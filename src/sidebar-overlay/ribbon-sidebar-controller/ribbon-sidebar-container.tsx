@@ -28,6 +28,8 @@ interface DispatchProps {
     handleToggleFullScreen: (e: Event) => void
     openSidebar: () => void
     openCommentBoxWithHighlight: (anchor: Anchor) => void
+    setActiveAnnotationUrl: (url: string) => void
+    setHoverAnnotationUrl: (url: string) => void
 }
 
 interface OwnProps {
@@ -91,8 +93,7 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
     }
 
     private _closeSidebarCallback = () => {
-        // TODO: Set active annotation to null.
-
+        this.props.setActiveAnnotationUrl(null)
         this.props.removeHighlights()
     }
 
@@ -100,8 +101,6 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
         if (!this.props.isSidebarOpen) {
             await this.props.openSidebar()
         }
-
-        // TODO: Set active annotation.
 
         setTimeout(() => {
             this.props.highlightAndScroll(annotation)
@@ -121,7 +120,7 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
     }
 
     private _focusOnAnnotation = (url: string) => {
-        // TODO: Set annotation as active.
+        this.props.setActiveAnnotationUrl(url)
 
         if (!url) {
             return
@@ -131,7 +130,7 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
     }
 
     private _hoverAnnotation = (url: string) => {
-        console.log(url)
+        this.props.setHoverAnnotationUrl(url)
     }
 
     private _ensureAnnotationIsVisible = (url: string) => {
@@ -220,6 +219,10 @@ const mapDispatchToProps: MapDispatchToProps<
     },
     openCommentBoxWithHighlight: anchor =>
         dispatch(commentBoxActions.openCommentBoxWithHighlight(anchor)),
+    setActiveAnnotationUrl: url =>
+        dispatch(sidebarActions.setActiveAnnotationUrl(url)),
+    setHoverAnnotationUrl: url =>
+        dispatch(sidebarActions.setHoverAnnotationUrl(url)),
 })
 
 export default connect(

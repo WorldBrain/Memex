@@ -31,13 +31,19 @@ const Footer = ({
         <div>
             <span
                 className={actionBtnClassName}
-                onClick={actionBtnClickHandler}
+                onClick={e => {
+                    e.stopPropagation()
+                    actionBtnClickHandler()
+                }}
             >
                 {actionBtnText}
             </span>
             <span
                 className={cancelBtnClassName}
-                onClick={cancelBtnClickHandler}
+                onClick={e => {
+                    e.stopPropagation()
+                    cancelBtnClickHandler()
+                }}
             >
                 Cancel
             </span>

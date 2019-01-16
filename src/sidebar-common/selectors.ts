@@ -22,6 +22,16 @@ export const pageTitle = createSelector(page, state => state.title)
 
 export const annotations = createSelector(sidebar, state => state.annotations)
 
+export const activeAnnotationUrl = createSelector(
+    sidebar,
+    state => state.activeAnnotationUrl,
+)
+
+export const hoverAnnotationUrl = createSelector(
+    sidebar,
+    state => state.hoverAnnotationUrl,
+)
+
 export const commentBox = createSelector(sidebar, state => state.commentBox)
 
 export const showCongratsMessage = createSelector(
