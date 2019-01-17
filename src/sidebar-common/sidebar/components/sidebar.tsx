@@ -25,10 +25,16 @@ interface Props {
     showCommentBox: boolean
     showCongratsMessage: boolean
     closeSidebar: () => void
-    goToAnnotation: (annotation: Annotation) => void
+    handleGoToAnnotation: (
+        annotation: Annotation,
+    ) => (e: React.MouseEvent<HTMLElement>) => void
     handleAddCommentBtnClick: () => void
     handleMouseEnter: (e: Event) => void
     handleMouseLeave: (e: Event) => void
+    handleAnnotationBoxMouseEnter: (
+        annotation: Annotation,
+    ) => (e: Event) => void
+    handleAnnotationBoxMouseLeave: () => (e: Event) => void
 }
 
 class Sidebar extends React.Component<Props> {
@@ -72,15 +78,6 @@ class Sidebar extends React.Component<Props> {
         openSettings()
     }
 
-    private _handleGoToAnnotation = (annotation: Annotation) => (
-        e: React.MouseEvent<HTMLElement>,
-    ) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        this.props.goToAnnotation(annotation)
-    }
-
     render() {
         const {
             env,
@@ -92,7 +89,10 @@ class Sidebar extends React.Component<Props> {
             showCommentBox,
             showCongratsMessage,
             closeSidebar,
+            handleGoToAnnotation,
             handleAddCommentBtnClick,
+            handleAnnotationBoxMouseEnter,
+            handleAnnotationBoxMouseLeave,
         } = this.props
 
         return (
@@ -131,9 +131,13 @@ class Sidebar extends React.Component<Props> {
                                     isHovered={
                                         hoverAnnotationUrl === annotation.url
                                     }
-                                    handleGoToAnnotation={this._handleGoToAnnotation(
+                                    handleGoToAnnotation={handleGoToAnnotation(
                                         annotation,
                                     )}
+                                    handleMouseEnter={handleAnnotationBoxMouseEnter(
+                                        annotation,
+                                    )}
+                                    handleMouseLeave={handleAnnotationBoxMouseLeave()}
                                 />
                             ))}
                             {showCongratsMessage && <CongratsMessage />}

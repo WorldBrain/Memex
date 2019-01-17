@@ -7,6 +7,8 @@ import {
     highlightAnnotations,
     highlightAndScroll,
     removeHighlights,
+    makeHighlightMedium,
+    removeMediumHighlights,
 } from './content_script/highlight-interactions'
 
 export const setupRibbonAndSidebarUI = (
@@ -26,6 +28,8 @@ export const setupRibbonAndSidebarUI = (
             highlightAll={highlightAnnotations}
             highlightAndScroll={highlightAndScroll}
             removeHighlights={removeHighlights}
+            makeHighlightMedium={makeHighlightMedium}
+            removeMediumHighlights={removeMediumHighlights}
         />,
         target,
     )

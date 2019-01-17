@@ -19,6 +19,8 @@ interface Props {
     ) => void
     highlightAndScroll: (annotation: Annotation) => number
     removeHighlights: () => void
+    makeHighlightMedium: (annotation: Annotation) => void
+    removeMediumHighlights: () => void
 }
 
 /* tslint:disable-next-line variable-name */

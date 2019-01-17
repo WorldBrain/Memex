@@ -28,6 +28,8 @@ interface OwnProps {
     comment?: string
     tags: string[]
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
+    handleMouseEnter: (e: Event) => void
+    handleMouseLeave: (e: Event) => void
 }
 
 interface StateProps {}
@@ -67,15 +69,27 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     private _setupEventListeners = () => {
         if (this._boxRef) {
-            this._boxRef.addEventListener('mouseenter', this._handleMouseEnter)
-            this._boxRef.addEventListener('mouseleave', this._handleMouseLeave)
+            this._boxRef.addEventListener(
+                'mouseenter',
+                this.props.handleMouseEnter,
+            )
+            this._boxRef.addEventListener(
+                'mouseleave',
+                this.props.handleMouseLeave,
+            )
         }
     }
 
     private _removeEventListeners = () => {
         if (this._boxRef) {
-            this._boxRef.addEventListener('mouseenter', this._handleMouseEnter)
-            this._boxRef.addEventListener('mouseleave', this._handleMouseLeave)
+            this._boxRef.addEventListener(
+                'mouseenter',
+                this.props.handleMouseEnter,
+            )
+            this._boxRef.addEventListener(
+                'mouseleave',
+                this.props.handleMouseLeave,
+            )
         }
     }
 
@@ -206,14 +220,6 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     private _handleCancelOperation = () => {
         this.setState({ mode: 'default' })
-    }
-
-    private _handleMouseEnter = (e: MouseEvent) => {
-        console.log(e)
-    }
-
-    private _handleMouseLeave = (e: MouseEvent) => {
-        console.log(e)
     }
 
     private _setBoxRef = (ref: HTMLDivElement) => {
