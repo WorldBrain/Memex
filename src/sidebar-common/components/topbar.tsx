@@ -1,7 +1,7 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-import CloseButton from '../close-button'
+import CloseButton from './close-button'
 
 const styles = require('./topbar.css')
 
