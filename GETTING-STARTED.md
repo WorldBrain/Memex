@@ -166,6 +166,19 @@ If you have made changes to any exports in existing modules, please update the c
 
 If you are creating a new feature module, please add a brief overview in the way of a README in the corresponding directory.
 
+### Naming conventions
+
+Over the course of the Memex project's life, different naming conventions
+for different files/modules have crept in. You'll see JS and TS modules often differing
+in the naming conventions they are named with depending on the type of code they contain.
+
+For all future contributions, we request that you please name any new JS/TS/CSS modules
+using `kebab-case`.
+
+We also ask that you postfix `-container` to any module name where the main export is
+a React container component. There may be certain cases where this isn't as obvious or
+appropriate though. Hopefully we can resolve that in the review stage.
+
 ### Styling
 
 We are using [prettier](https://github.com/prettier/prettier).
