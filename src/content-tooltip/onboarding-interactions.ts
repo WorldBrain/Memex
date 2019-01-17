@@ -1,9 +1,11 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 import { getLocalStorage } from 'src/util/storage'
-import { FLOWS, STAGES, STORAGE_KEYS } from './constants'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
-import * as utils from './utils'
+import { FLOWS, STAGES, STORAGE_KEYS } from 'src/overview/onboarding/constants'
+import * as utils from 'src/overview/onboarding/utils'
+
+import { destroyRootElement } from 'src/toolbar-notification/content_script/rendering'
 
 const processEventRPC = remoteFunction('processEvent')
 
@@ -128,6 +130,6 @@ export const conditionallyRemoveSelectOption = async nextStage => {
         await utils.setOnboardingStage(FLOWS.annotation, nextStage)
         // Close the curren select-option notification manually since
         // accessing the toolbarNotification instance from here is not possible
-        document.querySelector('.memex-tooltip-notification').remove()
+        destroyRootElement()
     }
 }

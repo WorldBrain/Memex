@@ -11,7 +11,7 @@ import {
     DoneComponent,
 } from './tooltip-states'
 
-import { conditionallyRemoveSelectOption } from 'src/overview/onboarding/notification-helper'
+import { conditionallyRemoveSelectOption } from '../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 
 class TooltipContainer extends React.Component {
