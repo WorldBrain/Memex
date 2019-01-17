@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { ClickHandler } from '../../types'
+import { ClickHandler } from '../types'
 
 const styles = require('./close-button.css')
 
