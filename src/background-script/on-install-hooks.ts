@@ -19,7 +19,7 @@ export async function onInstall() {
 
     analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
 
-    countlyAnalytics.trackEvent({ key: 'install' })
+    countlyAnalytics.trackEvent({ type: 'install' })
 
     // Open onboarding page
     browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })

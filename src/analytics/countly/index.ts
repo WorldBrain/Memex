@@ -8,4 +8,5 @@ const analytics = new Analytics({
     countlyConnector: Countly,
 })
 
+window['testers'] = analytics
 export default analytics
