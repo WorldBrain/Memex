@@ -2,7 +2,7 @@ import { browser, Tabs } from 'webextension-polyfill-ts'
 
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
 import QueryBuilder from 'src/search/query-builder'
-import { StorageManager, Dexie } from 'src/search'
+import { StorageManager, Dexie, search as searchPages } from 'src/search'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
@@ -57,6 +57,9 @@ export default class DirectLinkingBackground {
                 editAnnotation: this.editAnnotation.bind(this),
                 deleteAnnotation: this.deleteAnnotation.bind(this),
                 searchAnnotations: this.searchAnnotations.bind(this),
+                searchPagesAndAnnotations: this.searchPagesAndAnnotations.bind(
+                    this,
+                ),
                 toggleSidebar: this.toggleSidebar.bind(this),
                 getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
                 addAnnotationTag: this.addTagForAnnotation.bind(this),
@@ -191,6 +194,18 @@ export default class DirectLinkingBackground {
             terms: [...qb.query],
             ...params,
         })
+    }
+
+    async searchPagesAndAnnotations(_, { pageParams, annotParams }) {
+        const [pageResults, annotResults] = await Promise.all([
+            searchPages(pageParams),
+            this.searchAnnotations(_, {
+                ...annotParams,
+                includePageResults: true,
+            }),
+        ])
+
+        return { pageResults, annotResults }
     }
 
     async editAnnotation(_, pk, comment) {
