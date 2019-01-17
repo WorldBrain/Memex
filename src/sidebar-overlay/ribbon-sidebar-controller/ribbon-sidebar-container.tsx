@@ -42,6 +42,8 @@ interface OwnProps {
     ) => void
     highlightAndScroll: (annotation: Annotation) => number
     removeHighlights: () => void
+    makeHighlightMedium: (annotation: Annotation) => void
+    removeMediumHighlights: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -58,8 +60,14 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
         this._removeFullScreenListener()
     }
 
+    /**
+     * Whenever component receives changed annotations, it removes the previous
+     * highlights, if any. And proceeds to highlight the newly received
+     * annotations.
+     */
     componentDidUpdate(prevProps: Props) {
         if (prevProps.annotations !== this.props.annotations) {
+            this.props.removeHighlights()
             this._highlightAnnotations()
         }
     }
@@ -94,6 +102,7 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
 
     private _closeSidebarCallback = () => {
         this.props.setActiveAnnotationUrl(null)
+        this.props.setHoverAnnotationUrl(null)
         this.props.removeHighlights()
     }
 
@@ -172,6 +181,8 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
             handleRemoveRibbon,
             isPageFullScreen,
             isSidebarOpen,
+            makeHighlightMedium,
+            removeMediumHighlights,
         } = this.props
 
         return (
@@ -189,6 +200,8 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
                     ref={this._setSidebarRef}
                     goToAnnotation={this._goToAnnotation}
                     closeSidebarCallback={this._closeSidebarCallback}
+                    handleAnnotationBoxMouseEnter={makeHighlightMedium}
+                    handleAnnotationBoxMouseLeave={removeMediumHighlights}
                 />
             </React.Fragment>
         )
