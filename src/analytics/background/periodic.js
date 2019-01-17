@@ -73,7 +73,7 @@ const attemptPeriodicPing = async (
             })
 
             countlyAnalytics.trackEvent({
-                key: 'activity',
+                type: 'activity',
             })
         }
 
@@ -89,7 +89,7 @@ const attemptPeriodicPing = async (
         })
 
         countlyAnalytics.trackEvent({
-            key: 'install',
+            type: 'install',
         })
 
         await browser.storage.local.set({ [installKey]: Date.now() })
