@@ -49,12 +49,12 @@ export function retryUntilErrorResolves(
  * @param {HTMLElement} element DOM element to calculate the offsetTop.
  * @returns The number of pixels from the starting of the webpage.
  */
-export const getOffsetTop = element => {
+export const getOffsetTop = (element: HTMLElement) => {
     let el = element
     let offset = 0
     while (el) {
         offset = offset + el.offsetTop
-        el = el.offsetParent
+        el = el.offsetParent as HTMLElement
     }
     return offset
 }
