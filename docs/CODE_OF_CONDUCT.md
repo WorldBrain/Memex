@@ -23,7 +23,7 @@ The following behaviors are expected and requested of all community members:
 * **Attempt collaboration before conflict.**
 * Refrain from demeaning, discriminatory, or harassing behavior and speech.
 * Be mindful of your surroundings and of your fellow participants. Alert community leaders if you notice a dangerous situation, someone in distress, or violations of this Code of Conduct, even if they seem inconsequential.
-* Remember that the behaviour of our members does not only have an impact on our community, but also on how it is perceived in the public.
+* Remember that the behaviour of our members does not only have an impact on our community but also on how it is perceived in the public.
 **Conflict resolution and constructive debate is one of WorldBrain's core values.** We have to nurture them as a community in order to ensure a trustworthy image in the long run.
 
 ## 4. Unacceptable Behavior
@@ -59,7 +59,7 @@ If you feel you have been falsely or unfairly accused of violating this Code of 
 ## 8. Scope
 We expect all community participants (contributors, paid or otherwise; sponsors; and other guests) to abide by this Code of Conduct in all community venues–online and in-person–as well as in all one-on-one communications pertaining to community business.
 
-This code of conduct and its related procedures also applies to unacceptable behavior occuring outside the scope of community activities when such behavior has the potential to adversely affect the safety and well-being of community members.
+This code of conduct and its related procedures also applies to unacceptable behavior occurring outside the scope of community activities when such behavior has the potential to adversely affect the safety and well-being of community members.
 
 ## 9 . Contact info
 To report or discuss a suspected violation of this code of conduct by a community member, you may contact any of the team directly and in confidence, or the team-lead [Oliver Sauter](https://github.com/oliversauter).
@@ -72,6 +72,6 @@ This Code of Conduct is distributed under a Creative Commons Attribution-ShareAl
 
 It is derived from the Citizen Code of Conduct at http://citizencodeofconduct.org/ and from the Slidewinder Code of Conduct at http://www.slidewinder.io/docs/01_code_of_conduct.html.
 
-Portions of text dervied from the Django Code of Conduct and the Geek Feminism Anti-Harassment Policy.
+Portions of text derived from the Django Code of Conduct and the Geek Feminism Anti-Harassment Policy.
 
 Created at 07.02.2016 v1.0
