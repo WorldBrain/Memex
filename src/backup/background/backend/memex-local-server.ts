@@ -80,11 +80,16 @@ export default class MemexLocalBackend extends BackupBackend {
             throw new Error(await response.text())
         }
         const body = await response.text()
-        const fileNames = body.split(',')
-        return fileNames
+        if (body.length > 0) {
+            const fileNames = body.split(',')
+            return fileNames.length > 0 ? fileNames : []
+        } else {
+            return []
+        }
     }
 
     async retrieveObject(collection: string, object: string) {
+        console.log(`${this.url}/${collection}/${object}`)
         return (await fetch(`${this.url}/${collection}/${object}`)).json()
     }
 }
