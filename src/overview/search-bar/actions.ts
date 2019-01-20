@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import { remoteFunction } from '../../util/webextensionRPC'
-import analytics, { updateLastActive } from '../../analytics'
+import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
@@ -143,8 +143,6 @@ export const search: (args?: any) => Thunk = (
         console.error(`Search for '${query}' errored: ${error.toString()}`)
         dispatch(resultsActs.setLoading(false))
     }
-
-    updateLastActive() // Consider user active (analytics)
 }
 
 /**

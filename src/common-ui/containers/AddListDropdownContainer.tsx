@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
-import { updateLastActive } from '../../analytics'
 import { remoteFunction } from '../../util/webextensionRPC'
 import {
     IndexDropdownNewRow,
@@ -180,8 +179,6 @@ class AddListDropdownContainer extends Component<Props, State> {
 
         // Clear the component state.
         this.setState({ searchVal: '', focused: 0 })
-
-        updateLastActive() // Consider user active (analytics)
     }
 
     /**
@@ -303,8 +300,6 @@ class AddListDropdownContainer extends Component<Props, State> {
             searchVal: '',
             focused: 0,
         })
-
-        updateLastActive() // Consider user active (analytics)
     }
 
     private handleSearchArrowPress = (

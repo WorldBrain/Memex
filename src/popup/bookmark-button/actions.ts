@@ -1,7 +1,6 @@
 import { createAction } from 'redux-act'
 
 import { remoteFunction } from '../../util/webextensionRPC'
-import { updateLastActive } from '../../analytics'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
@@ -24,6 +23,4 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
     }
 
     dispatch(setIsBookmarked(!isBookmarked))
-
-    updateLastActive()
 }
