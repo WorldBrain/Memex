@@ -12,6 +12,7 @@ const store = configureStore()
 interface Props {
     annotationsManager: AnnotationsManager
     handleRemoveRibbon: () => void
+    insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     highlightAll: (
         highlights: Annotation[],
         focusOnAnnotation: (url: string) => void,
@@ -21,14 +22,17 @@ interface Props {
     removeHighlights: () => void
     makeHighlightMedium: (annotation: Annotation) => void
     removeMediumHighlights: () => void
+    setRibbonSidebarRef: any
 }
 
 /* tslint:disable-next-line variable-name */
 const RibbonSidebarController = (props: Props) => {
+    const { setRibbonSidebarRef, ...rest } = props
+
     return (
         <ErrorBoundary component={RuntimeError}>
             <Provider store={store}>
-                <RibbonSidebarContainer {...props} />
+                <RibbonSidebarContainer {...rest} ref={setRibbonSidebarRef} />
             </Provider>
         </ErrorBoundary>
     )
