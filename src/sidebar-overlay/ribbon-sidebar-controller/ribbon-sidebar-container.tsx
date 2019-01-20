@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom'
 import { connect, MapStateToProps } from 'react-redux'
 
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import * as actions from '../actions'
 import RootState, { MapDispatchToProps } from '../types'
 import RibbonContainer, {
     actions as ribbonActions,
@@ -25,9 +26,12 @@ interface StateProps {
 }
 
 interface DispatchProps {
+    onInit: () => void
     handleToggleFullScreen: (e: Event) => void
     openSidebar: () => void
     openCommentBoxWithHighlight: (anchor: Anchor) => void
+    setRibbonEnabled: (isRibbonEnabled: boolean) => void
+    setTooltipEnabled: (isTooltipEnabled: boolean) => void
     setActiveAnnotationUrl: (url: string) => void
     setHoverAnnotationUrl: (url: string) => void
 }
@@ -35,6 +39,7 @@ interface DispatchProps {
 interface OwnProps {
     annotationsManager: AnnotationsManager
     handleRemoveRibbon: () => void
+    insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     highlightAll: (
         highlights: Annotation[],
         focusOnAnnotation: (url: string) => void,
@@ -48,10 +53,11 @@ interface OwnProps {
 
 type Props = StateProps & DispatchProps & OwnProps
 
-class RibbonSidebarContainer extends React.PureComponent<Props> {
+class RibbonSidebarContainer extends React.Component<Props> {
     private _sidebarRef: React.Component = null
 
     componentDidMount() {
+        this.props.onInit()
         this._setupFullScreenListener()
         this._setupRPC()
     }
@@ -60,16 +66,23 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
         this._removeFullScreenListener()
     }
 
-    /**
-     * Whenever component receives changed annotations, it removes the previous
-     * highlights, if any. And proceeds to highlight the newly received
-     * annotations.
-     */
     componentDidUpdate(prevProps: Props) {
-        if (prevProps.annotations !== this.props.annotations) {
+        const { annotations, isSidebarOpen } = this.props
+        if (prevProps.annotations !== annotations && isSidebarOpen) {
             this.props.removeHighlights()
             this._highlightAnnotations()
         }
+    }
+
+    public updateRibbonState = ({
+        isRibbonEnabled,
+        isTooltipEnabled,
+    }: {
+        isRibbonEnabled: boolean
+        isTooltipEnabled: boolean
+    }) => {
+        this.props.setRibbonEnabled(isRibbonEnabled)
+        this.props.setTooltipEnabled(isTooltipEnabled)
     }
 
     private _setupRPC = () => {
@@ -179,6 +192,7 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
         const {
             annotationsManager,
             handleRemoveRibbon,
+            insertOrRemoveTooltip,
             isPageFullScreen,
             isSidebarOpen,
             makeHighlightMedium,
@@ -191,6 +205,7 @@ class RibbonSidebarContainer extends React.PureComponent<Props> {
                     !isPageFullScreen && (
                         <RibbonContainer
                             handleRemoveRibbon={handleRemoveRibbon}
+                            insertOrRemoveTooltip={insertOrRemoveTooltip}
                             openSidebar={this._openSidebar}
                         />
                     )}
@@ -222,6 +237,7 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps
 > = dispatch => ({
+    onInit: () => dispatch(actions.initState()),
     handleToggleFullScreen: e => {
         e.stopPropagation()
         dispatch(ribbonActions.toggleFullScreen())
@@ -232,13 +248,19 @@ const mapDispatchToProps: MapDispatchToProps<
     },
     openCommentBoxWithHighlight: anchor =>
         dispatch(commentBoxActions.openCommentBoxWithHighlight(anchor)),
+    setRibbonEnabled: isRibbonEnabled =>
+        dispatch(ribbonActions.setRibbonEnabled(isRibbonEnabled)),
+    setTooltipEnabled: isTooltipEnabled =>
+        dispatch(ribbonActions.setTooltipEnabled(isTooltipEnabled)),
     setActiveAnnotationUrl: url =>
         dispatch(sidebarActions.setActiveAnnotationUrl(url)),
     setHoverAnnotationUrl: url =>
         dispatch(sidebarActions.setHoverAnnotationUrl(url)),
 })
 
-export default connect(
+export default connect<StateProps, DispatchProps, OwnProps>(
     mapStateToProps,
     mapDispatchToProps,
+    null,
+    { withRef: true },
 )(RibbonSidebarContainer)
