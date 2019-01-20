@@ -126,7 +126,31 @@ class Analytics {
         if (
             eventArgs.type === EVENT_NAMES.SUCCESSFUL_SEARCH ||
             eventArgs.type === EVENT_NAMES.NLP_SEARCH ||
-            eventArgs.type === EVENT_NAMES.BOOKMARK
+            eventArgs.type === EVENT_NAMES.BOOKMARK ||
+            eventArgs.type === EVENT_NAMES.BOOKMARK_FILTER ||
+            eventArgs.type === EVENT_NAMES.REMOVE_RESULT_BOOKMARK ||
+            eventArgs.type === EVENT_NAMES.REMOVE_POPUP_BOOKMARK ||
+            eventArgs.type === EVENT_NAMES.CREATE_RESULT_BOOKMARK ||
+            eventArgs.type === EVENT_NAMES.ADD_BLACKLIST_ENTRY ||
+            eventArgs.type === EVENT_NAMES.ADD_TAG ||
+            eventArgs.type === EVENT_NAMES.ADD_POPUP_TAG ||
+            eventArgs.type === EVENT_NAMES.DELETE_TAG ||
+            eventArgs.type === EVENT_NAMES.DELETE_POPUP_TAG ||
+            eventArgs.type === EVENT_NAMES.DELETE_ANNOTATION ||
+            eventArgs.type === EVENT_NAMES.CREATE_ANNOTATION ||
+            eventArgs.type === EVENT_NAMES.CREATE_ANNOTATION_PAGE ||
+            eventArgs.type === EVENT_NAMES.CREATE_COLLECTION ||
+            eventArgs.type === EVENT_NAMES.INSERT_PAGE_COLLECTION ||
+            eventArgs.type === EVENT_NAMES.REMOVE_COLLECTION ||
+            eventArgs.type === EVENT_NAMES.REMOVE_PAGE_COLLECTION ||
+            eventArgs.type === EVENT_NAMES.REMOVE_BLACKLIST_ENTRY ||
+            eventArgs.type === EVENT_NAMES.DOMAIN_FILTER ||
+            eventArgs.type === EVENT_NAMES.DELETE_RESULT ||
+            eventArgs.type === EVENT_NAMES.TAG_FILTER ||
+            eventArgs.type === EVENT_NAMES.PAUSE_INDEXING ||
+            eventArgs.type === EVENT_NAMES.RESUME_INDEXING ||
+            eventArgs.type === EVENT_NAMES.PAGINATE_SEARCH ||
+            eventArgs.type === EVENT_NAMES.CLICK_RESULT_LINK
         ) {
             return true
         }

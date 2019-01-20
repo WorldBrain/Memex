@@ -110,6 +110,7 @@ export const EVENT_NAMES = {
     OVERVIEW_TOOLTIP: 'overviewTooltip',
     SET_TOOLTIP: 'setTooltip',
     CLOSE_TOOLTIP: 'closeTooltip',
+    CLICK_RESULT_LINK: 'clickResultLink',
 }
 
 export const EVENT_TYPES = {
@@ -399,6 +400,9 @@ export const EVENT_TYPES = {
     },
     [EVENT_NAMES.FINISH_BACKUP_ONBOARDING]: {
         id: 86,
+    },
+    [EVENT_NAMES.CLICK_RESULT_LINK]: {
+        id: 87,
     },
 }
 

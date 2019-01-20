@@ -1,6 +1,5 @@
 import { createAction } from 'redux-act'
 
-import { updateLastActive } from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 
@@ -99,8 +98,6 @@ export const delPageFromList = url => async (dispatch, getState) => {
         dispatch(hidePageFromList(url, index))
     } catch (err) {
         console.error(err)
-    } finally {
-        updateLastActive() // Consider user active
     }
 }
 
@@ -110,8 +107,6 @@ export const getListFromDB = () => async (dispatch, getState) => {
         dispatch(fetchAllLists(lists || []))
     } catch (err) {
         console.error(err)
-    } finally {
-        updateLastActive() // Consider user active
     }
 }
 
@@ -143,8 +138,6 @@ export const createPageList = (name, cb) => async (dispatch, getState) => {
         }
     } catch (err) {
         console.error(err)
-    } finally {
-        updateLastActive() // consider user active.
     }
 }
 
@@ -155,8 +148,6 @@ export const updateList = (index, name, id) => async (dispatch, getState) => {
         dispatch(updateListName(name, index))
     } catch (err) {
         console.error(err)
-    } finally {
-        updateLastActive() // consider user active.
     }
 }
 
@@ -171,7 +162,6 @@ export const deletePageList = () => async (dispatch, getState) => {
     } finally {
         dispatch(deleteList(id, deleting))
         dispatch(resetListDeleteModal())
-        updateLastActive() // Consider user active
     }
 }
 
@@ -182,6 +172,5 @@ export const addUrltoList = (url, index, id) => async (dispatch, getState) => {
         console.error(err)
     } finally {
         dispatch(addPagetoList(url, index))
-        updateLastActive()
     }
 }

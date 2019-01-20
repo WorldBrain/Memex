@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
-import { updateLastActive } from '../../analytics'
 import { remoteFunction } from '../../util/webextensionRPC'
 import {
     IndexDropdown,
@@ -226,8 +225,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         })
 
         this.props.onFilterAdd(newTag)
-
-        updateLastActive() // Consider user active (analytics)
     }
 
     private async handleSingleTagEdit(tag: string) {
@@ -294,8 +291,6 @@ class IndexDropdownContainer extends Component<Props, State> {
             focused: 0,
             clearFieldBtn: false,
         })
-
-        updateLastActive() // Consider user active (analytics)
     }
 
     private handleSearchEnterPress(
