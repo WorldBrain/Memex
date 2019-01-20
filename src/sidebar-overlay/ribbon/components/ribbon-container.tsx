@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
-import RootState, { ClickHandler, MapDispatchToProps } from '../../types'
+import RootState, { MapDispatchToProps } from '../../types'
 import Ribbon from './ribbon'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -14,14 +14,15 @@ interface StateProps {
 
 interface DispatchProps {
     onInit: () => void
-    handleRibbonToggle: ClickHandler<HTMLElement>
-    handleTooltipToggle: ClickHandler<HTMLElement>
-    handleMouseEnter: (e: MouseEvent) => void
-    handleMouseLeave: (e: MouseEvent) => void
+    handleRibbonToggle: () => void
+    handleTooltipToggle: () => void
+    handleMouseEnter: () => void
+    handleMouseLeave: () => void
 }
 
 interface OwnProps {
     handleRemoveRibbon: () => void
+    insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     openSidebar: () => void
 }
 
@@ -65,21 +66,31 @@ class RibbonContainer extends React.Component<Props> {
         this.ribbonRef = ref
     }
 
+    private _handleTooltipToggle = () => {
+        this.props.insertOrRemoveTooltip(this.props.isTooltipEnabled)
+        this.props.handleTooltipToggle()
+    }
+
     render() {
-        const { handleRemoveRibbon, openSidebar, ...rest } = this.props
+        const {
+            isExpanded,
+            isRibbonEnabled,
+            isTooltipEnabled,
+            openSidebar,
+            handleRibbonToggle,
+            handleRemoveRibbon,
+        } = this.props
 
         return (
             <div ref={this._setRibbonRef}>
                 <Ribbon
-                    {...rest}
-                    handleRemoveRibbon={e => {
-                        e.stopPropagation()
-                        handleRemoveRibbon()
-                    }}
-                    openSidebar={e => {
-                        e.stopPropagation()
-                        openSidebar()
-                    }}
+                    isExpanded={isExpanded}
+                    isRibbonEnabled={isRibbonEnabled}
+                    isTooltipEnabled={isTooltipEnabled}
+                    openSidebar={openSidebar}
+                    handleRibbonToggle={handleRibbonToggle}
+                    handleTooltipToggle={this._handleTooltipToggle}
+                    handleRemoveRibbon={handleRemoveRibbon}
                 />
             </div>
         )
@@ -101,22 +112,10 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps
 > = dispatch => ({
     onInit: () => dispatch(actions.initState()),
-    handleRibbonToggle: e => {
-        e.stopPropagation()
-        dispatch(actions.toggleRibbon())
-    },
-    handleTooltipToggle: e => {
-        e.stopPropagation()
-        dispatch(actions.toggleTooltip())
-    },
-    handleMouseEnter: e => {
-        e.stopPropagation()
-        dispatch(actions.setIsExpanded(true))
-    },
-    handleMouseLeave: e => {
-        e.stopPropagation()
-        dispatch(actions.setIsExpanded(false))
-    },
+    handleRibbonToggle: () => dispatch(actions.toggleRibbon()),
+    handleTooltipToggle: () => dispatch(actions.toggleTooltip()),
+    handleMouseEnter: () => dispatch(actions.setIsExpanded(true)),
+    handleMouseLeave: () => dispatch(actions.setIsExpanded(false)),
 })
 
 export default connect(

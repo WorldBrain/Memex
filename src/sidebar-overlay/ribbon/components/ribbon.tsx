@@ -2,7 +2,6 @@ import * as React from 'react'
 import cx from 'classnames'
 
 import { getExtUrl } from '../../utils'
-import { ClickHandler } from '../../types'
 
 const styles = require('./ribbon.css')
 
@@ -13,10 +12,10 @@ interface Props {
     isExpanded: boolean
     isRibbonEnabled: boolean
     isTooltipEnabled: boolean
-    openSidebar: ClickHandler<HTMLImageElement>
-    handleRibbonToggle: ClickHandler<HTMLElement>
-    handleTooltipToggle: ClickHandler<HTMLElement>
-    handleRemoveRibbon: ClickHandler<HTMLElement>
+    openSidebar: () => void
+    handleRibbonToggle: () => void
+    handleTooltipToggle: () => void
+    handleRemoveRibbon: () => void
 }
 
 /* tslint:disable-next-line variable-name */
@@ -40,7 +39,10 @@ const Ribbon = (props: Props) => {
             {/* Ribbon arrow */}
             <div className={styles.arrowBox}>
                 <img
-                    onClick={openSidebar}
+                    onClick={e => {
+                        e.stopPropagation()
+                        openSidebar()
+                    }}
                     className={styles.arrow}
                     src={arrowRibbon}
                     title={'Open Annotation Sidebar'}
@@ -52,13 +54,19 @@ const Ribbon = (props: Props) => {
                     <img
                         src={logo}
                         className={styles.logo}
-                        onClick={openSidebar}
+                        onClick={e => {
+                            e.stopPropagation()
+                            openSidebar()
+                        }}
                         title={'Open Annotation Sidebar'}
                     />
                     {/* Button to turn tooltip on/off on all pages */}
                     <div
                         className={styles.buttonHolder}
-                        onClick={handleTooltipToggle}
+                        onClick={e => {
+                            e.stopPropagation()
+                            handleTooltipToggle()
+                        }}
                     >
                         <span
                             className={cx(styles.toggler, {
@@ -71,7 +79,10 @@ const Ribbon = (props: Props) => {
                     {/* Button to turn ribbon on/off on all pages */}
                     <div
                         className={styles.buttonHolder}
-                        onClick={handleRibbonToggle}
+                        onClick={e => {
+                            e.stopPropagation()
+                            handleRibbonToggle()
+                        }}
                     >
                         <span
                             className={cx(styles.toggler, styles.ribbonIcon, {
@@ -84,7 +95,10 @@ const Ribbon = (props: Props) => {
                     {/* Button to remove ribbon from the current page */}
                     <div
                         className={styles.buttonHolder}
-                        onClick={handleRemoveRibbon}
+                        onClick={e => {
+                            e.stopPropagation()
+                            handleRemoveRibbon()
+                        }}
                     >
                         <span
                             title={

@@ -16,15 +16,21 @@ export const setupRibbonAndSidebarUI = (
     {
         annotationsManager,
         handleRemoveRibbon,
+        insertOrRemoveTooltip,
+        setRibbonSidebarRef,
     }: {
         annotationsManager: AnnotationsManager
         handleRemoveRibbon: () => void
+        insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
+        setRibbonSidebarRef: any
     },
 ) => {
     ReactDOM.render(
         <RibbonSidebarController
+            setRibbonSidebarRef={setRibbonSidebarRef}
             annotationsManager={annotationsManager}
             handleRemoveRibbon={handleRemoveRibbon}
+            insertOrRemoveTooltip={insertOrRemoveTooltip}
             highlightAll={highlightAnnotations}
             highlightAndScroll={highlightAndScroll}
             removeHighlights={removeHighlights}
