@@ -10,6 +10,7 @@ import { LoadingIndicator } from '../../../common-ui/components'
 import niceTime from '../../../util/nice-time'
 import SemiCircularRibbon from './SemiCircularRibbon'
 import ButtonTooltip from '../../../common-ui/components/button-tooltip'
+import AnnotationList from './annotation-list'
 
 const styles = require('./PageResultItem.css')
 
@@ -24,6 +25,8 @@ export interface Props {
     hasBookmark: boolean
     isSidebarOpen: boolean
     isListFilterActive: boolean
+    areAnnotationsExpanded: boolean
+    annotations: any[]
     tagPills: ReactNode[]
     tagManager: ReactNode
     onTagBtnClick: MouseEventHandler
@@ -47,6 +50,10 @@ class PageResultItem extends PureComponent<Props> {
             [styles.bookmark]: this.props.hasBookmark,
             [styles.notBookmark]: !this.props.hasBookmark,
         })
+    }
+
+    get hrefToPage() {
+        return `http://${this.props.url}`
     }
 
     dragStart: DragEventHandler = e => {
@@ -79,7 +86,7 @@ class PageResultItem extends PureComponent<Props> {
                         onDragStart={this.dragStart}
                         onDragEnd={this.props.resetUrlDragged}
                         className={styles.root}
-                        href={this.props.url}
+                        href={this.hrefToPage}
                         target="_blank"
                         draggable
                     >
@@ -93,12 +100,12 @@ class PageResultItem extends PureComponent<Props> {
                                 }
                             />
                         </div>
-                        <div className={styles.infoContainer}> 
+                        <div className={styles.infoContainer}>
                             <div className={styles.firstlineContainer}>
-                                    <div
-                                        className={styles.title}
-                                        title={this.props.title}
-                                        >
+                                <div
+                                    className={styles.title}
+                                    title={this.props.title}
+                                >
                                     {this.props.favIcon && (
                                         <img
                                             className={styles.favIcon}
@@ -106,24 +113,27 @@ class PageResultItem extends PureComponent<Props> {
                                         />
                                     )}
                                     <span className={styles.titleText}>
-                                    {this.props.title}
+                                        {this.props.title}
                                     </span>
                                 </div>
-                                 <ButtonTooltip
-                                    tooltipText='Remove from collection'
+                                <ButtonTooltip
+                                    tooltipText="Remove from collection"
                                     position="leftNarrow"
                                 >
-                                <div className={styles.crossRibbon}>
-                                    {this.props.isListFilterActive && (
-                                        <SemiCircularRibbon
-                                            onClick={this.props.handleCrossRibbonClick}
-                                        />
-                                    )}
-                                </div>
+                                    <div className={styles.crossRibbon}>
+                                        {this.props.isListFilterActive && (
+                                            <SemiCircularRibbon
+                                                onClick={
+                                                    this.props
+                                                        .handleCrossRibbonClick
+                                                }
+                                            />
+                                        )}
+                                    </div>
                                 </ButtonTooltip>
                             </div>
                             <div className={styles.url}>{this.props.url}</div>
-                            
+
                             <div className={styles.detailsContainer}>
                                 <div className={styles.detailsBox}>
                                     <div className={styles.displayTime}>
@@ -135,77 +145,59 @@ class PageResultItem extends PureComponent<Props> {
                                     </div>
                                 </div>
                                 <div
-                                        className={styles.buttonsContainer}
-                                        onClick={e => e.preventDefault()}
-                                    >
-                                        <ButtonTooltip
-                                            tooltipText='Delete this page & all related content'
-                                            position="bottom"
-                                        >
-                                        <button
-                                            disabled={this.props.isDeleting}
-                                            className={classNames(
-                                                styles.button,
-                                                styles.trash,
-                                            )}
-                                            onClick={this.props.onTrashBtnClick}
-                                            title={
-                                                'Delete this page & all related content'
-                                            }
-                                        />
-                                        </ButtonTooltip>
-                                         <ButtonTooltip
-                                            tooltipText='See & add Tags'
-                                            position="bottom"
-                                        >
-                                        <button
-                                            className={classNames(
-                                                styles.button,
-                                                styles.tag,
-                                            )}
-                                            onClick={this.props.onTagBtnClick}
-                                            ref={this.props.setTagButtonRef}
-                                            title={'Add/View Tags'}
-                                        />
-                                        </ButtonTooltip>
-                                         <ButtonTooltip
-                                            tooltipText='Open & Add comments'
-                                            position="bottom"
-                                        >
-                                        <button
-                                            className={classNames(
-                                                styles.button,
-                                                styles.comment,
-                                            )}
-                                            onClick={this.props.onCommentBtnClick}
-                                            title={
-                                                'Add/View Notes & Highlights'
-                                            }
-                                        />
-                                        </ButtonTooltip>
-
-                                         <ButtonTooltip
-                                            tooltipText={
-                                                !this.props.hasBookmark
-                                                    ? 'Star page'
-                                                    : 'Un-Star page'
-                                            }
-                                            position="bottom"
-                                        >
-                                        <button
-                                            disabled={this.props.isDeleting}
-                                            className={this.bookmarkClass}
-                                            onClick={
-                                                this.props.onToggleBookmarkClick
-                                            }
-                                            title={'Bookmark this page'}
-                                        />
-                                        </ButtonTooltip>
-                                    </div>
+                                    className={styles.buttonsContainer}
+                                    onClick={e => e.preventDefault()}
+                                >
+                                    <button
+                                        disabled={this.props.isDeleting}
+                                        className={classNames(
+                                            styles.button,
+                                            styles.trash,
+                                        )}
+                                        onClick={this.props.onTrashBtnClick}
+                                        title={
+                                            'Delete this page & all related content'
+                                        }
+                                    />
+                                    <button
+                                        className={classNames(
+                                            styles.button,
+                                            styles.tag,
+                                        )}
+                                        onClick={this.props.onTagBtnClick}
+                                        ref={this.props.setTagButtonRef}
+                                        title={'Add/View Tags'}
+                                    />
+                                    <button
+                                        className={classNames(
+                                            styles.button,
+                                            styles.comment,
+                                        )}
+                                        onClick={this.props.onCommentBtnClick}
+                                        title={
+                                            'Add/View Commments & Annotations'
+                                        }
+                                    />
+                                    <button
+                                        disabled={this.props.isDeleting}
+                                        className={this.bookmarkClass}
+                                        onClick={
+                                            this.props.onToggleBookmarkClick
+                                        }
+                                        title={'Bookmark this page'}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </a>
                 </div>
+                {this.props.annotations.length > 0 && (
+                    <AnnotationList
+                        isExpandedOverride={this.props.areAnnotationsExpanded}
+                        openAnnotationSidebar={this.props.onCommentBtnClick}
+                        annotations={this.props.annotations}
+                    />
+                )}
                 {this.props.tagManager}
             </li>
         )

@@ -55,31 +55,55 @@ export default class AnnotationStorage extends FeatureStorage {
         this._browserStorageArea = browserStorageArea
         this._getDb = getDb
 
-        this.storageManager.registry.registerCollection(this._annotationsColl, {
-            version: new Date(2018, 7, 26),
-            fields: {
-                pageTitle: { type: 'text' },
-                pageUrl: { type: 'url' },
-                body: { type: 'text' },
-                comment: { type: 'text' },
-                selector: { type: 'json' },
-                createdWhen: { type: 'datetime' },
-                lastEdited: { type: 'datetime' },
-                url: { type: 'string' },
+        this.storageManager.registry.registerCollection(this._annotationsColl, [
+            {
+                version: new Date(2018, 7, 26),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    comment: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    lastEdited: { type: 'datetime' },
+                    url: { type: 'string' },
+                },
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageTitle' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                    { field: 'comment' },
+                ],
             },
-            indices: [
-                { field: 'url', pk: true },
-                { field: 'pageTitle' },
-                { field: 'body' },
-                { field: 'createdWhen' },
-                { field: 'comment' },
-            ],
-        })
+            // Indexes the `pageUrl` field
+            {
+                version: new Date('2019-02-19'),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    comment: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    lastEdited: { type: 'datetime' },
+                    url: { type: 'string' },
+                },
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageUrl' },
+                    { field: 'pageTitle' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                    { field: 'comment' },
+                ],
+            },
+        ])
 
         this.storageManager.registry.registerCollection(this._listEntriesColl, {
             version: new Date(2019, 0, 4),
             fields: {
-                listId: { type: 'string' },
+                listId: { type: 'int' },
                 url: { type: 'string' },
                 createdAt: { type: 'datetime' },
             },

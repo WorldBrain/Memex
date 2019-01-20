@@ -35,6 +35,12 @@ export const domainsExc = createSelector(
     state => state.domainsExc,
 )
 export const listFilter = createSelector(searchFilters, state => state.lists)
+
+// Lists for now is just id of one list
+export const listFilterParam = createSelector(
+    listFilter,
+    state => (state === '' ? [] : [state]),
+)
 export const displayDomains = createSelector(
     domainsInc,
     domainsExc,
@@ -72,4 +78,26 @@ export const showClearFiltersBtn = createSelector(
 export const listFilterActive = createSelector(
     listFilter,
     lists => lists !== '',
+)
+
+export const contentType = createSelector(
+    searchFilters,
+    state => state.contentTypes,
+)
+
+export const websitesFilter = createSelector(contentType, state => state.pages)
+export const highlightsFilter = createSelector(
+    contentType,
+    state => state.highlights,
+)
+export const notesFilter = createSelector(contentType, state => state.notes)
+
+/**
+ * Selector for the annotation content type filter.
+ * Is true if both highlights and notes filter is selected.
+ */
+export const annotationsFilter = createSelector(
+    notesFilter,
+    highlightsFilter,
+    (notes, highlights) => notes && highlights,
 )

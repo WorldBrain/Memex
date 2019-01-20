@@ -12,6 +12,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
 
     private favIconMap: Map<string, string>
     private pageMap: Map<string, Page>
+    private tagMap: Map<string, string[]>
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
@@ -25,6 +26,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
     private initState() {
         this.favIconMap = new Map()
         this.pageMap = new Map()
+        this.tagMap = new Map()
     }
 
     private lookupPages(pageUrls: string[]) {
@@ -62,10 +64,21 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         return this.backend.dexieInstance
             .table('bookmarks')
             .where('url')
-            .anyOf([...pageUrls])
+            .anyOf(pageUrls)
             .eachPrimaryKey(url => {
                 const page = this.pageMap.get(url)
                 this.pageMap.set(url, { ...page, hasBookmark: true } as any)
+            })
+    }
+
+    private lookupTags(pageUrls: string[]) {
+        return this.backend.dexieInstance
+            .table('tags')
+            .where('url')
+            .anyOf(pageUrls)
+            .eachPrimaryKey(([name, url]) => {
+                const tags = this.tagMap.get(url) || []
+                this.tagMap.set(url, [...tags, name])
             })
     }
 
@@ -83,15 +96,21 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             [...this.pageMap.values()].map(page => page.hostname),
         )
 
-        await this.lookupFavIcons([...hostnames])
-
-        await this.lookupBookmarks(pageUrls)
+        await Promise.all([
+            this.lookupFavIcons([...hostnames]),
+            this.lookupBookmarks(pageUrls),
+            this.lookupTags(pageUrls),
+        ])
 
         // Map page results back to original input
         const pageResults = pageUrls.map(url => {
             const page = this.pageMap.get(url)
 
-            return { ...page, favIcon: this.favIconMap.get(page.hostname) }
+            return {
+                ...page,
+                favIcon: this.favIconMap.get(page.hostname),
+                tags: this.tagMap.get(url) || [],
+            }
         })
 
         return pageResults.map(reshapePageForDisplay)

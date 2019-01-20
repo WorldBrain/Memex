@@ -54,7 +54,7 @@ export default class TagsBackground {
             let page = await getPage(this.getDb)(tab.url)
 
             if (page == null || page.isStub) {
-                page = await createPageFromTab({
+                page = await createPageFromTab(this.getDb)({
                     tabId: tab.tabId,
                     url: tab.url,
                     allowScreenshot: false,

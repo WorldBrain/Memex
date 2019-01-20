@@ -23,6 +23,10 @@ const searchUpdateActions = [
     filterActs.resetFilters.getType(),
     filterActs.toggleListFilter.getType(),
     filterActs.delListFilter.getType(),
+    filterActs.toggleHighlightsFilter.getType(),
+    filterActs.toggleNotesFilter.getType(),
+    filterActs.toggleWebsitesFilter.getType(),
+    filterActs.setAnnotationsFilter.getType(),
 ]
 
 // When the query changed, refresh the search results

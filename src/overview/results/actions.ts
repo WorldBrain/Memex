@@ -35,6 +35,9 @@ export const appendSearchResult = createAction<SearchResult>(
     'results/appendSearchResult',
 )
 export const setLoading = createAction<boolean>('results/setLoading')
+export const toggleAreAnnotationsExpanded = createAction(
+    'results/toggleAreAnnotationsExpanded',
+)
 export const resetActiveTagIndex = createAction('results/resetActiveTagIndex')
 export const setActiveTagIndex = createAction<number>(
     'results/setActiveTagIndex',

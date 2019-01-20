@@ -9,10 +9,10 @@ export default class AnnotationsManager {
     private readonly _createAnnotationRPC = remoteFunction('createAnnotation')
     private readonly _addAnnotationTagRPC = remoteFunction('addAnnotationTag')
     private readonly _getAllAnnotationsByUrlRPC = remoteFunction(
-        'getAllAnnotationsByUrl',
+        'getAllAnnotations',
     )
     private readonly _getTagsByAnnotationUrlRPC = remoteFunction(
-        'getTagsByAnnotationUrl',
+        'getAnnotationTags',
     )
     private readonly _editAnnotationRPC = remoteFunction('editAnnotation')
     private readonly _editAnnotationTagsRPC = remoteFunction(

@@ -32,6 +32,7 @@ export interface StateProps {
     isScrollDisabled: boolean
     isNewSearchLoading: boolean
     isListFilterActive: boolean
+    areAnnotationsExpanded: boolean
     searchResults: Result[]
 }
 
@@ -160,6 +161,7 @@ class ResultListContainer extends PureComponent<Props> {
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
+                areAnnotationsExpanded={this.props.areAnnotationsExpanded}
                 {...doc}
             />
         ))
@@ -200,6 +202,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isListFilterActive: filters.listFilterActive(state),
     isScrollDisabled: selectors.isScrollDisabled(state),
     isNewSearchLoading: selectors.isNewSearchLoading(state),
+    areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({

@@ -101,7 +101,11 @@ export default class ImportItemProcessor {
     async _storeDocs({ pageDoc, bookmark, visits = [] }) {
         this._checkCancelled()
 
-        return searchIndex.addPage({ pageDoc, visits, bookmark })
+        return searchIndex.addPage(searchIndex.getDb)({
+            pageDoc,
+            visits,
+            bookmark,
+        })
     }
 
     /**

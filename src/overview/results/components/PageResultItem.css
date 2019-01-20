@@ -42,7 +42,7 @@
     }
 
     &:hover .button {
-        opacity: 0.6;
+        opacity: 0.3;
     }
 
     /*  &:hover .title {
@@ -235,15 +235,15 @@
     composes: buttonRadiusSmall hoverColor from '../../../common-ui/colors.css';
     display: inline;
     border: none;
-    width: 24px;
-    height: 24px;
+    background-color: transparent;
+    width: 26px;
+    height: 26px;
     background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
     background-position: center;
     background-size: 16px;
     border-radius: 3px;
-    background-color: transparent;
     opacity: 0.2;
 }
 
@@ -261,6 +261,10 @@
     opacity: 0.8;
     background-size: 18px;
     background-position-y: 3px;
+
+    &:hover {
+        opacity: 1;
+    }
 }
 
 .notBookmark {
@@ -272,7 +276,8 @@
 .tag {
     background-image: url('/img/tag.svg');
     background-size: 17px;
-    margin-left: 1px;
+    margin-left: 6px;
+    padding-top: 1px;
 }
 
 .tagList {

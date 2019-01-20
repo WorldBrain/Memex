@@ -69,6 +69,24 @@ const locationSync = ReduxQuerySync.enhancer({
             stringToValue: parseBool,
             defaultValue: false,
         },
+        notes: {
+            selector: filters.notesFilter,
+            action: filterActs.toggleNotesFilter,
+            stringToValue: parseBool,
+            defaultValue: false,
+        },
+        highlights: {
+            selector: filters.highlightsFilter,
+            action: filterActs.toggleHighlightsFilter,
+            stringToValue: parseBool,
+            defaultValue: false,
+        },
+        websites: {
+            selector: filters.websitesFilter,
+            action: filterActs.toggleWebsitesFilter,
+            stringToValue: parseBool,
+            defaultValue: true,
+        },
     },
 })
 

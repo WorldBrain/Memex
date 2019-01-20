@@ -44,6 +44,11 @@ export const isBadTerm = createSelector(
     results => !!results.isBadTerm,
 )
 
+export const areAnnotationsExpanded = createSelector(
+    resultsState,
+    results => results.areAnnotationsExpanded,
+)
+
 export const isInvalidSearch = createSelector(
     resultsState,
     results => !!results.isInvalidSearch,

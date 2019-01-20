@@ -87,6 +87,20 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
         )
     }
 
+    private async filterBookmarked(
+        annots: Annotation[],
+    ): Promise<Annotation[]> {
+        const bmUrls = new Set(
+            await this.backend.dexieInstance
+                .table(this.bookmarksColl)
+                .where('url')
+                .anyOf(annots.map(annot => annot.url))
+                .primaryKeys(),
+        )
+
+        return annots.filter(annot => bmUrls.has(annot.url))
+    }
+
     // TODO: Find better way of calculating this?
     private isAnnotDirectLink = (annot: Annotation) => {
         let isDirectLink = false
@@ -150,27 +164,6 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
         return new Set(pages as string[])
     }
 
-    private async mapSearchResToBookmarks(
-        { bookmarksOnly = false }: AnnotSearchParams,
-        results: Annotation[],
-    ) {
-        const bmUrls = new Set<string>()
-        await this.backend.dexieInstance
-            .table(this.bookmarksColl)
-            .where('url')
-            .anyOf(results.map(annot => annot.url))
-            .eachPrimaryKey(url => bmUrls.add(url))
-
-        if (bookmarksOnly) {
-            results = results.filter(annot => bmUrls.has(annot.url))
-        }
-
-        return results.map(annot => ({
-            ...annot,
-            hasBookmark: bmUrls.has(annot.pageUrl),
-        }))
-    }
-
     /**
      * I don't know why this is the only way I can get this working...
      * I originally intended a simpler single query like:
@@ -185,6 +178,7 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
             includeHighlights = true,
             includeNotes = true,
             includeDirectLinks = true,
+            bookmarksOnly,
         }: Partial<AnnotSearchParams>,
         urlFilters: UrlFilters,
     ) => async (term: string) => {
@@ -221,10 +215,17 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
             ? await termSearchField('_comment_terms')
             : []
 
-        return AnnotationsSearchPlugin.uniqAnnots([
+        let annots = AnnotationsSearchPlugin.uniqAnnots([
             ...bodyRes,
             ...commentsRes,
-        ]).slice(0, limit)
+        ])
+
+        // Exclude non-bookmarks if filter set
+        if (bookmarksOnly) {
+            annots = await this.filterBookmarked(annots)
+        }
+
+        return annots.slice(0, limit)
     }
 
     async search({
@@ -260,26 +261,8 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
         )
 
         // Flatten out results
-        let annotResults = AnnotationsSearchPlugin.uniqAnnots(
+        return AnnotationsSearchPlugin.uniqAnnots(
             [].concat(...termResults),
         ).slice(0, limit)
-
-        annotResults = await this.mapSearchResToBookmarks(
-            searchParams,
-            annotResults,
-        )
-
-        // Lookup tags for each annotation
-        return Promise.all(
-            annotResults.map(async annot => {
-                const tagKeys = await this.backend.dexieInstance
-                    .table(this.tagsColl)
-                    .where('url')
-                    .equals(annot.url)
-                    .primaryKeys()
-
-                return { ...annot, tags: tagKeys.map(([name]) => name) }
-            }),
-        )
     }
 }

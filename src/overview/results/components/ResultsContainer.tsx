@@ -8,6 +8,7 @@ import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
 import { OnboardingChecklist } from '../../onboarding/components'
+import * as actions from '../actions'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
 
@@ -18,13 +19,16 @@ export interface StateProps {
     isBadTerm: boolean
     isLoading: boolean
     showInbox: boolean
+    areAnnotationsExpanded: boolean
     shouldShowCount: boolean
     isInvalidSearch: boolean
     showInitSearchMsg: boolean
     totalResultCount: number
 }
 
-export interface DispatchProps {}
+export interface DispatchProps {
+    toggleAreAnnotationsExpanded: (e: React.SyntheticEvent) => void
+}
 
 export interface OwnProps {}
 
@@ -73,7 +77,7 @@ class ResultsContainer extends PureComponent<Props> {
             <React.Fragment>
                 {this.props.shouldShowCount && (
                     <ResultsMessage small>
-                        {this.props.totalResultCount}{' '}results
+                        {this.props.totalResultCount} results
                     </ResultsMessage>
                 )}
                 <ResultList />
@@ -92,13 +96,19 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
     isLoading: selectors.isLoading(state),
+    areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
     shouldShowCount: selectors.shouldShowCount(state),
     isInvalidSearch: selectors.isInvalidSearch(state),
     totalResultCount: selectors.totalResultCount(state),
     showInitSearchMsg: selectors.showInitSearchMsg(state),
 })
 
-const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = () => ({})
+const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
+    toggleAreAnnotationsExpanded: e => {
+        e.preventDefault()
+        dispatch(actions.toggleAreAnnotationsExpanded())
+    },
+})
 
 export default connect(
     mapState,

@@ -1,4 +1,5 @@
 @import url('/fonts/Inter/inter.css');
+@import url('/common-ui/colors.css');
 
 .container {
     composes: boxShadow h2Color buttonRadiusSmall from '../../common-ui/colors.css';

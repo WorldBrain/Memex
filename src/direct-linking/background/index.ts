@@ -51,16 +51,13 @@ export default class DirectLinkingBackground {
                 createAnnotation: this.createAnnotation.bind(this),
                 editAnnotation: this.editAnnotation.bind(this),
                 deleteAnnotation: this.deleteAnnotation.bind(this),
-                toggleSidebar: this.toggleSidebar.bind(this),
                 getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
                 addAnnotationTag: this.addTagForAnnotation.bind(this),
                 delAnnotationTag: this.delTagForAnnotation.bind(this),
                 followAnnotationRequest: this.followAnnotationRequest.bind(
                     this,
                 ),
-                openSidebarWithHighlight: this.openSidebarWithHighlight.bind(
-                    this,
-                ),
+                toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
                 toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
                 insertAnnotToList: this.insertAnnotToList.bind(this),
                 removeAnnotFromList: this.removeAnnotFromList.bind(this),
@@ -85,7 +82,7 @@ export default class DirectLinkingBackground {
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
-    async toggleSidebarOverlay({ tab }, { anchor, override } = {}) {
+    async toggleSidebarOverlay({ tab }, { anchor, override }) {
         const [currentTab] = await browser.tabs.query({
             active: true,
             currentWindow: true,
@@ -139,7 +136,10 @@ export default class DirectLinkingBackground {
             ({ createdWhen, lastEdited, ...annotation }) => ({
                 ...annotation,
                 createdWhen: createdWhen.getTime(),
-                lastEdited: lastEdited.getTime ? lastEdited.getTime() : null,
+                lastEdited:
+                    lastEdited && lastEdited instanceof Date
+                        ? lastEdited.getTime()
+                        : undefined,
             }),
         )
     }

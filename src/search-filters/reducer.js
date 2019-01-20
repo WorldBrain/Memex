@@ -30,6 +30,13 @@ const defaultState = {
     lists: '',
     suggestedTags: [],
     suggestedDomains: [],
+
+    /* Object way */
+    contentTypes: {
+        pages: true,
+        highlights: false,
+        notes: false,
+    },
 }
 
 const hideDomainFilter = state => ({
@@ -65,6 +72,42 @@ const showFilterTypes = state => ({
 const toggleFilterTypes = state => ({
     ...state,
     showFilterTypes: !state.showFilterTypes,
+})
+
+const toggleWebsitesFilter = state => ({
+    ...state,
+    contentTypes: {
+        ...state.contentTypes,
+        pages: !state.contentTypes.pages,
+    },
+})
+
+const toggleHighlightsFilter = state => ({
+    ...state,
+    contentTypes: {
+        ...state.contentTypes,
+        highlights: !state.contentTypes.highlights,
+    },
+})
+
+const toggleNotesFilter = state => ({
+    ...state,
+    contentTypes: {
+        ...state.contentTypes,
+        notes: !state.contentTypes.notes,
+    },
+})
+
+/**
+ * Setting annotations involves setting both notes and highlights
+ */
+const setAnnotationsFilter = (state, value) => ({
+    ...state,
+    contentTypes: {
+        ...state.contentTypes,
+        highlights: value,
+        notes: value,
+    },
 })
 
 const addFilter = filterKey => (state, value) => {
@@ -209,6 +252,10 @@ export default createReducer(
             ...state,
             showFilters: !state.showFilters,
         }),
+        [actions.toggleWebsitesFilter]: toggleWebsitesFilter,
+        [actions.toggleHighlightsFilter]: toggleHighlightsFilter,
+        [actions.toggleNotesFilter]: toggleNotesFilter,
+        [actions.setAnnotationsFilter]: setAnnotationsFilter,
     },
     defaultState,
 )
