@@ -1,0 +1,28 @@
+.container {
+    width: 100%;
+    background-color: #fefefe;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 3px 6px 0px rgba(23, 55, 102, 0.14902);
+}
+
+.icon {
+    display: inline-block;
+    width: 25px;
+    height: 20px;
+    transform: rotate(90deg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 25px 20px;
+    background-image: url('/img/arrow.svg');
+    vertical-align: bottom;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.inverted {
+    transform: rotate(-90deg);
+}
