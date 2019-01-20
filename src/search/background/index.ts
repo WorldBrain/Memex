@@ -9,6 +9,7 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { PageSearchParams, AnnotSearchParams, AnnotPage } from './types'
 import { annotSearchOnly, pageSearchOnly } from './utils'
 import { Annotation } from 'src/direct-linking/types'
+import { SearchError, BadTermError, InvalidSearchError } from './errors'
 
 export default class SearchBackground {
     private backend
@@ -17,6 +18,33 @@ export default class SearchBackground {
     private queryBuilderFactory: () => QueryBuilder
     private getDb: () => Promise<Dexie>
     private legacySearch
+
+    static handleSearchError(e: SearchError) {
+        if (e instanceof BadTermError) {
+            return {
+                docs: [],
+                resultsExhausted: true,
+                totalCount: null,
+                isBadTerm: true,
+            }
+        }
+
+        // Default error case
+        return {
+            docs: [],
+            resultsExhausted: true,
+            totalCount: null,
+            isInvalidSearch: true,
+        }
+    }
+
+    static shapePageResult(results, limit: number) {
+        return {
+            resultsExhausted: results.length < limit,
+            totalCount: results.length,
+            docs: results,
+        }
+    }
 
     constructor({
         storageManager,
@@ -97,17 +125,20 @@ export default class SearchBackground {
         })
     }
 
-    private processSearchParams({
-        query,
-        domainsInc,
-        domainsExc,
-        tagsInc,
-        collections,
-        contentTypes = { notes: true, highlights: true, pages: true },
-        skip = 0,
-        limit = 10,
-        ...params
-    }: any) {
+    private processSearchParams(
+        {
+            query,
+            domainsInc,
+            domainsExc,
+            tagsInc,
+            collections,
+            contentTypes = { notes: true, highlights: true, pages: true },
+            skip = 0,
+            limit = 10,
+            ...params
+        }: any,
+        ignoreBadSearch = false,
+    ) {
         // Extract query terms and in-query-filters via QueryBuilder
         const qb = this.queryBuilderFactory()
             .searchTerm(query)
@@ -116,6 +147,14 @@ export default class SearchBackground {
             .filterTags(tagsInc)
             .filterLists(collections)
             .get()
+
+        if (qb.isBadTerm && !ignoreBadSearch) {
+            throw new BadTermError()
+        }
+
+        if (qb.isInvalidSearch && !ignoreBadSearch) {
+            throw new InvalidSearchError()
+        }
 
         return {
             ...params,
@@ -128,6 +167,8 @@ export default class SearchBackground {
             includeNotes: contentTypes.notes,
             includeHighlights: contentTypes.highlights,
             isBlankSearch: !qb.terms.length,
+            bookmarksOnly: params.showOnlyBookmarks || params.bookmarksOnly,
+            contentTypes,
             limit,
             skip,
         }
@@ -181,7 +222,14 @@ export default class SearchBackground {
         return mergedResults.slice(skip, params.limit)
     }
 
-    private async blankPageSearch(params: AnnotSearchParams) {
+    private async blankPageSearch({
+        contentTypes,
+        ...params
+    }: PageSearchParams) {
+        if (annotSearchOnly(contentTypes)) {
+            return this.storage.searchPagesByLatestAnnotation(params)
+        }
+
         let results = await this.storage.searchPages(params, this.legacySearch)
 
         results = await Promise.all(
@@ -199,7 +247,7 @@ export default class SearchBackground {
     }
 
     async searchAnnotations(params: AnnotSearchParams): Promise<Annotation[]> {
-        const searchParams = this.processSearchParams(params)
+        const searchParams = this.processSearchParams(params, true)
 
         if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
             return []
@@ -216,30 +264,44 @@ export default class SearchBackground {
         }) as any
     }
 
-    async searchPages(params: PageSearchParams): Promise<AnnotPage[]> {
-        const searchParams = this.processSearchParams(params)
+    async searchPages(params: PageSearchParams) {
+        let searchParams
 
-        if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
-            return []
+        try {
+            searchParams = this.processSearchParams(params)
+        } catch (e) {
+            return SearchBackground.handleSearchError(e)
         }
 
         // Blank search; just list annots, applying search filters
         if (searchParams.isBlankSearch) {
-            return this.blankPageSearch(searchParams)
+            return SearchBackground.shapePageResult(
+                await this.blankPageSearch(searchParams),
+                searchParams.limit,
+            )
         }
 
-        if (pageSearchOnly(params.contentTypes)) {
-            return this.storage.searchPages(params, this.legacySearch)
+        if (pageSearchOnly(searchParams.contentTypes)) {
+            return SearchBackground.shapePageResult(
+                await this.storage.searchPages(searchParams, this.legacySearch),
+                searchParams.limit,
+            )
         }
 
-        if (annotSearchOnly(params.contentTypes)) {
-            return this.storage.searchAnnots({
-                ...searchParams,
-                includePageResults: true,
-            }) as any
+        if (annotSearchOnly(searchParams.contentTypes)) {
+            return SearchBackground.shapePageResult(
+                await this.storage.searchAnnots({
+                    ...searchParams,
+                    includePageResults: true,
+                }),
+                searchParams.limit,
+            )
         }
 
-        return this.combinedSearch(searchParams)
+        return SearchBackground.shapePageResult(
+            await this.combinedSearch(searchParams),
+            searchParams.limit,
+        )
     }
 
     async handleBookmarkRemoval(id, { node }) {

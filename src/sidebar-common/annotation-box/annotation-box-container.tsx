@@ -1,15 +1,12 @@
 import * as React from 'react'
 import cx from 'classnames'
 import moment from 'moment'
-import { connect } from 'react-redux'
 import noop from 'lodash/fp/noop'
 
-import * as actions from '../sidebar/actions'
 import DefaultDeleteModeContent from './default-delete-mode-content'
 import EditModeContent from './edit-mode-content'
 import { TruncatedTextRenderer } from '../components'
 import niceTime from '../../util/nice-time'
-import { MapDispatchToProps } from '../types'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
@@ -17,30 +14,24 @@ import { EVENT_NAMES } from 'src/analytics/internal/constants'
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')
 
-interface OwnProps {
+interface Props {
     /** Required to decide how to go to an annotation when it's clicked. */
     env: 'inpage' | 'overview'
     url: string
-    isActive: boolean
-    isHovered: boolean
+    className?: string
+    isActive?: boolean
+    isHovered?: boolean
     createdWhen: number
     lastEdited?: number
     body?: string
     comment?: string
     tags: string[]
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
-    handleMouseEnter: (e: Event) => void
-    handleMouseLeave: (e: Event) => void
-}
-
-interface StateProps {}
-
-interface DispatchProps {
+    handleMouseEnter?: (e: Event) => void
+    handleMouseLeave?: (e: Event) => void
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
 }
-
-type Props = OwnProps & StateProps & DispatchProps
 
 interface State {
     mode: 'default' | 'edit' | 'delete'
@@ -48,6 +39,11 @@ interface State {
 }
 
 class AnnotationBoxContainer extends React.Component<Props, State> {
+    static defaultProps = {
+        handleMouseEnter: () => undefined,
+        handleMouseLeave: () => undefined,
+    }
+
     private _processEventRPC = remoteFunction('processEvent')
     private _boxRef: HTMLDivElement = null
 
@@ -105,8 +101,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this.setState({ displayCrowdfunding: value })
     }
 
-    private _getFormattedTimestamp = (timestamp: number) =>
-        niceTime(timestamp)
+    private _getFormattedTimestamp = (timestamp: number) => niceTime(timestamp)
 
     private _getTruncatedTextObject: (
         text: string,
@@ -190,11 +185,11 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
             : this._getFormattedTimestamp(this.props.createdWhen)
 
         const isClickable = this.props.body && this.props.env !== 'overview'
-        
+
         return (
             <div
                 id={this.props.url} // Focusing on annotation relies on this ID.
-                className={cx(styles.container, {
+                className={cx(styles.container, this.props.className, {
                     [styles.isActive]: this.props.isActive,
                     [styles.isHovered]: this.props.isHovered,
                     [footerStyles.isHovered]: this.props.isHovered,
@@ -210,12 +205,12 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 {this.props.body && (
                     <div className={styles.highlight}>
                         <span className={styles.highlightText}>
-                        <TruncatedTextRenderer
-                            text={this.props.body}
-                            getTruncatedTextObject={
-                                this._getTruncatedTextObject
-                            }
-                        />
+                            <TruncatedTextRenderer
+                                text={this.props.body}
+                                getTruncatedTextObject={
+                                    this._getTruncatedTextObject
+                                }
+                            />
                         </span>
                     </div>
                 )}
@@ -252,16 +247,4 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
-    handleEditAnnotation: (url, comment, tags) =>
-        dispatch(actions.editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
-})
-
-export default connect(
-    undefined,
-    mapDispatchToProps,
-)(AnnotationBoxContainer)
+export default AnnotationBoxContainer

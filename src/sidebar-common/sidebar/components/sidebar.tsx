@@ -31,6 +31,8 @@ interface Props {
         annotation: Annotation,
     ) => (e: Event) => void
     handleAnnotationBoxMouseLeave: () => (e: Event) => void
+    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
+    handleDeleteAnnotation: (url: string) => void
 }
 
 interface State {
@@ -115,7 +117,7 @@ class Sidebar extends React.Component<Props, State> {
 
                         {/* New ribbon/sidebar work */}
 
-                        {/*<SearchBox
+                        {/* <SearchBox
                             searchValue={this.state.searchValue}
                             onSearchChange={this.handleChange}
                             onSearchEnter={this.handleSearchKeyDown}
@@ -162,7 +164,7 @@ class Sidebar extends React.Component<Props, State> {
                                     All
                                 </a>
                             </span>
-                        </div>*/}
+                        </div> */}
 
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
@@ -170,7 +172,7 @@ class Sidebar extends React.Component<Props, State> {
                             </div>
                         )}
 
-                        {/*{this.state.showPageResults &&*/}
+                        {/* {this.state.showPageResults && */}
 
                         {isLoading ? (
                             <Loader />
@@ -205,16 +207,16 @@ class Sidebar extends React.Component<Props, State> {
                         )}
 
                         {/* New ribbon/sidebar work */}
-                        {/*{this.state.showAllResults && (
+                        {/* {this.state.showAllResults && (
                             <div className={styles.allResultsDiv}>
                                 All results
                             </div>
-                        )}*/}
+                        )} */}
                     </div>
                 </Menu>
                 {/* New ribbon/sidebar work */}
 
-                {/*{this.state.showFilters && (
+                {/* {this.state.showFilters && (
                     <div className={styles.filtersSidebar}>
                         <div className={styles.filtersDiv}>
                             <span>Filters</span>
@@ -261,7 +263,7 @@ class Sidebar extends React.Component<Props, State> {
                         </div>
                         <div className={styles.listsDiv}>Custom lists</div>
                     </div>
-                )}*/}
+                )} */}
             </React.Fragment>
         )
     }

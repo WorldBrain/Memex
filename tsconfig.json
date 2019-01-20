@@ -17,13 +17,17 @@
         "strictNullChecks": false,
         "outDir": "tmp",
         "paths": {
-            "storex": ["external/storex/ts"],
-            "storex/lib/*": ["external/storex/ts/*"],
-            "storex-backend-dexie": ["external/storex-backend-dexie/ts"],
-            "storex-backend-dexie/lib/*": [
-                "external/storex-backend-dexie/ts/*"
+            "@worldbrain/storex": ["external/@worldbrain/storex/ts"],
+            "@worldbrain/storex/lib/*": ["external/@worldbrain/storex/ts/*"],
+            "@worldbrain/storex-backend-dexie": [
+                "external/@worldbrain/storex-backend-dexie/ts"
             ],
-            "memex-stemmer": ["external/memex-stemmer/ts"],
+            "@worldbrain/storex-backend-dexie/lib/*": [
+                "external/@worldbrain/storex-backend-dexie/ts/*"
+            ],
+            "@worldbrain/memex-stemmer": [
+                "external/@worldbrain/memex-stemmer/ts"
+            ],
             "src/*": ["src/*"]
         },
         "lib": ["es2017", "dom", "esnext.asynciterable"]

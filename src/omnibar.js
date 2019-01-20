@@ -78,7 +78,7 @@ async function makeSuggestion(query, suggest) {
 
     const queryFilters = extractTimeFiltersFromQuery(query)
 
-    const searchResults = await searchIndex.search({
+    const searchResults = await searchIndex.search(searchIndex.getDb)({
         ...queryFilters,
         limit: 5,
     })

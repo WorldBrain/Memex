@@ -47,7 +47,7 @@ const DefaultFooter = ({
                         trashIconClickHandler()
                     }}
                 />
-               {/* <button
+                {/* <button
                     className={cx(styles.commonIcon, styles.shareIcon)}
                     title="Share this note"
                     onClick={e => {
@@ -59,7 +59,10 @@ const DefaultFooter = ({
             <div>
                 {displayGoToAnnotation && (
                     <button
-                        className={cx(boxStyles.commonIcon, boxStyles.goToPageIcon)}
+                        className={cx(
+                            boxStyles.commonIcon,
+                            boxStyles.goToPageIcon,
+                        )}
                         title="Go to annotation"
                         onClick={goToAnnotationHandler}
                     />

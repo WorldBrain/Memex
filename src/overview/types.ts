@@ -1,3 +1,5 @@
+import { Annotation } from 'src/sidebar-common/sidebar/types'
+
 export interface Result {
     url: string
     title: string
@@ -9,6 +11,7 @@ export interface Result {
     displayTime: number
     screenshot: string
     favIcon: string
+    annotations: Annotation[]
 }
 
 export interface SearchResult {

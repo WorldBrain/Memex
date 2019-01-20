@@ -23,6 +23,8 @@ export interface State {
     totalCount: number
     /** Holds the number of searches performed. */
     searchCount: number
+    /** Denotes whether annotation lists are expanded by default */
+    areAnnotationsExpanded: boolean
 }
 
 const defState: State = {
@@ -35,6 +37,7 @@ const defState: State = {
     currentPage: 0,
     totalCount: null,
     searchCount: 0,
+    areAnnotationsExpanded: false,
 }
 
 const handleSearchResult = (overwrite: boolean) => (
@@ -137,6 +140,11 @@ reducer.on(acts.resetActiveTagIndex, state => ({
 reducer.on(acts.setActiveTagIndex, (state, payload) => ({
     ...state,
     activeTagIndex: payload,
+}))
+
+reducer.on(acts.toggleAreAnnotationsExpanded, state => ({
+    ...state,
+    areAnnotationsExpanded: !state.areAnnotationsExpanded,
 }))
 
 reducer.on(acts.nextPage, state => ({

@@ -47,7 +47,8 @@ export default class ImportItemCreator {
     constructor({
         limits = ImportItemCreator.DEF_LIMITS,
         dataSources = new DataSources({}),
-        existingKeySource = () => searchIndex.grabExistingKeys(),
+        existingKeySource = () =>
+            searchIndex.grabExistingKeys(searchIndex.getDb)(),
     }) {
         this.limits = limits
         this._dataSources = dataSources

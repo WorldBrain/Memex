@@ -8,6 +8,7 @@ export interface AnnotPage {
     screenshot?: string
     /** Object URL to the in-memory location of the assoc. fav-icon. */
     favIcon?: string
+    displayTime?: number
     annotations: Annotation[]
 }
 

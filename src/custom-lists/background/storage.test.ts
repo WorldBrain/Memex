@@ -1,7 +1,7 @@
 import initStorageManager from '../../search/memory-storex'
 import CustomListBackground from './'
 import * as DATA from './storage.test.data'
-import getDb from 'src/search'
+import { getDb } from 'src/search'
 
 describe('Custom List Integrations', () => {
     let bg: CustomListBackground

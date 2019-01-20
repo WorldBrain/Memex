@@ -15,7 +15,7 @@ import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
-const requestSearchRPC = remoteFunction('search')
+const requestSearchRPC = remoteFunction('searchPages')
 
 export const setQuery = createAction<string>('header/setQuery')
 export const setStartDate = createAction<number>('header/setStartDate')
@@ -122,13 +122,13 @@ export const search: (args?: any) => Thunk = (
         startDate,
         endDate,
         showOnlyBookmarks: filters.onlyBookmarks(state),
-        tags: filters.tags(state),
+        tagsInc: filters.tags(state),
         domains: filters.domainsInc(state),
         domainsExclude: filters.domainsExc(state),
         limit: constants.PAGE_SIZE,
         skip: results.resultsSkip(state),
-        // lists for now is just id of one list
-        lists: [filters.listFilter(state)],
+        lists: filters.listFilterParam(state),
+        contentTypes: filters.contentType(state),
     }
 
     try {

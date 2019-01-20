@@ -11,6 +11,8 @@
     word-wrap: break-word;
     font-size: 14px;
     justify-content: space-between;
+    margin: 0 15px;
+    box-sizing: border-box;
 
     &:hover,
     &:focus,
@@ -91,6 +93,17 @@
     border: none;
     background-color: color11;
     margin-left: 10px;
+    box-sizing: border-box;
+
+    &:placeholder-shown {
+        font-style: italic;
+        font-weight: 500;
+        font-family: 'Inter';
+    }
+
+    &::placeholder {
+        color: #888;
+    }
 
     &:focus {
         outline: none;
