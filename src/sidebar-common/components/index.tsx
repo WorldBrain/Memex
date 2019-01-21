@@ -1,4 +1,3 @@
-export { default as AnnotationBoxContainer } from './annotation-box'
 export { default as AnnotationHighlight } from './annotation-highlight'
 export { default as CloseButton } from './close-button'
 export { default as CongratsMessage } from './congrats-message'

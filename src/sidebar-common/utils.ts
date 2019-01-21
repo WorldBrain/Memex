@@ -15,8 +15,8 @@ const computeTagPillWidth = (letters: number) =>
     letters * avgLetterPx + tagPillExtra
 
 /**
- * Given a list of tags, computes the maximum possible of tags the container can
- * hold without overflowing.
+ * Given a list of tags, computes the maximum possible number of tags the
+ * container can hold without overflowing.
  * @param {Array<String>} tags Array of tag names
  * @returns {Number} Maximum possible tags the container can hold.
  */
