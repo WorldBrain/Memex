@@ -1,7 +1,7 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-const styles = require('./annotation-box-default-footer.css')
+const styles = require('./default-footer.css')
 
 interface Props {
     displayGoToAnnotation: boolean
@@ -13,7 +13,7 @@ interface Props {
 }
 
 /* tslint:disable-next-line variable-name */
-const AnnotationBoxDefaultFooter = ({
+const DefaultFooter = ({
     displayGoToAnnotation,
     goToAnnotationHandler,
     editIconClickHandler,
@@ -68,4 +68,4 @@ const AnnotationBoxDefaultFooter = ({
     </div>
 )
 
-export default AnnotationBoxDefaultFooter
+export default DefaultFooter

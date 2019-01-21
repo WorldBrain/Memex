@@ -1,0 +1,57 @@
+.annotationBoxFooter {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-top: 1px solid #d2d2d2;
+    font-size: 13px;
+    background: #fff;
+    border-radius: 0 0 5px 5px;
+    box-sizing: border-box;
+}
+
+.textArea {
+    box-sizing: border-box;
+    resize: vertical;
+    font-weight: 500;
+    width: 95%;
+    font-size: 14px;
+    color: #222;
+    font-family: 'Lato';
+    font-style: italic;
+    background: #f7f7f7;
+    border: none;
+    border-radius: 2px;
+    padding: 10px 7px;
+    margin: 5px 5px 5px 8px;
+    min-height: 40px;
+
+    &:focus {
+        outline: none;
+    }
+
+    &::placeholder {
+        color: #4a4a4a;
+    }
+}
+
+.footerBoldText {
+    box-sizing: border-box;
+    color: #000;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0 3px;
+    background-color: transparent;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.footerText {
+    box-sizing: border-box;
+    color: #818181;
+    cursor: pointer;
+    margin: 0 3px;
+    font-size: 14px;
+}

@@ -36,7 +36,8 @@ class TruncatedTextRenderer extends React.Component<Props, State> {
         }
     }
 
-    private _toggleTextTruncation = () => {
+    private _toggleTextTruncation = (e: React.MouseEvent) => {
+        e.stopPropagation()
         this.setState(prevState => ({
             shouldTruncate: !prevState.shouldTruncate,
         }))

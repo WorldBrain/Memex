@@ -1,3 +1,5 @@
+@import url('/fonts/Inter/inter.css');
+
 .textArea {
     box-sizing: border-box;
     resize: vertical;
@@ -5,7 +7,7 @@
     width: 95%;
     font-size: 14px;
     color: #222;
-    font-family: 'Lato';
+    font-family: 'Inter', sans-serif;
     font-style: italic;
     background: #f7f7f7;
     border: none;
