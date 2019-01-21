@@ -3,7 +3,7 @@ import cx from 'classnames'
 
 import TruncatedTextRenderer from '../truncated-text-renderer'
 
-const styles = require('./annotation-box-comment-tags.css')
+const styles = require('./comment-tags.css')
 
 interface Props {
     comment?: string
@@ -15,7 +15,7 @@ interface Props {
 }
 
 /* tslint:disable-next-line variable-name */
-const AnnotationBoxCommentTags = ({
+const CommentTags = ({
     comment,
     tags,
     isJustComment,
@@ -53,4 +53,4 @@ const AnnotationBoxCommentTags = ({
     </div>
 )
 
-export default AnnotationBoxCommentTags
+export default CommentTags

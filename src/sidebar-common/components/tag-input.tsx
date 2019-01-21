@@ -13,7 +13,7 @@ interface Props {
 }
 
 /* tslint:disable-next-line variable-name */
-const TagInputContainer = ({
+const TagInput = ({
     isTagInputActive,
     tags,
     initTagSuggestions,
@@ -47,4 +47,4 @@ const TagInputContainer = ({
     )
 }
 
-export default TagInputContainer
+export default TagInput
