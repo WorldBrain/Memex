@@ -5,10 +5,9 @@ import { connect } from 'react-redux'
 import noop from 'lodash/fp/noop'
 
 import * as actions from '../../sidebar/actions'
-import AnnotationBoxCommentTags from './annotation-box-comment-tags'
-import AnnotationBoxFooter from './annotation-box-footer'
+import DefaultDeleteModeContent from './default-delete-mode-content'
+import EditModeContent from './edit-mode-content'
 import TruncatedTextRenderer from '../truncated-text-renderer'
-import CommentTagsInput from './comment-tags-input'
 import { MapDispatchToProps } from '../../types'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -43,8 +42,6 @@ type Props = OwnProps & StateProps & DispatchProps
 
 interface State {
     mode: 'default' | 'edit' | 'delete'
-    commentText: string
-    tagsInput: string[]
     displayCrowdfunding: boolean
 }
 
@@ -54,8 +51,6 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     state: State = {
         mode: 'default',
-        commentText: '',
-        tagsInput: [],
         displayCrowdfunding: false,
     }
 
@@ -108,64 +103,6 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this.setState({ displayCrowdfunding: value })
     }
 
-    /**
-     * Method to change the text of the comment (which is temporary until
-     * saved explicitly). Gets called when the text of the text area is
-     * changed.
-     * Only relevant when component is in `edit` mode.
-     */
-    private _handleCommentTextChange = (comment: string) => {
-        this.setState({ commentText: comment })
-    }
-
-    /**
-     * Method to add a tag to the list of tags for the comment temporarily
-     * until saved explicitly. Gets called when the tags are changed through
-     * tag input.
-     * Only relevant when component is in `edit` mode.
-     */
-    private _addTag = (tag: string) => {
-        this.setState(prevState => ({
-            tagsInput: [tag, ...prevState.tagsInput],
-        }))
-    }
-
-    /**
-     * Method to delete a tag from the list of tags for the comment temporarily
-     * until saved explicitly. Gets called when the tags are changed through
-     * tag input.
-     * Only relevant when component is in `edit` mode.
-     */
-    private _deleteTag = (tag: string) => {
-        const tagIndex = this.state.tagsInput.indexOf(tag)
-        this.setState(prevState => ({
-            tagsInput: [
-                ...prevState.tagsInput.slice(0, tagIndex),
-                ...prevState.tagsInput.slice(tagIndex + 1),
-            ],
-        }))
-    }
-
-    /**
-     * Serves as a proxy to call the actual method (which is passed via props)
-     * that saves any edits made to the comment/annotation.
-     */
-    private _handleEditAnnotation = () => {
-        const { url } = this.props
-        const { commentText, tagsInput } = this.state
-        this.props.handleEditAnnotation(url, commentText.trim(), tagsInput)
-        this.setState({ mode: 'default' })
-    }
-
-    /**
-     * Serves as a proxy to call the actual method (which is passed via props)
-     * that deletes the current comment/annotation.
-     */
-    private _handleDeleteAnnotation = () => {
-        const { url } = this.props
-        this.props.handleDeleteAnnotation(url)
-    }
-
     private _getFormattedTimestamp = (timestamp: Date) =>
         moment(timestamp)
             .format('MMMM D YYYY')
@@ -201,9 +138,21 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         }
     }
 
+    private _handleEditAnnotation = (
+        commentText: string,
+        tagsInput: string[],
+    ) => {
+        const { url } = this.props
+        this.props.handleEditAnnotation(url, commentText.trim(), tagsInput)
+        this.setState({ mode: 'default' })
+    }
+
+    private _handleDeleteAnnotation = () => {
+        this.props.handleDeleteAnnotation(this.props.url)
+    }
+
     private _handleEditIconClick = () => {
-        const { tags, comment } = this.props
-        this.setState({ mode: 'edit', commentText: comment, tagsInput: tags })
+        this.setState({ mode: 'edit' })
     }
 
     private _handleTrashIconClick = () => {
@@ -228,26 +177,6 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     render() {
         const { mode, displayCrowdfunding } = this.state
-        const {
-            env,
-            url,
-            isActive,
-            isHovered,
-            createdWhen,
-            lastEdited,
-            body,
-            comment,
-            tags,
-            handleGoToAnnotation,
-        } = this.props
-
-        const timestamp = !!lastEdited
-            ? this._getFormattedTimestamp(lastEdited)
-            : this._getFormattedTimestamp(createdWhen)
-
-        const isJustComment = !body
-        const isClickable = !isJustComment && env !== 'overview'
-
         if (displayCrowdfunding) {
             return (
                 <CrowdfundingBox
@@ -256,22 +185,28 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
             )
         }
 
+        const timestamp = this.props.lastEdited
+            ? this._getFormattedTimestamp(this.props.lastEdited)
+            : this._getFormattedTimestamp(this.props.createdWhen)
+
+        const isClickable = this.props.body && this.props.env !== 'overview'
+
         return (
             <div
-                id={url} // Focusing on annotation relies on this ID.
+                id={this.props.url} // Focusing on annotation relies on this ID.
                 className={cx(styles.container, {
-                    [styles.isActive]: isActive,
-                    [styles.isHovered]: isHovered,
+                    [styles.isActive]: this.props.isActive,
+                    [styles.isHovered]: this.props.isHovered,
                     [styles.isClickable]: isClickable,
-                    [styles.isJustComment]: mode !== 'edit' && isJustComment,
+                    [styles.isJustComment]: mode !== 'edit' && !this.props.body,
                 })}
-                onClick={isClickable ? handleGoToAnnotation : noop}
+                onClick={isClickable ? this.props.handleGoToAnnotation : noop}
                 ref={this._setBoxRef}
             >
                 {/* Timestamp for the annotation. Hidden during 'edit' mode. */}
                 {mode !== 'edit' && (
                     <div className={styles.timestamp}>
-                        {!!lastEdited && (
+                        {!!this.props.lastEdited && (
                             <span className={styles.lastEdit}>Last Edit: </span>
                         )}
                         {timestamp}
@@ -280,10 +215,10 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
                 {/* Highlighted text for the annotation. If available, shown in
                 every mode. */}
-                {!isJustComment && (
+                {this.props.body && (
                     <div className={styles.highlight}>
                         <TruncatedTextRenderer
-                            text={body}
+                            text={this.props.body}
                             getTruncatedTextObject={
                                 this._getTruncatedTextObject
                             }
@@ -291,42 +226,30 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                     </div>
                 )}
 
-                {/* Comment and tags to be displayed. Hidden during 'edit' mode. */}
                 {mode !== 'edit' ? (
-                    (!!comment || (!!tags && tags.length !== 0)) && (
-                        <AnnotationBoxCommentTags
-                            comment={comment}
-                            tags={tags}
-                            isJustComment={isJustComment}
-                            getTruncatedTextObject={
-                                this._getTruncatedTextObject
-                            }
-                        />
-                    )
+                    <DefaultDeleteModeContent
+                        env={this.props.env}
+                        mode={mode}
+                        body={this.props.body}
+                        comment={this.props.comment}
+                        tags={this.props.tags}
+                        handleGoToAnnotation={this.props.handleGoToAnnotation}
+                        handleDeleteAnnotation={this._handleDeleteAnnotation}
+                        handleCancelOperation={this._handleCancelOperation}
+                        editIconClickHandler={this._handleEditIconClick}
+                        trashIconClickHandler={this._handleTrashIconClick}
+                        shareIconClickHandler={this._handleShareIconClick}
+                        replyIconClickHandler={this._handleReplyIconClick}
+                        getTruncatedTextObject={this._getTruncatedTextObject}
+                    />
                 ) : (
-                    <CommentTagsInput
-                        commentText={this.state.commentText}
-                        tags={this.state.tagsInput}
-                        handleCommentTextChange={this._handleCommentTextChange}
-                        addTag={this._addTag}
-                        deleteTag={this._deleteTag}
+                    <EditModeContent
+                        comment={this.props.comment}
+                        tags={this.props.tags}
+                        handleCancelOperation={this._handleCancelOperation}
+                        handleEditAnnotation={this._handleEditAnnotation}
                     />
                 )}
-
-                {/* Footer. */}
-                <AnnotationBoxFooter
-                    mode={mode}
-                    displayGoToAnnotation={env === 'overview' && !!body}
-                    handleGoToAnnotation={handleGoToAnnotation}
-                    handleEditAnnotation={this._handleEditAnnotation}
-                    handleDeleteAnnotation={this._handleDeleteAnnotation}
-                    handleCancelEdit={this._handleCancelOperation}
-                    handleCancelDeletion={this._handleCancelOperation}
-                    editIconClickHandler={this._handleEditIconClick}
-                    trashIconClickHandler={this._handleTrashIconClick}
-                    shareIconClickHandler={this._handleShareIconClick}
-                    replyIconClickHandler={this._handleReplyIconClick}
-                />
             </div>
         )
     }
