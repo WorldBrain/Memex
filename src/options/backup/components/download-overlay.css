@@ -1,0 +1,80 @@
+.box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -300px;
+    margin-top: -150px;
+    padding: 20px;
+    width: 600px;
+    height: 300px;
+    box-shadow: 0px 0px 4px #444;
+    background-color: #fafafa;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-row-gap: 10px;
+    grid-template-areas:
+        'header'
+        'description'
+        'linkbox'
+        'buttonbox';
+}
+
+.header {
+    grid-area: header;
+    margin: 0px;
+    text-align: center;
+    color: #273961;
+    font-style: italic;
+}
+
+.description {
+    grid-area: description;
+    margin: 0px;
+    text-align: center;
+    color: #273961;
+}
+
+.linkbox {
+    grid-area: linkbox;
+    display: inline-block;
+    justify-self: center;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+    margin: 0px 10px;
+    cursor: pointer;
+}
+
+.buttonbox {
+    grid-area: buttonbox;
+    display: inline-block;
+    justify-self: center;
+    margin-bottom: 10px;
+}
+
+.colorbutton,
+.greybutton {
+    display: inline-block;
+    border: solid 2px #3eb995;
+    border-radius: 5px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin: 0px 10px;
+    background: white;
+    color: #3eb995;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.colorbutton {
+    background: #3eb995;
+    color: white;
+}
+
+.colorbutton:hover {
+    background: #3eb995a5;
+}
