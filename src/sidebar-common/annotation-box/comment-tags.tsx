@@ -1,7 +1,7 @@
 import * as React from 'react'
 import cx from 'classnames'
 
-import TruncatedTextRenderer from '../truncated-text-renderer'
+import { TruncatedTextRenderer } from '../components'
 
 const styles = require('./comment-tags.css')
 
