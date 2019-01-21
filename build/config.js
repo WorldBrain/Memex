@@ -72,6 +72,9 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         performance: {
             hints: false,
         },
+        node: {
+            fs: 'empty',
+        },
     }
 
     if (mode === 'production') {

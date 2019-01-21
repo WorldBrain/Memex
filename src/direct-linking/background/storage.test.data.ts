@@ -1,7 +1,8 @@
 export const directLink = {
     pageTitle: 'Some random page',
+    pdfFingerprint: null,
     pageUrl: 'somerandomurl.com',
-    url: 'http://memex.link/3234235/',
+    url: 'https://memex.link/3234235/',
     body: 'Some random quote in some random page',
     comment: '',
     selector: {},
@@ -19,6 +20,7 @@ export const coll2 = 'testB'
 export const highlight = {
     pageTitle: 'Annotation title',
     pageUrl,
+    pdfFingerprint: null,
     body: 'Whooo this is a highlight',
     url: 'https://annotation.url/#12124124124',
     comment: '',
@@ -39,6 +41,7 @@ export const hybrid = {
 export const annotation = {
     pageTitle: 'Annotation title',
     pageUrl,
+    pdfFingerprint: null,
     body: 'Whooo this is an annotation',
     url: 'https://annotation.url/#12124124134',
     comment: 'Hmm this is the annotation comment',
@@ -50,6 +53,7 @@ export const comment = {
     pageTitle: 'Annotation title',
     pageUrl,
     body: 'some test text',
+    pdfFingerprint: null,
     url: 'https://annotation.url/#12124124159',
     comment: 'Hmm this is just a comment',
     selector: {},

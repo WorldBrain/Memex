@@ -37,6 +37,7 @@
     "permissions": [
         "<all_urls>",
         "alarms",
+        "activeTab",
         "idle",
         "bookmarks",
         "contextMenus",

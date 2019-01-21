@@ -30,6 +30,7 @@ export default class AnnotationsManager {
 
     public createAnnotation = async ({
         url,
+        pdfFingerprint,
         title,
         body,
         comment,
@@ -38,6 +39,7 @@ export default class AnnotationsManager {
         bookmarked,
     }: {
         url: string
+        pdfFingerprint: string | null
         title: string
         body: string
         comment: string

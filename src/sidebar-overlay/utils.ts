@@ -105,3 +105,8 @@ export const maxPossibleTags = (tags: string[]) => {
     }
     return tagsAllowed
 }
+
+export const openInNewTab = url => {
+    const win = window.open(url, '_blank')
+    win.focus()
+}

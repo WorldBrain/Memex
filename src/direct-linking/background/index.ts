@@ -11,6 +11,7 @@ import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
+import { getPdfFingerprintForURL } from 'src/activity-logger/background/pdffingerprint'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -196,14 +197,14 @@ export default class DirectLinkingBackground {
     ) {
         url = url == null && tab != null ? tab.url : url
 
-        const annotations = await this.annotationStorage.getAllAnnotationsByUrl(
-            {
-                url: normalize(url),
-                limit,
-                skip,
-                ...params,
-            },
-        )
+        const annotations = url.endsWith('.pdf')
+            ? await this.annotationStorage.getAnnotationsByFingerprint(url)
+            : await this.annotationStorage.getAllAnnotationsByUrl({
+                  url: normalize(url),
+                  limit,
+                  skip,
+                  ...params,
+              })
 
         const annotResults = await Promise.all(
             annotations.map(
@@ -228,13 +229,17 @@ export default class DirectLinkingBackground {
         { tab }: TabArg,
         { url, title, comment, body, selector, bookmarked },
     ) {
-        const pageUrl = url == null ? tab.url : url
+        const pageUrl: string = url == null ? tab.url : url
         const pageTitle = title == null ? tab.title : title
         const uniqueUrl = `${pageUrl}/#${Date.now()}`
+        const pdfFingerprint = pageUrl.endsWith('.pdf')
+            ? await getPdfFingerprintForURL(pageUrl)
+            : null
 
         await this.annotationStorage.createAnnotation({
             pageUrl,
             url: uniqueUrl,
+            pdfFingerprint,
             pageTitle,
             comment,
             body,

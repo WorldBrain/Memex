@@ -4,6 +4,7 @@ export interface Annotation {
     pageTitle: string
     pageUrl: string
     body?: string
+    pdfFingerprint?: string
     selector?: Anchor
     createdWhen?: Date
     lastEdited?: Date

@@ -17,6 +17,7 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { getPdfFingerprintForURL } from 'src/activity-logger/background/pdffingerprint'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -166,10 +167,12 @@ export const createAnnotation: (
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const { url, title } = selectors.page(state)
+    const pdfFingerprint = await getPdfFingerprintForURL(window.location.href)
 
     if (annotationsManager) {
         await annotationsManager.createAnnotation({
             url,
+            pdfFingerprint,
             title,
             body,
             comment,

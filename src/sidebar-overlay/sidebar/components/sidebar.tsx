@@ -1,6 +1,8 @@
 import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import Menu from 'react-burger-menu/lib/menus/slide'
+import cx from 'classnames'
+import { browser } from 'webextension-polyfill-ts'
 
 import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
@@ -14,7 +16,7 @@ import DragElement from 'src/overview/components/DragElement'
 import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
 import SearchTypeSwitch from './search-type-switch'
 import PageInfo from './page-info'
-import cx from 'classnames'
+import isPDFJSViewer from 'src/util/pdf-viewer'
 
 const styles = require('./sidebar.css')
 
@@ -232,6 +234,22 @@ class Sidebar extends React.Component<Props, State> {
                             <div className={styles.commentBoxContainer}>
                                 <CommentBoxContainer env={env} />
                             </div>
+                        )}
+                        {!isPDFJSViewer() &&
+                        window.location.href.endsWith('.pdf') ? (
+                            <button
+                                className={cx(styles.annotatePDFButton)}
+                                onClick={e => {
+                                    e.preventDefault()
+                                    browser.runtime.sendMessage({
+                                        request: 'open-pdf-viewer',
+                                    })
+                                }}
+                            >
+                                Annotate PDF
+                            </button>
+                        ) : (
+                            ''
                         )}
                         <div
                             className={cx(styles.resultsContainer, {

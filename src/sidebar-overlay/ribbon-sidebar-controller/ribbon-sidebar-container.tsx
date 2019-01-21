@@ -326,7 +326,9 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
 
         // Highlight any annotations with anchor.
         // (Done here as only in-page sidebar requires to do this.)
-        await this._highlightAnnotations()
+        if (!window.location.href.endsWith('.pdf')) {
+            await this._highlightAnnotations()
+        }
     }
 
     private _closeSidebarCallback = () => {

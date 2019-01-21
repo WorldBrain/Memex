@@ -17,7 +17,12 @@ export function createRootElement({
     container.classList.add(CONTAINER_CLASS)
     container.setAttribute('id', containerId)
 
-    const cssFile = browser.runtime.getURL('/content_script.css')
+    let cssFile
+    try {
+        cssFile = browser.runtime.getURL('/content_script.css')
+    } catch (e) {
+        cssFile = '/content_script.css'
+    }
     const { rootElement, shadow } = createShadowRootIfSupported(
         container,
         rootId,

@@ -150,6 +150,7 @@ export default class AnnotationStorage extends FeatureStorage {
                 fields: {
                     pageTitle: { type: 'text' },
                     pageUrl: { type: 'url' },
+                    pdfFingerprint: { type: 'text' },
                     body: { type: 'text' },
                     comment: { type: 'text' },
                     selector: { type: 'json' },
@@ -161,6 +162,7 @@ export default class AnnotationStorage extends FeatureStorage {
                     { field: 'url', pk: true },
                     { field: 'pageTitle' },
                     { field: 'pageUrl' },
+                    { field: 'pdfFingerprint' },
                     { field: 'body' },
                     { field: 'createdWhen' },
                     { field: 'comment' },
@@ -267,9 +269,37 @@ export default class AnnotationStorage extends FeatureStorage {
         return results
     }
 
+    async getAnnotationsByFingerprint(pdfFingerprint: string) {
+        return this.storageManager
+            .collection(AnnotationStorage.ANNOTS_COLL)
+            .findObjects<Annotation>({ pdfFingerprint })
+    }
+
+    async insertDirectLink({
+        pageTitle,
+        pageUrl,
+        url,
+        body,
+        selector,
+    }: Annotation) {
+        await this.storageManager
+            .collection(AnnotationStorage.ANNOTS_COLL)
+            .createObject({
+                pageTitle,
+                pageUrl,
+                body,
+                selector,
+                createdWhen: new Date(),
+                lastEdited: {},
+                url,
+                comment: '',
+            })
+    }
+
     async createAnnotation({
         pageTitle,
         pageUrl,
+        pdfFingerprint,
         body,
         url,
         comment,
@@ -280,6 +310,7 @@ export default class AnnotationStorage extends FeatureStorage {
             .collection(this._annotationsColl)
             .createObject({
                 pageTitle,
+                pdfFingerprint,
                 pageUrl,
                 comment,
                 body,

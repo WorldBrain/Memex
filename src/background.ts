@@ -115,3 +115,11 @@ window['notifications'] = notifications
 window['analytics'] = analytics
 window['logger'] = activityLogger
 window['tabMan'] = activityLogger.tabManager
+
+browser.runtime.onMessage.addListener((msg, sender) => {
+    if (msg.request === 'open-pdf-viewer') {
+        browser.tabs.update(sender.tab.id, {
+            url: `web/viewer.html?file=${encodeURI(sender.tab.url)}`,
+        })
+    }
+})

@@ -4,6 +4,8 @@ import { PageUrlsByDay } from 'src/search/background/types'
 export interface Result {
     url: string
     title: string
+    isPDF: boolean
+    pdfFingerprint: string | null
     tags: string[]
     hasBookmark: boolean
     isDeleting: boolean
