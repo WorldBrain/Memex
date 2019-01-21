@@ -1,5 +1,6 @@
 import { StorageManager, Page, Tag } from 'src/search'
-import { SearchParams, UrlFilters, Annotation, AnnotPage } from '../types'
+import { Annotation, AnnotPage } from 'src/direct-linking/types'
+import { AnnotSearchParams, UrlFilters } from './types'
 
 const uniqBy = require('lodash/fp/uniqBy')
 
@@ -18,7 +19,6 @@ export class AnnotsSearcher {
     private pagesColl: string
     private bookmarksColl: string
     private linkProviders: string[]
-    private getTagsByAnnotationUrl: (url: string) => Promise<Tag[]>
 
     private static projectPageSearchResults(results): AnnotPage[] {
         return results.map(({ annotations, fullUrl, fullTitle }) => ({
@@ -116,7 +116,6 @@ export class AnnotsSearcher {
         listEntriesColl,
         tagsColl,
         bookmarksColl,
-        getTagsByAnnotationUrl,
         pagesColl = AnnotsSearcher.PAGES_COLL,
         linkProviders = AnnotsSearcher.MEMEX_LINK_PROVIDERS,
     }) {
@@ -128,7 +127,6 @@ export class AnnotsSearcher {
         this.pagesColl = pagesColl
         this.bookmarksColl = bookmarksColl
         this.linkProviders = linkProviders
-        this.getTagsByAnnotationUrl = getTagsByAnnotationUrl
     }
 
     // TODO: Find better way of calculating this?
@@ -211,7 +209,7 @@ export class AnnotsSearcher {
     }
 
     private async mapSearchResToBookmarks(
-        { bookmarksOnly = false }: SearchParams,
+        { bookmarksOnly = false }: AnnotSearchParams,
         results: Annotation[],
     ) {
         const bookmarks = await this.storageManager
@@ -245,7 +243,7 @@ export class AnnotsSearcher {
             url,
             highlightsOnly = false,
             directLinksOnly = false,
-        }: Partial<SearchParams>,
+        }: Partial<AnnotSearchParams>,
         urlFilters: UrlFilters,
     ) => async (term: string) => {
         const termSearchField = async (field: string) => {
@@ -293,7 +291,7 @@ export class AnnotsSearcher {
         limit = 5,
         includePageResults = false,
         ...searchParams
-    }: SearchParams): Promise<Annotation[] | AnnotPage[]> {
+    }: AnnotSearchParams): Promise<Annotation[] | AnnotPage[]> {
         const filters: UrlFilters = {
             collUrlsInc: await this.collectionSearch(collections),
             tagUrlsInc: await this.tagSearch(tagsInc),
@@ -328,10 +326,12 @@ export class AnnotsSearcher {
 
         // Lookup tags for each annotation
         annotResults = await Promise.all(
-            annotResults.map(async annot => ({
-                ...annot,
-                tags: await this.getTagsByAnnotationUrl(annot.url),
-            })),
+            annotResults.map(async annot => {
+                const tags = await this.storageManager
+                    .collection(this.tagsColl)
+                    .findObjects({ url: annot.url })
+                return { ...annot, tags }
+            }),
         )
 
         if (includePageResults) {

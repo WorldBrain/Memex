@@ -1,7 +1,6 @@
 import { browser, Tabs } from 'webextension-polyfill-ts'
 
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
-import QueryBuilder from 'src/search/query-builder'
 import { StorageManager, Dexie, search as searchPages } from 'src/search'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
@@ -16,7 +15,6 @@ interface TabArg {
 
 export default class DirectLinkingBackground {
     private backend: DirectLinkingBackend
-    private queryBuilderFactory: () => QueryBuilder
     private annotationStorage: AnnotationStorage
     private sendAnnotation: AnnotationSender
     private requests: AnnotationRequests
@@ -24,14 +22,11 @@ export default class DirectLinkingBackground {
     constructor({
         storageManager,
         getDb,
-        queryBuilder = () => new QueryBuilder(),
     }: {
         storageManager: StorageManager
         getDb: () => Promise<Dexie>
-        queryBuilder?: () => QueryBuilder
     }) {
         this.backend = new DirectLinkingBackend()
-        this.queryBuilderFactory = queryBuilder
 
         this.annotationStorage = new AnnotationStorage({
             storageManager,
@@ -56,10 +51,6 @@ export default class DirectLinkingBackground {
                 createAnnotation: this.createAnnotation.bind(this),
                 editAnnotation: this.editAnnotation.bind(this),
                 deleteAnnotation: this.deleteAnnotation.bind(this),
-                searchAnnotations: this.searchAnnotations.bind(this),
-                searchPagesAndAnnotations: this.searchPagesAndAnnotations.bind(
-                    this,
-                ),
                 toggleSidebar: this.toggleSidebar.bind(this),
                 getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
                 addAnnotationTag: this.addTagForAnnotation.bind(this),
@@ -179,33 +170,6 @@ export default class DirectLinkingBackground {
         url = url == null ? tab.url : url
 
         return this.annotationStorage.toggleAnnotBookmark({ url })
-    }
-
-    async searchAnnotations(_, { query, ...params }) {
-        const qb = this.queryBuilderFactory()
-            .searchTerm(query)
-            .get()
-
-        if (qb.isBadTerm || qb.isInvalidSearch) {
-            return []
-        }
-
-        return this.annotationStorage.search({
-            terms: [...qb.query],
-            ...params,
-        })
-    }
-
-    async searchPagesAndAnnotations(_, { pageParams, annotParams }) {
-        const [pageResults, annotResults] = await Promise.all([
-            searchPages(pageParams),
-            this.searchAnnotations(_, {
-                ...annotParams,
-                includePageResults: true,
-            }),
-        ])
-
-        return { pageResults, annotResults }
     }
 
     async editAnnotation(_, pk, comment) {

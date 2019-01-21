@@ -3,13 +3,11 @@ import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
 import { createPageFromTab, Tag, Dexie, StorageManager } from '../../search'
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
-import { AnnotPage, Annotation, AnnotListEntry, SearchParams } from '../types'
-import { AnnotsSearcher } from './annots-search'
+import { Annotation, AnnotListEntry } from '../types'
 
 export interface AnnotationStorageProps {
     storageManager: StorageManager
     getDb: () => Promise<Dexie>
-    AnnotationsSearcher?: typeof AnnotsSearcher
     browserStorageArea?: Storage.StorageArea
     annotationsColl?: string
     pagesColl?: string
@@ -35,12 +33,9 @@ export default class AnnotationStorage extends FeatureStorage {
     private _listsColl: string
     private _listEntriesColl: string
 
-    search: (params: SearchParams) => Promise<Annotation[] | AnnotPage[]>
-
     constructor({
         storageManager,
         getDb,
-        AnnotationsSearcher = AnnotsSearcher,
         browserStorageArea = browser.storage.local,
         annotationsColl = AnnotationStorage.ANNOTS_COLL,
         bookmarksColl = AnnotationStorage.BMS_COLL,
@@ -144,18 +139,6 @@ export default class AnnotationStorage extends FeatureStorage {
                 ],
             },
         ])
-
-        const searcher = new AnnotationsSearcher({
-            storageManager,
-            listsColl,
-            listEntriesColl,
-            tagsColl,
-            bookmarksColl,
-            annotsColl: annotationsColl,
-            getTagsByAnnotationUrl: this.getTagsByAnnotationUrl.bind(this),
-        })
-
-        this.search = searcher.search.bind(searcher)
     }
 
     private async getListById({ listId }: { listId: number }) {
@@ -218,7 +201,7 @@ export default class AnnotationStorage extends FeatureStorage {
     async indexPageFromTab({ id, url }: Tabs.Tab) {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
-        const page = await createPageFromTab({
+        const page = await createPageFromTab(this._getDb)({
             tabId: id,
             url,
             stubOnly: !indexingPrefs.shouldIndexLinks,
