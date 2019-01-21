@@ -1,8 +1,8 @@
 import * as React from 'react'
 
-import TagInput from '../tag-input'
+import { TagInput } from '../components'
 import AllModesFooter from './all-modes-footer'
-import * as constants from '../../comment-box/constants'
+import * as constants from '../comment-box/constants'
 
 const styles = require('./edit-mode-content.css')
 

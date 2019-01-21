@@ -1,13 +1,8 @@
 import * as React from 'react'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
-import {
-    CongratsMessage,
-    Topbar,
-    Loader,
-    EmptyMessage,
-    AnnotationBoxContainer,
-} from '../../components'
+import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
+import AnnotationBoxContainer from '../../annotation-box'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
 import { Annotation } from '../types'
