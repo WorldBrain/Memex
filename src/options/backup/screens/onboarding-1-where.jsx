@@ -2,10 +2,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { ProviderList } from '../components/provider-list'
 import { PrimaryButton } from '../components/primary-button'
+import { DownloadOverlay } from '../components/download-overlay'
 import Styles from '../styles.css'
 
 export default class OnboardingWhere extends React.Component {
-    state = { provider: null }
+    state = { provider: null, path: null, overlay: false }
 
     render() {
         return (
@@ -15,7 +16,24 @@ export default class OnboardingWhere extends React.Component {
                     WHERE?
                 </p>
                 <ProviderList
-                    onChange={provider => this.setState({ provider })}
+                    onChange={provider => {
+                        this.setState({ provider })
+                        if (provider === 'local') {
+                            this.setState({ overlay: true })
+                        }
+                    }}
+                />
+                <DownloadOverlay
+                    disabled={!this.state.overlay}
+                    onClick={action => {
+                        if (action === 'continue') {
+                            this.setState({ overlay: false })
+                            this.props.onChoice(this.state.provider)
+                        }
+                        if (action === 'cancel') {
+                            this.setState({ overlay: false })
+                        }
+                    }}
                 />
                 <PrimaryButton
                     disabled={!this.state.provider}

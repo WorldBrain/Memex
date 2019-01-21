@@ -39,3 +39,16 @@ input {
     font-weight: 600;
     margin-bottom: 10px;
 }
+
+.title {
+    vertical-align: middle;
+    color: #3eb995;
+    font-weight: 500;
+}
+
+.description {
+    font-size: 13px;
+    margin: 5px 0px 0px 40px;
+    font-weight: 500;
+    color: grey;
+}
