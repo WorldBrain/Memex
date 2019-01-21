@@ -28,5 +28,11 @@
         "lib": ["es2017", "dom", "esnext.asynciterable"]
     },
     "include": ["./src/**/*"],
-    "exclude": ["node_modules", "./src/**/*.js", "./src/**/*.jsx"]
+    "exclude": [
+        "node_modules",
+        "./src/**/*.js",
+        "./src/**/*.jsx",
+        "src/build",
+        "src/web"
+    ]
 }

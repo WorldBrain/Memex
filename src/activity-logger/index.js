@@ -14,6 +14,11 @@ export function isLoggable({ url }) {
     return loggableUrlPattern.test(url)
 }
 
+export function isPDF({ url }) {
+    console.log(url.endsWith('.pdf'))
+    return url.endsWith('.pdf')
+}
+
 export const getPauseState = async () => {
     const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[
         PAUSE_STORAGE_KEY
