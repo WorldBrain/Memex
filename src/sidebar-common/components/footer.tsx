@@ -29,7 +29,7 @@ const Footer = ({
             )}
         </div>
         <div>
-            <span
+            <button
                 className={actionBtnClassName}
                 onClick={e => {
                     e.stopPropagation()
@@ -37,8 +37,8 @@ const Footer = ({
                 }}
             >
                 {actionBtnText}
-            </span>
-            <span
+            </button>
+            <button
                 className={cancelBtnClassName}
                 onClick={e => {
                     e.stopPropagation()
@@ -46,7 +46,7 @@ const Footer = ({
                 }}
             >
                 Cancel
-            </span>
+            </button>
         </div>
     </div>
 )
