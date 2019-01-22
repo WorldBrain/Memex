@@ -9,17 +9,6 @@ export interface Annotation {
     comment?: string
 }
 
-export interface AnnotPage {
-    url: string
-    title: string
-    hasBookmark: boolean
-    /** Object URL to the in-memory location of the assoc. screenshot. */
-    screenshot?: string
-    /** Object URL to the in-memory location of the assoc. fav-icon. */
-    favIcon?: string
-    annotations: Annotation[]
-}
-
 export interface AnnotListEntry {
     listId: number
     url: string

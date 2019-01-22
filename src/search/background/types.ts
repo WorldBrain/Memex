@@ -1,5 +1,21 @@
+import { StorageManager } from '..'
+import { Annotation } from 'src/direct-linking/types'
+
+export interface AnnotPage {
+    url: string
+    title: string
+    hasBookmark: boolean
+    /** Object URL to the in-memory location of the assoc. screenshot. */
+    screenshot?: string
+    /** Object URL to the in-memory location of the assoc. fav-icon. */
+    favIcon?: string
+    annotations: Annotation[]
+}
+
 export interface AnnotSearchParams {
-    /** Main text terms to search against annot body/comments. */
+    /** Main text to search against annot (pre-processed). */
+    query?: string
+    /** Main text terms to search against annot (post-processed). */
     terms?: string[]
     /** Collections to include (all results must be of pages in this collection). */
     collections?: string[]
@@ -28,6 +44,16 @@ export interface AnnotSearchParams {
     includePageResults?: boolean
 }
 
+export interface PageSearchParams extends AnnotSearchParams {
+    contentTypes: ContentTypes
+}
+
+export interface ContentTypes {
+    pages: boolean
+    notes: boolean
+    highlights: boolean
+}
+
 export interface UrlFilters {
     collUrlsInc?: Set<string>
     tagUrlsInc?: Set<string>
@@ -41,4 +67,10 @@ export interface AnnotListParams {
     url: string
     limit?: number
     skip?: number
+}
+
+export abstract class Searcher<Params, Result> {
+    constructor(protected storageManager: StorageManager) {}
+
+    abstract search(params: Params): Promise<Result[]>
 }

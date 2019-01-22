@@ -1,17 +1,16 @@
-import { StorageManager, Page, Tag } from 'src/search'
-import { Annotation, AnnotPage } from 'src/direct-linking/types'
-import { AnnotSearchParams, UrlFilters } from './types'
+import { Page, Tag } from 'src/search'
+import { Annotation } from 'src/direct-linking/types'
+import { AnnotSearchParams, UrlFilters, AnnotPage, Searcher } from './types'
 
 const uniqBy = require('lodash/fp/uniqBy')
 
-export class AnnotsSearcher {
+export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
     static MEMEX_LINK_PROVIDERS = [
         'http://memex.link',
         'http://staging.memex.link',
     ]
     static PAGES_COLL = 'pages'
 
-    private storageManager: StorageManager
     private annotsColl: string
     private listsColl: string
     private listEntriesColl: string
@@ -119,7 +118,7 @@ export class AnnotsSearcher {
         pagesColl = AnnotsSearcher.PAGES_COLL,
         linkProviders = AnnotsSearcher.MEMEX_LINK_PROVIDERS,
     }) {
-        this.storageManager = storageManager
+        super(storageManager)
         this.annotsColl = annotsColl
         this.listsColl = listsColl
         this.listEntriesColl = listEntriesColl
