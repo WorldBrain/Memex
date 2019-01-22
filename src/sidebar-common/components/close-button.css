@@ -4,6 +4,8 @@
     z-index: 2147483647;
     line-height: normal;
     background: #fff;
+    border: none;
+    outline: none;
 }
 
 .closeIcon {

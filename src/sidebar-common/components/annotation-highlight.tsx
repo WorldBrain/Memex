@@ -58,7 +58,7 @@ class AnnotationHighlight extends React.Component<Props, State> {
                 <div className={styles.highlightedText}>
                     "{this._getHighlightText()}"
                     {this._isHighlightLong() && (
-                        <span
+                        <button
                             className={cx(styles.showMoreBtn, {
                                 [styles.rotated]: !truncateHighlight,
                             })}

@@ -21,11 +21,11 @@
 }
 
 .showMoreBtn {
-    margin-left: 5px;
-    margin-bottom: -7px;
+    margin: 5px 0 0 5px;
     cursor: pointer;
     display: inline-block;
     background-image: url('/img/longarrow.svg');
+    background-color: transparent;
     background-repeat: no-repeat;
     background-size: 43px;
     width: 40px;
@@ -33,6 +33,8 @@
     background-position: center;
     transition: transform 0.15s ease-in;
     transform: rotate(0deg);
+    border: none;
+    outline: none;
 
     &.rotated {
         transform: rotate(-180deg);
