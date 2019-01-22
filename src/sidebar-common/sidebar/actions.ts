@@ -130,7 +130,7 @@ export const editAnnotation: (
         // Edit the annotation in Redux store.
         const newAnnotations = [
             ...annotations.slice(0, index),
-            { ...annotation, comment, tags, lastEdited: new Date() },
+            { ...annotation, comment, tags, lastEdited: Date.now() },
             ...annotations.slice(index + 1),
         ]
         dispatch(setAnnotations(newAnnotations))
