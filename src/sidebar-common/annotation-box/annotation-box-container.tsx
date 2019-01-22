@@ -21,8 +21,8 @@ interface OwnProps {
     url: string
     isActive: boolean
     isHovered: boolean
-    createdWhen: Date
-    lastEdited?: Date
+    createdWhen: number
+    lastEdited?: number
     body?: string
     comment?: string
     tags: string[]
@@ -103,7 +103,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this.setState({ displayCrowdfunding: value })
     }
 
-    private _getFormattedTimestamp = (timestamp: Date) =>
+    private _getFormattedTimestamp = (timestamp: number) =>
         moment(timestamp)
             .format('MMMM D YYYY')
             .toUpperCase()
