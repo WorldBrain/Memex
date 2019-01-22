@@ -90,9 +90,9 @@ describe('Annotations storage', () => {
 
         test('fetch all annotations', async () => {
             const normalizedUrl = normalize(DATA.pageUrl)
-            const annotations = await annotationStorage.getAnnotationsByUrl(
-                normalizedUrl,
-            )
+            const annotations = await annotationStorage.getAnnotationsByUrl({
+                pageUrl: normalizedUrl,
+            })
             expect(annotations).toBeDefined()
             expect(annotations).not.toBeNull()
             expect(annotations.length).toBe(3)
