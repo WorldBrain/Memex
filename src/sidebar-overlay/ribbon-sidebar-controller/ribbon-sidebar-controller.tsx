@@ -22,6 +22,7 @@ interface Props {
     removeHighlights: () => void
     makeHighlightMedium: (annotation: Annotation) => void
     removeMediumHighlights: () => void
+    sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     setRibbonSidebarRef: any
 }
 

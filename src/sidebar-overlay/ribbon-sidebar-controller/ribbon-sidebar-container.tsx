@@ -49,6 +49,7 @@ interface OwnProps {
     removeHighlights: () => void
     makeHighlightMedium: (annotation: Annotation) => void
     removeMediumHighlights: () => void
+    sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -197,6 +198,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
             isSidebarOpen,
             makeHighlightMedium,
             removeMediumHighlights,
+            sortAnnotationsByPosition,
         } = this.props
 
         return (
@@ -217,6 +219,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
                     closeSidebarCallback={this._closeSidebarCallback}
                     handleAnnotationBoxMouseEnter={makeHighlightMedium}
                     handleAnnotationBoxMouseLeave={removeMediumHighlights}
+                    sortAnnotationsByPosition={sortAnnotationsByPosition}
                 />
             </React.Fragment>
         )

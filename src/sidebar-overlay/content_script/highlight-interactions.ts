@@ -171,22 +171,27 @@ export const removeHighlights = (onlyRemoveDarkHighlights = false) => {
  * returns the sorted annotations.
  */
 export const sortAnnotationsByPosition = (annotations: Annotation[]) => {
-    const annotationsWithTops = annotations.map(annotation => {
+    const offsetTopObjects = annotations.map((annotation, index) => {
         const firstHighlight = document.querySelector(
             `.${styles['memex-highlight']}[data-annotation="${
                 annotation.url
             }"]`,
         )
         return {
-            ...annotation,
+            index,
             offsetTop: firstHighlight
                 ? getOffsetTop(firstHighlight as HTMLElement)
                 : Infinity,
         }
     })
 
-    // TODO: Check if it should be a minus or plus.
-    return annotationsWithTops.sort((a, b) => a.offsetTop - b.offsetTop)
+    const sortedOffsetTopObjects = offsetTopObjects.sort(
+        (a, b) => a.offsetTop - b.offsetTop,
+    )
+
+    return sortedOffsetTopObjects.map(
+        offsetTopObject => annotations[offsetTopObject.index],
+    )
 }
 
 /**

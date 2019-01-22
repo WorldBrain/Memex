@@ -34,6 +34,7 @@ interface DispatchProps {
 interface OwnProps {
     env: 'inpage' | 'overview'
     annotationsManager: AnnotationsManager
+    sortAnnotationsByPosition?: (annotations: Annotation[]) => Annotation[]
     goToAnnotation: (annotation: Annotation) => void
     /** Optional callback function that gets called after the sidebar is closed. */
     closeSidebarCallback?: () => void
@@ -131,6 +132,7 @@ class SidebarContainer extends React.Component<Props, State> {
             activeAnnotationUrl,
             hoverAnnotationUrl,
             handleAddCommentBtnClick,
+            sortAnnotationsByPosition,
             showCommentBox,
             showCongratsMessage,
         } = this.props
@@ -140,7 +142,11 @@ class SidebarContainer extends React.Component<Props, State> {
                 env={env}
                 isOpen={isOpen}
                 isLoading={isLoading}
-                annotations={annotations}
+                annotations={
+                    sortAnnotationsByPosition
+                        ? sortAnnotationsByPosition(annotations)
+                        : annotations
+                }
                 activeAnnotationUrl={activeAnnotationUrl}
                 hoverAnnotationUrl={hoverAnnotationUrl}
                 showCommentBox={showCommentBox}
