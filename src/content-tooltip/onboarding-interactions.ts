@@ -78,7 +78,8 @@ export const conditionallyShowOnboardingNotifications = async ({
         STORAGE_KEYS.shouldShowOnboarding,
         true,
     )
-    if (!utils.isDemoPage && !shouldShowOnboarding) {
+    console.log(utils.isDemoPage(), shouldShowOnboarding)
+    if (!utils.isDemoPage() || !shouldShowOnboarding) {
         return
     }
 
