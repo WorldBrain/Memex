@@ -9,6 +9,7 @@ import {
     removeHighlights,
     makeHighlightMedium,
     removeMediumHighlights,
+    sortAnnotationsByPosition,
 } from './content_script/highlight-interactions'
 
 export const setupRibbonAndSidebarUI = (
@@ -36,6 +37,7 @@ export const setupRibbonAndSidebarUI = (
             removeHighlights={removeHighlights}
             makeHighlightMedium={makeHighlightMedium}
             removeMediumHighlights={removeMediumHighlights}
+            sortAnnotationsByPosition={sortAnnotationsByPosition}
         />,
         target,
     )
