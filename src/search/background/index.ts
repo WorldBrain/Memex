@@ -2,12 +2,16 @@ import { browser } from 'webextension-polyfill-ts'
 
 import * as index from '..'
 import { AnnotsSearcher } from './annots-search'
+import { PageSearcher } from './page-search'
 import { Dexie, StorageManager } from '../types'
 import SearchStorage from './storage'
 import QueryBuilder from 'src/search/query-builder'
 import { TabManager } from 'src/activity-logger/background'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import AnnotsStorage from 'src/direct-linking/background/storage'
+import { PageSearchParams, AnnotSearchParams, AnnotPage } from './types'
+import { annotSearchOnly, pageSearchOnly } from './utils'
+import { Annotation } from 'src/direct-linking/types'
 
 export default class SearchBackground {
     private backend
@@ -16,6 +20,7 @@ export default class SearchBackground {
     private queryBuilderFactory: () => QueryBuilder
     private getDb: () => Promise<Dexie>
     private annotsSearcher: AnnotsSearcher
+    private pageSearcher: PageSearcher
 
     constructor({
         storageManager,
@@ -43,6 +48,11 @@ export default class SearchBackground {
             tagsColl: AnnotsStorage.TAGS_COLL,
             bookmarksColl: AnnotsStorage.BMS_COLL,
             annotsColl: AnnotsStorage.ANNOTS_COLL,
+        })
+
+        this.pageSearcher = new PageSearcher({
+            storageManager,
+            legacySearch: this.backend.search,
         })
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
@@ -98,10 +108,68 @@ export default class SearchBackground {
             getMatchingPageCount: this.backend.getMatchingPageCount,
             listAnnotations: this.storage.listAnnotations.bind(this.storage),
             searchAnnotations: this.searchAnnotations.bind(this),
+            searchPages: this.searchPages.bind(this),
         })
     }
 
-    async searchAnnotations({ query, ...params }) {
+    async searchPages({ contentTypes, ...params }: PageSearchParams) {
+        if (pageSearchOnly(contentTypes)) {
+            return this.pageSearcher.search(params)
+        }
+
+        if (annotSearchOnly(contentTypes)) {
+            return this.searchAnnotations({
+                ...params,
+                includePageResults: true,
+            })
+        }
+
+        return this.combinedSearch(params)
+    }
+
+    private mergeSearchResults(results: Array<AnnotPage[]>): AnnotPage[] {
+        const pageMap = new Map<string, [Partial<AnnotPage>, Annotation[]]>()
+
+        // Dedupe and group results by page
+        for (const searchRes of results) {
+            for (const { annotations, ...page } of searchRes) {
+                const entry = pageMap.get(page.url)
+
+                let annots =
+                    entry == null ? annotations : [...entry[1], ...annotations]
+
+                const urls = new Set(annots.map(a => a.pageUrl))
+                annots = annots.filter(annot => urls.has(annot.pageUrl))
+
+                pageMap.set(page.url, [page, annots])
+            }
+        }
+
+        // Convert Map back to array of results
+        return [...pageMap.values()].map(
+            ([page, annotations]) =>
+                ({
+                    ...page,
+                    annotations,
+                } as AnnotPage),
+        )
+    }
+
+    private async combinedSearch(params: AnnotSearchParams) {
+        const results = await Promise.all([
+            this.pageSearcher.search(params),
+            this.searchAnnotations({ ...params, includePageResults: true }),
+        ])
+
+        const mergedResults = this.mergeSearchResults(results as Array<
+            AnnotPage[]
+        >)
+
+        // Sort and paginate
+        return mergedResults
+    }
+
+    async searchAnnotations({ query, ...params }: AnnotSearchParams) {
         const qb = this.queryBuilderFactory()
             .searchTerm(query)
             .get()
@@ -115,6 +183,7 @@ export default class SearchBackground {
             ...params,
         })
     }
+
     async handleBookmarkRemoval(id, { node }) {
         // Created folders won't have `url`; ignore these
         if (!node.url) {
