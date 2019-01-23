@@ -2,11 +2,19 @@
     width: 100%;
     background-color: #fefefe;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
     box-shadow: 0 3px 6px 0px rgba(23, 55, 102, 0.14902);
+    transition: height 0.2s ease-in;
+}
+
+.iconContainer {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    justify-content: center;
 }
 
 .icon {
@@ -21,8 +29,20 @@
     vertical-align: bottom;
     cursor: pointer;
     margin-top: 5px;
+    transition: transform 0.2s ease-in;
 }
 
 .inverted {
     transform: rotate(-90deg);
+}
+
+.annotationList {
+    display: flex;
+    flex-direction: row;
+}
+
+.annotation {
+    width: 300px;
+    margin-left: 10px;
+    margin-bottom: 10px;
 }
