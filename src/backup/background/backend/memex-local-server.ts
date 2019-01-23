@@ -6,7 +6,7 @@ import {
     ObjectChange,
 } from './types'
 
-export default class MemexLocalBackend extends BackupBackend {
+export class MemexLocalBackend extends BackupBackend {
     private url
 
     constructor({ url }: { url: string }) {
@@ -16,10 +16,14 @@ export default class MemexLocalBackend extends BackupBackend {
     }
 
     async isConnected() {
-        return true
+        const response = await fetch(`${this.url}/status`)
+        console.log(response.status)
+        return response.status === 200
     }
+
     async isAuthenticated() {
-        return true
+        // this is for now, until there is some kind of authentication
+        return this.isConnected()
     }
 
     async storeObject({
@@ -30,7 +34,7 @@ export default class MemexLocalBackend extends BackupBackend {
         events: EventEmitter
     }): Promise<any> {
         await fetch(
-            `${this.url}/${backupObject.collection}/${encodeURIComponent(
+            `${this.url}/backup/${backupObject.collection}/${encodeURIComponent(
                 encodeURIComponent(backupObject.pk),
             )}`,
             {
@@ -65,14 +69,14 @@ export default class MemexLocalBackend extends BackupBackend {
             4,
         )
 
-        await fetch(`${this.url}/change-sets/${Date.now()}`, {
+        await fetch(`${this.url}/backup/change-sets/${Date.now()}`, {
             method: 'PUT',
             body,
         })
     }
 
     async listObjects(collection: string): Promise<string[]> {
-        const response = await fetch(`${this.url}/${collection}`)
+        const response = await fetch(`${this.url}/backup/${collection}`)
         if (response.status === 404) {
             return []
         }
@@ -89,7 +93,7 @@ export default class MemexLocalBackend extends BackupBackend {
     }
 
     async retrieveObject(collection: string, object: string) {
-        console.log(`${this.url}/${collection}/${object}`)
+        console.log(`${this.url}/backup/${collection}/${object}`)
         return (await fetch(`${this.url}/${collection}/${object}`)).json()
     }
 }

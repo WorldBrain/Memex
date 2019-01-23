@@ -4,6 +4,7 @@ import { StorageManager } from '../../search/types'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
+import { BackendSelect } from './backend-select'
 import estimateBackupSize from './estimate-backup-size'
 import BackupProcedure from './procedures/backup'
 import { BackupRestoreProcedure } from './procedures/restore'
@@ -14,9 +15,11 @@ export * from './backend'
 export class BackupBackgroundModule {
     storageManager: StorageManager
     storage: BackupStorage
+    backendLocation: string
     backend: BackupBackend
     lastBackupStorage: LastBackupStorage
     changeTrackingQueue: Queue
+    backendSelect = new BackendSelect()
     backupProcedure: BackupProcedure
     backupUiCommunication = new ProcedureUiCommunication('backup-event')
     restoreProcedure: BackupRestoreProcedure
@@ -33,32 +36,29 @@ export class BackupBackgroundModule {
     constructor({
         storageManager,
         lastBackupStorage,
-        backend,
         createQueue = Queue,
         queueOpts = { autostart: true, concurrency: 1 },
     }: {
         storageManager: StorageManager
         lastBackupStorage: LastBackupStorage
-        backend: BackupBackend
         createQueue?: typeof Queue
         queueOpts?: QueueOpts
     }) {
         this.storageManager = storageManager
         this.storage = new BackupStorage({ storageManager })
         this.lastBackupStorage = lastBackupStorage
-        this.backend = backend
         this.changeTrackingQueue = createQueue(queueOpts)
 
         this.backupProcedure = new BackupProcedure({
             storageManager,
             storage: this.storage,
             lastBackupStorage,
-            backend,
+            backend: this.backend,
         })
         this.restoreProcedure = new BackupRestoreProcedure({
             storageManager,
             storage: this.storage,
-            backend,
+            backend: this.backend,
         })
     }
 
@@ -116,11 +116,26 @@ export class BackupBackgroundModule {
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
                 },
+                setBackendLocation: async (info, location: string) => {
+                    if (
+                        location === 'gdrive' &&
+                        this.backendLocation !== location
+                    ) {
+                        this.backend = await this.backendSelect.initGDriveBackend()
+                    } else if (
+                        location === 'local' &&
+                        this.backendLocation !== location
+                    ) {
+                        this.backendLocation = location
+                        this.backend = await this.backendSelect.initLocalBackend()
+                    }
+                    this.setupRequestInterceptor()
+                },
                 isBackupAuthenticated: async () => {
-                    return this.backend.isAuthenticated()
+                    return this.backend ? this.backend.isAuthenticated() : false
                 },
                 isBackupConnected: async () => {
-                    return this.backend.isConnected()
+                    return this.backend ? this.backend.isConnected() : false
                 },
                 maybeCheckAutomaticBakupEnabled: async () => {
                     if (
@@ -172,6 +187,11 @@ export class BackupBackgroundModule {
             },
             { insertExtraArg: true },
         )
+    }
+
+    async setBackendFromStorage() {
+        this.backend = await this.backendSelect.restoreBackend()
+        return this.backend
     }
 
     setupRequestInterceptor() {
