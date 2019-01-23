@@ -20,7 +20,7 @@ import { SidebarButton } from './sidebar-button'
 import { NotifButton } from './notif-button'
 import { HistoryPauser } from './pause-button'
 import { selectors as tags, acts as tagActs, TagsButton } from './tags-button'
-import { AnnotatePDFButton } from './annotatePDF-button/components/AnnotatePDFButton'
+import AnnotatePDFButton from './annotatePDF-button/components/AnnotatePDFButton'
 import {
     selectors as collections,
     acts as collectionActs,
@@ -153,7 +153,9 @@ class PopupContainer extends PureComponent<Props> {
                     Go to Dashboard
                 </LinkButton>
                 <hr />
-                <AnnotatePDFButton isDisabled={false} />
+                {this.props.url.endsWith('.pdf') && (
+                    <AnnotatePDFButton pdfURL={this.props.url} />
+                )}
                 <BookmarkButton closePopup={this.closePopup} />
                 <TagsButton />
                 <CollectionsButton />
