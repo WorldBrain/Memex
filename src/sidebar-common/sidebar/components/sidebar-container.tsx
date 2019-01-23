@@ -29,6 +29,8 @@ interface DispatchProps {
     closeSidebar: () => void
     handleAddCommentBtnClick: () => void
     setHoverAnnotationUrl: (url: string) => void
+    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
+    handleDeleteAnnotation: (url: string) => void
 }
 
 interface OwnProps {
@@ -156,6 +158,8 @@ class SidebarContainer extends React.Component<Props, State> {
                 handleAnnotationBoxMouseLeave={
                     this._handleAnnotationBoxMouseLeave
                 }
+                handleEditAnnotation={this.props.handleEditAnnotation}
+                handleDeleteAnnotation={this.props.handleDeleteAnnotation}
             />
         )
     }
@@ -186,6 +190,9 @@ const mapDispatchToProps: MapDispatchToProps<
     handleAddCommentBtnClick: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
     setHoverAnnotationUrl: url => dispatch(actions.setHoverAnnotationUrl(url)),
+    handleEditAnnotation: (url, comment, tags) =>
+        dispatch(actions.editAnnotation(url, comment, tags)),
+    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
 })
 
 export default connect(

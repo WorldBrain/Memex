@@ -30,6 +30,8 @@ interface Props {
         annotation: Annotation,
     ) => (e: Event) => void
     handleAnnotationBoxMouseLeave: () => (e: Event) => void
+    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
+    handleDeleteAnnotation: (url: string) => void
 }
 
 class Sidebar extends React.Component<Props> {
@@ -133,6 +135,12 @@ class Sidebar extends React.Component<Props> {
                                         annotation,
                                     )}
                                     handleMouseLeave={handleAnnotationBoxMouseLeave()}
+                                    handleEditAnnotation={
+                                        this.props.handleEditAnnotation
+                                    }
+                                    handleDeleteAnnotation={
+                                        this.props.handleDeleteAnnotation
+                                    }
                                 />
                             ))}
                             {showCongratsMessage && <CongratsMessage />}

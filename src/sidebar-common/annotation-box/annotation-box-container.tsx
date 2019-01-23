@@ -1,21 +1,18 @@
 import * as React from 'react'
 import cx from 'classnames'
 import moment from 'moment'
-import { connect } from 'react-redux'
 import noop from 'lodash/fp/noop'
 
-import * as actions from '../sidebar/actions'
 import DefaultDeleteModeContent from './default-delete-mode-content'
 import EditModeContent from './edit-mode-content'
 import { TruncatedTextRenderer } from '../components'
-import { MapDispatchToProps } from '../types'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 const styles = require('./annotation-box-container.css')
 
-interface OwnProps {
+interface Props {
     /** Required to decide how to go to an annotation when it's clicked. */
     env: 'inpage' | 'overview'
     url: string
@@ -29,16 +26,9 @@ interface OwnProps {
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleMouseEnter: (e: Event) => void
     handleMouseLeave: (e: Event) => void
-}
-
-interface StateProps {}
-
-interface DispatchProps {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
 }
-
-type Props = OwnProps & StateProps & DispatchProps
 
 interface State {
     mode: 'default' | 'edit' | 'delete'
@@ -255,16 +245,4 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
-    handleEditAnnotation: (url, comment, tags) =>
-        dispatch(actions.editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
-})
-
-export default connect(
-    undefined,
-    mapDispatchToProps,
-)(AnnotationBoxContainer)
+export default AnnotationBoxContainer
