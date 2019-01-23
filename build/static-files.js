@@ -43,4 +43,12 @@ export const copyPatterns = [
         to: 'fonts/material-icons/[name].[ext]',
         toType: 'template',
     },
+    {
+        from: 'src/web',
+        to: './web',
+    },
+    {
+        from: 'src/build',
+        to: './build',
+    },
 ]
