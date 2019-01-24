@@ -48,18 +48,6 @@ export class BackupBackgroundModule {
         this.storage = new BackupStorage({ storageManager })
         this.lastBackupStorage = lastBackupStorage
         this.changeTrackingQueue = createQueue(queueOpts)
-
-        this.backupProcedure = new BackupProcedure({
-            storageManager,
-            storage: this.storage,
-            lastBackupStorage,
-            backend: this.backend,
-        })
-        this.restoreProcedure = new BackupRestoreProcedure({
-            storageManager,
-            storage: this.storage,
-            backend: this.backend,
-        })
     }
 
     setupRemoteFunctions() {
@@ -116,7 +104,7 @@ export class BackupBackgroundModule {
                 hasInitialBackup: async () => {
                     return !!(await this.lastBackupStorage.getLastBackupTime())
                 },
-                setBackendLocation: async (info, location: string) => {
+                setBackendLocation: async (info, location?: string) => {
                     if (
                         location === 'gdrive' &&
                         this.backendLocation !== location
@@ -130,6 +118,7 @@ export class BackupBackgroundModule {
                         this.backend = await this.backendSelect.initLocalBackend()
                     }
                     this.setupRequestInterceptor()
+                    this.initBackendDependants()
                 },
                 isBackupAuthenticated: async () => {
                     return this.backend ? this.backend.isAuthenticated() : false
@@ -191,7 +180,24 @@ export class BackupBackgroundModule {
 
     async setBackendFromStorage() {
         this.backend = await this.backendSelect.restoreBackend()
-        return this.backend
+        if (this.backend) {
+            this.setupRequestInterceptor()
+        }
+        this.initBackendDependants()
+    }
+
+    initBackendDependants() {
+        this.backupProcedure = new BackupProcedure({
+            storageManager: this.storageManager,
+            storage: this.storage,
+            lastBackupStorage: this.lastBackupStorage,
+            backend: this.backend,
+        })
+        this.restoreProcedure = new BackupRestoreProcedure({
+            storageManager: this.storageManager,
+            storage: this.storage,
+            backend: this.backend,
+        })
     }
 
     setupRequestInterceptor() {

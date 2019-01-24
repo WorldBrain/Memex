@@ -34,15 +34,19 @@ export class BackendSelect {
     }
 
     async restoreBackendLocation(): Promise<string> {
-        const backendInfo = await browser.storage.local.get('backendInfo')
-        if (backendInfo) {
-            return backendInfo.location
+        const storageObject = await browser.storage.local.get('backendInfo')
+        if (storageObject.backendInfo) {
+            const backendLocation = storageObject.backendInfo.location
+            return backendLocation
         } else {
             return undefined
         }
     }
 
     async saveBackendLocation(location: string): Promise<void> {
-        return browser.storage.local.set({ backendInfo: { location } })
+        const response = await browser.storage.local.set({
+            backendInfo: { location },
+        })
+        return response
     }
 }
