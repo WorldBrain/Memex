@@ -10,8 +10,9 @@ import {
     ErrorComponent,
     DoneComponent,
 } from './tooltip-states'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
+
+import { conditionallyRemoveSelectOption } from '../onboarding-interactions'
+import { STAGES } from 'src/overview/onboarding/constants'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -47,18 +48,10 @@ class TooltipContainer extends React.Component {
             showTooltip: false,
             position: {},
         })
-        const onboardingAnnotationStage = await getLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step1,
+        // Remove onboarding select option notification if it's present
+        await conditionallyRemoveSelectOption(
+            STAGES.annotation.notifiedHighlightText,
         )
-        if (onboardingAnnotationStage === 'select_option_notification_shown') {
-            await setLocalStorage(
-                STORAGE_KEYS.onboardingDemo.step1,
-                'highlight_text_notification_shown',
-            )
-            // Close toolbar notification manually
-            // Replace with better method in the future.
-            document.querySelector('.memex-tooltip-notification').remove()
-        }
     }
 
     closeTooltip = (event, options = { disable: false }) => {
@@ -87,17 +80,10 @@ class TooltipContainer extends React.Component {
         e.stopPropagation()
         await this.props.createAnnotation()
 
-        const onboardingAnnotationStage = await getLocalStorage(
-            STORAGE_KEYS.onboardingDemo.step1,
+        // Remove onboarding select option notification if it's present
+        await conditionallyRemoveSelectOption(
+            STAGES.annotation.annotationCreated,
         )
-        if (onboardingAnnotationStage === 'select_option_notification_shown') {
-            await setLocalStorage(
-                STORAGE_KEYS.onboardingDemo.step1,
-                'annotation_created',
-            )
-            // Remove active notification
-            document.querySelector('.memex-tooltip-notification').remove()
-        }
 
         // quick hack, to prevent the tooltip from popping again
         setTimeout(() => {

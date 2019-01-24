@@ -2,7 +2,8 @@ import { createAction } from 'redux-act'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 import * as selectors from './selectors'
-import { STORAGE_KEYS } from './constants'
+import * as utils from './utils'
+import { STORAGE_KEYS, FLOWS, STAGES } from './constants'
 
 export const setAnnotationStage = createAction<string>(
     'onboarding/setAnnotationStage',
@@ -21,40 +22,38 @@ export const setCongratsMessage = createAction<boolean>(
 )
 export const setBackupStage = createAction<string>('onboarding/setBackupStage')
 
+/**
+ * Checks whether all stages of onboarding is DONE.
+ * If yes, set congratsMessage to True.
+ */
 export const checkForCompletion = () => (dispatch, getState) => {
     const state = getState()
-    const annotationStage = selectors.annotationStage(state)
-    const powerSearchStage = selectors.powerSearchStage(state)
-    const taggingStage = selectors.taggingStage(state)
-    const backupStage = selectors.backupStage(state)
+    const isAnnotationDone = selectors.isAnnotationDone(state)
+    const isPowerSearchDone = selectors.isPowerSearchDone(state)
+    const isTaggingDone = selectors.isTaggingDone(state)
+    const isBackupDone = selectors.isBackupDone(state)
 
     if (
-        annotationStage === 'DONE' &&
-        powerSearchStage === 'DONE' &&
-        taggingStage === 'DONE' &&
-        backupStage === 'DONE'
+        isAnnotationDone &&
+        isPowerSearchDone &&
+        isTaggingDone &&
+        isBackupDone
     ) {
         dispatch(setCongratsMessage(true))
     }
 }
 
+/**
+ * Hydrates the onboarding states from the storage.
+ */
 export const fetchOnboardingStages = () => async dispatch => {
-    const annotationStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step1,
-        'unvisited',
-    )
-    const powerSearchStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step2,
-        'unvisited',
-    )
-    const taggingStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step3,
-        'unvisited',
-    )
-    const backupStage = await getLocalStorage(
-        STORAGE_KEYS.onboardingDemo.step4,
-        'unvisited',
-    )
+    // Fetch keys from storage
+    const {
+        annotationStage,
+        powerSearchStage,
+        taggingStage,
+        backupStage,
+    } = await utils.fetchAllStages()
 
     dispatch(setAnnotationStage(annotationStage))
     dispatch(setPowerSearchStage(powerSearchStage))
@@ -64,6 +63,9 @@ export const fetchOnboardingStages = () => async dispatch => {
     dispatch(checkForCompletion())
 }
 
+/**
+ * Hydrates the showOnboardingBox from storage
+ */
 export const fetchShowOnboarding = () => async dispatch => {
     const showOnboardingBox = await getLocalStorage(
         STORAGE_KEYS.shouldShowOnboarding,
@@ -72,19 +74,15 @@ export const fetchShowOnboarding = () => async dispatch => {
     dispatch(setShowOnboardingBox(showOnboardingBox))
 }
 
-/**
- * Sets Power Search Stage as done.
- * Dispatched from the last tooltip in Power Search Stage.
- */
 export const setPowerSearchDone = () => async dispatch => {
-    await setLocalStorage(STORAGE_KEYS.onboardingDemo.step2, 'DONE')
-    dispatch(setPowerSearchStage('DONE'))
+    await utils.setOnboardingStage(FLOWS.powerSearch, STAGES.done)
+    dispatch(setPowerSearchStage(STAGES.done))
     dispatch(checkForCompletion())
 }
 
 export const setBackupStageDone = () => async dispatch => {
-    await setLocalStorage(STORAGE_KEYS.onboardingDemo.step4, 'DONE')
-    dispatch(setBackupStage('DONE'))
+    await utils.setOnboardingStage(FLOWS.backup, STAGES.done)
+    dispatch(setBackupStage(STAGES.done))
     dispatch(checkForCompletion())
 }
 

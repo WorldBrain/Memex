@@ -27,3 +27,23 @@ export const congratsMessage = createSelector(
     onboarding,
     state => state.congratsMessage,
 )
+
+export const isAnnotationDone = createSelector(
+    annotationStage,
+    stage => stage === 'DONE',
+)
+
+export const isPowerSearchDone = createSelector(
+    powerSearchStage,
+    stage => stage === 'DONE',
+)
+
+export const isTaggingDone = createSelector(
+    taggingStage,
+    stage => stage === 'DONE',
+)
+
+export const isBackupDone = createSelector(
+    backupStage,
+    stage => stage === 'DONE',
+)

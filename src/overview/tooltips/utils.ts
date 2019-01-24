@@ -15,7 +15,7 @@ export const getBottomCenter = (
 ): Position => {
     const $element = document.querySelector(selector)
     if ($element === null) {
-        console.log(`ERROR: Element with selector '${selector}' not found.`)
+        console.error(`ERROR: Element with selector '${selector}' not found.`)
         return
     }
     const rect = $element.getBoundingClientRect()

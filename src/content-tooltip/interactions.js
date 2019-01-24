@@ -8,7 +8,7 @@ import {
 import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
 import { injectCSS } from '../search-injection/dom'
-import { conditionallyShowHighlightNotification } from './onboarding-notifications'
+import { conditionallyShowHighlightNotification } from './onboarding-interactions'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null

@@ -1,22 +1,21 @@
 import React, { PureComponent } from 'react'
 import { browser } from 'webextension-polyfill-ts'
+import { remoteFunction } from 'src/util/webextensionRPC'
 
 const styles = require('./CongratsMessage.css')
 
 const partyPopperIcon = browser.runtime.getURL('/img/party_popper.svg')
 
 class CongratsMessage extends PureComponent {
+    openOptionsTab = remoteFunction('openOptionsTab')
+
     moreAboutSidebar = () => {
         browser.tabs.create({
             url: 'https://worldbrain.io',
         })
     }
 
-    goToDashboard = () => {
-        browser.tabs.create({
-            url: browser.runtime.getURL('/options.html#/overview'),
-        })
-    }
+    goToDashboard = () => this.openOptionsTab('overview')
 
     render() {
         return (

@@ -1,8 +1,8 @@
 import { createAction } from 'redux-act'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 
 import * as selectors from './selectors'
-import { STORAGE_KEYS as onboardingKeys } from '../onboarding/constants'
+import { FLOWS, STAGES } from '../onboarding/constants'
+import { fetchOnboardingStage, setOnboardingStage } from '../onboarding/utils'
 import { TOOLTIPS } from './constants'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -20,12 +20,10 @@ export const initOnboardingTooltips = (index = 0) => dispatch => {
 }
 
 export const fetchOnboardingState = () => async dispatch => {
-    const onboardingState = await getLocalStorage(
-        onboardingKeys.onboardingDemo.step2,
-    )
-    if (onboardingState === 'overview-tooltips') {
+    const onboardingState = await fetchOnboardingStage(FLOWS.powerSearch)
+    if (onboardingState === STAGES.powerSearch.overviewTooltips) {
         dispatch(initOnboardingTooltips())
-    } else if (onboardingState === 'skip-to-time-filters') {
+    } else if (onboardingState === STAGES.powerSearch.skipToTimeFilters) {
         dispatch(initOnboardingTooltips(1))
     }
 }
@@ -58,7 +56,7 @@ export const closeTooltip = () => async dispatch => {
     processEventRPC({
         type: EVENT_NAMES.CLOSE_TOOLTIP,
     })
-    await setLocalStorage(onboardingKeys.onboardingDemo.step2, 'unvisited')
+    await setOnboardingStage(FLOWS.powerSearch, STAGES.unvisited)
 }
 
 /**

@@ -104,6 +104,9 @@ export const EVENT_NAMES = {
     POWERSEARCH_BROWSE_PAGE: 'powerSearchBrowsePage',
     POWERSEARCH_GOTO_DASH: 'powerSearchGotoDash',
     FINISH_POWERSEARCH_ONBOARDING: 'finshPowerSearchOnboarding',
+    START_TAGGING_ONBOARDING: 'startTaggingOnboarding',
+    FINISH_TAGGING_ONBOARDING: 'finishTaggingOnboarding',
+    FINISH_BACKUP_ONBOARDING: 'finishBackupOnboarding',
     OVERVIEW_TOOLTIP: 'overviewTooltip',
     SET_TOOLTIP: 'setTooltip',
     CLOSE_TOOLTIP: 'closeTooltip',
@@ -387,6 +390,15 @@ export const EVENT_TYPES = {
     [EVENT_NAMES.CLOSE_TOOLTIP]: {
         id: 83,
         notifType: EVENT_NAMES.OVERVIEW_TOOLTIP,
+    },
+    [EVENT_NAMES.START_TAGGING_ONBOARDING]: {
+        id: 84,
+    },
+    [EVENT_NAMES.FINISH_TAGGING_ONBOARDING]: {
+        id: 85,
+    },
+    [EVENT_NAMES.FINISH_BACKUP_ONBOARDING]: {
+        id: 86,
     },
 }
 

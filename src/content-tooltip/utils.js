@@ -1,5 +1,4 @@
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { ANNOTATION_DEMO_URL } from 'src/overview/onboarding/constants'
 import * as constants from './constants'
 
 export const delayed = (f, delay) => {
@@ -47,14 +46,3 @@ export const getPositionState = async () =>
 
 export const setPositionState = async positionValue =>
     setLocalStorage(constants.POSITION_STORAGE_NAME, positionValue)
-
-// Finding the coordinates to center the notification box
-export const getPageCenter = () => ({
-    x: window.innerWidth / 2,
-    y: window.innerHeight / 2 - 200, // Assuming average height as 200, since height is 'auto'
-})
-
-/**
- * Check whether page is onboarding demo page (Wikipedia Memex)
- */
-export const isDemoPage = () => window.location.href === ANNOTATION_DEMO_URL

@@ -26,13 +26,15 @@ export default function NotificationLayout({
                 {thirdRowImage && (
                     <img className={styles.thirdRowImage} src={thirdRowImage} />
                 )}
-                <img
-                    className={styles.close}
-                    src={closeIcon}
-                    width={'15px'}
-                    height={'15px'}
-                    onClick={() => onCloseRequested()}
-                />
+                {closeIcon && (
+                    <img
+                        className={styles.close}
+                        src={closeIcon}
+                        width={'15px'}
+                        height={'15px'}
+                        onClick={() => onCloseRequested()}
+                    />
+                )}
             </div>
         </div>
     )
