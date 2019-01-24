@@ -49,7 +49,6 @@ const backupModule = new backup.BackupBackgroundModule({
 
 backupModule.setBackendFromStorage()
 backupModule.setupRemoteFunctions()
-// backupModule.setupRequestInterceptor()
 backupModule.startRecordingChangesIfNeeded()
 
 const bgScript = new BackgroundScript({ notifsBackground: notifications })

@@ -93,7 +93,8 @@ export class MemexLocalBackend extends BackupBackend {
     }
 
     async retrieveObject(collection: string, object: string) {
-        console.log(`${this.url}/backup/${collection}/${object}`)
-        return (await fetch(`${this.url}/${collection}/${object}`)).json()
+        return (await fetch(
+            `${this.url}/backup/${collection}/${object}`,
+        )).json()
     }
 }
