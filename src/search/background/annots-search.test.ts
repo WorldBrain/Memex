@@ -74,6 +74,7 @@ describe('Annotations search', () => {
             listsColl: AnnotsStorage.LISTS_COLL,
             listEntriesColl: AnnotsStorage.LIST_ENTRIES_COLL,
             tagsColl: AnnotsStorage.TAGS_COLL,
+            pagesColl: AnnotsStorage.PAGES_COLL,
             storageManager,
         })
 
@@ -84,7 +85,7 @@ describe('Annotations search', () => {
     })
     test('terms search', async () => {
         const results = await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
         })
 
         expect(results).toBeDefined()
@@ -93,7 +94,7 @@ describe('Annotations search', () => {
 
     test('bookmarks only', async () => {
         const resA = await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
             bookmarksOnly: true,
         })
 
@@ -103,7 +104,7 @@ describe('Annotations search', () => {
 
     test('highlights only', async () => {
         const results = await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
             highlightsOnly: true,
         })
 
@@ -113,7 +114,7 @@ describe('Annotations search', () => {
 
     test('direct links only', async () => {
         const linkOnlyRes = await searcher.search({
-            terms: ['quote'],
+            termsInc: ['quote'],
             directLinksOnly: true,
         })
 
@@ -123,7 +124,7 @@ describe('Annotations search', () => {
 
     test('collections filter', async () => {
         const resA = await searcher.search({
-            terms: ['quote'],
+            termsInc: ['quote'],
             collections: [DATA.coll1, DATA.coll2],
         })
 
@@ -131,7 +132,7 @@ describe('Annotations search', () => {
         expect(resA.length).toBe(1)
 
         const resB = await searcher.search({
-            terms: ['quote'],
+            termsInc: ['quote'],
             collections: ['not a real coll'],
         })
 
@@ -141,7 +142,7 @@ describe('Annotations search', () => {
 
     test('tags filter', async () => {
         const results = await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
             tagsInc: [DATA.tag1],
         })
 
@@ -151,7 +152,7 @@ describe('Annotations search', () => {
 
     test('domains filter', async () => {
         const resA = await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
             domainsExc: ['annotation.url'],
         })
 
@@ -159,7 +160,7 @@ describe('Annotations search', () => {
         expect(resA.length).toBe(1)
 
         const resB = await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
             domainsInc: ['annotation.url'],
         })
 
@@ -169,15 +170,15 @@ describe('Annotations search', () => {
 
     test('limit', async () => {
         const single = await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
             limit: 1,
         })
         const double = await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
             limit: 2,
         })
         const triple = await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
             limit: 3,
         })
 
@@ -191,7 +192,7 @@ describe('Annotations search', () => {
 
     test('url scope', async () => {
         const res = await searcher.search({
-            terms: ['quote'],
+            termsInc: ['quote'],
             url: normalize(DATA.directLink.pageUrl),
         })
 
@@ -199,7 +200,7 @@ describe('Annotations search', () => {
         expect(res.length).toBe(1)
 
         const resNone = await searcher.search({
-            terms: ['quote'],
+            termsInc: ['quote'],
             url: normalize(DATA.pageUrl),
         })
 
@@ -209,7 +210,7 @@ describe('Annotations search', () => {
 
     test('page results include', async () => {
         const results = (await searcher.search({
-            terms: ['highlight', 'annotation', 'comment'],
+            termsInc: ['highlight', 'annotation', 'comment'],
             includePageResults: true,
         })) as AnnotPage[]
 

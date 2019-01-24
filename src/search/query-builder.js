@@ -2,22 +2,6 @@ import transformPageText from 'src/util/transform-page-text'
 import * as constants from '../overview/search-bar/constants'
 import { DEFAULT_TERM_SEPARATOR } from './util'
 
-/**
- * @typedef IndexQuery
- * @type {Object}
- * @property {Set<string>} query Query terms a user has searched for.
- * @property {Set<string>} queryExclude Query terms a user has excluded from search.
- * @property {Set<string>} domain Set of domains a user has chosen to filter, or extracted from query.
- * @property {Set<string>} domainExclude Set of domains a user has chosen to filter-out, or extracted from query.
- * @property {Set<string>} tags Set of tags a user has chosen to filter, or extracted from query.
- * @property {Set<string>} lists Set of lists a user has chosen to filter, or extracted from query.
- * @property {Map<string, any>} timeFilter Map of different time filter ranges to apply to search.
- * @property {number} [skip=0]
- * @property {number} [limit=10]
- * @property {boolean} [isBadTerm=false] Flag denoting whether or not searched query is not specific enough.
- * @property {boolean} isInvalidSearch
- */
-
 class QueryBuilder {
     /**
      * Pattern to match entire string to `domain.tld`-like format + optional subdomain prefix and ccTLD postfix.
@@ -76,25 +60,17 @@ class QueryBuilder {
     isBadTerm = false
     showOnlyBookmarks = false
 
-    /**
-     * @returns {IndexQuery}
-     * @memberof QueryBuilder
-     */
     get() {
         return {
-            query: this.query,
-            queryExclude: this.queryExclude,
-            limit: this.limit,
-            skip: this.skip,
-            domain: this.domain,
-            domainExclude: this.domainExclude,
-            tags: this.tags,
-            lists: this.lists,
+            terms: [...this.query],
+            termsExclude: [...this.queryExclude],
+            domains: [...this.domain],
+            domainsExclude: [...this.domainExclude],
+            tags: [...this.tags],
+            lists: [...this.lists],
             isBadTerm: this.isBadTerm,
             // Can't do a terms exclusion without some terms already defined
             isInvalidSearch: this.queryExclude.size && !this.query.size,
-            timeFilter: this.timeFilter,
-            bookmarksFilter: this.showOnlyBookmarks,
         }
     }
 

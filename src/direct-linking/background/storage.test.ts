@@ -66,7 +66,6 @@ describe('Annotations storage', () => {
             getDb,
         })
         customListsBg = new CustomListBackground({ storageManager })
-
         annotationStorage = annotBg['annotationStorage']
 
         await storageManager.finishInitialization()

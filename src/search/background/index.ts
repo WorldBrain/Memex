@@ -5,7 +5,7 @@ import { AnnotsSearcher } from './annots-search'
 import { PageSearcher } from './page-search'
 import { Dexie, StorageManager } from '../types'
 import SearchStorage from './storage'
-import QueryBuilder from 'src/search/query-builder'
+import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import AnnotsStorage from 'src/direct-linking/background/storage'
@@ -48,11 +48,13 @@ export default class SearchBackground {
             tagsColl: AnnotsStorage.TAGS_COLL,
             bookmarksColl: AnnotsStorage.BMS_COLL,
             annotsColl: AnnotsStorage.ANNOTS_COLL,
+            pagesColl: AnnotsStorage.PAGES_COLL,
         })
 
         this.pageSearcher = new PageSearcher({
             storageManager,
-            legacySearch: this.backend.search,
+            legacySearch: idx.fullSearch(this.getDb),
+            pagesColl: AnnotsStorage.PAGES_COLL,
         })
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
@@ -112,19 +114,32 @@ export default class SearchBackground {
         })
     }
 
-    async searchPages({ contentTypes, ...params }: PageSearchParams) {
-        if (pageSearchOnly(contentTypes)) {
-            return this.pageSearcher.search(params)
-        }
+    private processSearchParams({
+        query,
+        domainsInc,
+        domainsExc,
+        tagsInc,
+        collections,
+        ...params
+    }: AnnotSearchParams): any {
+        // Extract query terms and in-query-filters via QueryBuilder
+        const qb = this.queryBuilderFactory()
+            .searchTerm(query)
+            .filterDomains(domainsInc)
+            .filterExcDomains(domainsExc)
+            .filterTags(tagsInc)
+            .filterLists(collections)
+            .get()
 
-        if (annotSearchOnly(contentTypes)) {
-            return this.searchAnnotations({
-                ...params,
-                includePageResults: true,
-            })
+        return {
+            ...params,
+            termsInc: qb.terms,
+            termsExc: qb.termsExclude,
+            domainsInc: qb.domains,
+            domainsExc: qb.domainsExclude,
+            tagsInc: qb.tags,
+            collections: qb.lists,
         }
-
-        return this.combinedSearch(params)
     }
 
     private mergeSearchResults(results: Array<AnnotPage[]>): AnnotPage[] {
@@ -158,7 +173,7 @@ export default class SearchBackground {
     private async combinedSearch(params: AnnotSearchParams) {
         const results = await Promise.all([
             this.pageSearcher.search(params),
-            this.searchAnnotations({ ...params, includePageResults: true }),
+            this.annotsSearcher.search({ ...params, includePageResults: true }),
         ])
 
         const mergedResults = this.mergeSearchResults(results as Array<
@@ -170,18 +185,34 @@ export default class SearchBackground {
     }
 
     async searchAnnotations({ query, ...params }: AnnotSearchParams) {
-        const qb = this.queryBuilderFactory()
-            .searchTerm(query)
-            .get()
+        const searchParams = this.processSearchParams(params)
 
-        if (qb.isBadTerm || qb.isInvalidSearch) {
+        if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
             return []
         }
 
-        return this.annotsSearcher.search({
-            terms: [...qb.query],
-            ...params,
-        })
+        return this.annotsSearcher.search(searchParams)
+    }
+
+    async searchPages({ contentTypes, ...params }: PageSearchParams) {
+        const searchParams = this.processSearchParams(params)
+
+        if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
+            return []
+        }
+
+        if (pageSearchOnly(contentTypes)) {
+            return this.pageSearcher.search(searchParams)
+        }
+
+        if (annotSearchOnly(contentTypes)) {
+            return this.annotsSearcher.search({
+                ...searchParams,
+                includePageResults: true,
+            })
+        }
+
+        return this.combinedSearch(searchParams)
     }
 
     async handleBookmarkRemoval(id, { node }) {

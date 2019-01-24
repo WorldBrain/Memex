@@ -16,7 +16,8 @@ export interface AnnotSearchParams {
     /** Main text to search against annot (pre-processed). */
     query?: string
     /** Main text terms to search against annot (post-processed). */
-    terms?: string[]
+    termsInc?: string[]
+    termsExc?: string[]
     /** Collections to include (all results must be of pages in this collection). */
     collections?: string[]
     /** Tags to include (all results must have these tags). */
@@ -34,6 +35,7 @@ export interface AnnotSearchParams {
     url?: string
     /** Use for pagination (result skip may not be possible). */
     limit?: number
+    skip?: number
     /** Denotes whether or not to limit search to annotations on a bookmarked page. */
     bookmarksOnly?: boolean
     /** Denotes whether or not to limit search to highlighted text (body). */

@@ -19,6 +19,7 @@ export interface AnnotationStorageProps {
 
 // TODO: Move to src/annotations in the future
 export default class AnnotationStorage extends FeatureStorage {
+    static PAGES_COLL = 'pages'
     static ANNOTS_COLL = 'annotations'
     static TAGS_COLL = 'tags'
     static BMS_COLL = 'annotBookmarks'
@@ -235,7 +236,7 @@ export default class AnnotationStorage extends FeatureStorage {
     }) {
         return this.storageManager
             .collection(this._annotationsColl)
-            .findObjects<Annotation>({ pageUrl, limit, skip })
+            .findObjects<Annotation>({ pageUrl }, { skip, limit })
     }
 
     async createAnnotation({

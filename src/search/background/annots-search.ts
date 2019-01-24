@@ -9,7 +9,6 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         'http://memex.link',
         'http://staging.memex.link',
     ]
-    static PAGES_COLL = 'pages'
 
     private annotsColl: string
     private listsColl: string
@@ -115,7 +114,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         listEntriesColl,
         tagsColl,
         bookmarksColl,
-        pagesColl = AnnotsSearcher.PAGES_COLL,
+        pagesColl,
         linkProviders = AnnotsSearcher.MEMEX_LINK_PROVIDERS,
     }) {
         super(storageManager)
@@ -281,7 +280,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
     }
 
     async search({
-        terms = [],
+        termsInc = [],
         tagsInc = [],
         tagsExc = [],
         domainsInc = [],
@@ -310,7 +309,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         }
 
         const termResults = await Promise.all(
-            terms.map(this.termSearch({ ...searchParams, limit }, filters)),
+            termsInc.map(this.termSearch({ ...searchParams, limit }, filters)),
         )
 
         // Flatten out results
