@@ -6,6 +6,7 @@ import { Searcher } from './searcher'
 const uniqBy = require('lodash/fp/uniqBy')
 
 export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
+    static MAX_ANNOTS_PER_PAGE = 9
     static MEMEX_LINK_PROVIDERS = [
         'http://memex.link',
         'http://staging.memex.link',
@@ -130,14 +131,19 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         return isDirectLink
     }
 
-    private async mapAnnotsToPages(annots: Annotation[]): Promise<AnnotPage[]> {
+    private async mapAnnotsToPages(
+        annots: Annotation[],
+        maxAnnotsPerPage: number,
+    ): Promise<AnnotPage[]> {
         const pageUrls = new Set(annots.map(annot => annot.pageUrl))
-
         const annotsByUrl = new Map<string, Annotation[]>()
 
         for (const annot of annots) {
             const pageAnnots = annotsByUrl.get(annot.pageUrl) || []
-            annotsByUrl.set(annot.pageUrl, [...pageAnnots, annot])
+            annotsByUrl.set(
+                annot.pageUrl,
+                [...pageAnnots, annot].slice(0, maxAnnotsPerPage),
+            )
         }
 
         const pages = await this.findMatchingPages([...pageUrls])
@@ -278,6 +284,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         collections = [],
         limit = 5,
         includePageResults = false,
+        maxAnnotsPerPage = AnnotsSearcher.MAX_ANNOTS_PER_PAGE,
         ...searchParams
     }: AnnotSearchParams): Promise<Annotation[] | AnnotPage[]> {
         const filters: UrlFilters = {
@@ -323,7 +330,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         )
 
         if (includePageResults) {
-            return this.mapAnnotsToPages(annotResults)
+            return this.mapAnnotsToPages(annotResults, maxAnnotsPerPage)
         }
 
         // Project out unwanted data
