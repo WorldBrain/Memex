@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react'
-import { connect, MapStateToProps } from 'react-redux'
 
 import Button from '../../components/Button'
 import { browser } from 'webextension-polyfill-ts'
