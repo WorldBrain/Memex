@@ -54,7 +54,6 @@ export default class SearchBackground {
         this.pageSearcher = new PageSearcher({
             storageManager,
             legacySearch: idx.fullSearch(this.getDb),
-            pagesColl: AnnotsStorage.PAGES_COLL,
         })
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
@@ -120,7 +119,7 @@ export default class SearchBackground {
         domainsExc,
         tagsInc,
         collections,
-        contentTypes = {},
+        contentTypes = { notes: true, highlights: true },
         ...params
     }: any) {
         // Extract query terms and in-query-filters via QueryBuilder
@@ -190,10 +189,7 @@ export default class SearchBackground {
         return mergedResults
     }
 
-    async searchAnnotations({
-        query,
-        ...params
-    }: AnnotSearchParams): Promise<Annotation[]> {
+    async searchAnnotations(params: AnnotSearchParams): Promise<Annotation[]> {
         const searchParams = this.processSearchParams(params)
 
         if (searchParams.isBadTerm || searchParams.isInvalidSearch) {

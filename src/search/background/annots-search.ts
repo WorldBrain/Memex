@@ -1,6 +1,7 @@
 import { Page, Tag } from 'src/search'
 import { Annotation } from 'src/direct-linking/types'
-import { AnnotSearchParams, UrlFilters, AnnotPage, Searcher } from './types'
+import { AnnotSearchParams, UrlFilters, AnnotPage } from './types'
+import { Searcher } from './searcher'
 
 const uniqBy = require('lodash/fp/uniqBy')
 
@@ -17,15 +18,6 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
     private pagesColl: string
     private bookmarksColl: string
     private linkProviders: string[]
-
-    private static projectPageSearchResults(results): AnnotPage[] {
-        return results.map(({ url, annotations, fullTitle }) => ({
-            url,
-            title: fullTitle,
-            hasBookmark: true,
-            annotations: this.projectAnnotSearchResults(annotations),
-        }))
-    }
 
     private static projectAnnotSearchResults(results): Annotation[] {
         return results.map(
@@ -139,7 +131,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
     }
 
     private async mapAnnotsToPages(annots: Annotation[]): Promise<AnnotPage[]> {
-        const pageUrls = annots.map(annot => annot.pageUrl)
+        const pageUrls = new Set(annots.map(annot => annot.pageUrl))
 
         const annotsByUrl = new Map<string, Annotation[]>()
 
@@ -148,12 +140,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
             annotsByUrl.set(annot.pageUrl, [...pageAnnots, annot])
         }
 
-        const pages = await this.storageManager
-            .collection(this.pagesColl)
-            .findObjects<AnnotPage>({ url: { $in: pageUrls } })
-
-        // TODO: map bookmark status, favIcon, screenshot
-        // ...
+        const pages = await this.findMatchingPages([...pageUrls])
 
         return pages.map(page => ({
             ...page,
@@ -336,8 +323,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         )
 
         if (includePageResults) {
-            const pageResults = await this.mapAnnotsToPages(annotResults)
-            return AnnotsSearcher.projectPageSearchResults(pageResults)
+            return this.mapAnnotsToPages(annotResults)
         }
 
         // Project out unwanted data

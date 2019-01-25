@@ -1,4 +1,3 @@
-import { StorageManager } from '..'
 import { Annotation } from 'src/direct-linking/types'
 
 export interface AnnotPage {
@@ -71,10 +70,4 @@ export interface AnnotListParams {
     url: string
     limit?: number
     skip?: number
-}
-
-export abstract class Searcher<Params, Result> {
-    constructor(protected storageManager: StorageManager) {}
-
-    abstract search(params: Params): Promise<Result[]>
 }
