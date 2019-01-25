@@ -120,8 +120,9 @@ export default class SearchBackground {
         domainsExc,
         tagsInc,
         collections,
+        contentTypes = {},
         ...params
-    }: AnnotSearchParams): any {
+    }: any) {
         // Extract query terms and in-query-filters via QueryBuilder
         const qb = this.queryBuilderFactory()
             .searchTerm(query)
@@ -133,12 +134,14 @@ export default class SearchBackground {
 
         return {
             ...params,
+            tagsInc: qb.tags,
             termsInc: qb.terms,
             termsExc: qb.termsExclude,
             domainsInc: qb.domains,
             domainsExc: qb.domainsExclude,
-            tagsInc: qb.tags,
             collections: qb.lists,
+            includeNotes: contentTypes.notes,
+            includeHighlights: contentTypes.highlights,
         }
     }
 
@@ -173,43 +176,52 @@ export default class SearchBackground {
     private async combinedSearch(params: AnnotSearchParams) {
         const results = await Promise.all([
             this.pageSearcher.search(params),
-            this.annotsSearcher.search({ ...params, includePageResults: true }),
+            this.annotsSearcher.search({
+                ...params,
+                includePageResults: true,
+            }),
         ])
 
         const mergedResults = this.mergeSearchResults(results as Array<
             AnnotPage[]
         >)
 
-        // Sort and paginate
+        // TODO: Sort and paginate
         return mergedResults
     }
 
-    async searchAnnotations({ query, ...params }: AnnotSearchParams) {
+    async searchAnnotations({
+        query,
+        ...params
+    }: AnnotSearchParams): Promise<Annotation[]> {
         const searchParams = this.processSearchParams(params)
 
         if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
             return []
         }
 
-        return this.annotsSearcher.search(searchParams)
+        return this.annotsSearcher.search({
+            ...searchParams,
+            includePageResults: false,
+        }) as any
     }
 
-    async searchPages({ contentTypes, ...params }: PageSearchParams) {
+    async searchPages(params: PageSearchParams): Promise<AnnotPage[]> {
         const searchParams = this.processSearchParams(params)
 
         if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
             return []
         }
 
-        if (pageSearchOnly(contentTypes)) {
+        if (pageSearchOnly(params.contentTypes)) {
             return this.pageSearcher.search(searchParams)
         }
 
-        if (annotSearchOnly(contentTypes)) {
+        if (annotSearchOnly(params.contentTypes)) {
             return this.annotsSearcher.search({
                 ...searchParams,
                 includePageResults: true,
-            })
+            }) as any
         }
 
         return this.combinedSearch(searchParams)

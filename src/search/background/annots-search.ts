@@ -19,8 +19,8 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
     private linkProviders: string[]
 
     private static projectPageSearchResults(results): AnnotPage[] {
-        return results.map(({ annotations, fullUrl, fullTitle }) => ({
-            url: fullUrl,
+        return results.map(({ url, annotations, fullTitle }) => ({
+            url,
             title: fullTitle,
             hasBookmark: true,
             annotations: this.projectAnnotSearchResults(annotations),
@@ -239,8 +239,9 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
             startDate = 0,
             limit = 5,
             url,
-            highlightsOnly = false,
-            directLinksOnly = false,
+            includeHighlights = true,
+            includeNotes = true,
+            includeDirectLinks = true,
         }: Partial<AnnotSearchParams>,
         urlFilters: UrlFilters,
     ) => async (term: string) => {
@@ -263,15 +264,17 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
                 .collection(this.annotsColl)
                 .findObjects<Annotation>(query, { limit })
 
-            return directLinksOnly
-                ? results.filter(this.isAnnotDirectLink)
+            return !includeDirectLinks
+                ? results.filter(res => !this.isAnnotDirectLink(res))
                 : results
         }
 
-        const bodyRes = await termSearchField('_body_terms')
-        const commentsRes = highlightsOnly
-            ? []
-            : await termSearchField('_comment_terms')
+        const bodyRes = includeHighlights
+            ? await termSearchField('_body_terms')
+            : []
+        const commentsRes = includeNotes
+            ? await termSearchField('_comment_terms')
+            : []
 
         return AnnotsSearcher.uniqAnnots([...bodyRes, ...commentsRes]).slice(
             0,

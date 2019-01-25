@@ -102,24 +102,24 @@ describe('Annotations search', () => {
         expect(resA.length).toBe(1)
     })
 
-    test('highlights only', async () => {
+    test('exclude highlights search', async () => {
         const results = await searcher.search({
             termsInc: ['highlight', 'annotation', 'comment'],
-            highlightsOnly: true,
+            includeHighlights: false,
         })
 
         expect(results).toBeDefined()
         expect(results.length).toBe(3)
     })
 
-    test('direct links only', async () => {
-        const linkOnlyRes = await searcher.search({
+    test('exclude direct links', async () => {
+        const results = await searcher.search({
             termsInc: ['quote'],
-            directLinksOnly: true,
+            includeDirectLinks: false,
         })
 
-        expect(linkOnlyRes).toBeDefined()
-        expect(linkOnlyRes.length).toBe(1)
+        expect(results).toBeDefined()
+        expect(results.length).toBe(1)
     })
 
     test('collections filter', async () => {

@@ -38,10 +38,12 @@ export interface AnnotSearchParams {
     skip?: number
     /** Denotes whether or not to limit search to annotations on a bookmarked page. */
     bookmarksOnly?: boolean
-    /** Denotes whether or not to limit search to highlighted text (body). */
-    highlightsOnly?: boolean
-    /** Denotes whether or not to limit search to direct links. */
-    directLinksOnly?: boolean
+    /** Denotes whether or not to include highlighted text (body) in search. */
+    includeHighlights?: boolean
+    /** Denotes whether or not to include comments/notes in search. */
+    includeNotes?: boolean
+    /** Denotes whether or not to include direct links in search. */
+    includeDirectLinks?: boolean
     /** Denotes whether or not to return the assoc. pages with matched annots. */
     includePageResults?: boolean
 }
