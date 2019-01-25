@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, MouseEventHandler, Fragment } from 'react'
 import cx from 'classnames'
 
 import AnnotationBox from 'src/sidebar-common/annotation-box'
@@ -8,7 +8,10 @@ import { DUMMY_ANNOTATION } from '../constants'
 const styles = require('./annotation-list.css')
 
 export interface Props {
+    /* Array of matched annotations, limited to 3 */
     annotations: Annotation[]
+    /* Opens the annotation sidebar with all of the annotations */
+    openAnnotationSidebar: MouseEventHandler
 }
 
 export interface State {
@@ -66,6 +69,25 @@ class AnnotationList extends Component<Props, State> {
         const { isExpanded } = this.state
         return (
             <div className={styles.container}>
+                {/* Only show these following elements when the container is not expanded */}
+                {!isExpanded ? (
+                    <Fragment>
+                        {/* Element to show the number of annotations that matched the term */}
+                        <p className={styles.resultCount}>
+                            {this.props.annotations.length} annotations found on
+                            this page
+                        </p>
+                        {/* Button to open sidebar with the given page URL */}
+                        <a
+                            className={styles.seeAll}
+                            onClick={this.props.openAnnotationSidebar}
+                        >
+                            {/* TODO: Show total annotations count */}
+                            See all
+                        </a>
+                    </Fragment>
+                ) : null}
+
                 {/* Chevron up/down toggle button */}
                 <div className={styles.iconContainer}>
                     <span

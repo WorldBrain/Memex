@@ -10,6 +10,26 @@
     transition: height 0.2s ease-in;
 }
 
+.resultCount {
+    width: fit-content;
+    margin: 0;
+    text-align: center;
+    color: #4a4a4a;
+    margin-top: 2px;
+    align-self: center;
+}
+
+.seeAll {
+    margin: -10px 10px;
+    width: fit-content;
+    font-size: 13px;
+    justify-self: flex-start;
+    align-self: flex-end;
+    cursor: pointer;
+    color: #4a4a4a;
+    text-transform: uppercase;
+}
+
 .iconContainer {
     width: 100%;
     height: fit-content;
@@ -28,7 +48,7 @@
     background-image: url('/img/arrow.svg');
     vertical-align: bottom;
     cursor: pointer;
-    margin-top: 5px;
+    margin-top: 0px;
     transition: transform 0.2s ease-in;
 }
 
