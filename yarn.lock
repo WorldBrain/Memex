@@ -4814,9 +4814,9 @@ fathom-web@^2.1.0:
     jsdom "^11.2.0"
     wu "^2.1.0"
 
-"fathom-web@git://github.com/Treora/fathom.git#npm-testable":
+"fathom-web@https://github.com/Treora/fathom.git#npm-testable":
   version "1.1.2"
-  resolved "git://github.com/Treora/fathom.git#913009da10176f525274d0530d974a61cb6c93f2"
+  resolved "https://github.com/Treora/fathom.git#913009da10176f525274d0530d974a61cb6c93f2"
   dependencies:
     babel-runtime "^6.22.0"
     wu "^2.1.0"
@@ -8364,7 +8364,7 @@ package-json@^4.0.0:
   version "0.6.0"
   resolved "git+https://github.com/Treora/page-metadata-parser.git#07fe4ebfdee0b6b3197a41eb2b90fea8e3f07bf5"
   dependencies:
-    fathom-web "git://github.com/Treora/fathom.git#npm-testable"
+    fathom-web "https://github.com/Treora/fathom.git#npm-testable"
 
 pako@~1.0.2, pako@~1.0.5:
   version "1.0.6"
