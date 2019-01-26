@@ -3,4 +3,17 @@
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.6;
+    float: left;
+}
+
+.button {
+    display: inline-block;
+    width: 230px;
+    text-align: left;
+}
+
+.allTabs {
+    background-image: url('/img/tag_blue.svg');
+    background-repeat: no-repeat;
+    margin-top: 0px;
 }

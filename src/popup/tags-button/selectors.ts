@@ -14,3 +14,4 @@ export const initTagSuggestions = createSelector(
     tagsBtn,
     state => state.initTagSuggestions,
 )
+export const allTabs = createSelector(tagsBtn, state => state.allTabs)

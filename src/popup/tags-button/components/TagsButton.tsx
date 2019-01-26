@@ -16,6 +16,7 @@ interface StateProps {
 
 interface DispatchProps {
     toggleTagPopup: ClickHandler<HTMLButtonElement>
+    toggleAllTabsPopup: ClickHandler<HTMLButtonElement>
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
@@ -23,13 +24,25 @@ export type Props = OwnProps & StateProps & DispatchProps
 class TagsButton extends PureComponent<Props> {
     render() {
         return (
-            <Button
-                onClick={this.props.toggleTagPopup}
-                disabled={this.props.isDisabled}
-                btnClass={styles.tag}
-            >
-                Add Tag(s)
-            </Button>
+            <div>
+                <span>
+                    <Button
+                        onClick={this.props.toggleTagPopup}
+                        disabled={this.props.isDisabled}
+                        btnClass={styles.tag}
+                        itemClass={styles.button}
+                    >
+                        Add Tag(s)
+                    </Button>
+                </span>
+                <span style={{ position: 'absolute' }}>
+                    <Button
+                        children=""
+                        onClick={this.props.toggleAllTabsPopup}
+                        btnClass={styles.allTabs}
+                    />
+                </span>
+            </div>
         )
     }
 }
@@ -41,6 +54,12 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
 const mapDispatch = (dispatch): DispatchProps => ({
     toggleTagPopup: event => {
         event.preventDefault()
+        dispatch(acts.setAllTabs(false))
+        dispatch(acts.toggleShowTagsPicker())
+    },
+    toggleAllTabsPopup: event => {
+        event.preventDefault()
+        dispatch(acts.setAllTabs(true))
         dispatch(acts.toggleShowTagsPicker())
     },
 })
