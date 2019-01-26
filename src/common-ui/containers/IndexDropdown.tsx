@@ -229,7 +229,7 @@ class IndexDropdownContainer extends Component<Props, State> {
      */
     private handleTagSelection = (index: number) => async event => {
         const tag = this.state.displayFilters[index]
-        console.log(this.props.allTabs)
+
         if (this.props.allTabs) {
             if (!this.pageHasTag(tag)) {
                 if (this.allowIndexUpdate) {
