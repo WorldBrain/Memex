@@ -57,6 +57,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private suggestRPC
     private addTagRPC
     private delTagRPC
+    private addTagsToOpenTabsRPC
     private processEvent
     private inputEl: HTMLInputElement
 
@@ -66,6 +67,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.suggestRPC = remoteFunction('suggest')
         this.addTagRPC = remoteFunction('addTag')
         this.delTagRPC = remoteFunction('delTag')
+        this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabsRPC')
         this.processEvent = remoteFunction('processEvent')
 
         if (this.props.isForAnnotation) {
@@ -222,11 +224,12 @@ class IndexDropdownContainer extends Component<Props, State> {
         // Either add or remove the tag, let Redux handle the store changes.
         if (!this.pageHasTag(tag)) {
             if (this.allowIndexUpdate) {
-                this.addTagRPC({
-                    url: this.props.url,
-                    tag,
-                    tabId: this.props.tabId,
-                }).catch(console.error)
+                // this.addTagRPC({
+                //     url: this.props.url,
+                //     tag,
+                //     tabId: this.props.tabId,
+                // }).catch(console.error)
+                this.addTagsToOpenTabsRPC(tag).catch(console.error)
             }
 
             await this.storeTrackEvent(true)
