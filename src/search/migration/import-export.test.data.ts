@@ -26,6 +26,7 @@ export const PAGE_DOC_1 = {
     url: 'https://www.2-spyware.com/remove-skype-virus.html',
     normalizedUrl: '2-spyware.com/remove-skype-virus.html',
     _id: 'page/Mi1zcHl3YXJlLmNvbS9yZW1vdmUtc2t5cGUtdmlydXMuaHRtbA%3D%3D',
+    isPDF: false,
 }
 
 export const EXPORTED_PAGE_1: Partial<ExportedPage> = {

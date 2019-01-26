@@ -129,6 +129,8 @@ export interface PageAddRequest {
 export interface PageDoc {
     content: Partial<PageContent>
     url: string
+    isPDF: boolean
+    PDFFingerprint?: string
     favIconURI?: string
     screenshotURI?: string
     [extra: string]: any
