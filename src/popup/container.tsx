@@ -53,6 +53,7 @@ interface StateProps {
     searchValue: string
     initTagSuggs: string[]
     initCollSuggs: PageList[]
+    allTabs: boolean
 }
 
 interface DispatchProps {
@@ -116,6 +117,7 @@ class PopupContainer extends PureComponent<Props> {
                     onBackBtnClick={this.props.toggleShowTagsPicker}
                     onFilterAdd={this.props.onTagAdd}
                     onFilterDel={this.props.onTagDel}
+                    allTabs={this.props.allTabs}
                 />
             )
         }
@@ -193,6 +195,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     showTagsPicker: tags.showTagsPicker(state),
     tags: tags.tags(state),
     initTagSuggs: tags.initTagSuggestions(state),
+    allTabs: tags.allTabs(state),
 })
 
 const mapDispatch = (dispatch): DispatchProps => ({

@@ -27,6 +27,7 @@ class IndexDropdown extends PureComponent {
         clearSearchField: PropTypes.func,
         showClearfieldBtn: PropTypes.bool,
         onBackBtnClick: PropTypes.func,
+        allTabs: PropTypes.bool,
     }
 
     get styles() {
@@ -104,6 +105,11 @@ class IndexDropdown extends PureComponent {
                         </i>
                     )}
                 </form>
+                {this.props.allTabs ? (
+                    <p className={styles.allTabs}>
+                        Add tags to all tabs in window
+                    </p>
+                ) : null}
                 <div
                     className={cx(this.styles.tagContainerSB, {
                         [this.styles.tagContainer]: this.props.isForSidebar,

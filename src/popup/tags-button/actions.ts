@@ -20,3 +20,4 @@ export const addTagToPage = (tag: string) => async dispatch => {
     dispatch(addTag(tag))
     await onboarding.checkForTaggingStage()
 }
+export const setAllTabs = createAction<boolean>('tags/setAllTabs')
