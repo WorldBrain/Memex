@@ -67,7 +67,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.suggestRPC = remoteFunction('suggest')
         this.addTagRPC = remoteFunction('addTag')
         this.delTagRPC = remoteFunction('delTag')
-        this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabsRPC')
+        this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.processEvent = remoteFunction('processEvent')
 
         if (this.props.isForAnnotation) {
