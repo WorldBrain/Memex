@@ -1,0 +1,50 @@
+.checkmark {
+    width: 20px;
+    height: 20px;
+    background-image: url('/img/blacklist.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px;
+    display: inline-block;
+}
+
+.container {
+    padding: 9px 15px 9px 20px;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+
+    &:hover,
+    &:focus,
+    &:active {
+        background-color: #f7f7f7;
+        outline: none;
+
+        & .checkmark {
+            background-image: url('/img/blacklist_green.svg');
+        }
+    }
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+    & .title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #3a3a3a;
+        margin: 0;
+    }
+
+    & .sub {
+        font-size: 10px;
+        color: grey;
+        font-weight: 400;
+        margin: 0;
+    }
+}

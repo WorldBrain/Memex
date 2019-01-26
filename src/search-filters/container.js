@@ -9,6 +9,7 @@ import {
     FilterBar,
     FilteredRow,
     IndexDropdownSB,
+    CheckmarkRow,
 } from './components'
 import { actions, selectors } from './'
 import { selectors as sidebar } from '../overview/sidebar-left'
@@ -82,7 +83,7 @@ class SearchFiltersContainer extends PureComponent {
     renderFilteredTypes = () =>
         this.props.showfilteredTypes
             ? this.state.filterTypes.map(({ value, active, available }, i) => (
-                  <FilteredRow
+                  <CheckmarkRow
                       key={i}
                       value={value}
                       onClick={() => {}}
@@ -164,7 +165,7 @@ class SearchFiltersContainer extends PureComponent {
             onBarClick={() => {
                 this.props.toggleFilterTypes()
             }}
-            filter="Type"
+            filter="Content Type"
         />
     )
 
