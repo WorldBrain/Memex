@@ -61,7 +61,6 @@ export const addTagsToOpenTabs = async (tag: string): Promise<void> => {
             addTagRPC({
                 url: tab.url,
                 tag,
-                tabId: tab.id,
             })
         }
     }
@@ -74,7 +73,6 @@ export const delTagsFromOpenTabs = async (tag: string): Promise<void> => {
             delTagRPC({
                 url: tab.url,
                 tag,
-                tabId: tab.id,
             })
         }
     }
