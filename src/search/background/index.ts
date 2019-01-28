@@ -172,6 +172,10 @@ export default class SearchBackground {
     }
 
     private async combinedSearch(params: AnnotSearchParams) {
+        // Manually apply skip post-search
+        const skip = params.skip
+        delete params.skip
+
         const results = await Promise.all([
             this.pageSearcher.search(params),
             this.annotsSearcher.search({
@@ -184,8 +188,7 @@ export default class SearchBackground {
             AnnotPage[]
         >)
 
-        // TODO: Sort and paginate
-        return mergedResults
+        return mergedResults.slice(skip, params.limit)
     }
 
     private async blankPageSearch(params: AnnotSearchParams) {
