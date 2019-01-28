@@ -44,29 +44,29 @@ export const fetchPageTags = (getDb: () => Promise<Dexie>) => async (
     return page != null ? page.tags : []
 }
 
-const getAllInWindow = windowId => browser.tabs.query({windowId})
+const getAllInWindow = windowId => browser.tabs.query({ windowId })
 const getAllTabsInCurrentWindow = async () => {
-  const currentWindow = await browser.windows.getCurrent()
-  return getAllInWindow(currentWindow.id)
+    const currentWindow = await browser.windows.getCurrent()
+    return getAllInWindow(currentWindow.id)
 }
 const addTagRPC = remoteFunction('addTag')
 const delTagRPC = remoteFunction('delTag')
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 
-export const addTagsToOpenTabs = async(tag: string): Promise<void> => {
+export const addTagsToOpenTabs = async (tag: string): Promise<void> => {
     const tabs = await getAllTabsInCurrentWindow()
     for (const tab of tabs) {
         const tags = await fetchPageTagsRPC(tab.url)
         if (!tags.includes(tag)) {
-            await addTagRPC({
+            addTagRPC({
                 url: tab.url,
                 tag,
-                tabId: tab.id
+                tabId: tab.id,
             })
         }
     }
 }
-export const delTagsFromOpenTabs = async(tag: string): Promise<void> => {
+export const delTagsFromOpenTabs = async (tag: string): Promise<void> => {
     const tabs = await getAllTabsInCurrentWindow()
     for (const tab of tabs) {
         const tags = await fetchPageTagsRPC(tab.url)
@@ -74,7 +74,7 @@ export const delTagsFromOpenTabs = async(tag: string): Promise<void> => {
             delTagRPC({
                 url: tab.url,
                 tag,
-                tabId: tab.id
+                tabId: tab.id,
             })
         }
     }
