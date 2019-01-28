@@ -66,10 +66,3 @@ export interface UrlFilters {
     tagUrlsExc?: Set<string>
     domainUrlsExc?: Set<string>
 }
-
-export interface AnnotListParams {
-    /** URL of a particular page to list annots for. */
-    url: string
-    limit?: number
-    skip?: number
-}

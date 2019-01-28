@@ -107,7 +107,6 @@ export default class SearchBackground {
             delPagesByDomain: this.backend.delPagesByDomain,
             delPagesByPattern: this.backend.delPagesByPattern,
             getMatchingPageCount: this.backend.getMatchingPageCount,
-            listAnnotations: this.storage.listAnnotations.bind(this.storage),
             searchAnnotations: this.searchAnnotations.bind(this),
             searchPages: this.searchPages.bind(this),
         })
