@@ -188,11 +188,32 @@ export default class SearchBackground {
         return mergedResults
     }
 
+    private async blankPageSearch(params: AnnotSearchParams) {
+        let results = await this.pageSearcher.search(params)
+
+        results = await Promise.all(
+            results.map(async page => ({
+                ...page,
+                annotations: await this.storage.listAnnotations({
+                    ...params,
+                    limit: params.maxAnnotsPerPage,
+                }),
+            })),
+        )
+
+        return results
+    }
+
     async searchAnnotations(params: AnnotSearchParams): Promise<Annotation[]> {
         const searchParams = this.processSearchParams(params)
 
         if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
             return []
+        }
+
+        // Blank search; just list annots, applying search filters
+        if (!searchParams.termsInc.length) {
+            return this.storage.listAnnotations(searchParams)
         }
 
         return this.annotsSearcher.search({
@@ -206,6 +227,11 @@ export default class SearchBackground {
 
         if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
             return []
+        }
+
+        // Blank search; just list annots, applying search filters
+        if (!searchParams.termsInc.length) {
+            return this.blankPageSearch(searchParams)
         }
 
         if (pageSearchOnly(params.contentTypes)) {
