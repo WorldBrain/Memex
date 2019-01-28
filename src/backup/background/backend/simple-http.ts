@@ -5,6 +5,10 @@ import {
     BackupObjectLocation,
     ObjectChange,
 } from './types'
+import {
+    separateDataFromImageChanges,
+    shouldWriteImages,
+} from 'src/backup/background/backend/utils'
 
 export default class SimpleHttpBackend extends BackupBackend {
     private url
@@ -29,15 +33,19 @@ export default class SimpleHttpBackend extends BackupBackend {
         backupObject: BackupObject
         events: EventEmitter
     }): Promise<any> {
-        await fetch(
-            `${this.url}/${backupObject.collection}/${encodeURIComponent(
+        await this._writeToPath(
+            `${backupObject.collection}/${encodeURIComponent(
                 encodeURIComponent(backupObject.pk),
             )}`,
-            {
-                method: 'PUT',
-                body: JSON.stringify(backupObject.object),
-            },
+            JSON.stringify(backupObject.object),
         )
+    }
+
+    async _writeToPath(url: string, body: string) {
+        await fetch(`${this.url}/${url}`, {
+            method: 'PUT',
+            body,
+        })
     }
 
     async deleteObject({
@@ -51,24 +59,33 @@ export default class SimpleHttpBackend extends BackupBackend {
     }
 
     async backupChanges({
-        changes,
+        changes: unprocessedChanges,
         events,
         currentSchemaVersion,
+        options,
     }: {
         changes: ObjectChange[]
         events: EventEmitter
         currentSchemaVersion: number
+        options: { storeBlobs: boolean }
     }) {
-        const body = JSON.stringify(
-            { version: currentSchemaVersion, changes },
-            null,
-            4,
+        const stringify = obj => JSON.stringify(obj, null, 4)
+        const { images, changes } = await separateDataFromImageChanges(
+            unprocessedChanges,
         )
 
-        await fetch(`${this.url}/change-sets/${Date.now()}`, {
-            method: 'PUT',
-            body,
-        })
+        const timestamp = Date.now()
+        await this._writeToPath(
+            `change-sets/${timestamp}`,
+            stringify({ version: currentSchemaVersion, changes }),
+        )
+
+        if (shouldWriteImages(images, options.storeBlobs)) {
+            await this._writeToPath(
+                `images/${timestamp}`,
+                stringify({ version: currentSchemaVersion, images }),
+            )
+        }
     }
 
     async listObjects(collection: string): Promise<string[]> {
