@@ -45,15 +45,16 @@ class SearchFiltersContainer extends PureComponent {
         // Temporary dummy data for showing features.
         this.state = {
             filterTypes: [
-                { value: 'Websites', active: true, available: true },
                 { value: 'Annotations', active: true, available: false },
-                { value: 'Highlights', active: true, available: false },
-                { value: 'Comments', active: true, available: false },
                 {
-                    value: 'Received Memex.Links',
+                    value: 'Highlights',
                     active: true,
                     available: false,
+                    small: true,
                 },
+                { value: 'Notes', active: true, available: false, small: true },
+                { value: 'Websites', active: true, available: false },
+                { value: 'PDFs', active: true, available: false },
             ],
         }
     }
@@ -82,14 +83,8 @@ class SearchFiltersContainer extends PureComponent {
 
     renderFilteredTypes = () =>
         this.props.showfilteredTypes
-            ? this.state.filterTypes.map(({ value, active, available }, i) => (
-                  <CheckmarkRow
-                      key={i}
-                      value={value}
-                      onClick={() => {}}
-                      active={active}
-                      available={available}
-                  />
+            ? this.state.filterTypes.map((type, i) => (
+                  <CheckmarkRow key={i} onClick={() => {}} {...type} />
               ))
             : null
 

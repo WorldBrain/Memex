@@ -8,6 +8,7 @@
     display: inline-block;
 }
 
+/* Main CSS for the row container */
 .container {
     padding: 9px 15px 9px 20px;
     border-bottom: 1px solid #ccc;
@@ -27,6 +28,20 @@
             background-image: url('/img/blacklist_green.svg');
         }
     }
+
+    /* No border in the bottom for the last element */
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+/* CSS for the small checkmarks */
+.small {
+    padding-left: 40px;
+
+    & .checkmark {
+        background-size: 16px;
+    }
 }
 
 .item {
@@ -35,8 +50,8 @@
     justify-content: space-around;
 
     & .title {
-        font-size: 14px;
-        font-weight: 500;
+        font-size: 13px;
+        font-weight: 600;
         color: #3a3a3a;
         margin: 0;
     }
