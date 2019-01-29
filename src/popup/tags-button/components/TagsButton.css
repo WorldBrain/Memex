@@ -12,6 +12,10 @@
     text-align: left;
 }
 
+.spanbutton {
+    position: absolute;
+}
+
 .allTabs {
     background-image: url('/img/tag_blue.svg');
     background-repeat: no-repeat;

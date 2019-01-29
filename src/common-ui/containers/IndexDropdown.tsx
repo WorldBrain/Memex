@@ -194,12 +194,10 @@ class IndexDropdownContainer extends Component<Props, State> {
     private addTag = async () => {
         const newTag = this.getSearchVal()
 
-        if (this.props.allTabs) {
-            if (this.allowIndexUpdate) {
+        if (this.allowIndexUpdate) {
+            if (this.props.allTabs) {
                 addTagsToOpenTabs(newTag).catch(console.error)
-            }
-        } else {
-            if (this.allowIndexUpdate) {
+            } else {
                 this.addTagRPC({
                     url: this.props.url,
                     tag: newTag,
@@ -230,44 +228,30 @@ class IndexDropdownContainer extends Component<Props, State> {
     private handleTagSelection = (index: number) => async event => {
         const tag = this.state.displayFilters[index]
 
-        if (this.props.allTabs) {
+        // Either add or remove the tag, let Redux handle the store changes.
+        if (this.allowIndexUpdate) {
             if (!this.pageHasTag(tag)) {
-                if (this.allowIndexUpdate) {
+                if (this.props.allTabs) {
                     addTagsToOpenTabs(tag).catch(console.error)
-                }
-
-                await this.storeTrackEvent(true)
-                this.props.onFilterAdd(tag)
-            } else {
-                if (this.allowIndexUpdate) {
-                    delTagsFromOpenTabs(tag).catch(console.error)
-                }
-
-                await this.storeTrackEvent(false)
-                this.props.onFilterDel(tag)
-            }
-        } else {
-            // Either add or remove the tag, let Redux handle the store changes.
-            if (!this.pageHasTag(tag)) {
-                if (this.allowIndexUpdate) {
+                } else {
                     this.addTagRPC({
                         url: this.props.url,
                         tag,
                         tabId: this.props.tabId,
                     }).catch(console.error)
                 }
-
                 await this.storeTrackEvent(true)
                 this.props.onFilterAdd(tag)
             } else {
-                if (this.allowIndexUpdate) {
+                if (this.props.allTabs) {
+                    delTagsFromOpenTabs(tag).catch(console.error)
+                } else {
                     this.delTagRPC({
                         url: this.props.url,
                         tag,
                         tabId: this.props.tabId,
                     }).catch(console.error)
                 }
-
                 await this.storeTrackEvent(false)
                 this.props.onFilterDel(tag)
             }
