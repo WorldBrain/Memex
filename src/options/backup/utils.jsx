@@ -1,4 +1,7 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
+import * as notifications from '../../notifications/notifications'
+import createNotif from '../../util/notifications'
+const storeNotification = remoteFunction('storeNotification')
 
 export async function redirectToGDriveLogin() {
     window.location.href = await remoteFunction('getBackupProviderLoginLink')({
@@ -16,4 +19,26 @@ export function redirectToAutomaticBackupPurchase(billingPeriod) {
 
 export function redirectToAutomaticBackupCancellation() {
     window.location.href = 'https://worldbrain.io/community/subscriptions/'
+}
+
+export async function sendNotifOnBackupFailure(id: string) {
+    for (const notification of notifications.NOTIFS) {
+        if (notification.id === id) {
+            if (notification.overview) {
+                const newNotification = {
+                    ...notification.overview,
+                    id: notification.id,
+                    deliveredTime: Date.now(),
+                    sentTime: notifications.releaseTime,
+                }
+
+                // Store the notification so that it displays in the inbox
+                await storeNotification(newNotification)
+                await createNotif({
+                    title: notification.system.title,
+                    message: notification.system.message,
+                })
+            }
+        }
+    }
 }

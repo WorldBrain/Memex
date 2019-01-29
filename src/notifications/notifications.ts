@@ -106,4 +106,43 @@ export const NOTIFS: NotifDefinition[] = [
             ],
         },
     },
+    {
+        id: 'backup_error',
+        system: {
+            title: 'Error backing up data.',
+            message: 'An error occured while backing up your data',
+        },
+        overview: {
+            title: 'Error backing up data.',
+            message: 'An error occured while backing up your data.',
+            buttons: [
+                // TODO: Add the button sending them to the backup page
+            ],
+        },
+    },
+    {
+        id: 'drive_size_empty',
+        system: {
+            title: 'Drive Size',
+            message: 'There seems to be no space in your Google Drive',
+        },
+        overview: {
+            title: 'Drive Size',
+            message: 'There seems to be no space in your Google Drive',
+        },
+    },
+    {
+        id: 'auto_backup_expired',
+        system: {
+            title: 'Auto Backup',
+            message: 'Your auto-backup subscription has ended',
+        },
+        overview: {
+            title: 'Auto Backup',
+            message: 'Your auto-backup subscription has ended.',
+            buttons: [
+                // TODO: A link to send them to a page to renew the subscription
+            ],
+        },
+    },
 ]

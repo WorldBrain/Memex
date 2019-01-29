@@ -155,6 +155,12 @@ export class BackupBackgroundModule {
                 isAutomaticBackupEnabled: async () => {
                     return this.isAutomaticBackupEnabled()
                 },
+                getBackupInfo: () => {
+                    return this.state.info
+                },
+                getDriveSize: () => {
+                    return this.backend.getDriveSize()
+                },
                 estimateInitialBackupSize: () => {
                     return estimateBackupSize({
                         storageManager: this.storageManager,
