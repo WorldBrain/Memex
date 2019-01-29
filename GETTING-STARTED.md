@@ -188,20 +188,19 @@ This will automatically format all the styling for the code every time a commit 
 
 ## A brief overview of Web Extensions
 
-A web extension consists of three main parts:
+A web extension consists of a number of different scripts:
 
 -   `background.js` always runs, in an 'empty invisible tab', listening for
     messages and events.
 -   `content_script.js` is loaded into every web page that is visited. It is
     invisible from that web page's own scripts, and can talk to the background script.
+-   **User Interfaces**, The UI's are set up and declared in the `src/manifest.json` file. At the moment these consist of the popup and options scripts.
 
--   **User Interfaces**, The UI's are set up and declared in the `extension/manifest.json` file and at the moment consist of four elements the Popup, Overview, Options and Omnibar.
+Certain modules in the source code will end up in each of these scripts after
+being output from the build process, depending on the `import` trails throughout
+different modules. Each script is completely distinct from any other script. The main thing this means is you **should not** `import` from a module in the one script from any module in another script, or you end up duplicating the all the modules specific to one script in multiple other scripts in the build output. This is the main reason for our [`util/webextensionRPC`](./src/util/webextensionRPC.ts) module:
 
-The parts communicate in three ways:
-
--   Messaging through `browser.runtime.sendMessage`, usually done implicitly by using a remote procedure call ([`util/webextensionRPC.js`](./src/util/webextensionRPC.js)).
--   Bidirectional messaging using `browser.runtime.connect`. We use this to communicate between Overview UI script and background script, and also the deprecated imports UI (via Options UI script) and background script. See [Runtime](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/runtime) for more info
--   Through the in-browser PouchDB database, they get to see the same data and can react to changes made by other parts.
+We can setup remote functions (we sometimes call them "endpoints") with the `makeRemotelyCallable` export, then be able to remotely call them from other scripts with that `remoteFunction` export. This wraps around the WebExt [`runtime.sendMessage`](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/sendMessage) and related messaging APIs which afford interscript communication. Generally we setup endpoints via `makeRemotelyCallable` from the BG script and call them from UI scripts via `remoteFunction`, although there's nothing stopping you from doing it the other way. It just generally makes a more sense to contain a lot of the business logic in the BG script (it acts somewhat like our "backend server", being the only place the DB is ever interacted with), and keep the UI scripts concerned solely with managing UI state and rendering views.
 
 Besides these parts:
 [`browser-polyfill.js`](https://github.com/mozilla/webextension-polyfill/)
@@ -214,6 +213,17 @@ This API is available in Chrome/Chromium by default (under `window.chrome`) but 
 ## Application Structure
 
 To keep things modular, the source code in [`src/`](./src/) is split into "feature modules"/directories which are grouped by functionality. They can almost be thought of as separate libraries and some features may end up being factored out into their own repos later on.
+
+### Feature Structure
+
+For new BG script features, these should go into the `background/` dirs of top-level (`src/`) feature modules.
+
+An existing example top-level feature module is [`backup/`](./src/backup). You'll see `background/` and `content_script/` dirs in there containing BG script and content script logic related to that feature, respectively. The `backup/background/index` module acts as the BG script entrypoint for the backup feature, exporting a main class, `BackupBackgroundModule`, which accepts a few different args upon instantiation. Most important being `storageManager`; this allows access to the DB. The `BackupBackgroundModule` class has a lot of different methods to cover different feature behaviours, but all DB manipulation itself is done in another class in the `backup/background/storage` module.
+
+Looking into that, you'll see it extends the abstract [`FeatureStorage` class](./src/search/storage/index.ts#L6-L19), which affords consistent set up to interact with the `storageManager` DB instance and set up new Storex ([our DB](https://github.com/WorldBrain/storex)) data collections.
+Finally, all BG script features should be instantiated in the [BG script entrypoint module](./src/background.ts#L44).
+
+_Note that many features do not yet use this structure. We intend to port over legacy code eventually, but all new BG feature code should be written in this way._
 
 #### **[src/blacklist/](./src/blacklist/)**: blacklist
 
