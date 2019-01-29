@@ -5,10 +5,10 @@ const styles = require('./checkmark-row.css')
 
 export interface Props {
     value: string
-    subtitle?: string
+    subtitle: string
     active: boolean
-    available: boolean
-    small: boolean
+    available?: boolean
+    small?: boolean
     onClick: () => void
 }
 
@@ -16,15 +16,17 @@ export interface State {}
 
 class CheckmarkRow extends PureComponent<Props, State> {
     static defaultProps = {
-        subtitle: 'Highlights including notes',
+        small: false,
+        available: false,
     }
 
     render() {
-        const { value, subtitle, onClick, small } = this.props
+        const { value, subtitle, onClick, small, active } = this.props
         return (
             <div
                 className={cx(styles.container, {
                     [styles.small]: small,
+                    [styles.active]: active,
                 })}
                 onClick={onClick}
             >

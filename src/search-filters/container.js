@@ -9,7 +9,7 @@ import {
     FilterBar,
     FilteredRow,
     IndexDropdownSB,
-    CheckmarkRow,
+    ContentTypeContainer,
 } from './components'
 import { actions, selectors } from './'
 import { selectors as sidebar } from '../overview/sidebar-left'
@@ -40,25 +40,6 @@ class SearchFiltersContainer extends PureComponent {
         showfilteredTypes: PropTypes.bool.isRequired,
     }
 
-    constructor(props) {
-        super(props)
-        // Temporary dummy data for showing features.
-        this.state = {
-            filterTypes: [
-                { value: 'Annotations', active: true, available: false },
-                {
-                    value: 'Highlights',
-                    active: true,
-                    available: false,
-                    small: true,
-                },
-                { value: 'Notes', active: true, available: false, small: true },
-                { value: 'Websites', active: true, available: false },
-                { value: 'PDFs', active: true, available: false },
-            ],
-        }
-    }
-
     componentDidMount() {
         /** fetch initial suggested tags and domains to prepopulate
          filter dropdown **/
@@ -81,12 +62,12 @@ class SearchFiltersContainer extends PureComponent {
             : null
     }
 
-    renderFilteredTypes = () =>
-        this.props.showfilteredTypes
-            ? this.state.filterTypes.map((type, i) => (
-                  <CheckmarkRow key={i} onClick={() => {}} {...type} />
-              ))
-            : null
+    renderContentFilter = () => (
+        <ContentTypeContainer
+            showFilteredTypes={this.props.showfilteredTypes}
+            toggleFilterTypes={this.props.toggleFilterTypes}
+        />
+    )
 
     renderFilteredDomains = () => {
         return !this.props.domainFilterDropdown
@@ -155,25 +136,15 @@ class SearchFiltersContainer extends PureComponent {
         </Checkbox>
     )
 
-    renderTypeFilter = () => (
-        <FilterBar
-            onBarClick={() => {
-                this.props.toggleFilterTypes()
-            }}
-            filter="Content Type"
-        />
-    )
-
     render() {
         return (
             <SearchFilters
                 bookmarkFilter={this.renderBookmarkFilter()}
                 tagFilter={this.renderTagFilter()}
                 domainFilter={this.renderDomainFilter()}
+                contentFilter={this.renderContentFilter()}
                 filteredTags={this.renderFilteredTags()}
                 filteredDomains={this.renderFilteredDomains()}
-                filteredTypes={this.renderFilteredTypes()}
-                typeFilters={this.renderTypeFilter()}
             />
         )
     }

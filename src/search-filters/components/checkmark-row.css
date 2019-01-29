@@ -18,9 +18,7 @@
     align-items: center;
     cursor: pointer;
 
-    &:hover,
-    &:focus,
-    &:active {
+    &:hover {
         background-color: #f7f7f7;
         outline: none;
 
@@ -32,6 +30,19 @@
     /* No border in the bottom for the last element */
     &:last-child {
         border-bottom: none;
+    }
+}
+
+/* CSS for active checkmarks */
+.active {
+    &:hover {
+        & .checkmark {
+            background-image: url('/img/blacklist.svg');
+        }
+    }
+
+    & .checkmark {
+        background-image: url('/img/blacklist_green.svg');
     }
 }
 
@@ -51,7 +62,7 @@
 
     & .title {
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 500;
         color: #3a3a3a;
         margin: 0;
     }
