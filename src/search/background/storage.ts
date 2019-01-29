@@ -2,7 +2,6 @@ import { StorageManager } from '..'
 import { FeatureStorage } from '../storage'
 import { AnnotSearchParams } from './types'
 import { Annotation } from 'src/direct-linking/types'
-import { query } from 'src/overview/search-bar/selectors'
 
 export interface SearchStorageProps {
     storageManager: StorageManager
@@ -13,6 +12,43 @@ export default class SearchStorage extends FeatureStorage {
     static ANNOTS_COLL = 'annotations'
 
     private annotsColl: string
+
+    private static buildAnnotsQuery({
+        url,
+        startDate,
+        endDate,
+    }: AnnotSearchParams): object {
+        if (!url) {
+            throw new Error('URL must be supplied to list annotations.')
+        }
+
+        const baseQuery = { pageUrl: url }
+        let timeQuery = {}
+
+        if (endDate || startDate) {
+            const end = endDate ? { $lte: endDate } : {}
+            const start = startDate ? { $gte: startDate } : {}
+            timeQuery = { createdWhen: { ...end, ...start } }
+        }
+
+        return { ...baseQuery, ...timeQuery }
+    }
+
+    private static buildTagsQuery(
+        { tagsInc = [], tagsExc = [] }: AnnotSearchParams,
+        urls: string[],
+    ): object {
+        const baseQuery = { url: { $in: urls } }
+        let tagsQuery = {}
+
+        if (tagsInc.length || tagsExc.length) {
+            const inc = tagsInc.length ? { $in: tagsInc } : {}
+            const exc = tagsExc.length ? { $nin: tagsExc } : {}
+            tagsQuery = { name: { ...inc, ...exc } }
+        }
+
+        return { ...baseQuery, ...tagsQuery }
+    }
 
     constructor({
         storageManager,
@@ -36,19 +72,10 @@ export default class SearchStorage extends FeatureStorage {
 
     private async filterByTags(
         annots: Annotation[],
-        tagsInc: string[],
-        tagsExc: string[],
+        params: AnnotSearchParams,
     ) {
         const urls = annots.map(annot => annot.url)
-
-        let query: object = { url: { $in: urls } }
-
-        if (tagsExc && tagsExc.length) {
-            query = { ...query, name: { $nin: tagsExc } }
-        }
-        if (tagsInc && tagsInc.length) {
-            query = { ...query, name: { $in: tagsInc } }
-        }
+        const query = SearchStorage.buildTagsQuery(params, urls)
 
         const results = await this.storageManager
             .collection('tags')
@@ -60,16 +87,18 @@ export default class SearchStorage extends FeatureStorage {
 
     private async filterByCollections(
         annots: Annotation[],
-        collections: string[],
+        { collections }: AnnotSearchParams,
     ) {
-        const urls = annots.map(annot => annot.url)
-
-        const listIds = await this.storageManager
+        const lists = await this.storageManager
             .collection('customLists')
             .findObjects<any>({ name: { $in: collections } })
+
         const results = await this.storageManager
             .collection('annotListEntries')
-            .findObjects<any>({ url: { $in: urls }, listId: { $in: listIds } })
+            .findObjects<any>({
+                url: { $in: annots.map(annot => annot.url) },
+                listId: { $in: lists.map(list => list.id) },
+            })
 
         const resultSet = new Set(results.map(result => result.url))
         return annots.filter(annot => resultSet.has(annot.url))
@@ -82,52 +111,48 @@ export default class SearchStorage extends FeatureStorage {
     }: AnnotSearchParams): Promise<Annotation[]> {
         const innerLimit = limit * 2
         let innerSkip = 0
-        let results: Annotation[]
+        let results: Annotation[] = []
         let continueLookup = true
 
+        const query = SearchStorage.buildAnnotsQuery(params)
+
         while (continueLookup) {
-            results = await this.storageManager
+            let innerResults = await this.storageManager
                 .collection(this.annotsColl)
-                .findObjects<Annotation>(
-                    {
-                        pageUrl: params.url,
-                        createdWhen: {
-                            $gte: params.endDate,
-                            $lte: params.startDate,
-                        },
-                    },
-                    { skip: innerSkip, limit: innerLimit },
-                )
+                .findObjects<Annotation>(query, {
+                    skip: innerSkip,
+                    limit: innerLimit,
+                })
 
             // We've exhausted the DB results
-            if (results.length < innerLimit) {
+            if (innerResults.length < innerLimit) {
                 continueLookup = false
             }
 
             innerSkip += innerLimit
 
             if (params.bookmarksOnly) {
-                results = await this.filterByBookmarks(results)
+                innerResults = await this.filterByBookmarks(innerResults)
             }
 
-            if (params.tagsInc || params.tagsExc) {
-                results = await this.filterByTags(
-                    results,
-                    params.tagsInc,
-                    params.tagsExc,
-                )
+            if (
+                (params.tagsInc && params.tagsInc.length) ||
+                (params.tagsExc && params.tagsExc.length)
+            ) {
+                innerResults = await this.filterByTags(innerResults, params)
             }
 
-            if (params.collections) {
-                results = await this.filterByCollections(
-                    results,
-                    params.collections,
+            if (params.collections && params.collections.length) {
+                innerResults = await this.filterByCollections(
+                    innerResults,
+                    params,
                 )
+                return innerResults
             }
+
+            results = [...results, ...innerResults]
         }
 
         return results
     }
-
-    async
 }

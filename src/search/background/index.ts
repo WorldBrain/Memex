@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import { browser, Bookmarks } from 'webextension-polyfill-ts'
 
 import * as index from '..'
 import { AnnotsSearcher } from './annots-search'
@@ -25,15 +25,17 @@ export default class SearchBackground {
     constructor({
         storageManager,
         getDb,
-        queryBuilder = () => new QueryBuilder(),
         tabMan,
+        queryBuilder = () => new QueryBuilder(),
         idx = index,
+        bookmarksAPI = browser.bookmarks,
     }: {
         storageManager: StorageManager
         getDb: () => Promise<Dexie>
         queryBuilder?: () => QueryBuilder
         tabMan: TabManager
         idx?: typeof index
+        bookmarksAPI?: Bookmarks.Static
     }) {
         this.tabMan = tabMan
         this.getDb = getDb
@@ -57,10 +59,10 @@ export default class SearchBackground {
         })
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
-        browser.bookmarks.onCreated.addListener(
+        bookmarksAPI.onCreated.addListener(
             this.handleBookmarkCreation.bind(this),
         )
-        browser.bookmarks.onRemoved.addListener(
+        bookmarksAPI.onRemoved.addListener(
             this.handleBookmarkRemoval.bind(this),
         )
     }
@@ -118,7 +120,9 @@ export default class SearchBackground {
         domainsExc,
         tagsInc,
         collections,
-        contentTypes = { notes: true, highlights: true },
+        contentTypes = { notes: true, highlights: true, pages: true },
+        skip = 0,
+        limit = 10,
         ...params
     }: any) {
         // Extract query terms and in-query-filters via QueryBuilder
@@ -140,6 +144,9 @@ export default class SearchBackground {
             collections: qb.lists,
             includeNotes: contentTypes.notes,
             includeHighlights: contentTypes.highlights,
+            isBlankSearch: !qb.terms.length,
+            limit,
+            skip,
         }
     }
 
@@ -200,6 +207,7 @@ export default class SearchBackground {
                 annotations: await this.storage.listAnnotations({
                     ...params,
                     limit: params.maxAnnotsPerPage,
+                    url: page.url,
                 }),
             })),
         )
@@ -215,7 +223,7 @@ export default class SearchBackground {
         }
 
         // Blank search; just list annots, applying search filters
-        if (!searchParams.termsInc.length) {
+        if (searchParams.isBlankSearch) {
             return this.storage.listAnnotations(searchParams)
         }
 
@@ -233,7 +241,7 @@ export default class SearchBackground {
         }
 
         // Blank search; just list annots, applying search filters
-        if (!searchParams.termsInc.length) {
+        if (searchParams.isBlankSearch) {
             return this.blankPageSearch(searchParams)
         }
 

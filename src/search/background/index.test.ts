@@ -1,17 +1,22 @@
 import initStorageManager from '../memory-storex'
-import { StorageManager, getDb } from '..'
+import { StorageManager } from '..'
+import getDb, { setStorexBackend } from '../get-db'
+import SearchBg from './index'
 import { AnnotsSearcher } from './annots-search'
 import normalize from 'src/util/encode-url-for-id'
 import { AnnotPage } from './types'
-import CustomListBackground from 'src/custom-lists/background'
+import CustomListBg from 'src/custom-lists/background'
 import AnnotsBg from 'src/direct-linking/background'
 import AnnotsStorage from 'src/direct-linking/background/storage'
 import * as DATA from 'src/direct-linking/background/storage.test.data'
 
+const mockEvent = { addListener: () => undefined }
+
 describe('Annotations search', () => {
     let annotsStorage: AnnotsStorage
     let storageManager: StorageManager
-    let customListsBg: CustomListBackground
+    let customListsBg: CustomListBg
+    let searchBg: SearchBg
     let searcher: AnnotsSearcher
 
     async function insertTestData() {
@@ -28,8 +33,14 @@ describe('Annotations search', () => {
                 hostname: normalize(annot.pageUrl),
                 domain: normalize(annot.pageUrl),
                 title: annot.pageTitle,
-                text: '',
+                text: annot.body,
                 canonicalUrl: annot.url,
+            })
+
+            // Create a dummy visit 30 secs before annot creation time
+            await storageManager.collection('visits').createObject({
+                url: annot.pageUrl,
+                time: new Date(annot.createdWhen.getTime() - 300000).getTime(),
             })
 
             await annotsStorage.createAnnotation(annot)
@@ -40,15 +51,22 @@ describe('Annotations search', () => {
             url: DATA.directLink.url,
         })
         await annotsStorage.toggleAnnotBookmark({ url: DATA.hybrid.url })
+        await annotsStorage.toggleAnnotBookmark({ url: DATA.highlight.url })
 
         // Insert collections + collection entries
         const coll1Id = await customListsBg.createCustomList({
             name: DATA.coll1,
         })
-        await customListsBg.createCustomList({ name: DATA.coll2 })
+        const coll2Id = await customListsBg.createCustomList({
+            name: DATA.coll2,
+        })
         await annotsStorage.insertAnnotToList({
             listId: coll1Id,
             url: DATA.hybrid.url,
+        })
+        await annotsStorage.insertAnnotToList({
+            listId: coll2Id,
+            url: DATA.highlight.url,
         })
 
         // Insert tags
@@ -67,20 +85,20 @@ describe('Annotations search', () => {
             storageManager,
             getDb,
         })
-        customListsBg = new CustomListBackground({ storageManager })
-        searcher = new AnnotsSearcher({
-            annotsColl: AnnotsStorage.ANNOTS_COLL,
-            bookmarksColl: AnnotsStorage.BMS_COLL,
-            listsColl: AnnotsStorage.LISTS_COLL,
-            listEntriesColl: AnnotsStorage.LIST_ENTRIES_COLL,
-            tagsColl: AnnotsStorage.TAGS_COLL,
-            pagesColl: AnnotsStorage.PAGES_COLL,
+
+        searchBg = new SearchBg({
             storageManager,
+            getDb,
+            tabMan: { getActiveTab: () => ({ id: 1, url: 'test' }) } as any,
+            bookmarksAPI: { onCreated: mockEvent, onRemoved: mockEvent } as any,
         })
 
+        customListsBg = new CustomListBg({ storageManager })
+        searcher = searchBg['annotsSearcher']
         annotsStorage = annotBg['annotationStorage']
 
         await storageManager.finishInitialization()
+        setStorexBackend(storageManager.backend)
         await insertTestData()
     })
     test('terms search', async () => {
@@ -99,7 +117,7 @@ describe('Annotations search', () => {
         })
 
         expect(resA).toBeDefined()
-        expect(resA.length).toBe(1)
+        expect(resA.length).toBe(2)
     })
 
     test('exclude highlights search', async () => {
@@ -217,5 +235,140 @@ describe('Annotations search', () => {
         expect(results).toBeDefined()
         expect(results.length).toBe(2)
         expect(results[0].annotations.length).toBe(3)
+    })
+
+    test('blank annots search', async () => {
+        const results = await searchBg.searchAnnotations({
+            url: DATA.pageUrl,
+        })
+
+        expect(results).toBeDefined()
+        expect(results.length).toBe(3)
+
+        expect(results.map(res => res.url)).toEqual([
+            DATA.highlight.url,
+            DATA.annotation.url,
+            DATA.comment.url,
+        ])
+    })
+
+    test('blank annots search + bookmark filter', async () => {
+        const results = await searchBg.searchAnnotations({
+            url: DATA.pageUrl,
+            bookmarksOnly: true,
+        })
+
+        expect(results).toBeDefined()
+        expect(results.length).toBe(1)
+    })
+
+    test('blank annots search + tag inc filter', async () => {
+        const results = await searchBg.searchAnnotations({
+            url: DATA.pageUrl,
+            tagsInc: [DATA.tag1],
+        })
+
+        expect(results).toBeDefined()
+        expect(results.length).toBe(1)
+    })
+
+    test('blank annots search + tag exc filter', async () => {
+        const results = await searchBg.searchAnnotations({
+            url: DATA.pageUrl,
+            tagsExc: [DATA.tag1, DATA.tag2, 'dummy'],
+        })
+
+        expect(results).toBeDefined()
+        expect(results.length).toBe(0)
+    })
+
+    test('blank annots search + collection filter', async () => {
+        const resA = await searchBg.searchAnnotations({
+            url: DATA.pageUrl,
+            collections: [DATA.coll2],
+        })
+
+        const resB = await searchBg.searchAnnotations({
+            url: DATA.pageUrl,
+            collections: [DATA.coll1],
+        })
+
+        expect(resA).toBeDefined()
+        expect(resA.length).toBe(1)
+        expect(resB).toBeDefined()
+        expect(resB.length).toBe(0)
+    })
+
+    test('blank page search', async () => {
+        const results = await searchBg.searchPages({
+            contentTypes: { highlights: true, notes: true, pages: true },
+        })
+
+        expect(results).toBeDefined()
+        expect(results.length).toBe(3)
+
+        // Ensure order is by latest visit
+        expect(results.map(res => res.url)).toEqual([
+            DATA.hybrid.pageUrl,
+            DATA.highlight.pageUrl,
+            DATA.directLink.pageUrl,
+        ])
+
+        const resByUrl = new Map()
+        results.forEach(res => resByUrl.set(res.url, res))
+
+        expect(resByUrl.get(DATA.pageUrl).annotations.length).toBe(3)
+        expect(resByUrl.get(DATA.directLink.pageUrl).annotations.length).toBe(1)
+        expect(resByUrl.get(DATA.hybrid.pageUrl).annotations.length).toBe(1)
+    })
+
+    test('comment-text-only page search', async () => {
+        const results = await searchBg.searchPages({
+            query: 'comment',
+            contentTypes: { highlights: false, notes: true, pages: false },
+        })
+
+        expect(results).toBeDefined()
+        expect(results.length).toBe(1)
+        expect(results[0].annotations.length).toBe(2)
+        expect(results[0].annotations.map(annot => annot.url)).toEqual([
+            DATA.annotation.url,
+            DATA.comment.url,
+        ])
+    })
+
+    test('highlight-text-only page search', async () => {
+        const results = await searchBg.searchPages({
+            query: 'whooo',
+            contentTypes: { highlights: true, notes: false, pages: false },
+        })
+
+        expect(results).toBeDefined()
+        expect(results.length).toBe(2)
+        expect(results.map(res => res.url)).toEqual([
+            DATA.highlight.pageUrl,
+            DATA.hybrid.pageUrl,
+        ])
+
+        expect(results[0].annotations.length).toBe(2)
+        expect(results[0].annotations.map(annot => annot.url)).toEqual([
+            DATA.highlight.url,
+            DATA.annotation.url,
+        ])
+
+        expect(results[1].annotations.length).toBe(1)
+        expect(results[1].annotations.map(annot => annot.url)).toEqual([
+            DATA.hybrid.url,
+        ])
+    })
+
+    test('page-text-only page search', async () => {
+        const results = await searchBg.searchPages({
+            query: 'whooo',
+            contentTypes: { highlights: false, notes: false, pages: true },
+        })
+
+        expect(results).toBeDefined()
+        expect(results.length).toBe(2)
     })
 })
