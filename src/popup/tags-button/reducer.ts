@@ -9,6 +9,7 @@ export interface State {
     tags: string[]
     /** Holds the initial tag suggestions to display for user tag search. */
     initTagSuggestions: string[]
+    /** Denotes whether or not the popup should show the tags picker for multiedit. */
     allTabs: boolean
 }
 

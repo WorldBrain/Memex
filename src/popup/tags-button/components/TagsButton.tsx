@@ -24,25 +24,23 @@ export type Props = OwnProps & StateProps & DispatchProps
 class TagsButton extends PureComponent<Props> {
     render() {
         return (
-            <div>
-                <span>
+            <React.Fragment>
+                <Button
+                    onClick={this.props.toggleTagPopup}
+                    disabled={this.props.isDisabled}
+                    btnClass={styles.tag}
+                    itemClass={styles.button}
+                >
+                    Add Tag(s)
+                </Button>
+                <span className={styles.spanbutton}>
                     <Button
-                        onClick={this.props.toggleTagPopup}
-                        disabled={this.props.isDisabled}
-                        btnClass={styles.tag}
-                        itemClass={styles.button}
-                    >
-                        Add Tag(s)
-                    </Button>
-                </span>
-                <span style={{ position: 'absolute' }}>
-                    <Button
-                        children=""
                         onClick={this.props.toggleAllTabsPopup}
+                        disabled={this.props.isDisabled}
                         btnClass={styles.allTabs}
                     />
                 </span>
-            </div>
+            </React.Fragment>
         )
     }
 }
