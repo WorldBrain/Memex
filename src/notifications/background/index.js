@@ -95,8 +95,7 @@ export default class NotificationBackground {
                     )
                 }
             }
-
-            if (notification.overview) {
+            if (notification.id === 'backups_launch') {
                 notification = {
                     ...notification.overview,
                     id: notification.id,

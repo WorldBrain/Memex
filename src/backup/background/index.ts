@@ -12,6 +12,12 @@ import estimateBackupSize from './estimate-backup-size'
 const pickBy = require('lodash/pickBy')
 const last = require('lodash/last')
 
+/*
+ * TODO remove these imports
+ *
+ */
+import sendNotif from '../../util/send-notification'
+
 export * from './backend'
 
 export interface BackupProgressInfo {
@@ -90,11 +96,17 @@ export class BackupBackgroundModule {
 
                     this.doBackup()
                     const sendEvent = (eventType, event) => {
+                        if (true) {
+                            sendNotif('backup_error')
+                        }
                         try {
                             window['browser'].tabs.sendMessage(this.uiTabId, {
                                 type: 'backup-event',
                                 event: { type: eventType, ...(event || {}) },
                             })
+                            // if(eventType === 'fail') {
+                            //     sendNotif('backup_error')
+                            // }
                         } catch (e) {
                             // ignore the error, user closed tab
                         }
@@ -183,6 +195,9 @@ export class BackupBackgroundModule {
                 },
                 getBackupInfo: () => {
                     return this.state.info
+                },
+                getDriveSize: () => {
+                    return this.backend.getDriveSize()
                 },
                 estimateInitialBackupSize: () => {
                     return this.estimateInitialBackupSize()
@@ -399,6 +414,7 @@ export class BackupBackgroundModule {
                     console.error(e)
                     console.error(e.stack)
                     if (this.state.events) {
+                        sendNotif('backup_error')
                         this.state.events.emit('fail', e)
                     }
                     this.resetBackupState()
@@ -440,9 +456,11 @@ export class BackupBackgroundModule {
             batchSize: parseInt(process.env.BACKUP_BATCH_SIZE, 10),
         })) {
             if (this.state.info.state === 'paused') {
+                await sendNotif('backup_error')
                 await this.state.pausePromise
             }
             if (this.state.info.state === 'cancelled') {
+                sendNotif('backup_error')
                 break
             }
 

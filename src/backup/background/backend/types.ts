@@ -30,6 +30,10 @@ export abstract class BackupBackend {
     abstract isConnected(): Promise<boolean>
     abstract isAuthenticated(): Promise<boolean>
 
+    async getDriveSize(): Promise<object> {
+        return null
+    }
+
     async handleLoginRedirectedBack(locationHref: string) {
         return
     }

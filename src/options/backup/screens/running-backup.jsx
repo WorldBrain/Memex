@@ -11,6 +11,7 @@ import Styles from '../styles.css'
 export default class RunningBackupContainer extends React.Component {
     static propTypes = {
         onFinish: PropTypes.func.isRequired,
+        onBackupFailure: PropTypes.func.isRequired,
     }
 
     state = { status: null, info: null, canceling: false }
@@ -68,7 +69,11 @@ export default class RunningBackupContainer extends React.Component {
             })
         } else if (event.type === 'success') {
             this.setState({ status: 'success' })
+            this.props.onBackupFailure('error')
         } else if (event.type === 'fail') {
+            // This function is used to notify the user that there
+            // was a problem backing up the data
+            // this.props.onBackupFailure('error')
             this.setState({ status: 'fail' })
         }
     }

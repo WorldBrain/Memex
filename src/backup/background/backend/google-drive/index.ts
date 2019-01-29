@@ -60,6 +60,12 @@ export class DriveBackupBackend extends BackupBackend {
         )
     }
 
+    async getDriveSize() {
+        console.log('Inside getDriveSize in index.ts inside google-drive')
+        const response = await this.client.getDriveSize()
+        return response
+    }
+
     async handleLoginRedirectedBack(locationHref: string) {
         const response = await fetch(locationHref)
         const {

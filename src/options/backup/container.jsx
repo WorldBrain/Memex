@@ -1,6 +1,7 @@
 import React from 'react'
 // import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import sendNotifOnBackupFailure from 'src/util/send-notification'
 import analytics from 'src/analytics'
 import {
     redirectToGDriveLogin,
@@ -100,6 +101,9 @@ export default class BackupSettingsContainer extends React.Component {
                     onFinish={() => {
                         localStorage.removeItem('backup.onboarding')
                         this.setState({ screen: 'overview' })
+                    }}
+                    onBackupFailure={async id => {
+                        await sendNotifOnBackupFailure(id)
                     }}
                 />
             )
