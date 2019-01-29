@@ -130,7 +130,7 @@ export interface PageDoc {
     content: Partial<PageContent>
     url: string
     isPDF: boolean
-    PDFFingerprint?: string
+    PDFFingerprint: string
     favIconURI?: string
     screenshotURI?: string
     [extra: string]: any
@@ -152,6 +152,8 @@ export interface PipelineReq {
 
 export interface PipelineRes {
     url: string
+    isPDF: boolean
+    PDFFingerprint: string
 
     // Display data
     fullUrl: string

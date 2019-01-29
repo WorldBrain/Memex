@@ -19,6 +19,8 @@ export interface PageConstructorOptions {
     titleTerms: string[]
     domain: string
     hostname: string
+    isPDF: boolean
+    PDFFingerprint: string
 
     // Display data
     text: string
@@ -40,6 +42,8 @@ export default class Page extends AbstractModel
     implements PageConstructorOptions {
     public url: string
     public text: string
+    public isPDF: boolean
+    public PDFFingerprint: string
     public fullUrl: string
     public fullTitle: string
     public terms: string[]
@@ -57,6 +61,8 @@ export default class Page extends AbstractModel
     constructor(props: PageConstructorOptions) {
         super()
         this.url = props.url
+        this.isPDF = props.isPDF
+        this.PDFFingerprint = props.PDFFingerprint
         this.fullUrl = props.fullUrl
         this.fullTitle = props.fullTitle
         this.text = props.text

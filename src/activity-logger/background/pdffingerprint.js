@@ -1,10 +1,13 @@
 /* eslint eqeqeq: 0 */
 export default function getPDFFingerprint(pdfURL) {
-    const PDFJS = require('pdfjs-dist')
-    PDFJS.workerSrc = browser.extension.getURL('/lib/pdf.worker.min.js')
+    const PDFJS = require('../../build/pdf')
+    PDFJS.GlobalWorkerOptions.workerSrc = '../../build/pdf.worker.js'
     return new Promise((resolve, reject) => {
         PDFJS.getDocument(pdfURL)
-            .then(pdf => resolve(pdf.fingerprint))
+            .then(pdf => {
+                console.log(pdf.fingerprint)
+                resolve(pdf.fingerprint)
+            })
             .catch(err => reject(err))
     })
 }

@@ -105,19 +105,33 @@ export default class PageVisitLogger {
             delete analysisRes.content.fullText
 
             const isPDF = tab.url.endsWith('.pdf')
-            let PDFFingerprint = null
-            if (isPDF) {
-                getPDFFingerprint(tab.url).then(
-                    fingerprint => (PDFFingerprint = fingerprint),
-                )
-            }
-
+            const PDFFingerprint = null
             console.log({
                 url: tab.url,
                 isPDF,
                 PDFFingerprint,
                 ...analysisRes,
             })
+            if (isPDF) {
+                getPDFFingerprint(tab.url).then(async fingerprint => {
+                    console.log({
+                        url: tab.url,
+                        isPDF,
+                        PDFFingerprint: fingerprint,
+                        ...analysisRes,
+                    })
+                    await this._createPage({
+                        pageDoc: {
+                            url: tab.url,
+                            isPDF,
+                            PDFFingerprint: fingerprint,
+                            ...analysisRes,
+                        },
+                        visits: [internalTabState.visitTime],
+                        rejectNoContent: false,
+                    })
+                })
+            }
             await this._createPage({
                 pageDoc: {
                     url: tab.url,

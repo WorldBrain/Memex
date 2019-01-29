@@ -4,6 +4,8 @@ import { SearchParams, SearchResult, Dexie } from '../types'
 export interface SearchDisplayResult {
     url: string
     title: string
+    isPDF: boolean
+    PDFFingerprint: string
     hasBookmark: boolean
     displayTime: number
     screenshot: string
@@ -24,6 +26,8 @@ const mapPageToDisplay = (
 
         return {
             url: page.fullUrl,
+            isPDF: page.isPDF,
+            PDFFingerprint: page.PDFFingerprint,
             title: page.fullTitle,
             hasBookmark: page.hasBookmark,
             displayTime: page.getLatest(endDate),
