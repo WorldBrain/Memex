@@ -1,5 +1,4 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
-import { browser, Tabs } from 'webextension-polyfill-ts'
 
 import { remoteFunction } from '../../../util/webextensionRPC'
 import Message from './Message'
@@ -9,23 +8,17 @@ const styles = require('./CFBox.css')
 
 export interface Props {
     onClose: MouseEventHandler
-    tabs?: Tabs.Static
-    learnMoreUrl?: string
 }
 
 class CrowdfundingBox extends PureComponent<Props> {
-    static defaultProps: Pick<Props, 'tabs' | 'learnMoreUrl'> = {
-        tabs: browser.tabs,
-        learnMoreUrl: 'https://worldbrain.io/pricing',
-    }
+    private _processEventRPC = remoteFunction('processEvent')
+    private _openLearnMoreUrl = remoteFunction('openLearnMoreTab')
 
-    private processEventRPC = remoteFunction('processEvent')
-
-    private openNewLink = async () => {
-        await this.processEventRPC({
+    private _openNewLink = async () => {
+        await this._processEventRPC({
             type: EVENT_NAMES.LEARN_MORE_CROWD_FUNDING,
         })
-        this.props.tabs.create({ url: this.props.learnMoreUrl })
+        await this._openLearnMoreUrl()
     }
 
     render() {
@@ -34,7 +27,7 @@ class CrowdfundingBox extends PureComponent<Props> {
                 <Message
                     styles={styles}
                     context="annotations"
-                    openNewLink={this.openNewLink}
+                    openNewLink={this._openNewLink}
                 />
                 <div onClick={this.props.onClose} className={styles.closeDiv}>
                     Close Notification

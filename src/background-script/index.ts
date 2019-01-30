@@ -86,6 +86,7 @@ class BackgroundScript {
         makeRemotelyCallable({
             openOverviewTab: this.utils.openOverviewURL,
             openOptionsTab: this.utils.openOptionsURL,
+            openLearnMoreTab: this.utils.openLearnMoreURL,
         })
     }
 
