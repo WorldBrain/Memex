@@ -11,8 +11,6 @@ makeRemotelyCallable({
     addBookmark: index.addBookmark,
     delBookmark: index.delBookmark,
     fetchPageTags: index.fetchPageTags,
-    addTagsToOpenTabs: index.addTagsToOpenTabs,
-    delTagsFromOpenTabs: index.delTagsFromOpenTabs,
     extendedSuggest: index.extendedSuggest,
     delPagesByDomain: index.delPagesByDomain,
     delPagesByPattern: index.delPagesByPattern,
