@@ -94,6 +94,7 @@ export class TabManager {
                     isLoaded,
                     isBookmarked,
                     isActive,
+                    windowId: oldTab.windowId,
                     navState: oldTab.navState,
                 }),
             )
@@ -182,8 +183,12 @@ export class TabManager {
         }
     }
 
-    getUrlsFromOpenTabs() {
-        return Array.from(this._tabs.values()).map(tab => tab.url)
+    getTabUrls(windowId?: number) {
+        return windowId
+            ? Array.from(this._tabs.values())
+                  .filter(tab => tab.windowId === windowId)
+                  .map(tab => tab.url)
+            : Array.from(this._tabs.values()).map(tab => tab.url)
     }
 }
 
