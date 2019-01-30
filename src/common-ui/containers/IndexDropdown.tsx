@@ -195,7 +195,9 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         if (this.allowIndexUpdate) {
             if (this.props.allTabs) {
-                await this.addTagsToOpenTabsRPC(newTag).catch(console.error)
+                await this.addTagsToOpenTabsRPC({ name: newTag }).catch(
+                    console.error,
+                )
             } else {
                 this.addTagRPC({
                     url: this.props.url,
@@ -231,7 +233,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         if (!this.pageHasTag(tag)) {
             if (this.allowIndexUpdate) {
                 if (this.props.allTabs) {
-                    await this.addTagsToOpenTabsRPC(tag).catch(console.error)
+                    await this.addTagsToOpenTabsRPC({ name: tag }).catch(
+                        console.error,
+                    )
                 } else {
                     this.addTagRPC({
                         url: this.props.url,
@@ -246,7 +250,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         } else {
             if (this.allowIndexUpdate) {
                 if (this.props.allTabs) {
-                    await this.delTagsFromOpenTabsRPC(tag).catch(console.error)
+                    await this.delTagsFromOpenTabsRPC({ name: tag }).catch(
+                        console.error,
+                    )
                 } else {
                     this.delTagRPC({
                         url: this.props.url,
