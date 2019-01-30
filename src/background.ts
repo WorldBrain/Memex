@@ -16,9 +16,10 @@ import * as backupStorage from './backup/background/storage'
 import * as driveBackup from './backup/background/backend/google-drive'
 import setupChangeTracking from './backup/background/change-hooks'
 import BackgroundScript from './background-script'
+import TagsBackground from './tags/background'
 
 // Features that auto-setup
-import './activity-logger/background'
+import { tabManager } from './activity-logger/background'
 import './search/background'
 import './analytics/background'
 import './imports/background'
@@ -40,6 +41,9 @@ eventLog.setupRemoteFunctions()
 
 const customList = new CustomListBackground({ storageManager })
 customList.setupRemoteFunctions()
+
+const tags = new TagsBackground({ storageManager, tabMan: tabManager })
+tags.setupRemoteFunctions()
 
 const backupModule = new backup.BackupBackgroundModule({
     storageManager,
