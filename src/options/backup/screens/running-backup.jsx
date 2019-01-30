@@ -72,10 +72,8 @@ export default class RunningBackupContainer extends React.Component {
         } else if (event.type === 'fail') {
             // This function is used to notify the user that there
             // was a problem backing up the data
-            console.log('failure')
-            // this.props.onBackupFailure("error")
-            this.setState({ status: 'fail' })
             this.props.onBackupFailure('error')
+            this.setState({ status: 'fail' })
         }
     }
 

@@ -99,9 +99,6 @@ export class BackupBackgroundModule {
                                 type: 'backup-event',
                                 event: { type: eventType, ...(event || {}) },
                             })
-                            // if(eventType === 'fail') {
-                            //     sendNotif('backup_error')
-                            // }
                         } catch (e) {
                             // ignore the error, user closed tab
                         }
