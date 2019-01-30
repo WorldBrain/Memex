@@ -415,6 +415,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 {...this.props}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 isForSidebar={this.props.isForSidebar}
+                showSelection={!this.props.allTabs}
             />
         ))
 
