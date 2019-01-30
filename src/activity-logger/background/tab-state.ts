@@ -20,6 +20,7 @@ class Tab implements TabState {
     visitTime: number
     activeTime: number
     lastActivated: number
+    windowId: number
     scrollState: ScrollState
     navState: NavState
     private _timer: PausableTimer
@@ -28,6 +29,7 @@ class Tab implements TabState {
     constructor({
         id,
         url,
+        windowId,
         isActive = false,
         isLoaded = false,
         visitTime = Date.now(),
@@ -37,6 +39,7 @@ class Tab implements TabState {
     }: Partial<TabProps>) {
         this.id = id
         this.url = url
+        this.windowId = windowId
         this.isActive = isActive
         this.isLoaded = isLoaded
         this.isBookmarked = isBookmarked

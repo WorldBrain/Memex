@@ -27,6 +27,7 @@ export interface TabState {
     lastActivated: number
     scrollState: ScrollState
     navState: NavState
+    windowId: number
 }
 
 export type TabChangeListener = (
