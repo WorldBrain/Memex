@@ -67,8 +67,6 @@ const delPagesByPattern = delMethods.delPagesByPattern(getDb)
 const addTag = tagMethods.addTag(getDb)
 const delTag = tagMethods.delTag(getDb)
 const fetchPageTags = tagMethods.fetchPageTags(getDb)
-const addTagsToOpenTabs = tagMethods.addTagsToOpenTabs
-const delTagsFromOpenTabs = tagMethods.delTagsFromOpenTabs
 const addBookmark = bookmarkMethods.addBookmark(getDb)
 const delBookmark = bookmarkMethods.delBookmark(getDb)
 const pageHasBookmark = bookmarkMethods.pageHasBookmark(getDb)
@@ -94,8 +92,6 @@ export {
     addTag,
     delTag,
     fetchPageTags,
-    addTagsToOpenTabs,
-    delTagsFromOpenTabs,
     addBookmark,
     delBookmark,
     pageHasBookmark,
