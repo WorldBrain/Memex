@@ -64,8 +64,8 @@ This code of conduct and its related procedures also applies to unacceptable beh
 ## 9 . Contact info
 To report or discuss a suspected violation of this code of conduct by a community member, you may contact any of the team directly and in confidence, or the team-lead [Oliver Sauter](https://github.com/oliversauter).
 
-If you want to change that and contribute, visit our [Readme file](https://github.com/WorldBrain/Webmarks/blob/master/README.md). 
 
+If you want to change that and contribute, visit our [Readme file](https://github.com/WorldBrain/Memex/blob/master/Readme.md).
 
 ## 10. License and attribution
 This Code of Conduct is distributed under a Creative Commons Attribution-ShareAlike license.
