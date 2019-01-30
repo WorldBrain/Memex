@@ -1,7 +1,6 @@
 import { Tabs } from 'webextension-polyfill-ts'
 import Tab, { TabProps } from './tab-state'
 import { TabState, NavState } from './types'
-import { TABS_1 } from 'src/tags/background/storage.test.data'
 
 export class TabManager {
     static DELAY_UNIT = 1000
