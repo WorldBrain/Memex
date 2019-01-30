@@ -67,7 +67,7 @@ export default class NotificationBackground {
         ))[NotificationBackground.LAST_NOTIF_TIME]
 
         for (let notification of notifications.NOTIFS) {
-            if (notification.system) {
+            if (notification.id === `direct_links_inital_notification`) {
                 if (
                     !lastReleaseTime ||
                     lastReleaseTime < notification.sentTime

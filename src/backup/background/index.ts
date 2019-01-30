@@ -4,6 +4,7 @@ import { CollectionDefinition } from 'storex'
 
 import { StorageManager } from '../../search/types'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
+import sendNotif from '../../util/send-notification'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
@@ -11,12 +12,6 @@ import { ObjectChangeBatch } from './backend/types'
 import estimateBackupSize from './estimate-backup-size'
 const pickBy = require('lodash/pickBy')
 const last = require('lodash/last')
-
-/*
- * TODO remove these imports
- *
- */
-import sendNotif from '../../util/send-notification'
 
 export * from './backend'
 
@@ -184,6 +179,8 @@ export class BackupBackgroundModule {
                         this.automaticBackupCheck = Promise.resolve(
                             override === 'true',
                         )
+                        // Send a notification stating that the auto backup has expired
+                        sendNotif('auto_backup_expired')
                     } else {
                         await this.checkAutomaticBakupEnabled()
                     }
@@ -196,6 +193,7 @@ export class BackupBackgroundModule {
                 getBackupInfo: () => {
                     return this.state.info
                 },
+                // This function is used to get the users drive size
                 getDriveSize: () => {
                     return this.backend.getDriveSize()
                 },
