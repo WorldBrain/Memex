@@ -11,7 +11,6 @@ import {
     IndexDropdownRow,
 } from '../components'
 import { ClickHandler } from '../../popup/types'
-import { addTagsToOpenTabs, delTagsFromOpenTabs } from 'src/search/tags'
 
 export interface Props {
     source: 'tag' | 'domain'
@@ -196,7 +195,7 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         if (this.allowIndexUpdate) {
             if (this.props.allTabs) {
-                addTagsToOpenTabs(newTag).catch(console.error)
+                await this.addTagsToOpenTabsRPC(newTag).catch(console.error)
             } else {
                 this.addTagRPC({
                     url: this.props.url,
@@ -229,10 +228,10 @@ class IndexDropdownContainer extends Component<Props, State> {
         const tag = this.state.displayFilters[index]
 
         // Either add or remove the tag, let Redux handle the store changes.
-        if (this.allowIndexUpdate) {
-            if (!this.pageHasTag(tag)) {
+        if (!this.pageHasTag(tag)) {
+            if (this.allowIndexUpdate) {
                 if (this.props.allTabs) {
-                    addTagsToOpenTabs(tag).catch(console.error)
+                    await this.addTagsToOpenTabsRPC(tag).catch(console.error)
                 } else {
                     this.addTagRPC({
                         url: this.props.url,
@@ -240,11 +239,14 @@ class IndexDropdownContainer extends Component<Props, State> {
                         tabId: this.props.tabId,
                     }).catch(console.error)
                 }
-                await this.storeTrackEvent(true)
-                this.props.onFilterAdd(tag)
-            } else {
+            }
+
+            await this.storeTrackEvent(true)
+            this.props.onFilterAdd(tag)
+        } else {
+            if (this.allowIndexUpdate) {
                 if (this.props.allTabs) {
-                    delTagsFromOpenTabs(tag).catch(console.error)
+                    await this.delTagsFromOpenTabsRPC(tag).catch(console.error)
                 } else {
                     this.delTagRPC({
                         url: this.props.url,
@@ -252,9 +254,10 @@ class IndexDropdownContainer extends Component<Props, State> {
                         tabId: this.props.tabId,
                     }).catch(console.error)
                 }
-                await this.storeTrackEvent(false)
-                this.props.onFilterDel(tag)
             }
+
+            await this.storeTrackEvent(false)
+            this.props.onFilterDel(tag)
         }
 
         this.inputEl.focus()
