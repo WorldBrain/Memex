@@ -4,6 +4,7 @@ import checkIfOnline from './check-network'
 import { remoteFunction } from './webextensionRPC'
 
 const storeNotification = remoteFunction('storeNotification')
+const estimateBackupSize = remoteFunction('estimateInitialBackupSize')
 const getDriveSize = remoteFunction('getDriveSize')
 
 async function sendNotification(id: string) {
@@ -15,7 +16,14 @@ async function sendNotification(id: string) {
         } else {
             // Get the drive size if there is an error in the request
             const driveSize = await getDriveSize()
-            if (driveSize.limit && driveSize.usage >= driveSize.limit) {
+            // Get the backup size and compare to see if its greater than the free
+            // space available in the drive
+            const backupSize = await estimateBackupSize()
+            if (
+                (driveSize.limit && driveSize.usage >= driveSize.limit) ||
+                backupSize.bytesWithBlobs + backupSize.bytesWithoutBlobs >
+                    driveSize.limit - driveSize.usage
+            ) {
                 backupError = 'drive_size_empty'
             }
         }
@@ -28,20 +36,6 @@ async function sendNotification(id: string) {
         }
     }
 }
-
-// async function checkIfOnline(): Promise<boolean> {
-//     let online = false
-//     await fetch('www.google.com', {
-//         method: 'GET',
-//         headers: {
-//             'Content-Type': 'application/json',
-//         },
-//     })
-//         .catch(err => {online = false})
-//         .then((res) => {online = true})
-//         .catch(err => {online = false})
-//     return online
-// }
 
 async function dispatchNotification(notification) {
     if (notification.overview) {
