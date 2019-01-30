@@ -1,21 +1,25 @@
 import * as notifications from '../notifications/notifications'
 import createNotif from './notifications'
+import checkIfOnline from './check-network'
 import { remoteFunction } from './webextensionRPC'
 
 const storeNotification = remoteFunction('storeNotification')
 const getDriveSize = remoteFunction('getDriveSize')
 
 async function sendNotification(id: string) {
-    // get the drive size if there is an error in the request
-    const driveSize = id === 'error' ? await getDriveSize() : 1000
-
-    // Set the id for the notification
-    const backupError =
-        id === 'error'
-            ? driveSize.limit && driveSize.usage >= driveSize.limit
-                ? 'drive_size_empty'
-                : 'backup_error'
-            : id
+    // Set the if for the notification
+    let backupError = id
+    if (id === 'error') {
+        if (!!(await checkIfOnline)) {
+            backupError = 'backup_error'
+        } else {
+            // Get the drive size if there is an error in the request
+            const driveSize = await getDriveSize()
+            if (driveSize.limit && driveSize.usage >= driveSize.limit) {
+                backupError = 'drive_size_empty'
+            }
+        }
+    }
 
     // Send the corresponding notification
     for (const notification of notifications.NOTIFS) {
@@ -24,6 +28,20 @@ async function sendNotification(id: string) {
         }
     }
 }
+
+// async function checkIfOnline(): Promise<boolean> {
+//     let online = false
+//     await fetch('www.google.com', {
+//         method: 'GET',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//     })
+//         .catch(err => {online = false})
+//         .then((res) => {online = true})
+//         .catch(err => {online = false})
+//     return online
+// }
 
 async function dispatchNotification(notification) {
     if (notification.overview) {

@@ -1,6 +1,8 @@
 import Queue, { Options as QueueOpts } from 'queue'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { StorageManager } from '../../search/types'
+import { makeRemotelyCallable } from '../../util/webextensionRPC'
+import sendNotif from '../../util/send-notification'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
@@ -146,6 +148,8 @@ export class BackupBackgroundModule {
                         this.automaticBackupCheck = Promise.resolve(
                             override === 'true',
                         )
+                        // Send a notification stating that the auto backup has expired
+                        sendNotif('auto_backup_expired')
                     } else {
                         await this.checkAutomaticBakupEnabled()
                     }
@@ -158,6 +162,7 @@ export class BackupBackgroundModule {
                 getBackupInfo: () => {
                     return this.state.info
                 },
+                // This function is used to get the users drive size
                 getDriveSize: () => {
                     return this.backend.getDriveSize()
                 },

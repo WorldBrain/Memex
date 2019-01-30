@@ -110,13 +110,30 @@ export const NOTIFS: NotifDefinition[] = [
         id: 'backup_error',
         system: {
             title: 'Error backing up data.',
-            message: 'An error occured while backing up your data',
+            message: 'Please check your internet connectivity',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/backup',
+                        context: 'new-tab',
+                    },
+                    label: 'Backup Now',
+                },
+            ],
         },
         overview: {
             title: 'Error backing up data.',
-            message: 'An error occured while backing up your data.',
+            message: 'Please check your internet connectivity',
             buttons: [
-                // TODO: Add the button sending them to the backup page
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/backup',
+                        context: 'new-tab',
+                    },
+                    label: 'Retry',
+                },
             ],
         },
     },
@@ -136,12 +153,29 @@ export const NOTIFS: NotifDefinition[] = [
         system: {
             title: 'Auto Backup',
             message: 'Your auto-backup subscription has ended',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/backup',
+                        context: 'new-tab',
+                    },
+                    label: 'Renew Subscription',
+                },
+            ],
         },
         overview: {
             title: 'Auto Backup',
             message: 'Your auto-backup subscription has ended.',
             buttons: [
-                // TODO: A link to send them to a page to renew the subscription
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/backup',
+                        context: 'new-tab',
+                    },
+                    label: 'Renew Subscription',
+                },
             ],
         },
     },
