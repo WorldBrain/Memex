@@ -23,6 +23,7 @@ class IndexDropdownRow extends PureComponent {
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,
         scrollIntoView: PropTypes.func.isRequired,
+        showSelection: PropTypes.bool,
     }
 
     componentDidMount() {
@@ -60,7 +61,10 @@ class IndexDropdownRow extends PureComponent {
         return (
             <div className={this.mainClass} onClick={this.props.onClick}>
                 {this.props.value.name || this.props.value}
-                {this.props.active && <i className="material-icons">done</i>}
+                {this.props.active &&
+                    this.props.showSelection && (
+                        <i className="material-icons">done</i>
+                    )}
             </div>
         )
     }

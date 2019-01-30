@@ -184,11 +184,9 @@ export class TabManager {
     }
 
     getTabUrls(windowId?: number) {
-        return windowId
-            ? Array.from(this._tabs.values())
-                  .filter(tab => tab.windowId === windowId)
-                  .map(tab => tab.url)
-            : Array.from(this._tabs.values()).map(tab => tab.url)
+        return Array.from(this._tabs.values())
+            .filter(tab => (windowId ? tab.windowId === windowId : tab))
+            .map(tab => tab.url)
     }
 }
 
