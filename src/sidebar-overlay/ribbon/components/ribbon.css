@@ -1,7 +1,7 @@
 .ribbon {
     position: fixed;
     top: 20%;
-    right: -50px;
+    right: 0;
     width: 13px;
     height: 40px;
     background-color: #fff;
@@ -16,7 +16,6 @@
     line-height: normal;
     text-align: start;
     font-family: serif;
-    animation: slideLeft 0.15s ease-in 1s 1 forwards;
     cursor: pointer;
     display: flex;
     flex-direction: row;
@@ -111,14 +110,4 @@
 
 .ribbonIcon {
     padding-top: 1px;
-}
-
-@keyframes slideLeft {
-    0% {
-        right: -50px;
-    }
-
-    100% {
-        right: 0px;
-    }
 }
