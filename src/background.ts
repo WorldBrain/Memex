@@ -1,6 +1,7 @@
 import 'babel-polyfill'
 import 'core-js/es7/symbol'
 
+import { browser } from 'webextension-polyfill-ts'
 import initStorex from './search/memex-storex'
 import getDb, { setStorexBackend } from './search'
 import internalAnalytics from './analytics/internal'
@@ -42,7 +43,11 @@ eventLog.setupRemoteFunctions()
 const customList = new CustomListBackground({ storageManager })
 customList.setupRemoteFunctions()
 
-const tags = new TagsBackground({ storageManager, tabMan: tabManager })
+const tags = new TagsBackground({
+    storageManager,
+    tabMan: tabManager,
+    windows: browser.windows,
+})
 tags.setupRemoteFunctions()
 
 const backupModule = new backup.BackupBackgroundModule({
