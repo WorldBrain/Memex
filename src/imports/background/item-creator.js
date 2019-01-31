@@ -66,11 +66,11 @@ export default class ImportItemCreator {
     }
 
     get completedBmCount() {
-        return this._bmKeys.size
+        return this._bmCounts
     }
 
     get completedHistCount() {
-        return this._histKeys.size - this.completedBmCount
+        return this._histCounts - this.completedBmCount
     }
 
     static _limitMap = (items, limit) => new Map([...items].slice(0, limit))
@@ -85,6 +85,9 @@ export default class ImportItemCreator {
 
                 // Grab existing data keys from DB
                 const keySets = await this._existingKeys()
+
+                this._histCounts = keySets.histCounts._value
+                this._bmCounts = keySets.bmCounts._value
                 this._histKeys = keySets.histKeys
                 this._bmKeys = keySets.bmKeys
                 resolve()
