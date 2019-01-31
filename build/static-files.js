@@ -29,10 +29,6 @@ export const copyPatterns = [
     },
     { from: 'img', to: 'img' },
     {
-        from: 'node_modules/webextension-polyfill/dist/browser-polyfill.js',
-        to: 'lib/',
-    },
-    {
         from: 'node_modules/webextension-polyfill-ts/dist/',
         to: 'lib/',
     },
