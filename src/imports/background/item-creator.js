@@ -40,6 +40,7 @@ const deriveImportItem = type => item => ({
 
 export default class ImportItemCreator {
     static DEF_LIMITS = { histLimit: Infinity, bmLimit: Infinity }
+    static IMPORT_LIMIT = 1000
 
     /**
      * @param {ItemCreatorParams} args
@@ -47,7 +48,7 @@ export default class ImportItemCreator {
     constructor({
         limits = ImportItemCreator.DEF_LIMITS,
         dataSources = new DataSources({}),
-        existingKeySource = () => searchIndex.grabExistingKeys(),
+        existingKeySource = () => searchIndex.grabExistingKeys(ImportItemCreator.IMPORT_LIMIT),
     }) {
         this.limits = limits
         this._dataSources = dataSources

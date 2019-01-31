@@ -22,12 +22,14 @@ export const getPage = (getDb: () => Promise<Dexie>) => async (url: string) => {
  *
  * TODO: Maybe overhaul `import-item-creation` module to not need this (only caller)
  */
-export const grabExistingKeys = (getDb: () => Promise<Dexie>) => async () => {
-    const db = await getDb()
+export const grabExistingKeys = (getDb: () => Promise<Dexie>) => async (importLimit) => {
+    
     return db
         .transaction('r', db.pages, db.bookmarks, async () => ({
-            histKeys: new Set(await db.pages.toCollection().primaryKeys()),
-            bmKeys: new Set(await db.bookmarks.toCollection().primaryKeys()),
+            histCounts: db.pages.count(),
+            bmCounts: db.pages.count(),
+            histKeys: new Set(await db.pages.toCollection().limit(importLimit).primaryKeys()),
+            bmKeys: new Set(await db.bookmarks.toCollection().limit(importLimit).primaryKeys()),
         }))
         .catch(initErrHandler({ histKeys: new Set(), bmKeys: new Set() }))
 }
