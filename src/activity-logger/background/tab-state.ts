@@ -17,6 +17,7 @@ class Tab implements TabState {
     isActive: boolean
     isLoaded: boolean
     isBookmarked: boolean
+    isLoggable: boolean
     visitTime: number
     activeTime: number
     lastActivated: number
@@ -42,6 +43,7 @@ class Tab implements TabState {
         this.windowId = windowId
         this.isActive = isActive
         this.isLoaded = isLoaded
+        this.isLoggable = isLoggable({ url })
         this.isBookmarked = isBookmarked
         this.visitTime = visitTime
         this.navState = navState
@@ -59,7 +61,7 @@ class Tab implements TabState {
      * Should check whether the tab's loading state, loggability, tooltip enabled state.
      */
     private async _toggleRenderSidebarIFrame(shouldRender: boolean) {
-        if (!this.isLoaded || !isLoggable({ url: this.url })) {
+        if (!this.isLoaded || !this.isLoggable) {
             return
         }
 
@@ -76,7 +78,7 @@ class Tab implements TabState {
     }
 
     private async _toggleRibbon() {
-        if (!this.isLoaded || !isLoggable({ url: this.url })) {
+        if (!this.isLoaded || !this.isLoggable) {
             return
         }
 
@@ -87,7 +89,7 @@ class Tab implements TabState {
     }
 
     private async _toggleTooltip() {
-        if (!this.isLoaded || !isLoggable({ url: this.url })) {
+        if (!this.isLoaded || !this.isLoggable) {
             return
         }
 
@@ -98,7 +100,7 @@ class Tab implements TabState {
     }
 
     private async _updateRibbonState() {
-        if (!this.isLoaded || !isLoggable({ url: this.url })) {
+        if (!this.isLoaded || !this.isLoggable) {
             return
         }
 

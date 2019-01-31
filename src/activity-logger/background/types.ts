@@ -22,6 +22,7 @@ export interface TabState {
     isActive: boolean
     isLoaded: boolean
     isBookmarked: boolean
+    isLoggable: boolean
     visitTime: number
     activeTime: number
     lastActivated: number
