@@ -8,6 +8,8 @@ export interface GetPksProps {
     opValue?: any
     filter?: (doc: any) => boolean
     reverse?: boolean
+    limit?: number
+    offset?: number
 }
 
 export class DexieUtilsPlugin extends StorageBackendPlugin<
@@ -18,6 +20,7 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
     static NUKE_DB_OP = 'memex:dexie.recreateDatabase'
     static REGEXP_COUNT_OP = 'memex:dexie.countByRegexp'
     static REGEXP_DELETE_OP = 'memex:dexie.deleteByRegexp'
+    static GET_COUNT_OP = 'memex:dexie.getCollectionCount'
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
@@ -35,6 +38,10 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
         backend.registerOperation(
             DexieUtilsPlugin.NUKE_DB_OP,
             this.recreateDatabase,
+        )
+        backend.registerOperation(
+            DexieUtilsPlugin.GET_COUNT_OP,
+            this.getCollectionCount,
         )
     }
 
@@ -65,6 +72,8 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
         opValue,
         filter,
         reverse,
+        limit,
+        offset,
     }: GetPksProps) => {
         const table = this.backend.dexieInstance.table(collection)
         let coll
@@ -88,8 +97,19 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
             coll = coll.reverse()
         }
 
+        if (offset) {
+            coll = coll.offset(offset)
+        }
+
+        if (limit) {
+            coll = coll.limit(limit)
+        }
+
         return coll.primaryKeys()
     }
+
+    getCollectionCount = ({ collection }: { collection: string }) =>
+        this.backend.dexieInstance.table(collection).count()
 
     deleteByRegexp = args => this.queryByRegexp(args).delete()
     countByRegexp = args => this.queryByRegexp(args).count()

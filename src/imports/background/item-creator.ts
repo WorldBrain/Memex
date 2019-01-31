@@ -50,6 +50,7 @@ export default class ImportItemCreator {
         bmLimit: Infinity,
         servicesLimit: Infinity,
     }
+    static IMPORT_LIMIT = 1000
 
     _dataSources: DataSources
     _existingKeys: () => Promise<{
@@ -100,11 +101,11 @@ export default class ImportItemCreator {
     }
 
     get completedBmCount() {
-        return this._bmKeys.size
+        return this._bmCounts
     }
 
     get completedHistCount() {
-        return this._histKeys.size - this.completedBmCount
+        return this._histCounts - this.completedBmCount
     }
 
     get completedServicesCount() {
@@ -125,6 +126,9 @@ export default class ImportItemCreator {
 
                 // Grab existing data keys from DB
                 const keySets = await this._existingKeys()
+
+                this._histCounts = keySets.histCounts._value
+                this._bmCounts = keySets.bmCounts._value
                 this._histKeys = keySets.histKeys
                 this._bmKeys = keySets.bmKeys
                 resolve()
@@ -149,32 +153,36 @@ export default class ImportItemCreator {
      *
      * Performs all needed filtering on a collection of history or bookmarks
      *
-     * @param {(item: any) => any} [transform=noop] Opt. transformformation fn turning current iterm into import item structure.
-     * @param {(url: string) => bool} [alreadyExists] Opt. checker function to check against existing data.
-     * @return {(items: BrowserItem[]) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items.
+     * @param {(item: any) => any} [transform=noop] Opt. transformation fn turning current item into import item structure.
+     * @param {(count: number) => bool} [count] check against the maximum number of entries from the database
+     * @param {(url: string) => bool} [existsSet] Opt. checker function to check against existing data.
+     * @return {(items: BrowserItem[]) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items. (return type)
      */
-    _filterItemsByUrl = (transform, existsSet) => items => {
+    _filterItemsByUrl = (transform, count, existsSet) => items => {
         const importItems = new Map()
+        const addedItems = new Set(items)
+        let offset = existsSet.size
 
-        for (const item of items) {
-            // Exclude item if any of the standard checks fail
-            if (!isLoggable(item) || this._isBlacklisted(item)) {
-                continue
+        // constantly update existing urls to remove duplicates the set
+        while (offset < count) {
+            for (const url of existsSet) {
+                addedItems.delete(url)
             }
-
-            try {
-                // Asssociate the item with the encoded URL in results Map
-                const url = normalizeUrl(item.url)
-
-                if (!existsSet.has(url)) {
-                    existsSet.add(url)
-                    importItems.set(url, transform(item))
-                }
-            } catch (err) {
-                continue
-            }
+            existsSet = () =>
+                searchIndex.grabMoreExistingKeys(
+                    offset,
+                    ImportItemCreator.IMPORT_LIMIT,
+                )
+            offset += ImportItemCreator.IMPORT_LIMIT
         }
 
+        for (const url of addedItems.values()) {
+            if (!isLoggable(url) || this._isBlacklisted(url)) {
+                addedItems.delete(url)
+            } else {
+                importItems.set(normalizeUrl(url), transform(url))
+            }
+        }
         return importItems
     }
 
@@ -219,6 +227,7 @@ export default class ImportItemCreator {
         if (this._bmLimit > 0) {
             const itemsFilter = this._filterItemsByUrl(
                 deriveImportItem(TYPE.BOOKMARK),
+                this._bmCounts,
                 this._bmKeys,
             )
 
@@ -233,6 +242,7 @@ export default class ImportItemCreator {
         if (this._histLimit > 0) {
             const itemsFilter = this._filterItemsByUrl(
                 deriveImportItem(TYPE.HISTORY),
+                this._histCounts,
                 this._histKeys,
             )
 

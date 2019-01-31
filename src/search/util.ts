@@ -26,12 +26,32 @@ export const getPage = (getDb: DBGet) => async (url: string) => {
     return result
 }
 
-/**
- * Hardcoded replacement for now.
- *
- * TODO: Maybe overhaul `import-item-creation` module to not need this (only caller)
- */
-export const grabExistingKeys = (getDb: DBGet) => async () => {
+export const grabExistingKeyCounts = (getDb: DBGet) => async (): Promise<{
+    histCount: number
+    bmCount: number
+}> => {
+    const db = await getDb()
+
+    const histCount = await db.operation(DexieUtilsPlugin.GET_COUNT_OP, {
+        collection: 'pages ',
+    })
+    const bmCount = await db.operation(DexieUtilsPlugin.GET_COUNT_OP, {
+        collection: 'bookmarks',
+    })
+
+    return { histCount, bmCount }
+}
+
+export const grabExistingKeys = (getDb: DBGet) => async ({
+    limit,
+    offset,
+}: {
+    limit: number
+    offset: number
+}): Promise<{
+    histKeys: Set<string>
+    bmKeys: Set<string>
+}> => {
     const db = await getDb()
     let histKeys: Set<string>
     let bmKeys: Set<string>
@@ -40,11 +60,15 @@ export const grabExistingKeys = (getDb: DBGet) => async () => {
         histKeys = new Set(
             await db.operation(DexieUtilsPlugin.GET_PKS_OP, {
                 collection: 'pages',
+                limit,
+                offset,
             }),
         )
         bmKeys = new Set(
             await db.operation(DexieUtilsPlugin.GET_PKS_OP, {
                 collection: 'bookmarks',
+                limit,
+                offset,
             }),
         )
     } catch (err) {
@@ -52,6 +76,30 @@ export const grabExistingKeys = (getDb: DBGet) => async () => {
     }
 
     return { histKeys, bmKeys }
+}
+
+export const grabMoreExistingKeys = (getDb: () => Promise<Dexie>) => async (
+    offset,
+    importLimit,
+) => {
+    const db = await getDb()
+
+    return db.transaction('r', db.pages, db.bookmarks, async () => ({
+        histKeys: new Set(
+            await db.pages
+                .toCollection()
+                .offset(offset)
+                .limit(importLimit)
+                .primaryKeys(),
+        ),
+        bmKeys: new Set(
+            await db.bookmarks
+                .toCollection()
+                .offset(offset)
+                .limit(importLimit)
+                .primaryKeys(),
+        ),
+    }))
 }
 
 /**
