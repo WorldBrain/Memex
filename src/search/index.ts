@@ -75,6 +75,7 @@ const delBookmark = bookmarkMethods.delBookmark(getDb)
 const pageHasBookmark = bookmarkMethods.pageHasBookmark(getDb)
 const getPage = utilMethods.getPage(getDb)
 const grabExistingKeys = utilMethods.grabExistingKeys(getDb)
+const grabMoreExistingKeys = utilMethods.grabMoreExistingKeys(getDb)
 const search = searchMethods.search(getDb)
 const suggest = searchMethods.suggest(getDb)
 const extendedSuggest = searchMethods.extendedSuggest(getDb)
@@ -101,6 +102,7 @@ export {
     pageHasBookmark,
     getPage,
     grabExistingKeys,
+    grabMoreExistingKeys,
     search,
     suggest,
     extendedSuggest,
