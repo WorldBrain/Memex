@@ -30,6 +30,13 @@ const defaultState = {
     lists: '',
     suggestedTags: [],
     suggestedDomains: [],
+
+    /* Object way */
+    contentTypes: {
+        pages: false,
+        highlights: false,
+        notes: false,
+    },
 }
 
 const hideDomainFilter = state => ({
@@ -65,6 +72,30 @@ const showFilterTypes = state => ({
 const toggleFilterTypes = state => ({
     ...state,
     showFilterTypes: !state.showFilterTypes,
+})
+
+const toggleWebsitesFilter = state => ({
+    ...state,
+    contentTypes: {
+        ...state.contentTypes,
+        pages: !state.contentTypes.website,
+    },
+})
+
+const toggleHighlightsFilter = state => ({
+    ...state,
+    contentTypes: {
+        ...state.contentTypes,
+        highlights: !state.contentTypes.highlights,
+    },
+})
+
+const toggleNotesFilter = state => ({
+    ...state,
+    contentTypes: {
+        ...state.contentTypes,
+        notes: !state.contentTypes.website,
+    },
 })
 
 const addFilter = filterKey => (state, value) => {
@@ -209,6 +240,9 @@ export default createReducer(
             ...state,
             showFilters: !state.showFilters,
         }),
+        [actions.toggleWebsitesFilter]: toggleWebsitesFilter,
+        [actions.toggleHighlightsFilter]: toggleHighlightsFilter,
+        [actions.toggleNotesFilter]: toggleNotesFilter,
     },
     defaultState,
 )

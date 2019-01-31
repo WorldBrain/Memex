@@ -63,6 +63,15 @@ export const setSuggestedTags = createAction('search-filters/setSuggestedTags')
 export const setSuggestedDomains = createAction(
     'search-filters/setSuggestedDomains',
 )
+export const toggleWebsitesFilter = createAction(
+    'search-filters/toggleWebsitesFilter',
+)
+export const toggleHighlightsFilter = createAction(
+    'search-filters/toggleHighlightsFilter',
+)
+export const toggleNotesFilter = createAction(
+    'search-filters/toggleNotesFilter',
+)
 
 export const fetchSuggestedTags = () => async (dispatch, getState) => {
     const filteredTags = selectors.tags(getState())

@@ -1,17 +1,36 @@
 import React, { PureComponent, Fragment } from 'react'
+import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux'
+
+import * as selectors from '../selectors'
+import * as actions from '../actions'
 
 import FilterBar from './FilterBar'
 import ContentTypes from './content-types'
 
-export interface Props {
+export interface StateProps {
+    websitesFilter: boolean
+    annotationsFilter: boolean
+    highlightsFilter: boolean
+    notesFilter: boolean
+}
+
+export interface DispatchProps {
+    toggleWebsitesFilter: () => void
+    toggleHighlightsFilter: () => void
+    toggleNotesFilter: () => void
+}
+interface OwnProps {
     showFilteredTypes: boolean
     toggleFilterTypes: () => void
 }
 
-export interface State {}
+type Props = StateProps & DispatchProps & OwnProps
+
+interface State {}
 
 class ContentTypeContainer extends PureComponent<Props, State> {
     render() {
+        console.log(this.props)
         return (
             <Fragment>
                 <FilterBar
@@ -24,4 +43,23 @@ class ContentTypeContainer extends PureComponent<Props, State> {
     }
 }
 
-export default ContentTypeContainer
+const mapStateToProps = (state): StateProps => ({
+    websitesFilter: selectors.websitesFilter(state),
+    annotationsFilter: selectors.annotationsFilter(state),
+    highlightsFilter: selectors.highlightsFilter(state),
+    notesFilter: selectors.notesFilter(state),
+})
+
+const mapDispatchToProps: MapDispatchToProps<
+    DispatchProps,
+    OwnProps
+> = dispatch => ({
+    toggleWebsitesFilter: () => dispatch(actions.toggleWebsitesFilter()),
+    toggleHighlightsFilter: () => dispatch(actions.toggleHighlightsFilter()),
+    toggleNotesFilter: () => dispatch(actions.toggleNotesFilter()),
+})
+
+export default connect<StateProps, DispatchProps, OwnProps>(
+    mapStateToProps,
+    mapDispatchToProps,
+)(ContentTypeContainer)
