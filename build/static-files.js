@@ -32,6 +32,10 @@ export const copyPatterns = [
         from: 'node_modules/webextension-polyfill/dist/browser-polyfill.js',
         to: 'lib/',
     },
+    {
+        from: 'node_modules/webextension-polyfill-ts/dist/',
+        to: 'lib/',
+    },
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.min.js', to: 'lib/' },
     {
         from: 'fonts/*/*',
