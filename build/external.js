@@ -1,5 +1,5 @@
 export const externalTsModules = [
-    'storex',
-    'storex-backend-dexie',
-    'memex-stemmer',
+    '@worldbrain/storex',
+    '@worldbrain/storex-backend-dexie',
+    '@worldbrain/memex-stemmer',
 ]

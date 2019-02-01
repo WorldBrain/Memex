@@ -246,6 +246,7 @@ export default class AnnotationStorage extends FeatureStorage {
         url,
         comment,
         selector,
+        createdWhen = new Date(),
     }: Annotation) {
         return this.storageManager
             .collection(this._annotationsColl)
@@ -255,8 +256,7 @@ export default class AnnotationStorage extends FeatureStorage {
                 comment,
                 body,
                 selector,
-                createdWhen: new Date(),
-                lastEdited: {},
+                createdWhen,
                 url,
             })
     }

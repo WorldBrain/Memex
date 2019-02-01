@@ -34,7 +34,12 @@
         "no-implicit-dependencies": [
             true,
             "dev",
-            ["storex", "storex-backend-dexie", "memex-stemmer", "src"]
+            [
+                "@worldbrain/storex",
+                "@worldbrain/storex-backend-dexie",
+                "@worldbrain/memex-stemmer",
+                "src"
+            ]
         ],
         "no-object-literal-type-assertion": false,
         "no-shadowed-variable": true,

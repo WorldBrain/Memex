@@ -23,7 +23,7 @@ export const highlight = {
     url: 'https://annotation.url/#12124124124',
     comment: '',
     selector: {},
-    createdWhen: new Date('2019-01-30T12:04Z'),
+    createdWhen: new Date('2019-01-25T12:04Z'),
 }
 
 export const hybrid = {
