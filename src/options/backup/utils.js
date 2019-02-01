@@ -17,3 +17,8 @@ export function redirectToAutomaticBackupPurchase(billingPeriod) {
 export function redirectToAutomaticBackupCancellation() {
     window.location.href = 'https://worldbrain.io/community/subscriptions/'
 }
+
+export const getStringFromResponseBody = async response => {
+    const { value } = await response.body.getReader().read()
+    return new TextDecoder('utf-8').decode(value)
+}

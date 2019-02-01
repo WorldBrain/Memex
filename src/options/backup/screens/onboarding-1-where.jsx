@@ -4,9 +4,48 @@ import { ProviderList } from '../components/provider-list'
 import { PrimaryButton } from '../components/primary-button'
 import { DownloadOverlay } from '../components/download-overlay'
 import Styles from '../styles.css'
+import { getStringFromResponseBody } from '../utils'
 
 export default class OnboardingWhere extends React.Component {
-    state = { provider: null, path: null, overlay: false }
+    state = { provider: null, path: null, overlay: false, backupPath: null }
+
+    _proceedIfServerIsRunning = async provider => {
+        try {
+            let response = await fetch('http://localhost:11922/status')
+            const serverStatus = await getStringFromResponseBody(response)
+            if (serverStatus === 'running') {
+                response = await fetch('http://localhost:11922/backup/location')
+                const backupPath = await getStringFromResponseBody(response)
+                if (backupPath && backupPath.length) {
+                    this.setState({ backupPath, provider })
+                } else {
+                    this.setState({ backupPath: null })
+                }
+            } else {
+                this.setState({ backupPath: null, overlay: true })
+            }
+        } catch (err) {
+            // Show the overlay if we couldn't connect to the server.
+            this.setState({ backupPath: null, overlay: true })
+        }
+    }
+
+    _handleChangeBackupPath = async () => {
+        try {
+            let response = await fetch(
+                'http://localhost:11922/backup/open-change-location',
+            )
+            response = await fetch('http://localhost:11922/backup/location')
+            const backupPath = await getStringFromResponseBody(response)
+            if (backupPath && backupPath.length) {
+                this.setState({ backupPath })
+            } else {
+                this.setState({ backupPath: null })
+            }
+        } catch (err) {
+            this.setState({ backupPath: null, overlay: true })
+        }
+    }
 
     render() {
         return (
@@ -16,19 +55,22 @@ export default class OnboardingWhere extends React.Component {
                     WHERE?
                 </p>
                 <ProviderList
-                    onChange={provider => {
-                        this.setState({ provider })
+                    backupPath={this.state.backupPath}
+                    handleChangeBackupPath={this._handleChangeBackupPath}
+                    onChange={async provider => {
                         if (provider === 'local') {
-                            this.setState({ overlay: true })
+                            await this._proceedIfServerIsRunning(provider)
                         }
                     }}
                 />
                 <DownloadOverlay
                     disabled={!this.state.overlay}
-                    onClick={action => {
+                    onClick={async action => {
                         if (action === 'continue') {
                             this.setState({ overlay: false })
-                            this.props.onChoice(this.state.provider)
+                            await this._proceedIfServerIsRunning(
+                                this.state.provider,
+                            )
                         }
                         if (action === 'cancel') {
                             this.setState({ overlay: false })
@@ -36,7 +78,7 @@ export default class OnboardingWhere extends React.Component {
                     }}
                 />
                 <PrimaryButton
-                    disabled={!this.state.provider}
+                    disabled={!this.state.provider || !this.state.backupPath}
                     onClick={() => this.props.onChoice(this.state.provider)}
                 >
                     Continue
