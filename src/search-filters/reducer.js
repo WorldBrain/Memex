@@ -33,7 +33,7 @@ const defaultState = {
 
     /* Object way */
     contentTypes: {
-        pages: false,
+        pages: true,
         highlights: false,
         notes: false,
     },
