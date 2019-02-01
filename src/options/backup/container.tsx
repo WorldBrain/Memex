@@ -1,11 +1,7 @@
 import React from 'react'
-// import PropTypes from 'prop-types'
+
 import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
-import {
-    redirectToGDriveLogin,
-    redirectToAutomaticBackupPurchase,
-} from './utils'
 import { default as Overview } from './screens/overview'
 import { default as RunningBackup } from './screens/running-backup'
 import { default as OnboardingWhere } from './screens/onboarding-1-where'
@@ -16,7 +12,8 @@ import LoadingBlocker from './components/loading-blocker'
 import * as logic from 'src/options/backup/container.logic'
 import RestoreWhere from 'src/options/backup/screens/restore-where'
 import RestoreRunning from 'src/options/backup/screens/restore-running'
-const STYLES = require('./styles.css')
+
+const styles = require('./styles.css')
 
 export const SCREENS = {
     overview: {
@@ -67,13 +64,12 @@ export default class BackupSettingsContainer extends React.Component {
     state = { screen: null, isAuthenticated: null }
 
     async componentDidMount() {
-        this.setState(
-            await logic.getInitialState({
-                analytics,
-                localStorage,
-                remoteFunction,
-            }),
-        )
+        const state = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction,
+        })
+        this.setState(state)
     }
 
     renderScreen() {
@@ -115,7 +111,7 @@ export default class BackupSettingsContainer extends React.Component {
         return (
             <div>
                 <BackupHeader />
-                <div className={STYLES.screenContainer}>
+                <div className={styles.screenContainer}>
                     {this.renderScreen()}
                 </div>
             </div>

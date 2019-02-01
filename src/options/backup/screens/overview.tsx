@@ -3,28 +3,30 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import analytics from 'src/analytics'
-import AutomaticBackupButton from '../components/overview-automatic-backup-button'
-import OnboardingBackupMode from '../components/onboarding-backup-mode'
-import Styles from '../styles.css'
-import localStyles from './overview.css'
-import {
-    redirectToAutomaticBackupPurchase,
-    redirectToAutomaticBackupCancellation,
-} from '../utils'
+// import analytics from 'src/analytics'
+// import AutomaticBackupButton from '../components/overview-automatic-backup-button'
+// import OnboardingBackupMode from '../components/onboarding-backup-mode'
+// import {
+//     redirectToAutomaticBackupPurchase,
+//     redirectToAutomaticBackupCancellation,
+// } from '../utils'
 import { PrimaryButton } from '../components/primary-button'
 import LoadingBlocker from '../components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
 
-export default class OverviewContainer extends React.Component {
-    static propTypes = {
-        onBackupRequested: PropTypes.func.isRequired,
-        onRestoreRequested: PropTypes.func.isRequired,
-    }
+const styles = require('../styles.css')
+const localStyles = require('./overview.css')
 
+interface Props {
+    onBackupRequested: (...args: any[]) => any
+    onRestoreRequested: (...args: any[]) => any
+}
+
+export default class OverviewContainer extends React.Component<Props> {
     state = {
         automaticBackupEnabled: null,
         backupTimes: null,
+        hasInitialBackup: false,
         showAutomaticUpgradeDetails: false,
         upgradeBillingPeriod: null,
         showRestoreConfirmation: false,
@@ -33,11 +35,13 @@ export default class OverviewContainer extends React.Component {
     async componentDidMount() {
         await remoteFunction('maybeCheckAutomaticBakupEnabled')()
         const backupTimes = await remoteFunction('getBackupTimes')()
+        const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         this.setState({
             automaticBackupEnabled: await remoteFunction(
                 'isAutomaticBackupEnabled',
             )(),
             backupTimes,
+            hasInitialBackup,
         })
     }
 
@@ -57,11 +61,11 @@ export default class OverviewContainer extends React.Component {
                     />
                 )}
 
-                <p className={Styles.header2}>
+                {/* <p className={styles.header2}>
                     <strong>SETTINGS </strong>
                 </p>
-                <div className={Styles.option}>
-                    <span className={Styles.name}>Automatic Backup</span>
+                <div className={styles.option}>
+                    <span className={styles.name}>Automatic Backup</span>
                     <span className={classNames(localStyles.button)}>
                         {this.state.automaticBackupEnabled !== null &&
                             !this.state.showAutomaticUpgradeDetails && (
@@ -89,7 +93,7 @@ export default class OverviewContainer extends React.Component {
                             )}
                     </span>
                     <br />
-                    <span className={Styles.subname}>
+                    <span className={styles.subname}>
                         Worry-free backups every 15 minutes.
                     </span>
                     {this.state.showAutomaticUpgradeDetails && (
@@ -112,10 +116,10 @@ export default class OverviewContainer extends React.Component {
                             </PrimaryButton>
                         </div>
                     )}
-                </div>
+                </div> */}
 
-                <div className={Styles.option}>
-                    <span className={Styles.name}>Delete Backup</span>
+                {/* <div className={styles.option}>
+                    <span className={styles.name}>Delete Backup</span>
                     <a
                         target="_blank"
                         href="https://worldbrain.helprace.com/i100-delete-your-backup-and-start-over"
@@ -123,8 +127,8 @@ export default class OverviewContainer extends React.Component {
                         <span className={localStyles.button}>
                             <span
                                 className={classNames(
-                                    Styles.label,
-                                    Styles.labelFree,
+                                    styles.label,
+                                    styles.labelFree,
                                 )}
                             >
                                 Tutorial
@@ -132,44 +136,61 @@ export default class OverviewContainer extends React.Component {
                         </span>
                     </a>
                     <br />
-                </div>
+                </div> */}
 
-                <p className={Styles.header2}>
-                    <strong>STATUS </strong>
+                <p className={styles.header2}>
+                    <strong>STATUS</strong>
                 </p>
-                <div className={localStyles.statusLine}>
-                    <span className={Styles.name}>Last backup: </span>
-                    <span className={localStyles.time}>
-                        {this.state.backupTimes.lastBackup
-                            ? moment(
-                                this.state.backupTimes.lastBackup,
-                            ).fromNow()
-                            : "You haven't made any backup yet"}
-                    </span>
-                </div>
-                {this.state.backupTimes.nextBackup && (
+                {!this.state.hasInitialBackup ? (
                     <div className={localStyles.statusLine}>
-                        <span className={Styles.name}>Next backup: </span>
-                        <span className={localStyles.time}>
+                        <p>You haven't set up any backups yet.</p>
+                        <button
+                            className={localStyles.startWizard}
+                            onClick={this.props.onBackupRequested}
+                        >
+                            Start wizard
+                        </button>
+                    </div>
+                ) : (
+                    <div>
+                        <div className={localStyles.statusLine}>
+                            <span className={styles.name}>Last backup: </span>
+                            <span className={localStyles.time}>
+                                {this.state.backupTimes.lastBackup
+                                    ? moment(
+                                          this.state.backupTimes.lastBackup,
+                                      ).fromNow()
+                                    : "You haven't made any backup yet"}
+                            </span>
+                        </div>
+                        {this.state.backupTimes.nextBackup && (
+                            <div className={localStyles.statusLine}>
+                                <span className={styles.name}>
+                                    Next backup:{' '}
+                                </span>
+                                <span className={localStyles.time}>
+                                    {this.state.backupTimes.nextBackup !==
+                                    'running'
+                                        ? moment(
+                                              this.state.backupTimes.nextBackup,
+                                          ).fromNow()
+                                        : 'in progress'}
+                                </span>
+                            </div>
+                        )}
+                        <PrimaryButton onClick={this.props.onBackupRequested}>
                             {this.state.backupTimes.nextBackup !== 'running'
-                                ? moment(
-                                    this.state.backupTimes.nextBackup,
-                                ).fromNow()
-                                : 'in progress'}
-                        </span>
+                                ? 'Backup Now'
+                                : 'Go to Backup'}
+                        </PrimaryButton>
                     </div>
                 )}
-                <PrimaryButton onClick={this.props.onBackupRequested}>
-                    {this.state.backupTimes.nextBackup !== 'running'
-                        ? 'Backup Now'
-                        : 'Go to Backup'}
-                </PrimaryButton>
                 <div>
-                    <p className={Styles.header2}>
+                    <p className={styles.header2}>
                         <strong>RESTORE </strong>
                     </p>
-                    <div className={Styles.option}>
-                        <span className={Styles.name}>
+                    <div className={styles.option}>
+                        <span className={styles.name}>
                             Restore &amp; Replace
                         </span>
                         <a
@@ -180,8 +201,8 @@ export default class OverviewContainer extends React.Component {
                             <span className={localStyles.button}>
                                 <span
                                     className={classNames(
-                                        Styles.label,
-                                        Styles.labelFree,
+                                        styles.label,
+                                        styles.labelFree,
                                     )}
                                 >
                                     RESTORE
@@ -191,7 +212,7 @@ export default class OverviewContainer extends React.Component {
                         <br />
                         <span
                             className={classNames(
-                                Styles.subname,
+                                styles.subname,
                                 localStyles.limitWidth,
                             )}
                         >
@@ -199,8 +220,8 @@ export default class OverviewContainer extends React.Component {
                             everything from backup.
                         </span>
                     </div>
-                    <div className={Styles.option}>
-                        <span className={Styles.name}>Restore &amp; Merge</span>
+                    <div className={styles.option}>
+                        <span className={styles.name}>Restore &amp; Merge</span>
                         <a
                             target="_blank"
                             href="https://worldbrain.io/crowdfunding-memex"
@@ -208,8 +229,8 @@ export default class OverviewContainer extends React.Component {
                             <span className={localStyles.button}>
                                 <span
                                     className={classNames(
-                                        Styles.label,
-                                        Styles.labelContribute,
+                                        styles.label,
+                                        styles.labelContribute,
                                     )}
                                 >
                                     CONTRIBUTE
@@ -219,7 +240,7 @@ export default class OverviewContainer extends React.Component {
                         <br />
                         <span
                             className={classNames(
-                                Styles.subname,
+                                styles.subname,
                                 localStyles.limitWidth,
                             )}
                         >

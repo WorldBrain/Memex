@@ -16,10 +16,23 @@
 
 .statusLine {
     margin-left: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .statusLabel {
     font-weight: bold;
+}
+
+.startWizard {
+    border: none;
+    outline: none;
+    color: white;
+    background: #173766;
+    cursor: pointer;
+    padding: 8px;
+    font-size: 0.8rem;
 }
 
 /* .comingSoon {
