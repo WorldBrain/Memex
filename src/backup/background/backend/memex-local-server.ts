@@ -16,9 +16,15 @@ export class MemexLocalBackend extends BackupBackend {
     }
 
     async isConnected() {
-        const response = await fetch(`${this.url}/status`)
-        console.log(response.status)
-        return response.status === 200
+        try {
+            const response = await fetch(`${this.url}/status`)
+            console.log(response.status)
+            return response.status === 200
+        } catch (err) {
+            console.error(err)
+        }
+
+        return false
     }
 
     async isAuthenticated() {

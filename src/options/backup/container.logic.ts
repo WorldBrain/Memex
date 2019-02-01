@@ -60,17 +60,21 @@ export async function getStartScreen({
         ) {
             localStorage.removeItem('backup.onboarding.authenticating')
             return 'onboarding-size'
-        } else if (isAuthenticated) {
+        } else if (
+            isAuthenticated &&
+            !localStorage.getItem('backup.onboarding.where')
+        ) {
             localStorage.removeItem('backup.onboarding.payment')
             localStorage.removeItem('backup.onboarding.authenticating')
             localStorage.removeItem('backup.onboarding')
             return 'running-backup'
         } else {
-            return 'onboarding-where'
+            localStorage.removeItem('backup.onboarding.where')
+            localStorage.removeItem('backup.onboarding')
         }
-    } else {
-        return 'overview'
     }
+
+    return 'overview'
 }
 
 export async function processEvent({
@@ -90,6 +94,7 @@ export async function processEvent({
                 const needsOnBoarding = !hasInitialBackup && !backupInfo
                 if (needsOnBoarding) {
                     localStorage.setItem('backup.onboarding', true)
+                    localStorage.setItem('backup.onboarding.where', true)
                     analytics.trackEvent(
                         {
                             category: 'Backup',
