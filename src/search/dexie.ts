@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-import { DexieStorageBackend } from 'storex-backend-dexie'
+import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 import { Dexie as DexieExtended } from './types'
 

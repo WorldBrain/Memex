@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-import { CollectionDefinitions } from 'storex'
+import { CollectionDefinitions } from '@worldbrain/storex'
 
 import { StorageManager } from '../types'
 

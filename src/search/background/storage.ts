@@ -1,12 +1,26 @@
 import { StorageManager } from '..'
 import { FeatureStorage } from '../storage'
-import { AnnotSearchParams } from './types'
+import {
+    SearchParams as OldSearchParams,
+    SearchResult as OldSearchResult,
+} from '../types'
+import { AnnotSearchParams, AnnotPage } from './types'
 import { Annotation } from 'src/direct-linking/types'
+import { AnnotationsSearchPlugin } from './annots-search'
+import { PageUrlMapperPlugin } from './page-url-mapper'
+import { reshapeAnnotForDisplay, reshapeParamsForOldSearch } from './utils'
 
 export interface SearchStorageProps {
     storageManager: StorageManager
     annotationsColl?: string
 }
+
+export type LegacySearch = (
+    params: OldSearchParams,
+) => Promise<{
+    ids: OldSearchResult[]
+    totalCount: number
+}>
 
 export default class SearchStorage extends FeatureStorage {
     static ANNOTS_COLL = 'annotations'
@@ -48,6 +62,17 @@ export default class SearchStorage extends FeatureStorage {
         }
 
         return { ...baseQuery, ...tagsQuery }
+    }
+
+    static projectPageResults(results): AnnotPage[] {
+        return results.map(page => ({
+            url: page.url,
+            title: page.fullTitle,
+            hasBookmark: page.hasBookmark,
+            screenshot: page.screenshot,
+            favIcon: page.favIcon,
+            annotations: [],
+        }))
     }
 
     constructor({
@@ -104,6 +129,32 @@ export default class SearchStorage extends FeatureStorage {
         return annots.filter(annot => resultSet.has(annot.url))
     }
 
+    private async mapAnnotsToPages(
+        annots: Annotation[],
+        maxAnnotsPerPage: number,
+    ): Promise<AnnotPage[]> {
+        const pageUrls = new Set(annots.map(annot => annot.pageUrl))
+        const annotsByUrl = new Map<string, Annotation[]>()
+
+        for (const annot of annots) {
+            const pageAnnots = annotsByUrl.get(annot.pageUrl) || []
+            annotsByUrl.set(
+                annot.pageUrl,
+                [...pageAnnots, annot].slice(0, maxAnnotsPerPage),
+            )
+        }
+
+        const pages = await this.storageManager.operation(
+            PageUrlMapperPlugin.MAP_OP_ID,
+            [...pageUrls],
+        )
+
+        return pages.map(page => ({
+            ...page,
+            annotations: annotsByUrl.get(page.url),
+        }))
+    }
+
     async listAnnotations({
         limit = 10,
         skip = 0,
@@ -154,5 +205,36 @@ export default class SearchStorage extends FeatureStorage {
         }
 
         return results
+    }
+
+    async searchAnnots(
+        params: AnnotSearchParams,
+    ): Promise<Annotation[] | AnnotPage[]> {
+        const results: Annotation[] = await this.storageManager.operation(
+            AnnotationsSearchPlugin.SEARCH_OP_ID,
+            params,
+        )
+
+        if (params.includePageResults) {
+            return this.mapAnnotsToPages(
+                results,
+                params.maxAnnotsPerPage ||
+                    AnnotationsSearchPlugin.MAX_ANNOTS_PER_PAGE,
+            )
+        }
+
+        return results.map(reshapeAnnotForDisplay as any) as any
+    }
+
+    async searchPages(params: AnnotSearchParams, legacySearch: LegacySearch) {
+        const searchParams = reshapeParamsForOldSearch(params)
+
+        const { ids } = await legacySearch(searchParams)
+
+        const pageUrls = new Set(ids.map(([url]) => url))
+
+        return this.storageManager.operation(PageUrlMapperPlugin.MAP_OP_ID, [
+            ...pageUrls,
+        ])
     }
 }

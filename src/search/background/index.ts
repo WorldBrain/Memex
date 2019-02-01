@@ -1,14 +1,11 @@
 import { browser, Bookmarks } from 'webextension-polyfill-ts'
 
 import * as index from '..'
-import { AnnotsSearcher } from './annots-search'
-import { PageSearcher } from './page-search'
 import { Dexie, StorageManager } from '../types'
 import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import AnnotsStorage from 'src/direct-linking/background/storage'
 import { PageSearchParams, AnnotSearchParams, AnnotPage } from './types'
 import { annotSearchOnly, pageSearchOnly } from './utils'
 import { Annotation } from 'src/direct-linking/types'
@@ -19,8 +16,7 @@ export default class SearchBackground {
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
     private getDb: () => Promise<Dexie>
-    private annotsSearcher: AnnotsSearcher
-    private pageSearcher: PageSearcher
+    private legacySearch
 
     constructor({
         storageManager,
@@ -43,20 +39,7 @@ export default class SearchBackground {
         this.storage = new SearchStorage({ storageManager })
         this.initBackend(idx)
 
-        this.annotsSearcher = new AnnotsSearcher({
-            storageManager,
-            listsColl: AnnotsStorage.LISTS_COLL,
-            listEntriesColl: AnnotsStorage.LIST_ENTRIES_COLL,
-            tagsColl: AnnotsStorage.TAGS_COLL,
-            bookmarksColl: AnnotsStorage.BMS_COLL,
-            annotsColl: AnnotsStorage.ANNOTS_COLL,
-            pagesColl: AnnotsStorage.PAGES_COLL,
-        })
-
-        this.pageSearcher = new PageSearcher({
-            storageManager,
-            legacySearch: idx.fullSearch(this.getDb),
-        })
+        this.legacySearch = idx.fullSearch(getDb)
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
         bookmarksAPI.onCreated.addListener(
@@ -184,8 +167,8 @@ export default class SearchBackground {
         delete params.skip
 
         const results = await Promise.all([
-            this.pageSearcher.search(params),
-            this.annotsSearcher.search({
+            this.storage.searchPages(params, this.legacySearch),
+            this.storage.searchAnnots({
                 ...params,
                 includePageResults: true,
             }),
@@ -199,7 +182,7 @@ export default class SearchBackground {
     }
 
     private async blankPageSearch(params: AnnotSearchParams) {
-        let results = await this.pageSearcher.search(params)
+        let results = await this.storage.searchPages(params, this.legacySearch)
 
         results = await Promise.all(
             results.map(async page => ({
@@ -227,7 +210,7 @@ export default class SearchBackground {
             return this.storage.listAnnotations(searchParams)
         }
 
-        return this.annotsSearcher.search({
+        return this.storage.searchAnnots({
             ...searchParams,
             includePageResults: false,
         }) as any
@@ -246,11 +229,11 @@ export default class SearchBackground {
         }
 
         if (pageSearchOnly(params.contentTypes)) {
-            return this.pageSearcher.search(searchParams)
+            return this.storage.searchPages(params, this.legacySearch)
         }
 
         if (annotSearchOnly(params.contentTypes)) {
-            return this.annotsSearcher.search({
+            return this.storage.searchAnnots({
                 ...searchParams,
                 includePageResults: true,
             }) as any

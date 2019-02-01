@@ -1,4 +1,4 @@
-import { CollectionDefinitionMap } from 'storex'
+import { CollectionDefinitionMap } from '@worldbrain/storex'
 
 // TODO: move these declarations to own feature storage classes
 export default {

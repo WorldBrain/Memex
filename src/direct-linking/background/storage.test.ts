@@ -52,11 +52,6 @@ describe('Annotations storage', () => {
         // Insert tags
         await annotationStorage.modifyTags(true)(DATA.tag1, DATA.annotation.url)
         await annotationStorage.modifyTags(true)(DATA.tag2, DATA.annotation.url)
-
-        // I don't know why this happens: seemingly only in jest,
-        //  `getTagsByAnnotationUrl` returns one less result than it's meant to.
-        //  The best fix I can find for now is adding a dummy tag...
-        await annotationStorage.modifyTags(true)('dummy', DATA.annotation.url)
     }
 
     beforeEach(async () => {
@@ -191,9 +186,7 @@ describe('Annotations storage', () => {
                 )
                 expect(tagsAfter1).toBeDefined()
 
-                // More weird stuff... when you delete, `getTagsByAnnotationUrl` starts
-                //  returning the expected result, hence this is expecting 2 results again
-                expect(tagsAfter1.length).toBe(2)
+                expect(tagsAfter1.length).toBe(1)
 
                 await annotationStorage.modifyTags(false)(
                     tagsAfter1[0].name,
@@ -204,7 +197,7 @@ describe('Annotations storage', () => {
                     url,
                 )
                 expect(tagsAfter2).toBeDefined()
-                expect(tagsAfter2.length).toBe(1)
+                expect(tagsAfter2.length).toBe(0)
             })
         })
     })
