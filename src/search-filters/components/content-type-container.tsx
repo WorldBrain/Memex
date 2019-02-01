@@ -18,6 +18,7 @@ export interface DispatchProps {
     toggleWebsitesFilter: () => void
     toggleHighlightsFilter: () => void
     toggleNotesFilter: () => void
+    toggleAnnotationsFilter: () => void
 }
 interface OwnProps {
     showFilteredTypes: boolean
@@ -30,14 +31,31 @@ interface State {}
 
 class ContentTypeContainer extends PureComponent<Props, State> {
     render() {
-        console.log(this.props)
         return (
             <Fragment>
+                {/* The row header which when clicked expands to show the checklist */}
                 <FilterBar
                     filter="Content Type"
                     onBarClick={this.props.toggleFilterTypes}
                 />
-                {this.props.showFilteredTypes && <ContentTypes />}
+
+                {/* The Content Type checklist */}
+                {this.props.showFilteredTypes && (
+                    <ContentTypes
+                        annotationsFilter={this.props.annotationsFilter}
+                        highlightsFilter={this.props.highlightsFilter}
+                        notesFilter={this.props.notesFilter}
+                        websitesFilter={this.props.websitesFilter}
+                        toggleAnnotationsFilter={
+                            this.props.toggleAnnotationsFilter
+                        }
+                        toggleHighlightsFilter={
+                            this.props.toggleHighlightsFilter
+                        }
+                        toggleNotesFilter={this.props.toggleNotesFilter}
+                        toggleWebsitesFilter={this.props.toggleWebsitesFilter}
+                    />
+                )}
             </Fragment>
         )
     }
@@ -57,6 +75,7 @@ const mapDispatchToProps: MapDispatchToProps<
     toggleWebsitesFilter: () => dispatch(actions.toggleWebsitesFilter()),
     toggleHighlightsFilter: () => dispatch(actions.toggleHighlightsFilter()),
     toggleNotesFilter: () => dispatch(actions.toggleNotesFilter()),
+    toggleAnnotationsFilter: () => dispatch(actions.toggleAnnotationsFilter()),
 })
 
 export default connect<StateProps, DispatchProps, OwnProps>(

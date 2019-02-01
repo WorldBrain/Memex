@@ -72,6 +72,26 @@ export const toggleHighlightsFilter = createAction(
 export const toggleNotesFilter = createAction(
     'search-filters/toggleNotesFilter',
 )
+export const setAnnotationsFilter = createAction(
+    'search-filters/setAnnotationsFilter',
+)
+
+/**
+ * Action to toggle annotation content filter.
+ * Toggling it toggles both highlights and notes
+ * filter to either true or false.
+ */
+export const toggleAnnotationsFilter = () => (dispatch, getState) => {
+    const state = getState()
+    const highlightsFilter = selectors.highlightsFilter(state)
+    const notesFilter = selectors.notesFilter(state)
+
+    if (highlightsFilter && notesFilter) {
+        dispatch(setAnnotationsFilter(false))
+    } else {
+        dispatch(setAnnotationsFilter(true))
+    }
+}
 
 export const fetchSuggestedTags = () => async (dispatch, getState) => {
     const filteredTags = selectors.tags(getState())

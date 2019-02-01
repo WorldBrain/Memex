@@ -22,9 +22,9 @@
         background-color: #f7f7f7;
         outline: none;
 
-        & .checkmark {
+        /* & .checkmark {
             background-image: url('/img/blacklist_green.svg');
-        }
+        } */
     }
 
     /* No border in the bottom for the last element */
@@ -35,11 +35,11 @@
 
 /* CSS for active checkmarks */
 .active {
-    &:hover {
+    /* &:hover {
         & .checkmark {
             background-image: url('/img/blacklist.svg');
         }
-    }
+    } */
 
     & .checkmark {
         background-image: url('/img/blacklist_green.svg');

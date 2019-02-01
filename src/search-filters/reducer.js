@@ -78,7 +78,7 @@ const toggleWebsitesFilter = state => ({
     ...state,
     contentTypes: {
         ...state.contentTypes,
-        pages: !state.contentTypes.website,
+        pages: !state.contentTypes.pages,
     },
 })
 
@@ -94,7 +94,19 @@ const toggleNotesFilter = state => ({
     ...state,
     contentTypes: {
         ...state.contentTypes,
-        notes: !state.contentTypes.website,
+        notes: !state.contentTypes.notes,
+    },
+})
+
+/**
+ * Setting annotations involves setting both notes and highlights
+ */
+const setAnnotationsFilter = (state, value) => ({
+    ...state,
+    contentTypes: {
+        ...state.contentTypes,
+        highlights: value,
+        notes: value,
     },
 })
 
@@ -243,6 +255,7 @@ export default createReducer(
         [actions.toggleWebsitesFilter]: toggleWebsitesFilter,
         [actions.toggleHighlightsFilter]: toggleHighlightsFilter,
         [actions.toggleNotesFilter]: toggleNotesFilter,
+        [actions.setAnnotationsFilter]: setAnnotationsFilter,
     },
     defaultState,
 )
