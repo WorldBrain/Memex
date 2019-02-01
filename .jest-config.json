@@ -14,11 +14,11 @@
     "modulePaths": ["<rootDir>"],
     "moduleNameMapper": {
         "\\.(css|less)$": "identity-obj-proxy",
-        "^storex$": "<rootDir>/external/storex/ts",
-        "^storex/lib/(.*)": "<rootDir>/external/storex/ts/$1",
-        "^storex-backend-dexie$": "<rootDir>/external/storex-backend-dexie/ts",
-        "^storex-backend-dexie/lib/(.*)": "<rootDir>/external/storex-backend-dexie/ts/$1",
-        "^memex-stemmer$": "<rootDir>/external/memex-stemmer/ts"
+        "^@worldbrain/storex$": "<rootDir>/external/@worldbrain/storex/ts",
+        "^@worldbrain/storex/lib/(.*)": "<rootDir>/external/@worldbrain/storex/ts/$1",
+        "^@worldbrain/storex-backend-dexie$": "<rootDir>/external/@worldbrain/storex-backend-dexie/ts",
+        "^@worldbrain/storex-backend-dexie/lib/(.*)": "<rootDir>/external/@worldbrain/storex-backend-dexie/ts/$1",
+        "^@worldbrain/memex-stemmer$": "<rootDir>/external/@worldbrain/memex-stemmer/ts"
     },
     "moduleFileExtensions": ["js", "jsx", "ts", "tsx"],
     "setupFiles": ["jest-webextension-mock", "./setupJest.js"],

@@ -1,9 +1,9 @@
-import Storex, { CollectionDefinitionMap } from 'storex'
+import Storex, { CollectionDefinitionMap } from '@worldbrain/storex'
 import {
     DexieStorageBackend,
     IndexedDbImplementation,
-} from 'storex-backend-dexie'
-import stemmerFn from 'memex-stemmer'
+} from '@worldbrain/storex-backend-dexie'
+import stemmerFn from '@worldbrain/memex-stemmer'
 
 import schemaPatcherFn from './storage/dexie-schema'
 

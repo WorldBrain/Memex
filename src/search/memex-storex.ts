@@ -1,4 +1,4 @@
-import stemmer from 'memex-stemmer'
+import stemmer from '@worldbrain/memex-stemmer'
 
 import UrlField from './storage/url-field'
 import schemaPatcher from './storage/dexie-schema'

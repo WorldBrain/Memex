@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import * as AllRaven from 'raven-js'
-import { CollectionDefinition } from 'storex'
+import { CollectionDefinition } from '@worldbrain/storex'
 
 import { StorageManager } from '../../search/types'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'

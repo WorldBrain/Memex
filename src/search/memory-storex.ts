@@ -1,10 +1,10 @@
-import stemmer from 'memex-stemmer'
+import stemmer from '@worldbrain/memex-stemmer'
 
 import UrlField from './storage/url-field'
 import schemaPatcher from './storage/dexie-schema'
 import collections from './old-schema'
 import initStorex from './storex'
-import inMemoryDb from 'storex-backend-dexie/lib/in-memory'
+import inMemoryDb from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { suggestObjects } from './search/suggest'
 import { StorageManager } from './types'
 

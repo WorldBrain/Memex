@@ -1,4 +1,4 @@
-import Storex, { StorageCollection, FindManyOptions } from 'storex'
+import Storex, { StorageCollection, FindManyOptions } from '@worldbrain/storex'
 import DexieOrig from 'dexie'
 import { FilterQuery } from 'dexie-mongoify'
 
