@@ -1,6 +1,7 @@
 import initStorageManager from '../../search/memory-storex'
 import TagsBackground from './'
 import * as DATA from './storage.test.data'
+import getDb from 'src/search/'
 
 describe('Tags', () => {
     let bg: TagsBackground
@@ -13,7 +14,7 @@ describe('Tags', () => {
 
     beforeEach(async () => {
         const storageManager = initStorageManager()
-        bg = new TagsBackground({ storageManager })
+        bg = new TagsBackground({ storageManager, getDb })
 
         await storageManager.finishInitialization()
         await insertTestData()

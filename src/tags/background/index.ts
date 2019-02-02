@@ -19,7 +19,7 @@ export default class TagsBackground {
         windows,
     }: {
         storageManager: StorageManager
-        getDb?: () => Promise<Dexie>
+        getDb: () => Promise<Dexie>
         tabMan?: TabManager
         windows?: Windows.Static
     }) {
