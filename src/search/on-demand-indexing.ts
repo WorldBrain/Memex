@@ -6,6 +6,8 @@ import pipeline from './pipeline'
 import { Page } from './models'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../options/settings/constants'
 import { Dexie } from './types'
+import { getPage } from './util'
+import { initErrHandler } from './storage'
 
 interface Props {
     url: string
@@ -86,4 +88,20 @@ export const createPageViaBmTagActs = (getDb: () => Promise<Dexie>) => async (
     }
 
     return createPageFromUrl(getDb)({ stubOnly: !fullyIndex, ...props })
+}
+
+export const createPageIfNotPresent = (getDb: () => Promise<Dexie>) => async (
+    url: string,
+) => {
+    let page = await getPage(getDb)(url)
+    if (page == null || page.isStub) {
+        page = await createPageFromUrl(getDb)({ url })
+    }
+
+    // Add new visit if none, else page won't appear in results
+    if (!page.visits.length) {
+        page.addVisit()
+    }
+
+    await page.save(getDb).catch(initErrHandler())
 }

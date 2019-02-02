@@ -45,6 +45,7 @@ customList.setupRemoteFunctions()
 
 const tags = new TagsBackground({
     storageManager,
+    getDb,
     tabMan: tabManager,
     windows: browser.windows,
 })
