@@ -128,14 +128,12 @@ class IndexDropdown extends PureComponent {
                                 Back
                             </button>
                         )}
-                        {!this.props.allTabs && (
-                            <div className={this.styles.numberTags}>
-                                <span className={this.styles.bold}>
-                                    {this.props.numberOfTags}
-                                </span>{' '}
-                                {this.unit} selected
-                            </div>
-                        )}
+                        <div className={this.styles.numberTags}>
+                            <span className={this.styles.bold}>
+                                {this.props.numberOfTags}
+                            </span>{' '}
+                            {this.unit} selected
+                        </div>
                     </div>
                 )}
             </div>
