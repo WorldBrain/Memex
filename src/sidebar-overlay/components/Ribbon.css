@@ -30,19 +30,19 @@
 }
 
 .ribbonExpanded {
-    width: 130px;
-    height: 40px;
+    width: 45px;
+    height: 100px;
     display: grid;
     grid-template-areas: 'buttons arrow';
-    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
 }
 
 .buttons {
     grid-area: buttons;
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
+    margin-right: 3px;
 }
 
 .arrow {
