@@ -2,8 +2,8 @@ import React from 'react'
 import { storiesOf } from '@storybook/react'
 import 'babel-polyfill'
 
-import ResultItem from '../search-injection/components/ResultItem'
-import TooltipContainer from '../content-tooltip/components/container'
+import ResultItem from '../../search-injection/components/ResultItem'
+import TooltipContainer from '../../content-tooltip/components/container'
 
 storiesOf('Result Item', module).add('with all props', () => (
     <ResultItem
