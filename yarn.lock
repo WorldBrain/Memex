@@ -9679,6 +9679,13 @@ querystringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.0.0.tgz#fa3ed6e68eb15159457c89b37bc6472833195755"
 
+queue@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/queue/-/queue-5.0.0.tgz#95c4805b77d0f87244f05b4ef796ccb0f099cf71"
+  integrity sha512-2K9XzFpaho+lzRzyrFZVfzNSMq34/c0mRurL2Ciqy/+wShotbPDnl2COQjOpaJsKbNZQ28YMzQH96MTFdQD9AA==
+  dependencies:
+    inherits "~2.0.3"
+
 quick-format-unescaped@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/quick-format-unescaped/-/quick-format-unescaped-1.1.2.tgz#0ca581de3174becef25ac3c2e8956342381db698"

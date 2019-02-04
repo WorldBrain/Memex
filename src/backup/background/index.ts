@@ -1,3 +1,4 @@
+import Queue, { Options as QueueOpts } from 'queue'
 import { EventEmitter } from 'events'
 import * as AllRaven from 'raven-js'
 import { CollectionDefinition } from 'storex'
@@ -43,6 +44,7 @@ export class BackupBackgroundModule {
     lastBackupStorage: LastBackupStorage
     recordingChanges: boolean = false
     state: BackupState
+    changeTrackingQueue: Queue
     uiTabId?: any
     automaticBackupCheck?: Promise<boolean>
     automaticBackupTimeout?: any
@@ -53,15 +55,20 @@ export class BackupBackgroundModule {
         storageManager,
         lastBackupStorage,
         backend,
+        createQueue = Queue,
+        queueOpts = { autostart: true, concurrency: 1 },
     }: {
         storageManager: StorageManager
         lastBackupStorage: LastBackupStorage
         backend: BackupBackend
+        createQueue?: typeof Queue
+        queueOpts?: QueueOpts
     }) {
         this.storageManager = storageManager
         this.storage = new BackupStorage({ storageManager })
         this.lastBackupStorage = lastBackupStorage
         this.backend = backend
+        this.changeTrackingQueue = createQueue(queueOpts)
 
         const schemaVersions = Object.keys(
             storageManager.registry.collectionsByVersion,
@@ -246,11 +253,13 @@ export class BackupBackgroundModule {
                 .collections[collection]
 
             if (!isExcludedFromBackup(collectionDefinition)) {
-                this.storage.registerChange({
-                    collection,
-                    pk,
-                    operation,
-                })
+                this.changeTrackingQueue.push(() =>
+                    this.storage.registerChange({
+                        collection,
+                        pk,
+                        operation,
+                    }),
+                )
             }
         }
     }
