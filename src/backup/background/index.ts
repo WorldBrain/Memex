@@ -63,11 +63,9 @@ export class BackupBackgroundModule {
         this.lastBackupStorage = lastBackupStorage
         this.backend = backend
 
-        const schemaVersions = Object.keys(
-            storageManager.registry.collectionsByVersion,
-        ).map(version => parseInt(version, 10))
-        schemaVersions.sort()
-        this.currentSchemaVersion = last(schemaVersions)
+        this.currentSchemaVersion = last(
+            storageManager.registry.getSchemaHistory(),
+        ).version.getTime()
         this.resetBackupState()
     }
 
