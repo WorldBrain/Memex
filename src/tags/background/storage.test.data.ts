@@ -1,6 +1,6 @@
-export const TABS_1 = {
+export const TAGS_1 = {
     name: 'test',
-    urls: ['https://www.ipsum.com/test', 'https://www.ipsum.com/lorem/'],
+    url: 'https://www.ipsum.com/test',
 }
 
 export const TAGS_2 = {

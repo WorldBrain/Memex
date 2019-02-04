@@ -187,7 +187,7 @@ export class TabManager {
         return Array.from(this._tabs.values())
             .filter(tab => tab.isLoggable)
             .filter(tab => (windowId ? tab.windowId === windowId : tab))
-            .map(tab => tab.url)
+            .map(tab => ({ tabId: tab.id, url: tab.url }))
     }
 }
 
