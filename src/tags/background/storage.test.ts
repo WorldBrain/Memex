@@ -8,7 +8,7 @@ describe('Tags', () => {
 
     async function insertTestData() {
         // Insert some test data for all tests to use
-        await bg.addTagsToOpenTabs(DATA.TABS_1)
+        await bg.addTag(DATA.TAGS_1)
         await bg.addTag(DATA.TAGS_2)
     }
 
@@ -22,11 +22,9 @@ describe('Tags', () => {
 
     describe('read ops', () => {
         test('fetch page tags', async () => {
-            const { urls } = DATA.TABS_1
-            for (const url of urls) {
-                const tags = await bg.fetchPageTags({ url })
-                expect(tags.length).toBe(1)
-            }
+            const { url } = DATA.TAGS_1
+            const tags = await bg.fetchPageTags({ url })
+            expect(tags.length).toBe(1)
         })
 
         test('fetch pages', async () => {
@@ -36,13 +34,11 @@ describe('Tags', () => {
     })
 
     describe('delete ops', () => {
-        test('Remove tags from open tabs', async () => {
-            const { urls } = DATA.TABS_1
-            await bg.delTagsFromOpenTabs(DATA.TABS_1)
-            for (const url of urls) {
-                const tags = await bg.fetchPageTags({ url })
-                expect(tags.length).toBe(0)
-            }
+        test('Remove tags', async () => {
+            const { name, url } = DATA.TAGS_1
+            await bg.delTag({ name, url })
+            const tags = await bg.fetchPageTags({ url })
+            expect(tags.length).toBe(0)
         })
     })
 })

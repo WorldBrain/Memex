@@ -5,7 +5,12 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import { Windows } from 'webextension-polyfill-ts'
 import { getPage } from 'src/search/util'
-import { createPageFromUrl } from 'src/search'
+import { createPageFromTab } from 'src/search'
+
+interface Tabs {
+    tabId: number
+    url: string
+}
 
 export default class TagsBackground {
     private storage: TagStorage
@@ -38,26 +43,22 @@ export default class TagsBackground {
         })
     }
 
-    async addTagsToOpenTabs({
-        name,
-        urls,
-    }: {
-        name: string
-        urls?: Array<string>
-    }) {
-        if (!urls) {
+    async addTagsToOpenTabs({ name, tabs }: { name: string; tabs?: Tabs[] }) {
+        if (!tabs) {
             const currentWindow = await this.windows.getCurrent()
-            urls = this.tabMan.getTabUrls(currentWindow.id)
+            tabs = this.tabMan.getTabUrls(currentWindow.id)
         }
 
         const time = Date.now()
 
-        urls.forEach(async url => {
-            let page = await getPage(this.getDb)(url)
+        tabs.forEach(async tab => {
+            let page = await getPage(this.getDb)(tab.url)
 
             if (page == null || page.isStub) {
-                page = await createPageFromUrl({
-                    url,
+                page = await createPageFromTab({
+                    tabId: tab.tabId,
+                    url: tab.url,
+                    allowScreenshot: false,
                 })
             }
 
@@ -71,34 +72,28 @@ export default class TagsBackground {
 
         return this.storage.addTagsToOpenTabs({
             name,
-            urls: urls.map(url => normalizeUrl(url)),
+            urls: tabs.map(tab => normalizeUrl(tab.url)),
         })
     }
 
-    async delTagsFromOpenTabs({
-        name,
-        urls,
-    }: {
-        name: string
-        urls?: Array<string>
-    }) {
-        if (!urls) {
+    async delTagsFromOpenTabs({ name, tabs }: { name: string; tabs?: Tabs[] }) {
+        if (!tabs) {
             const currentWindow = await this.windows.getCurrent()
-            urls = this.tabMan.getTabUrls(currentWindow.id)
+            tabs = this.tabMan.getTabUrls(currentWindow.id)
         }
 
         return this.storage.delTagsFromOpenTabs({
             name,
-            urls: urls.map(url => normalizeUrl(url)),
+            urls: tabs.map(tab => normalizeUrl(tab.url)),
         })
     }
 
     async allTabsHasTag({ name }: { name: string }) {
         const currentWindow = await this.windows.getCurrent()
-        const urls = this.tabMan.getTabUrls(currentWindow.id)
+        const tabs = this.tabMan.getTabUrls(currentWindow.id)
 
         const pageTags = await Promise.all(
-            urls.map(url => this.fetchPageTags({ url: normalizeUrl(url) })),
+            tabs.map(tab => this.fetchPageTags({ url: normalizeUrl(tab.url) })),
         )
         return pageTags.every(page => page.includes(name))
     }
