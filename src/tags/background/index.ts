@@ -4,7 +4,8 @@ import { Dexie, StorageManager } from 'src/search/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import { Windows } from 'webextension-polyfill-ts'
-import { createPageIfNotPresent } from 'src/search/on-demand-indexing'
+import { getPage } from 'src/search/util'
+import { createPageFromUrl } from 'src/search'
 
 export default class TagsBackground {
     private storage: TagStorage
@@ -33,6 +34,7 @@ export default class TagsBackground {
         makeRemotelyCallable({
             addTagsToOpenTabs: this.addTagsToOpenTabs.bind(this),
             delTagsFromOpenTabs: this.delTagsFromOpenTabs.bind(this),
+            allTabsHasTag: this.allTabsHasTag.bind(this),
         })
     }
 
@@ -48,7 +50,24 @@ export default class TagsBackground {
             urls = this.tabMan.getTabUrls(currentWindow.id)
         }
 
-        urls.forEach(url => createPageIfNotPresent(this.getDb)(url))
+        const time = Date.now()
+
+        urls.forEach(async url => {
+            let page = await getPage(this.getDb)(url)
+
+            if (page == null || page.isStub) {
+                page = await createPageFromUrl({
+                    url,
+                })
+            }
+
+            // Add new visit if none, else page won't appear in results
+            if (!page.visits.length) {
+                page.addVisit(time)
+            }
+
+            await page.save(this.getDb)
+        })
 
         return this.storage.addTagsToOpenTabs({
             name,
@@ -72,6 +91,16 @@ export default class TagsBackground {
             name,
             urls: urls.map(url => normalizeUrl(url)),
         })
+    }
+
+    async allTabsHasTag({ name }: { name: string }) {
+        const currentWindow = await this.windows.getCurrent()
+        const urls = this.tabMan.getTabUrls(currentWindow.id)
+
+        const pageTags = await Promise.all(
+            urls.map(url => this.fetchPageTags({ url: normalizeUrl(url) })),
+        )
+        return pageTags.every(page => page.includes(name))
     }
 
     async fetchPageTags({ url }: { url: string }) {
