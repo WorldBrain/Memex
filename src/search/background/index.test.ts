@@ -362,7 +362,7 @@ describe('Annotations search', () => {
         ])
     })
 
-    test('page-text-only page search', async () => {
+    test.skip('page-text-only page search', async () => {
         const results = await searchBg.searchPages({
             query: 'whooo',
             contentTypes: { highlights: false, notes: false, pages: true },
