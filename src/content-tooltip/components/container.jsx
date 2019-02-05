@@ -13,6 +13,7 @@ import {
 
 import { conditionallyRemoveSelectOption } from '../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
+import { userSelectedText } from '../interactions'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -31,6 +32,22 @@ class TooltipContainer extends React.Component {
 
     componentDidMount() {
         this.props.onInit(this.showTooltip)
+        document.addEventListener(
+            'keydown',
+            e => {
+                if (userSelectedText()) {
+                    switch (e.key) {
+                        case 'h':
+                            this.createLink(e)
+                            break
+                        case 'a':
+                            this.createAnnotation(e)
+                            break
+                    }
+                }
+            },
+            false,
+        )
     }
 
     showTooltip = position => {
