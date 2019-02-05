@@ -69,6 +69,12 @@ export default class RunningBackupContainer extends React.Component {
             })
         } else if (event.type === 'success') {
             this.setState({ status: 'success' })
+            // Uncomment the next line to perform checks
+            // @TODO Testing
+
+            // Uncomment the following lines to check for backup error regarding the google drive
+
+            // this.props.onBackupFailure('error')
         } else if (event.type === 'fail') {
             // This function is used to notify the user that there
             // was a problem backing up the data
