@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
     STUBS: 'should-index-stubs',
     VISITS: 'should-index-visits',
     VISIT_DELAY: 'visit-indexing-delay',
+    SCREENSHOTS: 'should-capture-screenshots',
 }
 
 /**

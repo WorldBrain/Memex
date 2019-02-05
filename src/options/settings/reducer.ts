@@ -8,6 +8,7 @@ export interface State {
     bookmarks: boolean
     memexLinks: boolean
     stubs: boolean
+    screenshots: boolean
     visitDelay: number
 }
 
@@ -16,6 +17,7 @@ export const defaultState: State = {
     bookmarks: true,
     memexLinks: true,
     stubs: true,
+    screenshots: true,
     visitDelay: VISIT_DELAY_RANGE.DEF,
 }
 
@@ -36,11 +38,13 @@ reducer.on(acts.initLinks, initState<boolean>('memexLinks'))
 reducer.on(acts.initStubs, initState<boolean>('stubs'))
 reducer.on(acts.initVisits, initState<boolean>('visits'))
 reducer.on(acts.initVisitDelay, initState<number>('visitDelay'))
+reducer.on(acts.initScreenshots, initState<boolean>('screenshots'))
 
 reducer.on(acts.toggleBookmarks, toggleState('bookmarks'))
 reducer.on(acts.toggleLinks, toggleState('memexLinks'))
 reducer.on(acts.toggleStubs, toggleState('stubs'))
 reducer.on(acts.toggleVisits, toggleState('visits'))
+reducer.on(acts.toggleScreenshots, toggleState('screenshots'))
 
 reducer.on(acts.changeVisitDelay, (state, visitDelay) => ({
     ...state,
