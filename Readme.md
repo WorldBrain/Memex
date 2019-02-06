@@ -35,7 +35,7 @@ Its name and functionalities are heavily inspired by [Vannevar Bush's vision of 
  - **Web Annotations:** Add notes to websites and pieces of text in them ([60s Tutorial](https://www.youtube.com/watch?v=uEMmZ77IltE&feature=youtu.be))
  - **Memex.Link** Share links to specific pieces of text in any website, instead of copy-pasting the segements and urls you want to show someone. ([30s Tutorial](https://www.youtube.com/watch?v=lLcOVTqsMC8))
  - **Flexible Organisation**: Add bookmarks, tags or sort websites into lists. ([60s Tutorial](https://www.youtube.com/watch?v=6BOKwluMjKg))
- - **Google & DuckDuckGo integration:** See Memex reults while searching with your favorite search engine. 
+ - **Google & DuckDuckGo integration:** See Memex results while searching with your favorite search engine. 
  - **Full Data Ownership** All personal data is stored and processed on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at WorldBrain, we are highly concerned about your privacy, data ownership and security. For more info please see our [privacy policy](#privacy-policy) for more details.
 
 ## Project Status
