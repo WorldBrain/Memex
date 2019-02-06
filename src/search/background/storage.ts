@@ -1,6 +1,6 @@
-import { StorageManager } from '..'
+import { StorageManager, Page, FavIcon, Bookmark } from '..'
 import { FeatureStorage } from '../storage'
-import { AnnotSearchParams } from './types'
+import { AnnotSearchParams, AnnotPage } from './types'
 import { Annotation } from 'src/direct-linking/types'
 
 export interface SearchStorageProps {
@@ -50,6 +50,17 @@ export default class SearchStorage extends FeatureStorage {
         return { ...baseQuery, ...tagsQuery }
     }
 
+    static projectPageResults(results): AnnotPage[] {
+        return results.map(page => ({
+            url: page.url,
+            title: page.fullTitle,
+            hasBookmark: page.hasBookmark,
+            screenshot: page.screenshot,
+            favIcon: page.favIcon,
+            annotations: [],
+        }))
+    }
+
     constructor({
         storageManager,
         annotationsColl = SearchStorage.ANNOTS_COLL,
@@ -57,6 +68,71 @@ export default class SearchStorage extends FeatureStorage {
         super(storageManager)
 
         this.annotsColl = annotationsColl
+    }
+
+    private async findMatchingPages(pageUrls: string[]) {
+        const favIconMap = new Map<string, string>()
+        const pageMap = new Map<string, Page>()
+
+        await this.storageManager
+            .collection('pages')
+            .findObjects<Page>({ url: { $in: pageUrls } })
+            .then(res =>
+                res.forEach(page =>
+                    pageMap.set(page.url, {
+                        ...page,
+                        screenshot: page.screenshot
+                            ? URL.createObjectURL(page.screenshot)
+                            : undefined,
+                        hasBookmark: false, // Set later, if needed
+                    } as any),
+                ),
+            )
+
+        // Find all assoc. fav-icons and create object URLs
+        const hostnames = new Set(
+            [...pageMap.values()].map(page => page.hostname),
+        )
+
+        await this.storageManager
+            .collection('favIcons')
+            .findObjects<FavIcon>({ hostname: { $in: [...hostnames] } })
+            .then(res =>
+                res.forEach(fav =>
+                    favIconMap.set(
+                        fav.hostname,
+                        URL.createObjectURL(fav.favIcon),
+                    ),
+                ),
+            )
+
+        // Find all assoc. bookmarks and augment assoc. page in page map
+        await this.storageManager
+            .collection('bookmarks')
+            .findObjects<Bookmark>({ url: { $in: [...pageUrls] } })
+            .then(res =>
+                res.forEach(bm => {
+                    const page = pageMap.get(bm.url)
+                    pageMap.set(bm.url, { ...page, hasBookmark: true } as any)
+                }),
+            )
+
+        // Map page results back to original input
+        const pageResults = pageUrls.map(url => {
+            const page = pageMap.get(url)
+
+            return { ...page, favIcon: favIconMap.get(page.hostname) }
+        })
+
+        return SearchStorage.projectPageResults(pageResults)
+    }
+
+    public searchAnnots(params) {
+        this.storageManager.backend.operation(
+            'memex:dexie.searchAnnotations',
+            params,
+            this.findMatchingPages.bind(this),
+        )
     }
 
     private async filterByBookmarks(annots: Annotation[]) {

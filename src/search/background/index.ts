@@ -19,7 +19,6 @@ export default class SearchBackground {
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
     private getDb: () => Promise<Dexie>
-    private annotsSearcher: AnnotsSearcher
     private pageSearcher: PageSearcher
 
     constructor({
@@ -42,16 +41,6 @@ export default class SearchBackground {
         this.queryBuilderFactory = queryBuilder
         this.storage = new SearchStorage({ storageManager })
         this.initBackend(idx)
-
-        this.annotsSearcher = new AnnotsSearcher({
-            storageManager,
-            listsColl: AnnotsStorage.LISTS_COLL,
-            listEntriesColl: AnnotsStorage.LIST_ENTRIES_COLL,
-            tagsColl: AnnotsStorage.TAGS_COLL,
-            bookmarksColl: AnnotsStorage.BMS_COLL,
-            annotsColl: AnnotsStorage.ANNOTS_COLL,
-            pagesColl: AnnotsStorage.PAGES_COLL,
-        })
 
         this.pageSearcher = new PageSearcher({
             storageManager,
@@ -185,7 +174,7 @@ export default class SearchBackground {
 
         const results = await Promise.all([
             this.pageSearcher.search(params),
-            this.annotsSearcher.search({
+            this.storage.searchAnnots({
                 ...params,
                 includePageResults: true,
             }),
@@ -227,7 +216,7 @@ export default class SearchBackground {
             return this.storage.listAnnotations(searchParams)
         }
 
-        return this.annotsSearcher.search({
+        return this.storage.searchAnnots({
             ...searchParams,
             includePageResults: false,
         }) as any
@@ -250,7 +239,7 @@ export default class SearchBackground {
         }
 
         if (annotSearchOnly(params.contentTypes)) {
-            return this.annotsSearcher.search({
+            return this.storage.searchAnnots({
                 ...searchParams,
                 includePageResults: true,
             }) as any

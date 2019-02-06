@@ -1,3 +1,7 @@
+import { StorageBackendPlugin } from '@worldbrain/storex'
+import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import { DexieMongoify } from '@worldbrain/storex-backend-dexie/lib/types'
+
 import { Page, Tag } from 'src/search'
 import { Annotation } from 'src/direct-linking/types'
 import { AnnotSearchParams, UrlFilters, AnnotPage } from './types'
@@ -5,20 +9,17 @@ import { Searcher } from './searcher'
 
 const uniqBy = require('lodash/fp/uniqBy')
 
-export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
+export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
     static MAX_ANNOTS_PER_PAGE = 9
-    static MEMEX_LINK_PROVIDERS = [
-        'http://memex.link',
-        'http://staging.memex.link',
-    ]
 
-    private annotsColl: string
-    private listsColl: string
-    private listEntriesColl: string
-    private tagsColl: string
-    private pagesColl: string
-    private bookmarksColl: string
-    private linkProviders: string[]
+    private db: DexieMongoify
+    private annotsColl = 'annotations'
+    private listsColl = 'customLists'
+    private listEntriesColl = 'annotListEntries'
+    private tagsColl = 'tags'
+    private pagesColl = 'pages'
+    private bookmarksColl = 'annotBookmarks'
+    private linkProviders = ['http://memex.link', 'http://staging.memex.link']
 
     private static projectAnnotSearchResults(results): Annotation[] {
         return results.map(
@@ -100,26 +101,6 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         }
     }
 
-    constructor({
-        storageManager,
-        annotsColl,
-        listsColl,
-        listEntriesColl,
-        tagsColl,
-        bookmarksColl,
-        pagesColl,
-        linkProviders = AnnotsSearcher.MEMEX_LINK_PROVIDERS,
-    }) {
-        super(storageManager)
-        this.annotsColl = annotsColl
-        this.listsColl = listsColl
-        this.listEntriesColl = listEntriesColl
-        this.tagsColl = tagsColl
-        this.pagesColl = pagesColl
-        this.bookmarksColl = bookmarksColl
-        this.linkProviders = linkProviders
-    }
-
     // TODO: Find better way of calculating this?
     private isAnnotDirectLink = (annot: Annotation) => {
         let isDirectLink = false
@@ -134,6 +115,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
     private async mapAnnotsToPages(
         annots: Annotation[],
         maxAnnotsPerPage: number,
+        findMatchingPages: (urls: string[]) => Promise<AnnotPage[]>,
     ): Promise<AnnotPage[]> {
         const pageUrls = new Set(annots.map(annot => annot.pageUrl))
         const annotsByUrl = new Map<string, Annotation[]>()
@@ -146,7 +128,7 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
             )
         }
 
-        const pages = await this.findMatchingPages([...pageUrls])
+        const pages = await findMatchingPages([...pageUrls])
 
         return pages.map(page => ({
             ...page,
@@ -159,13 +141,15 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
             return undefined
         }
 
-        const colls = await this.storageManager
-            .collection(this.listsColl)
-            .findObjects<any>({ name: { $in: collections } })
+        const colls = await this.db
+            .collection<any>(this.listsColl)
+            .find({ name: { $in: collections } })
+            .toArray()
 
-        const collEntries = await this.storageManager
-            .collection(this.listEntriesColl)
-            .findObjects<any>({ listId: { $in: colls.map(coll => coll.id) } })
+        const collEntries = await this.db
+            .collection<any>(this.listEntriesColl)
+            .find({ listId: { $in: colls.map(coll => coll.id) } })
+            .toArray()
 
         return new Set<string>(collEntries.map(coll => coll.url))
     }
@@ -175,11 +159,12 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
             return undefined
         }
 
-        const tagResults = await this.storageManager
-            .collection(this.tagsColl)
-            .findObjects<Tag>({ name: { $in: tags } })
+        const tagResults = await this.db[this.tagsColl]
+            .where('name')
+            .anyOf(tags)
+            .primaryKeys()
 
-        return new Set<string>(tagResults.map(tag => tag.url))
+        return new Set<string>(tagResults.map(([, url]) => url))
     }
 
     private async domainSearch(domains: string[]) {
@@ -187,27 +172,29 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
             return undefined
         }
 
-        const pages = await this.storageManager
+        const pages = await this.db
             .collection(this.pagesColl)
-            .findObjects<Page>({
+            .find({
                 $or: [
                     { hostname: { $in: domains } },
                     { domain: { $in: domains } },
                 ],
             })
+            .uniqueKeys()
 
-        return new Set<string>(pages.map(page => page.url))
+        return new Set(pages as string[])
     }
 
     private async mapSearchResToBookmarks(
         { bookmarksOnly = false }: AnnotSearchParams,
         results: Annotation[],
     ) {
-        const bookmarks = await this.storageManager
-            .collection(this.bookmarksColl)
-            .findObjects<any>({
+        const bookmarks = await this.db
+            .collection<any>(this.bookmarksColl)
+            .find({
                 url: { $in: results.map(annot => annot.url) },
             })
+            .toArray()
 
         const bmUrlSet = new Set(bookmarks.map(bm => bm.url))
 
@@ -253,9 +240,11 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
                 query.pageUrl = url
             }
 
-            const results = await this.storageManager
-                .collection(this.annotsColl)
-                .findObjects<Annotation>(query, { limit })
+            const results = await this.db
+                .collection<any>(this.annotsColl)
+                .find(query)
+                .limit(limit)
+                .toArray()
 
             return !includeDirectLinks
                 ? results.filter(res => !this.isAnnotDirectLink(res))
@@ -275,18 +264,21 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         )
     }
 
-    async search({
-        termsInc = [],
-        tagsInc = [],
-        tagsExc = [],
-        domainsInc = [],
-        domainsExc = [],
-        collections = [],
-        limit = 5,
-        includePageResults = false,
-        maxAnnotsPerPage = AnnotsSearcher.MAX_ANNOTS_PER_PAGE,
-        ...searchParams
-    }: AnnotSearchParams): Promise<Annotation[] | AnnotPage[]> {
+    async search(
+        {
+            termsInc = [],
+            tagsInc = [],
+            tagsExc = [],
+            domainsInc = [],
+            domainsExc = [],
+            collections = [],
+            limit = 5,
+            includePageResults = false,
+            maxAnnotsPerPage = AnnotsSearcher.MAX_ANNOTS_PER_PAGE,
+            ...searchParams
+        }: AnnotSearchParams,
+        findMatchingPages,
+    ): Promise<Annotation[] | AnnotPage[]> {
         const filters: UrlFilters = {
             collUrlsInc: await this.collectionSearch(collections),
             tagUrlsInc: await this.tagSearch(tagsInc),
@@ -322,18 +314,33 @@ export class AnnotsSearcher extends Searcher<AnnotSearchParams, any> {
         // Lookup tags for each annotation
         annotResults = await Promise.all(
             annotResults.map(async annot => {
-                const tags = await this.storageManager
+                const tags = await this.db
                     .collection(this.tagsColl)
-                    .findObjects({ url: annot.url })
+                    .find({ url: annot.url })
                 return { ...annot, tags }
             }),
         )
 
         if (includePageResults) {
-            return this.mapAnnotsToPages(annotResults, maxAnnotsPerPage)
+            return this.mapAnnotsToPages(
+                annotResults,
+                maxAnnotsPerPage,
+                findMatchingPages,
+            )
         }
 
         // Project out unwanted data
         return AnnotsSearcher.projectAnnotSearchResults(annotResults)
+    }
+
+    install(backend: DexieStorageBackend) {
+        super.install(backend)
+
+        this.db = backend.dexieInstance
+
+        backend.registerOperation(
+            'memex:dexie.searchAnnotations',
+            this.search.bind(this),
+        )
     }
 }
