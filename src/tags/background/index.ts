@@ -39,7 +39,6 @@ export default class TagsBackground {
         makeRemotelyCallable({
             addTagsToOpenTabs: this.addTagsToOpenTabs.bind(this),
             delTagsFromOpenTabs: this.delTagsFromOpenTabs.bind(this),
-            allTabsHasTag: this.allTabsHasTag.bind(this),
         })
     }
 
@@ -86,16 +85,6 @@ export default class TagsBackground {
             name,
             urls: tabs.map(tab => normalizeUrl(tab.url)),
         })
-    }
-
-    async allTabsHasTag({ name }: { name: string }) {
-        const currentWindow = await this.windows.getCurrent()
-        const tabs = this.tabMan.getTabUrls(currentWindow.id)
-
-        const pageTags = await Promise.all(
-            tabs.map(tab => this.fetchPageTags({ url: normalizeUrl(tab.url) })),
-        )
-        return pageTags.every(page => page.includes(name))
     }
 
     async fetchPageTags({ url }: { url: string }) {

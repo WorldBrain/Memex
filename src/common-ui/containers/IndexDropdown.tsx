@@ -45,6 +45,7 @@ export interface State {
     filters: string[]
     focused: number
     clearFieldBtn: boolean
+    multiEdit: Set<string>
 }
 
 class IndexDropdownContainer extends Component<Props, State> {
@@ -60,9 +61,9 @@ class IndexDropdownContainer extends Component<Props, State> {
     private delTagRPC
     private addTagsToOpenTabsRPC
     private delTagsFromOpenTabsRPC
-    private allTabsHasTagRPC
     private processEvent
     private inputEl: HTMLInputElement
+    private multiEdit: Set<string>
 
     constructor(props: Props) {
         super(props)
@@ -72,7 +73,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.delTagRPC = remoteFunction('delTag')
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
-        this.allTabsHasTagRPC = remoteFunction('allTabsHasTag')
         this.processEvent = remoteFunction('processEvent')
 
         if (this.props.isForAnnotation) {
@@ -91,6 +91,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             filters: props.initFilters, // Actual tags associated with the page; will only change when DB updates
             focused: props.initFilters.length ? 0 : -1,
             clearFieldBtn: false,
+            multiEdit: new Set<string>(),
         }
     }
 
@@ -155,7 +156,9 @@ class IndexDropdownContainer extends Component<Props, State> {
     private getDisplayTags() {
         return this.state.displayFilters.map((value, i) => ({
             value,
-            active: this.pageHasTag(value),
+            active: this.props.allTabs
+                ? this.state.multiEdit.has(value)
+                : this.pageHasTag(value),
             focused: this.state.focused === i,
         }))
     }
@@ -200,6 +203,9 @@ class IndexDropdownContainer extends Component<Props, State> {
                 await this.addTagsToOpenTabsRPC({ name: newTag }).catch(
                     console.error,
                 )
+                this.setState({
+                    multiEdit: this.state.multiEdit.add(newTag),
+                })
             } else {
                 this.addTagRPC({
                     url: this.props.url,
@@ -233,25 +239,15 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         // Either add or remove the tag, let Redux handle the store changes.
         if (this.props.allTabs) {
-            const allTabsHasTag = await this.allTabsHasTagRPC({ name: tag })
-            if (!allTabsHasTag) {
-                if (this.allowIndexUpdate) {
-                    await this.addTagsToOpenTabsRPC({ name: tag }).catch(
-                        console.error,
-                    )
-                }
+            const multiEdit = this.state.multiEdit
+            if (!multiEdit.has(tag)) {
+                multiEdit.add(tag)
 
-                await this.storeTrackEvent(true)
-                this.props.onFilterAdd(tag)
+                await this.addTagsToOpenTabsRPC({ name: tag })
             } else {
-                if (this.allowIndexUpdate) {
-                    await this.delTagsFromOpenTabsRPC({ name: tag }).catch(
-                        console.error,
-                    )
-                }
+                multiEdit.delete(tag)
 
-                await this.storeTrackEvent(false)
-                this.props.onFilterDel(tag)
+                await this.delTagsFromOpenTabsRPC({ name: tag })
             }
         } else {
             if (!this.pageHasTag(tag)) {
@@ -457,7 +453,11 @@ class IndexDropdownContainer extends Component<Props, State> {
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
-                numberOfTags={this.state.filters.length}
+                numberOfTags={
+                    this.props.allTabs
+                        ? this.state.multiEdit.size
+                        : this.state.filters.length
+                }
                 tagSearchValue={this.state.searchVal}
                 clearSearchField={this.clearSearchField}
                 showClearfieldBtn={this.showClearfieldBtn()}
