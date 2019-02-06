@@ -6,6 +6,7 @@ import collections from './old-schema'
 import initStorex from './storex'
 import { suggestObjects } from './search/suggest'
 import { StorageManager, Dexie } from './types'
+import { plugins } from './storex-plugins'
 
 export default () =>
     initStorex<StorageManager>({
@@ -14,6 +15,7 @@ export default () =>
         schemaPatcher,
         dbName: 'memex',
         customFields: [{ key: 'url', field: UrlField }],
+        backendPlugins: plugins,
         idbImplementation: {
             factory: window.indexedDB,
             range: IDBKeyRange,
