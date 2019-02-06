@@ -9,7 +9,7 @@ export class BackendSelect {
         const backendLocation = await this.restoreBackendLocation()
         if (backendLocation === 'local') {
             return this.initLocalBackend()
-        } else if (backendLocation === 'gdrive') {
+        } else if (backendLocation === 'google-drive') {
             return this.initGDriveBackend()
         } else {
             return undefined
@@ -17,7 +17,7 @@ export class BackendSelect {
     }
 
     async initGDriveBackend(): Promise<BackupBackend> {
-        this.saveBackendLocation('gdrive')
+        this.saveBackendLocation('google-drive')
         return new driveBackup.DriveBackupBackend({
             tokenStore: new driveBackup.LocalStorageDriveTokenStore({
                 prefix: 'drive-token-',

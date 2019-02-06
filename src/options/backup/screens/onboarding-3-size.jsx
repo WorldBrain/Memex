@@ -9,13 +9,17 @@ import Styles from '../styles.css'
 
 export default class OnboardingSizeContainer extends React.Component {
     static propTypes = {
-        isAuthenticated: PropTypes.bool,
         onBlobPreferenceChange: PropTypes.func.isRequired,
         onLoginRequested: PropTypes.func.isRequired,
         onBackupRequested: PropTypes.func.isRequired,
     }
 
-    state = { estimation: null, blobPreference: true }
+    state = {
+        estimation: null,
+        blobPreference: true,
+        backendLocation: null,
+        isAuthenticated: null,
+    }
 
     async componentDidMount() {
         try {
@@ -31,6 +35,14 @@ export default class OnboardingSizeContainer extends React.Component {
             console.log(e)
             console.trace()
         }
+        this.setState({
+            backendLocation: await remoteFunction('getBackendLocation')(),
+        })
+        console.log(`backendLocation: ${this.state.backendLocation}`)
+        this.setState({
+            isAuthenticated: await remoteFunction('isBackupAuthenticated')(),
+        })
+        console.log(`isAuthenticated: ${this.state.isAuthenticated}`)
     }
 
     renderLoadingIndicator() {
@@ -140,25 +152,36 @@ export default class OnboardingSizeContainer extends React.Component {
                     </tbody>
                 </table>
 
-                {!this.props.isAuthenticated && (
-                    <PrimaryButton
-                        onClick={() => {
-                            this.props.onLoginRequested()
-                        }}
-                    >
-                        Connect with Google Drive
-                    </PrimaryButton>
-                )}
-                {this.props.isAuthenticated && (
-                    <PrimaryButton
-                        onClick={() => {
-                            console.log('backup button clicked')
-                            this.props.onBackupRequested()
-                        }}
-                    >
-                        Backup
-                    </PrimaryButton>
-                )}
+                {this.state.backendLocation === 'google-drive' &&
+                    !this.state.isAuthenticated && (
+                        <PrimaryButton
+                            onClick={() => {
+                                this.props.onLoginRequested()
+                            }}
+                        >
+                            Connect with Google Drive
+                        </PrimaryButton>
+                    )}
+                {this.state.backendLocation === 'google-drive' &&
+                    this.state.isAuthenticated && (
+                        <PrimaryButton
+                            onClick={() => {
+                                this.props.onBackupRequested()
+                            }}
+                        >
+                            Backup
+                        </PrimaryButton>
+                    )}
+                {this.state.backendLocation === 'local' &&
+                    this.state.isAuthenticated && (
+                        <PrimaryButton
+                            onClick={() => {
+                                this.props.onBackupRequested()
+                            }}
+                        >
+                            Backup
+                        </PrimaryButton>
+                    )}
             </div>
         )
     }
