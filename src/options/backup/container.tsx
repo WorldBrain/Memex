@@ -40,7 +40,9 @@ export const SCREENS = {
     },
     'onboarding-size': {
         component: OnboardingSize,
-        state: { isAuthenticated: true },
+        state: {
+            isAuthenticated: true,
+        },
         events: {
             onBlobPreferenceChange: { argument: 'saveBlobs' },
             onLoginRequested: true,
