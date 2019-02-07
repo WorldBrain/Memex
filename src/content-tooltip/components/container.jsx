@@ -13,6 +13,10 @@ import {
 
 import { conditionallyRemoveSelectOption } from '../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
+import { userSelectedText } from '../../content-tooltip/interactions'
+import * as Mousetrap from '../../mousetrap.min'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { highlightAnnotations } from '../../sidebar-overlay/content_script/interactions'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -31,6 +35,38 @@ class TooltipContainer extends React.Component {
 
     componentDidMount() {
         this.props.onInit(this.showTooltip)
+
+        const fetchAndHighlightAnnotations = async () => {
+            const annotations = await remoteFunction('getAllAnnotations')(
+                window.location.href,
+            )
+            const highlightables = annotations.filter(
+                annotation => annotation.selector,
+            )
+            highlightAnnotations(highlightables)
+        }
+
+        Mousetrap.bind(['r', 'h', 'a'], e => {
+            if (!userSelectedText()) {
+                switch (e.key) {
+                    case 'r':
+                        remoteFunction('toggleSidebar')()
+                        break
+                    case 'h':
+                        fetchAndHighlightAnnotations()
+                        break
+                }
+            } else {
+                switch (e.key) {
+                    case 'h':
+                        this.createLink()
+                        break
+                    case 'a':
+                        this.createAnnotation(e)
+                        break
+                }
+            }
+        })
     }
 
     showTooltip = position => {
