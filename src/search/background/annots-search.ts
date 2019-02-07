@@ -1,13 +1,15 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
-import { Page, Tag } from 'src/search'
 import { Annotation } from 'src/direct-linking/types'
 import { AnnotSearchParams, UrlFilters, AnnotPage } from './types'
 
 const uniqBy = require('lodash/fp/uniqBy')
 
-export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
+export class AnnotationsSearchPlugin extends StorageBackendPlugin<
+    DexieStorageBackend
+> {
+    static SEARCH_OP_ID = 'memex:dexie.searchAnnotations'
     static MAX_ANNOTS_PER_PAGE = 9
 
     private annotsColl = 'annotations'
@@ -17,28 +19,6 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
     private pagesColl = 'pages'
     private bookmarksColl = 'annotBookmarks'
     private linkProviders = ['http://memex.link', 'http://staging.memex.link']
-
-    private static projectAnnotSearchResults(results): Annotation[] {
-        return results.map(
-            ({
-                url,
-                pageUrl,
-                body,
-                comment,
-                createdWhen,
-                tags,
-                hasBookmark,
-            }) => ({
-                url,
-                pageUrl,
-                body,
-                comment,
-                createdWhen,
-                tags: tags.map(tag => tag.name),
-                hasBookmark,
-            }),
-        )
-    }
 
     private static uniqAnnots: (annots: Annotation[]) => Annotation[] = uniqBy(
         'url',
@@ -98,6 +78,15 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
         }
     }
 
+    install(backend: DexieStorageBackend) {
+        super.install(backend)
+
+        backend.registerOperation(
+            AnnotationsSearchPlugin.SEARCH_OP_ID,
+            this.search.bind(this),
+        )
+    }
+
     // TODO: Find better way of calculating this?
     private isAnnotDirectLink = (annot: Annotation) => {
         let isDirectLink = false
@@ -107,30 +96,6 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
         }
 
         return isDirectLink
-    }
-
-    private async mapAnnotsToPages(
-        annots: Annotation[],
-        maxAnnotsPerPage: number,
-        findMatchingPages: (urls: string[]) => Promise<AnnotPage[]>,
-    ): Promise<AnnotPage[]> {
-        const pageUrls = new Set(annots.map(annot => annot.pageUrl))
-        const annotsByUrl = new Map<string, Annotation[]>()
-
-        for (const annot of annots) {
-            const pageAnnots = annotsByUrl.get(annot.pageUrl) || []
-            annotsByUrl.set(
-                annot.pageUrl,
-                [...pageAnnots, annot].slice(0, maxAnnotsPerPage),
-            )
-        }
-
-        const pages = await findMatchingPages([...pageUrls])
-
-        return pages.map(page => ({
-            ...page,
-            annotations: annotsByUrl.get(page.url),
-        }))
     }
 
     private async collectionSearch(collections: string[]) {
@@ -231,7 +196,7 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
                 },
             }
 
-            AnnotsSearcher.applyUrlFilters(query, urlFilters)
+            AnnotationsSearchPlugin.applyUrlFilters(query, urlFilters)
 
             if (url != null && url.length) {
                 query.pageUrl = url
@@ -255,27 +220,22 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
             ? await termSearchField('_comment_terms')
             : []
 
-        return AnnotsSearcher.uniqAnnots([...bodyRes, ...commentsRes]).slice(
-            0,
-            limit,
-        )
+        return AnnotationsSearchPlugin.uniqAnnots([
+            ...bodyRes,
+            ...commentsRes,
+        ]).slice(0, limit)
     }
 
-    async search(
-        {
-            termsInc = [],
-            tagsInc = [],
-            tagsExc = [],
-            domainsInc = [],
-            domainsExc = [],
-            collections = [],
-            limit = 5,
-            includePageResults = false,
-            maxAnnotsPerPage = AnnotsSearcher.MAX_ANNOTS_PER_PAGE,
-            ...searchParams
-        }: AnnotSearchParams,
-        findMatchingPages,
-    ): Promise<Annotation[] | AnnotPage[]> {
+    async search({
+        termsInc = [],
+        tagsInc = [],
+        tagsExc = [],
+        domainsInc = [],
+        domainsExc = [],
+        collections = [],
+        limit = 5,
+        ...searchParams
+    }: AnnotSearchParams): Promise<Annotation[]> {
         const filters: UrlFilters = {
             collUrlsInc: await this.collectionSearch(collections),
             tagUrlsInc: await this.tagSearch(tagsInc),
@@ -299,7 +259,7 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
         )
 
         // Flatten out results
-        let annotResults = AnnotsSearcher.uniqAnnots(
+        let annotResults = AnnotationsSearchPlugin.uniqAnnots(
             [].concat(...termResults),
         ).slice(0, limit)
 
@@ -309,7 +269,7 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
         )
 
         // Lookup tags for each annotation
-        annotResults = await Promise.all(
+        return Promise.all(
             annotResults.map(async annot => {
                 const tags = await this.backend.dexieInstance
                     .collection(this.tagsColl)
@@ -317,26 +277,6 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
                     .toArray()
                 return { ...annot, tags }
             }),
-        )
-
-        if (includePageResults) {
-            return this.mapAnnotsToPages(
-                annotResults,
-                maxAnnotsPerPage,
-                findMatchingPages,
-            )
-        }
-
-        // Project out unwanted data
-        return AnnotsSearcher.projectAnnotSearchResults(annotResults)
-    }
-
-    install(backend: DexieStorageBackend) {
-        super.install(backend)
-
-        backend.registerOperation(
-            'memex:dexie.searchAnnotations',
-            this.search.bind(this),
         )
     }
 }

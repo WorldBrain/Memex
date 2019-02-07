@@ -1,12 +1,26 @@
-import { StorageManager, Page, FavIcon, Bookmark } from '..'
+import { StorageManager } from '..'
 import { FeatureStorage } from '../storage'
+import {
+    SearchParams as OldSearchParams,
+    SearchResult as OldSearchResult,
+} from '../types'
 import { AnnotSearchParams, AnnotPage } from './types'
 import { Annotation } from 'src/direct-linking/types'
+import { AnnotationsSearchPlugin } from './annots-search'
+import { PageUrlMapperPlugin } from './page-url-mapper'
+import { reshapeAnnotForDisplay, reshapeParamsForOldSearch } from './utils'
 
 export interface SearchStorageProps {
     storageManager: StorageManager
     annotationsColl?: string
 }
+
+export type LegacySearch = (
+    params: OldSearchParams,
+) => Promise<{
+    ids: OldSearchResult[]
+    totalCount: number
+}>
 
 export default class SearchStorage extends FeatureStorage {
     static ANNOTS_COLL = 'annotations'
@@ -70,71 +84,6 @@ export default class SearchStorage extends FeatureStorage {
         this.annotsColl = annotationsColl
     }
 
-    private async findMatchingPages(pageUrls: string[]) {
-        const favIconMap = new Map<string, string>()
-        const pageMap = new Map<string, Page>()
-
-        await this.storageManager
-            .collection('pages')
-            .findObjects<Page>({ url: { $in: pageUrls } })
-            .then(res =>
-                res.forEach(page =>
-                    pageMap.set(page.url, {
-                        ...page,
-                        screenshot: page.screenshot
-                            ? URL.createObjectURL(page.screenshot)
-                            : undefined,
-                        hasBookmark: false, // Set later, if needed
-                    } as any),
-                ),
-            )
-
-        // Find all assoc. fav-icons and create object URLs
-        const hostnames = new Set(
-            [...pageMap.values()].map(page => page.hostname),
-        )
-
-        await this.storageManager
-            .collection('favIcons')
-            .findObjects<FavIcon>({ hostname: { $in: [...hostnames] } })
-            .then(res =>
-                res.forEach(fav =>
-                    favIconMap.set(
-                        fav.hostname,
-                        URL.createObjectURL(fav.favIcon),
-                    ),
-                ),
-            )
-
-        // Find all assoc. bookmarks and augment assoc. page in page map
-        await this.storageManager
-            .collection('bookmarks')
-            .findObjects<Bookmark>({ url: { $in: [...pageUrls] } })
-            .then(res =>
-                res.forEach(bm => {
-                    const page = pageMap.get(bm.url)
-                    pageMap.set(bm.url, { ...page, hasBookmark: true } as any)
-                }),
-            )
-
-        // Map page results back to original input
-        const pageResults = pageUrls.map(url => {
-            const page = pageMap.get(url)
-
-            return { ...page, favIcon: favIconMap.get(page.hostname) }
-        })
-
-        return SearchStorage.projectPageResults(pageResults)
-    }
-
-    public searchAnnots(params) {
-        return this.storageManager.backend.operation(
-            'memex:dexie.searchAnnotations',
-            params,
-            this.findMatchingPages.bind(this),
-        )
-    }
-
     private async filterByBookmarks(annots: Annotation[]) {
         const urls = annots.map(annot => annot.url)
 
@@ -178,6 +127,32 @@ export default class SearchStorage extends FeatureStorage {
 
         const resultSet = new Set(results.map(result => result.url))
         return annots.filter(annot => resultSet.has(annot.url))
+    }
+
+    private async mapAnnotsToPages(
+        annots: Annotation[],
+        maxAnnotsPerPage: number,
+    ): Promise<AnnotPage[]> {
+        const pageUrls = new Set(annots.map(annot => annot.pageUrl))
+        const annotsByUrl = new Map<string, Annotation[]>()
+
+        for (const annot of annots) {
+            const pageAnnots = annotsByUrl.get(annot.pageUrl) || []
+            annotsByUrl.set(
+                annot.pageUrl,
+                [...pageAnnots, annot].slice(0, maxAnnotsPerPage),
+            )
+        }
+
+        const pages = await this.storageManager.backend.operation(
+            PageUrlMapperPlugin.MAP_OP_ID,
+            [...pageUrls],
+        )
+
+        return pages.map(page => ({
+            ...page,
+            annotations: annotsByUrl.get(page.url),
+        }))
     }
 
     async listAnnotations({
@@ -230,5 +205,37 @@ export default class SearchStorage extends FeatureStorage {
         }
 
         return results
+    }
+
+    async searchAnnots(
+        params: AnnotSearchParams,
+    ): Promise<Annotation[] | AnnotPage[]> {
+        const results: Annotation[] = await this.storageManager.backend.operation(
+            AnnotationsSearchPlugin.SEARCH_OP_ID,
+            params,
+        )
+
+        if (params.includePageResults) {
+            return this.mapAnnotsToPages(
+                results,
+                params.maxAnnotsPerPage ||
+                    AnnotationsSearchPlugin.MAX_ANNOTS_PER_PAGE,
+            )
+        }
+
+        return results.map(reshapeAnnotForDisplay as any) as any
+    }
+
+    async searchPages(params: AnnotSearchParams, legacySearch: LegacySearch) {
+        const searchParams = reshapeParamsForOldSearch(params)
+
+        const { ids } = await legacySearch(searchParams)
+
+        const pageUrls = new Set(ids.map(([url]) => url))
+
+        return this.storageManager.backend.operation(
+            PageUrlMapperPlugin.MAP_OP_ID,
+            [...pageUrls],
+        )
     }
 }
