@@ -103,17 +103,19 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const colls = await this.backend.dexieInstance
-            .collection<any>(this.listsColl)
-            .find({ name: { $in: collections } })
-            .toArray()
+        const collIds = await this.backend.dexieInstance
+            .table(this.listsColl)
+            .where('name')
+            .anyOf(collections)
+            .primaryKeys()
 
         const collEntries = await this.backend.dexieInstance
-            .collection<any>(this.listEntriesColl)
-            .find({ listId: { $in: colls.map(coll => coll.id) } })
-            .toArray()
+            .table(this.listEntriesColl)
+            .where('listId')
+            .anyOf(collIds)
+            .primaryKeys()
 
-        return new Set<string>(collEntries.map(coll => coll.url))
+        return new Set<string>(collEntries.map(([, url]) => url))
     }
 
     private async tagSearch(tags: string[]) {
@@ -121,7 +123,8 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const tagResults = await this.backend.dexieInstance[this.tagsColl]
+        const tagResults = await this.backend.dexieInstance
+            .table(this.tagsColl)
             .where('name')
             .anyOf(tags)
             .primaryKeys()
@@ -151,22 +154,20 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
         { bookmarksOnly = false }: AnnotSearchParams,
         results: Annotation[],
     ) {
-        const bookmarks = await this.backend.dexieInstance
-            .collection<any>(this.bookmarksColl)
-            .find({
-                url: { $in: results.map(annot => annot.url) },
-            })
-            .toArray()
-
-        const bmUrlSet = new Set(bookmarks.map(bm => bm.url))
+        const bmUrls = new Set<string>()
+        await this.backend.dexieInstance
+            .table(this.bookmarksColl)
+            .where('url')
+            .anyOf(results.map(annot => annot.url))
+            .eachPrimaryKey(url => bmUrls.add(url))
 
         if (bookmarksOnly) {
-            results = results.filter(annot => bmUrlSet.has(annot.url))
+            results = results.filter(annot => bmUrls.has(annot.url))
         }
 
         return results.map(annot => ({
             ...annot,
-            hasBookmark: bmUrlSet.has(annot.pageUrl),
+            hasBookmark: bmUrls.has(annot.pageUrl),
         }))
     }
 
@@ -271,11 +272,13 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
         // Lookup tags for each annotation
         return Promise.all(
             annotResults.map(async annot => {
-                const tags = await this.backend.dexieInstance
-                    .collection(this.tagsColl)
-                    .find({ url: annot.url })
-                    .toArray()
-                return { ...annot, tags }
+                const tagKeys = await this.backend.dexieInstance
+                    .table(this.tagsColl)
+                    .where('url')
+                    .equals(annot.url)
+                    .primaryKeys()
+
+                return { ...annot, tags: tagKeys.map(([name]) => name) }
             }),
         )
     }
