@@ -34,3 +34,12 @@ export const pageToAnnotPage = (
     hasBookmark: page.hasBookmark,
     annotations,
 })
+
+export const reshapePageForDisplay = page => ({
+    url: page.url,
+    title: page.fullTitle,
+    hasBookmark: page.hasBookmark,
+    screenshot: page.screenshot,
+    favIcon: page.favIcon,
+    annotations: [],
+})
