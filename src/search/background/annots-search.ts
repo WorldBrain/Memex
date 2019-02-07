@@ -1,18 +1,15 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
-import { DexieMongoify } from '@worldbrain/storex-backend-dexie/lib/types'
 
 import { Page, Tag } from 'src/search'
 import { Annotation } from 'src/direct-linking/types'
 import { AnnotSearchParams, UrlFilters, AnnotPage } from './types'
-import { Searcher } from './searcher'
 
 const uniqBy = require('lodash/fp/uniqBy')
 
 export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
     static MAX_ANNOTS_PER_PAGE = 9
 
-    private db: DexieMongoify
     private annotsColl = 'annotations'
     private listsColl = 'customLists'
     private listEntriesColl = 'annotListEntries'
@@ -141,12 +138,12 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
             return undefined
         }
 
-        const colls = await this.db
+        const colls = await this.backend.dexieInstance
             .collection<any>(this.listsColl)
             .find({ name: { $in: collections } })
             .toArray()
 
-        const collEntries = await this.db
+        const collEntries = await this.backend.dexieInstance
             .collection<any>(this.listEntriesColl)
             .find({ listId: { $in: colls.map(coll => coll.id) } })
             .toArray()
@@ -159,7 +156,7 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
             return undefined
         }
 
-        const tagResults = await this.db[this.tagsColl]
+        const tagResults = await this.backend.dexieInstance[this.tagsColl]
             .where('name')
             .anyOf(tags)
             .primaryKeys()
@@ -172,7 +169,7 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
             return undefined
         }
 
-        const pages = await this.db
+        const pages = await this.backend.dexieInstance
             .collection(this.pagesColl)
             .find({
                 $or: [
@@ -189,7 +186,7 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
         { bookmarksOnly = false }: AnnotSearchParams,
         results: Annotation[],
     ) {
-        const bookmarks = await this.db
+        const bookmarks = await this.backend.dexieInstance
             .collection<any>(this.bookmarksColl)
             .find({
                 url: { $in: results.map(annot => annot.url) },
@@ -240,7 +237,7 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
                 query.pageUrl = url
             }
 
-            const results = await this.db
+            const results = await this.backend.dexieInstance
                 .collection<any>(this.annotsColl)
                 .find(query)
                 .limit(limit)
@@ -314,9 +311,10 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
         // Lookup tags for each annotation
         annotResults = await Promise.all(
             annotResults.map(async annot => {
-                const tags = await this.db
+                const tags = await this.backend.dexieInstance
                     .collection(this.tagsColl)
                     .find({ url: annot.url })
+                    .toArray()
                 return { ...annot, tags }
             }),
         )
@@ -335,8 +333,6 @@ export class AnnotsSearcher extends StorageBackendPlugin<DexieStorageBackend> {
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
-
-        this.db = backend.dexieInstance
 
         backend.registerOperation(
             'memex:dexie.searchAnnotations',

@@ -101,7 +101,7 @@ describe('Annotations search', () => {
     })
     test('terms search', async () => {
         const results = await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
         })
 
         expect(results).toBeDefined()
@@ -110,7 +110,7 @@ describe('Annotations search', () => {
 
     test('bookmarks only', async () => {
         const resA = await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
             bookmarksOnly: true,
         })
 
@@ -120,7 +120,7 @@ describe('Annotations search', () => {
 
     test('exclude highlights search', async () => {
         const results = await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
             includeHighlights: false,
         })
 
@@ -130,7 +130,7 @@ describe('Annotations search', () => {
 
     test('exclude direct links', async () => {
         const results = await searchBg.searchAnnotations({
-            termsInc: ['quote'],
+            query: 'quote',
             includeDirectLinks: false,
         })
 
@@ -140,7 +140,7 @@ describe('Annotations search', () => {
 
     test('collections filter', async () => {
         const resA = await searchBg.searchAnnotations({
-            termsInc: ['quote'],
+            query: 'quote',
             collections: [DATA.coll1, DATA.coll2],
         })
 
@@ -148,7 +148,7 @@ describe('Annotations search', () => {
         expect(resA.length).toBe(1)
 
         const resB = await searchBg.searchAnnotations({
-            termsInc: ['quote'],
+            query: 'quote',
             collections: ['not a real coll'],
         })
 
@@ -158,7 +158,7 @@ describe('Annotations search', () => {
 
     test('tags filter', async () => {
         const results = await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
             tagsInc: [DATA.tag1],
         })
 
@@ -168,7 +168,7 @@ describe('Annotations search', () => {
 
     test('domains filter', async () => {
         const resA = await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
             domainsExc: ['annotation.url'],
         })
 
@@ -176,7 +176,7 @@ describe('Annotations search', () => {
         expect(resA.length).toBe(1)
 
         const resB = await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
             domainsInc: ['annotation.url'],
         })
 
@@ -186,15 +186,15 @@ describe('Annotations search', () => {
 
     test('limit', async () => {
         const single = await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
             limit: 1,
         })
         const double = await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
             limit: 2,
         })
         const triple = await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
             limit: 3,
         })
 
@@ -208,7 +208,7 @@ describe('Annotations search', () => {
 
     test('url scope', async () => {
         const res = await searchBg.searchAnnotations({
-            termsInc: ['quote'],
+            query: 'quote',
             url: normalize(DATA.directLink.pageUrl),
         })
 
@@ -216,7 +216,7 @@ describe('Annotations search', () => {
         expect(res.length).toBe(1)
 
         const resNone = await searchBg.searchAnnotations({
-            termsInc: ['quote'],
+            query: 'quote',
             url: normalize(DATA.pageUrl),
         })
 
@@ -226,7 +226,7 @@ describe('Annotations search', () => {
 
     test('page results include', async () => {
         const results = (await searchBg.searchAnnotations({
-            termsInc: ['highlight', 'annotation', 'comment'],
+            query: 'highlight annotation comment',
             includePageResults: true,
         })) as any[]
 

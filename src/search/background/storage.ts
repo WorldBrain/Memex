@@ -128,7 +128,7 @@ export default class SearchStorage extends FeatureStorage {
     }
 
     public searchAnnots(params) {
-        this.storageManager.backend.operation(
+        return this.storageManager.backend.operation(
             'memex:dexie.searchAnnotations',
             params,
             this.findMatchingPages.bind(this),
