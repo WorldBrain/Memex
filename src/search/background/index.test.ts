@@ -118,16 +118,6 @@ describe('Annotations search', () => {
         expect(resA.length).toBe(2)
     })
 
-    test('exclude highlights search', async () => {
-        const results = await searchBg.searchAnnotations({
-            query: 'highlight annotation comment',
-            includeHighlights: false,
-        })
-
-        expect(results).toBeDefined()
-        expect(results.length).toBe(3)
-    })
-
     test('exclude direct links', async () => {
         const results = await searchBg.searchAnnotations({
             query: 'quote',
@@ -222,17 +212,6 @@ describe('Annotations search', () => {
 
         expect(resNone).toBeDefined()
         expect(resNone.length).toBe(0)
-    })
-
-    test('page results include', async () => {
-        const results = (await searchBg.searchAnnotations({
-            query: 'highlight annotation comment',
-            includePageResults: true,
-        })) as any[]
-
-        expect(results).toBeDefined()
-        expect(results.length).toBe(2)
-        expect(results[0].annotations.length).toBe(3)
     })
 
     test('blank annots search', async () => {
