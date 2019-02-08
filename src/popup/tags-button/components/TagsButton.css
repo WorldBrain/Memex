@@ -1,4 +1,4 @@
-.tag {
+    .tag {
     background-image: url('/img/tag_blue.svg');
     background-repeat: no-repeat;
     background-size: 20px;
@@ -17,7 +17,12 @@
 }
 
 .allTabs {
-    background-image: url('/img/tag_blue.svg');
+    background-image: url('/img/multiedit.svg');
     background-repeat: no-repeat;
-    margin-top: 0px;
+    margin-left: -8px;
+    background-size: 22px;
+
+    &:hover {
+        background-image: url('/img/multiedit_green.svg');
+    }
 }
