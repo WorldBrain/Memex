@@ -185,8 +185,10 @@ export class TabManager {
 
     getTabUrls(windowId?: number) {
         return Array.from(this._tabs.values())
-            .filter(tab => tab.isLoggable)
-            .filter(tab => (windowId ? tab.windowId === windowId : tab))
+            .filter(tab => {
+                const isInWindow = windowId ? tab.windowId === windowId : true
+                return isInWindow && tab.isLoggable
+            })
             .map(tab => ({ tabId: tab.id, url: tab.url }))
     }
 }
