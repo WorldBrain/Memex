@@ -200,14 +200,14 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         if (this.allowIndexUpdate) {
             if (this.props.allTabs) {
+                this.setState(state => ({
+                    multiEdit: state.multiEdit.add(newTag),
+                }))
                 await this.addTagsToOpenTabsRPC({ name: newTag }).catch(
                     console.error,
                 )
-                this.setState({
-                    multiEdit: this.state.multiEdit.add(newTag),
-                })
             } else {
-                this.addTagRPC({
+                await this.addTagRPC({
                     url: this.props.url,
                     tag: newTag,
                     tabId: this.props.tabId,
@@ -230,6 +230,49 @@ class IndexDropdownContainer extends Component<Props, State> {
         updateLastActive() // Consider user active (analytics)
     }
 
+    private async handleSingleTagEdit(tag: string) {
+        if (!this.pageHasTag(tag)) {
+            if (this.allowIndexUpdate) {
+                await this.addTagRPC({
+                    url: this.props.url,
+                    tag,
+                    tabId: this.props.tabId,
+                }).catch(console.error)
+            }
+
+            await this.storeTrackEvent(true)
+            this.props.onFilterAdd(tag)
+        } else {
+            if (this.allowIndexUpdate) {
+                await this.delTagRPC({
+                    url: this.props.url,
+                    tag,
+                    tabId: this.props.tabId,
+                }).catch(console.error)
+            }
+
+            await this.storeTrackEvent(false)
+            this.props.onFilterDel(tag)
+        }
+    }
+
+    private async handleMultiTagEdit(tag: string) {
+        const multiEdit = this.state.multiEdit
+        let opPromise: Promise<any>
+
+        if (!multiEdit.has(tag)) {
+            multiEdit.add(tag)
+            opPromise = this.addTagsToOpenTabsRPC({ name: tag })
+        } else {
+            multiEdit.delete(tag)
+            opPromise = this.delTagsFromOpenTabsRPC({ name: tag })
+        }
+
+        // Allow state update to happen optimistically before async stuff is done
+        this.setState(() => ({ multiEdit }))
+        await opPromise
+    }
+
     /**
      * Used for clicks on displayed tags. Will either add or remove tags to the page
      * depending on their current status as assoc. tags or not.
@@ -237,42 +280,10 @@ class IndexDropdownContainer extends Component<Props, State> {
     private handleTagSelection = (index: number) => async event => {
         const tag = this.state.displayFilters[index]
 
-        // Either add or remove the tag, let Redux handle the store changes.
         if (this.props.allTabs) {
-            const multiEdit = this.state.multiEdit
-            if (!multiEdit.has(tag)) {
-                multiEdit.add(tag)
-
-                await this.addTagsToOpenTabsRPC({ name: tag })
-            } else {
-                multiEdit.delete(tag)
-
-                await this.delTagsFromOpenTabsRPC({ name: tag })
-            }
+            await this.handleMultiTagEdit(tag)
         } else {
-            if (!this.pageHasTag(tag)) {
-                if (this.allowIndexUpdate) {
-                    this.addTagRPC({
-                        url: this.props.url,
-                        tag,
-                        tabId: this.props.tabId,
-                    }).catch(console.error)
-                }
-
-                await this.storeTrackEvent(true)
-                this.props.onFilterAdd(tag)
-            } else {
-                if (this.allowIndexUpdate) {
-                    this.delTagRPC({
-                        url: this.props.url,
-                        tag,
-                        tabId: this.props.tabId,
-                    }).catch(console.error)
-                }
-
-                await this.storeTrackEvent(false)
-                this.props.onFilterDel(tag)
-            }
+            await this.handleSingleTagEdit(tag)
         }
 
         this.inputEl.focus()
