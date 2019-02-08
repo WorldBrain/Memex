@@ -144,7 +144,7 @@ export default class SearchStorage extends FeatureStorage {
             )
         }
 
-        const pages = await this.storageManager.backend.operation(
+        const pages = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...pageUrls],
         )
@@ -210,7 +210,7 @@ export default class SearchStorage extends FeatureStorage {
     async searchAnnots(
         params: AnnotSearchParams,
     ): Promise<Annotation[] | AnnotPage[]> {
-        const results: Annotation[] = await this.storageManager.backend.operation(
+        const results: Annotation[] = await this.storageManager.operation(
             AnnotationsSearchPlugin.SEARCH_OP_ID,
             params,
         )
@@ -233,9 +233,8 @@ export default class SearchStorage extends FeatureStorage {
 
         const pageUrls = new Set(ids.map(([url]) => url))
 
-        return this.storageManager.backend.operation(
-            PageUrlMapperPlugin.MAP_OP_ID,
-            [...pageUrls],
-        )
+        return this.storageManager.operation(PageUrlMapperPlugin.MAP_OP_ID, [
+            ...pageUrls,
+        ])
     }
 }
