@@ -19,6 +19,12 @@
 
 .disabled {
     border: solid 2px #3eb995;
-    color: #3eb995;
-    background: white;
+    background: #3eb995;
+    color: white;
+    opacity: 0.4;
+    cursor: not-allowed;
+
+    &:hover {
+        background: #3eb995;
+    }
 }

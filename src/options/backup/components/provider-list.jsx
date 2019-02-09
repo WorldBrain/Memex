@@ -18,7 +18,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             className={Styles.logo}
                             src={'img/google-drive.png'}
                         />
-                        <span className={Styles.name}>Google Drive</span>
+                        <span className={Styles.title}>Google Drive</span>
                     </span>
                 </label>
                 <br />
