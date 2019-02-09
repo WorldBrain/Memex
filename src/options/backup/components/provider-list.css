@@ -52,3 +52,43 @@ input {
     font-weight: 500;
     color: grey;
 }
+
+.destination {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 15px;
+    color: #0b0b69;
+    margin-top: 15px;
+    margin-left: 34px;
+    display: flex;
+    align-items: flex-start;
+
+    & p {
+        margin-top: -3px;
+    }
+
+    & .select {
+        margin-top: 4px;
+    }
+
+    & .folderIcon {
+        display: inline-block;
+        width: 25px;
+        height: 25px;
+        background-image: url('/img/collections.svg');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 25px;
+        margin-right: 10px;
+        margin-bottom: -8px;
+    }
+
+    & .change {
+        display: block;
+        text-align: left;
+        color: #333;
+        font-size: 11px;
+    }
+}

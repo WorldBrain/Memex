@@ -38,14 +38,23 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                         </p>
                     </span>
                     <button
+                        className={Styles.destination}
                         onClick={e => {
                             e.preventDefault()
                             handleChangeBackupPath()
                         }}
                     >
-                        {backupPath && backupPath.length
-                            ? backupPath
-                            : 'SELECT DESTINATION FOLDER'}
+                        <span className={Styles.folderIcon} />
+                        {backupPath && backupPath.length ? (
+                            <p>
+                                {backupPath}{' '}
+                                <span className={Styles.change}>change</span>
+                            </p>
+                        ) : (
+                            <p className={Styles.select}>
+                                SELECT DESTINATION FOLDER
+                            </p>
+                        )}
                     </button>
                 </label>
                 <br />
