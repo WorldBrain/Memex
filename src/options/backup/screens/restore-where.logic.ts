@@ -4,15 +4,33 @@ import {
     compositeEventProcessor,
 } from 'src/util/ui-logic'
 
-export const PROVIDERS = {
-    'google-drive': true,
+interface Providers {
+    [provider: string]: boolean
 }
-export const INITIAL_STATE = {
+interface State {
+    provider: 'google-drive' | 'local'
+    valid: boolean
+    backupPath: string
+}
+
+export const PROVIDERS: Providers = {
+    'google-drive': true,
+    local: true,
+}
+
+export const INITIAL_STATE: State = {
     provider: null,
     valid: false,
+    backupPath: null,
 }
 
 export const processEvent = compositeEventProcessor({
+    onChangeBackupPath: ({ event }) => {
+        const backupPath = event.backupPath
+        return {
+            updateState: { backupPath },
+        }
+    },
     onProviderChoice: ({ state, event }) => {
         const provider = event.value
         const valid = !!PROVIDERS[provider]
