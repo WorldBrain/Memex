@@ -13,3 +13,8 @@ export interface PageListEntry {
     listId: number
     fullUrl: string
 }
+
+export interface Tab {
+    tabId: number
+    url: string
+}
