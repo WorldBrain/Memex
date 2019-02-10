@@ -84,6 +84,19 @@ export async function processEvent({
     analytics,
     remoteFunction,
 }) {
+    const _onBlobPreferenceChange = () => {
+        analytics.trackEvent(
+            {
+                category: 'Backup',
+                action: 'onboarding-blob-pref-change',
+                value: event.saveBlobs,
+            },
+            true,
+        )
+        remoteFunction('setBackupBlobs')(event.saveBlobs)
+        return {}
+    }
+
     const handlers = {
         overview: {
             onBackupRequested: async () => {
@@ -114,6 +127,7 @@ export async function processEvent({
             onRestoreRequested: () => {
                 return { screen: 'restore-where' }
             },
+            onBlobPreferenceChange: _onBlobPreferenceChange,
         },
         'onboarding-where': {
             onChoice: async () => {
@@ -165,18 +179,7 @@ export async function processEvent({
             },
         },
         'onboarding-size': {
-            onBlobPreferenceChange: () => {
-                analytics.trackEvent(
-                    {
-                        category: 'Backup',
-                        action: 'onboarding-blob-pref-change',
-                        value: event.saveBlobs,
-                    },
-                    true,
-                )
-                remoteFunction('setBackupBlobs')(event.saveBlobs)
-                return {}
-            },
+            onBlobPreferenceChange: _onBlobPreferenceChange,
             onLoginRequested: () => {
                 analytics.trackEvent(
                     {

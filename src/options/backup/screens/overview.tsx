@@ -22,6 +22,7 @@ const localStyles = require('./overview.css')
 interface Props {
     onBackupRequested: (...args: any[]) => any
     onRestoreRequested: (...args: any[]) => any
+    onBlobPreferenceChange: (...args: any[]) => any
 }
 
 export default class OverviewContainer extends React.Component<Props> {
@@ -32,18 +33,31 @@ export default class OverviewContainer extends React.Component<Props> {
         showAutomaticUpgradeDetails: false,
         upgradeBillingPeriod: null,
         showRestoreConfirmation: false,
+        backupLocation: null,
+        blobPreference: true,
     }
 
     async componentDidMount() {
         await remoteFunction('maybeCheckAutomaticBakupEnabled')()
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
+        const backupLocation = await remoteFunction('getBackendLocation')()
         this.setState({
             automaticBackupEnabled: await remoteFunction(
                 'isAutomaticBackupEnabled',
             )(),
             backupTimes,
             hasInitialBackup,
+            backupLocation,
+        })
+        console.log(this)
+    }
+
+    handleToggle = () => {
+        const blobPreference = !this.state.blobPreference
+        this.props.onBlobPreferenceChange(blobPreference)
+        this.setState({
+            blobPreference,
         })
     }
 
@@ -227,7 +241,9 @@ export default class OverviewContainer extends React.Component<Props> {
                                     Backup Location
                                 </span>
                                 <span className={localStyles.location}>
-                                    Your computer
+                                    {this.state.backupLocation === 'local'
+                                        ? 'Your Computer'
+                                        : 'Google Drive'}
                                     <span className={localStyles.change}>
                                         change
                                     </span>
@@ -239,8 +255,8 @@ export default class OverviewContainer extends React.Component<Props> {
                                 </span>
                                 <span className={localStyles.right}>
                                     <ToggleSwitch
-                                        isChecked={true}
-                                        onChange={() => null}
+                                        isChecked={this.state.blobPreference}
+                                        onChange={this.handleToggle}
                                     />
                                 </span>
                             </p>
