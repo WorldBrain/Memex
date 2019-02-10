@@ -28,3 +28,4 @@ export const addCollectionToPage = (collection: PageList) => async dispatch => {
     dispatch(addCollection(collection))
     await onboarding.checkForTaggingStage()
 }
+export const setAllTabs = createAction<boolean>('collections/setAllTabs')

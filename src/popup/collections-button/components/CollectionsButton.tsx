@@ -16,6 +16,7 @@ interface StateProps {
 
 interface DispatchProps {
     toggleCollectionsPopup: ClickHandler<HTMLButtonElement>
+    toggleAllTabsPopup: ClickHandler<HTMLButtonElement>
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
@@ -23,13 +24,23 @@ export type Props = OwnProps & StateProps & DispatchProps
 class CollectionsButton extends PureComponent<Props> {
     render() {
         return (
-            <Button
-                onClick={this.props.toggleCollectionsPopup}
-                disabled={this.props.isDisabled}
-                btnClass={styles.addToList}
-            >
-                Add To Collection(s)
-            </Button>
+            <React.Fragment>
+                <Button
+                    onClick={this.props.toggleCollectionsPopup}
+                    disabled={this.props.isDisabled}
+                    btnClass={styles.addToList}
+                    itemClass={styles.button}
+                >
+                    Add To Collection(s)
+                </Button>
+                <span className={styles.spanbutton}>
+                    <Button
+                        onClick={this.props.toggleAllTabsPopup}
+                        disabled={this.props.isDisabled}
+                        btnClass={styles.allTabs}
+                    />
+                </span>
+            </React.Fragment>
         )
     }
 }
@@ -41,6 +52,12 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
 const mapDispatch = (dispatch): DispatchProps => ({
     toggleCollectionsPopup: event => {
         event.preventDefault()
+        dispatch(acts.setAllTabs(false))
+        dispatch(acts.toggleShowTagsPicker())
+    },
+    toggleAllTabsPopup: event => {
+        event.preventDefault()
+        dispatch(acts.setAllTabs(true))
         dispatch(acts.toggleShowTagsPicker())
     },
 })
