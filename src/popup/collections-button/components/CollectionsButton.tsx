@@ -38,6 +38,7 @@ class CollectionsButton extends PureComponent<Props> {
                         onClick={this.props.toggleAllTabsPopup}
                         disabled={this.props.isDisabled}
                         btnClass={styles.allTabs}
+                        title={'Add all tabs in this window to Collection(s)'}
                     />
                 </span>
             </React.Fragment>
