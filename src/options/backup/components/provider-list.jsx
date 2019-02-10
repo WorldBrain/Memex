@@ -37,25 +37,29 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             computer (e.g. Dropbox, Spideroak, GDrive)
                         </p>
                     </span>
-                    <button
-                        className={Styles.destination}
-                        onClick={e => {
-                            e.preventDefault()
-                            handleChangeBackupPath()
-                        }}
-                    >
-                        <span className={Styles.folderIcon} />
-                        {backupPath && backupPath.length ? (
-                            <p>
-                                {backupPath}{' '}
-                                <span className={Styles.change}>change</span>
-                            </p>
-                        ) : (
-                            <p className={Styles.select}>
-                                SELECT DESTINATION FOLDER
-                            </p>
-                        )}
-                    </button>
+                    {backupPath !== null ? (
+                        <button
+                            className={Styles.destination}
+                            onClick={e => {
+                                e.preventDefault()
+                                handleChangeBackupPath()
+                            }}
+                        >
+                            <span className={Styles.folderIcon} />
+                            {backupPath && backupPath.length ? (
+                                <p>
+                                    {backupPath}{' '}
+                                    <span className={Styles.change}>
+                                        change
+                                    </span>
+                                </p>
+                            ) : (
+                                <p className={Styles.select}>
+                                    SELECT DESTINATION FOLDER
+                                </p>
+                            )}
+                        </button>
+                    ) : null}
                 </label>
                 <br />
             </form>

@@ -159,12 +159,13 @@ export default class OverviewContainer extends React.Component<Props> {
                 {!this.state.hasInitialBackup ? (
                     <div className={localStyles.statusLine}>
                         <p>You haven't set up any backups yet.</p>
-                        <button
-                            className={localStyles.startWizard}
+                        <SmallButton
                             onClick={this.props.onBackupRequested}
+                            color="darkblue"
+                            extraClass={localStyles.right}
                         >
-                            Start wizard
-                        </button>
+                            Start Wizard
+                        </SmallButton>
                     </div>
                 ) : (
                     <div>
