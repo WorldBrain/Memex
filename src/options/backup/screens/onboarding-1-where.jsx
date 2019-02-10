@@ -9,41 +9,48 @@ import { getStringFromResponseBody } from '../utils'
 export default class OnboardingWhere extends React.Component {
     state = { provider: null, path: null, overlay: false, backupPath: null }
 
-    _proceedIfServerIsRunning = async provider => {
+    _fetchBackupPath = async () => {
         try {
-            let response = await fetch('http://localhost:11922/status')
-            const serverStatus = await getStringFromResponseBody(response)
-            if (serverStatus === 'running') {
-                response = await fetch('http://localhost:11922/backup/location')
-                const backupPath = await getStringFromResponseBody(response)
-                if (backupPath && backupPath.length) {
-                    this.setState({ backupPath, provider })
-                } else {
-                    this.setState({ backupPath: null })
-                }
-            } else {
-                this.setState({ backupPath: null, overlay: true })
-            }
-        } catch (err) {
-            // Show the overlay if we couldn't connect to the server.
-            this.setState({ backupPath: null, overlay: true })
-        }
-    }
-
-    _handleChangeBackupPath = async () => {
-        try {
-            let response = await fetch(
-                'http://localhost:11922/backup/open-change-location',
+            const response = await fetch(
+                'http://localhost:11922/backup/location',
             )
-            response = await fetch('http://localhost:11922/backup/location')
             const backupPath = await getStringFromResponseBody(response)
             if (backupPath && backupPath.length) {
                 this.setState({ backupPath })
             } else {
-                this.setState({ backupPath: null })
+                this.setState({ backupPath: '' })
             }
         } catch (err) {
             this.setState({ backupPath: null, overlay: true })
+        }
+    }
+
+    _proceedIfServerIsRunning = async provider => {
+        let overlay = false
+        try {
+            const response = await fetch('http://localhost:11922/status')
+            const serverStatus = await getStringFromResponseBody(response)
+            if (serverStatus === 'running') {
+                await this._fetchBackupPath()
+            } else {
+                overlay = true
+            }
+        } catch (err) {
+            // Show the overlay if we couldn't connect to the server.
+            overlay = true
+        }
+        this.setState({
+            provider,
+            overlay,
+        })
+    }
+
+    _handleChangeBackupPath = async () => {
+        try {
+            await fetch('http://localhost:11922/backup/open-change-location')
+            await this._fetchBackupPath()
+        } catch (err) {
+            this.setState({ overlay: true })
         }
     }
 
