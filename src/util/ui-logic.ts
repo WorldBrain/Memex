@@ -3,7 +3,7 @@ import * as fromPairs from 'lodash/fromPairs'
 export type EventProcessor<Dependencies> = (
     args: EventProcessorArgs<Dependencies>,
 ) => EventProcessorResult
-export type EventProcessorArgs<Dependencies> = {
+export interface EventProcessorArgs<Dependencies> {
     state: any
     event: { type: string; [key: string]: any }
     dependencies: Dependencies
@@ -21,7 +21,7 @@ export interface EventDispatch {
     args?: { [key: string]: any }
 }
 export interface ActionMap {
-    [key: string]: Function
+    [key: string]: () => any
 }
 
 export function compositeEventProcessor<Dependencies = null>(processors: {
@@ -48,10 +48,10 @@ export function handleEvent<Dependencies = null>({
     actions,
 }: {
     eventProcessor: EventProcessor<Dependencies>
-    state
-    setState
-    props
-    event
+    state: { [key: string]: any }
+    setState: (...args: any[]) => void
+    props: { [prop: string]: any }
+    event: EventDispatch
     dependencies: Dependencies
     actions: ActionMap
 }) {
