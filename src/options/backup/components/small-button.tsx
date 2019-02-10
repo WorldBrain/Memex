@@ -7,7 +7,7 @@ interface Props {
     children: React.ReactChild
     onClick: (...args: any[]) => any
     extraClass?: string
-    color: 'green' | 'white'
+    color: 'green' | 'white' | 'darkblue'
 }
 
 export default class SmallButton extends PureComponent<Props, {}> {

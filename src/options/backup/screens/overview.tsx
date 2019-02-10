@@ -10,6 +10,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 //     redirectToAutomaticBackupPurchase,
 //     redirectToAutomaticBackupCancellation,
 // } from '../utils'
+import { ToggleSwitch } from 'src/common-ui/components'
 import SmallButton from '../components/small-button'
 import LoadingBlocker from '../components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
@@ -67,7 +68,7 @@ export default class OverviewContainer extends React.Component<Props> {
                 </p>
                 <div className={styles.option}>
                     <span className={styles.name}>Automatic Backup</span>
-                    <span className={classNames(localStyles.button)}>
+                    <span className={classNames(localStyles.right)}>
                         {this.state.automaticBackupEnabled !== null &&
                             !this.state.showAutomaticUpgradeDetails && (
                                 <AutomaticBackupButton
@@ -125,7 +126,7 @@ export default class OverviewContainer extends React.Component<Props> {
                         target="_blank"
                         href="https://worldbrain.helprace.com/i100-delete-your-backup-and-start-over"
                     >
-                        <span className={localStyles.button}>
+                        <span className={localStyles.right}>
                             <span
                                 className={classNames(
                                     styles.label,
@@ -194,6 +195,68 @@ export default class OverviewContainer extends React.Component<Props> {
                         )}
                     </div>
                 )}
+
+                {/* Settings Section */}
+                {this.state.hasInitialBackup ? (
+                    <div>
+                        <p className={styles.header2}>
+                            <strong>SETTINGS</strong>
+                        </p>
+                        <div className={styles.option}>
+                            <span className={styles.name}>
+                                Enable Automatic Backups
+                            </span>
+                            <SmallButton
+                                extraClass={localStyles.right}
+                                onClick={() => null}
+                                color="darkblue"
+                            >
+                                Upgrade
+                            </SmallButton>
+                            <span
+                                className={classNames(
+                                    styles.subname,
+                                    localStyles.limitWidth,
+                                )}
+                            >
+                                Worry-free. Automatically backs up your data
+                                every 15 minutes.
+                            </span>
+                            <p className={styles.optionLine}>
+                                <span className={styles.name}>
+                                    Backup Location
+                                </span>
+                                <span className={localStyles.location}>
+                                    Your computer
+                                    <span className={localStyles.change}>
+                                        change
+                                    </span>
+                                </span>
+                            </p>
+                            <p className={styles.optionLine}>
+                                <span className={styles.name}>
+                                    Include Screenshots
+                                </span>
+                                <span className={localStyles.right}>
+                                    <ToggleSwitch
+                                        isChecked={true}
+                                        onChange={() => null}
+                                    />
+                                </span>
+                            </p>
+                            <span className={styles.name}>
+                                Download dump of your data
+                            </span>
+                            <SmallButton
+                                onClick={() => null}
+                                color="green"
+                                extraClass={localStyles.right}
+                            >
+                                Download
+                            </SmallButton>
+                        </div>
+                    </div>
+                ) : null}
                 <div>
                     <p className={styles.header2}>
                         <strong>RESTORE </strong>
@@ -207,7 +270,7 @@ export default class OverviewContainer extends React.Component<Props> {
                                 this.setState({ showRestoreConfirmation: true })
                             }
                             color="green"
-                            extraClass={localStyles.button}
+                            extraClass={localStyles.right}
                         >
                             Restore
                         </SmallButton>
@@ -233,26 +296,11 @@ export default class OverviewContainer extends React.Component<Props> {
                                     active: true,
                                 })
                             }
-                            extraClass={localStyles.button}
+                            extraClass={localStyles.right}
                             color="white"
                         >
                             Contribute
                         </SmallButton>
-                        {/* <a
-                            target="_blank"
-                            href="https://worldbrain.io/crowdfunding-memex"
-                        >
-                            <span className={localStyles.button}>
-                                <span
-                                    className={classNames(
-                                        styles.label,
-                                        styles.labelContribute,
-                                    )}
-                                >
-                                    CONTRIBUTE
-                                </span>
-                            </span>
-                        </a> */}
                         <br />
                         <span
                             className={classNames(

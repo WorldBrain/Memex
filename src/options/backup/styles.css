@@ -90,8 +90,11 @@ h1 {
     vertical-align: middle;
     display: inline-block;
     margin-bottom: 15px;
-    padding-left: 10px;
     width: 600px;
+}
+
+.optionLine {
+    margin: 20px 0;
 }
 
 .name {

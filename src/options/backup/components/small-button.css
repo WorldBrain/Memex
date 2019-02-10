@@ -38,3 +38,14 @@
         color: white;
     }
 }
+
+.darkblue {
+    background: #173766;
+    color: white;
+    border: solid 2px #173766;
+
+    &:hover {
+        background: white;
+        color: #173766;
+    }
+}

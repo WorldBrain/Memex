@@ -51,15 +51,25 @@
     margin-left: 5px;
 }
 
-.button {
+.right {
     float: right;
-    margin-top: -2px;
-    text-transform: uppercase;
-    font-weight: 600;
-    cursor: pointer;
+    margin-top: 0px;
 }
 
 .limitWidth {
     display: block;
     width: 400px;
+}
+
+.location {
+    float: right;
+    font-size: 0.8rem;
+    text-align: right;
+    color: #0b8863;
+
+    & .change {
+        display: block;
+        font-size: 0.6rem;
+        color: #555;
+    }
 }
