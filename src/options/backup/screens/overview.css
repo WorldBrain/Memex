@@ -15,15 +15,20 @@
 }
 
 .statusLine {
-    margin-left: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 600px;
+    font-size: 0.9rem;
+    color: #222;
 }
 
 .statusLabel {
     font-weight: bold;
+}
+
+.boldText {
+    font-weight: 600;
 }
 
 .startWizard {
@@ -43,12 +48,14 @@
 } */
 
 .time {
-    vertical-align: middle;
+    margin-left: 5px;
 }
 
 .button {
     float: right;
     margin-top: -2px;
+    text-transform: uppercase;
+    font-weight: 600;
     cursor: pointer;
 }
 
