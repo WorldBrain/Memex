@@ -18,7 +18,11 @@ const styles = require('./styles.css')
 export const SCREENS = {
     overview: {
         component: Overview,
-        events: { onBackupRequested: true, onRestoreRequested: true },
+        events: {
+            onBackupRequested: true,
+            onRestoreRequested: true,
+            onBlobPreferenceChange: { argument: 'saveBlobs' },
+        },
     },
     'running-backup': {
         component: RunningBackup,

@@ -122,6 +122,7 @@ export class BackupBackgroundModule {
                     this.initBackendDependants()
                 },
                 getBackendLocation: async info => {
+                    this.backendLocation = await this.backendSelect.restoreBackendLocation()
                     return this.backendLocation
                 },
                 isBackupAuthenticated: async () => {
