@@ -226,6 +226,11 @@ export async function processEvent({
                 }
             },
         },
+        'restore-running': {
+            onFinish: () => {
+                return { screen: 'overview' }
+            },
+        },
     }
 
     const handler = handlers[state.screen][event.type]
