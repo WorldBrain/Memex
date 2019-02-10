@@ -116,18 +116,20 @@ export default class CustomListStorage extends FeatureStorage {
     }
 
     async insertCustomList({
+        id,
         name,
         isDeletable = true,
         isNestable = true,
     }: {
+        id: number
         name: string
-        isDeletable: boolean
-        isNestable: boolean
+        isDeletable?: boolean
+        isNestable?: boolean
     }) {
         const { object } = await this.storageManager
             .collection(CustomListStorage.CUSTOM_LISTS_COLL)
             .createObject({
-                id: this._generateListId(),
+                id,
                 name,
                 isDeletable,
                 isNestable,
@@ -135,10 +137,6 @@ export default class CustomListStorage extends FeatureStorage {
             })
 
         return object.id
-    }
-
-    _generateListId() {
-        return Date.now()
     }
 
     async updateListName({ id, name }: { id: number; name: string }) {
