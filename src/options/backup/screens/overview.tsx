@@ -50,7 +50,6 @@ export default class OverviewContainer extends React.Component<Props> {
             hasInitialBackup,
             backupLocation,
         })
-        console.log(this)
     }
 
     handleToggle = () => {

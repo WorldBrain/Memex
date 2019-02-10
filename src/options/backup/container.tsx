@@ -59,7 +59,7 @@ export const SCREENS = {
     'restore-running': {
         component: RestoreRunning,
         events: {
-            onChoice: { argument: 'choice' },
+            onFinish: true,
         },
     },
 }
