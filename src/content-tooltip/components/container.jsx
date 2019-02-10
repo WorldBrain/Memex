@@ -16,13 +16,17 @@ import { STAGES } from 'src/overview/onboarding/constants'
 import { userSelectedText } from '../../content-tooltip/interactions'
 import * as Mousetrap from '../../mousetrap.min'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { highlightAnnotations } from '../../sidebar-overlay/content_script/interactions'
+import {
+    highlightAnnotations,
+    removeHighlights,
+} from '../../sidebar-overlay/content_script/interactions'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
         onInit: PropTypes.func.isRequired,
         createAndCopyDirectLink: PropTypes.func.isRequired,
         createAnnotation: PropTypes.func.isRequired,
+        createHighlight: PropTypes.func.isRequired,
         openSettings: PropTypes.func.isRequired,
         destroy: PropTypes.func.isRequired,
     }
@@ -31,6 +35,7 @@ class TooltipContainer extends React.Component {
         showTooltip: false,
         position: { x: 250, y: 200 },
         tooltipState: 'copied',
+        highlightsOn: false,
     }
 
     componentDidMount() {
@@ -46,20 +51,30 @@ class TooltipContainer extends React.Component {
             highlightAnnotations(highlightables)
         }
 
-        Mousetrap.bind(['r', 'h', 'a'], e => {
+        const toggleHighlights = () => {
+            this.state.highlightsOn
+                ? removeHighlights()
+                : fetchAndHighlightAnnotations()
+            this.setState({ highlightsOn: !this.state.highlightsOn })
+        }
+
+        Mousetrap.bind(['r', 'h', 'a', 'l'], e => {
             if (!userSelectedText()) {
                 switch (e.key) {
                     case 'r':
                         remoteFunction('toggleSidebar')()
                         break
                     case 'h':
-                        fetchAndHighlightAnnotations()
+                        toggleHighlights()
                         break
                 }
             } else {
                 switch (e.key) {
-                    case 'h':
+                    case 'l':
                         this.createLink()
+                        break
+                    case 'h':
+                        this.props.createHighlight()
                         break
                     case 'a':
                         this.createAnnotation(e)
