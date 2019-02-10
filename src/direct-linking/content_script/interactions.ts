@@ -34,6 +34,25 @@ export const createAnnotation = async () => {
     selectTextFromRange(range)
 }
 
+export async function createHighlight() {
+    const selection = document.getSelection()
+    const range = selection.getRangeAt(0)
+    const url = window.location.href
+    const title = document.title
+
+    const anchor = await extractAnchor(selection)
+    const body = anchor ? anchor.quote : ''
+    await remoteFunction('createAnnotation')({
+        url,
+        title,
+        comment: '',
+        tags: [],
+        body,
+        selector: anchor,
+    })
+    selectTextFromRange(range)
+}
+
 const extractAnchor = async (selection: Selection): Promise<Anchor> => {
     const quote = selection.toString()
 
