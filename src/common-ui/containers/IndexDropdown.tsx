@@ -35,6 +35,7 @@ export interface Props {
     initSuggestions?: string[]
     isForSidebar?: boolean
     onBackBtnClick?: ClickHandler<HTMLButtonElement>
+    allTabs?: boolean
 }
 
 export interface State {
@@ -44,6 +45,7 @@ export interface State {
     filters: string[]
     focused: number
     clearFieldBtn: boolean
+    multiEdit: Set<string>
 }
 
 class IndexDropdownContainer extends Component<Props, State> {
@@ -57,8 +59,11 @@ class IndexDropdownContainer extends Component<Props, State> {
     private suggestRPC
     private addTagRPC
     private delTagRPC
+    private addTagsToOpenTabsRPC
+    private delTagsFromOpenTabsRPC
     private processEvent
     private inputEl: HTMLInputElement
+    private multiEdit: Set<string>
 
     constructor(props: Props) {
         super(props)
@@ -66,6 +71,8 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.suggestRPC = remoteFunction('suggest')
         this.addTagRPC = remoteFunction('addTag')
         this.delTagRPC = remoteFunction('delTag')
+        this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
+        this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
         this.processEvent = remoteFunction('processEvent')
 
         if (this.props.isForAnnotation) {
@@ -84,6 +91,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             filters: props.initFilters, // Actual tags associated with the page; will only change when DB updates
             focused: props.initFilters.length ? 0 : -1,
             clearFieldBtn: false,
+            multiEdit: new Set<string>(),
         }
     }
 
@@ -148,7 +156,9 @@ class IndexDropdownContainer extends Component<Props, State> {
     private getDisplayTags() {
         return this.state.displayFilters.map((value, i) => ({
             value,
-            active: this.pageHasTag(value),
+            active: this.props.allTabs
+                ? this.state.multiEdit.has(value)
+                : this.pageHasTag(value),
             focused: this.state.focused === i,
         }))
     }
@@ -189,13 +199,21 @@ class IndexDropdownContainer extends Component<Props, State> {
         const newTag = this.getSearchVal()
 
         if (this.allowIndexUpdate) {
-            this.addTagRPC({
-                url: this.props.url,
-                tag: newTag,
-                tabId: this.props.tabId,
-            }).catch(console.error)
+            if (this.props.allTabs) {
+                this.setState(state => ({
+                    multiEdit: state.multiEdit.add(newTag),
+                }))
+                await this.addTagsToOpenTabsRPC({ name: newTag }).catch(
+                    console.error,
+                )
+            } else {
+                await this.addTagRPC({
+                    url: this.props.url,
+                    tag: newTag,
+                    tabId: this.props.tabId,
+                }).catch(console.error)
+            }
         }
-
         await this.storeTrackEvent(true)
 
         this.inputEl.focus()
@@ -212,17 +230,10 @@ class IndexDropdownContainer extends Component<Props, State> {
         updateLastActive() // Consider user active (analytics)
     }
 
-    /**
-     * Used for clicks on displayed tags. Will either add or remove tags to the page
-     * depending on their current status as assoc. tags or not.
-     */
-    private handleTagSelection = (index: number) => async event => {
-        const tag = this.state.displayFilters[index]
-
-        // Either add or remove the tag, let Redux handle the store changes.
+    private async handleSingleTagEdit(tag: string) {
         if (!this.pageHasTag(tag)) {
             if (this.allowIndexUpdate) {
-                this.addTagRPC({
+                await this.addTagRPC({
                     url: this.props.url,
                     tag,
                     tabId: this.props.tabId,
@@ -233,7 +244,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             this.props.onFilterAdd(tag)
         } else {
             if (this.allowIndexUpdate) {
-                this.delTagRPC({
+                await this.delTagRPC({
                     url: this.props.url,
                     tag,
                     tabId: this.props.tabId,
@@ -242,6 +253,37 @@ class IndexDropdownContainer extends Component<Props, State> {
 
             await this.storeTrackEvent(false)
             this.props.onFilterDel(tag)
+        }
+    }
+
+    private async handleMultiTagEdit(tag: string) {
+        const multiEdit = this.state.multiEdit
+        let opPromise: Promise<any>
+
+        if (!multiEdit.has(tag)) {
+            multiEdit.add(tag)
+            opPromise = this.addTagsToOpenTabsRPC({ name: tag })
+        } else {
+            multiEdit.delete(tag)
+            opPromise = this.delTagsFromOpenTabsRPC({ name: tag })
+        }
+
+        // Allow state update to happen optimistically before async stuff is done
+        this.setState(() => ({ multiEdit }))
+        await opPromise
+    }
+
+    /**
+     * Used for clicks on displayed tags. Will either add or remove tags to the page
+     * depending on their current status as assoc. tags or not.
+     */
+    private handleTagSelection = (index: number) => async event => {
+        const tag = this.state.displayFilters[index]
+
+        if (this.props.allTabs) {
+            await this.handleMultiTagEdit(tag)
+        } else {
+            await this.handleSingleTagEdit(tag)
         }
 
         this.inputEl.focus()
@@ -422,7 +464,11 @@ class IndexDropdownContainer extends Component<Props, State> {
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
-                numberOfTags={this.state.filters.length}
+                numberOfTags={
+                    this.props.allTabs
+                        ? this.state.multiEdit.size
+                        : this.state.filters.length
+                }
                 tagSearchValue={this.state.searchVal}
                 clearSearchField={this.clearSearchField}
                 showClearfieldBtn={this.showClearfieldBtn()}

@@ -11,6 +11,7 @@ interface Props {
     url: string
     tabId?: number
     stubOnly?: boolean
+    allowScreenshot?: boolean
 }
 
 export const createPageFromTab = (getDb: () => Promise<Dexie>) => async ({

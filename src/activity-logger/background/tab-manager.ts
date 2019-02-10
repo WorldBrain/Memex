@@ -16,12 +16,18 @@ export class TabManager {
      * @param {tabs.Tab} tab The browser tab to start keeping track of.
      */
     trackTab = (
-        { id, active, url }: Tabs.Tab,
+        { id, active, url, windowId }: Tabs.Tab,
         extraProps: Partial<TabProps> = {},
     ) =>
         this._tabs.set(
             id,
-            new Tab({ id, isActive: active, url, ...extraProps }),
+            new Tab({
+                id,
+                isActive: active,
+                url,
+                windowId,
+                ...extraProps,
+            }),
         )
 
     /**
@@ -88,6 +94,7 @@ export class TabManager {
                     isLoaded,
                     isBookmarked,
                     isActive,
+                    windowId: oldTab.windowId,
                     navState: oldTab.navState,
                 }),
             )
@@ -174,6 +181,15 @@ export class TabManager {
                 tab.isBookmarked = newState
             }
         }
+    }
+
+    getTabUrls(windowId?: number) {
+        return Array.from(this._tabs.values())
+            .filter(tab => {
+                const isInWindow = windowId ? tab.windowId === windowId : true
+                return isInWindow && tab.isLoggable
+            })
+            .map(tab => ({ tabId: tab.id, url: tab.url }))
     }
 }
 

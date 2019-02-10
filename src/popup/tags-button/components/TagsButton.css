@@ -1,6 +1,28 @@
-.tag {
+    .tag {
     background-image: url('/img/tag_blue.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.6;
+    float: left;
+}
+
+.button {
+    display: inline-block;
+    width: 230px;
+    text-align: left;
+}
+
+.spanbutton {
+    position: absolute;
+}
+
+.allTabs {
+    background-image: url('/img/multiedit.svg');
+    background-repeat: no-repeat;
+    margin-left: -8px;
+    background-size: 22px;
+
+    &:hover {
+        background-image: url('/img/multiedit_green.svg');
+    }
 }

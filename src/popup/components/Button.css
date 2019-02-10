@@ -21,7 +21,6 @@
     &:hover,
     &:focus {
         color: #3eb995;
-        background: rgb(229, 229, 229) !important;
         outline: 0;
     }
 }
@@ -46,7 +45,6 @@
     &:hover,
     &:focus {
         color: rgb(62, 185, 149);
-        background: rgb(229, 229, 229);
         outline: 0;
     }
 }

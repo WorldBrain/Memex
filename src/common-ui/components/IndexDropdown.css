@@ -163,3 +163,9 @@
     box-shadow: unset;
     width: 100%;
 }
+
+.allTabs {
+    color: #173766;
+    margin-left: 20px;
+    font-weight: 600;
+}
