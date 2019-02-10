@@ -1,0 +1,40 @@
+.button {
+    display: inline-block;
+    outline: none;
+    border: none;
+    background: transparent;
+    width: 120px;
+    vertical-align: middle;
+    margin-left: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 6px 3px;
+}
+
+.text {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.green {
+    color: white;
+    background: #3eb995;
+    border: solid 2px #3eb995;
+
+    &:hover {
+        color: #3eb995;
+        background: white;
+    }
+}
+
+.white {
+    background: white;
+    color: #3eb995;
+    border: solid 2px #3eb995;
+
+    &:hover {
+        background: #3eb995;
+        color: white;
+    }
+}
