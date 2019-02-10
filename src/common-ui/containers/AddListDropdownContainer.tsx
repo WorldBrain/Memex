@@ -25,6 +25,7 @@ export interface Props {
     applyBulkEdits?: () => void
     resetPagesInTempList?: () => void
     setTempLists?: () => void
+    allTabsCollection?: boolean
 }
 
 export interface State {
@@ -33,6 +34,7 @@ export interface State {
     displayFilters: PageList[]
     filters: PageList[]
     focused: number
+    multiEdit: Set<number>
 }
 
 class AddListDropdownContainer extends Component<Props, State> {
@@ -45,6 +47,8 @@ class AddListDropdownContainer extends Component<Props, State> {
     private addListRPC
     private addPageToListRPC
     private deletePageFromListRPC
+    private addOpenTabsToListRPC
+    private removeOpenTabsFromListRPC
     private fetchListByIdRPC
     private fetchListNameSuggestionsRPC
     private inputEl: HTMLInputElement
@@ -55,6 +59,10 @@ class AddListDropdownContainer extends Component<Props, State> {
         this.addListRPC = remoteFunction('createCustomList')
         this.addPageToListRPC = remoteFunction('insertPageToList')
         this.deletePageFromListRPC = remoteFunction('removePageFromList')
+        this.addOpenTabsToListRPC = remoteFunction('addOpenTabsToList')
+        this.removeOpenTabsFromListRPC = remoteFunction(
+            'removeOpenTabsFromList',
+        )
         this.fetchListByIdRPC = remoteFunction('fetchListById')
         this.fetchListNameSuggestionsRPC = remoteFunction(
             'fetchListNameSuggestions',
@@ -70,6 +78,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 : props.initLists, // Display state objects; will change all the time
             filters: props.initLists, // Actual lists associated with the page; will only change when DB updates
             focused: props.initLists.length ? 0 : -1,
+            multiEdit: new Set<number>(),
         }
     }
 
@@ -150,8 +159,14 @@ class AddListDropdownContainer extends Component<Props, State> {
             try {
                 // Add a list as well as add this page to the list.
                 const id = await this.addListRPC({ name: listName })
-                await this.addPageToListRPC({ id, url: this.props.url })
-
+                if (this.props.allTabsCollection) {
+                    this.setState(state => ({
+                        multiEdit: state.multiEdit.add(id),
+                    }))
+                    await this.addOpenTabsToListRPC({ listId: id })
+                } else {
+                    await this.addPageToListRPC({ id, url: this.props.url })
+                }
                 // Get the list that was added.
                 const newList = await this.fetchListByIdRPC({ id })
 
@@ -175,7 +190,9 @@ class AddListDropdownContainer extends Component<Props, State> {
     private getDisplayLists = () =>
         this.state.displayFilters.map((value, i) => ({
             value,
-            active: value.active,
+            active: this.props.allTabsCollection
+                ? this.state.multiEdit.has(value.id)
+                : value.active,
             focused: this.state.focused === i,
         }))
 
@@ -226,17 +243,10 @@ class AddListDropdownContainer extends Component<Props, State> {
         return null
     }
 
-    /**
-     * Used for clicks on displayed lists. Will either add or remove lists to
-     * the page depending on their current status as associated lists or not.
-     */
-    private handleListClick = (index: number) => async event => {
-        const list = this.state.displayFilters[index]
-
-        // Either add or remove the list, let Redux handle the store changes.
+    private async handleSingleCollectionEdit(list) {
         if (!this.pageBelongsToList(list)) {
             if (this.allowIndexUpdate) {
-                this.addPageToListRPC({
+                await this.addPageToListRPC({
                     id: list.id,
                     url: this.props.url,
                 }).catch(console.error)
@@ -245,13 +255,45 @@ class AddListDropdownContainer extends Component<Props, State> {
             this.props.onFilterAdd(list)
         } else {
             if (this.allowIndexUpdate) {
-                this.deletePageFromListRPC({
+                await this.deletePageFromListRPC({
                     id: list.id,
                     url: this.props.url,
                 }).catch(console.error)
             }
 
             this.props.onFilterDel(list)
+        }
+    }
+
+    private async handleMultiCollectionEdit(list) {
+        const { multiEdit } = this.state
+        let opPromise: Promise<any>
+
+        if (!multiEdit.has(list.id)) {
+            multiEdit.add(list.id)
+            opPromise = this.addOpenTabsToListRPC({ listId: list.id })
+        } else {
+            multiEdit.delete(list.id)
+            opPromise = this.removeOpenTabsFromListRPC({ listId: list.id })
+        }
+
+        // Allow state update to happen optimistically before async stuff is done
+        this.setState(() => ({ multiEdit }))
+        await opPromise
+    }
+
+    /**
+     * Used for clicks on displayed lists. Will either add or remove lists to
+     * the page depending on their current status as associated lists or not.
+     */
+    private handleListClick = (index: number) => async event => {
+        const list = this.state.displayFilters[index]
+
+        // Either add or remove the list, let Redux handle the store changes.
+        if (this.props.allTabsCollection) {
+            await this.handleMultiCollectionEdit(list)
+        } else {
+            await this.handleSingleCollectionEdit(list)
         }
 
         this.inputEl.focus()
@@ -375,7 +417,11 @@ class AddListDropdownContainer extends Component<Props, State> {
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
-                numberOfTags={this.state.filters.length}
+                numberOfTags={
+                    this.props.allTabsCollection
+                        ? this.state.multiEdit.size
+                        : this.state.filters.length
+                }
                 tagSearchValue={this.state.searchVal}
                 source="list"
                 {...this.props}
