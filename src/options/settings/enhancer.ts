@@ -21,6 +21,7 @@ function hydrateFromStorage(store: Store<any>) {
     hydrate(KEYS.STUBS, acts.initStubs, defs.stubs)
     hydrate(KEYS.VISITS, acts.initVisits, defs.visits)
     hydrate(KEYS.VISIT_DELAY, acts.initVisitDelay, defs.visitDelay)
+    hydrate(KEYS.SCREENSHOTS, acts.initScreenshots, defs.screenshots)
 }
 
 function syncToStorage(store: Store<any>) {
@@ -33,6 +34,7 @@ function syncToStorage(store: Store<any>) {
         dump(KEYS.STUBS, selectors.stubs(state))
         dump(KEYS.VISITS, selectors.visits(state))
         dump(KEYS.VISIT_DELAY, selectors.visitDelay(state))
+        dump(KEYS.SCREENSHOTS, selectors.screenshots(state))
     })
 }
 

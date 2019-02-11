@@ -52,7 +52,11 @@ export default class PageVisitLogger {
      * indexes display data, and searchable title/URL terms, but returns
      * an async callback for manual invocation of text indexing.
      */
-    async logPageStub(tab: Tabs.Tab, secsSinceLastVisit = 20) {
+    async logPageStub(
+        tab: Tabs.Tab,
+        allowScreenshot: boolean,
+        secsSinceLastVisit = 20,
+    ) {
         const internalTabState = this._tabManager.getTabState(tab.id)
 
         // Cannot process if tab not tracked
@@ -89,6 +93,7 @@ export default class PageVisitLogger {
                 analysisRes = await this._analyzePage({
                     tabId: tab.id,
                     allowFavIcon,
+                    allowScreenshot,
                 })
             } catch (err) {
                 console.error(err)
@@ -109,13 +114,17 @@ export default class PageVisitLogger {
         }
     }
 
-    async logPageVisit(tab: Tabs.Tab, textOnly = true) {
+    async logPageVisit(
+        tab: Tabs.Tab,
+        allowScreenshot: boolean,
+        textOnly = true,
+    ) {
         let analysisRes
         try {
             analysisRes = await this._analyzePage({
                 tabId: tab.id,
                 allowFavIcon: false,
-                allowScreenshot: !textOnly,
+                allowScreenshot,
             })
         } catch (err) {
             console.error(err)

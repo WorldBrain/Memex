@@ -9,11 +9,13 @@ export const initVisits = createAction('index-prefs/init-visits')
 export const initVisitDelay = createAction<number>(
     'index-prefs/init-visit-delay',
 )
+export const initScreenshots = createAction('index-prefs/init-screenshots')
 
 export const toggleBookmarks = createAction('index-prefs/toggle-bookmarks')
 export const toggleLinks = createAction('index-prefs/toggle-links')
 export const toggleStubs = createAction('index-prefs/toggle-stubs')
 export const toggleVisits = createAction('index-prefs/toggle-visits')
+export const toggleScreenshots = createAction('index-prefs/toggle-screenshots')
 
 export const changeVisitDelay = createAction<number>(
     'index-prefs/change-visit-delay',

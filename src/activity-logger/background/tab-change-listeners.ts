@@ -141,17 +141,20 @@ export default class TabChangeListeners {
     private async fetchIndexingPrefs(): Promise<{
         shouldLogStubs: boolean
         shouldLogVisits: boolean
+        shouldCaptureScreenshots: boolean
         logDelay: number
     }> {
         const storage = await this._storage.get([
             IDXING_PREF_KEYS.STUBS,
             IDXING_PREF_KEYS.VISITS,
+            IDXING_PREF_KEYS.SCREENSHOTS,
             IDXING_PREF_KEYS.VISIT_DELAY,
         ])
 
         return {
             shouldLogStubs: !!storage[IDXING_PREF_KEYS.STUBS],
             shouldLogVisits: !!storage[IDXING_PREF_KEYS.VISITS],
+            shouldCaptureScreenshots: !!storage[IDXING_PREF_KEYS.SCREENSHOTS],
             logDelay: storage[IDXING_PREF_KEYS.VISIT_DELAY],
         }
     }
@@ -217,7 +220,10 @@ export default class TabChangeListeners {
         // Run stage 1 of visit indexing immediately (depends on user settings)
         await this._pageDOMLoaded({ tabId })
         if (indexingPrefs.shouldLogStubs) {
-            await this._pageVisitLogger.logPageStub(tab)
+            await this._pageVisitLogger.logPageStub(
+                tab,
+                indexingPrefs.shouldCaptureScreenshots,
+            )
         }
 
         // Schedule stage 2 of visit indexing soon after - if user stays on page
@@ -229,6 +235,7 @@ export default class TabChangeListeners {
                         .then(() =>
                             this._pageVisitLogger.logPageVisit(
                                 tab,
+                                indexingPrefs.shouldCaptureScreenshots,
                                 indexingPrefs.shouldLogStubs,
                             ),
                         )
