@@ -75,6 +75,9 @@ class TooltipContainer extends React.Component {
                         break
                     case 'h':
                         this.props.createHighlight()
+                        this.setState({
+                            highlightsOn: !this.state.highlightsOn,
+                        })
                         break
                     case 'a':
                         this.createAnnotation(e)
