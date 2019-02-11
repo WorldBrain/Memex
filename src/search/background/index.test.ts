@@ -299,6 +299,22 @@ describe('Annotations search', () => {
         expect(resByUrl.get(DATA.hybrid.pageUrl).annotations.length).toBe(1)
     })
 
+    test('blank annots search', async () => {
+        const results = await searchBg.searchPages({
+            contentTypes: { highlights: true, notes: true, pages: false },
+        })
+
+        expect(results).toBeDefined()
+        expect(results.length).toBe(3)
+
+        // Ensure order is by latest annot
+        expect(results.map(res => res.url)).toEqual([
+            DATA.hybrid.pageUrl,
+            DATA.directLink.pageUrl,
+            DATA.highlight.pageUrl,
+        ])
+    })
+
     test('comment-text-only page search', async () => {
         const results = await searchBg.searchPages({
             query: 'comment',
