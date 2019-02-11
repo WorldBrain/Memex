@@ -17,3 +17,4 @@ export const initCollSuggestions = createSelector(
     collectionsBtn,
     state => state.initCollSuggestions,
 )
+export const allTabs = createSelector(collectionsBtn, state => state.allTabs)

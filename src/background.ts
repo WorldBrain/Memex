@@ -40,7 +40,12 @@ directLinking.setupRequestInterceptor()
 const eventLog = new EventLogBackground({ storageManager })
 eventLog.setupRemoteFunctions()
 
-const customList = new CustomListBackground({ storageManager })
+const customList = new CustomListBackground({
+    storageManager,
+    getDb,
+    tabMan: tabManager,
+    windows: browser.windows,
+})
 customList.setupRemoteFunctions()
 
 const tags = new TagsBackground({

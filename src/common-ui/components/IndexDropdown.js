@@ -28,6 +28,7 @@ class IndexDropdown extends PureComponent {
         showClearfieldBtn: PropTypes.bool,
         onBackBtnClick: PropTypes.func,
         allTabs: PropTypes.bool,
+        allTabsCollection: PropTypes.bool,
     }
 
     get styles() {
@@ -108,6 +109,11 @@ class IndexDropdown extends PureComponent {
                 {this.props.allTabs && (
                     <p className={styles.allTabs}>
                         Add tags to all tabs in window
+                    </p>
+                )}
+                {this.props.allTabsCollection && (
+                    <p className={styles.allTabs}>
+                        Add all tabs in window to collections
                     </p>
                 )}
                 <div

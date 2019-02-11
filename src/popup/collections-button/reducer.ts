@@ -10,12 +10,15 @@ export interface State {
     collections: PageList[]
     /** Holds the initial list suggestions to display for user list search. */
     initCollSuggestions: PageList[]
+    /** Denotes whether or not the popup should show the tags picker for multiedit. */
+    allTabs: boolean
 }
 
 export const defState: State = {
     showCollectionsPicker: false,
     collections: [],
     initCollSuggestions: [],
+    allTabs: false,
 }
 
 const reducer = createReducer<State>({}, defState)
@@ -28,6 +31,11 @@ reducer.on(acts.setShowCollectionsPicker, (state, payload) => ({
 reducer.on(acts.setCollections, (state, payload) => ({
     ...state,
     collections: payload,
+}))
+
+reducer.on(acts.setAllTabs, (state, payload) => ({
+    ...state,
+    allTabs: payload,
 }))
 
 reducer.on(acts.setInitColls, (state, payload) => ({

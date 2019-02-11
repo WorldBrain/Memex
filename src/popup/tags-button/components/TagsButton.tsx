@@ -38,6 +38,7 @@ class TagsButton extends PureComponent<Props> {
                         onClick={this.props.toggleAllTabsPopup}
                         disabled={this.props.isDisabled}
                         btnClass={styles.allTabs}
+                        title={'Tag all tabs in this window'}
                     />
                 </span>
             </React.Fragment>
