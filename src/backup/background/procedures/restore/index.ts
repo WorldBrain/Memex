@@ -231,9 +231,9 @@ export function _getChangeWhere(
     const collectionDef = registry.collections[change.collection]
     const pkIndex = collectionDef.pkIndex
     if (pkIndex instanceof Array) {
-        return zipObject(pkIndex, change.objectPk)
+        return zipObject(pkIndex, change.objectPk || change['pk'])
     } else if (typeof pkIndex === 'string') {
-        return { [pkIndex]: change.objectPk }
+        return { [pkIndex]: change.objectPk || change['pk'] }
     }
 }
 
