@@ -2,7 +2,7 @@ export interface Result {
     url: string
     title: string
     isPDF: boolean
-    PDFFingerprint: string
+    pdfFingerprint: string
     tags: string[]
     hasBookmark: boolean
     isDeleting: boolean

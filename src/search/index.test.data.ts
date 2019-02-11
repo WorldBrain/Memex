@@ -9,7 +9,7 @@ export const PAGE_1 = {
         title: 'page 3 dummy',
     },
     isPDF: false,
-    PDFFingerprint: null,
+    pdfFingerprint: null,
 }
 export const PAGE_2 = {
     url: 'https://sub.lorem.com/test1',
@@ -18,7 +18,7 @@ export const PAGE_2 = {
         title: 'page 2',
     },
     isPDF: false,
-    PDFFingerprint: null,
+    pdfFingerprint: null,
 }
 export const PAGE_3 = {
     url: 'https://www.test.com/test',
@@ -27,7 +27,7 @@ export const PAGE_3 = {
         title: 'page',
     },
     isPDF: false,
-    PDFFingerprint: null,
+    pdfFingerprint: null,
 }
 export const PAGE_4 = { ...PAGE_3, url: 'https://test.com/tmp' }
 

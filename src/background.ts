@@ -25,7 +25,6 @@ import './search/background'
 import './analytics/background'
 import './imports/background'
 import './omnibar'
-import { browser } from 'webextension-polyfill-ts'
 import browserIsChrome from './util/check-browser'
 
 initSentry()

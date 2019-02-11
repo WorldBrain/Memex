@@ -14,7 +14,7 @@ const styles = require('./PageResultItem.css')
 
 export interface Props {
     url: string
-    PDFFingerprint: string
+    pdfFingerprint: string
     isPDF: boolean
     title: string
     favIcon: string
@@ -110,7 +110,7 @@ class PageResultItem extends PureComponent<Props> {
                             <div className={styles.url}>
                                 {this.props.url}
                                 <br />
-                                {this.props.isPDF && this.props.PDFFingerprint}
+                                {this.props.isPDF && this.props.pdfFingerprint}
                             </div>
                             <div className={styles.time}>
                                 <div className={styles.displayTime}>

@@ -93,7 +93,7 @@ export function extractTerms(text: string): Set<string> {
  * @returns Resolves to an object containing all data needed for Page model.
  */
 export default function pipeline({
-    pageDoc: { content = {}, url, isPDF, PDFFingerprint, ...data },
+    pageDoc: { content = {}, url, isPDF, pdfFingerprint, ...data },
     rejectNoContent = true,
 }: PipelineReq): Promise<PipelineRes> {
     // First apply transformations to the URL
@@ -116,7 +116,7 @@ export default function pipeline({
     return Promise.resolve({
         url: normalizeUrl(url),
         isPDF,
-        PDFFingerprint,
+        pdfFingerprint,
         fullUrl: url,
         fullTitle: content.title,
         text: content.fullText,

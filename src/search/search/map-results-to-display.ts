@@ -5,7 +5,7 @@ export interface SearchDisplayResult {
     url: string
     title: string
     isPDF: boolean
-    PDFFingerprint: string
+    pdfFingerprint: string
     hasBookmark: boolean
     displayTime: number
     screenshot: string
@@ -27,7 +27,7 @@ const mapPageToDisplay = (
         return {
             url: page.fullUrl,
             isPDF: page.isPDF,
-            PDFFingerprint: page.PDFFingerprint,
+            pdfFingerprint: page.pdfFingerprint,
             title: page.fullTitle,
             hasBookmark: page.hasBookmark,
             displayTime: page.getLatest(endDate),
