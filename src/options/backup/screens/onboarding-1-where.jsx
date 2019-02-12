@@ -9,6 +9,24 @@ import { getStringFromResponseBody } from '../utils'
 export default class OnboardingWhere extends React.Component {
     state = { provider: null, path: null, overlay: false, backupPath: null }
 
+    componentDidMount() {
+        /* Keep checking backend server for the local backup location */
+        this.timer = setInterval(async () => {
+            if (this.state.provider === 'local') {
+                const status = await this._fetchBackupPath()
+                if (!status) {
+                    clearInterval(this.timer)
+                }
+            }
+        }, 1000)
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timer)
+    }
+
+    timer = null
+
     _fetchBackupPath = async () => {
         try {
             const response = await fetch(
@@ -22,7 +40,9 @@ export default class OnboardingWhere extends React.Component {
             }
         } catch (err) {
             this.setState({ backupPath: null, overlay: true })
+            return false
         }
+        return true
     }
 
     _proceedIfServerIsRunning = async provider => {
