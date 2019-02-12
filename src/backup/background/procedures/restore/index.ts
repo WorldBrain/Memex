@@ -1,6 +1,7 @@
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
 import { EventEmitter } from 'events'
+const dataURLtoBlob = require('dataurl-to-blob')
 import { StorageManager } from '../../../../search/types'
 import BackupStorage from '../../storage'
 import { BackupBackend, ObjectChange } from '../../backend'
@@ -172,29 +173,40 @@ export class BackupRestoreProcedure {
 
     async _writeChange(change: ObjectChange) {
         change = _filterBadChange(change)
+        _convertChangeBlobs(change)
 
         const collection = this.storageManager.collection(change.collection)
         if (change.operation === 'create') {
             // console.log('creating', change.object)
             await collection.createObject(change.object)
         } else if (change.operation === 'update') {
-            // console.log('updating', _getChangeWhere(change, this.storageManager.registry), change.object)
+            // console.log('updating', _getChangeWhere(change), change.object)
             await collection.updateOneObject(
-                _getChangeWhere(change, this.storageManager.registry),
+                this._getChangeWhere(change),
                 change.object,
             )
         } else if (change.operation === 'delete') {
-            // console.log('deleting', _getChangeWhere(change, this.storageManager.registry))
-            await collection.deleteOneObject(
-                _getChangeWhere(change, this.storageManager.registry),
-            )
+            // console.log('deleting', _getChangeWhere(change))
+            await collection.deleteOneObject(this._getChangeWhere(change))
         }
     }
 
     async _writeImage(image) {
+        if (!image || !image.data) {
+            return // invalid data, ignore
+        }
+
         const collection = this.storageManager.collection(image.collection)
-        const where = _getChangeWhere(image, this.storageManager.registry)
-        await collection.updateOneObject(where, { [image.type]: image.data })
+        const where = this._getChangeWhere(image)
+        try {
+            await collection.updateOneObject(where, {
+                [image.type]: _blobFromPngString(image.data),
+            })
+        } catch (e) {
+            console.error('Failed to commit image', where, image, {
+                [image.type]: _blobFromPngString(image.data),
+            })
+        }
     }
 
     _createDownloadQueue(collection: string, timestamps: string[]) {
@@ -221,19 +233,18 @@ export class BackupRestoreProcedure {
         this.info = { ...this.info, ...changes }
         this.events.emit('info', { info: this.info })
     }
-}
 
-export function _getChangeWhere(
-    change: ObjectChange,
-    registry: StorageRegistry,
-) {
-    // TODO: What if none of these are true?
-    const collectionDef = registry.collections[change.collection]
-    const pkIndex = collectionDef.pkIndex
-    if (pkIndex instanceof Array) {
-        return zipObject(pkIndex, change.objectPk || change['pk'])
-    } else if (typeof pkIndex === 'string') {
-        return { [pkIndex]: change.objectPk || change['pk'] }
+    _getChangeWhere(change: ObjectChange) {
+        // TODO: What if none of these are true?
+        const collectionDef = this.storageManager.registry.collections[
+            change.collection
+        ]
+        const pkIndex = collectionDef.pkIndex
+        if (pkIndex instanceof Array) {
+            return zipObject(pkIndex, change.objectPk || change['pk'])
+        } else if (typeof pkIndex === 'string') {
+            return { [pkIndex]: change.objectPk || change['pk'] }
+        }
     }
 }
 
@@ -264,4 +275,23 @@ export function _filterBadChange({
     }
 
     return { ...change, object }
+}
+
+export function _convertChangeBlobs(change: ObjectChange) {
+    const object = change.object
+    if (
+        change.collection === 'favIcons' &&
+        !!object.favIcon &&
+        typeof object.favIcon === 'string'
+    ) {
+        object.favIcon = _blobFromPngString(object.favIcon)
+    }
+}
+
+export function _blobFromPngString(s: string) {
+    const prefix = 'data:'
+    if (s.substr(0, prefix.length) !== prefix) {
+        s = 'data:image/png;base64,' + s
+    }
+    return dataURLtoBlob(s)
 }

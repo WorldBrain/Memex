@@ -2,6 +2,7 @@ import * as sinon from 'sinon'
 import * as expect from 'expect'
 import { BackupBackend, ObjectChange } from '../../backend'
 import { BackupRestoreProcedure } from '.'
+import encodeBlob from 'src/util/encode-blob'
 
 describe('BackupRestoreProcedure', () => {
     it('the top-level procedure for restoring change sets and images should work', async () => {
@@ -275,5 +276,64 @@ describe('BackupRestoreProcedure', () => {
                 test: pageDeleteChange.objectPk,
             }),
         ).toBe(true)
+    })
+
+    it('should correctly restore screenshot blobs', async () => {
+        const updates = []
+        const storageManager = {
+            collection: collectionName => ({
+                updateOneObject: async (...args) => {
+                    updates.push([collectionName, ...args])
+                },
+            }),
+        }
+        const restoreProcedure = new BackupRestoreProcedure({
+            backend: null,
+            storageManager: storageManager as any,
+            storage: null,
+        })
+        restoreProcedure._getChangeWhere = () => ({ boo: 'bla' })
+        const dataUrl = 'data:text/plain;charset=utf-8;base64,dGVzdA=='
+        await restoreProcedure._writeImage({
+            collection: 'pages',
+            type: 'screenshot',
+            data: dataUrl,
+        })
+        expect(updates).toEqual([
+            ['pages', { boo: 'bla' }, { screenshot: expect.any(Blob) }],
+        ])
+        const blob = updates[0][2].screenshot
+        expect(await encodeBlob(blob)).toEqual('test')
+    })
+
+    it('should correctly restore favIcon blobs', async () => {
+        const updates = []
+        const storageManager = {
+            collection: collectionName => ({
+                updateOneObject: async (...args) => {
+                    updates.push([collectionName, ...args])
+                },
+            }),
+        }
+        const restoreProcedure = new BackupRestoreProcedure({
+            backend: null,
+            storageManager: storageManager as any,
+            storage: null,
+        })
+        restoreProcedure._getChangeWhere = () => ({ boo: 'bla' })
+        await restoreProcedure._writeChange({
+            timestamp: 1,
+            collection: 'favIcons',
+            operation: 'update',
+            objectPk: 'bla',
+            object: {
+                favIcon: 'data:text/plain;charset=utf-8;base64,dGVzdA==',
+            },
+        })
+        expect(updates).toEqual([
+            ['favIcons', { boo: 'bla' }, { favIcon: expect.any(Blob) }],
+        ])
+        const blob = updates[0][2].favIcon
+        expect(await encodeBlob(blob)).toEqual('test')
     })
 })
