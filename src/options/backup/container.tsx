@@ -14,12 +14,12 @@ import RestoreWhere from 'src/options/backup/screens/restore-where'
 import RestoreRunning from 'src/options/backup/screens/restore-running'
 
 const styles = require('./styles.css')
-
+window['remoteFunction'] = remoteFunction
 export const SCREENS = {
     overview: {
         component: Overview,
         events: {
-            onBackupRequested: true,
+            onBackupRequested: { argument: 'changeBackupRequested' },
             onRestoreRequested: true,
             onBlobPreferenceChange: { argument: 'saveBlobs' },
         },

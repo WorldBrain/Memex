@@ -71,6 +71,7 @@
     font-size: 0.8rem;
     text-align: right;
     color: #0b8863;
+    cursor: pointer;
 
     & .change {
         display: block;

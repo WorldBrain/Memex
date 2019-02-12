@@ -2,7 +2,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { ProviderList } from '../components/provider-list'
 import { PrimaryButton } from '../components/primary-button'
-import { DownloadOverlay } from '../components/download-overlay'
+import {
+    DownloadOverlay,
+    CopyOverlay,
+    ChangeOverlay,
+} from '../components/overlays'
 import Styles from '../styles.css'
 import { getStringFromResponseBody } from '../utils'
 
@@ -104,6 +108,7 @@ export default class OnboardingWhere extends React.Component {
                         }
                     }}
                 />
+                <CopyOverlay disabled={false} onClick={action => null} />
                 <PrimaryButton
                     disabled={!this.state.provider || !this.state.backupPath}
                     onClick={() => this.props.onChoice(this.state.provider)}

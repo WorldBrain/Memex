@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Styles from './download-overlay.css'
+import Styles from './overlay.css'
 
-export function DownloadOverlay(props) {
+export default function DownloadOverlay(props) {
     return !props.disabled ? (
         <div>
             <div className={Styles.box}>
