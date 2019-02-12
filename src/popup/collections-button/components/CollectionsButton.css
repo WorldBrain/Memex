@@ -7,13 +7,16 @@
 }
 
 .button {
-    display: inline-block;
-    width: 230px;
+    flex: 7;
     text-align: left;
 }
 
-.spanbutton {
-    position: absolute;
+.buttonBulk {
+    flex: 1;
+}
+
+.buttonContainer {
+    display: flex;
 }
 
 .allTabs {

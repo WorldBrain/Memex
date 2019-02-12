@@ -1,4 +1,4 @@
-    .tag {
+.tag {
     background-image: url('/img/tag_blue.svg');
     background-repeat: no-repeat;
     background-size: 20px;
@@ -7,13 +7,16 @@
 }
 
 .button {
-    display: inline-block;
-    width: 230px;
+    flex: 7;
     text-align: left;
 }
 
-.spanbutton {
-    position: absolute;
+.buttonBulk {
+    flex: 1;
+}
+
+.buttonContainer {
+    display: flex;
 }
 
 .allTabs {
