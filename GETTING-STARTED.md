@@ -158,7 +158,19 @@ code.
 **Now you are ready to hack! 😃**
 We recommend reading through the [Code Overview](#code-overview) to get an idea of how the extension works and also looking @ [Submitting Changes](#submitting-changes) before making any pull requests.
 
-### Documenting
+## Managing dependencies
+
+We currently use yarn and its lockfile to manage all of our main dependencies that are
+available on either NPM or GitHub. Please use `yarn add $PACKAGE_NAME` to add any new
+deps and properly update the lockfile (please don't manually attempt to update the lockfile).
+Likewise, `yarn remove $PACKAGE_NAME` handles removal.
+
+Please be aware that managing deps via the `npm` CLI tool will **not** update the lockfile.
+
+For deps that aren't available on NPM or GitHub, these will require some more complicated form
+of management. We will treat these on a case-by-case basis and discuss with the team.
+
+## Documenting
 
 We try to encourage documententing module exports using JSDoc with TypeScript, and also higher level overviews of different "feature modules" (directories containing multiple modules related to a particular feature) in README markdown modules.
 
@@ -166,7 +178,7 @@ If you have made changes to any exports in existing modules, please update the c
 
 If you are creating a new feature module, please add a brief overview in the way of a README in the corresponding directory.
 
-### Naming conventions
+## Naming conventions
 
 Over the course of the Memex project's life, different naming conventions
 for different files/modules have crept in. You'll see JS and TS modules often differing
@@ -179,7 +191,7 @@ We also ask that you postfix `-container` to any module name where the main expo
 a React container component. There may be certain cases where this isn't as obvious or
 appropriate though. Hopefully we can resolve that in the review stage.
 
-### Styling
+## Styling
 
 We are using [prettier](https://github.com/prettier/prettier).
 This will automatically format all the styling for the code every time a commit is made, so you can focus on coding and not on code styling.
@@ -224,6 +236,11 @@ Looking into that, you'll see it extends the abstract [`FeatureStorage` class](.
 Finally, all BG script features should be instantiated in the [BG script entrypoint module](./src/background.ts#L44).
 
 _Note that many features do not yet use this structure. We intend to port over legacy code eventually, but all new BG feature code should be written in this way._
+
+## Feature list
+
+Note this may not be up-to-date and links may get broken as things change. Feel free to submit
+a PR to fix anything you notice is broken, missing, or just doesn't make sense.
 
 #### **[src/blacklist/](./src/blacklist/)**: blacklist
 
