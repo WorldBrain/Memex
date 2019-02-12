@@ -9,11 +9,19 @@ import {
 } from '../components/overlays'
 import Styles from '../styles.css'
 import { getStringFromResponseBody } from '../utils'
+import { remoteFunction } from 'src/util/webextensionRPC'
 
 export default class OnboardingWhere extends React.Component {
-    state = { provider: null, path: null, overlay: false, backupPath: null }
+    state = {
+        provider: null,
+        path: null,
+        overlay: false,
+        backupPath: null,
+        initialBackup: false,
+        backendLocation: null,
+    }
 
-    componentDidMount() {
+    async componentDidMount() {
         /* Keep checking backend server for the local backup location */
         this.timer = setInterval(async () => {
             if (this.state.provider === 'local') {
@@ -23,6 +31,13 @@ export default class OnboardingWhere extends React.Component {
                 }
             }
         }, 1000)
+
+        const initialBackup = await remoteFunction('hasInitialBackup')()
+        const backendLocation = await remoteFunction('getBackendLocation')()
+        this.setState({
+            initialBackup,
+            backendLocation,
+        })
     }
 
     componentWillUnmount() {
@@ -43,25 +58,25 @@ export default class OnboardingWhere extends React.Component {
                 this.setState({ backupPath: '' })
             }
         } catch (err) {
-            this.setState({ backupPath: null, overlay: true })
+            this.setState({ backupPath: null, overlay: 'download' })
             return false
         }
         return true
     }
 
     _proceedIfServerIsRunning = async provider => {
-        let overlay = false
+        let overlay = null
         try {
             const response = await fetch('http://localhost:11922/status')
             const serverStatus = await getStringFromResponseBody(response)
             if (serverStatus === 'running') {
                 await this._fetchBackupPath()
             } else {
-                overlay = true
+                overlay = 'download'
             }
         } catch (err) {
-            // Show the overlay if we couldn't connect to the server.
-            overlay = true
+            // Show the download overlay if we couldn't connect to the server.
+            overlay = 'download'
         }
         this.setState({
             provider,
@@ -73,12 +88,20 @@ export default class OnboardingWhere extends React.Component {
         try {
             await fetch('http://localhost:11922/backup/open-change-location')
             await this._fetchBackupPath()
+
+            const { initialBackup, backendLocation } = this.state
+            if (initialBackup && backendLocation === 'local') {
+                this.setState({
+                    overlay: 'copy',
+                })
+            }
         } catch (err) {
             this.setState({ overlay: true })
         }
     }
 
     render() {
+        console.log(this)
         return (
             <div>
                 <p className={Styles.header2}>
@@ -89,26 +112,55 @@ export default class OnboardingWhere extends React.Component {
                     backupPath={this.state.backupPath}
                     handleChangeBackupPath={this._handleChangeBackupPath}
                     onChange={async provider => {
+                        const { backendLocation } = this.state
+                        if (backendLocation && provider !== backendLocation) {
+                            this.setState({
+                                overlay: 'change',
+                            })
+                        }
                         if (provider === 'local') {
                             await this._proceedIfServerIsRunning(provider)
                         }
                     }}
                 />
                 <DownloadOverlay
-                    disabled={!this.state.overlay}
+                    disabled={this.state.overlay !== 'download'}
                     onClick={async action => {
                         if (action === 'continue') {
-                            this.setState({ overlay: false })
+                            this.setState({ overlay: null })
                             await this._proceedIfServerIsRunning(
                                 this.state.provider,
                             )
                         }
                         if (action === 'cancel') {
-                            this.setState({ overlay: false })
+                            this.setState({ overlay: null })
                         }
                     }}
                 />
-                <CopyOverlay disabled={false} onClick={action => null} />
+                <CopyOverlay
+                    disabled={this.state.overlay !== 'copy'}
+                    onClick={async action => {
+                        if (action === 'continue') {
+                            this.setState({ overlay: null })
+                        } else if (action === 'cancel') {
+                            this.setState({ overlay: null })
+                        }
+                    }}
+                />
+                <ChangeOverlay
+                    disabled={this.state.overlay !== 'change'}
+                    onClick={async action => {
+                        if (action === 'continue') {
+                            this.setState({ overlay: null })
+                            await this._proceedIfServerIsRunning(
+                                this.state.provider,
+                            )
+                        }
+                        if (action === 'cancel') {
+                            this.setState({ overlay: null })
+                        }
+                    }}
+                />
                 <PrimaryButton
                     disabled={!this.state.provider || !this.state.backupPath}
                     onClick={() => this.props.onChoice(this.state.provider)}
