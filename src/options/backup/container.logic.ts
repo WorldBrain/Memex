@@ -100,12 +100,14 @@ export async function processEvent({
     const handlers = {
         overview: {
             onBackupRequested: async () => {
+                const changeBackupRequested = event.changeBackupRequested
+                console.log(changeBackupRequested)
                 const [hasInitialBackup, backupInfo] = await Promise.all([
                     remoteFunction('hasInitialBackup')(),
                     remoteFunction('getBackupInfo')(),
                 ])
                 const needsOnBoarding = !hasInitialBackup && !backupInfo
-                if (needsOnBoarding) {
+                if (needsOnBoarding || changeBackupRequested) {
                     localStorage.setItem('backup.onboarding', true)
                     localStorage.setItem('backup.onboarding.where', true)
                     analytics.trackEvent(

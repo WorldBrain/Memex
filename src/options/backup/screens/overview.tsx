@@ -240,7 +240,12 @@ export default class OverviewContainer extends React.Component<Props> {
                                 <span className={styles.name}>
                                     Backup Location
                                 </span>
-                                <span className={localStyles.location}>
+                                <span
+                                    onClick={() =>
+                                        this.props.onBackupRequested(true)
+                                    }
+                                    className={localStyles.location}
+                                >
                                     {this.state.backupLocation === 'local'
                                         ? 'Your Computer'
                                         : 'Google Drive'}
