@@ -121,6 +121,9 @@ export default class OnboardingWhere extends React.Component {
                         if (provider === 'local') {
                             await this._proceedIfServerIsRunning(provider)
                         }
+                        this.setState({
+                            provider,
+                        })
                     }}
                 />
                 <DownloadOverlay
@@ -153,17 +156,22 @@ export default class OnboardingWhere extends React.Component {
                 <ChangeOverlay
                     disabled={this.state.overlay !== 'change'}
                     onClick={async action => {
-                        if (action === 'continue') {
+                        if (action === 'yes') {
                             this.setState({ overlay: null })
+                            await remoteFunction('forgetAllChanges')()
                             this.props.onChoice(this.state.provider)
                         }
-                        if (action === 'cancel') {
+                        if (action === 'nope') {
                             this.setState({ overlay: null })
                         }
                     }}
                 />
                 <PrimaryButton
-                    disabled={!this.state.provider || !this.state.backupPath}
+                    disabled={
+                        !this.state.provider ||
+                        (this.state.provider === 'local' &&
+                            !this.state.backupPath)
+                    }
                     onClick={() => this.props.onChoice(this.state.provider)}
                 >
                     Continue
