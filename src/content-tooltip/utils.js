@@ -46,3 +46,17 @@ export const getPositionState = async () =>
 
 export const setPositionState = async positionValue =>
     setLocalStorage(constants.POSITION_STORAGE_NAME, positionValue)
+
+export const getKeyboardShortcutsState = async () => {
+    return getLocalStorage(
+        constants.KEYBOARDSHORTCUTS_STORAGE_NAME,
+        constants.KEYBOARDSHORTCUTS_DEFAULT_STATE,
+    )
+}
+
+export const setKeyboardShortcutsState = async newKeyboardShortcutsState => {
+    return setLocalStorage(
+        constants.KEYBOARDSHORTCUTS_STORAGE_NAME,
+        newKeyboardShortcutsState,
+    )
+}

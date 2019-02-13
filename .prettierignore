@@ -3,4 +3,3 @@ extension/
 node_modules/
 .git/
 package.json
-src/mousetrap.min.js
