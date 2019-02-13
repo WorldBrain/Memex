@@ -101,13 +101,17 @@ export async function processEvent({
         overview: {
             onBackupRequested: async () => {
                 const changeBackupRequested = event.changeBackupRequested
-                console.log(changeBackupRequested)
-                const [hasInitialBackup, backupInfo] = await Promise.all([
+                const [
+                    hasInitialBackup,
+                    backupInfo,
+                    backendLocation,
+                ] = await Promise.all([
                     remoteFunction('hasInitialBackup')(),
                     remoteFunction('getBackupInfo')(),
+                    remoteFunction('getBackendLocation')(),
                 ])
                 const needsOnBoarding = !hasInitialBackup && !backupInfo
-                if (needsOnBoarding || changeBackupRequested) {
+                if (needsOnBoarding || changeBackupRequested === true) {
                     localStorage.setItem('backup.onboarding', true)
                     localStorage.setItem('backup.onboarding.where', true)
                     analytics.trackEvent(
@@ -152,6 +156,9 @@ export async function processEvent({
                 } else {
                     return { screen: 'onboarding-how' }
                 }
+            },
+            onChangeLocalLocation: () => {
+                return { screen: 'running-backup' }
             },
         },
         'onboarding-how': {

@@ -174,6 +174,7 @@ export interface LastBackupStorage {
 
     getLastBackupFinishTime(): Promise<Date>
     storeLastBackupFinishTime(time: Date): Promise<any>
+    removeBackupTimes(): Promise<void>
 }
 
 export class LocalLastBackupStorage implements LastBackupStorage {
@@ -197,6 +198,11 @@ export class LocalLastBackupStorage implements LastBackupStorage {
 
     async storeLastBackupFinishTime(time: Date) {
         await this._setDate(`${this.key}Finish`, time)
+    }
+
+    async removeBackupTimes() {
+        localStorage.removeItem(this.key)
+        localStorage.removeItem(`${this.key}Finish`)
     }
 
     async _getTime(key) {

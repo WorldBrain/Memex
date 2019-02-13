@@ -172,6 +172,9 @@ export class BackupBackgroundModule {
                 getBackupTimes: async () => {
                     return this.getBackupTimes()
                 },
+                forgetAllChanges: async () => {
+                    return this.forgetAllChanges()
+                },
                 storeWordpressUserId: (info, userId) => {
                     localStorage.setItem('wp.user-id', userId)
                 },
@@ -296,6 +299,11 @@ export class BackupBackgroundModule {
             clearTimeout(this.automaticBackupTimeout)
             this.automaticBackupTimeout = null
         }
+    }
+
+    async forgetAllChanges() {
+        await this.storage.forgetAllChanges()
+        await this.lastBackupStorage.removeBackupTimes()
     }
 
     async getBackupTimes() {

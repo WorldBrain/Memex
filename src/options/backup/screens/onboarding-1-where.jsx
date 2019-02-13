@@ -140,10 +140,13 @@ export default class OnboardingWhere extends React.Component {
                 <CopyOverlay
                     disabled={this.state.overlay !== 'copy'}
                     onClick={async action => {
-                        if (action === 'continue') {
+                        if (action === 'copied') {
                             this.setState({ overlay: null })
-                        } else if (action === 'cancel') {
+                            this.props.onChangeLocalLocation()
+                        } else if (action === 'newbackup') {
                             this.setState({ overlay: null })
+                            await remoteFunction('forgetAllChanges')()
+                            this.props.onChangeLocalLocation()
                         }
                     }}
                 />
@@ -152,9 +155,7 @@ export default class OnboardingWhere extends React.Component {
                     onClick={async action => {
                         if (action === 'continue') {
                             this.setState({ overlay: null })
-                            await this._proceedIfServerIsRunning(
-                                this.state.provider,
-                            )
+                            this.props.onChoice(this.state.provider)
                         }
                         if (action === 'cancel') {
                             this.setState({ overlay: null })
@@ -174,4 +175,5 @@ export default class OnboardingWhere extends React.Component {
 
 OnboardingWhere.propTypes = {
     onChoice: PropTypes.func.isRequired,
+    onChangeLocalLocation: PropTypes.func.isRequired,
 }

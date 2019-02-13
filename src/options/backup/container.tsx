@@ -30,7 +30,10 @@ export const SCREENS = {
     },
     'onboarding-where': {
         component: OnboardingWhere,
-        events: { onChoice: { argument: 'choice' } },
+        events: {
+            onChoice: { argument: 'choice' },
+            onChangeLocalLocation: true,
+        },
     },
     'onboarding-how': {
         component: OnboardingHow,
