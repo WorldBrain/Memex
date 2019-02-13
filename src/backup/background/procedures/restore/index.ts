@@ -1,13 +1,13 @@
-const sorted = require('lodash/sortBy')
-const zipObject = require('lodash/zipObject')
 import { EventEmitter } from 'events'
-const dataURLtoBlob = require('dataurl-to-blob')
 import { StorageManager } from '../../../../search/types'
 import BackupStorage from '../../storage'
 import { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
 import { StorageRegistry } from 'storex'
+const dataURLtoBlob = require('dataurl-to-blob')
+const sorted = require('lodash/sortBy')
+const zipObject = require('lodash/zipObject')
 
 export interface BackupRestoreInfo {
     status: 'preparing' | 'synching'
@@ -198,14 +198,14 @@ export class BackupRestoreProcedure {
 
         const collection = this.storageManager.collection(image.collection)
         const where = this._getChangeWhere(image)
+        const updates = {
+            $set: { [image.type]: _blobFromPngString(image.data) },
+        }
+
         try {
-            await collection.updateOneObject(where, {
-                [image.type]: _blobFromPngString(image.data),
-            })
+            await collection.updateOneObject(where, updates)
         } catch (e) {
-            console.error('Failed to commit image', where, image, {
-                [image.type]: _blobFromPngString(image.data),
-            })
+            console.error('Failed to commit image', where, image, updates)
         }
     }
 
