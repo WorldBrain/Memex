@@ -26,7 +26,7 @@ export default class CopyOverlay extends PureComponent<Props, {}> {
                         <div
                             className={styles.colorbutton}
                             onClick={() => {
-                                this.props.onClick('continue')
+                                this.props.onClick('copied')
                             }}
                         >
                             I copied them over
@@ -34,7 +34,7 @@ export default class CopyOverlay extends PureComponent<Props, {}> {
                         <div
                             className={styles.greybutton}
                             onClick={() => {
-                                this.props.onClick('cancel')
+                                this.props.onClick('newbackup')
                             }}
                         >
                             Start New Backup
