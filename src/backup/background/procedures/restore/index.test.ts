@@ -300,9 +300,13 @@ describe('BackupRestoreProcedure', () => {
             data: dataUrl,
         })
         expect(updates).toEqual([
-            ['pages', { boo: 'bla' }, { screenshot: expect.any(Blob) }],
+            [
+                'pages',
+                { boo: 'bla' },
+                { $set: { screenshot: expect.any(Blob) } },
+            ],
         ])
-        const blob = updates[0][2].screenshot
+        const blob = updates[0][2].$set.screenshot
         expect(await encodeBlob(blob)).toEqual('test')
     })
 
