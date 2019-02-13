@@ -28,10 +28,5 @@
         "lib": ["es2017", "dom", "esnext.asynciterable"]
     },
     "include": ["./src/**/*"],
-    "exclude": [
-        "node_modules",
-        "./src/**/*.js",
-        "./src/**/*.jsx",
-        "./src/mousetrap.min.js"
-    ]
+    "exclude": ["node_modules", "./src/**/*.js", "./src/**/*.jsx"]
 }

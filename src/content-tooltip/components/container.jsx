@@ -13,13 +13,14 @@ import {
 
 import { conditionallyRemoveSelectOption } from '../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
-import { userSelectedText } from '../../content-tooltip/interactions'
-import * as Mousetrap from '../../mousetrap.min'
+import { userSelectedText } from '../interactions'
+import * as Mousetrap from 'mousetrap'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import {
     highlightAnnotations,
     removeHighlights,
 } from '../../sidebar-overlay/content_script/interactions'
+import { getKeyboardShortcutsState } from '../utils'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -38,53 +39,86 @@ class TooltipContainer extends React.Component {
         highlightsOn: false,
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.props.onInit(this.showTooltip)
 
-        const fetchAndHighlightAnnotations = async () => {
-            const annotations = await remoteFunction('getAllAnnotations')(
-                window.location.href,
-            )
-            const highlightables = annotations.filter(
-                annotation => annotation.selector,
-            )
-            highlightAnnotations(highlightables)
-        }
+        const {
+            shortcutsEnabled,
+            highlightShortcut,
+            linkShortcut,
+            toggleSidebarShortcut,
+            toggleHighlightsShortcut,
+            createAnnotationShortcut,
+            highlightShortcutEnabled,
+            linkShortcutEnabled,
+            toggleSidebarShortcutEnabled,
+            toggleHighlightsShortcutEnabled,
+            createAnnotationShortcutEnabled,
+        } = await getKeyboardShortcutsState()
 
-        const toggleHighlights = () => {
-            this.state.highlightsOn
-                ? removeHighlights()
-                : fetchAndHighlightAnnotations()
-            this.setState({ highlightsOn: !this.state.highlightsOn })
-        }
-
-        Mousetrap.bind(['r', 'h', 'a', 'l'], e => {
+        const handleKeyboardShortcuts = e => {
             if (!userSelectedText()) {
                 switch (e.key) {
-                    case 'r':
-                        remoteFunction('toggleSidebar')()
+                    case toggleSidebarShortcut:
+                        toggleSidebarShortcutEnabled &&
+                            remoteFunction('toggleSidebar')()
                         break
-                    case 'h':
-                        toggleHighlights()
+                    case toggleHighlightsShortcut:
+                        toggleHighlightsShortcutEnabled &&
+                            this.toggleHighlights()
                         break
                 }
             } else {
                 switch (e.key) {
-                    case 'l':
-                        this.createLink()
+                    case linkShortcut:
+                        linkShortcutEnabled && this.createLink()
                         break
-                    case 'h':
-                        this.props.createHighlight()
-                        this.setState({
-                            highlightsOn: !this.state.highlightsOn,
-                        })
+                    case highlightShortcut:
+                        if (highlightShortcutEnabled) {
+                            this.props.createHighlight()
+                            this.setState({
+                                highlightsOn: true,
+                            })
+                        }
                         break
-                    case 'a':
-                        this.createAnnotation(e)
+                    case createAnnotationShortcut:
+                        createAnnotationShortcutEnabled &&
+                            this.createAnnotation(e)
                         break
                 }
             }
-        })
+        }
+
+        if (shortcutsEnabled) {
+            Mousetrap.bind(
+                [
+                    highlightShortcut,
+                    linkShortcut,
+                    toggleHighlightsShortcut,
+                    createAnnotationShortcut,
+                    toggleSidebarShortcut,
+                ],
+                handleKeyboardShortcuts,
+            )
+        }
+    }
+
+    fetchAndHighlightAnnotations = async () => {
+        const annotations = await remoteFunction('getAllAnnotations')(
+            window.location.href,
+        )
+        const highlightables = annotations.filter(
+            annotation => annotation.selector,
+        )
+        highlightAnnotations(highlightables)
+    }
+
+    toggleHighlights = () => {
+        console.log(this.state)
+        this.state.highlightsOn
+            ? removeHighlights()
+            : this.fetchAndHighlightAnnotations()
+        this.setState({ highlightsOn: !this.state.highlightsOn })
     }
 
     showTooltip = position => {
