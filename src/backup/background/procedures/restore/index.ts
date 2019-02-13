@@ -173,7 +173,7 @@ export class BackupRestoreProcedure {
 
     async _writeChange(change: ObjectChange) {
         change = _filterBadChange(change)
-        _convertChangeBlobs(change)
+        _deserializeChangeFields(change)
 
         const collection = this.storageManager.collection(change.collection)
         if (change.operation === 'create') {
@@ -277,14 +277,25 @@ export function _filterBadChange({
     return { ...change, object }
 }
 
-export function _convertChangeBlobs(change: ObjectChange) {
+export function _deserializeChangeFields(change: ObjectChange) {
     const object = change.object
-    if (
-        change.collection === 'favIcons' &&
-        !!object.favIcon &&
-        typeof object.favIcon === 'string'
-    ) {
+    const checkSerializedExists = (colls: string[], field: string) =>
+        colls.includes(change.collection) &&
+        !!object[field] &&
+        typeof object[field] === 'string'
+
+    if (checkSerializedExists(['favIcons'], 'favIcon')) {
         object.favIcon = _blobFromPngString(object.favIcon)
+    }
+
+    if (checkSerializedExists(['annotations'], 'createdWhen')) {
+        object.createdWhen = new Date(object.createdWhen)
+    }
+
+    if (
+        checkSerializedExists(['customLists', 'pageListEntries'], 'createdAt')
+    ) {
+        object.createdAt = new Date(object.createdAt)
     }
 }
 
