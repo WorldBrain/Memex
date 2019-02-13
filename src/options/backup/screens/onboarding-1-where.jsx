@@ -22,16 +22,6 @@ export default class OnboardingWhere extends React.Component {
     }
 
     async componentDidMount() {
-        /* Keep checking backend server for the local backup location */
-        this.timer = setInterval(async () => {
-            if (this.state.provider === 'local') {
-                const status = await this._fetchBackupPath()
-                if (!status) {
-                    clearInterval(this.timer)
-                }
-            }
-        }, 1000)
-
         const initialBackup = await remoteFunction('hasInitialBackup')()
         const backendLocation = await remoteFunction('getBackendLocation')()
         this.setState({
@@ -47,11 +37,12 @@ export default class OnboardingWhere extends React.Component {
     timer = null
 
     _fetchBackupPath = async () => {
+        let backupPath
         try {
             const response = await fetch(
                 'http://localhost:11922/backup/location',
             )
-            const backupPath = await getStringFromResponseBody(response)
+            backupPath = await getStringFromResponseBody(response)
             if (backupPath && backupPath.length) {
                 this.setState({ backupPath })
             } else {
@@ -61,7 +52,7 @@ export default class OnboardingWhere extends React.Component {
             this.setState({ backupPath: null, overlay: 'download' })
             return false
         }
-        return true
+        return backupPath
     }
 
     _proceedIfServerIsRunning = async provider => {
@@ -87,16 +78,42 @@ export default class OnboardingWhere extends React.Component {
     _handleChangeBackupPath = async () => {
         try {
             await fetch('http://localhost:11922/backup/open-change-location')
-            await this._fetchBackupPath()
-
             const { initialBackup, backendLocation } = this.state
-            if (initialBackup && backendLocation === 'local') {
-                this.setState({
-                    overlay: 'copy',
-                })
-            }
+
+            /* Keep checking backend server for the local backup location */
+            this.timer = setInterval(async () => {
+                if (this.state.provider === 'local') {
+                    const prevLocation = this.state.backupPath
+                    const location = await this._fetchBackupPath()
+                    if (!location) {
+                        this.setState({
+                            overlay: 'download',
+                        })
+                    } else if (location !== prevLocation) {
+                        clearInterval(this.timer)
+                        /* Throw change modal if they are changing from google-drive 
+                           to local. Else throw copy modal if they are just trying to 
+                           change the location. */
+                        if (
+                            initialBackup &&
+                            backendLocation === 'google-drive'
+                        ) {
+                            this.setState({
+                                overlay: 'change',
+                            })
+                        } else if (
+                            initialBackup &&
+                            backendLocation === 'local'
+                        ) {
+                            this.setState({
+                                overlay: 'copy',
+                            })
+                        }
+                    }
+                }
+            }, 1000)
         } catch (err) {
-            this.setState({ overlay: true })
+            this.setState({ overlay: 'download' })
         }
     }
 
@@ -113,7 +130,13 @@ export default class OnboardingWhere extends React.Component {
                     handleChangeBackupPath={this._handleChangeBackupPath}
                     onChange={async provider => {
                         const { backendLocation } = this.state
-                        if (backendLocation && provider !== backendLocation) {
+                        /* Only show the change modal right now, if the user is changing from
+                           local to google-drive. Google drive to Local modal is not shown
+                           right now */
+                        if (
+                            backendLocation === 'local' &&
+                            provider === 'google-drive'
+                        ) {
                             this.setState({
                                 overlay: 'change',
                             })
