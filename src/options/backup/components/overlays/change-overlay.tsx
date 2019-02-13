@@ -23,18 +23,18 @@ export default class ChangeOverlay extends PureComponent<Props, {}> {
                         <div
                             className={styles.colorbutton}
                             onClick={() => {
-                                this.props.onClick('continue')
+                                this.props.onClick('yes')
                             }}
                         >
-                            I copied them over
+                            Yes, get started
                         </div>
                         <div
                             className={styles.greybutton}
                             onClick={() => {
-                                this.props.onClick('cancel')
+                                this.props.onClick('nope')
                             }}
                         >
-                            Start New Backup
+                            Nope, get back
                         </div>
                     </div>
                 </div>
