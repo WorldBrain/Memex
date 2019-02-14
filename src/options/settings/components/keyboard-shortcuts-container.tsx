@@ -3,7 +3,7 @@ import { Checkbox } from '../../../common-ui/components'
 import * as utils from 'src/content-tooltip/utils'
 const styles = require('./settings.css')
 
-class KeyboardShortcuts extends React.PureComponent {
+class KeyboardShortcutsContainer extends React.PureComponent {
     state = {
         shortcutsEnabled: true,
         highlightShortcut: 'h',
@@ -21,23 +21,14 @@ class KeyboardShortcuts extends React.PureComponent {
         const keyboardShortcutsState = await utils.getKeyboardShortcutsState()
         this.setState(keyboardShortcutsState)
     }
-    handleCheckboxToggle = async e => {
+    handleInputChange = async e => {
         const name = e.target.name
-        const value = e.target.checked
+        const value =
+            e.target.type === 'checkbox' ? e.target.checked : e.target.value
         this.setState({ [name]: value })
         await utils.setKeyboardShortcutsState({
             ...this.state,
             [name]: value,
-        })
-    }
-
-    handleInputChange = async e => {
-        e.persist()
-        const name = e.target.name
-        this.setState({ [name]: e.target.value })
-        await utils.setKeyboardShortcutsState({
-            ...this.state,
-            [name]: e.target.value,
         })
     }
 
@@ -52,7 +43,7 @@ class KeyboardShortcuts extends React.PureComponent {
                 <Checkbox
                     id="shortcuts-enabled"
                     isChecked={this.state.shortcutsEnabled}
-                    handleChange={this.handleCheckboxToggle}
+                    handleChange={this.handleInputChange}
                     name="shortcutsEnabled"
                 >
                     Enable Keyboard Shortcuts
@@ -60,7 +51,7 @@ class KeyboardShortcuts extends React.PureComponent {
                 <Checkbox
                     id="link-shortcut"
                     isChecked={this.state.linkShortcutEnabled}
-                    handleChange={this.handleCheckboxToggle}
+                    handleChange={this.handleInputChange}
                     name="linkShortcutEnabled"
                 >
                     Create Links
@@ -74,7 +65,7 @@ class KeyboardShortcuts extends React.PureComponent {
                 <Checkbox
                     id="highlight-shortcut"
                     isChecked={this.state.highlightShortcutEnabled}
-                    handleChange={this.handleCheckboxToggle}
+                    handleChange={this.handleInputChange}
                     name="highlightShortcutEnabled"
                 >
                     Highlight selected text
@@ -88,7 +79,7 @@ class KeyboardShortcuts extends React.PureComponent {
                 <Checkbox
                     id="show-highlights-shortcut"
                     isChecked={this.state.toggleHighlightsShortcutEnabled}
-                    handleChange={this.handleCheckboxToggle}
+                    handleChange={this.handleInputChange}
                     name="toggleHighlightsShortcutEnabled"
                 >
                     Toggle visibility of highlights (with no text selected)
@@ -102,7 +93,7 @@ class KeyboardShortcuts extends React.PureComponent {
                 <Checkbox
                     id="sidebar-shortcut"
                     isChecked={this.state.toggleSidebarShortcutEnabled}
-                    handleChange={this.handleCheckboxToggle}
+                    handleChange={this.handleInputChange}
                     name="toggleSidebarShortcutEnabled"
                 >
                     Toggle Sidebar
@@ -116,7 +107,7 @@ class KeyboardShortcuts extends React.PureComponent {
                 <Checkbox
                     id="annotation-shortcut"
                     isChecked={this.state.createAnnotationShortcutEnabled}
-                    handleChange={this.handleCheckboxToggle}
+                    handleChange={this.handleInputChange}
                     name="createAnnotationShortcutEnabled"
                 >
                     Create Annotation
@@ -132,4 +123,4 @@ class KeyboardShortcuts extends React.PureComponent {
     }
 }
 
-export default KeyboardShortcuts
+export default KeyboardShortcutsContainer

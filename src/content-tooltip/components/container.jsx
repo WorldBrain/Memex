@@ -42,6 +42,7 @@ class TooltipContainer extends React.Component {
     async componentDidMount() {
         this.props.onInit(this.showTooltip)
 
+        const shortcutsState = await getKeyboardShortcutsState()
         const {
             shortcutsEnabled,
             highlightShortcut,
@@ -49,45 +50,7 @@ class TooltipContainer extends React.Component {
             toggleSidebarShortcut,
             toggleHighlightsShortcut,
             createAnnotationShortcut,
-            highlightShortcutEnabled,
-            linkShortcutEnabled,
-            toggleSidebarShortcutEnabled,
-            toggleHighlightsShortcutEnabled,
-            createAnnotationShortcutEnabled,
-        } = await getKeyboardShortcutsState()
-
-        const handleKeyboardShortcuts = e => {
-            if (!userSelectedText()) {
-                switch (e.key) {
-                    case toggleSidebarShortcut:
-                        toggleSidebarShortcutEnabled &&
-                            remoteFunction('toggleSidebar')()
-                        break
-                    case toggleHighlightsShortcut:
-                        toggleHighlightsShortcutEnabled &&
-                            this.toggleHighlights()
-                        break
-                }
-            } else {
-                switch (e.key) {
-                    case linkShortcut:
-                        linkShortcutEnabled && this.createLink()
-                        break
-                    case highlightShortcut:
-                        if (highlightShortcutEnabled) {
-                            this.props.createHighlight()
-                            this.setState({
-                                highlightsOn: true,
-                            })
-                        }
-                        break
-                    case createAnnotationShortcut:
-                        createAnnotationShortcutEnabled &&
-                            this.createAnnotation(e)
-                        break
-                }
-            }
-        }
+        } = shortcutsState
 
         if (shortcutsEnabled) {
             Mousetrap.bind(
@@ -98,8 +61,51 @@ class TooltipContainer extends React.Component {
                     createAnnotationShortcut,
                     toggleSidebarShortcut,
                 ],
-                handleKeyboardShortcuts,
+                this.initHandleKeyboardShortcuts(shortcutsState),
             )
+        }
+    }
+
+    initHandleKeyboardShortcuts = settingsState => e => {
+        const {
+            highlightShortcut,
+            linkShortcut,
+            toggleSidebarShortcut,
+            toggleHighlightsShortcut,
+            createAnnotationShortcut,
+            highlightShortcutEnabled,
+            linkShortcutEnabled,
+            toggleSidebarShortcutEnabled,
+            toggleHighlightsShortcutEnabled,
+            createAnnotationShortcutEnabled,
+        } = settingsState
+        if (!userSelectedText()) {
+            switch (e.key) {
+                case toggleSidebarShortcut:
+                    toggleSidebarShortcutEnabled &&
+                        remoteFunction('toggleSidebar')()
+                    break
+                case toggleHighlightsShortcut:
+                    toggleHighlightsShortcutEnabled && this.toggleHighlights()
+                    break
+            }
+        } else {
+            switch (e.key) {
+                case linkShortcut:
+                    linkShortcutEnabled && this.createLink()
+                    break
+                case highlightShortcut:
+                    if (highlightShortcutEnabled) {
+                        this.props.createHighlight()
+                        this.setState({
+                            highlightsOn: true,
+                        })
+                    }
+                    break
+                case createAnnotationShortcut:
+                    createAnnotationShortcutEnabled && this.createAnnotation(e)
+                    break
+            }
         }
     }
 
@@ -114,7 +120,6 @@ class TooltipContainer extends React.Component {
     }
 
     toggleHighlights = () => {
-        console.log(this.state)
         this.state.highlightsOn
             ? removeHighlights()
             : this.fetchAndHighlightAnnotations()
