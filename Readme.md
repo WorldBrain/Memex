@@ -119,6 +119,7 @@ Apart from that, the only data we obtain are some anonymous analytics on how peo
 
 For a complete list of things we track, visit our [privacy policy](https://worldbrain.io/privacy-policy/).
 
+testwordtotestrestore
 
 ## Thanks to
 [Sentry.io](https://sentry.io) for offering free error tracking to open-source projects and generally having an awesome product
