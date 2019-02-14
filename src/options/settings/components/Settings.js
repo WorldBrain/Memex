@@ -4,7 +4,7 @@ import SearchInjection from './SearchInjectionContainer'
 import IndexingPrefs from './IndexingPrefsContainer'
 import Tooltip from './Tooltip'
 import Ribbon from './Ribbon'
-import KeyboardShortcuts from './KeyboardShortcuts'
+import KeyboardShortcutsContainer from './keyboard-shortcuts-container'
 
 export default () => (
     <React.Fragment>
@@ -12,6 +12,6 @@ export default () => (
         <Tooltip />
         <Ribbon />
         <IndexingPrefs />
-        <KeyboardShortcuts />
+        <KeyboardShortcutsContainer />
     </React.Fragment>
 )
