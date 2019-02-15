@@ -60,3 +60,13 @@ export const setKeyboardShortcutsState = async newKeyboardShortcutsState => {
         newKeyboardShortcutsState,
     )
 }
+
+export const covertKeyboardEventToKeyString = e => {
+    return (
+        (e.altKey ? 'alt+' : '') +
+        (e.ctrlKey ? 'ctrl+' : '') +
+        (e.metaKey ? 'meta+' : '') +
+        (e.shiftKey ? 'shift+' : '') +
+        e.key
+    )
+}
