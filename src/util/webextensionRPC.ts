@@ -19,7 +19,6 @@
 // myRemoteFunc(21).then(result => { ... result is 42! ... })
 
 import mapValues from 'lodash/fp/mapValues'
-import { browser } from 'webextension-polyfill-ts'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -74,8 +73,8 @@ export function remoteFunction(
         try {
             response =
                 tabId !== undefined
-                    ? await browser.tabs.sendMessage(tabId, message)
-                    : await browser.runtime.sendMessage(message)
+                    ? await window['browser'].tabs.sendMessage(tabId, message)
+                    : await window['browser'].runtime.sendMessage(message)
         } catch (err) {
             if (throwWhenNoResponse) {
                 throw new RpcError(
@@ -100,6 +99,9 @@ export function remoteFunction(
 
         // Return the value or throw the error we received from the other side.
         if (response.errorMessage) {
+            console.error(
+                `Error occured on remote side, please check it's console for more details`,
+            )
             throw new RemoteError(response.errorMessage)
         } else {
             return response.returnValue
@@ -139,6 +141,7 @@ async function incomingRPCListener(message, sender) {
     try {
         returnValue = func(extraArg, ...args)
     } catch (error) {
+        console.error(error)
         return {
             errorMessage: error.message,
             [RPC_RESPONSE]: RPC_RESPONSE,
@@ -152,6 +155,7 @@ async function incomingRPCListener(message, sender) {
             [RPC_RESPONSE]: RPC_RESPONSE,
         }
     } catch (error) {
+        console.error(error)
         return {
             errorMessage: error.message,
             [RPC_RESPONSE]: RPC_RESPONSE,
@@ -194,7 +198,7 @@ export function makeRemotelyCallable(
 
     // Enable the listener if needed.
     if (!enabled) {
-        browser.runtime.onMessage.addListener(incomingRPCListener)
+        window['browser'].runtime.onMessage.addListener(incomingRPCListener)
         enabled = true
     }
 }
@@ -202,5 +206,15 @@ export function makeRemotelyCallable(
 export class RemoteFunctionRegistry {
     registerRemotelyCallable(functions, { insertExtraArg = false } = {}) {
         makeRemotelyCallable(functions, { insertExtraArg })
+    }
+}
+
+export function fakeRemoteFunction(functions: {
+    [name: string]: (...args) => any
+}) {
+    return name => {
+        return (...args) => {
+            return Promise.resolve(functions[name](...args))
+        }
     }
 }

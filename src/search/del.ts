@@ -43,3 +43,11 @@ export const delPagesByPattern = (getDb: () => Promise<Dexie>) => (
 
     return deletePages(table => table.filter(page => re.test(page.url)), getDb)
 }
+
+export const dangerousPleaseBeSureDeleteAndRecreateDatabase = (
+    getDb: () => Promise<Dexie>,
+) => async () => {
+    const db = await getDb()
+    await db.delete()
+    await db.open()
+}

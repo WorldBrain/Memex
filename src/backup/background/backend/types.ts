@@ -22,6 +22,10 @@ export interface ObjectChangeBatch {
     forget: () => Promise<void>
 }
 
+export interface ObjectChangeImages {
+    screenshot: string
+}
+
 export abstract class BackupBackend {
     async getLoginUrl(params: any): Promise<string | null> {
         return null
@@ -92,5 +96,13 @@ export abstract class BackupBackend {
                 })
             }
         }
+    }
+
+    async listObjects(collection: string): Promise<string[]> {
+        return null
+    }
+
+    async retrieveObject(collection: string, object: string) {
+        return null
     }
 }

@@ -3,6 +3,8 @@ import { CollectionDefinitions } from 'storex'
 import { FeatureStorage } from '../../search/storage'
 import { StorageManager } from '../../search/types'
 import { ObjectChangeBatch } from './backend/types'
+import { isExcludedFromBackup } from './utils'
+import setupChangeTracking from 'src/backup/background/change-hooks'
 
 export default class BackupStorage extends FeatureStorage {
     static BACKUP_COLL = 'backupChanges'
@@ -27,9 +29,43 @@ export default class BackupStorage extends FeatureStorage {
         ],
     }
 
+    recordingChanges: boolean = false
+
     constructor({ storageManager }: { storageManager: StorageManager }) {
         super(storageManager)
         this.registerCollections()
+    }
+
+    setupChangeTracking() {
+        setupChangeTracking(
+            this.storageManager,
+            this._handleStorageChange.bind(this),
+        )
+    }
+
+    _handleStorageChange({
+        collection,
+        pk,
+        operation,
+    }: {
+        collection: string
+        pk: string
+        operation: string
+    }) {
+        if (!this.recordingChanges) {
+            return
+        }
+
+        const collectionDefinition = this.storageManager.registry.collections[
+            collection
+        ]
+        if (!isExcludedFromBackup(collectionDefinition)) {
+            this.registerChange({
+                collection,
+                pk,
+                operation,
+            })
+        }
     }
 
     async registerChange({
@@ -56,6 +92,14 @@ export default class BackupStorage extends FeatureStorage {
                 objectPk: pk,
                 operation,
             })
+    }
+
+    startRecordingChanges() {
+        this.recordingChanges = true
+    }
+
+    stopRecordingChanges() {
+        this.recordingChanges = false
     }
 
     async *streamChanges(
@@ -127,6 +171,9 @@ export default class BackupStorage extends FeatureStorage {
 export interface LastBackupStorage {
     getLastBackupTime(): Promise<Date>
     storeLastBackupTime(time: Date): Promise<any>
+
+    getLastBackupFinishTime(): Promise<Date>
+    storeLastBackupFinishTime(time: Date): Promise<any>
 }
 
 export class LocalLastBackupStorage implements LastBackupStorage {
@@ -137,14 +184,30 @@ export class LocalLastBackupStorage implements LastBackupStorage {
     }
 
     async getLastBackupTime() {
-        const value = localStorage.getItem(this.key)
+        return this._getTime(this.key)
+    }
+
+    async storeLastBackupTime(time: Date) {
+        await this._setDate(this.key, time)
+    }
+
+    async getLastBackupFinishTime() {
+        return this._getTime(`${this.key}Finish`)
+    }
+
+    async storeLastBackupFinishTime(time: Date) {
+        await this._setDate(`${this.key}Finish`, time)
+    }
+
+    async _getTime(key) {
+        const value = localStorage.getItem(key)
         if (!value) {
             return null
         }
         return new Date(JSON.parse(value))
     }
 
-    async storeLastBackupTime(time: Date) {
-        localStorage.setItem(this.key, JSON.stringify(time.getTime()))
+    async _setDate(key, date) {
+        localStorage.setItem(key, date ? JSON.stringify(date.getTime()) : null)
     }
 }

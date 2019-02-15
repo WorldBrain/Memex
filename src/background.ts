@@ -84,10 +84,7 @@ bgScript.setupWebExtAPIHandlers()
 storageManager.finishInitialization().then(() => {
     setStorexBackend(storageManager.backend)
     internalAnalytics.registerOperations(eventLog)
-    setupChangeTracking(
-        storageManager,
-        backupModule.attemptChangeTrack.bind(backupModule),
-    )
+    backupModule.storage.setupChangeTracking()
 })
 
 // Attach interesting features onto global window scope for interested users
@@ -99,3 +96,5 @@ window['eventLog'] = eventLog
 window['directLinking'] = directLinking
 window['customList'] = customList
 window['notifications'] = notifications
+
+console.log('Background script initialized')

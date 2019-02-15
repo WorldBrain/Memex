@@ -53,15 +53,43 @@ export default class SimpleHttpBackend extends BackupBackend {
     async backupChanges({
         changes,
         events,
+        currentSchemaVersion,
     }: {
         changes: ObjectChange[]
         events: EventEmitter
+        currentSchemaVersion: number
     }) {
-        const body = JSON.stringify(changes, null, 4)
+        const body = JSON.stringify(
+            { version: currentSchemaVersion, changes },
+            null,
+            4,
+        )
 
         await fetch(`${this.url}/change-sets/${Date.now()}`, {
             method: 'PUT',
             body,
         })
+    }
+
+    async listObjects(collection: string): Promise<string[]> {
+        const response = await fetch(`${this.url}/${collection}`)
+        if (response.status === 404) {
+            return []
+        }
+        if (!response.ok) {
+            throw new Error(await response.text())
+        }
+
+        const body = await response.text()
+        const lines = body.split('\n')
+        const matches = lines.map(line => /href="([^"]+)"/g.exec(line))
+        const fileNames = matches
+            .filter(match => !!match)
+            .map(match => match[1])
+        return fileNames
+    }
+
+    async retrieveObject(collection: string, object: string) {
+        return (await fetch(`${this.url}/${collection}/${object}`)).json()
     }
 }
