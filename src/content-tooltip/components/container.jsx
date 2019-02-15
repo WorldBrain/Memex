@@ -20,7 +20,10 @@ import {
     highlightAnnotations,
     removeHighlights,
 } from '../../sidebar-overlay/content_script/interactions'
-import { getKeyboardShortcutsState } from '../utils'
+import {
+    getKeyboardShortcutsState,
+    covertKeyboardEventToKeyString,
+} from '../utils'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -80,7 +83,7 @@ class TooltipContainer extends React.Component {
             createAnnotationShortcutEnabled,
         } = settingsState
         if (!userSelectedText()) {
-            switch (e.key) {
+            switch (covertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
                     toggleSidebarShortcutEnabled &&
                         remoteFunction('toggleSidebar')()
