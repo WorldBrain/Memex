@@ -1,9 +1,8 @@
-@import url('/fonts/googlefonts/lato.css');
 @import url('/fonts/googlefonts/ibm-plex-serif.css');
 
 .commentBoxContainer {
     & > * {
-        font-family: 'Lato', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
 }
 
@@ -17,7 +16,7 @@
         font-size: 15px;
         margin-bottom: 20px;
         font-weight: 800;
-        font-family: 'Lato', serif;
+        font-family: 'Inter', serif;
     }
 
     & .highlightedText {
@@ -41,7 +40,7 @@
     width: 95%;
     font-size: 14px;
     color: #222;
-    font-family: 'Lato';
+    font-family: 'Inter';
     font-style: italic;
     background: #f7f7f7;
     border: none;
@@ -91,7 +90,7 @@
 }
 
 .save {
-    font-family: 'Lato', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-weight: bold;
     color: #000;
@@ -110,7 +109,7 @@
 }
 
 .cancel {
-    font-family: 'Lato', sans-serif;
+    font-family: 'Inter', sans-serif;
     color: #444;
     font-size: 14px;
     font-weight: 500;
@@ -138,7 +137,7 @@
 
 .addNote {
     box-sizing: border-box;
-    font-family: 'Lato', sans-serif;
+    font-family: 'Inter', sans-serif;
     background: #3eb995;
     color: #fff;
     cursor: pointer;

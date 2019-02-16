@@ -5,7 +5,7 @@
 
 .title {
     display: flex;
-    font-family: 'Lato', sans-serif;
+    font-family: 'Inter', sans-serif;
     flex-direction: row;
     width: 100%;
     padding-left: 10px;

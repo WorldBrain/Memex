@@ -1,7 +1,7 @@
-@import url('/fonts/googlefonts/open-sans.css');
+@import url('/fonts/googlefonts/Inter.css');
 
 .privacy {
-    font-family: 'Open Sans';
+    font-family: 'Inter';
 }
 
 .title {
