@@ -31,15 +31,15 @@ export default class ChecklistItem extends PureComponent<Props> {
                     >
                         {this.props.children}{' '}
                     </span>
+                    <p
+                        className={cx(styles.subTitle, {
+                            [styles.striked]: this.props.isChecked,
+                        })}
+                        onClick={this.props.handleClick}
+                    >
+                        {this.props.subtitle}
+                    </p>
                 </div>
-                <p
-                    className={cx(styles.subTitle, {
-                        [styles.striked]: this.props.isChecked,
-                    })}
-                    onClick={this.props.handleClick}
-                >
-                    {this.props.subtitle}
-                </p>
             </React.Fragment>
         )
     }
