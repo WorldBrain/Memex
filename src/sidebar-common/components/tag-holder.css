@@ -34,7 +34,8 @@
     display: inline-block;
     margin-left: 3px;
     color: #4a4a4a;
-    font-style: italic;
+    font-weight: 500;
+    font-family: 'Lato';
 }
 
 .plus {
