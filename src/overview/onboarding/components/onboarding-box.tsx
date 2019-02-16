@@ -9,7 +9,9 @@ class OnboardingBox extends PureComponent {
             <React.Fragment>
                 <div className={styles.container}>
                     <div className={styles.leftParent}>
-                        <p className={styles.welcome}>Welcome to your Memex</p>
+                        <p className={styles.welcome}>
+                            Welcome to <br /> your Memex
+                        </p>
                         <p className={styles.text}>
                             The all-in-one tool to get on top of
                             <br />

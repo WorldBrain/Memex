@@ -28,7 +28,7 @@
     width: 50%;
     text-align: left;
     padding: 30px;
-    background: #f0f0f066;
+    background: #f6f7fb;
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
 }
@@ -41,20 +41,20 @@
 }
 
 .welcome {
-    font-size: 29px;
+    font-size: 28px;
     text-align: center;
-    font-weight: 700;
+    font-weight: 800;
+    font-style: normal;
     font-family: 'Uni Neue';
-    font-style: italic;
-    color: #3eb995;
+    color: #1a2f58;
     line-height: 1;
     margin-top: 15px;
     margin-bottom: 25px;
 }
 
 .text {
-    font-size: 15px;
-    color: #3a3a75;
+    font-size: 14px;
+    color: #1a2f58;
     text-align: center;
     letter-spacing: 0.7px;
 }
