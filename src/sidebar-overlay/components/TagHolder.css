@@ -1,5 +1,3 @@
-@import url('/fonts/googlefonts/lato.css');
-
 .tagHolder {
     font-size: 14px;
     font-weight: 200;
@@ -18,7 +16,7 @@
     box-sizing: border-box;
 
     & > * {
-        font-family: 'Lato', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
 }
 
@@ -51,7 +49,7 @@
 .tagsLeft {
     font-weight: 800;
     color: #888;
-    font-family: 'Lato', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .cross {

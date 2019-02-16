@@ -4,11 +4,8 @@
  */
 export const htmlAssets = [
     'fonts/material-icons/material-icons.css',
-    'fonts/googlefonts/lato.css',
-    'fonts/googlefonts/open-sans.css',
-    'fonts/googlefonts/libre-franklin.css',
+    'fonts/inter.css',
     'lib/browser-polyfill.js',
-    'fonts/googlefonts/nunito.css',
 ]
 
 /**

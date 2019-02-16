@@ -30,7 +30,7 @@
     width: 100%;
     font-size: 1em;
     cursor: pointer;
-    font-family: 'Open Sans';
+    font-family: 'Inter';
     font-weight: 400;
     color: #555;
     padding-left: 20px;
@@ -84,7 +84,7 @@
     background: none;
     padding: 0;
     cursor: pointer;
-    font-family: 'Open Sans';
+    font-family: 'Inter';
     font-weight: 100;
     margin-right: 6px;
     margin-bottom: 6px;
