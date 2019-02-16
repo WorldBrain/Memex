@@ -3,7 +3,7 @@
     grid-template-columns: 80px auto;
     grid-template-rows: 1fr 1fr;
     text-align: left;
-    margin: 25px 0 25px -10px;
+    margin: 10px 0 10px -10px;
 }
 
 .checklistText {
@@ -27,7 +27,7 @@
 
 @media (min-width: 1024px) {
     .subTitle {
-        margin-right: 100px;
+        margin-right: 40px;
         margin-top: -10px;
     }
 }

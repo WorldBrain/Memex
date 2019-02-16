@@ -44,7 +44,7 @@
     text-align: center;
     font-weight: 800;
     font-style: normal;
-    font-family: 'Uni Neue';
+    font-family: 'Inter', sans-serif;
     color: #1a2f58;
     line-height: 1;
     margin-top: 15px;
@@ -81,8 +81,7 @@
     font-size: 18px;
     color: #1a2f58;
     font-weight: 600;
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin-bottom: 10px;
 }
 
 .subtextGreen {
@@ -95,16 +94,16 @@
 .learnMore {
     color: #1a2f58;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: normal;
     border: 2px solid #5cd9a6;
     padding: 7px 24px 8px 24px;
     border-radius: 6px;
     cursor: pointer;
-    margin-right: 20px;
+    margin-bottom: 72px;
     text-decoration: none;
 }
 
-.settings {
+/* .settings {
     background-repeat: no-repeat;
     display: inline-block;
     cursor: pointer;
@@ -115,4 +114,4 @@
     height: 20px;
     margin-left: -19px;
     margin-top: 9px;
-}
+} */

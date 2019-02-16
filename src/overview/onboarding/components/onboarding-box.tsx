@@ -39,7 +39,7 @@ class OnboardingBox extends PureComponent {
                     >
                         Learn more
                     </a>
-                    <a className={styles.settings} href="#privacy" />
+                    {/* <a className={styles.settings} href="#privacy" /> */}
                 </div>
             </React.Fragment>
         )
