@@ -26,7 +26,7 @@ class OnboardingBox extends PureComponent {
                 <div className={styles.footer}>
                     <div className={styles.textContainer}>
                         <p className={styles.bold}>
-                            ALL DATA STORED ON YOUR COMPUTER
+                            All data stored on your computer
                         </p>
                         <p className={styles.subtextGreen}>
                             Your data is not our business model
@@ -37,7 +37,7 @@ class OnboardingBox extends PureComponent {
                         target="_blank"
                         href="https://worldbrain.io/privacy"
                     >
-                        LEARN MORE
+                        Learn more
                     </a>
                     <a className={styles.settings} href="#privacy" />
                 </div>

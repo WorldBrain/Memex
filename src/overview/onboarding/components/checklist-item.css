@@ -4,19 +4,20 @@
 }
 
 .checklistText {
-    color: #333;
-    font-weight: 400;
+    color: #1a2f58;
+    font-weight: 600;
     cursor: pointer;
-    font-size: 15px;
+    vertical-align: top;
+    font-size: 18px;
 }
 
 .subTitle {
     font-size: 14px;
-    margin-left: 30px;
-    margin-top: -22px;
+    margin-left: 60px;
+    margin-top: -40px;
     cursor: pointer;
     margin-right: 20px;
-    color: #333333c7;
+    color: #bcc2bd;
 }
 
 .striked {
@@ -31,13 +32,13 @@
 
 .icon {
     display: inline-block;
-    width: 25px;
-    height: 25px;
+    width: 52px;
+    height: 52px;
     margin-bottom: -9px;
     margin-right: 15px;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 25px;
+    background-size: cover;
     vertical-align: bottom;
     cursor: pointer;
 }
@@ -47,17 +48,17 @@
 }
 
 .step1 {
-    background-image: url('/img/step1.svg');
+    background-image: url('/img/step_onboarding.svg');
 }
 
 .step2 {
-    background-image: url('/img/step2.svg');
+    background-image: url('/img/step_onboarding.svg');
 }
 
 .step3 {
-    background-image: url('/img/step3.svg');
+    background-image: url('/img/step_onboarding.svg');
 }
 
 .step4 {
-    background-image: url('/img/step4.svg');
+    background-image: url('/img/step_onboarding.svg');
 }

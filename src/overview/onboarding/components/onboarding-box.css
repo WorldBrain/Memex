@@ -1,6 +1,6 @@
 .container {
     width: 95%;
-    max-width: 800px;
+    max-width: 875px;
     height: 500px;
     background-color: #fff;
     margin: 150px auto 30px auto;
@@ -25,7 +25,7 @@
 }
 
 .leftParent {
-    width: 50%;
+    width: 55%;
     text-align: left;
     padding: 30px;
     background: #f6f7fb;
@@ -34,7 +34,7 @@
 }
 
 .rightParent {
-    width: 50%;
+    width: 60%;
     padding: 30px 30px 30px 55px;
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
@@ -74,38 +74,34 @@
 
 .footer {
     display: flex;
-    flex-direction: row;
-    width: 610px;
-    margin: 0px auto;
-    justify-content: space-evenly;
+    flex-direction: column;
+    align-items: center;
 }
 
 .bold {
-    font-size: 15px;
-    color: #000;
-    font-weight: 500;
+    font-size: 18px;
+    color: #1a2f58;
+    font-weight: 600;
     margin-top: 0px;
     margin-bottom: 0px;
 }
 
 .subtextGreen {
-    color: #3eb995;
-    font-size: 13px;
-    text-align: left;
+    color: #598b7c;
+    font-size: 14px;
+    text-align: center;
     margin-top: 0px;
 }
 
 .learnMore {
-    color: white;
-    background-color: #3eb995;
-    font-size: 13px;
+    color: #1a2f58;
+    font-size: 12px;
     font-weight: bold;
-    padding: 3px 24px 4px 24px;
-    border-radius: 15px;
+    border: 2px solid #5cd9a6;
+    padding: 7px 24px 8px 24px;
+    border-radius: 6px;
     cursor: pointer;
-    margin-top: 6px;
-    margin-bottom: 20px;
-    margin-right: -30px;
+    margin-right: 20px;
     text-decoration: none;
 }
 
