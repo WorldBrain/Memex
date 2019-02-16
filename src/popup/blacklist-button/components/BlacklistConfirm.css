@@ -1,4 +1,4 @@
-@import url('/fonts/googlefonts/open-sans.css');
+@import url('/fonts/googlefonts/Inter.css');
 
 .container {
     display: flex;
@@ -36,7 +36,7 @@
     padding-top: 5px;
     padding-bottom: 5px;
     border: 1px solid #3eb995;
-    font-family: 'Open Sans';
+    font-family: 'Inter';
     cursor: pointer;
     background-color: white;
     color: #3eb995;

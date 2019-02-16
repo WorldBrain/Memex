@@ -1,10 +1,8 @@
-@import url('/fonts/googlefonts/open-sans.css');
-
 .resultMessage {
     text-align: center;
     margin-top: 80px;
     font-size: 20px;
-    font-family: 'Open Sans';
+    font-family: 'Inter';
     color: grey;
     animation-name: fadeIn;
     animation-duration: 0.4s;
