@@ -1,15 +1,15 @@
 .title {
     text-align: left;
-    font-size: 18px;
-    color: #22227d;
-    font-weight: 400;
+    font-size: 12px;
+    font-weight: bold;
+    color: #1a2f58;
 }
 
 .subtext {
     text-align: left;
     margin-top: -12px;
-    color: #4a4a4a;
-    font-size: 15px;
+    color: #1a2f58;
+    font-size: 24px;
     margin-bottom: 30px;
 }
 

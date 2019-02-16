@@ -28,14 +28,14 @@ class Checklist extends PureComponent<Props> {
             >
                 <p className={styles.title}>
                     {!this.props.congratsMessage ? (
-                        'GET STARTED'
+                        'Get started'
                     ) : (
                         <span>CONGRATS!</span>
                     )}
                 </p>
                 <p className={styles.subtext}>
                     {!this.props.congratsMessage
-                        ? 'with 30 sec interactive tutorials'
+                        ? '30 sec interactive tutorials'
                         : 'You have completed all tutorials'}
                 </p>
 
