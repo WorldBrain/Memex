@@ -1,13 +1,15 @@
 .container {
     width: 95%;
-    max-width: 800px;
+    max-width: 850px;
     height: 500px;
     background-color: #fff;
     margin: 150px auto 30px auto;
     display: flex;
     font-size: 16px;
     font-family: 'Inter', sans-serif;
-    box-shadow: 0px 2px 4px 0px #00000026;
+    box-shadow: 0px 70px 0px -70px rgba(14, 23, 68, 0.2),
+        -50px 70px 70px -70px rgba(14, 23, 68, 0.2),
+        50px 70px 70px -70px rgba(14, 23, 68, 0.2);
     border-radius: 6px;
 }
 
@@ -28,7 +30,7 @@
     width: 50%;
     text-align: left;
     padding: 30px;
-    background: #f0f0f066;
+    background: #f6f7fb;
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
 }
@@ -44,9 +46,8 @@
     font-size: 29px;
     text-align: center;
     font-weight: 700;
-    font-family: 'Uni Neue';
-    font-style: italic;
-    color: #3eb995;
+    font-family: 'Inter', sans-serif;
+    color: #1a2f58;
     line-height: 1;
     margin-top: 15px;
     margin-bottom: 25px;
@@ -74,42 +75,43 @@
 
 .footer {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 610px;
     margin: 0px auto;
     justify-content: space-evenly;
+    align-items: center;
 }
 
 .bold {
     font-size: 15px;
-    color: #000;
-    font-weight: 500;
-    margin-top: 0px;
+    color: #1a2f58;
+    font-weight: 600;
+    margin-top: 20px;
     margin-bottom: 0px;
 }
 
 .subtextGreen {
-    color: #3eb995;
+    color: #598b7c;
     font-size: 13px;
-    text-align: left;
-    margin-top: 0px;
+    text-align: center;
+    margin-top: 10px;
 }
 
 .learnMore {
-    color: white;
-    background-color: #3eb995;
+    color: #1a2f58;
     font-size: 13px;
-    font-weight: bold;
-    padding: 3px 24px 4px 24px;
-    border-radius: 15px;
+    font-weight: 600;
+    padding: 7px 24px 8px 24px;
+    border: 2px solid #5cd9a6;
+    border-radius: 6px;
     cursor: pointer;
     margin-top: 6px;
-    margin-bottom: 20px;
-    margin-right: -30px;
+    margin-bottom: 72px;
+    margin-right: 4px;
     text-decoration: none;
 }
 
-.settings {
+/* .settings {
     background-repeat: no-repeat;
     display: inline-block;
     cursor: pointer;
@@ -120,4 +122,4 @@
     height: 20px;
     margin-left: -19px;
     margin-top: 9px;
-}
+} */
