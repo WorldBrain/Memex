@@ -44,11 +44,13 @@ export const highlightAnnotations = async (
     focusOnAnnotation: (url: string) => void,
     hoverAnnotationContainer: (url: string) => void,
 ) => {
-    annotations.forEach(async annotation =>
-        highlightAnnotation(
-            { annotation },
-            focusOnAnnotation,
-            hoverAnnotationContainer,
+    await Promise.all(
+        annotations.map(async annotation =>
+            highlightAnnotation(
+                { annotation },
+                focusOnAnnotation,
+                hoverAnnotationContainer,
+            ),
         ),
     )
 }
