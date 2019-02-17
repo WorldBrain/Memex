@@ -111,7 +111,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
 
         // Highlight any annotations with anchor.
         // (Done here as only in-page sidebar requires to do this.)
-        this._highlightAnnotations()
+        await this._highlightAnnotations()
     }
 
     private _closeSidebarCallback = () => {
@@ -131,11 +131,11 @@ class RibbonSidebarContainer extends React.Component<Props> {
         }, 200)
     }
 
-    private _highlightAnnotations = () => {
+    private _highlightAnnotations = async () => {
         const annotations = this.props.annotations.filter(
             annotation => !!annotation.selector,
         )
-        this.props.highlightAll(
+        await this.props.highlightAll(
             annotations,
             this._focusOnAnnotation,
             this._hoverAnnotation,

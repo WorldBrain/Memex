@@ -132,7 +132,7 @@ class SidebarContainer extends React.Component<Props, State> {
             activeAnnotationUrl,
             hoverAnnotationUrl,
             handleAddCommentBtnClick,
-            sortAnnotationsByPosition,
+            // sortAnnotationsByPosition,
             showCommentBox,
             showCongratsMessage,
         } = this.props
@@ -142,11 +142,12 @@ class SidebarContainer extends React.Component<Props, State> {
                 env={env}
                 isOpen={isOpen}
                 isLoading={isLoading}
-                annotations={
-                    sortAnnotationsByPosition
-                        ? sortAnnotationsByPosition(annotations)
-                        : annotations
-                }
+                // annotations={
+                //     sortAnnotationsByPosition
+                //         ? sortAnnotationsByPosition(annotations)
+                //         : annotations
+                // }
+                annotations={annotations}
                 activeAnnotationUrl={activeAnnotationUrl}
                 hoverAnnotationUrl={hoverAnnotationUrl}
                 showCommentBox={showCommentBox}
