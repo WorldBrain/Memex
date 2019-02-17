@@ -1,16 +1,16 @@
 .title {
     text-align: left;
-    font-size: 12px;
+    font-size: 0.75rem;
     color: #1a2f58;
     font-weight: bold;
 }
 
 .subtext {
     text-align: left;
-    margin-top: -12px;
+    margin-top: -0.5rem;
     color: #1a2f58;
-    font-size: 24px;
-    margin-bottom: 30px;
+    font-size: 1.5rem;
+    margin-bottom: 3rem;
 }
 
 .container {

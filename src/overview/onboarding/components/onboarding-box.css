@@ -1,11 +1,11 @@
 .container {
     width: 95%;
-    max-width: 850px;
-    height: 500px;
+    max-width: 50rem;
+    height: 32rem;
     background-color: #fff;
     margin: 150px auto 30px auto;
     display: flex;
-    font-size: 16px;
+    font-size: 1rem;
     font-family: 'Inter', sans-serif;
     box-shadow: 0px 70px 0px -70px rgba(14, 23, 68, 0.2),
         -50px 70px 70px -70px rgba(14, 23, 68, 0.2),
@@ -22,7 +22,7 @@
     }
 
     .text {
-        font-size: 15px;
+        font-size: 0.875rem;
     }
 }
 
@@ -43,7 +43,7 @@
 }
 
 .welcome {
-    font-size: 29px;
+    font-size: 1.75rem;
     text-align: center;
     font-weight: 700;
     font-family: 'Inter', sans-serif;
@@ -54,7 +54,7 @@
 }
 
 .text {
-    font-size: 15px;
+    font-size: 1rem;
     color: #3a3a75;
     text-align: center;
     letter-spacing: 0.7px;
@@ -83,7 +83,7 @@
 }
 
 .bold {
-    font-size: 15px;
+    font-size: 1rem;
     color: #1a2f58;
     font-weight: 600;
     margin-top: 20px;
@@ -92,14 +92,14 @@
 
 .subtextGreen {
     color: #598b7c;
-    font-size: 13px;
+    font-size: 0.8125rem;
     text-align: center;
     margin-top: 10px;
 }
 
 .learnMore {
     color: #1a2f58;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 600;
     padding: 7px 24px 8px 24px;
     border: 2px solid #5cd9a6;

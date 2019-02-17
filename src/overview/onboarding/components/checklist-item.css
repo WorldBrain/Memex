@@ -7,11 +7,11 @@
     color: #1a2f58;
     font-weight: 400;
     cursor: pointer;
-    font-size: 15px;
+    font-size: 0.9375rem;
 }
 
 .subTitle {
-    font-size: 14px;
+    font-size: 0.875rem;
     margin-left: 58px;
     margin-top: -26px;
     cursor: pointer;
@@ -33,7 +33,7 @@
     display: inline-block;
     width: 52px;
     height: 52px;
-    margin-bottom: -36px;
+    margin-bottom: -2rem;
     margin-right: 15px;
     background-repeat: no-repeat;
     background-position: center;
