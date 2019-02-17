@@ -1,10 +1,11 @@
 .container {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    max-width: 75%;
+    width: 95%;
+    max-width: 50rem;
+    height: 32rem;
     background-color: #fff;
     margin: 150px auto 30px auto;
-    font-size: 16px;
+    display: flex;
+    font-size: 1rem;
     font-family: 'Inter', sans-serif;
     box-shadow: 0px 70px 0px -70px rgba(14, 23, 68, 0.2),
         -50px 70px 70px -70px rgba(14, 23, 68, 0.2),
@@ -21,7 +22,7 @@
     }
 
     .text {
-        font-size: 15px;
+        font-size: 0.875rem;
     }
 }
 
@@ -42,10 +43,9 @@
 }
 
 .welcome {
-    font-size: 28px;
+    font-size: 1.75rem;
     text-align: center;
-    font-weight: 800;
-    font-style: normal;
+    font-weight: 700;
     font-family: 'Inter', sans-serif;
     color: #1a2f58;
     line-height: 1;
@@ -54,8 +54,8 @@
 }
 
 .text {
-    font-size: 14px;
-    color: #1a2f58;
+    font-size: 1rem;
+    color: #3a3a75;
     text-align: center;
     letter-spacing: 0.7px;
 }
@@ -76,32 +76,38 @@
 .footer {
     display: flex;
     flex-direction: column;
+    width: 610px;
+    margin: 0px auto;
+    justify-content: space-evenly;
     align-items: center;
 }
 
 .bold {
-    font-size: 18px;
+    font-size: 1rem;
     color: #1a2f58;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-top: 20px;
+    margin-bottom: 0px;
 }
 
 .subtextGreen {
     color: #598b7c;
-    font-size: 14px;
+    font-size: 0.8125rem;
     text-align: center;
-    margin-top: 0px;
+    margin-top: 10px;
 }
 
 .learnMore {
     color: #1a2f58;
-    font-size: 12px;
-    font-weight: normal;
-    border: 2px solid #5cd9a6;
+    font-size: 0.8125rem;
+    font-weight: 600;
     padding: 7px 24px 8px 24px;
+    border: 2px solid #5cd9a6;
     border-radius: 6px;
     cursor: pointer;
+    margin-top: 6px;
     margin-bottom: 72px;
+    margin-right: 4px;
     text-decoration: none;
 }
 
