@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Checkbox } from '../../../common-ui/components'
 import * as utils from 'src/content-tooltip/utils'
+import { convertKeyboardEventToKeyString } from '../../../content-tooltip/utils'
 const styles = require('./settings.css')
 
 class KeyboardShortcutsContainer extends React.PureComponent {
@@ -21,14 +22,23 @@ class KeyboardShortcutsContainer extends React.PureComponent {
         const keyboardShortcutsState = await utils.getKeyboardShortcutsState()
         this.setState(keyboardShortcutsState)
     }
-    handleInputChange = async e => {
+    handleToggle = async e => {
         const name = e.target.name
-        const value =
-            e.target.type === 'checkbox' ? e.target.checked : e.target.value
+        const value = e.target.checked
         this.setState({ [name]: value })
         await utils.setKeyboardShortcutsState({
             ...this.state,
             [name]: value,
+        })
+    }
+    recordBinding = async e => {
+        e.preventDefault()
+        const binding = convertKeyboardEventToKeyString(e)
+        const name = e.target.name
+        this.setState({ [name]: binding })
+        await utils.setKeyboardShortcutsState({
+            ...this.state,
+            [name]: binding,
         })
     }
 
@@ -48,7 +58,7 @@ class KeyboardShortcutsContainer extends React.PureComponent {
                 <Checkbox
                     id="shortcuts-enabled"
                     isChecked={this.state.shortcutsEnabled}
-                    handleChange={this.handleInputChange}
+                    handleChange={this.handleToggle}
                     name="shortcutsEnabled"
                 >
                     Enable Keyboard Shortcuts
@@ -56,70 +66,70 @@ class KeyboardShortcutsContainer extends React.PureComponent {
                 <Checkbox
                     id="link-shortcut"
                     isChecked={this.state.linkShortcutEnabled}
-                    handleChange={this.handleInputChange}
+                    handleChange={this.handleToggle}
                     name="linkShortcutEnabled"
                 >
                     Create Links
                     <input
                         type="text"
                         value={this.state.linkShortcut}
-                        onChange={this.handleInputChange}
+                        onKeyDown={this.recordBinding}
                         name="linkShortcut"
                     />{' '}
                 </Checkbox>
                 <Checkbox
                     id="highlight-shortcut"
                     isChecked={this.state.highlightShortcutEnabled}
-                    handleChange={this.handleInputChange}
+                    handleChange={this.handleToggle}
                     name="highlightShortcutEnabled"
                 >
                     Highlight selected text
                     <input
                         type="text"
                         value={this.state.highlightShortcut}
-                        onChange={this.handleInputChange}
+                        onKeyDown={this.recordBinding}
                         name="highlightShortcut"
                     />{' '}
                 </Checkbox>
                 <Checkbox
                     id="show-highlights-shortcut"
                     isChecked={this.state.toggleHighlightsShortcutEnabled}
-                    handleChange={this.handleInputChange}
+                    handleChange={this.handleToggle}
                     name="toggleHighlightsShortcutEnabled"
                 >
                     Toggle visibility of highlights (with no text selected)
                     <input
                         type="text"
                         value={this.state.toggleHighlightsShortcut}
-                        onChange={this.handleInputChange}
+                        onKeyDown={this.recordBinding}
                         name="toggleHighlightsShortcut"
                     />{' '}
                 </Checkbox>
                 <Checkbox
                     id="sidebar-shortcut"
                     isChecked={this.state.toggleSidebarShortcutEnabled}
-                    handleChange={this.handleInputChange}
+                    handleChange={this.handleToggle}
                     name="toggleSidebarShortcutEnabled"
                 >
                     Toggle Sidebar
                     <input
                         type="text"
                         value={this.state.toggleSidebarShortcut}
-                        onChange={this.handleInputChange}
+                        onKeyDown={this.recordBinding}
                         name="toggleSidebarShortcut"
                     />{' '}
                 </Checkbox>
                 <Checkbox
                     id="annotation-shortcut"
                     isChecked={this.state.createAnnotationShortcutEnabled}
-                    handleChange={this.handleInputChange}
+                    handleChange={this.handleToggle}
                     name="createAnnotationShortcutEnabled"
                 >
                     Create Annotation
                     <input
                         type="text"
                         value={this.state.createAnnotationShortcut}
-                        onChange={this.handleInputChange}
+                        onKeyDown={this.recordBinding}
                         name="createAnnotationShortcut"
                     />{' '}
                 </Checkbox>
