@@ -54,12 +54,6 @@ export default function({
             filename: 'options.html',
             template,
         }),
-        new HtmlPlugin({
-            title: 'Sidebar',
-            chunks: ['sidebar'],
-            filename: 'sidebar.html',
-            template,
-        }),
         new HtmlIncAssetsPlugin({
             append: false,
             assets: staticFiles.htmlAssets,

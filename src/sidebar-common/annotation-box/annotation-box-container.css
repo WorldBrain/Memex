@@ -1,0 +1,65 @@
+@import url('/fonts/Inter/inter.css');
+
+.container {
+    box-sizing: border-box;
+    width: 95.3%;
+    background-color: #fff;
+    border-radius: 5px;
+    color: #4a4a4a;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    border: 1px #d2d2d2 solid;
+    margin: 13px 0 0 0;
+    box-shadow: 0px 0px 5px 0px #00000040;
+    transition: border 0.05s ease-in;
+
+    & > * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    &:hover,
+    &.isHovered {
+        border-color: #3db994;
+    }
+
+    &.isActive {
+        border-color: #3db994b8;
+        box-shadow: 0px 0px 5px 1px #00000050;
+    }
+
+    &.isJustComment {
+        background: #f0f0f0;
+    }
+}
+
+.isClickable {
+    cursor: pointer;
+}
+
+.timestamp {
+    max-width: 100%;
+    font-size: 10px;
+    text-align: right;
+    vertical-align: middle;
+    padding: 16px 16px 8px 16px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    color: #4a4a4a;
+
+    & .lastEdit {
+        font-weight: 400;
+        color: #929292;
+        margin: 0 5px 0 -1px;
+    }
+}
+
+.highlight {
+    font-family: 'Inter', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    margin: 0 0 5px 0;
+    padding: 17px 15px 7px 15px;
+    line-height: 20px;
+}

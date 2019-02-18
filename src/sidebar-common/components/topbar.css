@@ -1,0 +1,55 @@
+.topbar {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2147483647;
+    padding: 7.5px;
+    height: 42px;
+    border-bottom: 1px solid #d2d2d2;
+    box-sizing: border-box;
+    box-shadow: 4px 5px 28px 1px white;
+}
+
+.right {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.settingsBtn {
+    background-image: url('/img/settings.svg');
+    background-color: #fff;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    margin-right: 10px;
+}
+
+.addCommentBtn {
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+    background: #3eb995;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    padding: 5px 6px;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    font-weight: 100;
+    vertical-align: middle;
+
+    &.disabled {
+        background: #bbb;
+        color: #efefef;
+        cursor: not-allowed;
+    }
+}
