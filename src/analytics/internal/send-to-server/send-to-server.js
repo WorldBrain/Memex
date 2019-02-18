@@ -1,7 +1,5 @@
 import { idleManager } from 'src/util/idle'
-import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from 'src/options/privacy/constants'
-import { generateTokenIfNot } from 'src/util/generate-token'
-import { INSTALL_TIME_KEY } from '../../../constants'
+import { shouldTrack, fetchUserId } from '../../utils'
 
 class SendToServer {
     static DEF_TRACKING = true
@@ -53,11 +51,11 @@ class SendToServer {
      * @return {Promise<Response>}
      */
     _sendReq = async event => {
-        if (!(await this.shouldTrack())) {
+        if (!(await shouldTrack(SendToServer.DEF_TRACKING))) {
             return
         }
 
-        const userId = await this.fetchUserId()
+        const userId = await fetchUserId()
 
         if (!userId) {
             return
@@ -77,12 +75,15 @@ class SendToServer {
      * @return {Promise<boolean>}
      */
     _sendBulkReq = async () => {
-        if (!this._pool.size || !(await this.shouldTrack())) {
+        if (
+            !this._pool.size ||
+            !(await shouldTrack(SendToServer.DEF_TRACKING))
+        ) {
             this._pool.clear() // Clear pool if user turned off tracking
             return
         }
 
-        const userId = await this.fetchUserId()
+        const userId = await fetchUserId()
 
         if (!userId) {
             return
@@ -99,33 +100,6 @@ class SendToServer {
         }
     }
 
-    async fetchUserId() {
-        if (!(await this.shouldTrack())) {
-            return null
-        }
-
-        const installTime = (await browser.storage.local.get(INSTALL_TIME_KEY))[
-            INSTALL_TIME_KEY
-        ]
-        const userId = await generateTokenIfNot(installTime)
-
-        return userId
-    }
-
-    async shouldTrack() {
-        const isDoNotTrackEnabled = window.navigator.doNotTrack
-
-        if (isDoNotTrackEnabled) {
-            return false
-        }
-
-        const storage = await browser.storage.local.get({
-            [SHOULD_TRACK]: SendToServer.DEF_TRACKING,
-        })
-
-        return storage[SHOULD_TRACK]
-    }
-
     /**
      * Track any user-invoked events.
      *
@@ -133,7 +107,7 @@ class SendToServer {
      * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
     async trackEvent(event, force = false) {
-        if (!(await this.shouldTrack())) {
+        if (!(await shouldTrack(SendToServer.DEF_TRACKING))) {
             return
         }
 

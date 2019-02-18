@@ -1,5 +1,6 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import analytics, { updateLastActive } from '..'
+import analytics from '..'
+import { updateLastActive } from '../utils'
 import './periodic'
 
 makeRemotelyCallable({

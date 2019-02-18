@@ -2,6 +2,7 @@ import moment from 'moment-timezone'
 
 import analytics from '../'
 import { STORAGE_KEYS, SCHEDULES, TIMEZONE } from '../constants'
+import countlyAnalytics from '../countly'
 
 /*
  * The purpose of this module is to attempt reimplement standard active user metrics
@@ -70,6 +71,10 @@ const attemptPeriodicPing = async (
                 category: 'Periodic',
                 action: `${action} activity ping`,
             })
+
+            countlyAnalytics.trackEvent({
+                type: 'activity',
+            })
         }
 
         // Update last ping time to stop further attempts in current period, regardless if active event was sent
@@ -81,6 +86,10 @@ const attemptPeriodicPing = async (
         analytics.trackEvent({
             category: 'Periodic',
             action: `${action} install ping`,
+        })
+
+        countlyAnalytics.trackEvent({
+            type: 'install',
         })
 
         await browser.storage.local.set({ [installKey]: Date.now() })
@@ -100,6 +109,6 @@ browser.alarms.onAlarm.addListener(alarm =>
     attemptPeriodicPing(alarm.name, getActivePeriodVars(alarm.name)),
 )
 
-createPeriodicEventJob('month')
-createPeriodicEventJob('week')
+// createPeriodicEventJob('month')
+// createPeriodicEventJob('week')
 createPeriodicEventJob('day')

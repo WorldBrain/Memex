@@ -38,7 +38,6 @@ class Container extends React.Component {
         this.changePosition = this.changePosition.bind(this)
         this.handleClickTick = this.handleClickTick.bind(this)
 
-        this.updateLastActive = remoteFunction('updateLastActive')
         this.trackEvent = remoteFunction('trackEvent')
         this.readNotification = remoteFunction('readNotification')
         this.fetchNotifById = remoteFunction('fetchNotifById')
@@ -86,7 +85,10 @@ class Container extends React.Component {
         })
     }
 
-    handleResultLinkClick = () => this.updateLastActive()
+    handleResultLinkClick = () =>
+        this.processEvent({
+            type: EVENT_NAMES.CLICK_RESULT_LINK,
+        })
 
     renderResultItems() {
         const resultItems = this.props.results.map((result, i) => (
@@ -101,7 +103,6 @@ class Container extends React.Component {
     }
 
     seeMoreResults() {
-        this.updateLastActive()
         // Create a new tab with the query overview URL
         const query = new URL(location.href).searchParams.get('q')
         this.openOverviewRPC(query)
