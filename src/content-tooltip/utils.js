@@ -61,12 +61,16 @@ export const setKeyboardShortcutsState = async newKeyboardShortcutsState => {
     )
 }
 
-export const covertKeyboardEventToKeyString = e => {
+function isAlpha(str) {
+    return /^[a-zA-Z]+$/.test(str)
+}
+
+export const convertKeyboardEventToKeyString = e => {
     return (
         (e.altKey ? 'alt+' : '') +
         (e.ctrlKey ? 'ctrl+' : '') +
         (e.metaKey ? 'meta+' : '') +
         (e.shiftKey ? 'shift+' : '') +
-        e.key
+        (isAlpha(e.key) ? e.key.toLowerCase() : e.key)
     )
 }

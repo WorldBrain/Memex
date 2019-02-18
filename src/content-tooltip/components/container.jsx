@@ -22,7 +22,7 @@ import {
 } from '../../sidebar-overlay/content_script/interactions'
 import {
     getKeyboardShortcutsState,
-    covertKeyboardEventToKeyString,
+    convertKeyboardEventToKeyString,
 } from '../utils'
 
 class TooltipContainer extends React.Component {
@@ -83,7 +83,7 @@ class TooltipContainer extends React.Component {
             createAnnotationShortcutEnabled,
         } = settingsState
         if (!userSelectedText()) {
-            switch (covertKeyboardEventToKeyString(e)) {
+            switch (convertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
                     toggleSidebarShortcutEnabled &&
                         remoteFunction('toggleSidebar')()
@@ -93,7 +93,7 @@ class TooltipContainer extends React.Component {
                     break
             }
         } else {
-            switch (e.key) {
+            switch (convertKeyboardEventToKeyString(e)) {
                 case linkShortcut:
                     linkShortcutEnabled && this.createLink()
                     break
