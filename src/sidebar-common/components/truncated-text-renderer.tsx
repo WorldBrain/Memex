@@ -53,7 +53,7 @@ class TruncatedTextRenderer extends React.Component<Props, State> {
 
         return (
             <React.Fragment>
-                "{textToBeDisplayed}"
+                {textToBeDisplayed}
                 {isTextTooLong && (
                     <button
                         className={cx(styles.showMoreBtn, {
