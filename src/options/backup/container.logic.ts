@@ -4,6 +4,7 @@ import {
     redirectToGDriveLogin,
     redirectToAutomaticBackupPurchase,
 } from 'src/options/backup/utils'
+import { browser } from 'webextension-polyfill-ts'
 
 export async function getInitialState({
     analytics,
@@ -226,9 +227,12 @@ export async function processEvent({
                     },
                     true,
                 )
-                const provider = event.choice
+                const location = event.choice
+                await browser.storage.local.set({
+                    backendInfo: { location },
+                })
 
-                if (provider === 'google-drive' && !state.isAuthenticated) {
+                if (location === 'google-drive' && !state.isAuthenticated) {
                     localStorage.setItem('backup.restore.authenticating', true)
                     return { redirect: { to: 'gdrive-login' } }
                 } else {

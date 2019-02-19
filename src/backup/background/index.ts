@@ -86,6 +86,9 @@ export class BackupBackgroundModule {
                     await this.backupProcedure.cancel()
                 },
                 startRestore: async ({ tab }) => {
+                    if (!this.backend) {
+                        await this.setBackendFromStorage()
+                    }
                     this.restoreUiCommunication.registerUiTab(tab)
                     await this.startRestore()
                 },
