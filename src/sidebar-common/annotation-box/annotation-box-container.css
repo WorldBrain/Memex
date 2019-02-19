@@ -6,16 +6,11 @@
     background-color: #fff;
     border-radius: 5px;
     color: #4a4a4a;
-    font-family: 'Inter', sans-serif;
     font-size: 13px;
     border: 1px #d2d2d2 solid;
     margin: 13px 0 0 0;
     box-shadow: 0px 0px 5px 0px #00000040;
     transition: border 0.05s ease-in;
-
-    & > * {
-        font-family: 'Inter', sans-serif;
-    }
 
     &:hover,
     &.isHovered {
@@ -43,7 +38,6 @@
     vertical-align: middle;
     padding: 16px 16px 8px 16px;
     font-weight: 600;
-    font-family: 'Inter', sans-serif;
     color: #4a4a4a;
 
     & .lastEdit {
@@ -54,10 +48,10 @@
 }
 
 .highlight {
-    font-family: 'Inter', serif;
     font-style: italic;
     font-weight: 400;
-    font-size: 14px;
+    font-size: 17px;
+    font-family: 'IBM sans-serif';
     letter-spacing: 0.5px;
     margin: 0 0 5px 0;
     padding: 17px 15px 7px 15px;
