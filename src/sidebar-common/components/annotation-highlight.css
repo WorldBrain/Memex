@@ -8,12 +8,10 @@
         font-size: 15px;
         margin-bottom: 20px;
         font-weight: 800;
-        font-family: 'Lato', serif;
     }
 
     & .highlightedText {
         font-size: 14px;
-        font-family: 'IBM Plex Serif', serif;
         line-height: 19px;
         letter-spacing: 0.5px;
         font-style: italic;
