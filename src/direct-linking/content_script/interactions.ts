@@ -1,7 +1,7 @@
 import { remoteFunction } from '../../util/webextensionRPC'
 import { copyToClipboard } from './utils'
 import * as annotations from './annotations'
-import { highlightAnnotations } from '../../sidebar-overlay/content_script/interactions'
+import { highlightAnnotations } from '../../sidebar-overlay/content_script/highlight-interactions'
 
 export interface Anchor {
     quote: string
@@ -36,10 +36,12 @@ export const createAnnotation = async () => {
 }
 
 const fetchAndHighlightAnnotations = async () => {
-    const annotations = await remoteFunction('getAllAnnotations')(
+    const annotationList = await remoteFunction('getAllAnnotationsByUrl')(
         window.location.href,
     )
-    const highlightables = annotations.filter(annotation => annotation.selector)
+    const highlightables = annotationList.filter(
+        annotation => annotation.selector,
+    )
     highlightAnnotations(highlightables)
 }
 export async function createHighlight() {
