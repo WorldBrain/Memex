@@ -226,8 +226,9 @@ export async function processEvent({
                     },
                     true,
                 )
+                const provider = event.choice
 
-                if (!state.isAuthenticated) {
+                if (provider === 'google-drive' && !state.isAuthenticated) {
                     localStorage.setItem('backup.restore.authenticating', true)
                     return { redirect: { to: 'gdrive-login' } }
                 } else {

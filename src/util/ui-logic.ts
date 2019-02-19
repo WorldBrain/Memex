@@ -104,7 +104,8 @@ export function _doDispatch(
                 `Dispatched ${type} without handler: ${dispatched.type}`,
             )
         }
-        handler()
+        const args = dispatched.args ? Object.values(dispatched.args) : []
+        handler(...args)
     }
 }
 

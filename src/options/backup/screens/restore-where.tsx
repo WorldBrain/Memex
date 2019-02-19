@@ -50,7 +50,11 @@ export default class RestoreWhere extends React.Component<Props> {
                     FROM WHERE?
                 </p>
                 <ProviderList
-                    backupPath={this.state.backupPath}
+                    backupPath={
+                        this.state.provider === 'local'
+                            ? this.state.backupPath
+                            : null
+                    }
                     handleChangeBackupPath={this.handleChangeBackupPath}
                     onChange={value =>
                         this.handleEvent({ type: 'onProviderChoice', value })
@@ -58,7 +62,11 @@ export default class RestoreWhere extends React.Component<Props> {
                 />
                 <PrimaryButton
                     disabled={!this.state.valid}
-                    onClick={() => this.handleEvent({ type: 'onConfirm' })}
+                    onClick={() =>
+                        this.handleEvent({
+                            type: 'onConfirm',
+                        })
+                    }
                 >
                     Continue
                 </PrimaryButton>

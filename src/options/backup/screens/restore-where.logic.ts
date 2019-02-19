@@ -42,7 +42,9 @@ export const processEvent = compositeEventProcessor({
         return {
             dispatch: state.valid && {
                 type: 'onChoice',
-                choice: state.provider,
+                args: {
+                    choice: state.provider,
+                },
             },
         }
     },
