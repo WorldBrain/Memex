@@ -1,6 +1,7 @@
 import { remoteFunction } from '../../util/webextensionRPC'
 import { copyToClipboard } from './utils'
 import * as annotations from './annotations'
+import { highlightAnnotations } from '../../sidebar-overlay/content_script/highlight-interactions'
 
 export interface Anchor {
     quote: string
@@ -32,6 +33,35 @@ export const createAnnotation = async () => {
     const anchor = await extractAnchor(selection)
     await remoteFunction('toggleSidebarOverlay')({ anchor, override: true })
     selectTextFromRange(range)
+}
+
+const fetchAndHighlightAnnotations = async () => {
+    const annotationList = await remoteFunction('getAllAnnotationsByUrl')(
+        window.location.href,
+    )
+    const highlightables = annotationList.filter(
+        annotation => annotation.selector,
+    )
+    highlightAnnotations(highlightables)
+}
+export async function createHighlight() {
+    const selection = document.getSelection()
+    const range = selection.getRangeAt(0)
+    const url = window.location.href
+    const title = document.title
+
+    const anchor = await extractAnchor(selection)
+    const body = anchor ? anchor.quote : ''
+    await remoteFunction('createAnnotation')({
+        url,
+        title,
+        comment: '',
+        tags: [],
+        body,
+        selector: anchor,
+    })
+    selectTextFromRange(range)
+    fetchAndHighlightAnnotations()
 }
 
 const extractAnchor = async (selection: Selection): Promise<Anchor> => {
