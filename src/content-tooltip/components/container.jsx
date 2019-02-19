@@ -19,7 +19,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import {
     highlightAnnotations,
     removeHighlights,
-} from '../../sidebar-overlay/content_script/interactions'
+} from '../../sidebar-overlay/content_script/highlight-interactions'
 import {
     getKeyboardShortcutsState,
     convertKeyboardEventToKeyString,
@@ -86,7 +86,7 @@ class TooltipContainer extends React.Component {
             switch (convertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
                     toggleSidebarShortcutEnabled &&
-                        remoteFunction('toggleSidebar')()
+                        remoteFunction('toggleSidebarOverlay')()
                     break
                 case toggleHighlightsShortcut:
                     toggleHighlightsShortcutEnabled && this.toggleHighlights()
@@ -113,7 +113,7 @@ class TooltipContainer extends React.Component {
     }
 
     fetchAndHighlightAnnotations = async () => {
-        const annotations = await remoteFunction('getAllAnnotations')(
+        const annotations = await remoteFunction('getAllAnnotationsByUrl')(
             window.location.href,
         )
         const highlightables = annotations.filter(

@@ -41,8 +41,8 @@ export const highlightAndScroll = (annotation: Annotation) => {
  */
 export const highlightAnnotations = async (
     annotations: Annotation[],
-    focusOnAnnotation: (url: string) => void,
-    hoverAnnotationContainer: (url: string) => void,
+    focusOnAnnotation?: (url: string) => void,
+    hoverAnnotationContainer?: (url: string) => void,
 ) => {
     await Promise.all(
         annotations.map(async annotation =>
