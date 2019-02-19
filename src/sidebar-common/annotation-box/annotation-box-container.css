@@ -50,10 +50,9 @@
 .highlight {
     font-style: italic;
     font-weight: 400;
-    font-size: 17px;
-    font-family: 'IBM sans-serif';
+    font-size: 14px;
     letter-spacing: 0.5px;
     margin: 0 0 5px 0;
-    padding: 17px 15px 7px 15px;
+    padding: 15px 15px 7px 15px;
     line-height: 20px;
 }
