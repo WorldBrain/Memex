@@ -19,7 +19,6 @@
 .blacklistText {
     font-size: 16px;
     font-weight: 600;
-    font-family: 'Inter';
     color: #666;
     margin: 20px 0 10px 0;
 }
@@ -27,7 +26,6 @@
 .blacklistAlert {
     font-size: 12px;
     font-weight: bold;
-    font-family: 'Inter';
     color: rgb(255, 74, 85);
     margin: 10px 0px 10px 0;
 }
