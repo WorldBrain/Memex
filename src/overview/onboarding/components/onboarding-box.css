@@ -27,6 +27,7 @@
 }
 
 .leftParent {
+    width: 25rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -37,6 +38,7 @@
 }
 
 .rightParent {
+    width: 25rem;
     padding: 30px 30px 30px 55px;
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
