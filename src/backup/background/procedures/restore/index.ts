@@ -181,13 +181,13 @@ export class BackupRestoreProcedure {
             await collection.createObject(change.object)
         } else if (change.operation === 'update') {
             // console.log('updating', _getChangeWhere(change), change.object)
-            await collection.updateOneObject(
+            await collection.updateObjects(
                 this._getChangeWhere(change),
                 change.object,
             )
         } else if (change.operation === 'delete') {
             // console.log('deleting', _getChangeWhere(change))
-            await collection.deleteOneObject(this._getChangeWhere(change))
+            await collection.deleteObjects(this._getChangeWhere(change))
         }
     }
 
