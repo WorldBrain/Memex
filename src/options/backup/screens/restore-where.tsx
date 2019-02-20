@@ -63,7 +63,7 @@ export default class RestoreWhere extends React.Component<Props> {
 
     private handleChangeBackupPath = async () => {
         try {
-            await fetch('http://localhost:11922/backup/open-change-location')
+            await fetch('http://localhost:11922/backup/start-change-location')
             // TODO: Update path
         } catch (err) {
             this.handleEvent({ type: 'onChangeOverlay', overlay: 'download' })

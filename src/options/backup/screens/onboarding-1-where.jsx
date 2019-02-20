@@ -77,7 +77,7 @@ export default class OnboardingWhere extends React.Component {
 
     _handleChangeBackupPath = async () => {
         try {
-            await fetch('http://localhost:11922/backup/open-change-location')
+            await fetch('http://localhost:11922/backup/start-change-location')
             const { initialBackup, backendLocation } = this.state
 
             /* Keep checking backend server for the local backup location */
