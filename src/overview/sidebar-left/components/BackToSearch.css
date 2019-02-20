@@ -3,7 +3,6 @@
     display: flex;
     flex-direction: row;
     top: 100px;
-    font-family: 'Inter';
     justify-content: space-evenly;
     padding: 11px 13px 10px 7px;
     color: #777;

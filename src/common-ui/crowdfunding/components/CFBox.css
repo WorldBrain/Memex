@@ -22,7 +22,6 @@
     align-items: center;
 
     & > * {
-        font-family: 'Inter', sans-serif;
         box-sizing: border-box;
     }
 }
@@ -34,7 +33,6 @@
     line-height: 32px;
     letter-spacing: 1px;
     margin-bottom: 10px;
-    font-family: 'Inter', sans-serif;
     font-weight: bolder;
     font-size: 25px;
 }

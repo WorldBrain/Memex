@@ -1,5 +1,3 @@
-@import url('/fonts/googlefonts/ibm-plex-serif.css');
-
 .commentBoxContainer {
     & > * {
         font-family: 'Inter', sans-serif;
