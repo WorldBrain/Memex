@@ -54,6 +54,9 @@ export class BackupBackgroundModule {
         makeRemotelyCallable(
             {
                 getBackupProviderLoginLink: async (info, params) => {
+                    if (!this.backend) {
+                        await this.setBackendFromStorage()
+                    }
                     const url = await this.backend.getLoginUrl(params)
                     return url
                 },
