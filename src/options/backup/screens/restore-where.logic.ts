@@ -11,6 +11,7 @@ interface State {
     provider: 'google-drive' | 'local'
     valid: boolean
     backupPath: string
+    overlay: string
 }
 
 export const PROVIDERS: Providers = {
@@ -22,9 +23,16 @@ export const INITIAL_STATE: State = {
     provider: null,
     valid: false,
     backupPath: null,
+    overlay: null,
 }
 
 export const processEvent = compositeEventProcessor({
+    onChangeOverlay: ({ event }) => {
+        const overlay = event.overlay
+        return {
+            updateState: { overlay },
+        }
+    },
     onChangeBackupPath: ({ event }) => {
         const backupPath = event.backupPath
         return {
