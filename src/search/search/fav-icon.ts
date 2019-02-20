@@ -1,9 +1,13 @@
-import db, { Storage } from '..'
+import { Dexie } from '../types'
 import { transformUrl } from '../pipeline'
+import { initErrHandler } from '../storage'
 
-export async function domainHasFavIcon(url: string) {
+export const domainHasFavIcon = (getDb: () => Promise<Dexie>) => async (
+    url: string,
+) => {
+    const db = await getDb()
     const { hostname } = transformUrl(url)
 
-    const res = await db.favIcons.get(hostname).catch(Storage.initErrHandler())
+    const res = await db.favIcons.get(hostname).catch(initErrHandler())
     return res != null
 }

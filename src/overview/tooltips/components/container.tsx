@@ -2,13 +2,11 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 
 import Tooltip from './tooltip'
-import TimeFilterTooltip from './time-filter-tooltip'
+import SearchBarTooltip from './search-bar-tooltip'
 import * as acts from '../actions'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
 import { getBottomCenter } from '../utils'
-
-const styles = require('./tooltip.css')
 
 export interface Props {
     showTooltip: boolean
@@ -38,16 +36,7 @@ class TooltipContainer extends Component<Props> {
                     nextTooltip={this.props.nextTooltip}
                     closeTooltip={this.props.closeTooltip}
                 >
-                    <div>
-                        Search with any word you remember from a website you've
-                        seen before
-                        <p className={styles.subInfo}>
-                            Make sure you visited some, or{' '}
-                            <a target="_blank" href="#import">
-                                imported your existing history
-                            </a>
-                        </p>
-                    </div>
+                    <SearchBarTooltip />
                 </Tooltip>
             )
         }
@@ -60,7 +49,7 @@ class TooltipContainer extends Component<Props> {
                     nextTooltip={this.props.nextTooltip}
                     previousTooltip={this.props.previousTooltip}
                 >
-                    <TimeFilterTooltip />
+                    Filter by time
                 </Tooltip>
             )
         }

@@ -3,6 +3,7 @@ import path from 'path'
 import initLoaderRules from './loaders'
 import initPlugins from './plugins'
 import initMinimizers from './minimizers'
+import { externalTsModules } from './external'
 
 export const extensions = ['.ts', '.tsx', '.js', '.jsx', '.coffee']
 
@@ -11,7 +12,6 @@ export const entry = {
     popup: './src/popup/index.tsx',
     content_script: './src/content_script.js',
     options: './src/options/options.jsx',
-    sidebar: './src/sidebar-overlay/sidebar.js',
 }
 
 export const htmlTemplate = path.resolve(__dirname, './template.html')
@@ -22,6 +22,22 @@ export const output = {
 }
 
 export default ({ context = __dirname, mode = 'development', ...opts }) => {
+    const aliases = {
+        src: path.resolve(context, './src'),
+    }
+    for (const externalTsModule of externalTsModules) {
+        Object.assign(aliases, {
+            [`${externalTsModule}$`]: path.resolve(
+                context,
+                `./external/${externalTsModule}/ts`,
+            ),
+            [`${externalTsModule}/lib`]: path.resolve(
+                context,
+                `./external/${externalTsModule}/ts`,
+            ),
+        })
+    }
+
     const conf = {
         context,
         entry,
@@ -43,10 +59,7 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
             extensions,
             symlinks: false,
             mainFields: ['browser', 'main', 'module'],
-            alias: {
-                src: path.resolve(context, './src'),
-                external: path.resolve(context, './external'),
-            },
+            alias: aliases,
         },
         stats: {
             assetsSort: 'size',

@@ -2,7 +2,7 @@ import { createAction } from 'redux-act'
 
 import { Thunk } from '../types'
 import * as selectors from './selectors'
-import onboardingCheck from '../onboarding-helper'
+import * as onboarding from 'src/overview/onboarding/popup-helper'
 
 export const setShowTagsPicker = createAction<boolean>('tags/showTagsPicker')
 export const setTags = createAction<string[]>('tags/setTags')
@@ -18,5 +18,6 @@ export const deleteTag = createAction<string>('tags/deleteTag')
 
 export const addTagToPage = (tag: string) => async dispatch => {
     dispatch(addTag(tag))
-    await onboardingCheck()
+    await onboarding.checkForTaggingStage()
 }
+export const setAllTabs = createAction<boolean>('tags/setAllTabs')

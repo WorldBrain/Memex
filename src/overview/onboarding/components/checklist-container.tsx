@@ -3,11 +3,10 @@ import { connect } from 'react-redux'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
-import * as constants from '../constants'
-import { browser } from 'webextension-polyfill-ts'
-import { setLocalStorage } from 'src/util/storage'
-import Checklist from './checklist'
+import { FLOWS, STAGES } from '../constants'
+import * as utils from '../utils'
 
+import Checklist from './checklist'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import * as tooltipsActs from '../../tooltips/actions'
@@ -15,10 +14,10 @@ import * as resultSelectors from '../../results/selectors'
 
 export interface StateProps {
     showOnboardingBox: boolean
-    annotationStage: string
-    powerSearchStage: string
-    taggingStage: string
-    backupStage: string
+    isAnnotationDone: boolean
+    isPowerSearchDone: boolean
+    isTaggingDone: boolean
+    isBackupDone: boolean
     noResults: boolean
     congratsMessage: boolean
 }
@@ -39,91 +38,79 @@ export type Props = StateProps & DispatchProps & OwnProps
 
 class OnboardingChecklist extends React.Component<Props> {
     processEvent = remoteFunction('processEvent')
+    openOptionsTab = remoteFunction('openOptionsTab')
 
     async componentDidMount() {
         await this.props.fetchShowOnboarding()
         await this.props.fetchOnboardingStages()
     }
 
-    _setOnboardingKey = async (step: string, value: string) => {
-        await setLocalStorage(
-            constants.STORAGE_KEYS.onboardingDemo[step],
-            value,
-        )
-    }
-
-    _openDemoPage = async () => {
-        const url = constants.ANNOTATION_DEMO_URL
-        await browser.tabs.create({ url })
-    }
-
-    handleAnnotationStage = async () => {
-        if (this.props.annotationStage === 'DONE') {
+    private handleAnnotationStage = async () => {
+        if (this.props.isAnnotationDone) {
             return
         }
+
+        await utils.setOnboardingStage(FLOWS.annotation, STAGES.redirected)
+        await utils.openDemoPage()
 
         this.processEvent({
             type: EVENT_NAMES.START_ANNOTATION_ONBOARDING,
         })
-
-        await this._setOnboardingKey('step1', 'highlight_text')
-        await this._openDemoPage()
     }
 
-    handlePowerSearchStage = async () => {
-        if (this.props.powerSearchStage === 'DONE') {
+    private handlePowerSearchStage = async () => {
+        if (this.props.isPowerSearchDone) {
             return
         }
-
-        this.processEvent({
-            type: EVENT_NAMES.START_POWERSEARCH_ONBOARDING,
-        })
 
         /*
         If there are no results in Overview, take user to the Wiki
         Else, directly start the onboarding tooltip process.
         */
         if (this.props.noResults) {
-            await this._setOnboardingKey('step2', 'redirected')
-            await this._openDemoPage()
+            await utils.setOnboardingStage(FLOWS.powerSearch, STAGES.redirected)
+            await utils.openDemoPage()
         } else {
-            await this._setOnboardingKey('step2', 'overview-tooltips')
+            await utils.setOnboardingStage(
+                FLOWS.powerSearch,
+                STAGES.powerSearch.overviewTooltips,
+            )
             this.props.initOnboardingTooltips()
         }
-    }
 
-    handleTaggingStage = async () => {
-        if (this.props.taggingStage === 'DONE') {
-            return
-        }
-        // TODO: Add analytics
-        await this._setOnboardingKey('step3', 'redirected')
-        await this._openDemoPage()
-    }
-
-    handleBackupStage = async () => {
-        if (this.props.backupStage === 'DONE') {
-            return
-        }
-
-        // TODO: Add analytics
-        await browser.tabs.create({
-            url: browser.runtime.getURL(constants.BACKUP_URL),
-            active: true,
+        this.processEvent({
+            type: EVENT_NAMES.START_POWERSEARCH_ONBOARDING,
         })
+    }
+
+    private handleTaggingStage = async () => {
+        if (this.props.isTaggingDone) {
+            return
+        }
+
+        await utils.setOnboardingStage(FLOWS.tagging, STAGES.redirected)
+        await utils.openDemoPage()
+
+        this.processEvent({
+            type: EVENT_NAMES.START_TAGGING_ONBOARDING,
+        })
+    }
+
+    private handleBackupStage = async () => {
+        if (this.props.isBackupDone) {
+            return
+        }
+
+        this.openOptionsTab('backup')
         await this.props.setBackupStageDone()
+
+        this.processEvent({
+            type: EVENT_NAMES.FINISH_BACKUP_ONBOARDING,
+        })
     }
 
     render() {
-        const {
-            showOnboardingBox,
-            annotationStage,
-            powerSearchStage,
-            taggingStage,
-            backupStage,
-        } = this.props
-
-        if (!showOnboardingBox) {
+        if (!this.props.showOnboardingBox) {
             return null
         }
 
@@ -131,10 +118,10 @@ class OnboardingChecklist extends React.Component<Props> {
             <Checklist
                 isRightBox={this.props.isRightBox}
                 congratsMessage={this.props.congratsMessage}
-                isAnnotationChecked={annotationStage === 'DONE'}
-                isPowerSearchChecked={powerSearchStage === 'DONE'}
-                isTaggingChecked={taggingStage === 'DONE'}
-                isBackupChecked={backupStage === 'DONE'}
+                isAnnotationChecked={this.props.isAnnotationDone}
+                isPowerSearchChecked={this.props.isPowerSearchDone}
+                isTaggingChecked={this.props.isTaggingDone}
+                isBackupChecked={this.props.isBackupDone}
                 handleAnnotationStage={this.handleAnnotationStage}
                 handlePowerSearchStage={this.handlePowerSearchStage}
                 handleTaggingStage={this.handleTaggingStage}
@@ -147,10 +134,10 @@ class OnboardingChecklist extends React.Component<Props> {
 
 const mapStateToProps = state => ({
     showOnboardingBox: selectors.showOnboardingBox(state),
-    annotationStage: selectors.annotationStage(state),
-    powerSearchStage: selectors.powerSearchStage(state),
-    taggingStage: selectors.taggingStage(state),
-    backupStage: selectors.backupStage(state),
+    isAnnotationDone: selectors.isAnnotationDone(state),
+    isPowerSearchDone: selectors.isPowerSearchDone(state),
+    isTaggingDone: selectors.isTaggingDone(state),
+    isBackupDone: selectors.isBackupDone(state),
     congratsMessage: selectors.congratsMessage(state),
     noResults: resultSelectors.noResults(state),
 })

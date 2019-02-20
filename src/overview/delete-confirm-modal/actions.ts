@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import { remoteFunction } from '../../util/webextensionRPC'
-import analytics, { updateLastActive } from '../../analytics'
+import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as selectors from './selectors'
 import { acts as resultsActs } from '../results'
@@ -44,6 +44,5 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     } finally {
         dispatch(searchFilterActs.removeTagFromFilter())
         dispatch(resetDeleteIndex())
-        updateLastActive() // Consider user active (analytics)
     }
 }

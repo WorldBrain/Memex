@@ -21,7 +21,6 @@
     &:hover,
     &:focus {
         color: #3eb995;
-        background: rgb(229, 229, 229) !important;
         outline: 0;
     }
 }
@@ -31,7 +30,6 @@
     width: 100%;
     font-size: 1em;
     cursor: pointer;
-    font-family: 'Open Sans';
     font-weight: 400;
     color: #555;
     padding-left: 20px;
@@ -46,7 +44,6 @@
     &:hover,
     &:focus {
         color: rgb(62, 185, 149);
-        background: rgb(229, 229, 229);
         outline: 0;
     }
 }
@@ -86,7 +83,6 @@
     background: none;
     padding: 0;
     cursor: pointer;
-    font-family: 'Open Sans';
     font-weight: 100;
     margin-right: 6px;
     margin-bottom: 6px;

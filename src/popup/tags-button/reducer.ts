@@ -9,12 +9,15 @@ export interface State {
     tags: string[]
     /** Holds the initial tag suggestions to display for user tag search. */
     initTagSuggestions: string[]
+    /** Denotes whether or not the popup should show the tags picker for multiedit. */
+    allTabs: boolean
 }
 
 export const defState: State = {
     showTagsPicker: false,
     tags: [],
     initTagSuggestions: [],
+    allTabs: false,
 }
 
 const reducer = createReducer<State>({}, defState)
@@ -27,6 +30,11 @@ reducer.on(acts.setShowTagsPicker, (state, payload) => ({
 reducer.on(acts.setTags, (state, payload) => ({
     ...state,
     tags: payload,
+}))
+
+reducer.on(acts.setAllTabs, (state, payload) => ({
+    ...state,
+    allTabs: payload,
 }))
 
 reducer.on(acts.setInitTagSuggests, (state, payload) => ({
@@ -57,7 +65,7 @@ reducer.on(acts.deleteTag, (state, payload) => {
     const tagIndex = state.tags.indexOf(payload)
     const suggestionIndex = state.initTagSuggestions.indexOf(payload)
 
-    // Remote the tag from the list of tags.
+    // Remove the tag from the list of tags.
     const tags = [
         ...state.tags.slice(0, tagIndex),
         ...state.tags.slice(tagIndex + 1),

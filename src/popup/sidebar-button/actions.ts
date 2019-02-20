@@ -38,16 +38,10 @@ export const toggleSidebarFlag: () => Thunk = () => async (
 
 export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
     const state = getState()
-    const tabId = popup.tabId(state)
     const isLoggable = popup.isLoggable(state)
     if (!isLoggable) {
         return
     }
 
-    const isEnabled = await getSidebarState()
-    if (!isEnabled) {
-        await remoteFunction('insertRibbon', { tabId })({ override: true })
-    }
-
-    await remoteFunction('toggleSidebarOverlay', { tabId })()
+    await remoteFunction('toggleSidebarOverlay')({ override: true })
 }

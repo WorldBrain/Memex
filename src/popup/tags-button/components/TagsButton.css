@@ -3,4 +3,29 @@
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.6;
+    float: left;
+}
+
+.button {
+    flex: 7;
+    text-align: left;
+}
+
+.buttonBulk {
+    flex: 1;
+}
+
+.buttonContainer {
+    display: flex;
+}
+
+.allTabs {
+    background-image: url('/img/multiedit.svg');
+    background-repeat: no-repeat;
+    margin-left: -8px;
+    background-size: 22px;
+
+    &:hover {
+        background-image: url('/img/multiedit_green.svg');
+    }
 }

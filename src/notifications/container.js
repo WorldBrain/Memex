@@ -111,7 +111,7 @@ class NotificationContainer extends Component {
                             this.handleOpenNewTab(action.url, id)
                         }
                     >
-                        {button.label}{' '}
+                        {button.label}
                     </ActionButton>
                 )
             } else if (action.type === actionTypes.TOGGLE_SETTING) {
@@ -133,7 +133,7 @@ class NotificationContainer extends Component {
                             definition: action,
                         })}
                     >
-                        {button.label}{' '}
+                        {button.label}
                     </ActionButton>
                 )
             }

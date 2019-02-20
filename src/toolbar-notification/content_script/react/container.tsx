@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { setLocalStorage } from 'src/util/storage'
 
 import TooltipFirstCloseNotification from './notifications/tooltip-first-close'
 import RibbonFirstCloseNotification from './notifications/ribbon-first-close'
@@ -10,7 +9,8 @@ import PowerSearchBrowse from './notifications/power-search-browse'
 import GoToDashboard from './notifications/go-to-dashboard'
 import TagThisPage from './notifications/tag-this-page'
 
-import { STORAGE_KEYS } from 'src/overview/onboarding/constants'
+import { setOnboardingStage } from 'src/overview/onboarding/utils'
+import { FLOWS, STAGES } from 'src/overview/onboarding/constants'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 const styles = require('./styles.css')
@@ -98,9 +98,9 @@ export class ToolbarNotification extends Component<Props> {
                             this.processEventRPC({
                                 type: EVENT_NAMES.POWERSEARCH_GOTO_DASH,
                             })
-                            await setLocalStorage(
-                                STORAGE_KEYS.onboardingDemo.step2,
-                                'overview-tooltips',
+                            await setOnboardingStage(
+                                FLOWS.powerSearch,
+                                STAGES.powerSearch.overviewTooltips,
                             )
                             this.openOptionsTab('overview')
                         }}

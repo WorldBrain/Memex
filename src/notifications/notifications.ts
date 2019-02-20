@@ -60,33 +60,48 @@ export const releaseTime: number = 1542240979258
 
 export const NOTIFS: NotifDefinition[] = [
     {
-        id: 'backups_launch',
+        id: 'restore',
         search: {
-            title: "Don't lose your knowledge!",
-            message: 'Backup your data to Google Drive',
+            title: "Tab Manager, shortcuts, restore",
+            message: 'A release packed with new features',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.io/pricing',
+                        url: 'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
                         context: 'new-tab',
                     },
-                    label: 'Backup Now',
+                    label: 'Find out more',
+                },
+            ],
+        },
+        system: {
+            title: 'Tab Manager & shortcuts',
+            message:
+                'A release packed with new features',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
+                        context: 'new-tab',
+                    },
+                    label: 'Learn More',
                 },
             ],
         },
         overview: {
-            title: "Don't lose your knowledge!",
+            title: "Tab Manager, keyboard shortcuts & restore",
             message:
-                'Backup your data for free with our new Google Drive backup.',
+                'Check out our latest release packed with new features',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: '/options.html#/backup',
+                        url: 'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
                         context: 'new-tab',
                     },
-                    label: 'Backup Now',
+                    label: 'Find out more',
                 },
             ],
         },

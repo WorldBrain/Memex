@@ -22,11 +22,13 @@ export interface TabState {
     isActive: boolean
     isLoaded: boolean
     isBookmarked: boolean
+    isLoggable: boolean
     visitTime: number
     activeTime: number
     lastActivated: number
     scrollState: ScrollState
     navState: NavState
+    windowId: number
 }
 
 export type TabChangeListener = (

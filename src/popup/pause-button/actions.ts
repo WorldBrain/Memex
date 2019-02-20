@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import { getPauseState } from '../../activity-logger'
-import analytics, { updateLastActive } from '../../analytics'
+import analytics from '../../analytics'
 import { remoteFunction } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
@@ -36,8 +36,6 @@ export const togglePaused: () => Thunk = () => (dispatch, getState) => {
             : EVENT_NAMES.PAUSE_INDEXING,
         details: isPaused ? undefined : { pauseValue: pauseTime },
     })
-
-    updateLastActive() // Consider user active (analytics)
 
     // Tell background script to pause
     togglePauseRPC(pauseTime)

@@ -1,11 +1,12 @@
 import { EventEmitter } from 'events'
 import * as AllRaven from 'raven-js'
-// tslint:disable-next-line:variable-name
-const Raven = AllRaven['default']
 import { GoogleDriveClient } from './client'
 import { DriveTokenManager, DriveTokenStore } from './token-manager'
-import { BackupBackend, ObjectChange } from '../types'
+import { BackupBackend, ObjectChange, ObjectChangeImages } from '../types'
 import encodeBlob from '../../../../util/encode-blob'
+
+// tslint:disable-next-line:variable-name
+const Raven = AllRaven['default']
 
 export { LocalStorageDriveTokenStore } from './token-manager'
 
@@ -75,33 +76,6 @@ export class DriveBackupBackend extends BackupBackend {
         })
     }
 
-    // async storeObject({
-    //     collection,
-    //     pk,
-    //     object,
-    //     events,
-    // }: {
-    //     collection: string
-    //     pk: string
-    //     object: object
-    //     events: EventEmitter
-    // }): Promise<any> {
-    //     // await new Promise(resolve => setTimeout(resolve, 3000))
-    //     await this.client.storeObject({ collection, pk, object })
-    // }
-
-    // async deleteObject({
-    //     collection,
-    //     pk,
-    //     events,
-    // }: {
-    //     collection: string
-    //     pk: string
-    //     events: EventEmitter
-    // }): Promise<any> {
-    //     await this.client.deleteObject({ collection, pk })
-    // }
-
     async backupChanges({
         changes,
         events,
@@ -131,7 +105,8 @@ export class DriveBackupBackend extends BackupBackend {
             fileName: Date.now().toString(),
             object: { version: currentSchemaVersion, changes },
         })
-        if (images.length) {
+
+        if (options.storeBlobs && images.length) {
             await this.client.storeObject({
                 folderName: 'images',
                 fileName: Date.now().toString(),
@@ -139,20 +114,43 @@ export class DriveBackupBackend extends BackupBackend {
             })
         }
     }
+
+    async listObjects(collection: string): Promise<string[]> {
+        await this.tokenManager.refreshAccessToken()
+        const collectionFolderId = await this.client.getFolderChildId(
+            'appDataFolder',
+            collection,
+        )
+        return Object.keys(await this.client.listFolder(collectionFolderId))
+    }
+
+    async retrieveObject(collection: string, object: string) {
+        await this.tokenManager.refreshAccessToken()
+        const collectionFolderId = await this.client.getFolderChildId(
+            'appDataFolder',
+            collection,
+        )
+        const collectionFolderContents = await this.client.listFolder(
+            collectionFolderId,
+        )
+        const objectFileId = collectionFolderContents[object]
+        return this.client.getFile(objectFileId, { json: true })
+    }
 }
 
 export async function _prepareBackupChangeForStorage(change: ObjectChange) {
-    const images = {}
+    const images: Partial<ObjectChangeImages> = {}
     if (
         change.collection === 'pages' &&
         change.object != null &&
         change.object.screenshot != null
     ) {
         try {
-            images['screenshot'] = await encodeBlob(change.object.screenshot)
+            images.screenshot = await encodeBlob(change.object.screenshot)
         } catch (e) {
             Raven.captureException(e)
         }
+        change.object.screenshot = undefined
     }
 
     if (

@@ -8,6 +8,7 @@ export interface Props {
     bookmarks: boolean
     memexLinks: boolean
     stubs: boolean
+    screenshots: boolean
     visits: boolean
     visitDelay: number
     visitDelayMin?: number
@@ -15,6 +16,7 @@ export interface Props {
     toggleBookmarks: CheckboxToggle
     toggleLinks: CheckboxToggle
     toggleStubs: CheckboxToggle
+    toggleScreenshots: CheckboxToggle
     toggleVisits: CheckboxToggle
     handleVisitDelayChange: (e: React.SyntheticEvent<HTMLInputElement>) => void
 }
@@ -67,6 +69,13 @@ class IndexingPrefs extends React.PureComponent<Props> {
                     handleChange={this.props.toggleStubs}
                 >
                     Make title and url always searchable (recommended)
+                </Checkbox>
+                <Checkbox
+                    id="index-screenshots"
+                    isChecked={this.props.screenshots}
+                    handleChange={this.props.toggleScreenshots}
+                >
+                    Capture screenshots
                 </Checkbox>
                 <p className={styles.subText}>
                     Did you know? You can also blacklist domains and urls.

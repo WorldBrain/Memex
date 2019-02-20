@@ -27,6 +27,12 @@ This could take a while....
 $ yarn
 ```
 
+**Clone [Storex](https://github.com/WorldBrain/storex) submodules that we depend on**
+
+```sh
+git submodule update --init --recursive
+```
+
 **Now run `yarn watch` to compile incremental builds**
 
 ```sh
@@ -152,15 +158,40 @@ code.
 **Now you are ready to hack! 😃**
 We recommend reading through the [Code Overview](#code-overview) to get an idea of how the extension works and also looking @ [Submitting Changes](#submitting-changes) before making any pull requests.
 
-### Documenting
+## Managing dependencies
+
+We currently use yarn and its lockfile to manage all of our main dependencies that are
+available on either NPM or GitHub. Please use `yarn add $PACKAGE_NAME` to add any new
+deps and properly update the lockfile (please don't manually attempt to update the lockfile).
+Likewise, `yarn remove $PACKAGE_NAME` handles removal.
+
+Please be aware that managing deps via the `npm` CLI tool will **not** update the lockfile.
+
+For deps that aren't available on NPM or GitHub, these will require some more complicated form
+of management. We will treat these on a case-by-case basis and discuss with the team.
+
+## Documenting
 
 We try to encourage documententing module exports using JSDoc with TypeScript, and also higher level overviews of different "feature modules" (directories containing multiple modules related to a particular feature) in README markdown modules.
 
 If you have made changes to any exports in existing modules, please update the corresponding docs if needed.
 
-If you are creating a new feature module, please add a brief overview in the way of a README in the corresponding directory. 
+If you are creating a new feature module, please add a brief overview in the way of a README in the corresponding directory.
 
-### Styling
+## Naming conventions
+
+Over the course of the Memex project's life, different naming conventions
+for different files/modules have crept in. You'll see JS and TS modules often differing
+in the naming conventions they are named with depending on the type of code they contain.
+
+For all future contributions, we request that you please name any new JS/TS/CSS modules
+using `kebab-case`.
+
+We also ask that you postfix `-container` to any module name where the main export is
+a React container component. There may be certain cases where this isn't as obvious or
+appropriate though. Hopefully we can resolve that in the review stage.
+
+## Styling
 
 We are using [prettier](https://github.com/prettier/prettier).
 This will automatically format all the styling for the code every time a commit is made, so you can focus on coding and not on code styling.
@@ -169,20 +200,19 @@ This will automatically format all the styling for the code every time a commit 
 
 ## A brief overview of Web Extensions
 
-A web extension consists of three main parts:
+A web extension consists of a number of different scripts:
 
 -   `background.js` always runs, in an 'empty invisible tab', listening for
     messages and events.
 -   `content_script.js` is loaded into every web page that is visited. It is
     invisible from that web page's own scripts, and can talk to the background script.
+-   **User Interfaces**, The UI's are set up and declared in the `src/manifest.json` file. At the moment these consist of the popup and options scripts.
 
--   **User Interfaces**, The UI's are set up and declared in the `extension/manifest.json` file and at the moment consist of four elements the Popup, Overview, Options and Omnibar.
+Certain modules in the source code will end up in each of these scripts after
+being output from the build process, depending on the `import` trails throughout
+different modules. Each script is completely distinct from any other script. The main thing this means is you **should not** `import` from a module in the one script from any module in another script, or you end up duplicating the all the modules specific to one script in multiple other scripts in the build output. This is the main reason for our [`util/webextensionRPC`](./src/util/webextensionRPC.ts) module:
 
-The parts communicate in three ways:
-
--   Messaging through `browser.runtime.sendMessage`, usually done implicitly by using a remote procedure call ([`util/webextensionRPC.js`](./src/util/webextensionRPC.js)).
--   Bidirectional messaging using `browser.runtime.connect`. We use this to communicate between Overview UI script and background script, and also the deprecated imports UI (via Options UI script) and background script. See [Runtime](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/runtime) for more info
--   Through the in-browser PouchDB database, they get to see the same data and can react to changes made by other parts.
+We can setup remote functions (we sometimes call them "endpoints") with the `makeRemotelyCallable` export, then be able to remotely call them from other scripts with that `remoteFunction` export. This wraps around the WebExt [`runtime.sendMessage`](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/sendMessage) and related messaging APIs which afford interscript communication. Generally we setup endpoints via `makeRemotelyCallable` from the BG script and call them from UI scripts via `remoteFunction`, although there's nothing stopping you from doing it the other way. It just generally makes a more sense to contain a lot of the business logic in the BG script (it acts somewhat like our "backend server", being the only place the DB is ever interacted with), and keep the UI scripts concerned solely with managing UI state and rendering views.
 
 Besides these parts:
 [`browser-polyfill.js`](https://github.com/mozilla/webextension-polyfill/)
@@ -195,6 +225,22 @@ This API is available in Chrome/Chromium by default (under `window.chrome`) but 
 ## Application Structure
 
 To keep things modular, the source code in [`src/`](./src/) is split into "feature modules"/directories which are grouped by functionality. They can almost be thought of as separate libraries and some features may end up being factored out into their own repos later on.
+
+### Feature Structure
+
+For new BG script features, these should go into the `background/` dirs of top-level (`src/`) feature modules.
+
+An existing example top-level feature module is [`backup/`](./src/backup). You'll see `background/` and `content_script/` dirs in there containing BG script and content script logic related to that feature, respectively. The `backup/background/index` module acts as the BG script entrypoint for the backup feature, exporting a main class, `BackupBackgroundModule`, which accepts a few different args upon instantiation. Most important being `storageManager`; this allows access to the DB. The `BackupBackgroundModule` class has a lot of different methods to cover different feature behaviours, but all DB manipulation itself is done in another class in the `backup/background/storage` module.
+
+Looking into that, you'll see it extends the abstract [`FeatureStorage` class](./src/search/storage/index.ts#L6-L19), which affords consistent set up to interact with the `storageManager` DB instance and set up new Storex ([our DB](https://github.com/WorldBrain/storex)) data collections.
+Finally, all BG script features should be instantiated in the [BG script entrypoint module](./src/background.ts#L44).
+
+_Note that many features do not yet use this structure. We intend to port over legacy code eventually, but all new BG feature code should be written in this way._
+
+## Feature list
+
+Note this may not be up-to-date and links may get broken as things change. Feel free to submit
+a PR to fix anything you notice is broken, missing, or just doesn't make sense.
 
 #### **[src/blacklist/](./src/blacklist/)**: blacklist
 

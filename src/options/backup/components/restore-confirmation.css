@@ -1,0 +1,52 @@
+.container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.box {
+    background: rgb(255, 255, 255);
+    width: 500px;
+    padding: 50px 50px 50px 60px;
+    margin: 200px auto;
+    border: 1px solid #eae9e9;
+    box-shadow: 0px 3px 4px 2px #ebebeb;
+    border-radius: 8px;
+}
+
+.danger {
+    color: #f29d9d;
+    font-weight: 700;
+    margin-left: 10px;
+}
+
+.dangerIcon {
+    height: 30px;
+    width: 30px;
+    vertical-align: middle;
+    padding-bottom: 2px;
+}
+
+.normal {
+    color: #1a2f58;
+}
+
+.instructions {
+    color: #1a2f58;
+}
+
+b {
+    color: #5cd9a6;
+}
+
+.input {
+    margin-left: 0px;
+    border-radius: 5px;
+    border: 2px solid #ebebeb;
+    width: 150px;
+    height: 25px;
+}

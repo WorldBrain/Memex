@@ -1,8 +1,4 @@
-@import url('/fonts/googlefonts/open-sans.css');
-
-.privacy {
-    font-family: 'Open Sans';
-}
+@import url('/fonts/googlefonts/Inter.css');
 
 .title {
     color: #3eb995;

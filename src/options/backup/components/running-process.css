@@ -1,0 +1,46 @@
+.steps {
+    margin-bottom: 10px;
+    width: 550px;
+    margin-right: 50px;
+}
+
+.step {
+    display: inline-flex;
+    margin-bottom: 10px;
+    width: 550px;
+}
+
+.stepLabel {
+    width: 450px;
+    color: #3eb995;
+}
+
+.stepNumber {
+    font-weight: bold;
+    color: #4a4a4a;
+    margin-right: 15px;
+}
+
+.actions {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    top: 230px;
+}
+
+.stepStatus {
+    text-align: right;
+    width: 100px;
+}
+
+.progressHelpText {
+    font-size: 15px;
+    color: #173766;
+    margin-top: 10px;
+}
+
+.actionCancel {
+    margin-top: 42px;
+    margin-left: 30px;
+    cursor: pointer;
+}

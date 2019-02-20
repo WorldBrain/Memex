@@ -4,11 +4,12 @@ import { delayed, getPositionState, getTooltipState } from './utils'
 import {
     createAndCopyDirectLink,
     createAnnotation,
+    createHighlight,
 } from '../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
 import { injectCSS } from '../search-injection/dom'
-import { conditionallyShowHighlightNotification } from './onboarding-notifications'
+import { conditionallyShowHighlightNotification } from './onboarding-interactions'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
@@ -71,6 +72,7 @@ export const insertTooltip = async ({ toolbarNotifications }) => {
     showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
         createAnnotation,
+        createHighlight,
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
             manualOverride = true

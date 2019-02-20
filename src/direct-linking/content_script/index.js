@@ -1,7 +1,7 @@
 import { bodyLoader } from 'src/util/loader'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as rendering from './rendering'
-import * as interactions from 'src/sidebar-overlay/content_script/interactions'
+import * as interactions from 'src/sidebar-overlay/content_script/highlight-interactions'
 
 export async function init() {
     await bodyLoader()
