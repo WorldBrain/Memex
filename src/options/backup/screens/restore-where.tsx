@@ -61,7 +61,11 @@ export default class RestoreWhere extends React.Component<Props> {
                     }
                 />
                 <PrimaryButton
-                    disabled={!this.state.valid}
+                    disabled={
+                        !this.state.provider ||
+                        (this.state.provider === 'local' &&
+                            !this.state.backupPath)
+                    }
                     onClick={() =>
                         this.handleEvent({
                             type: 'onConfirm',
