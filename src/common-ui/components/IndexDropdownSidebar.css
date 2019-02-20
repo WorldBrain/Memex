@@ -46,7 +46,6 @@
 }
 
 .summaryTagContainer {
-    font-family: 'Inter';
     font-size: 12px;
     display: flex;
     justify-content: space-around;
@@ -85,7 +84,6 @@
     &:placeholder-shown {
         font-style: italic;
         font-weight: 500;
-        font-family: 'Inter';
     }
 
     &::placeholder {
