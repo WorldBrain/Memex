@@ -1,11 +1,11 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 const localStyles = require('./running-process.css')
 import { ProgressBar } from '../components/progress-bar'
 import MovingDotsLabel from '../components/moving-dots-label'
 import { PrimaryButton } from '../components/primary-button'
 import LoadingBlocker from '../components/loading-blocker'
+import { FailedOverlay } from '../components/overlays'
 const STYLES = require('../styles.css')
 
 interface Props {
@@ -43,11 +43,7 @@ export default class RunningProcess extends React.Component<Props> {
                 info,
             })
         } else {
-            this.setState({
-                status: 'running',
-                info: { state: 'preparing' },
-            })
-            await remoteFunction(this.props.functionNames.start)()
+            await this.startRestore()
         }
 
         // this.setState({
@@ -72,6 +68,14 @@ export default class RunningProcess extends React.Component<Props> {
         window['browser'].runtime.onMessage.removeListener(this.messageListener)
     }
 
+    startRestore = async () => {
+        this.setState({
+            status: 'running',
+            info: { state: 'preparing' },
+        })
+        await remoteFunction(this.props.functionNames.start)()
+    }
+
     messageListener = message => {
         if (message.type === this.props.eventMessageName) {
             this.handleProcessEvent(message.event)
@@ -88,6 +92,7 @@ export default class RunningProcess extends React.Component<Props> {
             this.setState({ status: 'success' })
         } else if (event.type === 'fail') {
             let overlay = null
+            console.log(event.error)
             if (event.error === 'Backup file not found') {
                 overlay = true
             }
@@ -248,7 +253,7 @@ export default class RunningProcess extends React.Component<Props> {
     }
 
     render() {
-        const { info, status } = this.state
+        const { info, status, overlay } = this.state
         if (!info) {
             return <LoadingBlocker />
         }
@@ -258,6 +263,17 @@ export default class RunningProcess extends React.Component<Props> {
                 {status === 'running' && this.renderRunning(info)}
                 {status === 'success' && this.renderSuccess()}
                 {status === 'fail' && this.renderFail()}
+                <FailedOverlay
+                    disabled={!overlay}
+                    onClick={async action => {
+                        if (action === 'continue') {
+                            await this.startRestore()
+                        }
+                        this.setState({
+                            overlay: null,
+                        })
+                    }}
+                />
             </div>
         )
     }
