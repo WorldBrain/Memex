@@ -26,7 +26,12 @@ interface Props {
 }
 
 export default class RunningProcess extends React.Component<Props> {
-    state = { status: null, info: null, canceling: false }
+    state = {
+        status: null,
+        info: null,
+        canceling: false,
+        overlay: null,
+    }
 
     async componentDidMount() {
         window['browser'].runtime.onMessage.addListener(this.messageListener)
@@ -82,7 +87,11 @@ export default class RunningProcess extends React.Component<Props> {
         } else if (event.type === 'success') {
             this.setState({ status: 'success' })
         } else if (event.type === 'fail') {
-            this.setState({ status: 'fail' })
+            let overlay = null
+            if (event.error === 'Backup file not found') {
+                overlay = true
+            }
+            this.setState({ status: 'fail', overlay })
         }
     }
 

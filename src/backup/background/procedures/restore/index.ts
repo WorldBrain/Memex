@@ -65,6 +65,13 @@ export class BackupRestoreProcedure {
                     this._listBackupCollection('change-sets'),
                     this._listBackupCollection('images'),
                 ])
+
+                /* Backup file not found */
+                if (!changeSetTimestamps.length) {
+                    await this._unblockDatabase()
+                    throw new Error('Backup file not found')
+                }
+
                 this._updateInfo({
                     status: 'synching',
                     totalChanges:
@@ -102,7 +109,7 @@ export class BackupRestoreProcedure {
                 if (this.logErrors) {
                     console.error(e)
                 }
-                this.events.emit('fail', e)
+                this.events.emit('fail', { error: e.message })
                 return 'fail'
             } finally {
                 this.interruptable = null
@@ -127,7 +134,7 @@ export class BackupRestoreProcedure {
         await search.dangerousPleaseBeSureDeleteAndRecreateDatabase()
     }
 
-    _blockDatabase() { }
+    _blockDatabase() {}
 
     async _restoreCollection(
         collection: string,
@@ -168,7 +175,7 @@ export class BackupRestoreProcedure {
         )
     }
 
-    _unblockDatabase() { }
+    _unblockDatabase() {}
 
     async _writeChange(change: ObjectChange) {
         change = _filterBadChange(change)
