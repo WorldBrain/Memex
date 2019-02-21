@@ -12,9 +12,14 @@ export default class RestoreConfirmation extends React.Component {
 
     state = logic.INITIAL_STATE
     handleEvent = null
+    inputRef = null
 
     componentWillMount() {
         this.handleEvent = logic.reactEventHandler(this, logic.processEvent)
+    }
+
+    componentDidMount() {
+        this.inputRef.focus()
     }
 
     render() {
@@ -34,6 +39,7 @@ export default class RestoreConfirmation extends React.Component {
                                 value: event.target.value,
                             })
                         }
+                        ref={node => (this.inputRef = node)}
                     />
                 </div>
             </div>

@@ -111,6 +111,8 @@ export async function processEvent({
                     remoteFunction('getBackupInfo')(),
                     remoteFunction('getBackendLocation')(),
                 ])
+                /* Show onboarding screen if there is no initial backup or if the
+                    user is trying to change the backend location */
                 const needsOnBoarding = !hasInitialBackup && !backupInfo
                 if (needsOnBoarding || changeBackupRequested === true) {
                     localStorage.setItem('backup.onboarding', true)
@@ -125,10 +127,15 @@ export async function processEvent({
                     return { screen: 'onboarding-where' }
                 }
 
-                if (state.isAuthenticated) {
-                    return { screen: 'running-backup' }
-                } else {
+                /* Navigate to Google Drive login if previous it is not authentication
+                    else go to running backup */
+                if (
+                    backendLocation === 'google-drive' &&
+                    !state.isAuthenticated
+                ) {
                     return { redirect: { to: 'gdrive-login' } }
+                } else {
+                    return { screen: 'running-backup' }
                 }
             },
             onRestoreRequested: () => {
