@@ -5,7 +5,7 @@ import * as logic from './restore-where.logic'
 import { ProviderList } from 'src/options/backup/components/provider-list'
 import { PrimaryButton } from 'src/options/backup/components/primary-button'
 import { DownloadOverlay } from '../components/overlays'
-import { getStringFromResponseBody } from '../utils'
+import { fetchBackupPath, checkServerStatus, changeBackupPath } from '../utils'
 const STYLES = require('../styles.css')
 
 interface Props {
@@ -20,35 +20,13 @@ export default class RestoreWhere extends React.Component<Props> {
         this.handleEvent = logic.reactEventHandler(this, logic.processEvent)
     }
 
-    private fetchBackupPath = async () => {
-        let backupPath
-        try {
-            const response = await fetch(
-                'http://localhost:11922/backup/location',
-            )
-            backupPath = await getStringFromResponseBody(response)
-            if (backupPath && backupPath.length) {
-                return backupPath
-            }
-        } catch (err) {
-            return null
-        }
-        return null
-    }
-
     private proceedIfServerIsRunning = async () => {
         let overlay = null
         let backupPath = null
-        try {
-            const response = await fetch('http://localhost:11922/status')
-            const serverStatus = await getStringFromResponseBody(response)
-            if (serverStatus === 'running') {
-                backupPath = await this.fetchBackupPath()
-            } else {
-                overlay = 'download'
-            }
-        } catch (err) {
-            // Show the download overlay if we couldn't connect to the server.
+        const status = await checkServerStatus()
+        if (status) {
+            backupPath = await fetchBackupPath()
+        } else {
             overlay = 'download'
         }
         this.handleEvent({
@@ -62,10 +40,13 @@ export default class RestoreWhere extends React.Component<Props> {
     }
 
     private handleChangeBackupPath = async () => {
-        try {
-            await fetch('http://localhost:11922/backup/start-change-location')
-            // TODO: Update path
-        } catch (err) {
+        const backupPath = await changeBackupPath()
+        if (backupPath) {
+            this.handleEvent({
+                type: 'onChangeBackupPath',
+                backupPath,
+            })
+        } else {
             this.handleEvent({ type: 'onChangeOverlay', overlay: 'download' })
         }
     }

@@ -8,7 +8,7 @@ import {
     ChangeOverlay,
 } from '../components/overlays'
 import Styles from '../styles.css'
-import { getStringFromResponseBody } from '../utils'
+import { checkServerStatus, fetchBackupPath, changeBackupPath } from '../utils'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 export default class OnboardingWhere extends React.Component {
@@ -36,89 +36,47 @@ export default class OnboardingWhere extends React.Component {
 
     timer = null
 
-    _fetchBackupPath = async () => {
-        let backupPath
-        try {
-            const response = await fetch(
-                'http://localhost:11922/backup/location',
-            )
-            backupPath = await getStringFromResponseBody(response)
-            if (backupPath && backupPath.length) {
-                this.setState({ backupPath })
-            } else {
-                this.setState({ backupPath: '' })
-            }
-        } catch (err) {
-            this.setState({ backupPath: null, overlay: 'download' })
-            return false
-        }
-        return backupPath
-    }
-
-    _proceedIfServerIsRunning = async provider => {
+    _proceedIfServerIsRunning = async () => {
         let overlay = null
-        try {
-            const response = await fetch('http://localhost:11922/status')
-            const serverStatus = await getStringFromResponseBody(response)
-            if (serverStatus === 'running') {
-                await this._fetchBackupPath()
-            } else {
-                overlay = 'download'
-            }
-        } catch (err) {
-            // Show the download overlay if we couldn't connect to the server.
+        let backupPath = null
+        const status = await checkServerStatus()
+        if (status) {
+            backupPath = await fetchBackupPath()
+        } else {
             overlay = 'download'
         }
         this.setState({
-            provider,
+            backupPath,
             overlay,
         })
     }
 
     _handleChangeBackupPath = async () => {
-        try {
-            await fetch('http://localhost:11922/backup/start-change-location')
-            const { initialBackup, backendLocation } = this.state
-
-            /* Keep checking backend server for the local backup location */
-            this.timer = setInterval(async () => {
-                if (this.state.provider === 'local') {
-                    const prevLocation = this.state.backupPath
-                    const location = await this._fetchBackupPath()
-                    if (!location) {
-                        this.setState({
-                            overlay: 'download',
-                        })
-                    } else if (location !== prevLocation) {
-                        clearInterval(this.timer)
-                        /* Throw change modal if they are changing from google-drive 
-                           to local. Else throw copy modal if they are just trying to 
-                           change the location. */
-                        if (
-                            initialBackup &&
-                            backendLocation === 'google-drive'
-                        ) {
-                            this.setState({
-                                overlay: 'change',
-                            })
-                        } else if (
-                            initialBackup &&
-                            backendLocation === 'local'
-                        ) {
-                            this.setState({
-                                overlay: 'copy',
-                            })
-                        }
-                    }
-                }
-            }, 1000)
-        } catch (err) {
-            this.setState({ overlay: 'download' })
+        const newBackupPath = await changeBackupPath()
+        if (newBackupPath) {
+            const { initialBackup, backendLocation, backupPath } = this.state
+            /* If the user is trying to change the local backup location to a different
+                folder, show the copy overlay */
+            if (
+                initialBackup &&
+                backendLocation === 'local' &&
+                newBackupPath !== backupPath
+            ) {
+                this.setState({
+                    overlay: 'copy',
+                })
+            }
+            this.setState({
+                backupPath: newBackupPath,
+            })
+        } else {
+            this.setState({
+                overlay: 'download',
+            })
         }
     }
 
     render() {
-        console.log(this)
         return (
             <div>
                 <p className={Styles.header2}>
@@ -143,6 +101,14 @@ export default class OnboardingWhere extends React.Component {
                         }
                         if (provider === 'local') {
                             await this._proceedIfServerIsRunning(provider)
+                            if (
+                                backendLocation === 'google-drive' &&
+                                this.state.backupPath
+                            ) {
+                                this.setState({
+                                    overlay: 'change',
+                                })
+                            }
                         }
                         this.setState({
                             provider,
