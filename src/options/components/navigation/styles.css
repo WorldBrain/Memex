@@ -1,10 +1,13 @@
 .root {
-    width: 300px;
+    width: 17rem;
     height: auto;
-    min-width: 300px;
+    min-width: 17rem;
     min-height: 100vh;
-    background-color: #f7f7f7;
-    box-shadow: 2px 1px 1px #e2e2e2;
+    background-color: #edf0f4;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     line-height: 2;
     font-weight: 200;
 }
@@ -33,12 +36,13 @@
 .nav {
     margin: 0;
     padding: 0;
+    width: 80%;
     list-style: none;
 }
 
 .navIcon {
     float: left;
-    margin: 0 10px;
+    margin: 0 20px;
     font-size: 18px;
     padding: 12px 0 10px 0;
 }
@@ -55,18 +59,24 @@
 .navLink {
     display: block;
     text-decoration: none;
-    font-size: 15px;
-    padding: 5px 0 5px 20px;
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 2rem;
+    padding: 2px 0 5px 20px;
     padding-left: 20px;
-    color: #494949;
+    color: #1a2f58;
     width: 100%;
     letter-spacing: 1px;
 
     &.isActive {
-        color: white;
-        background-color: #3eb995;
+        color: #2ab98a;
+        font-weight: 400;
         border-right: none;
     }
+}
+
+.nav li:first-of-type a {
+    font-size: 0.75rem;
 }
 
 .importSubItems {
@@ -79,7 +89,7 @@
 }
 
 .active {
-    color: #3db995;
+    color: #2ab98a;
 }
 
 .done {
