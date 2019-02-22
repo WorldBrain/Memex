@@ -10,12 +10,11 @@ import {
     shouldWriteImages,
 } from 'src/backup/background/backend/utils'
 
-export default class SimpleHttpBackend extends BackupBackend {
+export class MemexLocalBackend extends BackupBackend {
     private url
 
     constructor({ url }: { url: string }) {
         super()
-
         this.url = url
     }
 
@@ -76,20 +75,20 @@ export default class SimpleHttpBackend extends BackupBackend {
 
         const timestamp = Date.now()
         await this._writeToPath(
-            `change-sets/${timestamp}`,
+            `backup/change-sets/${timestamp}`,
             stringify({ version: currentSchemaVersion, changes }),
         )
 
         if (shouldWriteImages(images, options.storeBlobs)) {
             await this._writeToPath(
-                `images/${timestamp}`,
+                `backup/images/${timestamp}`,
                 stringify({ version: currentSchemaVersion, images }),
             )
         }
     }
 
     async listObjects(collection: string): Promise<string[]> {
-        const response = await fetch(`${this.url}/${collection}`)
+        const response = await fetch(`${this.url}/backup/${collection}`)
         if (response.status === 404) {
             return []
         }
@@ -98,15 +97,17 @@ export default class SimpleHttpBackend extends BackupBackend {
         }
 
         const body = await response.text()
-        const lines = body.split('\n')
-        const matches = lines.map(line => /href="([^"]+)"/g.exec(line))
-        const fileNames = matches
-            .filter(match => !!match)
-            .map(match => match[1])
-        return fileNames
+        if (body.length > 0) {
+            const fileNames = body.split(',')
+            return fileNames.length > 0 ? fileNames : []
+        } else {
+            return []
+        }
     }
 
     async retrieveObject(collection: string, object: string) {
-        return (await fetch(`${this.url}/${collection}/${object}`)).json()
+        return (await fetch(
+            `${this.url}/backup/${collection}/${object}`,
+        )).json()
     }
 }

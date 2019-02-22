@@ -1,5 +1,5 @@
 import * as driveBackup from './backend/google-drive'
-import * as localBackup from './backend/memex-local-server'
+import * as localBackup from './backend/simple-http'
 import * as backup from '.'
 import { browser } from 'webextension-polyfill-ts'
 import { BackupBackend } from './backend/types'
