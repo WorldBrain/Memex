@@ -1,0 +1,84 @@
+import React from 'react'
+import RunningProcess from '../components/running-process'
+const STYLES = require('../styles.css')
+
+export default function RunningBackup({ onFinish }: { onFinish: () => void }) {
+    return (
+        <RunningProcess
+            functionNames={{
+                info: 'getBackupInfo',
+                start: 'startBackup',
+                cancel: 'cancelBackup',
+                pause: 'pauseBackup',
+                resume: 'resumeBackup',
+            }}
+            eventMessageName="backup-event"
+            preparingStepLabel="Preparing uploads"
+            synchingStepLabel="Uploading your Memex backup"
+            renderHeader={renderHeader}
+            renderFailMessage={renderFailMessage}
+            renderSuccessMessage={renderSuccessMessage}
+            onFinish={onFinish}
+        />
+    )
+}
+
+function renderHeader() {
+    return (
+        <p className={STYLES.header2}>
+            <strong>STEP 4/5: </strong>
+            BACKUP PROGRESS
+        </p>
+    )
+}
+
+<<<<<<< HEAD
+function renderFailMessage(errorId: string) {
+    return errorId === 'network-error' ? (
+=======
+function renderFailMessage() {
+    return (
+>>>>>>> 320b767c4e7b5c580ad768f0bd98abf7fda5d1b1
+        <React.Fragment>
+            <p className={STYLES.header2}>
+                <strong>BACKUP FAILED </strong>
+            </p>
+            <p className={STYLES.name}>
+<<<<<<< HEAD
+                Please check your internet connectivity. Backup was not
+                successful as the connection was either not strong enough or
+                there was no connection. If you still encounter issues please{' '}
+                <a href="mailto:support@worldbrain.io">contact support</a>.
+            </p>
+        </React.Fragment>
+    ) : (
+        <p className={STYLES.name}>
+            Please check whether you have enough space in your{' '}
+            <a href="https://drive.google.com">Google Drive</a> . Backup failed
+            as the size of the data to be uploaded was greater than the
+            remaining upload space available in your Google Drive. Clear some
+            space on the drive in order to successfully back up your data. If
+            you still encounter issues please{' '}
+            <a href="mailto:support@worldbrain.io">contact support</a>.
+        </p>
+=======
+                Please check whether you have enough space in your{' '}
+                <a href="https://http://drive.google.com">Google Drive</a> and
+                the stability of your internet connection. You can retry the
+                backup anytime you want. <br /> If you still encounter issues
+                please{' '}
+                <a href="mailto:support@worldbrain.io">contact support</a>.
+            </p>
+        </React.Fragment>
+>>>>>>> 320b767c4e7b5c580ad768f0bd98abf7fda5d1b1
+    )
+}
+
+function renderSuccessMessage() {
+    return (
+        <p className={STYLES.header2}>
+            <strong>FINISHED: </strong>
+            YOUR BACKUP WAS SUCCESSFUL
+        </p>
+    )
+}
