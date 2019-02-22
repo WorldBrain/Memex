@@ -1,6 +1,9 @@
 import Queue, { Options as QueueOpts } from 'queue'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
+<<<<<<< HEAD
 import { StorageManager } from '../../search/types'
+=======
+>>>>>>> 044336d53393a11670c315a41aa1f2151ee42a85
 import sendNotif from '../../util/send-notification'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
@@ -82,8 +85,32 @@ export class BackupBackgroundModule {
                     }
 
                     this.doBackup()
+<<<<<<< HEAD
                     this.backupUiCommunication.connect(
                         this.backupProcedure.events,
+=======
+                    const sendEvent = (eventType, event) => {
+                        if (true) {
+                            sendNotif('backup_error')
+                        }
+                        try {
+                            window['browser'].tabs.sendMessage(this.uiTabId, {
+                                type: 'backup-event',
+                                event: { type: eventType, ...(event || {}) },
+                            })
+                        } catch (e) {
+                            // ignore the error, user closed tab
+                        }
+                    }
+                    this.state.events.on('info', event =>
+                        sendEvent('info', event),
+                    )
+                    this.state.events.on('fail', event =>
+                        sendEvent('fail', event),
+                    )
+                    this.state.events.on('success', event =>
+                        sendEvent('success', event),
+>>>>>>> 044336d53393a11670c315a41aa1f2151ee42a85
                     )
                 },
                 getBackupInfo: () => {
@@ -157,6 +184,10 @@ export class BackupBackgroundModule {
                 },
                 isAutomaticBackupEnabled: async () => {
                     return this.isAutomaticBackupEnabled()
+                },
+                // This function is used to get the users drive size
+                getDriveSize: () => {
+                    return this.backend.getDriveSize()
                 },
                 // This function is used to get the users drive size
                 getDriveSize: () => {
@@ -292,14 +323,74 @@ export class BackupBackgroundModule {
                     ? nextBackup.getTime()
                     : nextBackup,
         }
+<<<<<<< HEAD
         return times
+=======
+
+        setTimeout(async () => {
+            procedure()
+                .then(() => {
+                    this.state.running = false
+                    if (this.state.events) {
+                        this.state.events.emit('success')
+                    }
+                    this.resetBackupState()
+                    this.maybeScheduleAutomaticBackup()
+                    resolveCompletionPromise()
+                })
+                .catch(e => {
+                    this.state.running = false
+
+                    if (process.env.NODE_ENV === 'production') {
+                        const raven = AllRaven['default']
+                        raven.captureException(e)
+                    }
+
+                    console.error(e)
+                    console.error(e.stack)
+                    if (this.state.events) {
+                        sendNotif('backup_error')
+                        this.state.events.emit('fail', e)
+                    }
+                    this.resetBackupState()
+                    this.maybeScheduleAutomaticBackup()
+                    resolveCompletionPromise()
+                })
+        }, 200)
+
+        return this.state.events
+>>>>>>> 044336d53393a11670c315a41aa1f2151ee42a85
     }
 
     doBackup() {
         this.clearAutomaticBackupTimeout()
 
+<<<<<<< HEAD
         this.storage.startRecordingChanges()
         this.backupProcedure.run()
+=======
+    async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
+        console.log('starting incremental backup')
+
+        const collectionsWithVersions = this._getCollectionsToBackup()
+        const info = (this.state.info = await this._createBackupInfo(
+            collectionsWithVersions,
+            untilWhen,
+        ))
+        events.emit('info', { info })
+
+        for await (const batch of this.storage.streamChanges(untilWhen, {
+            batchSize: parseInt(process.env.BACKUP_BATCH_SIZE, 10),
+        })) {
+            if (this.state.info.state === 'paused') {
+                await sendNotif('backup_error')
+                await this.state.pausePromise
+            }
+            if (this.state.info.state === 'cancelled') {
+                sendNotif('backup_error')
+                break
+            }
+>>>>>>> 044336d53393a11670c315a41aa1f2151ee42a85
 
         const always = () => {
             this.maybeScheduleAutomaticBackup()
