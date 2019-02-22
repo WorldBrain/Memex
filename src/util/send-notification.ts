@@ -2,6 +2,7 @@ import * as notifications from '../notifications/notifications'
 import createNotif from './notifications'
 import checkIfOnline from './check-network'
 import { remoteFunction } from './webextensionRPC'
+import { browser } from 'webextension-polyfill-ts'
 
 const storeNotification = remoteFunction('storeNotification')
 const estimateBackupSize = remoteFunction('estimateInitialBackupSize')
@@ -22,36 +23,11 @@ async function sendNotification(id: string) {
             // driveSize.limit will not exist if the user has an unlimited plan
             // check if user's usage quota has exceeded or reached the limit
             // Check if the data to be uploaded is greater than the size left in drive
-            // Play around with this condition to perform checks
-
-            // This is the actual condition to be checked
-            // @TODO Uncomment these lines for production
             if (
                 (driveSize.limit && driveSize.usage >= driveSize.limit) ||
                 backupSize.bytesWithBlobs + backupSize.bytesWithoutBlobs >
                     driveSize.limit - driveSize.usage
             ) {
-                // @TODO Comment out the following lines for production
-                // Check 1:
-                // This check is to see if the backupSize is greater than the size
-                // available in google drive. Taking the remaining size on google drive
-                // as 1000 bytes
-                /* if(
-                backupSize.bytesWithBlobs + backupSize.bytesWithoutBlobs > 1000
-             ) {
-                console.log('Total BackupSize:', backupSize.bytesWithBlobs + backupSize.bytesWithoutBlobs)
-            */
-
-                // @TODO Comment out the following lines for production
-                // Check 2:
-                // This check is to see if the user has no space available in the
-                // google drive, Assuming the limit of the drive space to be 1000 bytes
-                /*
-            if(
-                driveSize.usage >= 1000
-            ) {
-                console.log('Usage:', driveSize.usage)
-            */
                 backupError = 'drive_size_empty'
             }
         }
@@ -78,10 +54,18 @@ async function dispatchNotification(notification) {
     }
     if (notification.system) {
         // Check if the system has to be notified or not
-        await createNotif({
-            title: notification.system.title,
-            message: notification.system.message,
-        })
+        const url = notification.system.buttons[0].action.url
+        await createNotif(
+            {
+                title: notification.system.title,
+                message: notification.system.message,
+            },
+            () => {
+                return browser.tabs.create({
+                    url,
+                })
+            },
+        )
     }
 }
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import checkIfOnline from 'src/util/check-network'
 import localStyles from './running-backup.css'
 import { BackupProgressBar } from '../components/progress-bar'
 import MovingDotsLabel from '../components/moving-dots-label'
@@ -61,7 +62,7 @@ export default class RunningBackupContainer extends React.Component {
         }
     }
 
-    handleBackupEvent(event) {
+    async handleBackupEvent(event) {
         if (event.type === 'info') {
             this.setState({
                 status: 'running',
@@ -79,7 +80,16 @@ export default class RunningBackupContainer extends React.Component {
             // This function is used to notify the user that there
             // was a problem backing up the data
             this.props.onBackupFailure('error')
-            this.setState({ status: 'fail' })
+            // Check the state of the network connection
+            const netState = await checkIfOnline()
+            // Set the status as fail and also update the info as to
+            // what the reason of the failure was
+            this.setState({
+                status: 'fail',
+                info: {
+                    state: !netState ? 'network-failure' : 'full-drive',
+                },
+            })
         }
     }
 
@@ -225,19 +235,37 @@ export default class RunningBackupContainer extends React.Component {
                         <p className={Styles.header2}>
                             <strong>BACKUP FAILED </strong>
                         </p>
-                        <p className={Styles.name}>
-                            Please check whether you have enough space in your{' '}
-                            <a href="https://http://drive.google.com">
-                                Google Drive
-                            </a>{' '}
-                            and the stability of your internet connection. You
-                            can retry the backup anytime you want. <br /> If you
-                            still encounter issues please{' '}
-                            <a href="mailto:support@worldbrain.io">
-                                contact support
-                            </a>
-                            .
-                        </p>
+                        {info.state === 'network-failure' ? (
+                            <p className={Styles.name}>
+                                Please check your internet connectivity. Backup
+                                was not successful as the connection was either
+                                not strong enough or there was no connection. If
+                                you still encounter issues please{' '}
+                                <a href="mailto:support@worldbrain.io">
+                                    contact support
+                                </a>
+                                .
+                            </p>
+                        ) : (
+                            <p className={Styles.name}>
+                                Please check whether you have enough space in
+                                your{' '}
+                                <a href="https://drive.google.com">
+                                    Google Drive
+                                </a>{' '}
+                                . Backup failed as the size of the data to be
+                                uploaded was greater than the remaining upload
+                                space available in your Google Drive. Clear some
+                                space on the drive in order to successfully back
+                                up your data. If you still encounter issues
+                                please{' '}
+                                <a href="mailto:support@worldbrain.io">
+                                    contact support
+                                </a>
+                                .
+                            </p>
+                        )}
+
                         <PrimaryButton
                             onClick={() => {
                                 this.props.onFinish()

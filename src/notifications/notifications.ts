@@ -100,22 +100,23 @@ export const NOTIFS: NotifDefinition[] = [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: '/options.html#/backup',
-                        context: 'new-tab',
+                        url: '/options.html#/overview?showInbox=true',
+                        context: 'self',
                     },
                     label: 'Backup Now',
                 },
             ],
         },
         overview: {
-            title: 'Error backing up data.',
-            message: 'Please check your internet connectivity',
+            title: 'Backup Error due to poor internet connectivity.',
+            message: `Please make sure that you have an internet connection 
+                for a successful backup.`,
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
                         url: '/options.html#/backup',
-                        context: 'new-tab',
+                        context: 'self',
                     },
                     label: 'Retry',
                 },
@@ -127,37 +128,58 @@ export const NOTIFS: NotifDefinition[] = [
         system: {
             title: 'Drive Size',
             message: 'There seems to be no space in your Google Drive',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/overview?showInbox=true',
+                    },
+                    label: 'Retry',
+                },
+            ],
         },
         overview: {
-            title: 'Drive Size',
-            message: 'There seems to be no space in your Google Drive',
+            title: 'No Drive Size Available',
+            message: `There is no space available in your Google Drive.
+                Please clear some space in your drive to be able to successfully
+                backup your future data.`,
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://drive.google.com',
+                    },
+                    label: 'Go to Google Drive',
+                },
+            ],
         },
     },
     {
         id: 'auto_backup_expired',
         system: {
             title: 'Auto Backup',
-            message: 'Your auto-backup subscription has ended',
+            message: 'Your Auto Backup subscription has expired.',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: '/options.html#/backup',
-                        context: 'new-tab',
+                        url: 'https://worldbrain.io/pricing',
+                        context: 'self',
                     },
                     label: 'Renew Subscription',
                 },
             ],
         },
         overview: {
-            title: 'Auto Backup',
-            message: 'Your auto-backup subscription has ended.',
+            title: 'Auto Backup Subscription',
+            message: `Your Auto Backup subscription has expired. If you want to
+                renew your subscription click on the button below.`,
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: '/options.html#/backup',
-                        context: 'new-tab',
+                        url: 'https://worldbrain.io/pricing',
+                        context: 'self',
                     },
                     label: 'Renew Subscription',
                 },
