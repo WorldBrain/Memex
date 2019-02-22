@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import checkIfOnline from 'src/util/check-network'
+import sendNotifOnBackupFailure from 'src/util/send-notification'
 const localStyles = require('./running-process.css')
 import { ProgressBar } from '../components/progress-bar'
 import MovingDotsLabel from '../components/moving-dots-label'
@@ -20,7 +22,7 @@ interface Props {
     preparingStepLabel: string
     synchingStepLabel: string
     renderHeader: () => any
-    renderFailMessage: () => any
+    renderFailMessage: (errorId: string) => any
     renderSuccessMessage: () => any
     onFinish: () => void
 }
@@ -73,7 +75,7 @@ export default class RunningProcess extends React.Component<Props> {
         }
     }
 
-    handleProcessEvent(event) {
+    async handleProcessEvent(event) {
         if (event.type === 'info') {
             this.setState({
                 status: 'running',
@@ -82,7 +84,16 @@ export default class RunningProcess extends React.Component<Props> {
         } else if (event.type === 'success') {
             this.setState({ status: 'success' })
         } else if (event.type === 'fail') {
-            this.setState({ status: 'fail' })
+            await sendNotifOnBackupFailure('error')
+            const netState = await checkIfOnline()
+            // Set the status as fail and also update the info as to
+            // what the reason of the failure was
+            this.setState({
+                status: 'fail',
+                info: {
+                    state: !netState ? 'network-error' : 'full-drive',
+                },
+            })
         }
     }
 
@@ -223,10 +234,10 @@ export default class RunningProcess extends React.Component<Props> {
         )
     }
 
-    renderFail() {
+    renderFail(errorId: string) {
         return (
             <div className={localStyles.finish}>
-                {this.props.renderFailMessage()}
+                {this.props.renderFailMessage(errorId)}
                 <PrimaryButton
                     onClick={() => {
                         this.props.onFinish()
@@ -248,7 +259,7 @@ export default class RunningProcess extends React.Component<Props> {
             <div>
                 {status === 'running' && this.renderRunning(info)}
                 {status === 'success' && this.renderSuccess()}
-                {status === 'fail' && this.renderFail()}
+                {status === 'fail' && this.renderFail(info.state)}
             </div>
         )
     }

@@ -55,6 +55,7 @@ async function dispatchNotification(notification) {
     if (notification.system) {
         // Check if the system has to be notified or not
         const url = notification.system.buttons[0].action.url
+        // console.log(notification.system.title, 'hello')
         await createNotif(
             {
                 title: notification.system.title,
