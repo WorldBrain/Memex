@@ -162,6 +162,10 @@ export class BackupBackgroundModule {
                 getDriveSize: () => {
                     return this.backend.getDriveSize()
                 },
+                // This function is used to get the users drive size
+                getDriveSize: () => {
+                    return this.backend.getDriveSize()
+                },
                 estimateInitialBackupSize: () => {
                     return estimateBackupSize({
                         storageManager: this.storageManager,
