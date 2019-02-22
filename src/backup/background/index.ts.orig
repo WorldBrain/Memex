@@ -1,6 +1,7 @@
 import Queue, { Options as QueueOpts } from 'queue'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { StorageManager } from '../../search/types'
+import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import sendNotif from '../../util/send-notification'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
@@ -82,8 +83,32 @@ export class BackupBackgroundModule {
                     }
 
                     this.doBackup()
+<<<<<<< 56f6586e83190144129f59a88536d12323ca739d
                     this.backupUiCommunication.connect(
                         this.backupProcedure.events,
+=======
+                    const sendEvent = (eventType, event) => {
+                        if (true) {
+                            sendNotif('backup_error')
+                        }
+                        try {
+                            window['browser'].tabs.sendMessage(this.uiTabId, {
+                                type: 'backup-event',
+                                event: { type: eventType, ...(event || {}) },
+                            })
+                        } catch (e) {
+                            // ignore the error, user closed tab
+                        }
+                    }
+                    this.state.events.on('info', event =>
+                        sendEvent('info', event),
+                    )
+                    this.state.events.on('fail', event =>
+                        sendEvent('fail', event),
+                    )
+                    this.state.events.on('success', event =>
+                        sendEvent('success', event),
+>>>>>>> Made a few changes to empty drive notification
                     )
                 },
                 getBackupInfo: () => {
@@ -157,6 +182,9 @@ export class BackupBackgroundModule {
                 },
                 isAutomaticBackupEnabled: async () => {
                     return this.isAutomaticBackupEnabled()
+                },
+                getBackupInfo: () => {
+                    return this.state.info
                 },
                 // This function is used to get the users drive size
                 getDriveSize: () => {
