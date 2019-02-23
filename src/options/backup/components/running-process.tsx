@@ -15,12 +15,13 @@ interface Props {
         cancel: string
         pause: string
         resume: string
+        sendNotif: string
     }
     eventMessageName: string
     preparingStepLabel: string
     synchingStepLabel: string
     renderHeader: () => any
-    renderFailMessage: () => any
+    renderFailMessage: (errorId: string) => any
     renderSuccessMessage: () => any
     onFinish: () => void
 }
@@ -82,7 +83,7 @@ export default class RunningProcess extends React.Component<Props> {
         }
     }
 
-    handleProcessEvent(event) {
+    async handleProcessEvent(event) {
         if (event.type === 'info') {
             this.setState({
                 status: 'running',
@@ -91,12 +92,26 @@ export default class RunningProcess extends React.Component<Props> {
         } else if (event.type === 'success') {
             this.setState({ status: 'success' })
         } else if (event.type === 'fail') {
+            const errorId = await remoteFunction(
+                this.props.functionNames.sendNotif,
+            )('error')
+            // Set the status as fail and also update the info as to
+            // what the reason of the failure was
             let overlay = null
             console.log(event.error)
             if (event.error === 'Backup file not found') {
                 overlay = true
             }
-            this.setState({ status: 'fail', overlay })
+            this.setState({
+                status: 'fail',
+                info: {
+                    state:
+                        errorId === 'backup_error'
+                            ? 'network-error'
+                            : 'full-drive',
+                },
+                overlay,
+            })
         }
     }
 
@@ -210,7 +225,7 @@ export default class RunningProcess extends React.Component<Props> {
     renderFail() {
         return (
             <div className={localStyles.finish}>
-                {this.props.renderFailMessage()}
+                {this.props.renderFailMessage(this.state.info.state)}
                 <PrimaryButton
                     onClick={() => {
                         this.props.onFinish()

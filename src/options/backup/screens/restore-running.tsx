@@ -11,6 +11,7 @@ export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
                 cancel: 'cancelRestore',
                 pause: 'pauseRestore',
                 resume: 'resumeRestore',
+                sendNotif: 'sendNotification',
             }}
             eventMessageName="restore-event"
             preparingStepLabel="Preparing restore"

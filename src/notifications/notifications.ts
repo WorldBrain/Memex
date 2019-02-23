@@ -58,17 +58,18 @@ export const releaseTime: number = 1542240979258
     },
 */
 
-export const NOTIFS: NotifDefinition[] = [
+export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
         id: 'restore',
         search: {
-            title: "Tab Manager, shortcuts, restore",
+            title: 'Tab Manager, shortcuts, restore',
             message: 'A release packed with new features',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
+                        url:
+                            'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -77,13 +78,13 @@ export const NOTIFS: NotifDefinition[] = [
         },
         system: {
             title: 'Tab Manager & shortcuts',
-            message:
-                'A release packed with new features',
+            message: 'A release packed with new features',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
+                        url:
+                            'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
                         context: 'new-tab',
                     },
                     label: 'Learn More',
@@ -91,14 +92,14 @@ export const NOTIFS: NotifDefinition[] = [
             ],
         },
         overview: {
-            title: "Tab Manager, keyboard shortcuts & restore",
-            message:
-                'Check out our latest release packed with new features',
+            title: 'Tab Manager, keyboard shortcuts & restore',
+            message: 'Check out our latest release packed with new features',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
+                        url:
+                            'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -107,3 +108,101 @@ export const NOTIFS: NotifDefinition[] = [
         },
     },
 ]
+
+export const EVENT_NOTIFS: object = {
+    backup_error: {
+        id: 'backup_error',
+        system: {
+            title: 'Error backing up data.',
+            message: 'Please check your internet connectivity',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/overview?showInbox=true',
+                        context: 'self',
+                    },
+                    label: 'Backup Now',
+                },
+            ],
+        },
+        overview: {
+            title: 'Backup Error due to poor internet connectivity.',
+            message: `Please make sure that you have an internet connection 
+                for a successful backup.`,
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/backup',
+                        context: 'self',
+                    },
+                    label: 'Retry',
+                },
+            ],
+        },
+    },
+    drive_size_empty: {
+        id: 'drive_size_empty',
+        system: {
+            title: 'Drive Size',
+            message: 'There seems to be no space in your Google Drive',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/overview?showInbox=true',
+                    },
+                    label: 'Retry',
+                },
+            ],
+        },
+        overview: {
+            title: 'No Drive Size Available',
+            message: `There is no space available in your Google Drive.
+                Please clear some space in your drive to be able to successfully
+                backup your future data.`,
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://drive.google.com',
+                    },
+                    label: 'Go to Google Drive',
+                },
+            ],
+        },
+    },
+    auto_backup_expired: {
+        id: 'auto_backup_expired',
+        system: {
+            title: 'Auto Backup',
+            message: 'Your Auto Backup subscription has expired.',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://worldbrain.io/pricing',
+                        context: 'self',
+                    },
+                    label: 'Renew Subscription',
+                },
+            ],
+        },
+        overview: {
+            title: 'Auto Backup Subscription',
+            message: `Your Auto Backup subscription has expired. If you want to
+                renew your subscription click on the button below.`,
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://worldbrain.io/pricing',
+                        context: 'self',
+                    },
+                    label: 'Renew Subscription',
+                },
+            ],
+        },
+    },
+}

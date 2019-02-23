@@ -11,6 +11,7 @@ export default function RunningBackup({ onFinish }: { onFinish: () => void }) {
                 cancel: 'cancelBackup',
                 pause: 'pauseBackup',
                 resume: 'resumeBackup',
+                sendNotif: 'sendNotification',
             }}
             eventMessageName="backup-event"
             preparingStepLabel="Preparing uploads"
@@ -32,21 +33,29 @@ function renderHeader() {
     )
 }
 
-function renderFailMessage() {
-    return (
+function renderFailMessage(errorId: string) {
+    return errorId === 'network-error' ? (
         <React.Fragment>
             <p className={STYLES.header2}>
                 <strong>BACKUP FAILED </strong>
             </p>
             <p className={STYLES.name}>
-                Please check whether you have enough space in your{' '}
-                <a href="https://http://drive.google.com">Google Drive</a> and
-                the stability of your internet connection. You can retry the
-                backup anytime you want. <br /> If you still encounter issues
-                please{' '}
+                Please check your internet connectivity. Backup was not
+                successful as the connection was either not strong enough or
+                there was no connection. If you still encounter issues please{' '}
                 <a href="mailto:support@worldbrain.io">contact support</a>.
             </p>
         </React.Fragment>
+    ) : (
+        <p className={STYLES.name}>
+            Please check whether you have enough space in your{' '}
+            <a href="https://drive.google.com">Google Drive</a> . Backup failed
+            as the size of the data to be uploaded was greater than the
+            remaining upload space available in your Google Drive. Clear some
+            space on the drive in order to successfully back up your data. If
+            you still encounter issues please{' '}
+            <a href="mailto:support@worldbrain.io">contact support</a>.
+        </p>
     )
 }
 

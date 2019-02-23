@@ -61,6 +61,34 @@ export class DriveBackupBackend extends BackupBackend {
         )
     }
 
+    // This is to send a notification to the user
+    async sendNotificationOnFailure(
+        id: string,
+        notifications,
+        estimateBackupSize,
+    ) {
+        try {
+            // Get the drive size if there is an error in the request
+            // driveSize.limit will not exist if the user has an unlimited plan
+            // const driveSize = (await this.getDriveStorageQuota()).storageQuota
+            const driveSize = await this.client.getDriveStorageQuota()
+            const backupSize = await estimateBackupSize()
+            // check if user's usage quota has exceeded or reached the limit
+            // Check if the data to be uploaded is greater than the size left in drive
+            if (
+                (driveSize.limit && driveSize.usage >= driveSize.limit) ||
+                backupSize.bytesWithBlobs + backupSize.bytesWithoutBlobs >
+                    driveSize.limit - driveSize.usage
+            ) {
+                id = 'drive_size_empty'
+            }
+        } catch (err) {
+            id = 'backup_error'
+        }
+        await notifications.dispatchNotification(id)
+        return id
+    }
+
     async handleLoginRedirectedBack(locationHref: string) {
         const response = await fetch(locationHref)
         const {
