@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import { browser } from 'webextension-polyfill-ts'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { openInNewTab } from '../utils'
+import { openInNewTab } from '../../sidebar-overlay/utils'
 
 const styles = require('./congrats-message.css')
 

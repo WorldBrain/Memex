@@ -70,6 +70,7 @@ export const setSidebarState = async (enabled: boolean) =>
 
 export const getExtUrl = (location: string) =>
     browser.runtime ? browser.runtime.getURL(location) : location
+
 export const openInNewTab = url => {
     const win = window.open(url, '_blank')
     win.focus()
