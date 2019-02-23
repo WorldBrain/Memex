@@ -74,6 +74,13 @@ class EditModeContent extends React.Component<Props, State> {
             this._handleEditAnnotation()
         } else if (e.key === 'Tab' && !e.shiftKey) {
             this._setTagInputActive(true)
+        } else if (
+            !(e.ctrlKey || e.metaKey) &&
+            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
+        ) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.setState(state => ({ commentText: state.commentText + e.key }))
         }
     }
 

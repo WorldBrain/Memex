@@ -345,6 +345,16 @@ class IndexDropdownContainer extends Component<Props, State> {
     }
 
     handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (
+            !(event.ctrlKey || event.metaKey) &&
+            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
+        ) {
+            event.preventDefault()
+            event.stopPropagation()
+            this.setState(state => ({ searchVal: state.searchVal + event.key }))
+            return
+        }
+
         switch (event.key) {
             case 'Enter':
                 return this.handleSearchEnterPress(event)
