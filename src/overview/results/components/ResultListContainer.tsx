@@ -143,7 +143,6 @@ class ResultListContainer extends PureComponent<Props> {
             return <LoadingIndicator />
         }
 
-        console.log(this.props.searchResults)
         const resultItems = this.props.searchResults.map((doc, i) => (
             <PageResultItem
                 key={i}

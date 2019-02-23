@@ -4,6 +4,7 @@ import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 import DirectLinkingStorage, { AnnotationStorage } from './storage'
 import normalize from '../../util/encode-url-for-id'
+import { getPdfFingerprintForURL } from 'src/activity-logger/background/pdffingerprint'
 
 export default class DirectLinkingBackground {
     constructor({ storageManager, getDb }) {
@@ -119,9 +120,17 @@ export default class DirectLinkingBackground {
     async getAllAnnotationsByUrl({ tab }, url) {
         let pageUrl = url === null ? tab.url : url
         pageUrl = normalize(pageUrl)
-        const annotations = await this.annotationStorage.getAnnotationsByUrl(
-            pageUrl,
-        )
+        let annotations
+        if (pageUrl.endsWith('.pdf')) {
+            const pdfFingerprint = await getPdfFingerprintForURL(pageUrl)
+            annotations = await this.annotationStorage.getAnnotationsByFingerprint(
+                pdfFingerprint,
+            )
+        } else {
+            annotations = await this.annotationStorage.getAnnotationsByUrl(
+                pageUrl,
+            )
+        }
         return annotations.map(
             ({ createdWhen, lastEdited, ...annotation }) => ({
                 ...annotation,
@@ -133,12 +142,17 @@ export default class DirectLinkingBackground {
 
     async createAnnotation({ tab }, { url, title, comment, body, selector }) {
         const pageUrl = url === null ? tab.url : url
+        let pdfFingerprint = null
+        if (pageUrl.endsWith('.pdf')) {
+            pdfFingerprint = await getPdfFingerprintForURL(normalize(pageUrl))
+        }
         const pageTitle = title === null ? tab.title : title
         const uniqueUrl = `${pageUrl}/#${new Date().getTime()}`
 
         await this.annotationStorage.createAnnotation({
             pageUrl,
             url: uniqueUrl,
+            pdfFingerprint,
             pageTitle,
             comment,
             body,

@@ -5,7 +5,7 @@ import { TabManager } from './tab-manager'
 import analyzePage, { PageAnalyzer } from '../../page-analysis/background'
 import * as searchIndex from '../../search'
 import { FavIconChecker } from './types'
-import getPdfFingerprint from './pdffingerprint'
+import getPdfFingerprint, { setPdfFingerprintForURL } from './pdffingerprint'
 
 interface Props {
     tabManager: TabManager
@@ -105,9 +105,11 @@ export default class PageVisitLogger {
             delete analysisRes.content.fullText
 
             const isPDF = tab.url.endsWith('.pdf')
-            const pdfFingerprint = isPDF
-                ? await getPdfFingerprint(tab.url)
-                : undefined
+            let pdfFingerprint = null
+            if (isPDF) {
+                pdfFingerprint = await getPdfFingerprint(tab.url)
+                setPdfFingerprintForURL(tab.url, pdfFingerprint)
+            }
             console.log({
                 url: tab.url,
                 isPDF,

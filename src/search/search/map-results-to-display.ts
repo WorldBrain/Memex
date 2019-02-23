@@ -5,7 +5,7 @@ export interface SearchDisplayResult {
     url: string
     title: string
     isPDF: boolean
-    pdfFingerprint: string
+    pdfFingerprint: string | null
     hasBookmark: boolean
     displayTime: number
     screenshot: string

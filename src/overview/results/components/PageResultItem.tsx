@@ -14,7 +14,7 @@ const styles = require('./PageResultItem.css')
 
 export interface Props {
     url: string
-    pdfFingerprint: string
+    pdfFingerprint: string | null
     isPDF: boolean
     title: string
     favIcon: string

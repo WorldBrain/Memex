@@ -20,7 +20,7 @@ export interface PageConstructorOptions {
     domain: string
     hostname: string
     isPDF: boolean
-    pdfFingerprint: string
+    pdfFingerprint: string | null
 
     // Display data
     text: string
@@ -43,7 +43,7 @@ export default class Page extends AbstractModel
     public url: string
     public text: string
     public isPDF: boolean
-    public pdfFingerprint: string
+    public pdfFingerprint: string | null
     public fullUrl: string
     public fullTitle: string
     public terms: string[]

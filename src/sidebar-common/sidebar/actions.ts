@@ -12,6 +12,7 @@ import {
     fetchOnboardingStage,
     setOnboardingStage,
 } from 'src/overview/onboarding/utils'
+import { getPdfFingerprintForURL } from 'src/activity-logger/background/pdffingerprint'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -91,10 +92,11 @@ export const createAnnotation: (
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const { url, title } = selectors.page(state)
-
+    const pdfFingerprint = await getPdfFingerprintForURL(window.location.href)
     if (annotationsManager) {
         await annotationsManager.createAnnotation({
             url,
+            pdfFingerprint,
             title,
             body,
             comment,

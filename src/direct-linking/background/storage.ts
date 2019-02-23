@@ -8,6 +8,7 @@ import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constan
 export interface Annotation {
     pageTitle: string
     pageUrl: string
+    pdfFingerprint: string | null
     body: string
     selector: object
     createdWhen?: Date
@@ -160,6 +161,7 @@ export class AnnotationStorage extends FeatureStorage {
                 fields: {
                     pageTitle: { type: 'text' },
                     pageUrl: { type: 'url' },
+                    pdfFingerprint: { type: 'text' },
                     body: { type: 'text' },
                     comment: { type: 'text' },
                     selector: { type: 'json' },
@@ -170,6 +172,7 @@ export class AnnotationStorage extends FeatureStorage {
                 indices: [
                     { field: 'url', pk: true },
                     { field: 'pageTitle' },
+                    { field: 'pdfFingerprint' },
                     { field: 'body' },
                     { field: 'createdWhen' },
                     { field: 'comment' },
@@ -220,6 +223,12 @@ export class AnnotationStorage extends FeatureStorage {
             .findObjects<Annotation>({ pageUrl })
     }
 
+    async getAnnotationsByFingerprint(pdfFingerprint: string) {
+        return this.storageManager
+            .collection(AnnotationStorage.ANNOTATIONS_COLL)
+            .findObjects<Annotation>({ pdfFingerprint })
+    }
+
     async insertDirectLink({
         pageTitle,
         pageUrl,
@@ -244,6 +253,7 @@ export class AnnotationStorage extends FeatureStorage {
     async createAnnotation({
         pageTitle,
         pageUrl,
+        pdfFingerprint,
         body,
         url,
         comment,
@@ -253,6 +263,7 @@ export class AnnotationStorage extends FeatureStorage {
             .collection(AnnotationStorage.ANNOTATIONS_COLL)
             .createObject({
                 pageTitle,
+                pdfFingerprint,
                 pageUrl,
                 comment,
                 body,
