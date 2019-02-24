@@ -1,14 +1,16 @@
 .box {
     position: absolute;
-    top: 50%;
+    padding: 50px 50px 50px 60px;
+    border: 1px solid #efefefef;
+    box-shadow: 0px 80px 80px -80px #d2d2d2;
+    border-radius: 8px;
     left: 50%;
+    z-index: 2500;
     margin-left: -300px;
     margin-top: -150px;
-    padding: 20px;
     width: 600px;
     height: 300px;
-    box-shadow: 0px 0px 4px #444;
-    background-color: #fafafa;
+    background-color: white;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
@@ -58,23 +60,28 @@
 .colorbutton,
 .greybutton {
     display: inline-block;
-    border: solid 2px #3eb995;
+    padding: 9px 10px;
     border-radius: 5px;
     padding-left: 20px;
+    background-color: #F29D9D;
+    margin-top: 20px;
     padding-right: 20px;
-    margin: 0px 10px;
-    background: white;
-    color: #3eb995;
-    font-weight: 500;
+    font-weight: bold;
     font-size: 14px;
     cursor: pointer;
 }
 
 .colorbutton {
-    background: #3eb995;
-    color: white;
+    color: #F29D9D
 }
 
 .colorbutton:hover {
-    background: #3eb995a5;
+    background: #5cd9a6;
+}
+
+.greybutton {
+}
+
+.greybutton:hover {
+    color: #1A2F58;
 }

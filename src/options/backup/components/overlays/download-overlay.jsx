@@ -36,7 +36,7 @@ export default function DownloadOverlay(props) {
                 </div>
                 <div className={Styles.buttonbox}>
                     <div
-                        className={Styles.colorbutton}
+                        className={Styles.continueButton}
                         onClick={() => {
                             props.onClick('continue')
                         }}
@@ -44,7 +44,7 @@ export default function DownloadOverlay(props) {
                         Continue
                     </div>
                     <div
-                        className={Styles.greybutton}
+                        className={Styles.cancelButton}
                         onClick={() => {
                             props.onClick('cancel')
                         }}
