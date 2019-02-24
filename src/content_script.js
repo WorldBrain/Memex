@@ -1,5 +1,5 @@
 import 'babel-polyfill'
-import { RemoteFunctionRegistry } from './util/webextensionRPC'
+import { RemoteFunctionRegistry, remoteFunction } from './util/webextensionRPC'
 import 'src/activity-logger/content_script'
 import 'src/page-analysis/content_script'
 import 'src/search-injection/content_script'
@@ -9,6 +9,7 @@ import 'src/direct-linking/content_script'
 import initRibbonAndSidebar from './sidebar-overlay/content_script'
 import 'src/backup/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
+import isPDFJSViewer from 'src/util/check-pdf-viewer'
 
 const remoteFunctionRegistry = new RemoteFunctionRegistry()
 
@@ -21,3 +22,7 @@ const annotationsManager = new AnnotationsManager()
 
 initContentTooltip({ toolbarNotifications })
 initRibbonAndSidebar({ annotationsManager, toolbarNotifications })
+
+if (isPDFJSViewer()) {
+    remoteFunction('toggleSidebarOverlay')()
+}

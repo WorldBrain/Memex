@@ -1,5 +1,6 @@
 import * as React from 'react'
 import Menu from 'react-burger-menu/lib/menus/slide'
+import cx from 'classnames'
 
 import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
 import AnnotationBoxContainer from '../../annotation-box'
@@ -7,6 +8,7 @@ import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
 import { Annotation } from '../types'
 import { openSettings } from '../../utils'
+import isPDFJSViewer from 'src/util/check-pdf-viewer'
 
 const styles = require('./sidebar.css')
 
@@ -108,7 +110,14 @@ class Sidebar extends React.Component<Props> {
                     />
 
                     {showCommentBox && <CommentBoxContainer />}
-
+                    {!isPDFJSViewer() &&
+                    window.location.href.endsWith('.pdf') ? (
+                        <button className={cx(styles.annotatePDFButton)}>
+                            Annotate PDF
+                        </button>
+                    ) : (
+                        ''
+                    )}
                     {isLoading ? (
                         <Loader />
                     ) : annotations.length === 0 ? (
