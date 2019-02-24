@@ -8,8 +8,10 @@ export class BackendSelect {
     async restoreBackend(): Promise<BackupBackend> {
         const backendLocation = await this.restoreBackendLocation()
         if (backendLocation === 'local') {
+            this.saveBackendLocation('local')
             return this.initLocalBackend()
         } else if (backendLocation === 'google-drive') {
+            this.saveBackendLocation('google-drive')
             return this.initGDriveBackend()
         } else {
             return undefined
@@ -17,7 +19,6 @@ export class BackendSelect {
     }
 
     async initGDriveBackend(): Promise<BackupBackend> {
-        this.saveBackendLocation('google-drive')
         return new driveBackup.DriveBackupBackend({
             tokenStore: new driveBackup.LocalStorageDriveTokenStore({
                 prefix: 'drive-token-',
@@ -27,7 +28,6 @@ export class BackendSelect {
     }
 
     async initLocalBackend(): Promise<BackupBackend> {
-        this.saveBackendLocation('local')
         return new localBackup.MemexLocalBackend({
             url: 'http://localhost:11922',
         })

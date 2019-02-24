@@ -9,6 +9,7 @@ import estimateBackupSize from './estimate-backup-size'
 import BackupProcedure from './procedures/backup'
 import { BackupRestoreProcedure } from './procedures/restore'
 import { ProcedureUiCommunication } from 'src/backup/background/procedures/ui-communication'
+import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
 
 export * from './backend'
 
@@ -54,11 +55,8 @@ export class BackupBackgroundModule {
         makeRemotelyCallable(
             {
                 getBackupProviderLoginLink: async (info, params) => {
-                    if (!this.backend) {
-                        await this.setBackendFromStorage()
-                    }
-                    const url = await this.backend.getLoginUrl(params)
-                    return url
+                    const MEMEX_CLOUD_ORIGIN = _getMemexCloudOrigin()
+                    return `${MEMEX_CLOUD_ORIGIN}/auth/google?scope=${DEFAULT_AUTH_SCOPE}`
                 },
                 startBackup: ({ tab }, params) => {
                     this.backupUiCommunication.registerUiTab(tab)
@@ -76,6 +74,9 @@ export class BackupBackgroundModule {
                         this.backupProcedure.events,
                     )
                 },
+                initRestoreProcedure: (info, provider) => {
+                    return this.initRestoreProcedure(provider)
+                },
                 getBackupInfo: () => {
                     return this.backupProcedure.info
                 },
@@ -89,9 +90,6 @@ export class BackupBackgroundModule {
                     await this.backupProcedure.cancel()
                 },
                 startRestore: async ({ tab }) => {
-                    if (!this.backend) {
-                        await this.setBackendFromStorage()
-                    }
                     this.restoreUiCommunication.registerUiTab(tab)
                     await this.startRestore()
                 },
@@ -204,10 +202,20 @@ export class BackupBackgroundModule {
             lastBackupStorage: this.lastBackupStorage,
             backend: this.backend,
         })
+    }
+
+    async initRestoreProcedure(provider) {
+        let backend: BackupBackend = null
+        if (provider === 'local') {
+            backend = await this.backendSelect.initLocalBackend()
+        } else if (provider === 'google-drive') {
+            backend = await this.backendSelect.initGDriveBackend()
+        }
+
         this.restoreProcedure = new BackupRestoreProcedure({
             storageManager: this.storageManager,
             storage: this.storage,
-            backend: this.backend,
+            backend,
         })
     }
 
@@ -352,11 +360,11 @@ export class BackupBackgroundModule {
 
     async prepareRestore() {
         this.clearAutomaticBackupTimeout()
-        await this.lastBackupStorage.storeLastBackupTime(null)
+        // await this.lastBackupStorage.storeLastBackupTime(null)
 
         const runner = this.restoreProcedure.runner()
         this.restoreProcedure.events.once('success', async () => {
-            await this.lastBackupStorage.storeLastBackupTime(new Date())
+            // await this.lastBackupStorage.storeLastBackupTime(new Date())
             await this.startRecordingChangesIfNeeded()
             await this.maybeScheduleAutomaticBackup()
         })

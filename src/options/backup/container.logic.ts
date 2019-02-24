@@ -235,9 +235,7 @@ export async function processEvent({
                     true,
                 )
                 const location = event.choice
-                await browser.storage.local.set({
-                    backendInfo: { location },
-                })
+                await remoteFunction('initRestoreProcedure')(location)
 
                 if (location === 'google-drive' && !state.isAuthenticated) {
                     localStorage.setItem('backup.restore.authenticating', true)

@@ -9,7 +9,8 @@ import {
 
 export { LocalStorageDriveTokenStore } from './token-manager'
 
-const DEFAULT_AUTH_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
+export const DEFAULT_AUTH_SCOPE =
+    'https://www.googleapis.com/auth/drive.appdata'
 
 export class DriveBackupBackend extends BackupBackend {
     public authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
