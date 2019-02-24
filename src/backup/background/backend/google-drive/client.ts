@@ -165,6 +165,17 @@ export class GoogleDriveClient {
         return { id: response.id, created: true }
     }
 
+    // https://developers.google.com/drive/api/v3/reference/about
+    async getDriveSize() {
+        const response = await this._request(`/about?fields=storageQuota`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        return response
+    }
+
     async _request(path, options: any = {}): Promise<any> {
         const accessToken = await this.tokenManager.getAccessToken()
         options.headers = options.headers || {}
