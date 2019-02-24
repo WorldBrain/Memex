@@ -130,7 +130,16 @@ export class BackupBackgroundModule {
                     return this.backendLocation
                 },
                 isBackupAuthenticated: async () => {
-                    return this.backend ? this.backend.isAuthenticated() : false
+                    let backend = null
+                    /* Check if restoreProcedure's backend is present. 
+                        Restore's backend is only present during restore. */
+                    if (this.restoreProcedure) {
+                        backend = this.restoreProcedure.backend
+                    } else {
+                        backend = this.backend
+                    }
+
+                    return backend ? backend.isAuthenticated() : false
                 },
                 maybeCheckAutomaticBakupEnabled: async () => {
                     if (
@@ -210,6 +219,7 @@ export class BackupBackgroundModule {
             backend = await this.backendSelect.initLocalBackend()
         } else if (provider === 'google-drive') {
             backend = await this.backendSelect.initGDriveBackend()
+            this.setupRequestInterceptor(backend)
         }
 
         this.restoreProcedure = new BackupRestoreProcedure({
@@ -219,11 +229,16 @@ export class BackupBackgroundModule {
         })
     }
 
-    setupRequestInterceptor() {
+    resetRestoreProcedure() {
+        this.restoreProcedure = null
+    }
+
+    setupRequestInterceptor(backupBackend: BackupBackend = null) {
+        const backend = backupBackend || this.backend
         setupRequestInterceptors({
             webRequest: window['browser'].webRequest,
-            handleLoginRedirectedBack: this.backend.handleLoginRedirectedBack.bind(
-                this.backend,
+            handleLoginRedirectedBack: backend.handleLoginRedirectedBack.bind(
+                backend,
             ),
             checkAutomaticBakupEnabled: () => this.checkAutomaticBakupEnabled(),
             memexCloudOrigin: _getMemexCloudOrigin(),
@@ -367,6 +382,7 @@ export class BackupBackgroundModule {
             // await this.lastBackupStorage.storeLastBackupTime(new Date())
             await this.startRecordingChangesIfNeeded()
             await this.maybeScheduleAutomaticBackup()
+            this.resetRestoreProcedure()
         })
 
         return runner
