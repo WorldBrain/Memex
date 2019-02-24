@@ -98,4 +98,12 @@ window['directLinking'] = directLinking
 window['customList'] = customList
 window['notifications'] = notifications
 
+browser.runtime.onMessage.addListener((msg, sender) => {
+    if (msg.request === 'open-pdf-viewer') {
+        browser.tabs.update(sender.tab.id, {
+            url: `web/viewer.html?file=${encodeURI(sender.tab.url)}`,
+        })
+    }
+})
+
 console.log('Background script initialized')

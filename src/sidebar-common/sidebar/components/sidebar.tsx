@@ -8,7 +8,8 @@ import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
 import { Annotation } from '../types'
 import { openSettings } from '../../utils'
-import isPDFJSViewer from 'src/util/check-pdf-viewer'
+import isPDFJSViewer from 'src/util/pdf-viewer'
+import { browser } from 'webextension-polyfill-ts'
 
 const styles = require('./sidebar.css')
 
@@ -112,7 +113,15 @@ class Sidebar extends React.Component<Props> {
                     {showCommentBox && <CommentBoxContainer />}
                     {!isPDFJSViewer() &&
                     window.location.href.endsWith('.pdf') ? (
-                        <button className={cx(styles.annotatePDFButton)}>
+                        <button
+                            className={cx(styles.annotatePDFButton)}
+                            onClick={e => {
+                                e.preventDefault()
+                                browser.runtime.sendMessage({
+                                    request: 'open-pdf-viewer',
+                                })
+                            }}
+                        >
                             Annotate PDF
                         </button>
                     ) : (

@@ -9,7 +9,7 @@ import 'src/direct-linking/content_script'
 import initRibbonAndSidebar from './sidebar-overlay/content_script'
 import 'src/backup/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
-import isPDFJSViewer from 'src/util/check-pdf-viewer'
+import isPDFJSViewer from 'src/util/pdf-viewer'
 
 const remoteFunctionRegistry = new RemoteFunctionRegistry()
 

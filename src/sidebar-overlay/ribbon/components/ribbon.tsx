@@ -1,7 +1,9 @@
 import * as React from 'react'
 import cx from 'classnames'
+import { browser } from 'webextension-polyfill-ts'
 
 import { getExtUrl } from '../../utils'
+import isPDFJSViewer from 'src/util/pdf-viewer'
 
 const styles = require('./ribbon.css')
 
@@ -56,7 +58,12 @@ const Ribbon = (props: Props) => {
                         className={styles.logo}
                         onClick={e => {
                             e.stopPropagation()
-                            openSidebar()
+                            !isPDFJSViewer() &&
+                            window.location.href.endsWith('.pdf')
+                                ? browser.runtime.sendMessage({
+                                      request: 'open-pdf-viewer',
+                                  })
+                                : openSidebar()
                         }}
                         title={'Open Annotation Sidebar'}
                     />

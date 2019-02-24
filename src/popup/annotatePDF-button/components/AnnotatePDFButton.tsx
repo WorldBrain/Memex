@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
+import { browser } from 'webextension-polyfill-ts'
 
 import Button from '../../components/Button'
-import { browser } from 'webextension-polyfill-ts'
 
 const styles = require('./AnnotatePDFButton.css')
 
