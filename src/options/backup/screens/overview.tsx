@@ -177,27 +177,6 @@ export default class OverviewContainer extends React.Component<Props> {
                                     </span>
                                 </span>
                             </p>
-                            <p className={styles.optionLine}>
-                                <span className={styles.name}>
-                                    Include Screenshots
-                                </span>
-                                <span className={localStyles.right}>
-                                    <ToggleSwitch
-                                        isChecked={this.state.blobPreference}
-                                        onChange={this.handleToggle}
-                                    />
-                                </span>
-                            </p>
-                            <span className={styles.name}>
-                                Download dump of your data
-                            </span>
-                            <SmallButton
-                                onClick={() => null}
-                                color="green"
-                                extraClass={localStyles.right}
-                            >
-                                Download
-                            </SmallButton>
                         </div>
                     </div>
                 ) : null}
