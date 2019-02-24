@@ -67,7 +67,7 @@ export default class NotificationBackground {
         ))[NotificationBackground.LAST_NOTIF_TIME]
 
         for (let notification of notifications.NOTIFS) {
-            if (notification.system) {
+            if (notification.id === 'restore') {
                 if (
                     !lastReleaseTime ||
                     lastReleaseTime < notification.sentTime
@@ -96,7 +96,7 @@ export default class NotificationBackground {
                 }
             }
 
-            if (notification.overview) {
+            if (notification.id === 'restore' && notification.overview) {
                 notification = {
                     ...notification.overview,
                     id: notification.id,
