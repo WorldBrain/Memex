@@ -12,8 +12,10 @@ interface Props {
 export default class AnnotatePDFButton extends PureComponent<Props> {
     handleClick = e => {
         e.preventDefault()
-        browser.tabs.create({
-            url: `web/viewer.html?file=${encodeURI(this.props.pdfURL)}`,
+        browser.tabs.query({ active: true }).then(tabs => {
+            browser.tabs.update(tabs[0].id, {
+                url: `web/viewer.html?file=${encodeURI(this.props.pdfURL)}`,
+            })
         })
     }
     render() {
