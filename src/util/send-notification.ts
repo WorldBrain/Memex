@@ -16,7 +16,9 @@ async function sendNotification(id: string) {
             backupError = 'backup_error'
         } else {
             // Get the drive size if there is an error in the request
+            console.log(await getDriveSize())
             const driveSize = (await getDriveSize()).storageQuota
+
             // Get the backup size and compare to see if its greater than the free
             // space available in the drive
             const backupSize = await estimateBackupSize()
