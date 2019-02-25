@@ -1,15 +1,13 @@
 import React from 'react'
-import PropTypes from 'prop-types'
-import classNames from 'classnames'
 import * as logic from './restore-confirmation.logic'
 const styles = require('./restore-confirmation.css')
 
-export default class RestoreConfirmation extends React.Component {
-    static propTypes = {
-        onConfirm: PropTypes.func.isRequired,
-        onClose: PropTypes.func.isRequired,
-    }
+interface Props {
+    onConfirm: () => void
+    onClose: () => void
+}
 
+export default class RestoreConfirmation extends React.Component<Props, {}> {
     state = logic.INITIAL_STATE
     handleEvent = null
     inputRef = null
@@ -26,22 +24,38 @@ export default class RestoreConfirmation extends React.Component {
         return (
             <div className={styles.container}>
                 <div className={styles.box}>
-                <img className={styles.dangerIcon} src={'./img/danger.svg'}/><span className={styles.danger}>Danger Zone</span>
-                    <p className={styles.normal}>This will delete your existing data and replace it with your backup. You cannot go back.</p>
-                    <p className={styles.instructions}> Type <input
-                        type="text"
-                        className={styles.input}
-                        placeholder="RESTORE"
-                        value={this.state.confirmation}
-                        onChange={event =>
-                            this.handleEvent({
-                                type: 'onConfirmationChange',
-                                value: event.target.value,
-                            })
-                        }
-                        ref={node => (this.inputRef = node)}
-                    />to continue</p>
-                    
+                    <img
+                        className={styles.closeIcon}
+                        src={'./img/cross.svg'}
+                        onClick={this.props.onClose}
+                    />
+                    <img
+                        className={styles.dangerIcon}
+                        src={'./img/danger.svg'}
+                    />
+                    <span className={styles.danger}>Danger Zone</span>
+                    <p className={styles.normal}>
+                        This will delete your existing data and replace it with
+                        your backup. You cannot go back.
+                    </p>
+                    <p className={styles.instructions}>
+                        {' '}
+                        Type{' '}
+                        <input
+                            type="text"
+                            className={styles.input}
+                            placeholder="RESTORE"
+                            value={this.state.confirmation}
+                            onChange={event =>
+                                this.handleEvent({
+                                    type: 'onConfirmationChange',
+                                    value: event.target.value,
+                                })
+                            }
+                            ref={node => (this.inputRef = node)}
+                        />
+                        to continue
+                    </p>
                 </div>
             </div>
         )
