@@ -63,7 +63,10 @@ export class BackupBackgroundModule {
                     if (this.backupProcedure.running) {
                         return
                     }
-                    if (this.restoreProcedure.running) {
+                    if (
+                        this.restoreProcedure &&
+                        this.restoreProcedure.running
+                    ) {
                         throw new Error(
                             "Come on, don't be crazy and run backup and restore at once please",
                         )
@@ -114,12 +117,14 @@ export class BackupBackgroundModule {
                         this.backendLocation !== location
                     ) {
                         this.backendLocation = location
+                        await this.backendSelect.saveBackendLocation(location)
                         this.backend = await this.backendSelect.initGDriveBackend()
                     } else if (
                         location === 'local' &&
                         this.backendLocation !== location
                     ) {
                         this.backendLocation = location
+                        await this.backendSelect.saveBackendLocation(location)
                         this.backend = await this.backendSelect.initLocalBackend()
                     }
                     this.setupRequestInterceptor()
