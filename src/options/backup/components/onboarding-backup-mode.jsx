@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import Styles from './backup-mode.css'
 import classNames from 'classnames'
 
+import AutomaticPricing from './automatic-pricing'
+
 export default class OnboardingBackupModeContainer extends React.Component {
     static propTypes = {
         disableModeSelection: PropTypes.bool,
@@ -134,6 +136,11 @@ export function OnboardingBackupMode({
                             </label>
                         </div>
                     </div>
+                    <AutomaticPricing
+                        billingPeriod={billingPeriod}
+                        mode={mode}
+                        onBillingPeriodChange={onBillingPeriodChange}
+                    />
                 )}
             </div>
         </div>

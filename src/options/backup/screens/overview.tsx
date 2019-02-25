@@ -10,7 +10,8 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 //     redirectToAutomaticBackupPurchase,
 //     redirectToAutomaticBackupCancellation,
 // } from '../utils'
-import { ToggleSwitch } from 'src/common-ui/components'
+// import { ToggleSwitch } from 'src/common-ui/components'
+import AutomaticPricing from '../components/automatic-pricing'
 import SmallButton from '../components/small-button'
 import LoadingBlocker from '../components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
@@ -23,6 +24,7 @@ interface Props {
     onBackupRequested: (...args: any[]) => any
     onRestoreRequested: (...args: any[]) => any
     onBlobPreferenceChange: (...args: any[]) => any
+    onPaymentRequested: (...args: any[]) => any
 }
 
 export default class OverviewContainer extends React.Component<Props> {
@@ -31,10 +33,13 @@ export default class OverviewContainer extends React.Component<Props> {
         backupTimes: null,
         hasInitialBackup: false,
         showAutomaticUpgradeDetails: false,
-        upgradeBillingPeriod: null,
+        // upgradeBillingPeriod: null,
         showRestoreConfirmation: false,
         backupLocation: null,
         blobPreference: true,
+        /* Pricing */
+        showPricing: false,
+        billingPeriod: null,
     }
 
     async componentDidMount() {
@@ -145,7 +150,9 @@ export default class OverviewContainer extends React.Component<Props> {
                             </span>
                             <SmallButton
                                 extraClass={localStyles.right}
-                                onClick={() => null}
+                                onClick={() =>
+                                    this.setState({ showPricing: true })
+                                }
                                 color="darkblue"
                             >
                                 Upgrade
@@ -159,6 +166,30 @@ export default class OverviewContainer extends React.Component<Props> {
                                 Worry-free. Automatically backs up your data
                                 every 15 minutes.
                             </span>
+                            <br />
+                            {this.state.showPricing ? (
+                                <AutomaticPricing
+                                    mode="automatic"
+                                    billingPeriod={this.state.billingPeriod}
+                                    onBillingPeriodChange={billingPeriod =>
+                                        this.setState({ billingPeriod })
+                                    }
+                                />
+                            ) : null}
+                            <br />
+                            {this.state.showPricing &&
+                            this.state.billingPeriod ? (
+                                <SmallButton
+                                    color="green"
+                                    onClick={() =>
+                                        this.props.onPaymentRequested(
+                                            this.state.billingPeriod,
+                                        )
+                                    }
+                                >
+                                    Pay now
+                                </SmallButton>
+                            ) : null}
                             <p className={styles.optionLine}>
                                 <span className={styles.name}>
                                     Backup Location

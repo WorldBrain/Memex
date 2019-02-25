@@ -141,6 +141,13 @@ export async function processEvent({
             onRestoreRequested: () => {
                 return { screen: 'restore-where' }
             },
+            onPaymentRequested: () => {
+                const { choice } = event
+                localStorage.setItem('backup.onboarding.authenticating', true)
+                return {
+                    redirect: { to: 'automatic-backup-purchase', choice },
+                }
+            },
             onBlobPreferenceChange: _onBlobPreferenceChange,
         },
         'onboarding-where': {

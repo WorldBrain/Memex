@@ -224,7 +224,9 @@ describe('BackupRestoreProcedure', () => {
 
         const createObject = sinon.fake()
         const updateOneObject = sinon.fake()
+        const updateObjects = sinon.fake()
         const deleteOneObject = sinon.fake()
+        const deleteObjects = sinon.fake()
 
         const restoreProcedure = new BackupRestoreProcedure({
             backend: null,
@@ -232,7 +234,9 @@ describe('BackupRestoreProcedure', () => {
                 collection: () => ({
                     createObject,
                     deleteOneObject,
+                    deleteObjects,
                     updateOneObject,
+                    updateObjects,
                 }),
                 registry: {
                     collections: {
@@ -261,7 +265,7 @@ describe('BackupRestoreProcedure', () => {
 
         await restoreProcedure._writeChange(pageUpdateChange)
         expect(
-            updateOneObject.lastCall.calledWith(
+            updateObjects.lastCall.calledWith(
                 {
                     test: pageUpdateChange.objectPk,
                 },
@@ -271,7 +275,7 @@ describe('BackupRestoreProcedure', () => {
 
         await restoreProcedure._writeChange(pageDeleteChange)
         expect(
-            deleteOneObject.lastCall.calledWith({
+            deleteObjects.lastCall.calledWith({
                 test: pageDeleteChange.objectPk,
             }),
         ).toBe(true)
@@ -313,7 +317,7 @@ describe('BackupRestoreProcedure', () => {
         const updates = []
         const storageManager = {
             collection: collectionName => ({
-                updateOneObject: async (...args) => {
+                updateObjects: async (...args) => {
                     updates.push([collectionName, ...args])
                 },
             }),
