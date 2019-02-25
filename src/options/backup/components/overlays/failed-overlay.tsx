@@ -21,15 +21,15 @@ export default class FailedOverlay extends PureComponent<Props, {}> {
                     </p>
                     <div className={styles.buttonbox}>
                         <div
-                            className={styles.colorbutton}
+                            className={styles.continueButton}
                             onClick={() => {
                                 this.props.onClick('continue')
                             }}
                         >
-                            Continue
+                            Retry
                         </div>
                         <div
-                            className={styles.greybutton}
+                            className={styles.cancelButton}
                             onClick={() => {
                                 this.props.onClick('cancel')
                             }}

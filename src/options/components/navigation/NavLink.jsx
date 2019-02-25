@@ -24,7 +24,7 @@ class NavLink extends PureComponent {
 
     render() {
         return (
-            <li>
+            <li className={styles.listElements}>
                 <div className={this.navClasses()}>
                     <i className={cx(styles.navIcon, 'material-icons')}>
                         {this.props.icon}

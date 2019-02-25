@@ -10,16 +10,17 @@
     color: white;
 }
 
-h1 {
-    color: #3eb995;
-    margin-left: -2px;
+.backupTitle {
+    composes: titleColor from '../../common-ui/colors.css';
     font-weight: 600;
+    font-size: 25px;
+    margin-top: 0px;
 }
 
 .subtitle {
-    color: #4a4a4a;
+    composes: subTitleColor from '../../common-ui/colors.css';
     margin-top: -20px;
-    font-weight: 200;
+    font-size: 0.8rem;
 }
 
 .subtitle2 {
@@ -31,9 +32,9 @@ h1 {
 }
 
 .header2 {
-    composes: h2 from '../../common-ui/colors.css';
-    font-size: 20px;
-    margin-bottom: 10px;
+    composes: darkBlue from '../../common-ui/colors.css';
+    font-size: 18px;
+    margin-bottom: 5px;
     margin-top: 30px;
 }
 
@@ -98,12 +99,14 @@ h1 {
 }
 
 .name {
+    composes: h2Color from '../../common-ui/colors.css';
     vertical-align: middle;
-    color: #3eb995;
     font-weight: 500;
+    font-size: 15px;
 }
 
 .subname {
-    font-size: 15px;
-    color: #4a4a4a;
+    composes: subTitleColor from '../../common-ui/colors.css';
+    font-size: 13px;
+    margin-top: 4px;
 }

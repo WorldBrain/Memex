@@ -1,28 +1,51 @@
 /* COLOR CODING */
 
-.mainTitle {
+.titleColor {
     color: #111;
 }
 
-.h2 {
-	color: #333;
+.h2Color {
+	color: #444;
 }
 
-.subText {
-    color: #a2a2a2;
-    font-weight: 300;
-}
-
-.hoverText {
-    color: #5cd9a6;
+.hoverElementColor:hover {
+	background-color: #ebebeb;
+	color: #222;
 }
 
 .darkBlue {
 	color: #1a2f58;
 }
 
+.darkBlueBackground {
+	background-color: #1a2f58;
+}
+
+.subTitleColor {
+    color: #a2a2a2;
+    font-weight: 200;
+}
+
+.lighterGrey {
+	color: #666;
+	font-weight: 500;
+}
+
+.hoverText:hover {
+    color: #5cd9a6;
+}
+
+.menuItem {
+	composes: h2Color;
+	font-weight: 400;
+}
+
 .warningColor {
 	color: #f29d9d;
+}
+
+.sideBarColorOpen {
+	background-color: #edf0f4;
 }
 
 .CTA {

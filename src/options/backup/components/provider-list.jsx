@@ -5,24 +5,8 @@ import Styles from './provider-list.css'
 export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
     return (
         <div>
-            <p className={Styles.subTitle}>Currently Available</p>
-            <form>
-                <label>
-                    <input
-                        type="radio"
-                        name="backend-select"
-                        onChange={() => onChange('google-drive')}
-                    />
-                    <span style={{ cursor: 'pointer' }}>
-                        <img
-                            className={Styles.logo}
-                            src={'img/google-drive.png'}
-                        />
-                        <span className={Styles.title}>Google Drive</span>
-                    </span>
-                </label>
-                <br />
-                <label>
+            <form className={Styles.form}>
+                <label className={Styles.label}>
                     <input
                         type="radio"
                         name="backend-select"
@@ -31,10 +15,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                     <span style={{ cursor: 'pointer' }}>
                         <span className={Styles.title}>Local Backup</span>
                         <p className={Styles.description}>
-                            Backup your data locally, or to any cloud provider
-                            that has a syncing folder on your
-                            <br />
-                            computer (e.g. Dropbox, Spideroak, GDrive)
+                            Backup & restore your data locally, or to any cloud provider with a syncing folder on your computer (e.g. Dropbox, Spideroak, GDrive) <a className={Styles.link} target="_blank" href="https://www.notion.so/worldbrain/Backup-Restore-locally-and-to-any-cloud-provider-7b7e470247c548eeb3e9601a03e246a7">Learn More ▸</a>
                         </p>
                     </span>
                     {backupPath !== null ? (
@@ -60,6 +41,21 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             )}
                         </button>
                     ) : null}
+                </label>
+                <br />
+                <label className={Styles.label}>
+                    <input
+                        type="radio"
+                        name="backend-select"
+                        onChange={() => onChange('google-drive')}
+                    />
+                    <span style={{ cursor: 'pointer' }}>
+                        <span className={Styles.title}>Google Drive</span>
+                        <img
+                            className={Styles.logo}
+                            src={'img/google-drive.png'}
+                        />
+                    </span>
                 </label>
                 <br />
             </form>

@@ -10,9 +10,9 @@
 
 .box {
     composes: boxShadow from '../../../common-ui/colors.css';
-    width: 500px;
-    padding: 50px 50px 50px 60px;
-    margin: 200px auto;
+    padding: 40px 50px 30px 52px;
+    margin: 15% auto;
+    width: 28em;
 }
 
 .danger {
@@ -29,21 +29,21 @@
 }
 
 .normal {
-    color: #1a2f58;
+    composes: subTitleColor from '../../../common-ui/colors.css';
+    font-size: 15px;
 }
 
 .instructions {
-    color: #1a2f58;
-}
-
-b {
-    color: #5cd9a6;
+    composes: menuItem from '../../../common-ui/colors.css';
+    font-size: 15px;
 }
 
 .input {
-    margin-left: 0px;
+    margin-left: 10px;
     border-radius: 5px;
     border: 2px solid #ebebeb;
     width: 150px;
     height: 25px;
+    padding-left: 9px;
+    vertical-align: middle;
 }

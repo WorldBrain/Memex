@@ -10,14 +10,6 @@ body {
     font-weight: 200;
 }
 
-strong {
-    font-weight: 600;
-}
-
-h3 {
-    font-weight: 600;
-}
-
 .root {
     background-color: #fafafc;
     display: flex;
@@ -25,7 +17,7 @@ h3 {
 }
 
 .sidebar .route {
-    margin: 20px 20px 0;
+    margin: 25px 35px;
     flex-grow: 1;
     max-width: 800px;
     margin-left: 30px;

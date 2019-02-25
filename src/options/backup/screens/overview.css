@@ -14,17 +14,12 @@
     font-size: 0.9em;
 }
 
-.fontSize {
-    color: red;
-}
-
 .statusLine {
-    composes: fontSize;
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 600px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 
     & p {
         margin-bottom: 0;
@@ -37,11 +32,12 @@
 }
 
 .boldText {
+    composes: h2Color from '../../../common-ui/colors.css';
     font-weight: 600;
+    font-size: 15px;
 }
 
 .startWizard {
-    composes: fontSize;
     border: none;
     outline: none;
     color: white;
@@ -59,6 +55,8 @@
 
 .time {
     margin-left: 5px;
+    composes: subTitleColor from '../../../common-ui/colors.css';
+    font-size: 13px;
 }
 
 .right {
@@ -72,15 +70,19 @@
 }
 
 .location {
-    composes: fontSize;
+    composes: darkBlue from '../../../common-ui/colors.css';
     float: right;
     text-align: right;
-    color: #0b8863;
     cursor: pointer;
+    font-size: 15px;
 
     & .change {
         display: block;
         font-size: 0.6rem;
         color: #555;
+
+    & :hover {
+        font-weight: 700;
+    }
     }
 }

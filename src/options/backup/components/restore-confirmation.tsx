@@ -28,10 +28,10 @@ export default class RestoreConfirmation extends React.Component {
                 <div className={styles.box}>
                 <img className={styles.dangerIcon} src={'./img/danger.svg'}/><span className={styles.danger}>Danger Zone</span>
                     <p className={styles.normal}>This will delete your existing data and replace it with your backup. You cannot go back.</p>
-                    <p className={styles.instruction}> Type <b>RESTORE</b> to continue</p>
-                    <input
+                    <p className={styles.instructions}> Type <input
                         type="text"
                         className={styles.input}
+                        placeholder="RESTORE"
                         value={this.state.confirmation}
                         onChange={event =>
                             this.handleEvent({
@@ -40,7 +40,8 @@ export default class RestoreConfirmation extends React.Component {
                             })
                         }
                         ref={node => (this.inputRef = node)}
-                    />
+                    />to continue</p>
+                    
                 </div>
             </div>
         )

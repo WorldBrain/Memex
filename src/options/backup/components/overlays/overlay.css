@@ -1,11 +1,12 @@
 .box {
     composes: boxShadow from '../../../../common-ui/colors.css';
     position: absolute;
-    padding: 2.2em 2.2em;
+    padding: 40px;
     width: 105%;
+    max-width: 600px;
     z-index: 2500;
     margin: auto auto;
-    margin-top: -180px;
+    margin-top: -130px;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
@@ -18,14 +19,15 @@
 }
 
 .header {
-    composes: h2 from '../../../../common-ui/colors.css';
+    composes: h2color from '../../../../common-ui/colors.css';
     grid-area: header;
     margin: 0px;
     text-align: center;
+    font-size: 21px;
 }
 
 .description {
-    composes: subText from '../../../../common-ui/colors.css';
+    composes: subTitleColor from '../../../../common-ui/colors.css';
     grid-area: description;
     font-size: 0.9rem;
     margin: 0px;
@@ -62,6 +64,7 @@
     justify-self: center;
     font-size: 17px;
     margin-top: 30px;
+    cursor: pointer;
 }
 
 .continueButton {
@@ -85,4 +88,7 @@
     composes: darkBlue from '../../../../common-ui/colors.css';
     font-weight: 600;
     text-decoration: none;
+    position: absolute;
+    bottom: 50px;
+    right: 60px;
 }

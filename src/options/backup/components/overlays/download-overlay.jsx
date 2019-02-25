@@ -8,10 +8,10 @@ export default function DownloadOverlay(props) {
         <div>
             <div className={Styles.box}>
                 <h3 className={Styles.header}>
-                    Download Memex Backup App to enable local backups.
+                    Download Memex' Backup App to continue.
                 </h3>
                 <p className={Styles.description}>
-                        Download & start it, pick a backup folder and then return here to continue your backup. <br/><a className={Styles.link} target="_blank" href="https://www.notion.so/worldbrain/Backup-Restore-locally-and-to-any-cloud-provider-7b7e470247c548eeb3e9601a03e246a7">Learn More ▸</a>
+                        Start it & pick a backup folder. Then return to continue your backup. <br/><a className={Styles.link} target="_blank" href="https://www.notion.so/worldbrain/Backup-Restore-locally-and-to-any-cloud-provider-7b7e470247c548eeb3e9601a03e246a7">Learn More ▸</a>
                 </p>
                 <div className={Styles.linkbox}>
                     <a

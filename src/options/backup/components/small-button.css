@@ -2,51 +2,34 @@
     display: inline-block;
     outline: none;
     border: none;
-    background: transparent;
     width: 120px;
     vertical-align: middle;
     margin-left: 10px;
     border-radius: 3px;
     cursor: pointer;
-    padding: 6px 3px;
-}
-
-.text {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 1px;
-}
-
-.green {
-    color: white;
-    background: #3eb995;
-    border: solid 2px #3eb995;
-
-    &:hover {
-        color: #3eb995;
-        background: white;
-    }
-}
-
-.white {
-    background: white;
-    color: #3eb995;
-    border: solid 2px #3eb995;
-
-    &:hover {
-        background: #3eb995;
-        color: white;
-    }
+    padding: 9px 6px;
+    font-size: 13px;
 }
 
 .darkblue {
-    background: #173766;
+    background-color: #1a2f58;
+    opacity: 0.7;
     color: white;
-    border: solid 2px #173766;
 
     &:hover {
-        background: white;
-        color: #173766;
+        background-color: #1a2f58;
+        opacity: 1;
     }
+}
+
+.text {
+    composes: CTA from '../../../common-ui/colors.css';
+}
+
+.green {
+    composes: CTA from '../../../common-ui/colors.css';
+}
+
+.white {
+    composes: CTA from '../../../common-ui/colors.css';
 }

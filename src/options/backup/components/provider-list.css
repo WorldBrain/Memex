@@ -1,7 +1,7 @@
 .logo {
     height: 20px;
-    vertical-align: middle;
-    margin-right: 5px;
+    vertical-align: text-top;
+    margin-left: 5px;
 }
 
 .disabled {
@@ -36,21 +36,23 @@ input {
 }
 
 .subTitle {
-    font-weight: 600;
-    margin-bottom: 10px;
+    composes: h2Color from '../../../common-ui/colors.css';
+    vertical-align: middle;
+    font-weight: 500;
+    font-size: 15px;
 }
 
 .title {
+    composes: h2Color from '../../../common-ui/colors.css';
+    font-size: 15px;
     vertical-align: middle;
-    color: #3eb995;
     font-weight: 500;
 }
 
 .description {
+    composes: subTitleColor from '../../../common-ui/colors.css';
     font-size: 13px;
-    margin: 5px 0px 0px 40px;
-    font-weight: 500;
-    color: grey;
+    margin: 0px 0px 0px 36px;
 }
 
 .destination {
@@ -60,12 +62,13 @@ input {
     cursor: pointer;
     font-size: 15px;
     color: #0b0b69;
-    margin-top: 15px;
+    margin-top: 10px;
     margin-left: 34px;
     display: flex;
     align-items: flex-start;
 
     & p {
+        margin-bottom: -6px;
         margin-top: -3px;
     }
 
@@ -77,7 +80,7 @@ input {
         display: inline-block;
         width: 25px;
         height: 25px;
-        background-image: url('/img/collections.svg');
+        background-image: url('/img/computer.svg');
         background-repeat: no-repeat;
         background-position: center;
         background-size: 25px;
@@ -91,4 +94,14 @@ input {
         color: #333;
         font-size: 11px;
     }
+}
+
+.form {
+    margin-top: 15px;
+}
+
+.link {
+    composes: darkBlue from '../../../common-ui/colors.css';
+    font-weight: 600;
+    text-decoration: none;
 }
