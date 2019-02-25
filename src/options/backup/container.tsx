@@ -22,6 +22,7 @@ export const SCREENS = {
             onBackupRequested: { argument: 'changeBackupRequested' },
             onRestoreRequested: true,
             onBlobPreferenceChange: { argument: 'saveBlobs' },
+            onPaymentRequested: { argument: 'choice' },
         },
     },
     'running-backup': {

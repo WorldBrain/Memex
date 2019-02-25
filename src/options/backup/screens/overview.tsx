@@ -24,6 +24,7 @@ interface Props {
     onBackupRequested: (...args: any[]) => any
     onRestoreRequested: (...args: any[]) => any
     onBlobPreferenceChange: (...args: any[]) => any
+    onPaymentRequested: (...args: any[]) => any
 }
 
 export default class OverviewContainer extends React.Component<Props> {
@@ -174,6 +175,20 @@ export default class OverviewContainer extends React.Component<Props> {
                                         this.setState({ billingPeriod })
                                     }
                                 />
+                            ) : null}
+                            <br />
+                            {this.state.showPricing &&
+                            this.state.billingPeriod ? (
+                                <SmallButton
+                                    color="green"
+                                    onClick={() =>
+                                        this.props.onPaymentRequested(
+                                            this.state.billingPeriod,
+                                        )
+                                    }
+                                >
+                                    Pay now
+                                </SmallButton>
                             ) : null}
                             <p className={styles.optionLine}>
                                 <span className={styles.name}>
