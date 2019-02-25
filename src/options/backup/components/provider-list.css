@@ -70,6 +70,8 @@ input {
     & p {
         margin-bottom: -6px;
         margin-top: -3px;
+        text-align: left;
+        font-size: 12px;
     }
 
     & .select {
@@ -93,6 +95,7 @@ input {
         text-align: left;
         color: #333;
         font-size: 11px;
+        font-weight: bold;
     }
 }
 

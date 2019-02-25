@@ -81,9 +81,10 @@ export default class OnboardingWhere extends React.Component {
             <div>
                 <p className={Styles.header2}>
                     <strong>STEP 1/5: </strong>
-                    WHERE?
+                    Where do you want to store your data?
                 </p>
                 <ProviderList
+                    className={Styles.selectionlist}
                     backupPath={this.state.backupPath}
                     handleChangeBackupPath={this._handleChangeBackupPath}
                     onChange={async provider => {

@@ -72,10 +72,10 @@ export default class OnboardingSizeContainer extends React.Component {
             <div className={Styles.container}>
                 <p className={Styles.header2}>
                     <strong>STEP 3/5: </strong>
-                    WHAT?
+                    Estimating backup size
                 </p>
                 <div className={Styles.subtitle2}>
-                    Estimated size of your backup. What do you want to include?
+                    What do you want to include in the backup? 
                 </div>
                 <table>
                     <tbody>
