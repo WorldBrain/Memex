@@ -1,6 +1,6 @@
 .container {
     display: flex;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     flex-direction: row;
     width: 100%;
     padding-left: 10px;

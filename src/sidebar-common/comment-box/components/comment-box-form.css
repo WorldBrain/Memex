@@ -7,7 +7,7 @@
     width: 95%;
     font-size: 14px;
     color: #222;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     font-style: italic;
     background: #f7f7f7;
     border: none;
@@ -33,7 +33,7 @@
 }
 
 .saveBtn {
-    font-family: 'Lato', sans-serif;
+    font-family: 'Lato';
     font-size: 14px;
     font-weight: bold;
     color: #000;
@@ -52,7 +52,7 @@
 }
 
 .cancelBtn {
-    font-family: 'Lato', sans-serif;
+    font-family: 'Lato';
     color: #444;
     font-size: 14px;
     font-weight: 500;

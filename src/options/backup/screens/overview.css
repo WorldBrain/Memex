@@ -14,13 +14,17 @@
     font-size: 0.9em;
 }
 
+.fontSize {
+    color: red;
+}
+
 .statusLine {
+    composes: fontSize;
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 600px;
     font-size: 0.9rem;
-    color: #222;
 
     & p {
         margin-bottom: 0;
@@ -37,6 +41,7 @@
 }
 
 .startWizard {
+    composes: fontSize;
     border: none;
     outline: none;
     color: white;
@@ -67,8 +72,8 @@
 }
 
 .location {
+    composes: fontSize;
     float: right;
-    font-size: 0.8rem;
     text-align: right;
     color: #0b8863;
     cursor: pointer;

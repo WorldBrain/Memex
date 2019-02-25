@@ -9,13 +9,10 @@
 }
 
 .box {
-    background: rgb(255, 255, 255);
+    composes: boxShadow from '../../../common-ui/colors.css';
     width: 500px;
     padding: 50px 50px 50px 60px;
     margin: 200px auto;
-    border: 1px solid #eae9e9;
-    box-shadow: 0px 3px 4px 2px #ebebeb;
-    border-radius: 8px;
 }
 
 .danger {

@@ -1,0 +1,46 @@
+/* COLOR CODING */
+
+.mainTitle {
+    color: #111;
+}
+
+.h2 {
+	color: #333;
+}
+
+.subText {
+    color: #a2a2a2;
+    font-weight: 300;
+}
+
+.hoverText {
+    color: #5cd9a6;
+}
+
+.darkBlue {
+	color: #1a2f58;
+}
+
+.warningColor {
+	color: #f29d9d;
+}
+
+.CTA {
+    background-color: #8fffd7;
+    color: #444;
+    border-radius: 5px;
+    font-weight: bold;
+
+    &:hover {
+    	background-color: #5cd9a6;
+    }
+}
+
+/* BOX SHADOW FOR TOOLTIPS */
+
+.boxShadow {
+	background: rgb(255, 255, 255);
+    border: 1px solid #eae9e9;
+    box-shadow: 0px 3px 4px 2px #ebebeb;
+    border-radius: 5px;
+}

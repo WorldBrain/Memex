@@ -16,7 +16,7 @@
     box-sizing: border-box;
 
     & > * {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter';
     }
 }
 
@@ -50,7 +50,7 @@
 .tagsLeft {
     font-weight: 800;
     color: #888;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
 }
 
 .cross {

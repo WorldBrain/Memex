@@ -3,7 +3,7 @@
 .annotationText {
     font-size: 15px;
     font-weight: 500;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     line-height: 16px;
     overflow: hidden;
     word-wrap: break-word;

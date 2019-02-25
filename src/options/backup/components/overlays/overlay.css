@@ -1,16 +1,11 @@
 .box {
+    composes: boxShadow from '../../../../common-ui/colors.css';
     position: absolute;
-    padding: 50px 50px 50px 60px;
-    border: 1px solid #efefefef;
-    box-shadow: 0px 80px 80px -80px #d2d2d2;
-    border-radius: 8px;
-    left: 50%;
+    padding: 2.2em 2.2em;
+    width: 105%;
     z-index: 2500;
-    margin-left: -300px;
-    margin-top: -150px;
-    width: 600px;
-    height: 300px;
-    background-color: white;
+    margin: auto auto;
+    margin-top: -180px;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
@@ -23,65 +18,71 @@
 }
 
 .header {
+    composes: h2 from '../../../../common-ui/colors.css';
     grid-area: header;
     margin: 0px;
     text-align: center;
-    color: #273961;
-    font-style: italic;
 }
 
 .description {
+    composes: subText from '../../../../common-ui/colors.css';
     grid-area: description;
+    font-size: 0.9rem;
     margin: 0px;
     text-align: center;
-    color: #273961;
 }
 
 .linkbox {
     grid-area: linkbox;
     display: inline-block;
     justify-self: center;
+    margin-top: 20px;
 }
 
 .logo {
-    width: 50px;
-    height: 50px;
-    margin: 0px 10px;
+    width: 2em;
+    height: 2em;
+    margin: 0px 20px;
     cursor: pointer;
+    opacity: 0.6;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.linux {
+    margin-bottom: -3px;
 }
 
 .buttonbox {
     grid-area: buttonbox;
-    display: inline-block;
+    display: flex;
+    align-items: center;
     justify-self: center;
-    margin-bottom: 10px;
+    font-size: 17px;
+    margin-top: 30px;
 }
 
-.colorbutton,
-.greybutton {
-    display: inline-block;
-    padding: 9px 10px;
-    border-radius: 5px;
-    padding-left: 20px;
-    background-color: #F29D9D;
-    margin-top: 20px;
-    padding-right: 20px;
+.continueButton {
+    composes: CTA from '../../../../common-ui/colors.css';
+    margin-right: 10px;
+    padding: 10px 20px;
+}
+
+.cancelButton {
+    composes: warningColor from '../../../../common-ui/colors.css';
+    margin-left: 10px;
     font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
+
+    &:hover {
+        color: #222;
+        cursor: pointer;
+    }
 }
 
-.colorbutton {
-    color: #F29D9D
-}
-
-.colorbutton:hover {
-    background: #5cd9a6;
-}
-
-.greybutton {
-}
-
-.greybutton:hover {
-    color: #1A2F58;
+.link {
+    composes: darkBlue from '../../../../common-ui/colors.css';
+    font-weight: 600;
+    text-decoration: none;
 }
