@@ -70,6 +70,13 @@ class CommentBoxForm extends React.Component<Props, State> {
             setTimeout(() => {
                 this._tagInputRef.querySelector('input').focus()
             }, 0)
+        } else if (
+            !(e.ctrlKey || e.metaKey) &&
+            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
+        ) {
+            e.preventDefault()
+            e.stopPropagation()
+            this.props.handleCommentTextChange(this.props.commentText + e.key)
         }
     }
 
