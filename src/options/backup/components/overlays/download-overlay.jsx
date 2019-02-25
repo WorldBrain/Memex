@@ -15,19 +15,19 @@ export default function DownloadOverlay(props) {
                 </p>
                 <div className={Styles.linkbox}>
                     <a
-                        href="https://github.com/WorldBrain/local-backup-server/releases/download/v0.2-alpha/local-backup-server-win.exe"
+                        href="https://worldbrain.io/download/win"
                         target="_blank"
                     >
                         <img className={Styles.logo} src={'img/windows_logo.svg'} />
                     </a>
                     <a
-                        href="https://github.com/WorldBrain/local-backup-server/releases/download/v0.2-alpha/local-backup-server-macos"
+                        href="https://worldbrain.io/download/mac"
                         target="_blank"
                     >
                         <img className={Styles.logo} src={'img/apple_logo.svg'} />
                     </a>
                     <a
-                        href="https://github.com/WorldBrain/local-backup-server/releases/download/v0.2-alpha/local-backup-server-linux"
+                        href="https://worldbrain.io/download/linux"
                         target="_blank"
                     >
                         <img className={cx(Styles.logo, Styles.linux)} src={'img/linux_logo.svg'} />

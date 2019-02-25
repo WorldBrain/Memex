@@ -80,7 +80,7 @@ input {
 
     & .folderIcon {
         display: inline-block;
-        width: 25px;
+        min-width: 25px;
         height: 25px;
         background-image: url('/img/computer.svg');
         background-repeat: no-repeat;
@@ -107,4 +107,12 @@ input {
     composes: darkBlue from '../../../common-ui/colors.css';
     font-weight: 600;
     text-decoration: none;
+}
+
+.pathString {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 360px;
+    direction: rtl;
 }

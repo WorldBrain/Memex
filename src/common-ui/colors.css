@@ -1,4 +1,4 @@
-/* COLOR CODING */
+/* BASIC COLORS */
 
 .titleColor {
     color: #111;
@@ -6,6 +6,24 @@
 
 .h2Color {
 	color: #444;
+}
+
+.lightMintGreen {
+    color: #8fffd7;
+}
+
+.darkMintGreen {
+    color: #5cd9a6;
+}
+
+/* BACKGROUND COLORS */
+
+.backgroundLightMintGreen {
+    background-color: #8fffd7;
+}
+
+.backgroundMintGreen {
+    background-color: #5cd9a6;
 }
 
 .hoverElementColor:hover {
@@ -44,18 +62,50 @@
 	color: #f29d9d;
 }
 
+.backgroundWarningColor {
+    background-color: #f29d9d;
+}
+
 .sideBarColorOpen {
 	background-color: #edf0f4;
 }
 
+.CTAwarning {
+    composes: backgroundWarningColor;
+    border-radius: 5px;
+    color: #222;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.7;
+
+    &:hover {
+        background-color: darken;
+        color: #222;
+        opacity: 1;
+    }
+}
+
 .CTA {
-    background-color: #8fffd7;
-    color: #444;
+    composes: backgroundLightMintGreen h2Color;
     border-radius: 5px;
     font-weight: bold;
+    cursor: pointer;
 
     &:hover {
     	background-color: #5cd9a6;
+    }
+}
+
+.CTAdarkBlue {
+    composes: darkBlueBackground;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.7;
+
+    &:hover {
+        opacity: 1;
     }
 }
 

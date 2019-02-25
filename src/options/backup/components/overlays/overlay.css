@@ -77,10 +77,10 @@
     composes: warningColor from '../../../../common-ui/colors.css';
     margin-left: 10px;
     font-weight: bold;
+    cursor: pointer;
 
     &:hover {
         color: #222;
-        cursor: pointer;
     }
 }
 

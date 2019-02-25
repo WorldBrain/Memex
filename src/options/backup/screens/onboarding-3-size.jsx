@@ -77,7 +77,7 @@ export default class OnboardingSizeContainer extends React.Component {
                 <div className={Styles.subtitle2}>
                     What do you want to include in the backup? 
                 </div>
-                <table>
+                <table className={localStyles.table}>
                     <tbody>
                         <tr>
                             <td className={localStyles.estimationSize}>

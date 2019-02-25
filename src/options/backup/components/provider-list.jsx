@@ -28,10 +28,10 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                         >
                             <span className={Styles.folderIcon} />
                             {backupPath && backupPath.length ? (
-                                <p>
+                                <p className={Styles.pathString}>
                                     {backupPath}{' '}
                                     <span className={Styles.change}>
-                                        change
+                                        click to change path
                                     </span>
                                 </p>
                             ) : (

@@ -52,7 +52,7 @@ export function OnboardingBackupMode({
     showPrice,
 }) {
     return (
-        <div>
+        <div className={Styles.selectionDiv}>
             {!disableModeSelection && (
                 <div>
                     <label>
@@ -65,7 +65,6 @@ export function OnboardingBackupMode({
                             <span className={Styles.name}>Manual Backup</span>
                             <span
                                 className={classNames(
-                                    Styles.label,
                                     Styles.labelFree,
                                 )}
                             >
@@ -93,20 +92,9 @@ export function OnboardingBackupMode({
                                 Automatic Backup
                             </span>
                             <span
-                                className={classNames(
-                                    Styles.label,
-                                    Styles.labelPremium,
-                                )}
+                                className={Styles.labelPremium}
                             >
-                                <i
-                                    className={classNames(
-                                        'material-icons',
-                                        Styles.star,
-                                    )}
-                                >
-                                    star
-                                </i>
-                                Premium
+                                Upgrade
                             </span>
                             <br />
                             <span className={Styles.subname}>
@@ -116,7 +104,7 @@ export function OnboardingBackupMode({
                     </label>
                 )}
                 {showPrice && (
-                    <div style={{ marginLeft: '40px' }}>
+                    <div className={Styles.billingChoice}>
                         <div>
                             <label>
                                 <input

@@ -18,7 +18,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 600px;
     font-size: 0.8rem;
 
     & p {
@@ -66,7 +65,8 @@
 
 .limitWidth {
     display: block;
-    width: 400px;
+    width: 70%;
+    margin-bottom: 15px;
 }
 
 .location {

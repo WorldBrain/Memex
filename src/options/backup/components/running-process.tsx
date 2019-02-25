@@ -147,8 +147,8 @@ export default class RunningProcess extends React.Component<Props> {
                         {this.props.preparingStepLabel}
                     </div>
                     <div className={localStyles.stepStatus}>
-                        {info.state === 'preparing' && 'In progress'}
-                        {info.state !== 'preparing' && '✔️'}
+                        {info.state === 'preparing' && <p>test</p>}
+                        {info.state !== 'preparing' && <img src="/img/checkmarkGreen.svg"/>}
                     </div>
                 </div>
                 <div className={localStyles.step}>
@@ -160,8 +160,8 @@ export default class RunningProcess extends React.Component<Props> {
                         {info.state === 'preparing' && 'Waiting'}
                         {status === 'running' &&
                             info.state !== 'preparing' &&
-                            'In progress'}
-                        {status === 'success' && '✔️'}
+                            <p>test</p>}
+                        {status === 'success' && <img src="/img/checkmarkGreen.svg"/>}
                     </div>
                 </div>
             </React.Fragment>
@@ -171,36 +171,6 @@ export default class RunningProcess extends React.Component<Props> {
     renderActions(info) {
         return (
             <div className={localStyles.actions}>
-                {info.state !== 'paused' &&
-                    info.state !== 'pausing' && (
-                        <PrimaryButton
-                            onClick={() => {
-                                this.handlePause()
-                            }}
-                        >
-                            Pause
-                        </PrimaryButton>
-                    )}
-                {info.state !== 'paused' &&
-                    info.state === 'pausing' && (
-                        <PrimaryButton onClick={() => {}}>
-                            <div style={{ width: '150px' }}>
-                                <MovingDotsLabel
-                                    text="Preparing pause"
-                                    intervalMs={500}
-                                />
-                            </div>
-                        </PrimaryButton>
-                    )}
-                {info.state === 'paused' && (
-                    <PrimaryButton
-                        onClick={() => {
-                            this.handleResume()
-                        }}
-                    >
-                        Resume
-                    </PrimaryButton>
-                )}
                 {info.state !== 'paused' &&
                     info.state !== 'pausing' && (
                         <div

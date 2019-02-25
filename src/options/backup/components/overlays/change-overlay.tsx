@@ -15,13 +15,11 @@ export default class ChangeOverlay extends PureComponent<Props, {}> {
                     <h3 className={styles.header}>Are you sure?</h3>
                     <p className={styles.description}>
                         Changing your backup location will require a completely
-                        fresh
-                        <br />
-                        backup which might take some time.
+                        fresh backup which might take some time.
                     </p>
                     <div className={styles.buttonbox}>
                         <div
-                            className={styles.colorbutton}
+                            className={styles.continueButton}
                             onClick={() => {
                                 this.props.onClick('yes')
                             }}
@@ -29,7 +27,7 @@ export default class ChangeOverlay extends PureComponent<Props, {}> {
                             Yes, get started
                         </div>
                         <div
-                            className={styles.greybutton}
+                            className={styles.cancelButton}
                             onClick={() => {
                                 this.props.onClick('nope')
                             }}
