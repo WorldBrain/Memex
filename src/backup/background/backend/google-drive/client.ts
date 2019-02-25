@@ -102,10 +102,11 @@ export class GoogleDriveClient {
         let nextPageToken = null
         do {
             let query = ''
+            if (parentId !== 'appDataFolder') {
+                query += `q=${encodeURIComponent(`'${parentId}' in parents`)}&`
+            }
             if (nextPageToken) {
                 query += `pageToken=${nextPageToken}&`
-            } else if (parentId !== 'appDataFolder') {
-                query += `q=${encodeURIComponent(`'${parentId}' in parents`)}&`
             }
 
             const response = await this._request(
