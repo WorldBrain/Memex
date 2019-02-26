@@ -26,6 +26,12 @@ export const INITIAL_STATE: State = {
     overlay: null,
 }
 
+/**
+ * Reducer function to find the current valid state.
+ */
+const isValid = (provider: string, backupPath: string): boolean =>
+    provider === 'google-drive' || (provider === 'local' && !!backupPath)
+
 export const processEvent = compositeEventProcessor({
     onChangeOverlay: ({ event }) => {
         const overlay = event.overlay
@@ -33,17 +39,21 @@ export const processEvent = compositeEventProcessor({
             updateState: { overlay },
         }
     },
-    onChangeBackupPath: ({ event }) => {
+    onChangeBackupPath: ({ state, event }) => {
         const backupPath = event.backupPath
+        const valid = isValid(state.provider, backupPath)
+
         return {
-            updateState: { backupPath },
+            updateState: { backupPath, valid },
         }
     },
     onProviderChoice: ({ state, event }) => {
         const provider = event.value
-        const valid = !!PROVIDERS[provider]
+        // const valid = !!PROVIDERS[provider]
+        const valid = isValid(provider, state.backupPath)
+
         return {
-            updateState: { provider: valid ? provider : state.provider, valid },
+            updateState: { provider, valid },
         }
     },
     onConfirm: ({ state, event }) => {
