@@ -106,36 +106,6 @@ export function OnboardingBackupMode({
                     </label>
                 )}
                 {showPrice && (
-                    <div className={Styles.billingChoice}>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    checked={billingPeriod === 'yearly'}
-                                    disabled={mode !== 'automatic'}
-                                    onChange={() =>
-                                        onBillingPeriodChange('yearly')
-                                    }
-                                />
-                                <span className={Styles.price}>12 &euro;</span>
-                                <span className={Styles.period}> yearly</span>
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    checked={billingPeriod === 'monthly'}
-                                    disabled={mode !== 'automatic'}
-                                    onChange={() =>
-                                        onBillingPeriodChange('monthly')
-                                    }
-                                />
-                                <span className={Styles.price}>1,5 &euro;</span>
-                                <span className={Styles.period}> monthly</span>
-                            </label>
-                        </div>
-                    </div>
                     <AutomaticPricing
                         billingPeriod={billingPeriod}
                         mode={mode}

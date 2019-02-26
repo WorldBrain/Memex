@@ -26,6 +26,7 @@ input {
     margin-bottom: 14px;
     width: 90%;
     cursor: pointer;
+    margin-left: -5px;
 }
 
 .labelFree {

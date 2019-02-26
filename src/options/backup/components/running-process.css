@@ -50,3 +50,13 @@
     padding: 10px 20px;
     font-size: 14px;
 }
+
+.statusMessageActive {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.statusMessageWaiting {
+    composes: statusMessageActive;
+    composes: subTitleColor from '../../../common-ui/colors.css';
+}

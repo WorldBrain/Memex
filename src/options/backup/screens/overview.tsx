@@ -165,31 +165,39 @@ export default class OverviewContainer extends React.Component<Props> {
                             >
                                 Worry-free. Automatically backs up your data
                                 every 15 minutes.
-                            </span>
-                            <br />
+                            </span>                            
                             {this.state.showPricing ? (
-                                <AutomaticPricing
-                                    mode="automatic"
-                                    billingPeriod={this.state.billingPeriod}
-                                    onBillingPeriodChange={billingPeriod =>
-                                        this.setState({ billingPeriod })
-                                    }
-                                />
-                            ) : null}
-                            <br />
-                            {this.state.showPricing &&
-                            this.state.billingPeriod ? (
-                                <SmallButton
-                                    color="green"
-                                    onClick={() =>
-                                        this.props.onPaymentRequested(
-                                            this.state.billingPeriod,
-                                        )
-                                    }
-                                >
-                                    Pay now
-                                </SmallButton>
-                            ) : null}
+                                <div className={localStyles.pricing}>
+                                    <AutomaticPricing
+                                        mode="automatic"
+                                        billingPeriod={this.state.billingPeriod}
+                                        onBillingPeriodChange={billingPeriod =>
+                                            this.setState({ billingPeriod })
+                                        }
+                                    />
+                                {this.state.showPricing &&
+                                this.state.billingPeriod ? (
+                                    <div className={localStyles.payConfirm}>
+                                        <SmallButton
+                                            color="green"
+                                            onClick={() =>
+                                                this.props.onPaymentRequested(
+                                                    this.state.billingPeriod,
+                                                )
+                                            }
+                                        >
+                                            Pay now
+                                        </SmallButton>
+                                        <span
+                                                className={localStyles.cancelButton}
+                                                onClick={() =>
+                                                this.setState({ showPricing: false })}
+                                            >
+                                            Cancel
+                                        </span>
+                                    </div>
+                                    ) : null} 
+                            </div>) : null}
                             <p className={styles.optionLine}>
                                 <span className={styles.name}>
                                     Backup Location

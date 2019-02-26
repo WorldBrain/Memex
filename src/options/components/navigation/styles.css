@@ -16,7 +16,7 @@
 }
 
 .listElements {
-    composes: hoverElementColor from '../../../common-ui/colors.css';
+    composes: hoversidebaropen from '../../../common-ui/colors.css';
 }
 
 .icon {
@@ -66,7 +66,7 @@
     &.isActive {
         color: #222;
         font-weight: 600;
-        background-color: #ebebeb;
+        background-color: #e2e2e2;
         border-right: none;
     }
 }

@@ -15,7 +15,9 @@ input[disabled] {
 
 input {
     margin-right: 15px;
+    vertical-align: middle;
     margin-left: 10px;
+    margin-top: 0px;
 }
 
 .name {
@@ -52,18 +54,21 @@ input {
 .description {
     composes: subTitleColor from '../../../common-ui/colors.css';
     font-size: 13px;
-    margin: 0px 0px 0px 36px;
+    margin: 4px 0px 0px 37px;
+    line-height: 19px;
 }
 
 .destination {
+    composes: nakedButton hoverColor from '../../../common-ui/colors.css';
     background-color: transparent;
+    padding: 4px 4px;
     border: none;
     outline: none;
     cursor: pointer;
     font-size: 15px;
     color: #0b0b69;
     margin-top: 10px;
-    margin-left: 34px;
+    margin-left: 30px;
     display: flex;
     align-items: flex-start;
 
@@ -87,16 +92,14 @@ input {
         background-position: center;
         background-size: 25px;
         margin-right: 10px;
-        margin-bottom: -8px;
     }
+}
 
-    & .change {
-        display: block;
-        text-align: left;
-        color: #333;
-        font-size: 11px;
-        font-weight: bold;
-    }
+.change {
+    display: block;
+    text-align: left;
+    color: #555;
+    float: left;
 }
 
 .form {

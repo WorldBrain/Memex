@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import localStyles from './onboarding-3-size.css'
 import { PrimaryButton } from '../components/primary-button'
@@ -92,7 +91,7 @@ export default class OnboardingSizeContainer extends React.Component {
                                     <br />
                                     <span className={localStyles.subname}>
                                         Searchable History, Annotations,
-                                        Comments, Highlights, Collections
+                                        Comments, Highlights, Collections, Tags.
                                     </span>
                                 </span>
                             </td>
@@ -129,25 +128,6 @@ export default class OnboardingSizeContainer extends React.Component {
                                     </span>
                                 </span>
                             </td>
-                        </tr>
-                        <tr>
-                            <td
-                                className={classNames(
-                                    localStyles.estimationSize,
-                                    localStyles.sumCell,
-                                )}
-                            >
-                                {Math.ceil(
-                                    _bytesToMega(
-                                        this.state.blobPreference
-                                            ? sizes.withBlobs
-                                            : sizes.withoutBlobs,
-                                    ),
-                                )}
-                                MB
-                            </td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
                         </tr>
                     </tbody>
                 </table>

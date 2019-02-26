@@ -12,7 +12,7 @@ export default class AutomaticPricing extends PureComponent<Props, {}> {
     render() {
         const { billingPeriod, mode, onBillingPeriodChange } = this.props
         return (
-            <div style={{ marginLeft: '40px' }}>
+            <div>
                 <div>
                     <label>
                         <input

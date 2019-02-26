@@ -147,7 +147,7 @@ export default class RunningProcess extends React.Component<Props> {
                         {this.props.preparingStepLabel}
                     </div>
                     <div className={localStyles.stepStatus}>
-                        {info.state === 'preparing' && <p>test</p>}
+                        {info.state === 'preparing' && <span className={localStyles.statusMessageActive}>running</span>}
                         {info.state !== 'preparing' && <img src="/img/checkmarkGreen.svg"/>}
                     </div>
                 </div>
@@ -157,10 +157,10 @@ export default class RunningProcess extends React.Component<Props> {
                         {this.props.synchingStepLabel}
                     </div>
                     <div className={localStyles.stepStatus}>
-                        {info.state === 'preparing' && 'Waiting'}
+                        {info.state === 'preparing' && <span className={localStyles.statusMessageWaiting}>up next</span>}
                         {status === 'running' &&
                             info.state !== 'preparing' &&
-                            <p>test</p>}
+                            <span className={localStyles.statusMessageActive}>running</span>}
                         {status === 'success' && <img src="/img/checkmarkGreen.svg"/>}
                     </div>
                 </div>

@@ -75,14 +75,43 @@
     text-align: right;
     cursor: pointer;
     font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: unset;
+    margin-right: 3px;
+    justify-content: flex-end;
+}
 
-    & .change {
-        display: block;
+.change {
+        composes: nakedButton hoverColor from '../../../common-ui/colors.css';
+        float: right;
         font-size: 0.6rem;
         color: #555;
+        margin-right: -3px;
+        width: fit-content;
+        text-align: right;
+        align-self: flex-end;
+}
 
-    & :hover {
-        font-weight: 700;
-    }
-    }
+.pricing {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: -5px;
+    margin-left: 5px;
+    margin-bottom: 30px;
+}
+
+.payConfirm {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.cancelButton {
+    composes: warningColor nakedButton hoverColor from '../../../common-ui/colors.css';
+    margin-left: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 14px;
 }

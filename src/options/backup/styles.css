@@ -38,16 +38,12 @@
 }
 
 .back {
-    composes: warningColor from '../../common-ui/colors.css';
+    composes: warningColor hoverColor from '../../common-ui/colors.css';
     margin-left: 15px;
     font-weight: 500;
     cursor: pointer;
     margin-top: 20px;
     font-size: 15px;
-
-    &:hover {
-        color: #222;
-    }
 }
 
 /* Upgrade Button */
@@ -101,7 +97,9 @@
 }
 
 .optionLine {
-    margin: 20px 0 10px 0;
+    margin: 10px 0 10px 0;
+    display: flex;
+    justify-content: space-between;
 }
 
 .name {

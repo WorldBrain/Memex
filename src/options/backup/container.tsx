@@ -69,16 +69,16 @@ export const SCREENS = {
 }
 
 export default class BackupSettingsContainer extends React.Component {
-    state = { screen: null, isAuthenticated: null }
+    state = { screen: 'running-backup', isAuthenticated: null }
 
-    async componentDidMount() {
-        const state = await logic.getInitialState({
-            analytics,
-            localStorage,
-            remoteFunction,
-        })
-        this.setState(state)
-    }
+    // async componentDidMount() {
+    //     const state = await logic.getInitialState({
+    //         analytics,
+    //         localStorage,
+    //         remoteFunction,
+    //     })
+    //     this.setState(state)
+    // }
 
     renderScreen() {
         const { screen } = this.state
