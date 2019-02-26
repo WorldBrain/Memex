@@ -5,6 +5,7 @@
 
     overflow-y: scroll;
     border-left: 3px solid #e1ece9;
+    z-index: 999999999999;
 }
 
 .annotationsSection {
