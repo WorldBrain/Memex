@@ -20,7 +20,7 @@ body {
     padding-right: 30px;
     margin: 25px 0 0 35px;
     max-width: 700px;
-    width: calc(100vh - 180px);
+    width: calc(100vw - 180px);
 }
 
 .routeTitle {
