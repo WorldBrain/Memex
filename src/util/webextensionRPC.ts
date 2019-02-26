@@ -61,7 +61,7 @@ export function remoteFunction(
             ? "the tab's content script"
             : 'the background script'
 
-    const f = async function (...args) {
+    const f = async function(...args) {
         const message = {
             [RPC_CALL]: RPC_CALL,
             funcName,
@@ -79,7 +79,7 @@ export function remoteFunction(
             if (throwWhenNoResponse) {
                 throw new RpcError(
                     `Got no response when trying to call '${funcName}'. ` +
-                    `Did you enable RPC in ${otherSide}?`,
+                        `Did you enable RPC in ${otherSide}?`,
                 )
             }
             return

@@ -162,6 +162,7 @@ export async function processEvent({
                     },
                     true,
                 )
+                localStorage.removeItem('backup.onboarding.where')
 
                 const isAutomaticBackupEnabled = await remoteFunction(
                     'isAutomaticBackupEnabled',
@@ -199,6 +200,7 @@ export async function processEvent({
                 }
             },
             onBackRequested: () => {
+                localStorage.setItem('backup.onboarding.where', true)
                 return { screen: 'onboarding-where' }
             },
         },

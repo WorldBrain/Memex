@@ -49,11 +49,14 @@ describe('Backup settings container logic', () => {
                     isBackupAuthenticated: () => false,
                     hasInitialBackup: () => false,
                     getBackupInfo: () => null,
+                    getBackendLocation: () => undefined,
+                    setBackendLocation: choice => undefined,
                 },
             },
         )
         expect(localStorage.popChanges()).toEqual([
             { type: 'set', key: 'backup.onboarding', value: true },
+            { type: 'set', key: 'backup.onboarding.where', value: true },
         ])
         expect(analytics.popNew()).toEqual([
             {
@@ -72,6 +75,7 @@ describe('Backup settings container logic', () => {
             {
                 remoteFunctions: {
                     isAutomaticBackupEnabled: () => false,
+                    setBackendLocation: choice => undefined,
                 },
             },
         )
@@ -87,6 +91,9 @@ describe('Backup settings container logic', () => {
                 },
                 force: true,
             },
+        ])
+        expect(localStorage.popChanges()).toEqual([
+            { type: 'remove', key: 'backup.onboarding.where' },
         ])
 
         // User chooses manual backup
@@ -210,10 +217,10 @@ describe('Backup settings container logic', () => {
 
         const choiceResult = await triggerEvent(
             firstSessionState,
-            { type: 'onChoice' },
+            { type: 'onChoice', choice: 'google-drive' },
             {
                 remoteFunctions: {
-                    isBackupAuthenticated: () => false,
+                    initRestoreProcedure: provider => null,
                 },
             },
         )
@@ -278,10 +285,10 @@ describe('Backup settings container logic', () => {
 
         const choiceResult = await triggerEvent(
             firstSessionState,
-            { type: 'onChoice' },
+            { type: 'onChoice', choice: 'google-drive' },
             {
                 remoteFunctions: {
-                    isBackupAuthenticated: () => false,
+                    initRestoreProcedure: provider => null,
                 },
             },
         )
@@ -346,9 +353,11 @@ describe('Backup settings container logic', () => {
 
         await triggerEvent(
             firstSessionState,
-            { type: 'onChoice' },
+            { type: 'onChoice', choice: 'google-drive' },
             {
-                remoteFunctions: {},
+                remoteFunctions: {
+                    initRestoreProcedure: provider => null,
+                },
             },
         )
         expect(firstSessionState).toEqual({
