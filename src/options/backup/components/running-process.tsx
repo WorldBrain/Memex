@@ -127,7 +127,7 @@ export default class RunningProcess extends React.Component<Props> {
             <div>
                 {this.props.renderHeader()}
                 <div className={STYLES.subtitle2}>
-                    You can leave this page and come back at any time.
+                The preparation step can sometimes take a long time. <br />With a lot of data (> 15.000 pages) it is recommended running this over night. 
                 </div>
                 <div className={localStyles.steps}>
                     {this.renderSteps(info)}
