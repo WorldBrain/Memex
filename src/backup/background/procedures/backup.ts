@@ -166,17 +166,21 @@ export default class BackupProcedure {
     async _queueInitialBackup() {
         const collectionsWithVersions = this._getCollectionsToBackup()
 
+        const promises = []
         for (const collection of collectionsWithVersions) {
             for (const pk of this.storageManager.backend['dexieInstace']
                 .collection(collection)
                 .primaryKeys()) {
-                await this.storage.registerChange({
-                    collection: collection.name,
-                    pk,
-                    operation: 'create',
-                })
+                promises.push(
+                    this.storage.registerChange({
+                        collection: collection.name,
+                        pk,
+                        operation: 'create',
+                    }),
+                )
             }
         }
+        await Promise.all(promises)
     }
 
     async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
