@@ -167,9 +167,9 @@ export default class BackupProcedure {
         const collectionsWithVersions = this._getCollectionsToBackup()
 
         for (const collection of collectionsWithVersions) {
-            for await (const pk of this.storageManager
-                .collection(collection.name)
-                .streamPks()) {
+            for (const pk of this.storageManager.backend['dexieInstace']
+                .collection(collection)
+                .primaryKeys()) {
                 await this.storage.registerChange({
                     collection: collection.name,
                     pk,
