@@ -169,9 +169,9 @@ export default class BackupProcedure {
         const promises = []
         for (const collection of collectionsWithVersions) {
             console.log('writing changes for collection', collection)
-            for (const pk of this.storageManager.backend['dexieInstace']
-                .collection(collection)
-                .primaryKeys()) {
+            for (const pk of await this.storageManager.backend['dexieInstance']
+                .table(collection.name).toCollection().primaryKeys()
+                ) {
                 promises.push(
                     this.storage.registerChange({
                         collection: collection.name,
