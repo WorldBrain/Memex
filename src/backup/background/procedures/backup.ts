@@ -168,6 +168,7 @@ export default class BackupProcedure {
 
         const promises = []
         for (const collection of collectionsWithVersions) {
+            console.log('writing changes for collection', collection)
             for (const pk of this.storageManager.backend['dexieInstace']
                 .collection(collection)
                 .primaryKeys()) {
@@ -180,7 +181,9 @@ export default class BackupProcedure {
                 )
             }
         }
+        console.log('waiting for write ops to finish')
         await Promise.all(promises)
+        console.log('finished waiting for write ops to finish')
     }
 
     async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
