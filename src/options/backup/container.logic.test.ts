@@ -71,7 +71,7 @@ describe('Backup settings container logic', () => {
         // User chooses backup location
         await triggerEvent(
             firstSessionState,
-            { type: 'onChoice' },
+            { type: 'onChoice', choice: 'google-drive' },
             {
                 remoteFunctions: {
                     isAutomaticBackupEnabled: () => false,
@@ -184,6 +184,102 @@ describe('Backup settings container logic', () => {
 
         expect(secondSessionState).toEqual({
             isAuthenticated: true,
+            screen: 'overview',
+        })
+    })
+
+    it('should be to able to backup through local server', async () => {
+        const { localStorage, analytics, triggerEvent } = setupTest()
+
+        const firstSessionState = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction: fakeRemoteFunction({
+                isBackupAuthenticated: () => false,
+                hasInitialBackup: () => false,
+                getBackupInfo: () => null,
+            }),
+        })
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onBackupRequested' },
+            {
+                remoteFunctions: {
+                    isBackupAuthenticated: () => false,
+                    hasInitialBackup: () => false,
+                    getBackupInfo: () => null,
+                    getBackendLocation: () => undefined,
+                    setBackendLocation: choice => undefined,
+                },
+            },
+        )
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onChoice', choice: 'local' },
+            {
+                remoteFunctions: {
+                    isAutomaticBackupEnabled: () => false,
+                    setBackendLocation: choice => 'local',
+                },
+            },
+        )
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onChoice', choice: { type: 'manual' } },
+            {
+                remoteFunctions: {
+                    isAutomaticBackupEnabled: () => false,
+                    isAuthenticated: () => true,
+                },
+            },
+        )
+        console.log(firstSessionState)
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
+            screen: 'onboarding-size',
+        })
+
+        // Remove previous analytics and local storage events
+        analytics.popNew()
+        localStorage.popChanges()
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onBackupRequested' },
+            {
+                remoteFunctions: {
+                    isAuthenticated: () => true,
+                },
+            },
+        )
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
+            screen: 'running-backup',
+        })
+        expect(analytics.popNew()).toEqual([
+            {
+                eventArgs: {
+                    category: 'Backup',
+                    action: 'onboarding-backup-requested',
+                },
+                force: true,
+            },
+        ])
+
+        // Backup finished
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onFinish' },
+            {
+                remoteFunctions: {},
+            },
+        )
+
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
             screen: 'overview',
         })
     })
