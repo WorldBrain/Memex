@@ -1,5 +1,3 @@
-const last = require('lodash/last')
-const pickBy = require('lodash/pickBy')
 import * as AllRaven from 'raven-js'
 import { EventEmitter } from 'events'
 import { StorageManager } from '../../../search/types'
@@ -7,6 +5,8 @@ import BackupStorage, { LastBackupStorage } from '../storage'
 import { BackupBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
+const last = require('lodash/last')
+const pickBy = require('lodash/pickBy')
 
 export interface BackupProgressInfo {
     state: 'preparing' | 'synching' | 'paused' | 'cancelled'
@@ -163,35 +163,37 @@ export default class BackupProcedure {
         }, 200)
     }
 
-    async _queueInitialBackup() {
+    async _queueInitialBackup(chunkSize = 1000) {
         const collectionsWithVersions = this._getCollectionsToBackup()
+        // Change objects are created fast enough that `Date.now()` won't set unique PKs; instead use an inc PK
+        let pkIterator = 0
 
-        //const promises = []
         for (const collection of collectionsWithVersions) {
-            const changes = []
-            for (const pk of await this.storageManager.backend['dexieInstance']
-                .table(collection.name).toCollection().primaryKeys()
-                ) {
-                changes.push({
-                        timestamp: Date.now(),
-                        collection: collection.name,
-                        objectPk: pk,
-                        operation: 'create',
-                    })
-                await Promise.all(changes)
-                }
+            const dexie = this.storageManager.backend['dexieInstance']
 
-                console.log("step done to log all changes for ", collection.name)
-                console.log(changes.length)
+            let chunk = 0
+            let pks: any[]
+            do {
+                pks = await dexie
+                    .table(collection.name)
+                    .toCollection()
+                    .offset(chunk * chunkSize)
+                    .limit(chunkSize)
+                    .primaryKeys()
 
-                this.storageManager.backend['dexieInstance'].table('backupChanges').bulkPut(changes).then(function(){ 
-                    console.log(changes.length) //this one does skip the files sometimes > does not properly write all change to the backupChanges table. 
-                })
+                const changes = pks.map(objectPk => ({
+                    timestamp: pkIterator++,
+                    collection: collection.name,
+                    operation: 'create',
+                    objectPk,
+                }))
+
+                await dexie.table('backupChanges').bulkPut(changes)
+
+                chunk++ // Ensure next iteration goes to next chunk
+            } while (pks.length === chunkSize) // While data not exhausted
         }
-        console.log('waiting for write ops to finish')
-        //await Promise.all(promises)
-        console.log('finished waiting for write ops to finish')
-   // }
+    }
 
     async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
         console.log('starting incremental backup')
