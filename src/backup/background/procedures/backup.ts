@@ -166,25 +166,32 @@ export default class BackupProcedure {
     async _queueInitialBackup() {
         const collectionsWithVersions = this._getCollectionsToBackup()
 
-        const promises = []
+        //const promises = []
         for (const collection of collectionsWithVersions) {
-            console.log('writing changes for collection', collection)
+            const changes = []
             for (const pk of await this.storageManager.backend['dexieInstance']
                 .table(collection.name).toCollection().primaryKeys()
                 ) {
-                promises.push(
-                    this.storage.registerChange({
+                changes.push({
+                        timestamp: Date.now(),
                         collection: collection.name,
-                        pk,
+                        objectPk: pk,
                         operation: 'create',
-                    }),
-                )
-            }
+                    })
+                await Promise.all(changes)
+                }
+
+                console.log("step done to log all changes for ", collection.name)
+                console.log(changes.length)
+
+                this.storageManager.backend['dexieInstance'].table('backupChanges').bulkPut(changes).then(function(){ 
+                    console.log(changes.length) //this one does skip the files sometimes > does not properly write all change to the backupChanges table. 
+                })
         }
         console.log('waiting for write ops to finish')
-        await Promise.all(promises)
+        //await Promise.all(promises)
         console.log('finished waiting for write ops to finish')
-    }
+   // }
 
     async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
         console.log('starting incremental backup')
