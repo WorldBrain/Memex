@@ -127,7 +127,7 @@ export default class RunningProcess extends React.Component<Props> {
             <div>
                 {this.props.renderHeader()}
                 <div className={STYLES.subtitle2}>
-                The preparation step can sometimes take a long time. <br />With a lot of data (> 15.000 pages) it is recommended running this over night. 
+                With a lot of data (> 25.000 pages) it is recommended running this over night. 
                 </div>
                 <div className={localStyles.steps}>
                     {this.renderSteps(info)}
@@ -182,7 +182,7 @@ export default class RunningProcess extends React.Component<Props> {
                             {!this.state.canceling && 'Cancel'}
                             {this.state.canceling && (
                                 <MovingDotsLabel
-                                    text="Canceling"
+                                    text="Finishing current batch"
                                     intervalMs={500}
                                 />
                             )}

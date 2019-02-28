@@ -25,7 +25,7 @@
 
 .subtitle2 {
     composes: subTitleColor from '../../common-ui/colors.css';
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     margin-bottom: 30px;
 }
 
