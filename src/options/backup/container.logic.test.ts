@@ -236,7 +236,6 @@ describe('Backup settings container logic', () => {
                 },
             },
         )
-        console.log(firstSessionState)
         expect(firstSessionState).toEqual({
             isAuthenticated: false,
             screen: 'onboarding-size',
@@ -458,6 +457,48 @@ describe('Backup settings container logic', () => {
         )
         expect(firstSessionState).toEqual({
             isAuthenticated: true,
+            screen: 'restore-running',
+        })
+    })
+
+    it('should be able to guide the user through the restore flow when using local', async () => {
+        const { localStorage, analytics, triggerEvent } = setupTest()
+
+        const firstSessionState = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction: fakeRemoteFunction({
+                isBackupAuthenticated: () => false,
+                hasInitialBackup: () => false,
+                getBackupInfo: () => null,
+            }),
+        })
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
+            screen: 'overview',
+        })
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onRestoreRequested' },
+            { remoteFunctions: {} },
+        )
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
+            screen: 'restore-where',
+        })
+
+        await triggerEvent(
+            firstSessionState,
+            { type: 'onChoice', choice: 'local' },
+            {
+                remoteFunctions: {
+                    initRestoreProcedure: provider => null,
+                },
+            },
+        )
+        expect(firstSessionState).toEqual({
+            isAuthenticated: false,
             screen: 'restore-running',
         })
     })
