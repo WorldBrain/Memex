@@ -28,7 +28,7 @@ export default [
         icon: 'settings',
     },
     {
-        name: 'Import History & Bookmarks',
+        name: 'Import',
         pathname: '/import',
         component: ImportContainer,
         icon: 'file_download',
@@ -58,7 +58,7 @@ export default [
         isExternal: true,
     },
     {
-        name: 'Help Me Please',
+        name: 'Help',
         pathname: 'https://worldbrain.io/help',
         icon: 'help',
         isExternal: true,
