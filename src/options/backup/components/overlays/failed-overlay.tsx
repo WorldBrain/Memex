@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
-
-const styles = require('./overlay.css')
+import Overlay from 'src/common-ui/components/overview-overlay'
 
 interface Props {
     onClick: (action: string) => void
@@ -9,36 +8,18 @@ interface Props {
 
 export default class FailedOverlay extends PureComponent<Props, {}> {
     render() {
-        return !this.props.disabled ? (
-            <div>
-                <div className={styles.box}>
-                    <h3 className={styles.header}>
-                        No data found in your selected folder
-                    </h3>
-                    <p className={styles.description}>
-                        Change the folder location via the Memex Local App
-                        settings and then press continue.
-                    </p>
-                    <div className={styles.buttonbox}>
-                        <div
-                            className={styles.continueButton}
-                            onClick={() => {
-                                this.props.onClick('continue')
-                            }}
-                        >
-                            Retry
-                        </div>
-                        <div
-                            className={styles.cancelButton}
-                            onClick={() => {
-                                this.props.onClick('cancel')
-                            }}
-                        >
-                            Cancel
-                        </div>
-                    </div>
-                </div>
-            </div>
-        ) : null
+        return (
+            <Overlay
+                disabled={this.props.disabled}
+                header="No data found in your selected folder"
+                description={
+                    'Change the folder location via the Memex Local App settings and then press continue.'
+                }
+                continueButtonText="Retry"
+                continueButtonOnClick={() => this.props.onClick('continue')}
+                cancelButtonText="Cancel"
+                cancelButtonOnClick={() => this.props.onClick('cancel')}
+            />
+        )
     }
 }

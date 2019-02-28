@@ -1,5 +1,5 @@
 .box {
-    composes: boxShadow from '../../../../common-ui/colors.css';
+    composes: boxShadow from '../colors.css';
     position: absolute;
     padding: 40px;
     width: 105%;
@@ -19,7 +19,7 @@
 }
 
 .header {
-    composes: h2color from '../../../../common-ui/colors.css';
+    composes: h2color from '../colors.css';
     grid-area: header;
     margin: 0px;
     text-align: center;
@@ -27,34 +27,11 @@
 }
 
 .description {
-    composes: subTitleColor from '../../../../common-ui/colors.css';
+    composes: subTitleColor from '../colors.css';
     grid-area: description;
     font-size: 0.9rem;
     margin: 0px;
     text-align: center;
-}
-
-.linkbox {
-    grid-area: linkbox;
-    display: inline-block;
-    justify-self: center;
-    margin-top: 20px;
-}
-
-.logo {
-    width: 2em;
-    height: 2em;
-    margin: 0px 20px;
-    cursor: pointer;
-    opacity: 0.6;
-
-    &:hover {
-        opacity: 1;
-    }
-}
-
-.linux {
-    margin-bottom: -3px;
 }
 
 .buttonbox {
@@ -68,13 +45,13 @@
 }
 
 .continueButton {
-    composes: CTA from '../../../../common-ui/colors.css';
+    composes: CTA from '../colors.css';
     margin-right: 10px;
     padding: 10px 20px;
 }
 
 .cancelButton {
-    composes: warningColor from '../../../../common-ui/colors.css';
+    composes: warningColor from '../colors.css';
     margin-left: 10px;
     font-weight: bold;
     cursor: pointer;
@@ -82,13 +59,4 @@
     &:hover {
         color: #222;
     }
-}
-
-.link {
-    composes: darkBlue from '../../../../common-ui/colors.css';
-    font-weight: 600;
-    text-decoration: none;
-    position: absolute;
-    bottom: 50px;
-    right: 60px;
 }
