@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import Styles from './backup-mode.css'
 import classNames from 'classnames'
 
+import AutomaticPricing from './automatic-pricing'
+
 export default class OnboardingBackupModeContainer extends React.Component {
     static propTypes = {
         disableModeSelection: PropTypes.bool,
@@ -52,7 +54,7 @@ export function OnboardingBackupMode({
     showPrice,
 }) {
     return (
-        <div>
+        <div className={Styles.selectionDiv}>
             {!disableModeSelection && (
                 <div>
                     <label>
@@ -65,7 +67,6 @@ export function OnboardingBackupMode({
                             <span className={Styles.name}>Manual Backup</span>
                             <span
                                 className={classNames(
-                                    Styles.label,
                                     Styles.labelFree,
                                 )}
                             >
@@ -93,20 +94,9 @@ export function OnboardingBackupMode({
                                 Automatic Backup
                             </span>
                             <span
-                                className={classNames(
-                                    Styles.label,
-                                    Styles.labelPremium,
-                                )}
+                                className={Styles.labelPremium}
                             >
-                                <i
-                                    className={classNames(
-                                        'material-icons',
-                                        Styles.star,
-                                    )}
-                                >
-                                    star
-                                </i>
-                                Premium
+                                Upgrade
                             </span>
                             <br />
                             <span className={Styles.subname}>
@@ -116,36 +106,11 @@ export function OnboardingBackupMode({
                     </label>
                 )}
                 {showPrice && (
-                    <div style={{ marginLeft: '40px' }}>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    checked={billingPeriod === 'yearly'}
-                                    disabled={mode !== 'automatic'}
-                                    onChange={() =>
-                                        onBillingPeriodChange('yearly')
-                                    }
-                                />
-                                <span className={Styles.price}>12 &euro;</span>
-                                <span className={Styles.period}> yearly</span>
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    checked={billingPeriod === 'monthly'}
-                                    disabled={mode !== 'automatic'}
-                                    onChange={() =>
-                                        onBillingPeriodChange('monthly')
-                                    }
-                                />
-                                <span className={Styles.price}>1,5 &euro;</span>
-                                <span className={Styles.period}> monthly</span>
-                            </label>
-                        </div>
-                    </div>
+                    <AutomaticPricing
+                        billingPeriod={billingPeriod}
+                        mode={mode}
+                        onBillingPeriodChange={onBillingPeriodChange}
+                    />
                 )}
             </div>
         </div>

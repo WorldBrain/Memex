@@ -1,11 +1,11 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 const localStyles = require('./running-process.css')
 import { ProgressBar } from '../components/progress-bar'
 import MovingDotsLabel from '../components/moving-dots-label'
 import { PrimaryButton } from '../components/primary-button'
 import LoadingBlocker from '../components/loading-blocker'
+import { FailedOverlay } from '../components/overlays'
 const STYLES = require('../styles.css')
 
 interface Props {
@@ -26,7 +26,12 @@ interface Props {
 }
 
 export default class RunningProcess extends React.Component<Props> {
-    state = { status: null, info: null, canceling: false }
+    state = {
+        status: null,
+        info: null,
+        canceling: false,
+        overlay: null,
+    }
 
     async componentDidMount() {
         window['browser'].runtime.onMessage.addListener(this.messageListener)
@@ -38,11 +43,7 @@ export default class RunningProcess extends React.Component<Props> {
                 info,
             })
         } else {
-            this.setState({
-                status: 'running',
-                info: { state: 'preparing' },
-            })
-            await remoteFunction(this.props.functionNames.start)()
+            await this.startRestore()
         }
 
         // this.setState({
@@ -67,6 +68,14 @@ export default class RunningProcess extends React.Component<Props> {
         window['browser'].runtime.onMessage.removeListener(this.messageListener)
     }
 
+    startRestore = async () => {
+        this.setState({
+            status: 'running',
+            info: { state: 'preparing' },
+        })
+        await remoteFunction(this.props.functionNames.start)()
+    }
+
     messageListener = message => {
         if (message.type === this.props.eventMessageName) {
             this.handleProcessEvent(message.event)
@@ -82,7 +91,12 @@ export default class RunningProcess extends React.Component<Props> {
         } else if (event.type === 'success') {
             this.setState({ status: 'success' })
         } else if (event.type === 'fail') {
-            this.setState({ status: 'fail' })
+            let overlay = null
+            console.log(event.error)
+            if (event.error === 'Backup file not found') {
+                overlay = true
+            }
+            this.setState({ status: 'fail', overlay })
         }
     }
 
@@ -113,7 +127,7 @@ export default class RunningProcess extends React.Component<Props> {
             <div>
                 {this.props.renderHeader()}
                 <div className={STYLES.subtitle2}>
-                    You can leave this page and come back at any time.
+                With a lot of data (> 25.000 pages) it is recommended running this over night. 
                 </div>
                 <div className={localStyles.steps}>
                     {this.renderSteps(info)}
@@ -133,8 +147,8 @@ export default class RunningProcess extends React.Component<Props> {
                         {this.props.preparingStepLabel}
                     </div>
                     <div className={localStyles.stepStatus}>
-                        {info.state === 'preparing' && 'In progress'}
-                        {info.state !== 'preparing' && '✔️'}
+                        {info.state === 'preparing' && <span className={localStyles.statusMessageActive}>running</span>}
+                        {info.state !== 'preparing' && <img src="/img/checkmarkGreen.svg"/>}
                     </div>
                 </div>
                 <div className={localStyles.step}>
@@ -143,11 +157,11 @@ export default class RunningProcess extends React.Component<Props> {
                         {this.props.synchingStepLabel}
                     </div>
                     <div className={localStyles.stepStatus}>
-                        {info.state === 'preparing' && 'Waiting'}
+                        {info.state === 'preparing' && <span className={localStyles.statusMessageWaiting}>up next</span>}
                         {status === 'running' &&
                             info.state !== 'preparing' &&
-                            'In progress'}
-                        {status === 'success' && '✔️'}
+                            <span className={localStyles.statusMessageActive}>running</span>}
+                        {status === 'success' && <img src="/img/checkmarkGreen.svg"/>}
                     </div>
                 </div>
             </React.Fragment>
@@ -159,36 +173,6 @@ export default class RunningProcess extends React.Component<Props> {
             <div className={localStyles.actions}>
                 {info.state !== 'paused' &&
                     info.state !== 'pausing' && (
-                        <PrimaryButton
-                            onClick={() => {
-                                this.handlePause()
-                            }}
-                        >
-                            Pause
-                        </PrimaryButton>
-                    )}
-                {info.state !== 'paused' &&
-                    info.state === 'pausing' && (
-                        <PrimaryButton onClick={() => {}}>
-                            <div style={{ width: '150px' }}>
-                                <MovingDotsLabel
-                                    text="Preparing pause"
-                                    intervalMs={500}
-                                />
-                            </div>
-                        </PrimaryButton>
-                    )}
-                {info.state === 'paused' && (
-                    <PrimaryButton
-                        onClick={() => {
-                            this.handleResume()
-                        }}
-                    >
-                        Resume
-                    </PrimaryButton>
-                )}
-                {info.state !== 'paused' &&
-                    info.state !== 'pausing' && (
                         <div
                             className={localStyles.actionCancel}
                             onClick={() => {
@@ -198,7 +182,7 @@ export default class RunningProcess extends React.Component<Props> {
                             {!this.state.canceling && 'Cancel'}
                             {this.state.canceling && (
                                 <MovingDotsLabel
-                                    text="Canceling"
+                                    text="Finishing current batch"
                                     intervalMs={500}
                                 />
                             )}
@@ -239,7 +223,7 @@ export default class RunningProcess extends React.Component<Props> {
     }
 
     render() {
-        const { info, status } = this.state
+        const { info, status, overlay } = this.state
         if (!info) {
             return <LoadingBlocker />
         }
@@ -249,6 +233,17 @@ export default class RunningProcess extends React.Component<Props> {
                 {status === 'running' && this.renderRunning(info)}
                 {status === 'success' && this.renderSuccess()}
                 {status === 'fail' && this.renderFail()}
+                <FailedOverlay
+                    disabled={!overlay}
+                    onClick={async action => {
+                        if (action === 'continue') {
+                            await this.startRestore()
+                        }
+                        this.setState({
+                            overlay: null,
+                        })
+                    }}
+                />
             </div>
         )
     }

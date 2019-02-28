@@ -9,13 +9,11 @@
 }
 
 .box {
-    background: rgb(255, 255, 255);
-    width: 500px;
-    padding: 50px 50px 50px 60px;
-    margin: 200px auto;
-    border: 1px solid #eae9e9;
-    box-shadow: 0px 3px 4px 2px #ebebeb;
-    border-radius: 8px;
+    composes: boxShadow from '../../../common-ui/colors.css';
+    position: relative;
+    padding: 40px 50px 30px 52px;
+    margin: 15% auto;
+    width: 28em;
 }
 
 .danger {
@@ -31,22 +29,31 @@
     padding-bottom: 2px;
 }
 
+.closeIcon {
+    height: 15px;
+    width: 15px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
 .normal {
-    color: #1a2f58;
+    composes: subTitleColor from '../../../common-ui/colors.css';
+    font-size: 15px;
 }
 
 .instructions {
-    color: #1a2f58;
-}
-
-b {
-    color: #5cd9a6;
+    composes: menuItem from '../../../common-ui/colors.css';
+    font-size: 15px;
 }
 
 .input {
-    margin-left: 0px;
+    margin-left: 10px;
     border-radius: 5px;
     border: 2px solid #ebebeb;
     width: 150px;
     height: 25px;
+    padding-left: 9px;
+    vertical-align: middle;
 }

@@ -1,6 +1,6 @@
 .commentBoxContainer {
     & > * {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter';
     }
 }
 

@@ -1,46 +1,52 @@
 .steps {
     margin-bottom: 10px;
-    width: 550px;
     margin-right: 50px;
+    margin-top: -10px;
+    width: 100%;
 }
 
 .step {
-    display: inline-flex;
-    margin-bottom: 10px;
-    width: 550px;
+    width: 100%;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .stepLabel {
-    width: 450px;
-    color: #3eb995;
+    composes: subTitleColor from '../../../common-ui/colors.css';
+    font-size: 14px;
+    vertical-align: middle;
 }
 
 .stepNumber {
-    font-weight: bold;
-    color: #4a4a4a;
-    margin-right: 15px;
+    composes: h2Color from '../../../common-ui/colors.css';
+    margin-right: 5px;
+    font-weight: 500;
 }
 
 .actions {
     display: flex;
     flex-direction: row;
     position: absolute;
-    top: 230px;
+    margin-top: 25px;
 }
 
 .stepStatus {
     text-align: right;
-    width: 100px;
+    padding-right: 5px;
+    display: flex;
 }
 
 .progressHelpText {
-    font-size: 15px;
+    font-size: 10px;
     color: #173766;
     margin-top: 10px;
 }
 
 .actionCancel {
-    margin-top: 42px;
-    margin-left: 30px;
-    cursor: pointer;
+    composes: CTAwarning from '../../../common-ui/colors.css';
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 14px;
 }

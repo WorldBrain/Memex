@@ -1,11 +1,7 @@
 import React from 'react'
-// import PropTypes from 'prop-types'
+
 import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
-import {
-    redirectToGDriveLogin,
-    redirectToAutomaticBackupPurchase,
-} from './utils'
 import { default as Overview } from './screens/overview'
 import { default as RunningBackup } from './screens/running-backup'
 import { default as OnboardingWhere } from './screens/onboarding-1-where'
@@ -16,12 +12,18 @@ import LoadingBlocker from './components/loading-blocker'
 import * as logic from 'src/options/backup/container.logic'
 import RestoreWhere from 'src/options/backup/screens/restore-where'
 import RestoreRunning from 'src/options/backup/screens/restore-running'
-const STYLES = require('./styles.css')
 
+const styles = require('./styles.css')
+window['remoteFunction'] = remoteFunction
 export const SCREENS = {
     overview: {
         component: Overview,
-        events: { onBackupRequested: true, onRestoreRequested: true },
+        events: {
+            onBackupRequested: { argument: 'changeBackupRequested' },
+            onRestoreRequested: true,
+            onBlobPreferenceChange: { argument: 'saveBlobs' },
+            onPaymentRequested: { argument: 'choice' },
+        },
     },
     'running-backup': {
         component: RunningBackup,
@@ -29,7 +31,10 @@ export const SCREENS = {
     },
     'onboarding-where': {
         component: OnboardingWhere,
-        events: { onChoice: { argument: 'choice' } },
+        events: {
+            onChoice: { argument: 'choice' },
+            onChangeLocalLocation: true,
+        },
     },
     'onboarding-how': {
         component: OnboardingHow,
@@ -40,7 +45,9 @@ export const SCREENS = {
     },
     'onboarding-size': {
         component: OnboardingSize,
-        state: { isAuthenticated: true },
+        state: {
+            isAuthenticated: true,
+        },
         events: {
             onBlobPreferenceChange: { argument: 'saveBlobs' },
             onLoginRequested: true,
@@ -56,7 +63,7 @@ export const SCREENS = {
     'restore-running': {
         component: RestoreRunning,
         events: {
-            onChoice: { argument: 'choice' },
+            onFinish: true,
         },
     },
 }
@@ -65,13 +72,12 @@ export default class BackupSettingsContainer extends React.Component {
     state = { screen: null, isAuthenticated: null }
 
     async componentDidMount() {
-        this.setState(
-            await logic.getInitialState({
-                analytics,
-                localStorage,
-                remoteFunction,
-            }),
-        )
+        const state = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction,
+        })
+        this.setState(state)
     }
 
     renderScreen() {
@@ -113,7 +119,7 @@ export default class BackupSettingsContainer extends React.Component {
         return (
             <div>
                 <BackupHeader />
-                <div className={STYLES.screenContainer}>
+                <div className={styles.screenContainer}>
                     {this.renderScreen()}
                 </div>
             </div>

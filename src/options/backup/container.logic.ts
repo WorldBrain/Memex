@@ -4,6 +4,7 @@ import {
     redirectToGDriveLogin,
     redirectToAutomaticBackupPurchase,
 } from 'src/options/backup/utils'
+import { browser } from 'webextension-polyfill-ts'
 
 export async function getInitialState({
     analytics,
@@ -60,17 +61,21 @@ export async function getStartScreen({
         ) {
             localStorage.removeItem('backup.onboarding.authenticating')
             return 'onboarding-size'
-        } else if (isAuthenticated) {
+        } else if (
+            isAuthenticated &&
+            !localStorage.getItem('backup.onboarding.where')
+        ) {
             localStorage.removeItem('backup.onboarding.payment')
             localStorage.removeItem('backup.onboarding.authenticating')
             localStorage.removeItem('backup.onboarding')
             return 'running-backup'
         } else {
-            return 'onboarding-where'
+            localStorage.removeItem('backup.onboarding.where')
+            localStorage.removeItem('backup.onboarding')
         }
-    } else {
-        return 'overview'
     }
+
+    return 'overview'
 }
 
 export async function processEvent({
@@ -80,16 +85,38 @@ export async function processEvent({
     analytics,
     remoteFunction,
 }) {
+    const _onBlobPreferenceChange = () => {
+        analytics.trackEvent(
+            {
+                category: 'Backup',
+                action: 'onboarding-blob-pref-change',
+                value: event.saveBlobs,
+            },
+            true,
+        )
+        remoteFunction('setBackupBlobs')(event.saveBlobs)
+        return {}
+    }
+
     const handlers = {
         overview: {
             onBackupRequested: async () => {
-                const [hasInitialBackup, backupInfo] = await Promise.all([
+                const changeBackupRequested = event.changeBackupRequested
+                const [
+                    hasInitialBackup,
+                    backupInfo,
+                    backendLocation,
+                ] = await Promise.all([
                     remoteFunction('hasInitialBackup')(),
                     remoteFunction('getBackupInfo')(),
+                    remoteFunction('getBackendLocation')(),
                 ])
+                /* Show onboarding screen if there is no initial backup or if the
+                    user is trying to change the backend location */
                 const needsOnBoarding = !hasInitialBackup && !backupInfo
-                if (needsOnBoarding) {
+                if (needsOnBoarding || changeBackupRequested === true) {
                     localStorage.setItem('backup.onboarding', true)
+                    localStorage.setItem('backup.onboarding.where', true)
                     analytics.trackEvent(
                         {
                             category: 'Backup',
@@ -100,18 +127,34 @@ export async function processEvent({
                     return { screen: 'onboarding-where' }
                 }
 
-                if (state.isAuthenticated) {
-                    return { screen: 'running-backup' }
-                } else {
+                /* Navigate to Google Drive login if previous it is not authentication
+                    else go to running backup */
+                if (
+                    backendLocation === 'google-drive' &&
+                    !state.isAuthenticated
+                ) {
                     return { redirect: { to: 'gdrive-login' } }
+                } else {
+                    return { screen: 'running-backup' }
                 }
             },
             onRestoreRequested: () => {
                 return { screen: 'restore-where' }
             },
+            onPaymentRequested: () => {
+                const { choice } = event
+                localStorage.setItem('backup.onboarding.authenticating', true)
+                return {
+                    redirect: { to: 'automatic-backup-purchase', choice },
+                }
+            },
+            onBlobPreferenceChange: _onBlobPreferenceChange,
         },
         'onboarding-where': {
             onChoice: async () => {
+                // initializing the backend of the users choice
+                const location = event.choice
+                remoteFunction('setBackendLocation')(location)
                 analytics.trackEvent(
                     {
                         category: 'Backup',
@@ -119,6 +162,7 @@ export async function processEvent({
                     },
                     true,
                 )
+                localStorage.removeItem('backup.onboarding.where')
 
                 const isAutomaticBackupEnabled = await remoteFunction(
                     'isAutomaticBackupEnabled',
@@ -128,6 +172,9 @@ export async function processEvent({
                 } else {
                     return { screen: 'onboarding-how' }
                 }
+            },
+            onChangeLocalLocation: () => {
+                return { screen: 'running-backup' }
             },
         },
         'onboarding-how': {
@@ -153,22 +200,12 @@ export async function processEvent({
                 }
             },
             onBackRequested: () => {
+                localStorage.setItem('backup.onboarding.where', true)
                 return { screen: 'onboarding-where' }
             },
         },
         'onboarding-size': {
-            onBlobPreferenceChange: () => {
-                analytics.trackEvent(
-                    {
-                        category: 'Backup',
-                        action: 'onboarding-blob-pref-change',
-                        value: event.saveBlobs,
-                    },
-                    true,
-                )
-                remoteFunction('setBackupBlobs')(event.saveBlobs)
-                return {}
-            },
+            onBlobPreferenceChange: _onBlobPreferenceChange,
             onLoginRequested: () => {
                 analytics.trackEvent(
                     {
@@ -206,13 +243,20 @@ export async function processEvent({
                     },
                     true,
                 )
+                const location = event.choice
+                await remoteFunction('initRestoreProcedure')(location)
 
-                if (!state.isAuthenticated) {
+                if (location === 'google-drive' && !state.isAuthenticated) {
                     localStorage.setItem('backup.restore.authenticating', true)
                     return { redirect: { to: 'gdrive-login' } }
                 } else {
                     return { screen: 'restore-running' }
                 }
+            },
+        },
+        'restore-running': {
+            onFinish: () => {
+                return { screen: 'overview' }
             },
         },
     }

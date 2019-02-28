@@ -23,5 +23,8 @@ module.exports = {
         'selector-descendant-combinator-no-non-space': null,
         'selector-combinator-space-before': null,
         'no-descending-specificity': null,
+        "property-no-unknown":[true, {
+            "ignoreProperties":["composes"]
+        }],
     },
 }

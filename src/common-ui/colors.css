@@ -1,0 +1,144 @@
+/* BASIC COLORS */
+
+.titleColor {
+    color: #111;
+}
+
+.h2Color {
+	color: #444;
+}
+
+.lightMintGreen {
+    color: #8fffd7;
+}
+
+.darkMintGreen {
+    color: #5cd9a6;
+}
+
+/* BACKGROUND COLORS */
+
+.backgroundLightMintGreen {
+    background-color: #8fffd7;
+}
+
+.backgroundMintGreen {
+    background-color: #5cd9a6;
+}
+
+.darkBlue {
+	color: #1a2f58;
+}
+
+.darkBlueBackground {
+	background-color: #1a2f58;
+}
+
+.subTitleColor {
+    color: #a2a2a2;
+    font-weight: 200;
+}
+
+.lighterGrey {
+	color: #666;
+	font-weight: 500;
+}
+
+.hoverText:hover {
+    color: #5cd9a6;
+}
+
+.menuItem {
+	composes: h2Color;
+	font-weight: 400;
+}
+
+.warningColor {
+	color: #f29d9d;
+}
+
+.backgroundWarningColor {
+    background-color: #f29d9d;
+}
+
+.sideBarColorOpen {
+	background-color: #edf0f4;
+}
+
+/* BORDER RADIUS */
+
+.nakedButton {
+    padding: 3px 4px;
+    border-radius: 3px;
+    font-weight: 400;
+}
+
+.buttonRadius {
+    border-radius: 5px;
+}
+
+.tooltipRadius {
+    border-radius: 5px;
+}
+
+/* HOVER STATES */
+
+.hoverColor:hover {
+    background-color: #ebebeb;
+    color: #222;
+}
+
+.hoversidebaropen:hover {
+    background-color: #e0e0de;
+    color: #222;
+}
+
+/* BOX SHADOW FOR TOOLTIPS */
+
+.boxShadow {
+    composes: tooltipRadius;
+    background: rgb(255, 255, 255);
+    border: 1px solid #eae9e9;
+    box-shadow: 0px 3px 4px 2px #ebebeb;
+}
+
+/* CALL TO ACTION BUTTONS */
+
+.CTAwarning {
+    composes: backgroundWarningColor;
+    border-radius: 5px;
+    color: #222;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.7;
+
+    &:hover {
+        background-color: darken;
+        color: #222;
+        opacity: 1;
+    }
+}
+
+.CTA {
+    composes: backgroundLightMintGreen h2Color;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+    	background-color: #5cd9a6;
+    }
+}
+
+.CTAdarkBlue {
+    composes: darkBlueBackground;
+    composes: buttonRadius;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.7;
+
+    &:hover {
+        opacity: 1;
+    }
+}

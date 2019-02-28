@@ -12,9 +12,10 @@ export default class OnboardingHowContainer extends React.Component {
             <div>
                 <p className={Styles.header2}>
                     <strong>STEP 2/5: </strong>
-                    HOW?
+                    More or less work?
                 </p>
                 <OnboardingBackupMode
+                    className={Styles.selectionlist}
                     onModeChange={mode => this.setState({ mode })}
                     onBillingPeriodChange={billingPeriod =>
                         this.setState({ billingPeriod })
