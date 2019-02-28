@@ -1,13 +1,10 @@
 import React, { PureComponent, Fragment } from 'react'
 import cx from 'classnames'
+
 import Overlay from 'src/common-ui/components/overview-overlay'
+import { OverlayProps as Props } from './types'
 
 const styles = require('./styles.css')
-
-interface Props {
-    onClick: (action: string) => void
-    disabled: boolean
-}
 
 export default class DownloadOverlay extends PureComponent<Props, {}> {
     render() {

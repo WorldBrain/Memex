@@ -1,10 +1,7 @@
 import React, { PureComponent } from 'react'
-import Overlay from 'src/common-ui/components/overview-overlay'
 
-interface Props {
-    onClick: (action: string) => null
-    disabled: boolean
-}
+import Overlay from 'src/common-ui/components/overview-overlay'
+import { OverlayProps as Props } from './types'
 
 export default class ChangeOverlay extends PureComponent<Props, {}> {
     render() {

@@ -1,10 +1,7 @@
 import React, { PureComponent } from 'react'
-import Overlay from 'src/common-ui/components/overview-overlay'
 
-interface Props {
-    onClick: (action: string) => void
-    disabled: boolean
-}
+import Overlay from 'src/common-ui/components/overview-overlay'
+import { OverlayProps as Props } from './types'
 
 export default class FailedOverlay extends PureComponent<Props, {}> {
     render() {
