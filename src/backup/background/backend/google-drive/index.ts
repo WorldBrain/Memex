@@ -1,16 +1,16 @@
 import { EventEmitter } from 'events'
-import * as AllRaven from 'raven-js'
 import { GoogleDriveClient } from './client'
 import { DriveTokenManager, DriveTokenStore } from './token-manager'
-import { BackupBackend, ObjectChange, ObjectChangeImages } from '../types'
-import encodeBlob from '../../../../util/encode-blob'
-
-// tslint:disable-next-line:variable-name
-const Raven = AllRaven['default']
+import { BackupBackend, ObjectChange } from '../types'
+import {
+    separateDataFromImageChanges,
+    shouldWriteImages,
+} from 'src/backup/background/backend/utils'
 
 export { LocalStorageDriveTokenStore } from './token-manager'
 
-const DEFAULT_AUTH_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
+export const DEFAULT_AUTH_SCOPE =
+    'https://www.googleapis.com/auth/drive.appdata'
 
 export class DriveBackupBackend extends BackupBackend {
     public authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -77,7 +77,7 @@ export class DriveBackupBackend extends BackupBackend {
     }
 
     async backupChanges({
-        changes,
+        changes: unprocessedChanges,
         events,
         currentSchemaVersion,
         options,
@@ -87,18 +87,9 @@ export class DriveBackupBackend extends BackupBackend {
         currentSchemaVersion: number
         options: { storeBlobs: boolean }
     }) {
-        const images = []
-        for (const change of changes) {
-            const changeImages = await _prepareBackupChangeForStorage(change)
-            for (const [imageType, imageData] of Object.entries(changeImages)) {
-                images.push({
-                    collection: change.collection,
-                    pk: change.objectPk,
-                    type: imageType,
-                    data: imageData,
-                })
-            }
-        }
+        const { images, changes } = await separateDataFromImageChanges(
+            unprocessedChanges,
+        )
 
         await this.client.storeObject({
             folderName: 'change-sets',
@@ -106,7 +97,7 @@ export class DriveBackupBackend extends BackupBackend {
             object: { version: currentSchemaVersion, changes },
         })
 
-        if (options.storeBlobs && images.length) {
+        if (shouldWriteImages(images, options.storeBlobs)) {
             await this.client.storeObject({
                 folderName: 'images',
                 fileName: Date.now().toString(),
@@ -136,34 +127,4 @@ export class DriveBackupBackend extends BackupBackend {
         const objectFileId = collectionFolderContents[object]
         return this.client.getFile(objectFileId, { json: true })
     }
-}
-
-export async function _prepareBackupChangeForStorage(change: ObjectChange) {
-    const images: Partial<ObjectChangeImages> = {}
-    if (
-        change.collection === 'pages' &&
-        change.object != null &&
-        change.object.screenshot != null
-    ) {
-        try {
-            images.screenshot = await encodeBlob(change.object.screenshot)
-        } catch (e) {
-            Raven.captureException(e)
-        }
-        change.object.screenshot = undefined
-    }
-
-    if (
-        change.collection === 'favIcons' &&
-        change.object != null &&
-        change.object.favIcon != null
-    ) {
-        try {
-            change.object.favIcon = await encodeBlob(change.object.favIcon)
-        } catch (e) {
-            Raven.captureException(e)
-        }
-    }
-
-    return images
 }

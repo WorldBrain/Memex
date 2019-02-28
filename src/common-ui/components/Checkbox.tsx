@@ -9,6 +9,7 @@ export type CheckboxToggle = (
 export interface Props {
     id: string
     handleChange: CheckboxToggle
+    name?: string
     isChecked: boolean
     isDisabled?: boolean
     children?: React.ReactChild | React.ReactChild[]
@@ -25,6 +26,7 @@ class Checkbox extends React.PureComponent<Props> {
                     onChange={this.props.handleChange}
                     id={this.props.id}
                     disabled={this.props.isDisabled}
+                    name={this.props.name}
                 />
                 <label className={styles.checkboxText} htmlFor={this.props.id}>
                     {this.props.children}

@@ -34,7 +34,7 @@ export default [
         icon: 'file_download',
     },
     {
-        name: 'Backup',
+        name: 'Backup & Restore',
         pathname: '/backup',
         component: BackupSettingsContainer,
         icon: 'backup',
@@ -52,7 +52,7 @@ export default [
         icon: 'security',
     },
     {
-        name: 'Team',
+        name: 'Memex Team',
         pathname: 'https://worldbrain.io/team',
         icon: 'people',
         isExternal: true,

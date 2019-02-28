@@ -119,7 +119,6 @@
 
     &:placeholder-shown {
         font-style: italic;
-        font-family: 'Inter';
     }
 
     &::placeholder {
@@ -166,4 +165,8 @@
     color: #173766;
     margin-left: 20px;
     font-weight: 600;
+}
+
+.check {
+    float: right;
 }

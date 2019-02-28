@@ -34,7 +34,7 @@ export default class DirectLinkingBackground {
                 createDirectLink: (...params) => {
                     return this.createDirectLink(...params)
                 },
-                getAllAnnotations: (...params) => {
+                getAllAnnotationsByUrl: (...params) => {
                     return this.getAllAnnotationsByUrl(...params)
                 },
                 createAnnotation: (...params) => {
@@ -46,13 +46,10 @@ export default class DirectLinkingBackground {
                 deleteAnnotation: (...params) => {
                     return this.deleteAnnotation(...params)
                 },
-                openSidebarWithHighlight: (...params) => {
-                    return this.openSidebarWithHighlight(...params)
+                toggleSidebarOverlay: (...params) => {
+                    return this.toggleSidebarOverlay(...params)
                 },
-                toggleSidebar: () => {
-                    return this.toggleSidebar()
-                },
-                getAnnotationTags: (...params) => {
+                getTagsByAnnotationUrl: (...params) => {
                     return this.getTagsByAnnotationUrl(...params)
                 },
                 addAnnotationTag: (...params) => {
@@ -60,6 +57,9 @@ export default class DirectLinkingBackground {
                 },
                 delAnnotationTag: (...params) => {
                     return this.delTagForAnnotation(...params)
+                },
+                editAnnotationTags: (...params) => {
+                    return this.editAnnotationTags(...params)
                 },
             },
             { insertExtraArg: true },
@@ -73,7 +73,7 @@ export default class DirectLinkingBackground {
         })
     }
 
-    async triggerSidebar(functionName, ...args) {
+    async _triggerSidebar(functionName, ...args) {
         const [currentTab] = await browser.tabs.query({
             active: true,
             currentWindow: true,
@@ -82,16 +82,17 @@ export default class DirectLinkingBackground {
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
-    async toggleSidebar() {
-        await this.triggerSidebar('toggleSidebarOverlay')
-    }
+    async toggleSidebarOverlay({ tab }, { anchor, override } = {}) {
+        const [currentTab] = await browser.tabs.query({
+            active: true,
+            currentWindow: true,
+        })
 
-    async openSidebarWithHighlight({ tab }, anchor) {
-        // Toggling the sidebar ensures that if the page does not have the
-        // ribbon mounted at this point, then it will get inserted before
-        // proceeding any further.
-        await this.toggleSidebar()
-        this.triggerSidebar('openSidebarAndSendAnchor', anchor)
+        const { id: tabId } = currentTab
+        // Make sure that the ribbon is inserted before trying to open the
+        // sidebar.
+        await remoteFunction('insertRibbon', { tabId })({ override })
+        await remoteFunction('openSidebar', { tabId })(anchor)
     }
 
     followAnnotationRequest({ tab }) {
@@ -165,5 +166,13 @@ export default class DirectLinkingBackground {
 
     async delTagForAnnotation({ tab }, { tag, url }) {
         return this.annotationStorage.modifyTags(false)(tag, url)
+    }
+
+    async editAnnotationTags({ tab }, { tagsToBeAdded, tagsToBeDeleted, url }) {
+        return this.annotationStorage.editAnnotationTags(
+            tagsToBeAdded,
+            tagsToBeDeleted,
+            url,
+        )
     }
 }

@@ -9,9 +9,51 @@
 }
 
 .box {
-    background: rgba(255, 255, 255);
-    width: 500px;
-    height: 500px;
-    margin: 200px auto;
-    border: 1px solid black;
+    composes: boxShadow from '../../../common-ui/colors.css';
+    position: relative;
+    padding: 40px 50px 30px 52px;
+    margin: 15% auto;
+    width: 28em;
+}
+
+.danger {
+    color: #f29d9d;
+    font-weight: 700;
+    margin-left: 10px;
+}
+
+.dangerIcon {
+    height: 30px;
+    width: 30px;
+    vertical-align: middle;
+    padding-bottom: 2px;
+}
+
+.closeIcon {
+    height: 15px;
+    width: 15px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.normal {
+    composes: subTitleColor from '../../../common-ui/colors.css';
+    font-size: 15px;
+}
+
+.instructions {
+    composes: menuItem from '../../../common-ui/colors.css';
+    font-size: 15px;
+}
+
+.input {
+    margin-left: 10px;
+    border-radius: 5px;
+    border: 2px solid #ebebeb;
+    width: 150px;
+    height: 25px;
+    padding-left: 9px;
+    vertical-align: middle;
 }

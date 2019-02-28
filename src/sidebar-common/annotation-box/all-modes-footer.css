@@ -1,0 +1,44 @@
+.annotationBoxFooter {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-top: 1px solid #d2d2d2;
+    font-size: 13px;
+    background: #fff;
+    border-radius: 0 0 5px 5px;
+    box-sizing: border-box;
+}
+
+.footerBoldText {
+    box-sizing: border-box;
+    color: #000;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0 3px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.footerText {
+    box-sizing: border-box;
+    color: #818181;
+    cursor: pointer;
+    margin: 0 3px;
+    font-size: 14px;
+    background-color: #fff;
+    border: none;
+    outline: none;
+}
+
+.deleteReally {
+    box-sizing: border-box;
+    font-weight: 800;
+    font-size: 15px;
+    color: #000;
+}

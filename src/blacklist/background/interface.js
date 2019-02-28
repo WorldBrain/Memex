@@ -1,6 +1,5 @@
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
 import importStateManager from 'src/imports/background/state-manager'
-import { updateLastActive } from 'src/analytics'
 
 /**
  * Main checking logic between a given blacklist expression and current URL.
@@ -81,6 +80,5 @@ export async function addToBlacklist(url) {
             ? url.map(createBlacklistEntry)
             : [createBlacklistEntry(url)]
 
-    updateLastActive() // Consider user active (analytics)
     return storeBlacklist([...blacklist, ...newEntries])
 }

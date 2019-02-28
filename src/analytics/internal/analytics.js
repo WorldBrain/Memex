@@ -1,4 +1,5 @@
 import { EVENT_TYPES, EVENT_NAMES } from './constants'
+import { updateLastActive, isEventActiveEvent } from '../utils'
 
 class Analytics {
     _initDataLoaded
@@ -128,6 +129,10 @@ class Analytics {
      */
     async processEvent(eventArgs) {
         await this._initDataLoaded
+
+        if (isEventActiveEvent(eventArgs.type)) {
+            updateLastActive()
+        }
 
         // Prepare the event to store the event in dexie db.
         const time = Date.now()

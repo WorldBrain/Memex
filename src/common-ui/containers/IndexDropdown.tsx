@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
-import { updateLastActive } from '../../analytics'
 import { remoteFunction } from '../../util/webextensionRPC'
 import {
     IndexDropdown,
@@ -226,8 +225,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         })
 
         this.props.onFilterAdd(newTag)
-
-        updateLastActive() // Consider user active (analytics)
     }
 
     private async handleSingleTagEdit(tag: string) {
@@ -294,8 +291,6 @@ class IndexDropdownContainer extends Component<Props, State> {
             focused: 0,
             clearFieldBtn: false,
         })
-
-        updateLastActive() // Consider user active (analytics)
     }
 
     private handleSearchEnterPress(
@@ -350,6 +345,17 @@ class IndexDropdownContainer extends Component<Props, State> {
     }
 
     handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (
+            this.props.isForAnnotation &&
+            !(event.ctrlKey || event.metaKey) &&
+            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
+        ) {
+            event.preventDefault()
+            event.stopPropagation()
+            this.setState(state => ({ searchVal: state.searchVal + event.key }))
+            return
+        }
+
         switch (event.key) {
             case 'Enter':
                 return this.handleSearchEnterPress(event)
@@ -361,9 +367,9 @@ class IndexDropdownContainer extends Component<Props, State> {
     }
 
     private handleSearchChange = (
-        event: React.SyntheticEvent<HTMLInputElement>,
+        event: React.ChangeEvent<HTMLInputElement>,
     ) => {
-        const searchVal = event.currentTarget.value
+        const searchVal = event.target.value
 
         // If user backspaces to clear input, show the list of suggested tags again.
         let displayFilters
@@ -418,7 +424,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         // If not, set the container's scrollTop appropriately.
         // Below are two ways to do it
         // 1. Element.ScrollIntoView()
-        domNode.scrollIntoView({ behavior: 'instant', block: 'nearest' })
+        domNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
         // 2. Use Element.scrollTop()
         // const parentNode = domNode.parentNode as HTMLElement
         // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop

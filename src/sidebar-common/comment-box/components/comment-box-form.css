@@ -1,0 +1,65 @@
+@import url('/fonts/Inter/inter.css');
+
+.textArea {
+    box-sizing: border-box;
+    resize: vertical;
+    font-weight: 500;
+    width: 95%;
+    font-size: 14px;
+    color: #222;
+    font-family: 'Inter';
+    font-style: italic;
+    background: #f7f7f7;
+    border: none;
+    border-radius: 2px;
+    padding: 10px 7px;
+    margin: 5px 5px 5px 8px;
+    min-height: 40px;
+
+    &:focus {
+        outline: none;
+    }
+
+    &::placeholder {
+        color: #4a4a4a;
+    }
+}
+
+.buttonHolder {
+    margin: -10px 2px 60px 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.saveBtn {
+    font-family: 'Lato';
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: transparent;
+    margin-right: 10px;
+    margin-top: 6px;
+
+    &:focus,
+    &:active {
+        background-color: #88888840;
+        border-radius: 5px;
+    }
+}
+
+.cancelBtn {
+    font-family: 'Lato';
+    color: #444;
+    font-size: 14px;
+    font-weight: 500;
+    margin-right: 10px;
+    cursor: pointer;
+    margin-top: 7px;
+    border: none;
+    outline: none;
+    background: transparent;
+}

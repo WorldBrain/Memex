@@ -10,7 +10,6 @@
     text-overflow: ellipsis;
     font-size: 14px;
     flex: 10;
-    font-family: 'Inter';
     cursor: pointer;
     text-align: left;
 }

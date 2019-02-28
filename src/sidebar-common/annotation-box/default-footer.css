@@ -1,0 +1,63 @@
+.annotationBoxDefaultFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.commonIcon {
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-size: 18px;
+    display: inline-block;
+    cursor: pointer;
+    background-color: transparent;
+    background-position: center;
+    border: none;
+    padding: 3px;
+    width: 28px;
+    height: 28px;
+    opacity: 0.7;
+}
+
+.editIcon {
+    background-image: url('/img/edit_empty.svg');
+
+    &:hover {
+        background-image: url('/img/edit_full.svg');
+    }
+}
+
+.trashIcon {
+    background-image: url('/img/trash.svg');
+
+    &:hover {
+        background-image: url('/img/trash_blue_full.svg');
+    }
+}
+
+.shareIcon {
+    background-image: url('/img/share_empty.svg');
+
+    &:hover {
+        background-image: url('/img/share_full.svg');
+    }
+}
+
+.replyIcon {
+    background-image: url('/img/reply_empty.svg');
+
+    &:hover {
+        background-image: url('/img/reply_full.svg');
+    }
+}
+
+.goToPageIcon {
+    background-image: url('/img/gotopage.svg');
+    background-size: 30px;
+    padding-top: 5px;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}

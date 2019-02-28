@@ -1,0 +1,62 @@
+.box {
+    composes: boxShadow from '../colors.css';
+    position: absolute;
+    padding: 40px;
+    width: 105%;
+    max-width: 600px;
+    z-index: 2500;
+    margin: auto auto;
+    margin-top: -130px;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-row-gap: 10px;
+    grid-template-areas:
+        'header'
+        'description'
+        'linkbox'
+        'buttonbox';
+}
+
+.header {
+    composes: h2color from '../colors.css';
+    grid-area: header;
+    margin: 0px;
+    text-align: center;
+    font-size: 21px;
+}
+
+.description {
+    composes: subTitleColor from '../colors.css';
+    grid-area: description;
+    font-size: 0.9rem;
+    margin: 0px;
+    text-align: center;
+}
+
+.buttonbox {
+    grid-area: buttonbox;
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    font-size: 17px;
+    margin-top: 30px;
+    cursor: pointer;
+}
+
+.continueButton {
+    composes: CTA from '../colors.css';
+    margin-right: 10px;
+    padding: 10px 20px;
+}
+
+.cancelButton {
+    composes: warningColor from '../colors.css';
+    margin-left: 10px;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+        color: #222;
+    }
+}

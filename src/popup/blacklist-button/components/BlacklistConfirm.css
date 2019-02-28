@@ -1,4 +1,4 @@
-@import url('/fonts/googlefonts/Inter.css');
+@import url('/fonts/Inter/Inter.css');
 
 .container {
     display: flex;
@@ -36,7 +36,6 @@
     padding-top: 5px;
     padding-bottom: 5px;
     border: 1px solid #3eb995;
-    font-family: 'Inter';
     cursor: pointer;
     background-color: white;
     color: #3eb995;

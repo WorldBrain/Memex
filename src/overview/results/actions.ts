@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import { remoteFunction } from '../../util/webextensionRPC'
-import analytics, { updateLastActive } from '../../analytics'
+import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as selectors from './selectors'
 import * as constants from './constants'
@@ -74,8 +74,6 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
     } else {
         createBookmarkRPC({ url }).catch(errHandler)
     }
-
-    updateLastActive() // Consider user active (analytics)
 }
 
 export const updateSearchResult: (a: any) => Thunk = ({
@@ -163,8 +161,8 @@ function storeSearch(searchResult, overwrite, state) {
         searchResult.totalCount === 0
             ? EVENT_NAMES.UNSUCCESSFUL_SEARCH
             : overwrite
-            ? EVENT_NAMES.SUCCESSFUL_SEARCH
-            : EVENT_NAMES.PAGINATE_SEARCH
+                ? EVENT_NAMES.SUCCESSFUL_SEARCH
+                : EVENT_NAMES.PAGINATE_SEARCH
 
     processEventRPC({ type })
 

@@ -1,33 +1,42 @@
-import { bodyLoader, interactiveLoader } from '../../util/loader'
-import ToolbarNotifications from '../../toolbar-notification/content_script'
-import * as interactions from './interactions'
+import { bodyLoader, interactiveLoader } from 'src/util/loader'
+import ToolbarNotifications from 'src/toolbar-notification/content_script'
+import * as interactions from './ribbon-interactions'
 import { getSidebarState } from '../utils'
+import AnnotationsManager from 'src/sidebar-common/annotations-manager'
 
 const onKeydown = (
     e: KeyboardEvent,
-    toolbarNotifications: ToolbarNotifications,
+    {
+        annotationsManager,
+        toolbarNotifications,
+    }: {
+        annotationsManager: AnnotationsManager
+        toolbarNotifications: ToolbarNotifications
+    },
 ) => {
     if (e.key !== 'm') {
         return
     }
 
-    interactions.insertRibbon({ toolbarNotifications })
+    interactions.insertRibbon({ annotationsManager, toolbarNotifications })
 }
 
-export default async ({
+const initRibbonAndSidebar = async ({
+    annotationsManager,
     toolbarNotifications,
 }: {
+    annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
 }) => {
-    interactions.setupRPC({ toolbarNotifications })
+    interactions.setupRPC({ annotationsManager, toolbarNotifications })
 
     const isSidebarEnabled = await getSidebarState()
     if (!isSidebarEnabled) {
         return
     }
 
-    const onKeydownWrapper = e => {
-        onKeydown(e, toolbarNotifications)
+    const onKeydownWrapper = (e: KeyboardEvent) => {
+        onKeydown(e, { annotationsManager, toolbarNotifications })
     }
 
     await interactiveLoader()
@@ -36,5 +45,7 @@ export default async ({
     await bodyLoader()
     document.removeEventListener('keydown', onKeydownWrapper, false)
 
-    interactions.insertRibbon({ toolbarNotifications })
+    interactions.insertRibbon({ annotationsManager, toolbarNotifications })
 }
+
+export default initRibbonAndSidebar

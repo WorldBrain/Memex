@@ -1,5 +1,3 @@
-const last = require('lodash/last')
-const pickBy = require('lodash/pickBy')
 import * as AllRaven from 'raven-js'
 import { EventEmitter } from 'events'
 import { StorageManager } from '../../../search/types'
@@ -7,6 +5,8 @@ import BackupStorage, { LastBackupStorage } from '../storage'
 import { BackupBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
+const last = require('lodash/last')
+const pickBy = require('lodash/pickBy')
 
 export interface BackupProgressInfo {
     state: 'preparing' | 'synching' | 'paused' | 'cancelled'
@@ -163,19 +163,35 @@ export default class BackupProcedure {
         }, 200)
     }
 
-    async _queueInitialBackup() {
+    async _queueInitialBackup(chunkSize = 1000) {
         const collectionsWithVersions = this._getCollectionsToBackup()
+        // Change objects are created fast enough that `Date.now()` won't set unique PKs; instead use an inc PK
+        let pkIterator = 0
 
         for (const collection of collectionsWithVersions) {
-            for await (const pk of this.storageManager
-                .collection(collection.name)
-                .streamPks()) {
-                await this.storage.registerChange({
+            const dexie = this.storageManager.backend['dexieInstance']
+
+            let chunk = 0
+            let pks: any[]
+            do {
+                pks = await dexie
+                    .table(collection.name)
+                    .toCollection()
+                    .offset(chunk * chunkSize)
+                    .limit(chunkSize)
+                    .primaryKeys()
+
+                const changes = pks.map(objectPk => ({
+                    timestamp: pkIterator++,
                     collection: collection.name,
-                    pk,
                     operation: 'create',
-                })
-            }
+                    objectPk,
+                }))
+
+                await dexie.table('backupChanges').bulkPut(changes)
+
+                chunk++ // Ensure next iteration goes to next chunk
+            } while (pks.length === chunkSize) // While data not exhausted
         }
     }
 

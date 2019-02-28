@@ -5,11 +5,9 @@
     background-color: #fff;
     margin: 150px auto 30px auto;
     display: flex;
-    font-size: 1rem;
-    font-family: 'Inter', sans-serif;
-    box-shadow: 0px 70px 0px -70px rgba(14, 23, 68, 0.2),
-        -50px 70px 70px -70px rgba(14, 23, 68, 0.2),
-        50px 70px 70px -70px rgba(14, 23, 68, 0.2);
+    font-size: 16px;
+    font-family: 'Inter';
+    box-shadow: 0px 2px 4px 0px #00000026;
     border-radius: 6px;
 }
 

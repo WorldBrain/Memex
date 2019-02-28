@@ -21,7 +21,7 @@
 
     & * {
         box-sizing: content-box;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter';
     }
 
     & img {

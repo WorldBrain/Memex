@@ -1,0 +1,113 @@
+.ribbon {
+    position: fixed;
+    top: 20%;
+    right: 0;
+    width: 13px;
+    height: 40px;
+    background-color: #fff;
+    z-index: 2147483647;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border: 1px solid #7777775c;
+    border-right: none;
+    transform: translate(0, 0);
+    transition: all 0s ease-in;
+    box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16);
+    line-height: normal;
+    text-align: start;
+    font-family: serif;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.ribbonExpanded {
+    width: 130px;
+    height: 40px;
+    display: grid;
+    grid-template-areas: 'buttons arrow';
+    grid-template-columns: 1fr;
+}
+
+.buttons {
+    grid-area: buttons;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.arrow {
+    cursor: pointer;
+    height: 25px;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.arrowBox {
+    width: 9px;
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 4px;
+    padding-top: 1px;
+}
+
+.buttonHolder {
+    /* border-bottom: 1px solid #c2c2c2; */
+    display: flex;
+    margin-left: 10px;
+    padding-top: 1px;
+}
+
+.logo,
+.toggler,
+.cancel {
+    background-repeat: no-repeat;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.logo {
+    width: 15px;
+    height: 20px;
+    margin-left: 10px;
+}
+
+.toggler {
+    fill: white;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.cancel {
+    background-image: url('/img/cross_grey.svg');
+    fill: white;
+    background-size: 12px;
+    width: 12px;
+    height: 12px;
+}
+
+.tooltipOn {
+    background-image: url('/img/tooltipIcon_blue.svg');
+}
+
+.tooltipOff {
+    background-image: url('/img/tooltipIcon_grey.svg');
+}
+
+.ribbonOn {
+    background-image: url('/img/sidebarIcon_blue.svg');
+}
+
+.ribbonOff {
+    background-image: url('/img/sidebarIcon_grey.svg');
+}
+
+.ribbonIcon {
+    padding-top: 1px;
+}

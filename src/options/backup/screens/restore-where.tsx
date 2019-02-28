@@ -4,6 +4,8 @@ import React from 'react'
 import * as logic from './restore-where.logic'
 import { ProviderList } from 'src/options/backup/components/provider-list'
 import { PrimaryButton } from 'src/options/backup/components/primary-button'
+import { DownloadOverlay } from '../components/overlays'
+import { fetchBackupPath, checkServerStatus, changeBackupPath } from '../utils'
 const STYLES = require('../styles.css')
 
 interface Props {
@@ -14,8 +16,39 @@ export default class RestoreWhere extends React.Component<Props> {
     state = logic.INITIAL_STATE
     handleEvent = null
 
-    componentWillMount() {
+    async componentWillMount() {
         this.handleEvent = logic.reactEventHandler(this, logic.processEvent)
+    }
+
+    private proceedIfServerIsRunning = async () => {
+        let overlay = null
+        let backupPath = null
+        const status = await checkServerStatus()
+        if (status) {
+            backupPath = await fetchBackupPath()
+        } else {
+            overlay = 'download'
+        }
+        this.handleEvent({
+            type: 'onChangeOverlay',
+            overlay,
+        })
+        this.handleEvent({
+            type: 'onChangeBackupPath',
+            backupPath,
+        })
+    }
+
+    private handleChangeBackupPath = async () => {
+        const backupPath = await changeBackupPath()
+        if (backupPath) {
+            this.handleEvent({
+                type: 'onChangeBackupPath',
+                backupPath,
+            })
+        } else {
+            this.handleEvent({ type: 'onChangeOverlay', overlay: 'download' })
+        }
     }
 
     render() {
@@ -26,13 +59,44 @@ export default class RestoreWhere extends React.Component<Props> {
                     FROM WHERE?
                 </p>
                 <ProviderList
-                    onChange={value =>
-                        this.handleEvent({ type: 'onProviderChoice', value })
+                    backupPath={
+                        this.state.provider === 'local'
+                            ? this.state.backupPath
+                            : null
                     }
+                    handleChangeBackupPath={this.handleChangeBackupPath}
+                    onChange={async value => {
+                        this.handleEvent({ type: 'onProviderChoice', value })
+                        if (value === 'local') {
+                            await this.proceedIfServerIsRunning()
+                        }
+                    }}
+                />
+                <DownloadOverlay
+                    disabled={this.state.overlay !== 'download'}
+                    onClick={async action => {
+                        if (action === 'continue') {
+                            this.handleEvent({
+                                type: 'onChangeOverlay',
+                                overlay: null,
+                            })
+                            await this.proceedIfServerIsRunning()
+                        }
+                        if (action === 'cancel') {
+                            this.handleEvent({
+                                type: 'onChangeOverlay',
+                                overlay: null,
+                            })
+                        }
+                    }}
                 />
                 <PrimaryButton
                     disabled={!this.state.valid}
-                    onClick={() => this.handleEvent({ type: 'onConfirm' })}
+                    onClick={() =>
+                        this.handleEvent({
+                            type: 'onConfirm',
+                        })
+                    }
                 >
                     Continue
                 </PrimaryButton>

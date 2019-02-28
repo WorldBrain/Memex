@@ -1,8 +1,4 @@
-@import url('/fonts/googlefonts/Inter.css');
-
-.privacy {
-    font-family: 'Inter';
-}
+@import url('/fonts/Inter/Inter.css');
 
 .title {
     color: #3eb995;
