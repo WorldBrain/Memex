@@ -7,7 +7,7 @@ class DragElement extends PureComponent {
         return (
             <div id="dragged-element" className={styles.dragElement}>
                 {' '}
-                + Add to Collection
+                + Drop into Collection
             </div>
         )
     }

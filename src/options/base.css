@@ -6,16 +6,8 @@ html,
 body {
     margin: 0;
     font-size: 18px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter';
     font-weight: 200;
-}
-
-strong {
-    font-weight: 600;
-}
-
-h3 {
-    font-weight: 600;
 }
 
 .root {
@@ -24,16 +16,11 @@ h3 {
     flex-direction: row;
 }
 
-.sidebar .route {
-    margin: 20px 20px 0;
-    flex-grow: 1;
-    max-width: 800px;
-    margin-left: 30px;
-}
-
 .route {
-    width: 100%;
     padding-right: 30px;
+    margin: 25px 0 0 35px;
+    max-width: 700px;
+    width: calc(100vw - 180px);
 }
 
 .routeTitle {

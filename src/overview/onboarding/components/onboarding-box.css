@@ -1,60 +1,57 @@
-.container {
-    width: 95%;
-    max-width: 800px;
-    height: 500px;
-    background-color: #fff;
-    margin: 150px auto 30px auto;
-    display: flex;
-    font-size: 16px;
-    font-family: 'Inter', sans-serif;
-    box-shadow: 0px 2px 4px 0px #00000026;
-    border-radius: 6px;
+p {
+    margin: 0;
 }
 
-@media only screen and (max-width: 820px) {
-    .container {
-        width: 99%;
-        margin-top: -25px;
-        box-shadow: none;
-        border-bottom: solid 1px #4a4a4538;
-    }
-
-    .text {
-        font-size: 15px;
-    }
+.container {
+    /* composes: boxShadow from '../../../common-ui/colors.css'; */
+    box-shadow: 0px 53px 100px -50px #b7b7b7;
+    width: 95%;
+    max-width: 50rem;
+    margin: 100px auto 30px auto;
+    display: flex;
+    border: solid 1px #f4f4f4;
+    border-radius: 10px;
 }
 
 .leftParent {
+    composes: sideBarColorOpen from '../../../common-ui/colors.css';
     width: 50%;
-    text-align: left;
-    padding: 30px;
-    background: #f0f0f066;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 30px 30px 30px;
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
 }
 
 .rightParent {
-    width: 50%;
-    padding: 30px 30px 30px 55px;
+    width: 90%;
+    padding: 45px 35px 30px 47px;
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
 }
 
 .welcome {
-    font-size: 29px;
+    composes: h2Color from '../../../common-ui/colors.css';
+    font-size: 1.4rem;
     text-align: center;
     font-weight: 700;
-    font-family: 'Uni Neue';
-    font-style: italic;
-    color: #3eb995;
-    line-height: 1;
-    margin-top: 15px;
-    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.logo {
+    background-image: url('/img/memex_text_logo.png');
+    width: 100px;
+    height: 40px;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    margin-bottom: 30px;
+    margin-top: 5px;
 }
 
 .text {
-    font-size: 15px;
-    color: #3a3a75;
+    composes: subTextColor from '../../../common-ui/colors.css';
+    font-size: 0.9rem;
     text-align: center;
     letter-spacing: 0.7px;
 }
@@ -64,52 +61,49 @@
     display: flex;
     background-image: url('/img/privacy.svg');
     fill: white;
-    background-size: 100%;
+    background-size: contain;
     width: 65%;
     height: 100%;
     margin-left: auto;
+    margin-top: 25px;
     margin-right: auto;
-    margin-top: 40px;
 }
 
 .footer {
     display: flex;
-    flex-direction: row;
-    width: 610px;
+    flex-direction: column;
     margin: 0px auto;
     justify-content: space-evenly;
+    align-items: center;
 }
 
 .bold {
-    font-size: 15px;
-    color: #000;
-    font-weight: 500;
-    margin-top: 0px;
+    composes: h2Color from '../../../common-ui/colors.css';
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 20px;
     margin-bottom: 0px;
 }
 
 .subtextGreen {
-    color: #3eb995;
-    font-size: 13px;
-    text-align: left;
-    margin-top: 0px;
+    composes: subTextColor from '../../../common-ui/colors.css';
+    font-size: 0.8125rem;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 13px;
 }
 
 .learnMore {
-    color: white;
-    background-color: #3eb995;
-    font-size: 13px;
-    font-weight: bold;
-    padding: 3px 24px 4px 24px;
-    border-radius: 15px;
+    composes: CTA from '../../../common-ui/colors.css';
+    font-size: 0.8125rem;
+    padding: 7px 24px 8px 24px;
     cursor: pointer;
     margin-top: 6px;
-    margin-bottom: 20px;
-    margin-right: -30px;
-    text-decoration: none;
+    margin-bottom: 72px;
+    margin-right: 4px;
 }
 
-.settings {
+/* .settings {
     background-repeat: no-repeat;
     display: inline-block;
     cursor: pointer;
@@ -120,4 +114,38 @@
     height: 20px;
     margin-left: -19px;
     margin-top: 9px;
+} */
+
+@media only screen and (max-width: 820px) {
+    .container {
+        composes: h2Color from '../../../common-ui/colors.css';
+        margin-top: 75px;
+    }
+
+    .welcome {
+        font-size: 1.2rem;
+        line-height: 1.5rem;
+    }
+
+    .logo {
+        width: 90px;
+    }
+
+    .text {
+        font-size: 0.875rem;
+    }
+
+    .leftParent {
+        padding: 40px 30px 30px 30px;
+        width: 50%;
+    }
+
+    .privacyImage {
+        width: 85%;
+        height: 100%;
+        margin-left: 10px;
+        margin-top: 40px;
+        margin-right: auto;
+    }
 }
+

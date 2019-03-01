@@ -121,7 +121,6 @@ describe('BackupRestoreProcedure', () => {
         expect(restoreProcedure.running).toBe(false)
         expect(reportedInfo).toEqual(expectedInfo)
     })
-
     it('should list and fetch from backend correctly', async () => {
         const lists = []
         const retrievals = []
@@ -140,8 +139,8 @@ describe('BackupRestoreProcedure', () => {
             storageManager: null,
             storage: null,
         })
-        restoreProcedure._startRecordingChanges = () => {}
-        restoreProcedure._stopRecordingChanges = () => {}
+        restoreProcedure._startRecordingChanges = () => { }
+        restoreProcedure._stopRecordingChanges = () => { }
 
         expect(await restoreProcedure._listBackupCollection('foo')).toEqual([
             'one',
@@ -169,8 +168,8 @@ describe('BackupRestoreProcedure', () => {
         restoreProcedure._clearDatabase = async () => {
             throw new Error('Muahaha!')
         }
-        restoreProcedure._startRecordingChanges = () => {}
-        restoreProcedure._stopRecordingChanges = () => {}
+        restoreProcedure._startRecordingChanges = () => { }
+        restoreProcedure._stopRecordingChanges = () => { }
 
         const runner = restoreProcedure.runner()
         const boom = new Promise((resolve, reject) => {

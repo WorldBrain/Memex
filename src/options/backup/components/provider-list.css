@@ -1,7 +1,7 @@
 .logo {
     height: 20px;
-    vertical-align: middle;
-    margin-right: 5px;
+    vertical-align: text-top;
+    margin-left: 5px;
 }
 
 .disabled {
@@ -15,7 +15,9 @@ input[disabled] {
 
 input {
     margin-right: 15px;
+    vertical-align: middle;
     margin-left: 10px;
+    margin-top: 0px;
 }
 
 .name {
@@ -36,6 +38,84 @@ input {
 }
 
 .subTitle {
+    composes: h2Color from '../../../common-ui/colors.css';
+    vertical-align: middle;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.title {
+    composes: h2Color from '../../../common-ui/colors.css';
+    font-size: 15px;
+    vertical-align: middle;
+    font-weight: 500;
+}
+
+.description {
+    composes: subTitleColor from '../../../common-ui/colors.css';
+    font-size: 13px;
+    margin: 4px 0px 0px 37px;
+    line-height: 19px;
+}
+
+.destination {
+    composes: nakedButton hoverColor from '../../../common-ui/colors.css';
+    background-color: transparent;
+    padding: 4px 4px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 15px;
+    color: #0b0b69;
+    margin-top: 10px;
+    margin-left: 30px;
+    display: flex;
+    align-items: flex-start;
+
+    & p {
+        margin-bottom: -6px;
+        margin-top: -3px;
+        text-align: left;
+        font-size: 12px;
+    }
+
+    & .select {
+        margin-top: 4px;
+    }
+
+    & .folderIcon {
+        display: inline-block;
+        min-width: 25px;
+        height: 25px;
+        background-image: url('/img/computer.svg');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 25px;
+        margin-right: 10px;
+    }
+}
+
+.change {
+    display: block;
+    text-align: left;
+    color: #555;
+    float: left;
+}
+
+.form {
+    margin-top: 15px;
+}
+
+.link {
+    composes: darkBlue from '../../../common-ui/colors.css';
     font-weight: 600;
-    margin-bottom: 10px;
+    text-decoration: none;
+}
+
+.pathString {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 360px;
+    direction: rtl;
 }

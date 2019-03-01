@@ -1,6 +1,6 @@
 import React from 'react'
 import RunningProcess from '../components/running-process'
-const STYLES = require('../styles.css')
+const styles = require('../styles.css')
 
 export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
     return (
@@ -24,16 +24,16 @@ export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
 }
 
 function renderHeader() {
-    return <p className={STYLES.header2}>RESTORE PROGRESS</p>
+    return <p className={styles.header2}>RESTORE IN PROGRESS</p>
 }
 
 function renderFailMessage() {
     return (
         <React.Fragment>
-            <p className={STYLES.header2}>
+            <p className={styles.header2}>
                 <strong>RESTORE FAILED </strong>
             </p>
-            <p className={STYLES.name}>
+            <p className={styles.subname}>
                 You can retry the restore anytime you want. <br />
                 If you still encounter issues please{' '}
                 <a href="mailto:support@worldbrain.io">contact support</a>.
@@ -44,9 +44,11 @@ function renderFailMessage() {
 
 function renderSuccessMessage() {
     return (
-        <p className={STYLES.header2}>
-            <strong>FINISHED: </strong>
-            RESTORE WAS SUCCESSFUL
+        <p className={styles.header2}>
+            <strong>RESTORE SUCCESSFUL: </strong>
+            <p className={styles.subname}>
+                Return to <a href="#/overview">the dashboard</a> to search, organise and annotate. 
+            </p>
         </p>
     )
 }

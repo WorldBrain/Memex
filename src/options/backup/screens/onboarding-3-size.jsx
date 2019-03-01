@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import localStyles from './onboarding-3-size.css'
 import { PrimaryButton } from '../components/primary-button'
@@ -9,13 +8,17 @@ import Styles from '../styles.css'
 
 export default class OnboardingSizeContainer extends React.Component {
     static propTypes = {
-        isAuthenticated: PropTypes.bool,
         onBlobPreferenceChange: PropTypes.func.isRequired,
         onLoginRequested: PropTypes.func.isRequired,
         onBackupRequested: PropTypes.func.isRequired,
     }
 
-    state = { estimation: null, blobPreference: true }
+    state = {
+        estimation: null,
+        blobPreference: true,
+        backendLocation: null,
+        isAuthenticated: null,
+    }
 
     async componentDidMount() {
         try {
@@ -31,6 +34,14 @@ export default class OnboardingSizeContainer extends React.Component {
             console.log(e)
             console.trace()
         }
+        this.setState({
+            backendLocation: await remoteFunction('getBackendLocation')(),
+        })
+        console.log(`backendLocation: ${this.state.backendLocation}`)
+        this.setState({
+            isAuthenticated: await remoteFunction('isBackupAuthenticated')(),
+        })
+        console.log(`isAuthenticated: ${this.state.isAuthenticated}`)
     }
 
     renderLoadingIndicator() {
@@ -60,12 +71,12 @@ export default class OnboardingSizeContainer extends React.Component {
             <div className={Styles.container}>
                 <p className={Styles.header2}>
                     <strong>STEP 3/5: </strong>
-                    WHAT?
+                    Estimating backup size
                 </p>
                 <div className={Styles.subtitle2}>
-                    Estimated size of your backup. What do you want to include?
+                    What do you want to include in the backup? 
                 </div>
-                <table>
+                <table className={localStyles.table}>
                     <tbody>
                         <tr>
                             <td className={localStyles.estimationSize}>
@@ -80,7 +91,7 @@ export default class OnboardingSizeContainer extends React.Component {
                                     <br />
                                     <span className={localStyles.subname}>
                                         Searchable History, Annotations,
-                                        Comments, Highlights, Collections
+                                        Comments, Highlights, Collections, Tags.
                                     </span>
                                 </span>
                             </td>
@@ -118,47 +129,39 @@ export default class OnboardingSizeContainer extends React.Component {
                                 </span>
                             </td>
                         </tr>
-                        <tr>
-                            <td
-                                className={classNames(
-                                    localStyles.estimationSize,
-                                    localStyles.sumCell,
-                                )}
-                            >
-                                {Math.ceil(
-                                    _bytesToMega(
-                                        this.state.blobPreference
-                                            ? sizes.withBlobs
-                                            : sizes.withoutBlobs,
-                                    ),
-                                )}
-                                MB
-                            </td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                        </tr>
                     </tbody>
                 </table>
 
-                {!this.props.isAuthenticated && (
-                    <PrimaryButton
-                        onClick={() => {
-                            this.props.onLoginRequested()
-                        }}
-                    >
-                        Connect with Google Drive
-                    </PrimaryButton>
-                )}
-                {this.props.isAuthenticated && (
-                    <PrimaryButton
-                        onClick={() => {
-                            console.log('backup button clicked')
-                            this.props.onBackupRequested()
-                        }}
-                    >
-                        Backup
-                    </PrimaryButton>
-                )}
+                {this.state.backendLocation === 'google-drive' &&
+                    !this.state.isAuthenticated && (
+                        <PrimaryButton
+                            onClick={() => {
+                                this.props.onLoginRequested()
+                            }}
+                        >
+                            Connect with Google Drive
+                        </PrimaryButton>
+                    )}
+                {this.state.backendLocation === 'google-drive' &&
+                    this.state.isAuthenticated && (
+                        <PrimaryButton
+                            onClick={() => {
+                                this.props.onBackupRequested()
+                            }}
+                        >
+                            Backup
+                        </PrimaryButton>
+                    )}
+                {this.state.backendLocation === 'local' &&
+                    this.state.isAuthenticated && (
+                        <PrimaryButton
+                            onClick={() => {
+                                this.props.onBackupRequested()
+                            }}
+                        >
+                            Backup
+                        </PrimaryButton>
+                    )}
             </div>
         )
     }

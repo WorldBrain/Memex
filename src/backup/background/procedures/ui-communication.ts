@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 export class ProcedureUiCommunication {
     _uiTabIds: { [tabId: string]: true } = {}
 
-    constructor(public eventName: string) {}
+    constructor(public eventName: string) { }
 
     registerUiTab(tab) {
         this._uiTabIds[tab.id] = true
@@ -12,6 +12,7 @@ export class ProcedureUiCommunication {
     sendEvent(eventType, event) {
         for (const tabId of Object.keys(this._uiTabIds)) {
             try {
+                console.log('sending event', eventType, event)
                 window['browser'].tabs.sendMessage(parseInt(tabId, 10), {
                     type: this.eventName,
                     event: { type: eventType, ...(event || {}) },

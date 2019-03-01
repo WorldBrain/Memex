@@ -22,7 +22,7 @@ class ResultList extends PureComponent<Props> {
         // Calculate height of the list to prevent scrolling
         // Height = 90vh + amount of height scrolled
         return {
-            height: 0.9 * window.innerHeight + window.pageYOffset + 20,
+            height: 0.9 * window.innerHeight + window.pageYOffset - 10,
         }
     }
 

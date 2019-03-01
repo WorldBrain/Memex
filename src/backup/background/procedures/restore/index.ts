@@ -4,7 +4,6 @@ import BackupStorage from '../../storage'
 import { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
-import { StorageRegistry } from 'storex'
 const dataURLtoBlob = require('dataurl-to-blob')
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
@@ -66,6 +65,13 @@ export class BackupRestoreProcedure {
                     this._listBackupCollection('change-sets'),
                     this._listBackupCollection('images'),
                 ])
+
+                /* Backup file not found */
+                if (!changeSetTimestamps.length) {
+                    await this._unblockDatabase()
+                    throw new Error('Backup file not found')
+                }
+
                 this._updateInfo({
                     status: 'synching',
                     totalChanges:
@@ -103,7 +109,7 @@ export class BackupRestoreProcedure {
                 if (this.logErrors) {
                     console.error(e)
                 }
-                this.events.emit('fail', e)
+                this.events.emit('fail', { error: e.message })
                 return 'fail'
             } finally {
                 this.interruptable = null

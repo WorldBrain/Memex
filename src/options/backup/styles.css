@@ -10,36 +10,40 @@
     color: white;
 }
 
-h1 {
-    color: #3eb995;
-    margin-left: -2px;
+.backupTitle {
+    composes: titleColor from '../../common-ui/colors.css';
     font-weight: 600;
+    font-size: 25px;
+    margin-top: 0px;
+    margin-bottom: 3px;
 }
 
 .subtitle {
-    color: #4a4a4a;
-    margin-top: -20px;
-    font-weight: 200;
+    composes: subTitleColor from '../../common-ui/colors.css';
+    font-size: 0.8rem;
 }
 
 .subtitle2 {
-    color: #4a4a4a;
-    margin-top: -10px;
-    font-weight: 200;
-    font-size: 15px;
+    composes: subTitleColor from '../../common-ui/colors.css';
+    font-size: 0.7rem;
     margin-bottom: 30px;
 }
 
 .header2 {
-    color: #173766;
-    font-size: 20px;
-    margin-bottom: 10px;
+    composes: darkBlue from '../../common-ui/colors.css';
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
     margin-top: 30px;
 }
 
 .back {
+    composes: warningColor hoverColor from '../../common-ui/colors.css';
     margin-left: 15px;
+    font-weight: 500;
     cursor: pointer;
+    margin-top: 20px;
+    font-size: 15px;
 }
 
 /* Upgrade Button */
@@ -89,18 +93,28 @@ h1 {
 .option {
     vertical-align: middle;
     display: inline-block;
-    margin-bottom: 15px;
-    padding-left: 10px;
-    width: 600px;
+    width: 100%;
+}
+
+.optionLine {
+    margin: 10px 0 10px 0;
+    display: flex;
+    justify-content: space-between;
 }
 
 .name {
+    composes: h2Color from '../../common-ui/colors.css';
     vertical-align: middle;
-    color: #3eb995;
     font-weight: 500;
+    font-size: 15px;
 }
 
 .subname {
-    font-size: 15px;
-    color: #4a4a4a;
+    composes: subTitleColor from '../../common-ui/colors.css';
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.selectionlist {
+    margin-top: 10px;
 }

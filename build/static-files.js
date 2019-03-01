@@ -4,7 +4,7 @@
  */
 export const htmlAssets = [
     'fonts/material-icons/material-icons.css',
-    'fonts/inter.css',
+    'fonts/Inter/inter.css',
     'lib/browser-polyfill.js',
 ]
 
@@ -35,7 +35,7 @@ export const copyPatterns = [
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.min.js', to: 'lib/' },
     {
         from: 'fonts/*/*',
-        to: 'fonts/googlefonts/[name].[ext]',
+        to: 'fonts/Inter/[name].[ext]',
     },
     {
         from:

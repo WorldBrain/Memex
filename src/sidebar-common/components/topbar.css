@@ -34,7 +34,7 @@
 
 .addCommentBtn {
     box-sizing: border-box;
-    font-family: 'Lato', sans-serif;
+    font-family: 'Lato';
     background: #3eb995;
     color: #fff;
     cursor: pointer;

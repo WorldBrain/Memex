@@ -19,7 +19,6 @@
 // myRemoteFunc(21).then(result => { ... result is 42! ... })
 
 import mapValues from 'lodash/fp/mapValues'
-import { browser } from 'webextension-polyfill-ts'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -74,8 +73,8 @@ export function remoteFunction(
         try {
             response =
                 tabId !== undefined
-                    ? await browser.tabs.sendMessage(tabId, message)
-                    : await browser.runtime.sendMessage(message)
+                    ? await window['browser'].tabs.sendMessage(tabId, message)
+                    : await window['browser'].runtime.sendMessage(message)
         } catch (err) {
             if (throwWhenNoResponse) {
                 throw new RpcError(
@@ -199,7 +198,7 @@ export function makeRemotelyCallable(
 
     // Enable the listener if needed.
     if (!enabled) {
-        browser.runtime.onMessage.addListener(incomingRPCListener)
+        window['browser'].runtime.onMessage.addListener(incomingRPCListener)
         enabled = true
     }
 }

@@ -106,12 +106,12 @@ class PageList extends Component {
                 onMouseEnter={this.mouseEnter}
                 onMouseLeave={this.mouseLeave}
                 className={this.mainClass}
+                onClick={this.props.onListItemClick}
                 onDragOver={this.handleDragOver}
                 onDrop={this.handleDrop}
                 title={this.props.listName}
                 onDragEnter={this.handleDragEnter}
                 onDragLeave={this.handleDragLeave}
-                onClick={this.props.onListItemClick}
             >
                 <div className={styles.listName}>{this.props.listName}</div>
                 <div className={styles.buttonContainer}>

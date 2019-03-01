@@ -9,43 +9,44 @@ input {
 }
 
 .name {
+    composes: h2Color from '../../../common-ui/colors.css';
     vertical-align: middle;
-    color: #3eb995;
+    font-size: 15px;
     font-weight: 500;
 }
 
 .subname {
-    font-size: 15px;
-    color: #4a4a4a;
+    composes: subTitleColor from '../../../common-ui/colors.css';
+    font-size: 13px;
 }
 
 .option {
     vertical-align: top;
     display: inline-block;
-    margin-bottom: 15px;
-    width: 500px;
-}
-
-.label {
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    color: white;
-    font-size: 15px;
-    vertical-align: middle;
-    margin-left: 10px;
-    float: right;
+    margin-bottom: 14px;
+    width: 90%;
     cursor: pointer;
-    border-radius: 3px;
+    margin-left: -5px;
 }
 
 .labelFree {
-    background: #3eb995;
+    composes: h2Color from '../../../common-ui/colors.css';
+    font-size: 14px;
+    vertical-align: middle;
+    font-weight: bold;
+    float: right;
 }
 
 .labelPremium {
-    background: #173766;
+    composes: CTAdarkBlue from '../../../common-ui/colors.css';
+    padding-left: 20px;
+    padding-right: 20px;
+    font-weight: 500;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 14px;
+    vertical-align: middle;
+    float: right;
 }
 
 .star {
@@ -61,9 +62,18 @@ input {
 }
 
 .price {
-    font-family: 'Uni Neue';
-    font-style: italic;
-    color: #173766;
-    font-size: 19px;
+    composes: darkBlue from '../../../common-ui/colors.css';
+    font-size: 16px;
     vertical-align: middle;
+    line-height: 25px;
+    font-weight: bold;
+}
+
+.selectionDiv {
+    margin-top: 15px;
+}
+
+.billingChoice {
+    margin-left: 40px;
+    margin-top: -5px;
 }

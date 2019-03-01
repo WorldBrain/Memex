@@ -25,10 +25,11 @@
 }
 
 .plus {
-    font-size: 2em;
+    font-size: 25px;
     font-weight: bold;
     cursor: pointer;
     margin-right: 5px;
+    margin-top: -4px;
 }
 
 .button {
@@ -43,16 +44,16 @@
 }
 
 .allLists {
-    height: inherit;
-    min-width: 20vw;
-    overflow: hidden;
+    overflow: scroll;
     width: max-content;
+    width: 100%;
+    height: 120%;
 }
 
 .allListsInner {
     height: inherit;
-    min-width: 20vw;
     overflow-y: auto;
+    width: 100%;
 }
 
 /* width */

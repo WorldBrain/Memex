@@ -1,25 +1,30 @@
 .outerProgressBar {
-    width: 550px;
-    height: 30px;
+    border: solid 2px #eae9e9; /* MAN (manual adjustment necessary) */
+    width: 100%;
+    height: 31px;
     border-radius: 15px;
+    margin-left: -2px;
     padding: 2px;
-    border: 1px solid #3eb995;
     margin-top: 30px;
-    position: absolute;
+    position: relative;
 }
 
 .innerProgressBar {
-    position: relative;
-    background-color: #3eb995;
+    composes: backgroundMintGreen from '../../../common-ui/colors.css';
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 10px;
+    align-items: center;
+    position: absolute;
     border-radius: 12px;
-    height: 24px;
+    height: 87%;
     width: 100%;
 }
 
 .progressPercentage {
     top: 0;
-    padding-right: 15px;
-    color: white;
-    font-weight: 300;
+    color: #f7f7f7;
     float: right;
+    font-size: 15px;
+    font-weight: bold;
 }

@@ -99,20 +99,29 @@ export class GoogleDriveClient {
     }
 
     async cacheFolderContentIDs(parentId: string) {
-        const query =
-            parentId !== 'appDataFolder'
-                ? `q=${encodeURIComponent(`'${parentId}' in parents`)}&`
-                : ''
-        const entries = (await this._request(
-            `/files?${query}spaces=appDataFolder`,
-        )).files as Array<any>
+        let nextPageToken = null
+        do {
+            let query = ''
+            if (parentId !== 'appDataFolder') {
+                query += `q=${encodeURIComponent(`'${parentId}' in parents`)}&`
+            }
+            if (nextPageToken) {
+                query += `pageToken=${nextPageToken}&`
+            }
 
-        if (!this.idCache[parentId]) {
-            this.idCache[parentId] = {}
-        }
-        for (const entry of entries) {
-            this.idCache[parentId][entry.name] = entry.id
-        }
+            const response = await this._request(
+                `/files?${query}spaces=appDataFolder`,
+            )
+            const entries = response.files as Array<any>
+            nextPageToken = response.nextPageToken
+
+            if (!this.idCache[parentId]) {
+                this.idCache[parentId] = {}
+            }
+            for (const entry of entries) {
+                this.idCache[parentId][entry.name] = entry.id
+            }
+        } while (nextPageToken)
     }
 
     async getFolderChildId(parentId: string, childName: string) {

@@ -1,28 +1,35 @@
 .title {
+    composes: h2Color from '../../../common-ui/colors.css';
+    margin-bottom: 10px;
     text-align: left;
-    font-size: 18px;
-    color: #22227d;
-    font-weight: 400;
+    font-size: 0.9rem;
+    font-weight: bold;
 }
 
 .subtext {
+    composes: darkBlue from '../../../common-ui/colors.css';
     text-align: left;
-    margin-top: -12px;
-    color: #4a4a4a;
-    font-size: 15px;
-    margin-bottom: 30px;
+    font-size: 1.4rem;
+    margin-bottom: 1.8rem;
+    font-weight: 300;
 }
 
 .container {
+    composes: boxShadow from '../../../common-ui/colors.css';
     width: fit-content;
-    position: absolute;
-    right: 20px;
-    top: 495px;
-    background: white;
-    box-shadow: 0px 2px 11px 0px #00000075;
+    position: fixed;
+    right: -430px;
+    top: 165px;
     border-radius: 5px;
     z-index: 1;
-    padding: 10px 15px 15px 40px;
+    padding: 30px 15px 0px 15px;
+    transition: 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+.container:hover {
+    transform: translate(-440px, 0px);
+    transition: 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+    padding: 30px 25px 15px 35px;
 }
 
 .close {

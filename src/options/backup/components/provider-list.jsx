@@ -2,51 +2,69 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './provider-list.css'
 
-export function ProviderList({ onChange }) {
+export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
     return (
         <div>
-            <p className={Styles.subTitle}>Currently Available</p>
-            <label>
-                <input type="radio" onChange={() => onChange('google-drive')} />
-                <span style={{ cursor: 'pointer' }}>
-                    <img className={Styles.logo} src={'img/google-drive.png'} />
-                    <span className={Styles.name}>Google Drive</span>
-                </span>
-            </label>
-            <br />
-            <p className={Styles.subTitle}>Future Options</p>
-            <div className={Styles.voteContainer}>
-                <a
-                    className={Styles.vote}
-                    target="blank"
-                    href="https://goo.gl/forms/Lh5pPWc75r7ds2m63"
-                >
-                    Vote
-                </a>
-                <span>on your favorite provider</span>
-            </div>
-            <input type="radio" disabled />
-            <span className={Styles.disabled}>Local Hard Drive</span>
-            <br />
-            <input type="radio" disabled />
-            <span className={Styles.disabled}>Own Cloud</span>
-            <br />
-            <input type="radio" disabled />
-            <span className={Styles.disabled}>Self hosting</span>
-            <br />
-            <input type="radio" disabled />
-            <span className={Styles.disabled}>Own Cloud</span>
-            <br />
-            <input type="radio" disabled />
-            <span className={Styles.disabled}>Dropbox</span>
-            <br />
-            <input type="radio" disabled />
-            <span className={Styles.disabled}>AWS</span>
-            <br />
+            <form className={Styles.form}>
+                <label className={Styles.label}>
+                    <input
+                        type="radio"
+                        name="backend-select"
+                        onChange={() => onChange('local')}
+                    />
+                    <span style={{ cursor: 'pointer' }}>
+                        <span className={Styles.title}>Local Backup</span>
+                        <p className={Styles.description}>
+                            Backup & restore your data locally, or to any cloud provider with a syncing folder on your computer (e.g. Dropbox, Spideroak, GDrive) <a className={Styles.link} target="_blank" href="https://www.notion.so/worldbrain/Backup-Restore-locally-and-to-any-cloud-provider-7b7e470247c548eeb3e9601a03e246a7">Learn More ▸</a>
+                        </p>
+                    </span>
+                    {backupPath !== null ? (
+                        <button
+                            className={Styles.destination}
+                            onClick={e => {
+                                e.preventDefault()
+                                handleChangeBackupPath()
+                            }}
+                        >
+                            <span className={Styles.folderIcon} />
+                            {backupPath && backupPath.length ? (
+                                <p className={Styles.pathString}>
+                                    {backupPath}{' '}
+                                    <span className={Styles.change}>
+                                        click to change path
+                                    </span>
+                                </p>
+                            ) : (
+                                <p className={Styles.select}>
+                                    SELECT DESTINATION FOLDER
+                                </p>
+                            )}
+                        </button>
+                    ) : null}
+                </label>
+                <br />
+                <label className={Styles.label}>
+                    <input
+                        type="radio"
+                        name="backend-select"
+                        onChange={() => onChange('google-drive')}
+                    />
+                    <span style={{ cursor: 'pointer' }}>
+                        <span className={Styles.title}>Google Drive</span>
+                        <img
+                            className={Styles.logo}
+                            src={'img/google-drive.png'}
+                        />
+                    </span>
+                </label>
+                <br />
+            </form>
         </div>
     )
 }
 
 ProviderList.propTypes = {
     onChange: PropTypes.func.isRequired,
+    backupPath: PropTypes.string,
+    handleChangeBackupPath: PropTypes.func.isRequired,
 }

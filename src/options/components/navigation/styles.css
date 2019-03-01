@@ -1,12 +1,9 @@
 .root {
-    width: 300px;
+    composes: sideBarColorOpen from '../../../common-ui/colors.css';
     height: auto;
-    min-width: 300px;
+    max-width: 200px;
+    min-width: 190px;
     min-height: 100vh;
-    background-color: #f7f7f7;
-    box-shadow: 2px 1px 1px #e2e2e2;
-    line-height: 2;
-    font-weight: 200;
 }
 
 .title {
@@ -16,6 +13,10 @@
     color: #666;
     padding-bottom: 10px;
     border-bottom: 1px solid #ccc;
+}
+
+.listElements {
+    composes: hoversidebaropen from '../../../common-ui/colors.css';
 }
 
 .icon {
@@ -34,13 +35,14 @@
     margin: 0;
     padding: 0;
     list-style: none;
+    line-height: 20px;
 }
 
 .navIcon {
     float: left;
-    margin: 0 10px;
+    margin: 0 16px 0 13px;
     font-size: 18px;
-    padding: 12px 0 10px 0;
+    padding: 6px 0 10px 0;
 }
 
 .navItem {
@@ -53,20 +55,24 @@
 }
 
 .navLink {
+    composes: menuItem from '../../../common-ui/colors.css';
     display: block;
     text-decoration: none;
-    font-size: 15px;
-    padding: 5px 0 5px 20px;
-    padding-left: 20px;
-    color: #494949;
+    font-size: 13px;
+    padding: 5px 5px;
     width: 100%;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 
     &.isActive {
-        color: white;
-        background-color: #3eb995;
+        color: #222;
+        font-weight: 600;
+        background-color: #e2e2e2;
         border-right: none;
     }
+}
+
+.nav li:first-of-type a {
+    font-size: 0.75rem;
 }
 
 .importSubItems {
@@ -78,7 +84,7 @@
 }
 
 .active {
-    color: #3db995;
+    color: #2ab98a;
 }
 
 .done {
