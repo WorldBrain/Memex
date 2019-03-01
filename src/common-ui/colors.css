@@ -49,7 +49,7 @@
 }
 
 .menuItem {
-	composes: h2Color;
+    color: #555;
 	font-weight: 400;
 }
 
@@ -93,6 +93,15 @@
     color: #222;
 }
 
+.itemActive {
+    color: #222;
+    font-weight: 600;
+}
+
+.hoverSidebarActive {
+    background-color: #e0e0de;
+}
+
 /* BOX SHADOW FOR TOOLTIPS */
 
 .boxShadow {
@@ -124,6 +133,7 @@
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
+    text-decoration: none;
 
     &:hover {
     	background-color: #5cd9a6;

@@ -15,10 +15,9 @@
     display: flex;
     background: #d7d7d7;
     height: 50px;
-    width: 335px;
+    width: 100%;
     align-items: center;
     position: relative;
-    padding-left: 12px;
 }
 
 .tick {

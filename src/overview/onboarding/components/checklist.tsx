@@ -49,7 +49,6 @@ class Checklist extends PureComponent<Props> {
                 <ChecklistItem
                     isChecked={this.props.isAnnotationChecked}
                     handleClick={this.props.handleAnnotationStage}
-                    iconClass="step1"
                     subtitle="Learn how to add highlights and notes to websites."
                 >
                     Make your first web annotation
@@ -57,7 +56,6 @@ class Checklist extends PureComponent<Props> {
                 <ChecklistItem
                     isChecked={this.props.isPowerSearchChecked}
                     handleClick={this.props.handlePowerSearchStage}
-                    iconClass="step2"
                     subtitle="Learn how to full-text search your browser history and
                     bookmarks."
                 >
@@ -66,7 +64,6 @@ class Checklist extends PureComponent<Props> {
                 <ChecklistItem
                     isChecked={this.props.isTaggingChecked}
                     handleClick={this.props.handleTaggingStage}
-                    iconClass="step3"
                     subtitle="Learn how to add some organisation to your web-research."
                 >
                     Tag & sort websites into collections
@@ -74,7 +71,6 @@ class Checklist extends PureComponent<Props> {
                 <ChecklistItem
                     isChecked={this.props.isBackupChecked}
                     handleClick={this.props.handleBackupStage}
-                    iconClass="step4"
                     subtitle="Learn how to backup your data to any cloud provider."
                 >
                     Backup your Memex data

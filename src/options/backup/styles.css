@@ -15,11 +15,11 @@
     font-weight: 600;
     font-size: 25px;
     margin-top: 0px;
+    margin-bottom: 3px;
 }
 
 .subtitle {
     composes: subTitleColor from '../../common-ui/colors.css';
-    margin-top: -20px;
     font-size: 0.8rem;
 }
 

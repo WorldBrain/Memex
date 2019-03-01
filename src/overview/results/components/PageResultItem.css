@@ -321,15 +321,17 @@
 .dragElement {
     text-decoration: none;
     display: none;
-    border: solid 2px #3eb995;
-    font-size: 0.9em;
-    padding: 5px;
+    border: solid 2px #5cd9a6;
+    border-radius: 4px;
+    font-size: 0.8rem;
     max-height: 50px;
-    max-width: 300px;
+    max-width: 330px;
     text-align: center;
-    font-weight: 800;
-    background: #3eb995;
+    font-weight: 500;
+    background: #5cd9a6;
     color: #fff;
     opacity: 1;
+    padding: 5px 10px;
     position: absolute;
+    margin-left: 25px;
 }

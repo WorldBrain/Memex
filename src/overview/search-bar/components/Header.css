@@ -11,7 +11,7 @@
     z-index: 2000;
     background-color: #fff;
     padding: 0 60px;
-    box-shadow: 0 2px 4px rgba(220, 220, 220, 0.7);
+    border-bottom: 1px solid #ebebeb;
 
     @media (max-width: 1000px) {
         justify-content: center;

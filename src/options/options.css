@@ -9,7 +9,6 @@ body {
 
 .root {
     font-size: 18px;
-    font-family: 'Inter';
     font-weight: 200;
     display: flex;
     flex-direction: row;
