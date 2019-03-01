@@ -16,6 +16,10 @@
     color: #5cd9a6;
 }
 
+.lightBlueBackground {
+    background-color: #83c9f4;
+}
+
 /* BACKGROUND COLORS */
 
 .backgroundLightMintGreen {
@@ -77,6 +81,14 @@
     border-radius: 5px;
 }
 
+.buttonRadiusSmall {
+    border-radius: 3px;
+}
+
+.borderRadiusBig {
+    border-radius: 6px;
+}
+
 .tooltipRadius {
     border-radius: 5px;
 }
@@ -104,10 +116,13 @@
 
 /* BOX SHADOW FOR TOOLTIPS */
 
-.boxShadow {
-    composes: tooltipRadius;
-    background: rgb(255, 255, 255);
+.borderColor {
     border: 1px solid #eae9e9;
+}
+
+.boxShadow {
+    composes: tooltipRadius borderColor;
+    background: rgb(255, 255, 255);
     box-shadow: 0px 3px 4px 2px #ebebeb;
 }
 

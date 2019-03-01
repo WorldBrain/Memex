@@ -14,7 +14,7 @@
 .createListForm {
     display: flex;
     background: #d7d7d7;
-    height: 50px;
+    height: 40px;
     width: 100%;
     align-items: center;
     position: relative;
@@ -22,10 +22,10 @@
 
 .tick {
     background-image: url('/img/tick.svg');
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
     float: right;
-    right: 8px;
+    right: 4px;
     position: absolute;
 
     &:hover {
@@ -39,8 +39,8 @@
     height: 21px;
     float: right;
     position: absolute;
-    right: 54px;
-    top: 17px;
+    right: 35px;
+    top: 12px;
 
     &:hover {
         background-color: #3eb995;
