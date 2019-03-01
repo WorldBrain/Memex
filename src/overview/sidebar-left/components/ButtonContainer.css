@@ -14,11 +14,7 @@
     display: flex !important; /* stylelint-disable-line declaration-no-important */
     justify-content: space-between;
     top: 0px;
-    width: 250px;
-    background-color: #fff;
-    border-width: 0 2px 1px 0;
-    border-style: solid;
-    border-color: #e1ece9;
+    width: 100%;
     z-index: 214748364;
     align-items: center;
     height: 45px;
@@ -29,18 +25,19 @@
 }
 
 .closeIcon {
-    background-image: url('/img/cross.svg');
+    background-image: url('/img/doubleArrow.svg');
     background-size: 15px;
     display: block;
-    margin-right: 5px;
+    margin-right: 9px;
     background-repeat: no-repeat;
-    width: 29px;
-    height: 29px;
-    background-position: 6.5px 6.5px;
-    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    background-position: center;
+    background-position-x: 2px;
+    border-radius: 3px;
+    margin-top: -9px;
 
     &:hover {
-        background-image: url('/img/cross.svg');
         background-color: #f0f0f0;
     }
 }
@@ -81,17 +78,13 @@
 }
 
 .clearFilters {
-    color: #767676;
-    padding: 3px 6px;
+    composes: nakedButton menuItem hoverColor from '../../../common-ui/colors.css';
     margin-left: 40px;
     height: 24px;
-    font-size: 1.1em;
+    padding: 4px 6px 2px 6px;
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
-
-    &:hover {
-        background-color: #efefef;
-        border-radius: 5%;
-    }
 }
 
 .filterEnabled {

@@ -1,14 +1,15 @@
 .tagname {
     color: #3eb995;
-    padding: 1px 6px 3px 6px;
-    border-radius: 5px;
+    padding: 2px 9px 3px 9px;
+    border-radius: 3px;
+    font-size: 13px;
 }
 
 .notExpanded {
-    background-color: #3eb995;
+    composes: lightBlueBackground from '../../../common-ui/colors.css';
     color: white;
-    margin-left: 5px;
-    max-width: 120px;
+    margin-left: 20px;
+    max-width: 300px;
     display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;

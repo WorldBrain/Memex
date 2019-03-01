@@ -92,71 +92,79 @@ class PageResultItem extends PureComponent<Props> {
                                 }
                             />
                         </div>
-                        <div className={styles.descriptionContainer}>
-                            <div
-                                className={styles.title}
-                                title={this.props.title}
-                            >
-                                {this.props.favIcon && (
-                                    <img
-                                        className={styles.favIcon}
-                                        src={this.props.favIcon}
-                                    />
-                                )}
-                                {this.props.title}
-                            </div>
-                            <div className={styles.url}>{this.props.url}</div>
-                            <div className={styles.time}>
-                                <div className={styles.displayTime}>
-                                    {' '}
-                                    {niceTime(this.props.displayTime)}{' '}
-                                </div>
-                                <span className={styles.tagList}>
-                                    {this.props.tagPills}
-                                </span>
-                                <div
-                                    className={styles.buttonsContainer}
-                                    onClick={e => e.preventDefault()}
+                        <div className={styles.infoContainer}> 
+                            <div className={styles.firstlineContainer}>
+                                    <div
+                                    className={styles.title}
+                                    title={this.props.title}
                                 >
-                                    <button
-                                        disabled={this.props.isDeleting}
-                                        className={classNames(
-                                            styles.button,
-                                            styles.trash,
-                                        )}
-                                        onClick={this.props.onTrashBtnClick}
-                                        title={
-                                            'Delete this page & all related content'
-                                        }
-                                    />
-                                    <button
-                                        className={classNames(
-                                            styles.button,
-                                            styles.tag,
-                                        )}
-                                        onClick={this.props.onTagBtnClick}
-                                        ref={this.props.setTagButtonRef}
-                                        title={'Add/View Tags'}
-                                    />
-                                    <button
-                                        className={classNames(
-                                            styles.button,
-                                            styles.comment,
-                                        )}
-                                        onClick={this.props.onCommentBtnClick}
-                                        title={
-                                            'Add/View Commments & Annotations'
-                                        }
-                                    />
-                                    <button
-                                        disabled={this.props.isDeleting}
-                                        className={this.bookmarkClass}
-                                        onClick={
-                                            this.props.onToggleBookmarkClick
-                                        }
-                                        title={'Bookmark this page'}
-                                    />
+                                    {this.props.favIcon && (
+                                        <img
+                                            className={styles.favIcon}
+                                            src={this.props.favIcon}
+                                        />
+                                    )}
+                                    <span className={styles.titleText}>
+                                    {this.props.title}
+                                    </span>
+                                    </div>
+                            </div>
+                            
+                            <div className={styles.url}>{this.props.url}</div>
+                            
+                            <div className={styles.detailsContainer}>
+                                <div className={styles.detailsBox}>
+                                    <div className={styles.displayTime}>
+                                        {' '}
+                                        {niceTime(this.props.displayTime)}{' '}
+                                    </div>
+                                    <div className={styles.tagList}>
+                                        {this.props.tagPills}
+                                    </div>
                                 </div>
+                                <div
+                                        className={styles.buttonsContainer}
+                                        onClick={e => e.preventDefault()}
+                                    >
+                                        <button
+                                            disabled={this.props.isDeleting}
+                                            className={classNames(
+                                                styles.button,
+                                                styles.trash,
+                                            )}
+                                            onClick={this.props.onTrashBtnClick}
+                                            title={
+                                                'Delete this page & all related content'
+                                            }
+                                        />
+                                        <button
+                                            className={classNames(
+                                                styles.button,
+                                                styles.tag,
+                                            )}
+                                            onClick={this.props.onTagBtnClick}
+                                            ref={this.props.setTagButtonRef}
+                                            title={'Add/View Tags'}
+                                        />
+                                        <button
+                                            className={classNames(
+                                                styles.button,
+                                                styles.comment,
+                                            )}
+                                            onClick={this.props.onCommentBtnClick}
+                                            title={
+                                                'Add/View Commments & Annotations'
+                                            }
+                                        />
+                                        <button
+                                            disabled={this.props.isDeleting}
+                                            className={this.bookmarkClass}
+                                            onClick={
+                                                this.props.onToggleBookmarkClick
+                                            }
+                                            title={'Bookmark this page'}
+                                        />
+                                    </div>
                             </div>
                         </div>
                     </a>

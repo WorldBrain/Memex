@@ -1,22 +1,25 @@
 .checklist {
     text-align: left;
-    margin: 25px 0 36px -10px;
+    display: flex;
+    flex-direction: row;
+    min-height: 60px;
+    margin: 25px 0 15px 0px;
+    align-items: center;
+    cursor: pointer;
 }
 
 .checklistText {
-    color: #1a2f58;
+    composes: h2Color from '../../../common-ui/colors.css';
     font-weight: 400;
     cursor: pointer;
-    font-size: 0.9375rem;
+    font-size: 0.93rem;
 }
 
 .subTitle {
-    font-size: 0.875rem;
-    margin-left: 3.7rem;
-    margin-top: 0.5rem;
+    composes: subTitleColor from '../../../common-ui/colors.css';
+    font-size: 0.75rem;
+    margin-top: 3px;
     cursor: pointer;
-    margin-right: 20px;
-    color: #bcc2bd;
 }
 
 .striked {
@@ -30,34 +33,52 @@
 }
 
 .icon {
-    display: inline-block;
-    width: 52px;
-    height: 52px;
-    margin-bottom: -2rem;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
     margin-right: 15px;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 52px;
-    vertical-align: bottom;
+    background-size: 40px;
     cursor: pointer;
+    opacity: 0.7;
+    background-image: url('/img/step_onboarding.svg');
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.doneIcon {
+    background-image: url('/img/doneIcon.svg');
+    opacity: 1;
 }
 
 .close {
     background-image: url('/img/cross_circle.svg');
 }
 
-.step1 {
-    background-image: url('/img/step_onboarding.svg');
-}
+@media only screen and (max-width: 820px) {
+    .checklistText {
+        font-weight: 400;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
 
-.step2 {
-    background-image: url('/img/step_onboarding.svg');
-}
+    .subTitle {
+        font-size: 0.7rem;
+        font-weight: 300;
+    }
 
-.step3 {
-    background-image: url('/img/step_onboarding.svg');
-}
+    .icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        background-size: 40px;
+    }
 
-.step4 {
-    background-image: url('/img/step_onboarding.svg');
+    .checklist {
+        min-height: 45px;
+        margin: 25px 0 15px 0px;
+    }
 }

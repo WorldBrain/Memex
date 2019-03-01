@@ -4,6 +4,7 @@
     "version": "0.3.3",
     "offline_enabled": true,
     "description": "The bookmarking tool that works like your brain: Annotate & Full-Text Search anything you've seen on the web.",
+    "update_url": "https://worldbrain.io/",
     "background": {
         "scripts": ["lib/browser-polyfill.js", "background.js"]
     },

@@ -3,28 +3,13 @@
 }
 
 .pageList {
+    composes: hoversidebaropen from '../../../../common-ui/colors.css';
     display: flex;
     align-items: center;
-    height: 40px;
-    color: #767676;
+    height: 30px;
     position: relative;
-    width: 250px;
-    transition: width 0.1s ease-in, background-color 100ms linear;
+    width: 100%;
     cursor: pointer;
-
-    &:hover {
-        background-color: #e5e5e5;
-        width: 248px;
-        overflow-x: unset;
-    }
-
-    & > .listName {
-        width: 250px;
-    }
-
-    &:hover .listName {
-        width: 170px;
-    }
 }
 
 .pageListDrag {
@@ -32,8 +17,12 @@
 }
 
 .filtered {
-    background-color: #e5e5e5;
-    font-weight: 600;
+    composes: itemActive hoverSidebarActive from '../../../../common-ui/colors.css';
+}
+
+.filtered div {
+    font-weight: bold;
+    color: #222;
 }
 
 .editButton {
@@ -92,11 +81,13 @@
 }
 
 .listName {
+    composes: menuItem from '../../../../common-ui/colors.css';
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0px 15px 2px 30px;
-    font-size: 1.4em;
+    padding: 0px 15px 0px 25px;
+    font-size: 0.75rem;
+    font-weight: 400;
     cursor: pointer;
     width: 100%;
 }

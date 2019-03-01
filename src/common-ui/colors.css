@@ -16,6 +16,10 @@
     color: #5cd9a6;
 }
 
+.lightBlueBackground {
+    background-color: #83c9f4;
+}
+
 /* BACKGROUND COLORS */
 
 .backgroundLightMintGreen {
@@ -49,7 +53,7 @@
 }
 
 .menuItem {
-	composes: h2Color;
+    color: #555;
 	font-weight: 400;
 }
 
@@ -77,6 +81,14 @@
     border-radius: 5px;
 }
 
+.buttonRadiusSmall {
+    border-radius: 3px;
+}
+
+.borderRadiusBig {
+    border-radius: 6px;
+}
+
 .tooltipRadius {
     border-radius: 5px;
 }
@@ -93,12 +105,24 @@
     color: #222;
 }
 
+.itemActive {
+    color: #222;
+    font-weight: 600;
+}
+
+.hoverSidebarActive {
+    background-color: #e0e0de;
+}
+
 /* BOX SHADOW FOR TOOLTIPS */
 
-.boxShadow {
-    composes: tooltipRadius;
-    background: rgb(255, 255, 255);
+.borderColor {
     border: 1px solid #eae9e9;
+}
+
+.boxShadow {
+    composes: tooltipRadius borderColor;
+    background: rgb(255, 255, 255);
     box-shadow: 0px 3px 4px 2px #ebebeb;
 }
 
@@ -124,6 +148,7 @@
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
+    text-decoration: none;
 
     &:hover {
     	background-color: #5cd9a6;
