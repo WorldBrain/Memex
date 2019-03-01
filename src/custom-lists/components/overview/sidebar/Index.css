@@ -25,10 +25,11 @@
 }
 
 .plus {
-    font-size: 2em;
+    font-size: 25px;
     font-weight: bold;
     cursor: pointer;
     margin-right: 5px;
+    margin-top: -4px;
 }
 
 .button {

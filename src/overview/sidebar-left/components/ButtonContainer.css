@@ -78,17 +78,13 @@
 }
 
 .clearFilters {
-    color: #767676;
-    padding: 3px 6px;
+    composes: nakedButton menuItem hoverColor from '../../../common-ui/colors.css';
     margin-left: 40px;
     height: 24px;
-    font-size: 1.1em;
+    padding: 4px 6px 2px 6px;
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
-
-    &:hover {
-        background-color: #efefef;
-        border-radius: 5%;
-    }
 }
 
 .filterEnabled {

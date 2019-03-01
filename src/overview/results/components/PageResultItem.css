@@ -38,7 +38,7 @@
     height: var(--height);
 
     &:hover {
-        box-shadow:  0px 32px 27px -30px #ebebeb; /*MAN Manual Adjustment necessary */
+        box-shadow: 0px 32px 27px -30px #ebebeb; /* MAN Manual Adjustment necessary */
     }
 
     &:focus {
@@ -46,29 +46,17 @@
         box-shadow: 0 3px 10px 1px rgba(217, 219, 221, 0.6);
     }
 
-    &:hover .trash {
-        opacity: 0.5;
-    }
-
-    &:hover .tag {
-        opacity: 0.5;
-    }
-
-    &:hover .notBookmark {
-        opacity: 0.5;
-    }
-
     &:hover .crossRibbon {
         display: block;
     }
 
-    &:hover .buttonsContainer {
-        display: flex;
+    &:hover .button {
+        opacity: 0.6;
     }
 
-    &:hover .title {
+  /*  &:hover .title {
         width: 80%;
-    }
+    } */
 }
 
 .root {
@@ -183,14 +171,14 @@
     composes: darkBlue from '../../../common-ui/colors.css';
     display: flex;
     flex-direction: row;
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 16px;
+    font-weight: 600;
     align-items: center;
     width: 97%;
     flex-basis: 95%;
 }
 
-.titleText{
+.titleText {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -211,7 +199,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 8px;
     align-items: center;
     max-width: 100%;
     margin-bottom: 8px;
@@ -222,6 +209,11 @@
     text-decoration: none;
 }
 
+.detailsBox {
+    display: flex;
+    align-items: center;
+}
+
 .buttonsContainer {
     display: flex;
     flex-direction: row;
@@ -230,15 +222,14 @@
     width: 120px;
     height: 30px;
     justify-content: flex-end;
-    margin-top: -5px;
-    display: none;
-    margin-right: -6px;
+    margin-top: 0px;
+    margin-right: -2px;
 }
 
 .detailsContainer {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     margin-top: -27px;
     height: 30px;
@@ -254,23 +245,24 @@
     display: inline;
     border: none;
     background-color: transparent;
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
     background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
     background-position: center;
-    background-size: 18px;
-    opacity: 0.4;
+    background-size: 17px;
     border-radius: 3px;
+    opacity: 0.2;
+    margin-left: 4px;
 
     &:hover {
-        opacity: 1;
+        opacity: 0.75;
     }
 }
 
 .trash {
-    background-image: url('/img/trash.svg');    
+    background-image: url('/img/trash.svg');
 
     &:hover {
     background-image: url('/img/trash_blue_full.svg');
@@ -282,25 +274,25 @@
 
     &:hover {
         background-image: url('/img/comment_blue_full.svg');
-        opacity: 0.6;
     }
 }
 
 .bookmark {
     background-image: url('/img/star_blue_full.svg');
     opacity: 0.8;
+
+    &:hover {
+        opacity: 1;
+    }
 }
 
 .notBookmark {
     background-image: url('/img/star_blue_empty.svg');
-
-    &:hover {
-        background-image: url('/img/star_blue_full.svg');
-    }
 }
 
 .tag {
     background-image: url('/img/tag_blue_empty.svg');
+    margin-left: 6px;
 
     &:hover {
         background-image: url('/img/tag_blue.svg');

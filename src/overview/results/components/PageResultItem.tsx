@@ -108,7 +108,21 @@ class PageResultItem extends PureComponent<Props> {
                                     {this.props.title}
                                     </span>
                                     </div>
-                                    <div
+                            </div>
+                            
+                            <div className={styles.url}>{this.props.url}</div>
+                            
+                            <div className={styles.detailsContainer}>
+                                <div className={styles.detailsBox}>
+                                    <div className={styles.displayTime}>
+                                        {' '}
+                                        {niceTime(this.props.displayTime)}{' '}
+                                    </div>
+                                    <div className={styles.tagList}>
+                                        {this.props.tagPills}
+                                    </div>
+                                </div>
+                                <div
                                         className={styles.buttonsContainer}
                                         onClick={e => e.preventDefault()}
                                     >
@@ -150,18 +164,6 @@ class PageResultItem extends PureComponent<Props> {
                                             }
                                             title={'Bookmark this page'}
                                         />
-                                    </div>
-                            </div>
-                            
-                            <div className={styles.url}>{this.props.url}</div>
-                            
-                            <div className={styles.detailsContainer}>
-                                    <div className={styles.displayTime}>
-                                        {' '}
-                                        {niceTime(this.props.displayTime)}{' '}
-                                    </div>
-                                    <div className={styles.tagList}>
-                                        {this.props.tagPills}
                                     </div>
                             </div>
                         </div>
