@@ -1,5 +1,7 @@
 import React, { PureComponent } from 'react'
+import SVGInject from '@iconfu/svg-inject'
 import OnboardingChecklist from './checklist-container'
+import { PrivacyImage } from './../../../Icons'
 
 const styles = require('./onboarding-box.css')
 
@@ -9,15 +11,17 @@ class OnboardingBox extends PureComponent {
             <React.Fragment>
                 <div className={styles.container}>
                     <div className={styles.leftParent}>
-                        <p className={styles.welcome}>
-                            Welcome to your
-                        </p>
-                        <div className={styles.logo}/>
+                        <p className={styles.welcome}>Welcome to your</p>
+                        <div className={styles.logo} />
                         <p className={styles.text}>
-                            The all-in-one tool to get on top of
-                            your online chaos.
+                            The all-in-one tool to get on top of your online
+                            chaos.
                         </p>
-                        <div className={styles.privacyImage} />
+                        <img
+                            className={styles.privacyImage}
+                            src={PrivacyImage}
+                            onLoad={SVGInject(PrivacyImage)}
+                        />
                     </div>
                     <div className={styles.rightParent}>
                         <OnboardingChecklist />

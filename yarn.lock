@@ -179,6 +179,11 @@
   resolved "https://registry.yarnpkg.com/@emotion/utils/-/utils-0.7.1.tgz#e44e596d03c9f16ba3b127ad333a8a072bcb5a0a"
   integrity sha1-5E5ZbQPJ8WujsSetMzqKByvLWgo=
 
+"@iconfu/svg-inject@1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@iconfu/svg-inject/-/svg-inject-1.2.2.tgz#04d19d726cb77e68faf16fe808506241d5d76f74"
+  integrity sha512-T+zCX70Y1uT+M9/1oREzJfy7NlceTeFcQk1BAM6Duha8uYscaLJHTOvWTG7nvlWzjL4P5LGMFVMsf9BW1oSVPA==
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"

@@ -59,7 +59,8 @@ p {
 .privacyImage {
     background-repeat: no-repeat;
     display: flex;
-    background-image: url('/img/privacy.svg');
+
+    /* background-image: url('/img/privacy.svg'); */
     fill: white;
     background-size: contain;
     width: 65%;
@@ -148,4 +149,3 @@ p {
         margin-right: auto;
     }
 }
-
