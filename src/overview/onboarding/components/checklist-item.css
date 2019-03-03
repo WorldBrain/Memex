@@ -42,7 +42,6 @@
     background-size: 40px;
     cursor: pointer;
     opacity: 0.7;
-    background-image: url('/img/step_onboarding.svg');
 
     &:hover {
         opacity: 1;
@@ -50,7 +49,6 @@
 }
 
 .doneIcon {
-    background-image: url('/img/doneIcon.svg');
     opacity: 1;
 }
 
