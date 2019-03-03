@@ -124,6 +124,10 @@
     composes: tooltipRadius borderColor;
     background: rgb(255, 255, 255);
     box-shadow: 0px 3px 4px 2px #ebebeb;
+
+    &:hover {
+        box-shadow: 0px 32px 27px -30px #ebebeb;
+    }
 }
 
 /* CALL TO ACTION BUTTONS */
