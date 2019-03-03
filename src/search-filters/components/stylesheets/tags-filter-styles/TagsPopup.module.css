@@ -1,0 +1,23 @@
+.tagsPopup {
+    position: absolute;
+    width: 237px;
+    height: 250px;
+    background: #fff;
+    border: 1px solid #d5d8d6;
+    box-sizing: border-box;
+    border-radius: 6px;
+}
+
+.searchField {
+    margin-left: 55px;
+    border-width: 0px;
+}
+
+.searchField:focus {
+    outline: 0px;
+}
+
+.searchIcon {
+    margin-left: 31px;
+    margin-top: 24px;
+}
