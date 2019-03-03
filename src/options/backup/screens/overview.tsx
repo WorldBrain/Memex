@@ -65,6 +65,12 @@ export default class OverviewContainer extends React.Component<Props> {
         })
     }
 
+    onPaymentRequested = e => {
+        e.preventDefault()
+        const { billingPeriod } = this.state
+        this.props.onPaymentRequested({ billingPeriod })
+    }
+
     render() {
         if (!this.state.backupTimes) {
             return <LoadingBlocker />
@@ -165,7 +171,7 @@ export default class OverviewContainer extends React.Component<Props> {
                             >
                                 Worry-free. Automatically backs up your data
                                 every 15 minutes.
-                            </span>                            
+                            </span>
                             {this.state.showPricing ? (
                                 <div className={localStyles.pricing}>
                                     <AutomaticPricing
@@ -175,29 +181,33 @@ export default class OverviewContainer extends React.Component<Props> {
                                             this.setState({ billingPeriod })
                                         }
                                     />
-                                {this.state.showPricing &&
-                                this.state.billingPeriod ? (
-                                    <div className={localStyles.payConfirm}>
-                                        <SmallButton
-                                            color="green"
-                                            onClick={() =>
-                                                this.props.onPaymentRequested(
-                                                    this.state.billingPeriod,
-                                                )
-                                            }
-                                        >
-                                            Pay now
-                                        </SmallButton>
-                                        <span
-                                                className={localStyles.cancelButton}
-                                                onClick={() =>
-                                                this.setState({ showPricing: false })}
+                                    {this.state.showPricing &&
+                                    this.state.billingPeriod ? (
+                                        <div className={localStyles.payConfirm}>
+                                            <SmallButton
+                                                color="green"
+                                                onClick={
+                                                    this.onPaymentRequested
+                                                }
                                             >
-                                            Cancel
-                                        </span>
-                                    </div>
-                                    ) : null} 
-                            </div>) : null}
+                                                Pay now
+                                            </SmallButton>
+                                            <span
+                                                className={
+                                                    localStyles.cancelButton
+                                                }
+                                                onClick={() =>
+                                                    this.setState({
+                                                        showPricing: false,
+                                                    })
+                                                }
+                                            >
+                                                Cancel
+                                            </span>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : null}
                             <p className={styles.optionLine}>
                                 <span className={styles.name}>
                                     Backup Location
