@@ -3,9 +3,11 @@
     align-items: center;
     justify-content: flex-end;
     width: 100%;
+    padding: 5px;
 }
 
 .commonIcon {
+    composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
     box-sizing: border-box;
     background-repeat: no-repeat;
     background-size: 18px;
@@ -15,27 +17,24 @@
     background-position: center;
     border: none;
     padding: 3px;
-    width: 23px;
-    height: 23px;
+    width: 25px;
+    height: 25px;
     opacity: 0.7;
     margin: 0 3px;
 }
 
 .editIcon {
-    composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
     background-image: url('/img/edit.svg');
-    background-position-y: 2px;
+    background-position-y: 3px;
 }
 
 .trashIcon {
-    composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
     background-image: url('/img/trash.svg');
     background-size: 17px;
 }
 
 .shareIcon {
     background-size: 17px;
-    composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
     background-image: url('/img/share.svg');
 }
 
@@ -48,11 +47,7 @@
 }
 
 .goToPageIcon {
-    background-image: url('/img/gotopage.svg');
-    background-size: 30px;
-    padding-top: 5px;
-
-    &:hover {
-        background-color: #efefef;
-    }
+    background-image: url('/img/open.svg');
+    background-position-y: 4px;
+    background-size: 17px;
 }

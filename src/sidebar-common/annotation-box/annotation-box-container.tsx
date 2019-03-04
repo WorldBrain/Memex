@@ -199,6 +199,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                     [styles.isHovered]: this.props.isHovered,
                     [styles.isClickable]: isClickable,
                     [styles.isJustComment]: mode !== 'edit' && !this.props.body,
+                    [styles.isEdit]: mode === 'edit',
                 })}
                 onClick={isClickable ? this.props.handleGoToAnnotation : noop}
                 ref={this._setBoxRef}

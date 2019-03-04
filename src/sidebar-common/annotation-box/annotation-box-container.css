@@ -2,16 +2,23 @@
 @import url('/common-ui/colors.css');
 
 .container {
-    composes: boxShadow h2Color borderColor borderRadiusBig from '../../common-ui/colors.css';
-    box-shadow: none;
+    composes: boxShadow h2Color buttonRadiusSmall from '../../common-ui/colors.css';
     box-sizing: border-box;
-    width: 95.3%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
     font-size: 13px;
     margin: 10px 0 0 0;
+    cursor: pointer;
 
     &.isActive {
         border-color: #3db994b8;
         box-shadow: 0px 0px 5px 1px #00000050;
+    }
+
+    &.isEdit:hover {
+        background-color: white;
+        cursor: default;
     }
 }
 

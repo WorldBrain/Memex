@@ -141,12 +141,11 @@ class CommentBoxForm extends React.Component<Props, State> {
                     onKeyDown={this._handleTextAreaKeyDown}
                     ref={this._setTextAreaRef}
                 />
-                <br />
-
                 {/* Tags for the current annotation/comment. */}
                 <div
                     onKeyDown={this._handleTagInputKeyDown}
                     ref={this._setTagInputRef}
+                    className={styles.tagCommentEditor}
                 >
                     <TagInputContainer
                         env={env}

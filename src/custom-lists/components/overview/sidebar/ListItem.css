@@ -26,37 +26,32 @@
 }
 
 .editButton {
-    background-image: url('/img/edit_empty.svg');
+    composes: hoverColor buttonRadiusSmall from '../../../../common-ui/colors.css';
+    background-image: url('/img/edit.svg');
     width: 19px;
     height: 19px;
     visibility: hidden;
-    animation: appear 0.2s forwards;
     opacity: 0.4;
     margin-top: 1px;
     margin-right: 3px;
-
-    &:hover {
-        background-image: url('/img/edit_full.svg');
-    }
+    animation: appear 0.2s forwards;
 }
 
 .shareButton {
-    background-image: url('/img/share_empty.svg');
+    composes: hoverColor buttonRadiusSmall from '../../../../common-ui/colors.css';
+    background-image: url('/img/share.svg');
     width: 20px;
     height: 20px;
     visibility: hidden;
-    animation: appear 0.2s forwards;
     opacity: 0.4;
     margin-top: 1px;
     margin-right: 10px;
     margin-left: 5px;
-
-    &:hover {
-        background-image: url('/img/share_full.svg');
-    }
+    animation: appear 0.2s forwards;
 }
 
 .deleteButton {
+    composes: hoverColor buttonRadiusSmall from '../../../../common-ui/colors.css';
     background-image: url('/img/trash.svg');
     width: 20px;
     height: 20px;
@@ -64,10 +59,6 @@
     opacity: 0.4;
     margin-left: 7px;
     animation: appear 0.2s forwards;
-
-    &:hover {
-        background-image: url('/img/trash_blue_full.svg');
-    }
 }
 
 .button {

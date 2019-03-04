@@ -6,8 +6,7 @@
     border-top: none;
     word-wrap: break-word;
     font-size: 14px;
-    width: 95%;
-    margin-left: 8px;
+    margin: 0 15px;
     box-sizing: border-box;
 
     &:hover,
@@ -53,12 +52,11 @@
 
 .summaryTagContainer {
     font-family: 'Inter';
-    font-size: 12px;
+    font-size: 14px;
     display: flex;
     justify-content: space-around;
     padding-bottom: 4px;
     background: white;
-    width: 94.3%;
     margin-bottom: 16px;
     margin-left: 8px;
 }
@@ -68,17 +66,11 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px dashed #d2d2d28c;
-    padding: 0px 6px;
+    padding: 0px 10px;
     height: 39px;
     margin-bottom: 0;
     background-color: #f7f7f7;
-    width: 95%;
-    margin-left: 8px;
     box-sizing: border-box;
-
-    &.commentBox {
-        width: 95%;
-    }
 
     & > i {
         color: #3eb995;
@@ -89,7 +81,6 @@
 }
 
 .search {
-    width: 90%;
     font-size: 14px;
     font-weight: 500;
     padding-left: 5px;
@@ -105,7 +96,7 @@
     }
 
     &::placeholder {
-        color: #4a4a4a;
+        color: #888;
     }
 
     &:focus {
@@ -135,5 +126,4 @@
 
 .tagDivForFilter {
     z-index: 1;
-    width: 99.7%;
 }

@@ -1,9 +1,8 @@
 .tagHolder {
-    font-size: 14px;
+    font-size: 13px;
+    margin: 0 5px;
     font-weight: 200;
-    padding: 5px;
-    width: 95%;
-    margin-left: 8px;
+    padding: 10px;
     border: none;
     margin-bottom: 17px;
     background-color: #f7f7f7;
@@ -14,10 +13,7 @@
     justify-content: flex-start;
     align-items: center;
     box-sizing: border-box;
-
-    & > * {
-        font-family: 'Inter';
-    }
+    cursor: pointer;
 }
 
 .tag {
@@ -32,10 +28,9 @@
 
 .placeholder {
     display: inline-block;
-    margin-left: 3px;
-    color: #4a4a4a;
-    font-weight: 500;
-    font-family: 'Lato';
+    color: #888;
+    font-weight: 400;
+    font-style: italic;
 }
 
 .plus {
@@ -50,7 +45,6 @@
 .tagsLeft {
     font-weight: 800;
     color: #888;
-    font-family: 'Inter';
 }
 
 .cross {
