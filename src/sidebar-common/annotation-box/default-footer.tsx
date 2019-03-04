@@ -47,14 +47,6 @@ const DefaultFooter = ({
                     shareIconClickHandler()
                 }}
             />
-            <button
-                className={cx(styles.commonIcon, styles.replyIcon)}
-                title="Reply to this note"
-                onClick={e => {
-                    e.stopPropagation()
-                    replyIconClickHandler()
-                }}
-            />
         </div>
         <div>
             {displayGoToAnnotation && (

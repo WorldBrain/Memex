@@ -1,4 +1,4 @@
-.annotationBoxDefaultFooter {
+  .annotationBoxDefaultFooter {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -15,33 +15,28 @@
     background-position: center;
     border: none;
     padding: 3px;
-    width: 28px;
-    height: 28px;
+    width: 23px;
+    height: 23px;
     opacity: 0.7;
+    margin: 0 3px;
 }
 
 .editIcon {
-    background-image: url('/img/edit_empty.svg');
-
-    &:hover {
-        background-image: url('/img/edit_full.svg');
-    }
+    composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
+    background-image: url('/img/edit.svg');
+    background-position-y: 2px;
 }
 
 .trashIcon {
+    composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
     background-image: url('/img/trash.svg');
-
-    &:hover {
-        background-image: url('/img/trash_blue_full.svg');
-    }
+    background-size: 17px;
 }
 
 .shareIcon {
-    background-image: url('/img/share_empty.svg');
-
-    &:hover {
-        background-image: url('/img/share_full.svg');
-    }
+    background-size: 17px;
+    composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
+    background-image: url('/img/share.svg');
 }
 
 .replyIcon {

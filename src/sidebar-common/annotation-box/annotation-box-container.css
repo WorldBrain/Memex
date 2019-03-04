@@ -1,4 +1,5 @@
 @import url('/fonts/Inter/inter.css');
+@import url('/common-ui/colors.css');
 
 .container {
     composes: boxShadow h2Color borderColor borderRadiusBig from '../../common-ui/colors.css';
@@ -45,5 +46,8 @@
 }
 
 .highlightText {
-    background-color: yellow;
+    composes: backgroundLightMintGreen titleColor from '../../common-ui/colors.css';
+    padding: 2px 0;
+    line-height: 22px;
+    font-style: normal;
 }
