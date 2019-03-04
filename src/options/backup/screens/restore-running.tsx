@@ -11,6 +11,7 @@ export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
                 cancel: 'cancelRestore',
                 pause: 'pauseRestore',
                 resume: 'resumeRestore',
+                sendNotif: 'sendNotification',
             }}
             eventMessageName="restore-event"
             preparingStepLabel="Preparing restore"
@@ -47,7 +48,8 @@ function renderSuccessMessage() {
         <p className={styles.header2}>
             <strong>RESTORE SUCCESSFUL: </strong>
             <p className={styles.subname}>
-                Return to <a href="#/overview">the dashboard</a> to search, organise and annotate. 
+                Return to <a href="#/overview">the dashboard</a> to search,
+                organise and annotate.
             </p>
         </p>
     )

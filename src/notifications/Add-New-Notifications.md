@@ -1,10 +1,10 @@
-# Add New Notification steps
+# Add New Notification for Update steps
 
 Go to the `notifications.ts` file
 
 Update the `releaseTime`, set this as current unix time, You can get by `Date.now()`
 
-Now go to the NOTIFS array and add the notification content here
+Now go to the UPDATE_NOTIFS array and add the notification content here
 
 The mandtory fields of notification
 
@@ -42,3 +42,11 @@ key: If the button is of action type then add the key when the data will change 
 ```
 
 For more information you can see the types in the `types.ts`
+
+# Add new Notifications for Event steps
+
+Go to the `notifications.ts` file
+
+Go to EVENT_NOTIFS object.
+
+Add a new object with the key as the notification id and the value similiar as adding an object with the fields as mentioned above.

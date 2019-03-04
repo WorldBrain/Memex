@@ -31,6 +31,9 @@ export default class NotificationBackground {
             fetchNotifById: id => {
                 return this.fetchNotifById(id)
             },
+            dispatchNotification: notification => {
+                return this.dispatchNotification(notification)
+            },
         })
     }
 
@@ -61,12 +64,18 @@ export default class NotificationBackground {
         return this.storage.fetchNotifById(id)
     }
 
+    async dispatchNotification(notifId) {
+        await this.storage.dispatchNotification(
+            notifications.EVENT_NOTIFS[notifId],
+        )
+    }
+
     async deliverStaticNotifications() {
         const lastReleaseTime = (await browser.storage.local.get(
             NotificationBackground.LAST_NOTIF_TIME,
         ))[NotificationBackground.LAST_NOTIF_TIME]
 
-        for (let notification of notifications.NOTIFS) {
+        for (let notification of notifications.UPDATE_NOTIFS) {
             if (notification.system) {
                 if (
                     !lastReleaseTime ||
