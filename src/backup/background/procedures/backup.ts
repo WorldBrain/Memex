@@ -6,6 +6,7 @@ import BackupStorage, { LastBackupStorage } from '../storage'
 import { BackupBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
+import { timingSafeEqual } from 'crypto'
 const last = require('lodash/last')
 const pickBy = require('lodash/pickBy')
 
@@ -147,7 +148,6 @@ export default class BackupProcedure {
                 })
                 .catch(e => {
                     this.running = false
-
                     if (process.env.NODE_ENV === 'production') {
                         const raven = AllRaven['default']
                         raven.captureException(e)

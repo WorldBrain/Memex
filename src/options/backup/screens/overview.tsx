@@ -65,12 +65,6 @@ export default class OverviewContainer extends React.Component<Props> {
         })
     }
 
-    onPaymentRequested = e => {
-        e.preventDefault()
-        const { billingPeriod } = this.state
-        this.props.onPaymentRequested({ billingPeriod })
-    }
-
     render() {
         if (!this.state.backupTimes) {
             return <LoadingBlocker />
@@ -200,8 +194,11 @@ export default class OverviewContainer extends React.Component<Props> {
                                         <div className={localStyles.payConfirm}>
                                             <SmallButton
                                                 color="green"
-                                                onClick={
-                                                    this.onPaymentRequested
+                                                onClick={() =>
+                                                    this.props.onPaymentRequested(
+                                                        this.state
+                                                            .billingPeriod,
+                                                    )
                                                 }
                                             >
                                                 Pay now

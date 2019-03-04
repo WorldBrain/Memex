@@ -60,6 +60,7 @@ const backupModule = new backup.BackupBackgroundModule({
     lastBackupStorage: new backupStorage.LocalLastBackupStorage({
         key: 'lastBackup',
     }),
+    notifications,
 })
 
 backupModule.setBackendFromStorage()

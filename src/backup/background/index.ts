@@ -1,6 +1,7 @@
 // tslint:disable:no-console
 import Queue, { Options as QueueOpts } from 'queue'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
+import { setLocalStorage } from 'src/util/storage'
 import { StorageManager } from '../../search/types'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
@@ -10,6 +11,7 @@ import estimateBackupSize from './estimate-backup-size'
 import BackupProcedure from './procedures/backup'
 import { BackupRestoreProcedure } from './procedures/restore'
 import { ProcedureUiCommunication } from 'src/backup/background/procedures/ui-communication'
+import NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
 
 export * from './backend'
@@ -34,22 +36,26 @@ export class BackupBackgroundModule {
     automaticBackupTimeout?: any
     automaticBackupEnabled?: boolean
     scheduledAutomaticBackupTimestamp?: number
+    notifications: NotificationBackground
 
     constructor({
         storageManager,
         lastBackupStorage,
         createQueue = Queue,
         queueOpts = { autostart: true, concurrency: 1 },
+        notifications,
     }: {
         storageManager: StorageManager
         lastBackupStorage: LastBackupStorage
         createQueue?: typeof Queue
         queueOpts?: QueueOpts
+        notifications: NotificationBackground
     }) {
         this.storageManager = storageManager
         this.storage = new BackupStorage({ storageManager })
         this.lastBackupStorage = lastBackupStorage
         this.changeTrackingQueue = createQueue(queueOpts)
+        this.notifications = notifications
     }
 
     setupRemoteFunctions() {
@@ -136,9 +142,10 @@ export class BackupBackgroundModule {
                     return this.backendLocation
                 },
                 isBackupAuthenticated: async () => {
-                    // Check if restoreProcedure's backend is present.
-                    // Restore's backend is only present during restore.
-                    const backend = this.restoreProcedure
+                    let backend = null
+                    /* Check if restoreProcedure's backend is present. 
+                        Restore's backend is only present during restore. */
+                    backend = this.restoreProcedure
                         ? this.restoreProcedure.backend
                         : this.backend
 
@@ -168,6 +175,17 @@ export class BackupBackgroundModule {
                         this.automaticBackupCheck = Promise.resolve(
                             override === 'true',
                         )
+                        // Send a notification stating that the auto backup has expired
+                        this.notifications.dispatchNotification(
+                            'auto_backup_expired',
+                        )
+                        // Set the message of backupStatus stating the expiration of auto backup
+                        await setLocalStorage('backupStatus', {
+                            state: 'fail',
+                            id: 'auto_backup_expired',
+                            message:
+                                'Your Memex subscription has expired. Backups need to be done manually again.',
+                        })
                     } else {
                         await this.checkAutomaticBakupEnabled()
                     }
@@ -177,10 +195,16 @@ export class BackupBackgroundModule {
                 isAutomaticBackupEnabled: async () => {
                     return this.isAutomaticBackupEnabled()
                 },
+                sendNotification: async (id: string) => {
+                    const errorId = await this.backend.sendNotificationOnFailure(
+                        id,
+                        this.notifications,
+                        () => this.estimateInitialBackupSize(),
+                    )
+                    return errorId
+                },
                 estimateInitialBackupSize: () => {
-                    return estimateBackupSize({
-                        storageManager: this.storageManager,
-                    })
+                    return this.estimateInitialBackupSize()
                 },
                 setBackupBlobs: (info, saveBlobs) => {
                     localStorage.setItem('backup.save-blobs', saveBlobs)
@@ -199,6 +223,11 @@ export class BackupBackgroundModule {
         )
     }
 
+    estimateInitialBackupSize() {
+        return estimateBackupSize({
+            storageManager: this.storageManager,
+        })
+    }
     async setBackendFromStorage() {
         this.backend = await this.backendSelect.restoreBackend()
         if (this.backend) {

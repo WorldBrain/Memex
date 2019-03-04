@@ -7,6 +7,7 @@ import { Link } from 'react-router'
 
 import { OutLink } from '../../../common-ui/containers'
 import InboxButton from '../../../notifications/components/InboxButton'
+import BackupStatus from '../../../notifications/components/BackupStatusContainer'
 import { OVERVIEW_URL } from '../../../constants'
 import DateRangeSelection from './DateRangeSelection'
 
@@ -38,6 +39,8 @@ class Header extends PureComponent<Props> {
         searchPlaceholder: 'Search keywords and/or use # to filter by tag',
         pricingUrl: 'https://worldbrain.io/pricing',
         settingsIconUrl: '/img/settings.svg',
+        checkedIcon: 'img/checked_green.svg',
+        crossIcon: 'img/cross.svg',
         settingsRoute: '/settings',
         overviewUrl: OVERVIEW_URL,
     }
@@ -80,6 +83,13 @@ class Header extends PureComponent<Props> {
                     </div>
                 </div>
                 <div className={styles.links}>
+                    <BackupStatus />
+                    <InboxButton
+                        toggleInbox={this.props.toggleInbox}
+                        showInbox={this.props.showInbox}
+                        unreadNotifCount={this.props.unreadNotifCount}
+                        showUnreadCount={this.props.showUnreadCount}
+                    />
                     <OutLink
                         className={styles.upgrade}
                         to={this.props.pricingUrl}

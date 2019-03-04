@@ -1,0 +1,65 @@
+.overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 50px;
+    right: 65px;
+    width: 282px;
+    min-height: 166px;
+    z-index: 99999;
+    background: white;
+    composes: borderRadiusBig boxShadow from '../colors.css';
+    composes: borderColor from '../colors.css';
+    cursor: pointer;
+
+    /* &:disabled,
+    &[disabled] {
+        cursor: default;
+    } */
+}
+
+.backup {
+    font-size: 15px;
+    padding: 10px 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-content: center;
+}
+
+.icon {
+    height: 20px;
+    width: 20px;
+    background-size: 20px;
+    background-position: center;
+}
+
+.checkedIcon {
+    composes: icon;
+}
+
+.crossIcon {
+    composes: icon;
+    color: red;
+}
+
+.description {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.descInfo {
+    font-size: 15px;
+    padding: 20px;
+}
+
+.button {
+    margin-bottom: 10px;
+}

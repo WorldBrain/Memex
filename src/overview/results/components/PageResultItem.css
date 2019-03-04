@@ -45,7 +45,7 @@
         opacity: 0.6;
     }
 
-  /*  &:hover .title {
+    /*  &:hover .title {
         width: 80%;
     } */
 }
@@ -229,7 +229,6 @@
 .displayTime {
     font-size: 12px;
     color: #c1c1c1;
-    min-width: fit-content;
 }
 
 .button {
@@ -250,6 +249,10 @@
 
 .trash {
     background-image: url('/img/trash.svg');
+
+    &:hover {
+        background-image: url('/img/trash_blue_full.svg');
+    }
 }
 
 .comment {
@@ -279,7 +282,7 @@
 .tagList {
     display: flex;
     flex-grow: 2;
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 .isDeleting {
