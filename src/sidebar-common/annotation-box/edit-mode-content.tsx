@@ -7,6 +7,7 @@ import * as constants from '../comment-box/constants'
 const styles = require('./edit-mode-content.css')
 
 interface Props {
+    env?: 'inpage' | 'overview'
     comment?: string
     tags: string[]
     handleCancelOperation: () => void
@@ -75,6 +76,7 @@ class EditModeContent extends React.Component<Props, State> {
         } else if (e.key === 'Tab' && !e.shiftKey) {
             this._setTagInputActive(true)
         } else if (
+            this.props.env === 'inpage' &&
             !(e.ctrlKey || e.metaKey) &&
             /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
         ) {
@@ -144,6 +146,7 @@ class EditModeContent extends React.Component<Props, State> {
 
                 <div onKeyDown={this._handleTagInputKeydown}>
                     <TagInput
+                        env={this.props.env}
                         tags={this.state.tagsInput}
                         isTagInputActive={this.state.isTagInputActive}
                         setTagInputActive={this._setTagInputActive}

@@ -107,7 +107,7 @@ class Sidebar extends React.Component<Props> {
                         handleAddCommentBtnClick={handleAddCommentBtnClick}
                     />
 
-                    {showCommentBox && <CommentBoxContainer />}
+                    {showCommentBox && <CommentBoxContainer env={env} />}
 
                     {isLoading ? (
                         <Loader />

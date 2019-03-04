@@ -23,7 +23,9 @@ interface DispatchProps {
     cancelComment: ClickHandler<HTMLElement>
 }
 
-interface OwnProps {}
+interface OwnProps {
+    env?: 'inpage' | 'overview'
+}
 
 type Props = StateProps & DispatchProps & OwnProps
 
@@ -39,6 +41,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
 
     render() {
         const {
+            env,
             anchor,
             commentText,
             handleCommentTextChange,
@@ -50,6 +53,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
                 {!!anchor && <AnnotationHighlight anchor={anchor} />}
 
                 <CommentBoxForm
+                    env={env}
                     commentText={commentText}
                     handleCommentTextChange={handleCommentTextChange}
                     saveComment={this.save}

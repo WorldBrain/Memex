@@ -244,6 +244,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                     />
                 ) : (
                     <EditModeContent
+                        env={this.props.env}
                         comment={this.props.comment}
                         tags={this.props.tags}
                         handleCancelOperation={this._handleCancelOperation}
