@@ -3,18 +3,21 @@ import { ContentTypes, AnnotSearchParams, AnnotPage } from './types'
 import { Page } from '..'
 import { SearchParams as OldSearchParams } from '../types'
 
-export const pageSearchOnly = (flags: ContentTypes) =>
-    flags.pages && !flags.highlights && !flags.notes
+export const contentTypeChecks = {
+    pagesOnly: (flags: ContentTypes) =>
+        flags.pages && !flags.highlights && !flags.notes,
+    annotsOnly: (flags: ContentTypes) =>
+        !flags.pages && (flags.highlights || flags.notes),
+    combined: (flags: ContentTypes) =>
+        flags.pages && (flags.highlights || flags.notes),
+    noop: (flags: ContentTypes) =>
+        !flags.pages && !flags.highlights && !flags.notes,
+}
 
-export const annotSearchOnly = (flags: ContentTypes) =>
-    !flags.pages && (flags.highlights || flags.notes)
-
-export const reshapeParamsForOldSearch = (
-    params: AnnotSearchParams,
-): OldSearchParams => ({
+export const reshapeParamsForOldSearch = (params): OldSearchParams => ({
     lists: params.collections,
     bookmarks: params.bookmarksOnly,
-    domains: params.domainsInc,
+    domains: params.domains,
     domainsExclude: params.domainsExc,
     tags: params.tagsInc,
     terms: params.termsInc,

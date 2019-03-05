@@ -7,7 +7,7 @@ import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { PageSearchParams, AnnotSearchParams, AnnotPage } from './types'
-import { annotSearchOnly, pageSearchOnly } from './utils'
+import { contentTypeChecks } from './utils'
 import { Annotation } from 'src/direct-linking/types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 
@@ -41,7 +41,7 @@ export default class SearchBackground {
     static shapePageResult(results, limit: number) {
         return {
             resultsExhausted: results.length < limit,
-            totalCount: results.length,
+            totalCount: null, // TODO: try to get this implemented
             docs: results,
         }
     }
@@ -131,7 +131,7 @@ export default class SearchBackground {
             domainsInc,
             domainsExc,
             tagsInc,
-            collections,
+            lists,
             contentTypes = { notes: true, highlights: true, pages: true },
             skip = 0,
             limit = 10,
@@ -145,7 +145,7 @@ export default class SearchBackground {
             .filterDomains(domainsInc)
             .filterExcDomains(domainsExc)
             .filterTags(tagsInc)
-            .filterLists(collections)
+            .filterLists(lists)
             .get()
 
         if (qb.isBadTerm && !ignoreBadSearch) {
@@ -226,22 +226,26 @@ export default class SearchBackground {
         contentTypes,
         ...params
     }: PageSearchParams) {
-        if (annotSearchOnly(contentTypes)) {
-            return this.storage.searchPagesByLatestAnnotation(params)
+        if (contentTypeChecks.annotsOnly(contentTypes)) {
+            const res = await this.storage.searchPagesByLatestAnnotation(params)
+
+            // TODO: change this when blank annots pagination algo improves; super innefficient
+            return res.slice(params.skip, params.skip + params.limit)
         }
 
         let results = await this.storage.searchPages(params, this.legacySearch)
 
-        results = await Promise.all(
-            results.map(async page => ({
-                ...page,
-                annotations: await this.storage.listAnnotations({
-                    ...params,
-                    limit: params.maxAnnotsPerPage,
-                    url: page.url,
-                }),
-            })),
-        )
+        if (contentTypeChecks.combined(contentTypes)) {
+            results = await Promise.all(
+                results.map(async page => ({
+                    ...page,
+                    annotations: await this.storage.listAnnotations({
+                        ...params,
+                        url: page.url,
+                    }),
+                })),
+            )
+        }
 
         return results
     }
@@ -273,22 +277,26 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
+        if (contentTypeChecks.noop(searchParams.contentTypes)) {
+            return SearchBackground.shapePageResult([], searchParams.limit)
+        }
+
         // Blank search; just list annots, applying search filters
         if (searchParams.isBlankSearch) {
-            return SearchBackground.shapePageResult(
-                await this.blankPageSearch(searchParams),
-                searchParams.limit,
-            )
+            const results = await this.blankPageSearch(searchParams)
+
+            return SearchBackground.shapePageResult(results, searchParams.limit)
         }
 
-        if (pageSearchOnly(searchParams.contentTypes)) {
-            return SearchBackground.shapePageResult(
-                await this.storage.searchPages(searchParams, this.legacySearch),
-                searchParams.limit,
+        if (contentTypeChecks.pagesOnly(searchParams.contentTypes)) {
+            const res = await this.storage.searchPages(
+                searchParams,
+                this.legacySearch,
             )
+            return SearchBackground.shapePageResult(res, searchParams.limit)
         }
 
-        if (annotSearchOnly(searchParams.contentTypes)) {
+        if (contentTypeChecks.annotsOnly(searchParams.contentTypes)) {
             return SearchBackground.shapePageResult(
                 await this.storage.searchAnnots({
                     ...searchParams,

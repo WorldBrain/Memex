@@ -130,16 +130,16 @@ describe('Annotations search', () => {
         test('collections filter', async () => {
             const resA = await searchBg.searchAnnotations({
                 query: 'quote',
-                collections: [DATA.coll1, DATA.coll2],
-            })
+                lists: [DATA.coll1, DATA.coll2],
+            } as any)
 
             expect(resA).toBeDefined()
             expect(resA.length).toBe(1)
 
             const resB = await searchBg.searchAnnotations({
                 query: 'quote',
-                collections: ['not a real coll'],
-            })
+                lists: ['not a real coll'],
+            } as any)
 
             expect(resB).toBeDefined()
             expect(resB.length).toBe(0)
@@ -325,13 +325,13 @@ describe('Annotations search', () => {
         test('collection filter', async () => {
             const resA = await searchBg.searchAnnotations({
                 url: DATA.pageUrl,
-                collections: [DATA.coll2],
-            })
+                lists: [DATA.coll2],
+            } as any)
 
             const resB = await searchBg.searchAnnotations({
                 url: DATA.pageUrl,
-                collections: [DATA.coll1],
-            })
+                lists: [DATA.coll1],
+            } as any)
 
             expect(resA).toBeDefined()
             expect(resA.length).toBe(1)
