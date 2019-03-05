@@ -177,12 +177,21 @@ describe('BackupRestoreProcedure', () => {
                 resolve()
             })
             restoreProcedure.events.on('fail', err => {
+                console.log('rejecting with', err)
                 reject(err)
+                console.log('rejected')
             })
             runner()
         })
 
-        return expect(boom).rejects.toThrow('Muahaha!')
+        let rejected = false
+        try {
+            await boom
+        } catch (e) {
+            rejected = true
+        }
+
+        expect(rejected).toBe(true)
     })
 
     it('should not restore empty objects in place of Blobs', async () => {
