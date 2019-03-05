@@ -1,4 +1,10 @@
-* {
+div,
+p,
+h1,
+h2,
+input,
+h3,
+a {
     font-family: 'Inter';
 }
 

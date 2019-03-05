@@ -5,7 +5,7 @@ const styles = require('./SemiCircularRibbon.css')
 export interface Props {
     crossIconSrc?: string
     title?: string
-    onClick: MouseEventHandler<HTMLImageElement>
+    onClick: MouseEventHandler
 }
 
 class SemiCircularRibbon extends PureComponent<Props> {
@@ -16,16 +16,11 @@ class SemiCircularRibbon extends PureComponent<Props> {
 
     render() {
         return (
-            <div title={this.props.title} className={styles.ribbon}>
-                <img
-                    onClick={this.props.onClick}
-                    src={this.props.crossIconSrc}
-                    style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                    }}
-                />
-            </div>
+            <div 
+                title={this.props.title} 
+                className={styles.ribbon}
+                onClick={this.props.onClick}
+            />
         )
     }
 }

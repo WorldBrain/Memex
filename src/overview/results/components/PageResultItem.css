@@ -38,6 +38,7 @@
 
     &:hover .crossRibbon {
         display: block;
+        margin-right: -4px;
     }
 
     &:hover .button {
@@ -213,7 +214,7 @@
     height: 30px;
     justify-content: flex-end;
     margin-top: 0px;
-    margin-right: -2px;
+    margin-right: -4px;
 }
 
 .detailsContainer {
@@ -235,7 +236,6 @@
     composes: buttonRadiusSmall hoverColor from '../../../common-ui/colors.css';
     display: inline;
     border: none;
-    background-color: transparent;
     width: 26px;
     height: 26px;
     background-repeat: no-repeat;
@@ -245,7 +245,6 @@
     background-size: 17px;
     border-radius: 3px;
     opacity: 0.1;
-    margin-left: 4px;
 
     &:hover {
         opacity: 0.9;
@@ -258,28 +257,27 @@
 
 .comment {
     background-image: url('/img/comment.svg');
+    background-size: 19px;
 }
 
 .bookmark {
     background-image: url('/img/star_full.svg');
     opacity: 0.8;
-    background-size: 18px;
-
-    &:hover {
-        opacity: 1;
-    }
+    background-size: 19px;
+    background-position-y: 4px;
 }
 
 .notBookmark {
     background-image: url('/img/star_empty.svg');
     background-size: 18px;
+    background-size: 19px;
+    background-position-y: px;
 }
 
 .tag {
     background-image: url('/img/tag.svg');
     background-size: 17px;
-    margin-left: 6px;
-    padding-top: 1px;
+    margin-left: 1px;
 }
 
 .tagList {

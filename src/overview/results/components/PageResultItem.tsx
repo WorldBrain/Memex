@@ -95,9 +95,9 @@ class PageResultItem extends PureComponent<Props> {
                         <div className={styles.infoContainer}> 
                             <div className={styles.firstlineContainer}>
                                     <div
-                                    className={styles.title}
-                                    title={this.props.title}
-                                >
+                                        className={styles.title}
+                                        title={this.props.title}
+                                        >
                                     {this.props.favIcon && (
                                         <img
                                             className={styles.favIcon}
@@ -107,9 +107,15 @@ class PageResultItem extends PureComponent<Props> {
                                     <span className={styles.titleText}>
                                     {this.props.title}
                                     </span>
-                                    </div>
+                                </div>
+                                <div className={styles.crossRibbon}>
+                                    {this.props.isListFilterActive && (
+                                        <SemiCircularRibbon
+                                            onClick={this.props.handleCrossRibbonClick}
+                                        />
+                                    )}
+                                </div>
                             </div>
-                            
                             <div className={styles.url}>{this.props.url}</div>
                             
                             <div className={styles.detailsContainer}>
@@ -168,13 +174,6 @@ class PageResultItem extends PureComponent<Props> {
                             </div>
                         </div>
                     </a>
-                    <div className={styles.crossRibbon}>
-                        {this.props.isListFilterActive && (
-                            <SemiCircularRibbon
-                                onClick={this.props.handleCrossRibbonClick}
-                            />
-                        )}
-                    </div>
                 </div>
                 {this.props.tagManager}
             </li>
