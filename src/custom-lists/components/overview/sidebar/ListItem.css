@@ -76,16 +76,6 @@
     animation: appear 0.2s forwards;
 }
 
-.button {
-    display: inline;
-    border: none;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-size: contain;
-    cursor: pointer;
-    outline: none;
-}
-
 .listName {
     composes: menuItem from '../../../../common-ui/colors.css';
     white-space: nowrap;

@@ -10,10 +10,6 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
 > {
     static MAP_OP_ID = 'memex:dexie.mapUrlsToPages'
 
-    private favIconMap: Map<string, string>
-    private pageMap: Map<string, Page>
-    private tagMap: Map<string, string[]>
-
     install(backend: DexieStorageBackend) {
         super.install(backend)
 
@@ -23,19 +19,13 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         )
     }
 
-    private initState() {
-        this.favIconMap = new Map()
-        this.pageMap = new Map()
-        this.tagMap = new Map()
-    }
-
-    private lookupPages(pageUrls: string[]) {
+    private lookupPages(pageUrls: string[], pageMap: Map<string, Page>) {
         return this.backend.dexieInstance
             .table('pages')
             .where('url')
             .anyOf(pageUrls)
             .each(page =>
-                this.pageMap.set(page.url, {
+                pageMap.set(page.url, {
                     ...page,
                     screenshot: page.screenshot
                         ? URL.createObjectURL(page.screenshot)
@@ -45,40 +35,40 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             )
     }
 
-    private lookupFavIcons(hostnames: string[]) {
+    private lookupFavIcons(
+        hostnames: string[],
+        favIconMap: Map<string, string>,
+    ) {
         // Find all assoc. fav-icons and create object URLs pointing to the Blobs
         return this.backend.dexieInstance
             .table('favIcons')
             .where('hostname')
             .anyOf(hostnames)
             .each(fav =>
-                this.favIconMap.set(
-                    fav.hostname,
-                    URL.createObjectURL(fav.favIcon),
-                ),
+                favIconMap.set(fav.hostname, URL.createObjectURL(fav.favIcon)),
             )
     }
 
-    private lookupBookmarks(pageUrls: string[]) {
+    private lookupBookmarks(pageUrls: string[], pageMap: Map<string, Page>) {
         // Find all assoc. bookmarks and augment assoc. page in page map
         return this.backend.dexieInstance
             .table('bookmarks')
             .where('url')
             .anyOf(pageUrls)
             .eachPrimaryKey(url => {
-                const page = this.pageMap.get(url)
-                this.pageMap.set(url, { ...page, hasBookmark: true } as any)
+                const page = pageMap.get(url)
+                pageMap.set(url, { ...page, hasBookmark: true } as any)
             })
     }
 
-    private lookupTags(pageUrls: string[]) {
+    private lookupTags(pageUrls: string[], tagMap: Map<string, string[]>) {
         return this.backend.dexieInstance
             .table('tags')
             .where('url')
             .anyOf(pageUrls)
             .eachPrimaryKey(([name, url]) => {
-                const tags = this.tagMap.get(url) || []
-                this.tagMap.set(url, [...tags, name])
+                const tags = tagMap.get(url) || []
+                tagMap.set(url, [...tags, name])
             })
     }
 
@@ -88,28 +78,30 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
      * has an associated bookmark and fav-icon.
      */
     private async findMatchingPages(pageUrls: string[]): Promise<AnnotPage[]> {
-        this.initState()
+        const favIconMap = new Map<string, string>()
+        const pageMap = new Map<string, Page>()
+        const tagMap = new Map<string, string[]>()
 
-        await this.lookupPages(pageUrls)
+        await this.lookupPages(pageUrls, pageMap)
 
         const hostnames = new Set(
-            [...this.pageMap.values()].map(page => page.hostname),
+            [...pageMap.values()].map(page => page.hostname),
         )
 
         await Promise.all([
-            this.lookupFavIcons([...hostnames]),
-            this.lookupBookmarks(pageUrls),
-            this.lookupTags(pageUrls),
+            this.lookupFavIcons([...hostnames], favIconMap),
+            this.lookupBookmarks(pageUrls, pageMap),
+            this.lookupTags(pageUrls, tagMap),
         ])
 
         // Map page results back to original input
         const pageResults = pageUrls.map(url => {
-            const page = this.pageMap.get(url)
+            const page = pageMap.get(url)
 
             return {
                 ...page,
-                favIcon: this.favIconMap.get(page.hostname),
-                tags: this.tagMap.get(url) || [],
+                favIcon: favIconMap.get(page.hostname),
+                tags: tagMap.get(url) || [],
             }
         })
 

@@ -235,7 +235,6 @@
     composes: buttonRadiusSmall hoverColor from '../../../common-ui/colors.css';
     display: inline;
     border: none;
-    background-color: transparent;
     width: 26px;
     height: 26px;
     background-repeat: no-repeat;
@@ -254,6 +253,7 @@
 .comment {
     background-image: url('/img/comment.svg');
     margin-left: 1px;
+    background-size: 19px;
 }
 
 .bookmark {
@@ -276,8 +276,7 @@
 .tag {
     background-image: url('/img/tag.svg');
     background-size: 17px;
-    margin-left: 6px;
-    padding-top: 1px;
+    margin-left: 1px;
 }
 
 .tagList {
