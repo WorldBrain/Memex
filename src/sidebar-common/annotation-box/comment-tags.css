@@ -6,7 +6,8 @@
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
-    padding: 15px;
+    padding: 0 15px 15px 15px;
+    line-height: 1.4;
 
     &.isJustComment {
         border-top: none;
@@ -31,13 +32,5 @@
 }
 
 .tagPill {
-    font-size: 13px;
-    font-weight: 800;
-    background-color: #3eb995d9;
-    color: #fff;
-    margin-right: 8px;
-    margin-top: 5px;
-    padding: 2px 10px 3px 10px;
-    cursor: pointer;
-    border-radius: 3px;
+    composes: tagPill from '../../common-ui/elements.css';
 }

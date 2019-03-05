@@ -1,0 +1,26 @@
+/* Tag Pill */
+
+.tagPill {
+    composes: lightBlueBackground from './colors.css';
+    color: white;
+    padding: 2px 9px 3px 9px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+    	opacity: 0.8;
+    }
+}
+
+.tagPillSuggestions {
+	composes: tagPill;
+	opacity: 0.8;
+}
+
+.tagPillRemove {
+	composes: tagPill;
+	padding: 2px 4px 3px 9px;
+}

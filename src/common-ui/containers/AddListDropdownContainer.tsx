@@ -368,16 +368,6 @@ class AddListDropdownContainer extends Component<Props, State> {
     private renderLists() {
         const lists = this.getDisplayLists()
 
-        const listOptions = lists.map((list, i) => (
-            <IndexDropdownRow
-                {...list}
-                key={i}
-                onClick={this.handleListClick(i)}
-                scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                isForSidebar={false}
-            />
-        ))
-
         if (this.canCreateList()) {
             listOptions.push(
                 <IndexDropdownNewRow
@@ -391,6 +381,16 @@ class AddListDropdownContainer extends Component<Props, State> {
                 />,
             )
         }
+
+        const listOptions = lists.map((list, i) => (
+            <IndexDropdownRow
+                {...list}
+                key={i}
+                onClick={this.handleListClick(i)}
+                scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                isForSidebar={false}
+            />
+        ))
 
         return listOptions
     }

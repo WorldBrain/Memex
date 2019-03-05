@@ -1,23 +1,19 @@
 .menuItem {
-    display: block;
-    padding: 7px 17px 9px 21px;
+    display: flex;
+    padding: 10px 17px 10px 10px;
     cursor: pointer;
     border: 1px solid #d2d2d28c;
     border-top: none;
     word-wrap: break-word;
     font-size: 14px;
-    margin: 0 15px;
     box-sizing: border-box;
+    align-items: center;
 
     &:hover,
     &:focus,
     &:active {
         background-color: #f7f7f7;
         outline: none;
-    }
-
-    &.commentBox {
-        width: 95%;
     }
 }
 
@@ -65,7 +61,6 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px dashed #d2d2d28c;
     padding: 0px 10px;
     height: 39px;
     margin-bottom: 0;
@@ -88,6 +83,7 @@
     border: none;
     background-color: #f7f7f7;
     box-sizing: border-box;
+    width: 100%;
 
     &:placeholder-shown {
         font-style: italic;
@@ -126,4 +122,11 @@
 
 .tagDivForFilter {
     z-index: 1;
+    margin: 0 5px 0 5px;
+}
+
+.tagDivForFilter input {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter';
 }

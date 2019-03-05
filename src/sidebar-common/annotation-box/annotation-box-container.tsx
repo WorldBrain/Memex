@@ -112,7 +112,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         text: string,
     ) => { isTextTooLong: boolean; text: string } = text => {
         if (text.length > 280) {
-            const truncatedText = text.slice(0, 280) + ' [...]'
+            const truncatedText = text.slice(0, 280)
             return {
                 isTextTooLong: true,
                 text: truncatedText,
@@ -123,7 +123,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
             if (text[i] === '\n') {
                 newlineCount++
                 if (newlineCount > 4) {
-                    const truncatedText = text.slice(0, i) + ' [...]'
+                    const truncatedText = text.slice(0, i)
                     return {
                         isTextTooLong: true,
                         text: truncatedText,

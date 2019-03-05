@@ -1,0 +1,12 @@
+/* icons */
+
+.iconPosition {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 80%;
+}
+
+.removeIcon {
+	composes: iconPosition;
+	background-image: url('/img/removeIcon.svg');
+}

@@ -9,7 +9,7 @@ const IndexDropdownNewRow = ({ value, ...props }) => (
         {...props}
         value={
             <React.Fragment>
-                <span className={localStyles.bold}>add new: </span> {value}
+                <span className={localStyles.bold}>add new: </span><span className={localStyles.value}>{value}</span>
             </React.Fragment>
         }
     />

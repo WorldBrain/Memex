@@ -170,3 +170,8 @@
 .check {
     float: right;
 }
+
+.value {
+    composes: tagPill tagPillSuggestions from '../../common-ui/elements.css';
+    margin-left: 5px;
+}
