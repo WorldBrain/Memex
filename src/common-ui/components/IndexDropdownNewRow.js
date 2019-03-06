@@ -11,13 +11,13 @@ const IndexDropdownNewRow = ({ value, isNew = true, ...props }) => (
                 <span>{value}</span>
             </React.Fragment>
         }
-        isNew={1}
+        isNew
     />
 )
 
 IndexDropdownNewRow.propTypes = {
     value: PropTypes.string.isRequired,
-    isNew: PropTypes.bool.isRequired,
+    isNew: PropTypes.bool,
 }
 
 export default IndexDropdownNewRow

@@ -53,6 +53,10 @@
     }
 }
 
+.actionHover {
+    background-color: #79797930;
+}
+
 .subTitleColor {
     color: #a2a2a2;
     font-weight: 300;
@@ -115,7 +119,7 @@
 }
 
 .hoverColor:hover {
-    background-color: rgba(55, 53, 47, 0.2);
+    background-color: #7979791f;
     color: #222;
 }
 

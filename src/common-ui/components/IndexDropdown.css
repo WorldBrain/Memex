@@ -191,15 +191,16 @@
     margin-left: 5px;
 }
 
+.isNewNoteInvisible {
+    display: none;
+}
+
 .isNewNote {
     composes: darkBlue from '../../common-ui/colors.css';
     font-weight: bold;
     font-size: 14px;
     margin-right: 10px;
-}
-
-.isNewNoteInvisible {
-    display: none;
+    display: flex;
 }
 
 .isList {

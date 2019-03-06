@@ -119,3 +119,15 @@
     z-index: 1;
     width: 99.7%;
 }
+
+.isNewNoteInvisible {
+    display: none;
+}
+
+.isNewNote {
+    composes: darkBlue from '../../common-ui/colors.css';
+    font-weight: bold;
+    font-size: 14px;
+    margin-right: 10px;
+    display: flex;
+}

@@ -59,14 +59,15 @@ class IndexDropdownRow extends PureComponent {
     }
 
     render() {
+        console.log(this.props.isForSidebar, this.props.isNew)
         return (
             <div 
                 className={cx(this.mainClass, {
                     [this.styles.isNew]: this.props.isNew,
                 })}
                 onClick={this.props.onClick}>
-                <span className={cx(this.styles.isNewNote, {
-                        [this.styles.isNewNoteInvisible]: !this.props.isNew,
+                <span className={cx(this.styles.isNewNoteInvisible, {
+                        [this.styles.isNewNote]: this.props.isNew,
                     })}>Add New:
                 </span>
                 <span className={cx(this.styles.tagPill, {

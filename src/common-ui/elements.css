@@ -39,6 +39,5 @@
 }
 
 .greenActionButton {
-    composes: nakedButton hoverColor warningColor from './colors.css';   
+    composes: nakedButton hoverColor warningColor from './colors.css';
 }
-

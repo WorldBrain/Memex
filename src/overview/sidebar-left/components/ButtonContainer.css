@@ -25,6 +25,7 @@
 }
 
 .closeIcon {
+    composes: hoverColor from '../../../common-ui/colors.css';
     background-image: url('/img/doubleArrow.svg');
     background-size: 15px;
     display: block;
