@@ -16,6 +16,7 @@ class TypesPopup extends PureComponent {
     state = {
         type: {
             websites: false,
+            annotations: false,
             highlights: false,
             comments: false,
             memex: false,
@@ -30,6 +31,13 @@ class TypesPopup extends PureComponent {
                 type: {
                     ...prevState.type,
                     [name]: !prevState.type.websites,
+                },
+            }))
+        } else if (name === 'annotations') {
+            this.setState(prevState => ({
+                type: {
+                    ...prevState.type,
+                    [name]: !prevState.type.annotations,
                 },
             }))
         } else if (name === 'highlights') {
@@ -59,6 +67,7 @@ class TypesPopup extends PureComponent {
     componentDidMount() {
         const types = {
             websites: false,
+            annotations: false,
             highlights: false,
             comments: false,
             memex: false,
@@ -66,6 +75,7 @@ class TypesPopup extends PureComponent {
         const typ = {
             ...this.state.type,
             websites: this.props.prevTypes.websites,
+            annotations: this.props.prevTypes.annotations,
             comments: this.props.prevTypes.comments,
             highlights: this.props.prevTypes.highlights,
             memex: this.props.prevTypes.memex,
@@ -88,7 +98,7 @@ class TypesPopup extends PureComponent {
         let count = 0
         const arr = Object.values(this.state.type)
         arr.map((type, index) => {
-            if (type && index < 4) {
+            if (type && index < 5) {
                 count++
             }
         })
@@ -107,6 +117,23 @@ class TypesPopup extends PureComponent {
                                 type="checkbox"
                                 name="websites"
                                 checked={this.props.prevTypes.websites}
+                                onChange={this.selectedType}
+                            />
+                            <span
+                                className={[styles.slider, styles.round].join(
+                                    ' ',
+                                )}
+                            />
+                        </label>
+                    </div>
+
+                    <div className={styles.tagName}>
+                        <p>Annotations</p>
+                        <label className={styles.switch}>
+                            <input
+                                type="checkbox"
+                                name="annotations"
+                                checked={this.props.prevTypes.annotations}
                                 onChange={this.selectedType}
                             />
                             <span
