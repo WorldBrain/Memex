@@ -130,7 +130,7 @@ a {
 }
 
 .hoversidebaropen:hover {
-    background-color: #e0e0de;
+    background-color: rgba(55, 53, 47, 0.2);
     color: #222;
 }
 

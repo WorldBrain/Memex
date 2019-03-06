@@ -25,16 +25,27 @@
     color: #222;
 }
 
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: 70%;
+    background-position: center;
+    cursor: pointer;
+    outline: none;
+}
+
 .editButton {
     composes: hoverColor buttonRadiusSmall from '../../../../common-ui/colors.css';
     background-image: url('/img/edit.svg');
-    width: 19px;
-    height: 19px;
+    width: 20px;
+    height: 20px;
     visibility: hidden;
     opacity: 0.4;
     margin-top: 1px;
-    margin-right: 3px;
     animation: appear 0.2s forwards;
+    background-size: 75%;
 }
 
 .shareButton {
@@ -45,8 +56,8 @@
     visibility: hidden;
     opacity: 0.4;
     margin-top: 1px;
-    margin-right: 10px;
-    margin-left: 5px;
+    margin-right: 5px;
+    margin-left: 2px;
     animation: appear 0.2s forwards;
 }
 
@@ -57,18 +68,8 @@
     height: 20px;
     visibility: hidden;
     opacity: 0.4;
-    margin-left: 7px;
+    margin-left: 3px;
     animation: appear 0.2s forwards;
-}
-
-.button {
-    display: inline;
-    border: none;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-size: contain;
-    cursor: pointer;
-    outline: none;
 }
 
 .listName {

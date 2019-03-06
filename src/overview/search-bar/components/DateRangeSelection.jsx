@@ -213,7 +213,7 @@ class DateRangeSelection extends Component {
                     }}
                     className={styles.datePicker}
                     dateFormat={FORMAT}
-                    placeholderText="after..."
+                    placeholderText="from..."
                     isClearable
                     selected={startDate && moment(startDate)}
                     selectsStart
@@ -245,7 +245,7 @@ class DateRangeSelection extends Component {
                     }}
                     className={styles.datePicker}
                     dateFormat={FORMAT}
-                    placeholderText="before..."
+                    placeholderText="to..."
                     isClearable
                     selected={endDate && moment(endDate)}
                     selectsEnd

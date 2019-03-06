@@ -79,7 +79,7 @@
     &.isActive {
         color: #222;
         font-weight: 600;
-        background-color: #e2e2e2;
+        background-color: #e4e4e4; /* MAN */
         border-right: none;
     }
 }
