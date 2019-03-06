@@ -7,6 +7,7 @@ import styles from './styles.css'
 const Nav = ({ children }) => {
     return (
         <nav className={styles.root}>
+            <ul className={styles.nav}>{children}</ul>
             <div className={styles.icon_div}>
                 <Link to="/overview">
                     <img
@@ -15,7 +16,6 @@ const Nav = ({ children }) => {
                     />
                 </Link>
             </div>
-            <ul className={styles.nav}>{children}</ul>
         </nav>
     )
 }

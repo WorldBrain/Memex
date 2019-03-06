@@ -1,11 +1,13 @@
-.annotationBoxDefaultFooter {
+  .annotationBoxDefaultFooter {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     width: 100%;
+    padding: 5px;
 }
 
 .commonIcon {
+    composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
     box-sizing: border-box;
     background-repeat: no-repeat;
     background-size: 18px;
@@ -15,33 +17,25 @@
     background-position: center;
     border: none;
     padding: 3px;
-    width: 28px;
-    height: 28px;
+    width: 25px;
+    height: 25px;
     opacity: 0.7;
+    margin: 0 3px;
 }
 
 .editIcon {
-    background-image: url('/img/edit_empty.svg');
-
-    &:hover {
-        background-image: url('/img/edit_full.svg');
-    }
+    background-image: url('/img/edit.svg');
+    background-position-y: 3px;
 }
 
 .trashIcon {
     background-image: url('/img/trash.svg');
-
-    &:hover {
-        background-image: url('/img/trash_blue_full.svg');
-    }
+    background-size: 17px;
 }
 
 .shareIcon {
-    background-image: url('/img/share_empty.svg');
-
-    &:hover {
-        background-image: url('/img/share_full.svg');
-    }
+    background-size: 17px;
+    background-image: url('/img/share.svg');
 }
 
 .replyIcon {
@@ -53,11 +47,7 @@
 }
 
 .goToPageIcon {
-    background-image: url('/img/gotopage.svg');
-    background-size: 30px;
-    padding-top: 5px;
-
-    &:hover {
-        background-color: #efefef;
-    }
+    background-image: url('/img/open.svg');
+    background-position-y: 4px;
+    background-size: 17px;
 }

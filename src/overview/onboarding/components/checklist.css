@@ -15,10 +15,10 @@
 }
 
 .container {
-    composes: boxShadow from '../../../common-ui/colors.css';
+    composes: infoBoxes from '../../../common-ui/colors.css';
     width: fit-content;
     position: fixed;
-    right: -430px;
+    right: -440px;
     top: 165px;
     border-radius: 5px;
     z-index: 1;

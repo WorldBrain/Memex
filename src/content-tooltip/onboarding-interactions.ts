@@ -71,14 +71,13 @@ export const conditionallyShowOnboardingNotifications = async ({
     toolbarNotifications,
 }) => {
     /*
-    Fetch shouldShowOnboarding and return if it's false as 
+    Fetch shouldShowOnboarding and return if it's false as
     that would mean the user has closed the onboarding demo.
     */
     const shouldShowOnboarding = await getLocalStorage(
         STORAGE_KEYS.shouldShowOnboarding,
         true,
     )
-    console.log(utils.isDemoPage(), shouldShowOnboarding)
     if (!utils.isDemoPage() || !shouldShowOnboarding) {
         return
     }

@@ -5,6 +5,7 @@
     background-repeat: no-repeat;
     background-size: 17px;
     background-position: 27px;
+    background-color: transparent;
     padding-left: 50px;
     padding-right: 40px;
     width: 45%;
@@ -16,19 +17,19 @@
 }
 
 .datePicker {
+    composes: darkBlue from '../../../common-ui/colors.css';
     width: 130px;
     height: 30px;
     font-size: 15px;
-    color: #173766;
     border: none;
     margin: 0 10px;
-    font-weight: 400;
+    background-color: transparent;
+    font-weight: 500;
     padding-top: 1px;
     padding-right: 20px;
 
     &::placeholder {
         color: #b8b8b8;
-        font-style: italic;
     }
 
     &:focus {

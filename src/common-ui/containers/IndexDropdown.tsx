@@ -12,6 +12,7 @@ import {
 import { ClickHandler } from '../../popup/types'
 
 export interface Props {
+    env?: 'inpage' | 'overview'
     source: 'tag' | 'domain'
     /** The URL to use for dis/associating new tags with; set this to keep in sync with index. */
     url?: string
@@ -346,6 +347,7 @@ class IndexDropdownContainer extends Component<Props, State> {
 
     handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (
+            this.props.env === 'inpage' &&
             this.props.isForAnnotation &&
             !(event.ctrlKey || event.metaKey) &&
             /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
@@ -457,6 +459,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                     allowAdd={this.props.allowAdd}
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
                     isForSidebar={this.props.isForSidebar}
+                    source={this.props.source}
                 />,
             )
         }

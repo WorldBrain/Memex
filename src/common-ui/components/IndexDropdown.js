@@ -24,8 +24,8 @@ class IndexDropdown extends PureComponent {
         url: PropTypes.string,
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,
-        clearSearchField: PropTypes.func,
-        showClearfieldBtn: PropTypes.bool,
+        // clearSearchField: PropTypes.func,
+        // showClearfieldBtn: PropTypes.bool,
         onBackBtnClick: PropTypes.func,
         allTabs: PropTypes.bool,
         allTabsCollection: PropTypes.bool,
@@ -81,6 +81,7 @@ class IndexDropdown extends PureComponent {
                         [this.styles.commentBox]: this.props.allowAdd,
                     })}
                 >
+                    <span className={styles.searchIcon}/>
                     <input
                         className={this.styles.search}
                         name="query"
@@ -92,19 +93,6 @@ class IndexDropdown extends PureComponent {
                         value={this.props.tagSearchValue}
                         autoFocus
                     />
-                    {!this.props.showClearfieldBtn ? (
-                        <i className="material-icons">search</i>
-                    ) : (
-                        <i
-                            onClick={this.props.clearSearchField}
-                            className={cx(
-                                'material-icons',
-                                this.styles.closeButton,
-                            )}
-                        >
-                            cancel
-                        </i>
-                    )}
                 </div>
                 {this.props.allTabs && (
                     <p className={styles.allTabs}>

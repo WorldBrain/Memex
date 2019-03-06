@@ -1,18 +1,16 @@
 .sidebar {
-    padding: 0;
     height: 100%;
     background: #fff;
-
+    padding-bottom: 150px;
     overflow-y: scroll;
     border-left: 3px solid #e1ece9;
 }
 
 .annotationsSection {
-    margin: 0 0 100px 0;
-    width: 100%;
+    padding: 0 5px;
     background: #fff;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 }

@@ -1,0 +1,43 @@
+/* Tag Pill */
+
+.tagPill {
+    composes: lightBlueBackground from './colors.css';
+    color: white;
+    padding: 2px 9px 3px 9px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 300;
+    margin-right: 3px;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+    	opacity: 0.8;
+    }
+}
+
+.tagPillSuggestions {
+	composes: tagPill;
+	opacity: 0.8;
+}
+
+.tagPillRemove {
+	composes: tagPill;
+	padding: 2px 4px 3px 9px;
+}
+
+/* Tooltips */
+
+.toolTips {
+    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+}
+
+/* Buttons */
+
+.cancelNaked {
+    composes: nakedButton hoverColor warningColor from './colors.css';
+}
+
+.greenActionButton {
+    composes: nakedButton hoverColor warningColor from './colors.css';
+}

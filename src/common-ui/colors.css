@@ -5,7 +5,7 @@
 }
 
 .h2Color {
-	color: #444;
+	color: rgb(55, 53, 47);
 }
 
 .lightMintGreen {
@@ -38,9 +38,28 @@
 	background-color: #1a2f58;
 }
 
+.textColorSearchPlaceholder {
+    composes: darkBlue;
+    opacity: 1;
+
+    &:placeholder-shown {
+        font-family: 'Inter';
+        color: #1a2f58; /* MAN manual adjustment needed */
+    }
+
+    &:placeholder {
+        font-family: 'Inter';
+        color: #1a2f58; /* MAN manual adjustment needed */
+    }
+}
+
+.actionHover {
+    background-color: #79797930;
+}
+
 .subTitleColor {
     color: #a2a2a2;
-    font-weight: 200;
+    font-weight: 300;
 }
 
 .lighterGrey {
@@ -72,7 +91,7 @@
 /* BORDER RADIUS */
 
 .nakedButton {
-    padding: 3px 4px;
+    padding: 2px 6px 3px 6px;
     border-radius: 3px;
     font-weight: 400;
 }
@@ -95,13 +114,17 @@
 
 /* HOVER STATES */
 
+.selectedColor {
+    background-color: #f7f7f7;
+}
+
 .hoverColor:hover {
-    background-color: #ebebeb;
+    background-color: #7979791f;
     color: #222;
 }
 
 .hoversidebaropen:hover {
-    background-color: #e0e0de;
+    background-color: rgba(55, 53, 47, 0.2);
     color: #222;
 }
 
@@ -121,9 +144,21 @@
 }
 
 .boxShadow {
-    composes: tooltipRadius borderColor;
-    background: rgb(255, 255, 255);
-    box-shadow: 0px 3px 4px 2px #ebebeb;
+    composes: tooltipRadius;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    transition: background 120ms ease-in 0s;
+
+    &:hover {
+        transition: background 120ms ease-in 0s;
+        background-color: rgba(55, 53, 47, 0.03);
+    }
+}
+
+.infoBoxes {
+    composes: tooltipRadius;
+    box-shadow: 0px 53px 100px -50px #b7b7b7;
+    border: solid 1px #f4f4f4;
+    background: white;
 }
 
 /* CALL TO ACTION BUTTONS */

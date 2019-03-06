@@ -7,6 +7,7 @@ import TagInputContainer from './tag-input-container'
 const styles = require('./comment-box-form.css')
 
 interface Props {
+    env?: 'inpage' | 'overview'
     commentText: string
     handleCommentTextChange: (comment: string) => void
     saveComment: React.EventHandler<React.SyntheticEvent>
@@ -124,7 +125,7 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     render() {
-        const { commentText, saveComment, cancelComment } = this.props
+        const { env, commentText, saveComment, cancelComment } = this.props
         const { rows, isTagInputActive } = this.state
 
         return (
@@ -140,14 +141,14 @@ class CommentBoxForm extends React.Component<Props, State> {
                     onKeyDown={this._handleTextAreaKeyDown}
                     ref={this._setTextAreaRef}
                 />
-                <br />
-
                 {/* Tags for the current annotation/comment. */}
                 <div
                     onKeyDown={this._handleTagInputKeyDown}
                     ref={this._setTagInputRef}
+                    className={styles.tagCommentEditor}
                 >
                     <TagInputContainer
+                        env={env}
                         isTagInputActive={isTagInputActive}
                         setTagInputActive={this.setTagInputActive}
                     />

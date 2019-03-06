@@ -34,7 +34,6 @@ export async function getStartScreen({
         process.env.BACKUP_START_SCREEN.length
     if (hasScreenOverride) {
         const override = process.env.BACKUP_START_SCREEN
-        console.log('Backup screen override:', override)
         return override
     }
 

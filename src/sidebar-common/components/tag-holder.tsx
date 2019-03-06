@@ -59,11 +59,9 @@ class TagHolder extends React.Component<Props, State> {
                 <span key={tag} className={styles.tag}>
                     {tag}
                     <span
-                        className={styles.cross}
+                        className={styles.remove}
                         onClick={this._deleteFn(tag)}
-                    >
-                        x
-                    </span>
+                    />
                 </span>
             )
         })
@@ -87,7 +85,7 @@ class TagHolder extends React.Component<Props, State> {
         return (
             <div className={styles.tagHolder} onClick={clickHandler}>
                 {!tags.length && (
-                    <span className={styles.placeholder}>Tag Comment...</span>
+                    <span className={styles.placeholder}><span className={styles.tagIcon}/>Add tag</span>
                 )}
 
                 {this._renderTags()}

@@ -135,14 +135,11 @@ export class BackupBackgroundModule {
                     return this.backendLocation
                 },
                 isBackupAuthenticated: async () => {
-                    let backend = null
-                    /* Check if restoreProcedure's backend is present. 
-                        Restore's backend is only present during restore. */
-                    if (this.restoreProcedure) {
-                        backend = this.restoreProcedure.backend
-                    } else {
-                        backend = this.backend
-                    }
+                    // Check if restoreProcedure's backend is present.
+                    // Restore's backend is only present during restore.
+                    const backend = this.restoreProcedure
+                        ? this.restoreProcedure.backend
+                        : this.backend
 
                     return backend ? backend.isAuthenticated() : false
                 },

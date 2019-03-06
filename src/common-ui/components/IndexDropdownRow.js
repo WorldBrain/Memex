@@ -23,6 +23,9 @@ class IndexDropdownRow extends PureComponent {
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,
         scrollIntoView: PropTypes.func.isRequired,
+        isNew: PropTypes.bool,
+        isList: PropTypes.bool,
+        source: PropTypes.string,
     }
 
     componentDidMount() {
@@ -57,10 +60,23 @@ class IndexDropdownRow extends PureComponent {
     }
 
     render() {
+        console.log(this.props.isForSidebar, this.props.isNew)
         return (
-            <div className={this.mainClass} onClick={this.props.onClick}>
-                {this.props.value.name || this.props.value}
-                {this.props.active && <span className={localStyles.check}>✔︎</span>}
+            <div 
+                className={cx(this.mainClass, {
+                    [this.styles.isNew]: this.props.isNew,
+                })}
+                onClick={this.props.onClick}>
+                <span className={cx(this.styles.isNewNoteInvisible, {
+                        [this.styles.isNewNote]: this.props.isNew,
+                    })}>Add New:
+                </span>
+                <span className={cx(this.styles.tagPill, {
+                        [localStyles.isList]: this.props.isList || this.props.source === 'domain',
+                    })}>
+                    {this.props.isList && this.props.value.name || this.props.value}
+                </span>
+                {this.props.active && <span className={this.styles.check}/>}
             </div>
         )
     }

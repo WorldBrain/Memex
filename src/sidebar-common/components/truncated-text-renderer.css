@@ -1,21 +1,20 @@
 .showMoreBtn {
-    margin: 5px 0 0 5px;
     cursor: pointer;
-    display: inline-block;
-    background-image: url('/img/longarrow.svg');
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-size: 43px;
-    width: 40px;
-    height: 20px;
-    background-position: center;
-    transition: transform 0.15s ease-in;
-    transform: rotate(0deg);
+    display: inline-flex;
     border: none;
     outline: none;
+    font-style: bold;
 
     &.rotated {
+        background-image: url('/img/longarrow.svg');
+        content: '';
+        background-color: transparent;
+        background-repeat: no-repeat;
+        background-position: center;
         transform: rotate(-180deg);
         transform-origin: center;
+        width: 30px;
+        height: 20px;
+        background-size: 50px;
     }
 }

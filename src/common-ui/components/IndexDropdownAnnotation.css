@@ -1,14 +1,14 @@
 .menuItem {
-    display: block;
-    padding: 7px 17px 9px 21px;
+    composes: hoverColor from '../../common-ui/colors.css';
+    align-items: center;
+    display: flex;
+    padding: 8px 20px 8px 20px;
     cursor: pointer;
-    border: 1px solid #d2d2d28c;
-    border-top: none;
+    border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
     font-size: 14px;
-    width: 95%;
-    margin-left: 8px;
-    box-sizing: border-box;
+    min-height: 20px;
+    justify-content: space-between;
 
     &:hover,
     &:focus,
@@ -17,13 +17,23 @@
         outline: none;
     }
 
-    &.commentBox {
-        width: 95%;
+    &.isNew {
+        justify-content: flex-start;
     }
 }
 
+.tagPill {
+    composes: tagPillSuggestions from '../../common-ui/elements.css';
+}
+
 .menuItemFocused {
-    background-color: #f7f7f7;
+    composes: selectedColor from '../../common-ui/colors.css';
+    align-items: center;
+    display: flex;
+}
+
+.remove {
+    display: none;
 }
 
 .menuItem i {
@@ -52,13 +62,11 @@
 }
 
 .summaryTagContainer {
-    font-family: 'Inter';
     font-size: 12px;
     display: flex;
     justify-content: space-around;
     padding-bottom: 4px;
     background: white;
-    width: 94.3%;
     margin-bottom: 16px;
     margin-left: 8px;
 }
@@ -68,45 +76,18 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px dashed #d2d2d28c;
-    padding: 0px 6px;
-    height: 39px;
+    padding: 4px 11px;
     margin-bottom: 0;
-    background-color: #f7f7f7;
-    width: 95%;
-    margin-left: 8px;
-    box-sizing: border-box;
-
-    &.commentBox {
-        width: 95%;
-    }
-
-    & > i {
-        color: #3eb995;
-        padding: 0;
-        margin-right: 10px;
-        margin-top: 1px;
-    }
 }
 
 .search {
+    composes: textColorSearchPlaceholder from '../../common-ui/colors.css';
     width: 90%;
     font-size: 14px;
-    font-weight: 500;
-    padding-left: 5px;
-    height: 37px;
+    padding: 10px 0;
     border: none;
-    background-color: #f7f7f7;
-    box-sizing: border-box;
-
-    &:placeholder-shown {
-        font-style: italic;
-        font-weight: 500;
-        font-family: 'Inter';
-    }
-
-    &::placeholder {
-        color: #4a4a4a;
-    }
+    background-color: white;
+    margin-left: 10px;
 
     &:focus {
         outline: none;
@@ -136,4 +117,35 @@
 .tagDivForFilter {
     z-index: 1;
     width: 99.7%;
+}
+
+.check {
+    composes: checkMark from '../../common-ui/icons.css';
+    width: 20px;
+    height: 20px;
+}
+
+.value {
+    composes: tagPill tagPillSuggestions from '../../common-ui/elements.css';
+    margin-left: 5px;
+}
+
+.isNewNoteInvisible {
+    display: none;
+}
+
+.isNewNote {
+    composes: darkBlue from '../../common-ui/colors.css';
+    font-weight: bold;
+    font-size: 14px;
+    margin-right: 10px;
+    display: flex;
+}
+
+.isList {
+    font-size: 13px;
+    font-weight: 400;
+    color: black;
+    padding: 0;
+    background-color: transparent;
 }

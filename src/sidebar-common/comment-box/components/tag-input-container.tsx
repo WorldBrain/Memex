@@ -18,6 +18,7 @@ interface DispatchProps {
 }
 
 interface OwnProps {
+    env?: 'inpage' | 'overview'
     isTagInputActive: boolean
     setTagInputActive: (isTagInputActive: boolean) => void
 }

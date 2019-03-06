@@ -112,7 +112,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         text: string,
     ) => { isTextTooLong: boolean; text: string } = text => {
         if (text.length > 280) {
-            const truncatedText = text.slice(0, 280) + ' [...]'
+            const truncatedText = text.slice(0, 280)
             return {
                 isTextTooLong: true,
                 text: truncatedText,
@@ -123,7 +123,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
             if (text[i] === '\n') {
                 newlineCount++
                 if (newlineCount > 4) {
-                    const truncatedText = text.slice(0, i) + ' [...]'
+                    const truncatedText = text.slice(0, i)
                     return {
                         isTextTooLong: true,
                         text: truncatedText,
@@ -199,6 +199,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                     [styles.isHovered]: this.props.isHovered,
                     [styles.isClickable]: isClickable,
                     [styles.isJustComment]: mode !== 'edit' && !this.props.body,
+                    [styles.isEdit]: mode === 'edit',
                 })}
                 onClick={isClickable ? this.props.handleGoToAnnotation : noop}
                 ref={this._setBoxRef}
@@ -217,12 +218,14 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 every mode. */}
                 {this.props.body && (
                     <div className={styles.highlight}>
+                        <span className={styles.highlightText}>
                         <TruncatedTextRenderer
                             text={this.props.body}
                             getTruncatedTextObject={
                                 this._getTruncatedTextObject
                             }
                         />
+                        </span>
                     </div>
                 )}
 
@@ -238,12 +241,13 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         handleCancelOperation={this._handleCancelOperation}
                         editIconClickHandler={this._handleEditIconClick}
                         trashIconClickHandler={this._handleTrashIconClick}
-                        shareIconClickHandler={this._handleShareIconClick}
+                        // shareIconClickHandler={this._handleShareIconClick}
                         replyIconClickHandler={this._handleReplyIconClick}
                         getTruncatedTextObject={this._getTruncatedTextObject}
                     />
                 ) : (
                     <EditModeContent
+                        env={this.props.env}
                         comment={this.props.comment}
                         tags={this.props.tags}
                         handleCancelOperation={this._handleCancelOperation}

@@ -25,6 +25,7 @@ export interface Props {
     resetPagesInTempList?: () => void
     setTempLists?: () => void
     allTabsCollection?: boolean
+    isList: boolean
 }
 
 export interface State {
@@ -210,7 +211,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 url: this.props.url,
             })
         } catch (err) {
-            console.log(err)
+            console.error(err)
         }
 
         this.setState(state => ({
@@ -372,6 +373,7 @@ class AddListDropdownContainer extends Component<Props, State> {
             <IndexDropdownRow
                 {...list}
                 key={i}
+                isList={true}
                 onClick={this.handleListClick(i)}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 isForSidebar={false}
@@ -384,6 +386,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                     key="+"
                     value={this.state.searchVal}
                     onClick={this.createList}
+                    isList={1}
                     focused={
                         this.state.focused === this.state.displayFilters.length
                     }
@@ -391,7 +394,6 @@ class AddListDropdownContainer extends Component<Props, State> {
                 />,
             )
         }
-
         return listOptions
     }
 
@@ -412,6 +414,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
+                isList={1}
                 numberOfTags={
                     this.props.allTabsCollection
                         ? this.state.multiEdit.size

@@ -33,18 +33,13 @@
 }
 
 .addCommentBtn {
+    composes: CTA from '../../common-ui/colors.css';
     box-sizing: border-box;
-    font-family: 'Lato';
-    background: #3eb995;
-    color: #fff;
     cursor: pointer;
     border: none;
     outline: none;
-    border-radius: 5px;
-    padding: 5px 6px;
-    font-size: 11px;
+    padding: 6px 8px;
     letter-spacing: 0.6px;
-    font-weight: 100;
     vertical-align: middle;
 
     &.disabled {

@@ -58,7 +58,8 @@ class FilteredRow extends PureComponent {
                     >
                         {this.props.value}
                     </div>
-                    {this.props.isExclusive && (
+                    {this.props.isExclusive && 
+                        this.props.available && (
                         <button
                             title={'Results from this domain excluded'}
                             className={cx(styles.exclusion, styles.button)}
@@ -68,13 +69,10 @@ class FilteredRow extends PureComponent {
                         this.props.available && (
                             <button
                                 className={cx(
-                                    'material-icons',
                                     styles.tick,
                                     styles.button,
                                 )}
-                            >
-                                done
-                            </button>
+                            />
                         )}
                     {this.props.active &&
                         !this.props.available && (
