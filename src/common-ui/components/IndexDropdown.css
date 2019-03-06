@@ -155,6 +155,10 @@
     margin-left: 500px;
     border-radius: 3px;
 
+    &.backButton {
+        display: none;
+    }
+
     @media (max-width: 835px) {
         right: 10px;
     }

@@ -25,6 +25,7 @@ class IndexDropdownRow extends PureComponent {
         scrollIntoView: PropTypes.func.isRequired,
         isNew: PropTypes.bool,
         isList: PropTypes.bool,
+        source: PropTypes.string,
     }
 
     componentDidMount() {
@@ -71,7 +72,7 @@ class IndexDropdownRow extends PureComponent {
                     })}>Add New:
                 </span>
                 <span className={cx(this.styles.tagPill, {
-                        [localStyles.isList]: this.props.isList,
+                        [localStyles.isList]: this.props.isList || this.props.source === 'domain',
                     })}>
                     {this.props.isList && this.props.value.name || this.props.value}
                 </span>
