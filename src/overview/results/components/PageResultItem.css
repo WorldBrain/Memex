@@ -42,7 +42,7 @@
     }
 
     &:hover .button {
-        opacity: 0.3;
+        opacity: 0.6;
     }
 
   /*  &:hover .title {
@@ -163,7 +163,7 @@
     display: flex;
     flex-direction: row;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     align-items: center;
     width: 97%;
     flex-basis: 95%;
@@ -236,19 +236,16 @@
     composes: buttonRadiusSmall hoverColor from '../../../common-ui/colors.css';
     display: inline;
     border: none;
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
     background-position: center;
-    background-size: 17px;
+    background-size: 16px;
     border-radius: 3px;
+    background-color: transparent;
     opacity: 0.1;
-
-    &:hover {
-        opacity: 0.9;
-    }
 }
 
 .trash {
@@ -257,21 +254,20 @@
 
 .comment {
     background-image: url('/img/comment.svg');
-    background-size: 19px;
+    margin-left: 1px;
 }
 
 .bookmark {
     background-image: url('/img/star_full.svg');
     opacity: 0.8;
-    background-size: 19px;
-    background-position-y: 4px;
+    background-size: 18px;
+    background-position-y: 3px;
 }
 
 .notBookmark {
     background-image: url('/img/star_empty.svg');
     background-size: 18px;
-    background-size: 19px;
-    background-position-y: px;
+    background-position-y: 3px;
 }
 
 .tag {

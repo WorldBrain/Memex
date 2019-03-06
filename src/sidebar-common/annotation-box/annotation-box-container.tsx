@@ -241,7 +241,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         handleCancelOperation={this._handleCancelOperation}
                         editIconClickHandler={this._handleEditIconClick}
                         trashIconClickHandler={this._handleTrashIconClick}
-                        shareIconClickHandler={this._handleShareIconClick}
+                        // shareIconClickHandler={this._handleShareIconClick}
                         replyIconClickHandler={this._handleReplyIconClick}
                         getTruncatedTextObject={this._getTruncatedTextObject}
                     />

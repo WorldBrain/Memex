@@ -8,7 +8,7 @@ interface Props {
     goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
-    //shareIconClickHandler: () => void
+    // shareIconClickHandler: () => void
     replyIconClickHandler: () => void
 }
 
@@ -18,7 +18,7 @@ const DefaultFooter = ({
     goToAnnotationHandler,
     editIconClickHandler,
     trashIconClickHandler,
-    //shareIconClickHandler,
+    // shareIconClickHandler,
     replyIconClickHandler,
 }: Props) => (
     <div className={styles.annotationBoxDefaultFooter}>

@@ -1,9 +1,12 @@
 .root {
     composes: sideBarColorOpen from '../../../common-ui/colors.css';
     height: auto;
-    max-width: 200px;
-    min-width: 190px;
+    max-width: 280px;
+    min-width: 230px;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .title {
@@ -20,7 +23,7 @@
 }
 
 .icon {
-    width: 60%;
+    width: 70%;
     height: auto;
     margin: 20px 20px;
     margin-left: 30px;
@@ -29,13 +32,23 @@
 .icon_div {
     width: 100%;
     height: auto;
+    display: flex;
+}
+
+.icon_div > a {
+    text-align: center;
 }
 
 .nav {
-    margin: 0;
-    padding: 0;
     list-style: none;
+    display: flex;
+    flex-direction: column;
     line-height: 20px;
+    padding: 0px;
+}
+
+.nav li {
+    margin: 10px 0;
 }
 
 .navIcon {
@@ -59,8 +72,8 @@
     display: block;
     text-decoration: none;
     font-size: 13px;
-    padding: 5px 5px;
     width: 100%;
+    padding: 5px 5px 5px 20px;
     letter-spacing: 0.5px;
 
     &.isActive {
@@ -73,6 +86,7 @@
 
 .nav li:first-of-type a {
     font-size: 0.75rem;
+    font-weight: 600;
 }
 
 .importSubItems {

@@ -15,7 +15,7 @@ interface Props {
     handleCancelDeletion?: () => void
     editIconClickHandler?: () => void
     trashIconClickHandler?: () => void
-    //shareIconClickHandler?: () => void
+    // shareIconClickHandler?: () => void
     replyIconClickHandler?: () => void
 }
 
@@ -46,7 +46,7 @@ const AllModesFooter = (props: Props) => (
                 goToAnnotationHandler={props.handleGoToAnnotation}
                 editIconClickHandler={props.editIconClickHandler}
                 trashIconClickHandler={props.trashIconClickHandler}
-                //shareIconClickHandler={props.shareIconClickHandler}
+                // shareIconClickHandler={props.shareIconClickHandler}
                 replyIconClickHandler={props.replyIconClickHandler}
             />
         )}

@@ -10,3 +10,15 @@
 	composes: iconPosition;
 	background-image: url('/img/removeIcon.svg');
 }
+
+.searchIcon {
+	composes: iconPosition;
+	background-image: url('/img/search-icon.svg');
+}
+
+.checkMark {
+	composes: iconPosition;
+	background-image: url('/img/check.svg');
+	opacity: 0.7;
+	background-size: 100%;
+}
