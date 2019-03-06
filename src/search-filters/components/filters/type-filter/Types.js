@@ -7,6 +7,7 @@ class Types extends PureComponent {
     state = {
         types: {
             websites: false,
+            annotations: false,
             highlights: false,
             comments: false,
             memex: false,
@@ -31,6 +32,7 @@ class Types extends PureComponent {
             types: {
                 ...this.state.types,
                 websites: false,
+                annotations: false,
                 highlights: false,
                 comments: false,
                 memex: false,
@@ -78,7 +80,7 @@ class Types extends PureComponent {
                             style={{ fontWeight: 'bold', paddingLeft: '4px' }}
                         >
                             {this.state.count}
-                            /4
+                            /5
                         </span>
                     )}
                 </button>
@@ -95,6 +97,7 @@ class Types extends PureComponent {
                 <div style={{ display: 'grid' }}>
                     <span style={{ marginTop: '30px', fontSize: '15px' }}>
                         {this.state.types.websites ? 'Websites, ' : null}
+                        {this.state.types.annotations ? 'Annotations, ' : null}
                         {this.state.types.highlights ? 'Highlights, ' : null}
                         {this.state.types.comments ? 'Comments, ' : null}
                         {this.state.types.memex ? 'Memex.links, ' : null}

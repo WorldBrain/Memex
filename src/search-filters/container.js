@@ -12,7 +12,7 @@ import {
 } from './components'
 
 import Types from './components/filters/type-filter/Types'
-import Tags from './components/filters/tags-filter/Tags'
+// import Tags from './components/filters/tags-filter/Tags'
 
 import { actions, selectors } from './'
 import { selectors as sidebar } from '../overview/sidebar-left'
@@ -21,22 +21,22 @@ class SearchFiltersContainer extends PureComponent {
     static propTypes = {
         filteredTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         filteredDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
-        // addTagFilter: PropTypes.func.isRequired,
+        addTagFilter: PropTypes.func.isRequired,
         delTagFilter: PropTypes.func.isRequired,
         addDomainFilter: PropTypes.func.isRequired,
         showDomainFilter: PropTypes.func.isRequired,
-        // showTagFilter: PropTypes.func.isRequired,
+        showTagFilter: PropTypes.func.isRequired,
         tagFilterDropdown: PropTypes.bool.isRequired,
         domainFilterDropdown: PropTypes.bool.isRequired,
         bookmarkFilter: PropTypes.bool.isRequired,
         onShowOnlyBookmarksChange: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
-        // hideTagFilter: PropTypes.func.isRequired,
+        hideTagFilter: PropTypes.func.isRequired,
         hideDomainFilter: PropTypes.func.isRequired,
         delIncDomainFilter: PropTypes.func.isRequired,
         delExcDomainFilter: PropTypes.func.isRequired,
         fetchSuggestedTags: PropTypes.func.isRequired,
-        // suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         fetchSuggestedDomains: PropTypes.func.isRequired,
         suggestedDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
         // toggleFilterTypes: PropTypes.func.isRequired,
@@ -90,20 +90,20 @@ class SearchFiltersContainer extends PureComponent {
             : this.props.delExcDomainFilter(value)
     }
 
-    renderTagFilter = () => <Tags />
-    // !this.props.tagFilterDropdown ? (
-    //     <FilterBar onBarClick={this.props.showTagFilter} filter="Tag" />
-    // ) : (
-    //     <IndexDropdownSB
-    //         onFilterAdd={this.props.addTagFilter}
-    //         onFilterDel={this.props.delTagFilter}
-    //         initFilters={this.props.filteredTags}
-    //         initSuggestions={this.props.suggestedTags}
-    //         source="tag"
-    //         isSidebarOpen={this.props.isSidebarOpen}
-    //         closeDropdown={this.props.hideTagFilter}
-    //     />
-    // )
+    renderTagFilter = () =>
+        !this.props.tagFilterDropdown ? (
+            <FilterBar onBarClick={this.props.showTagFilter} filter="Tag" />
+        ) : (
+            <IndexDropdownSB
+                onFilterAdd={this.props.addTagFilter}
+                onFilterDel={this.props.delTagFilter}
+                initFilters={this.props.filteredTags}
+                initSuggestions={this.props.suggestedTags}
+                source="tag"
+                isSidebarOpen={this.props.isSidebarOpen}
+                closeDropdown={this.props.hideTagFilter}
+            />
+        )
 
     renderDomainFilter = () =>
         !this.props.domainFilterDropdown ? (
@@ -137,7 +137,11 @@ class SearchFiltersContainer extends PureComponent {
         </Checkbox>
     )
 
-    renderTypeFilter = () => <Types />
+    renderTypeFilter = () => (
+        <div>
+            <Types />
+        </div>
+    )
 
     render() {
         return (
@@ -145,7 +149,7 @@ class SearchFiltersContainer extends PureComponent {
                 bookmarkFilter={this.renderBookmarkFilter()}
                 tagFilter={this.renderTagFilter()}
                 domainFilter={this.renderDomainFilter()}
-                // filteredTags={this.renderFilteredTags()}
+                filteredTags={this.renderFilteredTags()}
                 filteredDomains={this.renderFilteredDomains()}
             />
         )
@@ -183,7 +187,7 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.toggleBookmarkFilter())
     },
     clearAllFilters: () => dispatch(actions.resetFilters()),
-    // handleFilterClick: source => () => dispatch(actions.setFilterPopup(source)),
+    handleFilterClick: source => () => dispatch(actions.setFilterPopup(source)),
     addTagFilter: tag => {
         dispatch(actions.addTagFilter(tag))
         dispatch(actions.fetchSuggestedTags())
