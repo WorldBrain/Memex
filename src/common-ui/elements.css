@@ -5,8 +5,9 @@
     color: white;
     padding: 2px 9px 3px 9px;
     border-radius: 3px;
-    font-size: 13px;
-    font-weight: 400;
+    font-size: 12px;
+    font-weight: 300;
+    margin-right: 3px;
     display: flex;
     align-items: center;
 
@@ -36,3 +37,8 @@
 .cancelNaked {
     composes: nakedButton hoverColor warningColor from './colors.css';
 }
+
+.greenActionButton {
+    composes: nakedButton hoverColor warningColor from './colors.css';   
+}
+
