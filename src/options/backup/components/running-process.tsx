@@ -92,7 +92,6 @@ export default class RunningProcess extends React.Component<Props> {
             this.setState({ status: 'success' })
         } else if (event.type === 'fail') {
             let overlay = null
-            console.log(event.error)
             if (event.error === 'Backup file not found') {
                 overlay = true
             }
@@ -127,7 +126,8 @@ export default class RunningProcess extends React.Component<Props> {
             <div>
                 {this.props.renderHeader()}
                 <div className={STYLES.subtitle2}>
-                With a lot of data (> 25.000 pages) it is recommended running this over night. 
+                    With a lot of data (> 25.000 pages) it is recommended
+                    running this over night.
                 </div>
                 <div className={localStyles.steps}>
                     {this.renderSteps(info)}
@@ -147,8 +147,14 @@ export default class RunningProcess extends React.Component<Props> {
                         {this.props.preparingStepLabel}
                     </div>
                     <div className={localStyles.stepStatus}>
-                        {info.state === 'preparing' && <span className={localStyles.statusMessageActive}>running</span>}
-                        {info.state !== 'preparing' && <img src="/img/checkmarkGreen.svg"/>}
+                        {info.state === 'preparing' && (
+                            <span className={localStyles.statusMessageActive}>
+                                running
+                            </span>
+                        )}
+                        {info.state !== 'preparing' && (
+                            <img src="/img/checkmarkGreen.svg" />
+                        )}
                     </div>
                 </div>
                 <div className={localStyles.step}>
@@ -157,11 +163,22 @@ export default class RunningProcess extends React.Component<Props> {
                         {this.props.synchingStepLabel}
                     </div>
                     <div className={localStyles.stepStatus}>
-                        {info.state === 'preparing' && <span className={localStyles.statusMessageWaiting}>up next</span>}
+                        {info.state === 'preparing' && (
+                            <span className={localStyles.statusMessageWaiting}>
+                                up next
+                            </span>
+                        )}
                         {status === 'running' &&
-                            info.state !== 'preparing' &&
-                            <span className={localStyles.statusMessageActive}>running</span>}
-                        {status === 'success' && <img src="/img/checkmarkGreen.svg"/>}
+                            info.state !== 'preparing' && (
+                                <span
+                                    className={localStyles.statusMessageActive}
+                                >
+                                    running
+                                </span>
+                            )}
+                        {status === 'success' && (
+                            <img src="/img/checkmarkGreen.svg" />
+                        )}
                     </div>
                 </div>
             </React.Fragment>

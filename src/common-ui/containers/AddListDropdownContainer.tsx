@@ -210,7 +210,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 url: this.props.url,
             })
         } catch (err) {
-            console.log(err)
+            console.error(err)
         }
 
         this.setState(state => ({

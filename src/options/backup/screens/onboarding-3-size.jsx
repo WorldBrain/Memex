@@ -31,17 +31,13 @@ export default class OnboardingSizeContainer extends React.Component {
             }
         } catch (e) {
             this.setState({ estimation: 'error' })
-            console.log(e)
+            console.error(e)
             console.trace()
         }
         this.setState({
+            isAuthenticated: await remoteFunction('isBackupAuthenticated')(),
             backendLocation: await remoteFunction('getBackendLocation')(),
         })
-        console.log(`backendLocation: ${this.state.backendLocation}`)
-        this.setState({
-            isAuthenticated: await remoteFunction('isBackupAuthenticated')(),
-        })
-        console.log(`isAuthenticated: ${this.state.isAuthenticated}`)
     }
 
     renderLoadingIndicator() {
@@ -74,7 +70,7 @@ export default class OnboardingSizeContainer extends React.Component {
                     Estimating backup size
                 </p>
                 <div className={Styles.subtitle2}>
-                    What do you want to include in the backup? 
+                    What do you want to include in the backup?
                 </div>
                 <table className={localStyles.table}>
                     <tbody>

@@ -85,5 +85,3 @@ window['eventLog'] = eventLog
 window['directLinking'] = directLinking
 window['customList'] = customList
 window['notifications'] = notifications
-
-console.log('Background script initialized')
