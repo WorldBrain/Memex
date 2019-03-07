@@ -2,15 +2,133 @@
     height: 100%;
     background: #fff;
     padding-bottom: 150px;
-    overflow-y: scroll;
-    border-left: 3px solid #e1ece9;
 }
 
 .annotationsSection {
+    width: 100%;
     padding: 0 5px;
     background: #fff;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+}
+
+.navBar {
+    margin-top: 10px;
+    color: #1a2f58;
+}
+
+.navLinks {
+    margin-right: 15px;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 10px 0;
+    position: relative;
+    display: inline-block;
+    outline: none;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+
+    &::before {
+        position: absolute;
+        transition: transform 0.3s, opacity 0.3s;
+        pointer-events: none;
+    }
+
+    &::after {
+        position: absolute;
+        top: 75%;
+        left: 0;
+        width: 100%;
+        height: 0.14em;
+        background: #1a2f58;
+        opacity: 0.3;
+        content: '';
+        transform: scale(0.92);
+        transition: all 0.5s ease-in-out;
+    }
+}
+
+.navLinks:hover::before,
+:focus::before {
+    opacity: 0;
+    transform: translateY(-2px);
+}
+
+.navLinks:hover::after,
+:focus::after {
+    opacity: 1;
+    transform: translateY(0px);
+}
+
+.filterNav {
+    float: left;
+    margin-left: 15px;
+}
+
+.resultsNav {
+    float: right;
+}
+
+.filtersSidebar {
+    position: fixed;
+    top: 0px;
+    right: 390px;
+    z-index: 1100;
+    width: 200px;
+    height: 100%;
+    margin-left: 5px;
+    background: #fff;
+    border-right: 1px solid rgb(26, 47, 88, 0.3);
+    box-shadow: 0 6px 31px -11px rgba(34, 12, 12, 0.32157);
+}
+
+.filtersDiv {
+    height: 30%;
+    margin-top: 5px;
+}
+
+.filters {
+    margin-left: 30px;
+    margin-top: 15px;
+    display: grid;
+    color: #1a2f58;
+}
+
+.filterButtons {
+    background: #fff;
+    margin-bottom: 10px;
+    margin-left: 15px;
+    border: 3px solid #d0d5e0;
+    border-radius: 5px;
+    margin-right: 15px;
+    width: 100px;
+    height: 25px;
+    text-align: center;
+}
+
+.bookmark {
+    background-image: url('/img/star_blue_full.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.arrow {
+    background-image: url('/img/arrow.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    margin-left: 65px;
+    border: none;
+}
+
+.listsDiv {
+    height: 100%;
+}
+
+.allResultsDiv {
+    margin-top: 50px;
 }

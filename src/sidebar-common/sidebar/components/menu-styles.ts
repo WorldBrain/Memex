@@ -3,13 +3,13 @@
 const baseStyles = {
     bmMenuWrap: {
         top: 0,
+        zIndex: 1000,
         transition: 'all 0s',
     },
     bmMenu: {
         position: 'fixed',
-        right: 0,
+        right: '55px',
         top: 0,
-        zIndex: 1100,
         width: '340px',
         height: '100%',
         transition: 'all 0s',
