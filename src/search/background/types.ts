@@ -9,6 +9,8 @@ export interface AnnotPage {
     /** Object URL to the in-memory location of the assoc. fav-icon. */
     favIcon?: string
     displayTime?: number
+    /** Total count of annots associated with this page. (regardless of search) */
+    annotsCount: number
     annotations: Annotation[]
 }
 

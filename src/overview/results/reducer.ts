@@ -142,6 +142,11 @@ reducer.on(acts.setActiveTagIndex, (state, payload) => ({
     activeTagIndex: payload,
 }))
 
+reducer.on(acts.setAreAnnotationsExpanded, (state, payload) => ({
+    ...state,
+    areAnnotationsExpanded: payload,
+}))
+
 reducer.on(acts.toggleAreAnnotationsExpanded, state => ({
     ...state,
     areAnnotationsExpanded: !state.areAnnotationsExpanded,

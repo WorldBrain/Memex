@@ -7,29 +7,41 @@ import { Annotation } from 'src/sidebar-common/sidebar/types'
 const styles = require('./annotation-list.css')
 
 export interface Props {
-    /* Override for expanding annotations by default */
+    /** Override for expanding annotations by default */
     isExpandedOverride: boolean
-    /* Array of matched annotations, limited to 3 */
+    /** Array of matched annotations, limited to 3 */
     annotations: Annotation[]
-    /* Opens the annotation sidebar with all of the annotations */
+    /** Opens the annotation sidebar with all of the annotations */
     openAnnotationSidebar: MouseEventHandler
 }
 
 export interface State {
     /** Boolean to denote whether the list is expanded or not */
     isExpanded: boolean
+    /** The previous prop to compare in getDerivedStateFromProps */
+    prevIsExpandedOverride: boolean
 }
 
 class AnnotationList extends Component<Props, State> {
     state = {
-        isExpanded: false,
+        /* The intial value is set to the isExpandedOverride which is
+        fetched from localStorage. */
+        isExpanded: this.props.isExpandedOverride,
+        prevIsExpandedOverride: this.props.isExpandedOverride,
     }
 
     /**
-     *  Derive isExpanded from override and current state
+     * We compare if the previous isExpandedOverride prop is different from
+     * the current isExpandedOverride, then we set the state accordingly.
      */
-    private get isExpanded(): boolean {
-        return this.props.isExpandedOverride || this.state.isExpanded
+    static getDerivedStateFromProps(props: Props, state: State): State {
+        if (props.isExpandedOverride !== state.prevIsExpandedOverride) {
+            return {
+                isExpanded: props.isExpandedOverride,
+                prevIsExpandedOverride: props.isExpandedOverride,
+            }
+        }
+        return state
     }
 
     private toggleIsExpanded = () => {
@@ -56,8 +68,7 @@ class AnnotationList extends Component<Props, State> {
     }
 
     render() {
-        const isExpanded = this.isExpanded
-
+        const { isExpanded } = this.state
         return (
             <div
                 className={cx({
@@ -67,11 +78,11 @@ class AnnotationList extends Component<Props, State> {
                 {/* Annotation count text and toggle arrow */}
                 <p
                     className={cx(styles.resultCount, {
-                            [styles.expandedCount]: this.state.isExpanded,
-                        })}
+                        [styles.expandedCount]: this.state.isExpanded,
+                    })}
                     onClick={this.toggleIsExpanded}
                 >
-                    <span className={styles.commentIcon}/>
+                    <span className={styles.commentIcon} />
                     <b>{this.props.annotations.length}</b> found on this page
                     <span
                         className={cx(styles.icon, {

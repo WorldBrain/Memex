@@ -72,6 +72,21 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             })
     }
 
+    private async lookupAnnotsCounts(
+        pageUrls: string[],
+        countMap: Map<string, number>,
+    ) {
+        for (const url of pageUrls) {
+            const count = await this.backend.dexieInstance
+                .table('annotations')
+                .where('pageUrl')
+                .equals(url)
+                .count()
+
+            countMap.set(url, count)
+        }
+    }
+
     /**
      * Goes through given input, finding all matching pages from the DB.
      * Then does further lookups to determine whether each matching page
@@ -81,6 +96,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const favIconMap = new Map<string, string>()
         const pageMap = new Map<string, Page>()
         const tagMap = new Map<string, string[]>()
+        const countMap = new Map<string, number>()
 
         await this.lookupPages(pageUrls, pageMap)
 
@@ -92,6 +108,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             this.lookupFavIcons([...hostnames], favIconMap),
             this.lookupBookmarks(pageUrls, pageMap),
             this.lookupTags(pageUrls, tagMap),
+            this.lookupAnnotsCounts(pageUrls, countMap),
         ])
 
         // Map page results back to original input
@@ -102,6 +119,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                 ...page,
                 favIcon: favIconMap.get(page.hostname),
                 tags: tagMap.get(url) || [],
+                annotsCount: countMap.get(url),
             }
         })
 
