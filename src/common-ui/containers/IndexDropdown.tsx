@@ -34,6 +34,7 @@ export interface Props {
     /** initial suggestions from the popup */
     initSuggestions?: string[]
     isForSidebar?: boolean
+    isForRibbon?: boolean
     onBackBtnClick?: ClickHandler<HTMLButtonElement>
     allTabs?: boolean
 }

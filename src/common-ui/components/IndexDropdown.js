@@ -26,6 +26,7 @@ class IndexDropdown extends PureComponent {
         isForSidebar: PropTypes.bool,
         // clearSearchField: PropTypes.func,
         // showClearfieldBtn: PropTypes.bool,
+        isForRibbon: PropTypes.bool,
         onBackBtnClick: PropTypes.func,
         allTabs: PropTypes.bool,
         allTabsCollection: PropTypes.bool,
@@ -43,7 +44,8 @@ class IndexDropdown extends PureComponent {
     get mainClass() {
         return cx(this.styles.tagDiv, {
             [this.styles.tagDivFromOverview]: this.props.hover,
-            [this.styles.tagDivForFilter]: !this.props.url,
+            [this.styles.tagDivForFilter]:
+                !this.props.url || this.props.isForRibbon,
             [this.styles.tagDivForFilterSB]: this.props.isForSidebar,
         })
     }
@@ -81,7 +83,7 @@ class IndexDropdown extends PureComponent {
                         [this.styles.commentBox]: this.props.allowAdd,
                     })}
                 >
-                    <span className={styles.searchIcon}/>
+                    <span className={styles.searchIcon} />
                     <input
                         className={this.styles.search}
                         name="query"
