@@ -16,7 +16,7 @@ interface Props {
     handleCancelOperation: () => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
-    // shareIconClickHandler: () => void
+    shareIconClickHandler: () => void
     replyIconClickHandler: () => void
     getTruncatedTextObject: (
         text: string,
@@ -50,7 +50,6 @@ const DefaultDeleteModeContent = (props: Props) => (
             handleCancelDeletion={props.handleCancelOperation}
             editIconClickHandler={props.editIconClickHandler}
             trashIconClickHandler={props.trashIconClickHandler}
-            // shareIconClickHandler={props.shareIconClickHandler}
             replyIconClickHandler={props.replyIconClickHandler}
         />
     </React.Fragment>

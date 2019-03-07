@@ -50,6 +50,7 @@ export default class DirectLinkingBackground {
                 getAllAnnotations: this.getAllAnnotationsByUrl.bind(this),
                 createAnnotation: this.createAnnotation.bind(this),
                 editAnnotation: this.editAnnotation.bind(this),
+                editAnnotationTags: this.editAnnotationTags.bind(this),
                 deleteAnnotation: this.deleteAnnotation.bind(this),
                 getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
                 addAnnotationTag: this.addTagForAnnotation.bind(this),

@@ -28,16 +28,6 @@ export const reshapeParamsForOldSearch = (params): OldSearchParams => ({
     endDate: Number(params.endDate) || undefined,
 })
 
-export const pageToAnnotPage = (
-    page: Page,
-    annotations: Annotation[] = [],
-): AnnotPage => ({
-    url: page.url,
-    title: page.fullTitle,
-    hasBookmark: page.hasBookmark,
-    annotations,
-})
-
 export const reshapeAnnotForDisplay = ({
     url,
     pageUrl,
@@ -64,4 +54,5 @@ export const reshapePageForDisplay = page => ({
     favIcon: page.favIcon,
     annotations: [],
     tags: page.tags,
+    annotsCount: page.annotsCount,
 })

@@ -226,13 +226,6 @@ export default class SearchBackground {
         contentTypes,
         ...params
     }: PageSearchParams) {
-        if (contentTypeChecks.annotsOnly(contentTypes)) {
-            const res = await this.storage.searchPagesByLatestAnnotation(params)
-
-            // TODO: change this when blank annots pagination algo improves; super innefficient
-            return res.slice(params.skip, params.skip + params.limit)
-        }
-
         let results = await this.storage.searchPages(params, this.legacySearch)
 
         if (contentTypeChecks.combined(contentTypes)) {
@@ -248,6 +241,13 @@ export default class SearchBackground {
         }
 
         return results
+    }
+
+    private async blankAnnotsSearch(params: PageSearchParams) {
+        const res = await this.storage.searchPagesByLatestAnnotation(params)
+
+        // TODO: change this when blank annots pagination algo improves; super innefficient
+        return res.slice(params.skip, params.skip + params.limit)
     }
 
     async searchAnnotations(params: AnnotSearchParams): Promise<Annotation[]> {
@@ -270,6 +270,9 @@ export default class SearchBackground {
 
     async searchPages(params: PageSearchParams) {
         let searchParams
+        let results
+        const shapeResult = res =>
+            SearchBackground.shapePageResult(res, searchParams.limit)
 
         try {
             searchParams = this.processSearchParams(params)
@@ -277,39 +280,44 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
+        // No content types checked; skip search
         if (contentTypeChecks.noop(searchParams.contentTypes)) {
-            return SearchBackground.shapePageResult([], searchParams.limit)
+            return shapeResult([])
         }
 
-        // Blank search; just list annots, applying search filters
+        // Blank search; just list pages/annots, applying search filters
         if (searchParams.isBlankSearch) {
-            const results = await this.blankPageSearch(searchParams)
+            const searchMethod = contentTypeChecks.annotsOnly(
+                searchParams.contentTypes,
+            )
+                ? this.blankAnnotsSearch.bind(this)
+                : this.blankPageSearch.bind(this)
 
-            return SearchBackground.shapePageResult(results, searchParams.limit)
+            results = await searchMethod(searchParams)
+            return shapeResult(results)
         }
 
+        // Page terms search
         if (contentTypeChecks.pagesOnly(searchParams.contentTypes)) {
-            const res = await this.storage.searchPages(
+            results = await this.storage.searchPages(
                 searchParams,
                 this.legacySearch,
             )
-            return SearchBackground.shapePageResult(res, searchParams.limit)
+            return shapeResult(results)
         }
 
+        // Annots terms search
         if (contentTypeChecks.annotsOnly(searchParams.contentTypes)) {
-            return SearchBackground.shapePageResult(
-                await this.storage.searchAnnots({
-                    ...searchParams,
-                    includePageResults: true,
-                }),
-                searchParams.limit,
-            )
+            results = await this.storage.searchAnnots({
+                ...searchParams,
+                includePageResults: true,
+            })
+            return shapeResult(results)
         }
 
-        return SearchBackground.shapePageResult(
-            await this.combinedSearch(searchParams),
-            searchParams.limit,
-        )
+        // Combined terms search
+        results = await this.combinedSearch(searchParams)
+        return shapeResult(results)
     }
 
     async handleBookmarkRemoval(id, { node }) {

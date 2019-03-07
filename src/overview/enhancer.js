@@ -102,6 +102,10 @@ const hydrateStateFromStorage = store => {
 
     // Keep each of these storage keys in sync
     hydrate(constants.SEARCH_COUNT_KEY, resultsActs.initSearchCount)
+    hydrate(
+        constants.ANNOTATIONS_EXPANDED_KEY,
+        resultsActs.setAreAnnotationsExpanded,
+    )
 }
 
 const syncStateToStorage = store =>
@@ -111,6 +115,10 @@ const syncStateToStorage = store =>
         const state = store.getState()
 
         dump(constants.SEARCH_COUNT_KEY, results.searchCount(state))
+        dump(
+            constants.ANNOTATIONS_EXPANDED_KEY,
+            results.areAnnotationsExpanded(state),
+        )
     })
 
 const storageSync = storeCreator => (reducer, initState, enhancer) => {
