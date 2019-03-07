@@ -10,6 +10,9 @@
     margin-top: -20px;
     display: flex;
     flex-direction: column;
+    border-bottom: #dedede solid 1px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
 }
 
 .resultLength {
