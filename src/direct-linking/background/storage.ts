@@ -76,7 +76,7 @@ export default class AnnotationStorage extends FeatureStorage {
                     { field: 'comment' },
                 ],
             },
-            // Indexes the `pageUrl` field
+            // Indexes the `pageUrl` and `lastEdited` fields
             {
                 version: new Date('2019-02-19'),
                 fields: {
@@ -95,6 +95,7 @@ export default class AnnotationStorage extends FeatureStorage {
                     { field: 'pageTitle' },
                     { field: 'body' },
                     { field: 'createdWhen' },
+                    { field: 'lastEdited' },
                     { field: 'comment' },
                 ],
             },
