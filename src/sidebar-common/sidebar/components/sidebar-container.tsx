@@ -202,4 +202,5 @@ const mapDispatchToProps: MapDispatchToProps<
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-)(onClickOutside(SidebarContainer))
+    // )(onClickOutside(SidebarContainer))
+)(SidebarContainer)
