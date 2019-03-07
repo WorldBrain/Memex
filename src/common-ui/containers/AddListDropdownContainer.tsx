@@ -12,6 +12,7 @@ import { PageList } from '../../custom-lists/background/types'
 import { ClickHandler } from '../../popup/types'
 
 export interface Props {
+    env?: 'inpage' | 'overview'
     mode: string
     url?: string
     initLists: PageList[]
@@ -338,6 +339,16 @@ class AddListDropdownContainer extends Component<Props, State> {
     private handleSearchKeyDown = (
         event: React.KeyboardEvent<HTMLInputElement>,
     ) => {
+        if (
+            this.props.env === 'inpage' &&
+            !(event.ctrlKey || event.metaKey) &&
+            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
+        ) {
+            event.preventDefault()
+            event.stopPropagation()
+            this.setState(state => ({ searchVal: state.searchVal + event.key }))
+            return
+        }
         switch (event.key) {
             case 'Enter':
                 return this.handleSearchEnterPress(event)

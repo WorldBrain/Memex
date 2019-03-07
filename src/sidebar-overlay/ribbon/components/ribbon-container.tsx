@@ -122,6 +122,7 @@ class RibbonContainer extends Component<Props> {
     private renderCollectionsManager() {
         return (
             <AddListDropdownContainer
+                env="inpage"
                 url={this.props.url}
                 initLists={this.props.collections}
                 initSuggestions={this.props.initCollSuggs}
