@@ -3,17 +3,18 @@
 const baseStyles = {
     bmMenuWrap: {
         top: 0,
-        transition: 'all 0s',
+        right: '-60px',
+        transition: 'all 0.3s cubic-bezier(0.65, 0.05, 0.36, 1) 0s',
     },
     bmMenu: {
         position: 'fixed',
-        right: 0,
+        right: '0px',
         top: 0,
         zIndex: 1100,
-        width: '340px',
+        width: '400px',
         height: '100%',
-        transition: 'all 0s',
-        boxShadow: '-4px 2px 20px 1px rgba(62, 185, 149, 0.0902)',
+        transition: 'all 0.3s cubic-bezier(0.65, 0.05, 0.36, 1) 0s',
+        boxShadow: 'rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px',
     },
     bmBurgerButton: {
         display: 'none',
@@ -26,9 +27,7 @@ const baseStyles = {
 const menuStyles = (env: 'inpage' | 'overview') => {
     if (env === 'overview') {
         ;((baseStyles.bmMenu.top as unknown) as string) = '55px'
-        ;((baseStyles.bmMenuWrap.top as unknown) as string) = '55px'
-        baseStyles.bmMenu.transition = 'all 0s'
-        baseStyles.bmMenuWrap.transition = 'all 0s'
+        ;((baseStyles.bmMenuWrap.top as unknown) as string) = '0px'
     }
 
     return baseStyles

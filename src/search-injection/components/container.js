@@ -7,7 +7,6 @@ import ResultItem from './ResultItem'
 import RemovedText from './RemovedText'
 import * as constants from '../constants'
 import { getLocalStorage, setLocalStorage } from '../utils'
-import { MigrationNotice } from '../../common-ui/containers'
 import Notification from './Notification'
 import { NOTIFS } from '../../notifications/notifications'
 import * as actionTypes from '../../notifications/action-types'
@@ -23,7 +22,6 @@ class Container extends React.Component {
         len: PropTypes.number.isRequired,
         rerender: PropTypes.func.isRequired,
         searchEngine: PropTypes.string.isRequired,
-        requiresMigration: PropTypes.bool.isRequired,
     }
 
     constructor(props) {
@@ -37,7 +35,6 @@ class Container extends React.Component {
         this.undoRemove = this.undoRemove.bind(this)
         this.changePosition = this.changePosition.bind(this)
         this.handleClickTick = this.handleClickTick.bind(this)
-
         this.trackEvent = remoteFunction('trackEvent')
         this.readNotification = remoteFunction('readNotification')
         this.fetchNotifById = remoteFunction('fetchNotifById')
@@ -287,10 +284,6 @@ class Container extends React.Component {
     }
 
     render() {
-        if (this.props.requiresMigration) {
-            return <MigrationNotice showBanner />
-        }
-
         // If the state.removed is true, show the RemovedText component
         if (this.state.removed) {
             return (

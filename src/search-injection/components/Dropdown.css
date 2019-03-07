@@ -1,24 +1,27 @@
 /* Dropdown */
-.dropdown {
-    padding: 10px;
+
+.dropdownContainer {
+    composes: toolTips from '../../common-ui/elements.css';
+    padding: 10px 0;
     background: white;
     display: block;
     position: absolute;
-    list-style-type: none;
-    z-index: 100;
-    box-shadow: 0px 6px 15px 2px rgba(0, 0, 0, 0.34902);
     top: 40px;
     right: 0px;
+    z-index: 10000;
+}
+
+.dropdown {
+    list-style-type: none;
+    z-index: 20000;
 }
 
 .dropdownElement {
+    composes: hoversidebaropen from '../../common-ui/colors.css';
     cursor: pointer;
     font-size: 15px;
+    font-weight: 400;
     color: #222;
-    padding: 5px;
-}
-
-.dropdownElement:hover {
-    background: #00000024;
-    color: #333;
+    padding: 10px 20px;
+    font-family: 'Inter';
 }

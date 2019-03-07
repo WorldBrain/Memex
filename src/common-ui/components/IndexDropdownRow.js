@@ -60,7 +60,6 @@ class IndexDropdownRow extends PureComponent {
     }
 
     render() {
-        console.log(this.props.isForSidebar, this.props.isNew)
         return (
             <div 
                 className={cx(this.mainClass, {

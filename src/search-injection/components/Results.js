@@ -1,14 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import { OutLink } from '../../common-ui/containers'
 import Dropdown from './Dropdown'
 import styles from './Results.css'
 
 const Results = props => {
-    const logoURL = browser.extension.getURL('img/worldbrain-logo-wo-beta.png')
-    const shortcut = browser.extension.getURL('img/shortcut.svg')
-    const voteIcon = browser.extension.getURL('img/vote_white.svg')
     const searchEngineClass = `${props.searchEngine}_${props.position}`
     return (
         <div
@@ -20,15 +16,15 @@ const Results = props => {
             <div className={styles.header}>
                 <p className={styles.resultsText}>
                     <span className={styles.resultLength}>
-                        {props.totalCount} results
+                        {props.totalCount}
                     </span>{' '}
-                    in your
-                    <img src={logoURL} className={styles.logo} />
+                    Memex results 
+                    <a className={styles.links} onClick={props.seeMoreResults}>
+                        See all
+                    </a>
                 </p>
                 <div className={styles.linksContainer}>
-                    <a className={styles.links} onClick={props.seeMoreResults}>
-                        See all results
-                    </a>
+                    
                     <a
                         className={styles.links}
                         onClick={props.toggleHideResults}
@@ -50,29 +46,17 @@ const Results = props => {
                     ''
                 )}
             </div>
+            <div className={classNames(styles.noDisplay, {
+                [styles.notification]: props.renderNotification,
+            })}>
             {props.renderNotification}
-            <div className={styles.proTip}>
-                <span className={styles.emoji}>🤓</span>
-                <span>
-                    <b>Pro Tip: </b>
-                    Search by typing
-                </span>
-                <img className={styles.shortcut} src={shortcut} />
-                <span>into the address bar</span>
             </div>
-            <div className={styles.resultsBox}>
+            <div className={classNames(styles.resultsBox, {
+                [styles.isBlurred]: props.renderNotification,
+            })}>
                 {// Render only if hideResults is false
                 props.hideResults ? '' : props.renderResultItems()}
             </div>
-            <OutLink
-                className={styles.upgradeButton}
-                to="https://worldbrain.io/vote_feature"
-            >
-                <div>
-                    <img className={styles.voteIcon} src={voteIcon} />
-                    Vote for Next Features
-                </div>
-            </OutLink>
         </div>
     )
 }

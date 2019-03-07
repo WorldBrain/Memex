@@ -1,13 +1,11 @@
 .mainContainer {
     display: flex;
-    flex-direction: row;
-    border: 1px solid #3eb995;
-    box-shadow: 0px 1px 4px #3eb995;
-    margin-bottom: 15px;
-    margin-top: 15px;
-    padding: 10px 5px;
+    flex-direction: column;
+    width: 100%;
     align-items: center;
-    justify-content: space-between;
+    background-color: white;
+    margin: 30px;
+    justify-content: flex-start;
 }
 
 .alertIcon {
@@ -20,30 +18,27 @@
     display: flex;
     align-items: flex-start;
     flex-direction: column;
-    margin: -1px 10px 0 3px;
-    text-align: left;
     width: 100%;
+    margin: 0px 0 20px 0;
 }
 
 .message {
-    font-size: 14px;
+    composes: subTitleColor from '../../common-ui/colors.css';
+    font-size: 16px;
     margin-top: 5px;
     width: 100%;
     align-items: flex-start;
 }
 
 .title {
+    composes: h2Color from '../../common-ui/colors.css';
     font-weight: 600;
-    font-size: 16px;
+    font-size: 21px;
 }
 
 .tick {
-    width: 60px;
-    margin-right: 3px;
+    composes: cancelNaked from '../../common-ui/elements.css';
+    margin-top: 10px;
+    font-size: 14px;
     cursor: pointer;
-
-    &:hover {
-        background-color: #efefef;
-        border-radius: 90px;
-    }
 }

@@ -321,3 +321,16 @@
     position: absolute;
     margin-left: 25px;
 }
+
+.duckduckgo {
+    padding-top: 9px;
+    padding-bottom: 9px;
+
+    & .url {
+        margin-top: -16px;
+    }
+
+    & .displayTime {
+        margin-top: -8px;
+    }
+}

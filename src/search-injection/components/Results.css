@@ -8,33 +8,33 @@
     position: relative;
     animation: fadeIn 1s ease-in;
     margin-top: -20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .resultLength {
     font-weight: 800;
-    color: var(--memex-green);
+    composes: darkMintGreen from '../../common-ui/colors.css';
+    font-size: 16px;
+    vertical-align: inherit;
 }
 
 .linksContainer {
     display: inline-block;
-    font-size: 1em;
     margin-bottom: 10px;
     margin-top: 6px;
-    margin-left: -30px;
+    margin-left: 10px;
 }
 
 .links {
-    color: #666;
-    text-decoration: none;
-    font-size: 0.9em;
+    composes: darkBlue from '../../common-ui/colors.css';
+    composes: nakedButton from '../../common-ui/elements.css';
+    text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+    font-size: 16px;
     display: inline-block;
+    font-weight: 600;
     margin-right: 10px;
     cursor: pointer;
-
-    &:hover {
-        color: #888;
-        text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
-    }
 }
 
 .logo {
@@ -45,37 +45,71 @@
 }
 
 .settingsButton {
+    composes: hoverColor from '../../common-ui/colors.css';
     position: absolute;
     top: 15px;
-    width: 5%;
     border: none;
-    padding: 0;
     cursor: pointer;
-    height: 20px;
-    outline: 0;
-    color: #909090;
     background-image: url('/img/settings.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     background-color: #fff;
+    height: 25px;
+    width: 25px;
+    background-position: center;
+    vertical-align: middle;
+    margin-top: -2px;
+    border-radius: 3px;
+    margin-right: 5px;
 }
 
 .resultsText {
+    composes: darkBlue from '../../common-ui/colors.css';
     display: inline-block;
     margin-bottom: 3px;
-    font-size: 1.1em;
-    font-weight: 400;
+    font-size: 16px;
+    font-weight: 600;
     width: 71%;
-    color: #173766;
+    margin-right: 10px;
+}
+
+.resultsText > a {
+    margin-left: 10px;
+}
+
+.noDisplay {
+    display: none;
+}
+
+.notification {
+    composes: boxShadowOverlays from '../../common-ui/colors.css';
+    position: absolute;
+    background: white;
+    z-index: 2000;
+    width: 95%;
+    min-width: 05%;
+    display: flex;
+    top: 70px;
+    margin: auto;
+    justify-self: center;
+    align-self: center;
+    border-radius: 3px;
+    max-width: 95%;
+}
+
+.isBlurred {
+    filter: blur(2px);
+    background: white;
+    z-index: 1000;
 }
 
 .google_above {
     & .settingsButton {
         right: -10px;
+        top: 16px;
     }
 
     & .resultsText {
-        padding-left: 16px;
         width: 76%;
     }
 
@@ -86,6 +120,10 @@
             width: 64%;
         }
     }
+
+    .resultLength {
+        vertical-align: middle;
+    }
 }
 
 .google_side {
@@ -93,7 +131,7 @@
 
     & .settingsButton {
         right: -5px;
-        top: 14px;
+        top: 17px;
     }
 
     & .mainContainer {

@@ -1,7 +1,7 @@
 // Limit for the number of search results to be fetched
 export const LIMIT = {
     above: 4,
-    side: 5,
+    side: 15,
 }
 
 // regex - Regular Expression to match the url

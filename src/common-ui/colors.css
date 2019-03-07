@@ -91,7 +91,7 @@
 /* BORDER RADIUS */
 
 .nakedButton {
-    padding: 2px 6px 3px 6px;
+    padding: 3px 8px 3px 8px;
     border-radius: 3px;
     font-weight: 400;
 }
@@ -152,6 +152,10 @@
         transition: background 120ms ease-in 0s;
         background-color: rgba(55, 53, 47, 0.03);
     }
+}
+
+.boxShadowOverlays {
+    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 5px 10px, rgba(15, 15, 15, 0.2) 0px 15px 40px;
 }
 
 .infoBoxes {

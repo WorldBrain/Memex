@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import styles from './SidebarIcons.css'
-import InfoTooltip from './Tooltip'
+import InfoTooltip from '../../../common-ui/components/miniTooltip'
 
 class SidebarIcons extends PureComponent {
     static propTypes = {
@@ -57,7 +57,8 @@ class SidebarIcons extends PureComponent {
                     [styles.buttonContainer]: !this.props.overviewMode,
                 })}
             >
-                <InfoTooltip showTooltip={this.state.showFilterTooltip}>
+                <InfoTooltip 
+                    showTooltip={this.state.showFilterTooltip}>
                     Filters
                 </InfoTooltip>
                 <div className={styles.enabled}>
@@ -81,7 +82,6 @@ class SidebarIcons extends PureComponent {
                 </div>
                 <InfoTooltip
                     showTooltip={this.state.showCollTooltip}
-                    content="My Collections"
                 >
                     My Collections
                 </InfoTooltip>
