@@ -29,6 +29,7 @@ interface DispatchProps {
     onInit: () => void
     handleToggleFullScreen: (e: Event) => void
     openSidebar: () => void
+    closeSidebar: () => void
     openCommentBoxWithHighlight: (anchor: Anchor) => void
     setRibbonEnabled: (isRibbonEnabled: boolean) => void
     setTooltipEnabled: (isTooltipEnabled: boolean) => void
@@ -203,24 +204,26 @@ class RibbonSidebarContainer extends React.Component<Props> {
 
         return (
             <React.Fragment>
-                {!isSidebarOpen &&
-                    !isPageFullScreen && (
-                        <RibbonContainer
-                            handleRemoveRibbon={handleRemoveRibbon}
-                            insertOrRemoveTooltip={insertOrRemoveTooltip}
-                            openSidebar={this._openSidebar}
-                        />
-                    )}
-                <SidebarContainer
-                    env="inpage"
-                    annotationsManager={annotationsManager}
-                    ref={this._setSidebarRef}
-                    goToAnnotation={this._goToAnnotation}
-                    closeSidebarCallback={this._closeSidebarCallback}
-                    handleAnnotationBoxMouseEnter={makeHighlightMedium}
-                    handleAnnotationBoxMouseLeave={removeMediumHighlights}
-                    sortAnnotationsByPosition={sortAnnotationsByPosition}
+                <RibbonContainer
+                    isSidebarOpen={isSidebarOpen}
+                    handleRemoveRibbon={handleRemoveRibbon}
+                    insertOrRemoveTooltip={insertOrRemoveTooltip}
+                    openSidebar={this._openSidebar}
+                    closeSidebar={this.props.closeSidebar}
                 />
+
+                {isSidebarOpen && (
+                    <SidebarContainer
+                        env="inpage"
+                        annotationsManager={annotationsManager}
+                        ref={this._setSidebarRef}
+                        goToAnnotation={this._goToAnnotation}
+                        closeSidebarCallback={this._closeSidebarCallback}
+                        handleAnnotationBoxMouseEnter={makeHighlightMedium}
+                        handleAnnotationBoxMouseLeave={removeMediumHighlights}
+                        sortAnnotationsByPosition={sortAnnotationsByPosition}
+                    />
+                )}
             </React.Fragment>
         )
     }
@@ -249,6 +252,7 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(ribbonActions.setIsExpanded(false))
         dispatch(sidebarActions.openSidebar())
     },
+    closeSidebar: () => dispatch(sidebarActions.closeSidebar()),
     openCommentBoxWithHighlight: anchor =>
         dispatch(commentBoxActions.openCommentBoxWithHighlight(anchor)),
     setRibbonEnabled: isRibbonEnabled =>
