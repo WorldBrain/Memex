@@ -24,7 +24,7 @@
         "member-access": false,
         "member-ordering": false,
         "no-arg": true,
-        "no-console": [true, "debug", "info", "trace"],
+        "no-console": [true, "debug", "info", "trace", "log"],
         "no-construct": true,
         "no-debugger": true,
         "no-duplicate-variable": true,

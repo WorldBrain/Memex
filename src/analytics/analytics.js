@@ -1,3 +1,4 @@
+/* eslint no-console: 0 */
 import { idleManager } from 'src/util/idle'
 import randomString from 'src/util/random-string'
 import { shouldTrack } from './utils'

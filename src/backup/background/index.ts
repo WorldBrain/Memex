@@ -1,3 +1,4 @@
+// tslint:disable:no-console
 import Queue, { Options as QueueOpts } from 'queue'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { StorageManager } from '../../search/types'

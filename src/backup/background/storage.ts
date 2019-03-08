@@ -77,13 +77,6 @@ export default class BackupStorage extends FeatureStorage {
         pk: string
         operation: string
     }) {
-        // console.log(
-        //     'registering change to collection',
-        //     collection,
-        //     'with pk',
-        //     pk,
-        // )
-
         await this.storageManager
             .collection(BackupStorage.BACKUP_COLL)
             .createObject({

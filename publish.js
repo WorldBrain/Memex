@@ -1,3 +1,4 @@
+/* eslint no-console: 0 */
 const path = require('path')
 const fs = require('fs')
 const { config: configEnv } = require('dotenv')

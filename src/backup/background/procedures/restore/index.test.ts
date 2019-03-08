@@ -173,14 +173,8 @@ describe('BackupRestoreProcedure', () => {
 
         const runner = restoreProcedure.runner()
         const boom = new Promise((resolve, reject) => {
-            restoreProcedure.events.on('success', () => {
-                resolve()
-            })
-            restoreProcedure.events.on('fail', err => {
-                console.log('rejecting with', err)
-                reject(err)
-                console.log('rejected')
-            })
+            restoreProcedure.events.on('success', resolve)
+            restoreProcedure.events.on('fail', reject)
             runner()
         })
 

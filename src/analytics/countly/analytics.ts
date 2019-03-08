@@ -1,3 +1,4 @@
+// tslint:disable:no-console
 import { fetchUserId, shouldTrack } from '../utils'
 
 class Analytics {

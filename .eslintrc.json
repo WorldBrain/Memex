@@ -38,6 +38,7 @@
         "operator-linebreak": "off",
         "space-before-function-paren": "off",
         "space-infix-ops": "off",
+        "no-console": ["warn", { "allow": ["warn", "error"] }],
         "no-empty": "error",
         "no-multiple-empty-lines": [
             "error",
