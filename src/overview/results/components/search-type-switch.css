@@ -1,0 +1,32 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px auto;
+    max-width: 800px;
+}
+
+.switchContainer {
+}
+
+.searchSwitchBtn {
+}
+
+.searchCount {
+}
+
+.unfoldAllBtn {
+    &:disabled {
+        display: none;
+    }
+}
+
+/* Nice if we move this type of stuff somewhere for easier re-use, like colors, fonts, etc. */
+.btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+
+    &:disabled {
+        cursor: auto;
+    }
+}

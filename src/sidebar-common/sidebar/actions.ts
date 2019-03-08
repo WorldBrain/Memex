@@ -119,8 +119,21 @@ export const editAnnotation: (
     const annotationsManager = selectors.annotationsManager(state)
     const annotations = selectors.annotations(state)
     const index = annotations.findIndex(annot => annot.url === url)
-    const annotation = annotations[index]
-    const { body } = annotation
+
+    let annotation
+    let body
+    if (index !== -1) {
+        annotation = annotations[index]
+        body = annotation.body
+    } else {
+        /* In the case of user trying to edit the annotation from the results list.
+        The sidebar isn't loaded, so the annotations aren't present in the sidebar's
+        state. So the action just returns after saving the annotation. */
+        if (annotationsManager) {
+            await annotationsManager.editAnnotation({ url, comment, tags })
+        }
+        return
+    }
 
     // Check that annotation isn't completely empty.
     if ((!body || !body.length) && !comment.length && !tags.length) {

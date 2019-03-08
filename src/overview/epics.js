@@ -3,6 +3,7 @@ import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/filter'
 
 import { acts as searchBarActs } from './search-bar'
+import { acts as resultActs } from './results'
 import { actions as filterActs } from '../search-filters'
 
 const searchUpdateActions = [
@@ -27,6 +28,7 @@ const searchUpdateActions = [
     filterActs.toggleNotesFilter.getType(),
     filterActs.toggleWebsitesFilter.getType(),
     filterActs.setAnnotationsFilter.getType(),
+    resultActs.setSearchType.getType(),
 ]
 
 // When the query changed, refresh the search results

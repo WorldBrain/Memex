@@ -120,6 +120,7 @@ export default class SearchBackground {
             delPagesByDomain: this.backend.delPagesByDomain,
             delPagesByPattern: this.backend.delPagesByPattern,
             getMatchingPageCount: this.backend.getMatchingPageCount,
+            searchPageAnnotations: this.searchPageAnnotations.bind(this),
             searchAnnotations: this.searchAnnotations.bind(this),
             searchPages: this.searchPages.bind(this),
         })
@@ -250,7 +251,7 @@ export default class SearchBackground {
         return res.slice(params.skip, params.skip + params.limit)
     }
 
-    async searchAnnotations(params: AnnotSearchParams): Promise<Annotation[]> {
+    async searchPageAnnotations(params: AnnotSearchParams) {
         const searchParams = this.processSearchParams(params, true)
 
         if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
@@ -266,6 +267,29 @@ export default class SearchBackground {
             ...searchParams,
             includePageResults: false,
         }) as any
+    }
+
+    async searchAnnotations(params: AnnotSearchParams) {
+        let results
+        const searchParams = this.processSearchParams(params, true)
+        const shapeResult = res =>
+            SearchBackground.shapePageResult(res, searchParams.limit)
+
+        if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
+            return shapeResult([])
+        }
+
+        // Blank search; just list annots, applying search filters
+        if (searchParams.isBlankSearch) {
+            results = await this.blankAnnotsSearch(searchParams)
+            return shapeResult(results)
+        }
+
+        results = await this.storage.searchAnnots({
+            ...searchParams,
+            includePageResults: false,
+        })
+        return shapeResult(results)
     }
 
     async searchPages(params: PageSearchParams) {

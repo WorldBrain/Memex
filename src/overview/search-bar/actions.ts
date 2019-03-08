@@ -15,7 +15,8 @@ import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
-const requestSearchRPC = remoteFunction('searchPages')
+const pageSearchRPC = remoteFunction('searchPages')
+const annotSearchRPC = remoteFunction('searchAnnotations')
 
 export const setQuery = createAction<string>('header/setQuery')
 export const setStartDate = createAction<number>('header/setStartDate')
@@ -132,8 +133,13 @@ export const search: (args?: any) => Thunk = (
     }
 
     try {
+        const searchRPC =
+            results.searchType(state) === 'page'
+                ? pageSearchRPC
+                : annotSearchRPC
+
         // Tell background script to search
-        const searchResult = await requestSearchRPC(searchParams)
+        const searchResult = await searchRPC(searchParams)
         dispatch(resultsActs.updateSearchResult({ overwrite, searchResult }))
 
         if (searchResult.docs.length) {
