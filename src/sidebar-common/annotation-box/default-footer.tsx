@@ -5,6 +5,8 @@ const styles = require('./default-footer.css')
 
 interface Props {
     displayGoToAnnotation: boolean
+    isEdited: boolean
+    timestamp: string
     goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
@@ -14,15 +16,19 @@ interface Props {
 
 /* tslint:disable-next-line variable-name */
 const DefaultFooter = ({
+    timestamp,
+    isEdited,
     displayGoToAnnotation,
     goToAnnotationHandler,
     editIconClickHandler,
     trashIconClickHandler,
-    // shareIconClickHandler,
-    replyIconClickHandler,
 }: Props) => (
     <div className={styles.annotationBoxDefaultFooter}>
-        <div className={styles.buttonBar}>
+        <div className={styles.timestamp}>
+            {isEdited && <span className={styles.lastEdit}>Last Edit: </span>}
+            {timestamp}
+        </div>
+        <div>
             <button
                 className={cx(styles.commonIcon, styles.editIcon)}
                 title="Edit note"

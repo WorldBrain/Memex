@@ -7,6 +7,8 @@ const styles = require('./all-modes-footer.css')
 
 interface Props {
     mode: 'default' | 'edit' | 'delete'
+    isEdited?: boolean
+    timestamp?: string
     displayGoToAnnotation?: boolean
     handleGoToAnnotation?: (e: React.MouseEvent<HTMLElement>) => void
     handleEditAnnotation?: () => void
@@ -42,6 +44,8 @@ const AllModesFooter = (props: Props) => (
             />
         ) : (
             <DefaultFooter
+                isEdited={props.isEdited}
+                timestamp={props.timestamp}
                 displayGoToAnnotation={props.displayGoToAnnotation}
                 goToAnnotationHandler={props.handleGoToAnnotation}
                 editIconClickHandler={props.editIconClickHandler}

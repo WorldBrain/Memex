@@ -6,6 +6,20 @@
     padding: 5px;
 }
 
+.timestamp {
+    margin-right: auto;
+    margin-left: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #4a4a4a;
+
+    & .lastEdit {
+        font-weight: 400;
+        color: #929292;
+        margin: 0 5px 0 -1px;
+    }
+}
+
 .commonIcon {
     composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
     box-sizing: border-box;

@@ -204,16 +204,6 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 onClick={isClickable ? this.props.handleGoToAnnotation : noop}
                 ref={this._setBoxRef}
             >
-                {/* Timestamp for the annotation. Hidden during 'edit' mode. */}
-                {mode !== 'edit' && (
-                    <div className={styles.timestamp}>
-                        {!!this.props.lastEdited && (
-                            <span className={styles.lastEdit}>Last Edit: </span>
-                        )}
-                        {timestamp}
-                    </div>
-                )}
-
                 {/* Highlighted text for the annotation. If available, shown in
                 every mode. */}
                 {this.props.body && (
@@ -236,6 +226,8 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         body={this.props.body}
                         comment={this.props.comment}
                         tags={this.props.tags}
+                        isEdited={!!this.props.lastEdited}
+                        timestamp={timestamp}
                         handleGoToAnnotation={this.props.handleGoToAnnotation}
                         handleDeleteAnnotation={this._handleDeleteAnnotation}
                         handleCancelOperation={this._handleCancelOperation}
