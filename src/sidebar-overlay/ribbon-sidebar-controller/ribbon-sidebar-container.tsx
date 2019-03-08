@@ -205,6 +205,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
         return (
             <React.Fragment>
                 <RibbonContainer
+                    annotationsManager={annotationsManager}
                     isSidebarOpen={isSidebarOpen}
                     handleRemoveRibbon={handleRemoveRibbon}
                     insertOrRemoveTooltip={insertOrRemoveTooltip}
@@ -215,7 +216,6 @@ class RibbonSidebarContainer extends React.Component<Props> {
                 {isSidebarOpen && (
                     <SidebarContainer
                         env="inpage"
-                        annotationsManager={annotationsManager}
                         ref={this._setSidebarRef}
                         goToAnnotation={this._goToAnnotation}
                         closeSidebarCallback={this._closeSidebarCallback}

@@ -180,6 +180,7 @@ class Sidebar extends React.Component<Props, State> {
                                     onClick={() =>
                                         this.setState({
                                             showPageResults: true,
+                                            showAllResults: false,
                                         })
                                     }
                                 >
@@ -190,7 +191,7 @@ class Sidebar extends React.Component<Props, State> {
                                     onClick={() =>
                                         this.setState(prevState => ({
                                             showPageResults: false,
-                                            showAllResults: !prevState.showAllResults,
+                                            showAllResults: true,
                                         }))
                                     }
                                 >

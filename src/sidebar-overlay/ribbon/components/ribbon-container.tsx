@@ -23,6 +23,8 @@ import {
     selectors as bookmark,
 } from 'src/popup/bookmark-button'
 import { PageList } from 'src/custom-lists/background/types'
+import AnnotationsManager from 'src/sidebar-common/annotations-manager'
+import { actions as sidebarActs } from 'src/sidebar-common/sidebar/'
 
 interface StateProps {
     isExpanded: boolean
@@ -40,6 +42,7 @@ interface StateProps {
 
 interface DispatchProps {
     onInit: () => void
+    setAnnotationsManager: (annotationsManager: AnnotationsManager) => void
     handleRibbonToggle: () => void
     handleTooltipToggle: () => void
     handleMouseEnter: () => void
@@ -54,6 +57,7 @@ interface DispatchProps {
 }
 
 interface OwnProps {
+    annotationsManager: AnnotationsManager
     isSidebarOpen: boolean
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
@@ -69,6 +73,7 @@ class RibbonContainer extends Component<Props> {
     componentDidMount() {
         this._setupHoverListeners()
         this.props.onInit()
+        this.props.setAnnotationsManager(this.props.annotationsManager)
     }
 
     componentWillUnmount() {
@@ -199,6 +204,8 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps
 > = dispatch => ({
     onInit: () => dispatch(actions.initState()),
+    setAnnotationsManager: annotationsManager =>
+        dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     handleRibbonToggle: () => dispatch(actions.toggleRibbon()),
     handleTooltipToggle: () => dispatch(actions.toggleTooltip()),
     handleMouseEnter: () => dispatch(actions.setIsExpanded(true)),
