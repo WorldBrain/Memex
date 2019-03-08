@@ -7,6 +7,7 @@ import NotificationContainer, {
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
+import SearchTypeSwitch from './search-type-switch-container'
 import { OnboardingChecklist } from '../../onboarding/components'
 import * as actions from '../actions'
 import * as selectors from '../selectors'

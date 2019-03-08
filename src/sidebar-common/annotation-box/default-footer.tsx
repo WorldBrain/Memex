@@ -22,7 +22,6 @@ const DefaultFooter = ({
     goToAnnotationHandler,
     editIconClickHandler,
     trashIconClickHandler,
-    replyIconClickHandler,
 }: Props) => (
     <div className={styles.annotationBoxDefaultFooter}>
         <div className={styles.timestamp}>

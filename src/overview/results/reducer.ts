@@ -2,7 +2,6 @@ import { createReducer } from 'redux-act'
 
 import * as acts from './actions'
 import { SearchResult, Result } from '../types'
-import { isInvalidSearch } from './selectors'
 
 export interface State {
     /** Holds the current search results used to render to the UI. */
@@ -25,6 +24,7 @@ export interface State {
     searchCount: number
     /** Denotes whether annotation lists are expanded by default */
     areAnnotationsExpanded: boolean
+    searchType: 'annot' | 'page'
 }
 
 const defState: State = {
@@ -38,6 +38,7 @@ const defState: State = {
     totalCount: null,
     searchCount: 0,
     areAnnotationsExpanded: false,
+    searchType: 'page',
 }
 
 const handleSearchResult = (overwrite: boolean) => (
@@ -177,5 +178,9 @@ reducer.on(acts.setLoading, (state, payload) => ({
 }))
 reducer.on(acts.appendSearchResult, handleSearchResult(false))
 reducer.on(acts.setSearchResult, handleSearchResult(true))
+reducer.on(acts.setSearchType, (state, searchType) => ({
+    ...state,
+    searchType,
+}))
 
 export default reducer

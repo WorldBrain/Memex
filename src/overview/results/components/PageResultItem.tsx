@@ -195,6 +195,7 @@ class PageResultItem extends PureComponent<Props> {
                     <AnnotationList
                         isExpandedOverride={this.props.areAnnotationsExpanded}
                         openAnnotationSidebar={this.props.onCommentBtnClick}
+                        pageUrl={this.hrefToPage}
                         annotations={this.props.annotations}
                     />
                 )}

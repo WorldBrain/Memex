@@ -1,4 +1,5 @@
 import { Dexie } from 'dexie'
+import moment from 'moment'
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
@@ -237,6 +238,39 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         } while (continueLookup)
 
         return this.mapUrlsToAnnots(results)
+    }
+
+    private clusterAnnotsByDays(annots: Annotation[]): Map<Date, Annotation[]> {
+        const annotsByDays = new Map<Date, Annotation[]>()
+
+        for (const annot of annots) {
+            const date = moment(annot.lastEdited || annot.createdWhen)
+                .startOf('day')
+                .toDate()
+            const existing = annotsByDays.get(date) || []
+            annotsByDays.set(date, [...existing, annot])
+        }
+
+        return annotsByDays
+    }
+
+    private clusterAnnotsByPage(
+        annots: Annotation[],
+    ): Map<Date, Map<string, Annotation[]>> {
+        const annotsByPage = new Map<Date, Map<string, Annotation[]>>()
+
+        for (const [date, matching] of this.clusterAnnotsByDays(annots)) {
+            const pageMap = new Map<string, Annotation[]>()
+
+            for (const annot of matching) {
+                const existing = pageMap.get(annot.pageUrl) || []
+                pageMap.set(annot.pageUrl, [...existing, annot])
+            }
+
+            annotsByPage.set(date, pageMap)
+        }
+
+        return annotsByPage
     }
 
     async listAnnots(

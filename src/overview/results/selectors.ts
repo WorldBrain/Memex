@@ -121,3 +121,8 @@ export const isScrollDisabled = createSelector(
     sidebarLeft.mouseOverSidebar,
     mouseOverSidebar => mouseOverSidebar,
 )
+
+export const searchType = createSelector(
+    resultsState,
+    state => state.searchType,
+)
