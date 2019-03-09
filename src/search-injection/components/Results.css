@@ -4,7 +4,6 @@
 
 .MEMEX_CONTAINER {
     /* Base size of the children elements */
-    margin-bottom: 30px;
     position: relative;
     animation: fadeIn 1s ease-in;
     margin-top: -20px;

@@ -8702,10 +8702,6 @@ pn@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
 
-popper.js@^1.0.2, popper.js@^1.11.1, popper.js@^1.14.7:
-  version "1.14.7"
-  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.14.7.tgz#e31ec06cfac6a97a53280c3e55e4e0c860e7738e"
-
 popper.js@^1.14.1:
   version "1.14.4"
   resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.14.4.tgz#8eec1d8ff02a5a3a152dd43414a15c7b79fd69b6"
@@ -10024,19 +10020,6 @@ react-textarea-autosize@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/react-textarea-autosize/-/react-textarea-autosize-6.1.0.tgz#df91387f8a8f22020b77e3833c09829d706a09a5"
   dependencies:
-    prop-types "^15.6.0"
-
-react-tippy@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/react-tippy/-/react-tippy-1.2.3.tgz#8aef183ec4986ca7c5c556465013d95196fecfd8"
-  dependencies:
-    popper.js "^1.11.1"
-
-react-tooltip@^3.10.0:
-  version "3.10.0"
-  resolved "https://registry.yarnpkg.com/react-tooltip/-/react-tooltip-3.10.0.tgz#268b5ef519fd8a1369288d1f086f42c90d5da7ef"
-  dependencies:
-    classnames "^2.2.5"
     prop-types "^15.6.0"
 
 react-transition-group@^2.0.0:
@@ -11841,12 +11824,6 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     extend-shallow "^3.0.2"
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
-
-tooltip.js@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/tooltip.js/-/tooltip.js-1.3.1.tgz#f14f18e4ec119c9be198d460db577969e0dc0806"
-  dependencies:
-    popper.js "^1.0.2"
 
 topo@1.x.x:
   version "1.1.0"
