@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 
-import styles from './Tooltip.css'
+import styles from './miniTooltip.css'
 
 const Tooltip = ({ showTooltip, children }) => {
     return (

@@ -6,20 +6,31 @@ import classNames from 'classnames'
 import styles from './ResultItem.css'
 
 const ResultItem = props => (
-    <div className={classNames(styles.result, styles[props.searchEngine])}>
+    <div className={classNames(styles.rootContainer, styles[props.searchEngine])}>
         <a
-            className={styles.title}
+            className={styles.root}
             href={props.url}
-            onClick={props.onLinkClick}
             target="_blank"
+            onClick={props.onLinkClick}
         >
-            {props.title || props.url}
+            <div className={styles.infoContainer}> 
+                <div className={styles.firstlineContainer}>
+                        <span className={styles.Title}>
+                        {props.title}
+                        </span>
+                </div>
+                <div className={styles.url}>{props.url}</div>
+                
+                <div className={styles.detailsContainer}>
+                    <div className={styles.detailsBox}>
+                        <div className={styles.displayTime}>
+                            {' '}
+                            {niceTime(props.displayTime)}{' '}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </a>
-        <p className={styles.url}>{props.url}</p>
-        <div className={styles.displayTime}>
-            {' '}
-            {niceTime(+props.displayTime)}{' '}
-        </div>
     </div>
 )
 

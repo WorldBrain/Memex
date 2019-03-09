@@ -1,14 +1,9 @@
 .actionButton {
-    padding: 10px 20px;
-    background-color: #3eb995;
-    color: white;
-    font-size: 16px;
-    width: fit-content;
-    border-radius: 2px;
+    composes: CTA from '../../common-ui/elements.css';
     cursor: pointer;
+    padding: 8px 20px;
     text-decoration: none;
-    margin-right: 10px;
-    border: 0;
+    font-size: 16px;
 }
 
 .searchActionButton {

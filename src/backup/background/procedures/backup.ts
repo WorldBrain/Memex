@@ -1,3 +1,4 @@
+// tslint:disable:no-console
 import * as AllRaven from 'raven-js'
 import { EventEmitter } from 'events'
 import { StorageManager } from '../../../search/types'
