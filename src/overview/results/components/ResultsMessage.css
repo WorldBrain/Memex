@@ -11,11 +11,11 @@
 }
 
 .smallMessage {
+    composes: h2Color from '../../../common-ui/colors.css';
     position: relative;
     left: -267px;
     top: -25px;
     margin: 0;
-    color: #4abf9d;
     font-size: 15px;
     font-style: normal;
     margin-bottom: -25px;

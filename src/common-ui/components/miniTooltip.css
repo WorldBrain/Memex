@@ -1,0 +1,29 @@
+.tooltip {
+    position: relative;
+    display: inline-block;
+
+    /* composes: miniTooltip from '../elements.css'; */
+}
+
+.hideTooltip {
+    visibility: hidden;
+}
+
+.tooltip .tooltiptext {
+    display: flex;
+    flex-wrap: nowrap;
+    border-radius: 3px;
+    background-color: rgb(55, 53, 47);
+    color: white;
+    font-size: 13px;
+    font-weight: 400;
+    min-width: fit-content;
+    padding: 4px 8px 3px 8px;
+    text-align: center;
+    position: absolute;
+    margin-left: 20px;
+    top: 15px;
+    z-index: 90;
+    overflow-wrap: normal;
+    letter-spacing: 0.5;
+}

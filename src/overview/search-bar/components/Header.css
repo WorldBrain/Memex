@@ -43,9 +43,9 @@
     width: 100%;
     max-width: 800px;
     height: 45px;
-    border-radius: 3.5px;
-    background-color: transparent;
-    box-shadow: 0px 6px 31px -11px #220c0c52;
+    border-radius: 35px;
+    border-radius: 43.5px;
+    background-color: #f5f3f3;
 
     @media (max-width: 724px) {
         margin: 0 8px;
@@ -61,12 +61,13 @@
     background-position: 3px;
     background-color: transparent;
     padding-left: 36px;
-    font-size: 15px;
+    font-size: 16px;
     border: none;
     font-weight: 400;
 
     &::placeholder {
         color: #b8b8b8;
+        font-size: 17px;
     }
 
     &:focus {
