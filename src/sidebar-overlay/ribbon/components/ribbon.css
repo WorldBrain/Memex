@@ -147,6 +147,10 @@
     color: #bcc2bd;
     width: 180px;
     height: 35px;
+
+    &:focus {
+        outline: none;
+    }
 }
 
 .commentBox {

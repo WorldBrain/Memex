@@ -45,9 +45,9 @@ export const resetCommentBox: () => Thunk = () => dispatch => {
     dispatch(setCommentText(''))
     dispatch(setTags([]))
     dispatch(setInitTagSuggestions([]))
+    dispatch(setIsCommentBookmarked(false))
     setTimeout(() => {
         dispatch(setIsCommentSaved(false))
-        dispatch(setIsCommentBookmarked(false))
     }, 3000)
 }
 

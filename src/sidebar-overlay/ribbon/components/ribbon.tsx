@@ -33,6 +33,8 @@ interface Props {
     handlePauseToggle: () => void
     handleSearchChange: (e: SyntheticEvent<HTMLInputElement>) => void
     isCommentSaved: boolean
+    commentText: string
+    setShowCommentBox: () => void
 }
 
 interface State {
@@ -54,6 +56,10 @@ class Ribbon extends Component<Props, State> {
     private openOptionsTabRPC
     private ribbonRef: HTMLElement
 
+    private inputQueryEl: HTMLInputElement
+
+    private setInputRef = (el: HTMLInputElement) => (this.inputQueryEl = el)
+
     constructor(props: Props) {
         super(props)
         this.openOverviewTabRPC = remoteFunction('openOverviewTab')
@@ -70,7 +76,14 @@ class Ribbon extends Component<Props, State> {
     }
 
     private handleMouseLeave = () => {
-        this.setState(defaultState)
+        this.props.commentText.length > 0
+            ? this.setState({
+                  showCommentBox: true,
+                  showSearchBox: false,
+                  showTagsPicker: false,
+                  showCollectionsPicker: false,
+              })
+            : this.setState(defaultState)
     }
 
     private onSearchEnter: KeyboardEventHandler<HTMLInputElement> = event => {
@@ -79,6 +92,19 @@ class Ribbon extends Component<Props, State> {
             const queryFilters = extractQueryFilters(this.props.searchValue)
             this.openOverviewTabRPC(queryFilters.query)
         }
+    }
+
+    private handleCommentIconBtnClick = () => {
+        if (this.props.isSidebarOpen) {
+            this.props.setShowCommentBox()
+            return
+        }
+        this.setState(prevState => ({
+            showSearchBox: false,
+            showCollectionsPicker: false,
+            showTagsPicker: false,
+            showCommentBox: !prevState.showCommentBox,
+        }))
     }
 
     render() {
@@ -123,14 +149,15 @@ class Ribbon extends Component<Props, State> {
                         <div>
                             <button
                                 className={cx(styles.button, styles.search)}
-                                onClick={() =>
+                                onClick={() => {
                                     this.setState(prevState => ({
                                         showSearchBox: !prevState.showSearchBox,
                                         showCollectionsPicker: false,
                                         showTagsPicker: false,
                                         showCommentBox: false,
                                     }))
-                                }
+                                    this.inputQueryEl.focus()
+                                }}
                                 title={'Search Memex'}
                             />
                             {this.state.showSearchBox && (
@@ -141,6 +168,7 @@ class Ribbon extends Component<Props, State> {
                                     <form>
                                         <input
                                             autoFocus={false}
+                                            ref={this.setInputRef}
                                             className={styles.searchInput}
                                             name="query"
                                             placeholder="Search your Memex"
@@ -172,35 +200,27 @@ class Ribbon extends Component<Props, State> {
                         <div>
                             <button
                                 className={cx(styles.button, styles.comments)}
-                                onClick={() =>
-                                    this.setState(prevState => ({
-                                        showSearchBox: false,
-                                        showCollectionsPicker: false,
-                                        showTagsPicker: false,
-                                        showCommentBox: !prevState.showCommentBox,
-                                    }))
-                                }
+                                onClick={this.handleCommentIconBtnClick}
                                 title={'Add comments'}
                             />
                             {this.state.showCommentBox && (
                                 <Tooltip position="left">
-                                    <CommentBoxContainer
-                                        env = 'inpage' />
+                                    <CommentBoxContainer env="inpage" />
                                 </Tooltip>
                             )}
                             {this.props.isCommentSaved && (
-                            <Tooltip
-                                position="left"
-                                itemClass={styles.commentSaved}
-                            >
-                            <div className={styles.saveBox}>
-                                <span className={styles.saveIcon}/>
-                                <span className={styles.saveText}>
-                                    Saved!
-                                </span>
-                            </div>
-                            </Tooltip>
-                        )}
+                                <Tooltip
+                                    position="left"
+                                    itemClass={styles.commentSaved}
+                                >
+                                    <div className={styles.saveBox}>
+                                        <span className={styles.saveIcon} />
+                                        <span className={styles.saveText}>
+                                            Saved!
+                                        </span>
+                                    </div>
+                                </Tooltip>
+                            )}
                         </div>
 
                         <div>

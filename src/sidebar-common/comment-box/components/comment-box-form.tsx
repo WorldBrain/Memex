@@ -71,7 +71,7 @@ class CommentBoxForm extends React.Component<Props, State> {
     ) => {
         // Save comment.
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            this.props.saveComment(e)
+            this.saveComment(e)
         } else if (e.key === 'Tab' && !e.shiftKey) {
             this.setTagInputActive(true)
             setTimeout(() => {
@@ -126,6 +126,17 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.props.handleCommentTextChange(comment)
     }
 
+    private saveComment = (
+        e:
+            | React.KeyboardEvent<HTMLTextAreaElement>
+            | React.MouseEvent<HTMLButtonElement>,
+    ) => {
+        this.props.saveComment(e)
+        this.setState({
+            showTagsPicker: false,
+        })
+    }
+
     setTagInputActive = (isTagInputActive: boolean) => {
         this.setState({ isTagInputActive })
     }
@@ -168,7 +179,8 @@ class CommentBoxForm extends React.Component<Props, State> {
                         />
                         <button
                             className={cx(styles.button, {
-                                [styles.bookmark]: this.props.isCommentBookmarked,
+                                [styles.bookmark]: this.props
+                                    .isCommentBookmarked,
                                 [styles.notBookmark]: !this.props
                                     .isCommentBookmarked,
                             })}
@@ -183,18 +195,22 @@ class CommentBoxForm extends React.Component<Props, State> {
                     <div>
                         <button
                             className={styles.saveBtn}
-                            onClick={saveComment}
+                            onClick={e => this.saveComment(e)}
                             onKeyDown={this._handleSaveButtonKeyDown}
                         >
                             Save
                         </button>
+                        <button
+                            className={styles.cancelBtn}
+                            onClick={cancelComment}
+                        >
+                            Cancel
+                        </button>
                     </div>
                 </div>
-               <span className={styles.tagDropdown}>
+                <span className={styles.tagDropdown}>
                     {this.state.showTagsPicker && (
-                        <Tooltip
-                            position="bottom"
-                        >
+                        <Tooltip position="bottom">
                             <TagsContainer env={this.props.env} />
                         </Tooltip>
                     )}

@@ -54,9 +54,11 @@ class CommentBoxContainer extends React.PureComponent<Props> {
         } = this.props
 
         return (
-              <div className={classNames(styles.commentBoxContainer, {
-                [styles.inPage]: env === 'inpage',
-                })}>
+            <div
+                className={classNames(styles.commentBoxContainer, {
+                    [styles.inPage]: env === 'inpage',
+                })}
+            >
                 {!!anchor && <AnnotationHighlight anchor={anchor} />}
 
                 <CommentBoxForm

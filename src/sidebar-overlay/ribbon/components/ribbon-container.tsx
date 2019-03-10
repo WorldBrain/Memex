@@ -64,6 +64,8 @@ interface OwnProps {
     openSidebar: () => void
     closeSidebar: () => void
     isCommentSaved: boolean
+    commentText: string
+    setShowCommentBox: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -156,6 +158,8 @@ class RibbonContainer extends Component<Props> {
             handlePauseToggle,
             handleBookmarkToggle,
             isCommentSaved,
+            commentText,
+            setShowCommentBox,
         } = this.props
 
         return (
@@ -168,6 +172,7 @@ class RibbonContainer extends Component<Props> {
                     isPaused={isPaused}
                     isBookmarked={isBookmarked}
                     isCommentSaved={isCommentSaved}
+                    commentText={commentText}
                     searchValue={searchValue}
                     tagManager={this.renderTagsManager()}
                     collectionsManager={this.renderCollectionsManager()}
@@ -179,6 +184,7 @@ class RibbonContainer extends Component<Props> {
                     handleSearchChange={handleSearchChange}
                     handlePauseToggle={handlePauseToggle}
                     handleBookmarkToggle={handleBookmarkToggle}
+                    setShowCommentBox={setShowCommentBox}
                 />
             </div>
         )

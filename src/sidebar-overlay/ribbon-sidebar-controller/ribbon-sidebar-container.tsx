@@ -24,6 +24,7 @@ interface StateProps {
     isPageFullScreen: boolean
     isSidebarOpen: boolean
     isCommentSaved: boolean
+    commentText: string
     annotations: Annotation[]
 }
 
@@ -37,6 +38,7 @@ interface DispatchProps {
     setTooltipEnabled: (isTooltipEnabled: boolean) => void
     setActiveAnnotationUrl: (url: string) => void
     setHoverAnnotationUrl: (url: string) => void
+    setShowCommentBox: () => void
 }
 
 interface OwnProps {
@@ -204,6 +206,8 @@ class RibbonSidebarContainer extends React.Component<Props> {
             sortAnnotationsByPosition,
             closeSidebar,
             isCommentSaved,
+            commentText,
+            setShowCommentBox,
         } = this.props
 
         return (
@@ -216,6 +220,8 @@ class RibbonSidebarContainer extends React.Component<Props> {
                     openSidebar={this._openSidebar}
                     closeSidebar={closeSidebar}
                     isCommentSaved={isCommentSaved}
+                    commentText={commentText}
+                    setShowCommentBox={setShowCommentBox}
                 />
 
                 {isSidebarOpen && (
@@ -242,6 +248,7 @@ const mapStateToProps: MapStateToProps<
     isPageFullScreen: ribbonSelectors.isPageFullScreen(state),
     isSidebarOpen: sidebarSelectors.isOpen(state),
     isCommentSaved: commentBoxselectors.isCommentSaved(state),
+    commentText: commentBoxselectors.commentText(state),
     annotations: sidebarSelectors.annotations(state),
 })
 
@@ -269,6 +276,8 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(sidebarActions.setActiveAnnotationUrl(url)),
     setHoverAnnotationUrl: url =>
         dispatch(sidebarActions.setHoverAnnotationUrl(url)),
+    setShowCommentBox: () =>
+        dispatch(commentBoxActions.setShowCommentBox(true)),
 })
 
 export default connect<StateProps, DispatchProps, OwnProps>(
