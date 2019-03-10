@@ -1,9 +1,11 @@
 .tooltip {
     position: relative;
+    border-radius: 3px;
 }
 
 .tooltipBubble {
     position: absolute;
+    background: white;
     composes: toolTips from '../../common-ui/elements.css';
 }
 
@@ -11,6 +13,7 @@
     font-size: 0.75rem;
     line-height: 1.4;
     width: 300px;
+    border-radius: 3px;
 }
 
 /*    &::after {
@@ -37,7 +40,6 @@
 .tooltipbottom {
     top: 100%;
     left: 50%;
-    padding-top: 9px;
     transform: translateX(-50%);
 
     /*    &::after {

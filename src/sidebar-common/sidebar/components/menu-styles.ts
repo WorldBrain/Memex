@@ -9,7 +9,7 @@ const baseStyles = {
     },
     bmMenu: {
         position: 'fixed',
-        right: '50px',
+        right: '55px',
         top: 0,
         overflow: 'hidden',
         width: '350px',

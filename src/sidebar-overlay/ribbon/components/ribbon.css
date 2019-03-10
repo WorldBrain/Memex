@@ -18,12 +18,12 @@
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
     text-align: start;
-    font-family: serif;
     cursor: pointer;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    font-family: 'Inter';
 }
 
 .ribbonExpanded {
@@ -40,8 +40,9 @@
 
 .button {
     composes: nakedButton from '../../../common-ui/elements.css';
-    width: 20px;
-    height: 20px;
+    composes: hoversidebaropen from '../../../common-ui/colors.css';
+    width: 25px;
+    height: 25px;
     border-radius: 3px;
     opacity: 0.6;
     margin-left: 4px;
@@ -157,15 +158,34 @@
 }
 
 .commentSaved {
-    border-radius: 15px;
-    border: 2px solid #5cd9a6;
-    width: 150px;
+    border-radius: 50px;
+    border: 1px solid #5cd9a6;
+    width: 100px;
     height: 35px;
 }
 
 .commentText {
     font-size: 15px;
     margin-left: 50px;
+}
+
+.saveBox {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.saveIcon {
+    background-image: url('/img/saveIcon.svg');
+    width: 35px;
+    height: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.saveText {
+    font-weight: 600;
+    margin-left: 10px;
 }
 
 .logo,

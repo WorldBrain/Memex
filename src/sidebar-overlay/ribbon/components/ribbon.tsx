@@ -69,9 +69,9 @@ class Ribbon extends Component<Props, State> {
         this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
     }
 
-    private handleMouseLeave = () => {
-        this.setState(defaultState)
-    }
+    // private handleMouseLeave = () => {
+    //     this.setState(defaultState)
+    // }
 
     private onSearchEnter: KeyboardEventHandler<HTMLInputElement> = event => {
         if (event.key === 'Enter') {
@@ -169,17 +169,6 @@ class Ribbon extends Component<Props, State> {
                                 title={'Star'}
                             />
                         </div>
-                        {this.props.isCommentSaved && (
-                            <Tooltip
-                                position="left"
-                                itemClass={styles.commentSaved}
-                            >
-                                <span className={styles.commentText}>
-                                    Saved!
-                                </span>
-                            </Tooltip>
-                        )}
-
                         <div>
                             <button
                                 className={cx(styles.button, styles.comments)}
@@ -195,9 +184,23 @@ class Ribbon extends Component<Props, State> {
                             />
                             {this.state.showCommentBox && (
                                 <Tooltip position="left">
-                                    <CommentBoxContainer />
+                                    <CommentBoxContainer
+                                        env = 'inpage' />
                                 </Tooltip>
                             )}
+                            {this.props.isCommentSaved && (
+                            <Tooltip
+                                position="left"
+                                itemClass={styles.commentSaved}
+                            >
+                            <div className={styles.saveBox}>
+                                <span className={styles.saveIcon}/>
+                                <span className={styles.saveText}>
+                                    Saved!
+                                </span>
+                            </div>
+                            </Tooltip>
+                        )}
                         </div>
 
                         <div>

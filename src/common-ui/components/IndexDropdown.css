@@ -111,6 +111,7 @@
     composes: searchIcon from '../../common-ui/icons.css';
     width: 25px;
     height: 25px;
+    background-size: 20px;
 }
 
 .closeButton {

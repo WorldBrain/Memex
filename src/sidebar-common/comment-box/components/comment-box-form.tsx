@@ -155,46 +155,50 @@ class CommentBoxForm extends React.Component<Props, State> {
                 />
 
                 {/* Save and Cancel buttons. */}
-                <div className={styles.buttonHolder}>
-                    <button
-                        className={cx(styles.button, styles.tag)}
-                        onClick={() =>
-                            this.setState(prevState => ({
-                                showTagsPicker: !prevState.showTagsPicker,
-                            }))
-                        }
-                        title={'Add tags'}
-                    />
-
+                <div className={styles.footer}>
+                    <div className={styles.interactions}>
+                        <button
+                            className={cx(styles.button, styles.tag)}
+                            onClick={() =>
+                                this.setState(prevState => ({
+                                    showTagsPicker: !prevState.showTagsPicker,
+                                }))
+                            }
+                            title={'Add tags'}
+                        />
+                        <button
+                            className={cx(styles.button, {
+                                [styles.bookmark]: this.props.isCommentBookmarked,
+                                [styles.notBookmark]: !this.props
+                                    .isCommentBookmarked,
+                            })}
+                            onClick={toggleBookmark}
+                            title={
+                                !this.props.isCommentBookmarked
+                                    ? 'Bookmark'
+                                    : 'Remove bookmark'
+                            }
+                        />
+                    </div>
+                    <div>
+                        <button
+                            className={styles.saveBtn}
+                            onClick={saveComment}
+                            onKeyDown={this._handleSaveButtonKeyDown}
+                        >
+                            Save
+                        </button>
+                    </div>
+                </div>
+               <span className={styles.tagDropdown}>
                     {this.state.showTagsPicker && (
                         <Tooltip
                             position="bottom"
-                            itemClass={styles.tagsContainer}
                         >
                             <TagsContainer env={this.props.env} />
                         </Tooltip>
                     )}
-                    <button
-                        className={cx(styles.button, {
-                            [styles.bookmark]: this.props.isCommentBookmarked,
-                            [styles.notBookmark]: !this.props
-                                .isCommentBookmarked,
-                        })}
-                        onClick={toggleBookmark}
-                        title={
-                            !this.props.isCommentBookmarked
-                                ? 'Bookmark'
-                                : 'Remove bookmark'
-                        }
-                    />
-                    <button
-                        className={styles.saveBtn}
-                        onClick={saveComment}
-                        onKeyDown={this._handleSaveButtonKeyDown}
-                    >
-                        Save
-                    </button>
-                </div>
+                </span>
             </React.Fragment>
         )
     }

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
+import classNames from 'classnames'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -53,7 +54,9 @@ class CommentBoxContainer extends React.PureComponent<Props> {
         } = this.props
 
         return (
-            <div className={styles.commentBoxContainer}>
+              <div className={classNames(styles.commentBoxContainer, {
+                [styles.inPage]: env === 'inpage',
+                })}>
                 {!!anchor && <AnnotationHighlight anchor={anchor} />}
 
                 <CommentBoxForm

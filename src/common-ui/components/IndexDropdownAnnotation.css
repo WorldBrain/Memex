@@ -62,13 +62,12 @@
 }
 
 .summaryTagContainer {
+    composes: subTitleColor from '../../common-ui/colors.css';
     font-size: 12px;
     display: flex;
     justify-content: space-around;
-    padding-bottom: 4px;
     background: white;
-    margin-bottom: 16px;
-    margin-left: 8px;
+    margin-bottom: 10px;
 }
 
 .searchContainer {
@@ -76,7 +75,7 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px dashed #d2d2d28c;
-    padding: 4px 11px;
+    padding: 7px 7px 5px 15px;
     margin-bottom: 0;
 }
 
@@ -115,8 +114,7 @@
 }
 
 .tagDivForFilter {
-    z-index: 1;
-    width: 99.7%;
+    z-index: 1000;
 }
 
 .check {

@@ -12,7 +12,7 @@
     border: 1px solid #d2d2d2;
     border-radius: 2px;
     padding: 10px 7px;
-    margin: 5px 5px 5px 5px;
+    margin: 5px 5px 0px 5px;
     min-height: 100px;
 
     &:focus {
@@ -24,11 +24,17 @@
     }
 }
 
-.buttonHolder {
-    display: initial;
-    flex-direction: row;
-    justify-content: flex-end;
-    padding: 5px 10px 5px 10px;
+.footer {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 4px 4px 4px;
+    height: 26px;
+}
+
+.interactions {
+    display: flex;
 }
 
 .saveBtn {
@@ -42,11 +48,11 @@
 
 .button {
     composes: nakedButton from '../../../common-ui/elements.css';
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     border-radius: 3px;
     opacity: 0.6;
-    margin-left: 4px;
+    margin-left: 2px;
     background-size: 18px 18px;
     background-repeat: no-repeat;
     background-position: center;
@@ -70,22 +76,21 @@
 .bookmark {
     background-image: url('/img/star_full.svg');
     opacity: 0.8;
-    background-size: 18px;
-    background-position-y: 3px;
+    background-size: 19px;
 }
 
 .notBookmark {
     background-image: url('/img/star_empty.svg');
-    background-size: 18px;
-    background-position-y: 3px;
+    background-size: 19px;
 }
 
 .tag {
     background-image: url('/img/tag.svg');
     background-size: 18px;
-    background-position-y: 3px;
 }
 
-.tagsContainer {
-    margin-top: 8px;
+.tagDropdown {
+    position: absolute;
+    align-self: center;
+    margin-top: 142px;
 }

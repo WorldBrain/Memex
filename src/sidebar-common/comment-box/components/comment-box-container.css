@@ -10,7 +10,7 @@
         background: white;
     }
 
-    & > * {
+    & * {
         font-family: 'Inter';
     }
 }
@@ -46,4 +46,10 @@
 
 .noDisplay {
     display: none;
+}
+
+.inPage {
+    box-shadow: none;
+    margin: 2px 2px 0px 2px;
+    cursor: default;
 }
