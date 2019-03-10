@@ -27,6 +27,7 @@ export interface Props {
     setTempLists?: () => void
     allTabsCollection?: boolean
     isList: boolean
+    isForRibbon: boolean
 }
 
 export interface State {
@@ -43,6 +44,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         onFilterAdd: noop,
         onFilterDel: noop,
         initLists: [],
+        isForRibbon: false,
     }
 
     private addListRPC

@@ -114,24 +114,25 @@ class IndexDropdown extends PureComponent {
                 >
                     {this.props.children}
                 </div>
-                {!this.props.isForSidebar && (
-                    <div className={this.styles.summaryTagContainer}>
-                        {!this.props.isForAnnotation && (
-                            <button
-                                className={this.styles.backButton}
-                                onClick={this.props.onBackBtnClick}
-                            >
-                                Back
-                            </button>
-                        )}
-                        <div className={this.styles.numberTags}>
-                            <span className={this.styles.bold}>
-                                {this.props.numberOfTags}
-                            </span>{' '}
-                            {this.unit} selected
+                {!this.props.isForSidebar &&
+                    !this.props.isForRibbon && (
+                        <div className={this.styles.summaryTagContainer}>
+                            {!this.props.isForAnnotation && (
+                                <button
+                                    className={this.styles.backButton}
+                                    onClick={this.props.onBackBtnClick}
+                                >
+                                    Back
+                                </button>
+                            )}
+                            <div className={this.styles.numberTags}>
+                                <span className={this.styles.bold}>
+                                    {this.props.numberOfTags}
+                                </span>{' '}
+                                {this.unit} selected
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
             </div>
         )
     }

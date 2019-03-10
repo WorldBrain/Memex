@@ -92,7 +92,6 @@
     grid-template-columns: 1fr 1.5fr 1fr;
     grid-template-areas: 'backButton numberTags .';
     padding: 10px 0 20px 0px;
-    background: white;
     border-radius: 0 0 3px 3px;
     background: white;
 }

@@ -55,6 +55,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         onFilterDel: noop,
         initFilters: [],
         isForAnnotation: false,
+        isForRibbon: false,
     }
 
     private suggestRPC
