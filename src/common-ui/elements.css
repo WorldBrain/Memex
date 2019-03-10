@@ -62,3 +62,9 @@
     border-radius: 3px;
     font-weight: 600;
 }
+
+/* TextAreas for Edits */
+
+.TextArea {
+    background-color: #f7f7f7;
+}

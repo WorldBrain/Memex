@@ -119,72 +119,74 @@ class Ribbon extends Component<Props, State> {
                 {true && (
                     // this.props.isExpanded || this.props.isSidebarOpen
                     <React.Fragment>
-                        <div>
-                            <button
-                                onClick={() => this.openOverviewTabRPC()}
-                                className={cx(styles.button, styles.dashboard)}
-                                title={'Open Dashboard'}
-                            />
-                        </div>
+                        <div className={styles.generalActions}>
+                            <div>
+                                <button
+                                    onClick={() => this.openOverviewTabRPC()}
+                                    className={cx(styles.button, styles.dashboard)}
+                                    title={'Open Dashboard'}
+                                />
+                            </div>
 
-                        <div>
-                            <button
-                                className={cx(styles.button, {
-                                    [styles.arrow]: !this.props.isSidebarOpen,
-                                    [styles.bookmark]: this.props.isSidebarOpen,
-                                })}
-                                onClick={() =>
-                                    !this.props.isSidebarOpen
-                                        ? this.props.openSidebar()
-                                        : this.props.closeSidebar()
-                                }
-                                title={
-                                    !this.props.isSidebarOpen
-                                        ? 'Open Sidebar'
-                                        : 'Close Sidebar'
-                                }
-                            />
-                        </div>
+                            <div>
+                                <button
+                                    className={cx(styles.button, {
+                                        [styles.arrow]: !this.props.isSidebarOpen,
+                                        [styles.arrowReverse]: this.props.isSidebarOpen,
+                                    })}
+                                    onClick={() =>
+                                        !this.props.isSidebarOpen
+                                            ? this.props.openSidebar()
+                                            : this.props.closeSidebar()
+                                    }
+                                    title={
+                                        !this.props.isSidebarOpen
+                                            ? 'Open Sidebar'
+                                            : 'Close Sidebar'
+                                    }
+                                />
+                            </div>
 
-                        <div>
-                            <button
-                                className={cx(styles.button, styles.search)}
-                                onClick={() => {
-                                    this.setState(prevState => ({
-                                        showSearchBox: !prevState.showSearchBox,
-                                        showCollectionsPicker: false,
-                                        showTagsPicker: false,
-                                        showCommentBox: false,
-                                    }))
-                                    this.inputQueryEl.focus()
-                                }}
-                                title={'Search Memex'}
-                            />
-                            {this.state.showSearchBox && (
-                                <Tooltip
-                                    position="left"
-                                    itemClass={styles.tooltipLeft}
-                                >
-                                    <form>
-                                        <input
-                                            autoFocus={false}
-                                            ref={this.setInputRef}
-                                            className={styles.searchInput}
-                                            name="query"
-                                            placeholder="Search your Memex"
-                                            autoComplete="off"
-                                            onKeyDown={this.onSearchEnter}
-                                            onChange={
-                                                this.props.handleSearchChange
-                                            }
-                                            value={this.props.searchValue}
-                                        />
-                                    </form>
-                                </Tooltip>
-                            )}
+                            <div>
+                                <button
+                                    className={cx(styles.button, styles.search)}
+                                    onClick={() => {
+                                        this.setState(prevState => ({
+                                            showSearchBox: !prevState.showSearchBox,
+                                            showCollectionsPicker: false,
+                                            showTagsPicker: false,
+                                            showCommentBox: false,
+                                        }))
+                                        this.inputQueryEl.focus()
+                                    }}
+                                    title={'Search Memex'}
+                                />
+                                {this.state.showSearchBox && (
+                                    <Tooltip
+                                        position="left"
+                                        itemClass={styles.tooltipLeft}
+                                    >
+                                        <form>
+                                            <input
+                                                autoFocus={false}
+                                                ref={this.setInputRef}
+                                                className={styles.searchInput}
+                                                name="query"
+                                                placeholder="Search your Memex"
+                                                autoComplete="off"
+                                                onKeyDown={this.onSearchEnter}
+                                                onChange={
+                                                    this.props.handleSearchChange
+                                                }
+                                                value={this.props.searchValue}
+                                            />
+                                        </form>
+                                    </Tooltip>
+                                )}
+                            </div>
                         </div>
-
-                        <div>
+                        <div className={styles.pageActions}>
+                            <div>
                             <button
                                 className={cx(styles.button, {
                                     [styles.bookmark]: this.props.isBookmarked,
@@ -196,125 +198,127 @@ class Ribbon extends Component<Props, State> {
                                 }
                                 title={'Star'}
                             />
-                        </div>
-                        <div>
-                            <button
-                                className={cx(styles.button, styles.comments)}
-                                onClick={this.handleCommentIconBtnClick}
-                                title={'Add comments'}
-                            />
-                            {this.state.showCommentBox && (
-                                <Tooltip position="left">
-                                    <CommentBoxContainer env="inpage" />
-                                </Tooltip>
-                            )}
-                            {this.props.isCommentSaved && (
-                                <Tooltip
-                                    position="left"
-                                    itemClass={styles.commentSaved}
-                                >
-                                    <div className={styles.saveBox}>
-                                        <span className={styles.saveIcon} />
-                                        <span className={styles.saveText}>
-                                            Saved!
-                                        </span>
-                                    </div>
-                                </Tooltip>
-                            )}
-                        </div>
-
-                        <div>
-                            <button
-                                className={cx(styles.button, styles.tag)}
-                                onClick={() =>
-                                    this.setState(prevState => ({
-                                        showSearchBox: false,
-                                        showCollectionsPicker: false,
-                                        showTagsPicker: !prevState.showTagsPicker,
-                                        showCommentBox: false,
-                                    }))
-                                }
-                                title={'Add tags'}
-                            />
-                            {this.state.showTagsPicker && (
-                                <Tooltip position="left">
-                                    {this.props.tagManager}
-                                </Tooltip>
-                            )}
-                        </div>
-
-                        <div>
-                            <button
-                                className={cx(styles.button, styles.collection)}
-                                onClick={() =>
-                                    this.setState(prevState => ({
-                                        showSearchBox: false,
-                                        showCollectionsPicker: !prevState.showCollectionsPicker,
-                                        showTagsPicker: false,
-                                        showCommentBox: false,
-                                    }))
-                                }
-                                title={'Add to collections'}
-                            />
-                            {this.state.showCollectionsPicker && (
-                                <Tooltip
-                                    position="left"
-                                    itemClass={styles.collectionDiv}
-                                >
-                                    {this.props.collectionsManager}
-                                </Tooltip>
-                            )}
-                        </div>
-
-                        <div>
-                            <button
-                                className={cx(styles.button, styles.settings)}
-                                onClick={() =>
-                                    this.openOptionsTabRPC('settings')
-                                }
-                                title={'Settings'}
-                            />
-                        </div>
-
-                        <div>
-                            <button
-                                className={cx(
-                                    styles.toggler,
-                                    styles.ribbonIcon,
-                                    {
-                                        [styles.ribbonOn]: this.props
-                                            .isRibbonEnabled,
-                                        [styles.ribbonOff]: !this.props
-                                            .isRibbonEnabled,
-                                    },
+                            </div>
+                            <div>
+                                <button
+                                    className={cx(styles.button, styles.comments)}
+                                    onClick={this.handleCommentIconBtnClick}
+                                    title={'Add comments'}
+                                />
+                                {this.state.showCommentBox && (
+                                    <Tooltip position="left">
+                                        <CommentBoxContainer env="inpage" />
+                                    </Tooltip>
                                 )}
-                                onClick={() => this.props.handleRibbonToggle()}
-                                title={'Disable this mini sidebar'}
-                            />
-                        </div>
+                                {this.props.isCommentSaved && (
+                                    <Tooltip
+                                        position="left"
+                                        itemClass={styles.commentSaved}
+                                    >
+                                        <div className={styles.saveBox}>
+                                            <span className={styles.saveIcon} />
+                                            <span className={styles.saveText}>
+                                                Saved!
+                                            </span>
+                                        </div>
+                                    </Tooltip>
+                                )}
+                            </div>
 
-                        <div>
-                            <button
-                                className={cx(styles.toggler, {
-                                    [styles.tooltipOn]: this.props
-                                        .isTooltipEnabled,
-                                    [styles.tooltipOff]: !this.props
-                                        .isTooltipEnabled,
-                                })}
-                                onClick={() => this.props.handleTooltipToggle()}
-                                title={'Disable Highlighter tooltip'}
-                            />
-                        </div>
+                            <div>
+                                <button
+                                    className={cx(styles.button, styles.tag)}
+                                    onClick={() =>
+                                        this.setState(prevState => ({
+                                            showSearchBox: false,
+                                            showCollectionsPicker: false,
+                                            showTagsPicker: !prevState.showTagsPicker,
+                                            showCommentBox: false,
+                                        }))
+                                    }
+                                    title={'Add tags'}
+                                />
+                                {this.state.showTagsPicker && (
+                                    <Tooltip position="left">
+                                        {this.props.tagManager}
+                                    </Tooltip>
+                                )}
+                            </div>
 
-                        <div>
-                            <button
-                                className={cx(styles.button, {
-                                    [styles.playIcon]: this.props.isPaused,
-                                    [styles.pauseIcon]: !this.props.isPaused,
-                                })}
-                                onClick={() => this.props.handlePauseToggle()}
-                                title={'Pause indexing'}
-                            />
+                            <div>
+                                <button
+                                    className={cx(styles.button, styles.collection)}
+                                    onClick={() =>
+                                        this.setState(prevState => ({
+                                            showSearchBox: false,
+                                            showCollectionsPicker: !prevState.showCollectionsPicker,
+                                            showTagsPicker: false,
+                                            showCommentBox: false,
+                                        }))
+                                    }
+                                    title={'Add to collections'}
+                                />
+                                {this.state.showCollectionsPicker && (
+                                    <Tooltip
+                                        position="left"
+                                        itemClass={styles.collectionDiv}
+                                    >
+                                        {this.props.collectionsManager}
+                                    </Tooltip>
+                                )}
+                            </div>
+                        </div>
+                        <div className={styles.settingsActions}>
+                            <div>
+                                <button
+                                    className={cx(styles.button, styles.settings)}
+                                    onClick={() =>
+                                        this.openOptionsTabRPC('settings')
+                                    }
+                                    title={'Settings'}
+                                />
+                            </div>
+
+                            <div>
+                                <button
+                                    className={cx(
+                                        styles.button,
+                                        styles.ribbonIcon,
+                                        {
+                                            [styles.ribbonOn]: this.props
+                                                .isRibbonEnabled,
+                                            [styles.ribbonOff]: !this.props
+                                                .isRibbonEnabled,
+                                        },
+                                    )}
+                                    onClick={() => this.props.handleRibbonToggle()}
+                                    title={'Disable this mini sidebar'}
+                                />
+                            </div>
+
+                            <div>
+                                <button
+                                    className={cx(styles.button, {
+                                        [styles.tooltipOn]: this.props
+                                            .isTooltipEnabled,
+                                        [styles.tooltipOff]: !this.props
+                                            .isTooltipEnabled,
+                                    })}
+                                    onClick={() => this.props.handleTooltipToggle()}
+                                    title={'Disable Highlighter tooltip'}
+                                />
+                            </div>
+
+                            <div>
+                                <button
+                                    className={cx(styles.button, {
+                                        [styles.playIcon]: this.props.isPaused,
+                                        [styles.pauseIcon]: !this.props.isPaused,
+                                    })}
+                                    onClick={() => this.props.handlePauseToggle()}
+                                    title={'Pause indexing'}
+                                />
+                            </div>
                         </div>
                     </React.Fragment>
                 )}

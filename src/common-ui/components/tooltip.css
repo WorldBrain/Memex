@@ -24,7 +24,6 @@
 .tooltiptop {
     bottom: 100%;
     left: 50%;
-    padding-bottom: 9px;
     transform: translateX(-50%);
 
     /*    &::after {

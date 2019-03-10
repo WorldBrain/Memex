@@ -91,7 +91,7 @@
     display: grid;
     grid-template-columns: 1fr 1.5fr 1fr;
     grid-template-areas: 'backButton numberTags .';
-    padding: 10px 0 20px 0px;
+    padding: 0px 0 10px 0px;
     border-radius: 0 0 3px 3px;
     background: white;
 }
@@ -171,7 +171,7 @@
     width: 300px;
     z-index: 1;
     background-color: #fff;
-    box-shadow: 0px 4px 7px 0px #3eb995;
+    border-radius: 3px;
 }
 
 .tagDivForFilterSB {
