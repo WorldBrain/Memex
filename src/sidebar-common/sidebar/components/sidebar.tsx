@@ -200,7 +200,11 @@ class Sidebar extends React.Component<Props, State> {
                             </div>
                         </div>
 
-                        {showCommentBox && <CommentBoxContainer env={env} />}
+                        {showCommentBox && (
+                            <div className={styles.commentBoxContainer}>
+                                <CommentBoxContainer env={env} />
+                            </div>
+                        )}
 
                         {this.state.showPageResults &&
                             (isLoading ? (

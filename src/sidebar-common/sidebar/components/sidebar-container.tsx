@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
-import onClickOutside from 'react-onclickoutside'
+// import onClickOutside from 'react-onclickoutside'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -59,22 +59,22 @@ class SidebarContainer extends React.Component<Props, State> {
     /**
      * Method used by `react-onclickoutside` to detect outside clicks.
      */
-    handleClickOutside = (e: Event) => {
-        e.stopPropagation()
+    // handleClickOutside = (e: Event) => {
+    //     e.stopPropagation()
 
-        // Only close the sidebar when all of the following conditions are met:
-        // 1. Sidebar is open.
-        // 2. Mouse is not inside the sidebar.
-        // 3. Click did not occur on an annotation highlight.
-        // This step is necessary as `onClickOutside` fires for a variety of events.
-        if (
-            this.props.isOpen &&
-            !this.state.isMouseInsideSidebar &&
-            !(e.target as any).dataset.annotation
-        ) {
-            this._closeSidebar()
-        }
-    }
+    //     // Only close the sidebar when all of the following conditions are met:
+    //     // 1. Sidebar is open.
+    //     // 2. Mouse is not inside the sidebar.
+    //     // 3. Click did not occur on an annotation highlight.
+    //     // This step is necessary as `onClickOutside` fires for a variety of events.
+    //     if (
+    //         this.props.isOpen &&
+    //         !this.state.isMouseInsideSidebar &&
+    //         !(e.target as any).dataset.annotation
+    //     ) {
+    //         this._closeSidebar()
+    //     }
+    // }
 
     private _handleMouseEnter = (e: Event) => {
         e.stopPropagation()
@@ -196,4 +196,5 @@ const mapDispatchToProps: MapDispatchToProps<
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-)(onClickOutside(SidebarContainer))
+    // )(onClickOutside(SidebarContainer))
+)(SidebarContainer)

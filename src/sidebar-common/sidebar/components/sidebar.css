@@ -12,6 +12,15 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    margin-bottom: 30px;
+}
+
+.commentBoxContainer {
+    margin-top: 50px;
+    background: white;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    margin-bottom: 10px;
 }
 
 .navBar {
