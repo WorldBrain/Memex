@@ -3,6 +3,7 @@ import { createAction } from 'redux-act'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { Thunk } from '../types'
 import { createAnnotation } from '../sidebar/actions'
+import * as selectors from './selectors'
 
 export const setShowCommentBox = createAction<boolean>('setShowCommentBox')
 
@@ -20,6 +21,14 @@ export const addTag = createAction<string>('addTag')
 
 export const deleteTag = createAction<string>('deleteTag')
 
+export const setIsCommentBookmarked = createAction<boolean>(
+    'bookmark/setIsCommentBookmarked',
+)
+
+export const setIsCommentSaved = createAction<boolean>(
+    'bookmark/setIsCommentSaved',
+)
+
 export const openCommentBoxWithHighlight: (
     anchor: Anchor,
 ) => Thunk = anchor => dispatch => {
@@ -36,6 +45,10 @@ export const resetCommentBox: () => Thunk = () => dispatch => {
     dispatch(setCommentText(''))
     dispatch(setTags([]))
     dispatch(setInitTagSuggestions([]))
+    setTimeout(() => {
+        dispatch(setIsCommentSaved(false))
+        dispatch(setIsCommentBookmarked(false))
+    }, 3000)
 }
 
 /**
@@ -52,6 +65,7 @@ export const saveComment: (
         const body = anchor !== null ? anchor.quote : ''
 
         dispatch(createAnnotation(anchor, body, commentText, tags))
+        dispatch(setIsCommentSaved(true))
         dispatch(resetCommentBox())
     }
 }
@@ -62,4 +76,9 @@ export const saveComment: (
  */
 export const cancelComment: () => Thunk = () => dispatch => {
     dispatch(resetCommentBox())
+}
+
+export const toggleBookmark: () => Thunk = () => (dispatch, getState) => {
+    const isBookmarked = selectors.isBookmarked(getState())
+    dispatch(setIsCommentBookmarked(!isBookmarked))
 }

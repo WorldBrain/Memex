@@ -22,3 +22,13 @@ export const initTagSuggestions = createSelector(
     commentBox,
     state => state.initTagSuggestions,
 )
+
+export const isBookmarked = createSelector(
+    commentBox,
+    state => state.isCommentBookmarked,
+)
+
+export const isCommentSaved = createSelector(
+    commentBox,
+    state => state.isCommentSaved,
+)

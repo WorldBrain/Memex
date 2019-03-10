@@ -9,11 +9,11 @@
     font-family: 'Inter';
     font-style: italic;
     background: #f7f7f7;
-    border: none;
+    border: 1px solid #d2d2d2;
     border-radius: 2px;
     padding: 10px 7px;
     margin: 5px 5px 5px 5px;
-    min-height: 40px;
+    min-height: 100px;
 
     &:focus {
         outline: none;
@@ -25,17 +25,67 @@
 }
 
 .buttonHolder {
-    display: flex;
+    display: initial;
     flex-direction: row;
     justify-content: flex-end;
     padding: 5px 10px 5px 10px;
-    border-top: 1px solid #d2d2d2;
 }
 
 .saveBtn {
     composes: footerBoldText from '../../annotation-box/all-modes-footer.css';
+    float: right;
 }
 
 .cancelBtn {
     composes: footerText from '../../annotation-box/all-modes-footer.css';
+}
+
+.button {
+    composes: nakedButton from '../../../common-ui/elements.css';
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    opacity: 0.6;
+    margin-left: 4px;
+    background-size: 18px 18px;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.75;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+    opacity: 0.8;
+    background-size: 18px;
+    background-position-y: 3px;
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+    background-size: 18px;
+    background-position-y: 3px;
+}
+
+.tag {
+    background-image: url('/img/tag.svg');
+    background-size: 18px;
+    background-position-y: 3px;
+}
+
+.tagsContainer {
+    margin-top: 8px;
 }

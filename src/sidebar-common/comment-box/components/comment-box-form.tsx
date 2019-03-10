@@ -2,21 +2,26 @@ import * as React from 'react'
 
 import { ClickHandler } from '../../types'
 import * as constants from '../constants'
-import TagInputContainer from './tag-input-container'
+import TagsContainer from './tag-input-container'
+import Tooltip from 'src/common-ui/components/tootltip'
+import cx from 'classnames'
 
 const styles = require('./comment-box-form.css')
 
 interface Props {
     env?: 'inpage' | 'overview'
     commentText: string
+    isCommentBookmarked: boolean
     handleCommentTextChange: (comment: string) => void
     saveComment: React.EventHandler<React.SyntheticEvent>
     cancelComment: ClickHandler<HTMLElement>
+    toggleBookmark: ClickHandler<HTMLButtonElement>
 }
 
 interface State {
     rows: number
     isTagInputActive: boolean
+    showTagsPicker: boolean
 }
 
 class CommentBoxForm extends React.Component<Props, State> {
@@ -28,6 +33,7 @@ class CommentBoxForm extends React.Component<Props, State> {
     state = {
         rows: constants.NUM_DEFAULT_ROWS,
         isTagInputActive: false,
+        showTagsPicker: false,
     }
 
     componentDidMount() {
@@ -125,7 +131,13 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     render() {
-        const { env, commentText, saveComment, cancelComment } = this.props
+        const {
+            env,
+            commentText,
+            saveComment,
+            cancelComment,
+            toggleBookmark,
+        } = this.props
         const { rows, isTagInputActive } = this.state
 
         return (
@@ -141,33 +153,46 @@ class CommentBoxForm extends React.Component<Props, State> {
                     onKeyDown={this._handleTextAreaKeyDown}
                     ref={this._setTextAreaRef}
                 />
-                {/* Tags for the current annotation/comment. */}
-                <div
-                    onKeyDown={this._handleTagInputKeyDown}
-                    ref={this._setTagInputRef}
-                    className={styles.tagCommentEditor}
-                >
-                    <TagInputContainer
-                        env={env}
-                        isTagInputActive={isTagInputActive}
-                        setTagInputActive={this.setTagInputActive}
-                    />
-                </div>
 
                 {/* Save and Cancel buttons. */}
                 <div className={styles.buttonHolder}>
+                    <button
+                        className={cx(styles.button, styles.tag)}
+                        onClick={() =>
+                            this.setState(prevState => ({
+                                showTagsPicker: !prevState.showTagsPicker,
+                            }))
+                        }
+                        title={'Add tags'}
+                    />
+
+                    {this.state.showTagsPicker && (
+                        <Tooltip
+                            position="bottom"
+                            itemClass={styles.tagsContainer}
+                        >
+                            <TagsContainer env={this.props.env} />
+                        </Tooltip>
+                    )}
+                    <button
+                        className={cx(styles.button, {
+                            [styles.bookmark]: this.props.isCommentBookmarked,
+                            [styles.notBookmark]: !this.props
+                                .isCommentBookmarked,
+                        })}
+                        onClick={toggleBookmark}
+                        title={
+                            !this.props.isCommentBookmarked
+                                ? 'Bookmark'
+                                : 'Remove bookmark'
+                        }
+                    />
                     <button
                         className={styles.saveBtn}
                         onClick={saveComment}
                         onKeyDown={this._handleSaveButtonKeyDown}
                     >
                         Save
-                    </button>
-                    <button
-                        className={styles.cancelBtn}
-                        onClick={cancelComment}
-                    >
-                        Cancel
                     </button>
                 </div>
             </React.Fragment>

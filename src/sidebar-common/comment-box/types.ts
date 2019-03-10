@@ -18,4 +18,6 @@ export default interface State {
      * (NOT BEING USED CURRENTLY but using would probably make for a better UX).
      */
     initTagSuggestions: string[]
+    isCommentBookmarked: boolean
+    isCommentSaved: boolean
 }

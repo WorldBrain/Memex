@@ -18,10 +18,12 @@ import { actions as commentBoxActions } from 'src/sidebar-common/comment-box'
 import AnnotationsManager from 'src/sidebar-common/annotations-manager'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { retryUntilErrorResolves } from '../utils'
+import { selectors as commentBoxselectors } from '../../sidebar-common/comment-box'
 
 interface StateProps {
     isPageFullScreen: boolean
     isSidebarOpen: boolean
+    isCommentSaved: boolean
     annotations: Annotation[]
 }
 
@@ -200,6 +202,8 @@ class RibbonSidebarContainer extends React.Component<Props> {
             makeHighlightMedium,
             removeMediumHighlights,
             sortAnnotationsByPosition,
+            closeSidebar,
+            isCommentSaved,
         } = this.props
 
         return (
@@ -210,7 +214,8 @@ class RibbonSidebarContainer extends React.Component<Props> {
                     handleRemoveRibbon={handleRemoveRibbon}
                     insertOrRemoveTooltip={insertOrRemoveTooltip}
                     openSidebar={this._openSidebar}
-                    closeSidebar={this.props.closeSidebar}
+                    closeSidebar={closeSidebar}
+                    isCommentSaved={isCommentSaved}
                 />
 
                 {isSidebarOpen && (
@@ -236,6 +241,7 @@ const mapStateToProps: MapStateToProps<
 > = state => ({
     isPageFullScreen: ribbonSelectors.isPageFullScreen(state),
     isSidebarOpen: sidebarSelectors.isOpen(state),
+    isCommentSaved: commentBoxselectors.isCommentSaved(state),
     annotations: sidebarSelectors.annotations(state),
 })
 

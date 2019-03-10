@@ -15,12 +15,14 @@ interface StateProps {
     anchor: Anchor
     commentText: string
     tags: string[]
+    isCommentBookmarked: boolean
 }
 
 interface DispatchProps {
     handleCommentTextChange: (comment: string) => void
     saveComment: (anchor: Anchor, commentText: string, tags: string[]) => void
     cancelComment: ClickHandler<HTMLElement>
+    toggleBookmark: ClickHandler<HTMLButtonElement>
 }
 
 interface OwnProps {
@@ -46,6 +48,8 @@ class CommentBoxContainer extends React.PureComponent<Props> {
             commentText,
             handleCommentTextChange,
             cancelComment,
+            isCommentBookmarked,
+            toggleBookmark,
         } = this.props
 
         return (
@@ -58,6 +62,8 @@ class CommentBoxContainer extends React.PureComponent<Props> {
                     handleCommentTextChange={handleCommentTextChange}
                     saveComment={this.save}
                     cancelComment={cancelComment}
+                    isCommentBookmarked={isCommentBookmarked}
+                    toggleBookmark={toggleBookmark}
                 />
             </div>
         )
@@ -72,6 +78,7 @@ const mapStateToProps: MapStateToProps<
     anchor: selectors.anchor(state),
     commentText: selectors.commentText(state),
     tags: selectors.tags(state),
+    isCommentBookmarked: selectors.isBookmarked(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<
@@ -87,6 +94,7 @@ const mapDispatchToProps: MapDispatchToProps<
         e.stopPropagation()
         dispatch(actions.cancelComment())
     },
+    toggleBookmark: () => dispatch(actions.toggleBookmark()),
 })
 
 export default connect(
