@@ -105,8 +105,9 @@
 .name {
     composes: h2Color from '../../common-ui/colors.css';
     vertical-align: middle;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 15px;
+    margin-right: 8px;
 }
 
 .subname {

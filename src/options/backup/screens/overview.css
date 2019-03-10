@@ -26,6 +26,11 @@
     }
 }
 
+.nextBackupLine {
+    display: flex;
+    align-items: flex-end;
+}
+
 .statusLabel {
     font-weight: bold;
 }
@@ -34,6 +39,7 @@
     composes: h2Color from '../../../common-ui/colors.css';
     font-weight: 600;
     font-size: 15px;
+    margin-right: 8px;
 }
 
 .startWizard {
@@ -55,7 +61,7 @@
 .time {
     margin-left: 5px;
     composes: subTitleColor from '../../../common-ui/colors.css';
-    font-size: 13px;
+    font-size: 15px;
 }
 
 .right {
