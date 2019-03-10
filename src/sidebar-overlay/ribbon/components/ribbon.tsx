@@ -69,9 +69,9 @@ class Ribbon extends Component<Props, State> {
         this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
     }
 
-    // private handleMouseLeave = () => {
-    //     this.setState(defaultState)
-    // }
+    private handleMouseLeave = () => {
+        this.setState(defaultState)
+    }
 
     private onSearchEnter: KeyboardEventHandler<HTMLInputElement> = event => {
         if (event.key === 'Enter') {
