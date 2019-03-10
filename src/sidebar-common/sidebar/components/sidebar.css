@@ -1,13 +1,12 @@
 .sidebar {
     height: 100%;
     background: #fff;
-    padding-bottom: 150px;
     overflow-y: scroll;
+    padding: 5px 5px 150px 5px;
 }
 
 .annotationsSection {
     width: 100%;
-    padding: 0 5px;
     background: #fff;
     display: flex;
     flex-direction: column;

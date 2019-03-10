@@ -14,9 +14,6 @@ import Tooltip from 'src/common-ui/components/tootltip'
 
 const styles = require('./ribbon.css')
 
-const arrowRibbon = getExtUrl('/img/arrow_ribbon.svg')
-const logo = getExtUrl('/img/worldbrain-logo-narrow.png')
-
 interface Props {
     isExpanded: boolean
     isRibbonEnabled: boolean
@@ -89,16 +86,23 @@ class Ribbon extends Component<Props, State> {
                 ref={ref => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
                     [styles.ribbonExpanded]:
-                        this.props.isExpanded || this.props.isSidebarOpen,
+                        true
+                        // this.props.isExpanded || this.props.isSidebarOpen,
                 })}
             >
-                {(this.props.isExpanded || this.props.isSidebarOpen) && (
+                {(true
+                    // this.props.isExpanded || this.props.isSidebarOpen
+                    ) && (
                     <React.Fragment>
+                        <div>
                         <button
                             onClick={() => this.openOverviewTabRPC()}
-                            className={cx(styles.button, styles.search)}
+                            className={cx(styles.button, styles.dashboard)}
                             title={'Open Dashboard'}
                         />
+                        </div>
+
+                        <div>
                         <button
                             className={cx(styles.button, styles.arrow)}
                             onClick={() =>
@@ -112,6 +116,9 @@ class Ribbon extends Component<Props, State> {
                                     : 'Close Sidebar'
                             }
                         />
+                        </div>
+
+                        <div>
                         <button
                             className={cx(styles.button, styles.search)}
                             onClick={() =>
@@ -128,7 +135,7 @@ class Ribbon extends Component<Props, State> {
                             >
                                 <form>
                                     <input
-                                        autoFocus
+                                        autoFocus={false}
                                         className={styles.searchInput}
                                         name="query"
                                         placeholder="Search your Memex"
@@ -140,6 +147,20 @@ class Ribbon extends Component<Props, State> {
                                 </form>
                             </Tooltip>
                         )}
+                        </div>
+
+                        <div>
+                         <button
+                            className={cx(styles.button, {
+                                [styles.bookmark]: this.props.isBookmarked,
+                                [styles.notBookmark]: !this.props.isBookmarked,
+                            })}
+                            onClick={() => this.props.handleBookmarkToggle()}
+                            title={'Star'}
+                        />
+                        </div>
+
+                        <div> 
                         <button
                             className={cx(styles.button, styles.comments)}
                             onClick={() =>
@@ -150,16 +171,14 @@ class Ribbon extends Component<Props, State> {
                             title={'Add comments'}
                         />
                         {this.state.showCommentBox && (
-                            <Tooltip
-                                position="left"
-                                itemClass={cx(
-                                    styles.tooltipLeft,
-                                    styles.commentBox,
-                                )}
-                            >
+                            <Tooltip 
+                                position="left">
                                 <CommentBoxContainer />
                             </Tooltip>
                         )}
+                        </div>
+
+                        <div>
                         <button
                             className={cx(styles.button, styles.tag)}
                             onClick={() =>
@@ -174,14 +193,9 @@ class Ribbon extends Component<Props, State> {
                                 {this.props.tagManager}
                             </Tooltip>
                         )}
-                        <button
-                            className={cx(styles.button, {
-                                [styles.bookmark]: this.props.isBookmarked,
-                                [styles.notBookmark]: !this.props.isBookmarked,
-                            })}
-                            onClick={() => this.props.handleBookmarkToggle()}
-                            title={'Star'}
-                        />
+                        </div>
+
+                        <div>
                         <button
                             className={cx(styles.button, styles.collection)}
                             onClick={() =>
@@ -199,11 +213,17 @@ class Ribbon extends Component<Props, State> {
                                 {this.props.collectionsManager}
                             </Tooltip>
                         )}
+                        </div>
+                        
+                        <div>
                         <button
                             className={cx(styles.button, styles.settings)}
                             onClick={() => this.openOptionsTabRPC('settings')}
                             title={'Settings'}
                         />
+                        </div>
+                        
+                        <div>
                         <button
                             className={cx(styles.toggler, styles.ribbonIcon, {
                                 [styles.ribbonOn]: this.props.isRibbonEnabled,
@@ -212,6 +232,9 @@ class Ribbon extends Component<Props, State> {
                             onClick={() => this.props.handleRibbonToggle()}
                             title={'Disable this mini sidebar'}
                         />
+                        </div>
+                        
+                        <div>
                         <button
                             className={cx(styles.toggler, {
                                 [styles.tooltipOn]: this.props.isTooltipEnabled,
@@ -221,6 +244,9 @@ class Ribbon extends Component<Props, State> {
                             onClick={() => this.props.handleTooltipToggle()}
                             title={'Disable Highlighter tooltip'}
                         />
+                        </div>
+
+                        <div>
                         <button
                             className={cx(styles.button, {
                                 [styles.playIcon]: this.props.isPaused,
@@ -229,6 +255,7 @@ class Ribbon extends Component<Props, State> {
                             onClick={() => this.props.handlePauseToggle()}
                             title={'Pause indexing'}
                         />
+                        </div>
                     </React.Fragment>
                 )}
             </div>

@@ -1,12 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="102px" height="102px" viewBox="0 0 102 102" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 40.3 (33839) - http://www.bohemiancoding.com/sketch -->
-    <title>noun_243845_3EB995</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="noun_243845_3EB995" fill="#3eb995">
-            <path d="M51,101.406977 C78.872093,101.406977 101.406977,78.872093 101.406977,51 C101.406977,23.127907 78.872093,0.593023256 51,0.593023256 C23.127907,0.593023256 0.593023256,23.127907 0.593023256,51 C0.593023256,78.872093 23.127907,101.406977 51,101.406977 L51,101.406977 Z M35.5813953,24.4325581 L81.6,51 L35.5813953,77.5674419 L35.5813953,24.4325581 L35.5813953,24.4325581 Z" id="Shape"></path>
-        </g>
-    </g>
+<svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.4997 22.9168C18.2526 22.9168 22.9163 18.2531 22.9163 12.5002C22.9163 6.7472 18.2526 2.0835 12.4997 2.0835C6.74671 2.0835 2.08301 6.7472 2.08301 12.5002C2.08301 18.2531 6.74671 22.9168 12.4997 22.9168Z" stroke="#444444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10.417 8.3335L16.667 12.5002L10.417 16.6668V8.3335Z" fill="#444444" stroke="#444444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

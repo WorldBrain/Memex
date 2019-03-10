@@ -7,6 +7,7 @@
     border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
     font-size: 14px;
+    background-color: white;
     min-height: 20px;
     justify-content: space-between;
 
@@ -45,6 +46,7 @@
     width: 100%;
     max-height: 401px;
     overflow-y: scroll;
+    background-color: white;
 
     &:focus {
         outline: none;
@@ -92,6 +94,7 @@
     padding: 10px 0 20px 0px;
     background: white;
     border-radius: 0 0 3px 3px;
+    background: white;
 }
 
 .searchContainer {

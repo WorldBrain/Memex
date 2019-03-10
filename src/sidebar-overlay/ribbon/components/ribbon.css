@@ -1,10 +1,10 @@
 .ribbon {
+    composes: sideBarColorOpen from '../../../common-ui/colors.css';
     position: fixed;
     top: 0;
     right: 0;
     width: 55px;
     height: 100%;
-    background: transparent;
     z-index: 1100;
 
     /* z-index: 2147483647;
@@ -31,129 +31,124 @@
     display: grid;
 }
 
+/* ICONS */
+
 .buttons {
     align-items: center;
     display: block;
 }
 
 .button {
-    margin-bottom: 25px;
-    width: 25px;
-    height: 25px;
+    composes: nakedButton from '../../../common-ui/elements.css';
+    width: 20px;
+    height: 20px;
     border-radius: 3px;
-    opacity: 0.2;
+    opacity: 0.6;
     margin-left: 4px;
+    background-size: 18px 18px;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
 
     &:hover {
         opacity: 0.75;
     }
+
+    :active {
+    opacity: 1;
+    }
+}
+
+.dashboard {
+    background-image: url('/img/open.svg');
+}
+
+.arrow {
+    background-image: url('/img/arrow.svg');
 }
 
 .search {
     background-image: url('/img/search-icon.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-    height: 25px;
-}
-
-.searchInput {
-    border: 2px solid #5cd9a6;
-    margin-right: 4px;
-    padding-left: 8px;
-    border-radius: 8px;
-    background: #fff;
-    color: #bcc2bd;
-    width: 180px;
-    height: 35px;
-}
-
-.tooltipLeft {
-    margin-right: 10px;
-}
-
-.commentBox {
-    width: 300px;
-    height: 150px;
-    border: 2px solid #5cd9a6;
-    padding-bottom: 15px;
 }
 
 .tag {
-    background-image: url('/img/tag_blue_empty.svg');
-    margin-left: 6px;
-
-    &:hover {
-        background-image: url('/img/tag_blue.svg');
-    }
+    background-image: url('/img/tag.svg');
 }
 
 .collection {
-    background-image: url('/img/collections.svg');
-    margin-left: 6px;
-
-    &:hover {
-        background-image: url('/img/tag_blue.svg');
-    }
+    background-image: url('/img/collections_add.svg');
 }
 
-.collectionDiv {
-    width: 300px;
-    margin-right: 15px;
-    border: 2px solid #5cd9a6;
+.comments {
+    background-image: url('/img/comment_add.svg');
 }
 
 .bookmark {
-    background-image: url('/img/star_blue_full.svg');
-    opacity: 0.8;
-
-    &:hover {
-        opacity: 1;
-    }
+    background-image: url('/img/star_full.svg');
 }
 
 .notBookmark {
-    background-image: url('/img/star_blue_empty.svg');
+    background-image: url('/img/star_empty.svg');
 }
 
 .settings {
     background-image: url('/img/settings.svg');
 }
 
+.tooltipOn {
+    background-image: url('/img/tooltipIcon_blue.svg');
+}
+
+.tooltipOff {
+    background-image: url('/img/tooltipIcon_grey.svg');
+}
+
+.ribbonOn {
+    background-image: url('/img/sidebarIcon_blue.svg');
+}
+
+.ribbonOff {
+    background-image: url('/img/sidebarIcon_grey.svg');
+}
+
+.ribbonIcon {
+    padding-top: 1px;
+}
+
 .pauseIcon {
-    background-image: url('/img/pause_blue.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-    cursor: pointer;
-    opacity: 0.6;
+    background-image: url('/img/pause.svg');
 }
 
 .playIcon {
-    background-image: url('/img/play_blue.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-    cursor: pointer;
-    opacity: 0.8;
+    background-image: url('/img/pause_active.svg');
+
+    &:hover {
+        background-image: url('/img/play.svg');
+    }
 }
 
-.arrow {
-    background-image: url('/img/arrow_ribbon.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
+/* Interaction Modals */
+
+.collectionDiv {
+    border-radius: 3px;
 }
 
-.arrowBox {
-    width: 9px;
-    display: flex;
-    justify-content: flex-end;
-    margin-right: 4px;
-    padding-top: 1px;
+.searchInput {
+    border: 2px solid #5cd9a6;
+    background: white;
+    opacity: 1;
+    color: #bcc2bd;
+    width: 180px;
+    height: 35px;
 }
 
-.buttonHolder {
-    /* border-bottom: 1px solid #c2c2c2; */
-    display: flex;
-    margin-left: 10px;
-    padding-top: 1px;
+.commentBox {
+    width: 300px;
+    height: 150px;
+    border: 2px solid #5cd9a6;
+    top: 50px;
 }
 
 .logo,
@@ -185,22 +180,3 @@
     height: 12px;
 }
 
-.tooltipOn {
-    background-image: url('/img/tooltipIcon_blue.svg');
-}
-
-.tooltipOff {
-    background-image: url('/img/tooltipIcon_grey.svg');
-}
-
-.ribbonOn {
-    background-image: url('/img/sidebarIcon_blue.svg');
-}
-
-.ribbonOff {
-    background-image: url('/img/sidebarIcon_grey.svg');
-}
-
-.ribbonIcon {
-    padding-top: 1px;
-}
