@@ -63,6 +63,7 @@ interface OwnProps {
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     openSidebar: () => void
     closeSidebar: () => void
+    isCommentSaved: boolean
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -154,6 +155,7 @@ class RibbonContainer extends Component<Props> {
             handleSearchChange,
             handlePauseToggle,
             handleBookmarkToggle,
+            isCommentSaved,
         } = this.props
 
         return (
@@ -165,6 +167,7 @@ class RibbonContainer extends Component<Props> {
                     isSidebarOpen={isSidebarOpen}
                     isPaused={isPaused}
                     isBookmarked={isBookmarked}
+                    isCommentSaved={isCommentSaved}
                     searchValue={searchValue}
                     tagManager={this.renderTagsManager()}
                     collectionsManager={this.renderCollectionsManager()}

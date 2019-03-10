@@ -56,8 +56,12 @@
         opacity: 0.75;
     }
 
-    :active {
-    opacity: 1;
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
     }
 }
 
@@ -149,6 +153,19 @@
     height: 150px;
     border: 2px solid #5cd9a6;
     top: 50px;
+    background: white;
+}
+
+.commentSaved {
+    border-radius: 15px;
+    border: 2px solid #5cd9a6;
+    width: 150px;
+    height: 35px;
+}
+
+.commentText {
+    font-size: 15px;
+    margin-left: 50px;
 }
 
 .logo,
@@ -179,4 +196,3 @@
     width: 12px;
     height: 12px;
 }
-

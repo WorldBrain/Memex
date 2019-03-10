@@ -11,7 +11,6 @@ import {
 import Sidebar from './sidebar'
 import SidebarState, { Annotation } from '../types'
 import { MapDispatchToProps } from '../../types'
-import AnnotationsManager from '../../annotations-manager'
 
 interface StateProps {
     isOpen: boolean
@@ -197,5 +196,4 @@ const mapDispatchToProps: MapDispatchToProps<
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-    // )(onClickOutside(SidebarContainer))
-)(SidebarContainer)
+)(onClickOutside(SidebarContainer))
