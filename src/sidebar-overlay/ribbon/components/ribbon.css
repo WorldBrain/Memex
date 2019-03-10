@@ -175,12 +175,17 @@
 }
 
 .searchInput {
-    border: 2px solid #5cd9a6;
     background: white;
-    opacity: 1;
-    color: #bcc2bd;
-    width: 180px;
+    width: calc(100% - 30px);
+    border-radius: 50px;
+    border: none;
+    padding: 0 15px;
     height: 35px;
+    font-size: 13px;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: nowrap;
+    text-overflow: ellipsis;
 
     &:focus {
         outline: none;

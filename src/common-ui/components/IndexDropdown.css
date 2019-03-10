@@ -177,7 +177,6 @@
 .tagDivForFilterSB {
     z-index: 1;
     background-color: #fff;
-    box-shadow: unset;
     width: 100%;
 }
 

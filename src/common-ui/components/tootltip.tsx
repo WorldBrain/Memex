@@ -7,12 +7,18 @@ export interface Props {
     children: React.ReactNode
     position: string
     itemClass?: string
+    toolTipType?: string
 }
 
 class Tooltip extends React.PureComponent<Props> {
     render() {
         return (
-            <span className={styles.tooltip}>
+            <span className={classNames(
+                    styles.tooltip, 
+                    {
+                        [styles.searchBar] : this.props.toolTipType === 'searchBar',
+                    },
+                )}>
                 <div
                     className={classNames(
                         styles.tooltipBubble,

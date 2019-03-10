@@ -61,7 +61,7 @@
 
     &.tooltipBubble {
         right: 35px;
-        top: -15px;
+        top: -13px;
     }
 }
 
@@ -79,4 +79,8 @@
         left: 0;
         transform: translateY(-50%);
     } */
+}
+
+.searchBar .tooltipBubble {
+    border-radius: 50px;
 }
