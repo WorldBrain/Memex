@@ -167,7 +167,6 @@
 }
 
 .tagDivForFilter {
-    position: initial;
     width: 300px;
     z-index: 1;
     background-color: #fff;

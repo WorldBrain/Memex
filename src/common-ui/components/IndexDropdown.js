@@ -44,8 +44,7 @@ class IndexDropdown extends PureComponent {
     get mainClass() {
         return cx(this.styles.tagDiv, {
             [this.styles.tagDivFromOverview]: this.props.hover,
-            [this.styles.tagDivForFilter]:
-                !this.props.url || this.props.isForRibbon,
+            [this.styles.tagDivForFilter]: !this.props.url,
             [this.styles.tagDivForFilterSB]: this.props.isForSidebar,
         })
     }
