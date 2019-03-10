@@ -107,6 +107,7 @@ class ResultListContainer extends PureComponent<Props> {
                 setTagDivRef={this.setTagDivRef}
                 initFilters={tags}
                 source="tag"
+                isForRibbon={true}
                 hover
             />
         )
