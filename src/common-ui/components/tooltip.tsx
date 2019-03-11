@@ -13,12 +13,11 @@ export interface Props {
 class Tooltip extends React.PureComponent<Props> {
     render() {
         return (
-            <span className={classNames(
-                    styles.tooltip, 
-                    {
-                        [styles.searchBar] : this.props.toolTipType === 'searchBar',
-                    },
-                )}>
+            <span
+                className={classNames(styles.tooltip, {
+                    [styles.searchBar]: this.props.toolTipType === 'searchBar',
+                })}
+            >
                 <div
                     className={classNames(
                         styles.tooltipBubble,
@@ -30,8 +29,7 @@ class Tooltip extends React.PureComponent<Props> {
                                 this.props.position === 'right',
                             [styles.tooltipbottom]:
                                 this.props.position === 'bottom',
-                            [styles.tooltiptop]: 
-                                this.props.position === 'top',
+                            [styles.tooltiptop]: this.props.position === 'top',
                         },
                     )}
                 >

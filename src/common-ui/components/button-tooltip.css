@@ -1,0 +1,44 @@
+.tooltip {
+    position: relative;
+}
+
+.tooltipTrigger {
+    display: inline-block;
+}
+
+.tooltipBubble {
+    position: absolute;
+    left: -160px;
+    border-radius: 5px;
+}
+
+.tooltipTop {
+    bottom: 100%;
+    left: 50%;
+    padding-bottom: 9px;
+    transform: translateX(-50%);
+}
+
+.tooltipBottom {
+    top: 100%;
+    left: 50%;
+    padding-top: 9px;
+    transform: translateX(-50%);
+}
+
+.tooltipLeft {
+    top: 50%;
+    right: 100%;
+    padding-right: 9px;
+    transform: translateY(-50%);
+}
+
+.tooltipMessage {
+    background: black;
+    border-radius: 55px;
+    color: white;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    padding: 0.75em;
+    text-align: center;
+}
