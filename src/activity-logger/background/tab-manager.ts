@@ -38,6 +38,12 @@ export class TabManager {
         return this._tabs.get(id)
     }
 
+    getTabStateByUrl(url: string) {
+        const tabs = new Map<string, Tab>()
+        this._tabs.forEach(tab => tabs.set(tab.url, tab))
+        return tabs.get(url)
+    }
+
     getActiveTab() {
         let activeTab: TabState = null
 

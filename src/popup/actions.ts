@@ -1,6 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 import { createAction } from 'redux-act'
-
+import normalizeUrl from 'src/util/encode-url-for-id'
 import { remoteFunction } from '../util/webextensionRPC'
 import { Thunk } from './types'
 import { acts as bookmarkActs } from './bookmark-button'
@@ -30,7 +30,7 @@ export const initState: () => Thunk = () => async dispatch => {
     } else {
         const url = window.location.href
         if (url) {
-            ;[currentTab] = await fetchTabByUrlRPC(url)
+            currentTab = await fetchTabByUrlRPC(url)
         }
     }
 
