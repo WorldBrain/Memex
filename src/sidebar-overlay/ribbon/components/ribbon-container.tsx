@@ -28,7 +28,6 @@ import { actions as sidebarActs } from 'src/sidebar-common/sidebar/'
 
 interface StateProps {
     isExpanded: boolean
-    isRibbonEnabled: boolean
     isTooltipEnabled: boolean
     isPaused: boolean
     isBookmarked: boolean
@@ -59,6 +58,7 @@ interface DispatchProps {
 interface OwnProps {
     annotationsManager: AnnotationsManager
     isSidebarOpen: boolean
+    isRibbonEnabled: boolean
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     openSidebar: () => void
@@ -197,7 +197,6 @@ const mapStateToProps: MapStateToProps<
     RootState
 > = state => ({
     isExpanded: selectors.isExpanded(state),
-    isRibbonEnabled: selectors.isRibbonEnabled(state),
     isTooltipEnabled: selectors.isTooltipEnabled(state),
     isPaused: pause.isPaused(state),
     isBookmarked: bookmark.isBookmarked(state),
