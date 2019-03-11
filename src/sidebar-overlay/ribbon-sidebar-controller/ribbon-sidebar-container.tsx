@@ -22,6 +22,7 @@ import { selectors as commentBoxselectors } from '../../sidebar-common/comment-b
 
 interface StateProps {
     isPageFullScreen: boolean
+    isRibbonEnabled: boolean
     isSidebarOpen: boolean
     isCommentSaved: boolean
     commentText: string
@@ -201,6 +202,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
             insertOrRemoveTooltip,
             isPageFullScreen,
             isSidebarOpen,
+            isRibbonEnabled,
             makeHighlightMedium,
             removeMediumHighlights,
             sortAnnotationsByPosition,
@@ -212,17 +214,20 @@ class RibbonSidebarContainer extends React.Component<Props> {
 
         return (
             <React.Fragment>
-                <RibbonContainer
-                    annotationsManager={annotationsManager}
-                    isSidebarOpen={isSidebarOpen}
-                    handleRemoveRibbon={handleRemoveRibbon}
-                    insertOrRemoveTooltip={insertOrRemoveTooltip}
-                    openSidebar={this._openSidebar}
-                    closeSidebar={closeSidebar}
-                    isCommentSaved={isCommentSaved}
-                    commentText={commentText}
-                    setShowCommentBox={setShowCommentBox}
-                />
+                {isRibbonEnabled && (
+                    <RibbonContainer
+                        annotationsManager={annotationsManager}
+                        isSidebarOpen={isSidebarOpen}
+                        isRibbonEnabled={isRibbonEnabled}
+                        handleRemoveRibbon={handleRemoveRibbon}
+                        insertOrRemoveTooltip={insertOrRemoveTooltip}
+                        openSidebar={this._openSidebar}
+                        closeSidebar={closeSidebar}
+                        isCommentSaved={isCommentSaved}
+                        commentText={commentText}
+                        setShowCommentBox={setShowCommentBox}
+                    />
+                )}
 
                 {isSidebarOpen && (
                     <SidebarContainer
@@ -250,6 +255,7 @@ const mapStateToProps: MapStateToProps<
     isCommentSaved: commentBoxselectors.isCommentSaved(state),
     commentText: commentBoxselectors.commentText(state),
     annotations: sidebarSelectors.annotations(state),
+    isRibbonEnabled: ribbonSelectors.isRibbonEnabled(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<

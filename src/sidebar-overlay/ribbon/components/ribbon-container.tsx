@@ -28,7 +28,6 @@ import { actions as sidebarActs } from 'src/sidebar-common/sidebar/'
 
 interface StateProps {
     isExpanded: boolean
-    isRibbonEnabled: boolean
     isTooltipEnabled: boolean
     isPaused: boolean
     isBookmarked: boolean
@@ -59,6 +58,7 @@ interface DispatchProps {
 interface OwnProps {
     annotationsManager: AnnotationsManager
     isSidebarOpen: boolean
+    isRibbonEnabled: boolean
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     openSidebar: () => void
@@ -88,10 +88,7 @@ class RibbonContainer extends Component<Props> {
             'mouseenter',
             this.props.handleMouseEnter,
         )
-        this.ribbonRef.addEventListener(
-            'mouseleave',
-            this.props.handleMouseLeave,
-        )
+        this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
     }
 
     private _removeHoverListeners() {
@@ -99,10 +96,7 @@ class RibbonContainer extends Component<Props> {
             'mouseenter',
             this.props.handleMouseEnter,
         )
-        this.ribbonRef.removeEventListener(
-            'mouseleave',
-            this.props.handleMouseLeave,
-        )
+        this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
     }
 
     private _setRibbonRef = (ref: HTMLElement) => {
@@ -112,6 +106,12 @@ class RibbonContainer extends Component<Props> {
     private _handleTooltipToggle = () => {
         this.props.insertOrRemoveTooltip(this.props.isTooltipEnabled)
         this.props.handleTooltipToggle()
+    }
+
+    private handleMouseLeave = () => {
+        if (this.props.commentText.length === 0) {
+            this.props.handleMouseLeave()
+        }
     }
 
     private renderTagsManager() {
@@ -197,7 +197,6 @@ const mapStateToProps: MapStateToProps<
     RootState
 > = state => ({
     isExpanded: selectors.isExpanded(state),
-    isRibbonEnabled: selectors.isRibbonEnabled(state),
     isTooltipEnabled: selectors.isTooltipEnabled(state),
     isPaused: pause.isPaused(state),
     isBookmarked: bookmark.isBookmarked(state),

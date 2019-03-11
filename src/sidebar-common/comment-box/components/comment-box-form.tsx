@@ -3,7 +3,7 @@ import * as React from 'react'
 import { ClickHandler } from '../../types'
 import * as constants from '../constants'
 import TagsContainer from './tag-input-container'
-import Tooltip from 'src/common-ui/components/tootltip'
+import { Tooltip } from 'src/common-ui/components'
 import cx from 'classnames'
 
 const styles = require('./comment-box-form.css')
@@ -27,8 +27,8 @@ interface State {
 class CommentBoxForm extends React.Component<Props, State> {
     /** Ref of the text area element to listen for `scroll` events. */
     private _textAreaRef: HTMLElement
-    /** Ref of the tag input element to focus on it when tabbing. */
-    private _tagInputRef: HTMLElement
+    /** Ref of the tag button element to focus on it when tabbing. */
+    private tagBtnRef: HTMLElement
 
     state = {
         rows: constants.NUM_DEFAULT_ROWS,
@@ -62,8 +62,8 @@ class CommentBoxForm extends React.Component<Props, State> {
         this._textAreaRef = ref
     }
 
-    private _setTagInputRef = (ref: HTMLElement) => {
-        this._tagInputRef = ref
+    private setTagButtonRef = (ref: HTMLElement) => {
+        this.tagBtnRef = ref
     }
 
     private _handleTextAreaKeyDown = (
@@ -72,11 +72,6 @@ class CommentBoxForm extends React.Component<Props, State> {
         // Save comment.
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             this.saveComment(e)
-        } else if (e.key === 'Tab' && !e.shiftKey) {
-            this.setTagInputActive(true)
-            setTimeout(() => {
-                this._tagInputRef.querySelector('input').focus()
-            }, 0)
         } else if (
             !(e.ctrlKey || e.metaKey) &&
             /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
@@ -87,25 +82,12 @@ class CommentBoxForm extends React.Component<Props, State> {
         }
     }
 
-    private _handleTagInputKeyDown = (
-        e: React.KeyboardEvent<HTMLDivElement>,
-    ) => {
-        // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
+    private handleTagButtonKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
         if (e.key === 'Tab') {
-            this.setTagInputActive(false)
-        }
-    }
-
-    private _handleSaveButtonKeyDown = (
-        e: React.KeyboardEvent<HTMLButtonElement>,
-    ) => {
-        // Focus on the tag input element when `Shift + Tab` is pressed,
-        // handle other events normally.
-        if (e.key === 'Tab' && e.shiftKey) {
-            this.setTagInputActive(true)
-            setTimeout(() => {
-                this._tagInputRef.querySelector('input').focus()
-            }, 0)
+            this.setState({
+                showTagsPicker: false,
+            })
+            this.tagBtnRef.focus()
         }
     }
 
@@ -169,6 +151,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                 <div className={styles.footer}>
                     <div className={styles.interactions}>
                         <button
+                            ref={this.setTagButtonRef}
                             className={cx(styles.button, styles.tag)}
                             onClick={() =>
                                 this.setState(prevState => ({
@@ -200,15 +183,25 @@ class CommentBoxForm extends React.Component<Props, State> {
                         >
                             Save
                         </button>
+
                         <button
                             className={styles.cancelBtn}
                             onClick={cancelComment}
                         >
                             Cancel
                         </button>
+                        <button
+                            className={styles.saveBtn}
+                            onClick={e => this.saveComment(e)}
+                        >
+                            Save
+                        </button>
                     </div>
                 </div>
-                <span className={styles.tagDropdown}>
+                <span
+                    className={styles.tagDropdown}
+                    onKeyDown={this.handleTagButtonKeyDown}
+                >
                     {this.state.showTagsPicker && (
                         <Tooltip position="bottom">
                             <TagsContainer env={this.props.env} />
