@@ -75,16 +75,16 @@ class Ribbon extends Component<Props, State> {
         this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
     }
 
-    // private handleMouseLeave = () => {
-    //     this.props.commentText.length > 0
-    //         ? this.setState({
-    //               showCommentBox: true,
-    //               showSearchBox: false,
-    //               showTagsPicker: false,
-    //               showCollectionsPicker: false,
-    //           })
-    //         : this.setState(defaultState)
-    // }
+    private handleMouseLeave = () => {
+        this.props.commentText.length > 0
+            ? this.setState({
+                  showCommentBox: true,
+                  showSearchBox: false,
+                  showTagsPicker: false,
+                  showCollectionsPicker: false,
+              })
+            : this.setState(defaultState)
+    }
 
     private onSearchEnter: KeyboardEventHandler<HTMLInputElement> = event => {
         if (event.key === 'Enter') {
@@ -112,12 +112,11 @@ class Ribbon extends Component<Props, State> {
             <div
                 ref={ref => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
-                    [styles.ribbonExpanded]: true,
-                    // this.props.isExpanded || this.props.isSidebarOpen,
+                    [styles.ribbonExpanded]: 
+                    this.props.isExpanded || this.props.isSidebarOpen,
                 })}
             >
-                {true && (
-                    // this.props.isExpanded || this.props.isSidebarOpen
+                {(this.props.isExpanded || this.props.isSidebarOpen) && (
                     <React.Fragment>
                         <div className={styles.generalActions}>
                             <div>

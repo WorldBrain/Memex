@@ -68,3 +68,25 @@
 .TextArea {
     background-color: #f7f7f7;
 }
+
+/* ANNOTATION CARDS */
+
+.annotationCard {
+    border-radius: 0px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    transition: background 120ms ease-in 0s;
+
+    &:hover {
+        transition: background 120ms ease-in 0s;
+        background-color: rgba(55, 53, 47, 0.03);
+    }
+}
+
+/* SEARCH BOXES */
+
+.filterText {
+    font-weight: 600;
+    composes: darkBlue from './colors.css';
+    composes: nakedButton;
+    display: inline-block;
+}

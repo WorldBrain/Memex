@@ -12,12 +12,11 @@
     border: 1px solid #7777775c;
     border-right: none; */
     transform: translate(0, 0);
-    transition: all 0s ease-in;
+    transition: all 0.2s ease-in-out;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
     text-align: start;
-    cursor: pointer;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -30,6 +29,7 @@
     display: grid;
     width: 55px;
     grid-template-rows: 25% 50% 25%;
+    transition: all 0.2s ease-in-out;
 }
 
 /* SECTIONS */
@@ -104,7 +104,7 @@
 
 .arrowReverse {
     background-image: url('/img/arrow.svg');
-    transform: background rotate(180deg);
+    transform: rotate(180deg);
     transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
 }
 
@@ -145,7 +145,8 @@
 }
 
 .ribbonOn {
-    background-image: url('/img/ribbonOn.svg');
+    composes: backgroundLightMintGreen from '../../../common-ui/colors.css';
+    background-image: url('/img/ribbonOff.svg');
 }
 
 .ribbonOff {

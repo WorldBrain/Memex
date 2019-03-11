@@ -72,6 +72,10 @@
     }
 }
 
+.confirmButtons {
+    display: flex;
+}
+
 .bookmark {
     background-image: url('/img/star_full.svg');
     opacity: 0.8;

@@ -91,7 +91,7 @@
     display: grid;
     grid-template-columns: 1fr 1.5fr 1fr;
     grid-template-areas: 'backButton numberTags .';
-    padding: 0px 0 10px 0px;
+    padding: 7px 0 10px 0px;
     border-radius: 0 0 3px 3px;
     background: white;
 }

@@ -5,6 +5,8 @@
     flex-direction: column;
     font-size: 13px;
     background: white;
+    width: 100%;
+    margin: 15px 0 20px 0;
 
     &:hover {
         background: white;

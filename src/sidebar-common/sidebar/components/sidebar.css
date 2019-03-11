@@ -3,6 +3,10 @@
     background: #fff;
     overflow-y: scroll;
     padding: 5px 5px 150px 5px;
+
+    & * {
+        font-family: 'Inter';
+    }
 }
 
 .annotationsSection {
@@ -16,68 +20,31 @@
 }
 
 .commentBoxContainer {
+    composes: annotationCard from '../../../common-ui/elements.css';
     margin-top: 50px;
     background: white;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 2px 4px;
     margin-bottom: 10px;
+
+    &:hover {
+        background: white;
+    }
 }
 
 .navBar {
-    margin-top: 10px;
-    color: #1a2f58;
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 10px;
+    font-weight: 600;
 }
 
 .navLinks {
-    margin-right: 15px;
-    font-weight: bold;
+    composes: filterText from '../../../common-ui/elements.css';
     font-size: 12px;
-    padding: 10px 0;
+    font-weight: 600;
     position: relative;
     display: inline-block;
     outline: none;
-    text-shadow: 0 0 1px rgba(255, 255, 255, 0.3);
     cursor: pointer;
-
-    &::before {
-        position: absolute;
-        transition: transform 0.3s, opacity 0.3s;
-        pointer-events: none;
-    }
-
-    &::after {
-        position: absolute;
-        top: 75%;
-        left: 0;
-        width: 100%;
-        height: 0.14em;
-        background: #1a2f58;
-        opacity: 0.3;
-        content: '';
-        transform: scale(0.92);
-        transition: all 0.5s ease-in-out;
-    }
-}
-
-.navLinks:hover::before,
-:focus::before {
-    opacity: 0;
-    transform: translateY(-2px);
-}
-
-.navLinks:hover::after,
-:focus::after {
-    opacity: 1;
-    transform: translateY(0px);
-}
-
-.filterNav {
-    float: left;
-    margin-left: 15px;
-}
-
-.resultsNav {
-    float: right;
 }
 
 .filtersSidebar {

@@ -192,7 +192,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                             }
                         />
                     </div>
-                    <div>
+                    <div className={styles.confirmButtons}>
                         <button
                             className={styles.saveBtn}
                             onClick={e => this.saveComment(e)}

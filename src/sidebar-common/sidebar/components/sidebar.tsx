@@ -174,7 +174,7 @@ class Sidebar extends React.Component<Props, State> {
                             >
                                 Filters
                             </a>
-                            <div className={styles.resultsNav}>
+                            <span className={styles.resultsNav}>
                                 <a
                                     className={styles.navLinks}
                                     onClick={() =>
@@ -197,15 +197,13 @@ class Sidebar extends React.Component<Props, State> {
                                 >
                                     All
                                 </a>
-                            </div>
+                            </span>
                         </div>
-
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
                                 <CommentBoxContainer env={env} />
                             </div>
                         )}
-
                         {this.state.showPageResults &&
                             (isLoading ? (
                                 <Loader />
