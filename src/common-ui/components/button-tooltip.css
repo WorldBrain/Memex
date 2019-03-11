@@ -8,8 +8,15 @@
 
 .tooltipBubble {
     position: absolute;
-    left: -160px;
+    right: 36px;
+    top: 4px;
+    height: 20px;
     border-radius: 5px;
+    display: flex;
+    flex-wrap: nowrap;
+    width: max-content;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .tooltipTop {
@@ -34,11 +41,12 @@
 }
 
 .tooltipMessage {
-    background: black;
+    composes: h2ColorBackground from '../colors.css';
     border-radius: 55px;
     color: white;
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     line-height: 1.4;
-    padding: 0.75em;
+    padding: 0.5em 1em;
     text-align: center;
+    width: fit-content;
 }

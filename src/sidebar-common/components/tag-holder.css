@@ -1,11 +1,6 @@
 .tagHolder {
-    font-size: 14px;
-    margin: 0 5px;
-    font-weight: 200;
-    padding: 10px;
-    border: none;
+    composes: TextArea from '../../common-ui/elements.css';
     margin-bottom: 17px;
-    background-color: #f7f7f7;
     height: 40px;
     overflow-x: hidden;
     position: relative;

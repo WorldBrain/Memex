@@ -21,9 +21,9 @@
 
 .commentBoxContainer {
     composes: annotationCard from '../../../common-ui/elements.css';
-    margin-top: 50px;
     background: white;
     margin-bottom: 10px;
+    border-radius: 3px;
 
     &:hover {
         background: white;

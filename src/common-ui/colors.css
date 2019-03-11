@@ -8,6 +8,10 @@
 	color: rgb(54, 54, 46);
 }
 
+.h2ColorBackground {
+    background-color: rgb(54, 54, 46);
+}
+
 .lightMintGreen {
     color: #8fffd7;
 }
@@ -65,6 +69,10 @@
 .lighterGrey {
 	color: #666;
 	font-weight: 500;
+}
+
+.editFields {
+    background-color: #f7f7f7;
 }
 
 .hoverText:hover {

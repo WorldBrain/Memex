@@ -1,14 +1,13 @@
 .formContainer {
+    composes: searchField from '../../common-ui/elements.css';
     display: flex;
-    border-radius: 1px;
-    box-shadow: 0 6px 31px -11px rgba(34, 12, 12, 0.32157);
 }
 
 .button {
     cursor: pointer;
     z-index: 2147483647;
     line-height: normal;
-    background: #fff;
+    background: transparent;
     border: none;
     outline: none;
 }
@@ -20,17 +19,17 @@
     background-repeat: no-repeat;
     width: 29px;
     height: 29px;
-    background-position: 6.5px 6.5px;
+    background-position: center;
     border-radius: 50%;
+    background-color: transparent;
 }
 
 .inputBox {
-    color: rgb(75, 94, 115);
+    composes: searchField from '../../common-ui/elements.css';
     padding: 5px 0px;
     width: 100%;
-    height: 35px;
+    height: 30px;
     border: none;
     outline: none;
-    font-weight: bold;
-    font-size: 12px;
+    background-color: transparent;
 }

@@ -22,7 +22,7 @@ const DefaultFooter = ({
     replyIconClickHandler,
 }: Props) => (
     <div className={styles.annotationBoxDefaultFooter}>
-        <div>
+        <div className={styles.buttonBar}>
             <button
                 className={cx(styles.commonIcon, styles.editIcon)}
                 title="Edit note"

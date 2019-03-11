@@ -174,16 +174,9 @@ class CommentBoxForm extends React.Component<Props, State> {
                                     : 'Remove bookmark'
                             }
                         />
+
                     </div>
                     <div className={styles.confirmButtons}>
-                        <button
-                            className={styles.saveBtn}
-                            onClick={e => this.saveComment(e)}
-                            onKeyDown={this._handleSaveButtonKeyDown}
-                        >
-                            Save
-                        </button>
-
                         <button
                             className={styles.cancelBtn}
                             onClick={cancelComment}

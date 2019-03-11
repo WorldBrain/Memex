@@ -1,25 +1,24 @@
 .close {
     cursor: pointer;
-    color: #3eb995;
     z-index: 2147483647;
     line-height: normal;
-    background: #fff;
+    background: transparent;
     border: none;
     outline: none;
 }
 
 .closeIcon {
-    background-image: url('/img/cross.svg');
-    background-size: 15px;
+    background-image: url('/img/removeIcon.svg');
+    background-size: 17px;
     display: block;
     cursor: pointer;
     background-repeat: no-repeat;
-    width: 29px;
-    height: 29px;
-    background-position: 6.5px 6.5px;
+    width: 25px;
+    height: 25px;
+    background-position: center;
     border-radius: 50%;
 
     &:hover {
-        background-color: #efefef;
+        background-color: rgba(55, 53, 47, 0.2);
     }
 }

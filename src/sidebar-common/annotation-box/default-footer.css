@@ -23,6 +23,10 @@
     margin: 0 3px;
 }
 
+.buttonBar {
+    display: flex;
+}
+
 .editIcon {
     background-image: url('/img/edit.svg');
     background-position-y: 3px;
