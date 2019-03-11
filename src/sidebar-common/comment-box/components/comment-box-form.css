@@ -25,7 +25,7 @@
 
 .footer {
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
     margin: 4px 4px 4px 4px;
@@ -38,11 +38,20 @@
 
 .saveBtn {
     composes: footerBoldText from '../../annotation-box/all-modes-footer.css';
-    float: right;
+    margin-left: 20px;
+
+    &:focus {
+        background-color: red;
+    }
 }
 
 .cancelBtn {
     composes: footerText from '../../annotation-box/all-modes-footer.css';
+    margin-left: 110px;
+
+    &:focus {
+        background-color: red;
+    }
 }
 
 .button {
@@ -67,9 +76,9 @@
         opacity: 1;
     }
 
-    &:focus {
+    /*    &:focus {
         outline: none;
-    }
+    } */
 }
 
 .bookmark {
