@@ -82,12 +82,28 @@ class CommentBoxForm extends React.Component<Props, State> {
         }
     }
 
-    private handleTagButtonKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    private handleTagBtnKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
         if (e.key === 'Tab') {
             this.setState({
                 showTagsPicker: false,
             })
             this.tagBtnRef.focus()
+        }
+    }
+
+    private handleTagBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (this.props.commentText.length > 0) {
+            this.setState(prevState => ({
+                showTagsPicker: !prevState.showTagsPicker,
+            }))
+        }
+    }
+
+    private handleBookmarkBtnClick = (
+        e: React.MouseEvent<HTMLButtonElement>,
+    ) => {
+        if (this.props.commentText.length > 0) {
+            this.props.toggleBookmark(e)
         }
     }
 
@@ -124,14 +140,8 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     render() {
-        const {
-            env,
-            commentText,
-            saveComment,
-            cancelComment,
-            toggleBookmark,
-        } = this.props
-        const { rows, isTagInputActive } = this.state
+        const { env, commentText, cancelComment } = this.props
+        const { rows } = this.state
 
         return (
             <React.Fragment>
@@ -153,11 +163,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                         <button
                             ref={this.setTagButtonRef}
                             className={cx(styles.button, styles.tag)}
-                            onClick={() =>
-                                this.setState(prevState => ({
-                                    showTagsPicker: !prevState.showTagsPicker,
-                                }))
-                            }
+                            onClick={this.handleTagBtnClick}
                             title={'Add tags'}
                         />
                         <button
@@ -167,37 +173,38 @@ class CommentBoxForm extends React.Component<Props, State> {
                                 [styles.notBookmark]: !this.props
                                     .isCommentBookmarked,
                             })}
-                            onClick={toggleBookmark}
+                            onClick={this.handleBookmarkBtnClick}
                             title={
                                 !this.props.isCommentBookmarked
                                     ? 'Bookmark'
                                     : 'Remove bookmark'
                             }
                         />
-
                     </div>
-                    <div className={styles.confirmButtons}>
-                        <button
-                            className={styles.cancelBtn}
-                            onClick={cancelComment}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            className={styles.saveBtn}
-                            onClick={e => this.saveComment(e)}
-                        >
-                            Save
-                        </button>
-                    </div>
+                    {commentText.length > 0 && (
+                        <div className={styles.confirmButtons}>
+                            <button
+                                className={styles.cancelBtn}
+                                onClick={cancelComment}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className={styles.saveBtn}
+                                onClick={e => this.saveComment(e)}
+                            >
+                                Save
+                            </button>
+                        </div>
+                    )}
                 </div>
                 <span
                     className={styles.tagDropdown}
-                    onKeyDown={this.handleTagButtonKeyDown}
+                    onKeyDown={this.handleTagBtnKeyDown}
                 >
                     {this.state.showTagsPicker && (
                         <Tooltip position="bottom">
-                            <TagsContainer env={this.props.env} />
+                            <TagsContainer env={env} />
                         </Tooltip>
                     )}
                 </span>
