@@ -166,7 +166,8 @@ class CommentBoxForm extends React.Component<Props, State> {
                             onClick={this.handleTagBtnClick}
                             title={'Add tags'}
                         />
-                        <button
+                        {/* New ribbon/sidebar work */}
+                        {/*<button
                             className={cx(styles.button, {
                                 [styles.bookmark]: this.props
                                     .isCommentBookmarked,
@@ -179,7 +180,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                                     ? 'Bookmark'
                                     : 'Remove bookmark'
                             }
-                        />
+                        />*/}
                     </div>
                     {commentText.length > 0 && (
                         <div className={styles.confirmButtons}>
