@@ -270,31 +270,32 @@ export default class SearchBackground {
     }
 
     async searchAnnotations(params: AnnotSearchParams) {
-        let results
-        const searchParams = this.processSearchParams(params, true)
+        let searchParams
         const shapeResult = res =>
             SearchBackground.shapePageResult(res, searchParams.limit)
+
+        try {
+            searchParams = this.processSearchParams(params, true)
+        } catch (e) {
+            return SearchBackground.handleSearchError(e)
+        }
 
         if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
             return shapeResult([])
         }
 
-        // Blank search; just list annots, applying search filters
-        if (searchParams.isBlankSearch) {
-            results = await this.blankAnnotsSearch(searchParams)
-            return shapeResult(results)
-        }
+        const results = searchParams.isBlankSearch
+            ? await this.blankAnnotsSearch(searchParams)
+            : await this.storage.searchAnnots({
+                  includePageResults: true,
+                  ...searchParams,
+              })
 
-        results = await this.storage.searchAnnots({
-            ...searchParams,
-            includePageResults: false,
-        })
         return shapeResult(results)
     }
 
     async searchPages(params: PageSearchParams) {
         let searchParams
-        let results
         const shapeResult = res =>
             SearchBackground.shapePageResult(res, searchParams.limit)
 
@@ -304,43 +305,10 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
-        // No content types checked; skip search
-        if (contentTypeChecks.noop(searchParams.contentTypes)) {
-            return shapeResult([])
-        }
+        const results = searchParams.isBlankSearch
+            ? await this.blankPageSearch(searchParams)
+            : await this.storage.searchPages(searchParams, this.legacySearch)
 
-        // Blank search; just list pages/annots, applying search filters
-        if (searchParams.isBlankSearch) {
-            const searchMethod = contentTypeChecks.annotsOnly(
-                searchParams.contentTypes,
-            )
-                ? this.blankAnnotsSearch.bind(this)
-                : this.blankPageSearch.bind(this)
-
-            results = await searchMethod(searchParams)
-            return shapeResult(results)
-        }
-
-        // Page terms search
-        if (contentTypeChecks.pagesOnly(searchParams.contentTypes)) {
-            results = await this.storage.searchPages(
-                searchParams,
-                this.legacySearch,
-            )
-            return shapeResult(results)
-        }
-
-        // Annots terms search
-        if (contentTypeChecks.annotsOnly(searchParams.contentTypes)) {
-            results = await this.storage.searchAnnots({
-                ...searchParams,
-                includePageResults: true,
-            })
-            return shapeResult(results)
-        }
-
-        // Combined terms search
-        results = await this.combinedSearch(searchParams)
         return shapeResult(results)
     }
 
