@@ -41,40 +41,47 @@ class ResultsContainer extends PureComponent<Props> {
             return <NotificationContainer />
         }
 
+        const renderSearchSwitch = children => (
+            <React.Fragment>
+                <SearchTypeSwitch />
+                {children}
+            </React.Fragment>
+        )
+
         if (this.props.isBadTerm) {
-            return (
+            return renderSearchSwitch(
                 <ResultsMessage>
                     <NoResultBadTerm>
                         Search terms are too common, or have been filtered out
                         to increase performance.
                     </NoResultBadTerm>
-                </ResultsMessage>
+                </ResultsMessage>,
             )
         }
 
         if (this.props.isInvalidSearch) {
-            return (
+            return renderSearchSwitch(
                 <ResultsMessage>
                     <NoResultBadTerm title="Invalid search query">
                         You can't exclude terms without including at least 1
                         term to search
                     </NoResultBadTerm>
-                </ResultsMessage>
+                </ResultsMessage>,
             )
         }
 
         if (this.props.noResults) {
-            return (
+            return renderSearchSwitch(
                 <ResultsMessage>
                     <NoResultBadTerm>
                         found for this query. ¯\_(ツ)_/¯
                     </NoResultBadTerm>
-                </ResultsMessage>
+                </ResultsMessage>,
             )
         }
 
         // No issues; render out results list view
-        return (
+        return renderSearchSwitch(
             <React.Fragment>
                 {this.props.shouldShowCount && (
                     <ResultsMessage small>
@@ -83,7 +90,7 @@ class ResultsContainer extends PureComponent<Props> {
                 )}
                 <ResultList />
                 {!this.props.isLoading && <OnboardingChecklist isRightBox />}
-            </React.Fragment>
+            </React.Fragment>,
         )
     }
 

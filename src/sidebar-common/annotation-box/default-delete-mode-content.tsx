@@ -18,6 +18,7 @@ interface Props {
     trashIconClickHandler: () => void
     shareIconClickHandler: () => void
     replyIconClickHandler: () => void
+    handleTagClick: (tag: string) => void
     getTruncatedTextObject: (
         text: string,
     ) => {
@@ -35,6 +36,7 @@ const DefaultDeleteModeContent = (props: Props) => (
                 comment={props.comment}
                 tags={props.tags}
                 isJustComment={!props.body}
+                handleTagClick={props.handleTagClick}
                 getTruncatedTextObject={props.getTruncatedTextObject}
             />
         )}

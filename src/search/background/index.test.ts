@@ -97,13 +97,13 @@ describe('Annotations search', () => {
         setStorexBackend(storageManager.backend)
         await insertTestData()
     })
+
     describe('terms search', () => {
         test('test terms', async () => {
-            const results = await searchBg.searchAnnotations({
+            const results = await searchBg.searchPageAnnotations({
                 query: 'highlight annotation comment',
             })
 
-            expect(results).toBeDefined()
             expect(results.length).toBe(4)
         })
 
@@ -113,8 +113,7 @@ describe('Annotations search', () => {
                 bookmarksOnly: true,
             })
 
-            expect(resA).toBeDefined()
-            expect(resA.length).toBe(2)
+            expect(resA.docs.length).toBe(2)
         })
 
         test('exclude direct links', async () => {
@@ -123,8 +122,7 @@ describe('Annotations search', () => {
                 includeDirectLinks: false,
             })
 
-            expect(results).toBeDefined()
-            expect(results.length).toBe(1)
+            expect(results.docs.length).toBe(1)
         })
 
         test('collections filter', async () => {
@@ -133,16 +131,14 @@ describe('Annotations search', () => {
                 lists: [DATA.coll1, DATA.coll2],
             } as any)
 
-            expect(resA).toBeDefined()
-            expect(resA.length).toBe(1)
+            expect(resA.docs.length).toBe(1)
 
             const resB = await searchBg.searchAnnotations({
                 query: 'quote',
                 lists: ['not a real coll'],
             } as any)
 
-            expect(resB).toBeDefined()
-            expect(resB.length).toBe(0)
+            expect(resB.docs.length).toBe(0)
         })
 
         test('tags filter', async () => {
@@ -151,47 +147,41 @@ describe('Annotations search', () => {
                 tagsInc: [DATA.tag1],
             })
 
-            expect(results).toBeDefined()
-            expect(results.length).toBe(1)
+            expect(results.docs.length).toBe(1)
         })
 
         test('domains filter', async () => {
-            const resA = await searchBg.searchAnnotations({
+            const resA = await searchBg.searchPageAnnotations({
                 query: 'highlight annotation comment',
                 domainsExc: ['annotation.url'],
             })
 
-            expect(resA).toBeDefined()
             expect(resA.length).toBe(1)
 
-            const resB = await searchBg.searchAnnotations({
+            const resB = await searchBg.searchPageAnnotations({
                 query: 'highlight annotation comment',
                 domainsInc: ['annotation.url'],
             })
 
-            expect(resB).toBeDefined()
             expect(resB.length).toBe(3)
         })
 
         test('limit', async () => {
-            const single = await searchBg.searchAnnotations({
+            const single = await searchBg.searchPageAnnotations({
                 query: 'highlight annotation comment',
                 limit: 1,
             })
-            const double = await searchBg.searchAnnotations({
+            const double = await searchBg.searchPageAnnotations({
                 query: 'highlight annotation comment',
                 limit: 2,
             })
-            const triple = await searchBg.searchAnnotations({
+            const triple = await searchBg.searchPageAnnotations({
                 query: 'highlight annotation comment',
                 limit: 3,
             })
 
-            expect(single).toBeDefined()
             expect(single.length).toBe(1)
-            expect(double).toBeDefined()
             expect(double.length).toBe(2)
-            expect(triple).toBeDefined()
             expect(triple.length).toBe(3)
         })
 
@@ -201,62 +191,41 @@ describe('Annotations search', () => {
                 url: normalize(DATA.directLink.pageUrl),
             })
 
-            expect(res).toBeDefined()
-            expect(res.length).toBe(1)
+            expect(res.docs.length).toBe(1)
 
             const resNone = await searchBg.searchAnnotations({
                 query: 'quote',
                 url: normalize(DATA.pageUrl),
             })
 
-            expect(resNone).toBeDefined()
-            expect(resNone.length).toBe(0)
+            expect(resNone.docs.length).toBe(0)
         })
 
         test('comment-text-only', async () => {
-            const {
-                docs: results,
-                resultsExhausted,
-            } = await searchBg.searchPages({
+            const results = await searchBg.searchPageAnnotations({
                 query: 'comment',
                 contentTypes: { highlights: false, notes: true, pages: false },
-            })
+            } as any)
 
-            expect(resultsExhausted).toBe(true)
             expect(results).toBeDefined()
-            expect(results.length).toBe(1)
-            expect(results[0].annotations.length).toBe(2)
-            expect(results[0].annotations.map(annot => annot.url)).toEqual([
+            expect(results.length).toBe(2)
+            expect(results.map(annot => annot.url)).toEqual([
                 DATA.annotation.url,
                 DATA.comment.url,
             ])
         })
 
         test('highlight-text-only', async () => {
-            const {
-                docs: results,
-                resultsExhausted,
-            } = await searchBg.searchPages({
+            const results = await searchBg.searchPageAnnotations({
                 query: 'whooo',
                 contentTypes: { highlights: true, notes: false, pages: false },
-            })
+            } as any)
 
-            expect(resultsExhausted).toBe(true)
             expect(results).toBeDefined()
-            expect(results.length).toBe(2)
+            expect(results.length).toBe(3)
             expect(results.map(res => res.url)).toEqual([
-                DATA.highlight.pageUrl,
-                DATA.hybrid.pageUrl,
-            ])
-
-            expect(results[0].annotations.length).toBe(2)
-            expect(results[0].annotations.map(annot => annot.url)).toEqual([
                 DATA.highlight.url,
                 DATA.annotation.url,
-            ])
-
-            expect(results[1].annotations.length).toBe(1)
-            expect(results[1].annotations.map(annot => annot.url)).toEqual([
                 DATA.hybrid.url,
             ])
         })
@@ -278,11 +247,10 @@ describe('Annotations search', () => {
 
     describe('url-based search', () => {
         test('blank', async () => {
-            const results = await searchBg.searchAnnotations({
+            const results = await searchBg.searchPageAnnotations({
                 url: DATA.pageUrl,
             })
 
-            expect(results).toBeDefined()
             expect(results.length).toBe(3)
 
             expect(results.map(res => res.url)).toEqual([
@@ -293,49 +261,44 @@ describe('Annotations search', () => {
         })
 
         test('bookmark filter', async () => {
-            const results = await searchBg.searchAnnotations({
+            const results = await searchBg.searchPageAnnotations({
                 url: DATA.pageUrl,
                 bookmarksOnly: true,
             })
 
-            expect(results).toBeDefined()
             expect(results.length).toBe(1)
         })
 
         test('tag inc filter', async () => {
-            const results = await searchBg.searchAnnotations({
+            const results = await searchBg.searchPageAnnotations({
                 url: DATA.pageUrl,
                 tagsInc: [DATA.tag1],
             })
 
-            expect(results).toBeDefined()
             expect(results.length).toBe(1)
         })
 
         test('tag exc filter', async () => {
-            const results = await searchBg.searchAnnotations({
+            const results = await searchBg.searchPageAnnotations({
                 url: DATA.pageUrl,
                 tagsExc: [DATA.tag1, DATA.tag2, 'dummy'],
             })
 
-            expect(results).toBeDefined()
             expect(results.length).toBe(0)
         })
 
         test('collection filter', async () => {
-            const resA = await searchBg.searchAnnotations({
+            const resA = await searchBg.searchPageAnnotations({
                 url: DATA.pageUrl,
                 lists: [DATA.coll2],
             } as any)
 
-            const resB = await searchBg.searchAnnotations({
+            const resB = await searchBg.searchPageAnnotations({
                 url: DATA.pageUrl,
                 lists: [DATA.coll1],
             } as any)
 
-            expect(resA).toBeDefined()
             expect(resA.length).toBe(1)
-            expect(resB).toBeDefined()
             expect(resB.length).toBe(0)
         })
     })
@@ -370,9 +333,7 @@ describe('Annotations search', () => {
             const {
                 docs: results,
                 resultsExhausted,
-            } = await searchBg.searchPages({
-                contentTypes: { highlights: true, notes: true, pages: false },
-            })
+            } = await searchBg.searchAnnotations({})
 
             expect(resultsExhausted).toBe(true)
             expect(results).toBeDefined()
@@ -401,8 +362,7 @@ describe('Annotations search', () => {
 
         test('time filters', async () => {
             // Should result in only the newest annot
-            const { docs: resA } = await searchBg.searchPages({
-                contentTypes: { highlights: true, notes: true, pages: false },
+            const { docs: resA } = await searchBg.searchAnnotations({
                 startDate: new Date('2019-01-30'),
             })
 
@@ -413,8 +373,7 @@ describe('Annotations search', () => {
             expect(resA[0].annotations[0].url).toBe(DATA.hybrid.url)
 
             // Should result in only the oldest annot
-            const { docs: resB } = await searchBg.searchPages({
-                contentTypes: { highlights: true, notes: true, pages: false },
+            const { docs: resB } = await searchBg.searchAnnotations({
                 endDate: new Date('2019-01-26'),
             })
 
@@ -425,8 +384,7 @@ describe('Annotations search', () => {
             expect(resB[0].annotations[0].url).toBe(DATA.highlight.url)
 
             // Should result in only the oldest annot
-            const { docs: resC } = await searchBg.searchPages({
-                contentTypes: { highlights: true, notes: true, pages: false },
+            const { docs: resC } = await searchBg.searchAnnotations({
                 startDate: new Date('2019-01-25'),
                 endDate: new Date('2019-01-28T23:00Z'),
             })
@@ -443,8 +401,7 @@ describe('Annotations search', () => {
             const {
                 docs: results,
                 resultsExhausted,
-            } = await searchBg.searchPages({
-                contentTypes: { highlights: true, notes: true, pages: false },
+            } = await searchBg.searchAnnotations({
                 tagsInc: [DATA.tag1],
             })
 

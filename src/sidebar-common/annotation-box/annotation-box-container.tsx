@@ -2,7 +2,9 @@ import * as React from 'react'
 import cx from 'classnames'
 import moment from 'moment'
 import noop from 'lodash/fp/noop'
+import { connect } from 'react-redux'
 
+import { MapDispatchToProps } from '../types'
 import DefaultDeleteModeContent from './default-delete-mode-content'
 import EditModeContent from './edit-mode-content'
 import { TruncatedTextRenderer } from '../components'
@@ -14,7 +16,7 @@ import { EVENT_NAMES } from 'src/analytics/internal/constants'
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')
 
-interface Props {
+interface OwnProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     env: 'inpage' | 'overview'
     url: string
@@ -33,6 +35,12 @@ interface Props {
     handleDeleteAnnotation: (url: string) => void
 }
 
+interface DispatchProps {
+    handleTagClick: (tag: string) => void
+}
+
+type Props = OwnProps & DispatchProps
+
 interface State {
     mode: 'default' | 'edit' | 'delete'
     displayCrowdfunding: boolean
@@ -42,6 +50,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     static defaultProps = {
         handleMouseEnter: () => undefined,
         handleMouseLeave: () => undefined,
+        handleTagClick: () => undefined,
     }
 
     private _processEventRPC = remoteFunction('processEvent')
@@ -227,6 +236,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         handleGoToAnnotation={this.props.handleGoToAnnotation}
                         handleDeleteAnnotation={this._handleDeleteAnnotation}
                         handleCancelOperation={this._handleCancelOperation}
+                        handleTagClick={this.props.handleTagClick}
                         editIconClickHandler={this._handleEditIconClick}
                         trashIconClickHandler={this._handleTrashIconClick}
                         shareIconClickHandler={this._handleShareIconClick}
@@ -247,4 +257,19 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     }
 }
 
-export default AnnotationBoxContainer
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+    props,
+) => ({
+    handleTagClick: tag => {
+        if (props.env === 'overview') {
+            const { toggleTagFilter } = require('src/search-filters/actions')
+            dispatch(toggleTagFilter(tag))
+        }
+    },
+})
+
+export default connect(
+    null,
+    mapDispatchToProps,
+)(AnnotationBoxContainer)

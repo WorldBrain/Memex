@@ -7,6 +7,7 @@
 
 * {
     box-sizing: border-box;
+    font-family: 'Inter';
 }
 
 /* List entries shown as context around a search result */
@@ -256,6 +257,13 @@
     background-size: 19px;
 }
 
+.commentActive {
+    background-image: url('/img/commentFull.svg');
+    margin-left: 1px;
+    background-size: 19px;
+    opacity: 0.8;
+}
+
 .bookmark {
     background-image: url('/img/star_full.svg');
     opacity: 0.8;
@@ -336,4 +344,8 @@
     & .displayTime {
         margin-top: -8px;
     }
+}
+
+.annotsCount {
+    color: white;
 }

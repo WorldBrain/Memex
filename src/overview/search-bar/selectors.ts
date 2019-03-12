@@ -2,7 +2,7 @@
 import { createSelector } from 'reselect'
 
 import { RootState } from '../../options/types'
-import { selectors as filterSelectors } from '../../search-filters'
+import * as filterSelectors from '../../search-filters/selectors'
 
 const searchBar = (state: RootState) => state.searchBar
 
