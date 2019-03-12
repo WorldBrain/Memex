@@ -60,17 +60,31 @@ interface OwnProps {
 
 type Props = StateProps & DispatchProps & OwnProps
 
-class RibbonSidebarContainer extends React.Component<Props> {
-    private _sidebarRef: React.Component = null
+interface State {
+    isMouseInRibbonSideSidebar: boolean
+}
+
+class RibbonSidebarContainer extends React.Component<Props, State> {
+    private ribbonSidebarRef: HTMLDivElement = null
+
+    private setRibbonSidebarRef = (ref: HTMLDivElement) => {
+        this.ribbonSidebarRef = ref
+    }
+
+    state: State = {
+        isMouseInRibbonSideSidebar: false,
+    }
 
     componentDidMount() {
         this.props.onInit()
         this._setupFullScreenListener()
         this._setupRPC()
+        this.attachEventListeners()
     }
 
     componentWillUnmount() {
         this._removeFullScreenListener()
+        this.removeEventListeners()
     }
 
     componentDidUpdate(prevProps: Props) {
@@ -107,6 +121,69 @@ class RibbonSidebarContainer extends React.Component<Props> {
     private _removeFullScreenListener = () => {
         const { handleToggleFullScreen } = this.props
         document.removeEventListener('fullscreenchange', handleToggleFullScreen)
+    }
+
+    private attachEventListeners() {
+        document.addEventListener('click', this.handleOutsideClick, false)
+        document.addEventListener('keydown', this.onKeydown, false)
+
+        this.ribbonSidebarRef.addEventListener(
+            'mouseenter',
+            this.handleMouseEnter,
+        )
+        this.ribbonSidebarRef.addEventListener(
+            'mouseleave',
+            this.handleMouseLeave,
+        )
+    }
+
+    private removeEventListeners() {
+        document.removeEventListener('click', this.handleOutsideClick, false)
+        document.removeEventListener('keydown', this.onKeydown, false)
+
+        this.ribbonSidebarRef.removeEventListener(
+            'mouseenter',
+            this.handleMouseEnter,
+        )
+        this.ribbonSidebarRef.removeEventListener(
+            'mouseleave',
+            this.handleMouseLeave,
+        )
+    }
+
+    private handleMouseEnter = (e: Event) => {
+        e.stopPropagation()
+        this.setState({ isMouseInRibbonSideSidebar: true })
+    }
+
+    private handleMouseLeave = (e: Event) => {
+        e.stopPropagation()
+        this.setState({ isMouseInRibbonSideSidebar: false })
+    }
+
+    private handleOutsideClick: EventListener = e => {
+        e.stopPropagation()
+
+        // Only close the sidebar when all of the following conditions are met:
+        // 1. Sidebar is open.
+        // 2. Mouse is not inside the sidebar.
+        // 3. Click did not occur on an annotation highlight.
+        // This step is necessary as `onClickOutside` fires for a variety of events.
+        if (
+            this.props.isSidebarOpen &&
+            !this.state.isMouseInRibbonSideSidebar &&
+            !(e.target as any).dataset.annotation
+        ) {
+            this.props.closeSidebar()
+            this._closeSidebarCallback()
+        }
+    }
+
+    private onKeydown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && this.props.isSidebarOpen) {
+            this.props.closeSidebar()
+            this._closeSidebarCallback()
+        }
     }
 
     private _openSidebar = async (anchor: Anchor = null) => {
@@ -163,7 +240,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
     }
 
     private _ensureAnnotationIsVisible = (url: string) => {
-        const containerNode: Node = ReactDOM.findDOMNode(this._sidebarRef)
+        const containerNode: Node = ReactDOM.findDOMNode(this.ribbonSidebarRef)
 
         // Find the root node as it may/may not be a shadow DOM.
         // 'any' prevents compilation error.
@@ -191,10 +268,6 @@ class RibbonSidebarContainer extends React.Component<Props> {
         )
     }
 
-    private _setSidebarRef = (ref: React.Component) => {
-        this._sidebarRef = ref
-    }
-
     render() {
         const {
             annotationsManager,
@@ -213,7 +286,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
         } = this.props
 
         return (
-            <React.Fragment>
+            <div ref={this.setRibbonSidebarRef}>
                 {isRibbonEnabled && (
                     <RibbonContainer
                         annotationsManager={annotationsManager}
@@ -232,7 +305,6 @@ class RibbonSidebarContainer extends React.Component<Props> {
                 {isSidebarOpen && (
                     <SidebarContainer
                         env="inpage"
-                        ref={this._setSidebarRef}
                         goToAnnotation={this._goToAnnotation}
                         closeSidebarCallback={this._closeSidebarCallback}
                         handleAnnotationBoxMouseEnter={makeHighlightMedium}
@@ -240,7 +312,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
                         sortAnnotationsByPosition={sortAnnotationsByPosition}
                     />
                 )}
-            </React.Fragment>
+            </div>
         )
     }
 }

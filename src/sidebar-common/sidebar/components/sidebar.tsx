@@ -27,8 +27,6 @@ interface Props {
         annotation: Annotation,
     ) => (e: React.MouseEvent<HTMLElement>) => void
     handleAddCommentBtnClick: () => void
-    handleMouseEnter: (e: Event) => void
-    handleMouseLeave: (e: Event) => void
     handleAnnotationBoxMouseEnter: (
         annotation: Annotation,
     ) => (e: Event) => void
@@ -43,8 +41,6 @@ interface State {
 }
 
 class Sidebar extends React.Component<Props, State> {
-    private _sidebarRef: HTMLElement
-
     constructor(props: Props) {
         super(props)
         this.state = {
@@ -53,40 +49,6 @@ class Sidebar extends React.Component<Props, State> {
             showPageResults: true,
             showAllResults: false,
         }
-    }
-
-    componentDidMount() {
-        this._attachEventListeners()
-    }
-
-    componentWillUnmount() {
-        this._removeEventListeners()
-    }
-
-    private _attachEventListeners() {
-        this._sidebarRef.addEventListener(
-            'mouseenter',
-            this.props.handleMouseEnter,
-        )
-        this._sidebarRef.addEventListener(
-            'mouseleave',
-            this.props.handleMouseLeave,
-        )
-    }
-
-    private _removeEventListeners() {
-        this._sidebarRef.removeEventListener(
-            'mouseenter',
-            this.props.handleMouseEnter,
-        )
-        this._sidebarRef.removeEventListener(
-            'mouseleave',
-            this.props.handleMouseLeave,
-        )
-    }
-
-    private _setSidebarRef = (ref: HTMLElement) => {
-        this._sidebarRef = ref
     }
 
     private _handleSettingsBtnClick = () => {
@@ -141,17 +103,19 @@ class Sidebar extends React.Component<Props, State> {
                     noOverlay
                     disableCloseOnEsc
                 >
-                    <div className={styles.sidebar} ref={this._setSidebarRef}>
-                        {/*                        <Topbar
+                    <div className={styles.sidebar}>
+                        <Topbar
                             disableAddCommentBtn={showCommentBox}
                             handleCloseBtnClick={closeSidebar}
                             handleSettingsBtnClick={
                                 this._handleSettingsBtnClick
                             }
                             handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        />*/}
+                        />
 
-                        <SearchBox
+                        {/* New ribbon/sidebar work */}
+
+                        {/*<SearchBox
                             searchValue={this.state.searchValue}
                             onSearchChange={this.handleChange}
                             onSearchEnter={this.handleSearchKeyDown}
@@ -198,53 +162,59 @@ class Sidebar extends React.Component<Props, State> {
                                     All
                                 </a>
                             </span>
-                        </div>
+                        </div>*/}
+
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
                                 <CommentBoxContainer env={env} />
                             </div>
                         )}
-                        {this.state.showPageResults &&
-                            (isLoading ? (
-                                <Loader />
-                            ) : annotations.length === 0 ? (
-                                <EmptyMessage />
-                            ) : (
-                                <div className={styles.annotationsSection}>
-                                    {annotations.map(annotation => (
-                                        <AnnotationBoxContainer
-                                            key={annotation.url}
-                                            env={env}
-                                            {...annotation}
-                                            isActive={
-                                                activeAnnotationUrl ===
-                                                annotation.url
-                                            }
-                                            isHovered={
-                                                hoverAnnotationUrl ===
-                                                annotation.url
-                                            }
-                                            handleGoToAnnotation={handleGoToAnnotation(
-                                                annotation,
-                                            )}
-                                            handleMouseEnter={handleAnnotationBoxMouseEnter(
-                                                annotation,
-                                            )}
-                                            handleMouseLeave={handleAnnotationBoxMouseLeave()}
-                                        />
-                                    ))}
-                                    {showCongratsMessage && <CongratsMessage />}
-                                </div>
-                            ))}
 
-                        {this.state.showAllResults && (
+                        {/*{this.state.showPageResults &&*/}
+
+                        {isLoading ? (
+                            <Loader />
+                        ) : annotations.length === 0 ? (
+                            <EmptyMessage />
+                        ) : (
+                            <div className={styles.annotationsSection}>
+                                {annotations.map(annotation => (
+                                    <AnnotationBoxContainer
+                                        key={annotation.url}
+                                        env={env}
+                                        {...annotation}
+                                        isActive={
+                                            activeAnnotationUrl ===
+                                            annotation.url
+                                        }
+                                        isHovered={
+                                            hoverAnnotationUrl ===
+                                            annotation.url
+                                        }
+                                        handleGoToAnnotation={handleGoToAnnotation(
+                                            annotation,
+                                        )}
+                                        handleMouseEnter={handleAnnotationBoxMouseEnter(
+                                            annotation,
+                                        )}
+                                        handleMouseLeave={handleAnnotationBoxMouseLeave()}
+                                    />
+                                ))}
+                                {showCongratsMessage && <CongratsMessage />}
+                            </div>
+                        )}
+
+                        {/* New ribbon/sidebar work */}
+                        {/*{this.state.showAllResults && (
                             <div className={styles.allResultsDiv}>
                                 All results
                             </div>
-                        )}
+                        )}*/}
                     </div>
                 </Menu>
-                {this.state.showFilters && (
+                {/* New ribbon/sidebar work */}
+
+                {/*{this.state.showFilters && (
                     <div className={styles.filtersSidebar}>
                         <div className={styles.filtersDiv}>
                             <span>Filters</span>
@@ -291,7 +261,7 @@ class Sidebar extends React.Component<Props, State> {
                         </div>
                         <div className={styles.listsDiv}>Custom lists</div>
                     </div>
-                )}
+                )}*/}
             </React.Fragment>
         )
     }
