@@ -6,11 +6,14 @@ import React, {
 } from 'react'
 import cx from 'classnames'
 
-import { getExtUrl } from '../../utils'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import CommentBoxContainer from 'src/sidebar-common/comment-box'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
+import {
+    highlightAnnotations,
+    removeHighlights,
+} from '../../content_script/highlight-interactions'
 
 const styles = require('./ribbon.css')
 
@@ -42,6 +45,7 @@ interface State {
     showSearchBox: boolean
     showTagsPicker: boolean
     showCollectionsPicker: boolean
+    showHighlights?: boolean
 }
 
 const defaultState: State = {
@@ -105,6 +109,23 @@ class Ribbon extends Component<Props, State> {
             showTagsPicker: false,
             showCommentBox: !prevState.showCommentBox,
         }))
+    }
+
+    private toggleHighlights = () => {
+        this.state.showHighlights
+            ? removeHighlights()
+            : this.fetchAndHighlightAnnotations()
+        this.setState(prevState => ({
+            showHighlights: !prevState.showHighlights,
+        }))
+    }
+
+    private fetchAndHighlightAnnotations = async () => {
+        const annotations = await remoteFunction('getAllAnnotationsByUrl')(
+            window.location.href,
+        )
+        const highlights = annotations.filter(annotation => annotation.selector)
+        highlightAnnotations(highlights)
     }
 
     render() {
@@ -209,13 +230,14 @@ class Ribbon extends Component<Props, State> {
                             </div>
                         </div>
                         <div className={styles.pageActions}>
-                            <ButtonTooltip 
+                            <ButtonTooltip
                                 tooltipText={
                                     !this.props.isBookmarked
                                         ? 'Star page'
                                         : 'Un-Star page'
                                 }
-                                position="left">
+                                position="left"
+                            >
                                 <button
                                     className={cx(styles.button, {
                                         [styles.bookmark]: this.props
@@ -310,7 +332,6 @@ class Ribbon extends Component<Props, State> {
                                                 showCommentBox: false,
                                             }))
                                         }
-                                        title={'Add to collections'}
                                     />
                                     {this.state.showCollectionsPicker && (
                                         <Tooltip
@@ -346,7 +367,30 @@ class Ribbon extends Component<Props, State> {
                             </ButtonTooltip>
 
                             <ButtonTooltip
-                                tooltipText={'Disable Highlighter tooltip'}
+                                tooltipText="Toggle highlights"
+                                position="left"
+                            >
+                                <button
+                                    className={cx(
+                                        styles.button,
+                                        styles.ribbonIcon,
+                                        {
+                                            [styles.tooltipOn]: this.state
+                                                .showHighlights,
+                                            [styles.tooltipOff]: !this.state
+                                                .showHighlights,
+                                        },
+                                    )}
+                                    onClick={this.toggleHighlights}
+                                />
+                            </ButtonTooltip>
+
+                            <ButtonTooltip
+                                tooltipText={
+                                    !this.props.isTooltipEnabled
+                                        ? 'Enable Highlighter tooltip'
+                                        : 'Disable Highlighter tooltip'
+                                }
                                 position="left"
                             >
                                 <button
