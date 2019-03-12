@@ -20,7 +20,11 @@
 }
 
 .plus {
-    font-size: 2em;
-    font-weight: bold;
-    margin-right: 13px;
+    composes: nakedButton from '../../common-ui/elements.css';
+    background-image: url('/img/plus.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 10px;
+    width: 10px;
+    height: 10px;
 }

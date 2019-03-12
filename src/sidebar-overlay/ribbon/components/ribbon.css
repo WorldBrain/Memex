@@ -2,7 +2,7 @@
     position: fixed;
     top: 0;
     right: 0;
-    width: 20px;
+    width: 30px;
     height: 100%;
     z-index: 1100;
 
@@ -12,7 +12,7 @@
     border: 1px solid #7777775c;
     border-right: none; */
     transform: translate(0, 0);
-    transition: all 0.2s ease-in-out;
+    transition: all 0.1s ease-in-out;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
@@ -21,7 +21,10 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    font-family: 'Inter';
+
+    & * {
+        font-family: 'Inter';
+    }
 }
 
 .ribbonExpanded {

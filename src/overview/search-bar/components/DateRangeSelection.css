@@ -20,7 +20,7 @@
     composes: darkBlue from '../../../common-ui/colors.css';
     width: 130px;
     height: 30px;
-    font-size: 16px;
+    font-size: 15px;
     border: none;
     margin: 0 10px;
     background-color: transparent;

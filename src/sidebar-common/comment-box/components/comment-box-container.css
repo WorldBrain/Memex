@@ -1,5 +1,5 @@
 .commentBoxContainer {
-    composes: boxShadow h2Color borderRadiusBig from '../../../common-ui/colors.css';
+    composes: boxShadow h2Color from '../../../common-ui/colors.css';
     box-sizing: border-box;
     display: flex;
     flex-direction: column;

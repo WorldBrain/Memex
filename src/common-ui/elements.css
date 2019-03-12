@@ -1,3 +1,12 @@
+@value colors: './colors.css';
+@value color1, color3, color6, color11 from colors;
+
+/* FONTs */
+
+.fontFamily {
+    font-family: 'Inter';
+}
+
 /* Tag Pill */
 
 .tagPill {
@@ -113,9 +122,19 @@
 }
 
 .searchField {
-    composes: editFields h2Color from './colors.css';
-    background-color: #f7f7f7;
+    background-color: color11;
+    color: color1;
     border-radius: 30px;
     font-size: 14px;
     font-weight: 500;
+
+    &::placeholder {
+        color: color3;
+        font-style: normal;
+    }
+
+    &:focus {
+        outline: none;
+        border: none;
+    }
 }

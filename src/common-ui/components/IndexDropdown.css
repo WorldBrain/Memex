@@ -1,6 +1,9 @@
+.tagContainer * {
+    font-family: 'Inter';
+}
+
 .menuItem {
     composes: hoverColor from '../../common-ui/colors.css';
-    align-items: center;
     display: flex;
     padding: 8px 20px 8px 20px;
     cursor: pointer;
@@ -29,7 +32,6 @@
 
 .menuItemFocused {
     composes: selectedColor from '../../common-ui/colors.css';
-    align-items: center;
     display: flex;
 }
 

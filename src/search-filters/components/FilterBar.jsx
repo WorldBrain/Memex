@@ -7,7 +7,7 @@ const FilterBar = ({ filter, onBarClick }) => (
     <div>
         <div onClick={onBarClick} className={styles.collection}>
             <span className={styles.myCollection}> {`${filter}s`} </span>
-            <span className={styles.plus}> + </span>
+            <span className={styles.plus}/>
         </div>
     </div>
 )

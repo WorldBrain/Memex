@@ -157,7 +157,7 @@ class Ribbon extends Component<Props, State> {
 
                             <div>
                                 <ButtonTooltip
-                                    tooltipText={'Search Memex'}
+                                    tooltipText={'Search Memex via Dashboard'}
                                     position="left"
                                 >
                                     <button
@@ -209,7 +209,13 @@ class Ribbon extends Component<Props, State> {
                             </div>
                         </div>
                         <div className={styles.pageActions}>
-                            <ButtonTooltip tooltipText="Star" position="left">
+                            <ButtonTooltip 
+                                tooltipText={
+                                    !this.props.isBookmarked
+                                        ? 'Star page'
+                                        : 'Un-Star page'
+                                }
+                                position="left">
                                 <button
                                     className={cx(styles.button, {
                                         [styles.bookmark]: this.props
@@ -224,7 +230,7 @@ class Ribbon extends Component<Props, State> {
                             </ButtonTooltip>
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add comments"
+                                    tooltipText="Add comments to page"
                                     position="left"
                                 >
                                     <button
@@ -261,7 +267,7 @@ class Ribbon extends Component<Props, State> {
 
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add tags"
+                                    tooltipText="Add tags to page"
                                     position="left"
                                 >
                                     <button
@@ -288,7 +294,7 @@ class Ribbon extends Component<Props, State> {
 
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add to collections"
+                                    tooltipText="Add page to collections"
                                     position="left"
                                 >
                                     <button
@@ -318,20 +324,6 @@ class Ribbon extends Component<Props, State> {
                             </div>
                         </div>
                         <div className={styles.settingsActions}>
-                            <ButtonTooltip
-                                tooltipText="Settings"
-                                position="left"
-                            >
-                                <button
-                                    className={cx(
-                                        styles.button,
-                                        styles.settings,
-                                    )}
-                                    onClick={() =>
-                                        this.openOptionsTabRPC('settings')
-                                    }
-                                />
-                            </ButtonTooltip>
                             <ButtonTooltip
                                 tooltipText="Disable this mini sidebar"
                                 position="left"
@@ -382,6 +374,21 @@ class Ribbon extends Component<Props, State> {
                                     })}
                                     onClick={() =>
                                         this.props.handlePauseToggle()
+                                    }
+                                />
+                            </ButtonTooltip>
+
+                            <ButtonTooltip
+                                tooltipText="Settings"
+                                position="left"
+                            >
+                                <button
+                                    className={cx(
+                                        styles.button,
+                                        styles.settings,
+                                    )}
+                                    onClick={() =>
+                                        this.openOptionsTabRPC('settings')
                                     }
                                 />
                             </ButtonTooltip>
