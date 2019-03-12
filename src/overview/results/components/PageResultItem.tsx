@@ -25,8 +25,10 @@ export interface Props {
     hasBookmark: boolean
     isSidebarOpen: boolean
     isListFilterActive: boolean
+    isAnnotsSearch: boolean
     areAnnotationsExpanded: boolean
     annotations: any[]
+    annotsCount: number
     tagPills: ReactNode[]
     tagManager: ReactNode
     onTagBtnClick: MouseEventHandler
@@ -69,6 +71,21 @@ class PageResultItem extends PureComponent<Props> {
         if (this.props.isSidebarOpen) {
             this.props.hideSearchFilters()
         }
+    }
+
+    renderAnnotsList() {
+        if (!this.props.annotations.length || !this.props.isAnnotsSearch) {
+            return null
+        }
+
+        return (
+            <AnnotationList
+                isExpandedOverride={this.props.areAnnotationsExpanded}
+                openAnnotationSidebar={this.props.onCommentBtnClick}
+                pageUrl={this.hrefToPage}
+                annotations={this.props.annotations}
+            />
+        )
     }
 
     render() {
@@ -172,12 +189,20 @@ class PageResultItem extends PureComponent<Props> {
                                         className={classNames(
                                             styles.button,
                                             styles.comment,
+                                            {
+                                                [styles.commentActive]:
+                                                    this.props.annotsCount > 0,
+                                            },
                                         )}
                                         onClick={this.props.onCommentBtnClick}
                                         title={
                                             'Add/View Commments & Annotations'
                                         }
-                                    />
+                                    >
+                                        <span className={styles.annotsCount}>
+                                            {this.props.annotsCount}
+                                        </span>
+                                    </button>
                                     <button
                                         disabled={this.props.isDeleting}
                                         className={this.bookmarkClass}
@@ -191,14 +216,7 @@ class PageResultItem extends PureComponent<Props> {
                         </div>
                     </a>
                 </div>
-                {this.props.annotations.length > 0 && (
-                    <AnnotationList
-                        isExpandedOverride={this.props.areAnnotationsExpanded}
-                        openAnnotationSidebar={this.props.onCommentBtnClick}
-                        pageUrl={this.hrefToPage}
-                        annotations={this.props.annotations}
-                    />
-                )}
+                {this.renderAnnotsList()}
                 {this.props.tagManager}
             </li>
         )

@@ -2,9 +2,10 @@ import React, { PureComponent, Fragment } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import { MapDispatchToProps } from 'src/util/types'
 
+import * as results from 'src/overview/results/selectors'
 import * as selectors from '../selectors'
 import * as actions from '../actions'
-import { RootState } from '../types'
+import { RootState } from 'src/options/types'
 
 import FilterBar from './FilterBar'
 import ContentTypes from './content-types'
@@ -14,6 +15,7 @@ export interface StateProps {
     annotationsFilter: boolean
     highlightsFilter: boolean
     notesFilter: boolean
+    isAnnotsSearch: boolean
 }
 
 export interface DispatchProps {
@@ -56,6 +58,7 @@ class ContentTypeContainer extends PureComponent<Props, State> {
                         }
                         toggleNotesFilter={this.props.toggleNotesFilter}
                         toggleWebsitesFilter={this.props.toggleWebsitesFilter}
+                        isAnnotsSearch={this.props.isAnnotsSearch}
                     />
                 )}
             </Fragment>
@@ -66,6 +69,7 @@ class ContentTypeContainer extends PureComponent<Props, State> {
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
     state,
 ): StateProps => ({
+    isAnnotsSearch: results.isAnnotsSearch(state),
     websitesFilter: selectors.websitesFilter(state),
     annotationsFilter: selectors.annotationsFilter(state),
     highlightsFilter: selectors.highlightsFilter(state),

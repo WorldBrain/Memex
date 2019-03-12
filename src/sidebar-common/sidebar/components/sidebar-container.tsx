@@ -112,30 +112,38 @@ class SidebarContainer extends React.Component<Props> {
         } = this.props
 
         return (
-            <Sidebar
-                env={env}
-                isOpen={isOpen}
-                isLoading={isLoading}
-                // annotations={
-                //     sortAnnotationsByPosition
-                //         ? sortAnnotationsByPosition(annotations)
-                //         : annotations
-                // }
-                annotations={annotations}
-                activeAnnotationUrl={activeAnnotationUrl}
-                hoverAnnotationUrl={hoverAnnotationUrl}
-                showCommentBox={showCommentBox}
-                showCongratsMessage={showCongratsMessage && !isLoading}
-                handleAddCommentBtnClick={handleAddCommentBtnClick}
-                closeSidebar={this._closeSidebar}
-                handleGoToAnnotation={this._handleGoToAnnotation}
-                handleAnnotationBoxMouseEnter={
-                    this._handleAnnotationBoxMouseEnter
-                }
-                handleAnnotationBoxMouseLeave={
-                    this._handleAnnotationBoxMouseLeave
-                }
-            />
+            <React.Fragment>
+                {isOpen && (
+                    <Sidebar
+                        env={env}
+                        isOpen={isOpen}
+                        isLoading={isLoading}
+                        // annotations={
+                        //     sortAnnotationsByPosition
+                        //         ? sortAnnotationsByPosition(annotations)
+                        //         : annotations
+                        // }
+                        annotations={annotations}
+                        activeAnnotationUrl={activeAnnotationUrl}
+                        hoverAnnotationUrl={hoverAnnotationUrl}
+                        showCommentBox={showCommentBox}
+                        showCongratsMessage={showCongratsMessage && !isLoading}
+                        handleAddCommentBtnClick={handleAddCommentBtnClick}
+                        closeSidebar={this._closeSidebar}
+                        handleGoToAnnotation={this._handleGoToAnnotation}
+                        handleAnnotationBoxMouseEnter={
+                            this._handleAnnotationBoxMouseEnter
+                        }
+                        handleAnnotationBoxMouseLeave={
+                            this._handleAnnotationBoxMouseLeave
+                        }
+                        handleEditAnnotation={this.props.handleEditAnnotation}
+                        handleDeleteAnnotation={
+                            this.props.handleDeleteAnnotation
+                        }
+                    />
+                )}
+            </React.Fragment>
         )
     }
 }

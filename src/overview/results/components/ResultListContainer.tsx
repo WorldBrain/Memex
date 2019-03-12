@@ -29,6 +29,7 @@ export interface StateProps {
     isLoading: boolean
     isSidebarOpen: boolean
     needsWaypoint: boolean
+    isAnnotsSearch: boolean
     isScrollDisabled: boolean
     isNewSearchLoading: boolean
     isListFilterActive: boolean
@@ -162,6 +163,7 @@ class ResultListContainer extends PureComponent<Props> {
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
+                isAnnotsSearch={this.props.isAnnotsSearch}
                 {...doc}
             />
         ))
@@ -201,6 +203,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     needsWaypoint: selectors.needsPagWaypoint(state),
     isListFilterActive: filters.listFilterActive(state),
     isScrollDisabled: selectors.isScrollDisabled(state),
+    isAnnotsSearch: selectors.isAnnotsSearch(state),
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
 })

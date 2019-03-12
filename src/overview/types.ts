@@ -11,6 +11,7 @@ export interface Result {
     displayTime: number
     screenshot: string
     favIcon: string
+    annotsCount: number
     annotations: Annotation[]
 }
 

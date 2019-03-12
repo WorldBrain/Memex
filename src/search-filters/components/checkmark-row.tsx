@@ -6,7 +6,7 @@ const styles = require('./checkmark-row.css')
 export interface Props {
     value: string
     subtitle: string
-    active: boolean
+    active?: boolean
     available?: boolean
     small?: boolean
     onClick: () => void

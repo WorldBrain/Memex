@@ -392,6 +392,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 onClick={this.handleListClick(i)}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 isForSidebar={false}
+                isList
             />
         ))
 
@@ -420,7 +421,6 @@ class AddListDropdownContainer extends Component<Props, State> {
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
-                isList={1}
                 numberOfTags={
                     this.props.allTabsCollection
                         ? this.state.multiEdit.size

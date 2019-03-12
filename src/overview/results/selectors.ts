@@ -126,3 +126,8 @@ export const searchType = createSelector(
     resultsState,
     state => state.searchType,
 )
+
+export const isAnnotsSearch = createSelector(
+    resultsState,
+    state => state.searchType === 'annot',
+)
