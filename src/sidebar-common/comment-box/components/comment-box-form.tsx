@@ -130,9 +130,11 @@ class CommentBoxForm extends React.Component<Props, State> {
             | React.MouseEvent<HTMLButtonElement>,
     ) => {
         this.props.saveComment(e)
-        this.setState({
-            showTagsPicker: false,
-        })
+        if (this.state.showTagsPicker) {
+            this.setState({
+                showTagsPicker: false,
+            })
+        }
     }
 
     setTagInputActive = (isTagInputActive: boolean) => {

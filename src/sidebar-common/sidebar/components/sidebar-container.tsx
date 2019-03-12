@@ -10,6 +10,7 @@ import {
 import Sidebar from './sidebar'
 import SidebarState, { Annotation } from '../types'
 import { MapDispatchToProps } from '../../types'
+import AnnotationsManager from '../../annotations-manager'
 
 interface StateProps {
     isOpen: boolean
@@ -23,6 +24,7 @@ interface StateProps {
 
 interface DispatchProps {
     onInit: () => void
+    setAnnotationsManager: (annotationsManager: AnnotationsManager) => void
     closeSidebar: () => void
     handleAddCommentBtnClick: () => void
     setHoverAnnotationUrl: (url: string) => void
@@ -30,6 +32,7 @@ interface DispatchProps {
 
 interface OwnProps {
     env: 'inpage' | 'overview'
+    annotationsManager: AnnotationsManager
     sortAnnotationsByPosition?: (annotations: Annotation[]) => Annotation[]
     goToAnnotation: (annotation: Annotation) => void
     /** Optional callback function that gets called after the sidebar is closed. */
@@ -45,6 +48,7 @@ type Props = StateProps & DispatchProps & OwnProps
 class SidebarContainer extends React.Component<Props> {
     componentDidMount() {
         this.props.onInit()
+        this.props.setAnnotationsManager(this.props.annotationsManager)
         document.addEventListener('keydown', this.onKeydown, false)
     }
 
@@ -157,6 +161,8 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps
 > = dispatch => ({
     onInit: () => dispatch(actions.initState()),
+    setAnnotationsManager: annotationsManager =>
+        dispatch(actions.setAnnotationsManager(annotationsManager)),
     closeSidebar: () => dispatch(actions.closeSidebar()),
     handleAddCommentBtnClick: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
