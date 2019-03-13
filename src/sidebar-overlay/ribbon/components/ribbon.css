@@ -1,3 +1,5 @@
+@import url('/fonts/Inter/inter.css');
+
 .ribbon {
     position: fixed;
     top: 0;
@@ -140,21 +142,43 @@
     background-image: url('/img/settings.svg');
 }
 
-.tooltipOn {
+.highlightsOn {
     background-image: url('/img/highlightOn.svg');
 }
 
-.tooltipOff {
+.highlightsOff {
     background-image: url('/img/highlightOff.svg');
+    opacity: 0.3;
+
+    &:hover {
+        opacity: 0.4;
+    }
+}
+
+.tooltipOn {
+    background-image: url('/img/tooltip.svg');
+}
+
+.tooltipOff {
+    background-image: url('/img/tooltip.svg');
+    opacity: 0.3;
+
+    &:hover {
+        opacity: 0.4;
+    }
 }
 
 .ribbonOn {
-    composes: backgroundLightMintGreen from '../../../common-ui/colors.css';
-    background-image: url('/img/ribbonOff.svg');
+    background-image: url('/img/ribbonOn.svg');
 }
 
 .ribbonOff {
     background-image: url('/img/ribbonOff.svg');
+    opacity: 0.3;
+
+    &:hover {
+        opacity: 0.4;
+    }
 }
 
 .ribbonIcon {

@@ -367,7 +367,7 @@ class Ribbon extends Component<Props, State> {
                             </ButtonTooltip>
 
                             <ButtonTooltip
-                                tooltipText="Toggle highlights"
+                                tooltipText="Toggle highlights (h)"
                                 position="left"
                             >
                                 <button
@@ -375,9 +375,9 @@ class Ribbon extends Component<Props, State> {
                                         styles.button,
                                         styles.ribbonIcon,
                                         {
-                                            [styles.tooltipOn]: this.state
+                                            [styles.highlightsOn]: this.state
                                                 .showHighlights,
-                                            [styles.tooltipOff]: !this.state
+                                            [styles.highlightsOff]: !this.state
                                                 .showHighlights,
                                         },
                                     )}

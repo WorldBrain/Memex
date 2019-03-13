@@ -8,8 +8,6 @@
 
 .tooltipBubble {
     position: absolute;
-    right: 36px;
-    top: 4px;
     height: 20px;
     border-radius: 5px;
     display: flex;
@@ -17,10 +15,10 @@
     width: max-content;
     align-items: center;
     justify-content: flex-end;
+    font-family: 'Inter';
 }
 
 .tooltipTop {
-    bottom: 100%;
     left: 50%;
     padding-bottom: 9px;
     transform: translateX(-50%);
@@ -34,19 +32,18 @@
 }
 
 .tooltipLeft {
-    top: 50%;
-    right: 100%;
-    padding-right: 9px;
-    transform: translateY(-50%);
+    top: 2px;
+    right: 35px;
 }
 
 .tooltipMessage {
     composes: h2ColorBackground from '../colors.css';
     border-radius: 55px;
     color: white;
-    font-size: 0.6rem;
+    font-size: 11px;
     line-height: 1.4;
     padding: 0.5em 1em;
     text-align: center;
     width: fit-content;
+    font-family: 'Inter';
 }

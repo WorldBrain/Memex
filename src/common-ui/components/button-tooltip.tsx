@@ -54,13 +54,14 @@ class ButtonTooltip extends React.Component<Props, State> {
                 {this.state.displayTooltip && (
                     <div
                         className={cx(styles.tooltipBubble, {
-                            [styles.tooltipleft]:
+                            [styles.tooltipLeft]:
                                 this.props.position === 'left',
-                            [styles.tooltipright]:
+                            [styles.tooltipRight]:
                                 this.props.position === 'right',
-                            [styles.tooltipbottom]:
+                            [styles.tooltipBottom]:
                                 this.props.position === 'bottom',
-                            [styles.tooltiptop]: this.props.position === 'top',
+                            [styles.tooltipTop]: 
+                                this.props.position === 'top',
                         })}
                     >
                         <div className={styles.tooltipMessage}>
