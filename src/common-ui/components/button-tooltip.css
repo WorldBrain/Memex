@@ -1,0 +1,49 @@
+.tooltip {
+    position: relative;
+}
+
+.tooltipTrigger {
+    display: inline-block;
+}
+
+.tooltipBubble {
+    position: absolute;
+    height: 20px;
+    border-radius: 5px;
+    display: flex;
+    flex-wrap: nowrap;
+    width: max-content;
+    align-items: center;
+    justify-content: flex-end;
+    font-family: 'Inter';
+}
+
+.tooltipTop {
+    left: 50%;
+    padding-bottom: 9px;
+    transform: translateX(-50%);
+}
+
+.tooltipBottom {
+    top: 100%;
+    left: 50%;
+    padding-top: 9px;
+    transform: translateX(-50%);
+}
+
+.tooltipLeft {
+    top: 2px;
+    right: 35px;
+}
+
+.tooltipMessage {
+    composes: h2ColorBackground from '../colors.css';
+    border-radius: 55px;
+    color: white;
+    font-size: 11px;
+    line-height: 1.4;
+    padding: 0.5em 1em;
+    text-align: center;
+    width: fit-content;
+    font-family: 'Inter';
+}

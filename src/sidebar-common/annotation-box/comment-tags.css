@@ -1,5 +1,6 @@
 .annotationText {
-    font-size: 14px;
+    composes: h2Color from '../../common-ui/colors.css';
+    font-size: 15px;
     font-weight: 400;
     overflow: hidden;
     word-wrap: break-word;

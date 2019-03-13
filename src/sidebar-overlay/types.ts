@@ -8,10 +8,28 @@ import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
 import { State as RibbonState } from './ribbon'
 import { State as SidebarState } from 'src/sidebar-common'
+import { State as BlacklistBtnState } from 'src/popup/blacklist-button/reducer'
+import { State as BookmarkBtnState } from 'src/popup/bookmark-button/reducer'
+import { State as TagsBtnState } from 'src/popup/tags-button/reducer'
+import { State as CollectionsBtnState } from 'src/popup/collections-button/reducer'
+import { State as PauseBtnState } from 'src/popup/pause-button/reducer'
+import { State as NotifsBtnState } from 'src/popup/notif-button/reducer'
+import { State as SidebarBtnState } from 'src/popup/sidebar-button/reducer'
+import { State as TooltipBtnState } from 'src/popup/tooltip-button/reducer'
+import { State as PopupState } from 'src/popup/reducer'
 
 export default interface RootState {
     ribbon: RibbonState
     sidebar: SidebarState
+    blacklistBtn: BlacklistBtnState
+    bookmarkBtn: BookmarkBtnState
+    tagsBtn: TagsBtnState
+    collectionsBtn: CollectionsBtnState
+    pauseBtn: PauseBtnState
+    sidebarBtn: SidebarBtnState
+    tooltipBtn: TooltipBtnState
+    notifsBtn: NotifsBtnState
+    popup: PopupState
 }
 
 export type ClickHandler<T extends HTMLElement> = (

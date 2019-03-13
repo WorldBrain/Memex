@@ -34,6 +34,7 @@ export interface Props {
     /** initial suggestions from the popup */
     initSuggestions?: string[]
     isForSidebar?: boolean
+    isForRibbon?: boolean
     onBackBtnClick?: ClickHandler<HTMLButtonElement>
     allTabs?: boolean
 }
@@ -54,6 +55,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         onFilterDel: noop,
         initFilters: [],
         isForAnnotation: false,
+        isForRibbon: false,
     }
 
     private suggestRPC

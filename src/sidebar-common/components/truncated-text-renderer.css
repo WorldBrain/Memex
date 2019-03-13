@@ -1,17 +1,17 @@
 .showMoreBtn {
-    cursor: pointer;
     display: inline-flex;
     border: none;
     outline: none;
-    font-style: bold;
+    vertical-align: text-top;
+    font-weight: bold;
+    background: transparent;
+    font-size: 12px;
+    margin-top: -1px;
 
     &.rotated {
-        background-image: url('/img/longarrow.svg');
-        content: '';
         background-color: transparent;
         background-repeat: no-repeat;
         background-position: center;
-        transform: rotate(-180deg);
         transform-origin: center;
         width: 30px;
         height: 20px;

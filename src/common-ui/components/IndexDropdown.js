@@ -26,6 +26,7 @@ class IndexDropdown extends PureComponent {
         isForSidebar: PropTypes.bool,
         // clearSearchField: PropTypes.func,
         // showClearfieldBtn: PropTypes.bool,
+        isForRibbon: PropTypes.bool,
         onBackBtnClick: PropTypes.func,
         allTabs: PropTypes.bool,
         allTabsCollection: PropTypes.bool,
@@ -81,7 +82,7 @@ class IndexDropdown extends PureComponent {
                         [this.styles.commentBox]: this.props.allowAdd,
                     })}
                 >
-                    <span className={styles.searchIcon}/>
+                    <span className={styles.searchIcon} />
                     <input
                         className={this.styles.search}
                         name="query"
@@ -114,14 +115,15 @@ class IndexDropdown extends PureComponent {
                 </div>
                 {!this.props.isForSidebar && (
                     <div className={this.styles.summaryTagContainer}>
-                        {!this.props.isForAnnotation && (
-                            <button
-                                className={this.styles.backButton}
-                                onClick={this.props.onBackBtnClick}
-                            >
-                                Back
-                            </button>
-                        )}
+                        {!this.props.isForAnnotation &&
+                            !this.props.isForRibbon && (
+                                <button
+                                    className={this.styles.backButton}
+                                    onClick={this.props.onBackBtnClick}
+                                >
+                                    Back
+                                </button>
+                            )}
                         <div className={this.styles.numberTags}>
                             <span className={this.styles.bold}>
                                 {this.props.numberOfTags}

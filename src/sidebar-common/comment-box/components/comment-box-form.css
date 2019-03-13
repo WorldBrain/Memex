@@ -1,41 +1,93 @@
 @import url('/fonts/Inter/inter.css');
 
 .textArea {
-    box-sizing: border-box;
-    resize: vertical;
-    font-weight: 400;
-    font-size: 13px;
-    color: #222;
-    font-family: 'Inter';
-    font-style: italic;
-    background: #f7f7f7;
-    border: none;
-    border-radius: 2px;
-    padding: 10px 7px;
-    margin: 5px 5px 5px 5px;
-    min-height: 40px;
+    composes: TextArea from '../../../common-ui/elements.css';
+    min-height: 100px;
 
     &:focus {
         outline: none;
     }
-
-    &::placeholder {
-        color: #888;
-    }
 }
 
-.buttonHolder {
+.footer {
     display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    padding: 5px 10px 5px 10px;
-    border-top: 1px solid #d2d2d2;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 4px 4px 4px;
+    height: 26px;
+}
+
+.interactions {
+    display: flex;
 }
 
 .saveBtn {
     composes: footerBoldText from '../../annotation-box/all-modes-footer.css';
+    margin-left: 6px;
+
+    &:focus {
+        background-color: #79797945;
+    }
 }
 
 .cancelBtn {
     composes: footerText from '../../annotation-box/all-modes-footer.css';
+
+    &:focus {
+        background-color: #79797945;
+    }
+}
+
+.button {
+    composes: nakedButton from '../../../common-ui/elements.css';
+    width: 25px;
+    height: 25px;
+    border-radius: 3px;
+    opacity: 0.6;
+    margin-left: 2px;
+    background-size: 18px 18px;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.75;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    /*    &:focus {
+        outline: none;
+    } */
+}
+
+.confirmButtons {
+    display: flex;
+}
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+    opacity: 0.8;
+    background-size: 19px;
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+    background-size: 19px;
+}
+
+.tag {
+    background-image: url('/img/tag.svg');
+    background-size: 18px;
+}
+
+.tagDropdown {
+    position: absolute;
+    align-self: center;
+    margin-top: 142px;
 }

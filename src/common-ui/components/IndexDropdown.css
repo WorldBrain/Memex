@@ -1,12 +1,16 @@
+.tagContainer * {
+    font-family: 'Inter';
+}
+
 .menuItem {
     composes: hoverColor from '../../common-ui/colors.css';
-    align-items: center;
     display: flex;
     padding: 8px 20px 8px 20px;
     cursor: pointer;
     border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
     font-size: 14px;
+    background-color: white;
     min-height: 20px;
     justify-content: space-between;
 
@@ -28,7 +32,6 @@
 
 .menuItemFocused {
     composes: selectedColor from '../../common-ui/colors.css';
-    align-items: center;
     display: flex;
 }
 
@@ -45,6 +48,7 @@
     width: 100%;
     max-height: 401px;
     overflow-y: scroll;
+    background-color: white;
 
     &:focus {
         outline: none;
@@ -89,9 +93,9 @@
     display: grid;
     grid-template-columns: 1fr 1.5fr 1fr;
     grid-template-areas: 'backButton numberTags .';
-    padding: 10px 0 20px 0px;
-    background: white;
+    padding: 7px 0 10px 0px;
     border-radius: 0 0 3px 3px;
+    background: white;
 }
 
 .searchContainer {
@@ -109,6 +113,7 @@
     composes: searchIcon from '../../common-ui/icons.css';
     width: 25px;
     height: 25px;
+    background-size: 20px;
 }
 
 .closeButton {
@@ -168,13 +173,12 @@
     width: 300px;
     z-index: 1;
     background-color: #fff;
-    box-shadow: 0px 4px 7px 0px #3eb995;
+    border-radius: 3px;
 }
 
 .tagDivForFilterSB {
     z-index: 1;
     background-color: #fff;
-    box-shadow: unset;
     width: 100%;
 }
 

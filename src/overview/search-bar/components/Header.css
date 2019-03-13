@@ -38,14 +38,14 @@
 }
 
 .searchField {
+    composes: searchField from '../../../common-ui/elements.css';
     display: flex;
     justify-content: space-between;
     width: 100%;
     max-width: 800px;
-    height: 45px;
+    height: 40px;
     border-radius: 35px;
     border-radius: 43.5px;
-    background-color: #f5f3f3;
 
     @media (max-width: 724px) {
         margin: 0 8px;
@@ -53,27 +53,16 @@
 }
 
 .query {
-    composes: darkBlue from '../../../common-ui/colors.css';
+    composes: searchField from '../../../common-ui/elements.css';
     flex: 1;
     background-image: url('/img/search-icon.svg');
     background-repeat: no-repeat;
     background-size: 17px;
     background-position: 3px;
     background-color: transparent;
-    padding-left: 36px;
-    font-size: 16px;
+    padding-left: 30px;
+    font-size: 15px;
     border: none;
-    font-weight: 400;
-
-    &::placeholder {
-        color: #b8b8b8;
-        font-size: 17px;
-    }
-
-    &:focus {
-        outline: none;
-        border: none;
-    }
 }
 
 .container {

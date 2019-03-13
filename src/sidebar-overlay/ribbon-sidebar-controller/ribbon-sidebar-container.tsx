@@ -18,10 +18,14 @@ import { actions as commentBoxActions } from 'src/sidebar-common/comment-box'
 import AnnotationsManager from 'src/sidebar-common/annotations-manager'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { retryUntilErrorResolves } from '../utils'
+import { selectors as commentBoxselectors } from '../../sidebar-common/comment-box'
 
 interface StateProps {
     isPageFullScreen: boolean
+    isRibbonEnabled: boolean
     isSidebarOpen: boolean
+    isCommentSaved: boolean
+    commentText: string
     annotations: Annotation[]
 }
 
@@ -29,11 +33,13 @@ interface DispatchProps {
     onInit: () => void
     handleToggleFullScreen: (e: Event) => void
     openSidebar: () => void
+    closeSidebar: () => void
     openCommentBoxWithHighlight: (anchor: Anchor) => void
     setRibbonEnabled: (isRibbonEnabled: boolean) => void
     setTooltipEnabled: (isTooltipEnabled: boolean) => void
     setActiveAnnotationUrl: (url: string) => void
     setHoverAnnotationUrl: (url: string) => void
+    setShowCommentBox: () => void
 }
 
 interface OwnProps {
@@ -54,17 +60,31 @@ interface OwnProps {
 
 type Props = StateProps & DispatchProps & OwnProps
 
-class RibbonSidebarContainer extends React.Component<Props> {
-    private _sidebarRef: React.Component = null
+interface State {
+    isMouseInRibbonSideSidebar: boolean
+}
+
+class RibbonSidebarContainer extends React.Component<Props, State> {
+    private ribbonSidebarRef: HTMLDivElement = null
+
+    private setRibbonSidebarRef = (ref: HTMLDivElement) => {
+        this.ribbonSidebarRef = ref
+    }
+
+    state: State = {
+        isMouseInRibbonSideSidebar: false,
+    }
 
     componentDidMount() {
         this.props.onInit()
         this._setupFullScreenListener()
         this._setupRPC()
+        this.attachEventListeners()
     }
 
     componentWillUnmount() {
         this._removeFullScreenListener()
+        this.removeEventListeners()
     }
 
     componentDidUpdate(prevProps: Props) {
@@ -101,6 +121,69 @@ class RibbonSidebarContainer extends React.Component<Props> {
     private _removeFullScreenListener = () => {
         const { handleToggleFullScreen } = this.props
         document.removeEventListener('fullscreenchange', handleToggleFullScreen)
+    }
+
+    private attachEventListeners() {
+        document.addEventListener('click', this.handleOutsideClick, false)
+        document.addEventListener('keydown', this.onKeydown, false)
+
+        this.ribbonSidebarRef.addEventListener(
+            'mouseenter',
+            this.handleMouseEnter,
+        )
+        this.ribbonSidebarRef.addEventListener(
+            'mouseleave',
+            this.handleMouseLeave,
+        )
+    }
+
+    private removeEventListeners() {
+        document.removeEventListener('click', this.handleOutsideClick, false)
+        document.removeEventListener('keydown', this.onKeydown, false)
+
+        this.ribbonSidebarRef.removeEventListener(
+            'mouseenter',
+            this.handleMouseEnter,
+        )
+        this.ribbonSidebarRef.removeEventListener(
+            'mouseleave',
+            this.handleMouseLeave,
+        )
+    }
+
+    private handleMouseEnter = (e: Event) => {
+        e.stopPropagation()
+        this.setState({ isMouseInRibbonSideSidebar: true })
+    }
+
+    private handleMouseLeave = (e: Event) => {
+        e.stopPropagation()
+        this.setState({ isMouseInRibbonSideSidebar: false })
+    }
+
+    private handleOutsideClick: EventListener = e => {
+        e.stopPropagation()
+
+        // Only close the sidebar when all of the following conditions are met:
+        // 1. Sidebar is open.
+        // 2. Mouse is not inside the sidebar.
+        // 3. Click did not occur on an annotation highlight.
+        // This step is necessary as `onClickOutside` fires for a variety of events.
+        if (
+            this.props.isSidebarOpen &&
+            !this.state.isMouseInRibbonSideSidebar &&
+            !(e.target as any).dataset.annotation
+        ) {
+            this.props.closeSidebar()
+            this._closeSidebarCallback()
+        }
+    }
+
+    private onKeydown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && this.props.isSidebarOpen) {
+            this.props.closeSidebar()
+            this._closeSidebarCallback()
+        }
     }
 
     private _openSidebar = async (anchor: Anchor = null) => {
@@ -157,7 +240,7 @@ class RibbonSidebarContainer extends React.Component<Props> {
     }
 
     private _ensureAnnotationIsVisible = (url: string) => {
-        const containerNode: Node = ReactDOM.findDOMNode(this._sidebarRef)
+        const containerNode: Node = ReactDOM.findDOMNode(this.ribbonSidebarRef)
 
         // Find the root node as it may/may not be a shadow DOM.
         // 'any' prevents compilation error.
@@ -185,10 +268,6 @@ class RibbonSidebarContainer extends React.Component<Props> {
         )
     }
 
-    private _setSidebarRef = (ref: React.Component) => {
-        this._sidebarRef = ref
-    }
-
     render() {
         const {
             annotationsManager,
@@ -196,32 +275,45 @@ class RibbonSidebarContainer extends React.Component<Props> {
             insertOrRemoveTooltip,
             isPageFullScreen,
             isSidebarOpen,
+            isRibbonEnabled,
             makeHighlightMedium,
             removeMediumHighlights,
             sortAnnotationsByPosition,
+            closeSidebar,
+            isCommentSaved,
+            commentText,
+            setShowCommentBox,
         } = this.props
 
         return (
-            <React.Fragment>
-                {!isSidebarOpen &&
-                    !isPageFullScreen && (
-                        <RibbonContainer
-                            handleRemoveRibbon={handleRemoveRibbon}
-                            insertOrRemoveTooltip={insertOrRemoveTooltip}
-                            openSidebar={this._openSidebar}
-                        />
-                    )}
-                <SidebarContainer
-                    env="inpage"
-                    annotationsManager={annotationsManager}
-                    ref={this._setSidebarRef}
-                    goToAnnotation={this._goToAnnotation}
-                    closeSidebarCallback={this._closeSidebarCallback}
-                    handleAnnotationBoxMouseEnter={makeHighlightMedium}
-                    handleAnnotationBoxMouseLeave={removeMediumHighlights}
-                    sortAnnotationsByPosition={sortAnnotationsByPosition}
-                />
-            </React.Fragment>
+            <div ref={this.setRibbonSidebarRef}>
+                {isRibbonEnabled && (
+                    <RibbonContainer
+                        annotationsManager={annotationsManager}
+                        isSidebarOpen={isSidebarOpen}
+                        isRibbonEnabled={isRibbonEnabled}
+                        handleRemoveRibbon={handleRemoveRibbon}
+                        insertOrRemoveTooltip={insertOrRemoveTooltip}
+                        openSidebar={this._openSidebar}
+                        closeSidebar={closeSidebar}
+                        isCommentSaved={isCommentSaved}
+                        commentText={commentText}
+                        setShowCommentBox={setShowCommentBox}
+                    />
+                )}
+
+                {isSidebarOpen && (
+                    <SidebarContainer
+                        env="inpage"
+                        annotationsManager={annotationsManager}
+                        goToAnnotation={this._goToAnnotation}
+                        closeSidebarCallback={this._closeSidebarCallback}
+                        handleAnnotationBoxMouseEnter={makeHighlightMedium}
+                        handleAnnotationBoxMouseLeave={removeMediumHighlights}
+                        sortAnnotationsByPosition={sortAnnotationsByPosition}
+                    />
+                )}
+            </div>
         )
     }
 }
@@ -233,7 +325,10 @@ const mapStateToProps: MapStateToProps<
 > = state => ({
     isPageFullScreen: ribbonSelectors.isPageFullScreen(state),
     isSidebarOpen: sidebarSelectors.isOpen(state),
+    isCommentSaved: commentBoxselectors.isCommentSaved(state),
+    commentText: commentBoxselectors.commentText(state),
     annotations: sidebarSelectors.annotations(state),
+    isRibbonEnabled: ribbonSelectors.isRibbonEnabled(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<
@@ -249,6 +344,7 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(ribbonActions.setIsExpanded(false))
         dispatch(sidebarActions.openSidebar())
     },
+    closeSidebar: () => dispatch(sidebarActions.closeSidebar()),
     openCommentBoxWithHighlight: anchor =>
         dispatch(commentBoxActions.openCommentBoxWithHighlight(anchor)),
     setRibbonEnabled: isRibbonEnabled =>
@@ -259,6 +355,8 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(sidebarActions.setActiveAnnotationUrl(url)),
     setHoverAnnotationUrl: url =>
         dispatch(sidebarActions.setHoverAnnotationUrl(url)),
+    setShowCommentBox: () =>
+        dispatch(commentBoxActions.setShowCommentBox(true)),
 })
 
 export default connect<StateProps, DispatchProps, OwnProps>(

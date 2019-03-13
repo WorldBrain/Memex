@@ -2,7 +2,7 @@ import { createAction } from 'redux-act'
 
 import { Thunk } from '../types'
 import * as selectors from './selectors'
-import { getSidebarState, setSidebarState } from '../utils'
+import { setSidebarState } from '../utils'
 import { getTooltipState, setTooltipState } from 'src/content-tooltip/utils'
 
 export const setIsPageFullScreen = createAction<boolean>('setIsPageFullScreen')
@@ -22,10 +22,8 @@ export const toggleFullScreen: () => Thunk = () => (dispatch, getState) => {
  * Hydrates the initial state of the ribbon.
  */
 export const initState: () => Thunk = () => async dispatch => {
-    const isRibbonEnabled = await getSidebarState()
     const isTooltipEnabled = await getTooltipState()
 
-    dispatch(setRibbonEnabled(isRibbonEnabled))
     dispatch(setTooltipEnabled(isTooltipEnabled))
 }
 

@@ -1,0 +1,86 @@
+.tooltip {
+    position: relative;
+    border-radius: 3px;
+}
+
+.tooltipBubble {
+    position: absolute;
+    background: white;
+    composes: toolTips from '../../common-ui/elements.css';
+}
+
+.tooltipContent {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    width: 300px;
+    border-radius: 3px;
+}
+
+/*    &::after {
+        content: '';
+        position: absolute;
+    } */
+
+.tooltiptop {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    /*    &::after {
+        border-left: 9px solid transparent;
+        border-right: 9px solid transparent;
+        border-top: 9px solid #1a2f58;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    } */
+}
+
+.tooltipbottom {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    /*    &::after {
+        border-left: 9px solid transparent;
+        border-right: 9px solid transparent;
+        border-bottom: 9px solid #1a2f58;
+        top: 0;
+        transform: translateX(-50%);
+    } */
+}
+
+.tooltipleft {
+    /*    &::after {
+        border-left: 9px solid #1a2f58;
+        border-top: 9px solid transparent;
+        border-bottom: 9px solid transparent;
+        right: 0;
+        transform: translateY(-50%);
+    } */
+
+    &.tooltipBubble {
+        right: 35px;
+        top: -13px;
+    }
+}
+
+.tooltipright {
+    top: 50%;
+    left: 100%;
+    padding-left: 9px;
+    transform: translateY(-50%);
+
+    /*    &::after {
+        border-right: 9px solid #1a2f58;
+        border-top: 9px solid transparent;
+        border-bottom: 9px solid transparent;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+    } */
+}
+
+.searchBar .tooltipBubble {
+    border-radius: 50px;
+}

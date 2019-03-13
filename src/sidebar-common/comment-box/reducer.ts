@@ -10,6 +10,8 @@ export const defaultState: State = {
     commentText: '',
     tags: [],
     initTagSuggestions: [],
+    isCommentBookmarked: false,
+    isCommentSaved: false,
 }
 
 const setShowCommentBox = (state: State, showCommentBox: boolean) => ({
@@ -81,6 +83,19 @@ const deleteTag = (state: State, tag: string) => {
     }
 }
 
+export const setIsCommentBookmarked = (
+    state: State,
+    isCommentBookmarked: boolean,
+) => ({
+    ...state,
+    isCommentBookmarked,
+})
+
+export const setIsCommentSaved = (state: State, isCommentSaved: boolean) => ({
+    ...state,
+    isCommentSaved,
+})
+
 export default createReducer<State>(on => {
     on(actions.setShowCommentBox, setShowCommentBox)
     on(actions.setAnchor, setAnchor)
@@ -89,4 +104,6 @@ export default createReducer<State>(on => {
     on(actions.setInitTagSuggestions, setInitTagSuggestions)
     on(actions.addTag, addTag)
     on(actions.deleteTag, deleteTag)
+    on(actions.setIsCommentBookmarked, setIsCommentBookmarked)
+    on(actions.setIsCommentSaved, setIsCommentSaved)
 }, defaultState)

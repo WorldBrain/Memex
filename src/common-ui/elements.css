@@ -1,12 +1,23 @@
+@value colors: './colors.css';
+@value color1, color3, color6, color11 from colors;
+
+/* FONTs */
+
+.fontFamily {
+    font-family: 'Inter';
+}
+
 /* Tag Pill */
 
 .tagPill {
     composes: lightBlueBackground from './colors.css';
-    color: white;
     padding: 2px 9px 3px 9px;
     border-radius: 3px;
-    font-size: 12px;
-    font-weight: 300;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    height: 18px;
+    color: white;
     margin-right: 3px;
     display: flex;
     align-items: center;
@@ -61,4 +72,69 @@
     padding: 0.5em 0.7em;
     border-radius: 3px;
     font-weight: 600;
+}
+
+/* TextAreas for Edits */
+
+.TextArea {
+    composes: editFields from './colors.css';
+    background-color: #f7f7f7;
+    box-sizing: border-box;
+    resize: vertical;
+    font-weight: 400;
+    font-size: 14px;
+    color: #222;
+    font-family: 'Inter';
+    border: 1px solid #d2d2d2;
+    border-radius: 3px;
+    padding: 10px 7px;
+    margin: 5px 5px 0px 5px;
+
+     &::placeholder {
+        color: #888;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+/* ANNOTATION CARDS */
+
+.annotationCard {
+    border-radius: 0px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    transition: background 120ms ease-in 0s;
+
+    &:hover {
+        transition: background 120ms ease-in 0s;
+        background-color: rgba(55, 53, 47, 0.03);
+    }
+}
+
+/* SEARCH BOXES */
+
+.filterText {
+    font-weight: 600;
+    composes: darkBlue from './colors.css';
+    composes: nakedButton;
+    display: inline-block;
+}
+
+.searchField {
+    background-color: color11;
+    color: color1;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 400;
+
+    &::placeholder {
+        color: color3;
+        font-style: normal;
+    }
+
+    &:focus {
+        outline: none;
+        border: none;
+    }
 }

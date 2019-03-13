@@ -3,7 +3,8 @@ import cx from 'classnames'
 
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 
-const styles = require('./annotation-highlight.css')
+const localStyles = require('./truncated-text-renderer.css')
+const styles = require('../annotation-box/annotation-box-container.css')
 
 interface Props {
     anchor: Anchor
@@ -53,19 +54,17 @@ class AnnotationHighlight extends React.Component<Props, State> {
         const { truncateHighlight } = this.state
 
         return (
-            <div className={styles.highlighted}>
+            <div className={styles.highlight}>
                 <div className={styles.newAnnotation}>New Annotation</div>
-                <div className={styles.highlightedText}>
-                    "{this._getHighlightText()}"
+                <span className={styles.highlightText}>
+                    {this._getHighlightText()}
                     {this._isHighlightLong() && (
                         <button
-                            className={cx(styles.showMoreBtn, {
-                                [styles.rotated]: !truncateHighlight,
-                            })}
+                            className={localStyles.showMoreBtn}
                             onClick={this._toggleHighlightTruncation}
                         />
                     )}
-                </div>
+                </span>
             </div>
         )
     }
