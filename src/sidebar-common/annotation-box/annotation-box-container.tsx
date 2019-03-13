@@ -28,11 +28,13 @@ interface OwnProps {
     body?: string
     comment?: string
     tags: string[]
+    hasBookmark: boolean
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleMouseEnter?: (e: Event) => void
     handleMouseLeave?: (e: Event) => void
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
+    handleBookmarkToggle: (url: string) => void
 }
 
 interface DispatchProps {
@@ -179,6 +181,10 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this.setState({ mode: 'default' })
     }
 
+    private handleBookmarkToggle = () => {
+        this.props.handleBookmarkToggle(this.props.url)
+    }
+
     private _setBoxRef = (ref: HTMLDivElement) => {
         this._boxRef = ref
     }
@@ -237,6 +243,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         tags={this.props.tags}
                         isEdited={this.isEdited}
                         timestamp={timestamp}
+                        hasBookmark={this.props.hasBookmark}
                         handleGoToAnnotation={this.props.handleGoToAnnotation}
                         handleDeleteAnnotation={this._handleDeleteAnnotation}
                         handleCancelOperation={this._handleCancelOperation}
@@ -245,6 +252,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         trashIconClickHandler={this._handleTrashIconClick}
                         shareIconClickHandler={this._handleShareIconClick}
                         getTruncatedTextObject={this._getTruncatedTextObject}
+                        handleBookmarkToggle={this.handleBookmarkToggle}
                     />
                 ) : (
                     <EditModeContent

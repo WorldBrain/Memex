@@ -25,6 +25,7 @@ interface OwnProps {
 interface DispatchProps {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
+    handleBookmarkToggle: (url: string) => void
 }
 
 interface StateProps {}
@@ -123,6 +124,24 @@ class AnnotationList extends Component<Props, State> {
         })
     }
 
+    private handleBookmarkToggle = (url: string) => {
+        this.props.handleBookmarkToggle(url)
+
+        const { annotations } = this.state
+
+        const index = annotations.findIndex(annot => annot.url === url)
+        const annotation: Annotation = annotations[index]
+        const newAnnotations: Annotation[] = [
+            ...annotations.slice(0, index),
+            { ...annotation, hasBookmark: !annotation.hasBookmark },
+            ...annotations.slice(index + 1),
+        ]
+
+        this.setState({
+            annotations: newAnnotations,
+        })
+    }
+
     private handleGoToAnnotation = (annotation: Annotation) => (
         e: React.MouseEvent<HTMLElement>,
     ) => {
@@ -140,6 +159,7 @@ class AnnotationList extends Component<Props, State> {
                 handleGoToAnnotation={this.handleGoToAnnotation(annot)}
                 handleDeleteAnnotation={this.handleDeleteAnnotation}
                 handleEditAnnotation={this.handleEditAnnotation}
+                handleBookmarkToggle={this.handleBookmarkToggle}
                 {...annot}
             />
         ))
@@ -185,6 +205,7 @@ const mapDispatchToProps: MapDispatchToProps<
     handleEditAnnotation: (url, comment, tags) =>
         dispatch(actions.editAnnotation(url, comment, tags)),
     handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
+    handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
 })
 
 export default connect(

@@ -237,3 +237,23 @@ export const checkAndSetCongratsMessage: () => Thunk = () => async (
         dispatch(setShowCongratsMessage(false))
     }
 }
+
+export const toggleBookmark: (url: string) => Thunk = url => async (
+    dispatch,
+    getState,
+) => {
+    const state = getState()
+    const annotationsManager = selectors.annotationsManager(state)
+    const annotations = selectors.annotations(state)
+
+    await annotationsManager.toggleBookmark(url)
+
+    const index = annotations.findIndex(annot => annot.url === url)
+    const annotation: Annotation = annotations[index]
+    const newAnnotations: Annotation[] = [
+        ...annotations.slice(0, index),
+        { ...annotation, hasBookmark: !annotation.hasBookmark },
+        ...annotations.slice(index + 1),
+    ]
+    dispatch(setAnnotations(newAnnotations))
+}

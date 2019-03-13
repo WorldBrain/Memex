@@ -27,7 +27,7 @@ export interface Annotation {
     createdWhen: number // Since backend returns number and not the actual date.
     lastEdited: number | null // Since backend returns number/null and not the actual date.
     tags: string[]
-    isBookmarked: boolean
+    hasBookmark: boolean
 }
 
 export default interface State {

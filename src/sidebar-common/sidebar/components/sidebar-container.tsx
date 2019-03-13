@@ -33,6 +33,7 @@ interface DispatchProps {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
     handleScrollPagination: () => void
+    handleBookmarkToggle: (url: string) => void
 }
 
 interface OwnProps {
@@ -115,43 +116,36 @@ class SidebarContainer extends React.Component<Props> {
         } = this.props
 
         return (
-            <React.Fragment>
-                {isOpen && (
-                    <Sidebar
-                        env={env}
-                        isOpen={isOpen}
-                        isLoading={isLoading}
-                        // annotations={
-                        //     sortAnnotationsByPosition
-                        //         ? sortAnnotationsByPosition(annotations)
-                        //         : annotations
-                        // }
-                        annotations={annotations}
-                        activeAnnotationUrl={activeAnnotationUrl}
-                        hoverAnnotationUrl={hoverAnnotationUrl}
-                        showCommentBox={showCommentBox}
-                        showCongratsMessage={showCongratsMessage && !isLoading}
-                        handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        closeSidebar={this._closeSidebar}
-                        handleGoToAnnotation={this._handleGoToAnnotation}
-                        handleAnnotationBoxMouseEnter={
-                            this._handleAnnotationBoxMouseEnter
-                        }
-                        handleAnnotationBoxMouseLeave={
-                            this._handleAnnotationBoxMouseLeave
-                        }
-                        handleEditAnnotation={this.props.handleEditAnnotation}
-                        handleDeleteAnnotation={
-                            this.props.handleDeleteAnnotation
-                        }
-                        handleScrollPagination={
-                            this.props.handleScrollPagination
-                        }
-                        needsWaypoint={this.props.needsWaypoint}
-                        appendLoader={this.props.appendLoader}
-                    />
-                )}
-            </React.Fragment>
+            <Sidebar
+                env={env}
+                isOpen={isOpen}
+                isLoading={isLoading}
+                // annotations={
+                //     sortAnnotationsByPosition
+                //         ? sortAnnotationsByPosition(annotations)
+                //         : annotations
+                // }
+                annotations={annotations}
+                activeAnnotationUrl={activeAnnotationUrl}
+                hoverAnnotationUrl={hoverAnnotationUrl}
+                showCommentBox={showCommentBox}
+                showCongratsMessage={showCongratsMessage && !isLoading}
+                handleAddCommentBtnClick={handleAddCommentBtnClick}
+                closeSidebar={this._closeSidebar}
+                handleGoToAnnotation={this._handleGoToAnnotation}
+                handleAnnotationBoxMouseEnter={
+                    this._handleAnnotationBoxMouseEnter
+                }
+                handleAnnotationBoxMouseLeave={
+                    this._handleAnnotationBoxMouseLeave
+                }
+                handleEditAnnotation={this.props.handleEditAnnotation}
+                handleDeleteAnnotation={this.props.handleDeleteAnnotation}
+                handleScrollPagination={this.props.handleScrollPagination}
+                needsWaypoint={this.props.needsWaypoint}
+                appendLoader={this.props.appendLoader}
+                handleBookmarkToggle={this.props.handleBookmarkToggle}
+            />
         )
     }
 }
@@ -198,6 +192,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
         dispatch(actions.editAnnotation(url, comment, tags)),
     handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
     handleScrollPagination: () => dispatch(actions.fetchMoreAnnotations()),
+    handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
 })
 
 export default connect(
