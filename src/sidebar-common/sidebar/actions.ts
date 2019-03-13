@@ -127,7 +127,11 @@ export const createAnnotation: (
     body: string,
     comment: string,
     tags: string[],
-) => Thunk = (anchor, body, comment, tags) => async (dispatch, getState) => {
+    bookmarked?: boolean,
+) => Thunk = (anchor, body, comment, tags, bookmarked) => async (
+    dispatch,
+    getState,
+) => {
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const { url, title } = selectors.page(state)
@@ -140,6 +144,7 @@ export const createAnnotation: (
             comment,
             anchor,
             tags,
+            bookmarked,
         })
 
         // Re-fetch annotations.
