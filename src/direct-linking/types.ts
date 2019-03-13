@@ -9,6 +9,7 @@ export interface Annotation {
     comment?: string
     _body_terms?: string[]
     _comment_terms?: string[]
+    hasBookmark?: boolean
 }
 
 export interface AnnotListEntry {
@@ -31,6 +32,10 @@ export interface StoredAnnotationRequestMap {
     [tabId: string]: StoredAnnotationRequest
 }
 
-export type AnnotationSender = (
-    { annotation, tabId }: { annotation: Annotation; tabId: number },
-) => void
+export type AnnotationSender = ({
+    annotation,
+    tabId,
+}: {
+    annotation: Annotation
+    tabId: number
+}) => void

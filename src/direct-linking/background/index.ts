@@ -134,21 +134,28 @@ export default class DirectLinkingBackground {
             },
         )
 
-        return annotations.map(
-            ({ createdWhen, lastEdited, ...annotation }) => ({
-                ...annotation,
-                createdWhen: createdWhen.getTime(),
-                lastEdited:
-                    lastEdited && lastEdited instanceof Date
-                        ? lastEdited.getTime()
-                        : undefined,
-            }),
+        const annotResults = await Promise.all(
+            annotations.map(
+                async ({ createdWhen, lastEdited, ...annotation }) => ({
+                    ...annotation,
+                    hasBookmark: await this.annotationStorage.annotHasBookmark({
+                        url: annotation.url,
+                    }),
+                    createdWhen: createdWhen.getTime(),
+                    lastEdited:
+                        lastEdited && lastEdited instanceof Date
+                            ? lastEdited.getTime()
+                            : undefined,
+                }),
+            ),
         )
+
+        return annotResults
     }
 
     async createAnnotation(
         { tab }: TabArg,
-        { url, title, comment, body, selector },
+        { url, title, comment, body, selector, bookmarked },
     ) {
         const pageUrl = url == null ? tab.url : url
         const pageTitle = title == null ? tab.title : title
@@ -162,6 +169,10 @@ export default class DirectLinkingBackground {
             body,
             selector,
         })
+
+        if (bookmarked) {
+            await this.toggleAnnotBookmark({ tab }, { url: uniqueUrl })
+        }
 
         return uniqueUrl
     }
