@@ -20,6 +20,10 @@ export default class AnnotationsManager {
     )
     private readonly _deleteAnnotationRPC = remoteFunction('deleteAnnotation')
 
+    private readonly bookmarkAnnotationRPC = remoteFunction(
+        'toggleAnnotBookmark',
+    )
+
     public createAnnotation = async ({
         url,
         title,
@@ -27,6 +31,7 @@ export default class AnnotationsManager {
         comment,
         anchor,
         tags,
+        bookmarked,
     }: {
         url: string
         title: string
@@ -34,6 +39,7 @@ export default class AnnotationsManager {
         comment: string
         anchor: Anchor
         tags: string[]
+        bookmarked?: boolean
     }) => {
         this._processEventRPC({ type: EVENT_NAMES.CREATE_ANNOTATION })
 
@@ -44,6 +50,7 @@ export default class AnnotationsManager {
             body,
             comment,
             selector: anchor,
+            bookmarked,
         })
 
         // Write tags to database.
@@ -109,6 +116,10 @@ export default class AnnotationsManager {
     public deleteAnnotation = async (url: string) => {
         await this._processEventRPC({ type: EVENT_NAMES.DELETE_ANNOTATION })
         await this._deleteAnnotationRPC(url)
+    }
+
+    public toggleBookmark = async (url: string) => {
+        return this.bookmarkAnnotationRPC({ url })
     }
 
     private _getTagArrays: (
