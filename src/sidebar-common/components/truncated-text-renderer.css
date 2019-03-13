@@ -7,6 +7,7 @@
     background: transparent;
     font-size: 12px;
     margin-top: -1px;
+    cursor: pointer;
 
     &.rotated {
         background-color: transparent;
