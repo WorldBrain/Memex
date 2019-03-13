@@ -34,6 +34,7 @@ interface Props {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
+    handleBookmarkToggle: (url: string) => void
 }
 
 interface State {
@@ -68,6 +69,7 @@ class Sidebar extends React.Component<Props, State> {
                 handleMouseEnter={this.props.handleAnnotationBoxMouseEnter(
                     annot,
                 )}
+                handleBookmarkToggle={this.props.handleBookmarkToggle}
             />
         ))
 

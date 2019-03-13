@@ -11,6 +11,7 @@ interface Props {
     tags: string[]
     isEdited: boolean
     timestamp: string
+    hasBookmark: boolean
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleDeleteAnnotation: () => void
     handleCancelOperation: () => void
@@ -18,6 +19,7 @@ interface Props {
     trashIconClickHandler: () => void
     shareIconClickHandler: () => void
     handleTagClick: (tag: string) => void
+    handleBookmarkToggle: () => void
     getTruncatedTextObject: (
         text: string,
     ) => {
@@ -45,12 +47,14 @@ const DefaultDeleteModeContent = (props: Props) => (
             mode={props.mode}
             isEdited={props.isEdited}
             timestamp={props.timestamp}
+            hasBookmark={props.hasBookmark}
             displayGoToAnnotation={props.body && props.env === 'overview'}
             handleGoToAnnotation={props.handleGoToAnnotation}
             handleDeleteAnnotation={props.handleDeleteAnnotation}
             handleCancelDeletion={props.handleCancelOperation}
             editIconClickHandler={props.editIconClickHandler}
             trashIconClickHandler={props.trashIconClickHandler}
+            handleBookmarkToggle={props.handleBookmarkToggle}
         />
     </React.Fragment>
 )

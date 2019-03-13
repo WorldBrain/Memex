@@ -9,6 +9,7 @@ interface Props {
     mode: 'default' | 'edit' | 'delete'
     isEdited?: boolean
     timestamp?: string
+    hasBookmark?: boolean
     displayGoToAnnotation?: boolean
     handleGoToAnnotation?: (e: React.MouseEvent<HTMLElement>) => void
     handleEditAnnotation?: () => void
@@ -17,6 +18,7 @@ interface Props {
     handleCancelDeletion?: () => void
     editIconClickHandler?: () => void
     trashIconClickHandler?: () => void
+    handleBookmarkToggle?: () => void
 }
 
 /* tslint:disable-next-line variable-name */
@@ -44,10 +46,12 @@ const AllModesFooter = (props: Props) => (
             <DefaultFooter
                 isEdited={props.isEdited}
                 timestamp={props.timestamp}
+                hasBookmark={props.hasBookmark}
                 displayGoToAnnotation={props.displayGoToAnnotation}
                 goToAnnotationHandler={props.handleGoToAnnotation}
                 editIconClickHandler={props.editIconClickHandler}
                 trashIconClickHandler={props.trashIconClickHandler}
+                handleBookmarkToggle={props.handleBookmarkToggle}
             />
         )}
     </div>

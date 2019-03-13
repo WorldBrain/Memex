@@ -80,3 +80,14 @@
     background-position-y: 4px;
     background-size: 17px;
 }
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+    opacity: 0.8;
+    background-size: 19px;
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+    background-size: 19px;
+}
