@@ -1,10 +1,18 @@
+@value colors: '../../common-ui/colors.css';
+@value color4 from colors;
+
 body {
     margin: 0;
     padding: 8px;
     width: 280px;
     font-size: 12px;
-    font-weight: 200;
+    font-weight: 600;
     background: #fff !important; /* stylelint-disable-line declaration-no-important */
+    color: color4;
+
+    & * {
+        font-family: 'Inter';
+    }
 }
 
 hr {
@@ -14,6 +22,18 @@ hr {
     margin-bottom: 7px;
     padding: 0;
     border-bottom: 1px solid rgb(229, 229, 229);
+}
+
+.item {
+    z-index: 1000;
+}
+
+.item:hover {
+    background: #efefef;
+
+    &:disabled {
+        background: none;
+    }
 }
 
 .popup {
@@ -64,7 +84,6 @@ hr {
 }
 
 .buttonContainer {
-    float: left;
-    margin-top: 1px;
-    margin-left: 22px;
+    display: flex;
+    justify-content: flex-end;
 }

@@ -45,7 +45,7 @@
     max-width: 800px;
     height: 40px;
     border-radius: 35px;
-    border-radius: 43.5px;
+    border-radius: 3px;
 
     @media (max-width: 724px) {
         margin: 0 8px;
@@ -55,7 +55,7 @@
 .query {
     composes: searchField from '../../../common-ui/elements.css';
     flex: 1;
-    background-image: url('/img/search-icon.svg');
+    background-image: url('/img/searchIcon.svg');
     background-repeat: no-repeat;
     background-size: 17px;
     background-position: 3px;

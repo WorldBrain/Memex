@@ -1,13 +1,20 @@
 .itemBtnBlacklisted {
-    background-image: url('/img/ignore_active.svg');
+    background-image: url('/img/blockActive.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.8;
 }
 
 .blacklist {
-    background-image: url('/img/ignore_blue.svg');
+    background-image: url('/img/block.svg');
     background-repeat: no-repeat;
     background-size: 20px;
-    opacity: 0.6;
+    opacity: 0.8;
+}
+
+.undo {
+	composes: CTA from '../../../common-ui/elements.css';
+	font-size: 12px;
+	padding: 0.3em 0.6em;
+	margin-left: 10px;
 }

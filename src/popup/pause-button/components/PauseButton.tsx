@@ -24,9 +24,8 @@ export default function PauseButton({
     children,
 }: Props) {
     return (
-        <div className={cx(buttonStyles.item, buttonStyles.itemDropdown)}>
+        <div onClick={togglePause} className={cx(styles.item, buttonStyles.item, buttonStyles.itemDropdown)}>
             <div
-                onClick={togglePause}
                 className={cx(getIconStyles(isPaused))}
             />
             {children}

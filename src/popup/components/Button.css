@@ -1,3 +1,6 @@
+@value colors: '../../common-ui/colors.css';
+@value color4, color5, color6 from colors;
+
 /* stylelint-disable declaration-no-important */
 
 .link {
@@ -9,9 +12,9 @@
 }
 
 .item {
-    color: #444;
     text-decoration: none;
     display: flex;
+    color: color4;
     align-items: center;
     cursor: default;
     font-weight: 400;
@@ -20,8 +23,9 @@
 
     &:hover,
     &:focus {
-        color: #3eb995;
         outline: 0;
+        color: color5;
+        font-weight: 500;
     }
 }
 
@@ -32,19 +36,21 @@
     cursor: pointer;
     font-weight: 400;
     color: #555;
+    color: color4;
     padding-left: 20px;
     background: none !important;
 
     &:disabled {
-        color: rgb(156, 156, 156);
+        color: color6;
         cursor: unset;
         background: none;
     }
 
     &:hover,
     &:focus {
-        color: rgb(62, 185, 149);
         outline: 0;
+        color: color5;
+        font-weight: 500;
     }
 }
 
@@ -78,25 +84,17 @@
 }
 
 .button {
-    float: right;
-    border: none;
-    background: none;
-    padding: 0;
+    composes: nakedSquareButton from '../../common-ui/elements.css';
     cursor: pointer;
-    font-weight: 100;
     margin-right: 6px;
     margin-bottom: 6px;
     outline: 0;
-    color: #909090;
     text-decoration: none;
+    opacity: 0.8;
 
-    i {
-        font-size: 24px;
+    &:hover {
+        opacity: 1;
     }
-}
-
-.settingsIcon {
-    margin-left: -2px;
 }
 
 .icon {
@@ -104,11 +102,12 @@
 }
 
 .customIcon {
-    width: 30px;
-    height: 29px;
-    margin-right: 5px;
+    width: 25px;
+    height: 25px;
+    align-self: center;
+    margin-right: 10px;
     outline: 0;
-    margin-bottom: -10px;
+    background-position: center;
 }
 
 .settings {
@@ -122,11 +121,11 @@
     background-image: url('/img/help.svg');
     background-repeat: no-repeat;
     background-size: 20px;
-    margin-top: 0px;
 }
 
 .buttonIcons {
     background-size: 20px;
+    margin-right: 0px;
 }
 
 .linkIcon {
@@ -134,39 +133,42 @@
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
-    opacity: 0.6;
-    margin-top: 6px;
+    opacity: 0.8;
 }
 
 .sidebarIcon {
-    background-image: url('/img/sidebarIcon_blue.svg');
+    background-image: url('/img/ribbonOn.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     float: left;
-    opacity: 0.6;
-    margin-top: 8px;
+    opacity: 0.8;
 }
 
 .highlighterIcon {
-    background-image: url('/img/tooltipIcon_blue.svg');
+    background-image: url('/img/tooltip.svg');
     background-repeat: no-repeat;
     background-size: 24px;
     float: left;
-    margin-top: 6px;
-    opacity: 0.6;
-    padding-right: 2px;
-    margin-left: -2px;
+    opacity: 0.8;
 }
 
 .searchIcon {
-    background-image: url('/img/search-icon.svg');
+    background-image: url('/img/searchIcon.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    opacity: 0.8;
+}
+
+
+.openIcon {
+    background-image: url('/img/open.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.8;
 }
 
 .badge {
-    background-color: #c12908;
+    background-color: color12;
     color: white;
     width: 15px;
     height: 15px;

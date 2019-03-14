@@ -140,29 +140,53 @@ class PopupContainer extends PureComponent<Props> {
 
         return (
             <React.Fragment>
+                <div className={styles.item}>
                 <Search
                     searchValue={this.props.searchValue}
                     onSearchChange={this.props.handleSearchChange}
                     onSearchEnter={this.onSearchEnter}
                 />
+                </div>
+                <div className={styles.item}>
                 <LinkButton
-                    btnClass={btnStyles.searchIcon}
+                    btnClass={btnStyles.openIcon}
                     href={`${constants.OPTIONS_URL}#/overview`}
                 >
                     Go to Dashboard
                 </LinkButton>
+                </div>
                 <hr />
-                <BookmarkButton closePopup={this.closePopup} />
-                <TagsButton />
-                <CollectionsButton />
+                <div className={styles.item}>
+                    <BookmarkButton closePopup={this.closePopup} />
+                </div>
+                
+                <div className={styles.item}>
+                    <TagsButton />
+                </div>
+
+                <div className={styles.item}>
+                    <CollectionsButton />
+                </div>
                 <hr />
+                
+                <div className={styles.item}>
                 <HistoryPauser />
+                </div>
+                
+                <div className={styles.item}>
                 <BlacklistButton />
+                </div>
                 <hr />
-                <SidebarButton closePopup={this.closePopup} />
-                <TooltipButton closePopup={this.closePopup} />
+
+                <div className={styles.item}>
+                    <SidebarButton closePopup={this.closePopup} />
+                </div>
+
+                <div className={styles.item}>
+                    <TooltipButton closePopup={this.closePopup} />
+                </div>
+
                 <hr />
-                <UpgradeButton />
                 <div className={styles.buttonContainer}>
                     <ButtonIcon
                         href={`${constants.OPTIONS_URL}#/settings`}

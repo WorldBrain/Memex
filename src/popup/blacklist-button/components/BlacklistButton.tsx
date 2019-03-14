@@ -38,7 +38,11 @@ class BookmarkButton extends PureComponent<Props> {
                 itemClass={styles.itemBlacklisted}
                 btnClass={styles.itemBtnBlacklisted}
             >
-                This Page is Blacklisted. Undo>>
+                Page on your ignore list. 
+
+                <span className={styles.undo}>
+                Undo
+                </span>
             </LinkButton>
         )
     }

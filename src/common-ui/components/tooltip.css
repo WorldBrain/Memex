@@ -60,8 +60,8 @@
     } */
 
     &.tooltipBubble {
-        right: 35px;
-        top: -13px;
+        right: 40px;
+        top: -17px;
     }
 }
 
@@ -82,5 +82,5 @@
 }
 
 .searchBar .tooltipBubble {
-    border-radius: 50px;
+    border-radius: 3px;
 }

@@ -1,8 +1,11 @@
+@value colors: '../../../common-ui/colors.css';
+@value color7 from colors;
+
 .addToList {
-    background-image: url('/img/add_collections_blue.svg');
+    background-image: url('/img/collections_add.svg');
     background-repeat: no-repeat;
     background-size: 20px;
-    opacity: 0.6;
+    opacity: 0.8;
     float: left;
 }
 
@@ -17,15 +20,19 @@
 
 .buttonContainer {
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .allTabs {
+    composes: nakedSquareButton from '../../../common-ui/elements.css';
     background-image: url('/img/multiedit.svg');
     background-repeat: no-repeat;
     margin-left: -8px;
-    background-size: 22px;
+    background-size: 18px;
+    opacity: 0.8;
 
     &:hover {
-        background-image: url('/img/multiedit_green.svg');
+        opacity: 1;
     }
 }

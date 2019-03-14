@@ -33,7 +33,7 @@ class TooltipButton extends PureComponent<Props> {
 
     render() {
         return (
-            <div>
+            <div className={styles.switchBlocks}>
                 <span>
                     <Button
                         onClick={this.props.openSidebar}
