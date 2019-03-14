@@ -17,7 +17,6 @@ const Tooltip = ({
     state,
     tooltipComponent,
     closeTooltip,
-    openSettings,
 }) => (
     <div
         className={deriveTooltipClass(state)}
@@ -25,7 +24,7 @@ const Tooltip = ({
         id="memex-tooltip"
     >
         <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
-        {_renderButtons({ closeTooltip, openSettings })}
+        {_renderButtons({ closeTooltip, state})}
     </div>
 )
 
@@ -35,18 +34,20 @@ Tooltip.propTypes = {
     state: PropTypes.string.isRequired,
     tooltipComponent: PropTypes.element.isRequired,
     closeTooltip: PropTypes.func.isRequired,
-    openSettings: PropTypes.func.isRequired,
 }
 
 export default Tooltip
 
-export function _renderButtons({ closeTooltip, openSettings }) {
+export function _renderButtons({ closeTooltip, state}) {
     return (
          <ButtonTooltip
             tooltipText="Close. Disable in ribbon (R)"
             position="rightContentTooltip"
         >
-        <span className={styles.buttons}>
+        <span className={classNames(styles.buttons, {
+            [styles.noShow] : state === 'running',
+            [styles.noShow] : state === 'copied',
+        })}>
             <a className={styles.imgCross} onClick={closeTooltip}/>
         </span>
         </ButtonTooltip>
@@ -55,5 +56,5 @@ export function _renderButtons({ closeTooltip, openSettings }) {
 
 _renderButtons.propTypes = {
     closeTooltip: PropTypes.func.isRequired,
-    openSettings: PropTypes.func,
+    state: PropTypes.string,
 }

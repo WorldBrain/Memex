@@ -1,3 +1,6 @@
+@value colors: '../../common-ui/colors.css';
+@value color4, color6 from colors;
+
 .tooltip {
     composes: toolTips from '../../common-ui/elements.css';
     display: flex;
@@ -7,8 +10,9 @@
     font-size: 13px;
     background-color: #fff;
     height: 40px;
-    width: 70px;
-    padding: 0px 0px;
+    width: max-content;
+    min-width: 50px;
+    padding: 2px 6px;
     border-radius: 3px;
     text-align: center;
     line-height: 1.2em;
@@ -27,7 +31,7 @@
 .tooltip::after {
     box-sizing: content-box;
     bottom: 84%;
-    left: 41.5%;
+    left: calc(50% - 5px);
     border: solid transparent;
     content: ' ';
     height: 10px;
@@ -59,23 +63,23 @@
 }
 
 .tooltip.stateCopied {
-    animation: expand-width 0.1s ease-in 0.2s;
+    animation: expand-width 0.05s ease-in;
     animation-fill-mode: forwards;
 
     &::after {
-        left: 48%;
+        left: 50%;
     }
 }
 
 .tooltip.statePristine {
     border-radius: 3px;
-    width: 115px;
+    width: 105px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 
     &::after {
-        left: 45%;
+        left: 50%;
         top: -6px;
     }
 }
@@ -104,12 +108,14 @@
 .createButtons {
     z-index: 10;
     width: 80px;
+    height: 100%;
     margin-left: 10px;
     display: grid;
     justify-content: flex-start;
     align-items: center;
     column-gap: 8px;
     grid-auto-flow: column;
+    animation: slideIn 0.05s ease-in-out;
 
     & div {
         cursor: pointer;
@@ -148,8 +154,9 @@
 }
 
 .progressIndicator {
-    width: 60%;
+    width: 100%;
     animation: slideIn 0.2s ease-in;
+    height: 100%;
 }
 
 .errorMessage {
@@ -169,22 +176,25 @@
 
 .doneComponent {
     width: 70%;
-    animation: slideIn 0.2s ease-in;
 
     & .check {
-        width: 25px;
-        height: auto;
+        width: 30px;
+        height: 30px;
     }
 }
 
 .copiedMessage {
-    width: 88%;
-    animation: slideIn 0.2s ease-in;
+    width: max-content;
+    height: 100%;
 
     & .check {
-        width: 25px;
-        height: auto;
-        animation: slideRight 0.2s ease-in 0.2s;
+        background-image: url('/img/checked_green.svg');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 28px;
+        width: 30px;
+        height: 30px;
+        animation: slideIn 0.05s ease-in-out 0.3s;
         animation-fill-mode: both;
         margin-left: 8px;
     }
@@ -193,30 +203,28 @@
         height: 35px;
         padding-left: 4px;
         padding-top: 7px;
-        animation: fadeInRight 0.2s ease-in 0.3s;
+        animation: slideIn 0.05s ease-in-out 0.3s;
         animation-fill-mode: both;
         text-align: left;
         text-shadow: none;
         margin-left: 3px;
-
-        & .greenText {
-            margin: 0;
-            padding: 0;
-            font-size: 12px;
-            color: #3db994;
-            font-weight: 800;
-            line-height: 1.3;
-        }
-
-        & .greyText {
-            margin: 0;
-            padding: 0;
-            font-size: 10px;
-            color: #a2a2a2;
-            font-weight: 400;
-            line-height: 1.3;
-        }
     }
+}
+
+.greenText {
+    color: color4;
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.greyText {
+    margin: 0;
+    padding: 0;
+    font-size: 11px;
+    color: color6;
+    font-weight: 400;
 }
 
 /* Right side buttons */
@@ -231,6 +239,11 @@
     right: 6px;
     top: -10px;
     z-index: 100001;
+    animation: slideIn 0.05s ease-in-out;
+}
+
+.noShow {
+    display: none;
 }
 
 .tooltipIcon {
@@ -269,7 +282,7 @@
     width: 17px;
     height: 17px;
     background-repeat: no-repeat;
-    margin-right: 7px;
+    margin-right: 2px;
     background-position: center;
     background-size: 16px 16px;
 }
@@ -279,9 +292,8 @@
     display: inline-block;
     position: relative;
     width: 40px;
-    height: 30px;
-    margin-left: -3px;
-    margin-top: 3px;
+    height: 100%;
+    margin-top: 14px;
 
     & div {
         position: absolute;
@@ -380,7 +392,7 @@
 
 @keyframes expand-width {
     0% {
-        width: 90px;
+        width: 115px;
     }
 
     100% {
@@ -390,12 +402,24 @@
 
 @keyframes fadeInRight {
     0% {
-        transform: translateX(50px);
+        transform: translateX(20px);
         opacity: 0;
     }
 
     100% {
         transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        transform: translateY(5px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
         opacity: 1;
     }
 }

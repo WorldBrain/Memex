@@ -32,13 +32,13 @@
 }
 
 .tooltipRightContentTooltip {
-    left: 6px;
+    left: 8px;
     top: -10px;
     justify-content: flex-start;
 }
 
 .tooltipBottom {
-    transform: translateY(35px);
+    transform: translateY(38px);
 }
 
 .tooltipLeft {
