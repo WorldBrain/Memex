@@ -7,12 +7,9 @@ import { LoggableTabChecker, VisitInteractionUpdater } from './types'
  * Combines all "loggable" conditions for logging on given tab data to determine
  * whether or not a tab should be logged.
  */
-export const shouldLogTab: LoggableTabChecker = async function({
-    url,
-    incognito,
-}) {
+export const shouldLogTab: LoggableTabChecker = async function({ url }) {
     // Short-circuit before async logic, if possible
-    if (incognito || !url || !isLoggable({ url })) {
+    if (!url || !isLoggable({ url })) {
         return false
     }
 
