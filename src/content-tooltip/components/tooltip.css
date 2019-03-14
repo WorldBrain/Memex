@@ -1,23 +1,22 @@
 .tooltip {
+    composes: toolTips from '../../common-ui/elements.css';
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     position: absolute;
     font-size: 13px;
     background-color: #fff;
-    color: #3eb995;
     height: 40px;
     width: 70px;
     padding: 0px 0px;
-    border-radius: 5px;
-    border: 1px solid #c2c2c2;
+    border-radius: 3px;
     text-align: center;
     line-height: 1.2em;
-    transform: translate(-45%, 45%);
+    transform: translate(-50%, 50%);
     z-index: 100000;
+    opacity: 1;
     box-sizing: content-box;
-    transition: all 0.15s ease-in;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+    transition: all 1s ease-in-out;
 
     & img {
         margin-bottom: 0px !important; /* stylelint-disable-line declaration-no-important */
@@ -35,7 +34,7 @@
     width: 10px;
     position: absolute;
     pointer-events: none;
-    border-color: #c2c2c2;
+    border-color: rgba(15, 15, 15, 0.2);
     border-width: 1px;
     border-bottom-color: transparent;
     border-left-color: transparent;
@@ -69,7 +68,11 @@
 }
 
 .tooltip.statePristine {
-    width: 110px;
+    border-radius: 3px;
+    width: 115px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
     &::after {
         left: 45%;
@@ -100,45 +103,48 @@
 
 .createButtons {
     z-index: 10;
-    width: 65%;
-    margin-left: 6px;
+    width: 80px;
+    margin-left: 10px;
+    display: grid;
+    justify-content: flex-start;
+    align-items: center;
+    column-gap: 8px;
+    grid-auto-flow: column;
 
     & div {
         cursor: pointer;
-        flex-basis: 50%;
         display: flex;
+        width: auto;
         flex-direction: row;
         align-items: center;
         justify-content: center;
-
-        & .annotateIcon {
-            background-image: url('/img/annotate.svg');
-            background-size: 24px;
-            background-repeat: no-repeat;
-            width: 25px;
-            height: 25px;
-            margin-top: 3px;
-            margin-right: -4px;
-
-            &:hover {
-                background-image: url('/img/annotate_hover.svg');
-            }
-        }
-
-        & .shareIcon {
-            background-image: url('/img/share.svg');
-            background-size: 23px;
-            background-repeat: no-repeat;
-            width: 25px;
-            height: 25px;
-            margin-top: 1px;
-            margin-right: -8px;
-
-            &:hover {
-                background-image: url('/img/share_hover.svg');
-            }
-        }
     }
+}
+
+.annotateIcon {
+        composes: nakedButton from '../../common-ui/elements.css';
+        padding: 3px;
+        background-image: url('/img/comment_add.svg');
+        background-size: 23px;
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 25px;
+        width: 25px;
+        margin-top: 0px;
+        margin-right: -4px;
+}
+
+.shareIcon {
+        composes: nakedButton from '../../common-ui/elements.css';
+        background-image: url('/img/share.svg');
+        padding: 3px;
+        background-size: 21px;
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 25px;
+        margin-top: 0px;
+        margin-right: 0px;
+        width: 25px;
 }
 
 .progressIndicator {
@@ -219,18 +225,12 @@
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    width: 13px;
-    height: 30px;
+    width: 20px;
+    height: 20px;
     position: absolute;
     right: 6px;
-    top: 5px;
+    top: -10px;
     z-index: 100001;
-    padding-left: 5px;
-
-    & .imgSettings {
-        width: 13px;
-        margin-top: 4px;
-    }
 }
 
 .tooltipIcon {
@@ -263,8 +263,15 @@
 }
 
 .imgCross {
-    width: 11px;
-    margin-top: 2px;
+    composes: nakedButton from '../../common-ui/elements.css';
+    background-image: url('/img/removeIcon.svg');
+    padding: 2px;
+    width: 17px;
+    height: 17px;
+    background-repeat: no-repeat;
+    margin-right: 7px;
+    background-position: center;
+    background-size: 16px 16px;
 }
 
 /* Loading CSS */

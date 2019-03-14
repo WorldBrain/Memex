@@ -11,8 +11,9 @@
     word-wrap: break-word;
     font-size: 14px;
     background-color: white;
-    min-height: 20px;
+    height: 30px;
     justify-content: space-between;
+    align-items: center;
 
     &:hover,
     &:focus,
@@ -23,6 +24,9 @@
 
     &.isNew {
         justify-content: flex-start;
+        align-items: center;
+        height: 45px;
+        padding: 0px 20px 0px 20px;
     }
 }
 
@@ -33,6 +37,7 @@
 .menuItemFocused {
     composes: selectedColor from '../../common-ui/colors.css';
     display: flex;
+    align-items: center;
 }
 
 .remove {
@@ -40,7 +45,7 @@
 }
 
 .menuItem i {
-    font-size: 18px;
+    font-size: 20px;
     float: right;
 }
 
@@ -104,7 +109,7 @@
     justify-content: space-between;
     padding: 12px 0px 5px 0px;
     border-radius: 3px 3px 0 0;
-    margin: 0px 20px 5px 20px;
+    margin: 0px 20px 0px 20px;
     border-bottom: 1px solid #eae9e9; /* MAN Manual Adjustment Needed */
     background-color: white;
 }
@@ -212,8 +217,8 @@
 }
 
 .isList {
-    font-size: 13px;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 500;
     color: black;
     padding: 0;
     background-color: transparent;

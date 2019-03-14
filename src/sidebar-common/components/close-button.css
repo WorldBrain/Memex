@@ -8,17 +8,14 @@
 }
 
 .closeIcon {
+    composes: nakedSquareButton from '../../common-ui/elements.css';
     background-image: url('/img/removeIcon.svg');
     background-size: 17px;
     display: block;
     cursor: pointer;
     background-repeat: no-repeat;
-    width: 25px;
-    height: 25px;
+    width: 22px;
+    height: 22px;
     background-position: center;
-    border-radius: 50%;
-
-    &:hover {
-        background-color: rgba(55, 53, 47, 0.2);
-    }
+    border-radius: 3px;
 }

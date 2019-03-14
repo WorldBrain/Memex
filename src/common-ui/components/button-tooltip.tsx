@@ -62,6 +62,8 @@ class ButtonTooltip extends React.Component<Props, State> {
                                 this.props.position === 'bottom',
                             [styles.tooltipTop]: 
                                 this.props.position === 'top',
+                            [styles.tooltipRightContentTooltip]:
+                                this.props.position === 'rightContentTooltip',
                         })}
                     >
                         <div className={styles.tooltipMessage}>

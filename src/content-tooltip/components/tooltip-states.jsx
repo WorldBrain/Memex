@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-
+import ButtonTooltip from '../../common-ui/components/button-tooltip'
 import styles from './tooltip.css'
 import { getExtURL } from '../utils'
 
@@ -12,6 +12,10 @@ const images = {
 
 export const InitialComponent = ({ createLink, createAnnotation }) => (
     <div className={styles.createButtons}>
+         <ButtonTooltip
+            tooltipText="Annotate (A)"
+            position="bottom"
+        >
         <div
             title={'Add note to highlight'}
             className={styles.annotateButton}
@@ -19,6 +23,11 @@ export const InitialComponent = ({ createLink, createAnnotation }) => (
         >
             <span className={styles.annotateIcon} />
         </div>
+        </ButtonTooltip>
+         <ButtonTooltip
+            tooltipText="Create Link (L)"
+            position="bottom"
+        >
         <div
             title={'Share a link to this highlight'}
             className={styles.linkButton}
@@ -26,6 +35,7 @@ export const InitialComponent = ({ createLink, createAnnotation }) => (
         >
             <span className={styles.shareIcon} />
         </div>
+        </ButtonTooltip>
     </div>
 )
 

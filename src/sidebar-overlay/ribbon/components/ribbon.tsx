@@ -156,8 +156,8 @@ class Ribbon extends Component<Props, State> {
                             <ButtonTooltip
                                 tooltipText={
                                     !this.props.isSidebarOpen
-                                        ? 'Open Sidebar'
-                                        : 'Close Sidebar'
+                                        ? 'Open Sidebar (R)'
+                                        : 'Close Sidebar (ESC)'
                                 }
                                 position="left"
                             >

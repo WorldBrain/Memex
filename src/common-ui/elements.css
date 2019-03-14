@@ -16,7 +16,7 @@
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.5px;
-    height: 18px;
+    height: 23px;
     color: white;
     margin-right: 3px;
     display: flex;
@@ -57,6 +57,11 @@
 
 .nakedButton {
     composes: nakedButton hoverColor from './colors.css';
+}
+
+.nakedSquareButton {
+    composes: nakedButton;
+    padding: 2px !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .cancelNaked {

@@ -7,7 +7,7 @@
     border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
     font-size: 14px;
-    min-height: 20px;
+    min-height: 30px;
     justify-content: space-between;
 
     &:hover,
@@ -19,6 +19,9 @@
 
     &.isNew {
         justify-content: flex-start;
+        align-items: center;
+        height: 45px;
+        padding: 0px 20px 0px 20px;
     }
 }
 

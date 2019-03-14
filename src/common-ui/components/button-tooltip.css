@@ -1,5 +1,7 @@
 .tooltip {
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .tooltipTrigger {
@@ -12,9 +14,8 @@
     border-radius: 5px;
     display: flex;
     flex-wrap: nowrap;
-    width: max-content;
+    min-width: max-content;
     align-items: center;
-    justify-content: flex-end;
     font-family: 'Inter';
 }
 
@@ -24,14 +25,24 @@
     transform: translateX(-50%);
 }
 
+.tooltipRight {
+    left: 40px;
+    top: 15px;
+    justify-content: flex-start;
+}
+
+.tooltipRightContentTooltip {
+    left: 6px;
+    top: -10px;
+    justify-content: flex-start;
+}
+
 .tooltipBottom {
-    top: 100%;
-    left: 50%;
-    padding-top: 9px;
-    transform: translateX(-50%);
+    transform: translateY(35px);
 }
 
 .tooltipLeft {
+    justify-content: flex-end;
     top: 2px;
     right: 35px;
 }
