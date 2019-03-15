@@ -2,6 +2,7 @@ import * as React from 'react'
 import cx from 'classnames'
 
 const styles = require('./default-footer.css')
+const boxStyles = require('./annotation-box-container.css')
 
 interface Props {
     displayGoToAnnotation: boolean
@@ -28,40 +29,42 @@ const DefaultFooter = ({
             {isEdited && <span className={styles.lastEdit}>Last Edit: </span>}
             {timestamp}
         </div>
-        <div>
-            <button
-                className={cx(styles.commonIcon, styles.editIcon)}
-                title="Edit note"
-                onClick={e => {
-                    e.stopPropagation()
-                    editIconClickHandler()
-                }}
-            />
-            <button
-                className={cx(styles.commonIcon, styles.trashIcon)}
-                title="Delete note"
-                onClick={e => {
-                    e.stopPropagation()
-                    trashIconClickHandler()
-                }}
-            />
-           {/* <button
-                className={cx(styles.commonIcon, styles.shareIcon)}
-                title="Share this note"
-                onClick={e => {
-                    e.stopPropagation()
-                    shareIconClickHandler()
-                }}
-            />*/}
-        </div>
-        <div>
-            {displayGoToAnnotation && (
+        <div className={boxStyles.buttonBar}>
+            <div>
                 <button
-                    className={cx(styles.commonIcon, styles.goToPageIcon)}
-                    title="Go to annotation"
-                    onClick={goToAnnotationHandler}
+                    className={cx(boxStyles.commonIcon, boxStyles.editIcon)}
+                    title="Edit note"
+                    onClick={e => {
+                        e.stopPropagation()
+                        editIconClickHandler()
+                    }}
                 />
-            )}
+                <button
+                    className={cx(boxStyles.commonIcon, boxStyles.trashIcon)}
+                    title="Delete note"
+                    onClick={e => {
+                        e.stopPropagation()
+                        trashIconClickHandler()
+                    }}
+                />
+               {/* <button
+                    className={cx(styles.commonIcon, styles.shareIcon)}
+                    title="Share this note"
+                    onClick={e => {
+                        e.stopPropagation()
+                        shareIconClickHandler()
+                    }}
+                />*/}
+            </div>
+            <div>
+                {displayGoToAnnotation && (
+                    <button
+                        className={cx(boxStyles.commonIcon, boxStyles.goToPageIcon)}
+                        title="Go to annotation"
+                        onClick={goToAnnotationHandler}
+                    />
+                )}
+            </div>
         </div>
     </div>
 )

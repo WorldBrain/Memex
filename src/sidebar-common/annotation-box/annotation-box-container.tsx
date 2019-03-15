@@ -8,12 +8,14 @@ import * as actions from '../sidebar/actions'
 import DefaultDeleteModeContent from './default-delete-mode-content'
 import EditModeContent from './edit-mode-content'
 import { TruncatedTextRenderer } from '../components'
+import niceTime from '../../util/nice-time'
 import { MapDispatchToProps } from '../types'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 const styles = require('./annotation-box-container.css')
+const footerStyles = require('./default-footer.css')
 
 interface OwnProps {
     /** Required to decide how to go to an annotation when it's clicked. */
@@ -104,9 +106,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     }
 
     private _getFormattedTimestamp = (timestamp: number) =>
-        moment(timestamp)
-            .format('MMMM D YYYY')
-            .toUpperCase()
+        niceTime(timestamp)
 
     private _getTruncatedTextObject: (
         text: string,
@@ -190,13 +190,14 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
             : this._getFormattedTimestamp(this.props.createdWhen)
 
         const isClickable = this.props.body && this.props.env !== 'overview'
-
+        
         return (
             <div
                 id={this.props.url} // Focusing on annotation relies on this ID.
                 className={cx(styles.container, {
                     [styles.isActive]: this.props.isActive,
                     [styles.isHovered]: this.props.isHovered,
+                    [footerStyles.isHovered]: this.props.isHovered,
                     [styles.isClickable]: isClickable,
                     [styles.isJustComment]: mode !== 'edit' && !this.props.body,
                     [styles.isEdit]: mode === 'edit',

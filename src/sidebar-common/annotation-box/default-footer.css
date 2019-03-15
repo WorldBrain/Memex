@@ -1,3 +1,6 @@
+@value colors: '../../common-ui/colors.css';
+@value color6 from colors;
+
   .annotationBoxDefaultFooter {
     display: flex;
     align-items: center;
@@ -10,13 +13,13 @@
     margin-right: auto;
     margin-left: 10px;
     font-size: 10px;
-    font-weight: 600;
-    color: #4a4a4a;
+    font-weight: 400;
+    color: color6;
 
     & .lastEdit {
-        font-weight: 400;
-        color: #929292;
-        margin: 0 5px 0 -1px;
+        font-weight: 600;
+        color: color6;
+        margin: 0px;
     }
 }
 
@@ -39,6 +42,7 @@
 
 .buttonBar {
     display: flex;
+    opacity: 0.2;
 }
 
 .editIcon {

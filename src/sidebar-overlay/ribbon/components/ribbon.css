@@ -78,10 +78,10 @@
 .button {
     composes: nakedButton from '../../../common-ui/elements.css';
     composes: hoversidebaropen from '../../../common-ui/colors.css';
-    width: 25px;
-    height: 25px;
+    width: 30px;
+    height: 30px;
     border-radius: 3px;
-    opacity: 0.6;
+    opacity: 0.8;
     margin-left: 4px;
     background-size: 18px 18px;
     background-repeat: no-repeat;
@@ -91,7 +91,7 @@
     cursor: pointer;
 
     &:hover {
-        opacity: 0.75;
+        opacity: 1;
     }
 
     &:active {

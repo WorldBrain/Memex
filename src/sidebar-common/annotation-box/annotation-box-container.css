@@ -26,7 +26,6 @@
 }
 
 .highlight {
-    font-style: italic;
     font-weight: 400;
     font-size: 14px;
     letter-spacing: 0.5px;
@@ -48,4 +47,65 @@
     margin-bottom: 10px;
     font-weight: 600;
     font-style: normal;
+}
+
+.commonIcon {
+    composes: nakedSquareButton from '../../common-ui/elements.css';
+    box-sizing: border-box;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    display: inline-block;
+    cursor: pointer;
+    background-color: transparent;
+    background-position: center;
+    border: none;
+    padding: 3px;
+    width: 24px;
+    height: 24px;
+    margin: 0 0px;
+    opacity: 0.2;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.commonIcon:hover {
+    opacity: 1;
+}
+
+.buttonBar {
+    display: flex;
+}
+
+.editIcon {
+    background-image: url('/img/edit.svg');
+}
+
+.trashIcon {
+    background-image: url('/img/trash.svg');
+    background-size: 15px;
+}
+
+.shareIcon {
+    background-size: 17px;
+    background-image: url('/img/share.svg');
+}
+
+.replyIcon {
+    background-image: url('/img/reply_empty.svg');
+
+    &:hover {
+        background-image: url('/img/reply_full.svg');
+    }
+}
+
+.goToPageIcon {
+    background-image: url('/img/open.svg');
+    background-position-y: 4px;
+    background-size: 17px;
+}
+
+.container:hover .commonIcon {
+    opacity: 0.6;
 }

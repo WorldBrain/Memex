@@ -1,3 +1,6 @@
+@value colors: '../../common-ui/colors.css';
+@value color11 from colors;
+
 .tagContainer * {
     font-family: 'Inter';
 }
@@ -101,14 +104,13 @@
 }
 
 .searchContainer {
+    background: color11;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 0px 5px 0px;
-    border-radius: 3px 3px 0 0;
-    margin: 0px 20px 0px 20px;
-    border-bottom: 1px solid #eae9e9; /* MAN Manual Adjustment Needed */
-    background-color: white;
+    padding: 2px 10px 2px 10px;
+    border-radius: 3px;
+    margin: 5px 5px 5px 5px;
 }
 
 .searchIcon {
@@ -135,12 +137,12 @@
 }
 
 .search {
-    composes: textColorSearchPlaceholder from '../../common-ui/colors.css';
+    composes: searchField from '../../common-ui/elements.css';
     width: 90%;
     font-size: 14px;
     padding: 10px 0;
     border: none;
-    background-color: white;
+    background-color: color11;
     margin-left: 10px;
 
     &:focus {

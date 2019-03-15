@@ -1,5 +1,5 @@
 @value colors: './colors.css';
-@value color1, color3, color6, color11 from colors;
+@value color1, color2, color3, color4, color5, color6, color11 from colors;
 
 /* FONTs */
 
@@ -73,10 +73,19 @@
 }
 
 .CTA {
-    composes: CTA from './colors.css';
-    padding: 0.5em 0.7em;
+    background: color1;
+    color: color4;
+    padding: 0.5em 1em;
     border-radius: 3px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+        background: color2;
+        color: color5;
+    }
 }
 
 /* TextAreas for Edits */
@@ -93,7 +102,7 @@
     border: 1px solid #d2d2d2;
     border-radius: 3px;
     padding: 10px 7px;
-    margin: 5px 5px 0px 5px;
+    margin: 5px 5px 5px 5px;
 
      &::placeholder {
         color: #888;
@@ -128,13 +137,13 @@
 
 .searchField {
     background-color: color11;
-    color: color1;
-    border-radius: 30px;
+    color: color4;
+    border-radius: 3px;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 500;
 
     &::placeholder {
-        color: color3;
+        color: color6;
         font-style: normal;
     }
 

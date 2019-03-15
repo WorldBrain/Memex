@@ -14,8 +14,10 @@
     flex-direction: row-reverse;
     justify-content: space-between;
     align-items: center;
-    margin: 4px 4px 4px 4px;
+    margin: 0px 4px 4px 4px;
     height: 26px;
+    animation: slideIn 0.2s ease-in-out;
+    animation-fill-mode: forwards;
 }
 
 .interactions {
@@ -90,4 +92,16 @@
     position: absolute;
     align-self: center;
     margin-top: 142px;
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translate(0, 5px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
 }

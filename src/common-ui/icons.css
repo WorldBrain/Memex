@@ -13,7 +13,7 @@
 
 .searchIcon {
 	composes: iconPosition;
-	background-image: url('/img/search-icon.svg');
+	background-image: url('/img/searchIcon.svg');
 }
 
 .checkMark {

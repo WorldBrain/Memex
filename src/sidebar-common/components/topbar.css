@@ -2,14 +2,15 @@
     position: sticky;
     top: 0;
     background: #fff;
-    width: 100%;
+    width: calc(100% + 10px);
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 2147483647;
-    padding: 7.5px;
+    padding: 13px 8px 5px 3px;
     height: 35px;
     box-sizing: border-box;
+    margin-left: -5px;
 }
 
 .right {
@@ -19,12 +20,11 @@
 }
 
 .button {
-    composes: nakedButton from '../../common-ui/elements.css';
-    composes: hoversidebaropen from '../../common-ui/colors.css';
-    width: 25px;
-    height: 25px;
+    composes: nakedSquareButton from '../../common-ui/elements.css';
+    width: 30px;
+    height: 30px;
     border-radius: 3px;
-    opacity: 0.6;
+    opacity: 0.8;
     margin-left: 4px;
     background-size: 18px 18px;
     background-repeat: no-repeat;
@@ -34,7 +34,7 @@
     cursor: pointer;
 
     &:hover {
-        opacity: 0.75;
+        opacity: 1;
     }
 
     &:active {

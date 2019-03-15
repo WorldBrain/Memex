@@ -45,8 +45,7 @@
 
 .tooltipLeft {
     justify-content: flex-end;
-    top: 2px;
-    right: 35px;
+    right: 40px;
 }
 
 .tooltipMessage {
