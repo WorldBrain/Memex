@@ -31,7 +31,7 @@
     cursor: pointer;
     font-weight: 500;
 
-    &:hover {
+    &:hover {
         font-weight: 600;
     }
 }
