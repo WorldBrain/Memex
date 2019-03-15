@@ -1,20 +1,16 @@
-.inbox {
-    font-size: 15px;
-    text-decoration: none;
-    padding-top: 15px;
-    margin-right: 20px;
-    margin-left: 20px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 15px;
-    color: #3eb995;
-    cursor: pointer;
+@value colors: '../../common-ui/colors.css';
+@value color12 from colors;
 
-    &:hover {
-        color: #777;
-        padding-top: 15px;
-        padding-bottom: 15px;
-    }
+.inbox {
+    composes: inboxIcon from '../../common-ui/icons.css';
+    composes: nakedSquareButton from '../../common-ui/elements.css';
+    height: 25px;
+    width: 25px;
+    display: flex;
+    padding: 5px;
+    background-size: 19px;
+    margin-left: 15px;
+    cursor: pointer;
 
     @media (max-width: 1650px) {
         display: none;
@@ -23,22 +19,36 @@
 
 .inboxCount {
     color: #fff;
-    background-color: #3eb995;
-    border-radius: 15px;
-    margin-left: 10px;
-    padding: 3px 18px;
-    padding-top: 2px;
+    background-color: color12;
+    border-radius: 3px;
+    padding: 1px 5px;
+    position: absolute;
+    width: fit-content;
+    font-size: 13px;
+    margin-top: 7px;
+    margin-left: 15px;
 }
 
 .activeInbox {
-    color: #777;
-    border-bottom: 6px solid #173766;
-    padding-bottom: 12px;
-    padding-top: 18px;
+    composes: nakedSquareButton from '../../common-ui/elements.css';
+    composes: inboxIconFull from '../../common-ui/icons.css';
+    height: 25px;
+    width: 25px;
+    display: flex;
+    padding: 5px;
+    background-size: 19px;
 
-    &:hover {
-        color: #777;
-        padding-bottom: 12px;
-        padding-top: 18px;
+    &.inboxIcon {
+        display:none;
     }
+}
+
+.inboxIcon {
+    composes: inboxIcon from '../../common-ui/icons.css';
+    composes: nakedSquareButton from '../../common-ui/elements.css';
+    height: 25px;
+    width: 25px;
+    display: flex;
+    padding: 5px;
+    background-size: 19px;
 }

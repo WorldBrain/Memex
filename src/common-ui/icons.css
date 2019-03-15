@@ -22,3 +22,23 @@
 	opacity: 0.7;
 	background-size: 100%;
 }
+
+.inboxIcon {
+	composes: iconPosition;
+	background-image: url('/img/notification.svg');
+}
+
+.inboxIconFull {
+	composes: iconPosition;
+	background-image: url('/img/notificationFull.svg');
+}
+
+.settingsIcon {
+	composes: iconPosition;
+	background-image: url('/img/settings.svg');
+}
+
+.upgradeIcon {
+	composes: iconPosition;
+	background-image: url('/img/star_yellow.svg');
+}

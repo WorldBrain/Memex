@@ -13,7 +13,6 @@ const InboxButton = props => (
         className={showInboxClass(props.showInbox)}
         onClick={props.toggleInbox}
     >
-        Inbox
         {props.showUnreadCount && (
             <span className={styles.inboxCount}>{props.unreadNotifCount}</span>
         )}

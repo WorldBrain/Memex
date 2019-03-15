@@ -179,7 +179,7 @@ class PageResultItem extends PureComponent<Props> {
                                             )}
                                             onClick={this.props.onCommentBtnClick}
                                             title={
-                                                'Add/View Commments & Annotations'
+                                                'Add/View Notes & Highlights'
                                             }
                                         />
                                         </ButtonTooltip>

@@ -81,6 +81,7 @@
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
+    border: none;
 
     &:hover {
         background: color2;

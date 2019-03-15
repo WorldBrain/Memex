@@ -32,7 +32,7 @@ const Topbar = ({
         <div className={styles.right}>
             {/* Button to add a comment. */}
             <ButtonTooltip
-                tooltipText="Add comments to page"
+                tooltipText="Add notes to page"
                 position="left"
             >
                 <button

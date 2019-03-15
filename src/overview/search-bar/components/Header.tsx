@@ -79,27 +79,25 @@ class Header extends PureComponent<Props> {
                     </div>
                 </div>
                 <div className={styles.links}>
+                    <OutLink
+                        className={styles.upgrade}
+                        to={this.props.pricingUrl}
+                    >
+                        <span
+                            className={styles.upgradeIcon}
+                        />
+                        ⭐️ Upgrade
+                    </OutLink>
                     <InboxButton
                         toggleInbox={this.props.toggleInbox}
                         showInbox={this.props.showInbox}
                         unreadNotifCount={this.props.unreadNotifCount}
                         showUnreadCount={this.props.showUnreadCount}
                     />
-                    <OutLink
-                        className={styles.upgrade}
-                        to={this.props.pricingUrl}
-                    >
-                        <img
-                            src={'/img/star_gold.svg'}
-                            className={styles.upgradeIcon}
-                        />
-                        Go Premium
-                    </OutLink>
                     <Link to={this.props.settingsRoute}>
-                        <img
-                            src={this.props.settingsIconUrl}
+                        <span
                             title="Settings"
-                            className={styles.SettingsIcon}
+                            className={styles.settingsIcon}
                         />
                     </Link>
                 </div>

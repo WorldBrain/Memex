@@ -253,7 +253,7 @@ class Ribbon extends Component<Props, State> {
                             </ButtonTooltip>
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add comments to page"
+                                    tooltipText="Add notes to page"
                                     position="left"
                                 >
                                     <button
