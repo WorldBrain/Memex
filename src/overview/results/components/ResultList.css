@@ -5,6 +5,12 @@
     max-width: 800px;
 }
 
+.clusterTime {
+    font-weight: 600;
+    font-size: 0.7rem;
+    margin-bottom: 5px;
+}
+
 .timestamp {
     display: inline-block;
     text-align: center;

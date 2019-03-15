@@ -7,6 +7,8 @@ export interface Annotation {
     lastEdited?: Date
     url?: string
     comment?: string
+    _body_terms?: string[]
+    _comment_terms?: string[]
 }
 
 export interface AnnotListEntry {

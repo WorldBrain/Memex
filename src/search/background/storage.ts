@@ -4,7 +4,13 @@ import {
     SearchParams as OldSearchParams,
     SearchResult as OldSearchResult,
 } from '../types'
-import { AnnotSearchParams, AnnotPage } from './types'
+import {
+    AnnotSearchParams,
+    AnnotPage,
+    PageUrlsByDay,
+    PagesByUrl,
+    AnnotsByPageUrl,
+} from './types'
 import { Annotation } from 'src/direct-linking/types'
 import { PageUrlMapperPlugin } from './page-url-mapper'
 import { reshapeAnnotForDisplay, reshapeParamsForOldSearch } from './utils'
@@ -135,20 +141,46 @@ export default class SearchStorage extends FeatureStorage {
     }
 
     async searchPagesByLatestAnnotation(params: AnnotSearchParams) {
-        let results = await this.storageManager.operation(
-            AnnotationsListPlugin.LIST_OP_ID,
+        const results: Map<
+            number,
+            Map<string, Annotation[]>
+        > = await this.storageManager.operation(
+            AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
             params,
         )
 
-        results = await this.attachDisplayDataToAnnots(results)
+        const normalizedResults: PageUrlsByDay = {}
+        const pagesByUrl: PagesByUrl = {}
 
-        const pages = await this.mapAnnotsToPages(
-            results,
-            params.maxAnnotsPerPage ||
-                AnnotationsSearchPlugin.MAX_ANNOTS_PER_PAGE,
-        )
+        for (const [day, annotsByPage] of results) {
+            const updatedAnnotsByPage: AnnotsByPageUrl = {}
 
-        return this.attachDisplayTimeToPages(pages, params.endDate)
+            const pageUrlAnnots = (await Promise.all(
+                [...annotsByPage].map(async ([pageUrl, annots]) => [
+                    pageUrl,
+                    await this.attachDisplayDataToAnnots(annots),
+                ]),
+            )) as [string, Annotation[]][]
+
+            pageUrlAnnots.forEach(([pageUrl, annots]) => {
+                updatedAnnotsByPage[pageUrl] = annots
+            })
+
+            normalizedResults[day] = updatedAnnotsByPage
+
+            let pages: AnnotPage[] = await this.storageManager.operation(
+                PageUrlMapperPlugin.MAP_OP_ID,
+                [...annotsByPage.keys()],
+            )
+
+            pages = await this.attachDisplayTimeToPages(pages, params.endDate)
+
+            pages.forEach(page => {
+                pagesByUrl[page.url] = page
+            })
+        }
+
+        return [normalizedResults, pagesByUrl]
     }
 
     async listAnnotations(params: AnnotSearchParams): Promise<Annotation[]> {

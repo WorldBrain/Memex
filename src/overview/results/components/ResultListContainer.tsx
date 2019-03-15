@@ -2,6 +2,7 @@ import React, { PureComponent, MouseEventHandler } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
+import moment from 'moment'
 
 import { LoadingIndicator } from '../../../common-ui/components'
 import { IndexDropdown } from '../../../common-ui/containers'
@@ -24,6 +25,8 @@ import {
     actions as filterActs,
     selectors as filters,
 } from '../../../search-filters'
+
+const styles = require('./ResultList.css')
 
 export interface StateProps {
     isLoading: boolean
@@ -141,12 +144,17 @@ class ResultListContainer extends PureComponent<Props> {
         return pills
     }
 
-    private renderResultItems() {
-        if (this.props.isNewSearchLoading) {
-            return <LoadingIndicator />
-        }
+    private formatTime(date: number): string {
+        return moment(date).calendar(null, {
+            sameDay: '[Today]',
+            lastDay: '[Yesterday]',
+            lastWeek: '[Last] dddd',
+            sameElse: 'dddd, DD MMMM, YYYY',
+        })
+    }
 
-        const resultItems = this.props.searchResults.map((doc, i) => (
+    private attachDocWithPageResultItem(doc, i) {
+        return (
             <PageResultItem
                 key={i}
                 setTagButtonRef={this.setTagButtonRef}
@@ -166,7 +174,51 @@ class ResultListContainer extends PureComponent<Props> {
                 isAnnotsSearch={this.props.isAnnotsSearch}
                 {...doc}
             />
-        ))
+        )
+    }
+
+    private renderResultItems() {
+        if (this.props.isNewSearchLoading) {
+            return <LoadingIndicator />
+        }
+        const resultItems = []
+        /* 
+            Try if the normal way to render page results work.
+            Else, it's annotation cluster. So render it using a different method.
+        */
+        try {
+            this.props.searchResults.forEach((doc, i) =>
+                resultItems.push(this.attachDocWithPageResultItem(doc, i)),
+            )
+        } catch (e) {
+            const [annotsByDay, pagesByUrl] = this.props.searchResults
+
+            const sortedKeys = Object.keys(annotsByDay)
+                .sort()
+                .reverse()
+            let key = 0
+            for (const day of sortedKeys) {
+                const formattedTime = this.formatTime(parseInt(day, 10))
+                resultItems.push(
+                    <p className={styles.clusterTime} key={key}>
+                        {formattedTime}
+                    </p>,
+                )
+                key += 1
+
+                const currentCluster = annotsByDay[day]
+                for (const pageUrl of Object.keys(currentCluster)) {
+                    const page = pagesByUrl[pageUrl]
+                    const annotations = currentCluster[pageUrl]
+                    const doc = {
+                        ...page,
+                        annotations,
+                    }
+                    resultItems.push(this.attachDocWithPageResultItem(doc, key))
+                    key += 1
+                }
+            }
+        }
 
         // Insert waypoint at the end of results to trigger loading new items when
         // scrolling down

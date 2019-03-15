@@ -3,6 +3,7 @@ import { createSelector } from 'reselect'
 
 import { RootState } from '../../options/types'
 import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
+
 import { PAGE_SIZE } from '../search-bar/constants'
 import * as sidebarLeft from '../sidebar-left/selectors'
 import * as constants from './constants'
@@ -21,6 +22,20 @@ function decideTitle(pageDoc) {
         ? pageDoc.content.title
         : pageDoc.url
 }
+
+/**
+ * Returns page doc with modified title, isDeleting and tagPills data.
+ */
+const editPageResults = ({ modalShown, deleting, tagIndex }) => (
+    pageDoc,
+    i,
+) => ({
+    ...pageDoc,
+    title: decideTitle(pageDoc),
+    isDeleting: !modalShown && i === deleting,
+    tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
+    shouldDisplayTagPopup: i === tagIndex,
+})
 
 const resultsState = (state: RootState) => state.results
 
@@ -94,19 +109,34 @@ export const shouldShowCount = createSelector(
     (count, isLoading) => count != null && !isLoading,
 )
 
+export const isAnnotsSearch = createSelector(
+    resultsState,
+    state => state.searchType === 'annot',
+)
+
 export const results = createSelector(
     resultDocs,
     deleteConfSelectors.isShown,
     deleteConfSelectors.indexToDelete,
     activeTagIndex,
-    (docs, modalShown, deleting, tagIndex) =>
-        docs.map((pageDoc, i) => ({
-            ...pageDoc,
-            title: decideTitle(pageDoc),
-            isDeleting: !modalShown && i === deleting,
-            tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
-            shouldDisplayTagPopup: i === tagIndex,
-        })),
+    (docs, modalShown, deleting, tagIndex) => {
+        const docsMapFn = editPageResults({ modalShown, deleting, tagIndex })
+        try {
+            return docs.map(docsMapFn)
+        } catch (e) {
+            /* For cluster view, the result docs are different
+               So pages are parsed different. */
+
+            const [annotsByDay, pagesByUrl] = docs
+
+            Object.keys(pagesByUrl).forEach((pageUrl, i) => {
+                const pageDoc = pagesByUrl[pageUrl]
+                pagesByUrl[pageUrl] = docsMapFn(pageDoc, i)
+            })
+
+            return [annotsByDay, pagesByUrl]
+        }
+    },
 )
 
 export const showInitSearchMsg = createSelector(
@@ -125,9 +155,4 @@ export const isScrollDisabled = createSelector(
 export const searchType = createSelector(
     resultsState,
     state => state.searchType,
-)
-
-export const isAnnotsSearch = createSelector(
-    resultsState,
-    state => state.searchType === 'annot',
 )
