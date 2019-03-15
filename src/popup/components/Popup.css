@@ -1,5 +1,5 @@
 @value colors: '../../common-ui/colors.css';
-@value color4 from colors;
+@value color4, color11 from colors;
 
 body {
     margin: 0;
@@ -43,40 +43,31 @@ hr {
     overflow: hidden;
 }
 
+.searchIcon {
+    composes: searchIcon from '../../common-ui/icons.css';
+    width: 25px;
+    height: 25px;
+    background-size: 20px;
+}
+
 .searchContainer {
+    background: color11;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 13px 12px;
-    border-bottom: 1px solid rgb(202, 202, 202);
-    background: white;
-    margin-bottom: 6px;
-
-    & > i {
-        color: #3eb995;
-        padding: 0;
-    }
-
-    i {
-        padding: 8px;
-    }
+    padding: 2px 10px 2px 10px;
+    border-radius: 3px;
+    margin: 5px 5px 5px 5px;
 }
 
 .search {
+    composes: searchField from '../../common-ui/elements.css';
     width: 90%;
-    font-size: 1em;
-    padding: 5px;
+    font-size: 14px;
+    padding: 10px 0;
     border: none;
-    height: 20px;
-
-    &:placeholder-shown {
-        font-style: italic;
-        font-weight: 300;
-    }
-
-    &::placeholder {
-        color: #777;
-    }
+    background-color: color11;
+    margin-left: 10px;
 
     &:focus {
         outline: none;

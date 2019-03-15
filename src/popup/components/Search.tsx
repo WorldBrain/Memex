@@ -12,11 +12,12 @@ class Search extends PureComponent<Props> {
     render() {
         return (
             <form className={styles.searchContainer}>
+                <span className={styles.searchIcon}/>
                 <input
                     autoFocus
                     className={styles.search}
                     name="query"
-                    placeholder="Search Memex (confirm with ENTER)"
+                    placeholder="Search your Memex"
                     autoComplete="off"
                     onKeyDown={this.props.onSearchEnter}
                     onChange={this.props.onSearchChange}

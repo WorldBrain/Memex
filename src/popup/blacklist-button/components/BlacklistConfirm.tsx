@@ -21,13 +21,13 @@ class BlacklistConfirm extends PureComponent<Props> {
                 </p>
                 <div className={styles.btnBar}>
                     <button
-                        className={cx(styles.btn, styles.btnDanger)}
+                        className={cx(styles.btn)}
                         onClick={this.props.onConfirmClick}
                     >
                         YES
                     </button>
                     <button
-                        className={styles.btn}
+                        className={styles.btnDanger}
                         onClick={this.props.onDenyClick}
                     >
                         NO

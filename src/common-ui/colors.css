@@ -222,15 +222,13 @@
 
 .CTAwarning {
     composes: backgroundWarningColor;
-    border-radius: 5px;
+    border-radius: 3px;
     color: color4;
-    font-weight: bold;
     cursor: pointer;
-    opacity: 0.7;
+    background: color12;
 
     &:hover {
-        background-color: darken;
-        color: color4;
+        color: black;
         opacity: 1;
     }
 }

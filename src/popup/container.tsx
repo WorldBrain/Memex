@@ -140,13 +140,11 @@ class PopupContainer extends PureComponent<Props> {
 
         return (
             <React.Fragment>
-                <div className={styles.item}>
                 <Search
                     searchValue={this.props.searchValue}
                     onSearchChange={this.props.handleSearchChange}
                     onSearchEnter={this.onSearchEnter}
                 />
-                </div>
                 <div className={styles.item}>
                 <LinkButton
                     btnClass={btnStyles.openIcon}

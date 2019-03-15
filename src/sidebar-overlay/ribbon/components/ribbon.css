@@ -208,17 +208,18 @@
 }
 
 .searchInput {
-    background: white;
-    width: calc(100% - 30px);
-    border-radius: 50px;
+    composes: searchField from '../../../common-ui/elements.css';
+    border-radius: 3px;
     border: none;
     padding: 0 15px;
     height: 35px;
     font-size: 13px;
     overflow: hidden;
+    width: calc(100% - 37px);
     display: flex;
     flex-wrap: nowrap;
     text-overflow: ellipsis;
+    margin: 4px;
 
     &:focus {
         outline: none;

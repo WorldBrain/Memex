@@ -1,6 +1,6 @@
 @import url('/fonts/Inter/inter.css');
 
-:host * {
+.sidebar * {
     font-family: 'Inter';
 }
 

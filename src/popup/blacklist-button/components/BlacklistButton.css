@@ -1,3 +1,6 @@
+@value colors: '../../../common-ui/colors.css';
+@value color1, color2 from colors;
+
 .itemBtnBlacklisted {
     background-image: url('/img/blockActive.svg');
     background-repeat: no-repeat;
@@ -17,4 +20,18 @@
 	font-size: 12px;
 	padding: 0.3em 0.6em;
 	margin-left: 10px;
+}
+
+.splitSide {
+    composes: CTA from '../../../common-ui/elements.css';
+    font-size: 14px;
+    padding: 0.3em 0.6em;
+    width: 60px;
+    margin-left: 30px;
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+        font-weight: 600;
+    }
 }

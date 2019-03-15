@@ -1,5 +1,9 @@
 .container {
     margin-bottom: 50px;
+
+    & * {
+        font-family: 'Inter';
+    }
 }
 
 .header {

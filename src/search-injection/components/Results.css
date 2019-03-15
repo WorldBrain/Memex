@@ -1,5 +1,11 @@
+@import url('/fonts/Inter/inter.css');
+
 :root {
     --memex-green: #4abf9d;
+}
+
+.MEMEX_CONTAINER * {
+    font-family: 'Inter';
 }
 
 .MEMEX_CONTAINER {
@@ -62,6 +68,10 @@
     margin-top: -2px;
     border-radius: 3px;
     margin-right: 5px;
+
+    &:focus {
+        outline: none;
+    }
 }
 
 .resultsText {

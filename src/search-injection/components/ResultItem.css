@@ -38,11 +38,11 @@
     flex-wrap: wrap;
     text-overflow: ellipsis;
     overflow-x: hidden;
-    height: 25px;
     overflow: hidden;
     white-space: nowrap;
     overflow-wrap: break-word;
     font-weight: 500;
+    height: 25px;
 }
 
 .title {
@@ -67,6 +67,7 @@
     font-size: 13px;
     min-width: 0;
     font-weight: 400;
+    height: 15px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -86,8 +87,9 @@
 }
 
 .displayTime {
-    font-size: 0.9em;
+    font-size: 12px;
     color: #bfbdbe;
+    height: 15px;
 }
 
 .duckduckgo {
