@@ -247,8 +247,7 @@ export default class SearchBackground {
     private async blankAnnotsSearch(params: PageSearchParams) {
         const res = await this.storage.searchPagesByLatestAnnotation(params)
 
-        // TODO: change this when blank annots pagination algo improves; super innefficient
-        return res.slice(params.skip, params.skip + params.limit)
+        return res
     }
 
     async searchPageAnnotations(params: AnnotSearchParams) {

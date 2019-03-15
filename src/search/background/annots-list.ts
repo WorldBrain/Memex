@@ -1,8 +1,11 @@
 import { Dexie } from 'dexie'
-import moment from 'moment'
+import moment from 'moment-timezone'
+import { browser } from 'webextension-polyfill-ts'
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import diff from 'lodash/difference'
 
+import { INSTALL_TIME_KEY } from 'src/constants'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Annotation } from 'src/direct-linking/types'
 import AnnotsStorage from 'src/direct-linking/background/storage'
@@ -12,6 +15,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
 > {
     static LIST_OP_ID = 'memex:dexie.listAnnotations'
     static LIST_BY_PAGE_OP_ID = 'memex:dexie.listAnnotationsByPage'
+    static LIST_BY_DAY_OP_ID = 'memex:dexie.listAnnotationsByDay'
     static DEF_INNER_LIMIT_MULTI = 2
 
     install(backend: DexieStorageBackend) {
@@ -25,6 +29,11 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         backend.registerOperation(
             AnnotationsListPlugin.LIST_BY_PAGE_OP_ID,
             this.listAnnotsByPage.bind(this),
+        )
+
+        backend.registerOperation(
+            AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
+            this.listAnnotsByDay.bind(this),
         )
     }
 
@@ -144,6 +153,25 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return urls.map(url => annotUrlMap.get(url))
     }
 
+    private async filterResults(results: string[], params: AnnotSearchParams) {
+        if (params.bookmarksOnly) {
+            results = await this.filterByBookmarks(results)
+        }
+
+        if (
+            (params.tagsInc && params.tagsInc.length) ||
+            (params.tagsExc && params.tagsExc.length)
+        ) {
+            results = await this.filterByTags(results, params)
+        }
+
+        if (params.collections && params.collections.length) {
+            results = await this.filterByCollections(results, params)
+        }
+
+        return results
+    }
+
     // The main logic
     private async list(
         { limit = 10, skip = 0, ...params }: AnnotSearchParams,
@@ -216,23 +244,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
                 innerSkip += innerLimit
             }
 
-            if (params.bookmarksOnly) {
-                innerResults = await this.filterByBookmarks(innerResults)
-            }
-
-            if (
-                (params.tagsInc && params.tagsInc.length) ||
-                (params.tagsExc && params.tagsExc.length)
-            ) {
-                innerResults = await this.filterByTags(innerResults, params)
-            }
-
-            if (params.collections && params.collections.length) {
-                innerResults = await this.filterByCollections(
-                    innerResults,
-                    params,
-                )
-            }
+            innerResults = await this.filterResults(innerResults, params)
 
             results = [...results, ...innerResults]
         } while (continueLookup)
@@ -240,15 +252,47 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return this.mapUrlsToAnnots(results)
     }
 
-    private clusterAnnotsByDays(annots: Annotation[]): Map<Date, Annotation[]> {
-        const annotsByDays = new Map<Date, Annotation[]>()
+    private async calcHardLowerTimeBound({ startDate }: AnnotSearchParams) {
+        const annotsRelease = startDate
+            ? moment(startDate)
+            : moment('2018-06-01')
+
+        const {
+            [INSTALL_TIME_KEY]: installTime,
+        } = await browser.storage.local.get(INSTALL_TIME_KEY)
+
+        return annotsRelease.isAfter(installTime)
+            ? annotsRelease
+            : moment(installTime)
+    }
+
+    private mergeResults(
+        a: Map<number, Map<string, Annotation[]>>,
+        b: Map<number, Map<string, Annotation[]>>,
+    ) {
+        for (const [date, pagesB] of b) {
+            const pagesA = a.get(date) || new Map()
+
+            for (const [page, annotsB] of pagesB) {
+                const existing = pagesA.get(page) || []
+                pagesA.set(page, [...existing, ...annotsB])
+            }
+
+            a.set(date, pagesA)
+        }
+    }
+
+    private clusterAnnotsByDays(
+        annots: Annotation[],
+    ): Map<number, Annotation[]> {
+        const annotsByDays = new Map<number, Annotation[]>()
 
         for (const annot of annots) {
-            const date = moment(annot.lastEdited || annot.createdWhen)
+            const date = moment(annot.createdWhen)
                 .startOf('day')
                 .toDate()
-            const existing = annotsByDays.get(date) || []
-            annotsByDays.set(date, [...existing, annot])
+            const existing = annotsByDays.get(date.getTime()) || []
+            annotsByDays.set(date.getTime(), [...existing, annot])
         }
 
         return annotsByDays
@@ -256,8 +300,8 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
 
     private clusterAnnotsByPage(
         annots: Annotation[],
-    ): Map<Date, Map<string, Annotation[]>> {
-        const annotsByPage = new Map<Date, Map<string, Annotation[]>>()
+    ): Map<number, Map<string, Annotation[]>> {
+        const annotsByPage = new Map<number, Map<string, Annotation[]>>()
 
         for (const [date, matching] of this.clusterAnnotsByDays(annots)) {
             const pageMap = new Map<string, Annotation[]>()
@@ -271,6 +315,97 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         }
 
         return annotsByPage
+    }
+
+    private termsMatch = ({
+        termsInc,
+        includeHighlights,
+        includeNotes,
+    }: AnnotSearchParams) => ({ _body_terms, _comment_terms }: Annotation) => {
+        const highlightsMatch = includeHighlights
+            ? diff(termsInc, _body_terms).length === 0
+            : true
+
+        const notesMatch = includeNotes
+            ? diff(termsInc, _comment_terms).length === 0
+            : true
+
+        if (includeHighlights && includeNotes) {
+            return notesMatch || highlightsMatch
+        }
+
+        if (includeHighlights && !includeNotes) {
+            return highlightsMatch
+        }
+
+        if (!includeHighlights && includeNotes) {
+            return notesMatch
+        }
+    }
+
+    private async queryAnnotsByDay(
+        startDate: number,
+        endDate: null,
+        params: AnnotSearchParams,
+    ) {
+        const collection = this.backend.dexieInstance
+            .table<Annotation>(AnnotsStorage.ANNOTS_COLL)
+            .where('createdWhen')
+            .between(startDate, endDate, true, true)
+            .reverse()
+
+        if (params.termsInc && params.termsInc.length) {
+            collection.filter(this.termsMatch(params))
+        }
+
+        return collection.toArray()
+    }
+
+    /**
+     * Don't use `params.skip` for pagination. Instead, as results
+     *  are ordered by day, use `params.endDate`.
+     */
+    async listAnnotsByDay(params: AnnotSearchParams) {
+        const hardLowerLimit = await this.calcHardLowerTimeBound(params)
+        let dateCursor = params.endDate
+            ? moment(params.endDate)
+            : moment().endOf('day')
+
+        let results = new Map<number, Map<string, Annotation[]>>()
+
+        while (
+            results.size < params.limit &&
+            dateCursor.isAfter(hardLowerLimit)
+        ) {
+            const upperBound = dateCursor.clone()
+
+            // Keep going back `limit` days until enough results, or until hard lower limit hit
+            if (dateCursor.diff(hardLowerLimit, 'days') < params.limit) {
+                dateCursor = hardLowerLimit
+            } else {
+                dateCursor.subtract(params.limit, 'days')
+            }
+
+            let annots = await this.queryAnnotsByDay(
+                dateCursor.toDate(),
+                upperBound.toDate(),
+                params,
+            )
+
+            const filteredPks = new Set(
+                await this.filterResults(annots.map(a => a.url), params),
+            )
+            annots = annots.filter(annot => filteredPks.has(annot.url))
+
+            this.mergeResults(results, this.clusterAnnotsByPage(annots))
+        }
+
+        // Cut off any excess
+        if (results.size > params.limit) {
+            results = new Map([...results].slice(0, params.limit))
+        }
+
+        return results
     }
 
     async listAnnots(

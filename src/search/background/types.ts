@@ -69,3 +69,22 @@ export interface UrlFilters {
     tagUrlsExc?: Set<string>
     domainUrlsExc?: Set<string>
 }
+
+/**
+ * Maps day (start of day timestamp) to list of pages that have annots created/edited
+ * on that day.
+ */
+export interface PageUrlsByDay {
+    [day: number]: AnnotsByPageUrl
+}
+
+/**
+ * Maps page URLs to pages containing list of annotations created/edited on that day.
+ */
+export interface PagesByUrl {
+    [pageUrl: string]: AnnotPage
+}
+
+export interface AnnotsByPageUrl {
+    [pageUrl: string]: Annotation[]
+}
