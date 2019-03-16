@@ -6,6 +6,7 @@ import React, {
 } from 'react'
 import cx from 'classnames'
 
+import qs from 'query-string'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import CommentBoxContainer from 'src/sidebar-common/comment-box'
@@ -94,7 +95,12 @@ class Ribbon extends Component<Props, State> {
         if (event.key === 'Enter') {
             event.preventDefault()
             const queryFilters = extractQueryFilters(this.props.searchValue)
-            this.openOverviewTabRPC(queryFilters.query)
+            const queryParams = qs.stringify(queryFilters)
+
+            console.log(queryFilters)
+            console.log(queryParams)
+
+            this.openOverviewTabRPC(queryParams)
         }
     }
 
