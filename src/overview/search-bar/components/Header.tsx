@@ -67,6 +67,7 @@ class Header extends PureComponent<Props> {
                             ref={this.setInputRef}
                             onKeyDown={this.props.onQueryKeyDown}
                             disabled={this.props.isSearchDisabled}
+                            autoComplete="off"
                         />
                         <DateRangeSelection
                             startDate={this.props.startDate}
