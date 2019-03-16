@@ -1,35 +1,35 @@
 .filterButton {
-    background-image: url('/img/filter_empty.svg');
-    width: 32px;
-    height: 34px;
-    opacity: 0.6;
+    composes: filtersIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 35px;
+    height: 35px;
+    opacity: 0.8;
 
     &:hover {
-        opacity: 0.8;
-        background-image: url('/img/filter_full.svg');
+        opacity: 1;
     }
 }
 
 .filterEnabled {
-    background-image: url('/img/filter_full.svg');
-    opacity: 1;
+    composes: filtersIconFull from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
 }
 
 .listButton {
-    background-image: url('/img/collections_empty.svg');
-    width: 30px;
-    height: 30px;
-    opacity: 0.5;
+    composes: collectionsIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 35px;
+    height: 35px;
+    opacity: 0.8;
 
     &:hover {
-        opacity: 0.8;
-        background-image: url('/img/collections.svg');
+        opacity: 1;
     }
 }
 
 .collectionEnabled {
-    background-image: url('/img/collections.svg');
-    opacity: 1;
+    composes: collectionsIconFull from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
 }
 
 .button {
@@ -37,10 +37,10 @@
     border: none;
     background-color: transparent;
     background-repeat: no-repeat;
-    background-size: contain;
     cursor: pointer;
     outline: none;
     padding: 0px;
+    background-size: 26px;
 }
 
 .buttonContainerOverview {
@@ -88,7 +88,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    height: 60px;
+    height: 45px;
     margin-top: 10px;
 }
 

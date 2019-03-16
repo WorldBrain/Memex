@@ -13,6 +13,7 @@
 @value color11: #f7f7f7; /* lightgrey for edit fields */
 @value color12: #f29d9d; /* mint-red for warning colors */
 @value color13: #edf0f4; /* light blue for fixed sidebars */
+@value color14: #efefef; /* light grey for selecting options */
 
 /* BORDER RADIUS */
 @value radius1: 1px;

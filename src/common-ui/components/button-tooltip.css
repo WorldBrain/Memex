@@ -4,6 +4,7 @@
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .tooltipTrigger {
@@ -33,6 +34,11 @@
     justify-content: flex-start;
 }
 
+.tooltipRightCentered {
+    left: 40px;
+    justify-content: flex-start;
+}
+
 .tooltipRightContentTooltip {
     left: 8px;
     top: -10px;
@@ -41,6 +47,7 @@
 
 .tooltipBottom {
     transform: translateY(38px);
+    justify-content: center;
 }
 
 .tooltipLeft {

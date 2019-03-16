@@ -42,3 +42,24 @@
 	composes: iconPosition;
 	background-image: url('/img/star_yellow.svg');
 }
+
+.collectionsIcon {
+	composes: iconPosition;
+	background-image: url('/img/collections.svg');
+}
+
+.filtersIcon {
+	composes: iconPosition;
+	background-image: url('/img/filter.svg');
+}
+
+.collectionsIconFull {
+	composes: iconPosition;
+	background-image: url('/img/collectionsIconFull.svg');
+}
+
+.filtersIconFull {
+	composes: iconPosition;
+	background-image: url('/img/filtersIconFull.svg');
+}
+

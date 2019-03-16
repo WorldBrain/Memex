@@ -155,7 +155,7 @@ class SearchFiltersContainer extends PureComponent {
             isChecked={this.props.bookmarkFilter}
             handleChange={this.props.onShowOnlyBookmarksChange}
         >
-            Bookmarks only
+            Starred pages
         </Checkbox>
     )
 

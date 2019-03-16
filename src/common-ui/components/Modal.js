@@ -17,14 +17,13 @@ class Modal extends PureComponent {
                 className={styles.overlay}
                 innerClassName={styles.popup}
                 onClose={this.props.onClose}
+                onClick={this.props.onClose}
             >
                 {this.props.onClose && (
                     <button
                         className={cx(styles.close, styles.button)}
                         onClick={this.props.onClose}
-                    >
-                        ×
-                    </button>
+                    />
                 )}
                 <div className={styles.content}>{this.props.children}</div>
             </Overlay>

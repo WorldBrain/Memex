@@ -1,6 +1,6 @@
 .notification {
-    background-image: url('/img/notification.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
+	composes: inboxIcon from 'src/common-ui/icons.css';
+    background-size: 18px;
     margin-top: 0px;
+    background-position-y: 4px;
 }

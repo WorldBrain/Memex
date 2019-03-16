@@ -1,5 +1,5 @@
 @value colors: '../../common-ui/colors.css';
-@value color4, color5, color6 from colors;
+@value color4, color5, color6, color12 from colors;
 
 /* stylelint-disable declaration-no-important */
 
@@ -44,6 +44,12 @@
         color: color6;
         cursor: unset;
         background: none;
+
+        &:hover {
+            cursor: not-allowed;
+            font-weight: 400;
+            color: color6;
+        }
     }
 
     &:hover,
@@ -167,17 +173,15 @@
 }
 
 .badge {
+    color: #fff;
     background-color: color12;
-    color: white;
-    width: 15px;
-    height: 15px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
+    border-radius: 3px;
+    padding: 1px 5px;
     position: absolute;
-    bottom: 15px;
-    left: 33px;
-    font-size: 10px;
+    width: fit-content;
+    font-size: 13px;
+    margin-top: -15px;
+    margin-left: 15px;
 }
 
 .subTitle {

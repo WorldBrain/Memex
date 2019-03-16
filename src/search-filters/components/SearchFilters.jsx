@@ -17,6 +17,9 @@ class SearchFilters extends PureComponent {
     render() {
         return (
             <div>
+                <div className = {styles.bookmarksFilter}>
+                {this.props.bookmarkFilter}
+                </div>
                 {this.props.tagFilter}
                 {this.props.filteredTags && (
                     <div className={styles.filtered}>
@@ -33,10 +36,7 @@ class SearchFilters extends PureComponent {
                 <div className={styles.filtered}>
                     {this.props.filteredTypes}
                 </div>
-                <div className={styles.otherFilters}>
-                    <span className={styles.others}>Others</span>
-                    {this.props.bookmarkFilter}
-                </div>
+                
             </div>
         )
     }

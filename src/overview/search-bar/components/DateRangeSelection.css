@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color6 from colors;
+
 .dateRangeSelection {
     display: flex;
     align-items: center;
@@ -17,19 +20,19 @@
 }
 
 .datePicker {
-    composes: darkBlue from '../../../common-ui/colors.css';
+    composes: darkBlue from 'src/common-ui/colors.css';
     width: 130px;
     height: 30px;
     font-size: 15px;
     border: none;
     margin: 0 10px;
     background-color: transparent;
-    font-weight: 500;
     padding-top: 1px;
     padding-right: 20px;
+    font-weight: 400;
 
     &::placeholder {
-        color: #b8b8b8;
+        color: color6;
     }
 
     &:focus {

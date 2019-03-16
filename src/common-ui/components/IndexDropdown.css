@@ -1,5 +1,5 @@
 @value colors: '../../common-ui/colors.css';
-@value color11 from colors;
+@value color11, color14 from colors;
 
 .tagContainer * {
     font-family: 'Inter';
@@ -20,7 +20,7 @@
     &:hover,
     &:focus,
     &:active {
-        background-color: #f7f7f7;
+        background-color: color14;
         outline: none;
     }
 

@@ -58,6 +58,8 @@ class ButtonTooltip extends React.Component<Props, State> {
                                 this.props.position === 'left',
                             [styles.tooltipRight]:
                                 this.props.position === 'right',
+                            [styles.tooltipRightCentered]:
+                                this.props.position === 'rightCentered',
                             [styles.tooltipBottom]:
                                 this.props.position === 'bottom',
                             [styles.tooltipTop]: 

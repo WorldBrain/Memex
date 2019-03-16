@@ -1,5 +1,5 @@
 @value colors: '../../common-ui/colors.css';
-@value color11 from colors;
+@value color11, color14 from colors;
 
 .menuItem {
     composes: hoverColor from '../../common-ui/colors.css';
@@ -15,7 +15,7 @@
     &:hover,
     &:focus,
     &:active {
-        background-color: #f7f7f7;
+        background-color: color14;
         outline: none;
     }
 
