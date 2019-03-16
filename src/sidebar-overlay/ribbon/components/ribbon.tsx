@@ -97,9 +97,6 @@ class Ribbon extends Component<Props, State> {
             const queryFilters = extractQueryFilters(this.props.searchValue)
             const queryParams = qs.stringify(queryFilters)
 
-            console.log(queryFilters)
-            console.log(queryParams)
-
             this.openOverviewTabRPC(queryParams)
         }
     }

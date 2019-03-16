@@ -24,19 +24,12 @@ const Import = ({
         {shouldRenderEsts && (
             <div>
                 <div className={localStyles.stepNumber}>
-                    Step 1/3: Analysing Browser History and Bookmarks{' '}
+                    Import your existing browsing history & bookmarks{' '}
                 </div>
                 <div className={localStyles.stepText}>
-                    <p className={localStyles.stepImportText}>
-                        If you want, you can also make your existing browsing
-                        history and bookmarks available for full-text search.
-                        <br />
-                        Even without doing that, you still can search everything
-                        you visit after installing the tool.
-                    </p>
                     <Warning>
-                        Re-downloading so many urls may slow down your regular
-                        browsing a bit.
+                        Re-downloading urls may slow down your web browsing.<br/>
+                        With more than 10.000 links it is suggested to let this run overnight. 
                     </Warning>
                 </div>
             </div>
@@ -44,27 +37,26 @@ const Import = ({
         {shouldRenderProgress && (
             <div>
                 <div className={localStyles.stepNumber}>
-                    Step 2/3: Download Progress{' '}
+                    Import Progress{' '}
                 </div>
                 <div className={localStyles.warningContainer}>
-                    <img src="/img/caution.png" className={localStyles.icon} />{' '}
-                    <p className={localStyles.stepText}>
-                        Your import may ocassionally freeze or crash. No need to
-                        worry. Go to{' '}
-                        <a
+                    <Warning>
+                        The import may freeze because of a browser setting.<br/>
+                        No need to worry. Go to{' '}
+                        <a className={localStyles.link}
                             target="_blank"
                             href="http://memex.link/2Jw-R3BQh/worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway"
                         >
                             <b>worldbrain.io/import_bug</b>
                         </a>{' '}
                         to fix it.
-                    </p>
+                    </Warning>
                 </div>
             </div>
         )}
         {isStopped && (
             <div className={localStyles.stepNumber}>
-                Step 3/3: Status Report{' '}
+                Status Report{' '}
             </div>
         )}
         <div className={localStyles.mainContainer}>

@@ -1,3 +1,6 @@
+@value colors: '../../../common-ui/colors.css';
+@value color1, color4, color12 from colors;
+
 .container {
     display: flex;
     flex-direction: row;
@@ -27,9 +30,11 @@
 }
 
 .actionButton {
-    height: 45px;
-    background-color: #3eb995;
-    border-radius: 5px;
+    background-color: color1;
+    color: color4;
+    border: none;
+    border-radius: 3px;
+    padding: 12px 24px;
 
     &.hidden {
         display: none;
@@ -49,45 +54,35 @@
 }
 
 .cancel {
-    background-color: #fafafc;
-    color: #db919c;
-    padding: 0.6em 1.5em;
+    composes: cancelNaked from '../../../common-ui/elements.css';
+    padding: 3px 8px 3px 8px;
+    background-color: transparent;
+    color: color12;
     border: none;
 }
 
 .pause,
 .resume {
-    background-color: white;
-    border: 1px solid #3eb995;
-    color: #3eb995;
+    composes: CTA from '../../../common-ui/elements.css';
     margin-left: 20px;
-    padding: 0.6em 4em;
 }
 
 .recalc {
-    width: 50px;
+    composes: nakedSquareButton from '../../../common-ui/elements.css';
+    color: color4;
     margin: 0 10px;
-    color: white;
+    background: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .startImport {
-    background: #3eb995;
-    color: white;
-    font-size: 0.8em;
-    padding: 0.6em 1.5em;
-    text-transform: uppercase;
+    composes: CTA from '../../../common-ui/elements.css';
     cursor: pointer;
     outline: 0;
     border: none;
-    box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.1);
     transition: all 0.1s ease-in;
-
-    &:hover {
-        transform: scale(1.02);
-    }
 
     &[disabled] {
         opacity: 0.4;
@@ -96,9 +91,8 @@
 }
 
 .newImport {
-    background-color: #3eb995;
-    padding: 0.6em 1.5em;
-    color: white;
+    composes: CTA from '../../../common-ui/elements.css';
     border: none;
+    outline: none;
     margin-top: 20px;
 }

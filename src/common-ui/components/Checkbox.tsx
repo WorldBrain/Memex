@@ -1,4 +1,5 @@
 import * as React from 'react'
+import cx from 'classnames'
 
 const styles = require('./Checkbox.css')
 
@@ -33,7 +34,11 @@ class Checkbox extends React.PureComponent<Props> {
                         name={this.props.name}
                     />
                     <span className={styles.label__text}>
-                        <span className={styles.label__check}/>
+                        <span className={styles.label__check}>
+                            <span className={cx(styles.icon, {
+                                [styles.checkedIcon]: this.props.isChecked === true,
+                            })}/>
+                        </span>
                         {this.props.children}
                     </span>
                 </label>

@@ -1,128 +1,79 @@
-.checkbox {
-    position: absolute;
-    opacity: 0;
-
-    & + label {
-        position: relative;
-        cursor: pointer;
-        padding: 0;
-    }
-
-    & + label::before {
-        content: '';
-        margin: 6px 10px 10px 14px;
-        display: inline-block;
-        vertical-align: text-top;
-        width: 12px;
-        height: 12px;
-        outline: 2px solid #3eb995;
-        box-shadow: 0 0 0 2pt #3eb995;
-        border-radius: 1px;
-    }
-
-    &:focus + label::before {
-        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
-    }
-
-    &:checked + label::before {
-        background: #3eb995;
-    }
-
-    &:checked + label::after {
-        content: '';
-        position: absolute;
-        margin-left: 14px;
-        margin-top: 3px;
-        left: 1px;
-        top: 8px;
-        background: white;
-        width: 2px;
-        height: 2px;
-        box-shadow: 2px 0 0 white, 4px 0 0 white, 4px -2px 0 white,
-            4px -4px 0 white, 4px -6px 0 white, 4px -8px 0 white;
-        transform: rotate(45deg);
-    }
-
-    &:disabled + label {
-        color: #d4d1d1;
-        cursor: auto;
-    }
-
-    &:disabled + label::before {
-        background: #d4d1d1;
-        box-shadow: 0 0 0 2pt #d4d1d1;
-        outline: #d4d1d1;
-    }
-}
-
 .container {
     margin: 10px 0;
 }
 
-.checkboxText {
-    color: #666;
-    font-size: 16px;
-}
-
-
-/* CHECKBOXES */
-
-body, html {
-  font-size: ~'calc(1rem + 1vw)';
-}
-
 .icon {
     composes: checkMark from '../icons.css';
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    color: transparent;
+    transition: opacity 0.3s 0.1s ease-in-out;
+    -webkit-text-stroke: 3px rgba(0, 0, 0, 0.5);
+    background-size: 15px;
+}
+
+.checkedIcon {
+    opacity: 1;
+    transform: scale(0);
+    width: 25px;
+    height: 25px;
+    color: white;
+    -webkit-text-stroke: 0;
+    animation: icon 0.2s cubic-bezier(1, 0.008, 0.565, 1.65) 1 forwards;
+}
+
+.label {
+    display: flex;
+    align-items: center;
 }
 
 .label__check {
-  display: inline-block;
-  border-radius: 3px;
-  border: 5px solid rgba(0,0,0,0.1);
-  background: white;
-  vertical-align: middle;
-  margin-right: 20px;
-  width: 2em;
-  height: 2em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border .3s ease;
-  
-  .icon {
-    opacity: 0;
-    font-size: ~'calc(1rem + 1vw)';
-    color: transparent;
-    transition: opacity .3s .1s ease;
-    -webkit-text-stroke: 3px rgba(0,0,0,.5);
-  }
-  
-  &:hover {
-    border: 5px solid rgba(0,0,0,0.2);
-  }
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: white;
+    vertical-align: middle;
+    margin-right: 20px;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border 0.3s ease;
+    outline: none;
+
+    &:hover {
+        outline: none;
+    }
+
+    &:focus {
+        outline: none;
+    }
 }
 
 .label__checkbox {
   display: none;
+  outline: none;
+}
+
+.label__text {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+
+    &:hover {
+        font-weight: 500;
+    }
 }
 
 .label__checkbox:checked + .label__text .label__check {
-  animation: check .5s cubic-bezier(0.895, 0.030, 0.685, 0.220) forwards;
-  
-  .icon {
-    opacity: 1;
-    transform: scale(0);
-    color: white;
-    -webkit-text-stroke: 0;
-    animation: icon .3s cubic-bezier(1.000, 0.008, 0.565, 1.650) .1s 1 forwards;
-  }
-}
-
-.center {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
+  animation: check 0.5s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
+  transform-origin: center center;
+  border: none;
+  width: 25px;
+  height: 25px;
+  outline: none;
 }
 
 @keyframes icon {
@@ -130,48 +81,53 @@ body, html {
     opacity: 0;
     transform: scale(0.3);
   }
+
   to {
     opacity: 1;
-    transform: scale(1)
+    transform: scale(1);
   }
 }
 
 @keyframes check {
   0% {
-    width: 1.5em;
-    height: 1.5em;
-    border-width: 5px;
+    width: 25px;
+    height: 25px;
+    padding: 2px;
+    outline: none;
   }
+
   10% {
-    width: 1.5em;
-    height: 1.5em;
+    width: 25px;
+    height: 25px;
     opacity: 0.1;
-    background: rgba(0,0,0,0.2);
-    border-width: 15px;
+    padding: 2px;
+    background: rgba(0, 0, 0, 0.2);
+    outline: none;
   }
+
   12% {
-    width: 1.5em;
-    height: 1.5em;
+    width: 25px;
+    height: 25px;
     opacity: 0.4;
-    background: rgba(0,0,0,0.1);
-    border-width: 0;
+    padding: 2px;
+    background: rgba(0, 0, 0, 0.1);
   }
+
   50% {
-    width: 2em;
-    height: 2em;
+    width: 25px;
+    height: 25px;
     background: #5cd9a6;
-    border: 0;
     opacity: 0.6;
+    outline: none;
   }
+
   100% {
-    width: 2em;
-    height: 2em;
+    width: 25px;
+    height: 25px;
     background: #5cd9a6;
-    border: 0;
     opacity: 1;
+    outline: none;
   }
 }
 
-
 /* CHECKBOXES END */
-

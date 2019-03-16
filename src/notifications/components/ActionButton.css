@@ -1,5 +1,4 @@
 .actionButton {
-    composes: CTA from '../../common-ui/elements.css';
     cursor: pointer;
     padding: 8px 20px;
     text-decoration: none;

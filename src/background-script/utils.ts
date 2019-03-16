@@ -7,7 +7,7 @@ export const openOverviewURL = (query?: string) =>
     browser.tabs.create({
         url:
             query !== undefined
-                ? `${OVERVIEW_URL}?query=${query}`
+                ? `${OVERVIEW_URL}?${query}`
                 : `${OVERVIEW_URL}`,
     })
 

@@ -3,8 +3,8 @@
 
 /* stylelint-disable  declaration-no-important, selector-pseudo-class-no-unknown */
 
-:global .react-datepicker__day--selected, 
-:global .react-datepicker__day--in-selecting-range, 
+:global .react-datepicker__day--selected,
+:global .react-datepicker__day--in-selecting-range,
 :global .react-datepicker__day--in-range {
             color: color4;
         }

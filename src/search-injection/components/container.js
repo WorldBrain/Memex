@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import Results from './Results'
-import qs from 'query-string'
 import strictUriEncode from 'strict-uri-encode'
 import ResultItem from './ResultItem'
 import RemovedText from './RemovedText'

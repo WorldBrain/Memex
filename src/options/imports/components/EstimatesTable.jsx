@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import cx from 'classnames'
 
 import { IMPORT_TYPE as TYPE } from '../constants'
 
@@ -23,9 +22,9 @@ const EstimatesTable = ({
         <thead className={localStyles.importTableHead}>
             <tr>
                 <th />
-                <th>Pages already saved</th>
-                <th>Not yet downloaded</th>
-                <th>Max. time to download</th>
+                <th>Saved pages</th>
+                <th>Not downloaded</th>
+                <th>Download time</th>
             </tr>
         </thead>
         <tbody>
@@ -51,7 +50,7 @@ const EstimatesTable = ({
                 </td>
                 <td>{estimates[TYPE.HISTORY].complete}</td>
                 <td>{estimates[TYPE.HISTORY].remaining}</td>
-                <td>{estimates[TYPE.HISTORY].timeRemaining}</td>
+                <td>{'~'}{estimates[TYPE.HISTORY].timeRemaining}</td>
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>
@@ -75,47 +74,7 @@ const EstimatesTable = ({
                 </td>
                 <td>{estimates[TYPE.BOOKMARK].complete}</td>
                 <td>{estimates[TYPE.BOOKMARK].remaining}</td>
-                <td>{estimates[TYPE.BOOKMARK].timeRemaining}</td>
-            </tr>
-            <tr
-                className={cx(localStyles.importTableRow, localStyles.disabled)}
-            >
-                <td>
-                    <input
-                        className={localStyles.checkbox}
-                        type="checkbox"
-                        name="evernote"
-                        id="evernote"
-                        disabled
-                    />
-                    <label className={localStyles.label} htmlFor="evernote">
-                        <span className={localStyles.checkboxText}>
-                            Evernote
-                        </span>
-                    </label>
-                </td>
-                <td className={localStyles.disabledComingSoon} colSpan="3">
-                    [COMING SOON]
-                </td>
-            </tr>
-            <tr
-                className={cx(localStyles.importTableRow, localStyles.disabled)}
-            >
-                <td>
-                    <input
-                        className={localStyles.checkbox}
-                        type="checkbox"
-                        name="evernote"
-                        id="pocket"
-                        disabled
-                    />
-                    <label className={localStyles.label} htmlFor="pocket">
-                        <span className={localStyles.checkboxText}>Pocket</span>
-                    </label>
-                </td>
-                <td className={localStyles.disabledComingSoon} colSpan="3">
-                    [COMING SOON]
-                </td>
+                <td>{'~'}{estimates[TYPE.BOOKMARK].timeRemaining}</td>
             </tr>
         </tbody>
     </table>

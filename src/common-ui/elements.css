@@ -1,5 +1,5 @@
 @value colors: './colors.css';
-@value color1, color2, color3, color4, color5, color6, color11 from colors;
+@value color1, color2, color3, color4, color5, color6, color11, radius3 from colors;
 
 /* FONTs */
 
@@ -57,6 +57,8 @@
 
 .nakedButton {
     composes: nakedButton hoverColor from './colors.css';
+    padding: 3px 8px 3px 8px;
+    border-radius: radius3;
 }
 
 .nakedSquareButton {
@@ -142,6 +144,7 @@
     border-radius: 3px;
     font-size: 14px;
     font-weight: 500;
+    text-align: left;
 
     &::placeholder {
         color: color6;

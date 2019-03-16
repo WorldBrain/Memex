@@ -10,16 +10,6 @@ const SearchInjection = ({ children }) => {
                 Show Memex Results in Search Engines
             </h1>
             {children}
-            <p className={styles.subText}>
-                Want others?{' '}
-                <a
-                    target="_new"
-                    href="https://github.com/WorldBrain/Memex/blob/develop/GETTING-STARTED.md"
-                >
-                    Help integrating them
-                </a>
-                .
-            </p>
         </div>
     )
 }

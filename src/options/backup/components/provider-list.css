@@ -9,17 +9,6 @@
     vertical-align: middle;
 }
 
-input[disabled] {
-    color: grey;
-}
-
-input {
-    margin-right: 15px;
-    vertical-align: middle;
-    margin-left: 10px;
-    margin-top: 0px;
-}
-
 .name {
     vertical-align: middle;
 }
@@ -104,6 +93,22 @@ input {
 
 .form {
     margin-top: 15px;
+}
+
+.form input {
+    margin-right: 10px;
+    vertical-align: middle;
+    margin-left: 10px;
+    margin-top: 0px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid #d2d2d2;
+    width: 100px;
+    text-align: center;
+}
+
+.form input[disabled] {
+    color: grey;
 }
 
 .link {

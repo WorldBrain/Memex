@@ -54,7 +54,7 @@ class IndexingPrefs extends React.PureComponent<Props> {
                     isChecked={this.props.bookmarks}
                     handleChange={this.props.toggleBookmarks}
                 >
-                    All that I bookmarked/tagged
+                    All that I bookmarked, tagged or sorted into collections. 
                 </Checkbox>
                 <Checkbox
                     id="index-links"
@@ -77,9 +77,6 @@ class IndexingPrefs extends React.PureComponent<Props> {
                 >
                     Capture screenshots
                 </Checkbox>
-                <p className={styles.subText}>
-                    Did you know? You can also blacklist domains and urls.
-                </p>
             </div>
         )
     }
