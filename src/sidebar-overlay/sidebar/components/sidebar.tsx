@@ -3,7 +3,7 @@ import Waypoint from 'react-waypoint'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
 import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
-import AnnotationBox from 'src/sidebar-common/annotation-box'
+import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
 import { Annotation } from '../types'

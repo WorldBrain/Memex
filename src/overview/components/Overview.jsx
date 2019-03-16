@@ -4,7 +4,7 @@ import propTypes from 'prop-types'
 
 import SidebarContainer, {
     selectors as sidebarSelectors,
-} from '../../sidebar-common'
+} from 'src/sidebar-overlay/sidebar'
 import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
 import {
@@ -18,7 +18,7 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import AnnotationsManager from '../../sidebar-common/annotations-manager'
+import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import { goToAnnotation } from '../utils'
 
 import styles from 'src/styles.css'

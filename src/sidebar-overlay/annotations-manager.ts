@@ -1,7 +1,7 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { Omit } from './types'
-import { Annotation } from './sidebar/types'
+import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import analytics from 'src/analytics'
 

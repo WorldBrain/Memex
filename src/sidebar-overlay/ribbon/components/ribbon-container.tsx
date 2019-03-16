@@ -22,8 +22,8 @@ import {
     selectors as bookmark,
 } from 'src/popup/bookmark-button'
 import { PageList } from 'src/custom-lists/background/types'
-import AnnotationsManager from 'src/sidebar-common/annotations-manager'
-import { actions as sidebarActs } from 'src/sidebar-common/sidebar/'
+import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar/'
 
 interface StateProps {
     isExpanded: boolean

@@ -9,7 +9,7 @@ import {
 } from '../../comment-box'
 import Sidebar from './sidebar'
 import SidebarState, { Annotation } from '../types'
-import { MapDispatchToProps } from '../../types'
+import RootState, { MapDispatchToProps } from '../../types'
 import AnnotationsManager from '../../annotations-manager'
 
 interface StateProps {
@@ -146,7 +146,7 @@ class SidebarContainer extends React.Component<Props> {
 const mapStateToProps: MapStateToProps<
     StateProps,
     OwnProps,
-    SidebarState
+    RootState
 > = state => ({
     isOpen: selectors.isOpen(state),
     isLoading: selectors.isLoading(state),

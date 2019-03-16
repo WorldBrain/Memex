@@ -12,13 +12,15 @@ import RibbonContainer, {
 import SidebarContainer, {
     actions as sidebarActions,
     selectors as sidebarSelectors,
-} from 'src/sidebar-common'
-import { Annotation, KeyboardActions } from 'src/sidebar-common/sidebar/types'
-import { actions as commentBoxActions } from 'src/sidebar-common/comment-box'
-import AnnotationsManager from 'src/sidebar-common/annotations-manager'
+} from 'src/sidebar-overlay/sidebar'
+import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
+import {
+    actions as commentBoxActions,
+    selectors as commentBoxselectors,
+} from 'src/sidebar-overlay/comment-box'
+import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { retryUntilErrorResolves } from '../utils'
-import { selectors as commentBoxselectors } from '../../sidebar-common/comment-box'
 import * as bookmarkActs from 'src/popup/bookmark-button/actions'
 
 interface StateProps {

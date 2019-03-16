@@ -2,10 +2,10 @@ import React, { Component, MouseEventHandler } from 'react'
 import { connect } from 'react-redux'
 import cx from 'classnames'
 
-import { MapDispatchToProps } from 'src/sidebar-common/types'
-import * as actions from 'src/sidebar-common/sidebar/actions'
-import AnnotationBox from 'src/sidebar-common/annotation-box'
-import { Annotation } from 'src/sidebar-common/sidebar/types'
+import { MapDispatchToProps } from 'src/sidebar-overlay/types'
+import * as actions from 'src/sidebar-overlay/sidebar/actions'
+import AnnotationBox from 'src/sidebar-overlay/annotation-box'
+import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 
 import { goToAnnotation } from '../../utils'
 

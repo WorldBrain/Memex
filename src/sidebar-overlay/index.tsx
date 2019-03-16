@@ -2,8 +2,8 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
 import RibbonSidebarController from './ribbon-sidebar-controller'
-import AnnotationsManager from 'src/sidebar-common/annotations-manager'
-import { KeyboardActions } from 'src/sidebar-common/sidebar/types'
+import AnnotationsManager from './annotations-manager'
+import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import {
     highlightAnnotations,
     highlightAndScroll,

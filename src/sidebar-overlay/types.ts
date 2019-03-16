@@ -7,7 +7,7 @@
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
 import { State as RibbonState } from './ribbon'
-import { State as SidebarState } from 'src/sidebar-common'
+import { State as SidebarState } from './sidebar'
 import { State as BlacklistBtnState } from 'src/popup/blacklist-button/reducer'
 import { State as BookmarkBtnState } from 'src/popup/bookmark-button/reducer'
 import { State as TagsBtnState } from 'src/popup/tags-button/reducer'
@@ -37,6 +37,12 @@ export type ClickHandler<T extends HTMLElement> = (
 ) => void
 
 export type Thunk<R = void> = ThunkAction<R, RootState, void, any>
+
+/**
+ * Allows omission of a key in T.
+ * Taken from: https://stackoverflow.com/a/48216010
+ */
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 
 export type MapDispatchToProps<DispatchProps, OwnProps> = (
     dispatch: ThunkDispatch<RootState, void, any>,

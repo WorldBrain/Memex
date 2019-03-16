@@ -2,7 +2,7 @@ import { combineReducers } from 'redux'
 
 import RootState from './types'
 import { reducer as ribbon } from './ribbon'
-import { reducer as sidebar } from 'src/sidebar-common'
+import { reducer as sidebar } from './sidebar'
 import { reducer as collectionsBtn } from 'src/popup/collections-button'
 import { reducer as blacklistBtn } from 'src/popup/blacklist-button'
 import { reducer as bookmarkBtn } from 'src/popup/bookmark-button'
