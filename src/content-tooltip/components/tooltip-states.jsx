@@ -14,7 +14,10 @@ export const InitialComponent = ({ createLink, createAnnotation }) => (
             className={styles.annotateButton}
             onMouseDown={createAnnotation}
         >
-            <span className={styles.annotateIcon} />
+            <span
+                data-annotation="annotationIcon"
+                className={styles.annotateIcon}
+            />
         </div>
         </ButtonTooltip>
          <ButtonTooltip
