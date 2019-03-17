@@ -16,6 +16,7 @@ interface Props {
     saveComment: React.EventHandler<React.SyntheticEvent>
     cancelComment: ClickHandler<HTMLElement>
     toggleBookmark: ClickHandler<HTMLButtonElement>
+    isAnnotation: boolean
 }
 
 interface State {
@@ -160,7 +161,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                 />
 
                 {/* Save and Cancel buttons. */}
-                {commentText.length > 0 && (
+                {(commentText.length > 0 || this.props.isAnnotation) && (
                     <div className={styles.footer}>
                         <div className={styles.interactions}>
                             <button

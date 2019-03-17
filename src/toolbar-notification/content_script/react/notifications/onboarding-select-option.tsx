@@ -5,24 +5,16 @@ import { getExtURL } from '../utils.js'
 
 const styles = require('./notifications.css')
 
-const images = {
-    annotateIcon: getExtURL('/img/annotate.svg'),
-    shareIcon: getExtURL('/img/share.svg'),
-}
-
 export default function OnboardingSelectOption({ onCloseRequested }) {
     return (
         <div className={styles.title}>
             <NotificationLayout
                 title={'STEP 2: SELECT OPTION IN TOOLTIP'}
-                icon={null}
                 onCloseRequested={onCloseRequested}
-                thirdRowImage={null}
-                closeIcon={null}
+                thirdRowImage={null} 
             >
                 <div className={styles.notifContainer}>
                     <img
-                        src={images.annotateIcon}
                         height={'30px'}
                         className={styles.selectIcon}
                     />
@@ -31,7 +23,6 @@ export default function OnboardingSelectOption({ onCloseRequested }) {
                     </div>
                     <br />
                     <img
-                        src={images.shareIcon}
                         className={styles.selectIcon}
                         height={'30px'}
                     />

@@ -69,6 +69,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
                     cancelComment={cancelComment}
                     isCommentBookmarked={isCommentBookmarked}
                     toggleBookmark={toggleBookmark}
+                    isAnnotation={true} // TODO: we need to pass the right state here 
                 />
             </div>
         )

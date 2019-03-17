@@ -1,15 +1,18 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6 from colors;
+
 .title {
-    color: #3eb995;
+    color: color4;
     font-size: 30px;
     font-weight: 800;
-    padding-top: 50px;
+    padding-top: 30px;
     margin-bottom: 20px;
-    font-style: italic;
 }
 
 .subtitle {
-    color: #3eb995;
+    color: color6;
     font-size: 18px;
+    font-weight: 400;
 }
 
 .subsubtitle {

@@ -6,6 +6,14 @@
 	background-size: 80%;
 }
 
+/* LOGOS */
+
+.logoSquared {
+	background-image: '/img/worldbrain-logo-narrow-bw-48.png';
+}
+
+/* OTHER */
+
 .removeIcon {
 	composes: iconPosition;
 	background-image: url('/img/removeIcon.svg');
@@ -63,3 +71,7 @@
 	background-image: url('/img/filtersIconFull.svg');
 }
 
+.arrowTriangle {
+	composes: iconPosition;
+	background: url('/img/arrow.svg');
+}

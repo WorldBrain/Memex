@@ -6,10 +6,7 @@ import { getExtURL } from '../utils.js'
 const styles = require('./notifications.css')
 
 const images = {
-    notifIcon: getExtURL('img/tag_blue.svg'),
-    brainIcon: getExtURL('/img/worldbrain-logo-narrow-bw-48.png'),
-    arrowUp: getExtURL('/img/notifArrowUp.svg'),
-    closeIcon: getExtURL('/img/cross.svg'),
+    arrowRight: getExtURL('/img/arrowRight.svg'),
 }
 
 export default function TagThisPage({ onCloseRequested }) {
@@ -17,15 +14,11 @@ export default function TagThisPage({ onCloseRequested }) {
         <div className={styles.title}>
             {/* <img className={styles.notifIcon} src={images.notifIcon}/> */}
             <NotificationLayout
-                title={'Tag & sort this page in collections'}
-                icon={images.notifIcon}
+                title={'Star, Tag & sort this page in collections'}
                 onCloseRequested={onCloseRequested}
-                thirdRowImage={images.arrowUp}
-                closeIcon={images.closeIcon}
+                thirdRowImage={images.arrowRight}
             >
-                Via the little{' '}
-                <img src={images.brainIcon} className={styles.icon} /> icon in
-                the menu
+                Move your cursor to the right side of any screen to open the menu.
             </NotificationLayout>
         </div>
     )

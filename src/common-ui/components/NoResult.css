@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6 from colors;
+
 .noResult {
     font-weight: bold;
     text-align: center;

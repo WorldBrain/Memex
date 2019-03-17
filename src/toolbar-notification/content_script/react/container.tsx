@@ -40,7 +40,7 @@ export class ToolbarNotification extends Component<Props> {
                 left: x - 185,
                 top: y + 80,
                 height: 'auto',
-                width: '400px',
+                width: '550px',
                 paddingTop: '20px',
                 position: 'absolute',
                 textAlign: 'center',
@@ -57,55 +57,52 @@ export class ToolbarNotification extends Component<Props> {
     render() {
         const containerStyles = this.deriveContainerStyles(this.props.position)
         return (
-            <div className={styles.container} style={containerStyles}>
-                {this.props.type === 'tooltip-first-close' && (
-                    <TooltipFirstCloseNotification
-                        onCloseRequested={this.props.onCloseRequested}
-                    />
-                )}
-                {this.props.type === 'go-to-dashboard' && (
-                    <GoToDashboard
-                        onCloseRequested={this.props.onCloseRequested}
-                    />
-                )}
-                {this.props.type === 'tag-this-page' && (
-                    <TagThisPage
-                        onCloseRequested={this.props.onCloseRequested}
-                    />
-                )}
-                {this.props.type === 'ribbon-first-close' && (
-                    <RibbonFirstCloseNotification
-                        onCloseRequested={this.props.onCloseRequested}
-                    />
-                )}
-                {this.props.type === 'onboarding-higlight-text' && (
-                    <OnboardingHighlightText
-                        onCloseRequested={this.props.onCloseRequested}
-                    />
-                )}
-                {this.props.type === 'onboarding-select-option' && (
-                    <OnboardingSelectOption
-                        onCloseRequested={this.props.onCloseRequested}
-                    />
-                )}
-                {this.props.type === 'power-search-browse' && (
-                    <PowerSearchBrowse
-                        onCloseRequested={() => {
-                            this.props.onCloseRequested()
-                            this.props.triggerNextNotification()
-                        }}
-                        openDashboard={async () => {
-                            this.processEventRPC({
-                                type: EVENT_NAMES.POWERSEARCH_GOTO_DASH,
-                            })
-                            await setOnboardingStage(
-                                FLOWS.powerSearch,
-                                STAGES.powerSearch.overviewTooltips,
-                            )
-                            this.openOptionsTab('overview')
-                        }}
-                    />
-                )}
+            <div className={styles.screen}>
+                <div className={styles.container} style={containerStyles}>
+                    {this.props.type === 'tooltip-first-close' && (
+                        <TooltipFirstCloseNotification
+                            onCloseRequested={this.props.onCloseRequested}
+                        />
+                    )}
+                    {this.props.type === 'go-to-dashboard' && (
+                        <GoToDashboard
+                            onCloseRequested={this.props.onCloseRequested}
+                        />
+                    )}
+                    {this.props.type === 'tag-this-page' && (
+                        <TagThisPage
+                            onCloseRequested={this.props.onCloseRequested}
+                        />
+                    )}
+                    {this.props.type === 'ribbon-first-close' && (
+                        <RibbonFirstCloseNotification
+                            onCloseRequested={this.props.onCloseRequested}
+                        />
+                    )}
+                    {this.props.type === 'onboarding-higlight-text' && (
+                        <OnboardingHighlightText
+                            onCloseRequested={this.props.onCloseRequested}
+                        />
+                    )}
+                    {this.props.type === 'power-search-browse' && (
+                        <PowerSearchBrowse
+                            onCloseRequested={() => {
+                                this.props.onCloseRequested()
+                                this.props.triggerNextNotification()
+                            }}
+                            openDashboard={async () => {
+                                this.processEventRPC({
+                                    type: EVENT_NAMES.POWERSEARCH_GOTO_DASH,
+                                })
+                                await setOnboardingStage(
+                                    FLOWS.powerSearch,
+                                    STAGES.powerSearch.overviewTooltips,
+                                )
+                                this.openOptionsTab('overview')
+                            }}
+                        />
+                    )}
+                </div>
             </div>
         )
     }

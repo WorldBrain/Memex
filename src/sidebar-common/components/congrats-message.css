@@ -1,12 +1,16 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4 from colors;
+
 .container {
-    width: 75%;
-    margin: 20px auto;
-    margin-left: 48px;
+    max-width: 100%;
+    padding: 20px;
     text-align: center;
 }
 
 .firstRow {
     display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
 }
 
 .partyPopper {
@@ -15,29 +19,16 @@
 }
 
 .title {
-    color: #506288;
-    font-weight: 400;
+    color: color4;
+    font-weight: 600;
     font-size: 17px;
     text-align: left;
-    margin-left: 15px;
-    text-transform: uppercase;
 }
 
 .learnMore {
-    background: #3eb995;
-    color: white;
-    padding: 5px 15px;
-    border-radius: 15px;
+    composes: CTA from 'src/common-ui/elements.css';
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 200;
-    width: fit-content;
-    margin: 3px auto;
-}
-
-.subtext {
-    color: #616161;
-    font-family: 11px;
-    margin-top: 6px;
-    cursor: pointer;
+    font-size: 14px;
+    width: max-content;
+    margin: auto;
 }

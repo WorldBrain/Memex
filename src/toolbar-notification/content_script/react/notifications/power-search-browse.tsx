@@ -5,33 +5,24 @@ import { getExtURL } from '../utils.js'
 
 const styles = require('./power-search-browse.css')
 
-const images = {
-    closeIcon: getExtURL('/img/cross.svg'),
-    annotateIcon: getExtURL('/img/annotate.svg'),
-    shareIcon: getExtURL('/img/share.svg'),
-}
-
 export default function PowerSearchBrowse({ onCloseRequested, openDashboard }) {
     return (
         <div className={styles.container}>
             <NotificationLayout
                 title={''}
-                icon={null}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={null}
-                closeIcon={images.closeIcon}
             >
                 <div className={styles.notifContainer}>
                     <p className={styles.title}>
-                        From now on you can search with any word of any page you
-                        visit.
+                        Memex makes every page you visit full-text searchable.
                     </p>
                     <p className={styles.instructions}>
-                        Search via the{' '}
+                        Try searching with a term either on this page on the<br/>
                         <span className={styles.button} onClick={openDashboard}>
                             Dashboard
                         </span>{' '}
-                        or via the address bar by typing{' '}
+                        or via the URL bar by typing{' '}
                     </p>
                     <p className={styles.keys}>
                         <span className={styles.key}>W</span>+

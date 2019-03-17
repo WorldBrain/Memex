@@ -8,9 +8,9 @@
 }
 
 .closeIcon {
-    composes: nakedSquareButton from '../../common-ui/elements.css';
-    background-image: url('/img/removeIcon.svg');
-    background-size: 17px;
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: removeIcon from 'src/common-ui/icons.css';
+    background-size: 12px;
     display: block;
     cursor: pointer;
     background-repeat: no-repeat;

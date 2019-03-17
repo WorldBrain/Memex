@@ -1,29 +1,21 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6, color2, radius3 from colors;
+
 .mainNotifContainer {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     margin-top: 30px;
     background-color: #fff;
-    padding: 4px 20px 20px 20px;
+    border-radius: radius3;
+    padding: 15px 20px 20px 20px;
     box-shadow: 0 4px 20px 1px rgba(62, 185, 149, 0.0902);
     min-width: 800px;
-}
-
-.whyContainer {
-    display: flex;
-    justify-content: flex-end;
-    position: relative;
-    top: 14px;
 }
 
 .notifContainer {
     display: flex;
     flex-direction: row;
-}
-
-.logo img {
-    width: 20px;
-    height: auto;
 }
 
 .content {
@@ -40,58 +32,44 @@
 .titleMessage {
     display: flex;
     flex-direction: column;
-    margin: 0 10px 0 20px;
     font-size: 14px;
 }
 
 .title {
     font-size: 18px;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     max-width: 600px;
 }
 
 .message {
-    color: #777;
+    color: #555;
     text-align: justify;
+    line-height: 20px;
     font-size: 14px;
+    margin-bottom: 20px;
 }
 
 .buttonTick {
     display: flex;
     flex-direction: row;
-    margin: 30px 0 -3px 20px;
     align-items: flex-end;
     justify-content: space-between;
 }
 
 .button {
+    composes: CTA from 'src/common-ui/elements.css';
     padding: 8px 20px;
-    background-color: #3eb995;
-    color: white !important; /* stylelint-disable */
     font-size: 16px;
-    width: fit-content;
-    border-radius: 2px;
-    cursor: pointer !important;
     text-decoration: none;
-    margin-right: 10px;
     text-align: center;
-
-    &:hover {
-        text-decoration: none !important;
-    }
 }
 
 .tick {
-    width: 40px;
-    margin-bottom: -6px;
-    padding-top: 0px;
+    composes: cancelNaked from 'src/common-ui/elements.css';
+    margin-top: 10px;
+    font-size: 14px;
     cursor: pointer;
-
-    &:hover {
-        background-color: #efefef;
-        border-radius: 90px;
-    }
 }
 
 .tick i {

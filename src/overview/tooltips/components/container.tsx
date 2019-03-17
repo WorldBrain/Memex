@@ -57,12 +57,12 @@ class TooltipContainer extends Component<Props> {
         if (tooltip === 'more-filters') {
             return (
                 <Tooltip
-                    position={getBottomCenter('#filter-icon', 20, -10)}
+                    position={getBottomCenter('#filter-icon', -50, 70)}
                     closeTooltip={this.props.closeTooltip}
                     previousTooltip={this.props.previousTooltip}
                 >
                     <React.Fragment>
-                        More <br /> Filters
+                        More Filters
                     </React.Fragment>
                 </Tooltip>
             )
