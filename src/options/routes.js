@@ -24,14 +24,14 @@ export default [
     {
         name: 'Settings',
         pathname: '/settings',
-        component: Settings,
+        component: Settings, 
         icon: 'settings',
     },
     {
         name: 'Import',
         pathname: '/import',
         component: ImportContainer,
-        icon: 'file_download',
+        icon: 'import',
     },
     {
         name: 'Backup & Restore',
@@ -40,8 +40,8 @@ export default [
         icon: 'backup',
     },
     {
-        name: 'Blacklist',
-        pathname: '/blacklist',
+        name: 'Blocklist',
+        pathname: '/blocklist',
         component: SettingsContainer,
         icon: 'block',
     },
@@ -49,14 +49,14 @@ export default [
         name: 'Privacy',
         pathname: '/privacy',
         component: Privacy,
-        icon: 'security',
+        icon: 'privacy',
     },
-    {
-        name: 'Memex Team',
-        pathname: 'https://worldbrain.io/team',
-        icon: 'people',
-        isExternal: true,
-    },
+    // {
+    //     name: 'Memex Team',
+    //     pathname: 'https://worldbrain.io/team',
+    //     icon: 'team',
+    //     isExternal: true,
+    // },
     {
         name: 'Help',
         pathname: 'https://worldbrain.io/help',
