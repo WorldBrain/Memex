@@ -2,47 +2,66 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { Checkbox } from 'src/common-ui/components'
+// import { Checkbox } from 'src/common-ui/components'
 import {
     SearchFilters,
-    FilterBar,
+    // BookmarkFilter,
+    // FilterBar,
     FilteredRow,
-    IndexDropdownSB,
-    ContentTypeContainer,
+    // IndexDropdownSB,
 } from './components'
 
 import Types from './components/filters/type-filter/Types'
-// import Tags from './components/filters/tags-filter/Tags'
+import Bookmark from './components/Bookmark'
+import Tags from './components/filters/tags-filter/Tags'
+import Domains from './components/Domains'
 
 import { actions, selectors } from './'
 import { selectors as sidebar } from '../overview/sidebar-left'
 
 class SearchFiltersContainer extends PureComponent {
     static propTypes = {
-        filteredTags: PropTypes.arrayOf(PropTypes.string).isRequired,
-        filteredDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
-        addTagFilter: PropTypes.func.isRequired,
-        delTagFilter: PropTypes.func.isRequired,
-        addDomainFilter: PropTypes.func.isRequired,
-        showDomainFilter: PropTypes.func.isRequired,
-        showTagFilter: PropTypes.func.isRequired,
-        tagFilterDropdown: PropTypes.bool.isRequired,
-        domainFilterDropdown: PropTypes.bool.isRequired,
-        bookmarkFilter: PropTypes.bool.isRequired,
-        onShowOnlyBookmarksChange: PropTypes.func.isRequired,
-        isSidebarOpen: PropTypes.bool.isRequired,
-        hideTagFilter: PropTypes.func.isRequired,
-        hideDomainFilter: PropTypes.func.isRequired,
-        delIncDomainFilter: PropTypes.func.isRequired,
-        delExcDomainFilter: PropTypes.func.isRequired,
+        // filteredTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        // filteredDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
+        // addTagFilter: PropTypes.func.isRequired,
+        // delTagFilter: PropTypes.func.isRequired,
+        // addDomainFilter: PropTypes.func.isRequired,
+        // showDomainFilter: PropTypes.func.isRequired,
+        // showTagFilter: PropTypes.func.isRequired,
+        // tagFilterDropdown: PropTypes.bool.isRequired,
+        // domainFilterDropdown: PropTypes.bool.isRequired,
+        // bookmarkFilter: PropTypes.bool.isRequired,
+        // onShowOnlyBookmarksChange: PropTypes.func.isRequired,
+        // isSidebarOpen: PropTypes.bool.isRequired,
+        // hideTagFilter: PropTypes.func.isRequired,
+        // hideDomainFilter: PropTypes.func.isRequired,
+        // delIncDomainFilter: PropTypes.func.isRequired,
+        // delExcDomainFilter: PropTypes.func.isRequired,
         fetchSuggestedTags: PropTypes.func.isRequired,
-        suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        // suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         fetchSuggestedDomains: PropTypes.func.isRequired,
-        suggestedDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
+        // suggestedDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
         // toggleFilterTypes: PropTypes.func.isRequired,
         showfilteredTypes: PropTypes.bool.isRequired,
     }
 
+    constructor(props) {
+        super(props)
+        // Temporary dummy data for showing features.
+        this.state = {
+            filterTypes: [
+                { value: 'Websites', active: true, available: true },
+                { value: 'Annotations', active: true, available: true },
+                { value: 'Highlights', active: true, available: true },
+                { value: 'Comments', active: true, available: true },
+                {
+                    value: 'Received Memex.Links',
+                    active: true,
+                    available: true,
+                },
+            ],
+        }
+    }
     componentDidMount() {
         /** fetch initial suggested tags and domains to prepopulate
          filter dropdown **/
@@ -50,7 +69,9 @@ class SearchFiltersContainer extends PureComponent {
         this.props.fetchSuggestedDomains()
     }
 
-    renderFilteredTags = () => {
+    renderBookmarkFilter = () => <BookmarkFilter/>
+
+    /* renderFilteredTags = () => {
         return !this.props.tagFilterDropdown
             ? this.props.filteredTags.map((tag, i) => (
                   <FilteredRow
@@ -61,7 +82,7 @@ class SearchFiltersContainer extends PureComponent {
                   />
               ))
             : null
-    }
+    } */
 
     renderContentFilter = () => (
         <ContentTypeContainer
@@ -70,7 +91,7 @@ class SearchFiltersContainer extends PureComponent {
         />
     )
 
-    renderFilteredDomains = () => {
+    /* renderFilteredDomains = () => {
         return !this.props.domainFilterDropdown
             ? this.props.filteredDomains.map(({ value, isExclusive }, i) => (
                   <FilteredRow
@@ -82,16 +103,17 @@ class SearchFiltersContainer extends PureComponent {
                   />
               ))
             : null
-    }
+    } */
 
-    toggleDomainFilter = ({ value, isExclusive }) => () => {
-        !isExclusive
-            ? this.props.delIncDomainFilter(value)
-            : this.props.delExcDomainFilter(value)
-    }
+    // toggleDomainFilter = ({ value, isExclusive }) => () => {
+    //     !isExclusive
+    //         ? this.props.delIncDomainFilter(value)
+    //         : this.props.delExcDomainFilter(value)
+    // }
 
-    renderTagFilter = () =>
-        !this.props.tagFilterDropdown ? (
+    renderTagFilter = () => <Tags />
+
+    /* !this.props.tagFilterDropdown ? (
             <FilterBar onBarClick={this.props.showTagFilter} filter="Tag" />
         ) : (
             <IndexDropdownSB
@@ -103,10 +125,10 @@ class SearchFiltersContainer extends PureComponent {
                 isSidebarOpen={this.props.isSidebarOpen}
                 closeDropdown={this.props.hideTagFilter}
             />
-        )
+        ) */
 
-    renderDomainFilter = () =>
-        !this.props.domainFilterDropdown ? (
+    renderDomainFilter = () => <Domains />
+    /* !this.props.domainFilterDropdown ? (
             <FilterBar
                 onBarClick={this.props.showDomainFilter}
                 filter="Domain"
@@ -125,32 +147,39 @@ class SearchFiltersContainer extends PureComponent {
                 isSidebarOpen={this.props.isSidebarOpen}
                 closeDropdown={this.props.hideDomainFilter}
             />
-        )
+        ) */
 
-    renderBookmarkFilter = () => (
-        <Checkbox
-            id="toggle-bookmark"
-            isChecked={this.props.bookmarkFilter}
-            handleChange={this.props.onShowOnlyBookmarksChange}
-        >
-            Starred pages
-        </Checkbox>
-    )
+    renderBookmarkFilter = () => <Bookmark />
 
-    renderTypeFilter = () => (
-        <div>
-            <Types />
-        </div>
-    )
+    // (
+    //     <Checkbox
+    //         id="toggle-bookmark"
+    //         isChecked={this.props.bookmarkFilter}
+    //         handleChange={this.props.onShowOnlyBookmarksChange}
+    //     >
+    //         Bookmarks only
+    //     </Checkbox>
+    // )
 
+    renderTypeFilter = () => <Types />
+
+    // <FilterBar
+    //    onBarClick={() => {
+    //       this.props.toggleFilterTypes()
+    //   }}
+    //   filter="Type"
+    // >
     render() {
+        // console.log(this.props.filteredTags)
         return (
             <SearchFilters
                 bookmarkFilter={this.renderBookmarkFilter()}
                 tagFilter={this.renderTagFilter()}
                 domainFilter={this.renderDomainFilter()}
-                filteredTags={this.renderFilteredTags()}
-                filteredDomains={this.renderFilteredDomains()}
+                // filteredTags={this.renderFilteredTags()}
+                // filteredDomains={this.renderFilteredDomains()}
+                filteredTypes={this.renderFilteredTypes()}
+                typeFilters={this.renderTypeFilter()}
             />
         )
     }

@@ -32,6 +32,10 @@ class SearchFilters extends PureComponent {
                     </div>
                 )}
                 {this.props.contentFilter}
+                {this.props.typeFilters}
+                <div className={styles.filtered}>
+                    {this.props.filteredTypes}
+                </div>
             </div>
         )
     }
