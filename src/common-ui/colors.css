@@ -113,6 +113,14 @@
     color: color3;
 }
 
+.darkGreyBackground {
+    background-color: color9;
+}
+
+.darkGrey {
+    color: color9;
+}
+
 .darkBlueBackground {
     background-color: color3;
 }
