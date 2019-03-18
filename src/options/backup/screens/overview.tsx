@@ -152,16 +152,26 @@ export default class OverviewContainer extends React.Component<Props> {
                         </p>
                         <div className={styles.option}>
                             <span className={styles.name}>
-                                Enable Automatic Backups
+                                {this.state.automaticBackupEnabled
+                                    ? 'Automatic Backups Enabled'
+                                    : 'Enable Automatic Backups'}
                             </span>
                             <SmallButton
                                 extraClass={localStyles.right}
-                                onClick={() =>
-                                    this.setState({ showPricing: true })
+                                onClick={() => {
+                                    if (!this.state.automaticBackupEnabled) {
+                                        this.setState({ showPricing: true })
+                                    }
+                                }}
+                                color={
+                                    this.state.automaticBackupEnabled
+                                        ? 'green'
+                                        : 'darkblue'
                                 }
-                                color="darkblue"
                             >
-                                Upgrade
+                                {this.state.automaticBackupEnabled
+                                    ? 'Upgraded'
+                                    : 'Upgrade'}
                             </SmallButton>
                             <span
                                 className={classNames(
@@ -254,7 +264,8 @@ export default class OverviewContainer extends React.Component<Props> {
                                 localStyles.limitWidth,
                             )}
                         >
-                            Restoring will <b>replace</b> all current data with a backup.
+                            Restoring will <b>replace</b> all current data with
+                            a backup.
                         </span>
                     </div>
                     <div className={styles.option}>
