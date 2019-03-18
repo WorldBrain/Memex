@@ -27,6 +27,7 @@
 .saveBtn {
     composes: footerBoldText from '../../annotation-box/all-modes-footer.css';
     margin-left: 6px;
+    background: transparent;
 
     &:focus {
         background-color: #79797945;
@@ -35,6 +36,7 @@
 
 .cancelBtn {
     composes: footerText from '../../annotation-box/all-modes-footer.css';
+    background: transparent;
 
     &:focus {
         background-color: #79797945;

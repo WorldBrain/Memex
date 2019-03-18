@@ -38,7 +38,7 @@
 }
 
 .menuItem i {
-    font-size: 18px;
+    font-size: 20px;
     float: right;
 }
 
@@ -69,22 +69,28 @@
 }
 
 .searchContainer {
+    composes: searchField from 'src/common-ui/elements.css';
+    justify-content: space-between;
+    padding: 2px 10px 2px 10px;
+    margin: 5px 5px 5px 5px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px dashed #d2d2d28c;
-    padding: 4px 11px;
-    margin-bottom: 0;
+}
+
+.searchIcon {
+    display: flex;
+    composes: searchIcon from '../../common-ui/icons.css';
+    width: 25px;
+    height: 25px;
+    background-size: 20px;
 }
 
 .search {
-    composes: textColorSearchPlaceholder from '../../common-ui/colors.css';
+    composes: searchField from 'src/common-ui/elements.css';
     width: 90%;
-    font-size: 14px;
     padding: 10px 0;
     border: none;
-    background-color: white;
-    margin-left: 10px;
+    background-color: transparent;
 
     &:focus {
         outline: none;

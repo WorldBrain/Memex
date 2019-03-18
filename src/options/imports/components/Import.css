@@ -109,10 +109,7 @@
 }
 
 .title {
-    color: color4;
-    font-weight: bold;
-    font-size: 16px;
-    letter-spacing: 1px;
+    composes: sectionTitle from 'src/options/base.css';
 }
 
 .warningContainer {

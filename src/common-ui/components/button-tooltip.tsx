@@ -56,6 +56,8 @@ class ButtonTooltip extends React.Component<Props, State> {
                         className={cx(styles.tooltipBubble, {
                             [styles.tooltipLeft]:
                                 this.props.position === 'left',
+                            [styles.tooltipLeftNarrow]:
+                                this.props.position === 'leftNarrow',
                             [styles.tooltipRight]:
                                 this.props.position === 'right',
                             [styles.tooltipRightCentered]:

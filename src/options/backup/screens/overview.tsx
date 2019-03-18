@@ -254,8 +254,7 @@ export default class OverviewContainer extends React.Component<Props> {
                                 localStyles.limitWidth,
                             )}
                         >
-                            This will replace all present data and replace
-                            everything from backup.
+                            Restoring will <b>replace</b> all current data with a backup.
                         </span>
                     </div>
                     <div className={styles.option}>

@@ -6,8 +6,9 @@
     display: flex;
     align-items: center;
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 500;
+    margin-bottom: 10px;
 
     & > div {
         display: none;
@@ -22,15 +23,23 @@
 
 .btnBar {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    flex-direction: row-reverse;
 }
 
 .btn {
-    composes: CTA from 'src/common-ui/elements.css';
     border: none;
     cursor: pointer;
     font-size: 17px;
     font-weight: 600;
+    height: 30px;
+    margin: 10px;
+    width: 75px;
+    text-align: center;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:disabled,
     &[disabled] {
@@ -41,9 +50,6 @@
 
 .confirmBtn {
     composes: CTA from 'src/common-ui/elements.css';
-    border-radius: 3px;
-    font-weight: 500;
-    cursor: pointer;
 }
 
 .cancelBtn {

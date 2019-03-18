@@ -119,6 +119,7 @@
     padding: 5px;
     display: flex;
     margin-left: 15px;
+    background-size: 21px;
 }
 
 .upgradeIcon {

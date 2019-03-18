@@ -1,25 +1,26 @@
+@value colors: 'src/common-ui/colors.css';
+@value color3 from colors;
+
 .privacy {
     margin-top: 20px;
 }
 
 .title {
-    color: #3eb995;
-    font-weight: 600;
-    font-size: 20px;
-    letter-spacing: 1px;
+    composes: sectionTitle from 'src/options/base.css';
+}
+
+.subTitle {
+    composes: subTitle from 'src/options/base.css';
 }
 
 .content {
-    font-style: normal;
+    composes: subText from 'src/options/base.css';
     margin-top: 20px;
     font-size: 15px;
-    color: #777;
     letter-spacing: 1px;
-    width: 80%;
-    min-width: 450px;
-    font-weight: 50;
+    line-height: 23px;
 }
 
 .link {
-    color: #928989;
+    color: color3;
 }

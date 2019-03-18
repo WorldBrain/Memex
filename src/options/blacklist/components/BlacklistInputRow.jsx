@@ -29,7 +29,7 @@ const BlacklistInputRow = ({
                 className={styles.blacklistButton}
                 disabled={isSaveBtnDisabled}
             >
-                ADD TO BLACKLIST
+                Block
             </button>
         </div>
     </form>

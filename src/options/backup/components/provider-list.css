@@ -41,9 +41,8 @@
 }
 
 .description {
-    composes: subTitleColor from '../../../common-ui/colors.css';
-    font-size: 13px;
-    margin: 4px 0px 0px 37px;
+    composes: subText from 'src/options/base.css';
+    margin: 4px 0px 0px 41px;
     line-height: 19px;
 }
 
@@ -96,14 +95,12 @@
 }
 
 .form input {
-    margin-right: 10px;
+    margin-right: 20px;
     vertical-align: middle;
     margin-left: 10px;
     margin-top: 0px;
     padding: 5px 10px;
     border-radius: 3px;
-    border: 1px solid #d2d2d2;
-    width: 100px;
     text-align: center;
 }
 

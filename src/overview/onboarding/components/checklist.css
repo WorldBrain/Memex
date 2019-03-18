@@ -33,29 +33,17 @@
 }
 
 .close {
+    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     position: absolute;
     top: 8px;
     right: 8px;
-    width: 25px;
-    height: 25px;
-    background: url('/img/cross.svg');
+    width: 22px;
+    height: 22px;
     background-repeat: no-repeat;
     background-position: center;
     padding: 2px;
-    background-size: 15px;
+    background-size: 12px;
     margin: 10px 10px 0px 0px;
     cursor: pointer;
-
-    &:hover {
-        border-radius: 50px;
-        background-color: #f0f0f0;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 15px;
-        margin: 10px 10px 0px 0px;
-        top: 8px;
-        width: 25px;
-        height: 25px;
-        right: 8px;
-    }
 }

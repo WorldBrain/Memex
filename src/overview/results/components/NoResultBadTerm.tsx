@@ -28,26 +28,13 @@ class NoResultBadTerm extends PureComponent<Props> {
                     <br />
                     <br />
                 </div>
-                <div className={styles.subsubtitle}>
-                    We know there is still a lot of{' '}
-                    <a
-                        className={styles.link}
-                        target="_new"
-                        href={this.props.roomToImproveUrl}
-                    >
-                        room to improve
-                    </a>
-                    .
-                </div>
                 <div className={styles.btnBox}>
+                    <span className={styles.subsubtitle}>
+                            Not what you expected?
+                    </span>
                     <a target="_new" href={this.props.reportProbUrl}>
                         <button className={styles.button}>
                             Report a Problem
-                        </button>
-                    </a>
-                    <a target="_new" href={this.props.monthlyUpdatesUrl}>
-                        <button className={styles.button}>
-                            Get Monthly Updates
                         </button>
                     </a>
                 </div>

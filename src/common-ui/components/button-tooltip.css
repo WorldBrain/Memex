@@ -52,7 +52,12 @@
 
 .tooltipLeft {
     justify-content: flex-end;
-    right: 40px;
+    right: 50px;
+}
+
+.tooltipLeftNarrow {
+    justify-content: flex-end;
+    right: 25px;
 }
 
 .tooltipMessage {

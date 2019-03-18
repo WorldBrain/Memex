@@ -16,10 +16,10 @@
 }
 
 .subsubtitle {
-    color: #3eb995;
-    font-size: 16px;
-    margin-top: 50px;
-    margin-bottom: 15px;
+    color: color4;
+    font-size: 15px;
+    margin-right: 10px;
+    font-weight: 300;
 }
 
 .link {
@@ -27,23 +27,15 @@
 }
 
 .button {
-    border-radius: 30px;
-    border: 1px solid #3eb995;
-    font-weight: 100;
+    composes: CTA from 'src/common-ui/elements.css';
     font-size: 15px;
-    color: #3eb995;
     cursor: pointer;
-    height: 25px;
-    width: 200px;
-    margin-top: 5px;
-    margin-left: 15px;
-
-    &:hover {
-        background: #3eb995;
-        color: white;
-    }
 }
 
 .btnBox {
-    display: block;
+    display: flex;
+    flex-direction: row;
+    margin-top: 50px;
+    justify-content: center;
+    align-items: center;
 }

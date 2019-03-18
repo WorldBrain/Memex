@@ -110,8 +110,8 @@ class PageResultItem extends PureComponent<Props> {
                                     </span>
                                 </div>
                                  <ButtonTooltip
-                                    tooltipText='Delete this page & all related content'
-                                    position="bottom"
+                                    tooltipText='Remove from collection'
+                                    position="leftNarrow"
                                 >
                                 <div className={styles.crossRibbon}>
                                     {this.props.isListFilterActive && (

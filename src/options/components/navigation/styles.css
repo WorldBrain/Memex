@@ -73,7 +73,7 @@
     display: flex;
     text-decoration: none;
     font-size: 15px;
-    padding: 5px 5px 5px 15px;
+    padding: 10px 5px 10px 25px;
     letter-spacing: 0.5px;
     align-items: center;
 
@@ -87,6 +87,10 @@
 
 .navlink > span {
     padding-left: 15px;
+}
+
+.navLink li:first-of-type {
+    margin-bottom: 50px;
 }
 
 .nav li:first-of-type a {

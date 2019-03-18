@@ -22,19 +22,11 @@
 }
 
 .header {
-    font-size: 20px;
-    color: color4;
-    font-weight: 600;
-    letter-spacing: 1px;
-    margin: 10px 0 15px;
+    composes: sectionTitle from 'src/options/base.css';
 }
 
 .subHeader {
-    font-size: 15px;
-    color: color6;
-    margin: -5px 0 20px;
-    line-height: 20px;
-    font-weight: 300;
+    composes: subText from 'src/options/base.css';
 }
 
 .dropdown {

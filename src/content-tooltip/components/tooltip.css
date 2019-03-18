@@ -233,11 +233,11 @@
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 25px;
     position: absolute;
-    right: 6px;
-    top: -10px;
+    right: 4px;
+    top: -13px;
     z-index: 100001;
     animation: slideIn 0.05s ease-in-out;
 }
@@ -279,12 +279,12 @@
     composes: nakedButton from '../../common-ui/elements.css';
     background-image: url('/img/removeIcon.svg');
     padding: 2px;
-    width: 17px;
-    height: 17px;
+    width: 20px;
+    height: 20px;
     background-repeat: no-repeat;
     margin-right: 2px;
     background-position: center;
-    background-size: 16px 16px;
+    background-size: 12px 12px;
 }
 
 /* Loading CSS */

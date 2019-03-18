@@ -5,7 +5,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1542240979258
+export const releaseTime: number = 1552869760591
 
 /* Example Notification:
 {
@@ -60,45 +60,29 @@ export const releaseTime: number = 1542240979258
 
 export const NOTIFS: NotifDefinition[] = [
     {
-        id: 'restore',
+        id: 'ribbon_new_2019_18_03',
         search: {
-            title: "Tab Manager, shortcuts, restore",
-            message: 'A release packed with new features',
+            title: "🚩 New Feature: Ribbon 2.0",
+            message: 'Tag, star, sort pages & add notes blazingly fast. Try it out by moving your cursor to the right side of the screen.',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
+                        url: 'https://www.notion.so/worldbrain/0-15-0-67ec1dcbf41642eda2fcef516ed1928a',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
                 },
             ],
         },
-        system: {
-            title: 'Tab Manager & shortcuts',
-            message:
-                'A release packed with new features',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
-                        context: 'new-tab',
-                    },
-                    label: 'Learn More',
-                },
-            ],
-        },
         overview: {
-            title: "Tab Manager, keyboard shortcuts & restore",
-            message:
-                'Check out our latest release packed with new features',
+            title: "🚩 New Feature: Ribbon 2.0",
+            message: 'Tag, star, sort pages & add notes blazingly fast. Try it out by moving your cursor to the right side of the screen.',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/0-13-0-7c5e607f7fd04fbf83d454866d683db9',
+                        url: 'https://www.notion.so/worldbrain/0-15-0-67ec1dcbf41642eda2fcef516ed1928a',
                         context: 'new-tab',
                     },
                     label: 'Find out more',

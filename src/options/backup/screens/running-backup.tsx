@@ -40,7 +40,7 @@ function renderFailMessage() {
             </p>
             <p className={STYLES.name}>
                 Please check whether your Memex Backup app is running,{' '} you have enough space in your
-                <a href="https://http://drive.google.com">Google Drive</a> or if you have{' '}
+                <a href="https://drive.google.com">Google Drive</a> or if you have{' '}
                 a stable internet connection.<br />If you still encounter issues
                 please{' '}
                 <a href="mailto:support@worldbrain.io">contact support</a>.

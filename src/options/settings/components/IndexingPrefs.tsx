@@ -29,7 +29,7 @@ class IndexingPrefs extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div>
+            <div className={styles.block}>
                 <h1 className={styles.header}>Indexing Preferences</h1>
                 <h3 className={styles.subHeader}>
                     Which websites do you want to make searchable?

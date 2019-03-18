@@ -73,8 +73,7 @@ class ResultsContainer extends PureComponent<Props> {
             <React.Fragment>
                 {this.props.shouldShowCount && (
                     <ResultsMessage small>
-                        Found <strong>{this.props.totalResultCount}</strong>{' '}
-                        results in your digital memory
+                        {this.props.totalResultCount}{' '}results
                     </ResultsMessage>
                 )}
                 <ResultList />

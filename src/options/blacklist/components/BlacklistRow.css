@@ -12,9 +12,8 @@
 }
 
 .actions {
-    float: right;
-    position: relative;
-    right: -20px;
+    display: flex;
+    justify-content: flex-end;
 
     & a {
         color: #666;
@@ -31,8 +30,9 @@
 }
 
 .icon {
-    font-size: 1.5em;
-    cursor: pointer;
-    color: #3eb995;
-    padding-right: 15px;
+    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 22px;
+    height: 22px;
+    background-size: 12px;
 }

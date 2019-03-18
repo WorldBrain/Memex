@@ -8,7 +8,7 @@
     height: 20px;
     opacity: 0;
     color: transparent;
-    transition: opacity 0.3s 0.1s ease-in-out;
+    transition: opacity 0.2s 0.1s ease-in-out;
     -webkit-text-stroke: 3px rgba(0, 0, 0, 0.5);
     background-size: 15px;
 }
@@ -68,7 +68,7 @@
 }
 
 .label__checkbox:checked + .label__text .label__check {
-  animation: check 0.5s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
+  animation: check 0.2s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
   transform-origin: center center;
   border: none;
   width: 25px;

@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import Button from '../../components/Button'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { ClickHandler, RootState } from '../../types'
 import * as acts from '../actions'
 import * as popup from '../../selectors'
@@ -33,6 +34,10 @@ class TagsButton extends PureComponent<Props> {
                 >
                     Add Tag(s)
                 </Button>
+                <ButtonTooltip
+                    tooltipText="Tag all tabs in window"
+                    position="left"
+                >
                 <Button
                     onClick={this.props.toggleAllTabsPopup}
                     disabled={this.props.isDisabled}
@@ -40,6 +45,7 @@ class TagsButton extends PureComponent<Props> {
                     itemClass={styles.buttonBulk}
                     title="Tag all tabs in this window"
                 />
+                </ButtonTooltip>
             </div>
         )
     }

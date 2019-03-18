@@ -17,7 +17,7 @@
     font-weight: 500;
     letter-spacing: 0.5px;
     height: 100%;
-    color: color4;
+    color: black;
     margin-right: 3px;
     display: flex;
     align-items: center;
@@ -52,15 +52,17 @@
 
 /* Buttons */
 
+.nakedSquareButton {
+    composes: hoverColor from './colors.css';
+    border-radius: radius3;
+    padding: 2px;
+}
+
 .nakedButton {
     composes: nakedButton hoverColor from './colors.css';
     padding: 3px 8px 3px 8px;
     border-radius: radius3;
-}
-
-.nakedSquareButton {
-    composes: nakedButton;
-    padding: 2px !important; /* stylelint-disable-line declaration-no-important */
+    background-color: transparent;
 }
 
 .cancelNaked {
