@@ -1,4 +1,24 @@
-button {
+/* button {
+    width: 54px;
+    height: 30px;
+    border: 1px solid #d0d5e0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 17px;
+    font-size: 13px;
+    color: #1a2f58;
+    cursor: pointer;
+    text-align: center;
+    background-color: #fff;
+} */
+
+/* button:focus {
+    background-color: #5cd9a6;
+} */
+
+.tagButton {
     width: 54px;
     height: 30px;
 
@@ -16,7 +36,7 @@ button {
     background-color: #fff;
 }
 
-button:focus {
+.tagButton:focus {
     background-color: #5cd9a6;
 }
 

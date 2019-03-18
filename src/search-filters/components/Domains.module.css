@@ -1,0 +1,51 @@
+.domainButton {
+    position: absolute;
+    width: 71px;
+    height: 30px;
+
+    /* ultra-light */
+    border: 1px solid #d0d5e0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.domainButton:focus {
+    background-color: #5cd9a6;
+}
+
+.buttonFocus {
+    background-color: #5cd9a6;
+}
+
+.buttonFocusSelected {
+    position: absolute;
+    width: 104px;
+    height: 30px;
+    background: #85efcc;
+    border-radius: 4px;
+}
+
+.cross {
+    width: 7px;
+    height: 7px;
+
+    /* position: absolute;
+    */
+
+    /* background-image: url('../../assets/times-solid.svg'); */
+    background-repeat: no-repeat;
+    border-color: transparent;
+    background-color: #5cd9a6;
+    border-width: 0px;
+    margin-left: 47px;
+    margin-top: 12px;
+}
+
+.cross:focus {
+    outline: 0;
+}
+
+.domainsStyle {
+    display: list-item;
+}

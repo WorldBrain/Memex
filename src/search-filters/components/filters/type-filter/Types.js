@@ -49,7 +49,7 @@ class Types extends PureComponent {
     }
 
     render() {
-        console.log(this.state.types)
+        // console.log(this.state.types)
         let show = null
         if (this.state.showPopup) {
             show = (

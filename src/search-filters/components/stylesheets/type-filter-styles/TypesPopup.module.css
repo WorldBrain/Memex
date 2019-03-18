@@ -1,9 +1,7 @@
-button {
+/* button {
     position: absolute;
     width: 54px;
     height: 30px;
-
-    /* ultra-light */
     border: 1px solid #d0d5e0;
     box-sizing: border-box;
     border-radius: 4px;
@@ -15,18 +13,45 @@ button {
     cursor: pointer;
     text-align: center;
     background-color: #fff;
-}
+} */
 
-button:focus {
+/* button:focus {
     background-color: #5cd9a6;
-}
+} */
 
 .buttonFocus {
+    position: absolute;
+    width: 54px;
+    height: 30px;
+    border: 1px solid #d0d5e0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 17px;
+    font-size: 13px;
+    color: #1a2f58;
+    cursor: pointer;
+    text-align: left;
     background-color: #5cd9a6;
 }
 
 .buttonFocusSelected {
-    text-align: left;
+    position: absolute;
+
+    /* width: 54px; */
+
+    /* height: 30px; */
+    border: 1px solid #d0d5e0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 17px;
+    font-size: 13px;
+    color: #1a2f58;
+    cursor: pointer;
+    text-align: center;
     width: 101px;
     height: 30px;
     background-color: #5cd9a6;

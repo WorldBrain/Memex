@@ -2,17 +2,17 @@ import React, { PureComponent } from 'react'
 
 // import ReactDOM from 'react-dom'
 
-import styles from '../../stylesheets/tags-filter-styles/Tags.module.css'
+import styles from './Domains.module.css'
 // import DatesPopup from './DatesPopup';
 // import DateRangeSelection from './DateRangeSelection';
-import TagsPopup from './TagsPopup'
+import DomainsPopup from './DomainsPopup'
 
-class Tags extends PureComponent {
+class Domains extends PureComponent {
     state = {
         showPopup: false,
     }
 
-    openTypesPopup = () => {
+    openDomainsPopup = () => {
         this.setState(prevState => ({
             showPopup: !prevState.showPopup,
         }))
@@ -22,16 +22,16 @@ class Tags extends PureComponent {
         let show = null
 
         if (this.state.showPopup) {
-            show = <TagsPopup />
+            show = <DomainsPopup />
         }
 
         return (
-            <div className={styles.tagsStyle}>
+            <div className={styles.domainsStyle}>
                 <button
-                    className={styles.tagButton}
-                    onClick={this.openTypesPopup}
+                    className={styles.domainButton}
+                    onClick={this.openDomainsPopup}
                 >
-                    Tags
+                    Domains
                 </button>
                 {show}
             </div>
@@ -39,4 +39,4 @@ class Tags extends PureComponent {
     }
 }
 
-export default Tags
+export default Domains

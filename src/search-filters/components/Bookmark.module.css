@@ -1,0 +1,31 @@
+.bookmarkButton {
+    position: absolute;
+    width: 34px;
+    height: 18px;
+    background-color: #fff;
+
+    /* light-grey */
+
+    /* background-image: url('./assets/star.svg'); */
+    border: 1px solid #d5d8d6;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.bookmarkButton:focus {
+    background: #8fffd7;
+}
+
+.bookmarkButtonSelected {
+    position: absolute;
+    width: 34px;
+    height: 18px;
+    background: #8fffd7;
+
+    /* light-grey */
+
+    /* background-image: url('./assets/star.svg'); */
+    border: 1px solid #d5d8d6;
+    box-sizing: border-box;
+    border-radius: 4px;
+}

@@ -7,10 +7,13 @@ const FilterBar = ({ filter, onBarClick }) => (
     <div>
         <div onClick={onBarClick} className={styles.collection}>
             <span className={styles.myCollection}> {`${filter}s`} </span>
-            <span className={styles.plus}/>
+            <span className={styles.plus} />
         </div>
     </div>
 )
+
+// <span className={styles.myCollection}> {`${filter}s`} </span>
+// <span className={styles.plus}/>
 
 FilterBar.propTypes = {
     filter: PropTypes.string.isRequired,
