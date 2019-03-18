@@ -1,3 +1,6 @@
+@value colors: '../../common-ui/colors.css';
+@value color4, color11, color2 from colors;
+
 .switch {
     cursor: pointer;
     text-indent: -9999px;
@@ -28,7 +31,7 @@
         left: calc(100% - 5px);
         transform: translateX(-100%);
     }
-    background: #3eb995;
+    background: color2;
 }
 
 .input {
@@ -57,5 +60,6 @@
     margin-top: auto;
     font-size: 10px;
     text-align: center;
+    margin-bottom: 0px;
     color: #777;
 }

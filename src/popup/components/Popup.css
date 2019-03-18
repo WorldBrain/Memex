@@ -77,5 +77,5 @@ hr {
 .buttonContainer {
     display: flex;
     justify-content: flex-end;
-    padding: 0 7px 2px 0px;
+    padding: 0 7px 0px 0;
 }

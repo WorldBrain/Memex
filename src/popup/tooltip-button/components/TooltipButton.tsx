@@ -34,7 +34,7 @@ class InPageSwitches extends PureComponent<Props> {
     render() {
         return (
             <div className={styles.switchBlocks}>
-                <span>
+                <div className={styles.option}>
                     <Button
                         onClick={this.props.showTooltip}
                         itemClass={styles.button}
@@ -46,8 +46,8 @@ class InPageSwitches extends PureComponent<Props> {
                             only on this page
                         </p>
                     </Button>
-                </span>
-                <span
+                </div>
+                <div
                     className={styles.switch}
                     title={
                         'Enable/disable Memex highlighter tooltip on all pages'
@@ -57,7 +57,7 @@ class InPageSwitches extends PureComponent<Props> {
                         isChecked={this.props.isEnabled}
                         onChange={this.props.handleChange}
                     />
-                </span>
+                </div>
             </div>
         )
     }
