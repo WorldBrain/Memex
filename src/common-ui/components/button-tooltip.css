@@ -23,9 +23,7 @@
 }
 
 .tooltipTop {
-    left: 50%;
-    padding-bottom: 9px;
-    transform: translateX(-50%);
+    transform: translateY(-28px);
 }
 
 .tooltipRight {
@@ -57,7 +55,7 @@
 
 .tooltipLeftNarrow {
     justify-content: flex-end;
-    right: 25px;
+    right: 35px;
 }
 
 .tooltipMessage {

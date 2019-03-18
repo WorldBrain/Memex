@@ -161,16 +161,18 @@ export default class OverviewContainer extends React.Component<Props> {
                                 onClick={() => {
                                     if (!this.state.automaticBackupEnabled) {
                                         this.setState({ showPricing: true })
+                                    } else {
+                                        window.open("https://worldbrain.io/community/view-subscription/", "_blank")
                                     }
                                 }}
                                 color={
                                     this.state.automaticBackupEnabled
-                                        ? 'green'
+                                        ? 'red'
                                         : 'darkblue'
                                 }
                             >
                                 {this.state.automaticBackupEnabled
-                                    ? 'Upgraded'
+                                    ? 'Cancel'
                                     : 'Upgrade'}
                             </SmallButton>
                             <span

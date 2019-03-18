@@ -1,6 +1,5 @@
 .tagHolder {
     composes: TextArea from '../../common-ui/elements.css';
-    margin-bottom: 17px;
     height: 40px;
     overflow-x: hidden;
     position: relative;
@@ -52,7 +51,11 @@
     padding: 3px;
     width: 8px;
     height: 8px;
+    background-size: 9px;
     margin-left: 3px;
-    background-position-y: 2px;
     opacity: 0.7;
+
+    &:hover {
+        background-color: white;
+    }
 }

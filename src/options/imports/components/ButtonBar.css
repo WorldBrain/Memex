@@ -33,8 +33,8 @@
     background-color: color1;
     color: color4;
     border: none;
+    height: 35px;
     border-radius: 3px;
-    padding: 12px 24px;
 
     &.hidden {
         display: none;
@@ -71,6 +71,7 @@
     composes: nakedSquareButton from '../../../common-ui/elements.css';
     color: color4;
     margin: 0 10px;
+    width: 35px;
     background: transparent;
     display: flex;
     justify-content: center;

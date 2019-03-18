@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { ButtonTooltip } from 'src/common-ui/components/'
 
 const styles = require('./footer.css')
 
@@ -28,7 +29,11 @@ const Footer = ({
                 <span className={dialogTextClassName || ''}>{dialogText}</span>
             )}
         </div>
-        <div>
+        <div className={styles.savecancel}>
+            <ButtonTooltip
+                tooltipText={'ctr/cmd + Enter'}
+                position="top"
+            >
             <button
                 className={actionBtnClassName}
                 onClick={e => {
@@ -38,6 +43,7 @@ const Footer = ({
             >
                 {actionBtnText}
             </button>
+            </ButtonTooltip>
             <button
                 className={cancelBtnClassName}
                 onClick={e => {

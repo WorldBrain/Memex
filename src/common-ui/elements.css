@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color3, color4, color5, color6, color11, radius3 from colors;
+@value color1, color2, color3, color4, color5, color6, color11, color12, radius3 from colors;
 
 /* FONTs */
 
@@ -62,7 +62,6 @@
     composes: nakedButton hoverColor from './colors.css';
     padding: 3px 8px 3px 8px;
     border-radius: radius3;
-    background-color: transparent;
 }
 
 .cancelNaked {
@@ -90,6 +89,18 @@
     }
 }
 
+.CTAwarning {
+    background-color: color12;
+    border-radius: 3px;
+    color: color4;
+    cursor: pointer;
+
+    &:hover {
+        color: black;
+        opacity: 1;
+    }
+}
+
 /* TextAreas for Edits */
 
 .TextArea {
@@ -101,7 +112,7 @@
     font-size: 14px;
     color: #222;
     font-family: 'Inter';
-    border: 1px solid #d2d2d2;
+    border: 1px solid #e2e2e2;
     border-radius: 3px;
     padding: 10px 7px;
     margin: 5px 5px 5px 5px;
