@@ -35,11 +35,12 @@ export default class SearchBackground {
         }
     }
 
-    static shapePageResult(results, limit: number) {
+    static shapePageResult(results, limit: number, extra = {}) {
         return {
             resultsExhausted: results.length < limit,
             totalCount: null, // TODO: try to get this implemented
             docs: results,
+            ...extra,
         }
     }
 
@@ -192,20 +193,29 @@ export default class SearchBackground {
     }
 
     async searchAnnotations(params: AnnotSearchParams) {
-        return this.search(
+        const results = await this.search(
             params,
             this.storage.searchAnnotsByDay.bind(this.storage),
         )
+
+        return SearchBackground.shapePageResult(results, params.limit, {
+            isAnnotsSearch: true,
+        })
     }
 
     async searchPages(params: PageSearchParams) {
-        return this.search(params, this.storage.searchPages.bind(this.storage))
+        const results = await this.search(
+            params,
+            this.storage.searchPages.bind(this.storage),
+        )
+
+        return SearchBackground.shapePageResult(results, params.limit, {
+            isAnnotsSearch: true,
+        })
     }
 
     async search(params: any, searchMethod: (params: any) => Promise<any[]>) {
         let searchParams
-        const shapeResult = res =>
-            SearchBackground.shapePageResult(res, searchParams.limit)
 
         try {
             searchParams = this.processSearchParams(params)
@@ -213,9 +223,7 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
-        const results = await searchMethod(searchParams)
-
-        return shapeResult(results)
+        return searchMethod(searchParams)
     }
 
     async handleBookmarkRemoval(id, { node }) {
