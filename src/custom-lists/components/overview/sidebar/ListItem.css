@@ -98,8 +98,8 @@
 
 @keyframes appear {
     0% {
-        transform: translateX(-3px);
-        visibility: hidden;
+        transform: translateX(5px);
+        visibility: hidden
     }
 
     100% {

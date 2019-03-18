@@ -9,8 +9,8 @@
     background-color: #fff;
     border-radius: radius3;
     padding: 15px 20px 20px 20px;
-    box-shadow: 0 4px 20px 1px rgba(62, 185, 149, 0.0902);
     min-width: 800px;
+    composes: annotationCard from 'src/common-ui/elements.css';
 }
 
 .notifContainer {

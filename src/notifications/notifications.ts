@@ -63,7 +63,7 @@ export const NOTIFS: NotifDefinition[] = [
         id: 'ribbon_new_2019_18_03',
         search: {
             title: "🚩 New Feature: Ribbon 2.0",
-            message: 'Tag, star, sort pages & add notes blazingly fast. Try it out by moving your cursor to the right side of the screen.',
+            message: 'Tag, star, sort pages & add notes blazingly fast. Try it out by moving your cursor to the right side of the screen when visiting a website.',
             buttons: [
                 {
                     action: {
@@ -77,7 +77,7 @@ export const NOTIFS: NotifDefinition[] = [
         },
         overview: {
             title: "🚩 New Feature: Ribbon 2.0",
-            message: 'Tag, star, sort pages & add notes blazingly fast. Try it out by moving your cursor to the right side of the screen.',
+            message: 'Tag, star, sort pages & add notes blazingly fast. Try it out by moving your cursor to the right side of the screen when visiting a website.',
             buttons: [
                 {
                     action: {
