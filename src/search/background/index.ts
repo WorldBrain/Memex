@@ -7,8 +7,6 @@ import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { PageSearchParams, AnnotSearchParams, AnnotPage } from './types'
-import { contentTypeChecks } from './utils'
-import { Annotation } from 'src/direct-linking/types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 
 export default class SearchBackground {
@@ -17,7 +15,6 @@ export default class SearchBackground {
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
     private getDb: () => Promise<Dexie>
-    private legacySearch
 
     static handleSearchError(e: SearchError) {
         if (e instanceof BadTermError) {
@@ -64,10 +61,11 @@ export default class SearchBackground {
         this.tabMan = tabMan
         this.getDb = getDb
         this.queryBuilderFactory = queryBuilder
-        this.storage = new SearchStorage({ storageManager })
+        this.storage = new SearchStorage({
+            storageManager,
+            legacySearch: idx.fullSearch(getDb),
+        })
         this.initBackend(idx)
-
-        this.legacySearch = idx.fullSearch(getDb)
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
         bookmarksAPI.onCreated.addListener(
@@ -175,81 +173,6 @@ export default class SearchBackground {
         }
     }
 
-    private mergeSearchResults(results: Array<AnnotPage[]>): AnnotPage[] {
-        const pageMap = new Map<string, [Partial<AnnotPage>, Annotation[]]>()
-
-        // Dedupe and group results by page
-        for (const searchRes of results) {
-            for (const { annotations, ...page } of searchRes) {
-                const entry = pageMap.get(page.url)
-
-                let annots =
-                    entry == null ? annotations : [...entry[1], ...annotations]
-
-                const urls = new Set(annots.map(a => a.pageUrl))
-                annots = annots.filter(annot => urls.has(annot.pageUrl))
-
-                pageMap.set(page.url, [page, annots])
-            }
-        }
-
-        // Convert Map back to array of results
-        return [...pageMap.values()].map(
-            ([page, annotations]) =>
-                ({
-                    ...page,
-                    annotations,
-                } as AnnotPage),
-        )
-    }
-
-    private async combinedSearch(params: AnnotSearchParams) {
-        // Manually apply skip post-search
-        const skip = params.skip
-        delete params.skip
-
-        const results = await Promise.all([
-            this.storage.searchPages(params, this.legacySearch),
-            this.storage.searchAnnots({
-                ...params,
-                includePageResults: true,
-            }),
-        ])
-
-        const mergedResults = this.mergeSearchResults(results as Array<
-            AnnotPage[]
-        >)
-
-        return mergedResults.slice(skip, params.limit)
-    }
-
-    private async blankPageSearch({
-        contentTypes,
-        ...params
-    }: PageSearchParams) {
-        let results = await this.storage.searchPages(params, this.legacySearch)
-
-        if (contentTypeChecks.combined(contentTypes)) {
-            results = await Promise.all(
-                results.map(async page => ({
-                    ...page,
-                    annotations: await this.storage.listAnnotations({
-                        ...params,
-                        url: page.url,
-                    }),
-                })),
-            )
-        }
-
-        return results
-    }
-
-    private async blankAnnotsSearch(params: PageSearchParams) {
-        const res = await this.storage.searchPagesByLatestAnnotation(params)
-
-        return res
-    }
-
     async searchPageAnnotations(params: AnnotSearchParams) {
         const searchParams = this.processSearchParams(params, true)
 
@@ -269,31 +192,17 @@ export default class SearchBackground {
     }
 
     async searchAnnotations(params: AnnotSearchParams) {
-        let searchParams
-        const shapeResult = res =>
-            SearchBackground.shapePageResult(res, searchParams.limit)
-
-        try {
-            searchParams = this.processSearchParams(params, true)
-        } catch (e) {
-            return SearchBackground.handleSearchError(e)
-        }
-
-        if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
-            return shapeResult([])
-        }
-
-        const results = searchParams.isBlankSearch
-            ? await this.blankAnnotsSearch(searchParams)
-            : await this.storage.searchAnnots({
-                  includePageResults: true,
-                  ...searchParams,
-              })
-
-        return shapeResult(results)
+        return this.search(
+            params,
+            this.storage.searchAnnotsByDay.bind(this.storage),
+        )
     }
 
     async searchPages(params: PageSearchParams) {
+        return this.search(params, this.storage.searchPages.bind(this.storage))
+    }
+
+    async search(params: any, searchMethod: (params: any) => Promise<any[]>) {
         let searchParams
         const shapeResult = res =>
             SearchBackground.shapePageResult(res, searchParams.limit)
@@ -304,9 +213,7 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
-        const results = searchParams.isBlankSearch
-            ? await this.blankPageSearch(searchParams)
-            : await this.storage.searchPages(searchParams, this.legacySearch)
+        const results = await searchMethod(searchParams)
 
         return shapeResult(results)
     }
