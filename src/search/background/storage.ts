@@ -13,14 +13,14 @@ import {
 } from './types'
 import { Annotation } from 'src/direct-linking/types'
 import { PageUrlMapperPlugin } from './page-url-mapper'
-import { reshapeAnnotForDisplay, reshapeParamsForOldSearch } from './utils'
-import { AnnotationsSearchPlugin } from './annots-search'
+import { reshapeParamsForOldSearch } from './utils'
 import { AnnotationsListPlugin } from './annots-list'
 import { Tag, Bookmark } from 'src/search/models'
 
 export interface SearchStorageProps {
     storageManager: StorageManager
     annotationsColl?: string
+    legacySearch: (params: any) => Promise<any>
 }
 
 export interface Interaction {
@@ -36,8 +36,12 @@ export type LegacySearch = (
 }>
 
 export default class SearchStorage extends FeatureStorage {
-    constructor({ storageManager }: SearchStorageProps) {
+    private legacySearch
+
+    constructor({ storageManager, legacySearch }: SearchStorageProps) {
         super(storageManager)
+
+        this.legacySearch = legacySearch
     }
 
     private async calcLatestInteraction(url: string, upperTimeBound?: number) {
@@ -114,33 +118,7 @@ export default class SearchStorage extends FeatureStorage {
         )
     }
 
-    private async mapAnnotsToPages(
-        annots: Annotation[],
-        maxAnnotsPerPage: number,
-    ): Promise<AnnotPage[]> {
-        const pageUrls = new Set(annots.map(annot => annot.pageUrl))
-        const annotsByUrl = new Map<string, Annotation[]>()
-
-        for (const annot of annots) {
-            const pageAnnots = annotsByUrl.get(annot.pageUrl) || []
-            annotsByUrl.set(
-                annot.pageUrl,
-                [...pageAnnots, annot].slice(0, maxAnnotsPerPage),
-            )
-        }
-
-        const pages = await this.storageManager.operation(
-            PageUrlMapperPlugin.MAP_OP_ID,
-            [...pageUrls],
-        )
-
-        return pages.map(page => ({
-            ...page,
-            annotations: annotsByUrl.get(page.url),
-        }))
-    }
-
-    async searchPagesByLatestAnnotation(params: AnnotSearchParams) {
+    async searchAnnotsByDay(params: AnnotSearchParams) {
         const results: Map<
             number,
             Map<string, Annotation[]>
@@ -192,36 +170,35 @@ export default class SearchStorage extends FeatureStorage {
         return this.attachDisplayDataToAnnots(results)
     }
 
+    // TODO: Hook into annotations search to enable this without the clustering
     async searchAnnots(
         params: AnnotSearchParams,
     ): Promise<Annotation[] | AnnotPage[]> {
-        let results: Annotation[] = await this.storageManager.operation(
-            AnnotationsSearchPlugin.SEARCH_OP_ID,
-            params,
-        )
+        // let results: Annotation[] = await this.storageManager.operation(
+        //     AnnotationsSearchPlugin.SEARCH_OP_ID,
+        //     params,
+        // )
 
-        results = await this.attachDisplayDataToAnnots(results)
+        // results = await this.attachDisplayDataToAnnots(results)
 
-        if (params.includePageResults) {
-            const pages = await this.mapAnnotsToPages(
-                results,
-                params.maxAnnotsPerPage ||
-                    AnnotationsSearchPlugin.MAX_ANNOTS_PER_PAGE,
-            )
+        // if (params.includePageResults) {
+        //     const pages = await this.mapAnnotsToPages(
+        //         results,
+        //         params.maxAnnotsPerPage ||
+        //             AnnotationsSearchPlugin.MAX_ANNOTS_PER_PAGE,
+        //     )
 
-            return this.attachDisplayTimeToPages(pages, params.endDate)
-        }
+        //     return this.attachDisplayTimeToPages(pages, params.endDate)
+        // }
 
-        return results.map(reshapeAnnotForDisplay as any) as any
+        // return results.map(reshapeAnnotForDisplay as any) as any
+        return []
     }
 
-    async searchPages(
-        params: AnnotSearchParams,
-        legacySearch: LegacySearch,
-    ): Promise<AnnotPage[]> {
+    async searchPages(params: AnnotSearchParams): Promise<AnnotPage[]> {
         const searchParams = reshapeParamsForOldSearch(params)
 
-        const { ids } = await legacySearch(searchParams)
+        const { ids } = await this.legacySearch(searchParams)
 
         const pageUrls = new Set(ids.map(([url]) => url))
 

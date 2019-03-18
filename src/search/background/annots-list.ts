@@ -1,5 +1,3 @@
-import { Dexie } from 'dexie'
-import moment from 'moment-timezone'
 import { browser } from 'webextension-polyfill-ts'
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
@@ -9,6 +7,7 @@ import { INSTALL_TIME_KEY } from 'src/constants'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Annotation } from 'src/direct-linking/types'
 import AnnotsStorage from 'src/direct-linking/background/storage'
+const moment = require('moment-timezone')
 
 export class AnnotationsListPlugin extends StorageBackendPlugin<
     DexieStorageBackend
@@ -22,11 +21,6 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         super.install(backend)
 
         backend.registerOperation(
-            AnnotationsListPlugin.LIST_OP_ID,
-            this.listAnnots.bind(this),
-        )
-
-        backend.registerOperation(
             AnnotationsListPlugin.LIST_BY_PAGE_OP_ID,
             this.listAnnotsByPage.bind(this),
         )
@@ -36,22 +30,6 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             this.listAnnotsByDay.bind(this),
         )
     }
-
-    private listWithoutTimeBounds = (params: Partial<AnnotSearchParams>) =>
-        this.backend.dexieInstance
-            .table<any, string>(AnnotsStorage.ANNOTS_COLL)
-            .orderBy('createdWhen')
-            .reverse()
-
-    private listWithTimeBounds = ({
-        startDate = 0,
-        endDate = Date.now(),
-    }: Partial<AnnotSearchParams>) =>
-        this.backend.dexieInstance
-            .table<any, string>(AnnotsStorage.ANNOTS_COLL)
-            .where('createdWhen')
-            .between(new Date(startDate), new Date(endDate), true, true)
-            .reverse()
 
     private listWithUrl = ({
         url,
@@ -177,32 +155,21 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         { limit = 10, skip = 0, ...params }: AnnotSearchParams,
         {
             innerLimitMultiplier,
-            listQuery,
-            terminateLoopOnPageCount,
             isUrlBased,
         }: {
             innerLimitMultiplier: number
-            terminateLoopOnPageCount?: boolean
             isUrlBased?: boolean
-            listQuery: (
-                params: AnnotSearchParams,
-            ) => Dexie.Collection<Annotation, string>
         },
     ): Promise<Annotation[]> {
         const innerLimit = limit * innerLimitMultiplier
 
-        // Page count version implements a much more inefficient algo,
-        //  going from the first result all the way to the skip amount
-        let innerSkip = terminateLoopOnPageCount
-            ? 0
-            : skip * innerLimitMultiplier
+        let innerSkip = skip * innerLimitMultiplier
 
-        let seenPages = new Set()
         let results: string[] = []
         let continueLookup: boolean
 
         const queryAnnots = (offset = innerSkip) =>
-            listQuery(params)
+            this.listWithUrl(params)
                 .offset(offset)
                 .limit(innerLimit)
 
@@ -210,39 +177,11 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             // The results found in this iteration
             let innerResults: string[] = []
 
-            if (terminateLoopOnPageCount) {
-                let cancelEverything = false
-                const innerSeenPages = new Set()
-
-                do {
-                    const queryResults: string[] = []
-
-                    await queryAnnots().each(annot => {
-                        queryResults.push(annot.url)
-                        innerSeenPages.add(annot.pageUrl)
-                    })
-
-                    // If we've completely exhausted the results, don't attempt to find anymore
-                    if (queryResults.length === 0) {
-                        cancelEverything = true
-                        break
-                    }
-
-                    innerResults.push(...queryResults)
-                    innerSkip += innerLimit
-                } while (innerSeenPages.size < limit) // Keep querying annots until we've seen our desired # of pages
-
-                seenPages = new Set(...seenPages, ...innerSeenPages)
-
-                continueLookup =
-                    !cancelEverything && seenPages.size < limit + skip
-            } else {
-                innerResults = await queryAnnots(
-                    isUrlBased ? 0 : innerSkip,
-                ).primaryKeys()
-                continueLookup = innerResults.length >= innerLimit
-                innerSkip += innerLimit
-            }
+            innerResults = await queryAnnots(
+                isUrlBased ? 0 : innerSkip,
+            ).primaryKeys()
+            continueLookup = innerResults.length >= innerLimit
+            innerSkip += innerLimit
 
             innerResults = await this.filterResults(innerResults, params)
 
@@ -408,29 +347,12 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return results
     }
 
-    async listAnnots(
-        params: AnnotSearchParams,
-        innerLimitMultiplier = AnnotationsListPlugin.DEF_INNER_LIMIT_MULTI,
-    ): Promise<Annotation[]> {
-        const listQuery =
-            params.endDate || params.startDate
-                ? this.listWithTimeBounds
-                : this.listWithoutTimeBounds
-
-        return this.list(params, {
-            innerLimitMultiplier,
-            listQuery,
-            terminateLoopOnPageCount: true,
-        })
-    }
-
     async listAnnotsByPage(
         params: AnnotSearchParams,
         innerLimitMultiplier = AnnotationsListPlugin.DEF_INNER_LIMIT_MULTI,
     ): Promise<Annotation[]> {
         return this.list(params, {
             innerLimitMultiplier,
-            listQuery: this.listWithUrl,
             isUrlBased: true,
         })
     }
