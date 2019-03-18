@@ -2,19 +2,22 @@ import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import moment from 'moment'
+import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 
 import ConfirmModalBtn from './ConfirmModalBtn'
 const styles = require('./BackupOverlay.css')
 
 interface Props {
-    hasInitBackup: boolean
-    backupTimes: any
-    isAutomaticBackupEnabled: boolean
+    header: string
     checkedIcon: string
     crossIcon: string
-    description: string
-    backupUrl: string
-    backupStatus: any
+    message: string
+    automaticBackup: boolean
+    lastBackup: string
+    nextBackup: string
+    buttonUrl: string
+    errorMessage: string
+    buttonText: string
 }
 
 export default class BackupOverlay extends PureComponent<Props> {
@@ -46,95 +49,100 @@ export default class BackupOverlay extends PureComponent<Props> {
     }
 
     render() {
-        // const nextBackup =
-        //     this.props.backupStatus &&
-        //     this.props.backupTimes &&
-        //     this.props.backupStatus.state === 'no_backup'
-        //         ? null
-        //         : moment(this.props.backupTimes.nextBackup).fromNow()
         const {
-            backupTimes,
-            backupStatus,
-            hasInitBackup,
-            isAutomaticBackupEnabled,
-            backupUrl,
-            checkedIcon,
+            header,
+            message,
+            automaticBackup,
+            lastBackup,
+            nextBackup,
+            buttonUrl,
+            errorMessage,
             crossIcon,
+            buttonText,
+            checkedIcon,
         } = this.props
-        const hasNextBackup = backupTimes
-            ? !(backupTimes.nextBackup === null)
-            : null
-        const nextBackup = hasNextBackup
-            ? backupStatus && backupStatus.state === 'no_backup'
-                ? null
-                : moment(backupTimes.nextBackup).fromNow()
-            : null
         return ReactDOM.createPortal(
             <>
                 <div className={styles.overlay}>
-                    <div className={styles.backup}>
-                        <span>Last Backup:</span>
-                        <span>
-                            <b>
-                                {hasInitBackup
-                                    ? `${moment(
-                                          backupTimes.lastBackup,
-                                      ).fromNow()}`
-                                    : 'Never'}
-                            </b>
-                        </span>
-                    </div>
-                    {hasNextBackup ? (
+                    {header && (
+                        <div className={styles.overlayHeader}>{header}</div>
+                    )}
+
+                    {message && (
+                        <div className={styles.description}>
+                            <span className={styles.descInfo}>{message}</span>
+                        </div>
+                    )}
+                    {errorMessage && (
+                        <div className={styles.errorMessage}>
+                            <span>
+                                <img
+                                    src={crossIcon}
+                                    className={styles.crossIcon}
+                                />
+                            </span>
+                            <span className={styles.errorDescInfo}>
+                                {errorMessage}
+                            </span>
+                        </div>
+                    )}
+                    {lastBackup && (
+                        <div className={styles.backup}>
+                            <span>Last Backup:</span>
+                            <span>
+                                <b>{moment(lastBackup).fromNow()}</b>
+                            </span>
+                        </div>
+                    )}
+
+                    {lastBackup && <div className={styles.bottomBorder} />}
+
+                    {nextBackup && (
                         <div className={styles.backup}>
                             <span>Next Backup:</span>
                             <span>
-                                <b>{nextBackup}</b>
+                                <b>{moment(nextBackup).fromNow()}</b>
                             </span>
                         </div>
-                    ) : null}
-                    <div className={styles.backup}>
-                        <span>Automatic Backup:</span>
-                        {isAutomaticBackupEnabled ? (
-                            <span>
-                                <img
-                                    src={checkedIcon}
-                                    className={styles.checkedIcon}
-                                />
-                            </span>
-                        ) : (
-                            <span>
-                                <img
-                                    src={crossIcon}
-                                    className={styles.crossIcon}
-                                />
-                            </span>
-                        )}
-                    </div>
-                    <div className={styles.description}>
-                        {backupStatus && backupStatus.state === 'success' ? (
-                            <span>
-                                <img
-                                    src={checkedIcon}
-                                    className={styles.checkedIcon}
-                                />
-                            </span>
-                        ) : (
-                            <span>
-                                <img
-                                    src={crossIcon}
-                                    className={styles.crossIcon}
-                                />
-                            </span>
-                        )}
-                        <span className={styles.descInfo}>
-                            {backupStatus ? backupStatus.message : null}
-                        </span>
-                    </div>
-                    <div className={styles.button}>
-                        <ConfirmModalBtn href={backupUrl}>
-                            Backup Now
-                        </ConfirmModalBtn>
-                    </div>
+                    )}
+
+                    {nextBackup && <div className={styles.bottomBorder} />}
+
+                    {automaticBackup && (
+                        <div className={styles.backup}>
+                            <span>Automatic Backup:</span>
+                            {/* 5 === 5 ? (
+                                <span>
+                                    <img
+                                        src={this.props.checkedIcon}
+                                        className={styles.checkedIcon}
+                                    />
+                                </span>
+                            ) : (
+                                <span>
+                                    <img
+                                        src={this.props.crossIcon}
+                                        className={styles.crossIcon}
+                                    />
+                                </span>
+                            ) */}
+                            <ToggleSwitch
+                                onChange={() => {
+                                    console.log('hello')
+                                }}
+                            />
+                        </div>
+                    )}
+
+                    {this.props.children}
+
+                    {buttonUrl && (
+                        <div className={styles.button}>
+                            <ConfirmModalBtn href={buttonUrl}>
+                                {buttonText}
+                            </ConfirmModalBtn>
+                        </div>
+                    )}
                 </div>
             </>,
             this.overlayRoot,

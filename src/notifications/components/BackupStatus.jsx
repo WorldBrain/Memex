@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import BackupOverlay from 'src/common-ui/components/BackupOverlay'
+// import BackupOverlay from 'src/common-ui/components/BackupOverlay'
+import { BackupSuccess, BackupFailed, AutomaticBackup } from './BackupOverlay'
 
 const styles = require('./BackupStatus.css')
 
@@ -22,20 +23,27 @@ const BackupStatus = props => {
                 </div>
                 <div className={[styles.backupOverlay]}>
                     {props.hover && (
-                        <BackupOverlay
-                            rootEl="div.container"
-                            hasInitBackup={props.hasInitBackup}
-                            backupTimes={props.backupTimes}
-                            backupLocation={props.backupLocation}
-                            crossIcon={props.crossIcon}
-                            checkedIcon={props.checkedIcon}
-                            automaticBackupEnabled={
-                                props.automaticBackupEnabled
-                            }
-                            backupInfo={props.backupInfo}
-                            backupUrl={props.backupUrl}
-                            backupStatus={props.backupStatus}
-                        />
+                        <div>
+                            {props.backupState.state === 'success' && (
+                                <BackupSuccess
+                                    lastBackup={props.backupTimes.lastBackup}
+                                    nextBackup={props.backupTimes.nextBackup}
+                                    buttonUrl={'/options.html#/backup'}
+                                    buttonText={'Backup Now'}
+                                />
+                            )}
+                            {props.backupState.state === 'fail' && (
+                                <BackupFailed
+                                    lastBackup={props.backupTimes.lastBackup}
+                                    buttonUrl={'/options.html#/backup'}
+                                    buttonText={'Backup Now'}
+                                    crossIcon={props.crossIcon}
+                                />
+                            )}
+                            {props.backupState.state === 'autoBackup' && (
+                                <AutomaticBackup />
+                            )}
+                        </div>
                     )}
                 </div>
             </div>
@@ -43,19 +51,32 @@ const BackupStatus = props => {
     )
 }
 
+{
+    /* <BackupFailed
+errorMessage={'There is an error. Please try again'}
+nextBackup={'this is a string'}
+lastBackup={'this is a string'}
+crossIcon={props.crossIcon}
+checkedIcon={props.checkedIcon}
+buttonUrl={'/options.html#/backup'}
+buttonText={'Backup Now'}
+/> */
+}
+
 BackupStatus.propTypes = {
     hasInitBackup: PropTypes.bool,
     backupTimes: PropTypes.object,
-    backupLocation: PropTypes.object,
+    // backupLocation: PropTypes.object,
     hover: PropTypes.bool,
     checkedIcon: PropTypes.string,
     crossIcon: PropTypes.string,
     onMouseEnter: PropTypes.func,
     onMouseLeave: PropTypes.func,
-    automaticBackupEnabled: PropTypes.bool,
-    backupInfo: PropTypes.object,
-    backupUrl: PropTypes.string,
-    backupStatus: PropTypes.object,
+    backupState: PropTypes.object,
+    // automaticBackupEnabled: PropTypes.bool,
+    // backupInfo: PropTypes.object,
+    // backupUrl: PropTypes.string,
+    // backupStatus: PropTypes.object,
 }
 
 export default BackupStatus

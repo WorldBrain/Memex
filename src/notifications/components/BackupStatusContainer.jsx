@@ -25,18 +25,21 @@ class BackupStatusContainer extends Component {
         backupLocation: null,
         hover: false,
         childPosition: '',
-        backupStatus: null,
+        backupState: null,
     }
 
     async componentDidMount() {
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
-        const backupStatus = await getLocalStorage('backupStatus', {
+        const backupStatus = await getLocalStorage('backup-status', {
             state: 'no_backup',
-            message:
-                'You have not yet done any backup. Hit the backup button below and follow the wizard to backup.',
+            id: 'no_backup',
         })
-        const backupTimes = await remoteFunction('getBackupTimes')()
-        console.log('backupTimes', !(backupTimes.nextBackup === null))
+        const getBackupState = await this.backupState(hasInitialBackup)
+        // const autBack = await remoteFunction('checkAutomaticBakupEnabled')()
+        // console.log('automaticBackup', autBack)
+        // console.log('hasSub', await localStorage.getItem('backup.has-subscription'))
+        // console.log('nextBackup', await localStorage.getItem('nextBackup'))
+        // console.log('backup-status', backupStatus)
         this.setState({
             automaticBackupEnabled: await remoteFunction(
                 'isAutomaticBackupEnabled',
@@ -45,8 +48,52 @@ class BackupStatusContainer extends Component {
             hasNextBackup: !(backupStatus.nextBackup === null),
             backupLocation: await remoteFunction('getBackendLocation')(),
             hasInitialBackup,
-            backupStatus,
+            backupState: getBackupState,
         })
+    }
+
+    backupState = async hasInitialBackup => {
+        let backupState
+        const backupStatus = await getLocalStorage('backup-status', {
+            state: 'no_backup',
+            id: 'no_backup',
+        })
+        if (backupStatus.state === 'success') {
+            backupState = {
+                state: 'success',
+                message:
+                    'Your last backup was successfull. Hit Backup Now if you want to backup again.',
+            }
+        } else if (backupStatus.state === 'fail') {
+            let message
+            if (backupState.id === 'backup_error') {
+                message =
+                    'Your last backup was unsuccessfull as there was no internet connectivity. Please try again'
+            } else if (backupState.id === 'drive_size_empty') {
+                message =
+                    'Your last backup was unsuccessfull as there was no space in your google drive. Please clear some space and try again'
+            } else if (backupState.id === 'auto_backup_expired') {
+                message =
+                    'Your Memex subscription has expired. Renew your subscription else Backups will have to be done manually.'
+            } else if (
+                backupState.id === 'auto_backup_expired' &&
+                !hasInitialBackup
+            ) {
+                message =
+                    'Great! You upgraded to automatic backups. However you will have to do your first backup manually.'
+            }
+            backupState = {
+                state: 'fail',
+                message,
+            }
+        } else if (backupStatus.state === 'no_backup') {
+            backupState = {
+                state: 'success',
+                message:
+                    'Your data is only stored on your computer. Back it up locally or to any cloud storage for free.',
+            }
+        }
+        return backupState
     }
 
     onMouseEnterHandler = () => {
@@ -69,7 +116,7 @@ class BackupStatusContainer extends Component {
             backupLocation,
             isAutomaticBackupEnabled,
             hover,
-            backupStatus,
+            backupState,
         } = this.state
         return (
             <BackupStatus
@@ -83,7 +130,7 @@ class BackupStatusContainer extends Component {
                 backupLocation={backupLocation}
                 isAutomaticBackupEnabled={isAutomaticBackupEnabled}
                 backupUrl={backupUrl}
-                backupStatus={backupStatus}
+                backupState={backupState}
             />
         )
     }

@@ -23,6 +23,7 @@ export interface Props {
     isSearchDisabled: boolean
     showUnreadCount: boolean
     showInbox: boolean
+    hasAutomaticBackup: boolean
     unreadNotifCount: number
     startDate: number
     endDate: number
@@ -43,6 +44,7 @@ class Header extends PureComponent<Props> {
         crossIcon: 'img/cross.svg',
         settingsRoute: '/settings',
         overviewUrl: OVERVIEW_URL,
+        hasAutomaticBackup: localStorage.getItem('backup.has-subscription'),
     }
 
     private inputQueryEl: HTMLInputElement
@@ -84,21 +86,15 @@ class Header extends PureComponent<Props> {
                 </div>
                 <div className={styles.links}>
                     <BackupStatus />
-                    <InboxButton
-                        toggleInbox={this.props.toggleInbox}
-                        showInbox={this.props.showInbox}
-                        unreadNotifCount={this.props.unreadNotifCount}
-                        showUnreadCount={this.props.showUnreadCount}
-                    />
-                    <OutLink
-                        className={styles.upgrade}
-                        to={this.props.pricingUrl}
-                    >
-                        <span
-                            className={styles.upgradeIcon}
-                        />
-                        ⭐️ Upgrade
-                    </OutLink>
+                    {!this.props.hasAutomaticBackup && (
+                        <OutLink
+                            className={styles.upgrade}
+                            to={this.props.pricingUrl}
+                        >
+                            <span className={styles.upgradeIcon} />
+                            ⭐️ Upgrade
+                        </OutLink>
+                    )}
                     <InboxButton
                         toggleInbox={this.props.toggleInbox}
                         showInbox={this.props.showInbox}
