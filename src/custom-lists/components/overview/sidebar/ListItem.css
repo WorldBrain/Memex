@@ -99,7 +99,7 @@
 @keyframes appear {
     0% {
         transform: translateX(5px);
-        visibility: hidden
+        visibility: hidden;
     }
 
     100% {
