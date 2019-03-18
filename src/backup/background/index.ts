@@ -180,11 +180,9 @@ export class BackupBackgroundModule {
                             'auto_backup_expired',
                         )
                         // Set the message of backupStatus stating the expiration of auto backup
-                        await setLocalStorage('backupStatus', {
+                        await setLocalStorage('backup-status', {
                             state: 'fail',
                             id: 'auto_backup_expired',
-                            message:
-                                'Your Memex subscription has expired. Backups need to be done manually again.',
                         })
                     } else {
                         await this.checkAutomaticBakupEnabled()
@@ -329,6 +327,8 @@ export class BackupBackgroundModule {
             if (endDate !== undefined) {
                 localStorage.setItem('backup.subscription-end-date', endDate)
             }
+
+            console.log('hasSubscription', hasSubscription)
 
             return hasSubscription
         })()

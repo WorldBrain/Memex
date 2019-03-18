@@ -21,14 +21,55 @@
     } */
 }
 
+.overlayHeader {
+    font-size: 18px;
+    font-weight: 600;
+    align-self: flex-start;
+    padding-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 0;
+}
+
+.description {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.errorMessage {
+    padding: 10px;
+    width: 90%;
+    margin: 10px 20px;
+    font-size: 15px;
+    composes: backgroundWarningColor from '../colors.css';
+    composes: radius5 from '../colors.css';
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.errorDescInfo {
+    padding: 0 10px;
+}
+
 .backup {
     font-size: 15px;
-    padding: 10px 0;
+    padding: 10px 20px;
     width: 100%;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
     align-content: center;
+    /* border-bottom: 1px solid rgba(55, 53, 47, 0.2) */
+}
+
+.bottomBorder {
+    margin-right: 20px;
+    margin-left: 20px;
+    width: 80%;
+    height: 1px;
+    /* background-color: black; */
+    border-bottom: 1px solid rgba(55, 53, 47, 0.2);
 }
 
 .icon {
@@ -45,14 +86,6 @@
 .crossIcon {
     composes: icon;
     color: red;
-}
-
-.description {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-right: 10px;
-    padding-left: 10px;
 }
 
 .descInfo {
