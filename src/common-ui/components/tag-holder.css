@@ -1,0 +1,20 @@
+.tagList {
+    display: flex;
+    flex-grow: 2;
+    margin-left: 10px;
+}
+
+.tagname {
+    composes: tagPill from '../elements.css';
+}
+
+.greyBorder {
+    background: transparent;
+    color: grey;
+    border: 1px solid grey;
+    opacity: 0.4;
+
+    &:hover {
+        opacity: 0.8;
+    }
+}

@@ -29,7 +29,7 @@ export interface Props {
     areAnnotationsExpanded: boolean
     annotations: any[]
     annotsCount: number
-    tagPills: ReactNode[]
+    tagHolder: ReactNode
     tagManager: ReactNode
     onTagBtnClick: MouseEventHandler
     onTrashBtnClick: MouseEventHandler
@@ -157,9 +157,8 @@ class PageResultItem extends PureComponent<Props> {
                                         {' '}
                                         {niceTime(this.props.displayTime)}{' '}
                                     </div>
-                                    <div className={styles.tagList}>
-                                        {this.props.tagPills}
-                                    </div>
+                                    {/* Tag Holder */}
+                                    {this.props.tagHolder}
                                 </div>
                                 <div
                                     className={styles.buttonsContainer}

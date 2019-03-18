@@ -1,7 +1,7 @@
 import React, { MouseEventHandler, PureComponent } from 'react'
 import cx from 'classnames'
 
-const styles = require('./TagPill.css')
+const styles = require('./tag-holder.css')
 
 export interface Props {
     value: string
@@ -18,7 +18,7 @@ class TagPill extends PureComponent<Props> {
 
     private get tagClass() {
         return cx(styles.tagname, {
-            [styles.notExpanded]: !this.props.noBg,
+            [styles.greyBorder]: this.props.noBg,
         })
     }
 

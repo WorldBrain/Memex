@@ -8,7 +8,7 @@ import { LoadingIndicator } from '../../../common-ui/components'
 import { IndexDropdown } from '../../../common-ui/containers'
 import PageResultItem from './PageResultItem'
 import ResultList from './ResultList'
-import TagPill from './TagPill'
+import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
 import { RootState } from '../../../options/types'
 import { Result } from '../../types'
@@ -118,31 +118,15 @@ class ResultListContainer extends PureComponent<Props> {
         )
     }
 
-    private renderTagPills({ tagPillsData, tags }, resultIndex) {
-        const pills = tagPillsData.map((tag, i) => (
-            <TagPill
-                key={i}
-                value={tag}
-                onClick={this.props.handlePillClick(tag)}
-            />
-        ))
-
-        // Add on dummy pill with '+' sign if over limit
-        if (tags.length > constants.SHOWN_TAGS_LIMIT) {
-            return [
-                ...pills,
-                <TagPill
-                    key="+"
-                    setRef={this.trackDropdownRef}
-                    value={`+${tags.length - constants.SHOWN_TAGS_LIMIT}`}
-                    onClick={this.props.handleTagBtnClick(resultIndex)}
-                    noBg
-                />,
-            ]
-        }
-
-        return pills
-    }
+    private renderTagHolder = ({ tags }, resultIndex) => (
+        <TagHolder
+            tags={tags}
+            maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
+            setTagManagerRef={this.trackDropdownRef}
+            handlePillClick={this.props.handlePillClick}
+            handleTagBtnClick={this.props.handleTagBtnClick(resultIndex)}
+        />
+    )
 
     private formatTime(date: number): string {
         return moment(date).calendar(null, {
@@ -158,7 +142,7 @@ class ResultListContainer extends PureComponent<Props> {
             <PageResultItem
                 key={i}
                 setTagButtonRef={this.setTagButtonRef}
-                tagPills={this.renderTagPills(doc, i)}
+                tagHolder={this.renderTagHolder(doc, i)}
                 isSidebarOpen={this.props.isSidebarOpen}
                 setUrlDragged={this.props.setUrlDragged}
                 tagManager={this.renderTagsManager(doc, i)}
