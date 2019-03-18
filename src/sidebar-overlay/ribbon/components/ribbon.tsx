@@ -371,7 +371,6 @@ class Ribbon extends Component<Props, State> {
                             </div>
                         </div>
                         <div className={styles.settingsActions}>
-
                             <ButtonTooltip
                                 tooltipText={
                                     'Remove Toolbar once. Disable permanently with button below.'

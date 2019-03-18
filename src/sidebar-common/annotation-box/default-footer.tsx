@@ -11,7 +11,6 @@ interface Props {
     goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
-    replyIconClickHandler: () => void
 }
 
 /* tslint:disable-next-line variable-name */

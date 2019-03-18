@@ -81,30 +81,18 @@
 
 .editIcon {
     background-image: url('/img/edit.svg');
+    background-size: 17px;
+    background-position-y: 3px;
 }
 
 .trashIcon {
     background-image: url('/img/trash.svg');
-    background-size: 15px;
-}
-
-.shareIcon {
-    background-size: 17px;
-    background-image: url('/img/share.svg');
-}
-
-.replyIcon {
-    background-image: url('/img/reply_empty.svg');
-
-    &:hover {
-        background-image: url('/img/reply_full.svg');
-    }
+    background-position-y: 3px;
 }
 
 .goToPageIcon {
     background-image: url('/img/open.svg');
     background-position-y: 4px;
-    background-size: 17px;
 }
 
 .container:hover .commonIcon {

@@ -17,7 +17,6 @@ interface Props {
     handleCancelDeletion?: () => void
     editIconClickHandler?: () => void
     trashIconClickHandler?: () => void
-    replyIconClickHandler?: () => void
 }
 
 /* tslint:disable-next-line variable-name */
@@ -49,7 +48,6 @@ const AllModesFooter = (props: Props) => (
                 goToAnnotationHandler={props.handleGoToAnnotation}
                 editIconClickHandler={props.editIconClickHandler}
                 trashIconClickHandler={props.trashIconClickHandler}
-                replyIconClickHandler={props.replyIconClickHandler}
             />
         )}
     </div>

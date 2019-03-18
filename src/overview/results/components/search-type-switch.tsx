@@ -34,9 +34,10 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
             <div className={styles.container}>
                 <div className={styles.switchContainer}>
                     <button
-                        className={cx(styles.searchSwitchBtn, styles.btn)}
+                        className={cx(styles.searchSwitchBtn, styles.btn, styles.pages)}
                         onClick={this.props.handleSearchTypeClick}
                         disabled={this.isPageSearch}
+                        id='pages'
                     >
                         {this.renderSearchCount(this.props.pageCount)}
                         Pages
