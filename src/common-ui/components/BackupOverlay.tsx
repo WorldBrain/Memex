@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import moment from 'moment'
-import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
+import ToggleSwitch from './ToggleSwitch'
 
 import ConfirmModalBtn from './ConfirmModalBtn'
 const styles = require('./BackupOverlay.css')
@@ -18,6 +18,8 @@ interface Props {
     buttonUrl: string
     errorMessage: string
     buttonText: string
+    isAutomaticBackupEnabled: boolean
+    onAutomaticBackupSelect: any
 }
 
 export default class BackupOverlay extends PureComponent<Props> {
@@ -59,7 +61,8 @@ export default class BackupOverlay extends PureComponent<Props> {
             errorMessage,
             crossIcon,
             buttonText,
-            checkedIcon,
+            isAutomaticBackupEnabled,
+            onAutomaticBackupSelect,
         } = this.props
         return ReactDOM.createPortal(
             <>
@@ -90,7 +93,11 @@ export default class BackupOverlay extends PureComponent<Props> {
                         <div className={styles.backup}>
                             <span>Last Backup:</span>
                             <span>
-                                <b>{moment(lastBackup).fromNow()}</b>
+                                {lastBackup === 'Never' ? (
+                                    <b>Never</b>
+                                ) : (
+                                    <b>{moment(lastBackup).fromNow()}</b>
+                                )}
                             </span>
                         </div>
                     )}
@@ -111,32 +118,16 @@ export default class BackupOverlay extends PureComponent<Props> {
                     {automaticBackup && (
                         <div className={styles.backup}>
                             <span>Automatic Backup:</span>
-                            {/* 5 === 5 ? (
-                                <span>
-                                    <img
-                                        src={this.props.checkedIcon}
-                                        className={styles.checkedIcon}
-                                    />
-                                </span>
-                            ) : (
-                                <span>
-                                    <img
-                                        src={this.props.crossIcon}
-                                        className={styles.crossIcon}
-                                    />
-                                </span>
-                            ) */}
                             <ToggleSwitch
-                                onChange={() => {
-                                    console.log('hello')
-                                }}
+                                defaultValue={isAutomaticBackupEnabled}
+                                onChange={onAutomaticBackupSelect}
                             />
                         </div>
                     )}
 
                     {this.props.children}
 
-                    {buttonUrl && (
+                    {buttonText && (
                         <div className={styles.button}>
                             <ConfirmModalBtn href={buttonUrl}>
                                 {buttonText}

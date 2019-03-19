@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { getLocalStorage } from 'src/util/storage'
 import BackupStatus from './BackupStatus'
+import { th } from 'remove-stopwords/lib/export_file'
 
 class BackupStatusContainer extends Component {
     static propTypes = {
@@ -21,20 +22,26 @@ class BackupStatusContainer extends Component {
         automaticBackupEnabled: null,
         backupTimes: null,
         hasInitialBackup: false,
-        hasNextBackup: false,
+        // hasNextBackup: false,
         backupLocation: null,
         hover: false,
         childPosition: '',
-        backupState: null,
+        backupState: {
+            state: 'no_backup',
+            id: 'no_backup',
+        },
+        billingPeriod: 'monthly',
+        paymentUrl: '',
     }
 
     async componentDidMount() {
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
-        const backupStatus = await getLocalStorage('backup-status', {
-            state: 'no_backup',
-            id: 'no_backup',
-        })
+        // const backupStatus = await getLocalStorage('backup-status', {
+        //     state: 'no_backup',
+        //     id: 'no_backup',
+        // })
         const getBackupState = await this.backupState(hasInitialBackup)
+        console.log('backupTimes', await remoteFunction('getBackupTimes')())
         // const autBack = await remoteFunction('checkAutomaticBakupEnabled')()
         // console.log('automaticBackup', autBack)
         // console.log('hasSub', await localStorage.getItem('backup.has-subscription'))
@@ -45,10 +52,11 @@ class BackupStatusContainer extends Component {
                 'isAutomaticBackupEnabled',
             )(),
             backupTimes: await remoteFunction('getBackupTimes')(),
-            hasNextBackup: !(backupStatus.nextBackup === null),
+            // hasNextBackup: !(backupStatus.nextBackup === null),
             backupLocation: await remoteFunction('getBackendLocation')(),
             hasInitialBackup,
             backupState: getBackupState,
+            paymentUrl: `http://worldbrain.io/?add-to-cart=7542&variation_id=7544`,
         })
     }
 
@@ -56,27 +64,28 @@ class BackupStatusContainer extends Component {
         let backupState
         const backupStatus = await getLocalStorage('backup-status', {
             state: 'no_backup',
-            id: 'no_backup',
+            backupId: 'no_backup',
         })
         if (backupStatus.state === 'success') {
             backupState = {
                 state: 'success',
+                header: 'Backup Successful',
                 message:
                     'Your last backup was successfull. Hit Backup Now if you want to backup again.',
             }
         } else if (backupStatus.state === 'fail') {
             let message
-            if (backupState.id === 'backup_error') {
+            if (backupStatus.backupId === 'backup_error') {
                 message =
                     'Your last backup was unsuccessfull as there was no internet connectivity. Please try again'
-            } else if (backupState.id === 'drive_size_empty') {
+            } else if (backupStatus.backupId === 'drive_size_empty') {
                 message =
                     'Your last backup was unsuccessfull as there was no space in your google drive. Please clear some space and try again'
-            } else if (backupState.id === 'auto_backup_expired') {
+            } else if (backupStatus.backupId === 'auto_backup_expired') {
                 message =
                     'Your Memex subscription has expired. Renew your subscription else Backups will have to be done manually.'
             } else if (
-                backupState.id === 'auto_backup_expired' &&
+                backupStatus.backupId === 'auto_backup_expired' &&
                 !hasInitialBackup
             ) {
                 message =
@@ -84,11 +93,13 @@ class BackupStatusContainer extends Component {
             }
             backupState = {
                 state: 'fail',
+                header: 'Backup Fail',
                 message,
             }
         } else if (backupStatus.state === 'no_backup') {
             backupState = {
-                state: 'success',
+                state: 'fail',
+                header: 'No Backups yet',
                 message:
                     'Your data is only stored on your computer. Back it up locally or to any cloud storage for free.',
             }
@@ -96,9 +107,28 @@ class BackupStatusContainer extends Component {
         return backupState
     }
 
-    onMouseEnterHandler = () => {
+    onAutomaticBackupSelect = val => {
+        this.setState(prevState => {
+            if (val && !prevState.automaticBackupEnabled) {
+                return {
+                    backupState: {
+                        state: 'autoBackup',
+                        header: 'Automatic Backups are a premium feature',
+                        message:
+                            'Backup your data automatically every 15 minutes. Worry-free.',
+                    },
+                }
+            } else {
+                return null
+            }
+        })
+    }
+
+    onMouseEnterHandler = async () => {
+        const backupState = await this.backupState()
         this.setState({
             hover: true,
+            backupState,
         })
     }
 
@@ -108,15 +138,26 @@ class BackupStatusContainer extends Component {
         })
     }
 
+    onBillingPeriodChange = billingPeriod => {
+        const productId = 7542
+        const variationId = billingPeriod === 'yearly' ? 7545 : 7544
+        this.setState({
+            billingPeriod,
+            paymentUrl: `http://worldbrain.io/?add-to-cart=${productId}&variation_id=${variationId}`,
+        })
+    }
+
     render() {
         const { checkedIcon, crossIcon, backupUrl } = this.props
         const {
             hasInitialBackup,
             backupTimes,
             backupLocation,
-            isAutomaticBackupEnabled,
+            automaticBackupEnabled,
             hover,
             backupState,
+            billingPeriod,
+            paymentUrl,
         } = this.state
         return (
             <BackupStatus
@@ -128,9 +169,13 @@ class BackupStatusContainer extends Component {
                 hover={hover}
                 backupTimes={backupTimes}
                 backupLocation={backupLocation}
-                isAutomaticBackupEnabled={isAutomaticBackupEnabled}
+                automaticBackup={automaticBackupEnabled}
                 backupUrl={backupUrl}
                 backupState={backupState}
+                onAutomaticBackupSelect={this.onAutomaticBackupSelect}
+                onBillingPeriodChange={this.onBillingPeriodChange}
+                billingPeriod={billingPeriod}
+                paymentUrl={paymentUrl}
             />
         )
     }

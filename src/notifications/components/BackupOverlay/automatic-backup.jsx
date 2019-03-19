@@ -5,18 +5,28 @@ import BackupOverlay from 'src/common-ui/components/BackupOverlay'
 const AutomaticBackup = props => {
     return (
         <BackupOverlay
-            header="Automatic Backups are a premium feature"
+            header={props.header}
             message={`Backup your data automatically every 15 minutes. Worry-free.`}
-            automaticBackup
-            buttonUrl={props.buttonUrl}
             buttonText={props.buttonText}
-        />
+            buttonUrl={props.buttonUrl}
+            onAutomaticBackupSelect={props.onAutomaticBackupSelect}
+            isAutomaticBackupEnabled={props.automaticBackup}
+        >
+            {props.children}
+        </BackupOverlay>
     )
 }
 
 AutomaticBackup.propTypes = {
     buttonUrl: PropTypes.string,
     buttonText: PropTypes.string,
+    onAutomaticBackupSelect: PropTypes.func,
+    automaticBackup: PropTypes.bool,
+    header: PropTypes.string,
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node,
+    ]).isRequired,
 }
 
 export default AutomaticBackup

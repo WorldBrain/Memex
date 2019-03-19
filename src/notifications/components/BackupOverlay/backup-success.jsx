@@ -5,26 +5,36 @@ import BackupOverlay from 'src/common-ui/components/BackupOverlay'
 const BackupSuccess = props => {
     return (
         <BackupOverlay
-            header="Backup Successful"
-            message={`Your last backup was successful. Click Backup Now if you want to backup again.`}
-            lastBackup={props.lastBackup}
+            header={props.header}
+            message={props.message}
+            lastBackup={props.lastBackup ? props.lastBackup : 'Never'}
             nextBackup={props.nextBackup}
             crossIcon={props.crossIcon}
             checkedIcon={props.checkedIcon}
             automaticBackup
-            buttonUrl={props.buttonUrl}
-            buttonText={props.buttonText}
-        />
+            isAutomaticBackupEnabled={props.automaticBackup}
+            onAutomaticBackupSelect={props.onAutomaticBackupSelect}
+            // buttonUrl={props.buttonUrl}
+            // buttonText={props.buttonText}
+        >
+            {props.children}
+        </BackupOverlay>
     )
 }
 
 BackupSuccess.propTypes = {
-    lastBackup: PropTypes.string.isRequired,
-    nextBackup: PropTypes.string.isRequired,
+    lastBackup: PropTypes.number.isRequired,
+    nextBackup: PropTypes.number.isRequired,
     crossIcon: PropTypes.string.isRequired,
     checkedIcon: PropTypes.string.isRequired,
-    buttonUrl: PropTypes.string.isRequired,
-    buttonText: PropTypes.string.isRequired,
+    automaticBackup: PropTypes.bool.isRequired,
+    onAutomaticBackupSelect: PropTypes.func,
+    message: PropTypes.string,
+    header: PropTypes.string,
+    children: PropTypes.oneOfType([
+        PropTypes.arrayOf(PropTypes.node),
+        PropTypes.node,
+    ]).isRequired,
 }
 
 export default BackupSuccess
