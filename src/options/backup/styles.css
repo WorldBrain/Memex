@@ -11,11 +11,7 @@
 }
 
 .backupTitle {
-    composes: titleColor from '../../common-ui/colors.css';
-    font-weight: 600;
-    font-size: 25px;
-    margin-top: 0px;
-    margin-bottom: 3px;
+    composes: sectionTitle from 'src/options/base.css';
 }
 
 .subtitle {
@@ -24,17 +20,12 @@
 }
 
 .subtitle2 {
-    composes: subTitleColor from '../../common-ui/colors.css';
-    font-size: 0.7rem;
+    composes: subText from 'src/options/base.css';
     margin-bottom: 30px;
 }
 
 .header2 {
-    composes: darkBlue from '../../common-ui/colors.css';
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 5px;
-    margin-top: 30px;
+    composes: subTitle from 'src/options/base.css';
 }
 
 .back {
@@ -110,8 +101,7 @@
 }
 
 .subname {
-    composes: subTitleColor from '../../common-ui/colors.css';
-    font-size: 13px;
+    composes: subText from 'src/options/base.css';
     margin-top: 4px;
 }
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import { remoteFunction } from 'src/util/webextensionRPC'
 const localStyles = require('./running-process.css')
-import { ProgressBar } from '../components/progress-bar'
+import { ProgressBar } from 'src/common-ui/components'
 import MovingDotsLabel from '../components/moving-dots-label'
 import { PrimaryButton } from '../components/primary-button'
 import LoadingBlocker from '../components/loading-blocker'
@@ -119,7 +119,7 @@ export default class RunningProcess extends React.Component<Props> {
     renderRunning(info) {
         const progressPercentage =
             info.processedChanges && info.totalChanges
-                ? info.processedChanges / info.totalChanges
+                ? info.processedChanges / info.totalChanges * 100
                 : 0
 
         return (
@@ -131,7 +131,7 @@ export default class RunningProcess extends React.Component<Props> {
                 </div>
                 <div className={localStyles.steps}>
                     {this.renderSteps(info)}
-                    <ProgressBar value={progressPercentage} />
+                    <ProgressBar progress={progressPercentage} />
                 </div>
                 {this.renderActions(info)}
             </div>

@@ -2,32 +2,39 @@ import * as React from 'react'
 
 import { ClickHandler } from '../../types'
 import * as constants from '../constants'
-import TagInputContainer from './tag-input-container'
+import TagsContainer from './tag-input-container'
+import { Tooltip } from 'src/common-ui/components'
+import cx from 'classnames'
 
 const styles = require('./comment-box-form.css')
 
 interface Props {
     env?: 'inpage' | 'overview'
     commentText: string
+    isCommentBookmarked: boolean
     handleCommentTextChange: (comment: string) => void
     saveComment: React.EventHandler<React.SyntheticEvent>
     cancelComment: ClickHandler<HTMLElement>
+    toggleBookmark: ClickHandler<HTMLButtonElement>
+    isAnnotation: boolean
 }
 
 interface State {
     rows: number
     isTagInputActive: boolean
+    showTagsPicker: boolean
 }
 
 class CommentBoxForm extends React.Component<Props, State> {
     /** Ref of the text area element to listen for `scroll` events. */
     private _textAreaRef: HTMLElement
-    /** Ref of the tag input element to focus on it when tabbing. */
-    private _tagInputRef: HTMLElement
+    /** Ref of the tag button element to focus on it when tabbing. */
+    private tagBtnRef: HTMLElement
 
     state = {
         rows: constants.NUM_DEFAULT_ROWS,
         isTagInputActive: false,
+        showTagsPicker: false,
     }
 
     componentDidMount() {
@@ -56,8 +63,8 @@ class CommentBoxForm extends React.Component<Props, State> {
         this._textAreaRef = ref
     }
 
-    private _setTagInputRef = (ref: HTMLElement) => {
-        this._tagInputRef = ref
+    private setTagButtonRef = (ref: HTMLElement) => {
+        this.tagBtnRef = ref
     }
 
     private _handleTextAreaKeyDown = (
@@ -65,12 +72,7 @@ class CommentBoxForm extends React.Component<Props, State> {
     ) => {
         // Save comment.
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            this.props.saveComment(e)
-        } else if (e.key === 'Tab' && !e.shiftKey) {
-            this.setTagInputActive(true)
-            setTimeout(() => {
-                this._tagInputRef.querySelector('input').focus()
-            }, 0)
+            this.saveComment(e)
         } else if (
             !(e.ctrlKey || e.metaKey) &&
             /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
@@ -81,25 +83,28 @@ class CommentBoxForm extends React.Component<Props, State> {
         }
     }
 
-    private _handleTagInputKeyDown = (
-        e: React.KeyboardEvent<HTMLDivElement>,
-    ) => {
-        // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
+    private handleTagBtnKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
         if (e.key === 'Tab') {
-            this.setTagInputActive(false)
+            this.setState({
+                showTagsPicker: false,
+            })
+            this.tagBtnRef.focus()
         }
     }
 
-    private _handleSaveButtonKeyDown = (
-        e: React.KeyboardEvent<HTMLButtonElement>,
+    private handleTagBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (this.props.commentText.length > 0) {
+            this.setState(prevState => ({
+                showTagsPicker: !prevState.showTagsPicker,
+            }))
+        }
+    }
+
+    private handleBookmarkBtnClick = (
+        e: React.MouseEvent<HTMLButtonElement>,
     ) => {
-        // Focus on the tag input element when `Shift + Tab` is pressed,
-        // handle other events normally.
-        if (e.key === 'Tab' && e.shiftKey) {
-            this.setTagInputActive(true)
-            setTimeout(() => {
-                this._tagInputRef.querySelector('input').focus()
-            }, 0)
+        if (this.props.commentText.length > 0) {
+            this.props.toggleBookmark(e)
         }
     }
 
@@ -120,13 +125,26 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.props.handleCommentTextChange(comment)
     }
 
+    private saveComment = (
+        e:
+            | React.KeyboardEvent<HTMLTextAreaElement>
+            | React.MouseEvent<HTMLButtonElement>,
+    ) => {
+        this.props.saveComment(e)
+        if (this.state.showTagsPicker) {
+            this.setState({
+                showTagsPicker: false,
+            })
+        }
+    }
+
     setTagInputActive = (isTagInputActive: boolean) => {
         this.setState({ isTagInputActive })
     }
 
     render() {
-        const { env, commentText, saveComment, cancelComment } = this.props
-        const { rows, isTagInputActive } = this.state
+        const { env, commentText, cancelComment } = this.props
+        const { rows } = this.state
 
         return (
             <React.Fragment>
@@ -141,35 +159,60 @@ class CommentBoxForm extends React.Component<Props, State> {
                     onKeyDown={this._handleTextAreaKeyDown}
                     ref={this._setTextAreaRef}
                 />
-                {/* Tags for the current annotation/comment. */}
-                <div
-                    onKeyDown={this._handleTagInputKeyDown}
-                    ref={this._setTagInputRef}
-                    className={styles.tagCommentEditor}
-                >
-                    <TagInputContainer
-                        env={env}
-                        isTagInputActive={isTagInputActive}
-                        setTagInputActive={this.setTagInputActive}
-                    />
-                </div>
 
                 {/* Save and Cancel buttons. */}
-                <div className={styles.buttonHolder}>
-                    <button
-                        className={styles.saveBtn}
-                        onClick={saveComment}
-                        onKeyDown={this._handleSaveButtonKeyDown}
-                    >
-                        Save
-                    </button>
-                    <button
-                        className={styles.cancelBtn}
-                        onClick={cancelComment}
-                    >
-                        Cancel
-                    </button>
-                </div>
+                {(commentText.length > 0 || this.props.isAnnotation) && (
+                    <div className={styles.footer}>
+                        <div className={styles.interactions}>
+                            <button
+                                ref={this.setTagButtonRef}
+                                className={cx(styles.button, styles.tag)}
+                                onClick={this.handleTagBtnClick}
+                                title={'Add tags'}
+                            />
+                            {/* New ribbon/sidebar work */}
+                            {/*<button
+                                className={cx(styles.button, {
+                                    [styles.bookmark]: this.props
+                                        .isCommentBookmarked,
+                                    [styles.notBookmark]: !this.props
+                                        .isCommentBookmarked,
+                                })}
+                                onClick={this.handleBookmarkBtnClick}
+                                title={
+                                    !this.props.isCommentBookmarked
+                                        ? 'Bookmark'
+                                        : 'Remove bookmark'
+                                }
+                            />*/}
+                        </div>
+                        <div className={styles.confirmButtons}>
+                            <button
+                                className={styles.cancelBtn}
+                                onClick={cancelComment}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className={styles.saveBtn}
+                                onClick={e => this.saveComment(e)}
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                <span
+                    className={styles.tagDropdown}
+                    onKeyDown={this.handleTagBtnKeyDown}
+                >
+                    {this.state.showTagsPicker && (
+                        <Tooltip position="bottom">
+                            <TagsContainer env={env} />
+                        </Tooltip>
+                    )}
+                </span>
             </React.Fragment>
         )
     }

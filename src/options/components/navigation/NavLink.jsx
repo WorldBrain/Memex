@@ -5,6 +5,7 @@ import cx from 'classnames'
 
 import { OutLink } from 'src/common-ui/containers'
 import styles from './styles.css'
+import icons from 'src/common-ui/icons.css'
 
 class NavLink extends PureComponent {
     static propTypes = {
@@ -25,17 +26,23 @@ class NavLink extends PureComponent {
     render() {
         return (
             <li className={styles.listElements}>
-                <div className={this.navClasses()}>
-                    <i className={cx(styles.navIcon, 'material-icons')}>
-                        {this.props.icon}
-                    </i>
-                    <this.LinkComponent
-                        className={this.navClasses()}
-                        to={this.props.pathname}
-                    >
-                        {this.props.name}
-                    </this.LinkComponent>
-                </div>
+                <this.LinkComponent
+                    className={this.navClasses()}
+                    to={this.props.pathname}
+                >
+                    <span className={cx(icons.standardMenu, {
+                    [icons.searchGreyIcon] : this.props.icon === "search",
+                    [icons.settingsIcon] : this.props.icon === "settings",
+                    [icons.importIcon] : this.props.icon === "import",
+                    [icons.backupIcon] : this.props.icon === "backup",
+                    [icons.blockIcon] : this.props.icon === "block",
+                    [icons.privacyIcon] : this.props.icon === "privacy",
+                    [icons.teamIcon] : this.props.icon === "team",
+                    [icons.helpIcon] : this.props.icon === "help",
+                    [icons.tutorialIcon] : this.props.icon === "info",
+                })}/>
+                    {this.props.name}
+                </this.LinkComponent>
             </li>
         )
     }

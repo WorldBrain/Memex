@@ -9,17 +9,6 @@
     vertical-align: middle;
 }
 
-input[disabled] {
-    color: grey;
-}
-
-input {
-    margin-right: 15px;
-    vertical-align: middle;
-    margin-left: 10px;
-    margin-top: 0px;
-}
-
 .name {
     vertical-align: middle;
 }
@@ -52,9 +41,8 @@ input {
 }
 
 .description {
-    composes: subTitleColor from '../../../common-ui/colors.css';
-    font-size: 13px;
-    margin: 4px 0px 0px 37px;
+    composes: subText from 'src/options/base.css';
+    margin: 4px 0px 0px 41px;
     line-height: 19px;
 }
 
@@ -104,6 +92,20 @@ input {
 
 .form {
     margin-top: 15px;
+}
+
+.form input {
+    margin-right: 20px;
+    vertical-align: middle;
+    margin-left: 10px;
+    margin-top: 0px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.form input[disabled] {
+    color: grey;
 }
 
 .link {

@@ -52,7 +52,7 @@ export default function niceTime(date, { now = undefined } = {}) {
         secondsAgo < 60 * 60 * 24 &&
         (now.getDay() === then.getDay() || secondsAgo < 60 * 60 * 6)
     ) {
-        return hourString(then)
+        return `Today ${hourString(then)}`
     }
     if (secondsAgo < 60 * 60 * 24) {
         return `Yesterday ${hourString(then)}`

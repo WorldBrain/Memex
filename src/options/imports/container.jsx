@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
+import ButtonTooltip from '../../common-ui/components/button-tooltip'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import * as constants from './constants'
@@ -268,12 +269,17 @@ class ImportContainer extends Component {
             {this.props.shouldRenderEsts && (
                 <React.Fragment>
                     <AdvSettingCheckbox {...this.props} />
-                    <ActionButton
-                        handleClick={this.props.recalcEsts}
-                        customClass="recalc"
+                    <ButtonTooltip
+                        tooltipText="Recalculate Numbers"
+                        position="bottom"
                     >
-                        <i className="material-icons">autorenew</i>
-                    </ActionButton>
+                        <ActionButton
+                            handleClick={this.props.recalcEsts}
+                            customClass="recalc"
+                        >
+                            <i className="material-icons">autorenew</i>
+                        </ActionButton>
+                    </ButtonTooltip>
                 </React.Fragment>
             )}
             {this.renderCancelButton()}

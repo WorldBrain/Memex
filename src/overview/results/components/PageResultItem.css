@@ -184,7 +184,7 @@
 
 .url {
     composes: subTitleColor from '../../../common-ui/colors.css';
-    font-size: 12px;
+    font-size: 13px;
     min-width: 0;
     font-weight: 400;
     white-space: nowrap;
@@ -245,7 +245,7 @@
     background-size: 16px;
     border-radius: 3px;
     background-color: transparent;
-    opacity: 0.1;
+    opacity: 0.2;
 }
 
 .trash {

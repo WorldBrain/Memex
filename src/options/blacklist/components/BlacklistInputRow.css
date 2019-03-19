@@ -5,47 +5,37 @@
 .newSiteInputRow {
     display: flex;
     flex-direction: row;
+    width: 100%;
+    margin-top: 10px;
+    height: 45px;
 }
 
 .input {
-    width: 100%;
-    padding: 10px 10px;
-    font-size: 14px;
-    font-style: italic;
+    composes: searchField from 'src/common-ui/elements.css';
     border: none;
     outline: none;
-    background: #f8f8f8;
+    width: 100%;
+    padding: 10px 20px;
+    margin-left: 0px;
 }
 
 .inputButtons {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    background: #f8f8f8;
 }
 
 .blacklistButton {
-    background: transparent;
+    composes: CTA from 'src/common-ui/elements.css';
     border: none;
-    font-size: 12px;
+    font-size: 14px;
     outline: none;
     cursor: pointer;
-    color: white;
-    width: 100%;
-    min-width: 150px;
-    background-color: #3eb994;
-    font-weight: bold;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-
-    &:hover {
-        color: #333;
-    }
+    width: max-content;
+    padding: 5px 10px;
 
     &:disabled {
-        color: #ebebeb;
-        cursor: default;
-        background-color: #93c9b9;
-        pointer-events: none;
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 }

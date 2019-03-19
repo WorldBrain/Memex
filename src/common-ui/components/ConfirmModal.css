@@ -1,12 +1,14 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4 from colors;
+
 .textContainer {
+    color: color4;
     display: flex;
     align-items: center;
     text-align: center;
-    color: #3eb995;
-    font-size: 18px;
-    justify-content: space-around;
-    margin-top: 25px;
-    margin-bottom: 20px;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 10px;
 
     & > div {
         display: none;
@@ -21,20 +23,23 @@
 
 .btnBar {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    flex-direction: row-reverse;
 }
 
 .btn {
     border: none;
-    background: none;
-    transition: all 200ms;
     cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-
-    &:hover:enabled {
-        color: #3eb995;
-    }
+    font-size: 17px;
+    font-weight: 600;
+    height: 30px;
+    margin: 10px;
+    width: 75px;
+    text-align: center;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:disabled,
     &[disabled] {
@@ -44,24 +49,9 @@
 }
 
 .confirmBtn {
-    padding: 6px 1.6em;
-    border-radius: 25px;
-    font-weight: 300;
-    border: 1px solid #3eb995;
-    font-size: 1rem;
-    color: #3eb995;
-    cursor: pointer;
-    height: 35px;
-    margin-left: 12px;
-    margin-right: 12px;
-
-    &:hover,
-    &:active {
-        background-color: #3eb995;
-        color: #fff;
-    }
+    composes: CTA from 'src/common-ui/elements.css';
 }
 
 .cancelBtn {
-    color: #f77;
+    composes: cancelNaked from 'src/common-ui/elements.css';
 }

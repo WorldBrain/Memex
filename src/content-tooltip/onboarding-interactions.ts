@@ -31,9 +31,7 @@ export const conditionallyShowHighlightNotification = async ({
     // Toolbar Notfication doesn't destroy the previous tooltip by default
     // So hack to destroy it using private method.
     toolbarNotifications._destroyRootElement()
-    toolbarNotifications.showToolbarNotification('onboarding-select-option', {
-        position,
-    })
+
     processEventRPC({
         type: EVENT_NAMES.ONBOARDING_HIGHLIGHT_MADE,
     })
@@ -111,10 +109,6 @@ export const conditionallyShowOnboardingNotifications = async ({
 
     if (taggingStage === STAGES.redirected) {
         toolbarNotifications.showToolbarNotification('tag-this-page')
-        await utils.setOnboardingStage(
-            FLOWS.tagging,
-            STAGES.tagging.notifiedTagPage,
-        )
     }
 }
 

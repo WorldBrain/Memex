@@ -5,26 +5,21 @@ import { getExtURL } from '../utils.js'
 const styles = require('./ribbon-first-close.css')
 
 const images = {
-    notifIcon: getExtURL('img/sidebarIcon_blue.svg'),
-    brainIcon: getExtURL('/img/worldbrain-logo-narrow-bw-48.png'),
     arrowUp: getExtURL('/img/notifArrowUp.svg'),
-    closeIcon: getExtURL('/img/cross.svg'),
 }
 
 export default function TooltipFirstCloseNotification({ onCloseRequested }) {
     return (
-        <div className={styles.title}>
+        <div>
             {/* <img className={styles.notifIcon} src={images.notifIcon}/> */}
             <NotificationLayout
                 title={'Turn on/off Ribbon permanently'}
-                icon={images.notifIcon}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={images.arrowUp}
-                closeIcon={images.closeIcon}
             >
                 Via the little{' '}
-                <img src={images.brainIcon} className={styles.brainIcon} /> icon
-                in the menu
+                <span className={styles.logo}/> icon in
+                the browser menu
             </NotificationLayout>
         </div>
     )

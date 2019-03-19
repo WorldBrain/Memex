@@ -70,12 +70,12 @@
 
 .navLink {
     composes: menuItem from '../../../common-ui/colors.css';
-    display: block;
+    display: flex;
     text-decoration: none;
-    font-size: 13px;
-    width: 100%;
-    padding: 5px 5px 5px 20px;
+    font-size: 15px;
+    padding: 10px 5px 10px 25px;
     letter-spacing: 0.5px;
+    align-items: center;
 
     &.isActive {
         color: #222;
@@ -85,8 +85,16 @@
     }
 }
 
+.navlink > span {
+    padding-left: 15px;
+}
+
+.navLink li:first-of-type {
+    margin-bottom: 50px;
+}
+
 .nav li:first-of-type a {
-    font-size: 0.75rem;
+    font-size: 15px;
     font-weight: 600;
 }
 

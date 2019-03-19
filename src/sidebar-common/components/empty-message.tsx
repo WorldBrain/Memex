@@ -8,7 +8,7 @@ const EmptyMessage = () => (
         <div className={styles.emoji}> ¯\_(ツ)_/¯ </div>
         <div className={styles.text}>
             {' '}
-            No comments and annotations made yet{' '}
+            No notes or highlights made yet{' '}
         </div>
         <a
             target="_blank"

@@ -1,20 +1,46 @@
-.pauseIcon {
-    background-image: url('/img/pause_blue.svg');
-    background-repeat: no-repeat;
-    background-size: 20px;
-    cursor: pointer;
-    opacity: 0.6;
-}
+@value colors: '../../../common-ui/colors.css';
+@value color4, color5, color6 from colors;
 
-.playIcon {
-    background-image: url('/img/play_blue.svg');
+.pauseIcon {
+    background-image: url('/img/pause.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     cursor: pointer;
     opacity: 0.8;
 }
 
+.playIcon {
+    background-image: url('/img/pause_active.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    cursor: pointer;
+    opacity: 1;
+
+    &:hover {
+        background-image: url('/img/play.svg');
+        opacity: 0.8;
+    }
+}
+
 .dropdown {
     margin: 0 5px;
     cursor: pointer;
+}
+
+.item {
+    cursor: pointer;
+    font-weight: 400;
+
+    &:disabled {
+        color: color6;
+        cursor: unset;
+        background: none;
+    }
+
+    &:hover,
+    &:focus {
+        font-weight: 500;
+        outline: 0;
+        color: color5;
+    }
 }

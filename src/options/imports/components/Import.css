@@ -1,3 +1,6 @@
+@value colors: '../../../common-ui/colors.css';
+@value color1, color2, color4, color6, color12 from colors;
+
 .importTable {
     width: 100%;
     padding: 0 15px;
@@ -17,8 +20,8 @@
     }
 
     & td {
-        color: #666;
-        min-width: 180px;
+        color: color4;
+        font-weight: 300;
     }
 
     & td.importTableCellSepar {
@@ -28,27 +31,33 @@
     & td:first-child {
         text-align: initial;
         font-weight: 500;
+        width: 190px;
     }
 }
 
 .importTableHead {
-    font-size: 16px;
-    color: #666;
-    border-bottom: 1px solid #d2d2d2;
+    font-size: 14px;
+    color: color4;
     line-height: 1.2;
 }
 
 .importTableRow {
     font-size: 14px;
-    height: 100px;
+    height: 110px;
+    vertical-align: middle;
 
     &:nth-child(even) {
-        background-color: #f6f6f6;
+        background-color: transparent;
     }
 
     &:nth-child(odd) {
-        background-color: #fbfafa;
+        background-color: #eceff390;
     }
+}
+
+.link {
+    color: color3;
+    text-decoration: none;
 }
 
 .importTableHelp {
@@ -72,13 +81,13 @@
     flex-direction: column;
     height: auto;
     justify-content: space-between;
-    background: #fbfafa;
+    background: transparent;
     border-radius: 10px;
 }
 
 .mainContainer {
     position: relative;
-    background-color: #fbfafa;
+    background-color: transparent;
 }
 
 .loadingBlocker {
@@ -100,15 +109,13 @@
 }
 
 .title {
-    color: #3eb995;
-    font-weight: bold;
-    font-size: 16px;
-    letter-spacing: 1px;
+    composes: sectionTitle from 'src/options/base.css';
 }
 
 .warningContainer {
     display: flex;
     flex-direction: row;
+    font-size: 15px;
 }
 
 .warningContainerReport {
@@ -119,35 +126,37 @@
 }
 
 .stepNumber {
-    font-size: 18px;
-    color: #3eb995;
+    font-size: 20px;
+    color: color4;
     font-weight: 600;
     letter-spacing: 1px;
-    margin-top: 20px;
+    margin-top: 10px;
     margin-bottom: 10px;
 }
 
 .stepText {
+    color: color6;
     font-size: 15px;
     font-weight: 300;
-    color: #777;
     margin-top: 0px;
     margin-bottom: 0px;
-    margin-left: 10px;
 }
 
 .warning {
     display: flex;
     margin: 1em 0;
     flex-direction: row;
-    color: #d5969e;
-    margin-top: 30px;
+    color: color12;
+    align-items: center;
+    font-weight: 500;
+    margin-top: 20px;
 }
 
 .warningText {
     left: 5px;
     position: relative;
     margin: 0;
+    line-height: 22px;
 }
 
 .warningCode {
@@ -156,8 +165,8 @@
 
 .icon {
     width: auto;
-    height: 20px;
-    margin-bottom: 20px;
+    height: 30px;
+    margin-right: 10px;
 }
 
 .stepImportText {
@@ -172,6 +181,7 @@
 .checkboxSubText {
     margin-left: 24px;
     font-size: 12px;
+    color: color6;
 }
 
 .checkbox {

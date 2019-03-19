@@ -13,7 +13,6 @@ module.exports = {
         'property-no-vendor-prefix': true,
         'selector-no-vendor-prefix': true,
         'value-no-vendor-prefix': true,
-        'at-rule-no-unknown': true,
         'declaration-no-important': true,
         'value-list-comma-newline-after': null,
         'declaration-colon-newline-after': null,
@@ -23,6 +22,7 @@ module.exports = {
         'selector-descendant-combinator-no-non-space': null,
         'selector-combinator-space-before': null,
         'no-descending-specificity': null,
+        "at-rule-no-unknown": null,
         "property-no-unknown":[true, {
             "ignoreProperties":["composes"]
         }],

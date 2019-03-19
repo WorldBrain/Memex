@@ -1,4 +1,7 @@
-.resultMessage {
+@value colors: 'src/common-ui/colors.css';
+@value color3 from colors;
+
+ .resultMessage {
     text-align: center;
     margin-top: 80px;
     font-size: 20px;
@@ -11,14 +14,17 @@
 }
 
 .smallMessage {
-    composes: h2Color from '../../../common-ui/colors.css';
+    color: color3;
     position: relative;
-    left: -267px;
+    left: calc(50vw - 800px / 2);
+    text-align: left;
     top: -25px;
     margin: 0;
     font-size: 15px;
+    font-weight: 600;
     font-style: normal;
     margin-bottom: -25px;
+    width: calc(100vw - 800px);
 
     & + ul {
         margin-top: -30px;

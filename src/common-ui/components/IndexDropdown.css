@@ -1,24 +1,32 @@
+@value colors: '../../common-ui/colors.css';
+@value color11, color14 from colors;
+
+.tagContainer * {
+    font-family: 'Inter';
+}
+
 .menuItem {
     composes: hoverColor from '../../common-ui/colors.css';
-    align-items: center;
     display: flex;
     padding: 8px 20px 8px 20px;
     cursor: pointer;
     border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
     font-size: 14px;
-    min-height: 20px;
+    background-color: white;
     justify-content: space-between;
+    align-items: center;
 
     &:hover,
     &:focus,
     &:active {
-        background-color: #f7f7f7;
+        background-color: color14;
         outline: none;
     }
 
     &.isNew {
         justify-content: flex-start;
+        align-items: center;
     }
 }
 
@@ -28,8 +36,8 @@
 
 .menuItemFocused {
     composes: selectedColor from '../../common-ui/colors.css';
-    align-items: center;
     display: flex;
+    align-items: center;
 }
 
 .remove {
@@ -37,7 +45,7 @@
 }
 
 .menuItem i {
-    font-size: 18px;
+    font-size: 20px;
     float: right;
 }
 
@@ -45,6 +53,7 @@
     width: 100%;
     max-height: 401px;
     overflow-y: scroll;
+    background-color: white;
 
     &:focus {
         outline: none;
@@ -89,26 +98,23 @@
     display: grid;
     grid-template-columns: 1fr 1.5fr 1fr;
     grid-template-areas: 'backButton numberTags .';
-    padding: 10px 0 20px 0px;
-    background: white;
+    padding: 7px 0 10px 0px;
     border-radius: 0 0 3px 3px;
+    background: white;
 }
 
 .searchContainer {
-    display: flex;
-    align-items: center;
+    composes: searchField from 'src/common-ui/elements.css';
     justify-content: space-between;
-    padding: 12px 0px 5px 0px;
-    border-radius: 3px 3px 0 0;
-    margin: 0px 20px 5px 20px;
-    border-bottom: 1px solid #eae9e9; /* MAN Manual Adjustment Needed */
-    background-color: white;
+    padding: 2px 10px 2px 10px;
+    margin: 5px 5px 5px 5px;
 }
 
 .searchIcon {
     composes: searchIcon from '../../common-ui/icons.css';
     width: 25px;
     height: 25px;
+    background-size: 20px;
 }
 
 .closeButton {
@@ -128,12 +134,12 @@
 }
 
 .search {
-    composes: textColorSearchPlaceholder from '../../common-ui/colors.css';
+    composes: searchField from '../../common-ui/elements.css';
     width: 90%;
     font-size: 14px;
     padding: 10px 0;
     border: none;
-    background-color: white;
+    background-color: color11;
     margin-left: 10px;
 
     &:focus {
@@ -168,13 +174,12 @@
     width: 300px;
     z-index: 1;
     background-color: #fff;
-    box-shadow: 0px 4px 7px 0px #3eb995;
+    border-radius: 3px;
 }
 
 .tagDivForFilterSB {
     z-index: 1;
     background-color: #fff;
-    box-shadow: unset;
     width: 100%;
 }
 
@@ -208,8 +213,8 @@
 }
 
 .isList {
-    font-size: 13px;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 500;
     color: black;
     padding: 0;
     background-color: transparent;

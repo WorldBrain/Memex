@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6 from colors;
+
 .container {
     display: flex;
     flex-direction: row;
@@ -6,61 +9,51 @@
     color: #3eb995;
 }
 
-.left {
-    width: 50px;
-    padding-top: 11px;
+.container a {
+    text-decoration: none;
+}
+
+.body {
+    color: color6;
 }
 
 .middle {
     flex-grow: 2;
+    justify-content: center;
+    display: flex;
+    color: color4;
+    flex-direction: column;
 }
 
 .right {
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 
 .thirdRowImage {
-    margin-right: 40px;
-    margin-bottom: 3px;
-}
-
-.notifIcon {
-    margin-left: 17px;
-    width: 20px;
+    margin-right: 20px;
+    width: 30px;
+    height: 30px;
 }
 
 .title {
     font-size: 1.1em;
-    color: #173766;
+    color: color4;
+    font-weight: 600;
     margin-bottom: 5px;
     margin-top: -1px;
+    align-self: flex-start;
 }
 
 .close {
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: removeIcon from 'src/common-ui/icons.css';
     position: absolute;
-    top: 7px;
-    right: 7px;
     cursor: pointer;
-    width: 13px;
-    height: 13px;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 20px;
-    margin: 3px 3px 0px 0px;
-
-    &:hover {
-        border-radius: 50px;
-        background-color: #f0f0f0;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 41px;
-        margin: 3px 3px 0px 0px;
-        top: 2.5px;
-        right: 3px;
-        cursor: pointer;
-        width: 22px;
-        height: 22px;
-        padding: 3px;
-    }
+    top: 5px;
+    right: 5px;
+    background-size: 12px;
+    width: 22px;
+    height: 22px;
 }

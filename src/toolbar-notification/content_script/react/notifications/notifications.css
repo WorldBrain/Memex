@@ -1,4 +1,5 @@
-.icon {
+.logo {
+    composes: logoSquared from 'src/common-ui/icons.css';
     height: 20px;
     vertical-align: bottom;
 }

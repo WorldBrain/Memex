@@ -2,6 +2,7 @@
     composes: removeIcon from '../../../common-ui/icons.css';
     composes: nakedButton hoverColor from '../../../common-ui/colors.css';
     display: flex;
+    background-size: 12px;
     width: 22px;
     height: 22px;
     cursor: pointer;

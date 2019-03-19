@@ -3,16 +3,21 @@
     box-sizing: border-box;
 }
 
+.screen {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+}
+
 .container {
     position: fixed;
-    top: 0;
-    right: 0;
+    top: 50px;
     width: 420px;
     display: flex;
     align-items: center;
-    height: 67px;
-    margin-right: 10%;
-    margin-top: 5px;
+    padding: 20px;
     border-radius: 5px;
     background: white;
     border: 1px solid #3eb99561;

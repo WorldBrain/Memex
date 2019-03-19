@@ -9,6 +9,7 @@ import classNames from 'classnames'
 import { LoadingIndicator } from '../../../common-ui/components'
 import niceTime from '../../../util/nice-time'
 import SemiCircularRibbon from './SemiCircularRibbon'
+import ButtonTooltip from '../../../common-ui/components/button-tooltip'
 
 const styles = require('./PageResultItem.css')
 
@@ -108,6 +109,10 @@ class PageResultItem extends PureComponent<Props> {
                                     {this.props.title}
                                     </span>
                                 </div>
+                                 <ButtonTooltip
+                                    tooltipText='Remove from collection'
+                                    position="leftNarrow"
+                                >
                                 <div className={styles.crossRibbon}>
                                     {this.props.isListFilterActive && (
                                         <SemiCircularRibbon
@@ -115,6 +120,7 @@ class PageResultItem extends PureComponent<Props> {
                                         />
                                     )}
                                 </div>
+                                </ButtonTooltip>
                             </div>
                             <div className={styles.url}>{this.props.url}</div>
                             
@@ -132,6 +138,10 @@ class PageResultItem extends PureComponent<Props> {
                                         className={styles.buttonsContainer}
                                         onClick={e => e.preventDefault()}
                                     >
+                                        <ButtonTooltip
+                                            tooltipText='Delete this page & all related content'
+                                            position="bottom"
+                                        >
                                         <button
                                             disabled={this.props.isDeleting}
                                             className={classNames(
@@ -143,6 +153,11 @@ class PageResultItem extends PureComponent<Props> {
                                                 'Delete this page & all related content'
                                             }
                                         />
+                                        </ButtonTooltip>
+                                         <ButtonTooltip
+                                            tooltipText='See & add Tags'
+                                            position="bottom"
+                                        >
                                         <button
                                             className={classNames(
                                                 styles.button,
@@ -152,6 +167,11 @@ class PageResultItem extends PureComponent<Props> {
                                             ref={this.props.setTagButtonRef}
                                             title={'Add/View Tags'}
                                         />
+                                        </ButtonTooltip>
+                                         <ButtonTooltip
+                                            tooltipText='Open & Add comments'
+                                            position="bottom"
+                                        >
                                         <button
                                             className={classNames(
                                                 styles.button,
@@ -159,9 +179,19 @@ class PageResultItem extends PureComponent<Props> {
                                             )}
                                             onClick={this.props.onCommentBtnClick}
                                             title={
-                                                'Add/View Commments & Annotations'
+                                                'Add/View Notes & Highlights'
                                             }
                                         />
+                                        </ButtonTooltip>
+
+                                         <ButtonTooltip
+                                            tooltipText={
+                                                !this.props.hasBookmark
+                                                    ? 'Star page'
+                                                    : 'Un-Star page'
+                                            }
+                                            position="bottom"
+                                        >
                                         <button
                                             disabled={this.props.isDeleting}
                                             className={this.bookmarkClass}
@@ -170,6 +200,7 @@ class PageResultItem extends PureComponent<Props> {
                                             }
                                             title={'Bookmark this page'}
                                         />
+                                        </ButtonTooltip>
                                     </div>
                             </div>
                         </div>

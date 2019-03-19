@@ -1,16 +1,20 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6 from colors;
+
 * {
     box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
 }
 
 html,
 body {
     margin: 0;
     font-size: 18px;
-    font-weight: 200;
+    font-weight: 300;
 }
 
 .root {
-    background-color: #fafafc;
+    background-color: white;
     display: flex;
     flex-direction: row;
 }
@@ -23,16 +27,30 @@ body {
 }
 
 .routeTitle {
-    font-size: 1em;
-    font-weight: 100;
-    color: #b7b7b7;
-    margin: 10px 0 10px 0;
+    font-size: 20px;
+    color: color4;
+    font-weight: 600;
+    margin-bottom: 30px;
 }
 
 .sectionTitle {
-    color: #3eb995;
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 20px;
+    font-size: 20px;
+    color: color4;
+    font-weight: 600;
     margin-top: 10px;
+}
+
+.subTitle {
+    composes: darkBlue from 'src/common-ui/colors.css';
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-top: 30px;
+}
+
+.subText {
+    font-size: 15px;
+    color: color6;
+    font-weight: 300;
+    margin: 5px 0 20px;
 }

@@ -1,20 +1,32 @@
-.container {
-    margin-bottom: 50px;
+@value colors: '../../../common-ui/colors.css';
+@value color1, color 2, color6, color4 from colors;
+
+.container * {
+        font-family: 'Inter';
+}
+
+.block {
+    margin-bottom: 60px;
+}
+
+.block input {
+    margin-right: 10px;
+    vertical-align: middle;
+    margin-left: 10px;
+    margin-top: 0px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid #d2d2d2;
+    width: 100px;
+    text-align: center;
 }
 
 .header {
-    font-size: 20px;
-    color: #808080;
-    font-weight: 400;
-    letter-spacing: 1px;
-    margin: 20px 0 15px;
+    composes: sectionTitle from 'src/options/base.css';
 }
 
 .subHeader {
-    font-size: 16px;
-    font-weight: lighter;
-    color: #a9a7a7;
-    margin: -5px 0 20px;
+    composes: subText from 'src/options/base.css';
 }
 
 .dropdown {
@@ -24,6 +36,5 @@
 
 .subText {
     font-size: 14px;
-    font-weight: lighter;
-    color: #a9a7a7;
+    color: color6;
 }

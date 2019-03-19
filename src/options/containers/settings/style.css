@@ -1,10 +1,6 @@
-.section {
-    margin-top: 20px;
-}
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6 from colors;
 
 .title {
-    color: #3eb995;
-    font-weight: 600;
-    font-size: 18px;
-    letter-spacing: 1px;
+	composes: sectionTitle from 'src/options/base.css';
 }

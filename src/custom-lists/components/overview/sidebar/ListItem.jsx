@@ -127,12 +127,6 @@ class PageList extends Component {
                             onClick={this.handleCrossBtnClick}
                         />
                     ) : null}
-                    {this.state.isMouseInside ? (
-                        <button
-                            className={cx(styles.shareButton, styles.button)}
-                            onClick={this.handleShareBtnClick}
-                        />
-                    ) : null}
                 </div>
             </div>
         )

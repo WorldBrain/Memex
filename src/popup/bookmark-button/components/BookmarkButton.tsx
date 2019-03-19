@@ -27,13 +27,13 @@ export type Props = OwnProps & StateProps & DispatchProps
 class BookmarkButton extends PureComponent<Props> {
     render() {
         const text = this.props.isBookmarked
-            ? 'Unbookmark this Page'
-            : 'Bookmark this Page'
+            ? 'Un-Star this Page'
+            : 'Star this Page'
 
         return (
             <Button
                 onClick={this.props.toggleBookmark}
-                title={'Bookmark, so you can filter for it later'}
+                title={'Bookmark'}
                 btnClass={cx({
                     [styles.bookmarkedBtn]: this.props.isBookmarked,
                     [styles.unbookmarkedBtn]: !this.props.isBookmarked,
@@ -58,7 +58,6 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     toggleBookmark: async e => {
         e.preventDefault()
         await dispatch(acts.toggleBookmark())
-        props.closePopup()
     },
 })
 

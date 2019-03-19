@@ -3,9 +3,12 @@ import { browser } from 'webextension-polyfill-ts'
 
 import { OPTIONS_URL, OVERVIEW_URL, LEARN_MORE_URL } from '../constants'
 
-export const openOverviewURL = (query: string) =>
+export const openOverviewURL = (query?: string) =>
     browser.tabs.create({
-        url: `${OVERVIEW_URL}?query=${query}`,
+        url:
+            query !== undefined
+                ? `${OVERVIEW_URL}?${query}`
+                : `${OVERVIEW_URL}`,
     })
 
 export const openOptionsURL = (query: string) =>

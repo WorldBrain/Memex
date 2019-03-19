@@ -76,6 +76,7 @@ export const fetchAnnotations: () => Thunk = () => async (
         const annotations = await annotationsManager.fetchAnnotationsWithTags(
             url,
         )
+        annotations.reverse()
         dispatch(setAnnotations(annotations))
     }
 

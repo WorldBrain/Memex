@@ -5,7 +5,7 @@ import * as actions from '../actions'
 import * as selectors from '../selectors'
 import State from '../types'
 import { MapDispatchToProps } from '../../types'
-import { TagInput } from '../../components'
+import { IndexDropdown } from 'src/common-ui/containers'
 
 interface StateProps {
     tags: string[]
@@ -19,14 +19,23 @@ interface DispatchProps {
 
 interface OwnProps {
     env?: 'inpage' | 'overview'
-    isTagInputActive: boolean
-    setTagInputActive: (isTagInputActive: boolean) => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
 
 /* tslint:disable-next-line variable-name */
-const TagInputContainer = (props: Props) => <TagInput {...props} />
+const TagsContainer = (props: Props) => (
+    <IndexDropdown
+        env={props.env}
+        isForAnnotation
+        allowAdd
+        initFilters={props.tags}
+        initSuggestions={props.initTagSuggestions}
+        onFilterAdd={props.addTag}
+        onFilterDel={props.deleteTag}
+        source="tag"
+    />
+)
 
 const mapStateToProps: MapStateToProps<
     StateProps,
@@ -48,4 +57,4 @@ const mapDispatchToProps: MapDispatchToProps<
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-)(TagInputContainer)
+)(TagsContainer)

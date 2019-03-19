@@ -1,24 +1,29 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-
+import ButtonTooltip from '../../common-ui/components/button-tooltip'
 import styles from './tooltip.css'
-import { getExtURL } from '../utils'
-
-const images = {
-    share: getExtURL('/img/share.svg'),
-    check: getExtURL('/img/green_check.svg'),
-    annotate: getExtURL('/img/annotate.svg'),
-}
 
 export const InitialComponent = ({ createLink, createAnnotation }) => (
     <div className={styles.createButtons}>
+         <ButtonTooltip
+            tooltipText="Annotate (A)"
+            position="bottom"
+        >
         <div
             title={'Add note to highlight'}
             className={styles.annotateButton}
             onMouseDown={createAnnotation}
         >
-            <span className={styles.annotateIcon} />
+            <span
+                data-annotation="annotationIcon"
+                className={styles.annotateIcon}
+            />
         </div>
+        </ButtonTooltip>
+         <ButtonTooltip
+            tooltipText="Create Link (L)"
+            position="bottom"
+        >
         <div
             title={'Share a link to this highlight'}
             className={styles.linkButton}
@@ -26,6 +31,7 @@ export const InitialComponent = ({ createLink, createAnnotation }) => (
         >
             <span className={styles.shareIcon} />
         </div>
+        </ButtonTooltip>
     </div>
 )
 
@@ -47,7 +53,7 @@ export const CreatingLinkComponent = () => (
 
 export const CopiedComponent = () => (
     <div className={styles.copiedMessage}>
-        <img className={styles.check} src={images.check} />
+        <span className={styles.check}/>
         <div className={styles.copiedTextContainer}>
             <p className={styles.greenText}>
                 Highlight link copied to clipboard
@@ -61,7 +67,7 @@ export const CopiedComponent = () => (
 
 export const DoneComponent = () => (
     <div className={styles.doneComponent}>
-        <img className={styles.check} src={images.check} />
+        <span className={styles.check}/>
     </div>
 )
 

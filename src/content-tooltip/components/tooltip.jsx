@@ -1,16 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-
+import ButtonTooltip from '../../common-ui/components/button-tooltip'
 import AnimationWrapper from './AnimationWrapper'
-import { getExtURL } from '../utils'
 import styles from './tooltip.css'
-
-const images = {
-    cross: getExtURL('/img/cross_grey.svg'),
-    settings: getExtURL('/img/settings.svg'),
-    tooltipIcon: getExtURL('/img/tooltipIcon.svg'),
-}
 
 const deriveTooltipClass = state =>
     classNames(styles.tooltip, {
@@ -24,7 +17,6 @@ const Tooltip = ({
     state,
     tooltipComponent,
     closeTooltip,
-    openSettings,
 }) => (
     <div
         className={deriveTooltipClass(state)}
@@ -32,7 +24,7 @@ const Tooltip = ({
         id="memex-tooltip"
     >
         <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
-        {_renderButtons({ closeTooltip, openSettings })}
+        {_renderButtons({ closeTooltip, state})}
     </div>
 )
 
@@ -42,33 +34,27 @@ Tooltip.propTypes = {
     state: PropTypes.string.isRequired,
     tooltipComponent: PropTypes.element.isRequired,
     closeTooltip: PropTypes.func.isRequired,
-    openSettings: PropTypes.func.isRequired,
 }
 
 export default Tooltip
 
-export function _renderButtons({ closeTooltip, openSettings }) {
+export function _renderButtons({ closeTooltip, state}) {
     return (
-        <span className={styles.buttons}>
-            <a onClick={closeTooltip} className={styles.smallButton}>
-                <img
-                    className={styles.imgCross}
-                    src={images.cross}
-                    title={
-                        'Close once. Disable via Memex icon in the extension toolbar.'
-                    }
-                />
-            </a>
-            {openSettings && (
-                <a onClick={openSettings} className={styles.smallButton}>
-                    <img className={styles.imgSettings} src={images.settings} />
-                </a>
-            )}
+         <ButtonTooltip
+            tooltipText="Close. Disable in ribbon (R)"
+            position="rightContentTooltip"
+        >
+        <span className={classNames(styles.buttons, {
+            [styles.noShow] : state === 'running',
+            [styles.noShow] : state === 'copied',
+        })}>
+            <a className={styles.imgCross} onClick={closeTooltip}/>
         </span>
+        </ButtonTooltip>
     )
 }
 
 _renderButtons.propTypes = {
     closeTooltip: PropTypes.func.isRequired,
-    openSettings: PropTypes.func,
+    state: PropTypes.string,
 }

@@ -15,7 +15,7 @@ class DeleteConfirmModal extends PureComponent<Props> {
         const { deleteDocs, ...modalProps } = this.props
 
         return (
-            <ConfirmModal {...modalProps} message="Sure you wanna delete that?">
+            <ConfirmModal {...modalProps} message="Delete page and related notes">
                 <ConfirmModalBtn onClick={deleteDocs}>Do it!</ConfirmModalBtn>
             </ConfirmModal>
         )

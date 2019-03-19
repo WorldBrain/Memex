@@ -1,23 +1,26 @@
+@value colors: '../../common-ui/colors.css';
+@value color4, color6 from colors;
+
 .tooltip {
+    composes: toolTips from '../../common-ui/elements.css';
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     position: absolute;
     font-size: 13px;
     background-color: #fff;
-    color: #3eb995;
     height: 40px;
-    width: 70px;
-    padding: 0px 0px;
-    border-radius: 5px;
-    border: 1px solid #c2c2c2;
+    width: max-content;
+    min-width: 50px;
+    padding: 2px 6px;
+    border-radius: 3px;
     text-align: center;
     line-height: 1.2em;
-    transform: translate(-45%, 45%);
+    transform: translate(-50%, 50%);
     z-index: 100000;
+    opacity: 1;
     box-sizing: content-box;
-    transition: all 0.15s ease-in;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+    transition: all 1s ease-in-out;
 
     & img {
         margin-bottom: 0px !important; /* stylelint-disable-line declaration-no-important */
@@ -28,14 +31,14 @@
 .tooltip::after {
     box-sizing: content-box;
     bottom: 84%;
-    left: 41.5%;
+    left: calc(50% - 5px);
     border: solid transparent;
     content: ' ';
     height: 10px;
     width: 10px;
     position: absolute;
     pointer-events: none;
-    border-color: #c2c2c2;
+    border-color: rgba(15, 15, 15, 0.2);
     border-width: 1px;
     border-bottom-color: transparent;
     border-left-color: transparent;
@@ -60,19 +63,23 @@
 }
 
 .tooltip.stateCopied {
-    animation: expand-width 0.1s ease-in 0.2s;
+    animation: expand-width 0.05s ease-in;
     animation-fill-mode: forwards;
 
     &::after {
-        left: 48%;
+        left: 50%;
     }
 }
 
 .tooltip.statePristine {
-    width: 110px;
+    border-radius: 3px;
+    width: 105px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
     &::after {
-        left: 45%;
+        left: 50%;
         top: -6px;
     }
 }
@@ -100,50 +107,56 @@
 
 .createButtons {
     z-index: 10;
-    width: 65%;
-    margin-left: 6px;
+    width: 80px;
+    height: 100%;
+    margin-left: 10px;
+    display: grid;
+    justify-content: flex-start;
+    align-items: center;
+    column-gap: 8px;
+    grid-auto-flow: column;
+    animation: slideIn 0.05s ease-in-out;
 
     & div {
         cursor: pointer;
-        flex-basis: 50%;
         display: flex;
+        width: auto;
         flex-direction: row;
         align-items: center;
         justify-content: center;
-
-        & .annotateIcon {
-            background-image: url('/img/annotate.svg');
-            background-size: 24px;
-            background-repeat: no-repeat;
-            width: 25px;
-            height: 25px;
-            margin-top: 3px;
-            margin-right: -4px;
-
-            &:hover {
-                background-image: url('/img/annotate_hover.svg');
-            }
-        }
-
-        & .shareIcon {
-            background-image: url('/img/share.svg');
-            background-size: 23px;
-            background-repeat: no-repeat;
-            width: 25px;
-            height: 25px;
-            margin-top: 1px;
-            margin-right: -8px;
-
-            &:hover {
-                background-image: url('/img/share_hover.svg');
-            }
-        }
     }
 }
 
+.annotateIcon {
+        composes: nakedButton from '../../common-ui/elements.css';
+        padding: 3px;
+        background-image: url('/img/comment_add.svg');
+        background-size: 23px;
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 25px;
+        width: 25px;
+        margin-top: 0px;
+        margin-right: -4px;
+}
+
+.shareIcon {
+        composes: nakedButton from '../../common-ui/elements.css';
+        background-image: url('/img/share.svg');
+        padding: 3px;
+        background-size: 21px;
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 25px;
+        margin-top: 0px;
+        margin-right: 0px;
+        width: 25px;
+}
+
 .progressIndicator {
-    width: 60%;
+    width: 100%;
     animation: slideIn 0.2s ease-in;
+    height: 100%;
 }
 
 .errorMessage {
@@ -163,22 +176,25 @@
 
 .doneComponent {
     width: 70%;
-    animation: slideIn 0.2s ease-in;
 
     & .check {
-        width: 25px;
-        height: auto;
+        width: 30px;
+        height: 30px;
     }
 }
 
 .copiedMessage {
-    width: 88%;
-    animation: slideIn 0.2s ease-in;
+    width: max-content;
+    height: 100%;
 
     & .check {
-        width: 25px;
-        height: auto;
-        animation: slideRight 0.2s ease-in 0.2s;
+        background-image: url('/img/checked_green.svg');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 28px;
+        width: 30px;
+        height: 30px;
+        animation: slideIn 0.05s ease-in-out 0.3s;
         animation-fill-mode: both;
         margin-left: 8px;
     }
@@ -187,30 +203,28 @@
         height: 35px;
         padding-left: 4px;
         padding-top: 7px;
-        animation: fadeInRight 0.2s ease-in 0.3s;
+        animation: slideIn 0.05s ease-in-out 0.3s;
         animation-fill-mode: both;
         text-align: left;
         text-shadow: none;
         margin-left: 3px;
-
-        & .greenText {
-            margin: 0;
-            padding: 0;
-            font-size: 12px;
-            color: #3db994;
-            font-weight: 800;
-            line-height: 1.3;
-        }
-
-        & .greyText {
-            margin: 0;
-            padding: 0;
-            font-size: 10px;
-            color: #a2a2a2;
-            font-weight: 400;
-            line-height: 1.3;
-        }
     }
+}
+
+.greenText {
+    color: color4;
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.greyText {
+    margin: 0;
+    padding: 0;
+    font-size: 11px;
+    color: color6;
+    font-weight: 400;
 }
 
 /* Right side buttons */
@@ -219,18 +233,17 @@
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    width: 13px;
-    height: 30px;
+    width: 22px;
+    height: 25px;
     position: absolute;
-    right: 6px;
-    top: 5px;
+    right: 4px;
+    top: -13px;
     z-index: 100001;
-    padding-left: 5px;
+    animation: slideIn 0.05s ease-in-out;
+}
 
-    & .imgSettings {
-        width: 13px;
-        margin-top: 4px;
-    }
+.noShow {
+    display: none;
 }
 
 .tooltipIcon {
@@ -263,8 +276,15 @@
 }
 
 .imgCross {
-    width: 11px;
-    margin-top: 2px;
+    composes: nakedButton from '../../common-ui/elements.css';
+    background-image: url('/img/removeIcon.svg');
+    padding: 2px;
+    width: 20px;
+    height: 20px;
+    background-repeat: no-repeat;
+    margin-right: 2px;
+    background-position: center;
+    background-size: 12px 12px;
 }
 
 /* Loading CSS */
@@ -272,9 +292,8 @@
     display: inline-block;
     position: relative;
     width: 40px;
-    height: 30px;
-    margin-left: -3px;
-    margin-top: 3px;
+    height: 100%;
+    margin-top: 14px;
 
     & div {
         position: absolute;
@@ -373,7 +392,7 @@
 
 @keyframes expand-width {
     0% {
-        width: 90px;
+        width: 115px;
     }
 
     100% {
@@ -383,12 +402,24 @@
 
 @keyframes fadeInRight {
     0% {
-        transform: translateX(50px);
+        transform: translateX(20px);
         opacity: 0;
     }
 
     100% {
         transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        transform: translateY(5px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
         opacity: 1;
     }
 }

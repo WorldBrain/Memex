@@ -28,16 +28,14 @@ class Ribbon extends React.Component {
             <div className={styles.container}>
                 <h1 className={styles.header}>Sidebar Ribbon</h1>
                 <p className={styles.subHeader}>
-                    Memex injects a small ribbon on the right side of every
-                    page. <br /> If disabled, you can still reach it via the
-                    little 'brain' icon in the popup.
+                    You can always open the sidebar via the Memex icon in the browser extensions menu. 
                 </p>
                 <Checkbox
                     id="show-memex-ribbon"
                     isChecked={this.state.ribbon}
                     handleChange={this.toggleRibbon}
                 >
-                    Show ribbon on every page
+                    Enable
                 </Checkbox>
             </div>
         )

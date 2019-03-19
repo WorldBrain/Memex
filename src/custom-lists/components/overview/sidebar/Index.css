@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color1, color 2, color6, color4, color14 from colors;
+
 .hr {
     border-color: #b0e0d2;
     width: 50px;
@@ -5,16 +8,17 @@
 }
 
 .collection {
-    color: #767676;
-    margin-bottom: 12px;
-    margin-top: 15px;
+    color: color4;
     cursor: pointer;
+    width: 100%;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: space-evenly;
+    padding: 5px 10px 5px 20px;
+    margin-top: 15px;
 
     &:hover {
-        background-color: #d7d7d7;
+        background-color: color14;
     }
 }
 
@@ -25,11 +29,13 @@
 }
 
 .plus {
-    font-size: 25px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-right: 5px;
-    margin-top: -4px;
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: addIcon from 'src/common-ui/icons.css';
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 12px;
+    width: 20px;
+    height: 20px;
 }
 
 .button {

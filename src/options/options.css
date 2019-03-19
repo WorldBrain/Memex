@@ -28,14 +28,9 @@ body {
 
 .button {
     font-size: 0.8em;
-    text-transform: uppercase;
     cursor: pointer;
     outline: 0;
     transition: all 0.1s ease-in;
-
-    &:hover {
-        transform: scale(1.02);
-    }
 
     &[disabled] {
         opacity: 0.4;

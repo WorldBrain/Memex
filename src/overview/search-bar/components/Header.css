@@ -38,14 +38,14 @@
 }
 
 .searchField {
+    composes: searchField from '../../../common-ui/elements.css';
     display: flex;
     justify-content: space-between;
     width: 100%;
     max-width: 800px;
-    height: 45px;
+    height: 40px;
     border-radius: 35px;
-    border-radius: 43.5px;
-    background-color: #f5f3f3;
+    border-radius: 3px;
 
     @media (max-width: 724px) {
         margin: 0 8px;
@@ -53,27 +53,16 @@
 }
 
 .query {
-    composes: darkBlue from '../../../common-ui/colors.css';
+    composes: searchField from '../../../common-ui/elements.css';
     flex: 1;
-    background-image: url('/img/search-icon.svg');
+    background-image: url('/img/searchIcon.svg');
     background-repeat: no-repeat;
     background-size: 17px;
     background-position: 3px;
     background-color: transparent;
-    padding-left: 36px;
-    font-size: 16px;
+    padding-left: 30px;
+    font-size: 15px;
     border: none;
-    font-weight: 400;
-
-    &::placeholder {
-        color: #b8b8b8;
-        font-size: 17px;
-    }
-
-    &:focus {
-        outline: none;
-        border: none;
-    }
 }
 
 .container {
@@ -110,46 +99,35 @@
 }
 
 .upgrade {
+    composes: h2Color from '../../../common-ui/colors.css';
+    composes: nakedButton from '../../../common-ui/elements.css';
     font-size: 15px;
     text-decoration: none;
-    padding-top: 5px;
-    margin-right: 20px;
-    margin-left: 20px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 5px;
-    color: #3eb995;
-
-    &:hover {
-        color: #777;
-        background-color: #f0f0f0;
-        border-radius: 4px;
-    }
+    margin-left: 15px;
+    padding: 0px 10px 2px 10px;
 
     @media (max-width: 1260px) {
         display: none;
     }
 }
 
-.SettingsIcon {
-    height: 35px;
-    width: 35px;
+.settingsIcon {
+    composes: settingsIcon from '../../../common-ui/icons.css';
+    composes: nakedSquareButton from '../../../common-ui/elements.css';
+    height: 25px;
+    width: 25px;
     padding: 5px;
-    margin-bottom: -6px;
-    background-size: 35px;
-    background-position: center;
-    border-radius: 30px;
-
-    &:hover {
-        background-color: #f0f0f0;
-        background-size: 50px;
-        padding: 5px;
-    }
+    display: flex;
+    margin-left: 15px;
+    background-size: 21px;
 }
 
 .upgradeIcon {
     width: 20px;
     height: 20px;
     vertical-align: top;
-    margin-right: 2px;
+
+    @media (max-width: 1260px) {
+        display: none;
+    }
 }

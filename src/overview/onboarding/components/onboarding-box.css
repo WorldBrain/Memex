@@ -7,7 +7,7 @@ p {
     box-shadow: 0px 53px 100px -50px #b7b7b7;
     width: 95%;
     max-width: 50rem;
-    margin: 100px auto 30px auto;
+    margin: 90px auto 30px auto;
     display: flex;
     border: solid 1px #f4f4f4;
     border-radius: 10px;
@@ -22,6 +22,7 @@ p {
     padding: 40px 30px 30px 30px;
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
+    z-index: 2;
 }
 
 .rightParent {

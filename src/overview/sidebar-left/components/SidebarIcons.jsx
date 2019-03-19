@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import styles from './SidebarIcons.css'
-import InfoTooltip from '../../../common-ui/components/miniTooltip'
+import ButtonTooltip from '../../../common-ui/components/button-tooltip'
 
 class SidebarIcons extends PureComponent {
     static propTypes = {
@@ -17,39 +17,6 @@ class SidebarIcons extends PureComponent {
         isListFilterActive: PropTypes.bool.isRequired,
     }
 
-    constructor(props) {
-        super(props)
-        this.state = {
-            // Capture mouse over events and display tooltip
-            showCollTooltip: false,
-            showFilterTooltip: false,
-        }
-    }
-
-    handleShowCollTooltip = () => {
-        this.setState({
-            showCollTooltip: true,
-        })
-    }
-
-    handleHideCollTooltip = () => {
-        this.setState({
-            showCollTooltip: false,
-        })
-    }
-
-    handleShowFilterTooltip = () => {
-        this.setState({
-            showFilterTooltip: true,
-        })
-    }
-
-    handleHideFilterTooltip = () => {
-        this.setState({
-            showFilterTooltip: false,
-        })
-    }
-
     render() {
         return (
             <div
@@ -57,10 +24,10 @@ class SidebarIcons extends PureComponent {
                     [styles.buttonContainer]: !this.props.overviewMode,
                 })}
             >
-                <InfoTooltip 
-                    showTooltip={this.state.showFilterTooltip}>
-                    Filters
-                </InfoTooltip>
+                <ButtonTooltip 
+                    position="right"
+                    tooltipText="Filters"
+                >
                 <div className={styles.enabled}>
                     <button
                         className={cx(styles.button, styles.filterButton, {
@@ -80,11 +47,11 @@ class SidebarIcons extends PureComponent {
                         </div>
                     )}
                 </div>
-                <InfoTooltip
-                    showTooltip={this.state.showCollTooltip}
+                </ButtonTooltip>
+                <ButtonTooltip
+                    position="right"
+                    tooltipText="My Collections"
                 >
-                    My Collections
-                </InfoTooltip>
                 <div className={styles.enabled}>
                     <button
                         className={cx(styles.listButton, styles.button, {
@@ -106,6 +73,7 @@ class SidebarIcons extends PureComponent {
                         </div>
                     )}
                 </div>
+                </ButtonTooltip>
             </div>
         )
     }

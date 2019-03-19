@@ -1,15 +1,21 @@
+@value colors: 'src/common-ui/colors.css';
+@value color1, color 2, color3, color6, color4, color14 from colors;
+
 .listItem {
     background: #d7d7d7;
 }
 
 .pageList {
-    composes: hoversidebaropen from '../../../../common-ui/colors.css';
     display: flex;
     align-items: center;
     height: 30px;
     position: relative;
     width: 100%;
     cursor: pointer;
+
+    &:hover {
+        background-color: color14;
+    }
 }
 
 .pageListDrag {
@@ -43,9 +49,8 @@
     height: 20px;
     visibility: hidden;
     opacity: 0.4;
-    margin-top: 1px;
-    animation: appear 0.2s forwards;
     background-size: 75%;
+    animation: appear 0.2s forwards;
 }
 
 .shareButton {
@@ -58,7 +63,6 @@
     margin-top: 1px;
     margin-right: 5px;
     margin-left: 2px;
-    animation: appear 0.2s forwards;
 }
 
 .deleteButton {
@@ -85,22 +89,21 @@
 }
 
 .buttonContainer {
-    position: absolute;
-    right: 0px;
     display: flex;
-    justify-content: space-evenly;
+    right: 10px;
+    justify-content: flex-end;
     width: 90px;
     align-items: center;
 }
 
 @keyframes appear {
     0% {
-        transform: scale(0);
+        transform: translateX(5px);
         visibility: hidden;
     }
 
     100% {
-        transform: scale(1);
+        transform: translateX(0px);
         visibility: visible;
     }
 }

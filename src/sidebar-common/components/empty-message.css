@@ -1,29 +1,26 @@
+@value colors: '../../common-ui/colors.css';
+@value color4, color6 from colors;
+
 .emptyMessage {
-    width: 65%;
+    width: 80%;
     margin: 0px auto;
-    color: #777;
     text-align: center;
     margin-top: 90px;
 
     & .emoji {
         font-size: 20px;
         margin-bottom: 15px;
+        color: color4;
     }
 
     & .text {
         margin-bottom: 15px;
         font-weight: 400;
         font-size: 15px;
+        color: color6;
     }
+}
 
-    & .learnHow {
-        color: #fff;
-        text-decoration: none;
-        padding: 3px 14px;
-        background-color: #3eb995;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 13px;
-        letter-spacing: 1px;
-    }
+.learnHow {
+    composes: CTA from '../../common-ui/elements.css';
 }

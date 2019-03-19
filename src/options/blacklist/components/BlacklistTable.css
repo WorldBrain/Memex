@@ -1,5 +1,4 @@
 .tableContainer {
-    max-height: 550px;
     overflow-y: scroll;
     clear: both;
 }
@@ -9,7 +8,6 @@
     background: white;
     width: 100%;
     font-size: 14px;
-    box-shadow: 0 3px 20px 2px rgba(0, 0, 0, 0.08);
 
     & th,
     & td {
@@ -30,6 +28,7 @@
 
     & tr td {
         text-align: left;
+        height: 60px;
 
         &:first-child {
             text-align: left;
@@ -56,9 +55,6 @@
     text-transform: uppercase;
     cursor: pointer;
     outline: 0;
-    border: 1px solid #999;
-    box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.1);
-    transition: all 0.1s ease-in;
 
     &:hover {
         background: #cdcdcd;

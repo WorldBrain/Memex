@@ -1,32 +1,32 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6, color2 from colors;
+
 .mainContainer {
+    composes: nakedButton from 'src/common-ui/elements.css';
+    color: color4;
     position: fixed;
     display: flex;
     flex-direction: row;
-    top: 100px;
+    top: 90px;
     justify-content: space-evenly;
-    padding: 11px 13px 10px 7px;
-    color: #777;
+    padding: 11px 13px 10px 13px;
     margin-left: 20px;
     margin-top: -10px;
     cursor: pointer;
     text-decoration: none;
-
-    &:hover {
-        background-color: #efefef;
-        border-radius: 4px;
-    }
+    align-items: center;
 }
 
 .image {
-    transform: rotate(90deg);
+    composes: arrowTriangle from 'src/common-ui/icons.css';
     margin-right: 8px;
-}
-
-.image img {
     width: 25px;
-    height: auto;
+    height: 25px;
+    background-repeat: no-repeat;
+    background-size: 15px;
 }
 
 .text {
+    color: color4;
     font-size: 16px;
 }

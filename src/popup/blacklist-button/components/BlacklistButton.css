@@ -1,13 +1,37 @@
+@value colors: '../../../common-ui/colors.css';
+@value color1, color2 from colors;
+
 .itemBtnBlacklisted {
-    background-image: url('/img/ignore_active.svg');
+    background-image: url('/img/blockActive.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.8;
 }
 
 .blacklist {
-    background-image: url('/img/ignore_blue.svg');
+    background-image: url('/img/block.svg');
     background-repeat: no-repeat;
     background-size: 20px;
-    opacity: 0.6;
+    opacity: 0.8;
+}
+
+.undo {
+	composes: CTA from '../../../common-ui/elements.css';
+	font-size: 12px;
+	padding: 0.3em 0.6em;
+	margin-left: 10px;
+}
+
+.splitSide {
+    composes: CTA from '../../../common-ui/elements.css';
+    font-size: 14px;
+    padding: 0.3em 0.6em;
+    width: 60px;
+    margin-left: 30px;
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+        font-weight: 600;
+    }
 }

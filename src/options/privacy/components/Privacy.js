@@ -1,5 +1,4 @@
 import React from 'react'
-import { Link } from 'react-router'
 import PropTypes from 'prop-types'
 
 import { OutLink } from 'src/common-ui/containers'
@@ -9,38 +8,38 @@ const Privacy = props => (
     <div className={localStyles.privacy}>
         <span className={localStyles.title}>
             {' '}
-            Your privacy & data-ownership is most important to us.
+            Your privacy & data-ownership is core to our mission.
         </span>
 
         <div className={localStyles.content}>
-            <h3>Your personal data is yours</h3>
+            <p className={localStyles.subTitle}>Your personal data is yours</p>
             All your personal data is stored locally on your computer.
-            <br />Noone will EVER have access to it by default.
+            <br />Unless you share it, or back it up to one of your cloud services, noone will ever have access to it by default.
             <br />
-            <br />Later, you will be able to <strong>voluntarily</strong> share
-            it with friends, followers and other applications. For more
-            information on that you can watch our{' '}
+            <br />See a more detailed version of our{' '}
             <OutLink
                 className={localStyles.link}
-                to="https://worldbrain.io/vision"
+                to="https://worldbrain.io/privacy"
             >
-                vision video
-            </OutLink>.
+                privacy policy
+            </OutLink> including some common questions answered.
             <br />
-            <br />
-            <h3>Anonymous Usage Statistics</h3>
+            <p className={localStyles.subTitle}>Anonymous, non-personalised usage statistics</p>
             WorldBrain.io may collect crash reports and anonymous statistics
             about how users use our website, the Memex software and its
             features.<br />
             This data will <strong>not contain any personal data</strong> (e.g.
             terms you search, the urls you visit/bookmark or the pages you
-            blacklist)<br />
+            blacklist, or the content of your notes<br />
             The data is solely used to improve Memex stability, usability and
             features, and is not shared with any 3rd party. <br />
-            <Link className={localStyles.link} to="/statistics">
-                Here
-            </Link>{' '}
-            is a complete list of all the data points Memex gathers currently.
+            See a{' '}
+            <OutLink
+                className={localStyles.link}
+                to="https://worldbrain.io/privacy"
+            >
+            a complete list</OutLink>
+            of all data points Memex gathers currently
             To cross-check this list you can examine our source code{' '}
             <OutLink
                 className={localStyles.link}
@@ -52,13 +51,11 @@ const Privacy = props => (
             <OutLink className={localStyles.link} to="https://WorldBrain.io/">
                 Piwik
             </OutLink>, an open-source alternative, and host the gathered data
-            on our servers.
+            on our own servers.
             <br />
-            <br />
-            <h3>Opting-out of Usage Statistics</h3>
-            We respect your wish of opting out either through the
-            "do-not-track"-feature of the browser or by manually selecting an
-            option below.
+            <p className={localStyles.subTitle}>Opt-ing out of this</p>
+            You can opt-out of these analytics and become a ghost for us. <br/>
+            We also respect the "do-not-track"-feature of the browser.
             <br />
             <br />Do you want to share anonymous usage statistics, so we can
             improve the Memex for you and others?
@@ -71,7 +68,7 @@ const Privacy = props => (
             </select>
             <br />
             <br />
-            <h3>Privacy Policy Changes</h3>
+            <p className={localStyles.subTitle}>Privacy Policy Changes</p>
             Although most changes are likely to be minor, WorldBrain.io may
             change its Privacy Policy from time to time, and in WorldBrain.io’s
             sole discretion. WorldBrain.io encourages visitors to frequently
@@ -79,10 +76,10 @@ const Privacy = props => (
             continued use of this site after any change in this Privacy Policy
             will constitute your acceptance of such change.
             <br />
-            Date of last change: 26.11.17
+            Date of last change: 17.03.2019
             <br />
             <br />
-            <h3>Protection of Certain Personally-Identifying Information</h3>
+            <p className={localStyles.subTitle}>Protection of Certain Personally-Identifying Information</p>
             WorldBrain.io will not rent or sell any of the gathered statistical,
             potentially personally-identifying and personally-identifying
             information to anyone. If you are a registered user of a
@@ -97,7 +94,7 @@ const Privacy = props => (
             personally-identifying and personally-identifying information.
             <br />
             <br />
-            <h3>Scope of Privacy Policy</h3>
+            <p className={localStyles.subTitle}>Scope of Privacy Policy</p>
             This Privacy Policy applies to the information that we obtain
             through your use of WorldBrain.io services via a device or when you
             otherwise interact with WorldBrain.io, Memex and WorldBrain UG.

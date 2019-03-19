@@ -1,6 +1,5 @@
 import { browser } from 'webextension-polyfill-ts'
 import { createAction } from 'redux-act'
-
 import { remoteFunction } from '../util/webextensionRPC'
 import { Thunk } from './types'
 import { acts as bookmarkActs } from './bookmark-button'
@@ -14,16 +13,25 @@ const fetchAllListsRPC = remoteFunction('fetchAllLists')
 const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
 const isURLBlacklistedRPC = remoteFunction('isURLBlacklisted')
 const fetchInternalTabRPC = remoteFunction('fetchTab')
+const fetchTabByUrlRPC = remoteFunction('fetchTabByUrl')
 
 export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
 
 export const initState: () => Thunk = () => async dispatch => {
-    const [currentTab] = await browser.tabs.query({
-        active: true,
-        currentWindow: true,
-    })
+    let currentTab
+    if (browser.tabs) {
+        ;[currentTab] = await browser.tabs.query({
+            active: true,
+            currentWindow: true,
+        })
+    } else {
+        const url = window.location.href
+        if (url) {
+            currentTab = await fetchTabByUrlRPC(url)
+        }
+    }
 
     // If we can't get the tab data, then can't init action button states
     if (!currentTab || !currentTab.url) {

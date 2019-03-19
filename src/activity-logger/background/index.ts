@@ -11,6 +11,7 @@ const toggleLoggingPause = initPauser()
 makeRemotelyCallable({
     toggleLoggingPause,
     fetchTab: id => tabManager.getTabState(id),
+    fetchTabByUrl: url => tabManager.getTabStateByUrl(url),
 })
 
 // Ensure tab scroll states are kept in-sync with scroll events from the content script

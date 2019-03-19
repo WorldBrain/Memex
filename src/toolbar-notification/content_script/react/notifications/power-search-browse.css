@@ -1,23 +1,22 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6, color2 from colors;
+
 .container {
     display: flex;
     font-family: 'Inter';
     flex-direction: row;
     width: 100%;
-    padding-left: 10px;
-    padding-right: 10px;
 }
 
 .title {
-    font-weight: 400;
-    color: #173766;
+    font-weight: 600;
+    color: color4;
     font-size: 17px;
 }
 
 .notifContainer {
     width: fit-content;
-    margin: 20px 20px 15px 20px;
     text-align: center;
-    color: #444;
 }
 
 .button {
@@ -31,30 +30,17 @@
     cursor: pointer;
 }
 
-.emoji {
-    font-size: 33px;
-    vertical-align: middle;
-    margin-top: -7px;
-}
-
-.protip {
-    font-weight: 800;
-    font-size: 18px;
-    letter-spacing: 0.5px;
-    margin: 0px 3px;
-    text-transform: uppercase;
-}
-
 .key {
     color: white;
-    padding: 5px;
-    background-color: #3eb995;
-    margin: 0px 3px;
+    background-color: color2;
+    margin: 0px 10px;
+    padding: 5px 11px;
+    cursor: unset;
 }
 
 .keys {
     margin-top: 20px;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
 }
 
 .instructions {

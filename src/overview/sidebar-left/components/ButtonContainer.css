@@ -25,7 +25,7 @@
 }
 
 .closeIcon {
-    composes: hoverColor from '../../../common-ui/colors.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     background-image: url('/img/doubleArrow.svg');
     background-size: 15px;
     display: block;
@@ -37,45 +37,29 @@
     background-position-x: 2px;
     border-radius: 3px;
     margin-top: -9px;
-
-    &:hover {
-        background-color: #f0f0f0;
-    }
 }
 
 .filterButton {
-    background-image: url('/img/filter.svg');
+    composes: filtersIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     background-size: 20px;
     display: block;
-    background-repeat: no-repeat;
     width: 35px;
     opacity: 0.6;
     height: 35px;
-    background-position: 7.5px 7.5px;
-    border-radius: 50%;
-
-    &:hover {
-        background-color: #f0f0f0;
-        opacity: 0.8;
-    }
+    border-top: solid 4px transparent;
 }
 
 .listButton {
-    background-image: url('/img/collections.svg');
+    composes: collectionsIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     background-size: 20px;
     display: block;
     margin-left: 10px;
     opacity: 0.6;
-    background-repeat: no-repeat;
     width: 35px;
     height: 35px;
-    background-position: 7.5px 6.5px;
-    border-radius: 50%;
-
-    &:hover {
-        background-color: #f0f0f0;
-        opacity: 0.8;
-    }
+    border-top: solid 4px transparent;
 }
 
 .clearFilters {
@@ -89,15 +73,13 @@
 }
 
 .filterEnabled {
-    border-bottom: solid 4px #173766;
-    padding-bottom: 36px;
-    margin-top: 5px;
+    border-top: solid 4px #173766;
+    padding-top: 40px;
+    margin-top: -4px;
     border-radius: 0px;
-    background-color: #fff0;
 
     &:hover {
-        background-color: #fff0;
-        opacity: 1;
+        background-color: transparent;
     }
 }
 

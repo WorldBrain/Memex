@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import Results from './Results'
+import strictUriEncode from 'strict-uri-encode'
 import ResultItem from './ResultItem'
 import RemovedText from './RemovedText'
 import * as constants from '../constants'
@@ -102,7 +103,9 @@ class Container extends React.Component {
     seeMoreResults() {
         // Create a new tab with the query overview URL
         const query = new URL(location.href).searchParams.get('q')
-        this.openOverviewRPC(query)
+        const finalQuery = strictUriEncode(query)
+
+        this.openOverviewRPC('query=' + finalQuery)
     }
 
     async toggleHideResults() {

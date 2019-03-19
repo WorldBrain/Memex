@@ -1,52 +1,63 @@
 @import url('/fonts/Inter/Inter.css');
 
+@value colors: '../../../common-ui/colors.css';
+@value color4, color6 from colors;
+
 .container {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    height: 200px;
+    height: 140px;
+}
+
+.container * {
+    &:focus {
+        outline: none;
+    }
 }
 
 .header {
     font-size: 1.5em;
     text-align: center;
-    color: #3eb995;
+    color: color4;
 }
 
 .content {
-    font-size: 1.1em;
+    font-size: 14px;
     text-align: center;
-    color: #3eb995;
+    color: color6;
     margin-top: -10px;
+    font-weight: 400;
+    line-height: 18px;
 }
 
 .btnBar {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
     width: 100%;
 }
 
 .btn {
-    font-size: 14px;
-    border-radius: 5px;
-    width: 100px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    border: 1px solid #3eb995;
-    cursor: pointer;
-    background-color: white;
-    color: #3eb995;
-
-    &:hover {
-        color: rgb(62, 185, 149);
-        background: #f2f2f2;
-    }
+    composes: CTA from '../../../common-ui/elements.css';
+    font-size: 15px;
+    padding: 5px 10px;
+    margin: 0 7.5px;
+    width: 60px;
+    border: none;
 }
 
 .btnDanger {
-    color: white;
-    background-color: #3eb995;
+    composes: CTAwarning from '../../../common-ui/colors.css';
+    font-size: 15px;
+    padding: 5px 10px;
+    margin: 0 7.5px;
+    border: none;
+    width: 60px;
+
+    &:hover {
+        font-weight: bold;
+    }
 }

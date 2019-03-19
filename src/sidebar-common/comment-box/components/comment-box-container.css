@@ -1,16 +1,18 @@
 .commentBoxContainer {
-    composes: boxShadow h2Color borderRadiusBig from '../../../common-ui/colors.css';
+    composes: boxShadow h2Color from '../../../common-ui/colors.css';
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     font-size: 13px;
-    margin: 5px 5px 30px 5px;
+    background: white;
+    width: 100%;
+    margin: 15px 0 0 0;
 
     &:hover {
-        background: none;
+        background: white;
     }
 
-    & > * {
+    & * {
         font-family: 'Inter';
     }
 }
@@ -46,4 +48,10 @@
 
 .noDisplay {
     display: none;
+}
+
+.inPage {
+    box-shadow: none;
+    margin-top: 1px;
+    cursor: default;
 }

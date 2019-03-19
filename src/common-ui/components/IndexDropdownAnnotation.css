@@ -1,3 +1,6 @@
+@value colors: '../../common-ui/colors.css';
+@value color11, color14 from colors;
+
 .menuItem {
     composes: hoverColor from '../../common-ui/colors.css';
     align-items: center;
@@ -7,18 +10,18 @@
     border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
     font-size: 14px;
-    min-height: 20px;
     justify-content: space-between;
 
     &:hover,
     &:focus,
     &:active {
-        background-color: #f7f7f7;
+        background-color: color14;
         outline: none;
     }
 
     &.isNew {
         justify-content: flex-start;
+        align-items: center;
     }
 }
 
@@ -62,31 +65,31 @@
 }
 
 .summaryTagContainer {
+    composes: subTitleColor from '../../common-ui/colors.css';
     font-size: 12px;
     display: flex;
     justify-content: space-around;
-    padding-bottom: 4px;
     background: white;
-    margin-bottom: 16px;
-    margin-left: 8px;
+    margin-bottom: 10px;
 }
 
 .searchContainer {
+    background: color11;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px dashed #d2d2d28c;
-    padding: 4px 11px;
-    margin-bottom: 0;
+    padding: 2px 10px 2px 10px;
+    border-radius: 3px;
+    margin: 5px 5px 5px 5px;
 }
 
 .search {
-    composes: textColorSearchPlaceholder from '../../common-ui/colors.css';
+    composes: searchField from '../../common-ui/elements.css';
     width: 90%;
     font-size: 14px;
     padding: 10px 0;
     border: none;
-    background-color: white;
+    background-color: color11;
     margin-left: 10px;
 
     &:focus {
@@ -115,8 +118,7 @@
 }
 
 .tagDivForFilter {
-    z-index: 1;
-    width: 99.7%;
+    z-index: 1000;
 }
 
 .check {

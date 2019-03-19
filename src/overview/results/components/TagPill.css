@@ -7,7 +7,7 @@
 
 .notExpanded {
     composes: lightBlueBackground from '../../../common-ui/colors.css';
-    color: white;
+    color: black;
     margin-left: 5px;
     max-width: 300px;
     display: inline-block;

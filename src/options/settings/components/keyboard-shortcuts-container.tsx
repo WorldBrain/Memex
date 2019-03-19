@@ -47,13 +47,7 @@ class KeyboardShortcutsContainer extends React.PureComponent {
             <div>
                 <h1 className={styles.header}>Keyboard Shortcuts</h1>
                 <h3 className={styles.subHeader}>
-                    Settings for the Keyboard Shortcuts for highlighting,
-                    annotating etc.
-                </h3>
-                <h3 className={styles.subHeader}>
-                    For modifier keys you can use shift, ctrl, alt, or meta.
-                    <br />
-                    Examples - ctrl+s, alt+shift+Y, meta+r
+                    You can also use shift, ctrl, alt, or meta to define keyboard shortcuts. 
                 </h3>
                 <Checkbox
                     id="shortcuts-enabled"

@@ -21,3 +21,11 @@
 .menuItem:last-child {
     border-bottom: none;
 }
+
+.bookmarksFilter {
+	padding: 10px 16px;
+}
+
+.bookmarksFilter span {
+	font-weight: 300;
+}

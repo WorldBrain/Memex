@@ -5,11 +5,10 @@ import styles from './style.css'
 
 const SettingsContainer = () => (
     <div>
-        <section className={styles.section}>
+        <section>
             <div className={styles.title}>
                 {' '}
-                Prevent specific URLs and domains from being indexed when
-                visiting them
+                Prevent URLs and domains from being indexed
             </div>
 
             <Blacklist />

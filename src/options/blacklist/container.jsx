@@ -100,9 +100,14 @@ class BlacklistContainer extends Component {
 
     renderAddBlacklistSites = () =>
         this.props.blacklist.length ? (
-            <div className={styles.blacklistText}>
-                You are currently not indexing ANY visits on URLs that have the
-                following text in them:
+            <div>
+                <p className={styles.subTitle}>
+                    List of blocked pages
+                </p>
+                <p className={styles.subText}>
+                    You are currently not logging visits on URLs that have the
+                    following text in them.
+                </p>
             </div>
         ) : (
             false
@@ -131,11 +136,14 @@ class BlacklistContainer extends Component {
         return (
             <React.Fragment>
                 <div>
-                    <div className={styles.ignoreDomainText}>
+                    <div className={styles.subTitle}>
                         Ignore a new domain/url:
                     </div>
                     {this.renderError()}
                     {this.renderBlacklistInputRow()}
+                     <div className={styles.subText}>
+                        You can use <a href="https://regexr.com/">RegExp's</a> too!
+                    </div>
                     {this.renderAddBlacklistSites()}
                     <BlacklistTable>
                         {this.renderBlacklistRows()}

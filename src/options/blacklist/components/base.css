@@ -15,12 +15,13 @@
     }
 }
 
-.ignoreDomainText,
-.blacklistText {
-    font-size: 16px;
-    font-weight: 600;
-    color: #666;
-    margin: 20px 0 10px 0;
+.subTitle {
+    composes: subTitle from 'src/options/base.css';
+}
+
+.subText {
+    margin-top: 5px;
+    composes: subText from 'src/options/base.css';
 }
 
 .blacklistAlert {

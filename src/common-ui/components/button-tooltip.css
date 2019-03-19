@@ -1,0 +1,74 @@
+@import url('/fonts/Inter/inter.css');
+
+.tooltip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tooltipTrigger {
+    display: inline-block;
+}
+
+.tooltipBubble {
+    position: absolute;
+    height: 20px;
+    border-radius: 5px;
+    display: flex;
+    flex-wrap: nowrap;
+    min-width: max-content;
+    align-items: center;
+    font-family: 'Inter';
+}
+
+.tooltipTop {
+    left: 50%;
+    padding-bottom: 9px;
+    transform: translateX(-50%);
+}
+
+.tooltipRight {
+    left: 40px;
+    top: 15px;
+    justify-content: flex-start;
+}
+
+.tooltipRightCentered {
+    left: 40px;
+    justify-content: flex-start;
+}
+
+.tooltipRightContentTooltip {
+    left: 8px;
+    top: -10px;
+    justify-content: flex-start;
+}
+
+.tooltipBottom {
+    transform: translateY(38px);
+    justify-content: center;
+}
+
+.tooltipLeft {
+    justify-content: flex-end;
+    right: 50px;
+}
+
+.tooltipLeftNarrow {
+    justify-content: flex-end;
+    right: 25px;
+}
+
+.tooltipMessage {
+    composes: h2ColorBackground from '../colors.css';
+    border-radius: 55px;
+    color: white;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+    padding: 0.5em 1em;
+    text-align: center;
+    width: fit-content;
+    font-family: 'Inter';
+}

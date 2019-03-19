@@ -107,6 +107,7 @@ class ResultListContainer extends PureComponent<Props> {
                 setTagDivRef={this.setTagDivRef}
                 initFilters={tags}
                 source="tag"
+                isForRibbon={true}
                 hover
             />
         )
@@ -230,6 +231,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
     hideSearchFilters: () => dispatch(sidebarLeftActs.openSidebarListMode()),
     handleCrossRibbonClick: ({ url }) => event => {
+        event.preventDefault()
         dispatch(listActs.delPageFromList(url))
         dispatch(acts.hideResultItem(url))
     },

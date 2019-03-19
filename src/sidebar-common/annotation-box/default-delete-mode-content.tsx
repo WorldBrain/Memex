@@ -9,6 +9,8 @@ interface Props {
     body?: string
     comment?: string
     tags: string[]
+    isEdited: boolean
+    timestamp: string
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleDeleteAnnotation: () => void
     handleCancelOperation: () => void
@@ -40,6 +42,8 @@ const DefaultDeleteModeContent = (props: Props) => (
         {/* Footer. */}
         <AllModesFooter
             mode={props.mode}
+            isEdited={props.isEdited}
+            timestamp={props.timestamp}
             displayGoToAnnotation={props.body && props.env === 'overview'}
             handleGoToAnnotation={props.handleGoToAnnotation}
             handleDeleteAnnotation={props.handleDeleteAnnotation}

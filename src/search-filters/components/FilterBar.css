@@ -1,15 +1,18 @@
+@value colors: 'src/common-ui/colors.css';
+@value color1, color 2, color6, color4, color14 from colors;
+
 .collection {
-    color: #767676;
+    color: color4;
     cursor: pointer;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 5px;
+    padding: 5px 10px 5px 5px;
     margin-top: 15px;
 
     &:hover {
-        background-color: #d7d7d7;
+        background-color: color14;
     }
 }
 
@@ -20,7 +23,11 @@
 }
 
 .plus {
-    font-size: 2em;
-    font-weight: bold;
-    margin-right: 13px;
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: addIcon from 'src/common-ui/icons.css';
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 12px;
+    width: 20px;
+    height: 20px;
 }

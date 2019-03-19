@@ -15,7 +15,6 @@
             "run_at": "document_start"
         }
     ],
-    "incognito": "spanning",
     "browser_action": {
         "default_title": "WorldBrain's Memex",
         "default_popup": "./popup.html"
@@ -56,9 +55,6 @@
         "/lib/pdf.worker.min.js",
         "/img/*",
         "/content_script.css",
-        "common-ui/colors.css",
-        "common-ui/icons.css",
-        "common-ui/elements.css",
         "/fonts/*",
         "sidebar.html"
     ],

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import cx from 'classnames'
-
+import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
 import CloseButton from './close-button'
 
 const styles = require('./topbar.css')
@@ -21,38 +21,36 @@ const Topbar = ({
 }: Props) => (
     <div className={styles.topbar}>
         {/* Button to close sidebar. */}
-        <CloseButton
-            title="Close sidebar once. Disable via Memex icon in the extension toolbar."
-            clickHandler={e => {
-                e.stopPropagation()
-                handleCloseBtnClick()
-            }}
-        />
-
-        <div className={styles.right}>
-            {/* Button to open settings. */}
-            <button
-                title="Open settings."
-                className={styles.settingsBtn}
-                onClick={e => {
+        
+        <ButtonTooltip
+                tooltipText="Close (ESC)"
+                position="rightCentered"
+        >
+            <CloseButton
+                title="Close sidebar once. Disable via Memex icon in the extension toolbar."
+                clickHandler={e => {
                     e.stopPropagation()
-                    handleSettingsBtnClick()
+                    handleCloseBtnClick()
                 }}
             />
+        </ButtonTooltip>
 
+        <div className={styles.right}>
             {/* Button to add a comment. */}
-            <button
-                title="Add a comment."
-                className={cx(styles.addCommentBtn, {
-                    [styles.disabled]: disableAddCommentBtn,
-                })}
-                onClick={e => {
+            <ButtonTooltip
+                tooltipText="Add notes to page"
+                position="left"
+            >
+                <button
+                    className={cx(styles.button, styles.comments, {
+                            [styles.disabled]: disableAddCommentBtn,
+                        })}
+                    onClick={e => {
                     e.stopPropagation()
                     handleAddCommentBtnClick()
                 }}
-            >
-                Add Comment
-            </button>
+                />
+            </ButtonTooltip>
         </div>
     </div>
 )

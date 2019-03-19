@@ -1,4 +1,8 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6 from colors;
+
 .container {
+    composes: toolTips from 'src/common-ui/elements.css';
     position: absolute;
     top: 100px;
     left: 200px;
@@ -6,17 +10,18 @@
     width: fit-content;
     background: #fff;
     height: fit-content;
-    padding: 30px;
+    padding: 6px 30px 35px 30px;
     font-family: 'Inter';
     font-weight: 400;
-    border-radius: 6px;
-    color: #173766;
-    border: solid 1px #3eb99536;
-    animation: pulse_slow 4s infinite;
+    color: color4;
     font-size: 16px;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.container::after {
+/* .container::after {
     content: ' ';
     position: absolute;
     top: -48px;
@@ -26,10 +31,18 @@
     background-color: #3eb995;
     border-radius: 50px;
     height: 16px;
-    border: solid 2px #173766;
     transform: rotate(45deg);
     z-index: 253459;
     animation: pulse 2s infinite;
+} */
+
+.container a {
+    text-decoration: none;
+}
+
+.title {
+    color: color4;
+    font-weight: 600;
 }
 
 .emoji {
@@ -60,85 +73,53 @@
     margin-top: 0px;
 }
 
-.close {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    cursor: pointer;
-    width: 20px;
+.navigationBox {
     height: 20px;
-    background: url('/img/cross.svg');
+    display: flex;
+    justify-content: flex-end;
+    margin-right: -22px;
+    margin-left: -6px;
+    margin-bottom: 15px;
+}
+
+.close {
+    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 10px;
-    margin: 3px 3px 0px 0px;
+    cursor: pointer;
+    background-size: 12px;
+    width: 22px;
+    height: 22px;
+}
 
-    &:hover {
-        border-radius: 50px;
-        background-color: #f0f0f0;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 10px;
-        margin: 3px 3px 0px 0px;
-        top: 3px;
-        right: 3px;
-        cursor: pointer;
-        width: 20px;
-        height: 20px;
-    }
+.text {
+    color: color4;
+    font-weight: 500;
+    font-size: 17px;
 }
 
 .prev {
-    position: absolute;
-    top: 3px;
-    left: 4px;
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-    background: url('/img/arrow.svg');
+    composes: arrowTriangle from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 7px;
-    margin: 3px 3px 0px 0px;
-    transform: rotate(180deg);
-
-    &:hover {
-        border-radius: 50px;
-        background-color: #f0f0f0;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 7px;
-        margin: 3px 3px 0px 0px;
-        cursor: pointer;
-        width: 20px;
-        height: 20px;
-    }
+    cursor: pointer;
+    width: 22px;
+    height: 22px;
+    background-size: 8px;
 }
 
 .next {
-    position: absolute;
-    top: 3px;
-    right: 24px;
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-    background: url('/img/arrow.svg');
+    composes: arrowTriangle from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 7px;
-    margin: 3px 3px 0px 0px;
-
-    &:hover {
-        border-radius: 50px;
-        background-color: #f0f0f0;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 7px;
-        margin: 3px 3px 0px 0px;
-        cursor: pointer;
-        width: 20px;
-        height: 20px;
-    }
+    cursor: pointer;
+    width: 22px;
+    height: 22px;
+    transform: rotate(180deg);
+    background-size: 8px;
 }
 
 .proTip {
@@ -150,7 +131,14 @@
 .subInfo {
     color: #3eb995;
     font-size: 15px;
-    margin-bottom: -5px;
+    margin-top: 10px;
+}
+
+.start {
+    composes: CTA from 'src/common-ui/elements.css';
+    font-size: 14px;
+    padding: 3px 8px;
+    margin-left: 10px;
 }
 
 @keyframes pulse {

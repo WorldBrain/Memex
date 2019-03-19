@@ -1,66 +1,268 @@
+@import url('/fonts/Inter/inter.css');
+
+:host * {
+    font-family: 'Inter';
+}
+
 .ribbon {
     position: fixed;
-    top: 20%;
+    top: 0;
     right: 0;
-    width: 13px;
-    height: 40px;
-    background-color: #fff;
-    z-index: 2147483647;
+    width: 30px;
+    height: 100%;
+    z-index: 1100;
+
+    /* z-index: 2147483647;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     border: 1px solid #7777775c;
-    border-right: none;
+    border-right: none; */
     transform: translate(0, 0);
-    transition: all 0s ease-in;
-    box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16);
+    transition: all 0.1s ease-in-out;
+
+    /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
     text-align: start;
-    font-family: serif;
-    cursor: pointer;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-}
 
-.ribbonExpanded {
-    width: 130px;
-    height: 40px;
-    display: grid;
-    grid-template-areas: 'buttons arrow';
-    grid-template-columns: 1fr;
-}
-
-.buttons {
-    grid-area: buttons;
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.arrow {
-    cursor: pointer;
-    height: 25px;
-
-    &:hover {
-        cursor: pointer;
+    & * {
+        font-family: 'Inter';
     }
 }
 
-.arrowBox {
-    width: 9px;
-    display: flex;
-    justify-content: flex-end;
-    margin-right: 4px;
+.ribbonExpanded {
+    composes: sideBarColorOpen from '../../../common-ui/colors.css';
+    display: grid;
+    width: 55px;
+    z-index: 999999999;
+    grid-template-rows: 25% 50% 25%;
+    transition: all 0.2s ease-in-out;
+}
+
+/* SECTIONS */
+
+.generalActions {
+    grid-row-gap: 20px;
+    display: grid;
+    justify-items: flex-start;
+    align-self: flex-start;
+    padding-top: 30px;
+}
+
+.pageActions {
+    grid-row-gap: 20px;
+    display: grid;
+    justify-items: flex-start;
+    align-self: flex-start;
+    padding-top: 30px;
+}
+
+.settingsActions {
+    grid-row-gap: 20px;
+    display: grid;
+    flex-direction: column;
+    align-self: flex-end;
+    margin-bottom: 30px;
+}
+
+/* ICONS */
+
+.buttons {
+    align-items: center;
+    display: block;
+}
+
+.button {
+    composes: nakedButton from '../../../common-ui/elements.css';
+    composes: hoversidebaropen from '../../../common-ui/colors.css';
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+    opacity: 0.8;
+    margin-left: 4px;
+    background-size: 18px 18px;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.dashboard {
+    background-image: url('/img/open.svg');
+}
+
+.arrow {
+    background-image: url('/img/arrow.svg');
+    transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+}
+
+.arrowReverse {
+    background-image: url('/img/arrow.svg');
+    transform: rotate(180deg);
+    transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+}
+
+.search {
+    background-image: url('/img/searchGrey.svg');
+}
+
+.tag {
+    background-image: url('/img/tag.svg');
+}
+
+.collection {
+    background-image: url('/img/collections_add.svg');
+}
+
+.comments {
+    background-image: url('/img/comment_add.svg');
+}
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+}
+
+.settings {
+    background-image: url('/img/settings.svg');
+}
+
+.highlightsOn {
+    background-image: url('/img/highlightOn.svg');
+}
+
+.highlightsOff {
+    background-image: url('/img/highlightOff.svg');
+    opacity: 0.3;
+
+    &:hover {
+        opacity: 0.4;
+    }
+}
+
+.tooltipOn {
+    background-image: url('/img/tooltip.svg');
+}
+
+.tooltipOff {
+    background-image: url('/img/tooltip.svg');
+    opacity: 0.3;
+
+    &:hover {
+        opacity: 0.4;
+    }
+}
+
+.ribbonOn {
+    background-image: url('/img/ribbonOn.svg');
+}
+
+.ribbonOff {
+    background-image: url('/img/ribbonOff.svg');
+    opacity: 0.3;
+
+    &:hover {
+        opacity: 0.4;
+    }
+}
+
+.ribbonIcon {
     padding-top: 1px;
 }
 
-.buttonHolder {
-    /* border-bottom: 1px solid #c2c2c2; */
+.pauseIcon {
+    background-image: url('/img/pause.svg');
+}
+
+.playIcon {
+    background-image: url('/img/pause_active.svg');
+
+    &:hover {
+        background-image: url('/img/play.svg');
+    }
+}
+
+/* Interaction Modals */
+
+.collectionDiv {
+    border-radius: 3px;
+}
+
+.searchInput {
+    composes: searchField from '../../../common-ui/elements.css';
+    border-radius: 3px;
+    border: none;
+    padding: 0 15px;
+    height: 35px;
+    font-size: 13px;
+    overflow: hidden;
+    width: calc(100% - 37px);
     display: flex;
+    flex-wrap: nowrap;
+    text-overflow: ellipsis;
+    margin: 4px;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.commentBox {
+    width: 300px;
+    height: 150px;
+    border: 2px solid #5cd9a6;
+    top: 50px;
+    background: white;
+}
+
+.commentSaved {
+    border-radius: 50px;
+    border: 1px solid #5cd9a6;
+    width: 100px;
+    height: 35px;
+}
+
+.commentText {
+    font-size: 15px;
+    margin-left: 50px;
+}
+
+.saveBox {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.saveIcon {
+    background-image: url('/img/saveIcon.svg');
+    width: 35px;
+    height: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.saveText {
+    font-weight: 600;
     margin-left: 10px;
-    padding-top: 1px;
 }
 
 .logo,
@@ -77,37 +279,10 @@
     margin-left: 10px;
 }
 
-.toggler {
-    fill: white;
-    background-size: 20px;
-    width: 20px;
-    height: 20px;
-}
-
 .cancel {
     background-image: url('/img/cross_grey.svg');
     fill: white;
     background-size: 12px;
     width: 12px;
     height: 12px;
-}
-
-.tooltipOn {
-    background-image: url('/img/tooltipIcon_blue.svg');
-}
-
-.tooltipOff {
-    background-image: url('/img/tooltipIcon_grey.svg');
-}
-
-.ribbonOn {
-    background-image: url('/img/sidebarIcon_blue.svg');
-}
-
-.ribbonOff {
-    background-image: url('/img/sidebarIcon_grey.svg');
-}
-
-.ribbonIcon {
-    padding-top: 1px;
 }

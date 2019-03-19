@@ -1,5 +1,11 @@
+@import url('/fonts/Inter/inter.css');
+
 :root {
     --memex-green: #4abf9d;
+}
+
+.MEMEX_CONTAINER * {
+    font-family: 'Inter';
 }
 
 .MEMEX_CONTAINER {
@@ -29,8 +35,7 @@
 }
 
 .links {
-    composes: darkBlue from '../../common-ui/colors.css';
-    composes: nakedButton from '../../common-ui/elements.css';
+    composes: filterText from '../../common-ui/elements.css';
     text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
     font-size: 16px;
     display: inline-block;
@@ -63,6 +68,10 @@
     margin-top: -2px;
     border-radius: 3px;
     margin-right: 5px;
+
+    &:focus {
+        outline: none;
+    }
 }
 
 .resultsText {
