@@ -1,4 +1,5 @@
 import * as React from 'react'
+import Waypoint from 'react-waypoint'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
 import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
@@ -14,6 +15,8 @@ interface Props {
     env: 'inpage' | 'overview'
     isOpen: boolean
     isLoading: boolean
+    needsWaypoint: boolean
+    appendLoader: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
     hoverAnnotationUrl: string
@@ -30,6 +33,7 @@ interface Props {
     handleAnnotationBoxMouseLeave: () => (e: Event) => void
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
+    handleScrollPagination: (args: Waypoint.CallbackArgs) => void
 }
 
 interface State {
@@ -50,7 +54,7 @@ class Sidebar extends React.Component<Props, State> {
     }
 
     private renderAnnots() {
-        return this.props.annotations.map(annot => (
+        const annots = this.props.annotations.map(annot => (
             <AnnotationBox
                 key={annot.url}
                 env={this.props.env}
@@ -66,6 +70,21 @@ class Sidebar extends React.Component<Props, State> {
                 )}
             />
         ))
+
+        if (this.props.needsWaypoint) {
+            annots.push(
+                <Waypoint
+                    onEnter={this.props.handleScrollPagination}
+                    key="sidebar-waypoint"
+                />,
+            )
+        }
+
+        if (this.props.isLoading && this.props.appendLoader) {
+            annots.push(<Loader key="more-loading" />)
+        }
+
+        return annots
     }
 
     render() {
@@ -104,7 +123,7 @@ class Sidebar extends React.Component<Props, State> {
                                 <CommentBoxContainer env={env} />
                             </div>
                         )}
-                        {isLoading ? (
+                        {isLoading && !this.props.appendLoader ? (
                             <Loader />
                         ) : annotations.length === 0 ? (
                             <EmptyMessage />

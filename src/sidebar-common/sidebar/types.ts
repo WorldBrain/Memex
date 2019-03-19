@@ -39,6 +39,8 @@ export default interface State {
     isOpen: boolean
     /** Denotes whether the sidebar is loading annotations or not. */
     isLoading: boolean
+    /** Denotes whether or not more annotations are available. */
+    resultsExhausted: boolean
     /** Information about the page to pass to the storage. */
     page: Page
     /** Annotations that this page has. */
@@ -51,4 +53,6 @@ export default interface State {
     commentBox: CommentBoxState
     /** Denotes whether to to show the congrats message during onboarding or not. */
     showCongratsMessage: boolean
+    /** Represents the latest page of annotations being fetched. */
+    currentResultPage: number
 }

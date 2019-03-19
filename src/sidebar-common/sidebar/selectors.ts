@@ -1,3 +1,4 @@
+/* tslint:disable:no-shadowed-variable */
 import { createSelector } from 'reselect'
 
 import State from './types'
@@ -38,3 +39,20 @@ export const showCongratsMessage = createSelector(
     sidebar,
     state => state.showCongratsMessage,
 )
+
+export const currentPage = createSelector(
+    sidebar,
+    state => state.currentResultPage,
+)
+export const resultsExhausted = createSelector(
+    sidebar,
+    state => state.resultsExhausted,
+)
+
+export const needsPagWaypoint = createSelector(
+    resultsExhausted,
+    isLoading,
+    (isExhausted, isLoading) => !isLoading && !isExhausted,
+)
+
+export const shouldAppendLoader = createSelector(currentPage, page => page > 0)
