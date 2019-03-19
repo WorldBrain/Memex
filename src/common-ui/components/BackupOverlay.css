@@ -62,7 +62,6 @@
     flex-direction: row;
     justify-content: space-between;
     align-content: center;
-    /* border-bottom: 1px solid rgba(55, 53, 47, 0.2) */
 }
 
 .bottomBorder {
@@ -70,7 +69,6 @@
     margin-left: 20px;
     width: 80%;
     height: 1px;
-    /* background-color: black; */
     border-bottom: 1px solid rgba(55, 53, 47, 0.2);
 }
 
