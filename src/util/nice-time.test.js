@@ -17,7 +17,7 @@ describe('niceTime', () => {
     test('should return timeperiod stamp for timeperiod less than 24 hours', () => {
         const date = new Date(2016, 7, 2, 14, 25)
         const now = new Date(2016, 7, 2, 18, 55)
-        expect(niceTime(date, { now })).toBe('14:25')
+        expect(niceTime(date, { now })).toBe('Today 14:25')
     })
 
     test('should return the timeperiod stamp and the day for timeperiod less than 24 hours but not on the same day', () => {
