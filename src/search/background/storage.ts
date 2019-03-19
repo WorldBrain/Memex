@@ -158,6 +158,16 @@ export default class SearchStorage extends FeatureStorage {
             })
         }
 
+        // Remove any annots without matching pages (keep data integrity regardless of DB)
+        const validUrls = new Set(Object.keys(pagesByUrl))
+        for (const day of Object.keys(normalizedResults)) {
+            for (const url of Object.keys(normalizedResults[day])) {
+                if (!validUrls.has(url)) {
+                    delete normalizedResults[day][url]
+                }
+            }
+        }
+
         return [normalizedResults, pagesByUrl]
     }
 
