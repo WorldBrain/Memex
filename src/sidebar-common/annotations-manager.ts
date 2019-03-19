@@ -52,11 +52,15 @@ export default class AnnotationsManager {
         })
     }
 
-    public fetchAnnotationsWithTags = async (url: string) => {
+    public fetchAnnotationsWithTags = async (
+        url: string,
+        limit = 10,
+        skip = 0,
+    ) => {
         const annotationsWithoutTags: Omit<
             Annotation,
             'tags'
-        >[] = await this._getAllAnnotationsByUrlRPC(url)
+        >[] = await this._getAllAnnotationsByUrlRPC(url, limit, skip)
 
         return Promise.all(
             annotationsWithoutTags.map(async annotation => {

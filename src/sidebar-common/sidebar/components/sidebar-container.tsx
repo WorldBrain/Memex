@@ -15,6 +15,8 @@ import AnnotationsManager from '../../annotations-manager'
 interface StateProps {
     isOpen: boolean
     isLoading: boolean
+    needsWaypoint: boolean
+    appendLoader: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
     hoverAnnotationUrl: string
@@ -30,6 +32,7 @@ interface DispatchProps {
     setHoverAnnotationUrl: (url: string) => void
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
+    handleScrollPagination: () => void
 }
 
 interface OwnProps {
@@ -141,6 +144,11 @@ class SidebarContainer extends React.Component<Props> {
                         handleDeleteAnnotation={
                             this.props.handleDeleteAnnotation
                         }
+                        handleScrollPagination={
+                            this.props.handleScrollPagination
+                        }
+                        needsWaypoint={this.props.needsWaypoint}
+                        appendLoader={this.props.appendLoader}
                     />
                 )}
             </React.Fragment>
@@ -155,6 +163,8 @@ const mapStateToProps: MapStateToProps<
 > = state => ({
     isOpen: selectors.isOpen(state),
     isLoading: selectors.isLoading(state),
+    needsWaypoint: selectors.needsPagWaypoint(state),
+    appendLoader: selectors.shouldAppendLoader(state),
     annotations: selectors.annotations(state),
     activeAnnotationUrl: selectors.activeAnnotationUrl(state),
     hoverAnnotationUrl: selectors.hoverAnnotationUrl(state),
@@ -176,6 +186,7 @@ const mapDispatchToProps: MapDispatchToProps<
     handleEditAnnotation: (url, comment, tags) =>
         dispatch(actions.editAnnotation(url, comment, tags)),
     handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
+    handleScrollPagination: () => dispatch(actions.fetchMoreAnnotations()),
 })
 
 export default connect(
