@@ -115,6 +115,11 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const pageResults = pageUrls.map(url => {
             const page = pageMap.get(url)
 
+            // Data integrity issue; no matching page in the DB. Fail nicely
+            if (!page) {
+                return null
+            }
+
             return {
                 ...page,
                 favIcon: favIconMap.get(page.hostname),
@@ -123,6 +128,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             }
         })
 
-        return pageResults.map(reshapePageForDisplay)
+        return pageResults
+            .filter(page => page != null)
+            .map(reshapePageForDisplay)
     }
 }
