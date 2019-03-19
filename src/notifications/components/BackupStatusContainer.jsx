@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { getLocalStorage } from 'src/util/storage'
 import BackupStatus from './BackupStatus'
-import { th } from 'remove-stopwords/lib/export_file'
 
 class BackupStatusContainer extends Component {
     static propTypes = {
@@ -22,7 +21,6 @@ class BackupStatusContainer extends Component {
         automaticBackupEnabled: null,
         backupTimes: null,
         hasInitialBackup: false,
-        // hasNextBackup: false,
         backupLocation: null,
         hover: false,
         childPosition: '',
@@ -36,23 +34,12 @@ class BackupStatusContainer extends Component {
 
     async componentDidMount() {
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
-        // const backupStatus = await getLocalStorage('backup-status', {
-        //     state: 'no_backup',
-        //     id: 'no_backup',
-        // })
         const getBackupState = await this.backupState(hasInitialBackup)
-        console.log('backupTimes', await remoteFunction('getBackupTimes')())
-        // const autBack = await remoteFunction('checkAutomaticBakupEnabled')()
-        // console.log('automaticBackup', autBack)
-        // console.log('hasSub', await localStorage.getItem('backup.has-subscription'))
-        // console.log('nextBackup', await localStorage.getItem('nextBackup'))
-        // console.log('backup-status', backupStatus)
         this.setState({
             automaticBackupEnabled: await remoteFunction(
                 'isAutomaticBackupEnabled',
             )(),
             backupTimes: await remoteFunction('getBackupTimes')(),
-            // hasNextBackup: !(backupStatus.nextBackup === null),
             backupLocation: await remoteFunction('getBackendLocation')(),
             hasInitialBackup,
             backupState: getBackupState,

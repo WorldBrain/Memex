@@ -9,13 +9,9 @@ const BackupSuccess = props => {
             message={props.message}
             lastBackup={props.lastBackup ? props.lastBackup : 'Never'}
             nextBackup={props.nextBackup}
-            crossIcon={props.crossIcon}
-            checkedIcon={props.checkedIcon}
             automaticBackup
             isAutomaticBackupEnabled={props.automaticBackup}
             onAutomaticBackupSelect={props.onAutomaticBackupSelect}
-            // buttonUrl={props.buttonUrl}
-            // buttonText={props.buttonText}
         >
             {props.children}
         </BackupOverlay>
@@ -25,8 +21,6 @@ const BackupSuccess = props => {
 BackupSuccess.propTypes = {
     lastBackup: PropTypes.number.isRequired,
     nextBackup: PropTypes.number.isRequired,
-    crossIcon: PropTypes.string.isRequired,
-    checkedIcon: PropTypes.string.isRequired,
     automaticBackup: PropTypes.bool.isRequired,
     onAutomaticBackupSelect: PropTypes.func,
     message: PropTypes.string,

@@ -211,10 +211,7 @@ export class GoogleDriveClient {
 
         const url = baseUrl + path
         const response = await fetch(url, options)
-        // console.log('response', response)
-        // console.log('ok', response.ok)
         if (!response.ok) {
-            // console.log('status Text', response.statusText)
             console.error(
                 'Something went wrong making a request to Drive:',
                 response,

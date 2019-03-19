@@ -164,10 +164,16 @@ export default class BackupProcedure {
                     console.error(e.stack)
 
                     // Set backup status for notification in search bar
-                    // await setLocalStorage('backup-status', {
-                    //     state: 'fail',
-                    //     backupId: 'backup_error',
-                    // })
+                    const getState = await getLocalStorage('backup-status')
+                    if (
+                        getState.state === 'success' ||
+                        getState.state === 'no_backup'
+                    ) {
+                        await setLocalStorage('backup-status', {
+                            state: 'fail',
+                            backupId: 'backup_error',
+                        })
+                    }
                     if (this.events) {
                         this.events.emit('fail', e)
                     }
