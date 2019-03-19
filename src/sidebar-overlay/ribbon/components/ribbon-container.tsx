@@ -31,7 +31,6 @@ interface StateProps {
     isTooltipEnabled: boolean
     isPaused: boolean
     isBookmarked: boolean
-    searchValue: string
     url: string
     tags: string[]
     initTagSuggs: string[]
@@ -48,7 +47,6 @@ interface DispatchProps {
     handleMouseLeave: () => void
     handlePauseToggle: () => void
     handleBookmarkToggle: () => void
-    handleSearchChange: ClickHandler<HTMLInputElement>
     onTagAdd: (tag: string) => void
     onTagDel: (tag: string) => void
     onCollectionAdd: (collection: PageList) => void
@@ -117,12 +115,14 @@ class RibbonContainer extends Component<Props> {
     private renderTagsManager() {
         return (
             <IndexDropdown
+                env="inpage"
                 url={this.props.url}
                 initFilters={this.props.tags}
                 source="tag"
                 onFilterAdd={this.props.onTagAdd}
                 onFilterDel={this.props.onTagDel}
-                isForRibbon={true}
+                isForRibbon
+                isForAnnotation
             />
         )
     }
@@ -136,7 +136,7 @@ class RibbonContainer extends Component<Props> {
                 initSuggestions={this.props.initCollSuggs}
                 onFilterAdd={this.props.onCollectionAdd}
                 onFilterDel={this.props.onCollectionDel}
-                isForRibbon={true}
+                isForRibbon
             />
         )
     }
@@ -152,9 +152,7 @@ class RibbonContainer extends Component<Props> {
             isSidebarOpen,
             isPaused,
             isBookmarked,
-            searchValue,
             closeSidebar,
-            handleSearchChange,
             handlePauseToggle,
             handleBookmarkToggle,
             isCommentSaved,
@@ -173,7 +171,6 @@ class RibbonContainer extends Component<Props> {
                     isBookmarked={isBookmarked}
                     isCommentSaved={isCommentSaved}
                     commentText={commentText}
-                    searchValue={searchValue}
                     tagManager={this.renderTagsManager()}
                     collectionsManager={this.renderCollectionsManager()}
                     openSidebar={openSidebar}
@@ -181,7 +178,6 @@ class RibbonContainer extends Component<Props> {
                     handleRibbonToggle={handleRibbonToggle}
                     handleTooltipToggle={this._handleTooltipToggle}
                     handleRemoveRibbon={handleRemoveRibbon}
-                    handleSearchChange={handleSearchChange}
                     handlePauseToggle={handlePauseToggle}
                     handleBookmarkToggle={handleBookmarkToggle}
                     setShowCommentBox={setShowCommentBox}
@@ -200,7 +196,6 @@ const mapStateToProps: MapStateToProps<
     isTooltipEnabled: selectors.isTooltipEnabled(state),
     isPaused: pause.isPaused(state),
     isBookmarked: bookmark.isBookmarked(state),
-    searchValue: popup.searchValue(state),
     url: popup.url(state),
     tags: tags.tags(state),
     initTagSuggs: tags.initTagSuggestions(state),
@@ -221,11 +216,6 @@ const mapDispatchToProps: MapDispatchToProps<
     handleMouseLeave: () => dispatch(actions.setIsExpanded(false)),
     handlePauseToggle: () => dispatch(pauseActs.togglePaused()),
     handleBookmarkToggle: () => dispatch(bookmarkActs.toggleBookmark()),
-    handleSearchChange: e => {
-        e.preventDefault()
-        const input = e.target as HTMLInputElement
-        dispatch(popupActs.setSearchVal(input.value))
-    },
     onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
     onTagDel: (tag: string) => dispatch(tagActs.deleteTag(tag)),
     onCollectionAdd: (collection: PageList) =>

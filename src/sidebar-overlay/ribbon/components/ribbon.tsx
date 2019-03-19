@@ -25,7 +25,6 @@ interface Props {
     isSidebarOpen: boolean
     isPaused: boolean
     isBookmarked: boolean
-    searchValue: string
     tagManager: ReactNode
     collectionsManager: ReactNode
     openSidebar: () => void
@@ -35,7 +34,6 @@ interface Props {
     handleRemoveRibbon: () => void
     handleBookmarkToggle: () => void
     handlePauseToggle: () => void
-    handleSearchChange: (e: SyntheticEvent<HTMLInputElement>) => void
     isCommentSaved: boolean
     commentText: string
     setShowCommentBox: () => void
@@ -47,6 +45,7 @@ interface State {
     showTagsPicker: boolean
     showCollectionsPicker: boolean
     showHighlights?: boolean
+    searchValue: string
 }
 
 const defaultState: State = {
@@ -54,6 +53,7 @@ const defaultState: State = {
     showSearchBox: false,
     showTagsPicker: false,
     showCollectionsPicker: false,
+    searchValue: '',
 }
 
 class Ribbon extends Component<Props, State> {
@@ -83,22 +83,20 @@ class Ribbon extends Component<Props, State> {
     private handleMouseLeave = () => {
         this.props.commentText.length > 0
             ? this.setState({
+                  ...defaultState,
                   showCommentBox: true,
-                  showSearchBox: false,
-                  showTagsPicker: false,
-                  showCollectionsPicker: false,
               })
             : this.setState(defaultState)
     }
 
-    private onSearchEnter: KeyboardEventHandler<HTMLInputElement> = event => {
-        if (event.key === 'Enter') {
-            event.preventDefault()
-            const queryFilters = extractQueryFilters(this.props.searchValue)
-            const queryParams = qs.stringify(queryFilters)
+    private handleSearchEnterPress: KeyboardEventHandler<
+        HTMLInputElement
+    > = event => {
+        event.preventDefault()
+        const queryFilters = extractQueryFilters(this.state.searchValue)
+        const queryParams = qs.stringify(queryFilters)
 
-            this.openOverviewTabRPC(queryParams)
-        }
+        this.openOverviewTabRPC(queryParams)
     }
 
     private handleCommentIconBtnClick = () => {
@@ -107,9 +105,7 @@ class Ribbon extends Component<Props, State> {
             return
         }
         this.setState(prevState => ({
-            showSearchBox: false,
-            showCollectionsPicker: false,
-            showTagsPicker: false,
+            ...defaultState,
             showCommentBox: !prevState.showCommentBox,
         }))
     }
@@ -131,13 +127,44 @@ class Ribbon extends Component<Props, State> {
         highlightAnnotations(highlights)
     }
 
+    private handleSearchKeyDown = (
+        event: React.KeyboardEvent<HTMLInputElement>,
+    ) => {
+        if (
+            !(event.ctrlKey || event.metaKey) &&
+            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
+        ) {
+            event.preventDefault()
+            event.stopPropagation()
+            this.setState(state => ({
+                ...state,
+                searchValue: state.searchValue + event.key,
+            }))
+            return
+        }
+
+        switch (event.key) {
+            case 'Enter':
+                return this.handleSearchEnterPress(event)
+            default:
+        }
+    }
+
+    private handleSearchChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        const searchValue = event.target.value
+
+        this.setState(state => ({ ...state, searchValue }))
+    }
+
     render() {
         return (
             <div
                 ref={ref => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
-                    [styles.ribbonExpanded]: 
-                    this.props.isExpanded || this.props.isSidebarOpen,
+                    [styles.ribbonExpanded]:
+                        this.props.isExpanded || this.props.isSidebarOpen,
                 })}
             >
                 {(this.props.isExpanded || this.props.isSidebarOpen) && (
@@ -191,10 +218,8 @@ class Ribbon extends Component<Props, State> {
                                         )}
                                         onClick={() => {
                                             this.setState(prevState => ({
+                                                ...defaultState,
                                                 showSearchBox: !prevState.showSearchBox,
-                                                showCollectionsPicker: false,
-                                                showTagsPicker: false,
-                                                showCommentBox: false,
                                             }))
                                             this.inputQueryEl.focus()
                                         }}
@@ -206,7 +231,9 @@ class Ribbon extends Component<Props, State> {
                                             toolTipType="searchBar"
                                         >
                                             <form>
-                                                <span className={styles.search} />
+                                                <span
+                                                    className={styles.search}
+                                                />
                                                 <input
                                                     autoFocus={false}
                                                     ref={this.setInputRef}
@@ -217,14 +244,13 @@ class Ribbon extends Component<Props, State> {
                                                     placeholder="Search your Memex"
                                                     autoComplete="off"
                                                     onKeyDown={
-                                                        this.onSearchEnter
+                                                        this.handleSearchKeyDown
                                                     }
                                                     onChange={
-                                                        this.props
-                                                            .handleSearchChange
+                                                        this.handleSearchChange
                                                     }
                                                     value={
-                                                        this.props.searchValue
+                                                        this.state.searchValue
                                                     }
                                                 />
                                             </form>
@@ -303,10 +329,8 @@ class Ribbon extends Component<Props, State> {
                                         )}
                                         onClick={() =>
                                             this.setState(prevState => ({
-                                                showSearchBox: false,
-                                                showCollectionsPicker: false,
+                                                ...defaultState,
                                                 showTagsPicker: !prevState.showTagsPicker,
-                                                showCommentBox: false,
                                             }))
                                         }
                                     />
@@ -330,10 +354,8 @@ class Ribbon extends Component<Props, State> {
                                         )}
                                         onClick={() =>
                                             this.setState(prevState => ({
-                                                showSearchBox: false,
+                                                ...defaultState,
                                                 showCollectionsPicker: !prevState.showCollectionsPicker,
-                                                showTagsPicker: false,
-                                                showCommentBox: false,
                                             }))
                                         }
                                     />
