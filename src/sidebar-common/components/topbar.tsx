@@ -39,7 +39,7 @@ const Topbar = ({
             {/* Button to add a comment. */}
             <ButtonTooltip
                 tooltipText="Add notes to page"
-                position="left"
+                position="leftNarrow"
             >
                 <button
                     className={cx(styles.button, styles.comments, {

@@ -1,6 +1,10 @@
 .footer {
     width: 100%;
     display: flex;
-    padding: 5px 10px 5px 10px;
-    justify-content: space-between;
+    justify-content: flex-start;
+}
+
+.savecancel {
+	display: flex;
+    flex-direction: row-reverse;
 }

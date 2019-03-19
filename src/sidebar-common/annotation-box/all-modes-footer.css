@@ -2,7 +2,8 @@
     display: flex;
     align-items: center;
     font-size: 13px;
-    border-radius: 0 0 5px 5px;
+    height: 25px;
+    margin: 0 4px 4px 4px;
     box-sizing: border-box;
 }
 
@@ -14,6 +15,7 @@
     border: none;
     font-weight: 700;
     outline: none;
+    background: none;
 }
 
 .footerText {

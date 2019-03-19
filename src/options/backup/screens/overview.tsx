@@ -107,7 +107,7 @@ export default class OverviewContainer extends React.Component<Props> {
                         <div className={localStyles.statusLine}>
                             <div>
                                 <span className={localStyles.boldText}>
-                                    Last backup:{' '}
+                                    Last backup:
                                 </span>
                                 <span className={localStyles.time}>
                                     {this.state.backupTimes.lastBackup
@@ -128,16 +128,18 @@ export default class OverviewContainer extends React.Component<Props> {
                         </div>
                         {this.state.backupTimes.nextBackup && (
                             <div className={localStyles.statusLine}>
-                                <span className={styles.name}>
-                                    Next backup:{' '}
-                                </span>
-                                <span className={localStyles.time}>
-                                    {this.state.backupTimes.nextBackup !==
-                                    'running'
-                                        ? moment(
-                                              this.state.backupTimes.nextBackup,
-                                          ).fromNow()
-                                        : 'in progress'}
+                                <span className={localStyles.nextBackupLine}>
+                                    <span className={styles.name}>
+                                        Next backup:
+                                    </span>
+                                    <span className={localStyles.time}>
+                                        {this.state.backupTimes.nextBackup !==
+                                        'running'
+                                            ? moment(
+                                                  this.state.backupTimes.nextBackup,
+                                              ).fromNow()
+                                            : 'in progress'}
+                                    </span>
                                 </span>
                             </div>
                         )}
@@ -152,16 +154,28 @@ export default class OverviewContainer extends React.Component<Props> {
                         </p>
                         <div className={styles.option}>
                             <span className={styles.name}>
-                                Enable Automatic Backups
+                                {this.state.automaticBackupEnabled
+                                    ? 'Automatic Backups Enabled'
+                                    : 'Enable Automatic Backups'}
                             </span>
                             <SmallButton
                                 extraClass={localStyles.right}
-                                onClick={() =>
-                                    this.setState({ showPricing: true })
+                                onClick={() => {
+                                    if (!this.state.automaticBackupEnabled) {
+                                        this.setState({ showPricing: true })
+                                    } else {
+                                        window.open("https://worldbrain.io/community/view-subscription/", "_blank")
+                                    }
+                                }}
+                                color={
+                                    this.state.automaticBackupEnabled
+                                        ? 'red'
+                                        : 'darkblue'
                                 }
-                                color="darkblue"
                             >
-                                Upgrade
+                                {this.state.automaticBackupEnabled
+                                    ? 'Cancel'
+                                    : 'Upgrade'}
                             </SmallButton>
                             <span
                                 className={classNames(
@@ -208,6 +222,7 @@ export default class OverviewContainer extends React.Component<Props> {
                                     ) : null}
                                 </div>
                             ) : null}
+
                             <p className={styles.optionLine}>
                                 <span className={styles.name}>
                                     Backup Location
@@ -254,7 +269,8 @@ export default class OverviewContainer extends React.Component<Props> {
                                 localStyles.limitWidth,
                             )}
                         >
-                            Restoring will <b>replace</b> all current data with a backup.
+                            Restoring will <b>replace</b> all current data with
+                            a backup.
                         </span>
                     </div>
                     <div className={styles.option}>

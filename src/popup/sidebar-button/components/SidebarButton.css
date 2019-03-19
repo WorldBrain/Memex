@@ -3,8 +3,10 @@
 }
 
 .switch {
-    position: absolute;
-    margin-left: 7px;
+    align-items: center;
+    margin: 0 20px 0px 0px;
+    display: flex;
+    padding-left: 10px;
 }
 
 .icon {
@@ -17,8 +19,16 @@
     display: inline-block;
     width: 200px;
     text-align: left;
+    border-right: 2px solid #a2a2a2ab;
 }
 
 .switchBlocks {
-    padding-top: 11px;
+    height: 45px;
+    display: flex;
+}
+
+.option {
+    width: 100%;
+    align-items: center;
+    display: flex;
 }

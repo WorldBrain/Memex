@@ -1,5 +1,5 @@
 @value colors: '../../common-ui/colors.css';
-@value color11, color14 from colors;
+@value color11, color14, color4, color6 from colors;
 
 .tagContainer * {
     font-family: 'Inter';
@@ -13,7 +13,6 @@
     border-bottom: 1px solid #eaecef;
     word-wrap: break-word;
     font-size: 14px;
-    background-color: white;
     justify-content: space-between;
     align-items: center;
 
@@ -71,17 +70,15 @@
 }
 
 .backButton {
+    composes: nakedButton from 'src/common-ui/elements.css';
     border: none;
     outline: none;
     grid-area: backButton;
     justify-self: center;
     align-self: center;
-    font-size: 1em;
-    background-color: #3eb995;
-    border-radius: 4px;
-    padding: 3px 7px 4px 7px;
-    color: white;
+    font-size: 15px;
     margin-top: 3px;
+    color: color4;
     cursor: pointer;
 }
 
@@ -89,7 +86,7 @@
     grid-area: numberTags;
     justify-self: center;
     align-self: center;
-    color: #777;
+    color: color6;
     padding-top: 2px;
 }
 

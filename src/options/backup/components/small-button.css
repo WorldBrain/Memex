@@ -22,6 +22,10 @@
     }
 }
 
+.red {
+    composes: CTAwarning from 'src/common-ui/elements.css';
+}
+
 .text {
     composes: CTA from '../../../common-ui/colors.css';
 }
