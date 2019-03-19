@@ -101,7 +101,7 @@
 .upgrade {
     composes: h2Color from '../../../common-ui/colors.css';
     composes: nakedButton from '../../../common-ui/elements.css';
-    /* display: none; */
+    display: none;
     font-size: 15px;
     text-decoration: none;
     margin-left: 15px;

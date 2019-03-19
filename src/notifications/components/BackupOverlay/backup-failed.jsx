@@ -10,8 +10,6 @@ const BackupFailed = props => {
             lastBackup={props.lastBackup ? props.lastBackup : 'Never'}
             nextBackup={props.nextBackup ? props.nextBackup : null}
             crossIcon={props.crossIcon}
-            // buttonText={props.buttonText}
-            // buttonUrl={props.buttonUrl}
             automaticBackup
             isAutomaticBackupEnabled={props.automaticBackup}
             onAutomaticBackupSelect={props.onAutomaticBackupSelect}

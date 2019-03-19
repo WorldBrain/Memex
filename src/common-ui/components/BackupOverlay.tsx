@@ -93,11 +93,12 @@ export default class BackupOverlay extends PureComponent<Props> {
                         <div className={styles.backup}>
                             <span>Last Backup:</span>
                             <span>
-                                {lastBackup === 'Never' ? (
-                                    <b>Never</b>
-                                ) : (
-                                    <b>{moment(lastBackup).fromNow()}</b>
-                                )}
+                                {lastBackup === 'Never' && <b>Never</b>}
+                                {lastBackup === 'running' && <b>Running</b>}
+                                {lastBackup !== 'Never' &&
+                                    lastBackup !== 'running' && (
+                                        <b>{moment(lastBackup).fromNow()}</b>
+                                    )}
                             </span>
                         </div>
                     )}
@@ -118,10 +119,18 @@ export default class BackupOverlay extends PureComponent<Props> {
                     {automaticBackup && (
                         <div className={styles.backup}>
                             <span>Automatic Backup:</span>
-                            <ToggleSwitch
-                                defaultValue={isAutomaticBackupEnabled}
-                                onChange={onAutomaticBackupSelect}
-                            />
+                            {!isAutomaticBackupEnabled && (
+                                <ToggleSwitch
+                                    defaultValue={isAutomaticBackupEnabled}
+                                    onChange={onAutomaticBackupSelect}
+                                />
+                            )}
+                            {isAutomaticBackupEnabled && (
+                                <ToggleSwitch
+                                    isChecked={isAutomaticBackupEnabled}
+                                    onChange={onAutomaticBackupSelect}
+                                />
+                            )}
                         </div>
                     )}
 
