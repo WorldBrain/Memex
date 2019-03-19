@@ -182,7 +182,7 @@ export class BackupBackgroundModule {
                         // Set the message of backupStatus stating the expiration of auto backup
                         await setLocalStorage('backup-status', {
                             state: 'fail',
-                            id: 'auto_backup_expired',
+                            backupId: 'auto_backup_expired',
                         })
                     } else {
                         await this.checkAutomaticBakupEnabled()
@@ -394,7 +394,7 @@ export class BackupBackgroundModule {
         const always = () => {
             this.maybeScheduleAutomaticBackup()
         }
-        this.backupProcedure.events.on('success', () => {
+        this.backupProcedure.events.on('success', async () => {
             this.lastBackupStorage.storeLastBackupFinishTime(new Date())
             always()
         })

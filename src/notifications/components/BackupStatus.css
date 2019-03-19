@@ -27,6 +27,29 @@
     border-radius: 30px;
 }
 
+.paymentOptions {
+    padding-left: 15px;
+    padding-bottom: 5px;
+    align-self: flex-start;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.period {
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.price {
+    composes: darkBlue from '../../common-ui/colors.css';
+    font-size: 16px;
+    vertical-align: middle;
+    line-height: 25px;
+    font-weight: bold;
+}
+
 .backupOverlay {
     position: relative;
 }

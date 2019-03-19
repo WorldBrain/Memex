@@ -11,9 +11,11 @@
     min-height: 166px;
     z-index: 99999;
     background: white;
-    composes: borderRadiusBig boxShadow from '../colors.css';
+    background-color: white;
+    composes: borderRadiusBig boxShadowOverlays from '../colors.css';
     composes: borderColor from '../colors.css';
     cursor: pointer;
+    padding-bottom: 20px;
 
     /* &:disabled,
     &[disabled] {
