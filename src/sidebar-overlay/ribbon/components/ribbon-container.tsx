@@ -118,6 +118,7 @@ class RibbonContainer extends Component<Props> {
                 env="inpage"
                 url={this.props.url}
                 initFilters={this.props.tags}
+                initSuggestions={this.props.initTagSuggs}
                 source="tag"
                 onFilterAdd={this.props.onTagAdd}
                 onFilterDel={this.props.onTagDel}
