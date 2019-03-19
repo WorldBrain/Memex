@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-// import BackupOverlay from 'src/common-ui/components/BackupOverlay'
 import { BackupSuccess, BackupFailed, AutomaticBackup } from './BackupOverlay'
 import ActionButton from './ActionButton'
 
@@ -170,7 +169,6 @@ const BackupStatus = props => {
 }
 
 BackupStatus.propTypes = {
-    hasInitBackup: PropTypes.bool,
     backupTimes: PropTypes.object,
     hover: PropTypes.bool,
     checkedIcon: PropTypes.string,

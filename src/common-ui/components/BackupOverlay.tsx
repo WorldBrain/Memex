@@ -34,6 +34,7 @@ export default class BackupOverlay extends PureComponent<Props> {
     static defaultProps = {
         rootEl: BackupOverlay.DEF_ROOT_EL,
     }
+    overlayRoot: any
 
     constructor(props) {
         super(props)
