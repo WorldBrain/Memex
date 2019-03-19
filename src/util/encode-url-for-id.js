@@ -32,7 +32,7 @@ function applyQueryParamsRules(url) {
     // Remove all query params that don't appear in special rules
     const rulesSet = new Set(rulesObj.rules)
     const rulesType = rulesObj.type
-    for (const param of parsed.searchParams.keys()) {
+    for (const param of [...parsed.searchParams.keys()]) {
         const shouldDelete =
             rulesType === 'keep' ? !rulesSet.has(param) : rulesSet.has(param)
         if (shouldDelete) {
