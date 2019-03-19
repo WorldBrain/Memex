@@ -34,11 +34,15 @@ class BackupStatusContainer extends Component {
 
     async componentDidMount() {
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
-        const getBackupState = await this.backupState(hasInitialBackup)
+        const automaticBackupEnabled = await remoteFunction(
+            'isAutomaticBackupEnabled',
+        )()
+        const getBackupState = await this.backupState(
+            hasInitialBackup,
+            automaticBackupEnabled,
+        )
         this.setState({
-            automaticBackupEnabled: await remoteFunction(
-                'isAutomaticBackupEnabled',
-            )(),
+            automaticBackupEnabled,
             backupTimes: await remoteFunction('getBackupTimes')(),
             backupLocation: await remoteFunction('getBackendLocation')(),
             hasInitialBackup,
@@ -47,7 +51,7 @@ class BackupStatusContainer extends Component {
         })
     }
 
-    backupState = async hasInitialBackup => {
+    backupState = async (hasInitialBackup, automaticBackupEnabled) => {
         let backupState
         const backupStatus = await getLocalStorage('backup-status', {
             state: 'no_backup',
@@ -84,11 +88,20 @@ class BackupStatusContainer extends Component {
                 message,
             }
         } else if (backupStatus.state === 'no_backup') {
-            backupState = {
-                state: 'fail',
-                header: 'No Backups yet',
-                message:
-                    'Your data is only stored on your computer. Back it up locally or to any cloud storage for free.',
+            if (automaticBackupEnabled) {
+                backupState = {
+                    state: 'fail',
+                    header: 'Do your first backup',
+                    message:
+                        'Great! You upgraded to automatic backups. You need to start your first backup manually.',
+                }
+            } else {
+                backupState = {
+                    state: 'fail',
+                    header: 'No Backups yet',
+                    message:
+                        'Your data is only stored on your computer. Back it up locally or to any cloud storage for free.',
+                }
             }
         }
         return backupState
