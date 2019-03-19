@@ -364,7 +364,10 @@ class AddListDropdownContainer extends Component<Props, State> {
     private handleSearchChange = (
         event: React.SyntheticEvent<HTMLInputElement>,
     ) => {
-        const searchVal = event.currentTarget.value
+        const searchVal =
+            this.props.env === 'inpage'
+                ? this.inputEl.value
+                : event.currentTarget.value
 
         // If user backspaces to clear input, show the list of suggested lists again.
         const displayFilters = !searchVal.length
