@@ -1,7 +1,10 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 // import ReactDOM from 'react-dom'
 
+import { actions, selectors } from '../../../'
 import styles from '../../stylesheets/type-filter-styles/TypesPopup.module.css'
 
 class TypesPopup extends PureComponent {
@@ -11,6 +14,8 @@ class TypesPopup extends PureComponent {
         checkCount: PropTypes.func.isRequired,
         typeStatus: PropTypes.object.isRequired,
         showPopup: PropTypes.bool.isRequired,
+        // showfilteredTypes: PropTypes.bool.isRequired,
+        // toggleFilterTypes: PropTypes.func.isRequired,
     }
 
     state = {
@@ -201,4 +206,20 @@ class TypesPopup extends PureComponent {
     }
 }
 
-export default TypesPopup
+const mapStateToProps = state => ({
+    showfilteredTypes: selectors.filterTypes(state),
+})
+
+const mapDispatchToProps = dispatch => ({
+    ...bindActionCreators(
+        {
+            toggleFilterTypes: actions.toggleFilterTypes,
+        },
+        dispatch,
+    ),
+})
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(TypesPopup)

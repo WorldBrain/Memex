@@ -36,6 +36,24 @@
     background-color: #fff;
 }
 
+.tagButtonSelected {
+    width: 75px;
+    height: 30px;
+
+    /* ultra-light */
+    border: 1px solid #d0d5e0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 17px;
+    font-size: 13px;
+    color: #1a2f58;
+    cursor: pointer;
+    text-align: left;
+    background-color: #5cd9a6;
+}
+
 .tagButton:focus {
     background-color: #5cd9a6;
 }

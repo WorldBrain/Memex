@@ -83,7 +83,8 @@ class Types extends PureComponent {
                                     paddingLeft: '4px',
                                 }}
                             >
-                                {this.state.count} /5
+                                {this.state.count}
+                                /5
                             </span>
                         )}
                     </button>

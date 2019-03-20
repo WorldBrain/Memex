@@ -1,5 +1,5 @@
 .domainButton {
-    position: absolute;
+    position: inherit;
     width: 71px;
     height: 30px;
 
@@ -8,6 +8,22 @@
     box-sizing: border-box;
     border-radius: 4px;
     background-color: #fff;
+    text-align: center;
+    margin-top: 12px;
+}
+
+.domainButtonSelected {
+    position: inherit;
+    margin-top: 12px;
+    width: 104px;
+    height: 30px;
+
+    /* ultra-light */
+    border: 1px solid #d0d5e0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    background-color: #5cd9a6;
+    text-align: left;
 }
 
 .domainButton:focus {

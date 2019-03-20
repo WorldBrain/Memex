@@ -45,15 +45,13 @@
     height: 7px;
     position: absolute;
 
-    /* background-image: url('../../assets/times-solid.svg'); */
+    background-image: url('../../../../../img/times-solid.svg');
     background-repeat: no-repeat;
     border-color: transparent;
-
-    background-color: #000;
+    background-color: #5cd9a6;
     border-width: 0px;
 
-    /* margin-left: 47px; */
-    margin-top: 12px;
+    margin-top: 11px;
 }
 
 .cross:focus {
@@ -134,19 +132,17 @@ p {
 
 .slider::before {
     position: absolute;
-    content: '';
     height: 23px;
     width: 23px;
 
     /* left: 4px;
      bottom: 4px;
     */
-    background-color: white;
+    background-color: #fff;
 
     /* -webkit-transition: 0.4s; */
     transition: 0.4s;
-
-    /* background-image: url('../../assets/times-solid.svg'); */
+    background-image: url('../../../../../img/times-solid.svg');
     background-size: 7px 7.17px;
     background-repeat: no-repeat;
     background-position: center;
@@ -168,7 +164,7 @@ input:checked + .slider::before {
     transform: translateX(23px);
     transform: translateX(23px);
 
-    /* background-image: url('../../assets/check-solid.svg'); */
+    background-image: url('../../../../../img/check-solid.svg');
     background-size: 8.8px 6.8px;
 }
 

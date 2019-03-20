@@ -163,7 +163,7 @@ p {
     /* -webkit-transition: 0.4s; */
     transition: 0.4s;
 
-    /* background-image: url('../../assets/times-solid.svg'); */
+    background-image: url('../../../../../img/times-solid.svg');
     background-size: 7px 7.17px;
     background-repeat: no-repeat;
     background-position: center;
@@ -185,7 +185,7 @@ input:checked + .slider::before {
     transform: translateX(23px);
     transform: translateX(23px);
 
-    /* background-image: url('../../assets/check-solid.svg'); */
+    background-image: url('../../../../../img/check-solid.svg');
     background-size: 8.8px 6.8px;
 }
 

@@ -20,6 +20,8 @@ class DomainsPopup extends PureComponent {
         // delTagFilter: PropTypes.func.isRequired,
         // tagFilterDropdown: PropTypes.bool.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
+        checkCount: PropTypes.func.isRequired,
+        checkDomains: PropTypes.func.isRequired,
         // hideTagFilter: PropTypes.func.isRequired,
         // suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         // toggleFilterTypes: PropTypes.func.isRequired,
@@ -57,6 +59,19 @@ class DomainsPopup extends PureComponent {
 
     render() {
         // console.log(this.props.filteredTags)
+        let count = 0
+        const arr = []
+        let k = 0
+        // const arr = Object.values(this.props.filteredDomains)
+        this.props.filteredDomains.map(({ value, isExclusive }, i) => {
+            if (value) {
+                count++
+            }
+            arr[k] = value
+            k = k + 1
+        })
+        this.props.checkCount(count)
+        this.props.checkDomains(arr)
         return (
             <div className={styles.domainsPopup}>
                 {this.renderFilteredDomains()}
