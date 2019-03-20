@@ -63,37 +63,41 @@ class Types extends PureComponent {
             )
         }
         return (
-            <div>
-                <button
-                    className={
-                        this.state.count > 0
-                            ? styles.buttonFocusSelected
-                            : styles.buttonFocus
-                    }
-                    onClick={this.openTypesPopup}
-                >
-                    Types{' '}
-                    {this.state.count === 0 ? (
-                        ''
-                    ) : (
-                        <span
-                            style={{ fontWeight: 'bold', paddingLeft: '4px' }}
-                        >
-                            {this.state.count}
-                            /5
-                        </span>
-                    )}
-                </button>
-                <p>
-                    {this.state.count === 0 ? (
-                        ''
-                    ) : (
-                        <button
-                            onClick={this.unSelect}
-                            className={styles.cross}
-                        />
-                    )}
-                </p>
+            <div className={styles.typesDiv}>
+                <div style={{ display: 'inline-flex' }}>
+                    <button
+                        className={
+                            this.state.count > 0
+                                ? styles.buttonFocusSelected
+                                : styles.buttonFocus
+                        }
+                        onClick={this.openTypesPopup}
+                    >
+                        Types{' '}
+                        {this.state.count === 0 ? (
+                            ''
+                        ) : (
+                            <span
+                                style={{
+                                    fontWeight: 'bold',
+                                    paddingLeft: '4px',
+                                }}
+                            >
+                                {this.state.count} /5
+                            </span>
+                        )}
+                    </button>
+                    <span style={{ display: 'contents', height: '0px' }}>
+                        {this.state.count === 0 ? (
+                            ''
+                        ) : (
+                            <button
+                                onClick={this.unSelect}
+                                className={styles.cross}
+                            />
+                        )}
+                    </span>
+                </div>
                 <div style={{ display: 'grid' }}>
                     <span style={{ marginTop: '30px', fontSize: '15px' }}>
                         {this.state.types.websites ? 'Websites, ' : null}
