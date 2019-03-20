@@ -449,6 +449,20 @@ class Ribbon extends Component<Props, State> {
                             </ButtonTooltip>
 
                             <ButtonTooltip
+                                tooltipText={
+                                    'Close ribbon once. Disable via Memex icon in the extension toolbar.'
+                                }
+                                position="left"
+                            >
+                                <button
+                                    className={cx(styles.button, styles.cancel)}
+                                    onClick={() =>
+                                        this.props.handleRemoveRibbon()
+                                    }
+                                />
+                            </ButtonTooltip>
+
+                            <ButtonTooltip
                                 tooltipText="Settings"
                                 position="left"
                             >
