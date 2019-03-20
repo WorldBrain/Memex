@@ -82,19 +82,6 @@ describe('Annotations storage', () => {
             expect(received.url).toBeDefined()
         }
 
-        test('fetch all annotations', async () => {
-            const normalizedUrl = normalize(DATA.pageUrl)
-            const annotations = await annotationStorage.getAnnotationsByUrl({
-                pageUrl: normalizedUrl,
-            })
-            expect(annotations).toBeDefined()
-            expect(annotations).not.toBeNull()
-            expect(annotations.length).toBe(3)
-            assertAnnotation(annotations[0], DATA.highlight)
-            assertAnnotation(annotations[1], DATA.annotation)
-            assertAnnotation(annotations[2], DATA.comment)
-        })
-
         test('fetch tags for an annotation', async () => {
             const url = DATA.annotation.url
             const tags = await annotationStorage.getTagsByAnnotationUrl(url)
