@@ -15,7 +15,6 @@ import NotificationBackground from './notifications/background'
 import SearchBackground from './search/background'
 import * as backup from './backup/background'
 import * as backupStorage from './backup/background/storage'
-import setupChangeTracking from './backup/background/change-hooks'
 import BackgroundScript from './background-script'
 import TagsBackground from './tags/background'
 
@@ -74,14 +73,19 @@ backupModule.setBackendFromStorage()
 backupModule.setupRemoteFunctions()
 backupModule.startRecordingChangesIfNeeded()
 
-const bgScript = new BackgroundScript({ notifsBackground: notifications })
-bgScript.setupRemoteFunctions()
-bgScript.setupWebExtAPIHandlers()
+let bgScript: BackgroundScript
 
 storageManager.finishInitialization().then(() => {
     setStorexBackend(storageManager.backend)
     internalAnalytics.registerOperations(eventLog)
     backupModule.storage.setupChangeTracking()
+
+    bgScript = new BackgroundScript({
+        storageManager,
+        notifsBackground: notifications,
+    })
+    bgScript.setupRemoteFunctions()
+    bgScript.setupWebExtAPIHandlers()
 })
 
 // Attach interesting features onto global window scope for interested users

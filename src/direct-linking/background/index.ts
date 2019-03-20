@@ -47,7 +47,6 @@ export default class DirectLinkingBackground {
         makeRemotelyCallable(
             {
                 createDirectLink: this.createDirectLink.bind(this),
-                getAllAnnotations: this.getAllAnnotationsByUrl.bind(this),
                 createAnnotation: this.createAnnotation.bind(this),
                 editAnnotation: this.editAnnotation.bind(this),
                 editAnnotationTags: this.editAnnotationTags.bind(this),
@@ -116,33 +115,6 @@ export default class DirectLinkingBackground {
         this.annotationStorage.indexPageFromTab(tab)
 
         return result
-    }
-
-    async getAllAnnotationsByUrl(
-        { tab }: TabArg,
-        url: string,
-        limit = 10,
-        skip = 0,
-    ) {
-        let pageUrl = url == null ? tab.url : url
-        pageUrl = normalize(pageUrl)
-
-        const annotations = await this.annotationStorage.getAnnotationsByUrl({
-            pageUrl,
-            limit,
-            skip,
-        })
-
-        return annotations.map(
-            ({ createdWhen, lastEdited, ...annotation }) => ({
-                ...annotation,
-                createdWhen: createdWhen.getTime(),
-                lastEdited:
-                    lastEdited && lastEdited instanceof Date
-                        ? lastEdited.getTime()
-                        : undefined,
-            }),
-        )
     }
 
     async createAnnotation(

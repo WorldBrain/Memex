@@ -9,7 +9,7 @@ import { Annotation } from 'src/direct-linking/types'
 import AnnotsStorage from 'src/direct-linking/background/storage'
 const moment = require('moment-timezone')
 
-export class AnnotationsListPlugin extends StorageBackendPlugin<
+export class AnnotationsSearchPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
     static LIST_OP_ID = 'memex:dexie.listAnnotations'
@@ -21,12 +21,12 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         super.install(backend)
 
         backend.registerOperation(
-            AnnotationsListPlugin.LIST_BY_PAGE_OP_ID,
+            AnnotationsSearchPlugin.LIST_BY_PAGE_OP_ID,
             this.listAnnotsByPage.bind(this),
         )
 
         backend.registerOperation(
-            AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
+            AnnotationsSearchPlugin.LIST_BY_DAY_OP_ID,
             this.listAnnotsByDay.bind(this),
         )
     }
@@ -150,47 +150,6 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return results
     }
 
-    // The main logic
-    private async list(
-        { limit = 10, skip = 0, ...params }: AnnotSearchParams,
-        {
-            innerLimitMultiplier,
-            isUrlBased,
-        }: {
-            innerLimitMultiplier: number
-            isUrlBased?: boolean
-        },
-    ): Promise<Annotation[]> {
-        const innerLimit = limit * innerLimitMultiplier
-
-        let innerSkip = skip * innerLimitMultiplier
-
-        let results: string[] = []
-        let continueLookup: boolean
-
-        const queryAnnots = (offset = innerSkip) =>
-            this.listWithUrl(params)
-                .offset(offset)
-                .limit(innerLimit)
-
-        do {
-            // The results found in this iteration
-            let innerResults: string[] = []
-
-            innerResults = await queryAnnots(
-                isUrlBased ? 0 : innerSkip,
-            ).primaryKeys()
-            continueLookup = innerResults.length >= innerLimit
-            innerSkip += innerLimit
-
-            innerResults = await this.filterResults(innerResults, params)
-
-            results = [...results, ...innerResults]
-        } while (continueLookup)
-
-        return this.mapUrlsToAnnots(results)
-    }
-
     private async calcHardLowerTimeBound({ startDate }: AnnotSearchParams) {
         const annotsRelease = startDate
             ? moment(startDate)
@@ -227,7 +186,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         const annotsByDays = new Map<number, Annotation[]>()
 
         for (const annot of annots) {
-            const date = moment(annot.createdWhen)
+            const date = moment(annot.lastEdited)
                 .startOf('day')
                 .toDate()
             const existing = annotsByDays.get(date.getTime()) || []
@@ -348,12 +307,34 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
     }
 
     async listAnnotsByPage(
-        params: AnnotSearchParams,
-        innerLimitMultiplier = AnnotationsListPlugin.DEF_INNER_LIMIT_MULTI,
+        { limit = 10, skip = 0, ...params }: AnnotSearchParams,
+        innerLimitMultiplier = AnnotationsSearchPlugin.DEF_INNER_LIMIT_MULTI,
     ): Promise<Annotation[]> {
-        return this.list(params, {
-            innerLimitMultiplier,
-            isUrlBased: true,
-        })
+        const innerLimit = limit * innerLimitMultiplier
+
+        let results: string[] = []
+        let continueLookup: boolean
+
+        do {
+            // The results found in this iteration
+            let innerResults: string[] = []
+
+            innerResults = await this.listWithUrl(params)
+                .limit(innerLimit)
+                .primaryKeys()
+
+            continueLookup = innerResults.length >= innerLimit
+
+            innerResults = await this.filterResults(innerResults, params)
+
+            results = [...results, ...innerResults]
+        } while (continueLookup)
+
+        // Cut off any excess
+        if (results.length > limit) {
+            results = [...results].slice(skip, skip + limit)
+        }
+
+        return this.mapUrlsToAnnots(results)
     }
 }

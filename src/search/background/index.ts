@@ -119,9 +119,9 @@ export default class SearchBackground {
             delPagesByDomain: this.backend.delPagesByDomain,
             delPagesByPattern: this.backend.delPagesByPattern,
             getMatchingPageCount: this.backend.getMatchingPageCount,
-            searchPageAnnotations: this.searchPageAnnotations.bind(this),
             searchAnnotations: this.searchAnnotations.bind(this),
             searchPages: this.searchPages.bind(this),
+            getAllAnnotations: this.getAllAnnotationsByUrl.bind(this),
         })
     }
 
@@ -174,24 +174,6 @@ export default class SearchBackground {
         }
     }
 
-    async searchPageAnnotations(params: AnnotSearchParams) {
-        const searchParams = this.processSearchParams(params, true)
-
-        if (searchParams.isBadTerm || searchParams.isInvalidSearch) {
-            return []
-        }
-
-        // Blank search; just list annots, applying search filters
-        if (searchParams.isBlankSearch) {
-            return this.storage.listAnnotations(searchParams)
-        }
-
-        return this.storage.searchAnnots({
-            ...searchParams,
-            includePageResults: false,
-        }) as any
-    }
-
     async searchAnnotations(params: AnnotSearchParams) {
         const results = await this.search(
             params,
@@ -224,6 +206,21 @@ export default class SearchBackground {
         }
 
         return searchMethod(searchParams)
+    }
+
+    async getAllAnnotationsByUrl(
+        url: string,
+        { limit = 10, skip = 0, ...params }: AnnotSearchParams = {
+            limit: 10,
+            skip: 0,
+        },
+    ) {
+        return this.storage.getAllAnnotationsByUrl({
+            url,
+            limit,
+            skip,
+            ...params,
+        })
     }
 
     async handleBookmarkRemoval(id, { node }) {

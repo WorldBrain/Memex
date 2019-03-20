@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import { browser, Runtime, Commands, Storage } from 'webextension-polyfill-ts'
 
 import * as utils from './utils'
 import { UNINSTALL_URL } from './constants'
@@ -10,24 +10,42 @@ import {
     storageChangesManager,
     StorageChangesManager,
 } from '../util/storage-changes'
+import { StorageManager } from 'src/search/types'
+import { migrations } from './quick-and-dirty-migrations'
 
 class BackgroundScript {
     private utils: typeof utils
     private notifsBackground: NotifsBackground
     private storageChangesMan: StorageChangesManager
+    private storageManager: StorageManager
+    private storageAPI: Storage.Static
+    private runtimeAPI: Runtime.Static
+    private commandsAPI: Commands.Static
 
     constructor({
+        storageManager,
         notifsBackground,
         utilFns = utils,
         storageChangesMan = storageChangesManager,
+        storageAPI = browser.storage,
+        runtimeAPI = browser.runtime,
+        commandsAPI = browser.commands,
     }: {
+        storageManager: StorageManager
         notifsBackground: NotifsBackground
         utilFns?: typeof utils
         storageChangesMan?: StorageChangesManager
+        storageAPI?: Storage.Static
+        runtimeAPI?: Runtime.Static
+        commandsAPI?: Commands.Static
     }) {
+        this.storageManager = storageManager
         this.notifsBackground = notifsBackground
         this.utils = utilFns
         this.storageChangesMan = storageChangesMan
+        this.storageAPI = storageAPI
+        this.runtimeAPI = runtimeAPI
+        this.commandsAPI = commandsAPI
     }
 
     get defaultUninstallURL() {
@@ -41,7 +59,7 @@ class BackgroundScript {
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/commands
      */
     private setupCommands() {
-        browser.commands.onCommand.addListener(command => {
+        this.commandsAPI.onCommand.addListener(command => {
             switch (command) {
                 case 'openOverview':
                     return this.utils.openOverview()
@@ -55,13 +73,14 @@ class BackgroundScript {
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onInstalled
      */
     private setupInstallHooks() {
-        browser.runtime.onInstalled.addListener(details => {
+        this.runtimeAPI.onInstalled.addListener(details => {
             switch (details.reason) {
                 case 'install':
                     this.notifsBackground.deliverStaticNotifications()
                     return onInstall()
                 case 'update':
                     this.notifsBackground.deliverStaticNotifications()
+                    this.runQuickAndDirtyMigrations()
                     return onUpdate()
                 default:
             }
@@ -69,14 +88,30 @@ class BackgroundScript {
     }
 
     /**
+     * Run all the quick and dirty migrations we have set up to run directly on Dexie.
+     */
+    private async runQuickAndDirtyMigrations() {
+        for (const [storageKey, migration] of Object.entries(migrations)) {
+            const storage = await this.storageAPI.local.get(storageKey)
+
+            if (storage[storageKey]) {
+                continue
+            }
+
+            await migration(this.storageManager.backend['dexieInstance'])
+            await this.storageAPI.local.set({ [storageKey]: true })
+        }
+    }
+
+    /**
      * Set up URL to open on extension uninstall.
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/setUninstallURL
      */
     private setupUninstallURL() {
-        browser.runtime.setUninstallURL(this.defaultUninstallURL)
+        this.runtimeAPI.setUninstallURL(this.defaultUninstallURL)
 
         this.storageChangesMan.addListener('local', USER_ID, ({ newValue }) =>
-            browser.runtime.setUninstallURL(
+            this.runtimeAPI.setUninstallURL(
                 `${UNINSTALL_URL}?user=${newValue}`,
             ),
         )
