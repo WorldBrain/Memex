@@ -6,6 +6,7 @@
     border: 1px solid #d5d8d6;
     box-sizing: border-box;
     border-radius: 6px;
+    margin-top: 10px;
 }
 
 .searchField {

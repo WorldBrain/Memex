@@ -178,7 +178,7 @@ class SearchFiltersContainer extends PureComponent {
                 domainFilter={this.renderDomainFilter()}
                 // filteredTags={this.renderFilteredTags()}
                 // filteredDomains={this.renderFilteredDomains()}
-                filteredTypes={this.renderFilteredTypes()}
+                // filteredTypes={this.renderFilteredTypes()}
                 typeFilters={this.renderTypeFilter()}
             />
         )

@@ -19,6 +19,8 @@ class TagsPopup extends PureComponent {
         // showTagFilter: PropTypes.func.isRequired,
         delTagFilter: PropTypes.func.isRequired,
         tagFilterDropdown: PropTypes.bool.isRequired,
+        checkCount: PropTypes.func.isRequired,
+        checkTags: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
         hideTagFilter: PropTypes.func.isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -40,7 +42,16 @@ class TagsPopup extends PureComponent {
     }
 
     render() {
-        console.log(this.props.filteredTags)
+        // console.log(this.props.filteredTags)
+        let count = 0
+        const arr = Object.values(this.props.filteredTags)
+        arr.map(type => {
+            if (type) {
+                count++
+            }
+        })
+        this.props.checkCount(count)
+        this.props.checkTags(arr)
         return (
             <div className={styles.tagsPopup}>
                 {this.renderFilteredTags()}
