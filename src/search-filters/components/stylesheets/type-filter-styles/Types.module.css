@@ -40,12 +40,10 @@
 }
 
 .cross {
-    margin-left: 75px;
+    margin-left: 80px;
     width: 7px;
     height: 7px;
-
-    /* position: absolute;
-    */
+    position: absolute;
 
     /* background-image: url('../../assets/times-solid.svg'); */
     background-repeat: no-repeat;
