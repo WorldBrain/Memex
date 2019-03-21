@@ -349,8 +349,7 @@ class IndexDropdownContainer extends Component<Props, State> {
 
     handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (
-            this.props.env === 'inpage' &&
-            this.props.isForAnnotation &&
+            (this.props.env === 'inpage' || this.props.isForAnnotation) &&
             !(event.ctrlKey || event.metaKey) &&
             /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
         ) {
