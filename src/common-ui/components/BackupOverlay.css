@@ -1,3 +1,6 @@
+@value colors: '../../common-ui/colors.css';
+@value color11, color6 from colors;
+
 .overlay {
     display: flex;
     flex-direction: column;
@@ -7,15 +10,13 @@
     position: absolute;
     top: 50px;
     right: 65px;
+    padding: 25px;
     width: 282px;
     min-height: 166px;
     z-index: 99999;
     background: white;
     background-color: white;
-    composes: borderRadiusBig boxShadowOverlays from '../colors.css';
-    composes: borderColor from '../colors.css';
-    cursor: pointer;
-    padding-bottom: 20px;
+    composes: toolTips from 'src/common-ui/elements.css'
 
     /* &:disabled,
     &[disabled] {
@@ -27,15 +28,14 @@
     font-size: 18px;
     font-weight: 600;
     align-self: flex-start;
-    padding-left: 20px;
-    padding-top: 20px;
-    padding-bottom: 0;
+    margin-bottom: 15px;
 }
 
 .description {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 15px;
 }
 
 .errorMessage {
@@ -56,18 +56,17 @@
 
 .backup {
     font-size: 15px;
-    padding: 10px 20px;
+    padding: 10px 0px;
     width: 100%;
+    font-weight: 400;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-content: center;
+    align-items: center;
 }
 
 .bottomBorder {
-    margin-right: 20px;
-    margin-left: 20px;
-    width: 80%;
+    width: 90%;
     height: 1px;
     border-bottom: 1px solid rgba(55, 53, 47, 0.2);
 }
@@ -89,8 +88,8 @@
 }
 
 .descInfo {
-    font-size: 15px;
-    padding: 20px;
+    font-size: 16px;
+    color: color6;
 }
 
 .button {

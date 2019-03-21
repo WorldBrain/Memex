@@ -1,28 +1,37 @@
+@value colors: '../../common-ui/colors.css';
+@value color11, color2 from colors;
+
 .switch {
     cursor: pointer;
     text-indent: -9999px;
-    width: 60px;
-    height: 30px;
-    background: grey;
-    display: block;
+    width: 45px;
+    height: 20px;
+    background: #b3b3b37a;
+    display: flex;
     border-radius: 100px;
     position: relative;
+    flex-direction: row-reverse;
+    align-items: center;
 
     &::after {
         content: '';
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        width: 20px;
-        height: 20px;
+        margin-left: 15px;
+        margin-right: -25px;
+        width: 24px;
+        height: 24px;
         background: #fff;
         border-radius: 90px;
+        box-shadow: 0px 1px 3px 1px #ccc;
         transition: 0.3s;
+        background-image: url('/img/removeIcon.svg');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 8px;
     }
 }
 
 .activeSwitch {
-    background: #3eb995;
+    background: color2;
 
     &::after {
         left: calc(100% - 5px);

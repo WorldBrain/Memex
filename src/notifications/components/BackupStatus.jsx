@@ -11,7 +11,7 @@ const BackupStatus = props => {
             <div
                 className={styles.container}
                 onMouseEnter={props.onMouseEnter}
-                onMouseLeave={props.onMouseLeave}
+                //onMouseLeave={props.onMouseLeave}
             >
                 <div className={styles.header}>Backup Status</div>
                 <div>
@@ -41,15 +41,18 @@ const BackupStatus = props => {
                                             props.onAutomaticBackupSelect
                                         }
                                     >
+                                    <div className={styles.ActionButton}>
                                         <ActionButton
                                             handleClick={() =>
                                                 (window.location.href =
                                                     '/options.html#/backup')
                                             }
+                                            className={styles.ActionButton}
                                         >
                                             {' '}
                                             Backup Now{' '}
                                         </ActionButton>
+                                    </div>
                                     </BackupSuccess>
                                 )}
                                 {props.backupState.state === 'fail' && (
@@ -68,15 +71,18 @@ const BackupStatus = props => {
                                             props.onAutomaticBackupSelect
                                         }
                                     >
+                                    <div className={styles.ActionButton}>
                                         <ActionButton
                                             handleClick={() =>
                                                 (window.location.href =
                                                     '/options.html#/backup')
                                             }
+                                            className={styles.ActionButton}
                                         >
                                             {' '}
                                             Backup Now{' '}
                                         </ActionButton>
+                                    </div>
                                     </BackupFailed>
                                 )}
                                 {props.backupState.state === 'autoBackup' && (
@@ -150,15 +156,18 @@ const BackupStatus = props => {
                                                 </label>
                                             </div>
                                         </div>
+                                        <div className={styles.ActionButton}>
                                         <ActionButton
                                             handleClick={() =>
                                                 (window.location.href =
                                                     props.paymentUrl)
                                             }
+                                            className={styles.ActionButton}
                                         >
                                             {' '}
                                             Upgrade now{' '}
                                         </ActionButton>
+                                        </div>
                                     </AutomaticBackup>
                                 )}
                             </div>
