@@ -74,7 +74,10 @@ class PageResultItem extends PureComponent<Props> {
     }
 
     renderAnnotsList() {
-        if (!this.props.annotations.length || !this.props.isAnnotsSearch) {
+        if (
+            !this.props.isAnnotsSearch ||
+            !(this.props.annotations && this.props.annotations.length)
+        ) {
             return null
         }
 

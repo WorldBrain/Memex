@@ -48,7 +48,7 @@ export default class DirectLinkingBackground {
         makeRemotelyCallable(
             {
                 createDirectLink: this.createDirectLink.bind(this),
-                getAllAnnotations: this.getAllAnnotationsByUrl.bind(this),
+                getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
                 createAnnotation: this.createAnnotation.bind(this),
                 editAnnotation: this.editAnnotation.bind(this),
                 editAnnotationTags: this.editAnnotationTags.bind(this),

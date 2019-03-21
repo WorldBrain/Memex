@@ -111,7 +111,12 @@ export const shouldShowCount = createSelector(
 
 export const isAnnotsSearch = createSelector(
     resultsState,
-    state => state.searchType === 'annot',
+    state => state.isAnnotsSearch,
+)
+
+export const annotsByDay = createSelector(
+    resultsState,
+    state => state.annotsByDay,
 )
 
 export const results = createSelector(
@@ -121,21 +126,7 @@ export const results = createSelector(
     activeTagIndex,
     (docs, modalShown, deleting, tagIndex) => {
         const docsMapFn = editPageResults({ modalShown, deleting, tagIndex })
-        try {
-            return docs.map(docsMapFn)
-        } catch (e) {
-            /* For cluster view, the result docs are different
-               So pages are parsed different. */
-
-            const [annotsByDay, pagesByUrl] = docs
-
-            Object.keys(pagesByUrl).forEach((pageUrl, i) => {
-                const pageDoc = pagesByUrl[pageUrl]
-                pagesByUrl[pageUrl] = docsMapFn(pageDoc, i)
-            })
-
-            return [annotsByDay, pagesByUrl]
-        }
+        return docs.map(docsMapFn)
     },
 )
 

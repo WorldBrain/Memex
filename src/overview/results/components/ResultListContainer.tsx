@@ -25,6 +25,7 @@ import {
     actions as filterActs,
     selectors as filters,
 } from '../../../search-filters'
+import { PageUrlsByDay } from 'src/search/background/types'
 
 const styles = require('./ResultList.css')
 
@@ -38,6 +39,7 @@ export interface StateProps {
     isListFilterActive: boolean
     areAnnotationsExpanded: boolean
     searchResults: Result[]
+    annotsByDay: PageUrlsByDay
 }
 
 export interface DispatchProps {
@@ -166,40 +168,52 @@ class ResultListContainer extends PureComponent<Props> {
             return <LoadingIndicator />
         }
         const resultItems = []
+
         /* 
-            Try if the normal way to render page results work.
-            Else, it's annotation cluster. So render it using a different method.
+            Switch rendering method based on annotsSearch value. 
+            If it's a page search, a simple map to PageResult items is enough.
+            For Annotation search, docs and annotsByDay are merged to render a 
+            clustered view
         */
-        try {
+        if (!this.props.isAnnotsSearch) {
             this.props.searchResults.forEach((doc, i) =>
                 resultItems.push(this.attachDocWithPageResultItem(doc, i)),
             )
-        } catch (e) {
-            const [annotsByDay, pagesByUrl] = this.props.searchResults
+        } else {
+            const { searchResults, annotsByDay } = this.props
 
             const sortedKeys = Object.keys(annotsByDay)
                 .sort()
                 .reverse()
-            let key = 0
+
             for (const day of sortedKeys) {
                 const formattedTime = this.formatTime(parseInt(day, 10))
                 resultItems.push(
-                    <p className={styles.clusterTime} key={key}>
+                    <p className={styles.clusterTime} key={day}>
                         {formattedTime}
                     </p>,
                 )
-                key += 1
 
                 const currentCluster = annotsByDay[day]
                 for (const pageUrl of Object.keys(currentCluster)) {
-                    const page = pagesByUrl[pageUrl]
+                    const pageIndex = searchResults.findIndex(
+                        curPage => curPage.url === pageUrl,
+                    )
+
+                    if (pageIndex === -1) {
+                        console.error(`Page object for ${pageUrl} not found.`)
+                        continue
+                    }
+
+                    const page = searchResults[pageIndex]
                     const annotations = currentCluster[pageUrl]
                     const doc = {
                         ...page,
                         annotations,
                     }
-                    resultItems.push(this.attachDocWithPageResultItem(doc, key))
-                    key += 1
+                    resultItems.push(
+                        this.attachDocWithPageResultItem(doc, pageIndex),
+                    )
                 }
             }
         }
@@ -235,6 +249,7 @@ class ResultListContainer extends PureComponent<Props> {
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isLoading: selectors.isLoading(state),
     searchResults: selectors.results(state),
+    annotsByDay: selectors.annotsByDay(state),
     isSidebarOpen: sidebarLeft.isSidebarOpen(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
     isListFilterActive: filters.listFilterActive(state),

@@ -179,8 +179,11 @@ export default class SearchBackground {
             this.storage.searchAnnotsByDay.bind(this.storage),
         )
 
-        return SearchBackground.shapePageResult(results, params.limit, {
+        const { docs, annotsByDay } = results
+
+        return SearchBackground.shapePageResult(docs, params.limit, {
             isAnnotsSearch: true,
+            annotsByDay,
         })
     }
 
@@ -191,11 +194,11 @@ export default class SearchBackground {
         )
 
         return SearchBackground.shapePageResult(results, params.limit, {
-            isAnnotsSearch: true,
+            isAnnotsSearch: false,
         })
     }
 
-    async search(params: any, searchMethod: (params: any) => Promise<any[]>) {
+    async search(params: any, searchMethod: (params: any) => Promise<any>) {
         let searchParams
 
         try {
