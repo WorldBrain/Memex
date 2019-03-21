@@ -185,7 +185,9 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
     ): Map<number, Annotation[]> {
         const annotsByDays = new Map<number, Annotation[]>()
 
-        for (const annot of annots) {
+        for (const annot of annots.sort(
+            (a, b) => b.lastEdited.getTime() - a.lastEdited.getTime(),
+        )) {
             const date = moment(annot.lastEdited)
                 .startOf('day')
                 .toDate()
