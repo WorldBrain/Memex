@@ -185,13 +185,4 @@ export default class SearchStorage extends FeatureStorage {
 
         return this.attachDisplayTimeToPages(pages, params.endDate)
     }
-
-    async getAllAnnotationsByUrl(params: AnnotSearchParams) {
-        const results: Annotation[] = await this.storageManager.operation(
-            AnnotationsSearchPlugin.LIST_BY_PAGE_OP_ID,
-            params,
-        )
-
-        return results
-    }
 }

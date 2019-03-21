@@ -114,9 +114,9 @@ class TooltipContainer extends React.Component {
     }
 
     fetchAndHighlightAnnotations = async () => {
-        const annotations = await remoteFunction('getAllAnnotationsByUrl')(
-            window.location.href,
-        )
+        const annotations = await remoteFunction('getAllAnnotationsByUrl')({
+            url: window.location.href,
+        })
         const highlightables = annotations.filter(
             annotation => annotation.selector,
         )

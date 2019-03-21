@@ -121,7 +121,6 @@ export default class SearchBackground {
             getMatchingPageCount: this.backend.getMatchingPageCount,
             searchAnnotations: this.searchAnnotations.bind(this),
             searchPages: this.searchPages.bind(this),
-            getAllAnnotations: this.getAllAnnotationsByUrl.bind(this),
         })
     }
 
@@ -206,21 +205,6 @@ export default class SearchBackground {
         }
 
         return searchMethod(searchParams)
-    }
-
-    async getAllAnnotationsByUrl(
-        url: string,
-        { limit = 10, skip = 0, ...params }: AnnotSearchParams = {
-            limit: 10,
-            skip: 0,
-        },
-    ) {
-        return this.storage.getAllAnnotationsByUrl({
-            url,
-            limit,
-            skip,
-            ...params,
-        })
     }
 
     async handleBookmarkRemoval(id, { node }) {
