@@ -26,7 +26,7 @@ BackupFailed.propTypes = {
     nextBackup: PropTypes.number,
     crossIcon: PropTypes.string.isRequired,
     automaticBackup: PropTypes.bool.isRequired,
-    onAutomaticBackupSelect: PropTypes.func,
+    onAutomaticBackupSelect: PropTypes.func.isRequired,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
         PropTypes.node,

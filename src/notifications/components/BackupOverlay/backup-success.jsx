@@ -20,10 +20,10 @@ const BackupSuccess = props => {
 
 BackupSuccess.propTypes = {
     lastBackup: PropTypes.number.isRequired,
-    nextBackup: PropTypes.number.isRequired,
+    nextBackup: PropTypes.number,
     automaticBackup: PropTypes.bool.isRequired,
-    onAutomaticBackupSelect: PropTypes.func,
-    message: PropTypes.string,
+    onAutomaticBackupSelect: PropTypes.func.isRequired,
+    message: PropTypes.string.isRequired,
     header: PropTypes.string,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
