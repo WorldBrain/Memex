@@ -371,8 +371,23 @@ class Ribbon extends Component<Props, State> {
                             </div>
                         </div>
                         <div className={styles.settingsActions}>
+
                             <ButtonTooltip
-                                tooltipText="Disable this mini sidebar"
+                                tooltipText={
+                                    'Remove Toolbar once. Disable permanently with button below.'
+                                }
+                                position="leftBig"
+                            >
+                                <button
+                                    className={cx(styles.button, styles.cancel)}
+                                    onClick={() =>
+                                        this.props.handleRemoveRibbon()
+                                    }
+                                />
+                            </ButtonTooltip>
+
+                            <ButtonTooltip
+                                tooltipText="Disable this Toolbar"
                                 position="left"
                             >
                                 <button
@@ -444,20 +459,6 @@ class Ribbon extends Component<Props, State> {
                                     })}
                                     onClick={() =>
                                         this.props.handlePauseToggle()
-                                    }
-                                />
-                            </ButtonTooltip>
-
-                            <ButtonTooltip
-                                tooltipText={
-                                    'Close ribbon once. Disable via Memex icon in the extension toolbar.'
-                                }
-                                position="left"
-                            >
-                                <button
-                                    className={cx(styles.button, styles.cancel)}
-                                    onClick={() =>
-                                        this.props.handleRemoveRibbon()
                                     }
                                 />
                             </ButtonTooltip>

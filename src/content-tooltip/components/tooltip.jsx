@@ -41,7 +41,7 @@ export default Tooltip
 export function _renderButtons({ closeTooltip, state}) {
     return (
          <ButtonTooltip
-            tooltipText="Close. Disable in ribbon (R)"
+            tooltipText="Close. Disable in Toolbar (R)"
             position="rightContentTooltip"
         >
         <span className={classNames(styles.buttons, {

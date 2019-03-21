@@ -5,7 +5,7 @@ import { getExtURL } from '../utils.js'
 const styles = require('./ribbon-first-close.css')
 
 const images = {
-    arrowUp: getExtURL('/img/notifArrowUp.svg'),
+    arrowUp: getExtURL('/img/arrowUp.svg'),
 }
 
 export default function TooltipFirstCloseNotification({ onCloseRequested }) {
@@ -13,7 +13,7 @@ export default function TooltipFirstCloseNotification({ onCloseRequested }) {
         <div>
             {/* <img className={styles.notifIcon} src={images.notifIcon}/> */}
             <NotificationLayout
-                title={'Turn on/off Ribbon permanently'}
+                title={'Turn on/off Toolbar permanently'}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={images.arrowUp}
             >

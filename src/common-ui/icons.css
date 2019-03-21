@@ -19,7 +19,8 @@
 /* LOGOS */
 
 .logoSquared {
-	background-image: '/img/worldbrain-logo-narrow-bw-48.png';
+	composes: iconPosition;
+	background-image: url('/img/worldbrain-logo-narrow-bw-48.png');
 }
 
 /* OTHER */
@@ -148,4 +149,9 @@
 .addIcon {
 	composes: iconPosition;
 	background-image: url('/img/plus.svg');
+}
+
+.arrowUpRight {
+	composes: iconPosition;
+	background-image: url('/img/arrowUp.svg');
 }

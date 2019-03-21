@@ -10,3 +10,16 @@
     width: 100%;
     padding-left: 10px;
 }
+
+.logo {
+	width: 20px;
+	height: 20px;
+	background-size: 20px;
+	display: inline-flex;
+    vertical-align: sub;
+	composes: logoSquared from 'src/common-ui/icons.css';
+}
+
+.arrowUp {
+	composes: arrowUpRight from 'src/common-ui/icons.css';
+}

@@ -6,7 +6,6 @@
     flex-direction: row;
     font-size: 14.4px;
     width: 100%;
-    color: #3eb995;
 }
 
 .container a {
@@ -22,6 +21,7 @@
     justify-content: center;
     display: flex;
     color: color4;
+    width: 310px;
     flex-direction: column;
 }
 

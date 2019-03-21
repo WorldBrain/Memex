@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
 import { getExtURL } from '../utils.js'
 
-const styles = require('./notifications.css')
+const styles = require('./ribbon-first-close.css')
 
 const images = {
-    arrowUp: getExtURL('/img/notifArrowUp.svg'),
+    arrowUp: getExtURL('/img/arrowUp.svg'),
 }
 
 export default function TooltipFirstCloseNotification({ onCloseRequested }) {

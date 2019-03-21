@@ -53,6 +53,16 @@
     right: 50px;
 }
 
+.tooltipLeftBig {
+    justify-content: flex-end;
+    right: 50px;
+
+    & .toolTipBubble {
+        flex-wrap: wrap;
+        width: 150px;
+    }
+}
+
 .tooltipLeftNarrow {
     justify-content: flex-end;
     right: 35px;
