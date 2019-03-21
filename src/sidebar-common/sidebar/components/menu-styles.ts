@@ -4,7 +4,7 @@ const baseStyles = {
     bmMenuWrap: {
         top: 0,
         right: '-60px',
-        zIndex: 1000,
+        zIndex: 1100,
         transition: 'all 0.3s cubic-bezier(0.65, 0.05, 0.36, 1) 0s',
     },
     bmMenu: {

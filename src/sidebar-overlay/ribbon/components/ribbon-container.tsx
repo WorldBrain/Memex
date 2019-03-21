@@ -123,7 +123,6 @@ class RibbonContainer extends Component<Props> {
                 onFilterAdd={this.props.onTagAdd}
                 onFilterDel={this.props.onTagDel}
                 isForRibbon
-                isForAnnotation
             />
         )
     }
