@@ -9,12 +9,11 @@ const styles = require('./BackupOverlay.css')
 
 interface Props {
     header: string
-    checkedIcon: string
     crossIcon: string
     message: string
     automaticBackup: boolean
-    lastBackup: string
-    nextBackup: string
+    lastBackup: number | string
+    nextBackup: number | string
     buttonUrl: string
     errorMessage: string
     buttonText: string
@@ -29,6 +28,17 @@ export default class BackupOverlay extends PureComponent<Props> {
         rootEl: PropTypes.string,
         hasInitBackup: PropTypes.bool,
         backupTimes: PropTypes.object,
+        header: PropTypes.string,
+        crossIcon: PropTypes.string,
+        message: PropTypes.string,
+        automaticBackup: PropTypes.bool,
+        lastBackup: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        nextBackup: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        buttonUrl: PropTypes.string,
+        errorMessage: PropTypes.string,
+        buttonText: PropTypes.string,
+        isAutomaticBackupEnabled: PropTypes.bool,
+        onAutomaticBackupSelect: PropTypes.func,
     }
 
     static defaultProps = {

@@ -92,6 +92,7 @@ const BackupStatus = props => {
                                             props.onAutomaticBackupSelect
                                         }
                                         automaticBackup={props.automaticBackup}
+                                        message={`Backup your data automatically every 15 minutes. Worry-free.`}
                                     >
                                         <div className={styles.paymentOptions}>
                                             <div>
