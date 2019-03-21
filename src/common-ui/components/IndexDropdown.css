@@ -60,7 +60,6 @@
 }
 
 .TagBox {
-    height: 50vh;
     overflow-x: hidden;
 }
 
@@ -68,7 +67,8 @@
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: 84vh;
+    max-height: 85vh;
+    height: max-content;
 
     &:focus {
         outline: none;

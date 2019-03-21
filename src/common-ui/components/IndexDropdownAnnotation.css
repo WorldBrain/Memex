@@ -106,7 +106,7 @@
 }
 
 .TagBox {
-    height: 50vh;
+    max-height: 50vh;
     overflow-x: hidden;
 }
 
