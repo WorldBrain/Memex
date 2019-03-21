@@ -2,6 +2,7 @@ import { createReducer } from 'redux-act'
 
 import * as acts from './actions'
 import { SearchResult, Result } from '../types'
+import { PageUrlsByDay } from 'src/search/background/types'
 
 export interface State {
     /** Holds the current search results used to render to the UI. */
@@ -24,6 +25,11 @@ export interface State {
     searchCount: number
     /** Denotes whether annotation lists are expanded by default */
     areAnnotationsExpanded: boolean
+    /** Denotes whether the returned results are of the clustered annotations form */
+    isAnnotsSearch: boolean
+    /** Holds the clustered annots object */
+    annotsByDay: PageUrlsByDay
+    /** Denotes the type of search performed */
     searchType: 'annot' | 'page'
 }
 
@@ -38,6 +44,8 @@ const defState: State = {
     totalCount: null,
     searchCount: 0,
     areAnnotationsExpanded: false,
+    isAnnotsSearch: false,
+    annotsByDay: null,
     searchType: 'page',
 }
 
@@ -49,13 +57,20 @@ const handleSearchResult = (overwrite: boolean) => (
         ? payload.docs
         : [...state.results, ...payload.docs]
 
+    const annotsByDay =
+        payload.annotsByDay && overwrite
+            ? payload.annotsByDay
+            : { ...state.annotsByDay, ...payload.annotsByDay }
+
     return {
         ...state,
         resultsExhausted: payload.resultsExhausted,
         totalCount: payload.totalCount,
         isBadTerm: payload.isBadTerm,
         isInvalidSearch: payload.isInvalidSearch,
+        isAnnotsSearch: payload.isAnnotsSearch,
         results,
+        annotsByDay,
     }
 }
 

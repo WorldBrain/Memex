@@ -1,4 +1,5 @@
 import { Annotation } from 'src/sidebar-common/sidebar/types'
+import { PageUrlsByDay } from 'src/search/background/types'
 
 export interface Result {
     url: string
@@ -21,6 +22,8 @@ export interface SearchResult {
     isBadTerm: boolean
     isInvalidSearch: boolean
     docs: Result[]
+    isAnnotsSearch: boolean
+    annotsByDay?: PageUrlsByDay
 }
 
 export interface Tooltip {

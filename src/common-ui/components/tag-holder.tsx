@@ -21,7 +21,7 @@ class TagHolder extends PureComponent<Props, {}> {
             handleTagBtnClick,
         } = this.props
 
-        if (!tags.length) {
+        if (!(tags && tags.length)) {
             return null
         }
 

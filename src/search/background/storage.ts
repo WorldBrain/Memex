@@ -118,6 +118,13 @@ export default class SearchStorage extends FeatureStorage {
         )
     }
 
+    /**
+     * Searches for annotations which match the passed params and returns
+     * them clustered by day.
+     * @param params Annotation search params
+     * @returns an object containing annotsByDay ( Timestamp as key and AnnotsByPageUrl as values )
+     * and docs which is of type AnnotPage[].
+     */
     async searchAnnotsByDay(params: AnnotSearchParams) {
         const results: Map<
             number,
@@ -128,7 +135,7 @@ export default class SearchStorage extends FeatureStorage {
         )
 
         const normalizedResults: PageUrlsByDay = {}
-        const pagesByUrl: PagesByUrl = {}
+        let pages: AnnotPage[] = []
 
         for (const [day, annotsByPage] of results) {
             const updatedAnnotsByPage: AnnotsByPageUrl = {}
@@ -146,20 +153,17 @@ export default class SearchStorage extends FeatureStorage {
 
             normalizedResults[day] = updatedAnnotsByPage
 
-            let pages: AnnotPage[] = await this.storageManager.operation(
+            pages = await this.storageManager.operation(
                 PageUrlMapperPlugin.MAP_OP_ID,
                 [...annotsByPage.keys()],
             )
 
             pages = await this.attachDisplayTimeToPages(pages, params.endDate)
-
-            pages.forEach(page => {
-                pagesByUrl[page.url] = page
-            })
         }
 
         // Remove any annots without matching pages (keep data integrity regardless of DB)
-        const validUrls = new Set(Object.keys(pagesByUrl))
+        const pageUrls: string[] = pages.map(page => page.url)
+        const validUrls = new Set(pageUrls)
         for (const day of Object.keys(normalizedResults)) {
             for (const url of Object.keys(normalizedResults[day])) {
                 if (!validUrls.has(url)) {
@@ -168,7 +172,10 @@ export default class SearchStorage extends FeatureStorage {
             }
         }
 
-        return [normalizedResults, pagesByUrl]
+        return {
+            annotsByDay: normalizedResults,
+            docs: pages,
+        }
     }
 
     async searchPages(params: AnnotSearchParams): Promise<AnnotPage[]> {
