@@ -59,10 +59,16 @@
     }
 }
 
+.TagBox {
+    height: 50vh;
+    overflow-x: hidden;
+}
+
 .tagContainerSB {
     width: 100%;
-    max-height: 200px;
     overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 84vh;
 
     &:focus {
         outline: none;

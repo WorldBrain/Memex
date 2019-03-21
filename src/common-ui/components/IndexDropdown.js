@@ -110,8 +110,10 @@ class IndexDropdown extends PureComponent {
                         [this.styles.tagContainer]: this.props.isForSidebar,
                         [this.styles.remove]: !this.props.children.length,
                     })}
-                >
+                >   
+                <div className={styles.TagBox}>
                     {this.props.children}
+                </div>
                 </div>
                 {!this.props.isForSidebar && (
                     <div className={this.styles.summaryTagContainer}>

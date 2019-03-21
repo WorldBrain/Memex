@@ -105,6 +105,11 @@
     box-shadow: none;
 }
 
+.TagBox {
+    height: 50vh;
+    overflow-x: hidden;
+}
+
 .tagDivFromOverview {
     position: absolute;
     width: 300px;
