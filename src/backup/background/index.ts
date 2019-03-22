@@ -216,6 +216,9 @@ export class BackupBackgroundModule {
                 storeWordpressUserId: (info, userId) => {
                     localStorage.setItem('wp.user-id', userId)
                 },
+                setupRequestInterceptor: () => {
+                    return this.setupRequestInterceptor()
+                },
             },
             { insertExtraArg: true },
         )
@@ -267,9 +270,9 @@ export class BackupBackgroundModule {
         const backend = backupBackend || this.backend
         setupRequestInterceptors({
             webRequest: window['browser'].webRequest,
-            handleLoginRedirectedBack: backend.handleLoginRedirectedBack.bind(
-                backend,
-            ),
+            handleLoginRedirectedBack: backend
+                ? backend.handleLoginRedirectedBack.bind(backend)
+                : null,
             checkAutomaticBakupEnabled: () => this.checkAutomaticBakupEnabled(),
             memexCloudOrigin: _getMemexCloudOrigin(),
         })

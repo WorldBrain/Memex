@@ -18,11 +18,11 @@ const AutomaticBackup = props => {
 }
 
 AutomaticBackup.propTypes = {
-    buttonUrl: PropTypes.string.isRequired,
-    buttonText: PropTypes.string.isRequired,
-    message: PropTypes.string.isRequired,
-    onAutomaticBackupSelect: PropTypes.func.isRequired,
-    automaticBackup: PropTypes.bool.isRequired,
+    buttonUrl: PropTypes.string,
+    buttonText: PropTypes.string,
+    message: PropTypes.string,
+    onAutomaticBackupSelect: PropTypes.func,
+    automaticBackup: PropTypes.bool,
     header: PropTypes.string,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
