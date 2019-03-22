@@ -14,7 +14,7 @@ import {
 import { Annotation } from 'src/direct-linking/types'
 import { PageUrlMapperPlugin } from './page-url-mapper'
 import { reshapeParamsForOldSearch } from './utils'
-import { AnnotationsSearchPlugin } from './annots-search'
+import { AnnotationsListPlugin } from './annots-list'
 import { Tag, Bookmark } from 'src/search/models'
 
 export interface SearchStorageProps {
@@ -130,40 +130,36 @@ export default class SearchStorage extends FeatureStorage {
             number,
             Map<string, Annotation[]>
         > = await this.storageManager.operation(
-            AnnotationsSearchPlugin.LIST_BY_DAY_OP_ID,
+            AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
             params,
         )
 
+        let pageUrls = new Set<string>()
+
+        for (const [, annotsByPage] of results) {
+            pageUrls = new Set([...pageUrls, ...annotsByPage.keys()])
+        }
+
+        let pages: AnnotPage[] = await this.storageManager.operation(
+            PageUrlMapperPlugin.MAP_OP_ID,
+            [...pageUrls],
+        )
+
+        pages = await this.attachDisplayTimeToPages(pages, params.endDate)
+
         const normalizedResults: PageUrlsByDay = {}
-        let pages: AnnotPage[] = []
 
         for (const [day, annotsByPage] of results) {
-            const updatedAnnotsByPage: AnnotsByPageUrl = {}
-
-            const pageUrlAnnots = (await Promise.all(
-                [...annotsByPage].map(async ([pageUrl, annots]) => [
-                    pageUrl,
-                    await this.attachDisplayDataToAnnots(annots),
-                ]),
-            )) as [string, Annotation[]][]
-
-            pageUrlAnnots.forEach(([pageUrl, annots]) => {
-                updatedAnnotsByPage[pageUrl] = annots
-            })
-
-            normalizedResults[day] = updatedAnnotsByPage
-
-            pages = await this.storageManager.operation(
-                PageUrlMapperPlugin.MAP_OP_ID,
-                [...annotsByPage.keys()],
-            )
-
-            pages = await this.attachDisplayTimeToPages(pages, params.endDate)
+            normalizedResults[day] = {}
+            for (const [pageUrl, annots] of annotsByPage) {
+                normalizedResults[day][
+                    pageUrl
+                ] = await this.attachDisplayDataToAnnots(annots)
+            }
         }
 
         // Remove any annots without matching pages (keep data integrity regardless of DB)
-        const pageUrls: string[] = pages.map(page => page.url)
-        const validUrls = new Set(pageUrls)
+        const validUrls = new Set(pages.map(page => page.url))
         for (const day of Object.keys(normalizedResults)) {
             for (const url of Object.keys(normalizedResults[day])) {
                 if (!validUrls.has(url)) {

@@ -24,7 +24,7 @@ interface OwnProps {
     isActive?: boolean
     isHovered?: boolean
     createdWhen: number
-    lastEdited?: number
+    lastEdited: number
     body?: string
     comment?: string
     tags: string[]
@@ -67,6 +67,10 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     componentWillUnmount() {
         this._removeEventListeners()
+    }
+
+    private get isEdited() {
+        return this.props.lastEdited !== this.props.createdWhen
     }
 
     private _setupEventListeners = () => {
@@ -231,7 +235,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         body={this.props.body}
                         comment={this.props.comment}
                         tags={this.props.tags}
-                        isEdited={!!this.props.lastEdited}
+                        isEdited={this.isEdited}
                         timestamp={timestamp}
                         handleGoToAnnotation={this.props.handleGoToAnnotation}
                         handleDeleteAnnotation={this._handleDeleteAnnotation}

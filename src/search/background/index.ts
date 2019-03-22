@@ -184,6 +184,7 @@ export default class SearchBackground {
         return SearchBackground.shapePageResult(docs, params.limit, {
             isAnnotsSearch: true,
             annotsByDay,
+            resultsExhausted: Object.keys(annotsByDay).length < params.limit,
         })
     }
 

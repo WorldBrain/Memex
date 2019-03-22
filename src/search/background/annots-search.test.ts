@@ -1,7 +1,7 @@
 import initStorageManager from '../memory-storex'
 import { StorageManager } from '..'
 import getDb, { setStorexBackend } from '../get-db'
-import { AnnotationsSearchPlugin } from './annots-search'
+import { AnnotationsListPlugin } from './annots-list'
 import * as DATA from './annots-search.test.data'
 import CustomListBg from 'src/custom-lists/background'
 import AnnotsBg from 'src/direct-linking/background'
@@ -29,7 +29,7 @@ describe.skip('annots search plugin', () => {
         params: AnnotSearchParams,
     ): Promise<Map<number, Map<string, Annotation[]>>> =>
         storageManager.operation(
-            AnnotationsSearchPlugin.LIST_BY_DAY_OP_ID,
+            AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
             params,
         )
 

@@ -9,7 +9,7 @@ import { Annotation } from 'src/direct-linking/types'
 import AnnotsStorage from 'src/direct-linking/background/storage'
 const moment = require('moment-timezone')
 
-export class AnnotationsSearchPlugin extends StorageBackendPlugin<
+export class AnnotationsListPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
     static LIST_OP_ID = 'memex:dexie.listAnnotations'
@@ -21,12 +21,12 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
         super.install(backend)
 
         backend.registerOperation(
-            AnnotationsSearchPlugin.LIST_BY_PAGE_OP_ID,
+            AnnotationsListPlugin.LIST_BY_PAGE_OP_ID,
             this.listAnnotsByPage.bind(this),
         )
 
         backend.registerOperation(
-            AnnotationsSearchPlugin.LIST_BY_DAY_OP_ID,
+            AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
             this.listAnnotsByDay.bind(this),
         )
     }
@@ -56,8 +56,8 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
         startDate = startDate instanceof Date ? startDate.getTime() : startDate
         endDate = endDate instanceof Date ? endDate.getTime() : endDate
 
-        return coll.filter(({ createdWhen }) => {
-            const time = createdWhen.getTime()
+        return coll.filter(({ lastEdited }) => {
+            const time = lastEdited.getTime()
             return time >= startDate && time <= endDate
         })
     }
@@ -250,7 +250,7 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
     ) {
         const collection = this.backend.dexieInstance
             .table<Annotation>(AnnotsStorage.ANNOTS_COLL)
-            .where('createdWhen')
+            .where('lastEdited')
             .between(startDate, endDate, true, true)
             .reverse()
 
@@ -287,7 +287,7 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
             }
 
             let annots = await this.queryAnnotsByDay(
-                dateCursor.toDate(),
+                dateCursor.valueOf(),
                 upperBound.toDate(),
                 params,
             )
@@ -310,7 +310,7 @@ export class AnnotationsSearchPlugin extends StorageBackendPlugin<
 
     async listAnnotsByPage(
         { limit = 10, skip = 0, ...params }: AnnotSearchParams,
-        innerLimitMultiplier = AnnotationsSearchPlugin.DEF_INNER_LIMIT_MULTI,
+        innerLimitMultiplier = AnnotationsListPlugin.DEF_INNER_LIMIT_MULTI,
     ): Promise<Annotation[]> {
         const innerLimit = limit * innerLimitMultiplier
 

@@ -139,21 +139,21 @@ class ResultListContainer extends PureComponent<Props> {
         })
     }
 
-    private attachDocWithPageResultItem(doc, i) {
+    private attachDocWithPageResultItem(doc, index, key) {
         return (
             <PageResultItem
-                key={i}
+                key={key}
                 setTagButtonRef={this.setTagButtonRef}
-                tagHolder={this.renderTagHolder(doc, i)}
+                tagHolder={this.renderTagHolder(doc, index)}
                 isSidebarOpen={this.props.isSidebarOpen}
                 setUrlDragged={this.props.setUrlDragged}
-                tagManager={this.renderTagsManager(doc, i)}
+                tagManager={this.renderTagsManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}
-                onTagBtnClick={this.props.handleTagBtnClick(i)}
+                onTagBtnClick={this.props.handleTagBtnClick(index)}
                 hideSearchFilters={this.props.hideSearchFilters}
                 isListFilterActive={this.props.isListFilterActive}
-                onTrashBtnClick={this.props.handleTrashBtnClick(doc, i)}
-                onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
+                onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
+                onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
@@ -177,7 +177,7 @@ class ResultListContainer extends PureComponent<Props> {
         */
         if (!this.props.isAnnotsSearch) {
             this.props.searchResults.forEach((doc, i) =>
-                resultItems.push(this.attachDocWithPageResultItem(doc, i)),
+                resultItems.push(this.attachDocWithPageResultItem(doc, i, i)),
             )
         } else {
             const { searchResults, annotsByDay } = this.props
@@ -212,7 +212,11 @@ class ResultListContainer extends PureComponent<Props> {
                         annotations,
                     }
                     resultItems.push(
-                        this.attachDocWithPageResultItem(doc, pageIndex),
+                        this.attachDocWithPageResultItem(
+                            doc,
+                            pageIndex,
+                            `${day}${pageUrl}`,
+                        ),
                     )
                 }
             }

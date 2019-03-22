@@ -3,7 +3,7 @@ import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
 import { createPageFromTab, Tag, Dexie, StorageManager } from '../../search'
 import { FeatureStorage } from '../../search/storage'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
-import { AnnotationsSearchPlugin } from 'src/search/background/annots-search'
+import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Annotation, AnnotListEntry } from '../types'
 
@@ -254,7 +254,7 @@ export default class AnnotationStorage extends FeatureStorage {
 
     async getAllAnnotationsByUrl(params: AnnotSearchParams) {
         const results: Annotation[] = await this.storageManager.operation(
-            AnnotationsSearchPlugin.LIST_BY_PAGE_OP_ID,
+            AnnotationsListPlugin.LIST_BY_PAGE_OP_ID,
             params,
         )
 
