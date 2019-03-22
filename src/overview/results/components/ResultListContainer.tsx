@@ -11,7 +11,7 @@ import ResultList from './ResultList'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
 import { RootState } from '../../../options/types'
-import { Result } from '../../types'
+import { Result, ResultsByUrl } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { actions as listActs } from '../../../custom-lists'
@@ -38,7 +38,9 @@ export interface StateProps {
     isNewSearchLoading: boolean
     isListFilterActive: boolean
     areAnnotationsExpanded: boolean
+    activeSidebarIndex: number
     searchResults: Result[]
+    resultsByUrl: ResultsByUrl
     annotsByDay: PageUrlsByDay
 }
 
@@ -51,7 +53,7 @@ export interface DispatchProps {
     delTag: (i: number) => (f: string) => void
     handlePillClick: (tag: string) => MouseEventHandler
     handleTagBtnClick: (i: number) => MouseEventHandler
-    handleCommentBtnClick: (doc: Result) => MouseEventHandler
+    handleCommentBtnClick: (doc: Result, index: number) => MouseEventHandler
     handleCrossRibbonClick: (doc: Result) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
@@ -154,10 +156,13 @@ class ResultListContainer extends PureComponent<Props> {
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
-                onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
+                onCommentBtnClick={this.props.handleCommentBtnClick(doc, index)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
                 isAnnotsSearch={this.props.isAnnotsSearch}
+                isResponsibleForSidebar={
+                    this.props.activeSidebarIndex === index
+                }
                 {...doc}
             />
         )
@@ -180,7 +185,7 @@ class ResultListContainer extends PureComponent<Props> {
                 resultItems.push(this.attachDocWithPageResultItem(doc, i, i)),
             )
         } else {
-            const { searchResults, annotsByDay } = this.props
+            const { annotsByDay, resultsByUrl } = this.props
 
             const sortedKeys = Object.keys(annotsByDay)
                 .sort()
@@ -196,16 +201,13 @@ class ResultListContainer extends PureComponent<Props> {
 
                 const currentCluster = annotsByDay[day]
                 for (const pageUrl of Object.keys(currentCluster)) {
-                    const pageIndex = searchResults.findIndex(
-                        curPage => curPage.url === pageUrl,
-                    )
+                    const page = resultsByUrl.get(pageUrl)
 
-                    if (pageIndex === -1) {
+                    if (!page) {
                         console.error(`Page object for ${pageUrl} not found.`)
                         continue
                     }
 
-                    const page = searchResults[pageIndex]
                     const annotations = currentCluster[pageUrl]
                     const doc = {
                         ...page,
@@ -214,7 +216,7 @@ class ResultListContainer extends PureComponent<Props> {
                     resultItems.push(
                         this.attachDocWithPageResultItem(
                             doc,
-                            pageIndex,
+                            page.index,
                             `${day}${pageUrl}`,
                         ),
                     )
@@ -253,6 +255,7 @@ class ResultListContainer extends PureComponent<Props> {
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isLoading: selectors.isLoading(state),
     searchResults: selectors.results(state),
+    resultsByUrl: selectors.resultsByUrl(state),
     annotsByDay: selectors.annotsByDay(state),
     isSidebarOpen: sidebarLeft.isSidebarOpen(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
@@ -261,6 +264,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isAnnotsSearch: selectors.isAnnotsSearch(state),
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
+    activeSidebarIndex: selectors.activeSidebarIndex(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
@@ -268,8 +272,9 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
         event.preventDefault()
         dispatch(acts.showTags(index))
     },
-    handleCommentBtnClick: ({ url, title }) => event => {
+    handleCommentBtnClick: ({ url, title }, index) => event => {
         event.preventDefault()
+        dispatch(acts.setActiveSidebarIndex(index))
         dispatch(sidebarActs.openSidebar(url, title))
     },
     handleToggleBm: ({ url }, index) => event => {

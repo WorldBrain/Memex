@@ -27,6 +27,7 @@ export interface Props {
     isListFilterActive: boolean
     isAnnotsSearch: boolean
     areAnnotationsExpanded: boolean
+    isResponsibleForSidebar: boolean
     annotations: any[]
     annotsCount: number
     tagHolder: ReactNode
@@ -101,7 +102,12 @@ class PageResultItem extends PureComponent<Props> {
                 {this.props.isDeleting && (
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
-                <div className={styles.rootContainer}>
+                <div
+                    className={classNames(styles.rootContainer, {
+                        [styles.isSidebarOpen]: this.props
+                            .isResponsibleForSidebar,
+                    })}
+                >
                     <a
                         onDragStart={this.dragStart}
                         onDragEnd={this.props.resetUrlDragged}

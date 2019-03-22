@@ -7,6 +7,7 @@ import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
 import { PAGE_SIZE } from '../search-bar/constants'
 import * as sidebarLeft from '../sidebar-left/selectors'
 import * as constants from './constants'
+import { ResultsByUrl } from '../types'
 
 /**
  * Either set display title to be the top-level title field, else look in content. Fallback is the URL.
@@ -44,6 +45,10 @@ export const resultDocs = createSelector(resultsState, state => state.results)
 export const activeTagIndex = createSelector(
     resultsState,
     state => state.activeTagIndex,
+)
+export const activeSidebarIndex = createSelector(
+    resultsState,
+    state => state.activeSidebarIndex,
 )
 export const currentPage = createSelector(
     resultsState,
@@ -127,6 +132,24 @@ export const results = createSelector(
     (docs, modalShown, deleting, tagIndex) => {
         const docsMapFn = editPageResults({ modalShown, deleting, tagIndex })
         return docs.map(docsMapFn)
+    },
+)
+
+export const resultsByUrl = createSelector(
+    isAnnotsSearch,
+    results,
+    (isAnnotsSearch, resultDocs) => {
+        const pages: ResultsByUrl = new Map()
+        if (isAnnotsSearch) {
+            resultDocs.forEach((doc, index) => {
+                pages.set(doc.url, {
+                    ...doc,
+                    index,
+                })
+            })
+            return pages
+        }
+        return pages
     },
 )
 

@@ -35,6 +35,10 @@
     width: 800px;
     height: var(--height);
 
+    &.isSidebarOpen {
+        box-shadow: #000 1px 1px 1px;
+    }
+
     &:hover .crossRibbon {
         display: block;
         margin-right: -4px;

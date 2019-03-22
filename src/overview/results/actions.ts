@@ -45,6 +45,12 @@ export const resetActiveTagIndex = createAction('results/resetActiveTagIndex')
 export const setActiveTagIndex = createAction<number>(
     'results/setActiveTagIndex',
 )
+export const resetActiveSidebarIndex = createAction(
+    'results/resetActiveSidebarIndex',
+)
+export const setActiveSidebarIndex = createAction<number>(
+    'results/setActiveSidebarIndex',
+)
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
 export const setSearchType = createAction<'page' | 'annot'>(
