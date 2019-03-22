@@ -298,6 +298,10 @@ export function _deserializeChangeFields(change: ObjectChange) {
         object.createdWhen = new Date(object.createdWhen)
     }
 
+    if (checkSerializedExists(['annotations'], 'lastEdited')) {
+        object.lastEdited = new Date(object.lastEdited)
+    }
+
     if (
         checkSerializedExists(['customLists', 'pageListEntries'], 'createdAt')
     ) {
