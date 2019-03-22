@@ -6,11 +6,13 @@ export function setupRequestInterceptors({
     checkAutomaticBakupEnabled,
     memexCloudOrigin,
 }) {
-    webRequest.onBeforeRequest.addListener(
-        makeGoogleCallbackHandler({ handleLoginRedirectedBack }),
-        { urls: [`${memexCloudOrigin}/auth/google/callback*`] },
-        ['blocking'],
-    )
+    if (handleLoginRedirectedBack) {
+        webRequest.onBeforeRequest.addListener(
+            makeGoogleCallbackHandler({ handleLoginRedirectedBack }),
+            { urls: [`${memexCloudOrigin}/auth/google/callback*`] },
+            ['blocking'],
+        )
+    }
     webRequest.onBeforeRequest.addListener(
         makeWooCommercePurchaseHandler({ checkAutomaticBakupEnabled }),
         { urls: ['https://worldbrain.io/order-received/thank-you/redirect/'] },

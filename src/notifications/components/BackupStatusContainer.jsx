@@ -107,7 +107,7 @@ class BackupStatusContainer extends Component {
         return backupState
     }
 
-    onAutomaticBackupSelect = val => {
+    onAutomaticBackupSelect = async val => {
         this.setState(prevState => {
             if (val && !prevState.automaticBackupEnabled) {
                 return {
@@ -122,6 +122,7 @@ class BackupStatusContainer extends Component {
                 return null
             }
         })
+        await remoteFunction('setupRequestInterceptor')()
     }
 
     onMouseEnterHandler = async () => {

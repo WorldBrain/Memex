@@ -22,7 +22,7 @@ const BackupFailed = props => {
 BackupFailed.propTypes = {
     errorMessage: PropTypes.string.isRequired,
     header: PropTypes.string.isRequired,
-    lastBackup: PropTypes.number.isRequired,
+    lastBackup: PropTypes.number,
     nextBackup: PropTypes.number,
     crossIcon: PropTypes.string.isRequired,
     automaticBackup: PropTypes.bool.isRequired,
