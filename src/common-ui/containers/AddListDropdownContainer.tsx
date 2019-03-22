@@ -348,7 +348,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         ) {
             event.preventDefault()
             event.stopPropagation()
-            this.setState(state => ({ searchVal: state.searchVal + event.key }))
+            this.setState(state => ({ searchVal: state.searchVal + event.key }), this.fetchListSuggestions)
             return
         }
         switch (event.key) {

@@ -51,7 +51,7 @@ interface State {
 const defaultState: State = {
     showCommentBox: false,
     showSearchBox: false,
-    showTagsPicker: false,
+    showTagsPicker: true,
     showCollectionsPicker: false,
     searchValue: '',
 }

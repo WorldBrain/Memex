@@ -355,7 +355,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         ) {
             event.preventDefault()
             event.stopPropagation()
-            this.setState(state => ({ searchVal: state.searchVal + event.key }))
+            this.setState(state => ({ searchVal: state.searchVal + event.key }), this.fetchTagSuggestions)
             return
         }
 

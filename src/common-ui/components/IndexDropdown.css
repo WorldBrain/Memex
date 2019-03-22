@@ -61,14 +61,14 @@
 
 .TagBox {
     overflow-x: hidden;
+    max-height: 100%;
 }
 
 .tagContainerSB {
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: 85vh;
-    height: max-content;
+    height: 300px;
 
     &:focus {
         outline: none;
