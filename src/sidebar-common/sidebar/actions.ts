@@ -13,6 +13,7 @@ import {
     fetchOnboardingStage,
     setOnboardingStage,
 } from 'src/overview/onboarding/utils'
+import * as resultActs from 'src/overview/results/actions'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -69,6 +70,7 @@ export const openSidebar: (url?: string, title?: string) => Thunk = (
 
 export const closeSidebar: () => Thunk = () => async dispatch => {
     dispatch(setSidebarOpen(false))
+    dispatch(resultActs.resetActiveSidebarIndex())
     await processEventRPC({ type: EVENT_NAMES.CLOSE_SIDEBAR_PAGE })
 }
 

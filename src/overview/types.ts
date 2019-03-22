@@ -16,6 +16,12 @@ export interface Result {
     annotations: Annotation[]
 }
 
+export interface ResultWithIndex extends Result {
+    index: number
+}
+
+export type ResultsByUrl = Map<string, ResultWithIndex>
+
 export interface SearchResult {
     totalCount: number
     resultsExhausted: boolean

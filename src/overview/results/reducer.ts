@@ -17,6 +17,8 @@ export interface State {
     isInvalidSearch: boolean
     /** Holds the index of the result where the tags popup should be displayed (-1 by default). */
     activeTagIndex: number
+    /** Holds the index of the result which has the sidebar open (-1 by default) */
+    activeSidebarIndex: number
     /** Holds the current page of results that the user has scrolled to (0-based). */
     currentPage: number
     /** Holds the total count of matching results to the current search (includes not-shown results). */
@@ -40,6 +42,7 @@ const defState: State = {
     isBadTerm: false,
     isInvalidSearch: false,
     activeTagIndex: -1,
+    activeSidebarIndex: -1,
     currentPage: 0,
     totalCount: null,
     searchCount: 0,
@@ -156,6 +159,16 @@ reducer.on(acts.resetActiveTagIndex, state => ({
 reducer.on(acts.setActiveTagIndex, (state, payload) => ({
     ...state,
     activeTagIndex: payload,
+}))
+
+reducer.on(acts.resetActiveSidebarIndex, state => ({
+    ...state,
+    activeSidebarIndex: defState.activeSidebarIndex,
+}))
+
+reducer.on(acts.setActiveSidebarIndex, (state, payload) => ({
+    ...state,
+    activeSidebarIndex: payload,
 }))
 
 reducer.on(acts.setAreAnnotationsExpanded, (state, payload) => ({
