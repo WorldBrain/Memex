@@ -59,10 +59,18 @@ class BackupStatusContainer extends Component {
             backupId: 'no_backup',
         })
         if (backupStatus.state === 'success') {
-            backupState = {
-                state: 'success',
-                header: 'Backup Successful',
-                message: messages.successful_backup,
+            if (automaticBackupEnabled) {
+                backupState = {
+                    state: 'success',
+                    header: 'Backup Successful',
+                    message: messages.successful_backup,
+                }
+            } else {
+                backupState = {
+                    state: 'fail',
+                    header: 'Backup mode: manual',
+                    message: messages.automatic_backup_disabled_first_backup_done,
+                }
             }
         } else if (backupStatus.state === 'fail') {
             let message
@@ -94,6 +102,12 @@ class BackupStatusContainer extends Component {
                     message: messages.backup_only_local,
                 }
             }
+        } else if (backupState.state !== 'fail' && automaticBackupEnabled) {
+             backupState = {
+                    state: 'success',
+                    header: 'Backup Successful',
+                    message: null,
+            }
         }
         return backupState
     }
@@ -104,7 +118,7 @@ class BackupStatusContainer extends Component {
                 return {
                     backupState: {
                         state: 'autoBackup',
-                        header: 'Automatic Backups are a premium feature',
+                        header: 'This is a premium feature',
                         message: messages.automatic_backup_message,
                     },
                 }
