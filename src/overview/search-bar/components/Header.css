@@ -81,6 +81,7 @@
     align-content: center;
     width: 360px;
     margin-left: -230px;
+    height: 100%;
     font-weight: normal;
     align-items: center;
 
@@ -98,9 +99,16 @@
     }
 }
 
+.backupStatus {
+    @media (max-width: 1400px) {
+        display: none;
+    }
+}
+
 .upgrade {
     composes: h2Color from '../../../common-ui/colors.css';
     composes: nakedButton from '../../../common-ui/elements.css';
+    display: none;
     font-size: 15px;
     text-decoration: none;
     margin-left: 15px;

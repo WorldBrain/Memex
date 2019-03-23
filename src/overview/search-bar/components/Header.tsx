@@ -7,6 +7,7 @@ import { Link } from 'react-router'
 
 import { OutLink } from '../../../common-ui/containers'
 import InboxButton from '../../../notifications/components/InboxButton'
+import BackupStatus from '../../../notifications/components/BackupStatusContainer'
 import { OVERVIEW_URL } from '../../../constants'
 import DateRangeSelection from './DateRangeSelection'
 
@@ -18,6 +19,9 @@ export interface Props {
     settingsRoute?: string
     overviewUrl?: string
     pricingUrl?: string
+    automaticBackupEnalbled?: boolean
+    checkedIcon: string
+    crossIcon: string
     query: string
     isSearchDisabled: boolean
     showUnreadCount: boolean
@@ -38,7 +42,10 @@ class Header extends PureComponent<Props> {
         searchPlaceholder: 'Search keywords and/or use # to filter by tag',
         pricingUrl: 'https://worldbrain.io/pricing',
         settingsIconUrl: '/img/settings.svg',
+        checkedIcon: 'img/checked_green.svg',
+        crossIcon: 'img/cross.svg',
         settingsRoute: '/settings',
+        automaticBackupEnabled: localStorage.getItem('backup.has-subscription'),
         overviewUrl: OVERVIEW_URL,
     }
 
@@ -80,15 +87,16 @@ class Header extends PureComponent<Props> {
                     </div>
                 </div>
                 <div className={styles.links}>
-                    <OutLink
-                        className={styles.upgrade}
-                        to={this.props.pricingUrl}
-                    >
-                        <span
-                            className={styles.upgradeIcon}
-                        />
-                        ⭐️ Upgrade
-                    </OutLink>
+                    <BackupStatus className={styles.backupStatus} />
+                    {!this.props.automaticBackupEnalbled && (
+                        <OutLink
+                            className={styles.upgrade}
+                            to={this.props.pricingUrl}
+                        >
+                            <span className={styles.upgradeIcon} />
+                            ⭐️ Upgrade
+                        </OutLink>
+                    )}
                     <InboxButton
                         toggleInbox={this.props.toggleInbox}
                         showInbox={this.props.showInbox}

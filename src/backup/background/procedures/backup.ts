@@ -6,6 +6,8 @@ import BackupStorage, { LastBackupStorage } from '../storage'
 import { BackupBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
+import { setLocalStorage } from 'src/util/storage'
+import { getLocalStorage } from '../../../util/storage'
 const last = require('lodash/last')
 const pickBy = require('lodash/pickBy')
 
@@ -137,17 +139,22 @@ export default class BackupProcedure {
 
         setTimeout(async () => {
             procedure()
-                .then(() => {
+                .then(async () => {
                     this.running = false
                     if (this.events) {
                         this.events.emit('success')
                     }
+                    // Set backup status for notification in search bar
+                    await setLocalStorage('backup-status', {
+                        state: 'success',
+                        backupId: 'success',
+                    })
+
                     this.reset()
                     resolveCompletionPromise()
                 })
-                .catch(e => {
+                .catch(async e => {
                     this.running = false
-
                     if (process.env.NODE_ENV === 'production') {
                         const raven = AllRaven['default']
                         raven.captureException(e)
@@ -155,6 +162,18 @@ export default class BackupProcedure {
 
                     console.error(e)
                     console.error(e.stack)
+
+                    // Set backup status for notification in search bar
+                    const getState = await getLocalStorage('backup-status')
+                    if (
+                        getState.state === 'success' ||
+                        getState.state === 'no_backup'
+                    ) {
+                        await setLocalStorage('backup-status', {
+                            state: 'fail',
+                            backupId: 'backup_error',
+                        })
+                    }
                     if (this.events) {
                         this.events.emit('fail', e)
                     }

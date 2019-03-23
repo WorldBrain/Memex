@@ -33,6 +33,7 @@ export default class OverviewContainer extends React.Component<Props> {
         backupTimes: null,
         hasInitialBackup: false,
         showAutomaticUpgradeDetails: false,
+        showWarning: false,
         // upgradeBillingPeriod: null,
         showRestoreConfirmation: false,
         backupLocation: null,
@@ -47,13 +48,19 @@ export default class OverviewContainer extends React.Component<Props> {
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()
+        const automaticBackupEnabled = await remoteFunction(
+            'isAutomaticBackupEnabled',
+        )()
+        let showWarning = false
+        if (!hasInitialBackup && automaticBackupEnabled) {
+            showWarning = true
+        }
         this.setState({
-            automaticBackupEnabled: await remoteFunction(
-                'isAutomaticBackupEnabled',
-            )(),
+            automaticBackupEnabled,
             backupTimes,
             hasInitialBackup,
             backupLocation,
+            showWarning,
         })
     }
 
@@ -65,12 +72,6 @@ export default class OverviewContainer extends React.Component<Props> {
         })
     }
 
-    onPaymentRequested = e => {
-        e.preventDefault()
-        const { billingPeriod } = this.state
-        this.props.onPaymentRequested({ billingPeriod })
-    }
-
     render() {
         if (!this.state.backupTimes) {
             return <LoadingBlocker />
@@ -78,6 +79,20 @@ export default class OverviewContainer extends React.Component<Props> {
 
         return (
             <div>
+                {this.state.showWarning && (
+                    <div className={styles.showWarning}>
+                        <span className={styles.WarningIcon}/>
+                        <span className={styles.showWarningText}>
+                            The first backup must be done manually. Follow{' '}
+                            <span 
+                                className={styles.underline} 
+                                onClick={this.props.onBackupRequested}
+                            >
+                            the wizard
+                            </span>{' '}to get started.
+                        </span>
+                    </div>
+                )}
                 {this.state.showRestoreConfirmation && (
                     <RestoreConfirmation
                         onConfirm={this.props.onRestoreRequested}
@@ -136,7 +151,8 @@ export default class OverviewContainer extends React.Component<Props> {
                                         {this.state.backupTimes.nextBackup !==
                                         'running'
                                             ? moment(
-                                                  this.state.backupTimes.nextBackup,
+                                                  this.state.backupTimes
+                                                      .nextBackup,
                                               ).fromNow()
                                             : 'in progress'}
                                     </span>
@@ -164,7 +180,10 @@ export default class OverviewContainer extends React.Component<Props> {
                                     if (!this.state.automaticBackupEnabled) {
                                         this.setState({ showPricing: true })
                                     } else {
-                                        window.open("https://worldbrain.io/community/view-subscription/", "_blank")
+                                        window.open(
+                                            'https://worldbrain.io/community/view-subscription/',
+                                            '_blank',
+                                        )
                                     }
                                 }}
                                 color={
@@ -200,8 +219,11 @@ export default class OverviewContainer extends React.Component<Props> {
                                         <div className={localStyles.payConfirm}>
                                             <SmallButton
                                                 color="green"
-                                                onClick={
-                                                    this.onPaymentRequested
+                                                onClick={() =>
+                                                    this.props.onPaymentRequested(
+                                                        this.state
+                                                            .billingPeriod,
+                                                    )
                                                 }
                                             >
                                                 Pay now
@@ -244,6 +266,40 @@ export default class OverviewContainer extends React.Component<Props> {
                         </div>
                     </div>
                 ) : null}
+                {!this.state.hasInitialBackup &&
+                    this.state.automaticBackupEnabled && (
+                        <div>
+                            <p className={styles.header2}>
+                                <strong>SETTINGS</strong>
+                            </p>
+                            <div className={styles.option}>
+                                <span className={styles.name}>
+                                    Automatic Backups Enabled
+                                </span>
+                                <SmallButton
+                                    extraClass={localStyles.right}
+                                    onClick={() => {
+                                        window.open(
+                                            'https://worldbrain.io/community/view-subscription/',
+                                            '_blank',
+                                        )
+                                    }}
+                                    color={'red'}
+                                >
+                                    Cancel
+                                </SmallButton>
+                                <span
+                                    className={classNames(
+                                        styles.subname,
+                                        localStyles.limitWidth,
+                                    )}
+                                >
+                                    Worry-free. Automatically backs up your data
+                                    every 15 minutes.
+                                </span>
+                            </div>
+                        </div>
+                    )}
                 <div>
                     <p className={styles.header2}>
                         <strong>RESTORE </strong>

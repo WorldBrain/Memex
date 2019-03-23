@@ -1,5 +1,6 @@
 import React from 'react'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { setLocalStorage } from 'src/util/storage'
 const localStyles = require('./running-process.css')
 import { ProgressBar } from 'src/common-ui/components'
 import MovingDotsLabel from '../components/moving-dots-label'
@@ -15,12 +16,13 @@ interface Props {
         cancel: string
         pause: string
         resume: string
+        sendNotif: string
     }
     eventMessageName: string
     preparingStepLabel: string
     synchingStepLabel: string
     renderHeader: () => any
-    renderFailMessage: () => any
+    renderFailMessage: (errorId: string) => any
     renderSuccessMessage: () => any
     onFinish: () => void
 }
@@ -82,20 +84,43 @@ export default class RunningProcess extends React.Component<Props> {
         }
     }
 
-    handleProcessEvent(event) {
+    async handleProcessEvent(event) {
         if (event.type === 'info') {
             this.setState({
                 status: 'running',
                 info: event.info || this.state.info,
             })
         } else if (event.type === 'success') {
+            await setLocalStorage('backup-status', {
+                state: 'success',
+                backupId: 'success',
+            })
             this.setState({ status: 'success' })
         } else if (event.type === 'fail') {
+            const errorId = await remoteFunction(
+                this.props.functionNames.sendNotif,
+            )('error')
+            await setLocalStorage('backup-status', {
+                state: 'fail',
+                backupId:
+                    errorId === 'backup_error' ? errorId : 'drive_size_empty',
+            })
+            // Set the status as fail and also update the info as to
+            // what the reason of the failure was
             let overlay = null
             if (event.error === 'Backup file not found') {
                 overlay = true
             }
-            this.setState({ status: 'fail', overlay })
+            this.setState({
+                status: 'fail',
+                info: {
+                    state:
+                        errorId === 'backup_error'
+                            ? 'network-error'
+                            : 'full-drive',
+                },
+                overlay,
+            })
         }
     }
 
@@ -227,7 +252,7 @@ export default class RunningProcess extends React.Component<Props> {
     renderFail() {
         return (
             <div className={localStyles.finish}>
-                {this.props.renderFailMessage()}
+                {this.props.renderFailMessage(this.state.info.state)}
                 <PrimaryButton
                     onClick={() => {
                         this.props.onFinish()

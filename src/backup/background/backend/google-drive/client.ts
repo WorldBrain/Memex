@@ -1,4 +1,5 @@
 import { DriveTokenManager } from './token-manager'
+import { setLocalStorage } from 'src/util/storage'
 
 export class GoogleDriveClient {
     private idCache: {
@@ -174,6 +175,17 @@ export class GoogleDriveClient {
         return { id: response.id, created: true }
     }
 
+    // https://developers.google.com/drive/api/v3/reference/about
+    async getDriveStorageQuota() {
+        const response = await this._request(`/about?fields=storageQuota`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        return response.storageQuota
+    }
+
     async _request(path, options: any = {}): Promise<any> {
         const accessToken = await this.tokenManager.getAccessToken()
         options.headers = options.headers || {}
@@ -204,6 +216,10 @@ export class GoogleDriveClient {
                 'Something went wrong making a request to Drive:',
                 response,
             )
+            await setLocalStorage('backup-status', {
+                state: 'fail',
+                backupId: 'drive_size_empty',
+            })
             throw new Error('Error during request to Drive')
         }
         return options.json ? response.json() : response

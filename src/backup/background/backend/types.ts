@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events'
+import NotificationBackground from 'src/notifications/background'
 
 export interface BackupObjectLocation {
     collection: string
@@ -42,6 +43,14 @@ export abstract class BackupBackend {
         return
     }
     async commitBackup({ events }: { events: EventEmitter }): Promise<any> {
+        return
+    }
+
+    async sendNotificationOnFailure(
+        id: string,
+        notifictions: NotificationBackground,
+        backupSize: any,
+    ): Promise<string> {
         return
     }
 
