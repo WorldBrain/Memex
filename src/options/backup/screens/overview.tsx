@@ -81,10 +81,16 @@ export default class OverviewContainer extends React.Component<Props> {
             <div>
                 {this.state.showWarning && (
                     <div className={styles.showWarning}>
-                        <p className={styles.showWarningText}>
-                            Your first backup must be done manually. Follow the
-                            wizard and complete your first backup.
-                        </p>
+                        <span className={styles.WarningIcon}/>
+                        <span className={styles.showWarningText}>
+                            The first backup must be done manually. Follow{' '}
+                            <span 
+                                className={styles.underline} 
+                                onClick={this.props.onBackupRequested}
+                            >
+                            the wizard
+                            </span>{' '}to get started.
+                        </span>
                     </div>
                 )}
                 {this.state.showRestoreConfirmation && (
