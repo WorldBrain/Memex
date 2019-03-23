@@ -6,6 +6,38 @@
     border: 1px solid #d5d8d6;
     box-sizing: border-box;
     border-radius: 6px;
+    z-index: 3;
+}
+
+.cross {
+    width: 7px;
+    height: 7px;
+    position: relative;
+
+    background-image: url('../../../../../img/times-solid.svg');
+    background-repeat: no-repeat;
+    border-color: transparent;
+    background-color: #83c9f4;
+    border-width: 0px;
+
+    margin-top: 11px;
+}
+
+.tagPill {
+    background-color: #83c9f4;
+    padding: 2px 9px 3px 9px;
+
+    /* border-radius: 3px; */
+    font-size: 13px;
+    font-weight: 500;
+    width: fit-content;
+    letter-spacing: 0.5px;
+    height: 100%;
+    color: black;
+    margin-right: 3px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 50px;
 }
 
 .searchField {

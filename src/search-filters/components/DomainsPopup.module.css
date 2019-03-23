@@ -7,6 +7,36 @@
     box-sizing: border-box;
     border-radius: 6px;
     margin-top: 10px;
+    z-index: 2;
+}
+
+.cross {
+    width: 7px;
+    height: 7px;
+    position: relative;
+
+    background-image: url('../../../img/times-solid.svg');
+    background-repeat: no-repeat;
+    border-color: transparent;
+    background-color: #fff;
+    border-width: 0px;
+
+    margin-top: 11px;
+}
+
+.domainPill {
+    background-color: #fff;
+    padding: 2px 9px 3px 9px;
+    border: 0.5px solid #bcc2bd;
+    font-size: 13px;
+    font-weight: 500;
+    width: fit-content;
+    letter-spacing: 0.5px;
+    height: 100%;
+    color: black;
+    margin-right: 3px;
+    display: flex;
+    align-items: center;
 }
 
 .searchField {
