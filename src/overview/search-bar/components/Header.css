@@ -98,6 +98,12 @@
     }
 }
 
+.backupStatus {
+    @media (max-width: 1400px) {
+        display: none;
+    }
+}
+
 .upgrade {
     composes: h2Color from '../../../common-ui/colors.css';
     composes: nakedButton from '../../../common-ui/elements.css';

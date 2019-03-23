@@ -37,6 +37,20 @@
     font-size: 15px;
 }
 
+/* Warning section */
+
+.showWarning {
+    display: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+}
+
+.showWarningText {
+    font-size: 15px;
+    composes: backgroundWarningColor from '../../common-ui/colors.css';
+}
+
 /* Upgrade Button */
 
 .labelFree {
