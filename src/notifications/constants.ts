@@ -15,5 +15,7 @@ export const BACKUP_STATUS_MESSAGES: any = {
     backup_only_local:
         'Your data is only stored on your computer. Back it up locally or to any cloud storage for free.',
     automatic_backup_message:
-        'Backup your data automatically every 15 minutes. Worry-free.',
+        'Automatic backups every 15 minutes. Worry-free.',
+    automatic_backup_disabled_first_backup_done:
+        'Remember to regularly backup your data',
 }

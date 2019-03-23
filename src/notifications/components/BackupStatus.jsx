@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { BackupSuccess, BackupFailed, AutomaticBackup } from './BackupOverlay'
 import ActionButton from './ActionButton'
+import classNames from 'classnames'
 
 const styles = require('./BackupStatus.css')
 
@@ -13,14 +14,15 @@ const BackupStatus = props => {
                 onMouseEnter={props.onMouseEnter}
                 onMouseLeave={props.onMouseLeave}
             >
-                <div className={styles.header}>Backup Status</div>
-                <div>
-                    {props.backupState.state === 'success' ||
-                    props.backupState.state === 'autoBackup' ? (
-                        <img src={props.checkedIcon} className={styles.icon} />
-                    ) : (
-                        <img src={props.crossIcon} className={styles.icon} />
-                    )}
+                <div className={styles.headerBox}>
+                    <div className={styles.header}>Backup Status</div>
+                    <div>
+                        {props.backupState.state === 'success' ? (
+                            <span className={classNames(styles.successIcon, styles.icon)} />
+                        ) : (
+                            <span className={classNames(styles.failIcon, styles.icon)} />
+                        )}
+                    </div>
                 </div>
                 <div className={[styles.backupOverlay]}>
                     {props.hover &&
@@ -179,7 +181,6 @@ const BackupStatus = props => {
 BackupStatus.propTypes = {
     backupTimes: PropTypes.object,
     hover: PropTypes.bool,
-    checkedIcon: PropTypes.string,
     crossIcon: PropTypes.string,
     onMouseEnter: PropTypes.func,
     onMouseLeave: PropTypes.func,

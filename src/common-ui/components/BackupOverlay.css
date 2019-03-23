@@ -1,5 +1,5 @@
 @value colors: '../../common-ui/colors.css';
-@value color11, color6 from colors;
+@value color11, color6, color12, radius3 from colors;
 
 .overlay {
     display: flex;
@@ -39,19 +39,19 @@
 }
 
 .errorMessage {
-    padding: 10px;
-    width: 90%;
-    margin: 10px 20px;
+    padding: 15px;
     font-size: 15px;
-    composes: backgroundWarningColor from '../colors.css';
-    composes: radius5 from '../colors.css';
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    margin-bottom: 15px;
+    background-color: color12;
+    border-radius: radius3;
 }
 
 .errorDescInfo {
-    padding: 0 10px;
+    font-weight: 500;
+    color: white;
+    line-height: 20px;
 }
 
 .backup {

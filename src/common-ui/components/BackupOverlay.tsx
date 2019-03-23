@@ -89,12 +89,6 @@ export default class BackupOverlay extends PureComponent<Props> {
                     )}
                     {errorMessage && (
                         <div className={styles.errorMessage}>
-                            <span>
-                                <img
-                                    src={crossIcon}
-                                    className={styles.crossIcon}
-                                />
-                            </span>
                             <span className={styles.errorDescInfo}>
                                 {errorMessage}
                             </span>

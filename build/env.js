@@ -9,7 +9,7 @@ export default ({ mode }) => {
         AUTOMATIC_BACKUP_PAYMENT_SUCCESS: '',
         MOCK_BACKUP_BACKEND: '',
         STORE_BACKUP_TIME: 'true',
-        BACKUP_BATCH_SIZE: '1000',
+        BACKUP_BATCH_SIZE: '500',
         BACKUP_START_SCREEN: '',
         BACKUP_TEST_SIZE_ESTIMATION: '',
     }
