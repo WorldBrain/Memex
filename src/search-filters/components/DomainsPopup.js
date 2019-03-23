@@ -8,7 +8,7 @@ import styles from './DomainsPopup.module.css'
 import { actions, selectors } from '../'
 import { selectors as sidebar } from '../../overview/sidebar-left'
 // import image from '../../assets/search-solid.svg';
-import { FilteredRow } from './'
+// import { FilteredRow } from './'
 
 import IndexDropdownSB from './IndexDropdownSB'
 
@@ -33,6 +33,7 @@ class DomainsPopup extends PureComponent {
         hideDomainFilter: PropTypes.func.isRequired,
         delIncDomainFilter: PropTypes.func.isRequired,
         delExcDomainFilter: PropTypes.func.isRequired,
+        // isExclusive: PropTypes.bool.isRequired,
         // fetchSuggestedDomains: PropTypes.func.isRequired,
         suggestedDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
     }
@@ -40,16 +41,27 @@ class DomainsPopup extends PureComponent {
     renderFilteredDomains = () => {
         return !this.props.domainFilterDropdown
             ? this.props.filteredDomains.map(({ value, isExclusive }, i) => (
-                  <FilteredRow
-                      key={i}
-                      value={value}
-                      onClick={this.toggleDomainFilter({ value, isExclusive })}
-                      active
-                      isExclusive={isExclusive}
-                  />
+                  <div style={{ display: 'flex' }}>
+                      <span className={styles.domainPill}>{value}</span>
+                      <button
+                          className={styles.cross}
+                          onClick={this.toggleDomainFilter({
+                              value,
+                              isExclusive,
+                          })}
+                      />
+                  </div>
               ))
             : null
     }
+
+    // <FilteredRow
+    // key={i}
+    // value={value}
+    // onClick={this.toggleDomainFilter({ value, isExclusive })}
+    // active
+    // isExclusive={isExclusive}
+    // />
 
     toggleDomainFilter = ({ value, isExclusive }) => () => {
         !isExclusive

@@ -8,7 +8,7 @@ import styles from '../../stylesheets/tags-filter-styles/TagsPopup.module.css'
 import { actions, selectors } from '../../../'
 import { selectors as sidebar } from '../../../../overview/sidebar-left'
 // import image from '../../assets/search-solid.svg';
-import { FilteredRow } from '../../'
+// import { FilteredRow } from '../../'
 
 import IndexDropdownSB from '../../IndexDropdownSB'
 
@@ -23,6 +23,7 @@ class TagsPopup extends PureComponent {
         checkTags: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
         hideTagFilter: PropTypes.func.isRequired,
+        // isNew: PropTypes.bool.isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         // toggleFilterTypes: PropTypes.func.isRequired,
         // showfilteredTypes: PropTypes.bool.isRequired,
@@ -31,15 +32,26 @@ class TagsPopup extends PureComponent {
     renderFilteredTags = () => {
         return !this.props.tagFilterDropdown
             ? this.props.filteredTags.map((tag, i) => (
-                  <FilteredRow
-                      key={i}
-                      value={tag}
-                      onClick={() => this.props.delTagFilter(tag)}
-                      active
-                  />
+                  <span style={{ width: 'fit-content' }}>
+                      <span className={styles.tagPill}>
+                          {tag}
+                          {'  '}
+                      </span>
+                      <button
+                          onClick={() => this.props.delTagFilter(tag)}
+                          className={styles.cross}
+                      />
+                  </span>
               ))
             : null
     }
+
+    // <FilteredRow
+    // key={i}
+    // value={tag}
+    // onClick={() => this.props.delTagFilter(tag)}
+    // active
+    // />
 
     render() {
         // console.log(this.props.filteredTags)
