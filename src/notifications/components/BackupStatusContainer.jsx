@@ -58,12 +58,13 @@ class BackupStatusContainer extends Component {
             state: 'no_backup',
             backupId: 'no_backup',
         })
+
         if (backupStatus.state === 'success') {
             if (automaticBackupEnabled) {
                 backupState = {
                     state: 'success',
-                    header: 'Backup Successful',
-                    message: messages.successful_backup,
+                    header: 'All good!',
+                    message: null,
                 }
             } else {
                 backupState = {
@@ -74,7 +75,9 @@ class BackupStatusContainer extends Component {
             }
         } else if (backupStatus.state === 'fail') {
             let message
-            if (backupStatus.backupId === 'backup_error') {
+            if (backupStatus.backupId === 'backup_error' && automaticBackupEnabled) {
+                message = messages.unsuccessful_backup_auto_enabled
+            } else if (backupStatus.backupId === 'backup_error') {
                 message = messages.unsuccessful_backup_internet
             } else if (backupStatus.backupId === 'drive_size_empty') {
                 message = messages.unsuccessful_backup_drive_size
@@ -102,12 +105,6 @@ class BackupStatusContainer extends Component {
                     message: messages.backup_only_local,
                 }
             }
-        } else if (backupState.state !== 'fail' && automaticBackupEnabled) {
-             backupState = {
-                    state: 'success',
-                    header: 'Backup Successful',
-                    message: null,
-            }
         }
         return backupState
     }
@@ -118,7 +115,7 @@ class BackupStatusContainer extends Component {
                 return {
                     backupState: {
                         state: 'autoBackup',
-                        header: 'This is a premium feature',
+                        header: '⭐️ This is a premium feature',
                         message: messages.automatic_backup_message,
                     },
                 }
@@ -130,16 +127,14 @@ class BackupStatusContainer extends Component {
     }
 
     onMouseEnterHandler = async () => {
-        const backupState = await this.backupState()
         this.setState({
             hover: true,
-            backupState,
         })
     }
 
     onMouseLeaveHandler = () => {
         this.setState({
-            hover: false,
+            hover: false,  
         })
     }
 

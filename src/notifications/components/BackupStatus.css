@@ -1,9 +1,14 @@
 @value colors: 'src/common-ui/colors.css';
 @value color4, color12 from colors;
 
+.TopContainer {
+    height: 100%;
+}
+
 .container {
     display: flex;
     align-items: center;
+    height: 100%;
 }
 
 .header {

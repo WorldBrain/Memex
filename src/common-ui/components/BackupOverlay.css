@@ -7,11 +7,11 @@
     justify-content: flex-start;
     align-content: space-between;
     align-items: center;
-    position: absolute;
+    position: fixed;
     top: 50px;
-    right: 65px;
+    right: 50px;
     padding: 25px;
-    width: 282px;
+    width: 300px;
     min-height: 166px;
     z-index: 99999;
     background: white;
