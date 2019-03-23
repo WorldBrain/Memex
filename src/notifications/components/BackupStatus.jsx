@@ -8,7 +8,9 @@ const styles = require('./BackupStatus.css')
 
 const BackupStatus = props => {
     return (
-        <div>
+        <div
+            className={styles.TopContainer}
+        >
             <div
                 className={styles.container}
                 onMouseEnter={props.onMouseEnter}
@@ -94,7 +96,7 @@ const BackupStatus = props => {
                                             props.onAutomaticBackupSelect
                                         }
                                         automaticBackup={props.automaticBackup}
-                                        message={`Backup your data automatically every 15 minutes. Worry-free.`}
+                                        message={`Automatic backups every 15 minutes. Worry-free.`}
                                     >
                                         <div className={styles.paymentOptions}>
                                             <div>

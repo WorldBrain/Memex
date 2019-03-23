@@ -249,10 +249,6 @@
 
 .trash {
     background-image: url('/img/trash.svg');
-
-    &:hover {
-        background-image: url('/img/trash_blue_full.svg');
-    }
 }
 
 .comment {

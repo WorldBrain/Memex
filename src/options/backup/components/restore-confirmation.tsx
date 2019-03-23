@@ -26,7 +26,6 @@ export default class RestoreConfirmation extends React.Component<Props, {}> {
                 <div className={styles.box}>
                     <img
                         className={styles.closeIcon}
-                        src={'./img/cross.svg'}
                         onClick={this.props.onClose}
                     />
                     <img

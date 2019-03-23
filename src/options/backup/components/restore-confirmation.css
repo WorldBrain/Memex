@@ -9,11 +9,12 @@
 }
 
 .box {
-    composes: boxShadow from '../../../common-ui/colors.css';
+    composes: toolTips from 'src/common-ui/elements.css';
     position: relative;
-    padding: 40px 50px 30px 52px;
+    padding: 40px 50px 40px 52px;
     margin: 15% auto;
     width: 28em;
+    background-color: white;
 }
 
 .danger {
@@ -30,6 +31,8 @@
 }
 
 .closeIcon {
+    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     height: 15px;
     width: 15px;
     position: absolute;
@@ -41,6 +44,8 @@
 .normal {
     composes: subTitleColor from '../../../common-ui/colors.css';
     font-size: 15px;
+    margin: 15px 0px;
+    line-height: 22px;
 }
 
 .instructions {
