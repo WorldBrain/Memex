@@ -19,6 +19,7 @@ export interface Props {
     settingsRoute?: string
     overviewUrl?: string
     pricingUrl?: string
+    automaticBackupEnalbled?: boolean
     checkedIcon: string
     crossIcon: string
     query: string
@@ -44,6 +45,7 @@ class Header extends PureComponent<Props> {
         checkedIcon: 'img/checked_green.svg',
         crossIcon: 'img/cross.svg',
         settingsRoute: '/settings',
+        automaticBackupEnabled: localStorage.getItem('backup.has-subscription'),
         overviewUrl: OVERVIEW_URL,
     }
 
@@ -85,14 +87,16 @@ class Header extends PureComponent<Props> {
                     </div>
                 </div>
                 <div className={styles.links}>
-                    <BackupStatus />
-                    <OutLink
-                        className={styles.upgrade}
-                        to={this.props.pricingUrl}
-                    >
-                        <span className={styles.upgradeIcon} />
-                        ⭐️ Upgrade
-                    </OutLink>
+                    <BackupStatus className={styles.backupStatus} />
+                    {!this.props.automaticBackupEnalbled && (
+                        <OutLink
+                            className={styles.upgrade}
+                            to={this.props.pricingUrl}
+                        >
+                            <span className={styles.upgradeIcon} />
+                            ⭐️ Upgrade
+                        </OutLink>
+                    )}
                     <InboxButton
                         toggleInbox={this.props.toggleInbox}
                         showInbox={this.props.showInbox}

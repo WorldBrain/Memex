@@ -9,7 +9,6 @@
 /* .settingsLabel {
 
 } */
-
 .settingsHelp {
     font-size: 0.9em;
 }
@@ -89,14 +88,14 @@
 }
 
 .change {
-        composes: nakedButton hoverColor from '../../../common-ui/colors.css';
-        float: right;
-        font-size: 0.6rem;
-        color: #555;
-        margin-right: -3px;
-        width: fit-content;
-        text-align: right;
-        align-self: flex-end;
+    composes: nakedButton hoverColor from '../../../common-ui/colors.css';
+    float: right;
+    font-size: 0.6rem;
+    color: #555;
+    margin-right: -3px;
+    width: fit-content;
+    text-align: right;
+    align-self: flex-end;
 }
 
 .pricing {
