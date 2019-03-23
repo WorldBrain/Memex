@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color12 from colors;
+
 .screenContainer {
     position: relative;
     width: 100%;
@@ -40,15 +43,34 @@
 /* Warning section */
 
 .showWarning {
-    display: absolute;
+    display: flex;
     top: 0;
     right: 0;
     width: 100%;
+    padding: 15px 40px;
+    background-color: color12;
+    composes: toolTips from 'src/common-ui/elements.css';
+    align-items: center;
 }
 
 .showWarningText {
     font-size: 15px;
-    composes: backgroundWarningColor from '../../common-ui/colors.css';
+    text-align: center;
+    font-weight: 500;
+    color: white;
+}
+
+.underline {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.WarningIcon {
+    composes: WarningIconWhite from 'src/common-ui/icons.css';
+    width: 25px;
+    height: 25px;
+    display: inline-flex;
+    margin-right: 15px;
 }
 
 /* Upgrade Button */

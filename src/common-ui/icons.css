@@ -145,6 +145,12 @@
 	background-image: url('/img/searchGrey.svg');
 }
 
+.WarningIconWhite {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-image: url('/img/warning_white.svg');
+}
+
 .addIcon {
 	composes: iconPosition;
 	background-image: url('/img/plus.svg');
