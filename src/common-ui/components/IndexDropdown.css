@@ -29,8 +29,71 @@
     }
 }
 
-.tagPill {
+.cross {
+    width: 7px;
+    height: 7px;
+    position: relative;
+
+    background-image: url('../../../img/times-solid.svg');
+    background-repeat: no-repeat;
+    border-color: transparent;
+    background-color: #83c9f4;
+    border-width: 0px;
+
+    margin-top: 3px;
+    margin-left: 3px;
+}
+
+.cross1 {
+    width: 7px;
+    height: 7px;
+    position: relative;
+
+    background-image: url('../../../img/times-solid.svg');
+    background-repeat: no-repeat;
+    border-color: transparent;
+    background-color: #fff;
+    border-width: 0px;
+
+    margin-top: 3px;
+    margin-left: 3px;
+}
+
+/* .tagPill {
     composes: tagPillSuggestions from '../../common-ui/elements.css';
+} */
+
+.tagPill {
+    background-color: #83c9f4;
+    padding: 2px 9px 3px 9px;
+
+    /* border-radius: 3px; */
+    font-size: 13px;
+    font-weight: 500;
+    width: fit-content;
+    letter-spacing: 0.5px;
+    height: 100%;
+    color: black;
+    margin-right: 3px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 50px;
+}
+
+.domainPill {
+    background-color: #fff;
+    padding: 2px 9px 3px 9px;
+    border: 0.5px solid #bcc2bd;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 500;
+    width: fit-content;
+    letter-spacing: 0.5px;
+    height: 100%;
+    color: black;
+    margin-right: 3px;
+    display: flex;
+    align-items: center;
 }
 
 .menuItemFocused {
@@ -116,6 +179,7 @@
 
 .searchIcon {
     composes: searchIcon from '../../common-ui/icons.css';
+    background-image: url('../../../img/searchGrey.svg');
     width: 25px;
     height: 25px;
     background-size: 20px;

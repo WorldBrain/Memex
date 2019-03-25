@@ -46,6 +46,14 @@
     background-size: 100%;
 }
 
+.starMark {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/star_blue_full.svg');
+    opacity: 0.7;
+    background-size: 100%;
+}
+
 .inboxIcon {
     background-position: center;
     background-repeat: no-repeat;

@@ -86,7 +86,7 @@ class DomainsPopup extends PureComponent {
         this.props.checkDomains(arr)
         return (
             <div className={styles.domainsPopup}>
-                {this.renderFilteredDomains()}
+                {/* this.renderFilteredDomains() */}
                 {
                     <IndexDropdownSB
                         onFilterAdd={this.props.addDomainFilter}

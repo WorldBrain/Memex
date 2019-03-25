@@ -10,7 +10,7 @@ import { selectors as sidebar } from '../../../../overview/sidebar-left'
 // import image from '../../assets/search-solid.svg';
 // import { FilteredRow } from '../../'
 
-import IndexDropdownSB from '../../IndexDropdownSB'
+import IndexDropdownKS from '../../IndexDropdownKS'
 
 class TagsPopup extends PureComponent {
     static propTypes = {
@@ -29,11 +29,19 @@ class TagsPopup extends PureComponent {
         // showfilteredTypes: PropTypes.bool.isRequired,
     }
 
+    // state = {
+    //     countResult: 0,
+    // }
+
+    // countResult = countResult => {
+    //     this.setState({ countResult: countResult })
+    // }
+
     renderFilteredTags = () => {
         return !this.props.tagFilterDropdown
             ? this.props.filteredTags.map((tag, i) => (
-                  <span style={{ width: 'fit-content' }}>
-                      <span className={styles.tagPill}>
+                  <span className={styles.tagPill}>
+                      <span>
                           {tag}
                           {'  '}
                       </span>
@@ -66,9 +74,15 @@ class TagsPopup extends PureComponent {
         this.props.checkTags(arr)
         return (
             <div className={styles.tagsPopup}>
-                {this.renderFilteredTags()}
+                {count > 0 ? (
+                    <div className={styles.selected}>Selected</div>
+                ) : null}
+                <div className={styles.selectedTags}>
+                    {/* this.renderFilteredTags() */}
+                </div>
                 {
-                    <IndexDropdownSB
+                    <IndexDropdownKS
+                        // checkResultCount={this.countResult}
                         onFilterAdd={this.props.addTagFilter}
                         onFilterDel={this.props.delTagFilter}
                         initFilters={this.props.filteredTags}
