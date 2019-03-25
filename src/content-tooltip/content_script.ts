@@ -93,6 +93,7 @@ const handleKeyboardShortcuts = settingsState => async e => {
                 case toggleHighlightsShortcut:
                     toggleHighlightsShortcutEnabled && toggleHighlights()
                     break
+                default:
             }
         } else {
             switch (convertKeyboardEventToKeyString(e)) {
@@ -109,6 +110,7 @@ const handleKeyboardShortcuts = settingsState => async e => {
                     createAnnotationShortcutEnabled &&
                         (await createNewAnnotation(e))
                     break
+                default:
             }
         }
     }
