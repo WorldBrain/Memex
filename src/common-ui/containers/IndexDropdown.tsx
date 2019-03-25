@@ -10,7 +10,6 @@ import {
     IndexDropdownRow,
 } from '../components'
 import { ClickHandler } from '../../popup/types'
-
 export interface Props {
     env?: 'inpage' | 'overview'
     source: 'tag' | 'domain'
@@ -151,7 +150,6 @@ class IndexDropdownContainer extends Component<Props, State> {
             }
         }
     }
-
     /**
      * Selector for derived display tags state
      */
@@ -223,7 +221,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         // Clear the component state.
         this.setState({
             searchVal: '',
-            focused: 0,
+            focused: -1,
             clearFieldBtn: false,
         })
 
@@ -291,7 +289,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         // Clear the component state.
         this.setState({
             searchVal: '', // Clear the search field.
-            focused: 0,
+            focused: -1,
             clearFieldBtn: false,
         })
     }
@@ -436,7 +434,6 @@ class IndexDropdownContainer extends Component<Props, State> {
 
     private renderTags() {
         const tags = this.getDisplayTags()
-
         const tagOptions = tags.map((tag, i) => (
             <IndexDropdownRow
                 {...tag}
@@ -449,7 +446,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         ))
 
         if (this.canCreateTag()) {
-            tagOptions.push(
+            tagOptions.unshift(
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
@@ -480,9 +477,11 @@ class IndexDropdownContainer extends Component<Props, State> {
                         ? this.state.multiEdit.size
                         : this.state.filters.length
                 }
+                tags={this.state.filters}
                 tagSearchValue={this.state.searchVal}
                 clearSearchField={this.clearSearchField}
                 showClearfieldBtn={this.showClearfieldBtn()}
+                handleTagSelection={this.handleTagSelection}
                 {...this.props}
             >
                 {this.renderTags()}

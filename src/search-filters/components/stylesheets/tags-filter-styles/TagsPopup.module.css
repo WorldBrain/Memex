@@ -9,6 +9,20 @@
     z-index: 3;
 }
 
+.selected {
+    position: absolute;
+    width: 85px;
+    height: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+    color: #bcc2bd;
+}
+
+.selectedTags {
+    margin-top: 15px;
+}
+
 .cross {
     width: 7px;
     height: 7px;
@@ -20,7 +34,8 @@
     background-color: #83c9f4;
     border-width: 0px;
 
-    margin-top: 11px;
+    margin-top: 3px;
+    margin-left: 3px;
 }
 
 .tagPill {

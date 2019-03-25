@@ -12,6 +12,7 @@ import sidebarStyles from './IndexDropdownSidebar.css'
 class IndexDropdown extends PureComponent {
     static propTypes = {
         children: PropTypes.array.isRequired,
+        tags: PropTypes.array.isRequired,
         onTagSearchChange: PropTypes.func.isRequired,
         onTagSearchKeyDown: PropTypes.func.isRequired,
         numberOfTags: PropTypes.number.isRequired,
@@ -30,6 +31,9 @@ class IndexDropdown extends PureComponent {
         onBackBtnClick: PropTypes.func,
         allTabs: PropTypes.bool,
         allTabsCollection: PropTypes.bool,
+        // onFilterDel: PropTypes.func.isRequired,
+        // renderTags: PropTypes.func.isRequired,
+        handleTagSelection: PropTypes.func.isRequired,
     }
 
     get styles() {
@@ -74,10 +78,57 @@ class IndexDropdown extends PureComponent {
         return this.placeholder.toLowerCase()
     }
 
+    renderTags() {
+        const tagOptions = this.props.tags.map((tag, i) => (
+            <span className={styles.tagPill}>
+                {tag}
+                {
+                    <button
+                        onClick={this.props.handleTagSelection(i)}
+                        className={styles.cross}
+                    />
+                }
+            </span>
+        ))
+        return tagOptions
+    }
+
+    renderDomains() {
+        const domainOptions = this.props.tags.map((tag, i) => (
+            <span className={styles.domainPill}>
+                {tag}
+                {
+                    <button
+                        onClick={() => this.props.handleTagSelection(tag)}
+                        className={styles.cross1}
+                    />
+                }
+            </span>
+        ))
+        return domainOptions
+    }
+
     render() {
+        // console.log(this.placeholder)
         return (
             <div className={this.mainClass} ref={this.props.setTagDivRef}>
+                {!this.props.isForSidebar ? (
+                    <div className={this.styles.numberTags}>
+                        <span className={this.styles.bold}>
+                            {this.props.numberOfTags}
+                        </span>{' '}
+                        {this.unit} selected
+                    </div>
+                ) : null}
+                <span>
+                    {this.placeholder === 'Tags' ? this.renderTags() : null}
+                    {this.placeholder === 'Domains'
+                        ? this.renderDomains()
+                        : null}
+                </span>
+
                 <div
+                    style={{ background: '#fff' }}
                     className={cx(this.styles.searchContainer, {
                         [this.styles.commentBox]: this.props.allowAdd,
                     })}
@@ -126,12 +177,6 @@ class IndexDropdown extends PureComponent {
                                     Back
                                 </button>
                             )}
-                        <div className={this.styles.numberTags}>
-                            <span className={this.styles.bold}>
-                                {this.props.numberOfTags}
-                            </span>{' '}
-                            {this.unit} selected
-                        </div>
                     </div>
                 )}
             </div>
