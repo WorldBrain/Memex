@@ -69,7 +69,7 @@ class TooltipContainer extends React.Component {
         }
     }
 
-    initHandleKeyboardShortcuts = settingsState => e => {
+    initHandleKeyboardShortcuts = settingsState => async e => {
         const {
             highlightShortcut,
             linkShortcut,
@@ -86,7 +86,7 @@ class TooltipContainer extends React.Component {
             switch (convertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
                     toggleSidebarShortcutEnabled &&
-                        remoteFunction('toggleSidebarOverlay')()
+                        (await remoteFunction('toggleSidebarOverlay')())
                     break
                 case toggleHighlightsShortcut:
                     toggleHighlightsShortcutEnabled && this.toggleHighlights()
@@ -95,7 +95,7 @@ class TooltipContainer extends React.Component {
         } else {
             switch (convertKeyboardEventToKeyString(e)) {
                 case linkShortcut:
-                    linkShortcutEnabled && this.createLink()
+                    linkShortcutEnabled && (await this.createLink())
                     break
                 case highlightShortcut:
                     if (highlightShortcutEnabled) {
@@ -106,7 +106,8 @@ class TooltipContainer extends React.Component {
                     }
                     break
                 case createAnnotationShortcut:
-                    createAnnotationShortcutEnabled && this.createAnnotation(e)
+                    createAnnotationShortcutEnabled &&
+                        (await this.createAnnotation(e))
                     break
             }
         }
