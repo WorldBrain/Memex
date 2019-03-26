@@ -125,7 +125,7 @@ export default class SearchStorage extends FeatureStorage {
      * @returns an object containing annotsByDay ( Timestamp as key and AnnotsByPageUrl as values )
      * and docs which is of type AnnotPage[].
      */
-    async searchAnnotsByDay(params: AnnotSearchParams) {
+    private async searchAnnotsByDay(params: AnnotSearchParams) {
         const results: Map<
             number,
             Map<string, Annotation[]>
@@ -143,6 +143,7 @@ export default class SearchStorage extends FeatureStorage {
         let pages: AnnotPage[] = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...pageUrls],
+            params.base64Img,
         )
 
         pages = await this.attachDisplayTimeToPages(pages, params.endDate)
@@ -172,6 +173,38 @@ export default class SearchStorage extends FeatureStorage {
             annotsByDay: normalizedResults,
             docs: pages,
         }
+    }
+
+    private async searchTermsAnnots(params: AnnotSearchParams) {
+        const results: Map<
+            string,
+            Annotation[]
+        > = await this.storageManager.operation(
+            AnnotationsListPlugin.TERMS_SEARCH_OP_ID,
+            params,
+        )
+
+        let pages: AnnotPage[] = await this.storageManager.operation(
+            PageUrlMapperPlugin.MAP_OP_ID,
+            [...results.keys()],
+            params.base64Img,
+        )
+
+        pages = await this.attachDisplayTimeToPages(pages, params.endDate)
+
+        return {
+            docs: pages.map(page => ({
+                ...page,
+                annotations: results.get(page.url),
+            })),
+        }
+    }
+
+    async searchAnnots(params: AnnotSearchParams) {
+        if (!params.termsInc || !params.termsInc.length) {
+            return this.searchAnnotsByDay(params)
+        }
+        return this.searchTermsAnnots(params)
     }
 
     async searchPages(params: AnnotSearchParams): Promise<AnnotPage[]> {

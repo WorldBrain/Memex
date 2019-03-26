@@ -12,13 +12,18 @@ const moment = require('moment-timezone')
 export class AnnotationsListPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
-    static LIST_OP_ID = 'memex:dexie.listAnnotations'
+    static TERMS_SEARCH_OP_ID = 'memex:dexie.searchAnnotations'
     static LIST_BY_PAGE_OP_ID = 'memex:dexie.listAnnotationsByPage'
     static LIST_BY_DAY_OP_ID = 'memex:dexie.listAnnotationsByDay'
     static DEF_INNER_LIMIT_MULTI = 2
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
+
+        backend.registerOperation(
+            AnnotationsListPlugin.TERMS_SEARCH_OP_ID,
+            this.searchAnnots.bind(this),
+        )
 
         backend.registerOperation(
             AnnotationsListPlugin.LIST_BY_PAGE_OP_ID,
@@ -217,6 +222,16 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return annotsByPage
     }
 
+    private async queryAnnotsByDay(startDate: number, endDate: null) {
+        const collection = this.backend.dexieInstance
+            .table<Annotation>(AnnotsStorage.ANNOTS_COLL)
+            .where('lastEdited')
+            .between(startDate, endDate, true, true)
+            .reverse()
+
+        return collection.toArray()
+    }
+
     private termsMatch = ({
         termsInc,
         includeHighlights,
@@ -243,22 +258,117 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         }
     }
 
-    private async queryAnnotsByDay(
-        startDate: number,
-        endDate: null,
-        params: AnnotSearchParams,
-    ) {
-        const collection = this.backend.dexieInstance
+    private async queryTermsField(
+        args: {
+            field: string
+            term: string
+        },
+        { startDate, endDate }: AnnotSearchParams,
+    ): Promise<string[]> {
+        let coll = this.backend.dexieInstance
             .table<Annotation>(AnnotsStorage.ANNOTS_COLL)
-            .where('lastEdited')
-            .between(startDate, endDate, true, true)
-            .reverse()
+            .where(args.field)
+            .equals(args.term)
 
-        if (params.termsInc && params.termsInc.length) {
-            collection.filter(this.termsMatch(params))
+        if (startDate || endDate) {
+            coll = coll.filter(
+                annot =>
+                    annot.lastEdited >= new Date(startDate || 0) &&
+                    annot.lastEdited <= new Date(endDate || Date.now()),
+            )
         }
 
-        return collection.toArray()
+        return coll.primaryKeys()
+    }
+
+    private async lookupTerms({
+        termsInc,
+        includeHighlights,
+        includeNotes,
+        ...params
+    }: AnnotSearchParams) {
+        const fields = []
+
+        if (includeHighlights) {
+            fields.push('_body_terms')
+        }
+        if (includeNotes) {
+            fields.push('_comment_terms')
+        }
+
+        const results = new Map<string, string[]>()
+
+        // Run all needed queries for each term and on each field concurrently
+        for (const term of termsInc) {
+            const termRes = await Promise.all(
+                fields.map(field =>
+                    this.queryTermsField({ field, term }, params),
+                ),
+            )
+
+            // Collect all results from each field for this term
+            results.set(term, [...new Set([].concat(...termRes))])
+        }
+
+        // Get intersection of results for all terms (all terms must match)
+        const intersected = [...results.values()].reduce((a, b) => {
+            const bSet = new Set(b)
+            return a.filter(res => bSet.has(res))
+        })
+
+        return intersected
+    }
+
+    private async paginateAnnotsResults(
+        results: string[],
+        { skip, limit }: AnnotSearchParams,
+    ) {
+        const internalPageSize = limit * 2
+        const annotsByPage = new Map<string, Annotation[]>()
+        const seenPages = new Set<string>()
+        let internalSkip = 0
+
+        while (annotsByPage.size < limit) {
+            const resSlice = results.slice(
+                internalSkip,
+                internalSkip + internalPageSize,
+            )
+
+            if (!resSlice.length) {
+                break
+            }
+
+            const annots = await this.mapUrlsToAnnots(resSlice)
+
+            annots.forEach(annot => {
+                seenPages.add(annot.pageUrl)
+                const prev = annotsByPage.get(annot.pageUrl) || []
+
+                if (annotsByPage.size !== limit && seenPages.size > skip) {
+                    annotsByPage.set(annot.pageUrl, [...prev, annot])
+                }
+            })
+
+            internalSkip += internalPageSize
+        }
+
+        return annotsByPage
+    }
+
+    async searchAnnots(params: AnnotSearchParams) {
+        const termsSearchResults = await this.lookupTerms(params)
+
+        const filteredResults = await this.filterResults(
+            termsSearchResults,
+            params,
+        )
+
+        const annotsByPage = await this.paginateAnnotsResults(
+            filteredResults,
+            params,
+        )
+
+        return annotsByPage
     }
 
     /**
@@ -289,7 +399,6 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             let annots = await this.queryAnnotsByDay(
                 dateCursor.valueOf(),
                 upperBound.toDate(),
-                params,
             )
 
             const filteredPks = new Set(

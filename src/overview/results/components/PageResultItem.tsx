@@ -25,7 +25,6 @@ export interface Props {
     hasBookmark: boolean
     isSidebarOpen: boolean
     isListFilterActive: boolean
-    isAnnotsSearch: boolean
     areAnnotationsExpanded: boolean
     isResponsibleForSidebar: boolean
     annotations: any[]
@@ -75,10 +74,7 @@ class PageResultItem extends PureComponent<Props> {
     }
 
     renderAnnotsList() {
-        if (
-            !this.props.isAnnotsSearch ||
-            !(this.props.annotations && this.props.annotations.length)
-        ) {
+        if (!(this.props.annotations && this.props.annotations.length)) {
             return null
         }
 

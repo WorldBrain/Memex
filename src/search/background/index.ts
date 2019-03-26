@@ -165,7 +165,6 @@ export default class SearchBackground {
             collections: qb.lists,
             includeNotes: contentTypes.notes,
             includeHighlights: contentTypes.highlights,
-            isBlankSearch: !qb.terms.length,
             bookmarksOnly: params.showOnlyBookmarks || params.bookmarksOnly,
             contentTypes,
             limit,
@@ -174,32 +173,6 @@ export default class SearchBackground {
     }
 
     async searchAnnotations(params: AnnotSearchParams) {
-        const results = await this.search(
-            params,
-            this.storage.searchAnnotsByDay.bind(this.storage),
-        )
-
-        const { docs, annotsByDay } = results
-
-        return SearchBackground.shapePageResult(docs, params.limit, {
-            isAnnotsSearch: true,
-            annotsByDay,
-            resultsExhausted: Object.keys(annotsByDay).length < params.limit,
-        })
-    }
-
-    async searchPages(params: PageSearchParams) {
-        const results = await this.search(
-            params,
-            this.storage.searchPages.bind(this.storage),
-        )
-
-        return SearchBackground.shapePageResult(results, params.limit, {
-            isAnnotsSearch: false,
-        })
-    }
-
-    async search(params: any, searchMethod: (params: any) => Promise<any>) {
         let searchParams
 
         try {
@@ -208,7 +181,33 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
-        return searchMethod(searchParams)
+        const { docs, annotsByDay }: any = await this.storage.searchAnnots(
+            searchParams,
+        )
+
+        const extra = annotsByDay
+            ? {
+                  isAnnotsSearch: true,
+                  annotsByDay,
+                  resultsExhausted:
+                      Object.keys(annotsByDay).length < searchParams.limit,
+              }
+            : {}
+
+        return SearchBackground.shapePageResult(docs, searchParams.limit, extra)
+    }
+
+    async searchPages(params: PageSearchParams) {
+        let searchParams
+
+        try {
+            searchParams = this.processSearchParams(params)
+        } catch (e) {
+            return SearchBackground.handleSearchError(e)
+        }
+
+        const docs = await this.storage.searchPages(searchParams)
+        return SearchBackground.shapePageResult(docs, searchParams.limit)
     }
 
     async handleBookmarkRemoval(id, { node }) {
