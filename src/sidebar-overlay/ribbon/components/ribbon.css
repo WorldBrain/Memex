@@ -10,7 +10,7 @@
     right: 0;
     width: 20px;
     height: 100%;
-    z-index: 1100;
+    z-index: 2147483645;
 
     /* z-index: 2147483647;
     border-top-left-radius: 5px;
@@ -36,7 +36,7 @@
     composes: sideBarColorOpen from '../../../common-ui/colors.css';
     display: grid;
     width: 35px;
-    z-index: 999999999;
+    z-index: 2147483647;
     grid-template-rows: 25% 50% 25%;
     transition: all 0.2s ease-in-out;
 }
@@ -293,17 +293,17 @@
     }
 
     .generalActions {
-        grid-row-gap: 5px;
+        grid-row-gap: 7px;
         padding-top: 10px;
     }
 
     .pageActions {
-        grid-row-gap: 5px;
+        grid-row-gap: 7px;
         padding-top: 10px;
     }
 
     .settingsActions {
-        grid-row-gap: 5px;
+        grid-row-gap: 7px;
         margin-bottom: 10px;
     }
 
