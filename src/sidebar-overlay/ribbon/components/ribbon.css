@@ -26,7 +26,6 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
 
     & * {
         font-family: 'Inter';
@@ -36,7 +35,7 @@
 .ribbonExpanded {
     composes: sideBarColorOpen from '../../../common-ui/colors.css';
     display: grid;
-    width: 55px;
+    width: 35px;
     z-index: 999999999;
     grid-template-rows: 25% 50% 25%;
     transition: all 0.2s ease-in-out;
@@ -50,6 +49,7 @@
     justify-items: flex-start;
     align-self: flex-start;
     padding-top: 30px;
+    justify-content: center;
 }
 
 .pageActions {
@@ -58,6 +58,7 @@
     justify-items: flex-start;
     align-self: flex-start;
     padding-top: 30px;
+    justify-content: center;
 }
 
 .settingsActions {
@@ -66,6 +67,7 @@
     flex-direction: column;
     align-self: flex-end;
     margin-bottom: 30px;
+    justify-content: center;
 }
 
 /* ICONS */
@@ -78,12 +80,11 @@
 .button {
     composes: nakedButton from '../../../common-ui/elements.css';
     composes: hoversidebaropen from '../../../common-ui/colors.css';
-    width: 30px;
-    height: 30px;
+    width: 26px;
+    height: 26px;
     border-radius: 3px;
     opacity: 0.8;
-    margin-left: 4px;
-    background-size: 18px 18px;
+    background-size: 16px;
     background-repeat: no-repeat;
     background-position: center;
     border: none;
@@ -281,5 +282,54 @@
 
 .cancel {
     background-image: url('/img/removeIcon.svg');
-    background-size: 16px;
+    background-size: 14px;
+}
+
+@media (max-height: 450px) {
+    .button {
+        width: 20px;
+        height: 20px;
+        background-size: 12px;
+    }
+
+    .generalActions {
+        grid-row-gap: 5px;
+        padding-top: 10px;
+    }
+
+    .pageActions {
+        grid-row-gap: 5px;
+        padding-top: 10px;
+    }
+
+    .settingsActions {
+        grid-row-gap: 5px;
+        margin-bottom: 10px;
+    }
+
+    .cancel {
+        background-image: url('/img/removeIcon.svg');
+        background-size: 12px;
+    }
+}
+
+@media (min-height: 451px) and (max-height: 600px) {
+    .button {
+        width: 20px;
+        height: 20px;
+        background-size: 12px;
+    }
+
+    .generalActions {
+        grid-row-gap: 15px;
+    }
+
+    .pageActions {
+        grid-row-gap: 15px;
+        padding-top: 10px;
+    }
+
+    .settingsActions {
+        grid-row-gap: 15px;
+    }
 }
