@@ -33,10 +33,10 @@ export interface StateProps {
     isLoading: boolean
     isSidebarOpen: boolean
     needsWaypoint: boolean
-    isAnnotsSearch: boolean
     isScrollDisabled: boolean
     isNewSearchLoading: boolean
     isListFilterActive: boolean
+    resultsClusteredByDay: boolean
     areAnnotationsExpanded: boolean
     activeSidebarIndex: number
     searchResults: Result[]
@@ -159,7 +159,6 @@ class ResultListContainer extends PureComponent<Props> {
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc, index)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
-                isAnnotsSearch={this.props.isAnnotsSearch}
                 isResponsibleForSidebar={
                     this.props.activeSidebarIndex === index
                 }
@@ -168,61 +167,61 @@ class ResultListContainer extends PureComponent<Props> {
         )
     }
 
+    /* 
+     * Switch rendering method based on annotsSearch value. 
+     * If it's a page search, a simple map to PageResult items is enough.
+     * For Annotation search, docs and annotsByDay are merged to render a 
+     * clustered view
+     */
+    private resultsStateToItems() {
+        if (!this.props.resultsClusteredByDay) {
+            return this.props.searchResults.map((res, i) =>
+                this.attachDocWithPageResultItem(res, i, i),
+            )
+        }
+
+        const els: JSX.Element[] = []
+
+        const sortedKeys = Object.keys(this.props.annotsByDay)
+            .sort()
+            .reverse()
+
+        for (const day of sortedKeys) {
+            els.push(
+                <p className={styles.clusterTime} key={day}>
+                    {this.formatTime(parseInt(day, 10))}
+                </p>,
+            )
+
+            const currentCluster = this.props.annotsByDay[day]
+            for (const [pageUrl, annotations] of Object.entries(
+                currentCluster,
+            )) {
+                const page = this.props.resultsByUrl.get(pageUrl)
+
+                if (!page) {
+                    continue // Page not found for whatever reason...
+                }
+
+                els.push(
+                    this.attachDocWithPageResultItem(
+                        { ...page, annotations },
+                        page.index,
+                        `${day}${pageUrl}`,
+                    ),
+                )
+            }
+        }
+
+        return els
+    }
+
     private renderResultItems() {
         if (this.props.isNewSearchLoading) {
             return <LoadingIndicator />
         }
-        const resultItems = []
 
-        /* 
-            Switch rendering method based on annotsSearch value. 
-            If it's a page search, a simple map to PageResult items is enough.
-            For Annotation search, docs and annotsByDay are merged to render a 
-            clustered view
-        */
-        if (!this.props.isAnnotsSearch) {
-            this.props.searchResults.forEach((doc, i) =>
-                resultItems.push(this.attachDocWithPageResultItem(doc, i, i)),
-            )
-        } else {
-            const { annotsByDay, resultsByUrl } = this.props
-
-            const sortedKeys = Object.keys(annotsByDay)
-                .sort()
-                .reverse()
-
-            for (const day of sortedKeys) {
-                const formattedTime = this.formatTime(parseInt(day, 10))
-                resultItems.push(
-                    <p className={styles.clusterTime} key={day}>
-                        {formattedTime}
-                    </p>,
-                )
-
-                const currentCluster = annotsByDay[day]
-                for (const pageUrl of Object.keys(currentCluster)) {
-                    const page = resultsByUrl.get(pageUrl)
-
-                    if (!page) {
-                        console.error(`Page object for ${pageUrl} not found.`)
-                        continue
-                    }
-
-                    const annotations = currentCluster[pageUrl]
-                    const doc = {
-                        ...page,
-                        annotations,
-                    }
-                    resultItems.push(
-                        this.attachDocWithPageResultItem(
-                            doc,
-                            page.index,
-                            `${day}${pageUrl}`,
-                        ),
-                    )
-                }
-            }
-        }
+        const resultItems = this.resultsStateToItems()
 
         // Insert waypoint at the end of results to trigger loading new items when
         // scrolling down
@@ -261,10 +260,10 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     needsWaypoint: selectors.needsPagWaypoint(state),
     isListFilterActive: filters.listFilterActive(state),
     isScrollDisabled: selectors.isScrollDisabled(state),
-    isAnnotsSearch: selectors.isAnnotsSearch(state),
-    isNewSearchLoading: selectors.isNewSearchLoading(state),
-    areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
     activeSidebarIndex: selectors.activeSidebarIndex(state),
+    isNewSearchLoading: selectors.isNewSearchLoading(state),
+    resultsClusteredByDay: selectors.resultsClusteredByDay(state),
+    areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({

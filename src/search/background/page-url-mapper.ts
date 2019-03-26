@@ -19,16 +19,32 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         )
     }
 
-    private lookupPages(pageUrls: string[], pageMap: Map<string, Page>) {
+    private encodeImage = (img: Blob, base64Img?: boolean) =>
+        new Promise<string>((resolve, reject) => {
+            if (!base64Img) {
+                return resolve(URL.createObjectURL(img))
+            }
+
+            const reader = new FileReader()
+            reader.onerror = reject
+            reader.onload = () => resolve(reader.result as string)
+            reader.readAsDataURL(img)
+        })
+
+    private lookupPages(
+        pageUrls: string[],
+        pageMap: Map<string, Page>,
+        base64Img?: boolean,
+    ) {
         return this.backend.dexieInstance
             .table('pages')
             .where('url')
             .anyOf(pageUrls)
-            .each(page =>
+            .each(async page =>
                 pageMap.set(page.url, {
                     ...page,
                     screenshot: page.screenshot
-                        ? URL.createObjectURL(page.screenshot)
+                        ? await this.encodeImage(page.screenshot, base64Img)
                         : undefined,
                     hasBookmark: false, // Set later, if needed
                 } as any),
@@ -38,14 +54,18 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
     private lookupFavIcons(
         hostnames: string[],
         favIconMap: Map<string, string>,
+        base64Img?: boolean,
     ) {
         // Find all assoc. fav-icons and create object URLs pointing to the Blobs
         return this.backend.dexieInstance
             .table('favIcons')
             .where('hostname')
             .anyOf(hostnames)
-            .each(fav =>
-                favIconMap.set(fav.hostname, URL.createObjectURL(fav.favIcon)),
+            .each(async fav =>
+                favIconMap.set(
+                    fav.hostname,
+                    await this.encodeImage(fav.favIcon, base64Img),
+                ),
             )
     }
 
@@ -92,20 +112,23 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
      * Then does further lookups to determine whether each matching page
      * has an associated bookmark and fav-icon.
      */
-    private async findMatchingPages(pageUrls: string[]): Promise<AnnotPage[]> {
+    async findMatchingPages(
+        pageUrls: string[],
+        base64Img?: boolean,
+    ): Promise<AnnotPage[]> {
         const favIconMap = new Map<string, string>()
         const pageMap = new Map<string, Page>()
         const tagMap = new Map<string, string[]>()
         const countMap = new Map<string, number>()
 
-        await this.lookupPages(pageUrls, pageMap)
+        await this.lookupPages(pageUrls, pageMap, base64Img)
 
         const hostnames = new Set(
             [...pageMap.values()].map(page => page.hostname),
         )
 
         await Promise.all([
-            this.lookupFavIcons([...hostnames], favIconMap),
+            this.lookupFavIcons([...hostnames], favIconMap, base64Img),
             this.lookupBookmarks(pageUrls, pageMap),
             this.lookupTags(pageUrls, tagMap),
             this.lookupAnnotsCounts(pageUrls, countMap),

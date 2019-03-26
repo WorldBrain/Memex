@@ -6,6 +6,7 @@ import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
 
 import { PAGE_SIZE } from '../search-bar/constants'
 import * as sidebarLeft from '../sidebar-left/selectors'
+import { query } from '../search-bar/selectors'
 import * as constants from './constants'
 import { ResultsByUrl } from '../types'
 
@@ -114,11 +115,6 @@ export const shouldShowCount = createSelector(
     (count, isLoading) => count != null && !isLoading,
 )
 
-export const isAnnotsSearch = createSelector(
-    resultsState,
-    state => state.isAnnotsSearch,
-)
-
 export const annotsByDay = createSelector(
     resultsState,
     state => state.annotsByDay,
@@ -132,24 +128,6 @@ export const results = createSelector(
     (docs, modalShown, deleting, tagIndex) => {
         const docsMapFn = editPageResults({ modalShown, deleting, tagIndex })
         return docs.map(docsMapFn)
-    },
-)
-
-export const resultsByUrl = createSelector(
-    isAnnotsSearch,
-    results,
-    (isAnnotsSearch, resultDocs) => {
-        const pages: ResultsByUrl = new Map()
-        if (isAnnotsSearch) {
-            resultDocs.forEach((doc, index) => {
-                pages.set(doc.url, {
-                    ...doc,
-                    index,
-                })
-            })
-            return pages
-        }
-        return pages
     },
 )
 
@@ -169,4 +147,34 @@ export const isScrollDisabled = createSelector(
 export const searchType = createSelector(
     resultsState,
     state => state.searchType,
+)
+
+export const isAnnotsSearch = createSelector(
+    searchType,
+    state => state === 'annot',
+)
+
+export const resultsClusteredByDay = createSelector(
+    isAnnotsSearch,
+    query,
+    (isAnnotsSearch, query) => isAnnotsSearch && !query.trim().length,
+)
+
+export const resultsByUrl = createSelector(
+    isAnnotsSearch,
+    results,
+    (isAnnotsSearch, resultDocs) => {
+        const pages: ResultsByUrl = new Map()
+
+        if (isAnnotsSearch) {
+            resultDocs.forEach((doc, index) => {
+                pages.set(doc.url, {
+                    ...doc,
+                    index,
+                })
+            })
+        }
+
+        return pages
+    },
 )

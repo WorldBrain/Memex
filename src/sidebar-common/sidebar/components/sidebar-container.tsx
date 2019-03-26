@@ -172,14 +172,25 @@ const mapStateToProps: MapStateToProps<
     showCongratsMessage: selectors.showCongratsMessage(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+    props,
+) => ({
     onInit: () => dispatch(actions.initState()),
     setAnnotationsManager: annotationsManager =>
         dispatch(actions.setAnnotationsManager(annotationsManager)),
-    closeSidebar: () => dispatch(actions.closeSidebar()),
+    closeSidebar: () => {
+        // This state is not used in the content script version of sidebar
+        //  statically importing causes big issues
+        if (props.env === 'overview') {
+            const {
+                resetActiveSidebarIndex,
+            } = require('src/overview/results/actions')
+            dispatch(resetActiveSidebarIndex())
+        }
+
+        dispatch(actions.closeSidebar())
+    },
     handleAddCommentBtnClick: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
     setHoverAnnotationUrl: url => dispatch(actions.setHoverAnnotationUrl(url)),

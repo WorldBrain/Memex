@@ -48,8 +48,8 @@ export interface AnnotSearchParams {
     includeDirectLinks?: boolean
     /** Denotes whether or not to return the assoc. pages with matched annots. */
     includePageResults?: boolean
-    /** If `includePageResults` set, sets a limit on the max # of annots per page. */
-    maxAnnotsPerPage?: number
+    /** If set, encodes any images as base64 strings rather than Object URL refs. */
+    base64Img?: boolean
 }
 
 export interface PageSearchParams extends AnnotSearchParams {
