@@ -34,7 +34,7 @@ class BookmarkButton extends PureComponent<Props> {
     private renderBlacklisted() {
         return (
             <LinkButton
-                href={`${OPTIONS_URL}#/blacklist`}
+                href={`${OPTIONS_URL}#/blocklist`}
                 itemClass={styles.itemBlacklisted}
                 btnClass={styles.itemBtnBlacklisted}
             >

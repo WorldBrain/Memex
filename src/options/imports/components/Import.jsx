@@ -24,7 +24,7 @@ const Import = ({
         {shouldRenderEsts && (
             <div>
                 <div className={localStyles.stepNumber}>
-                    Import your existing browsing history & bookmarks{' '}
+                    Import urls from other services{' '}
                 </div>
                 <div className={localStyles.stepText}>
                     <Warning>
