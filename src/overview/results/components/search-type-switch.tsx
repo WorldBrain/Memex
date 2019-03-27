@@ -1,5 +1,6 @@
 import React from 'react'
 import cx from 'classnames'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 const styles = require('./search-type-switch.css')
 
@@ -49,6 +50,14 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                     >
                         {this.renderSearchCount(this.props.annotCount)}
                         Notes
+                        <span className={styles.betaBox}>
+                         <ButtonTooltip
+                            tooltipText="Searching notes is in beta mode. Bugs may appear."
+                            position="bottom"
+                        >
+                        <span className={styles.beta}>beta</span>
+                        </ButtonTooltip>
+                    </span>
                     </button>
                 </div>
                 <button

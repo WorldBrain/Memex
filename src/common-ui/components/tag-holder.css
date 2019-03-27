@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color1, color2, color3, color6 from colors;
+
 .tagList {
     display: flex;
     flex-grow: 2;
@@ -9,12 +12,16 @@
 }
 
 .greyBorder {
-    background: transparent;
-    color: grey;
-    border: 1px solid grey;
-    opacity: 0.4;
-
-    &:hover {
-        opacity: 0.8;
-    }
+    composes: nakedSquareButton from '../elements.css';
+    background-color: transparent;
+    color: color6;
+    font-size: 21px;
+    width: 21px;
+    height: 21px;
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    padding-bottom: 3px;
 }
