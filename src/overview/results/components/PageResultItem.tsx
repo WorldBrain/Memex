@@ -220,8 +220,8 @@ class PageResultItem extends PureComponent<Props> {
                         </div>
                     </a>
                 </div>
-                {this.renderAnnotsList()}
                 {this.props.tagManager}
+                {this.renderAnnotsList()}
             </li>
         )
     }

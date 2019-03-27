@@ -21,8 +21,8 @@
 
 .button {
     composes: nakedSquareButton from '../../common-ui/elements.css';
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     border-radius: 3px;
     opacity: 0.8;
     margin-left: 4px;

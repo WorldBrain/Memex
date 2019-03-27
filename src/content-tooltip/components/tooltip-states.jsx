@@ -10,7 +10,6 @@ export const InitialComponent = ({ createLink, createAnnotation }) => (
             position="bottom"
         >
         <div
-            title={'Add note to highlight'}
             className={styles.annotateButton}
             onMouseDown={createAnnotation}
         >
@@ -25,7 +24,6 @@ export const InitialComponent = ({ createLink, createAnnotation }) => (
             position="bottom"
         >
         <div
-            title={'Share a link to this highlight'}
             className={styles.linkButton}
             onMouseDown={createLink}
         >

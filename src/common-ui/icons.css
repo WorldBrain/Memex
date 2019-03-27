@@ -4,6 +4,7 @@
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: 80%;
+	display: flex;
 }
 
 .standardMenu {

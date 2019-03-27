@@ -35,9 +35,8 @@ class TagHolder extends PureComponent<Props, {}> {
         return [
             ...pills,
             <TagPill
-                key="+"
                 setRef={setTagManagerRef}
-                value={`+ Add`}
+                value={`+`}
                 onClick={handleTagBtnClick}
                 noBg
             />,

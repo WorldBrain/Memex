@@ -36,7 +36,7 @@
     height: var(--height);
 
     &.isSidebarOpen {
-        box-shadow: #000 1px 1px 1px;
+        border-right: solid #5cd9a4 5px;
     }
 
     &:hover .crossRibbon {
@@ -142,6 +142,7 @@
     border-right: solid 1px #ebebeb;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
+    background-color: white;
 
     & .screenshot {
         max-width: 100%;
@@ -256,6 +257,7 @@
     background-size: 16px;
     border-radius: 3px;
     opacity: 0.2;
+    background-color: transparent;
 
     &:hover .trash {
         opacity: 0.8;
@@ -363,4 +365,6 @@
 
 .annotsCount {
     color: white;
+    font-size: 10px;
+    padding-left: 1px;
 }

@@ -8,7 +8,9 @@
 .clusterTime {
     font-weight: 600;
     font-size: 0.7rem;
-    margin-bottom: 5px;
+    font-size: 18px;
+    margin-bottom: 10px;
+    margin-top: 20px;
 }
 
 .timestamp {
