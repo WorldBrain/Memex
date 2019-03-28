@@ -35,6 +35,10 @@ interface State {}
 
 class ContentTypeContainer extends PureComponent<Props, State> {
     render() {
+        if (!this.props.isAnnotsSearch) {
+            return null
+        }
+
         return (
             <Fragment>
                 {/* The row header which when clicked expands to show the checklist */}

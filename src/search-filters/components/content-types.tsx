@@ -46,12 +46,11 @@ class ContentTypes extends PureComponent<Props, State> {
                     active={this.props.websitesFilter}
                     onClick={this.props.toggleWebsitesFilter}
                 /> */}
-                {/* Unsure about whether PDF should have a state or the comming soon tag */}
-                <CheckmarkRow
+                {/* <CheckmarkRow
                     value="PDFs"
                     subtitle="All your visited PDFs"
                     onClick={() => null}
-                />
+                /> */}
             </React.Fragment>
         )
     }
