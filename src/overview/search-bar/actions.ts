@@ -75,6 +75,7 @@ export const setQueryTagsDomains: (
         processEventRPC({ type: EVENT_NAMES.NLP_SEARCH })
     }
 
+    dispatch(resultsActs.setLoading(true))
     dispatch(setQuery(input))
 }
 
