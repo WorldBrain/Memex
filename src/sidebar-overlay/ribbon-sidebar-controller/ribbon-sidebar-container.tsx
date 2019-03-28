@@ -204,9 +204,11 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     }
 
     private _goToAnnotation = async (annotation: Annotation) => {
-        if (!this.props.isSidebarOpen) {
-            await this.props.openSidebar()
-        }
+        setTimeout(async () => {
+            if (!this.props.isSidebarOpen) {
+                await this.props.openSidebar()
+            }
+        }, 2000)
 
         setTimeout(() => {
             this.props.highlightAndScroll(annotation)
