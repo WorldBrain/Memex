@@ -12,7 +12,12 @@ export const migrations: Migrations = {
         await db
             .table('annotations')
             .toCollection()
-            .filter(annot => annot.lastEdited == null)
+            .filter(
+                annot =>
+                    annot.lastEdited == null ||
+                    (Object.keys(annot.lastEdited).length === 0 &&
+                        annot.lastEdited.constructor === Object),
+            )
             .modify(annot => {
                 annot.lastEdited = annot.createdWhen
             })
