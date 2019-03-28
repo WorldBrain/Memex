@@ -10,7 +10,6 @@ interface Props {
     isTaggingChecked: boolean
     isBackupChecked: boolean
     congratsMessage: boolean
-    isRightBox?: boolean
     handleAnnotationStage: () => void
     handlePowerSearchStage: () => void
     handleTaggingStage: () => void
@@ -21,61 +20,44 @@ interface Props {
 class Checklist extends PureComponent<Props> {
     render() {
         return (
-            <div
-                className={cx({
-                    [styles.container]: this.props.isRightBox,
-                })}
-            >
-                <p className={styles.title}>
-                    {!this.props.congratsMessage ? (
-                        'Get started'
-                    ) : (
-                        <span>CONGRATS!</span>
-                    )}
-                </p>
-                <p className={styles.subtext}>
-                    {!this.props.congratsMessage
-                        ? '30 sec interactive tutorials'
-                        : 'You have completed all tutorials'}
-                </p>
-
-                {this.props.isRightBox ? (
-                    <span
-                        className={styles.close}
-                        onClick={this.props.closeOnboardingBox}
-                    />
-                ) : null}
-
-                <ChecklistItem
-                    isChecked={this.props.isAnnotationChecked}
-                    handleClick={this.props.handleAnnotationStage}
-                    subtitle="Learn how to add highlights and notes to websites."
-                >
-                    Make your first web annotation
-                </ChecklistItem>
-                <ChecklistItem
-                    isChecked={this.props.isPowerSearchChecked}
-                    handleClick={this.props.handlePowerSearchStage}
-                    subtitle="Learn how to full-text search your browser history and
-                    bookmarks."
-                >
-                    Do your first History search
-                </ChecklistItem>
-                <ChecklistItem
-                    isChecked={this.props.isTaggingChecked}
-                    handleClick={this.props.handleTaggingStage}
-                    subtitle="Learn how to add some organisation to your web-research."
-                >
-                    Tag & sort websites into collections
-                </ChecklistItem>
-                <ChecklistItem
-                    isChecked={this.props.isBackupChecked}
-                    handleClick={this.props.handleBackupStage}
-                    subtitle="Learn how to backup your data to any cloud provider."
-                >
-                    Backup your Memex data
-                </ChecklistItem>
+            <React.Fragment>
+            <div 
+                className={styles.topBar}>All you need to know to get started</div>
+                <div className={styles.featureBox}>
+                    <div className={styles.leftParent}>
+                        <div className={styles.featureIntro}>
+                            <div className={styles.featureTitle}>Search through your history</div>
+                            <div className={styles.featureText}>Type this shortcut into the address bar of the browser. Search with any word you remember about websites you’ve visited.</div>
+                        </div>
+                        <div className={styles.tutorial}>
+                            <div className={styles.keyboardM}>M</div>
+                            <div className={styles.keyboardPlus}>+</div>
+                            <div className={styles.keyboardSpace}>Space</div>
+                        </div>
+                        <div 
+                            className={styles.tryButton}
+                            onClick={this.props.handlePowerSearchStage}
+                            >
+                            Try it!
+                        </div>
+                    </div>
+                    <div className={styles.rightParent}>
+                        <div className={styles.featureIntro}>
+                            <div className={styles.featureTitle}>Add your notes to the web</div>
+                            <div className={styles.featureText}>Highlight any piece of text on the web and attach notes & tags</div>
+                        </div>
+                        <div className={styles.tutorial}>
+                            <span className={styles.infoGif}/>
+                        </div>
+                    <div 
+                        className={styles.tryButton}
+                        onClick={this.props.handleAnnotationStage}
+                        >
+                        Try it!
+                    </div>
+                </div>
             </div>
+            </React.Fragment>
         )
     }
 }

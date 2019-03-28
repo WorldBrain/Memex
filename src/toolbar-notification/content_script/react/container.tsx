@@ -38,11 +38,11 @@ export class ToolbarNotification extends Component<Props> {
             containerStyles = {
                 opacity: 0,
                 left: x - 185,
-                top: y + 80,
+                top: '80px',
                 height: 'auto',
                 width: '550px',
                 paddingTop: '20px',
-                position: 'absolute',
+                position: 'fixed',
                 textAlign: 'center',
             }
         } else {

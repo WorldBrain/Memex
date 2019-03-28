@@ -35,15 +35,6 @@ class ResultList extends PureComponent<Props> {
             <div>
                 <ul className={this.mainClass} style={this.listHeightStyles}>
                     {this.props.children}
-                    <p className={styles.infoBox}>
-                        <span className={styles.emoji}>🤓</span>
-                        <span>
-                            <b>Pro Tip: </b>
-                            Search by typing
-                        </span>
-                        <img className={styles.shortcut} src={shortcut} />
-                        <span>into the address bar</span>
-                    </p>
                 </ul>
             </div>
         )

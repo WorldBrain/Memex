@@ -30,11 +30,7 @@ export interface DispatchProps {
     setBackupStageDone: () => void
 }
 
-export interface OwnProps {
-    isRightBox?: boolean
-}
-
-export type Props = StateProps & DispatchProps & OwnProps
+export type Props = StateProps & DispatchProps
 
 class OnboardingChecklist extends React.Component<Props> {
     processEvent = remoteFunction('processEvent')
@@ -62,21 +58,8 @@ class OnboardingChecklist extends React.Component<Props> {
         if (this.props.isPowerSearchDone) {
             return
         }
-
-        /*
-        If there are no results in Overview, take user to the Wiki
-        Else, directly start the onboarding tooltip process.
-        */
-        if (this.props.noResults) {
-            await utils.setOnboardingStage(FLOWS.powerSearch, STAGES.redirected)
-            await utils.openDemoPage()
-        } else {
-            await utils.setOnboardingStage(
-                FLOWS.powerSearch,
-                STAGES.powerSearch.overviewTooltips,
-            )
-            this.props.initOnboardingTooltips()
-        }
+        await utils.setOnboardingStage(FLOWS.powerSearch, STAGES.redirected)
+        await utils.openDemoPage()
 
         this.processEvent({
             type: EVENT_NAMES.START_POWERSEARCH_ONBOARDING,
@@ -116,7 +99,6 @@ class OnboardingChecklist extends React.Component<Props> {
 
         return (
             <Checklist
-                isRightBox={this.props.isRightBox}
                 congratsMessage={this.props.congratsMessage}
                 isAnnotationChecked={this.props.isAnnotationDone}
                 isPowerSearchChecked={this.props.isPowerSearchDone}

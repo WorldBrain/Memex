@@ -4,6 +4,7 @@ import NotificationLayout from '../layout'
 import { getExtURL } from '../utils.js'
 
 const styles = require('./power-search-browse.css')
+const externalStyles = require('src/overview/onboarding/components/checklist.css')
 
 export default function PowerSearchBrowse({ onCloseRequested, openDashboard }) {
     return (
@@ -14,22 +15,17 @@ export default function PowerSearchBrowse({ onCloseRequested, openDashboard }) {
                 thirdRowImage={null}
             >
                 <div className={styles.notifContainer}>
-                    <p className={styles.title}>
+                    <div className={styles.title}>
                         Memex makes every page you visit full-text searchable.
-                    </p>
-                    <p className={styles.instructions}>
-                        Try searching with a term either on this page on the<br/>
-                        <span className={styles.button} onClick={openDashboard}>
-                            Dashboard
-                        </span>{' '}
-                        or via the URL bar by typing{' '}
-                    </p>
-                    <p className={styles.keys}>
-                        <span className={styles.key}>W</span>+
-                        <span className={styles.key}>SPACE</span>
-                        or
-                        <span className={styles.key}>TAB</span>
-                    </p>
+                    </div>
+                    <div className={styles.instructions}>
+                        Type this shortcut into the address bar and search with a term you see on this page
+                    </div>
+                    <div className={styles.tutorial}>
+                            <div className={externalStyles.keyboardM}>M</div>
+                            <div className={externalStyles.keyboardPlus}>+</div>
+                            <div className={externalStyles.keyboardSpace}>Space</div>
+                        </div>
                 </div>
             </NotificationLayout>
         </div>

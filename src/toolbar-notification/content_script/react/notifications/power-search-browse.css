@@ -11,39 +11,26 @@
 .title {
     font-weight: 600;
     color: color4;
-    font-size: 17px;
+    font-size: 18px;
 }
 
 .notifContainer {
-    width: fit-content;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.button {
-    color: #444;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-.pointer {
-    cursor: pointer;
-}
-
-.key {
-    color: white;
-    background-color: color2;
-    margin: 0px 10px;
-    padding: 5px 11px;
-    cursor: unset;
-}
-
-.keys {
-    margin-top: 20px;
-    margin-bottom: 25px;
+.tutorial {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 10px;
 }
 
 .instructions {
-    margin-top: 20px;
-    color: #3eb995;
+    color: color6;
+    margin-top: 15px;
+    padding: 0 80px;
+    line-height: 20px;
 }

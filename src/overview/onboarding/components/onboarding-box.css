@@ -1,53 +1,31 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6, color3 from colors;
+
 p {
     margin: 0;
 }
 
 .container {
     /* composes: boxShadow from '../../../common-ui/colors.css'; */
-    box-shadow: 0px 53px 100px -50px #b7b7b7;
+    composes: toolTips from 'src/common-ui/elements.css';
     width: 95%;
     max-width: 50rem;
     margin: 90px auto 30px auto;
     display: flex;
     border: solid 1px #f4f4f4;
     border-radius: 10px;
-}
-
-.leftParent {
-    composes: sideBarColorOpen from '../../../common-ui/colors.css';
-    width: 50%;
-    display: flex;
+    height: 570px;
     flex-direction: column;
-    align-items: center;
-    padding: 40px 30px 30px 30px;
-    border-top-left-radius: 6px;
-    border-bottom-left-radius: 6px;
-    z-index: 2;
-}
-
-.rightParent {
-    width: 90%;
-    padding: 45px 35px 30px 47px;
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
-}
-
-.welcome {
-    composes: h2Color from '../../../common-ui/colors.css';
-    font-size: 1.4rem;
-    text-align: center;
-    font-weight: 700;
-    line-height: 1.5;
 }
 
 .logo {
-    background-image: url('/img/memex_text_logo.png');
-    width: 100px;
-    height: 40px;
+    background-image: url('/img/memex_beta_logo.png');
+    width: 210px;
+    height: 50px;
+    display: flex;
     background-size: 100%;
     background-repeat: no-repeat;
-    margin-bottom: 30px;
-    margin-top: 5px;
+    margin: 40px auto -40px auto;
 }
 
 .text {

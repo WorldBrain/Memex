@@ -7,21 +7,9 @@ class OnboardingBox extends PureComponent {
     render() {
         return (
             <React.Fragment>
+                <div className={styles.logo}/>
                 <div className={styles.container}>
-                    <div className={styles.leftParent}>
-                        <p className={styles.welcome}>
-                            Welcome to your
-                        </p>
-                        <div className={styles.logo}/>
-                        <p className={styles.text}>
-                            The all-in-one tool to get on top of
-                            your online chaos.
-                        </p>
-                        <div className={styles.privacyImage} />
-                    </div>
-                    <div className={styles.rightParent}>
-                        <OnboardingChecklist />
-                    </div>
+                    <OnboardingChecklist />
                 </div>
                 <div className={styles.footer}>
                     <div className={styles.textContainer}>

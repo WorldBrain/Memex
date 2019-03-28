@@ -35,19 +35,25 @@ class Overview extends PureComponent {
     render() {
         return (
             <React.Fragment>
-                <Head />
-                <Header />
-                <SidebarIcons />
-                <SidebarLeft />
-                {isDuringInstall() ? <Onboarding /> : <Results />}
-                <DeleteConfirmModal />
-                <DragElement />
-                <SidebarContainer
-                    env="overview"
-                    annotationsManager={this._annotationsManager}
-                    goToAnnotation={goToAnnotation(this.props.pageUrl)}
-                />
-                <Tooltip />
+            {isDuringInstall() ?
+                    <Onboarding /> 
+                    :
+                    <div>
+                        <Head />
+                        <Header />
+                        <SidebarIcons />
+                        <SidebarLeft />
+                        <Results />
+                        <DeleteConfirmModal />
+                        <DragElement />
+                        <SidebarContainer
+                            env="overview"
+                            annotationsManager={this._annotationsManager}
+                            goToAnnotation={goToAnnotation(this.props.pageUrl)}
+                        />
+                        <Tooltip />
+                    </div>
+            }
             </React.Fragment>
         )
     }

@@ -77,7 +77,7 @@ class ResultsContainer extends PureComponent<Props> {
                     </ResultsMessage>
                 )}
                 <ResultList />
-                {!this.props.isLoading && <OnboardingChecklist isRightBox />}
+                {!this.props.isLoading}
             </React.Fragment>
         )
     }
