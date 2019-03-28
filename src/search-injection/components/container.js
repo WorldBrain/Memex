@@ -9,7 +9,7 @@ import RemovedText from './RemovedText'
 import * as constants from '../constants'
 import { getLocalStorage, setLocalStorage } from '../utils'
 import Notification from './Notification'
-import { NOTIFS } from '../../notifications/notifications'
+import { UPDATE_NOTIFS } from '../../notifications/notifications'
 import * as actionTypes from '../../notifications/action-types'
 import { actionRegistry } from '../../notifications/registry'
 import ActionButton from '../../notifications/components/ActionButton'
@@ -55,7 +55,7 @@ class Container extends React.Component {
     async componentDidMount() {
         let notification
 
-        for (const notif of NOTIFS) {
+        for (const notif of UPDATE_NOTIFS) {
             if (notif.search) {
                 notification = {
                     ...notif.search,

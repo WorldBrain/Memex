@@ -62,8 +62,8 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
         id: 'new_shortcut_28.03.2019',
         search: {
-            title: "🚨 Important: New Keyboard Shortcut",
-            message: 'Memex can now be activated with M + Space or Tab, the old shortcut (w+space/tab) does not work anymore',
+            title: "🚨 Changed Keyboard Shortcut",
+            message: 'Memex can now be activated with m + Space/Tab, the old shortcut (w + space/tab) does not work anymore',
             buttons: [
                 {
                     action: {
@@ -76,8 +76,8 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
             ],
         },
         overview: {
-            title: "🚨 Important: New Keyboard Shortcut",
-            message: 'Memex can now be activated with M + Space or Tab, the old shortcut (w+space/tab) does not work anymore.',
+            title: "🚨 Changed Keyboard Shortcut",
+            message: 'Memex can now be activated with M + Space or Tab, the old shortcut (w + space/tab) does not work anymore.',
             buttons: [
                 {
                     action: {
