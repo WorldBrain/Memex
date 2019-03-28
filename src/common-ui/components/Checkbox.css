@@ -53,14 +53,15 @@
 }
 
 .label__checkbox {
-  display: none;
-  outline: none;
+    display: none;
+    outline: none;
 }
 
 .label__text {
     display: flex;
     align-items: center;
     font-size: 15px;
+    cursor: pointer;
 
     &:hover {
         font-weight: 500;
@@ -68,66 +69,66 @@
 }
 
 .label__checkbox:checked + .label__text .label__check {
-  animation: check 0.2s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
-  transform-origin: center center;
-  border: none;
-  width: 25px;
-  height: 25px;
-  outline: none;
+    animation: check 0.2s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
+    transform-origin: center center;
+    border: none;
+    width: 25px;
+    height: 25px;
+    outline: none;
 }
 
 @keyframes icon {
-  from {
-    opacity: 0;
-    transform: scale(0.3);
-  }
+    from {
+        opacity: 0;
+        transform: scale(0.3);
+    }
 
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 @keyframes check {
-  0% {
-    width: 25px;
-    height: 25px;
-    padding: 2px;
-    outline: none;
-  }
+    0% {
+        width: 25px;
+        height: 25px;
+        padding: 2px;
+        outline: none;
+    }
 
-  10% {
-    width: 25px;
-    height: 25px;
-    opacity: 0.1;
-    padding: 2px;
-    background: rgba(0, 0, 0, 0.2);
-    outline: none;
-  }
+    10% {
+        width: 25px;
+        height: 25px;
+        opacity: 0.1;
+        padding: 2px;
+        background: rgba(0, 0, 0, 0.2);
+        outline: none;
+    }
 
-  12% {
-    width: 25px;
-    height: 25px;
-    opacity: 0.4;
-    padding: 2px;
-    background: rgba(0, 0, 0, 0.1);
-  }
+    12% {
+        width: 25px;
+        height: 25px;
+        opacity: 0.4;
+        padding: 2px;
+        background: rgba(0, 0, 0, 0.1);
+    }
 
-  50% {
-    width: 25px;
-    height: 25px;
-    background: #5cd9a6;
-    opacity: 0.6;
-    outline: none;
-  }
+    50% {
+        width: 25px;
+        height: 25px;
+        background: #5cd9a6;
+        opacity: 0.6;
+        outline: none;
+    }
 
-  100% {
-    width: 25px;
-    height: 25px;
-    background: #5cd9a6;
-    opacity: 1;
-    outline: none;
-  }
+    100% {
+        width: 25px;
+        height: 25px;
+        background: #5cd9a6;
+        opacity: 1;
+        outline: none;
+    }
 }
 
 /* CHECKBOXES END */

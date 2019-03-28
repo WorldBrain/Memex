@@ -5,7 +5,6 @@ import { bindActionCreators } from 'redux'
 import { Checkbox } from 'src/common-ui/components'
 import {
     SearchFilters,
-    BookmarkFilter,
     FilterBar,
     FilteredRow,
     IndexDropdownSB,
@@ -46,8 +45,6 @@ class SearchFiltersContainer extends PureComponent {
         this.props.fetchSuggestedTags()
         this.props.fetchSuggestedDomains()
     }
-
-    renderBookmarkFilter = () => <BookmarkFilter />
 
     renderFilteredTags = () => {
         return !this.props.tagFilterDropdown
