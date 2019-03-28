@@ -2,7 +2,6 @@ import * as React from 'react'
 import cx from 'classnames'
 
 const styles = require('./default-footer.css')
-const boxStyles = require('./annotation-box-container.css')
 
 interface Props {
     displayGoToAnnotation: boolean
@@ -32,7 +31,6 @@ const DefaultFooter = ({
             {timestamp}
         </div>
         <div>
-            {hasBookmark}
             <button
                 className={cx(styles.commonIcon, {
                     [styles.bookmark]: hasBookmark,
@@ -72,7 +70,7 @@ const DefaultFooter = ({
         <div>
             {displayGoToAnnotation && (
                 <button
-                    className={cx(boxStyles.commonIcon, boxStyles.goToPageIcon)}
+                    className={cx(styles.commonIcon, styles.goToPageIcon)}
                     title="Go to annotation"
                     onClick={goToAnnotationHandler}
                 />
