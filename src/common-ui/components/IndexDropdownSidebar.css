@@ -44,8 +44,9 @@
 
 .tagContainer {
     width: 100%;
-    height: 40vh;
+    max-height: 40vh;
     overflow-y: scroll;
+    height: max-content;
 
     &:focus {
         outline: none;

@@ -59,7 +59,7 @@
         "sidebar.html"
     ],
     "omnibox": {
-        "keyword": "w"
+        "keyword": "m"
     },
     "options_ui": {
         "page": "./options.html#/settings",

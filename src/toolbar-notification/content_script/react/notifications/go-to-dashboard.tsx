@@ -7,6 +7,7 @@ const styles = require('./notifications.css')
 
 const images = {
     arrow: getExtURL('/img/arrowUp.svg'),
+    logo: getExtURL('/img/worldbrain-logo-narrow-bw-48.png'),
 }
 
 export default function GoToDashboard({ onCloseRequested }) {
@@ -14,7 +15,7 @@ export default function GoToDashboard({ onCloseRequested }) {
         <div className={styles.title}>
             {/* <img className={styles.notifIcon} src={images.notifIcon}/> */}
             <NotificationLayout
-                title={'Go back to the search Dashboard'}
+                title={'Go back to the search dashboard'}
                 onCloseRequested={onCloseRequested}
                 thirdRowImage={images.arrow}
             >

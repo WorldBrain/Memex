@@ -5,7 +5,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1552869760591
+export const releaseTime: number = 1553738538350
 
 /* Example Notification:
 {
@@ -60,10 +60,10 @@ export const releaseTime: number = 1552869760591
 
 export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
-        id: 'ribbon_new_2019_18_03',
+        id: 'new_shortcut_28.03.2019',
         search: {
-            title: "🚩 New Feature: Toolbar 2.0",
-            message: 'Tag, star, sort pages & add notes blazingly fast. Try it out by moving your cursor to the right side of the screen when visiting a website.',
+            title: "🚨 Important: New Keyboard Shortcut",
+            message: 'Memex can now be activated with M + Space or Tab, the old shortcut (w+space/tab) does not work anymore',
             buttons: [
                 {
                     action: {
@@ -76,8 +76,8 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
             ],
         },
         overview: {
-            title: "🚩 New Feature: Toolbar 2.0",
-            message: 'Tag, star, sort pages & add notes blazingly fast. Try it out by moving your cursor to the right side of the screen when visiting a website.',
+            title: "🚨 Important: New Keyboard Shortcut",
+            message: 'Memex can now be activated with M + Space or Tab, the old shortcut (w+space/tab) does not work anymore.',
             buttons: [
                 {
                     action: {

@@ -14,13 +14,13 @@ export default class DownloadOverlay extends PureComponent<Props, {}> {
                 header="Download Memex' Backup App to continue."
                 description={
                     <Fragment>
-                        Start it & pick a backup folder. Then return to continue
+                        Start the app & pick a backup folder. Then return here to continue
                         your backup.
                         <br />
                         <a
                             className={styles.link}
                             target="_blank"
-                            href="https://www.notion.so/worldbrain/Backup-Restore-locally-and-to-any-cloud-provider-7b7e470247c548eeb3e9601a03e246a7"
+                            href="https://www.notion.so/worldbrain/Backup-locally-to-any-cloud-provider-7dacad9e95b44c5db681033fc264fb59"
                         >
                             Learn More ▸
                         </a>

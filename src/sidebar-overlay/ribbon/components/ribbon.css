@@ -48,7 +48,7 @@
     display: grid;
     justify-items: flex-start;
     align-self: flex-start;
-    padding-top: 30px;
+    padding-top: 20px;
     justify-content: center;
 }
 
@@ -102,6 +102,12 @@
     &:focus {
         outline: none;
     }
+}
+
+.logo {
+    composes: logoSquared from 'src/common-ui/icons.css';
+    background-size: 20px;
+    margin-bottom: 10px;
 }
 
 .dashboard {
@@ -266,18 +272,11 @@
     margin-left: 10px;
 }
 
-.logo,
 .toggler,
 .cancel {
     background-repeat: no-repeat;
     display: inline-block;
     cursor: pointer;
-}
-
-.logo {
-    width: 15px;
-    height: 20px;
-    margin-left: 10px;
 }
 
 .cancel {

@@ -2,6 +2,7 @@
     composes: logoSquared from 'src/common-ui/icons.css';
     height: 20px;
     vertical-align: bottom;
+    width: 20px;
 }
 
 .title {
