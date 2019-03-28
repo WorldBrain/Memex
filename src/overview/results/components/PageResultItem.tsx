@@ -176,9 +176,7 @@ class PageResultItem extends PureComponent<Props> {
                                             styles.trash,
                                         )}
                                         onClick={this.props.onTrashBtnClick}
-                                        title={
-                                            'Delete this page & all related content'
-                                        }
+                                        title="Delete this page & all related content"
                                     />
                                     <button
                                         className={classNames(
@@ -187,7 +185,7 @@ class PageResultItem extends PureComponent<Props> {
                                         )}
                                         onClick={this.props.onTagBtnClick}
                                         ref={this.props.setTagButtonRef}
-                                        title={'Add/View Tags'}
+                                        title="Add/View Tags"
                                     />
                                     <button
                                         className={classNames(
@@ -199,9 +197,7 @@ class PageResultItem extends PureComponent<Props> {
                                             },
                                         )}
                                         onClick={this.props.onCommentBtnClick}
-                                        title={
-                                            'Add/View Commments & Annotations'
-                                        }
+                                        title="Add/View Commments & Annotations"
                                     >
                                         <span className={styles.annotsCount}>
                                             {this.props.annotsCount}
@@ -213,7 +209,7 @@ class PageResultItem extends PureComponent<Props> {
                                         onClick={
                                             this.props.onToggleBookmarkClick
                                         }
-                                        title={'Bookmark this page'}
+                                        title="Bookmark this page"
                                     />
                                 </div>
                             </div>
