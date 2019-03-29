@@ -8,7 +8,6 @@ import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
 import SearchTypeSwitch from './search-type-switch-container'
-import { OnboardingChecklist } from '../../onboarding/components'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
@@ -89,7 +88,6 @@ class ResultsContainer extends PureComponent<Props> {
                     </ResultsMessage>
                 )}
                 <ResultList />
-                {!this.props.isLoading && <OnboardingChecklist />}
             </React.Fragment>,
         )
     }

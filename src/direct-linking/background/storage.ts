@@ -219,7 +219,7 @@ export default class AnnotationStorage extends FeatureStorage {
     async annotHasBookmark({ url }: { url: string }) {
         const coll = this.storageManager.collection(this._bookmarksColl)
         const bookmark = await coll.findOneObject({ url })
-        return bookmark !== null ? true : false
+        return bookmark != null
     }
 
     private async fetchIndexingPrefs(): Promise<{ shouldIndexLinks: boolean }> {
