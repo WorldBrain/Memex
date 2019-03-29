@@ -1,13 +1,16 @@
 // tslint:disable:no-console
+import Storex from '@worldbrain/storex'
 import * as AllRaven from 'raven-js'
 import { EventEmitter } from 'events'
-import { StorageManager } from '../../../search/types'
+
 import BackupStorage, { LastBackupStorage } from '../storage'
 import { BackupBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
 import { setLocalStorage } from 'src/util/storage'
 import { getLocalStorage } from '../../../util/storage'
+import { DexieUtilsPlugin, BackupPlugin } from 'src/search/plugins'
+
 const last = require('lodash/last')
 const pickBy = require('lodash/pickBy')
 
@@ -22,7 +25,7 @@ export interface BackupProgressInfo {
 }
 
 export default class BackupProcedure {
-    storageManager: StorageManager
+    storageManager: Storex
     storage: BackupStorage
     backend: BackupBackend
     lastBackupStorage: LastBackupStorage
@@ -43,7 +46,7 @@ export default class BackupProcedure {
         lastBackupStorage,
         backend,
     }: {
-        storageManager: StorageManager
+        storageManager: Storex
         storage: BackupStorage
         lastBackupStorage: LastBackupStorage
         backend: BackupBackend
@@ -184,35 +187,13 @@ export default class BackupProcedure {
     }
 
     async _queueInitialBackup(chunkSize = 1000) {
-        const collectionsWithVersions = this._getCollectionsToBackup()
-        // Change objects are created fast enough that `Date.now()` won't set unique PKs; instead use an inc PK
-        let pkIterator = 0
-
-        for (const collection of collectionsWithVersions) {
-            const dexie = this.storageManager.backend['dexieInstance']
-
-            let chunk = 0
-            let pks: any[]
-            do {
-                pks = await dexie
-                    .table(collection.name)
-                    .toCollection()
-                    .offset(chunk * chunkSize)
-                    .limit(chunkSize)
-                    .primaryKeys()
-
-                const changes = pks.map(objectPk => ({
-                    timestamp: pkIterator++,
-                    collection: collection.name,
-                    operation: 'create',
-                    objectPk,
-                }))
-
-                await dexie.table('backupChanges').bulkPut(changes)
-
-                chunk++ // Ensure next iteration goes to next chunk
-            } while (pks.length === chunkSize) // While data not exhausted
-        }
+        const collections = this._getCollectionsToBackup().map(
+            coll => coll.name,
+        )
+        await this.storageManager.operation(BackupPlugin.QUEUE_CHANGES, {
+            collections,
+            chunkSize,
+        })
     }
 
     async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
@@ -250,9 +231,13 @@ export default class BackupProcedure {
         // console.log('preparing batch')
         for (const change of batch.changes) {
             const object = pickBy(
-                await this.storageManager
-                    .collection(change.collection)
-                    .findByPk(change.objectPk),
+                await this.storageManager.operation(
+                    DexieUtilsPlugin.FIND_BY_PK_OP,
+                    {
+                        collection: change.collection,
+                        pk: change.objectPk,
+                    },
+                ),
                 (val, key) => {
                     return key !== 'terms' && key.indexOf('_terms') === -1
                 },
@@ -335,7 +320,7 @@ export function _shouldStoreBlobs() {
     return pref !== 'false'
 }
 
-export function getCurrentSchemaVersion(storageManager: StorageManager) {
+export function getCurrentSchemaVersion(storageManager: Storex) {
     const schemaVersions = Object.keys(
         storageManager.registry.collectionsByVersion,
     ).map(version => parseInt(version, 10))

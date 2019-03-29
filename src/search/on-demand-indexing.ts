@@ -5,7 +5,7 @@ import fetchPageData from '../page-analysis/background/fetch-page-data'
 import pipeline from './pipeline'
 import { Page } from './models'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../options/settings/constants'
-import { Dexie } from './types'
+import { DBGet } from './types'
 
 interface Props {
     url: string
@@ -14,7 +14,7 @@ interface Props {
     allowScreenshot?: boolean
 }
 
-export const createPageFromTab = (getDb: () => Promise<Dexie>) => async ({
+export const createPageFromTab = (getDb: DBGet) => async ({
     url,
     tabId,
     stubOnly = false,
@@ -38,13 +38,14 @@ export const createPageFromTab = (getDb: () => Promise<Dexie>) => async ({
         pageDoc: { ...analysisRes, url },
         rejectNoContent: !stubOnly,
     })
+    const db = await getDb()
 
-    const page = new Page(pageData)
-    await page.loadRels(getDb)
+    const page = new Page(db, pageData)
+    await page.loadRels()
     return page
 }
 
-export const createPageFromUrl = (getDb: () => Promise<Dexie>) => async ({
+export const createPageFromUrl = (getDb: DBGet) => async ({
     url,
     stubOnly = false,
 }: Props) => {
@@ -65,8 +66,9 @@ export const createPageFromUrl = (getDb: () => Promise<Dexie>) => async ({
         rejectNoContent: !stubOnly,
     })
 
-    const page = new Page(pageData)
-    await page.loadRels(getDb)
+    const db = await getDb()
+    const page = new Page(db, pageData)
+    await page.loadRels()
     return page
 }
 
@@ -75,7 +77,7 @@ export const createPageFromUrl = (getDb: () => Promise<Dexie>) => async ({
  * Also sets the `stubOnly` option based on user bookmark/tag indexing pref.
  * TODO: Better name?
  */
-export const createPageViaBmTagActs = (getDb: () => Promise<Dexie>) => async (
+export const createPageViaBmTagActs = (getDb: DBGet) => async (
     props: Props,
 ) => {
     const {

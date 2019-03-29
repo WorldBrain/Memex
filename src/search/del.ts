@@ -1,53 +1,44 @@
-import DexieOrig from 'dexie'
-
 import { Page } from '.'
 import { initErrHandler } from './storage'
-import { Dexie } from './types'
+import { collections } from './util'
+import { DBGet } from './types'
 import normalizeUrl from '../util/encode-url-for-id'
+import { DexieUtilsPlugin } from './plugins/dexie-utils'
 
-type QueryApplier = (
-    table: DexieOrig.Table<Page, string>,
-) => DexieOrig.Collection<Page, string>
-
-const deletePages = async (
-    applyQuery: QueryApplier,
-    getDb: () => Promise<Dexie>,
-) => {
+const deletePages = async (getDb: DBGet, query: object) => {
     const db = await getDb()
-    return db.transaction('rw', db.tables, async () => {
-        const pages = await applyQuery(db.pages).toArray()
+    const pages = await db.collection('pages').findObjects<Page>(query)
 
-        await Promise.all(pages.map(page => page.delete(getDb))).catch(
-            initErrHandler(),
-        )
-    })
+    return Promise.all(pages.map(page => new Page(db, page).delete())).catch(
+        initErrHandler(),
+    )
 }
 
-export const delPages = (getDb: () => Promise<Dexie>) => (urls: string[]) => {
+export const delPages = (getDb: DBGet) => (urls: string[]) => {
     const normalizedUrls: string[] = urls.map(normalizeUrl as any)
 
-    return deletePages(table => table.where('url').anyOf(normalizedUrls), getDb)
+    return deletePages(getDb, { url: { $in: normalizedUrls } })
 }
 
-export const delPagesByDomain = (getDb: () => Promise<Dexie>) => (
-    url: string,
-) => {
-    return deletePages(table => table.where('domain').equals(url), getDb)
+export const delPagesByDomain = (getDb: DBGet) => (url: string) => {
+    return deletePages(getDb, { domain: url })
 }
 
 // WARNING: Inefficient; goes through entire table
-export const delPagesByPattern = (getDb: () => Promise<Dexie>) => (
+export const delPagesByPattern = (getDb: DBGet) => async (
     pattern: string | RegExp,
 ) => {
-    const re = typeof pattern === 'string' ? new RegExp(pattern, 'i') : pattern
-
-    return deletePages(table => table.filter(page => re.test(page.url)), getDb)
+    const db = await getDb()
+    return db.operation(DexieUtilsPlugin.REGEXP_DELETE_OP, {
+        collection: 'pages',
+        fieldName: 'url',
+        pattern,
+    })
 }
 
 export const dangerousPleaseBeSureDeleteAndRecreateDatabase = (
-    getDb: () => Promise<Dexie>,
+    getDb: DBGet,
 ) => async () => {
     const db = await getDb()
-    await db.delete()
-    await db.open()
+    return db.operation(DexieUtilsPlugin.NUKE_DB_OP)
 }

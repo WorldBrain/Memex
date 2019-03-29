@@ -1,9 +1,10 @@
 import 'babel-polyfill'
 import 'core-js/es7/symbol'
+import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
 import { browser } from 'webextension-polyfill-ts'
 import initStorex from './search/memex-storex'
-import getDb, { setStorexBackend } from './search/get-db'
+import getDb, { setStorex } from './search/get-db'
 import internalAnalytics from './analytics/internal'
 import initSentry from './util/raven'
 
@@ -40,7 +41,6 @@ social.setupRemoteFunctions()
 
 export const directLinking = new DirectLinkingBackground({
     storageManager,
-    getDb,
     socialBg: social,
 })
 directLinking.setupRemoteFunctions()
@@ -55,7 +55,6 @@ activityLogger.setupWebExtAPIHandlers()
 
 const search = new SearchBackground({
     storageManager,
-    getDb,
     tabMan: activityLogger.tabManager,
 })
 search.setupRemoteFunctions()
@@ -65,7 +64,6 @@ eventLog.setupRemoteFunctions()
 
 export const customList = new CustomListBackground({
     storageManager,
-    getDb,
     tabMan: activityLogger.tabManager,
     windows: browser.windows,
 })
@@ -73,7 +71,6 @@ customList.setupRemoteFunctions()
 
 export const tags = new TagsBackground({
     storageManager,
-    getDb,
     tabMan: activityLogger.tabManager,
     windows: browser.windows,
 })
@@ -96,10 +93,20 @@ backupModule.setBackendFromStorage()
 backupModule.setupRemoteFunctions()
 backupModule.startRecordingChangesIfNeeded()
 
+registerModuleMapCollections(storageManager.registry, {
+    annotations: directLinking.annotationStorage,
+    notifications: notifications.storage,
+    customList: customList.storage,
+    backup: backupModule.storage,
+    eventLog: eventLog.storage,
+    search: search.storage,
+    tags: tags.storage,
+})
+
 let bgScript: BackgroundScript
 
 storageManager.finishInitialization().then(() => {
-    setStorexBackend(storageManager.backend)
+    setStorex(storageManager)
     internalAnalytics.registerOperations(eventLog)
     backupModule.storage.setupChangeTracking()
 

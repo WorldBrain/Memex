@@ -1,5 +1,5 @@
 import { Page, FavIcon } from '../models'
-import { SearchParams, SearchResult, Dexie } from '../types'
+import { SearchParams, SearchResult, DBGet } from '../types'
 
 export interface SearchDisplayResult {
     url: string
@@ -15,12 +15,13 @@ const mapPageToDisplay = (
     pagesMap: Map<string, Page>,
     favIconsMap: Map<string, FavIcon>,
     { endDate }: SearchParams,
-    getDb: () => Promise<Dexie>,
+    getDb: DBGet,
 ) =>
     async function([url]: SearchResult): Promise<SearchDisplayResult> {
-        const page = pagesMap.get(url)
+        const db = await getDb()
+        const page = new Page(db, pagesMap.get(url))
         const favIcon = favIconsMap.get(page.hostname)
-        await page.loadRels(getDb)
+        await page.loadRels()
 
         return {
             url: page.fullUrl,
@@ -36,7 +37,7 @@ const mapPageToDisplay = (
 /**
  * Used as a helper to shape the search results for the current UI's expected result shape.
  */
-export const mapResultsToDisplay = (getDb: () => Promise<Dexie>) => async (
+export const mapResultsToDisplay = (getDb: DBGet) => async (
     results: SearchResult[],
     params: SearchParams,
 ) => {
@@ -48,19 +49,20 @@ export const mapResultsToDisplay = (getDb: () => Promise<Dexie>) => async (
     const favIconsMap = new Map<string, FavIcon>()
 
     // Grab all pages + tags for pages, creating a Map for easy lookup-by-URL + set of hostnames
-    await db.pages
-        .where('url')
-        .anyOf(resultUrls)
-        .each(page => {
-            hostnamesSet.add(page.hostname)
-            pagesMap.set(page.url, page)
-        })
+    const pages = await db.collection('pages').findObjects<Page>({
+        url: { $in: resultUrls },
+    })
+
+    pages.forEach(page => {
+        hostnamesSet.add(page.hostname)
+        pagesMap.set(page.url, page)
+    })
 
     // Grab all corresponding fav-icons for hostnames set
-    await db.favIcons
-        .where('hostname')
-        .anyOf(...hostnamesSet)
-        .each(favIcon => favIconsMap.set(favIcon.hostname, favIcon))
+    const favIcons = await db.collection('favIcons').findObjects<FavIcon>({
+        hostname: { $in: [...hostnamesSet] },
+    })
+    favIcons.forEach(favIcon => favIconsMap.set(favIcon.hostname, favIcon))
 
     // Grab all the Pages needed for results (mapping over input `results` to maintain order)
     return Promise.all(

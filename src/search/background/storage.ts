@@ -1,5 +1,9 @@
-import { StorageManager } from '..'
-import { FeatureStorage } from '../storage'
+import Storex from '@worldbrain/storex'
+import {
+    StorageModule,
+    StorageModuleConfig,
+} from '@worldbrain/storex-pattern-modules'
+
 import {
     SearchParams as OldSearchParams,
     SearchResult as OldSearchResult,
@@ -16,11 +20,10 @@ import { reshapeParamsForOldSearch } from './utils'
 import { AnnotationsListPlugin } from './annots-list'
 import { SocialSearchPlugin } from './social-search'
 import { SocialPage } from 'src/social-integration/types'
-import { buildTweetUrl } from 'src/social-integration/util'
-import { Tag, Bookmark } from 'src/search/models'
+import { SuggestPlugin, SuggestType } from '../plugins/suggest'
 
 export interface SearchStorageProps {
-    storageManager: StorageManager
+    storageManager: Storex
     annotationsColl?: string
     legacySearch: (params: any) => Promise<any>
 }
@@ -37,42 +40,91 @@ export type LegacySearch = (
     totalCount: number
 }>
 
-export default class SearchStorage extends FeatureStorage {
+export default class SearchStorage extends StorageModule {
     private legacySearch
 
     constructor({ storageManager, legacySearch }: SearchStorageProps) {
-        super(storageManager)
+        super({ storageManager })
 
         this.legacySearch = legacySearch
     }
 
-    private async calcLatestInteraction(url: string, upperTimeBound?: number) {
-        let max = 0
-        const visitQuery: any = { url }
-        const bmQuery: any = { url }
+    getConfig = (): StorageModuleConfig => ({
+        operations: {
+            findAnnotBookmarksByUrl: {
+                collection: 'annotBookmarks',
+                operation: 'findObjects',
+                args: { url: { $in: '$annotUrls:string[]' } },
+            },
+            findAnnotTagsByUrl: {
+                collection: 'tags',
+                operation: 'findObjects',
+                args: [{ url: { $in: '$annotUrls:string[]' } }, { limit: 4 }],
+            },
+            searchAnnotsByDay: {
+                operation: AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
+                args: ['$params:any'],
+            },
+            [PageUrlMapperPlugin.MAP_OP_SOCIAL_ID]: {
+                operation: PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
+                args: [
+                    { results: '$results:any' },
+                    {
+                        base64Img: '$base64Img:boolean',
+                        upperTimeBound: '$endDate:number',
+                    },
+                ],
+            },
+            [SocialSearchPlugin.MAP_POST_IDS_OP_ID]: {
+                operation: SocialSearchPlugin.MAP_POST_IDS_OP_ID,
+                args: { postIds: '$postIds:number[]' },
+            },
+            [SocialSearchPlugin.SEARCH_OP_ID]: {
+                operation: SocialSearchPlugin.SEARCH_OP_ID,
+                args: ['$params:any'],
+            },
+            [AnnotationsListPlugin.TERMS_SEARCH_OP_ID]: {
+                operation: AnnotationsListPlugin.TERMS_SEARCH_OP_ID,
+                args: ['$params:any'],
+            },
+            [PageUrlMapperPlugin.MAP_OP_ID]: {
+                operation: PageUrlMapperPlugin.MAP_OP_ID,
+                args: [
+                    '$pageUrls:string[]',
+                    {
+                        base64Img: '$base64Img:boolean',
+                        upperTimeBound: '$upperTimeBound:number',
+                        latestTimes: '$latestTimes:number[]',
+                    },
+                ],
+            },
+            [SuggestPlugin.SUGGEST_OP_ID]: {
+                operation: SuggestPlugin.SUGGEST_OP_ID,
+                args: {
+                    query: '$query:string',
+                    type: '$type:string',
+                    limit: '$limit:number',
+                },
+            },
+            [SuggestPlugin.SUGGEST_EXT_OP_ID]: {
+                operation: SuggestPlugin.SUGGEST_EXT_OP_ID,
+                args: {
+                    notInclude: '$notInclude:string[]',
+                    type: '$type:string',
+                    limit: '$limit:number',
+                },
+            },
+        },
+    })
 
-        if (upperTimeBound) {
-            visitQuery.time = { $lte: upperTimeBound }
-            bmQuery.time = { $lte: upperTimeBound }
-        }
+    suggest = (args: { query: string; type: SuggestType; limit?: number }) =>
+        this.operation(SuggestPlugin.SUGGEST_OP_ID, args)
 
-        const [visits, bookmark] = await Promise.all([
-            this.storageManager
-                .collection('visits')
-                .findObjects<Interaction>(visitQuery),
-            this.storageManager
-                .collection('bookmarks')
-                .findOneObject<Interaction>(bmQuery),
-        ])
-
-        max = visits.sort((a, b) => b.time - a.time)[0].time
-
-        if (!!bookmark && bookmark.time > max) {
-            max = bookmark.time
-        }
-
-        return max
-    }
+    suggestExtended = (args: {
+        notInclude?: string[]
+        type: SuggestType
+        limit?: number
+    }) => this.operation(SuggestPlugin.SUGGEST_EXT_OP_ID, args)
 
     private async findAnnotsDisplayData(
         annotUrls: string[],
@@ -80,17 +132,13 @@ export default class SearchStorage extends FeatureStorage {
         annotsToTags: Map<string, string[]>
         bmUrls: Set<string>
     }> {
-        const bookmarks = await this.storageManager
-            .collection('annotBookmarks')
-            .findAllObjects<Bookmark>({
-                url: { $in: annotUrls },
-            })
+        const bookmarks = await this.operation('findAnnotBookmarksByUrl', {
+            annotUrls,
+        })
 
-        const bmUrls = new Set(bookmarks.map(bm => bm.url))
+        const bmUrls = new Set<string>(bookmarks.map(bm => bm.url))
 
-        const tags = await this.storageManager
-            .collection('tags')
-            .findAllObjects<Tag>({ url: { $in: annotUrls } }, { limit: 4 })
+        const tags = await this.operation('findAnnotTagsByUrl', { annotUrls })
 
         const annotsToTags = new Map<string, string[]>()
 
@@ -119,10 +167,13 @@ export default class SearchStorage extends FeatureStorage {
                     : pageIds.push(url),
         )
 
-        const pages: AnnotPage[] = await this.storageManager.operation(
+        const pages: AnnotPage[] = await this.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
-            pageIds,
-            { base64Img: params.base64Img, upperTimeBound: params.endDate },
+            {
+                pageUrls: pageIds,
+                base64Img: params.base64Img,
+                upperTimeBound: params.endDate,
+            },
         )
 
         pages.forEach(page => results.set(page.url, page))
@@ -130,15 +181,17 @@ export default class SearchStorage extends FeatureStorage {
         const socialResults: Map<
             number,
             Map<string, SocialPage>
-        > = await this.storageManager.operation(
-            SocialSearchPlugin.MAP_POST_IDS_OP_ID,
+        > = await this.operation(SocialSearchPlugin.MAP_POST_IDS_OP_ID, {
             postIds,
-        )
+        })
 
-        const socialPages: SocialPage[] = await this.storageManager.operation(
+        const socialPages: SocialPage[] = await this.operation(
             PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
-            socialResults,
-            { base64Img: params.base64Img, upperTimeBound: params.endDate },
+            {
+                results: socialResults,
+                base64Img: params.base64Img,
+                upperTimeBound: params.endDate,
+            },
         )
 
         socialPages.forEach(page =>
@@ -172,10 +225,7 @@ export default class SearchStorage extends FeatureStorage {
         const results: Map<
             number,
             Map<string, Annotation[]>
-        > = await this.storageManager.operation(
-            AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
-            params,
-        )
+        > = await this.operation('searchAnnotsByDay', { params })
 
         let pageUrls = new Set<string>()
 
@@ -254,12 +304,9 @@ export default class SearchStorage extends FeatureStorage {
     }
 
     private async searchTermsAnnots(params: AnnotSearchParams) {
-        const results: Map<
-            string,
-            Annotation[]
-        > = await this.storageManager.operation(
+        const results: Map<string, Annotation[]> = await this.operation(
             AnnotationsListPlugin.TERMS_SEARCH_OP_ID,
-            params,
+            { params },
         )
 
         const pages: AnnotPage[] = await this.getMergedAnnotsPages(
@@ -308,34 +355,28 @@ export default class SearchStorage extends FeatureStorage {
         const latestTimes =
             ids[0].length === 3 ? ids.map(([, , time]) => time) : undefined
 
-        return this.storageManager.operation(
-            PageUrlMapperPlugin.MAP_OP_ID,
-            ids.map(([url]) => url),
-            {
-                upperTimeBound: params.endDate,
-                latestTimes,
-                base64Img: params.base64Img,
-            },
-        )
+        return this.operation(PageUrlMapperPlugin.MAP_OP_ID, {
+            pageUrls: ids.map(([url]) => url),
+            upperTimeBound: params.endDate,
+            base64Img: params.base64Img,
+            latestTimes,
+        })
     }
 
     async searchSocial(params: SocialSearchParams) {
-        const results: Map<
-            number,
-            SocialPage
-        > = await this.storageManager.operation(
+        const results: Map<number, SocialPage> = await this.operation(
             SocialSearchPlugin.SEARCH_OP_ID,
-            params,
+            { params },
         )
 
         if (!results.size) {
             return []
         }
 
-        return this.storageManager.operation(
-            PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
+        return this.operation(PageUrlMapperPlugin.MAP_OP_SOCIAL_ID, {
             results,
-            { base64Img: params.base64Img, upperTimeBound: params.endDate },
-        )
+            base64Img: params.base64Img,
+            upperTimeBound: params.endDate,
+        })
     }
 }

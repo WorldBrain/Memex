@@ -1,4 +1,5 @@
-import { StorageManager } from '../../search/types'
+import Storex from '@worldbrain/storex'
+
 import { isExcludedFromBackup } from './utils'
 import { USERS_COLL } from 'src/social-integration/constants'
 
@@ -13,7 +14,7 @@ const estimateBackupSize = ({
     dbName = 'memex',
     estimateBoost = 20,
 }: {
-    storageManager: StorageManager
+    storageManager: Storex
     indexedDB?: IDBFactory
     dbName?: string
     /** Percentage which will be added to the total estimate. */
@@ -110,7 +111,7 @@ const calcBlobSize = (blob: Blob) =>
     // https://stackoverflow.com/questions/4715415/base64-what-is-the-worst-possible-increase-in-space-usage
     Math.ceil(blob.size / 3) * 4
 
-const deriveStoreNames = ({ registry }: StorageManager) =>
+const deriveStoreNames = ({ registry }: Storex) =>
     Object.entries(registry.collections)
         .filter(([, def]) => !isExcludedFromBackup(def))
         .map(([name]) => name)

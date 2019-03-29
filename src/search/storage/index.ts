@@ -1,22 +1,4 @@
 import Dexie from 'dexie'
-import { CollectionDefinitions } from '@worldbrain/storex'
-
-import { StorageManager } from '../types'
-
-export abstract class FeatureStorage {
-    protected collections: { [name: string]: CollectionDefinitions }
-
-    constructor(protected storageManager: StorageManager) {}
-
-    registerCollections() {
-        for (const name of Object.keys(this.collections || {})) {
-            this.storageManager.registry.registerCollection(
-                name,
-                this.collections[name],
-            )
-        }
-    }
-}
 
 /**
  * Error hanlder captures `OpenFailedError`s relating to `createObjectStore` IDB issues,

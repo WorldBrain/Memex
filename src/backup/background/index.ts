@@ -1,8 +1,9 @@
 // tslint:disable:no-console
+import Storex from '@worldbrain/storex'
 import Queue, { Options as QueueOpts } from 'queue'
+
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { setLocalStorage } from 'src/util/storage'
-import { StorageManager } from '../../search/types'
 import { setupRequestInterceptors } from './redirect'
 import BackupStorage, { LastBackupStorage } from './storage'
 import { BackupBackend } from './backend'
@@ -17,7 +18,7 @@ import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
 export * from './backend'
 
 export class BackupBackgroundModule {
-    storageManager: StorageManager
+    storageManager: Storex
     storage: BackupStorage
     backendLocation: string
     backend: BackupBackend
@@ -45,7 +46,7 @@ export class BackupBackgroundModule {
         queueOpts = { autostart: true, concurrency: 1 },
         notifications,
     }: {
-        storageManager: StorageManager
+        storageManager: Storex
         lastBackupStorage: LastBackupStorage
         createQueue?: typeof Queue
         queueOpts?: QueueOpts

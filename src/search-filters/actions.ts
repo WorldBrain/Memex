@@ -170,7 +170,10 @@ export const toggleAnnotationsFilter = () => (dispatch, getState) => {
 
 export const fetchSuggestedTags = () => async (dispatch, getState) => {
     const filteredTags = selectors.tags(getState())
-    const tags = await remoteFunction('extendedSuggest')(filteredTags, 'tag')
+    const tags = await remoteFunction('extendedSuggest')({
+        notInclude: filteredTags,
+        type: 'tag',
+    })
     dispatch(setSuggestedTags([...(filteredTags || []), ...tags]))
 }
 
@@ -192,10 +195,10 @@ export const fetchSuggestedHashtags = () => async (dispatch, getState) => {
 export const fetchSuggestedDomains = () => async (dispatch, getState) => {
     const filteredDomains = selectors.displayDomains(getState())
     const domains = filteredDomains.map(({ value }) => value)
-    const suggestedDomains = await remoteFunction('extendedSuggest')(
-        domains,
-        'domain',
-    )
+    const suggestedDomains = await remoteFunction('extendedSuggest')({
+        notInclude: domains,
+        type: 'domain',
+    })
 
     dispatch(
         setSuggestedDomains([
