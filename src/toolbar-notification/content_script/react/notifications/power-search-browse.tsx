@@ -23,7 +23,7 @@ export default function PowerSearchBrowse({ onCloseRequested, openDashboard }) {
                     </div>
                     <div className={styles.tutorial}>
                             <div className={externalStyles.keyboardM}>M</div>
-                            <div className={externalStyles.keyboardPlus}>+</div>
+                            <div className={externalStyles.keyboardPlus}>then</div>
                             <div className={externalStyles.keyboardSpace}>Space</div>
                         </div>
                 </div>
