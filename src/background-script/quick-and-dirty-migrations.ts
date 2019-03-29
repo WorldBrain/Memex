@@ -1,4 +1,4 @@
-import { Dexie } from 'src/search/types'
+import Dexie from 'dexie'
 
 export interface Migrations {
     [storageKey: string]: (db: Dexie) => Promise<void>

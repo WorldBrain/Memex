@@ -1,6 +1,7 @@
+import Storex from '@worldbrain/storex'
+
 import initStorageManager from '../memory-storex'
-import { StorageManager } from '..'
-import getDb, { setStorexBackend } from '../get-db'
+import { setStorex } from '../get-db'
 import SearchBg from './index'
 import normalize from 'src/util/encode-url-for-id'
 import CustomListBg from 'src/custom-lists/background'
@@ -26,7 +27,7 @@ const countAnnots = res => {
 describe.skip('Annotations search', () => {
     let annotsStorage: AnnotsStorage
     let annotsBg: AnnotsBg
-    let storageManager: StorageManager
+    let storageManager: Storex
     let customListsBg: CustomListBg
     let searchBg: SearchBg
 
@@ -94,22 +95,20 @@ describe.skip('Annotations search', () => {
         storageManager = initStorageManager()
         annotsBg = new AnnotsBg({
             storageManager,
-            getDb,
             socialBg: {} as any,
         })
 
         searchBg = new SearchBg({
             storageManager,
-            getDb,
             tabMan: { getActiveTab: () => ({ id: 1, url: 'test' }) } as any,
             bookmarksAPI: { onCreated: mockEvent, onRemoved: mockEvent } as any,
         })
 
-        customListsBg = new CustomListBg({ storageManager, getDb })
+        customListsBg = new CustomListBg({ storageManager })
         annotsStorage = annotsBg['annotationStorage']
 
         await storageManager.finishInitialization()
-        setStorexBackend(storageManager.backend)
+        setStorex(storageManager)
         await insertTestData()
     })
 

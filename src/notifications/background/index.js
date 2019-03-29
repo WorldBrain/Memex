@@ -13,7 +13,7 @@ export default class NotificationBackground {
         updateNotifs = notifications.UPDATE_NOTIFS,
         releaseTime = notifications.releaseTime,
     }) {
-        this.storage = new NotificationStorage(storageManager)
+        this.storage = new NotificationStorage({ storageManager })
         this.eventNotifs = eventNotifs
         this.updateNotifs = updateNotifs
         this.releaseTime = releaseTime

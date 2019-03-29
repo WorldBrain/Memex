@@ -1,20 +1,29 @@
-import { Dexie } from './types'
+import Storex from '@worldbrain/storex'
+
+import { DexieUtilsPlugin } from './plugins/dexie-utils'
+import { DBGet } from './types'
+import { Page } from './models'
 import normalizeUrl from '../util/encode-url-for-id'
 import { initErrHandler } from './storage'
 
 export const DEFAULT_TERM_SEPARATOR = /[|\u{A0}' .,|(\n)]+/u
 export const URL_SEPARATOR = /[/?#=+& _.,\-|(\n)]+/
 
-export const getPage = (getDb: () => Promise<Dexie>) => async (url: string) => {
+export const collections = (db: Storex) => Object.keys(db.registry.collections)
+
+export const getPage = (getDb: DBGet) => async (url: string) => {
     const db = await getDb()
-    const page = await db.pages.get(normalizeUrl(url)).catch(initErrHandler())
+    const page = await db
+        .collection('pages')
+        .findOneObject<Page>({ url: normalizeUrl(url) })
+        .catch(initErrHandler())
 
-    if (page != null) {
-        // Force-load any related records from other tables
-        await page.loadRels(getDb)
+    if (page == null) {
+        return null
     }
-
-    return page
+    const result = new Page(db, page)
+    await result.loadRels()
+    return result
 }
 
 /**
@@ -22,14 +31,27 @@ export const getPage = (getDb: () => Promise<Dexie>) => async (url: string) => {
  *
  * TODO: Maybe overhaul `import-item-creation` module to not need this (only caller)
  */
-export const grabExistingKeys = (getDb: () => Promise<Dexie>) => async () => {
+export const grabExistingKeys = (getDb: DBGet) => async () => {
     const db = await getDb()
-    return db
-        .transaction('r', db.pages, db.bookmarks, async () => ({
-            histKeys: new Set(await db.pages.toCollection().primaryKeys()),
-            bmKeys: new Set(await db.bookmarks.toCollection().primaryKeys()),
-        }))
-        .catch(initErrHandler({ histKeys: new Set(), bmKeys: new Set() }))
+    let histKeys: Set<string>
+    let bmKeys: Set<string>
+
+    try {
+        histKeys = new Set(
+            await db.operation(DexieUtilsPlugin.GET_PKS_OP, {
+                collection: 'pages',
+            }),
+        )
+        bmKeys = new Set(
+            await db.operation(DexieUtilsPlugin.GET_PKS_OP, {
+                collection: 'bookmarks',
+            }),
+        )
+    } catch (err) {
+        initErrHandler({ histKeys: new Set(), bmKeys: new Set() })(err)
+    }
+
+    return { histKeys, bmKeys }
 }
 
 /**

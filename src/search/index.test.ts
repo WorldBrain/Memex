@@ -1,7 +1,10 @@
+import Storex from '@worldbrain/storex'
+
 import initStorageManager from './memory-storex'
-import getDb, { setStorexBackend } from './get-db'
+import getDb, { setStorex } from './get-db'
 import * as idx from '.'
 import * as DATA from './index.test.data'
+import { FavIcon } from './models'
 
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
@@ -9,7 +12,7 @@ jest.mock('lodash/fp/flatten')
 jest.mock('lodash/fp/difference')
 
 describe('Search index integration', () => {
-    let storageManager
+    let storageManager: Storex
 
     async function insertTestData() {
         // Insert some test data for all tests to use
@@ -50,7 +53,7 @@ describe('Search index integration', () => {
     beforeEach(async () => {
         storageManager = initStorageManager()
         await storageManager.finishInitialization()
-        setStorexBackend(storageManager.backend)
+        setStorex(storageManager)
         await resetTestData()
     })
 
@@ -105,6 +108,7 @@ describe('Search index integration', () => {
             expect(docsTitle[1]).toEqual([DATA.PAGE_ID_2, DATA.VISIT_2])
         })
 
+        // TODO: Fix this feature
         test('boosted url term search', async () => {
             // Term appears in page 3's URL
             const { docs: docsTitle } = await search({ query: 'test' })
@@ -349,45 +353,46 @@ describe('Search index integration', () => {
             testTags({ tags: ['quality'] }, { tags: ['quality', 'good'] }),
         )
 
-        test('domains suggest', async () => {
-            const expected1 = ['lorem.com']
-            expect(await idx.suggest(getDb)('l', 'domain')).toEqual(expected1)
-            expect(await idx.suggest(getDb)('lo', 'domain')).toEqual(expected1)
-            expect(await idx.suggest(getDb)('lol', 'domain')).not.toEqual(
-                expected1,
-            )
+        // TODO: Suggest code moved to storex plugin; Move these tests too
+        // test('domains suggest', async () => {
+        //     const expected1 = ['lorem.com']
+        //     expect(await idx.suggest(getDb)('l', 'domain')).toEqual(expected1)
+        //     expect(await idx.suggest(getDb)('lo', 'domain')).toEqual(expected1)
+        //     expect(await idx.suggest(getDb)('lol', 'domain')).not.toEqual(
+        //         expected1,
+        //     )
 
-            const expected2 = ['test.com']
-            expect(await idx.suggest(getDb)('t', 'domain')).toEqual(expected2)
-            expect(await idx.suggest(getDb)('te', 'domain')).toEqual(expected2)
-            expect(await idx.suggest(getDb)('tet', 'domain')).not.toEqual(
-                expected2,
-            )
+        //     const expected2 = ['test.com']
+        //     expect(await idx.suggest(getDb)('t', 'domain')).toEqual(expected2)
+        //     expect(await idx.suggest(getDb)('te', 'domain')).toEqual(expected2)
+        //     expect(await idx.suggest(getDb)('tet', 'domain')).not.toEqual(
+        //         expected2,
+        //     )
 
-            // New implementation should also support hostnames
-            const expected3 = ['sub.lorem.com']
-            expect(await idx.suggest(getDb)('s', 'domain')).toEqual(expected3)
-            expect(await idx.suggest(getDb)('su', 'domain')).toEqual(expected3)
-            expect(await idx.suggest(getDb)('sus', 'domain')).not.toEqual(
-                expected3,
-            )
-        })
+        //     // New implementation should also support hostnames
+        //     const expected3 = ['sub.lorem.com']
+        //     expect(await idx.suggest(getDb)('s', 'domain')).toEqual(expected3)
+        //     expect(await idx.suggest(getDb)('su', 'domain')).toEqual(expected3)
+        //     expect(await idx.suggest(getDb)('sus', 'domain')).not.toEqual(
+        //         expected3,
+        //     )
+        // })
 
-        test('tags suggest', async () => {
-            const expected1 = ['quality']
-            expect(await idx.suggest(getDb)('q', 'tag')).toEqual(expected1)
-            expect(await idx.suggest(getDb)('qu', 'tag')).toEqual(expected1)
-            expect(await idx.suggest(getDb)('quq', 'tag')).not.toEqual(
-                expected1,
-            )
+        // test('tags suggest', async () => {
+        //     const expected1 = ['quality']
+        //     expect(await idx.suggest(getDb)('q', 'tag')).toEqual(expected1)
+        //     expect(await idx.suggest(getDb)('qu', 'tag')).toEqual(expected1)
+        //     expect(await idx.suggest(getDb)('quq', 'tag')).not.toEqual(
+        //         expected1,
+        //     )
 
-            const expected2 = ['good']
-            expect(await idx.suggest(getDb)('g', 'tag')).toEqual(expected2)
-            expect(await idx.suggest(getDb)('go', 'tag')).toEqual(expected2)
-            expect(await idx.suggest(getDb)('gog', 'tag')).not.toEqual(
-                expected2,
-            )
-        })
+        //     const expected2 = ['good']
+        //     expect(await idx.suggest(getDb)('g', 'tag')).toEqual(expected2)
+        //     expect(await idx.suggest(getDb)('go', 'tag')).toEqual(expected2)
+        //     expect(await idx.suggest(getDb)('gog', 'tag')).not.toEqual(
+        //         expected2,
+        //     )
+        // })
 
         test('blank search', async () => {
             const { docs } = await search()
@@ -428,8 +433,12 @@ describe('Search index integration', () => {
             await idx.addFavIcon(getDb)(DATA.PAGE_1.url, DATA.FAV_1)
             await idx.addFavIcon(getDb)(DATA.PAGE_2.url, DATA.FAV_1)
 
-            const fav1 = await db.favIcons.get(hostname1)
-            const fav2 = await db.favIcons.get(hostname2)
+            const fav1 = await db
+                .collection('favIcons')
+                .findOneObject<FavIcon>({ hostname: hostname1 })
+            const fav2 = await db
+                .collection('favIcons')
+                .findOneObject<FavIcon>({ hostname: hostname2 })
             expect(fav1.hostname).toBe(hostname1)
             expect(fav2.hostname).toBe(hostname2)
         })
