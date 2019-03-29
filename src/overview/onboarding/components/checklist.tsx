@@ -26,12 +26,12 @@ class Checklist extends PureComponent<Props> {
                 <div className={styles.featureBox}>
                     <div className={styles.leftParent}>
                         <div className={styles.featureIntro}>
-                            <div className={styles.featureTitle}>Search through your history</div>
-                            <div className={styles.featureText}>Type this shortcut into the address bar of the browser. Search with any word you remember about websites you’ve visited.</div>
+                            <div className={styles.featureTitle}>Search your browser history</div>
+                            <div className={styles.featureText}>Type this shortcut into the <b>address bar of the browser</b>. Search with any word you remember about websites you’ve visited.</div>
                         </div>
                         <div className={styles.tutorial}>
                             <div className={styles.keyboardM}>M</div>
-                            <div className={styles.keyboardPlus}>+</div>
+                            <div className={styles.keyboardPlus}>then</div>
                             <div className={styles.keyboardSpace}>Space</div>
                         </div>
                         <div 
