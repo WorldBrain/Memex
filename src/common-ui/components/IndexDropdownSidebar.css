@@ -44,7 +44,7 @@
 
 .tagContainer {
     width: 100%;
-    max-height: 40vh;
+    height: 190px;
     overflow-y: scroll;
     height: max-content;
 
@@ -76,11 +76,13 @@
     margin: 5px 5px 5px 5px;
     display: flex;
     align-items: center;
+    background-color: #fff;
 }
 
 .searchIcon {
     display: flex;
     composes: searchIcon from '../../common-ui/icons.css';
+    background-image: url('../../../img/searchGrey.svg');
     width: 25px;
     height: 25px;
     background-size: 20px;

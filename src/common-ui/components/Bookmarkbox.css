@@ -3,7 +3,7 @@
 }
 
 .icon {
-    composes: checkMark from '../icons.css';
+    composes: starMark from '../icons.css';
     width: 20px;
     height: 20px;
     opacity: 0;
@@ -42,12 +42,9 @@
     justify-content: center;
     transition: border 0.3s ease;
     outline: none;
-
-    /* background-image: url('../../../img/check-solid.svg'); */
-
-    /* background-repeat: no-repeat; */
-
-    /* background-position: center; */
+    background-image: url('../../../img/star_blue_empty1.svg');
+    background-repeat: no-repeat;
+    background-position: center;
 
     &:hover {
         outline: none;
@@ -67,7 +64,6 @@
     display: flex;
     align-items: center;
     font-size: 15px;
-    cursor: pointer;
 
     &:hover {
         font-weight: 500;

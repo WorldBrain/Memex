@@ -32,7 +32,8 @@
     font-weight: 500;
     width: fit-content;
     letter-spacing: 0.5px;
-    height: 100%;
+
+    /* height: 100%; */
     color: black;
     margin-right: 3px;
     display: flex;
