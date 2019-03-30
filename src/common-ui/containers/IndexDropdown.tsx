@@ -354,7 +354,10 @@ class IndexDropdownContainer extends Component<Props, State> {
         ) {
             event.preventDefault()
             event.stopPropagation()
-            this.setState(state => ({ searchVal: state.searchVal + event.key }), this.fetchTagSuggestions)
+            this.setState(
+                state => ({ searchVal: state.searchVal + event.key }),
+                this.fetchTagSuggestions,
+            )
             return
         }
 
@@ -442,6 +445,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 {...this.props}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 isForSidebar={this.props.isForSidebar}
+                // isForRibbon={this.props.isForRibbon}
             />
         ))
 

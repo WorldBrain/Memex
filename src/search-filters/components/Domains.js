@@ -22,7 +22,7 @@ class Domains extends PureComponent {
         this.setState({ domains: domains })
     }
 
-    openDomainsPopup = () => {
+    toggleDomainsPopup = () => {
         this.setState(prevState => ({
             showPopup: !prevState.showPopup,
         }))
@@ -50,12 +50,10 @@ class Domains extends PureComponent {
                             ? styles.domainButtonSelected
                             : styles.domainButton
                     }
-                    onClick={this.openDomainsPopup}
+                    onClick={this.toggleDomainsPopup}
                 >
                     Domains{' '}
-                    {this.state.count === 0 ? (
-                        ''
-                    ) : (
+                    {this.state.count !== 0 && (
                         <span
                             style={{
                                 fontWeight: 'bold',

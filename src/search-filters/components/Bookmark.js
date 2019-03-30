@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 // import styles from './Bookmark.module.css'
-import { Checkbox } from 'src/common-ui/components'
+import { Bookmarkbox } from 'src/common-ui/components'
 
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
@@ -14,13 +14,13 @@ class Bookmark extends PureComponent {
 
     render() {
         return (
-            <div>
-                <Checkbox
+            <React.Fragment>
+                <Bookmarkbox
                     id="toggle-bookmark"
                     isChecked={this.props.bookmarkFilter}
                     handleChange={this.props.onShowOnlyBookmarksChange}
                 />
-            </div>
+            </React.Fragment>
         )
     }
 }

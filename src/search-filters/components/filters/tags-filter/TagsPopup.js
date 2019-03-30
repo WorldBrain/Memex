@@ -74,9 +74,9 @@ class TagsPopup extends PureComponent {
         this.props.checkTags(arr)
         return (
             <div className={styles.tagsPopup}>
-                {count > 0 ? (
-                    <div className={styles.selected}>Selected</div>
-                ) : null}
+                {count > 0 &&
+                    // <div className={styles.selected}>Selected</div>
+                    null}
                 <div className={styles.selectedTags}>
                     {/* this.renderFilteredTags() */}
                 </div>

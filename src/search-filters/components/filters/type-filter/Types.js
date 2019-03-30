@@ -17,7 +17,7 @@ class Types extends PureComponent {
         count: 0,
     }
 
-    openTypesPopup = () => {
+    toggleTypesPopup = () => {
         this.setState(prevState => ({
             showPopup: !prevState.showPopup,
             unSelect: false,
@@ -71,7 +71,7 @@ class Types extends PureComponent {
                                 ? styles.buttonFocusSelected
                                 : styles.buttonFocus
                         }
-                        onClick={this.openTypesPopup}
+                        onClick={this.toggleTypesPopup}
                     >
                         Types{' '}
                         {this.state.count === 0 ? (

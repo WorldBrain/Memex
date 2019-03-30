@@ -22,7 +22,7 @@ class Tags extends PureComponent {
         this.setState({ tags: tags })
     }
 
-    openTypesPopup = () => {
+    toggleTypesPopup = () => {
         this.setState(prevState => ({
             showPopup: !prevState.showPopup,
         }))
@@ -44,12 +44,10 @@ class Tags extends PureComponent {
                             ? styles.tagButtonSelected
                             : styles.tagButton
                     }
-                    onClick={this.openTypesPopup}
+                    onClick={this.toggleTypesPopup}
                 >
                     Tags{' '}
-                    {this.state.count === 0 ? (
-                        ''
-                    ) : (
+                    {this.state.count === 0 ? null : (
                         <span
                             style={{
                                 fontWeight: 'bold',

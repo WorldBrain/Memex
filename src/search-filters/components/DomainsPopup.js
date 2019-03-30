@@ -39,20 +39,21 @@ class DomainsPopup extends PureComponent {
     }
 
     renderFilteredDomains = () => {
-        return !this.props.domainFilterDropdown
-            ? this.props.filteredDomains.map(({ value, isExclusive }, i) => (
-                  <div style={{ display: 'flex' }}>
-                      <span className={styles.domainPill}>{value}</span>
-                      <button
-                          className={styles.cross}
-                          onClick={this.toggleDomainFilter({
-                              value,
-                              isExclusive,
-                          })}
-                      />
-                  </div>
-              ))
-            : null
+        return (
+            !this.props.domainFilterDropdown &&
+            this.props.filteredDomains.map(({ value, isExclusive }, i) => (
+                <div className={styles.domainPill} style={{ display: 'flex' }}>
+                    <span>{value}</span>
+                    <button
+                        className={styles.cross}
+                        onClick={this.toggleDomainFilter({
+                            value,
+                            isExclusive,
+                        })}
+                    />
+                </div>
+            ))
+        )
     }
 
     // <FilteredRow
