@@ -9,7 +9,8 @@ class SearchFilters extends PureComponent {
         dateFilter: PropTypes.node.isRequired,
         domainFilter: PropTypes.node.isRequired,
         contentFilter: PropTypes.node.isRequired,
-        filteredTags: PropTypes.node,
+        // filteredTags: PropTypes.node,
+        filteredTypes: PropTypes.node,
         filteredDomains: PropTypes.node,
         bookmarkFilter: PropTypes.node.isRequired,
     }
@@ -22,11 +23,11 @@ class SearchFilters extends PureComponent {
                 </div>
                 {this.props.dateFilter}
                 {this.props.tagFilter}
-                {this.props.filteredTags && (
+                {/* this.props.filteredTags && (
                     <div className={styles.filtered}>
                         {this.props.filteredTags}
                     </div>
-                )}
+                ) */}
                 {this.props.domainFilter}
                 {this.props.filteredDomains && (
                     <div className={styles.filtered}>
@@ -34,7 +35,6 @@ class SearchFilters extends PureComponent {
                     </div>
                 )}
                 {this.props.contentFilter}
-                {this.props.typeFilters}
                 <div className={styles.filtered}>
                     {this.props.filteredTypes}
                 </div>
