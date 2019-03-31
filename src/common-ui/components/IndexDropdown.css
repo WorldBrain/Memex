@@ -1,4 +1,4 @@
-@value colors: '../../common-ui/colors.css';
+@value colors: 'src/common-ui/colors.css';
 @value color11, color14, color4, color6 from colors;
 
 .tagContainer * {
