@@ -6,6 +6,7 @@ import styles from './SearchFilters.css'
 class SearchFilters extends PureComponent {
     static propTypes = {
         tagFilter: PropTypes.node.isRequired,
+        dateFilter: PropTypes.node.isRequired,
         domainFilter: PropTypes.node.isRequired,
         contentFilter: PropTypes.node.isRequired,
         filteredTags: PropTypes.node,
@@ -19,6 +20,7 @@ class SearchFilters extends PureComponent {
                 <div className={styles.bookmarksFilter}>
                     {this.props.bookmarkFilter}
                 </div>
+                {this.props.dateFilter}
                 {this.props.tagFilter}
                 {this.props.filteredTags && (
                     <div className={styles.filtered}>

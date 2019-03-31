@@ -36,6 +36,10 @@ class IndexDropdown extends PureComponent {
         handleTagSelection: PropTypes.func.isRequired,
     }
 
+    componentDidUpdate(prevProps, prevSate) {
+        // this._input.focus();
+    }
+
     get styles() {
         if (this.props.isForAnnotation) {
             return annotationStyles

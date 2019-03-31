@@ -25,6 +25,7 @@ class TagsPopup extends PureComponent {
         hideTagFilter: PropTypes.func.isRequired,
         // isNew: PropTypes.bool.isRequired,
         suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
+        // toggleTagPopup: PropTypes.bool.isRequired,
         // toggleFilterTypes: PropTypes.func.isRequired,
         // showfilteredTypes: PropTypes.bool.isRequired,
     }

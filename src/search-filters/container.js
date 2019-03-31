@@ -15,6 +15,7 @@ import Types from './components/filters/type-filter/Types'
 import Bookmark from './components/Bookmark'
 import Tags from './components/filters/tags-filter/Tags'
 import Domains from './components/Domains'
+import Dates from './components/Dates'
 
 import { actions, selectors } from './'
 import { selectors as sidebar } from '../overview/sidebar-left'
@@ -169,11 +170,15 @@ class SearchFiltersContainer extends PureComponent {
     //   }}
     //   filter="Type"
     // >
+
+    renderDateFilter = () => <Dates />
+
     render() {
         // console.log(this.props.filteredTags)
         return (
             <SearchFilters
                 bookmarkFilter={this.renderBookmarkFilter()}
+                // dateFilter={this.renderDateFilter()}
                 tagFilter={this.renderTagFilter()}
                 domainFilter={this.renderDomainFilter()}
                 // filteredTags={this.renderFilteredTags()}

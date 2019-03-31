@@ -445,7 +445,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 {...this.props}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 isForSidebar={this.props.isForSidebar}
-                // isForRibbon={this.props.isForRibbon}
+                isForRibbon={this.props.isForRibbon}
             />
         ))
 
@@ -457,16 +457,17 @@ class IndexDropdownContainer extends Component<Props, State> {
                     onClick={this.addTag}
                     focused={
                         this.state.focused === this.state.displayFilters.length
+                        // this.state.focused === this.state.displayFilters.length-1
                     }
                     isForAnnotation={this.props.isForAnnotation}
                     allowAdd={this.props.allowAdd}
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
                     isForSidebar={this.props.isForSidebar}
                     source={this.props.source}
+                    isForRibbon={this.props.isForRibbon}
                 />,
             )
         }
-
         return tagOptions
     }
 
