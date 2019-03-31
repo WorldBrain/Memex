@@ -11,7 +11,7 @@ body {
     color: color4;
 
     & * {
-        font-family: 'Inter';
+        font-family: 'Inter', sans-serif;
     }
 }
 

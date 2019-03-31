@@ -11,7 +11,6 @@
     word-wrap: break-word;
     font-size: 14px;
     justify-content: space-between;
-    margin: 0 15px;
     box-sizing: border-box;
 
     &:hover,
@@ -98,7 +97,7 @@
     &:placeholder-shown {
         font-style: italic;
         font-weight: 500;
-        font-family: 'Inter';
+        font-family: 'Inter', sans-serif;
     }
 
     &::placeholder {

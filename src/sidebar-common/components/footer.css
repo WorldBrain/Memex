@@ -2,6 +2,8 @@
     width: 100%;
     display: flex;
     justify-content: flex-start;
+    align-items: center;
+    margin-left: 11px;
 }
 
 .savecancel {

@@ -32,30 +32,26 @@ const DefaultFooter = ({
         </div>
         <div>
             <button
-                className={cx(styles.commonIcon, {
-                    [styles.bookmark]: hasBookmark,
-                    [styles.notBookmark]: !hasBookmark,
-                })}
-                title="Toggle bookmark"
+                className={cx(styles.commonIcon, styles.trashIcon)}
+                title="Delete note"
                 onClick={e => {
                     e.stopPropagation()
-                    handleBookmarkToggle()
+                    trashIconClickHandler()
                 }}
             />
+            {displayGoToAnnotation && (
+                <button
+                    className={cx(styles.commonIcon, styles.goToPageIcon)}
+                    title="Go to annotation"
+                    onClick={goToAnnotationHandler}
+                />
+            )}
             <button
                 className={cx(styles.commonIcon, styles.editIcon)}
                 title="Edit note"
                 onClick={e => {
                     e.stopPropagation()
                     editIconClickHandler()
-                }}
-            />
-            <button
-                className={cx(styles.commonIcon, styles.trashIcon)}
-                title="Delete note"
-                onClick={e => {
-                    e.stopPropagation()
-                    trashIconClickHandler()
                 }}
             />
             {/* <button
@@ -66,15 +62,17 @@ const DefaultFooter = ({
                     shareIconClickHandler()
                 }}
             /> */}
-        </div>
-        <div>
-            {displayGoToAnnotation && (
-                <button
-                    className={cx(styles.commonIcon, styles.goToPageIcon)}
-                    title="Go to annotation"
-                    onClick={goToAnnotationHandler}
-                />
-            )}
+            <button
+                className={cx(styles.commonIcon, {
+                    [styles.bookmark]: hasBookmark,
+                    [styles.notBookmark]: !hasBookmark,
+                })}
+                title="Toggle bookmark"
+                onClick={e => {
+                    e.stopPropagation()
+                    handleBookmarkToggle()
+                }}
+            />
         </div>
     </div>
 )

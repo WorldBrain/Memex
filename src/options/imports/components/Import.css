@@ -12,7 +12,7 @@
 
     & th,
     & td {
-        padding: 15px;
+        padding: 15px 10px 10px 10px;
     }
 
     & th {
@@ -31,7 +31,8 @@
     & td:first-child {
         text-align: initial;
         font-weight: 500;
-        width: 190px;
+        width: 30%;
+        padding: 15px 5px 15px 15px;
     }
 }
 
@@ -91,7 +92,6 @@
 }
 
 .loadingBlocker {
-    z-index: 2;
     position: absolute;
     top: 0;
     display: flex;
@@ -100,6 +100,7 @@
     align-items: center;
     height: 750px;
     width: 830px;
+    z-index: 25000000;
     background: #fbfafa;
     opacity: 0.8;
 }

@@ -1,5 +1,5 @@
 .memex-highlight {
-    background: #bcf2ff;
+    background: #8fffd7;
     transition: all 0.1s;
     cursor: pointer;
 
@@ -8,6 +8,6 @@
     }
 
     &.dark {
-        background: #93dbc6;
+        background: #5cd9a6;
     }
 }

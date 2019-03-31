@@ -86,7 +86,7 @@ class TooltipContainer extends React.Component {
             switch (convertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
                     toggleSidebarShortcutEnabled &&
-                        (await remoteFunction('toggleSidebarOverlay')())
+                        (await remoteFunction('toggleSidebarOverlay')({override:true}))
                     break
                 case toggleHighlightsShortcut:
                     toggleHighlightsShortcutEnabled && this.toggleHighlights()

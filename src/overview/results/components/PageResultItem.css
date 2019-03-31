@@ -34,6 +34,7 @@
     margin-bottom: 18px;
     width: 800px;
     height: var(--height);
+    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 
     &.isSidebarOpen {
         border-right: solid #5cd9a4 5px;
@@ -45,7 +46,7 @@
     }
 
     &:hover .button {
-        opacity: 0.3;
+        opacity: 0.5;
     }
 
     &:hover .commentActive {
@@ -367,4 +368,15 @@
     color: white;
     font-size: 10px;
     padding-left: 1px;
+}
+
+@keyframes onload {
+    0% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }

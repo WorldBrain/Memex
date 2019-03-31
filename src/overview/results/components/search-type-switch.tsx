@@ -52,7 +52,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                         Notes
                         <span className={styles.betaBox}>
                          <ButtonTooltip
-                            tooltipText="Searching notes is in beta mode. Bugs may appear."
+                            tooltipText="Searching notes is in beta mode. Bugs may appear. Let us know: support@worldbrain.io or github.com/worldbrain"
                             position="bottom"
                         >
                         <span className={styles.beta}>beta</span>

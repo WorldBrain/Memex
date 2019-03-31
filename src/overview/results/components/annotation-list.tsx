@@ -180,8 +180,7 @@ class AnnotationList extends Component<Props, State> {
                     })}
                     onClick={this.toggleIsExpanded}
                 >
-                    <span className={styles.commentIcon} />
-                    <b>{this.props.annotations.length}</b> found on this page
+                    <b>{this.props.annotations.length}</b> <span className={styles.resultsText}>results</span>
                     <span
                         className={cx(styles.icon, {
                             [styles.inverted]: this.state.isExpanded,

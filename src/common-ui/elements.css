@@ -4,7 +4,7 @@
 /* FONTs */
 
 .fontFamily {
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
 }
 
 /* Tag Pill */
@@ -111,7 +111,7 @@
     font-weight: 400;
     font-size: 14px;
     color: #222;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     border: 1px solid #e2e2e2;
     border-radius: 3px;
     padding: 10px 7px;
