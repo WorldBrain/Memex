@@ -130,12 +130,12 @@
     opacity: 1;
 
     &:placeholder-shown {
-        font-family: 'Inter';
+        font-family: 'Inter', sans-serif;
         color: color3;
     }
 
     &:placeholder {
-        font-family: 'Inter';
+        font-family: 'Inter', sans-serif;
         color: color3;
     }
 }

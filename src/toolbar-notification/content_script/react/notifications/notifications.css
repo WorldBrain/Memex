@@ -7,7 +7,7 @@
 
 .title {
     display: flex;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     flex-direction: row;
     width: 100%;
 }
