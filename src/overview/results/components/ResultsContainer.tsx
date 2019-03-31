@@ -7,7 +7,8 @@ import NotificationContainer, {
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
-import { OnboardingChecklist } from '../../onboarding/components'
+import SearchTypeSwitch from './search-type-switch-container'
+import * as actions from '../actions'
 import * as selectors from '../selectors'
 import { RootState } from '../../../options/types'
 
@@ -18,13 +19,16 @@ export interface StateProps {
     isBadTerm: boolean
     isLoading: boolean
     showInbox: boolean
+    areAnnotationsExpanded: boolean
     shouldShowCount: boolean
     isInvalidSearch: boolean
     showInitSearchMsg: boolean
     totalResultCount: number
 }
 
-export interface DispatchProps {}
+export interface DispatchProps {
+    toggleAreAnnotationsExpanded: (e: React.SyntheticEvent) => void
+}
 
 export interface OwnProps {}
 
@@ -36,49 +40,55 @@ class ResultsContainer extends PureComponent<Props> {
             return <NotificationContainer />
         }
 
+        const renderSearchSwitch = children => (
+            <React.Fragment>
+                <SearchTypeSwitch />
+                {children}
+            </React.Fragment>
+        )
+
         if (this.props.isBadTerm) {
-            return (
+            return renderSearchSwitch(
                 <ResultsMessage>
                     <NoResultBadTerm>
                         Search terms are too common, or have been filtered out
                         to increase performance.
                     </NoResultBadTerm>
-                </ResultsMessage>
+                </ResultsMessage>,
             )
         }
 
         if (this.props.isInvalidSearch) {
-            return (
+            return renderSearchSwitch(
                 <ResultsMessage>
                     <NoResultBadTerm title="Invalid search query">
                         You can't exclude terms without including at least 1
                         term to search
                     </NoResultBadTerm>
-                </ResultsMessage>
+                </ResultsMessage>,
             )
         }
 
         if (this.props.noResults) {
-            return (
+            return renderSearchSwitch(
                 <ResultsMessage>
                     <NoResultBadTerm>
                         found for this query. ¯\_(ツ)_/¯
                     </NoResultBadTerm>
-                </ResultsMessage>
+                </ResultsMessage>,
             )
         }
 
         // No issues; render out results list view
-        return (
+        return renderSearchSwitch(
             <React.Fragment>
                 {this.props.shouldShowCount && (
                     <ResultsMessage small>
-                        {this.props.totalResultCount}{' '}results
+                        {this.props.totalResultCount} results
                     </ResultsMessage>
                 )}
                 <ResultList />
-                {!this.props.isLoading}
-            </React.Fragment>
+            </React.Fragment>,
         )
     }
 
@@ -92,13 +102,19 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
     isLoading: selectors.isLoading(state),
+    areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
     shouldShowCount: selectors.shouldShowCount(state),
     isInvalidSearch: selectors.isInvalidSearch(state),
     totalResultCount: selectors.totalResultCount(state),
     showInitSearchMsg: selectors.showInitSearchMsg(state),
 })
 
-const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = () => ({})
+const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
+    toggleAreAnnotationsExpanded: e => {
+        e.preventDefault()
+        dispatch(actions.toggleAreAnnotationsExpanded())
+    },
+})
 
 export default connect(
     mapState,

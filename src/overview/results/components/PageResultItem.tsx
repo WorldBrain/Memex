@@ -10,6 +10,7 @@ import { LoadingIndicator } from '../../../common-ui/components'
 import niceTime from '../../../util/nice-time'
 import SemiCircularRibbon from './SemiCircularRibbon'
 import ButtonTooltip from '../../../common-ui/components/button-tooltip'
+import AnnotationList from './annotation-list'
 
 const styles = require('./PageResultItem.css')
 
@@ -24,7 +25,11 @@ export interface Props {
     hasBookmark: boolean
     isSidebarOpen: boolean
     isListFilterActive: boolean
-    tagPills: ReactNode[]
+    areAnnotationsExpanded: boolean
+    isResponsibleForSidebar: boolean
+    annotations: any[]
+    annotsCount: number
+    tagHolder: ReactNode
     tagManager: ReactNode
     onTagBtnClick: MouseEventHandler
     onTrashBtnClick: MouseEventHandler
@@ -49,6 +54,10 @@ class PageResultItem extends PureComponent<Props> {
         })
     }
 
+    get hrefToPage() {
+        return `http://${this.props.url}`
+    }
+
     dragStart: DragEventHandler = e => {
         const { url, setUrlDragged } = this.props
 
@@ -64,6 +73,21 @@ class PageResultItem extends PureComponent<Props> {
         }
     }
 
+    renderAnnotsList() {
+        if (!(this.props.annotations && this.props.annotations.length)) {
+            return null
+        }
+
+        return (
+            <AnnotationList
+                isExpandedOverride={this.props.areAnnotationsExpanded}
+                openAnnotationSidebar={this.props.onCommentBtnClick}
+                pageUrl={this.hrefToPage}
+                annotations={this.props.annotations}
+            />
+        )
+    }
+
     render() {
         return (
             <li
@@ -74,12 +98,17 @@ class PageResultItem extends PureComponent<Props> {
                 {this.props.isDeleting && (
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
-                <div className={styles.rootContainer}>
+                <div
+                    className={classNames(styles.rootContainer, {
+                        [styles.isSidebarOpen]: this.props
+                            .isResponsibleForSidebar,
+                    })}
+                >
                     <a
                         onDragStart={this.dragStart}
                         onDragEnd={this.props.resetUrlDragged}
                         className={styles.root}
-                        href={this.props.url}
+                        href={this.hrefToPage}
                         target="_blank"
                         draggable
                     >
@@ -93,12 +122,12 @@ class PageResultItem extends PureComponent<Props> {
                                 }
                             />
                         </div>
-                        <div className={styles.infoContainer}> 
+                        <div className={styles.infoContainer}>
                             <div className={styles.firstlineContainer}>
-                                    <div
-                                        className={styles.title}
-                                        title={this.props.title}
-                                        >
+                                <div
+                                    className={styles.title}
+                                    title={this.props.title}
+                                >
                                     {this.props.favIcon && (
                                         <img
                                             className={styles.favIcon}
@@ -106,107 +135,89 @@ class PageResultItem extends PureComponent<Props> {
                                         />
                                     )}
                                     <span className={styles.titleText}>
-                                    {this.props.title}
+                                        {this.props.title}
                                     </span>
                                 </div>
-                                 <ButtonTooltip
-                                    tooltipText='Remove from collection'
+                                <ButtonTooltip
+                                    tooltipText="Remove from collection"
                                     position="leftNarrow"
                                 >
-                                <div className={styles.crossRibbon}>
-                                    {this.props.isListFilterActive && (
-                                        <SemiCircularRibbon
-                                            onClick={this.props.handleCrossRibbonClick}
-                                        />
-                                    )}
-                                </div>
+                                    <div className={styles.crossRibbon}>
+                                        {this.props.isListFilterActive && (
+                                            <SemiCircularRibbon
+                                                onClick={
+                                                    this.props
+                                                        .handleCrossRibbonClick
+                                                }
+                                            />
+                                        )}
+                                    </div>
                                 </ButtonTooltip>
                             </div>
                             <div className={styles.url}>{this.props.url}</div>
-                            
+
                             <div className={styles.detailsContainer}>
                                 <div className={styles.detailsBox}>
                                     <div className={styles.displayTime}>
                                         {' '}
                                         {niceTime(this.props.displayTime)}{' '}
                                     </div>
-                                    <div className={styles.tagList}>
-                                        {this.props.tagPills}
-                                    </div>
+                                    {/* Tag Holder */}
+                                    {this.props.tagHolder}
                                 </div>
                                 <div
-                                        className={styles.buttonsContainer}
-                                        onClick={e => e.preventDefault()}
+                                    className={styles.buttonsContainer}
+                                    onClick={e => e.preventDefault()}
+                                >
+                                    <button
+                                        disabled={this.props.isDeleting}
+                                        className={classNames(
+                                            styles.button,
+                                            styles.trash,
+                                        )}
+                                        onClick={this.props.onTrashBtnClick}
+                                        title="Delete this page & all related content"
+                                    />
+                                    <button
+                                        className={classNames(
+                                            styles.button,
+                                            styles.tag,
+                                        )}
+                                        onClick={this.props.onTagBtnClick}
+                                        ref={this.props.setTagButtonRef}
+                                        title="Add/View Tags"
+                                    />
+                                    <button
+                                        className={classNames(
+                                            styles.button,
+                                            styles.comment,
+                                            {
+                                                [styles.commentActive]:
+                                                    this.props.annotsCount > 0,
+                                            },
+                                        )}
+                                        onClick={this.props.onCommentBtnClick}
+                                        title="Add/View Commments & Annotations"
                                     >
-                                        <ButtonTooltip
-                                            tooltipText='Delete this page & all related content'
-                                            position="bottom"
-                                        >
-                                        <button
-                                            disabled={this.props.isDeleting}
-                                            className={classNames(
-                                                styles.button,
-                                                styles.trash,
-                                            )}
-                                            onClick={this.props.onTrashBtnClick}
-                                            title={
-                                                'Delete this page & all related content'
-                                            }
-                                        />
-                                        </ButtonTooltip>
-                                         <ButtonTooltip
-                                            tooltipText='See & add Tags'
-                                            position="bottom"
-                                        >
-                                        <button
-                                            className={classNames(
-                                                styles.button,
-                                                styles.tag,
-                                            )}
-                                            onClick={this.props.onTagBtnClick}
-                                            ref={this.props.setTagButtonRef}
-                                            title={'Add/View Tags'}
-                                        />
-                                        </ButtonTooltip>
-                                         <ButtonTooltip
-                                            tooltipText='Open & Add comments'
-                                            position="bottom"
-                                        >
-                                        <button
-                                            className={classNames(
-                                                styles.button,
-                                                styles.comment,
-                                            )}
-                                            onClick={this.props.onCommentBtnClick}
-                                            title={
-                                                'Add/View Notes & Highlights'
-                                            }
-                                        />
-                                        </ButtonTooltip>
-
-                                         <ButtonTooltip
-                                            tooltipText={
-                                                !this.props.hasBookmark
-                                                    ? 'Star page'
-                                                    : 'Un-Star page'
-                                            }
-                                            position="bottom"
-                                        >
-                                        <button
-                                            disabled={this.props.isDeleting}
-                                            className={this.bookmarkClass}
-                                            onClick={
-                                                this.props.onToggleBookmarkClick
-                                            }
-                                            title={'Bookmark this page'}
-                                        />
-                                        </ButtonTooltip>
-                                    </div>
+                                        <span className={styles.annotsCount}>
+                                            {this.props.annotsCount}
+                                        </span>
+                                    </button>
+                                    <button
+                                        disabled={this.props.isDeleting}
+                                        className={this.bookmarkClass}
+                                        onClick={
+                                            this.props.onToggleBookmarkClick
+                                        }
+                                        title="Bookmark this page"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </a>
                 </div>
                 {this.props.tagManager}
+                {this.renderAnnotsList()}
             </li>
         )
     }

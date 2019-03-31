@@ -60,7 +60,9 @@ class TruncatedTextRenderer extends React.Component<Props, State> {
                             [styles.rotated]: !shouldTruncate,
                         })}
                         onClick={this._toggleTextTruncation}
-                    >[...]</button>
+                    >
+                        {shouldTruncate ? 'More' : 'Less'}
+                    </button>
                 )}
             </React.Fragment>
         )

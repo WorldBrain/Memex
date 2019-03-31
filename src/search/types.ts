@@ -1,4 +1,5 @@
-import Storex, { StorageCollection, FindManyOptions } from 'storex'
+import Storex, { FindManyOptions } from '@worldbrain/storex'
+import { StorageCollection } from '@worldbrain/storex/lib/types/manager'
 import DexieOrig from 'dexie'
 import { FilterQuery } from 'dexie-mongoify'
 
@@ -97,14 +98,6 @@ export interface FilteredURLs {
     isAllowed(url: string): boolean
 }
 
-/**
- * @typedef {Object} VisitInteraction
- * @property {number} duration Time user was active during visit (ms).
- * @property {number} scrollPx Y-axis pixel scrolled to at point in time.
- * @property {number} scrollPerc
- * @property {number} scrollMaxPx Furthest y-axis pixel scrolled to during visit.
- * @property {number} scrollMaxPerc
- */
 export interface VisitInteraction {
     duration: number
     scrollPx: number
@@ -113,12 +106,6 @@ export interface VisitInteraction {
     scrollMaxPerc: number
 }
 
-/**
- * @typedef {Object} PageAddRequest
- * @property {any} pageData TODO: type
- * @property {number[]} [visits=[]] Opt. visit times to assoc. with Page.
- * @property {number} [bookmark] Opt. bookmark time to assoc. with Page.
- */
 export interface PageAddRequest {
     pageDoc: PageDoc
     visits: VisitInput[]

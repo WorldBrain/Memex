@@ -86,7 +86,7 @@ class TooltipContainer extends React.Component {
             switch (convertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
                     toggleSidebarShortcutEnabled &&
-                        (await remoteFunction('toggleSidebarOverlay')())
+                        (await remoteFunction('toggleSidebarOverlay')({override:true}))
                     break
                 case toggleHighlightsShortcut:
                     toggleHighlightsShortcutEnabled && this.toggleHighlights()
@@ -114,9 +114,9 @@ class TooltipContainer extends React.Component {
     }
 
     fetchAndHighlightAnnotations = async () => {
-        const annotations = await remoteFunction('getAllAnnotationsByUrl')(
-            window.location.href,
-        )
+        const annotations = await remoteFunction('getAllAnnotationsByUrl')({
+            url: window.location.href,
+        })
         const highlightables = annotations.filter(
             annotation => annotation.selector,
         )

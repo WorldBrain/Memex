@@ -385,19 +385,19 @@ class AddListDropdownContainer extends Component<Props, State> {
     private renderLists() {
         const lists = this.getDisplayLists()
 
-        const listOptions = lists.map((list, i) => (
+        const listOptions: React.ReactNode[] = lists.map((list, i) => (
             <IndexDropdownRow
                 {...list}
                 key={i}
-                isList={true}
                 onClick={this.handleListClick(i)}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 isForSidebar={false}
+                isList
             />
         ))
 
         if (this.canCreateList()) {
-            listOptions.push(
+            const addRow: React.ReactNode = (
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
@@ -407,30 +407,20 @@ class AddListDropdownContainer extends Component<Props, State> {
                         this.state.focused === this.state.displayFilters.length
                     }
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                />,
+                />
             )
+            return [addRow, ...listOptions]
         }
+
         return listOptions
     }
 
     render() {
         return (
-            // <AddListDropdown
-            // onTagSearchChange={this.handleSearchChange}
-            // onTagSearchKeyDown={this.handleSearchKeyDown}
-            //     setInputRef={this.setInputRef}
-            //     tagSearchValue={this.state.searchVal}
-            //     overviewMode={this.overviewMode()}
-            //     numberOfTags={this.state.filters.length}
-            //     {...this.props}
-            // >
-            //     {this.renderLists()}
-            // </AddListDropdown>
             <IndexDropdown
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchKeyDown={this.handleSearchKeyDown}
                 setInputRef={this.setInputRef}
-                isList={1}
                 numberOfTags={
                     this.props.allTabsCollection
                         ? this.state.multiEdit.size

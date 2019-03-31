@@ -1,8 +1,29 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6, color3 from colors;
+
 .root {
     list-style: none;
-    margin: 10px auto;
-    padding: 0;
-    max-width: 800px;
+    width: 100%;
+    overflow: scroll;
+    margin: 0px auto;
+    padding: 1px 0px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    justify-content: flex-start;
+    align-items: center;
+    top: 90px;
+    height: calc(100vh - 90px);
+}
+
+.clusterTime {
+    font-weight: 600;
+    font-size: 0.7rem;
+    font-size: 18px;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    align-self: center;
+    width: 800px;
 }
 
 .timestamp {
@@ -15,39 +36,28 @@
 
 .noScroll {
     overflow: hidden;
-    margin-bottom: 0;
 }
 
 .main {
-    margin-top: 90px;
     font-size: 0.65rem;
     font-weight: normal;
-
-    @media (max-width: 1000px) {
-        margin-top: 100px !important; /* stylelint-disable-line declaration-no-important */
-    }
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    align-items: center;
 }
 
 .proTip {
     margin-left: 1px;
-    color: #3eb995;
-    font-size: 12px;
+    font-size: 11px;
     display: flex;
     justify-content: center;
     margin-top: 14px;
 }
 
-.shortcut {
-    vertical-align: middle;
-    width: 35%;
-    height: 35%;
-    margin: -2px 10px 0px 10px;
-}
-
 .emoji {
-    font-size: 30px;
+    font-size: 15px;
     vertical-align: middle;
-    margin-top: 1px;
     margin-right: 5px;
 }
 
@@ -55,7 +65,44 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 750px;
+    width: 500px;
     margin: 30px auto 50px auto;
-    font-size: 15px;
+    font-size: 11px;
+    color: color4;
+}
+
+.tutorial {
+    display: flex;
+    flex-direction: row;
+    margin: 0 5px;
+}
+
+.keyboardM {
+    box-shadow: 0px 1px 4px #bababa;
+    color: color4;
+    font-size: 12px;
+    margin: 0px 5px;
+    display: flex;
+    height: 25px;
+    width: 25px;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    border-radius: 3px;
+}
+
+.keyboardPlus {
+    color: color4;
+    font-size: 11px;
+    margin: 0 5px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    height: 25px;
+    vertical-align: middle;
+}
+
+.keyboardSpace {
+    composes: keyboardM;
+    width: 90px;
 }

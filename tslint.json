@@ -31,7 +31,16 @@
         "no-empty": false,
         "no-empty-interface": false,
         "no-eval": true,
-        "no-implicit-dependencies": false,
+        "no-implicit-dependencies": [
+            true,
+            "dev",
+            [
+                "@worldbrain/storex",
+                "@worldbrain/storex-backend-dexie",
+                "@worldbrain/memex-stemmer",
+                "src"
+            ]
+        ],
         "no-object-literal-type-assertion": false,
         "no-shadowed-variable": true,
         "no-string-literal": false,

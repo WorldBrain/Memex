@@ -12,13 +12,17 @@ export default class AnnotationsManager {
         'getAllAnnotationsByUrl',
     )
     private readonly _getTagsByAnnotationUrlRPC = remoteFunction(
-        'getTagsByAnnotationUrl',
+        'getAnnotationTags',
     )
     private readonly _editAnnotationRPC = remoteFunction('editAnnotation')
     private readonly _editAnnotationTagsRPC = remoteFunction(
         'editAnnotationTags',
     )
     private readonly _deleteAnnotationRPC = remoteFunction('deleteAnnotation')
+
+    private readonly bookmarkAnnotationRPC = remoteFunction(
+        'toggleAnnotBookmark',
+    )
 
     public createAnnotation = async ({
         url,
@@ -27,6 +31,7 @@ export default class AnnotationsManager {
         comment,
         anchor,
         tags,
+        bookmarked,
     }: {
         url: string
         title: string
@@ -34,6 +39,7 @@ export default class AnnotationsManager {
         comment: string
         anchor: Anchor
         tags: string[]
+        bookmarked?: boolean
     }) => {
         this._processEventRPC({ type: EVENT_NAMES.CREATE_ANNOTATION })
 
@@ -44,6 +50,7 @@ export default class AnnotationsManager {
             body,
             comment,
             selector: anchor,
+            bookmarked,
         })
 
         // Write tags to database.
@@ -52,11 +59,15 @@ export default class AnnotationsManager {
         })
     }
 
-    public fetchAnnotationsWithTags = async (url: string) => {
+    public fetchAnnotationsWithTags = async (
+        url: string,
+        limit = 10,
+        skip = 0,
+    ) => {
         const annotationsWithoutTags: Omit<
             Annotation,
             'tags'
-        >[] = await this._getAllAnnotationsByUrlRPC(url)
+        >[] = await this._getAllAnnotationsByUrlRPC({ url, limit, skip })
 
         return Promise.all(
             annotationsWithoutTags.map(async annotation => {
@@ -105,6 +116,10 @@ export default class AnnotationsManager {
     public deleteAnnotation = async (url: string) => {
         await this._processEventRPC({ type: EVENT_NAMES.DELETE_ANNOTATION })
         await this._deleteAnnotationRPC(url)
+    }
+
+    public toggleBookmark = async (url: string) => {
+        return this.bookmarkAnnotationRPC({ url })
     }
 
     private _getTagArrays: (

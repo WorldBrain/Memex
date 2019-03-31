@@ -88,7 +88,7 @@ const tagSearch = (getDb: () => Promise<Dexie>) => async ({
 const domainSearch = (getDb: () => Promise<Dexie>) => async (
     domains: string[],
 ) => {
-    if (!domains.length) {
+    if (!domains || !domains.length) {
         return undefined
     }
 

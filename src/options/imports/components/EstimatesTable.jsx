@@ -22,9 +22,9 @@ const EstimatesTable = ({
         <thead className={localStyles.importTableHead}>
             <tr>
                 <th />
-                <th>Saved pages</th>
-                <th>Not downloaded</th>
-                <th>Download time</th>
+                <th>Saved <br />pages</th>
+                <th>Not<br /> downloaded</th>
+                <th>Download <br />time</th>
             </tr>
         </thead>
         <tbody>

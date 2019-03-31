@@ -88,7 +88,7 @@ const handleKeyboardShortcuts = settingsState => async e => {
             switch (convertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
                     toggleSidebarShortcutEnabled &&
-                        (await remoteFunction('toggleSidebarOverlay')())
+                         (await remoteFunction('toggleSidebarOverlay')({override:true}))
                     break
                 case toggleHighlightsShortcut:
                     toggleHighlightsShortcutEnabled && toggleHighlights()

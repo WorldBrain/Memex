@@ -1,15 +1,13 @@
 import * as React from 'react'
+import Waypoint from 'react-waypoint'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
 import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
-import AnnotationBoxContainer from '../../annotation-box'
+import AnnotationBox from 'src/sidebar-common/annotation-box'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
 import { Annotation } from '../types'
 import { openSettings } from '../../utils'
-
-import SearchBox from '../../components/search-box'
-import cx from 'classnames'
 
 const styles = require('./sidebar.css')
 
@@ -17,6 +15,8 @@ interface Props {
     env: 'inpage' | 'overview'
     isOpen: boolean
     isLoading: boolean
+    needsWaypoint: boolean
+    appendLoader: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
     hoverAnnotationUrl: string
@@ -31,6 +31,10 @@ interface Props {
         annotation: Annotation,
     ) => (e: Event) => void
     handleAnnotationBoxMouseLeave: () => (e: Event) => void
+    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
+    handleDeleteAnnotation: (url: string) => void
+    handleScrollPagination: (args: Waypoint.CallbackArgs) => void
+    handleBookmarkToggle: (url: string) => void
 }
 
 interface State {
@@ -41,39 +45,48 @@ interface State {
 }
 
 class Sidebar extends React.Component<Props, State> {
-    constructor(props: Props) {
-        super(props)
-        this.state = {
-            searchValue: '',
-            showFilters: false,
-            showPageResults: true,
-            showAllResults: false,
+    private _handleSettingsBtnClick = openSettings
+
+    state = {
+        searchValue: '',
+        showFilters: false,
+        showPageResults: true,
+        showAllResults: false,
+    }
+
+    private renderAnnots() {
+        const annots = this.props.annotations.map(annot => (
+            <AnnotationBox
+                key={annot.url}
+                env={this.props.env}
+                {...annot}
+                isActive={this.props.activeAnnotationUrl === annot.url}
+                isHovered={this.props.hoverAnnotationUrl === annot.url}
+                handleGoToAnnotation={this.props.handleGoToAnnotation(annot)}
+                handleEditAnnotation={this.props.handleEditAnnotation}
+                handleDeleteAnnotation={this.props.handleDeleteAnnotation}
+                handleMouseLeave={this.props.handleAnnotationBoxMouseLeave()}
+                handleMouseEnter={this.props.handleAnnotationBoxMouseEnter(
+                    annot,
+                )}
+                handleBookmarkToggle={this.props.handleBookmarkToggle}
+            />
+        ))
+
+        if (this.props.needsWaypoint) {
+            annots.push(
+                <Waypoint
+                    onEnter={this.props.handleScrollPagination}
+                    key="sidebar-waypoint"
+                />,
+            )
         }
-    }
 
-    private _handleSettingsBtnClick = () => {
-        openSettings()
-    }
-
-    private handleSearchKeyDown = (
-        e: React.KeyboardEvent<HTMLInputElement>,
-    ) => {
-        if (
-            this.props.env === 'inpage' &&
-            !(e.ctrlKey || e.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
-        ) {
-            e.preventDefault()
-            e.stopPropagation()
-            this.setState(state => ({ searchValue: state.searchValue + e.key }))
+        if (this.props.isLoading && this.props.appendLoader) {
+            annots.push(<Loader key="more-loading" />)
         }
-    }
 
-    private handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault()
-        e.stopPropagation()
-        const searchValue = e.target.value
-        this.setState({ searchValue })
+        return annots
     }
 
     render() {
@@ -82,15 +95,10 @@ class Sidebar extends React.Component<Props, State> {
             isOpen,
             isLoading,
             annotations,
-            activeAnnotationUrl,
-            hoverAnnotationUrl,
             showCommentBox,
             showCongratsMessage,
             closeSidebar,
-            handleGoToAnnotation,
             handleAddCommentBtnClick,
-            handleAnnotationBoxMouseEnter,
-            handleAnnotationBoxMouseLeave,
         } = this.props
 
         return (
@@ -103,165 +111,32 @@ class Sidebar extends React.Component<Props, State> {
                     noOverlay
                     disableCloseOnEsc
                 >
+                    <Topbar
+                        disableAddCommentBtn={showCommentBox}
+                        handleCloseBtnClick={closeSidebar}
+                        handleSettingsBtnClick={
+                            this._handleSettingsBtnClick
+                        }
+                        handleAddCommentBtnClick={handleAddCommentBtnClick}
+                    />
                     <div className={styles.sidebar}>
-                        <Topbar
-                            disableAddCommentBtn={showCommentBox}
-                            handleCloseBtnClick={closeSidebar}
-                            handleSettingsBtnClick={
-                                this._handleSettingsBtnClick
-                            }
-                            handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        />
-
-                        {/* New ribbon/sidebar work */}
-
-                        {/*<SearchBox
-                            searchValue={this.state.searchValue}
-                            onSearchChange={this.handleChange}
-                            onSearchEnter={this.handleSearchKeyDown}
-                            onClearBtn={() =>
-                                this.setState({ searchValue: '' })
-                            }
-                        />
-
-                        <div className={styles.navBar}>
-                            <a
-                                className={cx(
-                                    styles.filterNav,
-                                    styles.navLinks,
-                                )}
-                                onClick={() =>
-                                    this.setState(prevState => ({
-                                        showFilters: !prevState.showFilters,
-                                    }))
-                                }
-                            >
-                                Filters
-                            </a>
-                            <span className={styles.resultsNav}>
-                                <a
-                                    className={styles.navLinks}
-                                    onClick={() =>
-                                        this.setState({
-                                            showPageResults: true,
-                                            showAllResults: false,
-                                        })
-                                    }
-                                >
-                                    This page
-                                </a>
-                                <a
-                                    className={styles.navLinks}
-                                    onClick={() =>
-                                        this.setState(prevState => ({
-                                            showPageResults: false,
-                                            showAllResults: true,
-                                        }))
-                                    }
-                                >
-                                    All
-                                </a>
-                            </span>
-                        </div>*/}
-
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
                                 <CommentBoxContainer env={env} />
                             </div>
                         )}
-
-                        {/*{this.state.showPageResults &&*/}
-
-                        {isLoading ? (
+                        {isLoading && !this.props.appendLoader ? (
                             <Loader />
                         ) : annotations.length === 0 ? (
                             <EmptyMessage />
                         ) : (
                             <div className={styles.annotationsSection}>
-                                {annotations.map(annotation => (
-                                    <AnnotationBoxContainer
-                                        key={annotation.url}
-                                        env={env}
-                                        {...annotation}
-                                        isActive={
-                                            activeAnnotationUrl ===
-                                            annotation.url
-                                        }
-                                        isHovered={
-                                            hoverAnnotationUrl ===
-                                            annotation.url
-                                        }
-                                        handleGoToAnnotation={handleGoToAnnotation(
-                                            annotation,
-                                        )}
-                                        handleMouseEnter={handleAnnotationBoxMouseEnter(
-                                            annotation,
-                                        )}
-                                        handleMouseLeave={handleAnnotationBoxMouseLeave()}
-                                    />
-                                ))}
+                                {this.renderAnnots()}
                                 {showCongratsMessage && <CongratsMessage />}
                             </div>
                         )}
-
-                        {/* New ribbon/sidebar work */}
-                        {/*{this.state.showAllResults && (
-                            <div className={styles.allResultsDiv}>
-                                All results
-                            </div>
-                        )}*/}
                     </div>
                 </Menu>
-                {/* New ribbon/sidebar work */}
-
-                {/*{this.state.showFilters && (
-                    <div className={styles.filtersSidebar}>
-                        <div className={styles.filtersDiv}>
-                            <span>Filters</span>
-                            <button
-                                className={styles.arrow}
-                                onClick={() =>
-                                    this.setState({ showFilters: false })
-                                }
-                                title={'Close filters sidebar'}
-                            />
-                            <div className={styles.filters}>
-                                <button
-                                    className={cx(
-                                        styles.filterButtons,
-                                        styles.bookmark,
-                                    )}
-                                    onClick={() => {}}
-                                />
-                                <button
-                                    className={styles.filterButtons}
-                                    onClick={() => {}}
-                                >
-                                    Dates
-                                </button>
-                                <button
-                                    className={styles.filterButtons}
-                                    onClick={() => {}}
-                                >
-                                    Tags
-                                </button>
-                                <button
-                                    className={styles.filterButtons}
-                                    onClick={() => {}}
-                                >
-                                    Domains
-                                </button>
-                                <button
-                                    className={styles.filterButtons}
-                                    onClick={() => {}}
-                                >
-                                    Types
-                                </button>
-                            </div>
-                        </div>
-                        <div className={styles.listsDiv}>Custom lists</div>
-                    </div>
-                )}*/}
             </React.Fragment>
         )
     }

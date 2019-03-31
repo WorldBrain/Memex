@@ -7,18 +7,17 @@ class SearchFilters extends PureComponent {
     static propTypes = {
         tagFilter: PropTypes.node.isRequired,
         domainFilter: PropTypes.node.isRequired,
+        contentFilter: PropTypes.node.isRequired,
         filteredTags: PropTypes.node,
         filteredDomains: PropTypes.node,
         bookmarkFilter: PropTypes.node.isRequired,
-        typeFilters: PropTypes.node.isRequired,
-        filteredTypes: PropTypes.node,
     }
 
     render() {
         return (
             <div>
-                <div className = {styles.bookmarksFilter}>
-                {this.props.bookmarkFilter}
+                <div className={styles.bookmarksFilter}>
+                    {this.props.bookmarkFilter}
                 </div>
                 {this.props.tagFilter}
                 {this.props.filteredTags && (
@@ -32,11 +31,7 @@ class SearchFilters extends PureComponent {
                         {this.props.filteredDomains}
                     </div>
                 )}
-                {this.props.typeFilters}
-                <div className={styles.filtered}>
-                    {this.props.filteredTypes}
-                </div>
-                
+                {this.props.contentFilter}
             </div>
         )
     }

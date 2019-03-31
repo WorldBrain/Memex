@@ -16,6 +16,8 @@ export const goToAnnotation = (pageUrl: string) => async (
         return
     }
 
+    pageUrl = pageUrl.startsWith('http') ? pageUrl : `https://${pageUrl}`
+
     const tab = await browser.tabs.create({
         active: true,
         url: pageUrl,

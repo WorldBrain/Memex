@@ -50,6 +50,7 @@
     align-items: center;
     top: 80px;
     left: -8px;
+    z-index: 500;
     width: 105px;
     justify-content: space-evenly;
 

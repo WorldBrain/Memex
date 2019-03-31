@@ -15,6 +15,8 @@ import AnnotationsManager from '../../annotations-manager'
 interface StateProps {
     isOpen: boolean
     isLoading: boolean
+    needsWaypoint: boolean
+    appendLoader: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
     hoverAnnotationUrl: string
@@ -28,6 +30,10 @@ interface DispatchProps {
     closeSidebar: () => void
     handleAddCommentBtnClick: () => void
     setHoverAnnotationUrl: (url: string) => void
+    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
+    handleDeleteAnnotation: (url: string) => void
+    handleScrollPagination: () => void
+    handleBookmarkToggle: (url: string) => void
 }
 
 interface OwnProps {
@@ -133,6 +139,12 @@ class SidebarContainer extends React.Component<Props> {
                 handleAnnotationBoxMouseLeave={
                     this._handleAnnotationBoxMouseLeave
                 }
+                handleEditAnnotation={this.props.handleEditAnnotation}
+                handleDeleteAnnotation={this.props.handleDeleteAnnotation}
+                handleScrollPagination={this.props.handleScrollPagination}
+                needsWaypoint={this.props.needsWaypoint}
+                appendLoader={this.props.appendLoader}
+                handleBookmarkToggle={this.props.handleBookmarkToggle}
             />
         )
     }
@@ -145,6 +157,8 @@ const mapStateToProps: MapStateToProps<
 > = state => ({
     isOpen: selectors.isOpen(state),
     isLoading: selectors.isLoading(state),
+    needsWaypoint: selectors.needsPagWaypoint(state),
+    appendLoader: selectors.shouldAppendLoader(state),
     annotations: selectors.annotations(state),
     activeAnnotationUrl: selectors.activeAnnotationUrl(state),
     hoverAnnotationUrl: selectors.hoverAnnotationUrl(state),
@@ -152,17 +166,33 @@ const mapStateToProps: MapStateToProps<
     showCongratsMessage: selectors.showCongratsMessage(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+    props,
+) => ({
     onInit: () => dispatch(actions.initState()),
     setAnnotationsManager: annotationsManager =>
         dispatch(actions.setAnnotationsManager(annotationsManager)),
-    closeSidebar: () => dispatch(actions.closeSidebar()),
+    closeSidebar: () => {
+        // This state is not used in the content script version of sidebar
+        //  statically importing causes big issues
+        if (props.env === 'overview') {
+            const {
+                resetActiveSidebarIndex,
+            } = require('src/overview/results/actions')
+            dispatch(resetActiveSidebarIndex())
+        }
+
+        dispatch(actions.closeSidebar())
+    },
     handleAddCommentBtnClick: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
     setHoverAnnotationUrl: url => dispatch(actions.setHoverAnnotationUrl(url)),
+    handleEditAnnotation: (url, comment, tags) =>
+        dispatch(actions.editAnnotation(url, comment, tags)),
+    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
+    handleScrollPagination: () => dispatch(actions.fetchMoreAnnotations()),
+    handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
 })
 
 export default connect(

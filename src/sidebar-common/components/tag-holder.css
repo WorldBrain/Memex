@@ -26,7 +26,7 @@
 .placeholder {
     display: inline-block;
     color: #888;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     font-weight: 400;
     font-style: italic;
 }

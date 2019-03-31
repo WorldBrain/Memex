@@ -21,7 +21,7 @@ export const search = (getDb: () => Promise<Dexie>) => async ({
 }) => {
     const db = await getDb()
     // Extract query terms via QueryBuilder (may change)
-    const qb = new QueryBuilder()
+    const { isBadTerm, isInvalidSearch, ...qbParams } = new QueryBuilder()
         .searchTerm(query)
         .filterDomains(domains)
         .filterExcDomains(domainsExclude)
@@ -30,7 +30,7 @@ export const search = (getDb: () => Promise<Dexie>) => async ({
         .get()
 
     // Short-circuit search if bad term
-    if (qb.isBadTerm) {
+    if (isBadTerm) {
         return {
             docs: [],
             resultsExhausted: true,
@@ -39,7 +39,7 @@ export const search = (getDb: () => Promise<Dexie>) => async ({
         }
     }
 
-    if (qb.isInvalidSearch) {
+    if (isInvalidSearch) {
         return {
             docs: [],
             resultsExhausted: true,
@@ -48,17 +48,10 @@ export const search = (getDb: () => Promise<Dexie>) => async ({
         }
     }
 
-    // WTF
-    // Reshape needed params; prob consolidate interface later when remove old index code
     const params = {
         ...restParams,
         bookmarks: showOnlyBookmarks,
-        terms: [...qb.query],
-        termsExclude: [...qb.queryExclude],
-        domains: [...qb.domain],
-        domainsExclude: [...qb.domainExclude],
-        tags: [...qb.tags],
-        lists: [...qb.lists],
+        ...qbParams,
     } as SearchParams
 
     const { docs, totalCount } = await db
@@ -73,9 +66,9 @@ export const search = (getDb: () => Promise<Dexie>) => async ({
 
     return {
         docs,
-        resultsExhausted: docs.length < params.limit,
-        isBadTerm: qb.isBadTerm,
+        isBadTerm,
         totalCount,
+        resultsExhausted: docs.length < params.limit,
     }
 }
 
@@ -94,7 +87,7 @@ export const getMatchingPageCount = (
 /**
  * Main search logic. Calls the rest of serach depending on input search params.
  */
-const fullSearch = (getDb: () => Promise<Dexie>) => async ({
+export const fullSearch = (getDb: () => Promise<Dexie>) => async ({
     terms = [],
     termsExclude = [],
     ...params

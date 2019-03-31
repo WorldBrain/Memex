@@ -32,7 +32,7 @@ export const updateVisitInteractionData: VisitInteractionUpdater = ({
     scrollState,
 }) =>
     searchIndex
-        .updateTimestampMeta(url, +visitTime, {
+        .updateTimestampMeta(searchIndex.getDb)(url, +visitTime, {
             duration: activeTime,
             scrollPx: scrollState.pixel,
             scrollMaxPx: scrollState.maxPixel,

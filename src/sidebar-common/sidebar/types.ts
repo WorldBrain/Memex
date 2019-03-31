@@ -1,4 +1,4 @@
-/**
+/*
  * This file contains any type declarations pertinent to the sidebar.
  * Default export is the Sidebar's state's type declaration.
  */
@@ -27,7 +27,7 @@ export interface Annotation {
     createdWhen: number // Since backend returns number and not the actual date.
     lastEdited: number | null // Since backend returns number/null and not the actual date.
     tags: string[]
-    isBookmarked: boolean
+    hasBookmark: boolean
 }
 
 export default interface State {
@@ -39,6 +39,8 @@ export default interface State {
     isOpen: boolean
     /** Denotes whether the sidebar is loading annotations or not. */
     isLoading: boolean
+    /** Denotes whether or not more annotations are available. */
+    resultsExhausted: boolean
     /** Information about the page to pass to the storage. */
     page: Page
     /** Annotations that this page has. */
@@ -51,4 +53,6 @@ export default interface State {
     commentBox: CommentBoxState
     /** Denotes whether to to show the congrats message during onboarding or not. */
     showCongratsMessage: boolean
+    /** Represents the latest page of annotations being fetched. */
+    currentResultPage: number
 }

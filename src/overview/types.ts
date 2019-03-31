@@ -1,3 +1,6 @@
+import { Annotation } from 'src/sidebar-common/sidebar/types'
+import { PageUrlsByDay } from 'src/search/background/types'
+
 export interface Result {
     url: string
     title: string
@@ -9,7 +12,15 @@ export interface Result {
     displayTime: number
     screenshot: string
     favIcon: string
+    annotsCount: number
+    annotations: Annotation[]
 }
+
+export interface ResultWithIndex extends Result {
+    index: number
+}
+
+export type ResultsByUrl = Map<string, ResultWithIndex>
 
 export interface SearchResult {
     totalCount: number
@@ -17,6 +28,8 @@ export interface SearchResult {
     isBadTerm: boolean
     isInvalidSearch: boolean
     docs: Result[]
+    isAnnotsSearch: boolean
+    annotsByDay?: PageUrlsByDay
 }
 
 export interface Tooltip {

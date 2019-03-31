@@ -81,7 +81,8 @@ describe('remoteFunction', () => {
             returnValue: 'Remote function return value',
         })
         const remoteFunc = remoteFunction('remoteFunc', { tabId: 1 })
-        await expect(remoteFunc()).resolves.toBe('Remote function return value')
+        const returnVal = await remoteFunc()
+        expect(returnVal).toBe('Remote function return value')
     })
 
     it('should create fake remote functions', async () => {

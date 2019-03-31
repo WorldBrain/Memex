@@ -1,164 +1,164 @@
 /* Positioning */
 
 .iconPosition {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: 80%;
-	display: inline-flex;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 80%;
+    display: flex;
 }
 
 .standardMenu {
-	width: 22px;
-	height: 22px;
-	padding-left: 35px;
-	margin-right: 15px;
-	background-size: 20px;
-	background-position: center;
-	background-repeat: no-repeat;
+    width: 22px;
+    height: 22px;
+    padding-left: 35px;
+    margin-right: 15px;
+    background-size: 20px;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* LOGOS */
 
 .logoSquared {
-	composes: iconPosition;
-	background-image: url('/img/worldbrain-logo-narrow-bw-48.png');
+    composes: iconPosition;
+    background-image: url('/img/worldbrain-logo-narrow-bw-48.png');
 }
 
 /* OTHER */
 
 .removeIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/removeIcon.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/removeIcon.svg');
 }
 
 .searchIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/searchIcon.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/searchIcon.svg');
 }
 
 .checkMark {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/check.svg');
-	opacity: 0.7;
-	background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/check.svg');
+    opacity: 0.7;
+    background-size: 100%;
 }
 
 .inboxIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/notification.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/notification.svg');
 }
 
 .inboxIconFull {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/notificationFull.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/notificationFull.svg');
 }
 
 .settingsIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/settings.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/settings.svg');
 }
 
 .upgradeIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/star_yellow.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/star_yellow.svg');
 }
 
 .collectionsIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/collections.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/collections.svg');
 }
 
 .filtersIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/filter.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/filter.svg');
 }
 
 .collectionsIconFull {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/collectionsIconFull.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/collectionsIconFull.svg');
 }
 
 .filtersIconFull {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/filtersIconFull.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/filtersIconFull.svg');
 }
 
 .arrowTriangle {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/arrow.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/arrow.svg');
 }
 
 .importIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/import.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/import.svg');
 }
 
 .backupIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/backup.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/backup.svg');
 }
 
 .blockIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/block.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/block.svg');
 }
 
 .privacyIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/shield.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/shield.svg');
 }
 
 .teamIcon {
-	composes: iconPosition;
-	background-image: url('/img/arrow.svg');
+    composes: iconPosition;
+    background-image: url('/img/arrow.svg');
 }
 
 .helpIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/help.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/help.svg');
 }
 
 .tutorialIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/book.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/book.svg');
 }
 
 .searchGreyIcon {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/searchGrey.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/searchGrey.svg');
 }
 
 .WarningIconWhite {
-	background-position: center;
-	background-repeat: no-repeat;
-	background-image: url('/img/warning_white.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/warning_white.svg');
 }
 
 .addIcon {
-	composes: iconPosition;
-	background-image: url('/img/plus.svg');
+    composes: iconPosition;
+    background-image: url('/img/plus.svg');
 }
 
 .arrowUpRight {
-	composes: iconPosition;
-	background-image: url('/img/arrowUp.svg');
+    composes: iconPosition;
+    background-image: url('/img/arrowUp.svg');
 }

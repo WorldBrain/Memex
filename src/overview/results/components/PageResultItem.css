@@ -1,12 +1,11 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color1, color2, color3, color6 from colors;
+
 :root {
     --height: 100px;
     --imgWidth: 200px;
     --vertical-spacing: 30px;
     --compact-scale: 0.6;
-}
-
-* {
-    box-sizing: border-box;
 }
 
 /* List entries shown as context around a search result */
@@ -35,6 +34,11 @@
     margin-bottom: 18px;
     width: 800px;
     height: var(--height);
+    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+
+    &.isSidebarOpen {
+        border-right: solid #5cd9a4 5px;
+    }
 
     &:hover .crossRibbon {
         display: block;
@@ -42,7 +46,15 @@
     }
 
     &:hover .button {
-        opacity: 0.6;
+        opacity: 0.5;
+    }
+
+    &:hover .commentActive {
+        opacity: 0.8;
+    }
+
+    &:hover .bookmark {
+        opacity: 0.8;
     }
 
     /*  &:hover .title {
@@ -131,6 +143,7 @@
     border-right: solid 1px #ebebeb;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
+    background-color: white;
 
     & .screenshot {
         max-width: 100%;
@@ -159,7 +172,7 @@
 }
 
 .title {
-    composes: darkBlue from '../../../common-ui/colors.css';
+    color: color3;
     display: flex;
     flex-direction: row;
     font-size: 16px;
@@ -183,7 +196,7 @@
 }
 
 .url {
-    composes: subTitleColor from '../../../common-ui/colors.css';
+    color: color6;
     font-size: 13px;
     min-width: 0;
     font-weight: 400;
@@ -228,11 +241,12 @@
 
 .displayTime {
     font-size: 12px;
-    color: #c1c1c1;
+    color: color6;
+    min-width: fit-content;
 }
 
 .button {
-    composes: buttonRadiusSmall hoverColor from '../../../common-ui/colors.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     display: inline;
     border: none;
     width: 24px;
@@ -243,8 +257,12 @@
     background-position: center;
     background-size: 16px;
     border-radius: 3px;
-    background-color: transparent;
     opacity: 0.2;
+    background-color: transparent;
+
+    &:hover .trash {
+        opacity: 0.8;
+    }
 }
 
 .trash {
@@ -254,6 +272,14 @@
 .comment {
     background-image: url('/img/comment.svg');
     margin-left: 1px;
+    background-size: 17px;
+}
+
+.commentActive {
+    background-image: url('/img/commentFull.svg');
+    margin-left: 1px;
+    background-size: 17px;
+    opacity: 0.8;
 }
 
 .bookmark {
@@ -261,6 +287,10 @@
     opacity: 0.8;
     background-size: 18px;
     background-position-y: 3px;
+
+    &:hover {
+        opacity: 1;
+    }
 }
 
 .notBookmark {
@@ -306,7 +336,7 @@
 .dragElement {
     text-decoration: none;
     display: none;
-    border: solid 2px #5cd9a6;
+    border: solid 2px color2;
     border-radius: 4px;
     font-size: 0.8rem;
     max-height: 50px;
@@ -331,5 +361,22 @@
 
     & .displayTime {
         margin-top: -8px;
+    }
+}
+
+.annotsCount {
+    color: white;
+    font-size: 10px;
+    padding-left: 1px;
+}
+
+@keyframes onload {
+    0% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
     }
 }

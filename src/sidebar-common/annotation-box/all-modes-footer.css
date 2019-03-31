@@ -26,6 +26,7 @@
     border: none;
     outline: none;
     margin-right: -6px;
+    background: transparent;
 }
 
 .deleteReally {
@@ -33,4 +34,5 @@
     font-weight: 800;
     font-size: 15px;
     color: #000;
+    margin-right: 5px;
 }

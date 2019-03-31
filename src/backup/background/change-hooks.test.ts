@@ -1,7 +1,7 @@
 import * as expect from 'expect'
-import Storex from 'storex'
-import { DexieStorageBackend } from 'storex-backend-dexie'
-import inMemory from 'storex-backend-dexie/lib/in-memory'
+import Storex from '@worldbrain/storex'
+import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 
 import { StorageManager } from '../../search/types'
 import setupChangeTracking from './change-hooks'

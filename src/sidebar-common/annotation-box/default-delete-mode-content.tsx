@@ -11,13 +11,15 @@ interface Props {
     tags: string[]
     isEdited: boolean
     timestamp: string
+    hasBookmark: boolean
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleDeleteAnnotation: () => void
     handleCancelOperation: () => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
-    // shareIconClickHandler: () => void
-    replyIconClickHandler: () => void
+    shareIconClickHandler: () => void
+    handleTagClick: (tag: string) => void
+    handleBookmarkToggle: () => void
     getTruncatedTextObject: (
         text: string,
     ) => {
@@ -35,6 +37,7 @@ const DefaultDeleteModeContent = (props: Props) => (
                 comment={props.comment}
                 tags={props.tags}
                 isJustComment={!props.body}
+                handleTagClick={props.handleTagClick}
                 getTruncatedTextObject={props.getTruncatedTextObject}
             />
         )}
@@ -44,14 +47,14 @@ const DefaultDeleteModeContent = (props: Props) => (
             mode={props.mode}
             isEdited={props.isEdited}
             timestamp={props.timestamp}
+            hasBookmark={props.hasBookmark}
             displayGoToAnnotation={props.body && props.env === 'overview'}
             handleGoToAnnotation={props.handleGoToAnnotation}
             handleDeleteAnnotation={props.handleDeleteAnnotation}
             handleCancelDeletion={props.handleCancelOperation}
             editIconClickHandler={props.editIconClickHandler}
             trashIconClickHandler={props.trashIconClickHandler}
-            // shareIconClickHandler={props.shareIconClickHandler}
-            replyIconClickHandler={props.replyIconClickHandler}
+            handleBookmarkToggle={props.handleBookmarkToggle}
         />
     </React.Fragment>
 )

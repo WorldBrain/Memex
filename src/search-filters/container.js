@@ -5,10 +5,10 @@ import { bindActionCreators } from 'redux'
 import { Checkbox } from 'src/common-ui/components'
 import {
     SearchFilters,
-    BookmarkFilter,
     FilterBar,
     FilteredRow,
     IndexDropdownSB,
+    ContentTypeContainer,
 } from './components'
 import { actions, selectors } from './'
 import { selectors as sidebar } from '../overview/sidebar-left'
@@ -39,32 +39,12 @@ class SearchFiltersContainer extends PureComponent {
         showfilteredTypes: PropTypes.bool.isRequired,
     }
 
-    constructor(props) {
-        super(props)
-        // Temporary dummy data for showing features.
-        this.state = {
-            filterTypes: [
-                { value: 'Websites', active: true, available: true },
-                { value: 'Annotations', active: true, available: false },
-                { value: 'Highlights', active: true, available: false },
-                { value: 'Comments', active: true, available: false },
-                {
-                    value: 'Received Memex.Links',
-                    active: true,
-                    available: false,
-                },
-            ],
-        }
-    }
-
     componentDidMount() {
         /** fetch initial suggested tags and domains to prepopulate
          filter dropdown **/
         this.props.fetchSuggestedTags()
         this.props.fetchSuggestedDomains()
     }
-
-    renderBookmarkFilter = () => <BookmarkFilter />
 
     renderFilteredTags = () => {
         return !this.props.tagFilterDropdown
@@ -79,18 +59,12 @@ class SearchFiltersContainer extends PureComponent {
             : null
     }
 
-    renderFilteredTypes = () =>
-        this.props.showfilteredTypes
-            ? this.state.filterTypes.map(({ value, active, available }, i) => (
-                  <FilteredRow
-                      key={i}
-                      value={value}
-                      onClick={() => {}}
-                      active={active}
-                      available={available}
-                  />
-              ))
-            : null
+    renderContentFilter = () => (
+        <ContentTypeContainer
+            showFilteredTypes={this.props.showfilteredTypes}
+            toggleFilterTypes={this.props.toggleFilterTypes}
+        />
+    )
 
     renderFilteredDomains = () => {
         return !this.props.domainFilterDropdown
@@ -159,25 +133,15 @@ class SearchFiltersContainer extends PureComponent {
         </Checkbox>
     )
 
-    renderTypeFilter = () => (
-        <FilterBar
-            onBarClick={() => {
-                this.props.toggleFilterTypes()
-            }}
-            filter="Type"
-        />
-    )
-
     render() {
         return (
             <SearchFilters
                 bookmarkFilter={this.renderBookmarkFilter()}
                 tagFilter={this.renderTagFilter()}
                 domainFilter={this.renderDomainFilter()}
+                contentFilter={this.renderContentFilter()}
                 filteredTags={this.renderFilteredTags()}
                 filteredDomains={this.renderFilteredDomains()}
-                filteredTypes={this.renderFilteredTypes()}
-                typeFilters={this.renderTypeFilter()}
             />
         )
     }

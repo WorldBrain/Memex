@@ -11,7 +11,7 @@
     height: 85px;
     flex-direction: column;
     justify-content: space-between;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
 }
 
 .rootContainer > a {

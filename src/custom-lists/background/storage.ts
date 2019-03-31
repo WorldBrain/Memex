@@ -82,11 +82,8 @@ export default class CustomListStorage extends FeatureStorage {
             return null
         }
 
-        const pages = await this.storageManager
-            .collection(CustomListStorage.LIST_ENTRIES_COLL)
-            .findObjects<PageListEntry>({
-                listId: list.id,
-            })
+        const pages = await this.fetchListPagesById({ listId: list.id })
+
         delete list['_name_terms']
         return {
             ...list,
@@ -97,7 +94,7 @@ export default class CustomListStorage extends FeatureStorage {
     async fetchListPagesById({ listId }: { listId: number }) {
         return this.storageManager
             .collection(CustomListStorage.LIST_ENTRIES_COLL)
-            .findObjects({ listId })
+            .findObjects<PageListEntry>({ listId })
     }
 
     async fetchListPagesByUrl({ url }: { url: string }) {

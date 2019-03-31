@@ -11,11 +11,11 @@
     background: #fff;
     height: fit-content;
     padding: 6px 30px 35px 30px;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
     font-weight: 400;
     color: color4;
     font-size: 16px;
-    z-index: 3;
+    z-index: 35000;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

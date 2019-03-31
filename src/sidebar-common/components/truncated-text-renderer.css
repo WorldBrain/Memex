@@ -1,20 +1,17 @@
 .showMoreBtn {
+    composes: nakedButton from 'src/common-ui/elements.css';
     display: inline-flex;
     border: none;
     outline: none;
     vertical-align: text-top;
     font-weight: bold;
-    background: transparent;
-    font-size: 12px;
-    margin-top: -1px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: -2px;
+    border-radius: 0px;
+    background-color: transparent;
 
-    &.rotated {
-        background-color: transparent;
-        background-repeat: no-repeat;
-        background-position: center;
-        transform-origin: center;
-        width: 30px;
-        height: 20px;
-        background-size: 50px;
+    &:hover {
+        border-radius: 3px;
     }
 }

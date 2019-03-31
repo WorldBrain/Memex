@@ -1,15 +1,14 @@
 import * as React from 'react'
 import cx from 'classnames'
 import moment from 'moment'
-import { connect } from 'react-redux'
 import noop from 'lodash/fp/noop'
+import { connect } from 'react-redux'
 
-import * as actions from '../sidebar/actions'
+import { MapDispatchToProps } from '../types'
 import DefaultDeleteModeContent from './default-delete-mode-content'
 import EditModeContent from './edit-mode-content'
 import { TruncatedTextRenderer } from '../components'
 import niceTime from '../../util/nice-time'
-import { MapDispatchToProps } from '../types'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
@@ -21,26 +20,28 @@ interface OwnProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     env: 'inpage' | 'overview'
     url: string
-    isActive: boolean
-    isHovered: boolean
+    className?: string
+    isActive?: boolean
+    isHovered?: boolean
     createdWhen: number
-    lastEdited?: number
+    lastEdited: number
     body?: string
     comment?: string
     tags: string[]
+    hasBookmark: boolean
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
-    handleMouseEnter: (e: Event) => void
-    handleMouseLeave: (e: Event) => void
-}
-
-interface StateProps {}
-
-interface DispatchProps {
+    handleMouseEnter?: (e: Event) => void
+    handleMouseLeave?: (e: Event) => void
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
+    handleBookmarkToggle: (url: string) => void
 }
 
-type Props = OwnProps & StateProps & DispatchProps
+interface DispatchProps {
+    handleTagClick: (tag: string) => void
+}
+
+type Props = OwnProps & DispatchProps
 
 interface State {
     mode: 'default' | 'edit' | 'delete'
@@ -48,6 +49,12 @@ interface State {
 }
 
 class AnnotationBoxContainer extends React.Component<Props, State> {
+    static defaultProps = {
+        handleMouseEnter: () => undefined,
+        handleMouseLeave: () => undefined,
+        handleTagClick: () => undefined,
+    }
+
     private _processEventRPC = remoteFunction('processEvent')
     private _boxRef: HTMLDivElement = null
 
@@ -62,6 +69,10 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     componentWillUnmount() {
         this._removeEventListeners()
+    }
+
+    private get isEdited() {
+        return this.props.lastEdited !== this.props.createdWhen
     }
 
     private _setupEventListeners = () => {
@@ -105,8 +116,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this.setState({ displayCrowdfunding: value })
     }
 
-    private _getFormattedTimestamp = (timestamp: number) =>
-        niceTime(timestamp)
+    private _getFormattedTimestamp = (timestamp: number) => niceTime(timestamp)
 
     private _getTruncatedTextObject: (
         text: string,
@@ -171,6 +181,10 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         this.setState({ mode: 'default' })
     }
 
+    private handleBookmarkToggle = () => {
+        this.props.handleBookmarkToggle(this.props.url)
+    }
+
     private _setBoxRef = (ref: HTMLDivElement) => {
         this._boxRef = ref
     }
@@ -190,11 +204,11 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
             : this._getFormattedTimestamp(this.props.createdWhen)
 
         const isClickable = this.props.body && this.props.env !== 'overview'
-        
+
         return (
             <div
                 id={this.props.url} // Focusing on annotation relies on this ID.
-                className={cx(styles.container, {
+                className={cx(styles.container, this.props.className, {
                     [styles.isActive]: this.props.isActive,
                     [styles.isHovered]: this.props.isHovered,
                     [footerStyles.isHovered]: this.props.isHovered,
@@ -210,12 +224,12 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                 {this.props.body && (
                     <div className={styles.highlight}>
                         <span className={styles.highlightText}>
-                        <TruncatedTextRenderer
-                            text={this.props.body}
-                            getTruncatedTextObject={
-                                this._getTruncatedTextObject
-                            }
-                        />
+                            <TruncatedTextRenderer
+                                text={this.props.body}
+                                getTruncatedTextObject={
+                                    this._getTruncatedTextObject
+                                }
+                            />
                         </span>
                     </div>
                 )}
@@ -227,16 +241,18 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         body={this.props.body}
                         comment={this.props.comment}
                         tags={this.props.tags}
-                        isEdited={!!this.props.lastEdited}
+                        isEdited={this.isEdited}
                         timestamp={timestamp}
+                        hasBookmark={this.props.hasBookmark}
                         handleGoToAnnotation={this.props.handleGoToAnnotation}
                         handleDeleteAnnotation={this._handleDeleteAnnotation}
                         handleCancelOperation={this._handleCancelOperation}
+                        handleTagClick={this.props.handleTagClick}
                         editIconClickHandler={this._handleEditIconClick}
                         trashIconClickHandler={this._handleTrashIconClick}
-                        // shareIconClickHandler={this._handleShareIconClick}
-                        replyIconClickHandler={this._handleReplyIconClick}
+                        shareIconClickHandler={this._handleShareIconClick}
                         getTruncatedTextObject={this._getTruncatedTextObject}
+                        handleBookmarkToggle={this.handleBookmarkToggle}
                     />
                 ) : (
                     <EditModeContent
@@ -252,16 +268,19 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     }
 }
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
-    handleEditAnnotation: (url, comment, tags) =>
-        dispatch(actions.editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+    props,
+) => ({
+    handleTagClick: tag => {
+        if (props.env === 'overview') {
+            const { toggleTagFilter } = require('src/search-filters/actions')
+            dispatch(toggleTagFilter(tag))
+        }
+    },
 })
 
 export default connect(
-    undefined,
+    null,
     mapDispatchToProps,
 )(AnnotationBoxContainer)

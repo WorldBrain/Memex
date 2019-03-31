@@ -5,7 +5,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 250000;
+    z-index: 2;
 }
 
 .tooltipTrigger {
@@ -20,7 +20,7 @@
     flex-wrap: nowrap;
     min-width: max-content;
     align-items: center;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
 }
 
 .tooltipTop {
@@ -45,8 +45,14 @@
 }
 
 .tooltipBottom {
-    transform: translateY(38px);
+    transform: translateY(33px);
     justify-content: center;
+
+    & .tooltipMessage {
+        position: relative;
+        display: flex;
+        align-self: flex-start;
+    }
 }
 
 .tooltipLeft {
@@ -71,13 +77,14 @@
 
 .tooltipMessage {
     composes: h2ColorBackground from '../colors.css';
-    border-radius: 55px;
+    border-radius: 3px;
     color: white;
     font-size: 11px;
-    font-weight: 400;
+    font-weight: 500;
+    max-width: 160px;
     line-height: 1.4;
     padding: 0.5em 1em;
     text-align: center;
     width: fit-content;
-    font-family: 'Inter';
+    font-family: 'Inter', sans-serif;
 }

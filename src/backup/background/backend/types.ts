@@ -10,11 +10,11 @@ export type BackupObject = BackupObjectLocation & {
     object: object
 }
 
-export interface ObjectChange {
+export interface ObjectChange<T = any> {
     collection: string
     objectPk: string
     timestamp: number
-    object?: any
+    object?: T
     operation: 'create' | 'update' | 'delete'
 }
 

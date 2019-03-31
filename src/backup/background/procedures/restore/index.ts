@@ -4,6 +4,7 @@ import BackupStorage from '../../storage'
 import { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
+import { collections } from 'src/popup/collections-button/selectors'
 const dataURLtoBlob = require('dataurl-to-blob')
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
@@ -180,6 +181,7 @@ export class BackupRestoreProcedure {
     async _writeChange(change: ObjectChange) {
         change = _filterBadChange(change)
         _deserializeChangeFields(change)
+        _migrateObject(change)
 
         const collection = this.storageManager.collection(change.collection)
         if (change.operation === 'create') {
@@ -283,6 +285,27 @@ export function _filterBadChange({
     return { ...change, object }
 }
 
+export function _migrateObject(change: ObjectChange) {
+    const object = change.object
+    const migrate = <T = any>(args: {
+        collection: string
+        field: string
+        value: (prev: T) => any
+    }) => {
+        if (change.collection === args.collection) {
+            object[args.field] = args.value(object)
+        }
+    }
+
+    // `lastEdited` was changed from a nullable to non-null field used in search feature.
+    // All missing data should be set to created time.
+    migrate({
+        collection: 'annotations',
+        field: 'lastEdited',
+        value: prev => prev.createdWhen,
+    })
+}
+
 export function _deserializeChangeFields(change: ObjectChange) {
     const object = change.object
     const checkSerializedExists = (colls: string[], field: string) =>
@@ -296,6 +319,10 @@ export function _deserializeChangeFields(change: ObjectChange) {
 
     if (checkSerializedExists(['annotations'], 'createdWhen')) {
         object.createdWhen = new Date(object.createdWhen)
+    }
+
+    if (checkSerializedExists(['annotations'], 'lastEdited')) {
+        object.lastEdited = new Date(object.lastEdited)
     }
 
     if (

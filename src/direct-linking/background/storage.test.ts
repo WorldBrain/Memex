@@ -1,36 +1,67 @@
 import initStorageManager from '../../search/memory-storex'
 import normalize from '../../util/encode-url-for-id'
 import AnnotationBackground from './'
-import { AnnotationStorage } from './storage'
-import getDb from '../../search'
+import AnnotationStorage from './storage'
+import { StorageManager, getDb } from '../../search'
+import CustomListBackground from 'src/custom-lists/background'
 import * as DATA from './storage.test.data'
 
 describe('Annotations storage', () => {
     let annotationStorage: AnnotationStorage
+    let storageManager: StorageManager
+    let customListsBg: CustomListBackground
+    let coll1Id: number
 
     async function insertTestData() {
-        // Insert annotations and direct links
-        await annotationStorage.insertDirectLink(DATA.directLink)
-        await annotationStorage.createAnnotation(DATA.highlight)
-        await annotationStorage.createAnnotation(DATA.annotation)
-        await annotationStorage.createAnnotation(DATA.comment)
+        for (const annot of [
+            DATA.directLink,
+            DATA.highlight,
+            DATA.annotation,
+            DATA.comment,
+            DATA.hybrid,
+        ]) {
+            // Pages also need to be seeded to match domains filters against
+            await storageManager.collection('pages').createObject({
+                url: annot.pageUrl,
+                hostname: normalize(annot.pageUrl),
+                domain: normalize(annot.pageUrl),
+                title: annot.pageTitle,
+                text: '',
+                canonicalUrl: annot.url,
+            })
+
+            await annotationStorage.createAnnotation(annot)
+        }
+
+        // Insert bookmarks
+        await annotationStorage.toggleAnnotBookmark({
+            url: DATA.directLink.url,
+        })
+        await annotationStorage.toggleAnnotBookmark({ url: DATA.hybrid.url })
+
+        // Insert collections + collection entries
+        coll1Id = await customListsBg.createCustomList({
+            name: DATA.coll1,
+        })
+        await customListsBg.createCustomList({ name: DATA.coll2 })
+        await annotationStorage.insertAnnotToList({
+            listId: coll1Id,
+            url: DATA.hybrid.url,
+        })
+
         // Insert tags
         await annotationStorage.modifyTags(true)(DATA.tag1, DATA.annotation.url)
         await annotationStorage.modifyTags(true)(DATA.tag2, DATA.annotation.url)
-
-        // I don't know why this happens: seemingly only in jest,
-        //  `getTagsByAnnotationUrl` returns one less result than it's meant to.
-        //  The best fix I can find for now is adding a dummy tag...
-        await annotationStorage.modifyTags(true)('dummy', DATA.annotation.url)
     }
 
     beforeEach(async () => {
-        const storageManager = initStorageManager()
+        storageManager = initStorageManager()
         const annotBg = new AnnotationBackground({
             storageManager,
             getDb,
         })
-        annotationStorage = annotBg.annotationStorage
+        customListsBg = new CustomListBackground({ storageManager, getDb })
+        annotationStorage = annotBg['annotationStorage']
 
         await storageManager.finishInitialization()
         await insertTestData()
@@ -51,19 +82,6 @@ describe('Annotations storage', () => {
             expect(received.url).toBeDefined()
         }
 
-        test('fetch all annotations', async () => {
-            const normalizedUrl = normalize(DATA.pageUrl)
-            const annotations = await annotationStorage.getAnnotationsByUrl(
-                normalizedUrl,
-            )
-            expect(annotations).toBeDefined()
-            expect(annotations).not.toBeNull()
-            expect(annotations.length).toBe(3)
-            assertAnnotation(annotations[0], DATA.highlight)
-            assertAnnotation(annotations[1], DATA.annotation)
-            assertAnnotation(annotations[2], DATA.comment)
-        })
-
         test('fetch tags for an annotation', async () => {
             const url = DATA.annotation.url
             const tags = await annotationStorage.getTagsByAnnotationUrl(url)
@@ -72,94 +90,102 @@ describe('Annotations storage', () => {
             expect(tags.length).toBe(2)
             assertTag(tags[0], DATA.tag1)
         })
-    })
 
-    describe('Update operations: ', () => {
-        const runChecks = async annotation => {
-            expect(annotation).toBeDefined()
-            expect(annotation).not.toBeNull()
-        }
+        describe('Update operations: ', () => {
+            const runChecks = async annotation => {
+                expect(annotation).toBeDefined()
+                expect(annotation).not.toBeNull()
+            }
 
-        test('update comment', async () => {
-            const oldComment = await annotationStorage.getAnnotationByPk(
-                DATA.comment.url,
-            )
-            await annotationStorage.editAnnotation(
-                DATA.comment.url,
-                'Edited comment',
-            )
-            const newComment = await annotationStorage.getAnnotationByPk(
-                DATA.comment.url,
-            )
+            test('update comment', async () => {
+                const oldComment = await annotationStorage.getAnnotationByPk(
+                    DATA.comment.url,
+                )
+                await annotationStorage.editAnnotation(
+                    DATA.comment.url,
+                    'Edited comment',
+                )
+                const newComment = await annotationStorage.getAnnotationByPk(
+                    DATA.comment.url,
+                )
 
-            // Test the name is updated correctly
-            runChecks(oldComment)
-            runChecks(newComment)
-            expect(oldComment.comment).toBe(DATA.comment.comment)
-            expect(newComment.comment).toBe('Edited comment')
+                // Test the name is updated correctly
+                runChecks(oldComment)
+                runChecks(newComment)
+                expect(oldComment.comment).toBe(DATA.comment.comment)
+                expect(newComment.comment).toBe('Edited comment')
+            })
+
+            test('add comment to highlight', async () => {
+                const oldHighlight = await annotationStorage.getAnnotationByPk(
+                    DATA.highlight.url,
+                )
+                await annotationStorage.editAnnotation(
+                    DATA.highlight.url,
+                    'Adding a comment to the highlight.',
+                )
+                const newHighlight = await annotationStorage.getAnnotationByPk(
+                    DATA.highlight.url,
+                )
+
+                runChecks(oldHighlight)
+                runChecks(newHighlight)
+                expect(oldHighlight.comment).toBe('')
+                expect(newHighlight.comment).toBe(
+                    'Adding a comment to the highlight.',
+                )
+            })
         })
 
-        test('add comment to highlight', async () => {
-            const oldHighlight = await annotationStorage.getAnnotationByPk(
-                DATA.highlight.url,
-            )
-            await annotationStorage.editAnnotation(
-                DATA.highlight.url,
-                'Adding a comment to the highlight.',
-            )
-            const newHighlight = await annotationStorage.getAnnotationByPk(
-                DATA.highlight.url,
-            )
+        describe('Delete operations: ', () => {
+            test('delete annotation', async () => {
+                const url = DATA.directLink.url
+                const directLink = await annotationStorage.getAnnotationByPk(
+                    url,
+                )
+                await annotationStorage.deleteAnnotation(url)
+                const afterDeletion = await annotationStorage.getAnnotationByPk(
+                    url,
+                )
 
-            runChecks(oldHighlight)
-            runChecks(newHighlight)
-            expect(oldHighlight.comment).toBe('')
-            expect(newHighlight.comment).toBe(
-                'Adding a comment to the highlight.',
-            )
-        })
-    })
+                expect(directLink).toBeDefined()
+                expect(directLink).not.toBeNull()
 
-    describe('Delete operations: ', () => {
-        test('delete annotation', async () => {
-            const url = DATA.directLink.url
-            const directLink = await annotationStorage.getAnnotationByPk(url)
-            await annotationStorage.deleteAnnotation(url)
-            const afterDeletion = await annotationStorage.getAnnotationByPk(url)
+                // expect(afterDeletion).not.toBeDefined()
+                expect(afterDeletion).toBeNull()
+            })
 
-            expect(directLink).toBeDefined()
-            expect(directLink).not.toBeNull()
+            test('delete tags', async () => {
+                const url = DATA.annotation.url
+                const tagsBefore = await annotationStorage.getTagsByAnnotationUrl(
+                    url,
+                )
+                expect(tagsBefore).toBeDefined()
+                expect(tagsBefore.length).toBe(2)
 
-            // expect(afterDeletion).not.toBeDefined()
-            expect(afterDeletion).toBeNull()
-        })
+                await annotationStorage.modifyTags(false)(
+                    tagsBefore[0].name,
+                    url,
+                )
 
-        test('delete tags', async () => {
-            const url = DATA.annotation.url
-            const tagsBefore = await annotationStorage.getTagsByAnnotationUrl(
-                url,
-            )
-            expect(tagsBefore).toBeDefined()
-            expect(tagsBefore.length).toBe(2)
+                const tagsAfter1 = await annotationStorage.getTagsByAnnotationUrl(
+                    url,
+                )
+                expect(tagsAfter1).toBeDefined()
 
-            await annotationStorage.modifyTags(false)(tagsBefore[0].name, url)
+                expect(tagsAfter1.length).toBe(1)
 
-            const tagsAfter1 = await annotationStorage.getTagsByAnnotationUrl(
-                url,
-            )
-            expect(tagsAfter1).toBeDefined()
+                await annotationStorage.modifyTags(false)(
+                    tagsAfter1[0].name,
+                    url,
+                )
 
-            // More weird stuff... when you delete, `getTagsByAnnotationUrl` starts
-            //  returning the expected result, hence this is expecting 2 results again
-            expect(tagsAfter1.length).toBe(2)
-
-            await annotationStorage.modifyTags(false)(tagsAfter1[0].name, url)
-
-            const tagsAfter2 = await annotationStorage.getTagsByAnnotationUrl(
-                url,
-            )
-            expect(tagsAfter2).toBeDefined()
-            expect(tagsAfter2.length).toBe(1)
+                const tagsAfter2 = await annotationStorage.getTagsByAnnotationUrl(
+                    url,
+                )
+                expect(tagsAfter2).toBeDefined()
+                expect(tagsAfter2.length).toBe(0)
+            })
         })
     })
 })

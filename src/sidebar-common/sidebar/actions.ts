@@ -1,6 +1,7 @@
 import { createAction } from 'redux-act'
 
 import { Thunk } from '../types'
+import { RES_PAGE_SIZE } from './constants'
 import { Annotation, Page } from './types'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 import * as selectors from './selectors'
@@ -25,8 +26,16 @@ export const setSidebarOpen = createAction<boolean>('setSidebarOpen')
 export const setIsLoading = createAction<boolean>('setIsLoading')
 
 export const setPage = createAction<Page>('setPage')
+export const nextResultsPage = createAction('sidebar/nextResultsPage')
+export const resetResultsPage = createAction('sidebar/resetResultsPage')
+export const setResultsExhausted = createAction<boolean>(
+    'sidebar/setResultsExhausted',
+)
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
+export const appendAnnotations = createAction<Annotation[]>(
+    'sidebar/appendAnnotations',
+)
 
 export const setActiveAnnotationUrl = createAction<string>(
     'setActiveAnnotationUrl',
@@ -44,6 +53,7 @@ export const setShowCongratsMessage = createAction<boolean>(
  * Hydrates the initial state of the sidebar.
  */
 export const initState: () => Thunk = () => dispatch => {
+    dispatch(resetResultsPage())
     dispatch(fetchAnnotations())
 }
 
@@ -67,6 +77,7 @@ export const fetchAnnotations: () => Thunk = () => async (
     getState,
 ) => {
     dispatch(setIsLoading(true))
+    dispatch(resetResultsPage())
 
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
@@ -78,6 +89,34 @@ export const fetchAnnotations: () => Thunk = () => async (
         )
         annotations.reverse()
         dispatch(setAnnotations(annotations))
+        dispatch(nextResultsPage())
+        dispatch(setResultsExhausted(annotations.length < RES_PAGE_SIZE))
+    }
+
+    dispatch(setIsLoading(false))
+}
+
+export const fetchMoreAnnotations: () => Thunk = () => async (
+    dispatch,
+    getState,
+) => {
+    dispatch(setIsLoading(true))
+
+    const state = getState()
+    const annotationsManager = selectors.annotationsManager(state)
+    const { url } = selectors.page(state)
+    const currentPage = selectors.currentPage(state)
+
+    if (annotationsManager) {
+        const annotations = await annotationsManager.fetchAnnotationsWithTags(
+            url,
+            RES_PAGE_SIZE,
+            currentPage * RES_PAGE_SIZE,
+        )
+        annotations.reverse()
+        dispatch(appendAnnotations(annotations))
+        dispatch(nextResultsPage())
+        dispatch(setResultsExhausted(annotations.length < RES_PAGE_SIZE))
     }
 
     dispatch(setIsLoading(false))
@@ -88,7 +127,11 @@ export const createAnnotation: (
     body: string,
     comment: string,
     tags: string[],
-) => Thunk = (anchor, body, comment, tags) => async (dispatch, getState) => {
+    bookmarked?: boolean,
+) => Thunk = (anchor, body, comment, tags, bookmarked) => async (
+    dispatch,
+    getState,
+) => {
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const { url, title } = selectors.page(state)
@@ -101,6 +144,7 @@ export const createAnnotation: (
             comment,
             anchor,
             tags,
+            bookmarked,
         })
 
         // Re-fetch annotations.
@@ -119,8 +163,21 @@ export const editAnnotation: (
     const annotationsManager = selectors.annotationsManager(state)
     const annotations = selectors.annotations(state)
     const index = annotations.findIndex(annot => annot.url === url)
-    const annotation = annotations[index]
-    const { body } = annotation
+
+    let annotation
+    let body
+    if (index !== -1) {
+        annotation = annotations[index]
+        body = annotation.body
+    } else {
+        /* In the case of user trying to edit the annotation from the results list.
+        The sidebar isn't loaded, so the annotations aren't present in the sidebar's
+        state. So the action just returns after saving the annotation. */
+        if (annotationsManager) {
+            await annotationsManager.editAnnotation({ url, comment, tags })
+        }
+        return
+    }
 
     // Check that annotation isn't completely empty.
     if ((!body || !body.length) && !comment.length && !tags.length) {
@@ -179,4 +236,24 @@ export const checkAndSetCongratsMessage: () => Thunk = () => async (
         // it can be set to false after setting it true once.
         dispatch(setShowCongratsMessage(false))
     }
+}
+
+export const toggleBookmark: (url: string) => Thunk = url => async (
+    dispatch,
+    getState,
+) => {
+    const state = getState()
+    const annotationsManager = selectors.annotationsManager(state)
+    const annotations = selectors.annotations(state)
+
+    await annotationsManager.toggleBookmark(url)
+
+    const index = annotations.findIndex(annot => annot.url === url)
+    const annotation: Annotation = annotations[index]
+    const newAnnotations: Annotation[] = [
+        ...annotations.slice(0, index),
+        { ...annotation, hasBookmark: !annotation.hasBookmark },
+        ...annotations.slice(index + 1),
+    ]
+    dispatch(setAnnotations(newAnnotations))
 }

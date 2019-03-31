@@ -1,4 +1,4 @@
-import { CollectionDefinitions } from 'storex'
+import { CollectionDefinitions } from '@worldbrain/storex'
 
 import { FeatureStorage } from '../../search/storage'
 import { StorageManager } from '../../search/types'

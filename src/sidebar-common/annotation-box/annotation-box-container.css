@@ -9,10 +9,10 @@
     font-size: 13px;
     margin: 10px 0 0 0;
     cursor: pointer;
+    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 
     &.isActive {
-        border-color: #3db994b8;
-        box-shadow: 0px 0px 5px 1px #00000050;
+        box-shadow: 0px 0px 5px 1px #00000080;
     }
 
     &.isEdit:hover {
@@ -80,32 +80,31 @@
 
 .editIcon {
     background-image: url('/img/edit.svg');
+    background-size: 17px;
+    background-position-y: 3px;
 }
 
 .trashIcon {
     background-image: url('/img/trash.svg');
-    background-size: 15px;
-}
-
-.shareIcon {
-    background-size: 17px;
-    background-image: url('/img/share.svg');
-}
-
-.replyIcon {
-    background-image: url('/img/reply_empty.svg');
-
-    &:hover {
-        background-image: url('/img/reply_full.svg');
-    }
+    background-position-y: 3px;
 }
 
 .goToPageIcon {
     background-image: url('/img/open.svg');
     background-position-y: 4px;
-    background-size: 17px;
 }
 
 .container:hover .commonIcon {
     opacity: 0.6;
+}
+
+@keyframes onload {
+    0% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
