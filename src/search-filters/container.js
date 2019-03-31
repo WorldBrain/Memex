@@ -7,8 +7,9 @@ import {
     SearchFilters,
     // BookmarkFilter,
     // FilterBar,
-    FilteredRow,
+    // FilteredRow,
     // IndexDropdownSB,
+    ContentTypeContainer,
 } from './components'
 
 import Types from './components/filters/type-filter/Types'
@@ -42,7 +43,7 @@ class SearchFiltersContainer extends PureComponent {
         // suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
         fetchSuggestedDomains: PropTypes.func.isRequired,
         // suggestedDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
-        // toggleFilterTypes: PropTypes.func.isRequired,
+        toggleFilterTypes: PropTypes.func.isRequired,
         showfilteredTypes: PropTypes.bool.isRequired,
     }
 
@@ -70,7 +71,7 @@ class SearchFiltersContainer extends PureComponent {
         this.props.fetchSuggestedDomains()
     }
 
-    renderBookmarkFilter = () => <BookmarkFilter/>
+    // renderBookmarkFilter = () => <BookmarkFilter/>
 
     /* renderFilteredTags = () => {
         return !this.props.tagFilterDropdown
