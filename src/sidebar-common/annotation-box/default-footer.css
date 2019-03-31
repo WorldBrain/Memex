@@ -6,9 +6,11 @@
     align-items: center;
     justify-content: flex-end;
     width: 100%;
+    padding-bottom: 6px;
+    padding-right: 5px;
 
     &:hover .commonIcon {
-        opacity: 0.8;
+        opacity: 0.5;
     }
 }
 
@@ -30,64 +32,48 @@
     composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
     box-sizing: border-box;
     background-repeat: no-repeat;
-    background-size: 18px;
+    background-size: 16px;
     display: inline-block;
     cursor: pointer;
     background-color: transparent;
     background-position: center;
     border: none;
-    padding: 3px;
-    width: 25px;
-    height: 25px;
-    opacity: 0.5;
-    margin: 0 3px;
+    width: 24px;
+    height: 24px;
+    opacity: 0.2;
 
     &:hover {
-        opacity: 0.9;
+        opacity: 1;
     }
 }
 
 .buttonBar {
     display: flex;
-    opacity: 0.2;
 }
 
 .editIcon {
     background-image: url('/img/edit.svg');
-    background-position-y: 3px;
 }
 
 .trashIcon {
     background-image: url('/img/trash.svg');
-    background-size: 17px;
-}
-
-.shareIcon {
-    background-size: 17px;
-    background-image: url('/img/share.svg');
-}
-
-.replyIcon {
-    background-image: url('/img/reply_empty.svg');
-
-    &:hover {
-        background-image: url('/img/reply_full.svg');
-    }
 }
 
 .goToPageIcon {
     background-image: url('/img/open.svg');
-    background-position-y: 4px;
-    background-size: 17px;
 }
 
 .bookmark {
     background-image: url('/img/star_full.svg');
     opacity: 0.8;
-    background-size: 19px;
+    background-size: 18px;
+
+    &:hover {
+        opacity: 1;
+    }
 }
 
 .notBookmark {
     background-image: url('/img/star_empty.svg');
-    background-size: 19px;
+    background-size: 18px;
 }

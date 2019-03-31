@@ -22,10 +22,10 @@ export default function PowerSearchBrowse({ onCloseRequested, openDashboard }) {
                         Type this shortcut into the address bar and search with a term you see on this page
                     </div>
                     <div className={styles.tutorial}>
-                            <div className={externalStyles.keyboardM}>M</div>
-                            <div className={externalStyles.keyboardPlus}>then</div>
-                            <div className={externalStyles.keyboardSpace}>Space</div>
-                        </div>
+                        <div className={externalStyles.keyboardM}>M</div>
+                        <div className={externalStyles.keyboardPlus}>then</div>
+                        <div className={externalStyles.keyboardSpace}>Space</div>
+                    </div>
                 </div>
             </NotificationLayout>
         </div>

@@ -2,15 +2,16 @@
 
 const baseStyles = {
     bmMenuWrap: {
-        top: '55px',
+        top: 0,
         right: '-60px',
-        zIndex: 2147483646,
+        zIndex: 0,
         transition: 'all 0.3s cubic-bezier(0.65, 0.05, 0.36, 1) 0s',
     },
     bmMenu: {
         position: 'fixed',
         right: '35px',
-        top: 0,
+        top: '55px',
+        zIndex: 2147483646,
         overflow: 'hidden',
         width: '350px',
         height: '100%',

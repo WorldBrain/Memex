@@ -31,6 +31,39 @@ const DefaultFooter = ({
             {timestamp}
         </div>
         <div>
+            {displayGoToAnnotation && (
+                <button
+                    className={cx(styles.commonIcon, styles.goToPageIcon)}
+                    title="Go to annotation"
+                    onClick={goToAnnotationHandler}
+                />
+            )}
+        </div>
+        <div>
+             <button
+                className={cx(styles.commonIcon, styles.trashIcon)}
+                title="Delete note"
+                onClick={e => {
+                    e.stopPropagation()
+                    trashIconClickHandler()
+                }}
+            />
+            <button
+                className={cx(styles.commonIcon, styles.editIcon)}
+                title="Edit note"
+                onClick={e => {
+                    e.stopPropagation()
+                    editIconClickHandler()
+                }}
+            />
+            {/* <button
+                className={cx(styles.commonIcon, styles.shareIcon)}
+                title="Share this note"
+                onClick={e => {
+                    e.stopPropagation()
+                    shareIconClickHandler()
+                }}
+            /> */}
             <button
                 className={cx(styles.commonIcon, {
                     [styles.bookmark]: hasBookmark,
@@ -42,39 +75,6 @@ const DefaultFooter = ({
                     handleBookmarkToggle()
                 }}
             />
-            <button
-                className={cx(styles.commonIcon, styles.editIcon)}
-                title="Edit note"
-                onClick={e => {
-                    e.stopPropagation()
-                    editIconClickHandler()
-                }}
-            />
-            <button
-                className={cx(styles.commonIcon, styles.trashIcon)}
-                title="Delete note"
-                onClick={e => {
-                    e.stopPropagation()
-                    trashIconClickHandler()
-                }}
-            />
-            {/* <button
-                className={cx(styles.commonIcon, styles.shareIcon)}
-                title="Share this note"
-                onClick={e => {
-                    e.stopPropagation()
-                    shareIconClickHandler()
-                }}
-            /> */}
-        </div>
-        <div>
-            {displayGoToAnnotation && (
-                <button
-                    className={cx(styles.commonIcon, styles.goToPageIcon)}
-                    title="Go to annotation"
-                    onClick={goToAnnotationHandler}
-                />
-            )}
         </div>
     </div>
 )

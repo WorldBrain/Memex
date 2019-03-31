@@ -3,10 +3,8 @@
  * See: https://github.com/jharris4/html-webpack-include-assets-plugin#example
  */
 export const htmlAssets = [
-    'fonts/material-icons/material-icons.css',
     'fonts/Inter/inter.css',
     'lib/browser-polyfill.js',
-    // 'common-ui/colors.css',
 ]
 
 /**
