@@ -40,7 +40,6 @@
     margin-top: -5px;
     margin-bottom: 10px;
     margin-left: 2px;
-    animation: none;
 }
 
 .inverted {
@@ -54,6 +53,10 @@
 .annotationList {
     display: flex;
     flex-direction: column;
+}
+
+.noanimation {
+    animation: none;
 }
 
 .annotation {
@@ -85,7 +88,7 @@
 
 @keyframes annotationLoad {
     0% {
-        transform: translateY(-10px);
+        transform: translateY(10px);
         opacity: 0;
     }
 

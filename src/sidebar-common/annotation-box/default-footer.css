@@ -41,6 +41,7 @@
     width: 24px;
     height: 24px;
     opacity: 0.2;
+    outline: none;
 
     &:hover {
         opacity: 1;

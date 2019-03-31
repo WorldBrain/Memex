@@ -1,7 +1,6 @@
 .checkmark {
     width: 20px;
     height: 20px;
-    background-image: url('/img/blacklist.svg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: 20px;
@@ -42,7 +41,7 @@
     } */
 
     & .checkmark {
-        background-image: url('/img/blacklist_green.svg');
+        background-image: url('/img/check.svg');
     }
 }
 
