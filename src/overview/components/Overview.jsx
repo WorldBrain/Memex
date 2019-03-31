@@ -23,7 +23,7 @@ import { goToAnnotation } from '../utils'
 class Overview extends PureComponent {
     static propTypes = {
         init: propTypes.func.isRequired,
-        pageUrl: propTypes.string.isRequired,
+        pageUrl: propTypes.string,
     }
 
     componentDidMount() {

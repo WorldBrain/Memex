@@ -3,9 +3,12 @@ import { createSelector } from 'reselect'
 
 import { RootState } from '../../options/types'
 import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
+
 import { PAGE_SIZE } from '../search-bar/constants'
 import * as sidebarLeft from '../sidebar-left/selectors'
+import { query } from '../search-bar/selectors'
 import * as constants from './constants'
+import { ResultsByUrl } from '../types'
 
 /**
  * Either set display title to be the top-level title field, else look in content. Fallback is the URL.
@@ -22,6 +25,20 @@ function decideTitle(pageDoc) {
         : pageDoc.url
 }
 
+/**
+ * Returns page doc with modified title, isDeleting and tagPills data.
+ */
+const editPageResults = ({ modalShown, deleting, tagIndex }) => (
+    pageDoc,
+    i,
+) => ({
+    ...pageDoc,
+    title: decideTitle(pageDoc),
+    isDeleting: !modalShown && i === deleting,
+    tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
+    shouldDisplayTagPopup: i === tagIndex,
+})
+
 const resultsState = (state: RootState) => state.results
 
 export const isLoading = createSelector(resultsState, state => state.isLoading)
@@ -29,6 +46,10 @@ export const resultDocs = createSelector(resultsState, state => state.results)
 export const activeTagIndex = createSelector(
     resultsState,
     state => state.activeTagIndex,
+)
+export const activeSidebarIndex = createSelector(
+    resultsState,
+    state => state.activeSidebarIndex,
 )
 export const currentPage = createSelector(
     resultsState,
@@ -42,6 +63,11 @@ const resultsExhausted = createSelector(
 export const isBadTerm = createSelector(
     resultsState,
     results => !!results.isBadTerm,
+)
+
+export const areAnnotationsExpanded = createSelector(
+    resultsState,
+    results => results.areAnnotationsExpanded,
 )
 
 export const isInvalidSearch = createSelector(
@@ -89,19 +115,20 @@ export const shouldShowCount = createSelector(
     (count, isLoading) => count != null && !isLoading,
 )
 
+export const annotsByDay = createSelector(
+    resultsState,
+    state => state.annotsByDay,
+)
+
 export const results = createSelector(
     resultDocs,
     deleteConfSelectors.isShown,
     deleteConfSelectors.indexToDelete,
     activeTagIndex,
-    (docs, modalShown, deleting, tagIndex) =>
-        docs.map((pageDoc, i) => ({
-            ...pageDoc,
-            title: decideTitle(pageDoc),
-            isDeleting: !modalShown && i === deleting,
-            tagPillsData: pageDoc.tags.slice(0, constants.SHOWN_TAGS_LIMIT),
-            shouldDisplayTagPopup: i === tagIndex,
-        })),
+    (docs, modalShown, deleting, tagIndex) => {
+        const docsMapFn = editPageResults({ modalShown, deleting, tagIndex })
+        return docs.map(docsMapFn)
+    },
 )
 
 export const showInitSearchMsg = createSelector(
@@ -115,4 +142,39 @@ export const showInitSearchMsg = createSelector(
 export const isScrollDisabled = createSelector(
     sidebarLeft.mouseOverSidebar,
     mouseOverSidebar => mouseOverSidebar,
+)
+
+export const searchType = createSelector(
+    resultsState,
+    state => state.searchType,
+)
+
+export const isAnnotsSearch = createSelector(
+    searchType,
+    state => state === 'annot',
+)
+
+export const resultsClusteredByDay = createSelector(
+    isAnnotsSearch,
+    query,
+    (isAnnotsSearch, query) => isAnnotsSearch && !query.trim().length,
+)
+
+export const resultsByUrl = createSelector(
+    isAnnotsSearch,
+    results,
+    (isAnnotsSearch, resultDocs) => {
+        const pages: ResultsByUrl = new Map()
+
+        if (isAnnotsSearch) {
+            resultDocs.forEach((doc, index) => {
+                pages.set(doc.url, {
+                    ...doc,
+                    index,
+                })
+            })
+        }
+
+        return pages
+    },
 )

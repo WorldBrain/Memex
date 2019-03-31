@@ -161,31 +161,30 @@ class CommentBoxForm extends React.Component<Props, State> {
                 />
 
                 {/* Save and Cancel buttons. */}
-                {(commentText.length > 0 || this.props.isAnnotation) && (
-                    <div className={styles.footer}>
-                        <div className={styles.interactions}>
-                            <button
-                                ref={this.setTagButtonRef}
-                                className={cx(styles.button, styles.tag)}
-                                onClick={this.handleTagBtnClick}
-                                title={'Add tags'}
-                            />
-                            {/* New ribbon/sidebar work */}
-                            {/*<button
-                                className={cx(styles.button, {
-                                    [styles.bookmark]: this.props
-                                        .isCommentBookmarked,
-                                    [styles.notBookmark]: !this.props
-                                        .isCommentBookmarked,
-                                })}
-                                onClick={this.handleBookmarkBtnClick}
-                                title={
-                                    !this.props.isCommentBookmarked
-                                        ? 'Bookmark'
-                                        : 'Remove bookmark'
-                                }
-                            />*/}
-                        </div>
+                <div className={styles.footer}>
+                    <div className={styles.interactions}>
+                        <button
+                            ref={this.setTagButtonRef}
+                            className={cx(styles.button, styles.tag)}
+                            onClick={this.handleTagBtnClick}
+                            title={'Add tags'}
+                        />
+                        <button
+                            className={cx(styles.button, {
+                                [styles.bookmark]: this.props
+                                    .isCommentBookmarked,
+                                [styles.notBookmark]: !this.props
+                                    .isCommentBookmarked,
+                            })}
+                            onClick={this.handleBookmarkBtnClick}
+                            title={
+                                !this.props.isCommentBookmarked
+                                    ? 'Bookmark'
+                                    : 'Remove bookmark'
+                            }
+                        />
+                    </div>
+                    {commentText.length > 0 && (
                         <div className={styles.confirmButtons}>
                             <button
                                 className={styles.cancelBtn}
@@ -200,9 +199,8 @@ class CommentBoxForm extends React.Component<Props, State> {
                                 Save
                             </button>
                         </div>
-                    </div>
-                )}
-
+                    )}
+                </div>
                 <span
                     className={styles.tagDropdown}
                     onKeyDown={this.handleTagBtnKeyDown}

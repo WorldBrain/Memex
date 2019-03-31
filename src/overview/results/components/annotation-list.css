@@ -1,0 +1,62 @@
+.parentExpanded {
+    padding-left: 20px;
+    border-left: 6px solid #ededed; /* MAN - Manual Adjustment Needed */
+    margin-top: -20px;
+    padding-top: 12px;
+    margin-left: 8px;
+    margin-bottom: 35px;
+}
+
+.resultCount {
+    composes: subTitleColor nakedButton hoverColor from '../../../common-ui/colors.css';
+    width: fit-content;
+    margin: -13px 0 20px -2px;
+    text-align: start;
+    font-size: 13px;
+    align-self: center;
+    cursor: pointer;
+}
+
+.icon {
+    display: inline-block;
+    width: 20px;
+    height: 15px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url('/img/triangleSmall.svg');
+    vertical-align: bottom;
+    margin-top: 0px;
+    margin-left: 3px;
+    transition: transform 0.2s ease-in;
+    background-size: 15px;
+}
+
+.expandedCount {
+    margin-top: -5px;
+    margin-bottom: 10px;
+    margin-left: 2px;
+}
+
+.inverted {
+    transform: rotate(180deg);
+}
+
+.annotationList {
+    display: flex;
+    flex-direction: column;
+}
+
+.annotation {
+    width: 100%;
+}
+
+.commentIcon {
+    background-image: url('/img/comment.svg');
+    width: 15px;
+    height: 15px;
+    background-size: contain;
+    margin-right: 5px;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 8px;
+}

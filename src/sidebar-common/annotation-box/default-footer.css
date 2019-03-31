@@ -1,12 +1,15 @@
 @value colors: '../../common-ui/colors.css';
 @value color6 from colors;
 
-  .annotationBoxDefaultFooter {
+.annotationBoxDefaultFooter {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-    padding: 5px;
+
+    &:hover .commonIcon {
+        opacity: 0.8;
+    }
 }
 
 .timestamp {
@@ -36,8 +39,12 @@
     padding: 3px;
     width: 25px;
     height: 25px;
-    opacity: 0.7;
+    opacity: 0.5;
     margin: 0 3px;
+
+    &:hover {
+        opacity: 0.9;
+    }
 }
 
 .buttonBar {
@@ -72,4 +79,15 @@
     background-image: url('/img/open.svg');
     background-position-y: 4px;
     background-size: 17px;
+}
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+    opacity: 0.8;
+    background-size: 19px;
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+    background-size: 19px;
 }

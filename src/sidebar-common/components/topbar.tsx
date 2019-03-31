@@ -21,11 +21,8 @@ const Topbar = ({
 }: Props) => (
     <div className={styles.topbar}>
         {/* Button to close sidebar. */}
-        
-        <ButtonTooltip
-                tooltipText="Close (ESC)"
-                position="rightCentered"
-        >
+
+        <ButtonTooltip tooltipText="Close (ESC)" position="rightCentered">
             <CloseButton
                 title="Close sidebar once. Disable via Memex icon in the extension toolbar."
                 clickHandler={e => {
@@ -43,12 +40,12 @@ const Topbar = ({
             >
                 <button
                     className={cx(styles.button, styles.comments, {
-                            [styles.disabled]: disableAddCommentBtn,
-                        })}
+                        [styles.disabled]: disableAddCommentBtn,
+                    })}
                     onClick={e => {
-                    e.stopPropagation()
-                    handleAddCommentBtnClick()
-                }}
+                        e.stopPropagation()
+                        handleAddCommentBtnClick()
+                    }}
                 />
             </ButtonTooltip>
         </div>

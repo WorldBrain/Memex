@@ -2,7 +2,15 @@
     list-style: none;
     margin: 10px auto;
     padding: 0;
-    max-width: 800px;
+    width: 800px;
+}
+
+.clusterTime {
+    font-weight: 600;
+    font-size: 0.7rem;
+    font-size: 18px;
+    margin-bottom: 10px;
+    margin-top: 20px;
 }
 
 .timestamp {
@@ -19,13 +27,11 @@
 }
 
 .main {
-    margin-top: 90px;
+    margin-top: 75px;
     font-size: 0.65rem;
     font-weight: normal;
-
-    @media (max-width: 1000px) {
-        margin-top: 100px !important; /* stylelint-disable-line declaration-no-important */
-    }
+    display: flex;
+    flex-direction: column;
 }
 
 .proTip {

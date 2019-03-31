@@ -22,6 +22,8 @@ export const defaultState: State = {
     hoverAnnotationUrl: null,
     commentBox: defCommentBoxState,
     showCongratsMessage: false,
+    currentResultPage: 0,
+    resultsExhausted: false,
 }
 
 const setAnnotationsManager = (
@@ -65,6 +67,7 @@ const pageReducer = createReducer<Page>(on => {
 
 const annotationsReducer = createReducer<Annotation[]>(on => {
     on(actions.setAnnotations, setAnnotations)
+    on(actions.appendAnnotations, (state, payload) => [...state, ...payload])
 }, defaultState.annotations)
 
 const activeAnnotationUrlReducer = createReducer<string>(on => {
@@ -79,6 +82,15 @@ const showCongratsMessageReducer = createReducer<boolean>(on => {
     on(actions.setShowCongratsMessage, setShowCongratsMessage)
 }, defaultState.showCongratsMessage)
 
+const currentResultPage = createReducer(on => {
+    on(actions.resetResultsPage, page => defaultState.currentResultPage)
+    on(actions.nextResultsPage, page => page + 1)
+}, defaultState.currentResultPage)
+
+const resultsExhausted = createReducer(on => {
+    on(actions.setResultsExhausted, (state, payload) => payload)
+}, defaultState.resultsExhausted)
+
 const reducer = combineReducers<State>({
     annotationsManager: annotationsManagerReducer,
     isOpen: isOpenReducer,
@@ -89,6 +101,8 @@ const reducer = combineReducers<State>({
     hoverAnnotationUrl: hoverAnnotationUrlReducer,
     commentBox: commentBoxReducer,
     showCongratsMessage: showCongratsMessageReducer,
+    currentResultPage,
+    resultsExhausted,
 })
 
 export default reducer

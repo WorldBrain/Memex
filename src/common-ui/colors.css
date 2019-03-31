@@ -72,7 +72,7 @@
 }
 
 .h2Color {
-	color: color4;
+    color: color4;
 }
 
 .h2ColorBackground {
@@ -110,11 +110,19 @@
 }
 
 .darkBlue {
-	color: color3;
+    color: color3;
+}
+
+.darkGreyBackground {
+    background-color: color9;
+}
+
+.darkGrey {
+    color: color9;
 }
 
 .darkBlueBackground {
-	background-color: color3;
+    background-color: color3;
 }
 
 .textColorSearchPlaceholder {
@@ -147,7 +155,7 @@
 
 .menuItem {
     color: #555;
-	font-weight: 400;
+    font-weight: 400;
 }
 
 /* BORDER RADIUS */
@@ -199,7 +207,8 @@
 
 .boxShadow {
     border-radius: radius3;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 2px 4px;
     transition: background 120ms ease-in 0s;
 
     &:hover {
@@ -209,7 +218,8 @@
 }
 
 .boxShadowOverlays {
-    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 5px 10px, rgba(15, 15, 15, 0.2) 0px 15px 40px;
+    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 5px 10px, rgba(15, 15, 15, 0.2) 0px 15px 40px;
 }
 
 .infoBoxes {
@@ -242,7 +252,7 @@
     text-decoration: none;
 
     &:hover {
-    	background-color: #5cd9a6;
+        background-color: #5cd9a6;
     }
 }
 

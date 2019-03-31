@@ -69,6 +69,24 @@ const locationSync = ReduxQuerySync.enhancer({
             stringToValue: parseBool,
             defaultValue: false,
         },
+        notes: {
+            selector: filters.notesFilter,
+            action: filterActs.toggleNotesFilter,
+            stringToValue: parseBool,
+            defaultValue: true,
+        },
+        highlights: {
+            selector: filters.highlightsFilter,
+            action: filterActs.toggleHighlightsFilter,
+            stringToValue: parseBool,
+            defaultValue: true,
+        },
+        websites: {
+            selector: filters.websitesFilter,
+            action: filterActs.toggleWebsitesFilter,
+            stringToValue: parseBool,
+            defaultValue: true,
+        },
     },
 })
 
@@ -84,6 +102,10 @@ const hydrateStateFromStorage = store => {
 
     // Keep each of these storage keys in sync
     hydrate(constants.SEARCH_COUNT_KEY, resultsActs.initSearchCount)
+    hydrate(
+        constants.ANNOTATIONS_EXPANDED_KEY,
+        resultsActs.setAreAnnotationsExpanded,
+    )
 }
 
 const syncStateToStorage = store =>
@@ -93,6 +115,10 @@ const syncStateToStorage = store =>
         const state = store.getState()
 
         dump(constants.SEARCH_COUNT_KEY, results.searchCount(state))
+        dump(
+            constants.ANNOTATIONS_EXPANDED_KEY,
+            results.areAnnotationsExpanded(state),
+        )
     })
 
 const storageSync = storeCreator => (reducer, initState, enhancer) => {

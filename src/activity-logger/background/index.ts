@@ -3,7 +3,7 @@ import { browser } from 'webextension-polyfill-ts'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import initPauser from './pause-logging'
 import { updateVisitInteractionData } from './util'
-import tabManager from './tab-manager'
+import tabManager, { TabManager } from './tab-manager'
 import { tabUpdatedListener, trackNewTab } from './tab-bridge'
 
 // Allow logging pause state toggle to be called from other scripts
@@ -64,4 +64,4 @@ browser.webNavigation.onCommitted.addListener(
 
 browser.tabs.onUpdated.addListener(tabUpdatedListener)
 
-export { tabManager }
+export { TabManager, tabManager }

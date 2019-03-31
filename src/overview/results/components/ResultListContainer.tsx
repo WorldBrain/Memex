@@ -2,15 +2,16 @@ import React, { PureComponent, MouseEventHandler } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
+import moment from 'moment'
 
 import { LoadingIndicator } from '../../../common-ui/components'
 import { IndexDropdown } from '../../../common-ui/containers'
 import PageResultItem from './PageResultItem'
 import ResultList from './ResultList'
-import TagPill from './TagPill'
+import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
 import { RootState } from '../../../options/types'
-import { Result } from '../../types'
+import { Result, ResultsByUrl } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { actions as listActs } from '../../../custom-lists'
@@ -24,6 +25,9 @@ import {
     actions as filterActs,
     selectors as filters,
 } from '../../../search-filters'
+import { PageUrlsByDay } from 'src/search/background/types'
+
+const styles = require('./ResultList.css')
 
 export interface StateProps {
     isLoading: boolean
@@ -32,7 +36,12 @@ export interface StateProps {
     isScrollDisabled: boolean
     isNewSearchLoading: boolean
     isListFilterActive: boolean
+    resultsClusteredByDay: boolean
+    areAnnotationsExpanded: boolean
+    activeSidebarIndex: number
     searchResults: Result[]
+    resultsByUrl: ResultsByUrl
+    annotsByDay: PageUrlsByDay
 }
 
 export interface DispatchProps {
@@ -44,7 +53,7 @@ export interface DispatchProps {
     delTag: (i: number) => (f: string) => void
     handlePillClick: (tag: string) => MouseEventHandler
     handleTagBtnClick: (i: number) => MouseEventHandler
-    handleCommentBtnClick: (doc: Result) => MouseEventHandler
+    handleCommentBtnClick: (doc: Result, index: number) => MouseEventHandler
     handleCrossRibbonClick: (doc: Result) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
@@ -113,30 +122,98 @@ class ResultListContainer extends PureComponent<Props> {
         )
     }
 
-    private renderTagPills({ tagPillsData, tags }, resultIndex) {
-        const pills = tagPillsData.map((tag, i) => (
-            <TagPill
-                key={i}
-                value={tag}
-                onClick={this.props.handlePillClick(tag)}
-            />
-        ))
+    private renderTagHolder = ({ tags }, resultIndex) => (
+        <TagHolder
+            tags={tags}
+            maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
+            setTagManagerRef={this.trackDropdownRef}
+            handlePillClick={this.props.handlePillClick}
+            handleTagBtnClick={this.props.handleTagBtnClick(resultIndex)}
+        />
+    )
 
-        // Add on dummy pill with '+' sign if over limit
-        if (tags.length > constants.SHOWN_TAGS_LIMIT) {
-            return [
-                ...pills,
-                <TagPill
-                    key="+"
-                    setRef={this.trackDropdownRef}
-                    value={`+${tags.length - constants.SHOWN_TAGS_LIMIT}`}
-                    onClick={this.props.handleTagBtnClick(resultIndex)}
-                    noBg
-                />,
-            ]
+    private formatTime(date: number): string {
+        return moment(date).calendar(null, {
+            sameDay: '[Today]',
+            lastDay: '[Yesterday]',
+            lastWeek: '[Last] dddd',
+            sameElse: 'dddd, DD MMMM, YYYY',
+        })
+    }
+
+    private attachDocWithPageResultItem(doc, index, key) {
+        return (
+            <PageResultItem
+                key={key}
+                setTagButtonRef={this.setTagButtonRef}
+                tagHolder={this.renderTagHolder(doc, index)}
+                isSidebarOpen={this.props.isSidebarOpen}
+                setUrlDragged={this.props.setUrlDragged}
+                tagManager={this.renderTagsManager(doc, index)}
+                resetUrlDragged={this.props.resetUrlDragged}
+                onTagBtnClick={this.props.handleTagBtnClick(index)}
+                hideSearchFilters={this.props.hideSearchFilters}
+                isListFilterActive={this.props.isListFilterActive}
+                onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
+                onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
+                onCommentBtnClick={this.props.handleCommentBtnClick(doc, index)}
+                handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
+                areAnnotationsExpanded={this.props.areAnnotationsExpanded}
+                isResponsibleForSidebar={
+                    this.props.activeSidebarIndex === index
+                }
+                {...doc}
+            />
+        )
+    }
+
+    /* 
+     * Switch rendering method based on annotsSearch value. 
+     * If it's a page search, a simple map to PageResult items is enough.
+     * For Annotation search, docs and annotsByDay are merged to render a 
+     * clustered view
+     */
+    private resultsStateToItems() {
+        if (!this.props.resultsClusteredByDay) {
+            return this.props.searchResults.map((res, i) =>
+                this.attachDocWithPageResultItem(res, i, i),
+            )
         }
 
-        return pills
+        const els: JSX.Element[] = []
+
+        const sortedKeys = Object.keys(this.props.annotsByDay)
+            .sort()
+            .reverse()
+
+        for (const day of sortedKeys) {
+            els.push(
+                <p className={styles.clusterTime} key={day}>
+                    {this.formatTime(parseInt(day, 10))}
+                </p>,
+            )
+
+            const currentCluster = this.props.annotsByDay[day]
+            for (const [pageUrl, annotations] of Object.entries(
+                currentCluster,
+            )) {
+                const page = this.props.resultsByUrl.get(pageUrl)
+
+                if (!page) {
+                    continue // Page not found for whatever reason...
+                }
+
+                els.push(
+                    this.attachDocWithPageResultItem(
+                        { ...page, annotations },
+                        page.index,
+                        `${day}${pageUrl}`,
+                    ),
+                )
+            }
+        }
+
+        return els
     }
 
     private renderResultItems() {
@@ -144,25 +221,7 @@ class ResultListContainer extends PureComponent<Props> {
             return <LoadingIndicator />
         }
 
-        const resultItems = this.props.searchResults.map((doc, i) => (
-            <PageResultItem
-                key={i}
-                setTagButtonRef={this.setTagButtonRef}
-                tagPills={this.renderTagPills(doc, i)}
-                isSidebarOpen={this.props.isSidebarOpen}
-                setUrlDragged={this.props.setUrlDragged}
-                tagManager={this.renderTagsManager(doc, i)}
-                resetUrlDragged={this.props.resetUrlDragged}
-                onTagBtnClick={this.props.handleTagBtnClick(i)}
-                hideSearchFilters={this.props.hideSearchFilters}
-                isListFilterActive={this.props.isListFilterActive}
-                onTrashBtnClick={this.props.handleTrashBtnClick(doc, i)}
-                onToggleBookmarkClick={this.props.handleToggleBm(doc, i)}
-                onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
-                handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
-                {...doc}
-            />
-        ))
+        const resultItems = this.resultsStateToItems()
 
         // Insert waypoint at the end of results to trigger loading new items when
         // scrolling down
@@ -195,11 +254,16 @@ class ResultListContainer extends PureComponent<Props> {
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isLoading: selectors.isLoading(state),
     searchResults: selectors.results(state),
+    resultsByUrl: selectors.resultsByUrl(state),
+    annotsByDay: selectors.annotsByDay(state),
     isSidebarOpen: sidebarLeft.isSidebarOpen(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
     isListFilterActive: filters.listFilterActive(state),
     isScrollDisabled: selectors.isScrollDisabled(state),
+    activeSidebarIndex: selectors.activeSidebarIndex(state),
     isNewSearchLoading: selectors.isNewSearchLoading(state),
+    resultsClusteredByDay: selectors.resultsClusteredByDay(state),
+    areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
@@ -207,8 +271,9 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
         event.preventDefault()
         dispatch(acts.showTags(index))
     },
-    handleCommentBtnClick: ({ url, title }) => event => {
+    handleCommentBtnClick: ({ url, title }, index) => event => {
         event.preventDefault()
+        dispatch(acts.setActiveSidebarIndex(index))
         dispatch(sidebarActs.openSidebar(url, title))
     },
     handleToggleBm: ({ url }, index) => event => {

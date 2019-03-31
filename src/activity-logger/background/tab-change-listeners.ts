@@ -83,11 +83,11 @@ export default class TabChangeListeners {
         loggableTabCheck = shouldLogTab,
         visitUpdate = updateVisitInteractionData,
         favIconFetch = fetchFavIcon,
-        favIconCheck = searchIndex.domainHasFavIcon,
-        favIconCreate = searchIndex.addFavIcon,
+        favIconCheck = searchIndex.domainHasFavIcon(searchIndex.getDb),
+        favIconCreate = searchIndex.addFavIcon(searchIndex.getDb),
         domLoadCheck = whenPageDOMLoaded,
         tabActiveCheck = whenTabActive,
-        bookmarkCheck = searchIndex.pageHasBookmark,
+        bookmarkCheck = searchIndex.pageHasBookmark(searchIndex.getDb),
         contentScriptPaths = TabChangeListeners.DEF_CONTENT_SCRIPTS,
     }: Props) {
         this._tabManager = tabManager

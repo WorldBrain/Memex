@@ -9,6 +9,7 @@ interface Props {
     comment?: string
     tags?: string[]
     isJustComment: boolean
+    handleTagClick: (tag: string) => void
     getTruncatedTextObject: (
         text: string,
     ) => { isTextTooLong: boolean; text: string }
@@ -19,6 +20,7 @@ const CommentTags = ({
     comment,
     tags,
     isJustComment,
+    handleTagClick,
     getTruncatedTextObject,
 }: Props) => (
     <div
@@ -44,7 +46,15 @@ const CommentTags = ({
                     })}
                 >
                     {tags.map(tag => (
-                        <span key={tag} className={styles.tagPill}>
+                        <span
+                            key={tag}
+                            className={styles.tagPill}
+                            onClick={e => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                handleTagClick(tag)
+                            }}
+                        >
                             {tag}
                         </span>
                     ))}

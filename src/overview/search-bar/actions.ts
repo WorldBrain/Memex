@@ -5,7 +5,8 @@ import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { actions as sidebarActs } from '../sidebar-left'
+import { actions as sidebarLeftActs } from '../sidebar-left'
+import { actions as sidebarActs } from 'src/sidebar-common/sidebar'
 import { acts as resultsActs, selectors as results } from '../results'
 import {
     actions as filterActs,
@@ -15,7 +16,8 @@ import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
-const requestSearchRPC = remoteFunction('search')
+const pageSearchRPC = remoteFunction('searchPages')
+const annotSearchRPC = remoteFunction('searchAnnotations')
 
 export const setQuery = createAction<string>('header/setQuery')
 export const setStartDate = createAction<number>('header/setStartDate')
@@ -73,6 +75,7 @@ export const setQueryTagsDomains: (
         processEventRPC({ type: EVENT_NAMES.NLP_SEARCH })
     }
 
+    dispatch(resultsActs.setLoading(true))
     dispatch(setQuery(input))
 }
 
@@ -92,13 +95,15 @@ export const search: (args?: any) => Thunk = (
 
     // const showTooltip = selectors.showTooltip(firstState)
     if (filters.showClearFiltersBtn(getState())) {
-        dispatch(sidebarActs.openSidebarFilterMode())
+        dispatch(sidebarLeftActs.openSidebarFilterMode())
     }
 
     if (query.includes('#')) {
         return
     }
 
+    dispatch(sidebarActs.closeSidebar())
+    dispatch(resultsActs.resetActiveSidebarIndex())
     dispatch(resultsActs.setLoading(true))
 
     // if (showTooltip) {
@@ -122,18 +127,23 @@ export const search: (args?: any) => Thunk = (
         startDate,
         endDate,
         showOnlyBookmarks: filters.onlyBookmarks(state),
-        tags: filters.tags(state),
+        tagsInc: filters.tags(state),
         domains: filters.domainsInc(state),
         domainsExclude: filters.domainsExc(state),
         limit: constants.PAGE_SIZE,
         skip: results.resultsSkip(state),
-        // lists for now is just id of one list
-        lists: [filters.listFilter(state)],
+        lists: filters.listFilterParam(state),
+        contentTypes: filters.contentType(state),
     }
 
     try {
+        const searchRPC =
+            results.searchType(state) === 'page'
+                ? pageSearchRPC
+                : annotSearchRPC
+
         // Tell background script to search
-        const searchResult = await requestSearchRPC(searchParams)
+        const searchResult = await searchRPC(searchParams)
         dispatch(resultsActs.updateSearchResult({ overwrite, searchResult }))
 
         if (searchResult.docs.length) {

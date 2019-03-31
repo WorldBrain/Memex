@@ -21,7 +21,12 @@ interface StateProps {
 
 interface DispatchProps {
     handleCommentTextChange: (comment: string) => void
-    saveComment: (anchor: Anchor, commentText: string, tags: string[]) => void
+    saveComment: (
+        anchor: Anchor,
+        commentText: string,
+        tags: string[],
+        bookmarked: boolean,
+    ) => void
     cancelComment: ClickHandler<HTMLElement>
     toggleBookmark: ClickHandler<HTMLButtonElement>
 }
@@ -38,8 +43,14 @@ class CommentBoxContainer extends React.PureComponent<Props> {
         e.preventDefault()
         e.stopPropagation()
 
-        const { anchor, commentText, tags, saveComment } = this.props
-        saveComment(anchor, commentText.trim(), tags)
+        const {
+            anchor,
+            commentText,
+            tags,
+            saveComment,
+            isCommentBookmarked,
+        } = this.props
+        saveComment(anchor, commentText.trim(), tags, isCommentBookmarked)
     }
 
     render() {
@@ -93,8 +104,8 @@ const mapDispatchToProps: MapDispatchToProps<
 > = dispatch => ({
     handleCommentTextChange: comment =>
         dispatch(actions.setCommentText(comment)),
-    saveComment: (anchor, commentText, tags) =>
-        dispatch(actions.saveComment(anchor, commentText, tags)),
+    saveComment: (anchor, commentText, tags, bookmarked) =>
+        dispatch(actions.saveComment(anchor, commentText, tags, bookmarked)),
     cancelComment: e => {
         e.preventDefault()
         e.stopPropagation()

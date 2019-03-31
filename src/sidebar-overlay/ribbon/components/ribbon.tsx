@@ -120,9 +120,9 @@ class Ribbon extends Component<Props, State> {
     }
 
     private fetchAndHighlightAnnotations = async () => {
-        const annotations = await remoteFunction('getAllAnnotationsByUrl')(
-            window.location.href,
-        )
+        const annotations = await remoteFunction('getAllAnnotationsByUrl')({
+            url: window.location.href,
+        })
         const highlights = annotations.filter(annotation => annotation.selector)
         highlightAnnotations(highlights)
     }
@@ -378,7 +378,6 @@ class Ribbon extends Component<Props, State> {
                             </div>
                         </div>
                         <div className={styles.settingsActions}>
-
                             <ButtonTooltip
                                 tooltipText={
                                     'Remove Toolbar once. Disable permanently with button below.'

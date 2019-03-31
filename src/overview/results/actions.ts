@@ -35,14 +35,36 @@ export const appendSearchResult = createAction<SearchResult>(
     'results/appendSearchResult',
 )
 export const setLoading = createAction<boolean>('results/setLoading')
+export const setAreAnnotationsExpanded = createAction(
+    'results/setAreAnnotationsExpanded',
+)
+export const toggleAreAnnotationsExpanded = createAction(
+    'results/toggleAreAnnotationsExpanded',
+)
 export const resetActiveTagIndex = createAction('results/resetActiveTagIndex')
 export const setActiveTagIndex = createAction<number>(
     'results/setActiveTagIndex',
 )
+export const resetActiveSidebarIndex = createAction(
+    'results/resetActiveSidebarIndex',
+)
+export const setActiveSidebarIndex = createAction<number>(
+    'results/setActiveSidebarIndex',
+)
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
+export const setSearchType = createAction<'page' | 'annot'>(
+    'results/setSearchType',
+)
 export const initSearchCount = createAction('overview/initSearchCount')
 export const incSearchCount = createAction('overview/incSearchCount')
+
+export const toggleSearchType: () => Thunk = () => (dispatch, getState) => {
+    const currSearchType = selectors.searchType(getState())
+    const newSearchType = currSearchType === 'page' ? 'annot' : 'page'
+    dispatch(setLoading(true))
+    dispatch(setSearchType(newSearchType))
+}
 
 export const toggleBookmark: (url: string, i: number) => Thunk = (
     url,
