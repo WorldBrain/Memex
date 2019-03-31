@@ -3,9 +3,18 @@
 
 .root {
     list-style: none;
-    margin: 10px auto;
-    padding: 0;
-    width: 800px;
+    width: 100%;
+    overflow-y: hidden;
+    overflow: scroll;
+    margin: 0px auto;
+    padding: 1px 0px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    justify-content: flex-start;
+    align-items: center;
+    top: 90px;
+    height: calc(100vh - 90px);
 }
 
 .clusterTime {
@@ -26,7 +35,6 @@
 
 .noScroll {
     overflow: hidden;
-    margin-bottom: 0;
 }
 
 .main {

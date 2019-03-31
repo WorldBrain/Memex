@@ -6,8 +6,8 @@
     align-self: center;
     justify-content: space-between;
     width: 800px;
-    margin-top: -10px;
     align-items: center;
+    padding-top: 60px;
 }
 
 .unfoldAllBtn {
