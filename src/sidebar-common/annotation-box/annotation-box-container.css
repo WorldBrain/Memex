@@ -9,10 +9,11 @@
     font-size: 13px;
     margin: 10px 0 0 0;
     cursor: pointer;
+    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 
     &.isActive {
-        border-color: #3db994b8;
         box-shadow: 0px 0px 5px 1px #00000050;
+        border: solid 1px rgba(54, 54, 46, 0.5);
     }
 
     &.isEdit:hover {
@@ -96,4 +97,15 @@
 
 .container:hover .commonIcon {
     opacity: 0.6;
+}
+
+@keyframes onload {
+    0% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }

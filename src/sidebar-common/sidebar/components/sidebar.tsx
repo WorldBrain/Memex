@@ -111,15 +111,15 @@ class Sidebar extends React.Component<Props, State> {
                     noOverlay
                     disableCloseOnEsc
                 >
+                    <Topbar
+                        disableAddCommentBtn={showCommentBox}
+                        handleCloseBtnClick={closeSidebar}
+                        handleSettingsBtnClick={
+                            this._handleSettingsBtnClick
+                        }
+                        handleAddCommentBtnClick={handleAddCommentBtnClick}
+                    />
                     <div className={styles.sidebar}>
-                        <Topbar
-                            disableAddCommentBtn={showCommentBox}
-                            handleCloseBtnClick={closeSidebar}
-                            handleSettingsBtnClick={
-                                this._handleSettingsBtnClick
-                            }
-                            handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        />
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
                                 <CommentBoxContainer env={env} />
