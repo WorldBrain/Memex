@@ -5,7 +5,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1553738538350
+export const releaseTime: number = 1554069006280
 
 /* Example Notification:
 {
@@ -60,15 +60,15 @@ export const releaseTime: number = 1553738538350
 
 export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
-        id: 'new_shortcut_28.03.2019',
+        id: 'annotation_search_01.04.2019',
         search: {
-            title: "🚨 Changed Keyboard Shortcut",
-            message: 'Memex can now be activated with m + Space/Tab, the old shortcut (w + space/tab) does not work anymore',
+            title: "🔍Annotation Search & Timeline",
+            message: "You can now full-text search & filter your annotations & highlights and see a timeline of everything you've done",
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/0-15-5-d566ffaf7a024d15b16c38e95382e989',
+                        url: 'https://www.notion.so/3f22ac13107347bc9ea1f6e1095b703e',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -76,13 +76,13 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
             ],
         },
         overview: {
-            title: "🚨 Changed Keyboard Shortcut",
-            message: 'Memex can now be activated with M + Space or Tab, the old shortcut (w + space/tab) does not work anymore.',
+            title: "🔍Annotation Search & Timeline",
+            message: "You can now full-text search & filter your annotations & highlights and see a timeline of everything you've done",
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/0-15-5-d566ffaf7a024d15b16c38e95382e989',
+                        url: 'https://www.notion.so/3f22ac13107347bc9ea1f6e1095b703e',
                         context: 'new-tab',
                     },
                     label: 'Find out more',

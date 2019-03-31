@@ -4,7 +4,6 @@
 .root {
     list-style: none;
     width: 100%;
-    overflow-y: hidden;
     overflow: scroll;
     margin: 0px auto;
     padding: 1px 0px;
