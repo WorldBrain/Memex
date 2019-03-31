@@ -31,16 +31,7 @@ const DefaultFooter = ({
             {timestamp}
         </div>
         <div>
-            {displayGoToAnnotation && (
-                <button
-                    className={cx(styles.commonIcon, styles.goToPageIcon)}
-                    title="Go to annotation"
-                    onClick={goToAnnotationHandler}
-                />
-            )}
-        </div>
-        <div>
-             <button
+            <button
                 className={cx(styles.commonIcon, styles.trashIcon)}
                 title="Delete note"
                 onClick={e => {
@@ -48,6 +39,13 @@ const DefaultFooter = ({
                     trashIconClickHandler()
                 }}
             />
+            {displayGoToAnnotation && (
+                <button
+                    className={cx(styles.commonIcon, styles.goToPageIcon)}
+                    title="Go to annotation"
+                    onClick={goToAnnotationHandler}
+                />
+            )}
             <button
                 className={cx(styles.commonIcon, styles.editIcon)}
                 title="Edit note"

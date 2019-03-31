@@ -23,6 +23,8 @@
     font-size: 18px;
     margin-bottom: 10px;
     margin-top: 20px;
+    align-self: center;
+    width: 800px;
 }
 
 .timestamp {
@@ -38,11 +40,12 @@
 }
 
 .main {
-    margin-top: 75px;
     font-size: 0.65rem;
     font-weight: normal;
     display: flex;
     flex-direction: column;
+    height: 100vh;
+    align-items: center;
 }
 
 .proTip {
