@@ -46,7 +46,6 @@
     width: 100%;
     height: 190px;
     overflow-y: scroll;
-    height: max-content;
 
     &:focus {
         outline: none;

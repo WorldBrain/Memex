@@ -29,6 +29,35 @@ class TypesPopup extends PureComponent {
         showPopup: false,
     }
 
+    componentDidMount() {
+        const types = {
+            websites: false,
+            annotations: false,
+            highlights: false,
+            comments: false,
+            memex: false,
+        }
+        const typ = {
+            ...this.state.type,
+            websites: this.props.prevTypes.websites,
+            annotations: this.props.prevTypes.annotations,
+            comments: this.props.prevTypes.comments,
+            highlights: this.props.prevTypes.highlights,
+            memex: this.props.prevTypes.memex,
+        }
+        // console.log(this.props.prevTypes)
+        if (this.props.unSelect) {
+            this.setState({
+                type: types,
+                showPopup: false,
+            })
+        } else {
+            this.setState({
+                type: typ,
+            })
+        }
+    }
+
     selectedType = ev => {
         const { name } = ev.target
         if (name === 'websites') {
@@ -69,35 +98,6 @@ class TypesPopup extends PureComponent {
         }
     }
 
-    componentDidMount() {
-        const types = {
-            websites: false,
-            annotations: false,
-            highlights: false,
-            comments: false,
-            memex: false,
-        }
-        const typ = {
-            ...this.state.type,
-            websites: this.props.prevTypes.websites,
-            annotations: this.props.prevTypes.annotations,
-            comments: this.props.prevTypes.comments,
-            highlights: this.props.prevTypes.highlights,
-            memex: this.props.prevTypes.memex,
-        }
-        // console.log(this.props.prevTypes)
-        if (this.props.unSelect) {
-            this.setState({
-                type: types,
-                showPopup: false,
-            })
-        } else {
-            this.setState({
-                type: typ,
-            })
-        }
-    }
-
     render() {
         let show = null
         let count = 0
@@ -110,7 +110,7 @@ class TypesPopup extends PureComponent {
         this.props.checkCount(count)
         this.props.typeStatus(this.state.type)
 
-        console.log(this.props.prevTypes)
+        // console.log(this.props.prevTypes)
 
         if (this.props.showPopup) {
             show = (

@@ -22,6 +22,7 @@ class IndexDropdownRow extends PureComponent {
         isForAnnotation: PropTypes.bool,
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,
+        isForRibbon: PropTypes.bool,
         scrollIntoView: PropTypes.func.isRequired,
         isNew: PropTypes.bool,
         isList: PropTypes.bool,
@@ -39,7 +40,7 @@ class IndexDropdownRow extends PureComponent {
     get styles() {
         if (this.props.isForAnnotation) {
             return annotationStyles
-        } else if (this.props.isForSidebar) {
+        } else if (this.props.isForSidebar || this.props.isForRibbon) {
             return sidebarStyles
         }
         return localStyles
@@ -60,6 +61,7 @@ class IndexDropdownRow extends PureComponent {
     }
 
     render() {
+        // console.log(this.props.isForRibbon)
         return (
             <div
                 className={cx(this.mainClass, {

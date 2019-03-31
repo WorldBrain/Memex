@@ -1642,7 +1642,11 @@ babel-plugin-react-docgen@^2.0.0-rc.1:
     lodash "^4.17.10"
     react-docgen "^3.0.0-beta12"
 
-<<<<<<< e0e267618588e1898f166960eada69782ec5a344
+babel-plugin-react-svg@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-react-svg/-/babel-plugin-react-svg-2.1.0.tgz#169eeba1a20fa2dee3a71ff38eedd63d08e69487"
+  integrity sha512-dHhDj5o4TEdrGSIzWQvTthZsEGCWGRKzSd+zO0xl8ie0zMf4to5nF64Cyu2zfM0mfB9BGRYQLE3YQliv9c+gPA==
+
 babel-plugin-remove-console@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/babel-plugin-remove-console/-/babel-plugin-remove-console-1.0.1.tgz#d8f24556c3a05005d42aaaafd27787f53ff013a7"
@@ -1654,12 +1658,6 @@ babel-plugin-remove-debugger@^1.0.1:
 babel-plugin-runtime@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/babel-plugin-runtime/-/babel-plugin-runtime-1.0.7.tgz#bf7c7d966dd56ecd5c17fa1cb253c9acb7e54aaf"
-=======
-babel-plugin-react-svg@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/babel-plugin-react-svg/-/babel-plugin-react-svg-2.1.0.tgz#169eeba1a20fa2dee3a71ff38eedd63d08e69487"
-  integrity sha512-dHhDj5o4TEdrGSIzWQvTthZsEGCWGRKzSd+zO0xl8ie0zMf4to5nF64Cyu2zfM0mfB9BGRYQLE3YQliv9c+gPA==
->>>>>>> Built the domains filter
 
 babel-plugin-syntax-async-functions@^6.8.0:
   version "6.13.0"
