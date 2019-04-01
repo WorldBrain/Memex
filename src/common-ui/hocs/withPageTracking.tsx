@@ -10,9 +10,10 @@ import analytics from 'src/analytics'
  * @param {React.Component} Component
  * @returns {React.Component}
  */
-const withPageTracking = Component =>
-    class extends React.Component {
+const withPageTracking = (Component: typeof React.Component) =>
+    class extends React.Component<any> {
         static propTypes = { location: PropTypes.object.isRequired }
+        trackPage: any
 
         constructor(props) {
             super(props)
@@ -30,7 +31,12 @@ const withPageTracking = Component =>
             }
         }
 
-        _trackPage = () => analytics.trackPage({ title: document.title })
+        _trackPage = () =>
+            analytics.trackEvent({
+                category: 'Global',
+                action: 'Page Visit',
+                value: document.title,
+            })
 
         render() {
             return <Component {...this.props} />

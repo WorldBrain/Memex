@@ -22,7 +22,7 @@ let browserName
     // XXX Firefox seems the only one currently implementing this function, but
     // luckily that is enough for our current needs.
     if (!browserIsChrome()) {
-        const browserInfo = await browser.runtime.getBrowserInfo()
+        const browserInfo = await window['browser'].runtime.getBrowserInfo()
         browserName = browserInfo.name
     }
 })()
@@ -40,7 +40,7 @@ function formatTime(timestamp, showTime) {
 }
 
 function setOmniboxMessage(text) {
-    browser.omnibox.setDefaultSuggestion({
+    window['browser'].omnibox.setDefaultSuggestion({
         description: text,
     })
 }
@@ -78,7 +78,7 @@ async function makeSuggestion(query, suggest) {
 
     const queryFilters = extractTimeFiltersFromQuery(query)
 
-    const searchResults = await searchIndex.search(searchIndex.getDb)({
+    const searchResults = await (searchIndex.search(searchIndex.getDb) as any)({
         ...queryFilters,
         limit: 5,
     })
@@ -155,17 +155,17 @@ const acceptInput = async (text, disposition) => {
 
     switch (disposition) {
         case 'currentTab':
-            browser.tabs.update({
+            window['browser'].tabs.update({
                 url,
             })
             break
         case 'newForegroundTab':
-            browser.tabs.create({
+            window['browser'].tabs.create({
                 url,
             })
             break
         case 'newBackgroundTab':
-            browser.tabs.create({
+            window['browser'].tabs.create({
                 url,
                 active: false,
             })
@@ -173,5 +173,7 @@ const acceptInput = async (text, disposition) => {
     }
 }
 
-browser.omnibox.onInputChanged.addListener(debounce(500)(makeSuggestion))
-browser.omnibox.onInputEntered.addListener(acceptInput)
+window['browser'].omnibox.onInputChanged.addListener(
+    debounce(500)(makeSuggestion),
+)
+window['browser'].omnibox.onInputEntered.addListener(acceptInput)

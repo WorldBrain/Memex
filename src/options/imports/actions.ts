@@ -12,12 +12,14 @@ export const filterDownloadDetails = createAction(
     'imports/filterDownloadDetails',
 )
 
-export const addImportItem = createAction('imports/addImportItem')
+export const addImportItem = createAction('imports/addImportItem') as any
 
 export const toggleAllowType = createAction('imports/toggleAllowType')
 export const setAllowType = createAction('imports/setAllowType')
 export const initAllowTypes = createAction('imports/initAllowTypes')
-export const initEstimateCounts = createAction('imports/initEstimateCounts')
+export const initEstimateCounts = createAction(
+    'imports/initEstimateCounts',
+) as any
 export const initTotalsCounts = createAction('imports/initTotalsCounts')
 export const initFailCounts = createAction('imports/initFailCounts')
 export const initSuccessCounts = createAction('imports/initSuccessCounts')
@@ -67,6 +69,8 @@ const getCmdMessageHandler = dispatch => ({ cmd, ...payload }) => {
         case CMDS.COMPLETE:
             dispatch(stopImport())
             break
+        default:
+            break
     }
 }
 
@@ -77,7 +81,7 @@ let port
  * Handles initing the imports runtime connection with the background script's batch import logic.
  */
 export const init = () => async dispatch => {
-    port = browser.runtime.connect({
+    port = window['browser'].runtime.connect({
         name: IMPORT_CONN_NAME,
     })
     port.onMessage.addListener(getCmdMessageHandler(dispatch))
@@ -93,7 +97,7 @@ export const init = () => async dispatch => {
 const makePortMessagingThunk = ({
     actionCreator,
     cmd,
-    cb = f => f,
+    cb = () => {},
 }) => payload => dispatch => {
     cb()
     dispatch(actionCreator(payload))

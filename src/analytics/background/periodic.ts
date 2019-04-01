@@ -2,7 +2,6 @@ import moment from 'moment-timezone'
 
 import analytics from '../'
 import { STORAGE_KEYS, SCHEDULES, TIMEZONE } from '../constants'
-import countlyAnalytics from '../countly'
 
 /*
  * The purpose of this module is to attempt reimplement standard active user metrics
@@ -52,7 +51,7 @@ const attemptPeriodicPing = async (
         [activityKey]: lastActivityPing,
         [installKey]: lastInstallPing,
         [STORAGE_KEYS.LAST_ACTIVE]: lastActive,
-    } = await browser.storage.local.get({
+    } = await window['browser'].storage.local.get({
         [activityKey]: 0,
         [installKey]: 0,
         [STORAGE_KEYS.LAST_ACTIVE]: 0,
@@ -71,14 +70,10 @@ const attemptPeriodicPing = async (
                 category: 'Periodic',
                 action: `${action} activity ping`,
             })
-
-            countlyAnalytics.trackEvent({
-                type: 'activity',
-            })
         }
 
         // Update last ping time to stop further attempts in current period, regardless if active event was sent
-        await browser.storage.local.set({ [activityKey]: Date.now() })
+        await window['browser'].storage.local.set({ [activityKey]: Date.now() })
     }
 
     // Same deal with install pings
@@ -87,25 +82,20 @@ const attemptPeriodicPing = async (
             category: 'Periodic',
             action: `${action} install ping`,
         })
-
-        countlyAnalytics.trackEvent({
-            type: 'install',
-        })
-
-        await browser.storage.local.set({ [installKey]: Date.now() })
+        await window['browser'].storage.local.set({ [installKey]: Date.now() })
     }
 }
 
 // Schedule all periodic ping attempts at a random minute past the hour, every hour
 const createPeriodicEventJob = period =>
-    browser.alarms.create(period, {
+    window['browser'].alarms.create(period, {
         // fire the initial alarm in a random minute,
         // this will ensure all of the created alarms fire at different time of the hour
         delayInMinutes: Math.floor(Math.random() * 60),
         periodInMinutes: SCHEDULES.EVERY_HOUR,
     })
 
-browser.alarms.onAlarm.addListener(alarm =>
+window['browser'].alarms.onAlarm.addListener(alarm =>
     attemptPeriodicPing(alarm.name, getActivePeriodVars(alarm.name)),
 )
 

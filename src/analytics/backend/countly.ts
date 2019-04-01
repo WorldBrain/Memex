@@ -1,7 +1,9 @@
 // tslint:disable:no-console
 import { fetchUserId, shouldTrack } from '../utils'
+import { AnalyticsBackend } from './types'
+import { AnalyticsEvent, AnalyticsTrackEventOptions } from '../types'
 
-class Analytics {
+export default class CountlyAnalyticsBackend implements AnalyticsBackend {
     static DEF_TRACKING = true
 
     private countlyConnector
@@ -31,31 +33,33 @@ class Analytics {
         this.countlyConnector.init()
     }
 
-    private enqueueEvent({ key, id }) {
+    private enqueueEvent({ key, id, value }) {
         this.countlyConnector.q.push([
             'add_event',
             {
                 key,
                 count: 1,
-                segmentation: { id },
+                segmentation: {
+                    id,
+                    ...(value ? { value } : {}),
+                },
             },
         ])
     }
 
-    async trackEvent(params: { type: string }) {
-        const shouldTrackValue = await shouldTrack(Analytics.DEF_TRACKING)
+    async trackEvent(
+        event: AnalyticsEvent,
+        options?: AnalyticsTrackEventOptions,
+    ) {
         const userId = await fetchUserId()
-
-        if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
-            console.log('Tracking event', shouldTrackValue, userId, params)
-        }
-
-        if (!shouldTrackValue || !userId) {
+        if (!userId) {
             return
         }
 
-        return this.enqueueEvent({ id: userId, key: params.type })
+        return this.enqueueEvent({
+            id: userId,
+            key: `${event.category}:${event.action}`,
+            value: event.value,
+        })
     }
 }
-
-export default Analytics
