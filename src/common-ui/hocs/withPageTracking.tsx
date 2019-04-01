@@ -7,10 +7,10 @@ import analytics from 'src/analytics'
 /**
  * HOC that adds page tracking to whatever router-connected component.
  *
- * @param {React.Component} Component
+ * @param {React.Component} componentClass
  * @returns {React.Component}
  */
-const withPageTracking = (Component: typeof React.Component) =>
+const withPageTracking = (componentClass: typeof React.Component) =>
     class extends React.Component<any> {
         static propTypes = { location: PropTypes.object.isRequired }
         trackPage: any
@@ -39,7 +39,7 @@ const withPageTracking = (Component: typeof React.Component) =>
             })
 
         render() {
-            return <Component {...this.props} />
+            return React.createElement(componentClass, this.props as any)
         }
     }
 

@@ -27,7 +27,7 @@ interface Props {
     onEndDateChange: Function
     onEndDateTextChange: Function
     disabled: boolean
-    changeTooltip: Function
+    changeTooltip: (...args) => void
 }
 class DateRangeSelection extends Component<Props> {
     startDatePicker: any

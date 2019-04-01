@@ -16,7 +16,7 @@ export async function onInstall() {
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
 
-    analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
+    analytics.trackEvent({ category: 'Global', action: 'Install' })
 
     // Open onboarding page
     browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })

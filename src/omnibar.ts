@@ -170,6 +170,8 @@ const acceptInput = async (text, disposition) => {
                 active: false,
             })
             break
+        default:
+            break
     }
 }
 
