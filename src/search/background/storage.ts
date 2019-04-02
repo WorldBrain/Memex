@@ -4,13 +4,7 @@ import {
     SearchParams as OldSearchParams,
     SearchResult as OldSearchResult,
 } from '../types'
-import {
-    AnnotSearchParams,
-    AnnotPage,
-    PageUrlsByDay,
-    PagesByUrl,
-    AnnotsByPageUrl,
-} from './types'
+import { AnnotSearchParams, AnnotPage, PageUrlsByDay } from './types'
 import { Annotation } from 'src/direct-linking/types'
 import { PageUrlMapperPlugin } from './page-url-mapper'
 import { reshapeParamsForOldSearch } from './utils'
@@ -72,50 +66,32 @@ export default class SearchStorage extends FeatureStorage {
         return max
     }
 
-    private async attachDisplayDataToAnnots(
-        annots: Annotation[],
-    ): Promise<Annotation[]> {
+    private async findAnnotsDisplayData(
+        annotUrls: string[],
+    ): Promise<{
+        annotsToTags: Map<string, string[]>
+        bmUrls: Set<string>
+    }> {
         const bookmarks = await this.storageManager
             .collection('annotBookmarks')
             .findAllObjects<Bookmark>({
-                url: { $in: annots.map(annot => annot.url) },
+                url: { $in: annotUrls },
             })
 
         const bmUrls = new Set(bookmarks.map(bm => bm.url))
 
-        return Promise.all(
-            annots.map(async annot => {
-                const tags = await this.storageManager
-                    .collection('tags')
-                    .findAllObjects<Tag>({ url: annot.url }, { limit: 4 })
+        const tags = await this.storageManager
+            .collection('tags')
+            .findAllObjects<Tag>({ url: { $in: annotUrls } }, { limit: 4 })
 
-                return {
-                    ...annot,
-                    tags: tags.map(tag => tag.name),
-                    hasBookmark: bmUrls.has(annot.url),
-                }
-            }),
-        )
-    }
+        const annotsToTags = new Map<string, string[]>()
 
-    private async attachDisplayTimeToPages(
-        pages: AnnotPage[],
-        endDate: Date | number,
-    ): Promise<AnnotPage[]> {
-        return Promise.all(
-            pages.map(async page => {
-                const upperTimeBound =
-                    endDate instanceof Date ? endDate.getTime() : endDate
+        tags.forEach(({ name, url }) => {
+            const current = annotsToTags.get(url) || []
+            annotsToTags.set(url, [...current, name])
+        })
 
-                return {
-                    ...page,
-                    displayTime: await this.calcLatestInteraction(
-                        page.url,
-                        upperTimeBound,
-                    ),
-                }
-            }),
-        )
+        return { annotsToTags, bmUrls }
     }
 
     /**
@@ -140,37 +116,55 @@ export default class SearchStorage extends FeatureStorage {
             pageUrls = new Set([...pageUrls, ...annotsByPage.keys()])
         }
 
-        let pages: AnnotPage[] = await this.storageManager.operation(
+        const pages: AnnotPage[] = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...pageUrls],
-            params.base64Img,
+            { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
 
-        pages = await this.attachDisplayTimeToPages(pages, params.endDate)
+        const clusteredResults: PageUrlsByDay = {}
 
-        const normalizedResults: PageUrlsByDay = {}
-
+        // Create reverse annots map pointing from each annot's PK to their data
+        // related to which page, day cluster they belong to + display data.
+        const reverseAnnotMap = new Map<string, [number, string, Annotation]>()
         for (const [day, annotsByPage] of results) {
-            normalizedResults[day] = {}
+            clusteredResults[day] = {}
             for (const [pageUrl, annots] of annotsByPage) {
-                normalizedResults[day][
-                    pageUrl
-                ] = await this.attachDisplayDataToAnnots(annots)
+                annots.forEach(annot =>
+                    reverseAnnotMap.set(annot.url, [day, pageUrl, annot]),
+                )
             }
         }
 
+        // Get display data for all annots then map them back to their clusters
+        const { annotsToTags, bmUrls } = await this.findAnnotsDisplayData([
+            ...reverseAnnotMap.keys(),
+        ])
+
+        reverseAnnotMap.forEach(([day, pageUrl, annot]) => {
+            const current = clusteredResults[day][pageUrl] || []
+            clusteredResults[day][pageUrl] = [
+                ...current,
+                {
+                    ...annot,
+                    tags: annotsToTags.get(annot.url) || [],
+                    hasBookmark: bmUrls.has(annot.url),
+                } as any,
+            ]
+        })
+
         // Remove any annots without matching pages (keep data integrity regardless of DB)
         const validUrls = new Set(pages.map(page => page.url))
-        for (const day of Object.keys(normalizedResults)) {
-            for (const url of Object.keys(normalizedResults[day])) {
+        for (const day of Object.keys(clusteredResults)) {
+            for (const url of Object.keys(clusteredResults[day])) {
                 if (!validUrls.has(url)) {
-                    delete normalizedResults[day][url]
+                    delete clusteredResults[day][url]
                 }
             }
         }
 
         return {
-            annotsByDay: normalizedResults,
+            annotsByDay: clusteredResults,
             docs: pages,
         }
     }
@@ -184,19 +178,29 @@ export default class SearchStorage extends FeatureStorage {
             params,
         )
 
-        let pages: AnnotPage[] = await this.storageManager.operation(
+        const pages: AnnotPage[] = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...results.keys()],
-            params.base64Img,
+            { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
 
-        pages = await this.attachDisplayTimeToPages(pages, params.endDate)
+        const annotUrls = [].concat(...results.values()).map(annot => annot.url)
+
+        // Get display data for all annots then map them back to their clusters
+        const { annotsToTags, bmUrls } = await this.findAnnotsDisplayData(
+            annotUrls,
+        )
 
         return {
-            docs: pages.map(page => ({
-                ...page,
-                annotations: results.get(page.url),
-            })),
+            docs: pages.map(page => {
+                const annotations = results.get(page.url).map(annot => ({
+                    ...annot,
+                    tags: annotsToTags.get(annot.url) || [],
+                    hasBookmark: bmUrls.has(annot.url),
+                }))
+
+                return { ...page, annotations }
+            }),
         }
     }
 
@@ -214,11 +218,10 @@ export default class SearchStorage extends FeatureStorage {
 
         const pageUrls = new Set(ids.map(([url]) => url))
 
-        const pages = await this.storageManager.operation(
+        return this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...pageUrls],
+            { upperTimeBound: params.endDate },
         )
-
-        return this.attachDisplayTimeToPages(pages, params.endDate)
     }
 }

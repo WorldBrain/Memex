@@ -18,7 +18,7 @@
     text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 65px;
 }
 
 .infoContainer {

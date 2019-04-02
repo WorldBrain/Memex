@@ -411,7 +411,9 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
 
         // Cut off any excess
         if (results.size > params.limit) {
-            results = new Map([...results].slice(0, params.limit))
+            results = new Map(
+                [...results].slice(params.skip, params.skip + params.limit),
+            )
         }
 
         return results
