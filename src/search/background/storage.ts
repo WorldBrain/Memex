@@ -184,11 +184,23 @@ export default class SearchStorage extends FeatureStorage {
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
 
+        const annotUrls = [].concat(...results.values()).map(annot => annot.url)
+
+        // Get display data for all annots then map them back to their clusters
+        const { annotsToTags, bmUrls } = await this.findAnnotsDisplayData(
+            annotUrls,
+        )
+
         return {
-            docs: pages.map(page => ({
-                ...page,
-                annotations: results.get(page.url),
-            })),
+            docs: pages.map(page => {
+                const annotations = results.get(page.url).map(annot => ({
+                    ...annot,
+                    tags: annotsToTags.get(annot.url) || [],
+                    hasBookmark: bmUrls.has(annot.url),
+                }))
+
+                return { ...page, annotations }
+            }),
         }
     }
 
