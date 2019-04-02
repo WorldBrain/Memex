@@ -72,6 +72,8 @@ export default class BackupSettingsContainer extends React.Component {
     state = { screen: null, isAuthenticated: null }
 
     async componentDidMount() {
+        // analytics.trackEvent({ category: 'Test', action: 'New Event' })
+
         const state = await logic.getInitialState({
             analytics,
             localStorage,
