@@ -40,6 +40,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .table('pages')
             .where('url')
             .anyOf(pageUrls)
+            .limit(pageUrls.length)
             .toArray()
 
         return Promise.all(
@@ -57,33 +58,43 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         )
     }
 
-    private lookupFavIcons(
+    private async lookupFavIcons(
         hostnames: string[],
         favIconMap: Map<string, string>,
         base64Img?: boolean,
     ) {
         // Find all assoc. fav-icons and create object URLs pointing to the Blobs
-        return this.backend.dexieInstance
+        const favIcons = await this.backend.dexieInstance
             .table('favIcons')
             .where('hostname')
             .anyOf(hostnames)
-            .each(async fav =>
+            .limit(hostnames.length)
+            .toArray()
+
+        await Promise.all(
+            favIcons.map(async fav =>
                 favIconMap.set(
                     fav.hostname,
                     await this.encodeImage(fav.favIcon, base64Img),
                 ),
-            )
+            ),
+        )
     }
 
-    private lookupTags(pageUrls: string[], tagMap: Map<string, string[]>) {
-        return this.backend.dexieInstance
+    private async lookupTags(
+        pageUrls: string[],
+        tagMap: Map<string, string[]>,
+    ) {
+        const tags = await this.backend.dexieInstance
             .table('tags')
             .where('url')
             .anyOf(pageUrls)
-            .eachPrimaryKey(([name, url]) => {
-                const tags = tagMap.get(url) || []
-                tagMap.set(url, [...tags, name])
-            })
+            .primaryKeys()
+
+        tags.forEach(([name, url]) => {
+            const current = tagMap.get(url) || []
+            tagMap.set(url, [...current, name])
+        })
     }
 
     private async lookupAnnotsCounts(
@@ -196,24 +207,23 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         ])
 
         // Map page results back to original input
-        const pageResults = pageUrls.map(url => {
-            const page = pageMap.get(url)
+        return pageUrls
+            .map(url => {
+                const page = pageMap.get(url)
 
-            // Data integrity issue; no matching page in the DB. Fail nicely
-            if (!page) {
-                return null
-            }
+                // Data integrity issue; no matching page in the DB. Fail nicely
+                if (!page) {
+                    return null
+                }
 
-            return {
-                ...page,
-                favIcon: favIconMap.get(page.hostname),
-                tags: tagMap.get(url) || [],
-                annotsCount: countMap.get(url),
-                displayTime: timeMap.get(url),
-            }
-        })
-
-        return pageResults
+                return {
+                    ...page,
+                    favIcon: favIconMap.get(page.hostname),
+                    tags: tagMap.get(url) || [],
+                    annotsCount: countMap.get(url),
+                    displayTime: timeMap.get(url),
+                }
+            })
             .filter(page => page != null)
             .map(reshapePageForDisplay)
     }
