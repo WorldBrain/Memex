@@ -4,13 +4,7 @@ import {
     SearchParams as OldSearchParams,
     SearchResult as OldSearchResult,
 } from '../types'
-import {
-    AnnotSearchParams,
-    AnnotPage,
-    PageUrlsByDay,
-    PagesByUrl,
-    AnnotsByPageUrl,
-} from './types'
+import { AnnotSearchParams, AnnotPage, PageUrlsByDay } from './types'
 import { Annotation } from 'src/direct-linking/types'
 import { PageUrlMapperPlugin } from './page-url-mapper'
 import { reshapeParamsForOldSearch } from './utils'
@@ -98,26 +92,6 @@ export default class SearchStorage extends FeatureStorage {
         )
     }
 
-    private async attachDisplayTimeToPages(
-        pages: AnnotPage[],
-        endDate: Date | number,
-    ): Promise<AnnotPage[]> {
-        return Promise.all(
-            pages.map(async page => {
-                const upperTimeBound =
-                    endDate instanceof Date ? endDate.getTime() : endDate
-
-                return {
-                    ...page,
-                    displayTime: await this.calcLatestInteraction(
-                        page.url,
-                        upperTimeBound,
-                    ),
-                }
-            }),
-        )
-    }
-
     /**
      * Searches for annotations which match the passed params and returns
      * them clustered by day.
@@ -140,13 +114,11 @@ export default class SearchStorage extends FeatureStorage {
             pageUrls = new Set([...pageUrls, ...annotsByPage.keys()])
         }
 
-        let pages: AnnotPage[] = await this.storageManager.operation(
+        const pages: AnnotPage[] = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...pageUrls],
-            params.base64Img,
+            { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
-
-        pages = await this.attachDisplayTimeToPages(pages, params.endDate)
 
         const normalizedResults: PageUrlsByDay = {}
 
@@ -184,13 +156,11 @@ export default class SearchStorage extends FeatureStorage {
             params,
         )
 
-        let pages: AnnotPage[] = await this.storageManager.operation(
+        const pages: AnnotPage[] = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...results.keys()],
-            params.base64Img,
+            { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
-
-        pages = await this.attachDisplayTimeToPages(pages, params.endDate)
 
         return {
             docs: pages.map(page => ({
@@ -214,11 +184,10 @@ export default class SearchStorage extends FeatureStorage {
 
         const pageUrls = new Set(ids.map(([url]) => url))
 
-        const pages = await this.storageManager.operation(
+        return this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...pageUrls],
+            { upperTimeBound: params.endDate },
         )
-
-        return this.attachDisplayTimeToPages(pages, params.endDate)
     }
 }

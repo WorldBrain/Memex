@@ -31,24 +31,30 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             reader.readAsDataURL(img)
         })
 
-    private lookupPages(
+    private async lookupPages(
         pageUrls: string[],
         pageMap: Map<string, Page>,
         base64Img?: boolean,
     ) {
-        return this.backend.dexieInstance
+        const pages = await this.backend.dexieInstance
             .table('pages')
             .where('url')
             .anyOf(pageUrls)
-            .each(async page =>
+            .toArray()
+
+        return Promise.all(
+            pages.map(async page => {
+                const screenshot = page.screenshot
+                    ? await this.encodeImage(page.screenshot, base64Img)
+                    : undefined
+
                 pageMap.set(page.url, {
                     ...page,
-                    screenshot: page.screenshot
-                        ? await this.encodeImage(page.screenshot, base64Img)
-                        : undefined,
+                    screenshot,
                     hasBookmark: false, // Set later, if needed
-                } as any),
-            )
+                })
+            }),
+        )
     }
 
     private lookupFavIcons(
@@ -69,18 +75,6 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             )
     }
 
-    private lookupBookmarks(pageUrls: string[], pageMap: Map<string, Page>) {
-        // Find all assoc. bookmarks and augment assoc. page in page map
-        return this.backend.dexieInstance
-            .table('bookmarks')
-            .where('url')
-            .anyOf(pageUrls)
-            .eachPrimaryKey(url => {
-                const page = pageMap.get(url)
-                pageMap.set(url, { ...page, hasBookmark: true } as any)
-            })
-    }
-
     private lookupTags(pageUrls: string[], tagMap: Map<string, string[]>) {
         return this.backend.dexieInstance
             .table('tags')
@@ -96,14 +90,66 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         pageUrls: string[],
         countMap: Map<string, number>,
     ) {
-        for (const url of pageUrls) {
-            const count = await this.backend.dexieInstance
-                .table('annotations')
-                .where('pageUrl')
-                .equals(url)
-                .count()
+        const annotUrls = (await this.backend.dexieInstance
+            .table('annotations')
+            .where('pageUrl')
+            .anyOf(pageUrls)
+            .keys()) as string[]
 
-            countMap.set(url, count)
+        annotUrls.forEach(url => {
+            const count = countMap.get(url) || 0
+            countMap.set(url, count + 1)
+        })
+    }
+
+    private async lookupLatestTimes(
+        pageUrls: string[],
+        timeMap: Map<string, number>,
+        pageMap: Map<string, Page>,
+        upperTimeBound: number,
+    ) {
+        const visitQueryP = this.backend.dexieInstance
+            .table('visits')
+            .where('url')
+            .anyOf(pageUrls)
+            .primaryKeys()
+        const bmQueryP = this.backend.dexieInstance
+            .table('bookmarks')
+            .where('url')
+            .anyOf(pageUrls)
+            .limit(pageUrls.length)
+            .toArray()
+
+        const [visits, bms] = await Promise.all([visitQueryP, bmQueryP])
+
+        const visitMap = new Map<string, number>()
+        for (const [time, url] of visits) {
+            if (upperTimeBound && time > upperTimeBound) {
+                continue
+            }
+
+            // For urls with lots of visits, IDB sorts them latest last
+            visitMap.set(url, time)
+        }
+
+        const bookmarkMap = new Map<string, number>()
+        for (const { time, url } of bms) {
+            const page = pageMap.get(url)
+            pageMap.set(url, { ...page, hasBookmark: true } as any)
+
+            if (upperTimeBound && time > upperTimeBound) {
+                continue
+            }
+
+            bookmarkMap.set(url, time)
+        }
+
+        for (const url of pageUrls) {
+            const visit = visitMap.get(url)
+            const bm = bookmarkMap.get(url)
+
+            const max = !bm || bm < visit ? visit : bm
+            timeMap.set(url, max)
         }
     }
 
@@ -114,24 +160,39 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
      */
     async findMatchingPages(
         pageUrls: string[],
-        base64Img?: boolean,
+        {
+            base64Img,
+            upperTimeBound,
+        }: {
+            base64Img?: boolean
+            upperTimeBound?: number
+        },
     ): Promise<AnnotPage[]> {
+        if (!pageUrls.length) {
+            return []
+        }
+
         const favIconMap = new Map<string, string>()
         const pageMap = new Map<string, Page>()
         const tagMap = new Map<string, string[]>()
         const countMap = new Map<string, number>()
+        const timeMap = new Map<string, number>()
 
-        await this.lookupPages(pageUrls, pageMap, base64Img)
+        // Run the first set of queries to get display data
+        await Promise.all([
+            this.lookupPages(pageUrls, pageMap, base64Img),
+            this.lookupTags(pageUrls, tagMap),
+            this.lookupAnnotsCounts(pageUrls, countMap),
+        ])
 
         const hostnames = new Set(
             [...pageMap.values()].map(page => page.hostname),
         )
 
+        // Run the subsequent set of queries that depend on earlier results
         await Promise.all([
+            this.lookupLatestTimes(pageUrls, timeMap, pageMap, upperTimeBound),
             this.lookupFavIcons([...hostnames], favIconMap, base64Img),
-            this.lookupBookmarks(pageUrls, pageMap),
-            this.lookupTags(pageUrls, tagMap),
-            this.lookupAnnotsCounts(pageUrls, countMap),
         ])
 
         // Map page results back to original input
@@ -148,6 +209,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                 favIcon: favIconMap.get(page.hostname),
                 tags: tagMap.get(url) || [],
                 annotsCount: countMap.get(url),
+                displayTime: timeMap.get(url),
             }
         })
 

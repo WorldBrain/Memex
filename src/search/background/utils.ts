@@ -54,5 +54,6 @@ export const reshapePageForDisplay = page => ({
     favIcon: page.favIcon,
     annotations: [],
     tags: page.tags,
+    displayTime: page.displayTime,
     annotsCount: page.annotsCount,
 })
