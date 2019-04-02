@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
-import { CMDS, IMPORT_CONN_NAME } from './constants'
+import { CMDS, IMPORT_CONN_NAME, IMPORT_TYPE } from './constants'
 import * as selectors from './selectors'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
@@ -38,8 +38,13 @@ export const resumeImport = createAction('imports/resumeImport')
 export const toggleAdvMode = createAction('imports-adv/toggleAdvMode')
 export const setConcurrency = createAction('imports-adv/setConcurrency')
 export const setProcessErrs = createAction('imports-adv/setProcessErrs')
+export const toggleBookmarkImports = createAction(
+    'imports-adv/toggleBookmarkImports',
+)
+export const toggleIndexTitle = createAction('imports-adv/toggleIndexTitle')
 
 export const showDownloadDetails = createAction('imports/showDownloadDetails')
+export const setBlobUrl = createAction('imports/setBlobUrl')
 
 /**
  * Responds to messages sent from background script over the runtime connection by dispatching
@@ -99,10 +104,23 @@ const makePortMessagingThunk = ({
     })
 }
 
-export const recalcEsts = makePortMessagingThunk({
-    actionCreator: prepareImport,
-    cmd: CMDS.RECALC,
-})
+export const recalcEsts = () => (dispatch, getState) => {
+    const state = getState()
+
+    dispatch(prepareImport())
+
+    port.postMessage({
+        cmd: CMDS.RECALC,
+        payload: {
+            allowTypes: selectors.allowTypes(state),
+            options: {
+                bookmarkImports: selectors.bookmarkImports(state),
+                indexTitle: selectors.indexTitle(state),
+            },
+            blobUrl: selectors.blobUrl(state),
+        },
+    })
+}
 
 export const setPrevFailed = makePortMessagingThunk({
     actionCreator: setProcessErrs,
@@ -189,9 +207,21 @@ export const start = () => (dispatch, getState) => {
         type: EVENT_NAMES.START_IMPORT,
     })
 
-    dispatch(prepareImport())
+    const allowTypes = selectors.allowTypes(state)
+
+    if (allowTypes[IMPORT_TYPE.HISTORY] || allowTypes[IMPORT_TYPE.BOOKMARK]) {
+        dispatch(prepareImport())
+    }
+
     port.postMessage({
         cmd: CMDS.START,
-        payload: selectors.allowTypes(state),
+        payload: {
+            allowTypes,
+            options: {
+                bookmarkImports: selectors.bookmarkImports(state),
+                indexTitle: selectors.indexTitle(state),
+            },
+            blobUrl: selectors.blobUrl(state),
+        },
     })
 }

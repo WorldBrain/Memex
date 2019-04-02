@@ -32,7 +32,10 @@ const storageManager = initStorex()
 const notifications = new NotificationBackground({ storageManager })
 notifications.setupRemoteFunctions()
 
-const directLinking = new DirectLinkingBackground({ storageManager, getDb })
+export const directLinking = new DirectLinkingBackground({
+    storageManager,
+    getDb,
+})
 directLinking.setupRemoteFunctions()
 directLinking.setupRequestInterceptor()
 
@@ -46,7 +49,7 @@ search.setupRemoteFunctions()
 const eventLog = new EventLogBackground({ storageManager })
 eventLog.setupRemoteFunctions()
 
-const customList = new CustomListBackground({
+export const customList = new CustomListBackground({
     storageManager,
     getDb,
     tabMan: tabManager,
@@ -54,7 +57,7 @@ const customList = new CustomListBackground({
 })
 customList.setupRemoteFunctions()
 
-const tags = new TagsBackground({
+export const tags = new TagsBackground({
     storageManager,
     getDb,
     tabMan: tabManager,

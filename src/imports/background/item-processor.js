@@ -1,6 +1,7 @@
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import * as searchIndex from 'src/search'
+import { tags as tagStorage, customList as listStorage } from 'src/background'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -98,14 +99,52 @@ export default class ImportItemProcessor {
         }
     }
 
-    async _storeDocs({ pageDoc, bookmark, visits = [] }) {
+    async _storeDocs({
+        pageDoc,
+        bookmark,
+        visits = [],
+        rejectNoContent = true,
+    }) {
         this._checkCancelled()
 
         return searchIndex.addPage(searchIndex.getDb)({
             pageDoc,
             visits,
             bookmark,
+            rejectNoContent,
         })
+    }
+
+    async _storeOtherData({ url, tags, collections, annotations }) {
+        this._checkCancelled()
+
+        await Promise.all(
+            collections.map(async coll => {
+                const list = await listStorage.fetchListByName({
+                    name: coll,
+                })
+
+                if (list) {
+                    await listStorage.insertPageToList({
+                        id: list.id,
+                        url,
+                    })
+                } else {
+                    const newList = await listStorage.createCustomList({
+                        name: coll,
+                    })
+
+                    await listStorage.insertPageToList({
+                        id: newList.id,
+                        url,
+                    })
+                }
+            }),
+
+            tags.map(async tag => {
+                await tagStorage.addTag({ url, name: tag })
+            }),
+        )
     }
 
     /**
@@ -160,6 +199,49 @@ export default class ImportItemProcessor {
         return { status: DOWNLOAD_STATUS.SUCC }
     }
 
+    async _processImportItem(importItem, options = {}) {
+        await checkVisitItemTransitionTypes(importItem)
+        const {
+            url,
+            title,
+            tags,
+            collections,
+            annotations,
+            timeAdded,
+        } = importItem
+
+        const pageDoc = !options.indexTitle
+            ? await this._createPageDoc(importItem)
+            : {
+                  url,
+                  content: {
+                      title,
+                  },
+              }
+
+        const visits = await getVisitTimes(importItem)
+
+        if (timeAdded) {
+            visits.push(timeAdded, Date.now())
+        }
+
+        const bookmark = options.bookmarkImports
+            ? timeAdded || Date.now()
+            : undefined
+
+        await this._storeDocs({
+            pageDoc,
+            bookmark,
+            visits,
+            rejectNoContent: false,
+        })
+        await this._storeOtherData({ url, tags, collections, annotations })
+
+        this._checkCancelled()
+        // If we finally got here without an error being thrown, return the success status message + pageDoc data
+        return { status: DOWNLOAD_STATUS.SUCC }
+    }
+
     /**
      * Given an import state item, performs appropriate processing depending on the import type.
      * Main execution method.
@@ -168,13 +250,15 @@ export default class ImportItemProcessor {
      * @returns {Promise<any>} Resolves to a status string denoting the outcome of import processing as `status`.
      *  Rejects for any other error, including bad content check errors, and cancellation - caller should handle.
      */
-    async process(importItem) {
+    async process(importItem, options = {}) {
         this._checkCancelled()
 
         switch (importItem.type) {
             case IMPORT_TYPE.BOOKMARK:
             case IMPORT_TYPE.HISTORY:
                 return this._processHistory(importItem)
+            case IMPORT_TYPE.POCKET:
+                return this._processImportItem(importItem, options)
             default:
                 throw new Error('Unknown import type')
         }

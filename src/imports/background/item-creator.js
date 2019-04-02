@@ -12,6 +12,11 @@ const deriveImportItem = type => item => ({
     type,
 })
 
+const deriveServicesImportItem = type => item => ({
+    ...item,
+    type,
+})
+
 /**
  * @typedef {Object} ImportItemChunk
  * @property {string} type
@@ -39,7 +44,11 @@ const deriveImportItem = type => item => ({
  */
 
 export default class ImportItemCreator {
-    static DEF_LIMITS = { histLimit: Infinity, bmLimit: Infinity }
+    static DEF_LIMITS = {
+        histLimit: Infinity,
+        bmLimit: Infinity,
+        pocketLimit: Infinity,
+    }
 
     /**
      * @param {ItemCreatorParams} args
@@ -60,9 +69,11 @@ export default class ImportItemCreator {
     set limits({
         histLimit = ImportItemCreator.DEF_LIMITS.histLimit,
         bmLimit = ImportItemCreator.DEF_LIMITS.bmLimit,
+        pocketLimit = ImportItemCreator.DEF_LIMITS.pocketLimit,
     }) {
         this._histLimit = histLimit
         this._bmLimit = bmLimit
+        this._pocketLimit = pocketLimit
     }
 
     get completedBmCount() {
@@ -73,12 +84,16 @@ export default class ImportItemCreator {
         return this._histKeys.size - this.completedBmCount
     }
 
+    get completedPocketCount() {
+        return this._completedPocketKeys.size
+    }
+
     static _limitMap = (items, limit) => new Map([...items].slice(0, limit))
 
     /**
      * Sets up existing data states which are used for filtering out items.
      */
-    async initData() {
+    async initData(data = []) {
         this.existingDataReady = new Promise(async (resolve, reject) => {
             try {
                 this._isBlacklisted = await checkWithBlacklist()
@@ -94,6 +109,12 @@ export default class ImportItemCreator {
         })
 
         await this.existingDataReady
+        this._pocketData = data
+        this._completedPocketKeys = new Set(
+            this._pocketData
+                .filter(item => this._histKeys.has(normalizeUrl(item.url)))
+                .map(item => item.url),
+        )
     }
 
     /**
@@ -161,6 +182,15 @@ export default class ImportItemCreator {
         }
     }
 
+    chunks = (array, size) => {
+        const result = []
+        for (let i = 0; i < array.length; i += size) {
+            const chunk = array.slice(i, i + size)
+            result.push(chunk)
+        }
+        return result
+    }
+
     /**
      * Main interface method, allowing incremental creation of different import item types.
      *
@@ -192,6 +222,20 @@ export default class ImportItemCreator {
                 itemsFilter,
                 this._histLimit,
                 TYPE.HISTORY,
+            )
+        }
+
+        if (this._pocketData && this._pocketLimit > 0) {
+            const itemsFilter = this._filterItemsByUrl(
+                deriveServicesImportItem(TYPE.POCKET),
+                new Set(),
+            )
+
+            yield* this._iterateItems(
+                this.chunks(this._pocketData, 10),
+                itemsFilter,
+                this._pocketLimit,
+                TYPE.POCKET,
             )
         }
     }

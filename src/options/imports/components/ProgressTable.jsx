@@ -59,6 +59,9 @@ const ProgressTable = ({ progress, allowTypes }) => (
             {allowTypes[TYPE.BOOKMARK] && (
                 <ProgressRow label="Bookmarks" {...progress[TYPE.BOOKMARK]} />
             )}
+            {allowTypes[TYPE.POCKET] && (
+                <ProgressRow label="Pocket" {...progress[TYPE.POCKET]} />
+            )}
         </tbody>
     </table>
 )
@@ -75,6 +78,7 @@ ProgressTable.propTypes = {
     progress: PropTypes.shape({
         [TYPE.HISTORY]: progressShape.isRequired,
         [TYPE.BOOKMARK]: progressShape.isRequired,
+        [TYPE.POCKET]: progressShape.isRequired,
     }).isRequired,
     allowTypes: PropTypes.object.isRequired,
 }

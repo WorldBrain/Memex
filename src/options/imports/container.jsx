@@ -33,7 +33,7 @@ class ImportContainer extends Component {
         showDownloadDetails: PropTypes.bool.isRequired,
         downloadDataFilter: PropTypes.string.isRequired,
         recalcEsts: PropTypes.func.isRequired,
-
+        allowTypes: PropTypes.object.isRequired,
         // Misc
         boundActions: PropTypes.object.isRequired,
     }
@@ -54,7 +54,11 @@ class ImportContainer extends Component {
     componentWillUnmount() {
         if (this.props.isRunning) {
             this.props.boundActions.pause()
-        } else if (!this.props.isPaused) {
+        } else if (
+            (!this.props.isPaused &&
+                this.props.allowTypes[constants.IMPORT_TYPE.HISTORY]) ||
+            this.props.allowTypes[constants.IMPORT_TYPE.BOOKMARK]
+        ) {
             this.props.boundActions.prepareImport()
         }
     }
@@ -92,6 +96,17 @@ class ImportContainer extends Component {
 
     renderHelpText = () =>
         this.state.waitingOnCancelConfirm ? 'Press cancel again to confirm' : ''
+
+    handleInputFile = event => {
+        const input = event.target
+        if (!input.files[0]) {
+            return
+        }
+        const file = input.files[0]
+        this.props.boundActions.prepareImport()
+        this.props.boundActions.setBlobUrl(URL.createObjectURL(file))
+        setTimeout(() => this.props.recalcEsts(), 500)
+    }
 
     renderCancelButton = () => (
         <ActionButton
@@ -171,6 +186,10 @@ class ImportContainer extends Component {
             onAllowHistoryClick={this.handleEstTableCheck(
                 constants.IMPORT_TYPE.HISTORY,
             )}
+            onAllowPocketClick={this.handleEstTableCheck(
+                constants.IMPORT_TYPE.POCKET,
+            )}
+            onInputImport={this.handleInputFile}
         />
     )
 

@@ -299,3 +299,28 @@
         cursor: pointer;
     }
 }
+
+.selectFile {
+    composes: CTA from '../../../common-ui/elements.css';
+    cursor: pointer;
+    outline: 0;
+    border: none;
+    transition: all 0.1s ease-in;
+
+    &[disabled] {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+.hidden {
+    composes: CTA from '../../../common-ui/elements.css';
+    background: #5cd9a6;
+    color: #111;
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+input[type='file'] {
+    display: none;
+}

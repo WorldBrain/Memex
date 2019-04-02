@@ -8,6 +8,8 @@ const mapStateToProps = state => ({
     advMode: selectors.advMode(state),
     concurrency: selectors.concurrency(state),
     prevFailedValue: selectors.processErrors(state),
+    bookmarkImports: selectors.bookmarkImports(state),
+    indexTitle: selectors.indexTitle(state),
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -16,6 +18,8 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.setConcurrencyLevel(+event.target.value)),
     onPrevFailedToggle: event =>
         dispatch(actions.setPrevFailed(event.target.checked)),
+    onBookmarImportsToggle: event => dispatch(actions.toggleBookmarkImports()),
+    onIndexTitleToggle: event => dispatch(actions.toggleIndexTitle()),
 })
 
 export default connect(

@@ -80,6 +80,10 @@ export default class CustomListBackground {
         return this.storage.fetchListById(id)
     }
 
+    async fetchListByName({ name }: { name: string }) {
+        return this.storage.fetchListByName(name)
+    }
+
     async fetchListPagesById({ id }: { id: number }) {
         return this.storage.fetchListPagesById({
             listId: id,

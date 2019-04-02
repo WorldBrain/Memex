@@ -26,6 +26,8 @@ const completed = createSelector(imports, state => state.completed)
 export const allowTypes = createSelector(imports, state => state.allowTypes)
 export const loadingMsg = createSelector(imports, state => state.loadingMsg)
 
+export const blobUrl = createSelector(imports, state => state.blobUrl)
+
 /**
  * Currently only used for analytics; derive the import type from `allowTypes` state
  */
@@ -59,6 +61,11 @@ export const processErrors = createSelector(
     imports,
     state => state.processErrors,
 )
+export const bookmarkImports = createSelector(
+    imports,
+    state => state.bookmarkImports,
+)
+export const indexTitle = createSelector(imports, state => state.indexTitle)
 
 const getImportStatusFlag = status =>
     createSelector(importStatus, importStatus => importStatus === status)
@@ -128,6 +135,7 @@ export const progress = createSelector(
     (...args) => ({
         [TYPE.HISTORY]: getProgress(...args.map(arg => arg[TYPE.HISTORY])),
         [TYPE.BOOKMARK]: getProgress(...args.map(arg => arg[TYPE.BOOKMARK])),
+        [TYPE.POCKET]: getProgress(...args.map(arg => arg[TYPE.POCKET])),
     }),
 )
 
@@ -136,7 +144,8 @@ export const successCount = createSelector(
     allowTypes,
     (progress, allowTypes) =>
         (allowTypes.h ? progress[TYPE.HISTORY].success : 0) +
-        (allowTypes.b ? progress[TYPE.BOOKMARK].success : 0),
+        (allowTypes.b ? progress[TYPE.BOOKMARK].success : 0) +
+        (allowTypes.p ? progress[TYPE.POCKET].success : 0),
 )
 
 export const failCount = createSelector(
@@ -144,7 +153,8 @@ export const failCount = createSelector(
     allowTypes,
     (progress, allowTypes) =>
         (allowTypes.h ? progress[TYPE.HISTORY].fail : 0) +
-        (allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0),
+        (allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0) +
+        (allowTypes.p ? progress[TYPE.POCKET].fail : 0),
 )
 
 export const progressPercent = createSelector(
@@ -153,11 +163,13 @@ export const progressPercent = createSelector(
     (progress, allowTypes) => {
         const total =
             (allowTypes[TYPE.HISTORY] ? progress[TYPE.HISTORY].total : 0) +
-            (allowTypes[TYPE.BOOKMARK] ? progress[TYPE.BOOKMARK].total : 0)
+            (allowTypes[TYPE.BOOKMARK] ? progress[TYPE.BOOKMARK].total : 0) +
+            (allowTypes[TYPE.POCKET] ? progress[TYPE.POCKET].total : 0)
+
         const complete =
             (allowTypes[TYPE.HISTORY] ? progress[TYPE.HISTORY].complete : 0) +
-            (allowTypes[TYPE.BOOKMARK] ? progress[TYPE.BOOKMARK].complete : 0)
-
+            (allowTypes[TYPE.BOOKMARK] ? progress[TYPE.BOOKMARK].complete : 0) +
+            (allowTypes[TYPE.POCKET] ? progress[TYPE.POCKET].complete : 0)
         return (complete / total) * 100
     },
 )
@@ -195,6 +207,7 @@ export const estimates = createSelector(
             completed[TYPE.BOOKMARK],
             totals[TYPE.BOOKMARK],
         ),
+        [TYPE.POCKET]: getEstimate(completed[TYPE.POCKET], totals[TYPE.POCKET]),
     }),
 )
 
@@ -210,7 +223,9 @@ export const isStartBtnDisabled = createSelector(
             .reduce((prev, curr) => prev && curr, true)
 
         const allCheckboxesDisabled =
-            !allowTypes[TYPE.HISTORY] && !allowTypes[TYPE.BOOKMARK]
+            !allowTypes[TYPE.HISTORY] &&
+            !allowTypes[TYPE.BOOKMARK] &&
+            !allowTypes[TYPE.POCKET]
 
         return allCheckboxesDisabled || noImportsRemaining
     },

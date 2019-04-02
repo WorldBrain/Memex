@@ -12,6 +12,7 @@ import {
 const defaultStats = {
     [TYPE.HISTORY]: 0,
     [TYPE.BOOKMARK]: 0,
+    [TYPE.POCKET]: 0,
 }
 
 const defaultState = {
@@ -21,7 +22,7 @@ const defaultState = {
     fail: defaultStats, // Fail counts for completed import items
     success: defaultStats, // Success counts for completed import items
     totals: defaultStats, // Static state to use to derive remaining counts from
-    importStatus: STATUS.LOADING,
+    importStatus: STATUS.IDLE,
     loadingMsg:
         'Analysing your browsing history & bookmarks for importing. This can take a few moments.',
     downloadDataFilter: FILTERS.ALL,
@@ -30,8 +31,12 @@ const defaultState = {
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
+        [TYPE.POCKET]: false,
     },
     showDownloadDetails: false,
+    blobUrl: null,
+    bookmarkImports: false,
+    indexTitle: false,
 }
 
 /**
@@ -71,19 +76,22 @@ const toggleAllowTypeReducer = (state, type) => ({
     },
 })
 
-const finishImportsReducer = ({ loading = false }) => state => ({
+const finishImportsReducer = ({ loading = false, finish = true }) => state => ({
     ...state,
+    allowTypes: finish ? defaultState.allowTypes : state.allowTypes,
     importStatus: loading ? STATUS.LOADING : STATUS.IDLE,
     downloadData: [],
     success: defaultStats,
     fail: defaultStats,
 })
 
-const prepareImportReducer = state => ({
-    ...state,
-    importStatus: STATUS.LOADING,
-    loadingMsg: 'Recalculating Download Size.',
-})
+const prepareImportReducer = state => {
+    return {
+        ...state,
+        importStatus: STATUS.LOADING,
+        loadingMsg: 'Recalculating Download Size.',
+    }
+}
 
 const cancelImportReducer = state => ({
     ...state,
@@ -111,7 +119,10 @@ export default createReducer(
         [actions.startImport]: setImportState(STATUS.RUNNING),
         [actions.stopImport]: setImportState(STATUS.STOPPED),
         [actions.finishImport]: finishImportsReducer({ loading: true }),
-        [actions.readyImport]: finishImportsReducer({ loading: false }),
+        [actions.readyImport]: finishImportsReducer({
+            loading: false,
+            finish: false,
+        }),
         [actions.cancelImport]: cancelImportReducer,
         [actions.pauseImport]: setImportState(STATUS.PAUSED),
         [actions.resumeImport]: setImportState(STATUS.RUNNING),
@@ -135,6 +146,9 @@ export default createReducer(
                 [TYPE.HISTORY]:
                     allowTypes[TYPE.HISTORY] ||
                     defaultState.allowTypes[TYPE.HISTORY],
+                [TYPE.POCKET]:
+                    allowTypes[TYPE.POCKET] ||
+                    defaultState.allowTypes[TYPE.POCKET],
             },
         }),
         [actions.setConcurrency]: (state, concurrency) => ({
@@ -154,6 +168,18 @@ export default createReducer(
             processErrors,
             importStatus: STATUS.LOADING,
             loadingMsg: 'Preparing import.',
+        }),
+        [actions.setBlobUrl]: (state, blobUrl) => ({
+            ...state,
+            blobUrl,
+        }),
+        [actions.toggleBookmarkImports]: state => ({
+            ...state,
+            bookmarkImports: !state.bookmarkImports,
+        }),
+        [actions.toggleIndexTitle]: state => ({
+            ...state,
+            indexTitle: !state.indexTitle,
         }),
     },
     defaultState,
