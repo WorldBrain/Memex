@@ -1,10 +1,6 @@
 @value colors: 'src/common-ui/colors.css';
 @value color4, color6, color3 from colors;
 
-p {
-    margin: 0;
-}
-
 .container {
     /* composes: boxShadow from '../../../common-ui/colors.css'; */
     composes: toolTips from 'src/common-ui/elements.css';
