@@ -66,29 +66,29 @@ class ContentTypeContainer extends PureComponent<Props, State> {
             )
         }
 
-        if (this.props.annotationsFilter) {
-            filterNodes.push(
-                <span key="annots">
-                    Annotations
-                    <span
-                        className={styles.clearFilters}
-                        onClick={this.props.toggleAnnotationsFilter}
-                    />
-                </span>,
-            )
-        }
+        // if (this.props.annotationsFilter) {
+        //     filterNodes.push(
+        //         <span key="annots">
+        //             Annotations
+        //             <span
+        //                 className={styles.clearFilters}
+        //                 onClick={this.props.toggleAnnotationsFilter}
+        //             />
+        //         </span>,
+        //     )
+        // }
 
-        if (this.props.websitesFilter) {
-            filterNodes.push(
-                <span key="pages">
-                    Websites
-                    <span
-                        className={styles.clearFilters}
-                        onClick={this.props.toggleWebsitesFilter}
-                    />
-                </span>,
-            )
-        }
+        // if (this.props.websitesFilter) {
+        //     filterNodes.push(
+        //         <span key="pages">
+        //             Websites
+        //             <span
+        //                 className={styles.clearFilters}
+        //                 onClick={this.props.toggleWebsitesFilter}
+        //             />
+        //         </span>,
+        //     )
+        // }
 
         return filterNodes
     }

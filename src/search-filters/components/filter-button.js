@@ -29,8 +29,8 @@ class FilterButton extends PureComponent {
         if (this.props.source === 'Types' && this.state.typesCount) {
             return (
                 <React.Fragment>
-                    <span className={styles.detailsFilter}>
-                        {this.state.typesCount + '/ 4'}
+                    <span className={styles.tagCount}>
+                        {this.state.typesCount + '/ 2'}
                     </span>
                     <span
                         className={styles.clearFilters}
@@ -79,7 +79,9 @@ class FilterButton extends PureComponent {
             <div>
                 <button
                     className={
-                        this.props.filteredItems.length || this.props.startDate || this.props.endDate
+                        this.props.filteredItems.length ||
+                        this.props.startDate ||
+                        this.props.endDate
                             ? styles.tagButtonSelected
                             : styles.tagButton
                     }

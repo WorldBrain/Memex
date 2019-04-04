@@ -63,13 +63,18 @@ class SidebarContainer extends PureComponent {
         this.props.closeSidebar()
     }
 
+    onMouseLeave = () => {
+        this.props.resetMouseOver()
+        this.props.closeSidebar()
+    }
+
     render() {
         return (
             <Sidebar
                 isSidebarOpen={this.props.isSidebarOpen}
                 isSidebarLocked={this.props.isSidebarLocked}
                 captureStateChange={this.captureStateChange}
-                onMouseLeave={this.props.resetMouseOver}
+                onMouseLeave={this.onMouseLeave}
                 onMouseEnter={this.props.setMouseOver}
                 closeSidebar={this.props.closeSidebar}
                 setSidebarLocked={this.props.setSidebarLocked}
