@@ -3,16 +3,17 @@ import { connect } from 'react-redux'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
-import SidebarIcons from './SidebarIcons'
-import BackToSearch from './BackToSearch'
-import * as acts from '../actions'
+import CollectionsButton from './collections-button'
+import BackToSearch from 'src/overview/sidebar-left/components/BackToSearch'
+import { actions as acts } from 'src/overview/sidebar-left/'
 import {
     selectors as filters,
     actions as filterActs,
 } from '../../../search-filters'
-import { selectors as notifs } from '../../../notifications'
+import { selectors as notifs } from 'src/notifications'
 import { acts as tooltipActs } from '../../tooltips'
 import { actions as onboardingActs } from '../../onboarding'
+import { selectors as lists } from 'src/custom-lists'
 
 export interface Props {
     showInbox: boolean
@@ -20,19 +21,20 @@ export interface Props {
 
 const processEventRPC = remoteFunction('processEvent')
 
-class SidebarIconsContainer extends PureComponent<Props> {
+class CollecstionsButtonContainer extends PureComponent<Props> {
     render() {
         const { showInbox, ...props } = this.props
         if (showInbox) {
             return <BackToSearch />
         }
 
-        return <SidebarIcons overviewMode {...props} />
+        return <CollectionsButton {...props} />
     }
 }
 
 const mapState = state => ({
     filterActive: filters.showClearFiltersBtn(state),
+    activeCollectionName: lists.activeCollectionName(state),
     isListFilterActive: filters.listFilterActive(state),
     showInbox: notifs.showInbox(state),
 })
@@ -58,4 +60,4 @@ const mapDispatch = dispatch => ({
 export default connect(
     mapState,
     mapDispatch,
-)(SidebarIconsContainer)
+)(CollecstionsButtonContainer)

@@ -1,0 +1,106 @@
+.filterButton {
+    composes: filtersIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 35px;
+    height: 35px;
+    opacity: 0.8;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.filterEnabled {
+    composes: filtersIconFull from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+}
+
+.listButton {
+    composes: collectionsIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 35px;
+    height: 35px;
+    opacity: 0.8;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.collectionEnabled {
+    composes: collectionsIconFull from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+}
+
+.title {
+    font-size: 15px;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+    background-size: 26px;
+}
+
+.buttonContainerOverview {
+    position: fixed;
+    display: flex !important; /* stylelint-disable-line declaration-no-important */
+    flex-direction: column;
+    align-items: center;
+    top: 80px;
+    left: -8px;
+    z-index: 500;
+    width: 105px;
+    justify-content: space-evenly;
+
+    @media (max-width: 835px) {
+        display: none !important; /* stylelint-disable-line declaration-no-important */
+    }
+}
+
+.buttonContainer {
+    position: absolute;
+    display: flex !important; /* stylelint-disable-line declaration-no-important */
+    justify-content: space-between;
+    flex-direction: row;
+    width: 250px;
+    align-items: baseline;
+}
+
+.smallButton {
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #767676;
+    padding: 2px 4px;
+    border-radius: 3%;
+    animation: appear 0.4s forwards 0s;
+
+    &:hover {
+        background-color: #efefef;
+    }
+}
+
+.enabled {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 45px;
+    margin-top: 10px;
+}
+
+@keyframes appear {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}

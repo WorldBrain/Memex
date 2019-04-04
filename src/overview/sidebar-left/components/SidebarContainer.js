@@ -5,30 +5,22 @@ import { bindActionCreators } from 'redux'
 import onClickOutside from 'react-onclickoutside'
 
 import { selectors, actions } from '..'
-import SearchFilters, {
-    actions as filterActs,
-    selectors as filters,
-} from '../../../search-filters'
+import { actions as filterActs } from 'src/search-filters'
 import { selectors as customLists } from '../../../custom-lists'
 import { ListSideBar } from '../../../custom-lists/components'
 
 import Sidebar from './SideBar'
-import ClearFilter from './ClearFilter'
-import ButtonContainer from './ButtonContainer'
 import crowdfundingModalStyles from 'src/common-ui/crowdfunding/components/CFModal.css'
 
 class SidebarContainer extends PureComponent {
     static propTypes = {
-        filterMode: PropTypes.bool.isRequired,
-        hideSearchFilters: PropTypes.func.isRequired,
-        showSearchFilters: PropTypes.func.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
+        isSidebarLocked: PropTypes.bool.isRequired,
         closeSidebar: PropTypes.func.isRequired,
         setSidebarState: PropTypes.func.isRequired,
-        clearAllFilters: PropTypes.func.isRequired,
+        setSidebarLocked: PropTypes.func.isRequired,
         setMouseOver: PropTypes.func.isRequired,
         resetMouseOver: PropTypes.func.isRequired,
-        showClearFiltersBtn: PropTypes.bool.isRequired,
         urlDragged: PropTypes.string.isRequired,
     }
 
@@ -63,32 +55,8 @@ class SidebarContainer extends PureComponent {
         }, 200)
     }
 
-    renderSearchFilters = () => <SearchFilters />
-
     // TODO: Find a better name for list sidebar
     renderListSidebar = () => <ListSideBar />
-
-    renderClearFilters = () => (
-        <ClearFilter resetFilters={this.props.clearAllFilters} />
-    )
-
-    renderChildren = () => {
-        return this.props.filterMode
-            ? this.renderSearchFilters()
-            : this.renderListSidebar()
-    }
-
-    renderSidebarIcons = () =>
-        this.props.isSidebarOpen ? (
-            <ButtonContainer
-                filterBtnClick={this.props.showSearchFilters}
-                listBtnClick={this.props.hideSearchFilters}
-                showSearchFilters={this.props.filterMode}
-                resetFilters={this.props.clearAllFilters}
-                closeSidebar={this.closeSidebar}
-                showClearFiltersBtn={this.props.showClearFiltersBtn}
-            />
-        ) : null
 
     closeSidebar = () => {
         this.props.resetMouseOver()
@@ -98,19 +66,15 @@ class SidebarContainer extends PureComponent {
     render() {
         return (
             <Sidebar
-                searchFilters={this.renderSearchFilters()}
-                listSidebar={this.renderListSidebar()}
-                handleHideSearchFilters={this.props.hideSearchFilters}
-                handleShowSearchFilters={this.props.showSearchFilters}
-                showSearchFilters={this.props.filterMode}
                 isSidebarOpen={this.props.isSidebarOpen}
-                sidebarIcons={this.renderSidebarIcons()}
-                closeSidebar={this.props.closeSidebar}
+                isSidebarLocked={this.props.isSidebarLocked}
                 captureStateChange={this.captureStateChange}
                 onMouseLeave={this.props.resetMouseOver}
                 onMouseEnter={this.props.setMouseOver}
+                closeSidebar={this.props.closeSidebar}
+                setSidebarLocked={this.props.setSidebarLocked}
             >
-                {this.renderChildren()}
+                {this.renderListSidebar()}
             </Sidebar>
         )
     }
@@ -118,20 +82,19 @@ class SidebarContainer extends PureComponent {
 
 const mapStateToProps = state => ({
     isSidebarOpen: selectors.isSidebarOpen(state),
-    filterMode: selectors.showFilters(state),
-    showClearFiltersBtn: filters.showClearFiltersBtn(state),
+    isSidebarLocked: selectors.sidebarLocked(state),
     urlDragged: customLists.urlDragged(state),
 })
 
 const mapDispatchToProps = dispatch => ({
     ...bindActionCreators(
         {
-            showSearchFilters: actions.openSidebarFilterMode,
-            hideSearchFilters: actions.openSidebarListMode,
             closeSidebar: actions.closeSidebar,
+            openSidebar: actions.openSidebar,
             setSidebarState: actions.setSidebarState,
             setMouseOver: actions.setMouseOver,
             resetMouseOver: actions.resetMouseOver,
+            setSidebarLocked: actions.setSidebarLocked,
         },
         dispatch,
     ),

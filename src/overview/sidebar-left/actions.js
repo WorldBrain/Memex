@@ -5,6 +5,7 @@ export const openSidebar = createAction('sidebar/openSidebar')
 export const showFilters = createAction('sidebar/showFilters')
 export const hideFilters = createAction('sidebar/hideFilters')
 export const setSidebarState = createAction('sidebar/setSidebarState')
+export const setSidebarLocked = createAction('sidebar/setSidebarLocked')
 
 export const openSidebarFilterMode = () => dispatch => {
     dispatch(showFilters())

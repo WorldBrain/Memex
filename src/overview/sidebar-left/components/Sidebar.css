@@ -41,3 +41,51 @@
     height: 100%;
     padding-bottom: 10vh;
 }
+
+.arrowButton {
+    composes: nakedButton from 'src/common-ui/elements.css';
+    composes: hoversidebaropen from 'src/common-ui/colors.css';
+    width: 26px;
+    height: 26px;
+    border-radius: 3px;
+    opacity: 0.8;
+    background-size: 16px;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    float: right;
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.arrow {
+    background-image: url('/img/arrow.svg');
+    transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+}
+
+.arrowReverse {
+    background-image: url('/img/arrow.svg');
+    transform: rotate(180deg);
+    transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
+}
+
+.sidebarLocked {
+    background-color: #edf0f4;
+}
+
+.collectionsBtn {
+    width: 250px;
+    height: 55px;
+}
