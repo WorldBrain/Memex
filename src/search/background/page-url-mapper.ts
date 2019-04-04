@@ -179,6 +179,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             upperTimeBound?: number
         },
     ): Promise<AnnotPage[]> {
+        console.log('  starting data mapping for search results:', pageUrls)
         if (!pageUrls.length) {
             return []
         }
@@ -190,21 +191,25 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const timeMap = new Map<string, number>()
 
         // Run the first set of queries to get display data
+        console.time('  #1 display data batch')
         await Promise.all([
             this.lookupPages(pageUrls, pageMap, base64Img),
             this.lookupTags(pageUrls, tagMap),
             this.lookupAnnotsCounts(pageUrls, countMap),
         ])
+        console.timeEnd('  #1 display data batch')
 
         const hostnames = new Set(
             [...pageMap.values()].map(page => page.hostname),
         )
 
+        console.time('  #2 display data batch')
         // Run the subsequent set of queries that depend on earlier results
         await Promise.all([
             this.lookupLatestTimes(pageUrls, timeMap, pageMap, upperTimeBound),
             this.lookupFavIcons([...hostnames], favIconMap, base64Img),
         ])
+        console.timeEnd('  #2 display data batch')
 
         // Map page results back to original input
         return pageUrls
