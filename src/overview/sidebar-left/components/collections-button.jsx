@@ -24,19 +24,22 @@ class CollectionsButton extends PureComponent {
                             onClick={this.props.listBtnClick}
                             onDragEnter={this.props.onPageDrag}
                             id="collection-icon"
-                        />
+                        >
+                       <span className={styles.title}>
+                            {this.props.activeCollectionName || 'All Collections'}
+                        </span>
+                        </button>
                         {this.props.isListFilterActive && (
-                            <div
-                                onClick={this.props.onShowBtnClick}
-                                className={styles.smallButton}
-                            >
-                                show all
-                            </div>
+                            <React.Fragment>
+                                <div
+                                    onClick={this.props.onShowBtnClick}
+                                    className={styles.smallButton}
+                                >
+                                    show all
+                                </div>
+                            </React.Fragment>
                         )}
                     </div>
-                    <span className={styles.title}>
-                        {this.props.activeCollectionName || 'All Collections'}
-                    </span>
                 </ButtonTooltip>
             </div>
         )

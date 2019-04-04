@@ -97,7 +97,7 @@
         display: none;
     }
 
-    > a {
+    & > a {
         height: 25px;
     }
 }

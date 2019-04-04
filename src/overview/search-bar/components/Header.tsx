@@ -65,9 +65,6 @@ class Header extends PureComponent<Props> {
         return (
             <React.Fragment>
                 <div className={styles.navbar}>
-                    <a href={this.props.overviewUrl}>
-                        <div className={styles.logo} />
-                    </a>
                     <div className={styles.container}>
                         <div className={styles.searchField}>
                             <input
