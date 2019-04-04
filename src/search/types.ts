@@ -81,6 +81,7 @@ export interface SearchParams {
     domains: string[]
     domainsExclude: string[]
     tags: string[]
+    tagsExc: string[]
     terms: string[]
     termsExclude: string[]
     bookmarks: boolean
