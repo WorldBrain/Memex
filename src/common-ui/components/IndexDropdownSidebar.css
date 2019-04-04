@@ -81,7 +81,7 @@
 .searchIcon {
     display: flex;
     composes: searchIcon from '../../common-ui/icons.css';
-    background-image: url('../../../img/searchGrey.svg');
+    background-image: url('/img/searchGrey.svg');
     width: 25px;
     height: 25px;
     background-size: 20px;
@@ -126,6 +126,20 @@
 
 .check {
     composes: checkMark from '../../common-ui/icons.css';
+    width: 20px;
+    height: 20px;
+}
+
+.excludeIcon {
+    background-image: url('/img/exclusion1.svg');
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.excluded {
+    background: url('/img/exclusion.svg');
+    background-size: 20px;
     width: 20px;
     height: 20px;
 }

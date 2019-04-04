@@ -42,6 +42,7 @@ export interface StateProps {
     searchResults: Result[]
     resultsByUrl: ResultsByUrl
     annotsByDay: PageUrlsByDay
+    isFilterBarActive: boolean
 }
 
 export interface DispatchProps {
@@ -167,10 +168,10 @@ class ResultListContainer extends PureComponent<Props> {
         )
     }
 
-    /* 
-     * Switch rendering method based on annotsSearch value. 
+    /*
+     * Switch rendering method based on annotsSearch value.
      * If it's a page search, a simple map to PageResult items is enough.
-     * For Annotation search, docs and annotsByDay are merged to render a 
+     * For Annotation search, docs and annotsByDay are merged to render a
      * clustered view
      */
     private resultsStateToItems() {
@@ -244,7 +245,10 @@ class ResultListContainer extends PureComponent<Props> {
 
     render() {
         return (
-            <ResultList scrollDisabled={this.props.isScrollDisabled}>
+            <ResultList
+                scrollDisabled={this.props.isScrollDisabled}
+                isFilterBarActive={this.props.isFilterBarActive}
+            >
                 {this.renderResultItems()}
             </ResultList>
         )
@@ -264,6 +268,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     resultsClusteredByDay: selectors.resultsClusteredByDay(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
+    isFilterBarActive: filters.showFilterBar(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({

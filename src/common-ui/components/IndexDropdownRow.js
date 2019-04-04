@@ -17,7 +17,9 @@ class IndexDropdownRow extends PureComponent {
             PropTypes.element,
         ]).isRequired,
         active: PropTypes.bool,
+        excActive: PropTypes.bool,
         onClick: PropTypes.func.isRequired,
+        onExcClick: PropTypes.func,
         focused: PropTypes.bool,
         isForAnnotation: PropTypes.bool,
         allowAdd: PropTypes.bool,
@@ -29,12 +31,35 @@ class IndexDropdownRow extends PureComponent {
         source: PropTypes.string,
     }
 
+    state = {
+        displayExcIcon: false,
+    }
+
     componentDidMount() {
         this.ensureVisible()
+        this.ref.addEventListener('mouseenter', this.handleMouseEnter)
+        this.ref.addEventListener('mouseleave', this.handleMouseLeave)
     }
 
     componentDidUpdate() {
         this.ensureVisible()
+    }
+
+    componentWillUnmount() {
+        this.ref.removeEventListener('mouseenter', this.handleMouseEnter)
+        this.ref.removeEventListener('mouseleave', this.handleMouseLeave)
+    }
+
+    handleMouseEnter = () => {
+        this.setState({
+            displayExcIcon: true,
+        })
+    }
+
+    handleMouseLeave = () => {
+        this.setState({
+            displayExcIcon: false,
+        })
     }
 
     get styles() {
@@ -64,10 +89,10 @@ class IndexDropdownRow extends PureComponent {
         // console.log(this.props.isForRibbon)
         return (
             <div
+                ref={ref => (this.ref = ref)}
                 className={cx(this.mainClass, {
                     [this.styles.isNew]: this.props.isNew,
                 })}
-                onClick={this.props.onClick}
             >
                 <span
                     className={cx(this.styles.isNewNoteInvisible, {
@@ -81,11 +106,22 @@ class IndexDropdownRow extends PureComponent {
                         [localStyles.isList]:
                             this.props.isList || this.props.source === 'domain',
                     })}
+                    onClick={this.props.onClick}
                 >
                     {(this.props.isList && this.props.value.name) ||
                         this.props.value}
                 </span>
                 {this.props.active && <span className={this.styles.check} />}
+                {this.props.isForSidebar && (
+                    <span
+                        onClick={this.props.onExcClick}
+                        className={cx({
+                            [this.styles.excludeIcon]: this.state
+                                .displayExcIcon,
+                            [this.styles.excluded]: this.props.excActive,
+                        })}
+                    />
+                )}
             </div>
         )
     }

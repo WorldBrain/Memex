@@ -13,6 +13,8 @@ const searchUpdateActions = [
     filterActs.toggleBookmarkFilter.getType(),
     filterActs.addTagFilter.getType(),
     filterActs.delTagFilter.getType(),
+    filterActs.addExcTagFilter.getType(),
+    filterActs.delExcTagFilter.getType(),
     filterActs.toggleTagFilter.getType(),
     filterActs.addIncDomainFilter.getType(),
     filterActs.addExcDomainFilter.getType(),
@@ -21,6 +23,7 @@ const searchUpdateActions = [
     filterActs.setIncDomainFilters.getType(),
     filterActs.setExcDomainFilters.getType(),
     filterActs.setTagFilters.getType(),
+    filterActs.setExcTagFilters.getType(),
     filterActs.resetFilters.getType(),
     filterActs.toggleListFilter.getType(),
     filterActs.delListFilter.getType(),
@@ -28,6 +31,7 @@ const searchUpdateActions = [
     filterActs.toggleNotesFilter.getType(),
     filterActs.toggleWebsitesFilter.getType(),
     filterActs.setAnnotationsFilter.getType(),
+    filterActs.clearFilterTypes.getType(),
     resultActs.setSearchType.getType(),
 ]
 

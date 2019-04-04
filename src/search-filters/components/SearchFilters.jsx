@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-
+import cx from 'classnames'
 import styles from './SearchFilters.css'
+import { ButtonTooltip } from 'src/common-ui/components/'
 
 class SearchFilters extends PureComponent {
     static propTypes = {
@@ -9,34 +10,30 @@ class SearchFilters extends PureComponent {
         dateFilter: PropTypes.node.isRequired,
         domainFilter: PropTypes.node.isRequired,
         contentFilter: PropTypes.node.isRequired,
-        // filteredTags: PropTypes.node,
-        filteredTypes: PropTypes.node,
-        filteredDomains: PropTypes.node,
         bookmarkFilter: PropTypes.node.isRequired,
+        toggleFilterBar: PropTypes.func.isRequired,
     }
 
     render() {
         return (
-            <div>
-                <div className={styles.bookmarksFilter}>
-                    {this.props.bookmarkFilter}
-                </div>
-                {this.props.dateFilter}
-                {this.props.tagFilter}
-                {/* this.props.filteredTags && (
-                    <div className={styles.filtered}>
-                        {this.props.filteredTags}
+            <div className={styles.filterBar}>
+                <div className={styles.innerContainer}>
+                    <ButtonTooltip
+                        tooltipText="Close Filter Bar"
+                        position="bottom"
+                    >
+                        <button
+                            className={cx(styles.button, styles.arrow)}
+                            onClick={() => this.props.toggleFilterBar()}
+                        />
+                    </ButtonTooltip>
+                    <div className={styles.bookmarksFilter}>
+                        {this.props.bookmarkFilter}
                     </div>
-                ) */}
-                {this.props.domainFilter}
-                {this.props.filteredDomains && (
-                    <div className={styles.filtered}>
-                        {this.props.filteredDomains}
-                    </div>
-                )}
-                {this.props.contentFilter}
-                <div className={styles.filtered}>
-                    {this.props.filteredTypes}
+                    {this.props.dateFilter}
+                    {this.props.tagFilter}
+                    {this.props.domainFilter}
+                    {this.props.contentFilter}
                 </div>
             </div>
         )

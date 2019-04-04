@@ -1,0 +1,63 @@
+.cross {
+    width: 7px;
+    height: 7px;
+
+    position: absolute;
+    background-image: url('/img/times-solid.svg');
+    background-repeat: no-repeat;
+    border-color: transparent;
+    background-color: #5cd9a6;
+    border-width: 0px;
+    margin-left: 47px;
+    margin-top: 12px;
+
+    &:focus {
+        outline: 0;
+    }
+}
+
+.domainTooltip {
+    margin-top: 30px;
+}
+
+.domainsPopup {
+    position: absolute;
+    width: 237px;
+    height: 250px;
+    background: #fff;
+    border: 1px solid #d5d8d6;
+    box-sizing: border-box;
+    border-radius: 6px;
+    margin-top: 10px;
+    z-index: 2;
+}
+
+.domainPill {
+    background-color: #fff;
+    padding: 2px 9px 3px 9px;
+    border: 0.5px solid #bcc2bd;
+    font-size: 13px;
+    font-weight: 500;
+    width: fit-content;
+    letter-spacing: 0.5px;
+
+    /* height: 100%; */
+    color: black;
+    margin-right: 3px;
+    display: flex;
+    align-items: center;
+}
+
+.searchField {
+    margin-left: 55px;
+    border-width: 0px;
+}
+
+.searchField:focus {
+    outline: 0px;
+}
+
+.searchIcon {
+    margin-left: 31px;
+    margin-top: 24px;
+}

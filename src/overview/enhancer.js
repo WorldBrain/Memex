@@ -8,7 +8,6 @@ import * as constants from './constants'
 import { selectors as filters, actions as filterActs } from '../search-filters'
 import { selectors as searchBar, acts as searchBarActs } from './search-bar'
 import { selectors as results, acts as resultsActs } from './results'
-
 const parseBool = str => str === 'true'
 const parseNumber = str => Number(str)
 const stringifyArr = arr => arr.join(',')
@@ -38,6 +37,12 @@ const locationSync = ReduxQuerySync.enhancer({
         tags: {
             selector: filters.tags,
             action: filterActs.setTagFilters,
+            valueToString: stringifyArr,
+            defaultValue: [],
+        },
+        tagsExc: {
+            selector: filters.tagsExc,
+            action: filterActs.setExcTagFilters,
             valueToString: stringifyArr,
             defaultValue: [],
         },

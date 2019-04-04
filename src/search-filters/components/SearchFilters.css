@@ -23,9 +23,68 @@
 }
 
 .bookmarksFilter {
-	padding: 10px 16px;
+    padding: 10px 16px;
 }
 
 .bookmarksFilter span {
-	font-weight: 300;
+    font-weight: 300;
+}
+
+.filterBar {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    height: 55px;
+    position: fixed;
+    top: 55px;
+    left: 0;
+    right: 0;
+    z-index: 300001;
+    background-color: #fff;
+    padding: 0 60px;
+    border-bottom: 1px solid #ebebeb;
+
+    @media (max-width: 1000px) {
+        justify-content: center;
+        padding: 0;
+    }
+}
+
+.innerContainer {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.button {
+    composes: nakedButton from 'src/common-ui/elements.css';
+    width: 26px;
+    height: 26px;
+    border-radius: 3px;
+    opacity: 0.8;
+    background-size: 16px;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.arrow {
+    background-image: url('/img/arrow.svg');
+    transform: rotate(90deg);
 }

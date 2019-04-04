@@ -1,9 +1,17 @@
 import React, { PureComponent } from 'react'
-import CheckmarkRow from './checkmark-row'
-
 import { StateProps, DispatchProps } from './content-type-container'
+import { Tooltip } from 'src/common-ui/components'
+import ToggleSwitch from './toggle-switch'
+import cx from 'classnames'
 
-type Props = StateProps & DispatchProps
+const styles = require('./content-types.css')
+
+interface OwnProps {
+    env: 'overview' | 'inpage'
+    tooltipPosition: string
+}
+
+type Props = StateProps & DispatchProps & OwnProps
 
 interface State {}
 
@@ -15,15 +23,13 @@ class ContentTypes extends PureComponent<Props, State> {
 
         return (
             <React.Fragment>
-                <CheckmarkRow
+                <ToggleSwitch
                     value="Highlights"
-                    subtitle="Only highlighted text"
                     active={this.props.highlightsFilter}
                     onClick={this.props.toggleHighlightsFilter}
                 />
-                <CheckmarkRow
+                <ToggleSwitch
                     value="Notes"
-                    subtitle="Only the content of Notes"
                     active={this.props.notesFilter}
                     onClick={this.props.toggleNotesFilter}
                 />
@@ -32,26 +38,36 @@ class ContentTypes extends PureComponent<Props, State> {
     }
     render() {
         return (
-            <React.Fragment>
-                {/* <CheckmarkRow
-                    value="Annotations"
-                    subtitle="Highlights including notes"
-                    active={this.props.annotationsFilter}
-                    onClick={this.props.toggleAnnotationsFilter}
-                /> */}
-                {this.renderAnnotsTypes()}
-                {/* <CheckmarkRow
-                    value="Websites"
-                    subtitle="All your visited web history"
-                    active={this.props.websitesFilter}
-                    onClick={this.props.toggleWebsitesFilter}
-                /> */}
-                {/* <CheckmarkRow
-                    value="PDFs"
-                    subtitle="All your visited PDFs"
-                    onClick={() => null}
-                /> */}
-            </React.Fragment>
+            <Tooltip position={this.props.tooltipPosition}>
+                <div className={styles.container}>
+                    {this.renderAnnotsTypes()}
+                    {/*<ToggleSwitch
+                        value="Highlights"
+                        active={this.props.highlightsFilter}
+                        onClick={this.props.toggleHighlightsFilter}
+                    />
+                    <ToggleSwitch
+                        value="Notes"
+                        active={this.props.notesFilter}
+                        onClick={this.props.toggleNotesFilter}
+                    />
+                    <ToggleSwitch
+                        value="Annotations"
+                        active={this.props.annotationsFilter}
+                        onClick={this.props.toggleAnnotationsFilter}
+                    />
+                    <ToggleSwitch
+                        value="Websites"
+                        active={this.props.websitesFilter}
+                        onClick={this.props.toggleWebsitesFilter}
+                    />
+                     <ToggleSwitch
+                        value="PDFs"
+                        active={false}
+                        onClick={() => null}
+                    /> */}
+                </div>
+            </Tooltip>
         )
     }
 }

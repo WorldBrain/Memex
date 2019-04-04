@@ -6,11 +6,14 @@ export interface ContentTypes {
 
 export interface RootState {
     showTagFilter: boolean
+    showDatesFilter: boolean
+    showFilterBar: boolean
     showDomainFilter: boolean
     showFilters: boolean
     onlyBookmarks: boolean
     popup: string
     tags: string[]
+    tagsExc: string[]
     domainsInc: string[]
     domainsExc: string[]
     lists: string

@@ -12,7 +12,6 @@ import sidebarStyles from './IndexDropdownSidebar.css'
 class IndexDropdown extends PureComponent {
     static propTypes = {
         children: PropTypes.array.isRequired,
-        tags: PropTypes.array.isRequired,
         onTagSearchChange: PropTypes.func.isRequired,
         onTagSearchKeyDown: PropTypes.func.isRequired,
         numberOfTags: PropTypes.number.isRequired,
@@ -31,9 +30,6 @@ class IndexDropdown extends PureComponent {
         onBackBtnClick: PropTypes.func,
         allTabs: PropTypes.bool,
         allTabsCollection: PropTypes.bool,
-        // onFilterDel: PropTypes.func.isRequired,
-        // renderTags: PropTypes.func.isRequired,
-        handleTagSelection: PropTypes.func.isRequired,
     }
 
     componentDidUpdate(prevProps, prevSate) {
@@ -82,32 +78,6 @@ class IndexDropdown extends PureComponent {
         return this.placeholder.toLowerCase()
     }
 
-    renderTags() {
-        const tagOptions = this.props.tags.map((tag, i) => (
-            <span key={i} className={styles.tagPill}>
-                {tag}
-                <button
-                    onClick={this.props.handleTagSelection(i)}
-                    className={styles.cross}
-                />
-            </span>
-        ))
-        return tagOptions
-    }
-
-    renderDomains() {
-        const domainOptions = this.props.tags.map((tag, i) => (
-            <span className={styles.domainPill}>
-                {tag}
-                <button
-                    onClick={() => this.props.handleTagSelection(i)}
-                    className={styles.cross1}
-                />
-            </span>
-        ))
-        return domainOptions
-    }
-
     render() {
         // console.log(this.placeholder)
         return (
@@ -120,9 +90,6 @@ class IndexDropdown extends PureComponent {
                         {this.unit} selected
                     </div>
                 )}
-                {/* <span>
-                    {this.placeholder === 'Tags' ? this.renderTags() : null}
-                </span> */}
 
                 <div
                     className={cx(this.styles.searchContainer, {

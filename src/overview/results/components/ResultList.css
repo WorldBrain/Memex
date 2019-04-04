@@ -106,3 +106,7 @@
     composes: keyboardM;
     width: 90px;
 }
+
+.filterBarActive {
+    top: 150px;
+}

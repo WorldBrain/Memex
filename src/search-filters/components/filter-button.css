@@ -1,0 +1,103 @@
+.tagButton {
+    width: 54px;
+    height: 30px;
+
+    /* ultra-light */
+    border: 1px solid #d0d5e0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 17px;
+    font-size: 13px;
+    color: #1a2f58;
+    cursor: pointer;
+    text-align: center;
+    background-color: #fff;
+}
+
+.tagButtonSelected {
+    width: 75px;
+    height: 30px;
+
+    /* ultra-light */
+    border: 1px solid #d0d5e0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 17px;
+    font-size: 13px;
+    color: #1a2f58;
+    cursor: pointer;
+    text-align: left;
+    background-color: #5cd9a6;
+}
+
+.tagButton:focus {
+    background-color: #5cd9a6;
+}
+
+.buttonFocus {
+    background-color: #5cd9a6;
+}
+
+.buttonFocusSelected {
+    text-align: left;
+    width: 101px;
+    height: 30px;
+    background-color: #5cd9a6;
+}
+
+.tagCount {
+    position: absolute;
+    font-weight: bold;
+    padding-left: 4px;
+}
+
+.clearFilters {
+    background-image: url('/img/removeIcon.svg');
+    background-size: 10px;
+    display: inline-block;
+    cursor: pointer;
+    width: 10px;
+    height: 10px;
+    margin-left: 10px;
+}
+
+.cross {
+    width: 7px;
+    height: 7px;
+    position: absolute;
+    background-image: url('/img/times-solid.svg');
+    background-repeat: no-repeat;
+    border-color: transparent;
+    background-color: #5cd9a6;
+    border-width: 0px;
+    margin-left: 47px;
+    margin-top: 12px;
+
+    &:focus {
+        outline: 0;
+    }
+}
+
+.displayFilters {
+    display: grid;
+    font-size: 12px;
+}
+
+.spanInc {
+    background: #83c9f4;
+}
+
+.spanExc {
+    background: #f29d9d;
+}
+
+.dateText {
+    display: grid;
+    font-size: 12px;
+    background-color: #5cd9a6;
+    color: rgb(54, 54, 46);
+}

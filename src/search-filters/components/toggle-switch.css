@@ -1,0 +1,80 @@
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+    margin: auto 30px auto auto;
+}
+
+p {
+    margin: auto;
+    margin-left: 32px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 37px;
+    font-size: 14px;
+    color: #1a2f58;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+
+    &::before {
+        position: absolute;
+        content: '';
+        height: 23px;
+        width: 23px;
+        background-color: white;
+        transition: 0.4s;
+        background-image: url('/img/times-solid.svg');
+        background-size: 7px 7.17px;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+}
+
+.sliderChecked {
+    background-color: #5cd9a6;
+
+    &::before {
+        transform: translateX(23px);
+        background-image: url('/img/check-solid.svg');
+        background-size: 8.8px 6.8px;
+    }
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #5cd9a6;
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+
+    &::before {
+        border-radius: 50%;
+    }
+}
+
+.tagName {
+    display: inline-flex;
+    width: 232px;
+    height: 37px;
+
+    &:hover {
+        background-color: rgba(213, 216, 214, 0.28);
+    }
+}
+
+.toggleButton {
+    margin: auto;
+    color: #5cd9a6;
+    cursor: pointer;
+}

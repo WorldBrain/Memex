@@ -8,6 +8,8 @@ export const showTagFilter = createAction('search-filters/showTagFilter')
 export const hideTagFilter = createAction('search-filters/hideTagFilter')
 export const showDomainFilter = createAction('search-filters/showDomainFilter')
 export const hideDomainFilter = createAction('search-filters/hideDomainter')
+export const showDatesFilter = createAction('search-filters/showDatesFilter')
+export const hideDatesFilter = createAction('search-filters/hideDatesFilter')
 export const showFilterTypes = createAction('search-filters/showTypeFilters')
 export const hideFilterTypes = createAction('search-filters/hideTypeFilters')
 export const toggleFilterTypes = createAction(
@@ -16,8 +18,14 @@ export const toggleFilterTypes = createAction(
 
 export const addTagFilter = createAction('search-filters/addTagFilter')
 export const delTagFilter = createAction('search-filters/delTagFilter')
+export const addExcTagFilter = createAction('search-filters/addExcTagFilter')
+export const delExcTagFilter = createAction('search-filters/delExcTagFilter')
 export const toggleTagFilter = createAction(
     'search-filters/toggleTagFilter',
+    a => a,
+)
+export const toggleExcTagFilter = createAction(
+    'search-filters/toggleExcTagFilter',
     a => a,
 )
 export const addIncDomainFilter = createAction(
@@ -41,6 +49,7 @@ export const toggleExcDomainFilter = createAction(
     a => a,
 )
 export const setTagFilters = createAction('search-filters/setTagFilters')
+export const setExcTagFilters = createAction('search-filters/setExcTagFilters')
 export const setListFilters = createAction('searc-filters/setListFilters')
 export const setIncDomainFilters = createAction(
     'search-filters/setIncDomainFilters',
@@ -75,6 +84,8 @@ export const toggleNotesFilter = createAction(
 export const setAnnotationsFilter = createAction(
     'search-filters/setAnnotationsFilter',
 )
+export const clearFilterTypes = createAction('search-filters/clearFilterTypes')
+export const toggleFilterBar = createAction('search-filters/toggleFilterBar')
 
 /**
  * Action to toggle annotation content filter.
