@@ -46,3 +46,29 @@
     height: 8px;
     margin-top: 1px;
 }
+
+.dateRangeDiv {
+    width: 600px;
+    height: 400px;
+    display: flex;
+    background: white;
+}
+
+.pickerContainer {
+    width: 50%;
+}
+
+.datePickerDiv {
+    margin-top: 20px;
+    margin-left: 10px;
+}
+
+.clearFilters {
+    background-image: url('/img/removeIcon.svg');
+    background-size: 10px;
+    display: inline-block;
+    cursor: pointer;
+    width: 10px;
+    height: 10px;
+    margin-left: 5px;
+}

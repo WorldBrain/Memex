@@ -2,11 +2,9 @@ import { connect } from 'react-redux'
 
 import * as acts from '../actions'
 import * as selectors from '../selectors'
-import {
-    actions as notifActs,
-    selectors as notifs,
-} from '../../../notifications'
+import { actions as notifActs, selectors as notifs } from 'src/notifications'
 import { acts as tooltipActs } from '../../tooltips'
+import { actions as filterActs, selectors as filters } from 'src/search-filters'
 
 import Header, { Props } from './Header'
 
@@ -17,6 +15,8 @@ const mapState = state => ({
     startDate: selectors.startDate(state),
     endDate: selectors.endDate(state),
     query: selectors.query(state),
+    showFilterBar: filters.showFilterBar(state),
+    showClearFiltersBtn: filters.showClearFiltersBtn(state),
 })
 
 const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
@@ -39,6 +39,8 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
         // Change tooltip notification to more filters once the user selects date
         dispatch(tooltipActs.setTooltip('more-filters'))
     },
+    toggleFilterBar: () => dispatch(filterActs.toggleFilterBar()),
+    clearFilters: () => dispatch(filterActs.resetFilters()),
 })
 
 export default connect(

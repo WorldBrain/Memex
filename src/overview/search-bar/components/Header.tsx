@@ -9,7 +9,7 @@ import { OutLink } from '../../../common-ui/containers'
 import InboxButton from '../../../notifications/components/InboxButton'
 import BackupStatus from '../../../notifications/components/BackupStatusContainer'
 import { OVERVIEW_URL } from '../../../constants'
-import DateRangeSelection from './DateRangeSelection'
+import SearchFilters from 'src/search-filters'
 
 const styles = require('./Header.css')
 
@@ -29,12 +29,16 @@ export interface Props {
     unreadNotifCount: number
     startDate: number
     endDate: number
+    showFilterBar: boolean
+    showClearFiltersBtn: boolean
     onQueryKeyDown: KeyboardEventHandler<HTMLInputElement>
     onQueryChange: ReactEventHandler<HTMLInputElement>
     onStartDateChange: (date: number) => void
     onEndDateChange: (date: number) => void
     toggleInbox: () => void
     changeTooltip: () => void
+    toggleFilterBar: () => void
+    clearFilters: () => void
 }
 
 class Header extends PureComponent<Props> {
@@ -59,58 +63,65 @@ class Header extends PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.navbar}>
-                <a href={this.props.overviewUrl}>
-                    <div className={styles.logo} />
-                </a>
-                <div className={styles.container}>
-                    <div className={styles.searchField}>
-                        <input
-                            id="query-search-bar"
-                            className={styles.query}
-                            onChange={this.props.onQueryChange}
-                            placeholder={this.props.searchPlaceholder}
-                            value={this.props.query}
-                            ref={this.setInputRef}
-                            onKeyDown={this.props.onQueryKeyDown}
-                            disabled={this.props.isSearchDisabled}
-                            autoComplete="off"
+            <React.Fragment>
+                <div className={styles.navbar}>
+                    <a href={this.props.overviewUrl}>
+                        <div className={styles.logo} />
+                    </a>
+                    <div className={styles.container}>
+                        <div className={styles.searchField}>
+                            <input
+                                id="query-search-bar"
+                                className={styles.query}
+                                onChange={this.props.onQueryChange}
+                                placeholder={this.props.searchPlaceholder}
+                                value={this.props.query}
+                                ref={this.setInputRef}
+                                onKeyDown={this.props.onQueryKeyDown}
+                                disabled={this.props.isSearchDisabled}
+                                autoComplete="off"
+                            />
+                        </div>
+                        <button
+                            className={styles.button}
+                            onClick={this.props.toggleFilterBar}
+                        >
+                            Filters
+                            {this.props.showClearFiltersBtn && (
+                                <span
+                                    className={styles.clearFilters}
+                                    onClick={this.props.clearFilters}
+                                />
+                            )}
+                        </button>
+                    </div>
+                    <div className={styles.links}>
+                        <BackupStatus className={styles.backupStatus} />
+                        {!this.props.automaticBackupEnalbled && (
+                            <OutLink
+                                className={styles.upgrade}
+                                to={this.props.pricingUrl}
+                            >
+                                <span className={styles.upgradeIcon} />
+                                ⭐️ Upgrade
+                            </OutLink>
+                        )}
+                        <InboxButton
+                            toggleInbox={this.props.toggleInbox}
+                            showInbox={this.props.showInbox}
+                            unreadNotifCount={this.props.unreadNotifCount}
+                            showUnreadCount={this.props.showUnreadCount}
                         />
-                        <DateRangeSelection
-                            startDate={this.props.startDate}
-                            endDate={this.props.endDate}
-                            onStartDateChange={this.props.onStartDateChange}
-                            onEndDateChange={this.props.onEndDateChange}
-                            disabled={this.props.isSearchDisabled}
-                            changeTooltip={this.props.changeTooltip}
-                        />
+                        <Link to={this.props.settingsRoute}>
+                            <span
+                                title="Settings"
+                                className={styles.settingsIcon}
+                            />
+                        </Link>
                     </div>
                 </div>
-                <div className={styles.links}>
-                    <BackupStatus className={styles.backupStatus} />
-                    {!this.props.automaticBackupEnalbled && (
-                        <OutLink
-                            className={styles.upgrade}
-                            to={this.props.pricingUrl}
-                        >
-                            <span className={styles.upgradeIcon} />
-                            ⭐️ Upgrade
-                        </OutLink>
-                    )}
-                    <InboxButton
-                        toggleInbox={this.props.toggleInbox}
-                        showInbox={this.props.showInbox}
-                        unreadNotifCount={this.props.unreadNotifCount}
-                        showUnreadCount={this.props.showUnreadCount}
-                    />
-                    <Link to={this.props.settingsRoute}>
-                        <span
-                            title="Settings"
-                            className={styles.settingsIcon}
-                        />
-                    </Link>
-                </div>
-            </div>
+                {this.props.showFilterBar && <SearchFilters />}
+            </React.Fragment>
         )
     }
 }

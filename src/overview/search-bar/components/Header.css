@@ -8,9 +8,12 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 300001;
+
+    /* z-index: 300001;
     background-color: #fff;
-    padding: 0 60px;
+    padding: 0 60px; */
+
+    padding-left: 310px;
     border-bottom: 1px solid #ebebeb;
 
     @media (max-width: 1000px) {
@@ -69,7 +72,7 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 800px;
+    max-width: 600px;
     background-color: #fff;
     transition: all 200ms ease-out;
     border-right: none;
@@ -138,4 +141,38 @@
     @media (max-width: 1260px) {
         display: none;
     }
+}
+
+.button {
+    composes: nakedButton from 'src/common-ui/elements.css';
+    border-radius: 3px;
+    opacity: 0.8;
+    border: none;
+    margin-left: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.clearFilters {
+    background-image: url('/img/cross.svg');
+    background-color: #f29d9d;
+    background-size: 10px;
+    display: inline-block;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    margin-left: 5px;
 }
