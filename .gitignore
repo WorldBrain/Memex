@@ -1,6 +1,7 @@
-node_modules
-extension
-dist
+node_modules/
+extension/
+extension.crx
+dist/
 .chrome-extension-key.pem
 jest_0/
 *.sublime-workspace
