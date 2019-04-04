@@ -124,7 +124,7 @@ class Ribbon extends Component<Props, State> {
             url: window.location.href,
         })
         const highlights = annotations.filter(annotation => annotation.selector)
-        highlightAnnotations(highlights)
+        highlightAnnotations(highlights, this.props.openSidebar)
     }
 
     private handleSearchKeyDown = (
@@ -171,12 +171,9 @@ class Ribbon extends Component<Props, State> {
                     <React.Fragment>
                         <div className={styles.generalActions}>
                             <button
-                                    onClick={() => this.openOverviewTabRPC()}
-                                    className={cx(
-                                        styles.button,
-                                        styles.logo,
-                                    )}
-                                />
+                                onClick={() => this.openOverviewTabRPC()}
+                                className={cx(styles.button, styles.logo)}
+                            />
                             <ButtonTooltip
                                 tooltipText="Open Dashboard"
                                 position="left"

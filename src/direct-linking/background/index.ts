@@ -84,7 +84,10 @@ export default class DirectLinkingBackground {
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
-    async toggleSidebarOverlay({ tab }, { anchor, override }) {
+    async toggleSidebarOverlay(
+        { tab },
+        { anchor, override } = { anchor: null, override: false },
+    ) {
         const [currentTab] = await browser.tabs.query({
             active: true,
             currentWindow: true,

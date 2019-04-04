@@ -24,6 +24,7 @@ import {
     getKeyboardShortcutsState,
     convertKeyboardEventToKeyString,
 } from '../utils'
+import { toggleSidebarOverlay } from 'src/direct-linking/content_script/interactions'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -86,7 +87,9 @@ class TooltipContainer extends React.Component {
             switch (convertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
                     toggleSidebarShortcutEnabled &&
-                        (await remoteFunction('toggleSidebarOverlay')({override:true}))
+                        toggleSidebarOverlay({
+                            override: true,
+                        })
                     break
                 case toggleHighlightsShortcut:
                     toggleHighlightsShortcutEnabled && this.toggleHighlights()
@@ -120,7 +123,7 @@ class TooltipContainer extends React.Component {
         const highlightables = annotations.filter(
             annotation => annotation.selector,
         )
-        highlightAnnotations(highlightables)
+        highlightAnnotations(highlightables, toggleSidebarOverlay)
     }
 
     toggleHighlights = () => {

@@ -9,8 +9,9 @@ const Raven = AllRaven['default']
 
 export async function highlightAnnotation(
     { annotation },
-    focusOnAnnotation = null,
-    hoverAnnotationContainer = null,
+    openSidebar,
+    focusOnAnnotation = url => undefined,
+    hoverAnnotationContainer = url => undefined,
 ) {
     const baseClass = styles['memex-highlight']
     try {
@@ -43,6 +44,7 @@ export async function highlightAnnotation(
                 annotation,
                 focusOnAnnotation,
                 hoverAnnotationContainer,
+                openSidebar,
             )
         })
     } catch (e) {

@@ -11,6 +11,8 @@ export interface Anchor {
     }
 }
 
+export const toggleSidebarOverlay = remoteFunction('toggleSidebarOverlay')
+
 export const createAndCopyDirectLink = async () => {
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
@@ -31,7 +33,7 @@ export const createAnnotation = async () => {
     const range = selection.getRangeAt(0)
 
     const anchor = await extractAnchor(selection)
-    await remoteFunction('toggleSidebarOverlay')({ anchor, override: true })
+    await toggleSidebarOverlay({ anchor, override: true })
     selectTextFromRange(range)
 }
 
@@ -42,7 +44,7 @@ const fetchAndHighlightAnnotations = async () => {
     const highlightables = annotationList.filter(
         annotation => annotation.selector,
     )
-    highlightAnnotations(highlightables)
+    highlightAnnotations(highlightables, toggleSidebarOverlay)
 }
 export async function createHighlight() {
     const selection = document.getSelection()
@@ -64,7 +66,7 @@ export async function createHighlight() {
     fetchAndHighlightAnnotations()
 }
 
-const extractAnchor = async (selection: Selection): Promise<Anchor> => {
+export const extractAnchor = async (selection: Selection): Promise<Anchor> => {
     const quote = selection.toString()
 
     const descriptor = await annotations.selectionToDescriptor({ selection })

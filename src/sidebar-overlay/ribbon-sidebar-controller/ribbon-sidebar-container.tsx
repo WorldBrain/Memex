@@ -48,6 +48,7 @@ interface OwnProps {
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     highlightAll: (
         highlights: Annotation[],
+        openSidebar: () => void,
         focusOnAnnotation: (url: string) => void,
         hoverAnnotationContainer: (url: string) => void,
     ) => void
@@ -207,13 +208,12 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         if (!this.props.isSidebarOpen) {
             setTimeout(async () => {
                 await this.props.openSidebar()
-                    setTimeout(() => {
-                        this.props.highlightAndScroll(annotation)
-                        this._focusOnAnnotation(annotation.url)
-                    }, 1500)
+                setTimeout(() => {
+                    this.props.highlightAndScroll(annotation)
+                    this._focusOnAnnotation(annotation.url)
+                }, 1500)
             }, 2000)
         } else {
-            
             setTimeout(() => {
                 this.props.highlightAndScroll(annotation)
                 this._focusOnAnnotation(annotation.url)
@@ -227,6 +227,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         )
         await this.props.highlightAll(
             annotations,
+            this.props.openSidebar,
             this._focusOnAnnotation,
             this._hoverAnnotation,
         )

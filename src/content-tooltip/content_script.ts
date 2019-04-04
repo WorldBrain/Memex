@@ -1,11 +1,6 @@
 import * as Mousetrap from 'mousetrap'
 import { bodyLoader } from '../util/loader'
-import {
-    setupRPC,
-    insertTooltip,
-    removeTooltip,
-    userSelectedText,
-} from './interactions'
+import { setupRPC, insertTooltip, userSelectedText } from './interactions'
 import ToolbarNotifications from '../toolbar-notification/content_script'
 import {
     conditionallyShowOnboardingNotifications,
@@ -23,12 +18,11 @@ import {
 } from 'src/sidebar-overlay/content_script/highlight-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 import {
+    toggleSidebarOverlay,
     createAnnotation,
     createAndCopyDirectLink,
     createHighlight,
 } from 'src/direct-linking/content_script/interactions'
-import { browser } from 'webextension-polyfill-ts'
-import createNotification from 'src/util/notifications'
 
 export default async function init({
     toolbarNotifications,
@@ -88,7 +82,9 @@ const handleKeyboardShortcuts = settingsState => async e => {
             switch (convertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
                     toggleSidebarShortcutEnabled &&
-                         (await remoteFunction('toggleSidebarOverlay')({override:true}))
+                        toggleSidebarOverlay({
+                            override: true,
+                        })
                     break
                 case toggleHighlightsShortcut:
                     toggleHighlightsShortcutEnabled && toggleHighlights()
@@ -125,7 +121,7 @@ const fetchAndHighlightAnnotations = async () => {
         window.location.href,
     )
     const highlightables = annotations.filter(annotation => annotation.selector)
-    highlightAnnotations(highlightables)
+    highlightAnnotations(highlightables, toggleSidebarOverlay)
 }
 
 const createNewAnnotation = async e => {

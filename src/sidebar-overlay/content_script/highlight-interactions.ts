@@ -41,6 +41,7 @@ export const highlightAndScroll = (annotation: Annotation) => {
  */
 export const highlightAnnotations = async (
     annotations: Annotation[],
+    openSidebar: () => void,
     focusOnAnnotation?: (url: string) => void,
     hoverAnnotationContainer?: (url: string) => void,
 ) => {
@@ -48,6 +49,7 @@ export const highlightAnnotations = async (
         annotations.map(async annotation =>
             highlightAnnotation(
                 { annotation },
+                openSidebar,
                 focusOnAnnotation,
                 hoverAnnotationContainer,
             ),
@@ -66,21 +68,20 @@ export const attachEventListenersToNewHighlights = (
     annotation: Annotation,
     focusOnAnnotation: (url: string) => void,
     hoverAnnotationContainer: (url: string) => void,
+    openSidebar: () => void,
 ) => {
     const newHighlights = document.querySelectorAll(
         `.${styles['memex-highlight']}:not([data-annotation])`,
     )
     newHighlights.forEach(highlight => {
         ;(highlight as HTMLElement).dataset.annotation = annotation.url
-        if (!focusOnAnnotation || !hoverAnnotationContainer) {
-            return
-        }
 
         const clickListener = async e => {
             e.preventDefault()
             if (!e.target.dataset.annotation) {
                 return
             }
+            openSidebar()
             removeHighlights(true)
             makeHighlightDark(annotation)
             focusOnAnnotation(annotation.url)
