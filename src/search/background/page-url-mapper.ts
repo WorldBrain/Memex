@@ -174,12 +174,18 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         {
             base64Img,
             upperTimeBound,
+            latestTimes,
         }: {
             base64Img?: boolean
             upperTimeBound?: number
+            /**
+             * If defined, it should be the same length as main input `pageUrls`, containing the latest times
+             * to use for each result. This allows us to skip the lookup
+             * (old page search involves this lookup already for scoring).
+             */
+            latestTimes?: number[]
         },
     ): Promise<AnnotPage[]> {
-        console.log('  starting data mapping for search results:', pageUrls)
         if (!pageUrls.length) {
             return []
         }
@@ -206,14 +212,21 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         console.time('  #2 display data batch')
         // Run the subsequent set of queries that depend on earlier results
         await Promise.all([
-            this.lookupLatestTimes(pageUrls, timeMap, pageMap, upperTimeBound),
+            latestTimes
+                ? Promise.resolve()
+                : this.lookupLatestTimes(
+                      pageUrls,
+                      timeMap,
+                      pageMap,
+                      upperTimeBound,
+                  ),
             this.lookupFavIcons([...hostnames], favIconMap, base64Img),
         ])
         console.timeEnd('  #2 display data batch')
 
         // Map page results back to original input
         return pageUrls
-            .map(url => {
+            .map((url, i) => {
                 const page = pageMap.get(url)
 
                 // Data integrity issue; no matching page in the DB. Fail nicely
@@ -226,7 +239,9 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                     favIcon: favIconMap.get(page.hostname),
                     tags: tagMap.get(url) || [],
                     annotsCount: countMap.get(url),
-                    displayTime: timeMap.get(url),
+                    displayTime: latestTimes
+                        ? latestTimes[i]
+                        : timeMap.get(url),
                 }
             })
             .filter(page => page != null)

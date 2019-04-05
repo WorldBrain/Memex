@@ -232,32 +232,6 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return collection.toArray()
     }
 
-    private termsMatch = ({
-        termsInc,
-        includeHighlights,
-        includeNotes,
-    }: AnnotSearchParams) => ({ _body_terms, _comment_terms }: Annotation) => {
-        const highlightsMatch = includeHighlights
-            ? diff(termsInc, _body_terms).length === 0
-            : true
-
-        const notesMatch = includeNotes
-            ? diff(termsInc, _comment_terms).length === 0
-            : true
-
-        if (includeHighlights && includeNotes) {
-            return notesMatch || highlightsMatch
-        }
-
-        if (includeHighlights && !includeNotes) {
-            return highlightsMatch
-        }
-
-        if (!includeHighlights && includeNotes) {
-            return notesMatch
-        }
-    }
-
     private async queryTermsField(
         args: {
             field: string

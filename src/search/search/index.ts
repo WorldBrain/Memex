@@ -117,8 +117,9 @@ export const fullSearch = (getDb: () => Promise<Dexie>) => async ({
         const urls = [...urlScoreMultiMap.keys()]
         const latestEvents = await mapUrlsToLatestEvents(getDb)(params, urls)
 
-        urlScoresMap = applyScores(urlScoreMultiMap, latestEvents)
-        totalCount = urlScoresMap.size
+        const scoredResults = applyScores(urlScoreMultiMap, latestEvents)
+        totalCount = scoredResults.length
+        return { ids: paginate(scoredResults, params), totalCount }
     }
 
     return { ids: paginate(urlScoresMap, params), totalCount }

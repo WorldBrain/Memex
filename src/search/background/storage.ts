@@ -234,13 +234,14 @@ export default class SearchStorage extends FeatureStorage {
         const { ids } = await this.legacySearch(searchParams)
         console.timeEnd('page search stage')
 
-        const pageUrls = new Set(ids.map(([url]) => url))
-
         console.time('display data mapping stage (TOTAL)')
         const a = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
-            [...pageUrls],
-            { upperTimeBound: params.endDate },
+            ids.map(([url]) => url),
+            {
+                upperTimeBound: params.endDate,
+                latestTimes: ids.map(([, , time]) => time),
+            },
         )
 
         console.timeEnd('display data mapping stage (TOTAL)')

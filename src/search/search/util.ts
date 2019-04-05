@@ -5,10 +5,12 @@ import { SearchParams, SearchResult, PageResultsMap } from '..'
  * @return Sorted and trimmed version of `resultEntries` input.
  */
 export const paginate = (
-    resultEntries: PageResultsMap,
+    resultEntries: SearchResult[] | PageResultsMap,
     { skip = 0, limit = 10 }: Partial<SearchParams>,
 ): SearchResult[] =>
-    [...resultEntries].sort(([, a], [, b]) => b - a).slice(skip, skip + limit)
+    [...resultEntries]
+        .sort(([, a], [, b]) => b - a)
+        .slice(skip, skip + limit) as SearchResult[]
 
 /**
  * @param urlScoreMap Map of URL keys to score multipliers.
@@ -18,15 +20,14 @@ export const paginate = (
 export const applyScores = (
     urlScoreMap: PageResultsMap,
     latestVisitsMap: PageResultsMap,
-): PageResultsMap =>
-    new Map(
-        [...urlScoreMap]
-            // Visits may be filtered down by time; only keep URLs appearing in visits Map
-            .filter(([url]) => latestVisitsMap.has(url))
-            .map(
-                ([url, multi]): [string, number] => [
-                    url,
-                    Math.trunc(latestVisitsMap.get(url) * multi),
-                ],
-            ),
-    )
+): SearchResult[] =>
+    [...urlScoreMap]
+        // Visits may be filtered down by time; only keep URLs appearing in visits Map
+        .filter(([url]) => latestVisitsMap.has(url))
+        .map(
+            ([url, multi]): [string, number, number] => [
+                url,
+                Math.trunc(latestVisitsMap.get(url) * multi),
+                latestVisitsMap.get(url),
+            ],
+        )

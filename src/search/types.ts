@@ -73,7 +73,7 @@ export type VisitInput = number
 export type BookmarkInput = number
 export type PageID = string
 export type PageScore = number
-export type SearchResult = [PageID, PageScore]
+export type SearchResult = [PageID, PageScore, number]
 export type TermsIndexName = 'terms' | 'urlTerms' | 'titleTerms'
 export type PageResultsMap = Map<PageID, PageScore>
 
