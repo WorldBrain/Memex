@@ -18,6 +18,15 @@ class SearchFilters extends PureComponent {
         return (
             <div className={styles.filterBar}>
                 <div className={styles.innerContainer}>
+                    <div className={styles.filters}>
+                        <div className={styles.bookmarksFilter}>
+                            {this.props.bookmarkFilter}
+                        </div>
+                        {this.props.dateFilter}
+                        {this.props.tagFilter}
+                        {this.props.domainFilter}
+                        {this.props.contentFilter}
+                    </div>
                     <ButtonTooltip
                         tooltipText="Close Filter Bar"
                         position="bottom"
@@ -27,13 +36,6 @@ class SearchFilters extends PureComponent {
                             onClick={() => this.props.toggleFilterBar()}
                         />
                     </ButtonTooltip>
-                    <div className={styles.bookmarksFilter}>
-                        {this.props.bookmarkFilter}
-                    </div>
-                    {this.props.dateFilter}
-                    {this.props.tagFilter}
-                    {this.props.domainFilter}
-                    {this.props.contentFilter}
                 </div>
             </div>
         )

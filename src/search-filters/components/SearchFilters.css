@@ -22,10 +22,6 @@
     border-bottom: none;
 }
 
-.bookmarksFilter {
-    padding: 10px 16px;
-}
-
 .bookmarksFilter span {
     font-weight: 300;
 }
@@ -34,15 +30,14 @@
     display: flex;
     flex: 1;
     align-items: center;
-    justify-content: space-between;
-    height: 55px;
+    justify-content: center;
+    height: fit-content;
     position: fixed;
     top: 55px;
     left: 0;
     right: 0;
-    z-index: 300001;
+    z-index: 1000;
     background-color: #fff;
-    padding: 0 60px;
     border-bottom: 1px solid #ebebeb;
 
     @media (max-width: 1000px) {
@@ -52,10 +47,23 @@
 }
 
 .innerContainer {
-    width: 50%;
+    width: 800px;
+    height: max-content;
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.filters {
+    align-items: flex-start;
+    height: auto;
+    padding: 5px 0px;
+    display: grid;
+    justify-content: space-between;
+    grid-auto-flow: column;
+    grid-column-start: unset;
+    grid-template-columns: max-content max-content max-content max-content;
+    grid-gap: 20px;
 }
 
 .button {

@@ -1,6 +1,5 @@
-.container {
-    margin: 10px 0;
-}
+@value colors: 'src/common-ui/colors.css';
+@value color1, color2, color3, color4, color6, color8, color12, color9 from colors;
 
 .icon {
     composes: starMark from 'src/common-ui/icons.css';
@@ -8,19 +7,16 @@
     height: 20px;
     opacity: 0;
     color: transparent;
-    transition: opacity 0.2s 0.1s ease-in-out;
-    -webkit-text-stroke: 3px rgba(0, 0, 0, 0.5);
     background-size: 15px;
 }
 
 .checkedIcon {
     opacity: 1;
     transform: scale(0);
-    width: 25px;
-    height: 25px;
-    color: white;
+    width: 24px;
+    height: 24px;
+    color: color3;
     -webkit-text-stroke: 0;
-    animation: icon 0.2s cubic-bezier(1, 0.008, 0.565, 1.65) 1 forwards;
 }
 
 .label {
@@ -30,19 +26,18 @@
 
 .label__check {
     border-radius: 3px;
-    border: 2px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid color9;
     background: white;
     vertical-align: middle;
-    margin-right: 20px;
-    width: 25px;
-    height: 25px;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border 0.3s ease;
     outline: none;
     background-image: url('/img/star_blue_empty1.svg');
+
     background-repeat: no-repeat;
     background-position: center;
 
@@ -61,12 +56,12 @@
 }
 
 .label__checkbox:checked + .label__text .label__check {
-    animation: check 0.2s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
     transform-origin: center center;
     border: none;
-    width: 25px;
-    height: 25px;
+    width: 24px;
+    height: 24px;
     outline: none;
+    background-image: url('/img/star_blue_full.svg');
 }
 
 @keyframes icon {

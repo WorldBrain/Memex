@@ -1,90 +1,71 @@
+@value colors: 'src/common-ui/colors.css';
+@value color1, color2, color3, color4, color6, color8, color12, color9 from colors;
+
 .tagButton {
-    width: 54px;
-    height: 30px;
+    height: 24px;
 
     /* ultra-light */
-    border: 1px solid #d0d5e0;
+    border: 1px solid color9;
     box-sizing: border-box;
-    border-radius: 4px;
-    font-style: normal;
-    font-weight: normal;
-    line-height: 17px;
-    font-size: 13px;
-    color: #1a2f58;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: color3;
+    width: fit-content;
     cursor: pointer;
     text-align: center;
     background-color: #fff;
+    outline: none;
+    padding: 1px 7px 2px 7px;
+
+    &:hover {
+        background-color: color1;
+    }
 }
 
 .tagButtonSelected {
-    width: 75px;
-    height: 30px;
-
-    /* ultra-light */
-    border: 1px solid #d0d5e0;
-    box-sizing: border-box;
-    border-radius: 4px;
-    font-style: normal;
-    font-weight: normal;
-    line-height: 17px;
-    font-size: 13px;
-    color: #1a2f58;
-    cursor: pointer;
-    text-align: left;
-    background-color: #5cd9a6;
+    composes: tagButton;
+    background-color: color2;
+    padding: 1px 4px 2px 7px;
 }
 
 .tagButton:focus {
-    background-color: #5cd9a6;
+    background-color: color1;
 }
 
 .buttonFocus {
-    background-color: #5cd9a6;
+    background-color: color2;
 }
 
 .buttonFocusSelected {
     text-align: left;
     width: 101px;
-    height: 30px;
-    background-color: #5cd9a6;
-}
-
-.tagCount {
-    position: absolute;
-    font-weight: bold;
-    padding-left: 4px;
+    height: 24px;
+    background-color: color2;
 }
 
 .clearFilters {
-    background-image: url('/img/removeIcon.svg');
+    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     background-size: 10px;
-    display: inline-block;
     cursor: pointer;
-    width: 10px;
-    height: 10px;
+    width: 18px;
+    height: 18px;
     margin-left: 10px;
-}
+    background-position: center center;
 
-.cross {
-    width: 7px;
-    height: 7px;
-    position: absolute;
-    background-image: url('/img/times-solid.svg');
-    background-repeat: no-repeat;
-    border-color: transparent;
-    background-color: #5cd9a6;
-    border-width: 0px;
-    margin-left: 47px;
-    margin-top: 12px;
-
-    &:focus {
-        outline: 0;
+    &:hover {
+        background-color: color8;
     }
 }
 
-.displayFilters {
+.detailsFilter {
     display: grid;
-    font-size: 12px;
+    color: color4;
+    font-size: 14px;
+    margin-left: 10px;
 }
 
 .spanInc {
@@ -93,11 +74,4 @@
 
 .spanExc {
     background: #f29d9d;
-}
-
-.dateText {
-    display: grid;
-    font-size: 12px;
-    background-color: #5cd9a6;
-    color: rgb(54, 54, 46);
 }

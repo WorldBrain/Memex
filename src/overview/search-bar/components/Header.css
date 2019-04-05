@@ -13,7 +13,6 @@
     background-color: #fff;
     padding: 0 60px; */
 
-    padding-left: 310px;
     border-bottom: 1px solid #ebebeb;
 
     @media (max-width: 1000px) {
@@ -41,7 +40,7 @@
 }
 
 .searchField {
-    composes: searchField from '../../../common-ui/elements.css';
+    composes: searchField from 'src/common-ui/elements.css';
     display: flex;
     justify-content: space-between;
     width: 100%;
@@ -56,7 +55,7 @@
 }
 
 .query {
-    composes: searchField from '../../../common-ui/elements.css';
+    composes: searchField from 'src/common-ui/elements.css';
     flex: 1;
     background-image: url('/img/searchIcon.svg');
     background-repeat: no-repeat;
@@ -72,10 +71,11 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
     background-color: #fff;
     transition: all 200ms ease-out;
     border-right: none;
+    align-items: center;
 }
 
 .links {
@@ -109,8 +109,8 @@
 }
 
 .upgrade {
-    composes: h2Color from '../../../common-ui/colors.css';
-    composes: nakedButton from '../../../common-ui/elements.css';
+    composes: h2Color from 'src/common-ui/colors.css';
+    composes: nakedButton from 'src/common-ui/elements.css';
     display: none;
     font-size: 15px;
     text-decoration: none;
@@ -123,8 +123,8 @@
 }
 
 .settingsIcon {
-    composes: settingsIcon from '../../../common-ui/icons.css';
-    composes: nakedSquareButton from '../../../common-ui/elements.css';
+    composes: settingsIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     height: 25px;
     width: 25px;
     padding: 5px;
@@ -145,13 +145,16 @@
 
 .button {
     composes: nakedButton from 'src/common-ui/elements.css';
-    border-radius: 3px;
-    opacity: 0.8;
     border: none;
+    padding: 4px 6px 3px 8px;
+    display: flex;
+    align-items: center;
     margin-left: 25px;
-    font-size: 14px;
+    height: 25px;
+    font-size: 15px;
     font-weight: 500;
     cursor: pointer;
+    margin-right: -8px;
 
     &:hover {
         opacity: 1;
@@ -167,12 +170,15 @@
 }
 
 .clearFilters {
-    background-image: url('/img/cross.svg');
-    background-color: #f29d9d;
+    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: onHoverDark from 'src/common-ui/colors.css';
+    border-radius: 3px;
     background-size: 10px;
     display: inline-block;
     cursor: pointer;
     width: 18px;
     height: 18px;
     margin-left: 5px;
+    background-repeat: no-repeat;
+    background-position: center;
 }
