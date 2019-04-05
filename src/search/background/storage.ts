@@ -234,13 +234,18 @@ export default class SearchStorage extends FeatureStorage {
         const { ids } = await this.legacySearch(searchParams)
         console.timeEnd('page search stage')
 
+        // Terms search requires lookup of the latest interaction times for scoring,
+        //  so it returns triple. The 3rd index is the latest time (to avoid redoing those queries).
+        const latestTimes =
+            ids[0].length === 3 ? ids.map(([, , time]) => time) : undefined
+
         console.time('display data mapping stage (TOTAL)')
         const a = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             ids.map(([url]) => url),
             {
                 upperTimeBound: params.endDate,
-                latestTimes: ids.map(([, , time]) => time),
+                latestTimes,
             },
         )
 
