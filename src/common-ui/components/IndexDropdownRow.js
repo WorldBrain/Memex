@@ -86,7 +86,6 @@ class IndexDropdownRow extends PureComponent {
     }
 
     render() {
-        // console.log(this.props.isForRibbon)
         return (
             <div
                 ref={ref => (this.ref = ref)}
@@ -112,17 +111,23 @@ class IndexDropdownRow extends PureComponent {
                         this.props.value}
                 </span>
                 <span className={this.styles.selectionOption}>
-                    {this.props.isForSidebar && (
+                    {this.props.active && (
+                        <span className={this.styles.check} />
+                    )}
+                    {this.props.isForSidebar && !this.props.active && (
                         <span
-                            onClick={this.props.onExcClick}
+                            onClick={e => {
+                                e.stopPropagation()
+                                this.props.onExcClick()
+                            }}
                             className={cx({
-                                [this.styles.excludeInactive]: this.state
-                                    .displayExcIcon,
+                                [this.styles.excludeInactive]:
+                                    this.state.displayExcIcon &&
+                                    !this.props.excActive,
                                 [this.styles.excluded]: this.props.excActive,
                             })}
                         />
                     )}
-                    {this.props.active && <span className={this.styles.check} />}
                 </span>
             </div>
         )

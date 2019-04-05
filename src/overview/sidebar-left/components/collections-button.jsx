@@ -12,11 +12,16 @@ class CollectionsButton extends PureComponent {
         onShowBtnClick: PropTypes.func,
         isListFilterActive: PropTypes.bool.isRequired,
         activeCollectionName: PropTypes.string,
+        isSidebarLocked: PropTypes.bool,
     }
 
     render() {
         return (
-            <div className={styles.buttonContainer}>
+            <div
+                className={cx(styles.buttonContainer, {
+                    [styles.sidebarLocked]: this.props.isSidebarLocked,
+                })}
+            >
                 <ButtonTooltip position="bottom" tooltipText="My Collections">
                     <div className={styles.enabled}>
                         <button
@@ -25,9 +30,10 @@ class CollectionsButton extends PureComponent {
                             onDragEnter={this.props.onPageDrag}
                             id="collection-icon"
                         >
-                       <span className={styles.title}>
-                            {this.props.activeCollectionName || 'All Collections'}
-                        </span>
+                            <span className={styles.title}>
+                                {this.props.activeCollectionName ||
+                                    'All Collections'}
+                            </span>
                         </button>
                         {this.props.isListFilterActive && (
                             <React.Fragment>

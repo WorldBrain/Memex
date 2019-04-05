@@ -11,11 +11,13 @@ import { ListSideBar } from '../../../custom-lists/components'
 
 import Sidebar from './SideBar'
 import crowdfundingModalStyles from 'src/common-ui/crowdfunding/components/CFModal.css'
+import collectionsButtonStyles from './collections-button.css'
 
 class SidebarContainer extends PureComponent {
     static propTypes = {
         isSidebarOpen: PropTypes.bool.isRequired,
         isSidebarLocked: PropTypes.bool.isRequired,
+        openSidebar: PropTypes.func.isRequired,
         closeSidebar: PropTypes.func.isRequired,
         setSidebarState: PropTypes.func.isRequired,
         setSidebarLocked: PropTypes.func.isRequired,
@@ -40,7 +42,14 @@ class SidebarContainer extends PureComponent {
         const $modalContainer = document.querySelector(
             `.${crowdfundingModalStyles.background}`,
         )
-        if ($modalContainer && $modalContainer.contains(e.target)) {
+        const $collectionsContainer = document.querySelector(
+            `.${collectionsButtonStyles.buttonContainer}`,
+        )
+
+        if (
+            ($modalContainer && $modalContainer.contains(e.target)) ||
+            ($collectionsContainer && $collectionsContainer.contains(e.target))
+        ) {
             return
         }
 
@@ -63,9 +72,21 @@ class SidebarContainer extends PureComponent {
         this.props.closeSidebar()
     }
 
-    onMouseLeave = () => {
+    onMouseLeave = e => {
+        const $hoverOvercollections = document.querySelector(
+            `.${collectionsButtonStyles.buttonContainer}:hover`,
+        )
+        if ($hoverOvercollections) {
+            return
+        }
+
         this.props.resetMouseOver()
         this.props.closeSidebar()
+    }
+
+    openSidebaronMouseEnter = () => {
+        this.props.setMouseOver()
+        this.props.openSidebar()
     }
 
     render() {
@@ -78,6 +99,7 @@ class SidebarContainer extends PureComponent {
                 onMouseEnter={this.props.setMouseOver}
                 closeSidebar={this.props.closeSidebar}
                 setSidebarLocked={this.props.setSidebarLocked}
+                openSidebaronMouseEnter={this.openSidebaronMouseEnter}
             >
                 {this.renderListSidebar()}
             </Sidebar>

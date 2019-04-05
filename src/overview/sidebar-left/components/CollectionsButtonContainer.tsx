@@ -14,6 +14,7 @@ import { selectors as notifs } from 'src/notifications'
 import { acts as tooltipActs } from '../../tooltips'
 import { actions as onboardingActs } from '../../onboarding'
 import { selectors as lists } from 'src/custom-lists'
+import * as selectors from '../selectors'
 
 export interface Props {
     showInbox: boolean
@@ -36,6 +37,7 @@ const mapState = state => ({
     filterActive: filters.showClearFiltersBtn(state),
     activeCollectionName: lists.activeCollectionName(state),
     isListFilterActive: filters.listFilterActive(state),
+    isSidebarLocked: selectors.sidebarLocked(state),
     showInbox: notifs.showInbox(state),
 })
 
@@ -54,7 +56,10 @@ const mapDispatch = dispatch => ({
     listBtnClick: () => dispatch(acts.openSidebarListMode()),
     onPageDrag: () => dispatch(acts.openSidebarListMode()),
     onClearBtnClick: () => dispatch(filterActs.resetFilters()),
-    onShowBtnClick: () => dispatch(filterActs.delListFilter()),
+    onShowBtnClick: () => {
+        dispatch(filterActs.delListFilter())
+        dispatch(acts.openSidebar())
+    },
 })
 
 export default connect(

@@ -58,7 +58,10 @@ class IndexDropdownContainer extends Component<Props, State> {
     static defaultProps: Partial<Props> = {
         onFilterAdd: noop,
         onFilterDel: noop,
+        onExcFilterAdd: noop,
+        onExcFilterDel: noop,
         initFilters: [],
+        initExcFilters: [],
         isForAnnotation: false,
         isForRibbon: false,
     }
@@ -70,7 +73,6 @@ class IndexDropdownContainer extends Component<Props, State> {
     private delTagsFromOpenTabsRPC
     private processEvent
     private inputEl: HTMLInputElement
-    private multiEdit: Set<string>
 
     constructor(props: Props) {
         super(props)
@@ -108,15 +110,21 @@ class IndexDropdownContainer extends Component<Props, State> {
         // when a filter is added or deleted, which implies that the length of
         // props.initFilters will differ across two updates.
         if (
-            prevProps.initFilters !== undefined &&
-            this.props.initFilters !== undefined &&
-            prevProps.initFilters.length !== this.props.initFilters.length
+            (prevProps.initFilters !== undefined &&
+                this.props.initFilters !== undefined &&
+                prevProps.initFilters.length !==
+                    this.props.initFilters.length) ||
+            (prevProps.initExcFilters !== undefined &&
+                this.props.initExcFilters !== undefined &&
+                prevProps.initExcFilters.length !==
+                    this.props.initExcFilters.length)
         ) {
             this.setState({
                 displayFilters: this.props.initSuggestions
                     ? this.props.initSuggestions
                     : this.props.initFilters,
                 filters: this.props.initFilters,
+                excFilters: new Set<string>(this.props.initExcFilters),
             })
         }
     }
@@ -160,8 +168,12 @@ class IndexDropdownContainer extends Component<Props, State> {
     /**
      * Selector for derived display tags state
      */
-    private getDisplayTags() {
-        return this.state.displayFilters.map((value, i) => ({
+    private getDisplayTags(displayTags = true) {
+        const filters = displayTags
+            ? this.state.displayFilters
+            : [...this.state.filters, ...this.state.excFilters] // to display queried selected tags as well
+
+        return filters.map((value, i) => ({
             value,
             active: this.props.allTabs
                 ? this.state.multiEdit.has(value)
@@ -283,8 +295,13 @@ class IndexDropdownContainer extends Component<Props, State> {
      * Used for clicks on displayed tags. Will either add or remove tags to the page
      * depending on their current status as assoc. tags or not.
      */
-    private handleTagSelection = (index: number) => async event => {
-        const tag = this.state.displayFilters[index]
+    private handleTagSelection = (
+        index: number,
+        displayFilters = true,
+    ) => async event => {
+        const tag = displayFilters
+            ? this.state.displayFilters[index]
+            : [...this.state.filters, ...this.state.excFilters][index]
 
         if (this.props.allTabs) {
             await this.handleMultiTagEdit(tag)
@@ -302,8 +319,14 @@ class IndexDropdownContainer extends Component<Props, State> {
         })
     }
 
-    private handleExcTagSelection = (index: number) => event => {
-        const tag = this.state.displayFilters[index]
+    private handleExcTagSelection = (
+        index: number,
+        displayFilters = true,
+    ) => event => {
+        const tag = displayFilters
+            ? this.state.displayFilters[index]
+            : [...this.state.filters, ...this.state.excFilters][index]
+
         const excFilters = this.state.excFilters
 
         if (!excFilters.has(tag)) {
@@ -509,6 +532,9 @@ class IndexDropdownContainer extends Component<Props, State> {
                 tagSearchValue={this.state.searchVal}
                 clearSearchField={this.clearSearchField}
                 showClearfieldBtn={this.showClearfieldBtn()}
+                tags={this.getDisplayTags(false)}
+                onTagClick={this.handleTagSelection}
+                onExcTagClick={this.handleExcTagSelection}
                 {...this.props}
             >
                 {this.renderTags()}

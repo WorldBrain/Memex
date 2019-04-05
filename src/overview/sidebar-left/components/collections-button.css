@@ -34,6 +34,13 @@
 
 .title {
     font-size: 15px;
+    margin-left: 50px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.sidebarLocked {
+    background: #edf0f4;
 }
 
 .button {

@@ -82,10 +82,24 @@
 }
 
 .sidebarLocked {
-    background-color: #edf0f4;
+    background: #edf0f4;
 }
 
-.collectionsBtn {
+.sidebar {
+    position: absolute;
+    width: 20px;
+    height: 90vh;
+    transform: translate(0, 0);
+    transition: all 0.1s ease-in-out;
+    line-height: normal;
+    text-align: start;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.sidebarExpanded {
     width: 250px;
-    height: 55px;
+    display: grid;
+    transition: all 0.2s ease-in-out;
 }

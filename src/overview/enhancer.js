@@ -38,7 +38,7 @@ const locationSync = ReduxQuerySync.enhancer({
             stringToValue: parseBool,
             defaultValue: false,
         },
-        tags: {
+        tagsInc: {
             selector: filters.tags,
             action: filterActs.setTagFilters,
             valueToString: stringifyArr,

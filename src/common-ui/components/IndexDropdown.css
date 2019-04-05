@@ -294,3 +294,21 @@
     padding: 0;
     background-color: transparent;
 }
+
+.clearFilters {
+    background-image: url('/img/removeIcon.svg');
+    background-size: 10px;
+    display: inline-block;
+    cursor: pointer;
+    width: 10px;
+    height: 10px;
+    margin-left: 10px;
+}
+
+.incFilter {
+    background: #83c9f4;
+}
+
+.excFilter {
+    background: #f29d9d;
+}

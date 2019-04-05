@@ -5,7 +5,6 @@ import { slide as Menu } from 'react-burger-menu'
 import menuStyles from './menu-styles'
 import localStyles from './Sidebar.css'
 import cx from 'classnames'
-import CollectionsButton from './CollectionsButtonContainer'
 
 class Sidebar extends PureComponent {
     static propTypes = {
@@ -17,6 +16,7 @@ class Sidebar extends PureComponent {
         onMouseEnter: PropTypes.func.isRequired,
         closeSidebar: PropTypes.func.isRequired,
         setSidebarLocked: PropTypes.func.isRequired,
+        openSidebaronMouseEnter: PropTypes.func.isRequired,
     }
 
     closeLockedSidebar = () => {
@@ -31,35 +31,46 @@ class Sidebar extends PureComponent {
                 onMouseEnter={this.props.onMouseEnter}
             >
                 <Menu
-                    styles={menuStyles(
-                        this.props.isSidebarLocked,
-                        this.props.isSidebarOpen || this.props.isSidebarLocked,
-                    )}
+                    styles={menuStyles(this.props.isSidebarLocked)}
                     noOverlay
                     customBurgerIcon={null}
                     customCrossIcon={<img src="/img/cross_grey.svg" />}
                     isOpen
                     onStateChange={this.props.captureStateChange}
                 >
-                    <div className={localStyles.container}>
-                        <div className={localStyles.collectionsBtn}>
-                            <CollectionsButton />
+                    <div
+                        onMouseEnter={this.props.openSidebaronMouseEnter}
+                        className={cx(localStyles.sidebar, {
+                            [localStyles.sidebarExpanded]:
+                                this.props.isSidebarOpen ||
+                                this.props.isSidebarLocked,
+                            [localStyles.sidebarLocked]: this.props
+                                .isSidebarLocked,
+                        })}
+                    >
+                        <div className={localStyles.container}>
+                            {(this.props.isSidebarOpen ||
+                                this.props.isSidebarLocked) && (
+                                <React.Fragment>
+                                    <button
+                                        className={cx(localStyles.arrowButton, {
+                                            [localStyles.arrow]: this.props
+                                                .isSidebarLocked,
+                                            [localStyles.arrowReverse]: !this
+                                                .props.isSidebarLocked,
+                                        })}
+                                        onClick={() =>
+                                            !this.props.isSidebarLocked
+                                                ? this.props.setSidebarLocked(
+                                                      true,
+                                                  )
+                                                : this.closeLockedSidebar()
+                                        }
+                                    />
+                                    {this.props.children}
+                                </React.Fragment>
+                            )}
                         </div>
-                        <button
-                            className={cx(localStyles.arrowButton, {
-                                [localStyles.arrow]: this.props.isSidebarLocked,
-                                [localStyles.arrowReverse]: !this.props
-                                    .isSidebarLocked,
-                            })}
-                            onClick={() =>
-                                !this.props.isSidebarLocked
-                                    ? this.props.setSidebarLocked(true)
-                                    : this.closeLockedSidebar()
-                            }
-                        />
-                        {(this.props.isSidebarOpen ||
-                            this.props.isSidebarLocked) &&
-                            this.props.children}
                     </div>
                 </Menu>
             </div>

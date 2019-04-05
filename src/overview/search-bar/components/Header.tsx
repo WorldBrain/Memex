@@ -10,6 +10,7 @@ import InboxButton from '../../../notifications/components/InboxButton'
 import BackupStatus from '../../../notifications/components/BackupStatusContainer'
 import { OVERVIEW_URL } from '../../../constants'
 import SearchFilters from 'src/search-filters'
+import CollectionsButton from 'src/overview/sidebar-left/components/CollectionsButtonContainer'
 
 const styles = require('./Header.css')
 
@@ -65,6 +66,10 @@ class Header extends PureComponent<Props> {
         return (
             <React.Fragment>
                 <div className={styles.navbar}>
+                    {' '}
+                    <div className={styles.collectionsBtn}>
+                        <CollectionsButton />
+                    </div>
                     <a href={this.props.overviewUrl}>
                         <div className={styles.logo} />
                     </a>
