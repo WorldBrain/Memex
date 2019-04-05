@@ -87,8 +87,8 @@ class FilterButton extends PureComponent {
                 >
                     {this.props.source}
                     {this.renderCount()}
-                    {this.props.children}
                 </button>
+                {this.props.children}
             </div>
         )
     }

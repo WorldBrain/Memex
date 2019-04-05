@@ -77,22 +77,20 @@ class DomainsPopup extends PureComponent {
                                 this.props.env === 'overview',
                         })}
                     >
-                        <div className={styles.domainsPopup}>
-                            <IndexDropdown
-                                env={this.props.env}
-                                onFilterAdd={this.props.addIncDomainFilter}
-                                onFilterDel={this.props.delIncDomainFilter}
-                                onExcFilterAdd={this.props.addExcDomainFilter}
-                                onExcFilterDel={this.props.delExcDomainFilter}
-                                initFilters={this.props.domainsInc}
-                                initExcFilters={this.props.domainsExc}
-                                initSuggestions={this.props.suggestedDomains.map(
-                                    ({ value }) => value,
-                                )}
-                                source="domain"
-                                isForSidebar
-                            />
-                        </div>
+                        <IndexDropdown
+                            env={this.props.env}
+                            onFilterAdd={this.props.addIncDomainFilter}
+                            onFilterDel={this.props.delIncDomainFilter}
+                            onExcFilterAdd={this.props.addExcDomainFilter}
+                            onExcFilterDel={this.props.delExcDomainFilter}
+                            initFilters={this.props.domainsInc}
+                            initExcFilters={this.props.domainsExc}
+                            initSuggestions={this.props.suggestedDomains.map(
+                                ({ value }) => value,
+                            )}
+                            source="domain"
+                            isForSidebar
+                        />
                     </Tooltip>
                 )}
             </FilterButton>

@@ -1,6 +1,8 @@
 .tooltip {
     position: relative;
     border-radius: 3px;
+    display: flex;
+    justify-content: center;
 }
 
 .tooltipBubble {
@@ -37,9 +39,6 @@
 }
 
 .tooltipbottom {
-    top: 1px;
-    left: 50%;
-    transform: translateX(-50%);
 
     /*    &::after {
         border-left: 9px solid transparent;
