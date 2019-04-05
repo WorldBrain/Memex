@@ -60,9 +60,9 @@ export const initSearchCount = createAction('overview/initSearchCount')
 export const incSearchCount = createAction('overview/incSearchCount')
 
 export const toggleSearchType: () => Thunk = () => (dispatch, getState) => {
+    dispatch(setLoading(true))
     const currSearchType = selectors.searchType(getState())
     const newSearchType = currSearchType === 'page' ? 'annot' : 'page'
-    dispatch(setLoading(true))
     dispatch(setSearchType(newSearchType))
 }
 

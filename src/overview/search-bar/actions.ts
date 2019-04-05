@@ -155,16 +155,6 @@ export const search: (args?: any) => Thunk = (
     }
 }
 
-/**
- * Init a connection to the index running in the background script, allowing
- * redux actions to be dispatched whenever a command is received from the background script.
- * Also perform an initial search to populate the view (empty query = get all docs)
- */
-export const init = () => (dispatch, getState) => {
+export const init = () => dispatch => {
     dispatch(notifActs.updateUnreadNotif())
-
-    // Only do init search if empty query; if query set, the epic will trigger a search
-    if (selectors.isEmptyQuery(getState())) {
-        dispatch(search({ overwrite: true }))
-    }
 }
