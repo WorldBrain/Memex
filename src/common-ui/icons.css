@@ -178,3 +178,8 @@
     composes: iconPosition;
     background-image: url('/img/reload.svg');
 }
+
+.excluded {
+    composes: iconPosition;
+    background-image: url('/img/exclusion.svg');
+}
