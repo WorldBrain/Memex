@@ -17,6 +17,7 @@
 
 .tooltip {
     margin-top: 30px;
+    height: 400px;
 }
 
 .tagsPopup {
@@ -79,12 +80,13 @@
 }
 
 .searchField {
+    composes: searchField from 'src/common-ui/elements.css';
     margin-left: 55px;
     border-width: 0px;
 }
 
 .searchField:focus {
-    outline: 0px;
+    outline: none;
 }
 
 .searchIcon {

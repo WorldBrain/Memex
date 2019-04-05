@@ -170,3 +170,8 @@
     composes: iconPosition;
     background-image: url('/img/arrowUp.svg');
 }
+
+.excluded {
+    composes: iconPosition;
+    background-image: url('/img/exclusion.svg');
+}

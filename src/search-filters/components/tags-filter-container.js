@@ -55,7 +55,6 @@ class TagsFilter extends PureComponent {
                             [styles.tooltip]: this.props.env === 'overview',
                         })}
                     >
-                        <div className={styles.tagsPopup}>
                             <IndexDropdown
                                 env={this.props.env}
                                 onFilterAdd={this.props.addIncTagFilter}
@@ -68,7 +67,6 @@ class TagsFilter extends PureComponent {
                                 source="tag"
                                 isForSidebar
                             />
-                        </div>
                     </Tooltip>
                 )}
             </FilterButton>

@@ -44,7 +44,7 @@
 
 .tagContainer {
     width: 100%;
-    height: 190px;
+    height: 345px;
     overflow-y: scroll;
 
     &:focus {
@@ -75,7 +75,6 @@
     margin: 5px 5px 5px 5px;
     display: flex;
     align-items: center;
-    background-color: #fff;
 }
 
 .searchIcon {
@@ -128,20 +127,24 @@
     composes: checkMark from '../../common-ui/icons.css';
     width: 20px;
     height: 20px;
-}
-
-.excludeIcon {
-    background-image: url('/img/exclusion1.svg');
-    background-size: 20px;
-    width: 20px;
-    height: 20px;
+    margin-left: 5px;
 }
 
 .excluded {
-    background: url('/img/exclusion.svg');
-    background-size: 20px;
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: excluded from 'src/common-ui/icons.css';
+    background-size: 16px;
     width: 20px;
     height: 20px;
+}
+
+.excludeInactive {
+    composes: excluded;
+    opacity: 0.5;
+
+    &:hover {
+        opacity: 0.75;
+    }
 }
 
 .value {
@@ -167,4 +170,8 @@
     color: black;
     padding: 0;
     background-color: transparent;
+}
+
+.selectionOption {
+    display: flex;
 }

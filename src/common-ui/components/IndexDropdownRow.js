@@ -93,6 +93,7 @@ class IndexDropdownRow extends PureComponent {
                 className={cx(this.mainClass, {
                     [this.styles.isNew]: this.props.isNew,
                 })}
+                onClick={this.props.onClick}
             >
                 <span
                     className={cx(this.styles.isNewNoteInvisible, {
@@ -106,22 +107,23 @@ class IndexDropdownRow extends PureComponent {
                         [localStyles.isList]:
                             this.props.isList || this.props.source === 'domain',
                     })}
-                    onClick={this.props.onClick}
                 >
                     {(this.props.isList && this.props.value.name) ||
                         this.props.value}
                 </span>
-                {this.props.active && <span className={this.styles.check} />}
-                {this.props.isForSidebar && (
-                    <span
-                        onClick={this.props.onExcClick}
-                        className={cx({
-                            [this.styles.excludeIcon]: this.state
-                                .displayExcIcon,
-                            [this.styles.excluded]: this.props.excActive,
-                        })}
-                    />
-                )}
+                <span className={this.styles.selectionOption}>
+                    {this.props.isForSidebar && (
+                        <span
+                            onClick={this.props.onExcClick}
+                            className={cx({
+                                [this.styles.excludeInactive]: this.state
+                                    .displayExcIcon,
+                                [this.styles.excluded]: this.props.excActive,
+                            })}
+                        />
+                    )}
+                    {this.props.active && <span className={this.styles.check} />}
+                </span>
             </div>
         )
     }
