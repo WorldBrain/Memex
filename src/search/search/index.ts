@@ -100,22 +100,30 @@ export const fullSearch = (getDb: () => Promise<Dexie>) => async ({
     // Few different cases of search params we can take short-cuts on
     if (!terms.length && filteredUrls.isDataFiltered) {
         // Blank search + domain/tags filters: just grab the events for filtered URLs and paginate
+        console.time('mapUrlsToLatestEvents')
         urlScoresMap = await mapUrlsToLatestEvents(getDb)(params, [
             ...filteredUrls.include,
         ])
+        console.timeEnd('mapUrlsToLatestEvents')
         totalCount = urlScoresMap.size
     } else if (!terms.length) {
         // Blank search: simply do lookback from `endDate` on visits and score URLs by latest
+        console.time('group latest event by url')
         urlScoresMap = await groupLatestEventsByUrl(getDb)(params, filteredUrls)
+        console.timeEnd('group latest event by url')
     } else {
         // Terms search: do terms lookup first then latest event lookup (within time bounds) for each result
+        console.time('textSearch')
         const urlScoreMultiMap = await textSearch(getDb)(
             { terms, termsExclude },
             filteredUrls,
         )
+        console.timeEnd('textSearch')
 
         const urls = [...urlScoreMultiMap.keys()]
+        console.time('mapUrlsToLatestEvents')
         const latestEvents = await mapUrlsToLatestEvents(getDb)(params, urls)
+        console.timeEnd('mapUrlsToLatestEvents')
 
         const scoredResults = applyScores(urlScoreMultiMap, latestEvents)
         totalCount = scoredResults.length
