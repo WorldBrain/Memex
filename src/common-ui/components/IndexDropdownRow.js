@@ -92,7 +92,10 @@ class IndexDropdownRow extends PureComponent {
                 className={cx(this.mainClass, {
                     [this.styles.isNew]: this.props.isNew,
                 })}
-                onClick={this.props.onClick}
+                onClick={e => {
+                    e.stopPropagation()
+                    !this.props.excActive && this.props.onClick()
+                }}
             >
                 <span
                     className={cx(this.styles.isNewNoteInvisible, {
@@ -114,20 +117,22 @@ class IndexDropdownRow extends PureComponent {
                     {this.props.active && (
                         <span className={this.styles.check} />
                     )}
-                    {this.props.isForSidebar && !this.props.active && (
-                        <span
-                            onClick={e => {
-                                e.stopPropagation()
-                                this.props.onExcClick()
-                            }}
-                            className={cx({
-                                [this.styles.excludeInactive]:
-                                    this.state.displayExcIcon &&
-                                    !this.props.excActive,
-                                [this.styles.excluded]: this.props.excActive,
-                            })}
-                        />
-                    )}
+                    {this.props.isForSidebar &&
+                        !this.props.active && (
+                            <span
+                                onClick={e => {
+                                    e.stopPropagation()
+                                    this.props.onExcClick()
+                                }}
+                                className={cx({
+                                    [this.styles.excludeInactive]:
+                                        this.state.displayExcIcon &&
+                                        !this.props.excActive,
+                                    [this.styles.excluded]: this.props
+                                        .excActive,
+                                })}
+                            />
+                        )}
                 </span>
             </div>
         )
