@@ -48,11 +48,9 @@ const lookupTerm = (excluded: string[], getDb: () => Promise<Dexie>) =>
     async function(term: string): Promise<TermResults> {
         const queryIndex = termQuery(term, excluded, getDb)
 
-        const [content, title, url] = await Promise.all([
-            queryIndex('terms'),
-            queryIndex('titleTerms'),
-            queryIndex('urlTerms'),
-        ])
+        const content = await queryIndex('terms')
+        const title = await queryIndex('titleTerms')
+        const url = await queryIndex('urlTerms')
 
         return { content, title, url }
     }

@@ -44,23 +44,29 @@ export const mapUrlsToLatestEvents = (getDb: () => Promise<Dexie>) => async (
     // Simple state to keep track of when to finish each query
     const doneFlags = urlsToCheck.map(url => false)
 
-    // Previously used `.anyOf()` + `.eachPrimaryKey()` in a single query
-    //  Turns out it's _way_ faster to do multiple parrallel queries for this
-    //  (URLs are not unique in visits index)
-    await Promise.all(
-        urlsToCheck.map((currUrl, i) =>
-            db.visits
-                .where('url')
-                .equals(currUrl)
-                .reverse()
-                // Mark of current query as done as soon as visit passes adding criteria
-                .until(() => doneFlags[i])
-                .eachPrimaryKey(
-                    ([time, url]) =>
-                        (doneFlags[i] = attemptAdd(latestVisits)(time, url)),
-                ),
-        ),
-    )
+    const visits = await db.visits
+        .where('url')
+        .anyOf(urlsToCheck)
+        .reverse()
+        .primaryKeys()
+
+    const visitsPerPage = new Map<string, number[]>()
+    visits.forEach(([time, url]) => {
+        const current = visitsPerPage.get(url) || []
+        visitsPerPage.set(url, [...current, time])
+    })
+
+    urlsToCheck.forEach((url, i) => {
+        const currVisits = visitsPerPage.get(url) || []
+        // `currVisits` array assumed sorted latest first
+        currVisits.forEach(visit => {
+            if (doneFlags[i]) {
+                return
+            }
+
+            doneFlags[i] = attemptAdd(latestVisits)(visit, url)
+        })
+    })
 
     // Merge results
     const latestEvents: PageResultsMap = new Map()
