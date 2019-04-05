@@ -40,6 +40,7 @@ export const createAnnotation = async () => {
 const fetchAndHighlightAnnotations = async () => {
     const annotationList = await remoteFunction('getAllAnnotationsByUrl')({
         url: window.location.href,
+        limit: 1000,
     })
     const highlightables = annotationList.filter(
         annotation => annotation.selector,
