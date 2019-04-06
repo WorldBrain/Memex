@@ -41,7 +41,7 @@ class SearchFiltersContainer extends PureComponent {
     renderBookmarkFilter = () => <BookmarkFilter />
 
     renderDateFilter = () => (
-        <DatesFilter tooltipPosition="bottom" env="overview" />
+        <DatesFilter tooltipPosition="tooltipDate" env="overview" />
     )
 
     render() {

@@ -31,7 +31,7 @@ const menuStyles = (isSidebarLocked, isSidebarOpen) => {
         ;((baseStyles.bmMenuWrap.opacity as unknown) as string) = '1'
         ;((baseStyles.bmMenuWrap.background as unknown) as string) = 'transparent'
     } else {
-        ;((baseStyles.bmMenuWrap.marginLeft as unknown) as string) = '-200px'
+        ;((baseStyles.bmMenuWrap.marginLeft as unknown) as string) = '-230px'
         ;((baseStyles.bmMenuWrap.opacity as unknown) as string) = '0'
         ;((baseStyles.bmMenuWrap.background as unknown) as string) = 'transparent'
     }

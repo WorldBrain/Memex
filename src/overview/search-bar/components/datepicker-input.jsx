@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import styles from './DateRangeSelection.css'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+
 
 class DatePickerInput extends PureComponent {
     static propTypes = {
@@ -14,7 +16,11 @@ class DatePickerInput extends PureComponent {
     }
     render() {
         return (
-            <div>
+            <div className={styles.datepickerInput}>
+                <ButtonTooltip
+                    tooltipText="You can also type e.g. 'last Friday 10am'"
+                    position="bottom"
+                >
                 <input
                     name={this.props.name}
                     value={this.props.value}
@@ -22,12 +28,19 @@ class DatePickerInput extends PureComponent {
                     onChange={e => this.props.onChange(e)}
                     onKeyDown={e => this.props.onSearchEnter(e)}
                     disabled={this.props.disabled}
+                    className={styles.timeInput}
                 />
+                </ButtonTooltip>
                 {this.props.value && (
-                    <button
-                        className={styles.clearFilters}
-                        onClick={e => this.props.clearFilter(e)}
-                    />
+                    <ButtonTooltip
+                            tooltipText="Clear Selection"
+                            position="bottom"
+                        >
+                        <button
+                            className={styles.clearFilters}
+                            onClick={e => this.props.clearFilter(e)}
+                        />
+                    </ButtonTooltip>
                 )}
             </div>
         )

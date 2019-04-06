@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import moment from 'moment'
 import chrono from 'chrono-node'
+import classnames from 'classnames'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-
 import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
@@ -216,8 +216,25 @@ class DateRangeSelection extends Component {
                 {/* <div className={styles.dateRangeSelection} id="date-picker">
                     <img src="/img/to-icon.png" className={styles.toIcon} />
                 </div> */}
-                <div className={styles.pickerContainer}>
-                    <span>From</span>
+                <div className={classnames(styles.pickerContainer, styles.borderRight)}>
+                    <div className={styles.dateTitleContainer}>
+                            <span className={styles.dateTitle}>From</span>
+                        <DatePickerInput
+                        placeholder="🕒 type time..."
+                        value={this.state.startDateText}
+                        name="from"
+                        onChange={this.handleRawInputChange({
+                            isStartDate: true,
+                        })}
+                        onSearchEnter={this.handleKeydown({
+                            isStartDate: true,
+                        })}
+                        disabled={disabled}
+                        clearFilter={this.handleClearClick({
+                            isStartDate: true,
+                        })}
+                        />
+                    </div>
                     <div className={styles.datePickerDiv}>
                         <DatePicker
                             ref={dp => {
@@ -238,25 +255,26 @@ class DateRangeSelection extends Component {
                             inline
                         />
                     </div>
-
-                    <DatePickerInput
-                        placeholder="from..."
-                        value={this.state.startDateText}
+                </div>
+                <div className={styles.pickerContainer}>
+                    <div className={styles.dateTitleContainer}>
+                        <span className={styles.dateTitle}>To</span>
+                        <DatePickerInput
+                        placeholder="🕒 type time..."
+                        value={this.state.endDateText}
                         name="from"
                         onChange={this.handleRawInputChange({
-                            isStartDate: true,
+                            isStartDate: false,
                         })}
                         onSearchEnter={this.handleKeydown({
-                            isStartDate: true,
+                            isStartDate: false,
                         })}
                         disabled={disabled}
                         clearFilter={this.handleClearClick({
-                            isStartDate: true,
+                            isStartDate: false,
                         })}
-                    />
-                </div>
-                <div className={styles.pickerContainer}>
-                    <span>To</span>
+                        />
+                    </div>
                     <div className={styles.datePickerDiv}>
                         <DatePicker
                             ref={dp => {
@@ -277,21 +295,6 @@ class DateRangeSelection extends Component {
                             inline
                         />
                     </div>
-                    <DatePickerInput
-                        placeholder="to..."
-                        value={this.state.endDateText}
-                        name="from"
-                        onChange={this.handleRawInputChange({
-                            isStartDate: false,
-                        })}
-                        onSearchEnter={this.handleKeydown({
-                            isStartDate: false,
-                        })}
-                        disabled={disabled}
-                        clearFilter={this.handleClearClick({
-                            isStartDate: false,
-                        })}
-                    />
                 </div>
                 {/*                <div className={stylesPro.proTipBox}>
                     <span className={stylesPro.emoji}>🤓</span>

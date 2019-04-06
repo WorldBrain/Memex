@@ -29,11 +29,19 @@ class Tooltip extends React.PureComponent<Props> {
                                 this.props.position === 'right',
                             [styles.tooltipbottom]:
                                 this.props.position === 'bottom',
-                            [styles.tooltiptop]: this.props.position === 'top',
+                            [styles.tooltiptop]: 
+                                this.props.position === 'top',
+                            [styles.tooltipDate]: 
+                                this.props.position === 'tooltipDate',
                         },
                     )}
                 >
-                    <div className={styles.tooltipContent}>
+                    <div className={classNames(
+                        styles.tooltipContent, {
+                            [styles.tooltipContentDate]: 
+                                this.props.position === 'tooltipDate',
+                        })}
+                    >
                         {this.props.children}
                     </div>
                 </div>

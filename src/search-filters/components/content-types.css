@@ -18,3 +18,11 @@
     height: 10px;
     margin-left: 10px;
 }
+
+.typeBox {
+    padding: 5px 0px;
+}
+
+.typeTooltip {
+    margin-top: 5px;
+}

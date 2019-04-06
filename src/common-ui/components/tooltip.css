@@ -2,7 +2,7 @@
     position: relative;
     border-radius: 3px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .tooltipBubble {
@@ -16,6 +16,14 @@
     line-height: 1.4;
     width: 300px;
     border-radius: 3px;
+}
+
+.tooltipContentDate {
+    width: fit-content;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /*    &::after {
@@ -46,6 +54,10 @@
         top: 0;
         transform: translateX(-50%);
     } */
+}
+
+.tooltipbottomRight {
+    background-color: blue;
 }
 
 .tooltipleft {

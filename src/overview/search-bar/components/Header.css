@@ -18,8 +18,9 @@
     border-bottom: 1px solid #ebebeb;
 
     @media (max-width: 1000px) {
-        justify-content: center;
+        justify-content: flex-end;
         padding: 0;
+        display: flex;
     }
 }
 
@@ -62,7 +63,8 @@
     align-items: center;
 
      @media (max-width: 1000px) {
-        width: 500px;
+        width: 65%;
+        margin-right: 20px;
     }
 }
 
@@ -73,6 +75,7 @@
     height: 100%;
     font-weight: normal;
     align-items: center;
+    padding-right: 20px;
 
     @media (max-width: 1200px) {
         margin-left: 0;

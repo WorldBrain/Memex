@@ -38,34 +38,15 @@ class ContentTypes extends PureComponent<Props, State> {
     }
     render() {
         return (
-            <Tooltip position={this.props.tooltipPosition}>
-                <div className={styles.container}>
+            <Tooltip 
+                position={this.props.tooltipPosition}
+                itemClass={cx({
+                    [styles.typeTooltip]:
+                        this.props.env === 'overview',
+                })}
+            >
+                <div className={styles.typeBox}>
                     {this.renderAnnotsTypes()}
-                    {/*<ToggleSwitch
-                        value="Highlights"
-                        active={this.props.highlightsFilter}
-                        onClick={this.props.toggleHighlightsFilter}
-                    />
-                    <ToggleSwitch
-                        value="Notes"
-                        active={this.props.notesFilter}
-                        onClick={this.props.toggleNotesFilter}
-                    />
-                    <ToggleSwitch
-                        value="Annotations"
-                        active={this.props.annotationsFilter}
-                        onClick={this.props.toggleAnnotationsFilter}
-                    />
-                    <ToggleSwitch
-                        value="Websites"
-                        active={this.props.websitesFilter}
-                        onClick={this.props.toggleWebsitesFilter}
-                    />
-                     <ToggleSwitch
-                        value="PDFs"
-                        active={false}
-                        onClick={() => null}
-                    /> */}
                 </div>
             </Tooltip>
         )
