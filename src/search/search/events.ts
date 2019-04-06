@@ -32,27 +32,23 @@ export const mapUrlsToLatestEvents = (getDb: () => Promise<Dexie>) => async (
     }
 
     const latestBookmarks: PageResultsMap = new Map()
-    console.time('mapUrlsToLatestEvents: bm lookup')
     await db.bookmarks
         .where('url')
         .anyOf(urls)
         .each(({ time, url }) =>
             attemptAdd(latestBookmarks, bookmarks)(time, url),
         )
-    console.timeEnd('mapUrlsToLatestEvents: bm lookup')
 
     const latestVisits: PageResultsMap = new Map()
     const urlsToCheck = bookmarks ? [...latestBookmarks.keys()] : urls
     // Simple state to keep track of when to finish each query
     const doneFlags = urlsToCheck.map(url => false)
 
-    console.time('mapUrlsToLatestEvents: visit lookup')
     const visits = await db.visits
         .where('url')
         .anyOf(urlsToCheck)
         .reverse()
         .primaryKeys()
-    console.timeEnd('mapUrlsToLatestEvents: visit lookup')
 
     const visitsPerPage = new Map<string, number[]>()
     visits.forEach(([time, url]) => {

@@ -38,10 +38,7 @@ const termQuery = (
         })
     }
 
-    console.time(`terms search: index: ${index}, term: ${term}`)
-    const a = await coll.primaryKeys()
-    console.timeEnd(`terms search: index: ${index}, term: ${term}`)
-    return a
+    return coll.primaryKeys()
 }
 
 /**
