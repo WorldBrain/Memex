@@ -8,7 +8,6 @@ import { selectors, actions } from '..'
 import { actions as filterActs } from 'src/search-filters'
 import { selectors as customLists } from '../../../custom-lists'
 import { ListSideBar } from '../../../custom-lists/components'
-import { actions as acts } from 'src/overview/sidebar-left/'
 
 import Sidebar from './SideBar'
 import crowdfundingModalStyles from 'src/common-ui/crowdfunding/components/CFModal.css'
@@ -127,7 +126,6 @@ const mapDispatchToProps = dispatch => ({
         dispatch,
     ),
     clearAllFilters: () => dispatch(filterActs.resetFilters()),
-    onPageDrag: () => dispatch(acts.openSidebarListMode()),
 })
 
 export default connect(

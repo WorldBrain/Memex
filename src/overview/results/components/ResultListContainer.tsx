@@ -47,7 +47,6 @@ export interface StateProps {
 
 export interface DispatchProps {
     resetUrlDragged: () => void
-    hideSearchFilters: () => void
     resetActiveTagIndex: () => void
     setUrlDragged: (url: string) => void
     addTag: (i: number) => (f: string) => void
@@ -153,7 +152,6 @@ class ResultListContainer extends PureComponent<Props> {
                 tagManager={this.renderTagsManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}
                 onTagBtnClick={this.props.handleTagBtnClick(index)}
-                hideSearchFilters={this.props.hideSearchFilters}
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
@@ -299,7 +297,6 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetActiveTagIndex: () => dispatch(acts.resetActiveTagIndex()),
     setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
-    hideSearchFilters: () => dispatch(sidebarLeftActs.openSidebarListMode()),
     handleCrossRibbonClick: ({ url }) => event => {
         event.preventDefault()
         dispatch(listActs.delPageFromList(url))

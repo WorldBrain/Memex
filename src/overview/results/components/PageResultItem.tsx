@@ -37,7 +37,6 @@ export interface Props {
     onToggleBookmarkClick: MouseEventHandler
     handleCrossRibbonClick: MouseEventHandler
     resetUrlDragged: () => void
-    hideSearchFilters: () => void
     setUrlDragged: (url: string) => void
     setTagButtonRef: (el: HTMLButtonElement) => void
 }
@@ -68,9 +67,6 @@ class PageResultItem extends PureComponent<Props> {
         e.dataTransfer.setData('text/plain', url)
 
         e.dataTransfer.setDragImage(crt, 10, 10)
-        if (this.props.isSidebarOpen) {
-            this.props.hideSearchFilters()
-        }
     }
 
     renderAnnotsList() {

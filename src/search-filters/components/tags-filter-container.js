@@ -32,12 +32,6 @@ class TagsFilter extends PureComponent {
             : this.props.showTagFilter()
     }
 
-    toggleDelTagFilter = ({ value, isExclusive }) => () => {
-        !isExclusive
-            ? this.props.delIncTagFilter(value)
-            : this.props.delExcTagFilter(value)
-    }
-
     render() {
         return (
             <FilterButton
@@ -55,18 +49,18 @@ class TagsFilter extends PureComponent {
                             [styles.tooltip]: this.props.env === 'overview',
                         })}
                     >
-                            <IndexDropdown
-                                env={this.props.env}
-                                onFilterAdd={this.props.addIncTagFilter}
-                                onFilterDel={this.props.delIncTagFilter}
-                                onExcFilterAdd={this.props.addExcTagFilter}
-                                onExcFilterDel={this.props.delExcTagFilter}
-                                initFilters={this.props.tagsInc}
-                                initExcFilters={this.props.tagsExc}
-                                initSuggestions={this.props.suggestedTags}
-                                source="tag"
-                                isForSidebar
-                            />
+                        <IndexDropdown
+                            env={this.props.env}
+                            onFilterAdd={this.props.addIncTagFilter}
+                            onFilterDel={this.props.delIncTagFilter}
+                            onExcFilterAdd={this.props.addExcTagFilter}
+                            onExcFilterDel={this.props.delExcTagFilter}
+                            initFilters={this.props.tagsInc}
+                            initExcFilters={this.props.tagsExc}
+                            initSuggestions={this.props.suggestedTags}
+                            source="tag"
+                            isForSidebar
+                        />
                     </Tooltip>
                 )}
             </FilterButton>

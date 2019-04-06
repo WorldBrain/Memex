@@ -5,8 +5,12 @@ import * as selectors from '../selectors'
 import { actions as notifActs, selectors as notifs } from 'src/notifications'
 import { acts as tooltipActs } from '../../tooltips'
 import { actions as filterActs, selectors as filters } from 'src/search-filters'
-
+import { actions as onboardingActs } from '../../onboarding'
 import Header, { Props } from './Header'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
+
+const processEventRPC = remoteFunction('processEvent')
 
 const mapState = state => ({
     unreadNotifCount: notifs.unreadNotifCount(state),
@@ -39,7 +43,16 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
         // Change tooltip notification to more filters once the user selects date
         dispatch(tooltipActs.setTooltip('more-filters'))
     },
-    toggleFilterBar: () => dispatch(filterActs.toggleFilterBar()),
+    toggleFilterBar: () => {
+        // Remove and reset onboarding tooltip
+        dispatch(tooltipActs.resetTooltips())
+        // Tick off Power Search onboarding stage
+        dispatch(onboardingActs.setPowerSearchDone())
+        processEventRPC({
+            type: EVENT_NAMES.FINISH_POWERSEARCH_ONBOARDING,
+        })
+        dispatch(filterActs.toggleFilterBar())
+    },
     clearFilters: () => dispatch(filterActs.resetFilters()),
 })
 

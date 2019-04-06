@@ -7,7 +7,10 @@ import SidebarContainer, {
 } from '../../sidebar-common'
 import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
-import { SidebarContainer as SidebarLeft } from '../sidebar-left'
+import {
+    SidebarContainer as SidebarLeft,
+    CollectionsContainer as CollectionsButton,
+} from '../sidebar-left'
 import { Header, acts as searchBarActs } from '../search-bar'
 import { Results } from '../results'
 import Head from '../../options/containers/Head'
@@ -16,8 +19,6 @@ import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
 import AnnotationsManager from '../../sidebar-common/annotations-manager'
 import { goToAnnotation } from '../utils'
-import CollectionsButton from 'src/overview/sidebar-left/components/CollectionsButtonContainer'
-
 
 class Overview extends PureComponent {
     static propTypes = {

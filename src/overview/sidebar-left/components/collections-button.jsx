@@ -7,7 +7,6 @@ import styles from './collections-button.css'
 class CollectionsButton extends PureComponent {
     static propTypes = {
         listBtnClick: PropTypes.func.isRequired,
-        onPageDrag: PropTypes.func,
         onShowBtnClick: PropTypes.func,
         isListFilterActive: PropTypes.bool.isRequired,
         activeCollectionName: PropTypes.string,
@@ -16,23 +15,20 @@ class CollectionsButton extends PureComponent {
 
     render() {
         return (
-            <div
-                className={styles.buttonContainer}
-            >
-                <div 
+            <div className={styles.buttonContainer}>
+                <div
                     className={cx(styles.enabled, {
                         [styles.sidebarLocked]: this.props.isSidebarLocked,
                     })}
                     onClick={this.props.listBtnClick}
-                    onDragEnter={this.props.onPageDrag}
+                    onDragEnter={this.props.listBtnClick}
                 >
                     <span
                         className={cx(styles.listButton, styles.button)}
                         id="collection-icon"
                     />
                     <span className={styles.title}>
-                        {this.props.activeCollectionName ||
-                            'All Collections'}
+                        {this.props.activeCollectionName || 'All Collections'}
                     </span>
                 </div>
                 {this.props.isListFilterActive && (
