@@ -72,10 +72,6 @@ export default class SearchStorage extends FeatureStorage {
         annotsToTags: Map<string, string[]>
         bmUrls: Set<string>
     }> {
-        console.log(
-            'starting annots data mapping for search results:',
-            annotUrls,
-        )
         const bookmarks = await this.storageManager
             .collection('annotBookmarks')
             .findAllObjects<Bookmark>({
@@ -106,7 +102,6 @@ export default class SearchStorage extends FeatureStorage {
      * and docs which is of type AnnotPage[].
      */
     private async searchAnnotsByDay(params: AnnotSearchParams) {
-        console.time('annot search stage')
         const results: Map<
             number,
             Map<string, Annotation[]>
@@ -114,7 +109,6 @@ export default class SearchStorage extends FeatureStorage {
             AnnotationsListPlugin.LIST_BY_DAY_OP_ID,
             params,
         )
-        console.timeEnd('annot search stage')
 
         let pageUrls = new Set<string>()
 
@@ -122,13 +116,11 @@ export default class SearchStorage extends FeatureStorage {
             pageUrls = new Set([...pageUrls, ...annotsByPage.keys()])
         }
 
-        console.time('display data mapping stage (TOTAL)')
         const pages: AnnotPage[] = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...pageUrls],
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
-        console.timeEnd('display data mapping stage (TOTAL)')
 
         const clusteredResults: PageUrlsByDay = {}
 
@@ -144,12 +136,10 @@ export default class SearchStorage extends FeatureStorage {
             }
         }
 
-        console.time('annots display data mapping stage (TOTAL)')
         // Get display data for all annots then map them back to their clusters
         const { annotsToTags, bmUrls } = await this.findAnnotsDisplayData([
             ...reverseAnnotMap.keys(),
         ])
-        console.timeEnd('annots display data mapping stage (TOTAL)')
 
         reverseAnnotMap.forEach(([day, pageUrl, annot]) => {
             const current = clusteredResults[day][pageUrl] || []
@@ -180,7 +170,6 @@ export default class SearchStorage extends FeatureStorage {
     }
 
     private async searchTermsAnnots(params: AnnotSearchParams) {
-        console.time('annots search stage')
         const results: Map<
             string,
             Annotation[]
@@ -188,24 +177,19 @@ export default class SearchStorage extends FeatureStorage {
             AnnotationsListPlugin.TERMS_SEARCH_OP_ID,
             params,
         )
-        console.timeEnd('annots search stage')
 
-        console.time('display data mapping stage (TOTAL)')
         const pages: AnnotPage[] = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             [...results.keys()],
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
-        console.timeEnd('display data mapping stage (TOTAL)')
 
         const annotUrls = [].concat(...results.values()).map(annot => annot.url)
 
-        console.time('annots display data mapping stage (TOTAL)')
         // Get display data for all annots then map them back to their clusters
         const { annotsToTags, bmUrls } = await this.findAnnotsDisplayData(
             annotUrls,
         )
-        console.timeEnd('annots display data mapping stage (TOTAL)')
 
         return {
             docs: pages.map(page => {
@@ -230,17 +214,14 @@ export default class SearchStorage extends FeatureStorage {
     async searchPages(params: AnnotSearchParams): Promise<AnnotPage[]> {
         const searchParams = reshapeParamsForOldSearch(params)
 
-        console.time('page search stage')
         const { ids } = await this.legacySearch(searchParams)
-        console.timeEnd('page search stage')
 
         // Terms search requires lookup of the latest interaction times for scoring,
         //  so it returns triple. The 3rd index is the latest time (to avoid redoing those queries).
         const latestTimes =
             ids[0].length === 3 ? ids.map(([, , time]) => time) : undefined
 
-        console.time('display data mapping stage (TOTAL)')
-        const a = await this.storageManager.operation(
+        return this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
             ids.map(([url]) => url),
             {
@@ -248,8 +229,5 @@ export default class SearchStorage extends FeatureStorage {
                 latestTimes,
             },
         )
-
-        console.timeEnd('display data mapping stage (TOTAL)')
-        return a
     }
 }
