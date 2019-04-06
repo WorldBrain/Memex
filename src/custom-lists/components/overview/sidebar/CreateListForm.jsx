@@ -22,11 +22,16 @@ const CreateListForm = props => (
                 autoFocus
                 required
             />
-            <button type="submit" className={cx(styles.tick, styles.button)} />
-            <button
-                onClick={props.closeCreateListForm}
-                className={cx(styles.deleteButton, styles.button)}
-            />
+            <span className={styles.buttonBox}>
+                <button 
+                    type="submit" 
+                    className={cx(styles.tick, styles.button)} 
+                />
+                <button
+                    onClick={props.closeCreateListForm}
+                    className={cx(styles.deleteButton, styles.button)}
+                />
+            </span>
         </form>
         {props.showWarning && (
             <small className={styles.sameNameWarning}>

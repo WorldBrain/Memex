@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color 2, color6, color4, color14 from colors;
+@value color1, color 2, color6, color4, color8, color14 from colors;
 
 .hr {
     border-color: #b0e0d2;
@@ -29,12 +29,17 @@
 
 .plus {
     composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: onHoverDark from 'src/common-ui/colors.css';
     composes: addIcon from 'src/common-ui/icons.css';
     background-position: center;
     background-repeat: no-repeat;
     background-size: 12px;
     width: 20px;
     height: 20px;
+
+    &:hover {
+        background-color: color8;
+    }
 }
 
 .button {

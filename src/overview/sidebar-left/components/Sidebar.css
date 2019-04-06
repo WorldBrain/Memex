@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color1, color 2, color3, color6, color4, color13 from colors;
+
 .filterButton {
     background-image: url('/img/filter.svg');
     width: 40px;
@@ -70,7 +73,7 @@
 
 .arrow {
     background-image: url('/img/doubleArrow.svg');
-    animation: changeLoc 0.1s cubic-bezier(0.65, 0.05, 0.36, 1);
+    animation: changeLoc 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
     composes: hoversidebaropen from 'src/common-ui/colors.css';
 }
 
@@ -101,6 +104,8 @@
 .sidebarLocked {
     &.sidebarExpanded {
         box-shadow: none;
+        background: color13;
+        animation: background 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
     }
 }
 
@@ -120,9 +125,9 @@
 .sidebarExpanded {
     margin-top: 10px;
     width: 250px;
-    background: transparent;
     border-radius: 3px;
     display: grid;
+    background: white;
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
 }
 

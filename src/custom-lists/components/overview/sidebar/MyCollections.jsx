@@ -5,12 +5,7 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 const List = props => (
     <div className={styles.collection} onClick={props.handleRenderCreateList}>
-        <ButtonTooltip
-                    position="bottom"
-                    tooltipText="Drag & drop pages into collections."
-        >
         <span className={styles.myCollection}> My Collections </span>
-        </ButtonTooltip>
          <ButtonTooltip
                     position="right"
                     tooltipText="Add new collection. Add items via Drag & Drop"

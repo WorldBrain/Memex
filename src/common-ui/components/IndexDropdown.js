@@ -14,7 +14,6 @@ class IndexDropdown extends PureComponent {
         children: PropTypes.array.isRequired,
         onTagSearchChange: PropTypes.func.isRequired,
         onTagSearchKeyDown: PropTypes.func.isRequired,
-        numberOfTags: PropTypes.number.isRequired,
         setTagDivRef: PropTypes.func,
         setInputRef: PropTypes.func.isRequired,
         tagSearchValue: PropTypes.string.isRequired,
@@ -30,9 +29,6 @@ class IndexDropdown extends PureComponent {
         onBackBtnClick: PropTypes.func,
         allTabs: PropTypes.bool,
         allTabsCollection: PropTypes.bool,
-        tags: PropTypes.arrayOf(PropTypes.object).isRequired,
-        onTagClick: PropTypes.func.isRequired,
-        onExcTagClick: PropTypes.func.isRequired,
     }
 
     get styles() {
@@ -77,43 +73,10 @@ class IndexDropdown extends PureComponent {
         return this.placeholder.toLowerCase()
     }
 
-    renderSelectedTags = () => {
-        return this.props.tags.map(
-            (tag, i) =>
-                (tag.active || tag.excActive) && (
-                    <span
-                        key={i}
-                        className={cx(styles.tagPill, {
-                            [styles.excFilter]: tag.excActive,
-                        })}
-                    >
-                        {tag.value}
-                        <span
-                            onClick={
-                                tag.active
-                                    ? this.props.onTagClick(i, false)
-                                    : this.props.onExcTagClick(i, false)
-                            }
-                            className={styles.clearFilters}
-                        />
-                    </span>
-                ),
-        )
-    }
-
     render() {
         // console.log(this.placeholder)
         return (
             <div className={this.mainClass} ref={this.props.setTagDivRef}>
-                {!this.props.isForSidebar && (
-                    <div className={this.styles.numberTags}>
-                        <span className={this.styles.bold}>
-                            {this.props.numberOfTags}
-                        </span>{' '}
-                        {this.unit} selected
-                    </div>
-                )}
-                {this.renderSelectedTags()}
                 <div
                     className={cx(this.styles.searchContainer, {
                         [this.styles.commentBox]: this.props.allowAdd,

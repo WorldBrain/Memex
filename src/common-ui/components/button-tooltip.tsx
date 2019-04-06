@@ -42,7 +42,7 @@ class ButtonTooltip extends React.Component<Props, State> {
 
     handleMouseLeave = () => {
         this.setState({
-            displayTooltip: true,
+            displayTooltip: false,
         })
     }
 

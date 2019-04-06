@@ -8,8 +8,7 @@
     top: 0;
     left: 0;
     right: 0;
-    grid-template-columns: 25% 50% 25%;
-    padding: 0 60px 0px 30px;
+    grid-template-columns: 25% 800px 25%;
     z-index: 1000;
 
     /* z-index: 300001;
@@ -21,24 +20,6 @@
     @media (max-width: 1000px) {
         justify-content: center;
         padding: 0;
-    }
-}
-
-.logo {
-    background-image: url('/img/worldbrain-logo.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 131px;
-    height: 33px;
-
-    @media (max-width: 1200px) {
-        width: 24px;
-        background-image: url('/img/worldbrain-logo-narrow.png');
-    }
-
-    @media (max-width: 1000px) {
-        display: none;
     }
 }
 
@@ -79,6 +60,10 @@
     transition: all 200ms ease-out;
     border-right: none;
     align-items: center;
+
+     @media (max-width: 1000px) {
+        width: 500px;
+    }
 }
 
 .links {
