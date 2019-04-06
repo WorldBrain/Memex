@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { slide as Menu } from 'react-burger-menu'
-
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import menuStyles from './menu-styles'
 import localStyles from './Sidebar.css'
 import cx from 'classnames'
@@ -17,6 +17,7 @@ class Sidebar extends PureComponent {
         closeSidebar: PropTypes.func.isRequired,
         setSidebarLocked: PropTypes.func.isRequired,
         openSidebaronMouseEnter: PropTypes.func.isRequired,
+        onPageDrag: PropTypes.func,
     }
 
     closeLockedSidebar = () => {
@@ -30,16 +31,18 @@ class Sidebar extends PureComponent {
                 onMouseLeave={this.props.onMouseLeave}
                 onMouseEnter={this.props.onMouseEnter}
             >
+            <div 
+                className={localStyles.triggerDiv} 
+                onMouseEnter={this.props.openSidebaronMouseEnter}
+                onDragEnter={this.props.onPageDrag}
+            />
                 <Menu
-                    styles={menuStyles(this.props.isSidebarLocked)}
+                    styles={menuStyles(this.props.isSidebarLocked, this.props.isSidebarOpen)}
                     noOverlay
-                    customBurgerIcon={null}
-                    customCrossIcon={<img src="/img/cross_grey.svg" />}
                     isOpen
                     onStateChange={this.props.captureStateChange}
                 >
                     <div
-                        onMouseEnter={this.props.openSidebaronMouseEnter}
                         className={cx(localStyles.sidebar, {
                             [localStyles.sidebarExpanded]:
                                 this.props.isSidebarOpen ||
@@ -52,21 +55,35 @@ class Sidebar extends PureComponent {
                             {(this.props.isSidebarOpen ||
                                 this.props.isSidebarLocked) && (
                                 <React.Fragment>
-                                    <button
-                                        className={cx(localStyles.arrowButton, {
-                                            [localStyles.arrow]: this.props
-                                                .isSidebarLocked,
-                                            [localStyles.arrowReverse]: !this
-                                                .props.isSidebarLocked,
-                                        })}
-                                        onClick={() =>
-                                            !this.props.isSidebarLocked
-                                                ? this.props.setSidebarLocked(
-                                                      true,
-                                                  )
-                                                : this.closeLockedSidebar()
-                                        }
-                                    />
+                                    <div className={cx(localStyles.arrowBox, {
+                                                    [localStyles.arrowBoxLocked]: this.props
+                                                        .isSidebarLocked,
+                                                })}>
+                                        <ButtonTooltip
+                                            tooltipText={this.props.isSidebarLocked ? (
+                                                        "Close Sidebar"
+                                                      ) : (
+                                                        "Keep Sidebar Open"
+                                                      )}
+                                            position="right"
+                                        >
+                                            <button
+                                                className={cx(localStyles.arrowButton, {
+                                                    [localStyles.arrow]: this.props
+                                                        .isSidebarLocked,
+                                                    [localStyles.arrowReverse]: !this
+                                                        .props.isSidebarLocked,
+                                                })}
+                                                onClick={() =>
+                                                    !this.props.isSidebarLocked
+                                                        ? this.props.setSidebarLocked(
+                                                              true,
+                                                          )
+                                                        : this.closeLockedSidebar()
+                                                }
+                                            />
+                                        </ButtonTooltip>
+                                    </div>
                                     {this.props.children}
                                 </React.Fragment>
                             )}

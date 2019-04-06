@@ -1,5 +1,5 @@
 .navbar {
-    display: flex;
+    display: grid;
     flex: 1;
     align-items: center;
     justify-content: space-between;
@@ -8,6 +8,9 @@
     top: 0;
     left: 0;
     right: 0;
+    grid-template-columns: 25% 50% 25%;
+    padding: 0 60px 0px 30px;
+    z-index: 1000;
 
     /* z-index: 300001;
     background-color: #fff;
@@ -82,8 +85,6 @@
     display: flex;
     justify-content: flex-end;
     align-content: center;
-    width: 360px;
-    margin-left: -230px;
     height: 100%;
     font-weight: normal;
     align-items: center;
@@ -186,4 +187,6 @@
 .collectionsBtn {
     width: 250px;
     height: 55px;
+    align-items: center;
+    display: flex;
 }

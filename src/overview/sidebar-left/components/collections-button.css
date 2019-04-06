@@ -1,26 +1,9 @@
-.filterButton {
-    composes: filtersIcon from 'src/common-ui/icons.css';
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
-    width: 35px;
-    height: 35px;
-    opacity: 0.8;
-
-    &:hover {
-        opacity: 1;
-    }
-}
-
-.filterEnabled {
-    composes: filtersIconFull from 'src/common-ui/icons.css';
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
-}
-
 .listButton {
-    composes: collectionsIcon from 'src/common-ui/icons.css';
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
-    width: 35px;
-    height: 35px;
+    composes: collectionsIconFull from 'src/common-ui/icons.css';
+    width: 30px;
+    height: 30px;
     opacity: 0.8;
+    background-size: 24px;
 
     &:hover {
         opacity: 1;
@@ -34,13 +17,9 @@
 
 .title {
     font-size: 15px;
-    margin-left: 50px;
+    margin-left: 10px;
     white-space: nowrap;
     text-align: center;
-}
-
-.sidebarLocked {
-    background: #edf0f4;
 }
 
 .button {
@@ -71,12 +50,18 @@
 }
 
 .buttonContainer {
-    position: absolute;
+    position: fixed;
     display: flex !important; /* stylelint-disable-line declaration-no-important */
     justify-content: space-between;
     flex-direction: row;
-    width: 250px;
-    align-items: baseline;
+    align-items: center;
+    height: 55px;
+    z-index: 1200;
+    padding-left: 20px;
+}
+
+.sidebarLocked {
+    composes: hoversidebaropen from 'src/common-ui/colors.css';
 }
 
 .smallButton {
@@ -95,11 +80,12 @@
 
 .enabled {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    height: 45px;
-    margin-top: 10px;
+    justify-content: flex-start;
+    cursor: pointer;
+    outline: none;
+    composes: nakedButton from 'src/common-ui/elements.css';
 }
 
 @keyframes appear {

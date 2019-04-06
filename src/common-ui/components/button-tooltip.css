@@ -3,8 +3,6 @@
 .tooltip {
     position: relative;
     display: flex;
-    align-items: center;
-    justify-content: center;
     z-index: 2;
 }
 
@@ -28,9 +26,8 @@
 }
 
 .tooltipRight {
-    left: 40px;
-    top: 15px;
-    justify-content: flex-start;
+    margin-left: 40px;
+    margin-top: 2px;
 }
 
 .tooltipRightCentered {

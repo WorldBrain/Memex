@@ -16,6 +16,8 @@ import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
 import AnnotationsManager from '../../sidebar-common/annotations-manager'
 import { goToAnnotation } from '../utils'
+import CollectionsButton from 'src/overview/sidebar-left/components/CollectionsButtonContainer'
+
 
 class Overview extends PureComponent {
     static propTypes = {
@@ -37,6 +39,7 @@ class Overview extends PureComponent {
                 ) : (
                     <div>
                         <Head />
+                        <CollectionsButton />
                         <Header />
                         <SidebarLeft />
                         <Results />

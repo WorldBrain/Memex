@@ -58,7 +58,6 @@ const mapDispatch = dispatch => ({
     onClearBtnClick: () => dispatch(filterActs.resetFilters()),
     onShowBtnClick: () => {
         dispatch(filterActs.delListFilter())
-        dispatch(acts.openSidebar())
     },
 })
 

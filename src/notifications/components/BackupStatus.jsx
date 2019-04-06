@@ -18,7 +18,7 @@ const BackupStatus = props => {
             >
                 <div className={styles.headerBox}>
                     <div className={styles.header}>Backup Status</div>
-                    <div>
+                    <div className={styles.IconBox}>
                         {props.backupState.state === 'success' ? (
                             <span className={classNames(styles.successIcon, styles.icon)} />
                         ) : (

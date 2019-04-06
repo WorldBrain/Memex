@@ -17,7 +17,7 @@ class ToggleSwitch extends PureComponent<Props, State> {
         const { value, subtitle, onClick, active } = this.props
         return (
             <div className={styles.tagName}>
-                <p>{value}</p>
+                <span className={styles.value}>{value}</span>
                 <div className={styles.switch} onClick={onClick}>
                     <div
                         className={cx(styles.slider, styles.round, {

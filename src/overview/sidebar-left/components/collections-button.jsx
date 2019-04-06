@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import styles from './collections-button.css'
-import { ButtonTooltip } from 'src/common-ui/components/'
 
 class CollectionsButton extends PureComponent {
     static propTypes = {
@@ -18,35 +17,34 @@ class CollectionsButton extends PureComponent {
     render() {
         return (
             <div
-                className={cx(styles.buttonContainer, {
-                    [styles.sidebarLocked]: this.props.isSidebarLocked,
-                })}
+                className={styles.buttonContainer}
             >
-                <ButtonTooltip position="bottom" tooltipText="My Collections">
-                    <div className={styles.enabled}>
-                        <button
-                            className={cx(styles.listButton, styles.button)}
-                            onClick={this.props.listBtnClick}
-                            onDragEnter={this.props.onPageDrag}
-                            id="collection-icon"
+                <div 
+                    className={cx(styles.enabled, {
+                        [styles.sidebarLocked]: this.props.isSidebarLocked,
+                    })}
+                    onClick={this.props.listBtnClick}
+                    onDragEnter={this.props.onPageDrag}
+                >
+                    <span
+                        className={cx(styles.listButton, styles.button)}
+                        id="collection-icon"
+                    />
+                    <span className={styles.title}>
+                        {this.props.activeCollectionName ||
+                            'All Collections'}
+                    </span>
+                </div>
+                {this.props.isListFilterActive && (
+                    <React.Fragment>
+                        <div
+                            onClick={this.props.onShowBtnClick}
+                            className={styles.smallButton}
                         >
-                            <span className={styles.title}>
-                                {this.props.activeCollectionName ||
-                                    'All Collections'}
-                            </span>
-                        </button>
-                        {this.props.isListFilterActive && (
-                            <React.Fragment>
-                                <div
-                                    onClick={this.props.onShowBtnClick}
-                                    className={styles.smallButton}
-                                >
-                                    show all
-                                </div>
-                            </React.Fragment>
-                        )}
-                    </div>
-                </ButtonTooltip>
+                            show all
+                        </div>
+                    </React.Fragment>
+                )}
             </div>
         )
     }
