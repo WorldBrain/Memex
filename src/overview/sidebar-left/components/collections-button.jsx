@@ -15,7 +15,11 @@ class CollectionsButton extends PureComponent {
 
     render() {
         return (
-            <div className={styles.buttonContainer}>
+            <div 
+                className={cx(styles.buttonContainer, {
+                        [styles.longContainer]: !this.props.isSidebarLocked,
+                })}
+            >
                 <div
                     className={cx(styles.enabled, {
                         [styles.sidebarLocked]: this.props.isSidebarLocked,
@@ -27,7 +31,10 @@ class CollectionsButton extends PureComponent {
                         className={cx(styles.listButton, styles.button)}
                         id="collection-icon"
                     />
-                    <span className={styles.title}>
+                    <span className={cx(styles.title, {
+                        [styles.longTitle]: !this.props.isSidebarLocked,
+                    })}
+                    >
                         {this.props.activeCollectionName || 'All Collections'}
                     </span>
                 </div>

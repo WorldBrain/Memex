@@ -20,7 +20,21 @@
     margin-left: 10px;
     white-space: nowrap;
     text-align: center;
+    max-width: 164px;
+    overflow-x: scroll;
+
+    &::-webkit-scrollbar {
+        height: 0px;  /* Remove scrollbar space */
+        background: transparent;  /* Optional: just make scrollbar invisible */
+    }
 }
+
+
+.longTitle {
+    overflow-x: unset;
+    max-width: fit-content;
+}
+
 
 .button {
     display: inline;
@@ -52,13 +66,20 @@
 .buttonContainer {
     position: fixed;
     display: flex !important; /* stylelint-disable-line declaration-no-important */
-    justify-content: space-between;
-    flex-direction: row;
+    justify-content: flex-start;
+    flex-direction: column;
     align-items: center;
     height: 55px;
     z-index: 1200;
-    padding-left: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    max-width: 205px;
 }
+
+.longContainer {
+    max-width: fit-content;
+}
+
 
 .sidebarLocked {
     composes: hoversidebaropen from 'src/common-ui/colors.css';
@@ -71,10 +92,13 @@
     color: #767676;
     padding: 2px 4px;
     border-radius: 3%;
-    animation: appear 0.4s forwards 0s;
+    animation: appear 0.2s forwards 0s;
+    top: 33px;
+    left: 41px;
+    position: relative;
 
     &:hover {
-        background-color: #efefef;
+        color: #111;
     }
 }
 
@@ -86,6 +110,9 @@
     cursor: pointer;
     outline: none;
     composes: nakedButton from 'src/common-ui/elements.css';
+    margin-top: 9px;
+    position: absolute;
+    left: 7px;
 }
 
 @keyframes appear {

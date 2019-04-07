@@ -10,7 +10,6 @@ import MyCollection from './MyCollections'
 import CreateListForm from './CreateListForm'
 import ListItem from './ListItem'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
-import { CrowdfundingModal } from '../../../../common-ui/crowdfunding'
 import { actions as filterActs } from '../../../../search-filters'
 import * as sidebar from '../../../../overview/sidebar-left/selectors'
 
@@ -19,7 +18,6 @@ class ListContainer extends Component {
         getListFromDB: PropTypes.func.isRequired,
         lists: PropTypes.array.isRequired,
         handleEditBtnClick: PropTypes.func.isRequired,
-        setShowCrowdFundingModal: PropTypes.func.isRequired,
         isDeleteConfShown: PropTypes.bool.isRequired,
         resetListDeleteModal: PropTypes.func.isRequired,
         handleCrossBtnClick: PropTypes.func.isRequired,
@@ -31,8 +29,8 @@ class ListContainer extends Component {
         toggleCreateListForm: PropTypes.func.isRequired,
         showCreateList: PropTypes.bool.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
-        showCrowdFundingModal: PropTypes.bool.isRequired,
         isSidebarOpen: PropTypes.bool.isRequired,
+        isSidebarLocked: PropTypes.bool.isRequired,
         closeCreateListForm: PropTypes.func.isRequired,
         resetUrlDragged: PropTypes.func.isRequired,
     }
@@ -118,9 +116,6 @@ class ListContainer extends Component {
                     listName={list.name}
                     isFiltered={list.isFilterIndex}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
-                    onShareButtonClick={this.props.setShowCrowdFundingModal(
-                        true,
-                    )}
                     onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
                     onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
@@ -159,6 +154,7 @@ class ListContainer extends Component {
                         className={cx({
                             [extStyles.wrapper]: this.props.isSidebarOpen,
                             [extStyles.allListsInner]: this.props.isSidebarOpen,
+                            [extStyles.allListsInnerLocked]: this.props.isSidebarLocked,
                         })}
                     >
                         {this.renderAllLists()}
@@ -170,13 +166,6 @@ class ListContainer extends Component {
                     onClose={this.props.resetListDeleteModal}
                     deleteDocs={this.props.handleDeleteList}
                 />
-                {this.props.showCrowdFundingModal ? (
-                    <CrowdfundingModal
-                        onClose={this.props.setShowCrowdFundingModal(false)}
-                        context="collections"
-                        learnMoreUrl="https://worldbrain.io/pricing/"
-                    />
-                ) : null}
             </React.Fragment>
         )
     }
@@ -185,7 +174,6 @@ class ListContainer extends Component {
 const mapStateToProps = state => ({
     lists: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
-    showCrowdFundingModal: selectors.showCrowdFundingModal(state),
     showCreateList: selectors.showCreateListForm(state),
     showCommonNameWarning: selectors.showCommonNameWarning(state),
     isSidebarOpen: sidebar.isSidebarOpen(state),
@@ -207,11 +195,6 @@ const mapDispatchToProps = (dispatch, getState) => ({
     handleEditBtnClick: index => event => {
         event.preventDefault()
         dispatch(actions.showEditBox(index))
-    },
-    setShowCrowdFundingModal: value => e => {
-        e.preventDefault()
-        e.stopPropagation()
-        dispatch(actions.setShowCrowdFundingModal(value))
     },
     handleCrossBtnClick: ({ id }, index) => event => {
         event.preventDefault()
