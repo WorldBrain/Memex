@@ -109,19 +109,23 @@ class PageResultItem extends PureComponent<Props> {
                         draggable
                     >
                         <div className={styles.screenshotContainer}>
-                            <ButtonTooltip
-                                position='CenterCenter'
-                                tooltipText="This can happen when you switch away from the page too quickly."
-                            >
-                            <img
-                                className={styles.screenshot}
-                                src={
-                                    this.props.screenshot == null
-                                        ? this.props.nullImg
-                                        : this.props.screenshot
-                                }
-                            />
-                            </ButtonTooltip>
+                            {this.props.screenshot == null ? (
+                                <ButtonTooltip
+                                    position='CenterCenter'
+                                    tooltipText="This can happen when you switch away from the page too quickly."
+                                >
+                                    <img
+                                        className={styles.screenshot}
+                                        src={this.props.nullImg}
+                                    />
+                                </ButtonTooltip>
+
+                            ): (
+                                <img
+                                    className={styles.screenshot}
+                                    src={this.props.screenshot}
+                                />
+                            )}
                         </div>
                         <div className={styles.infoContainer}>
                             <div className={styles.firstlineContainer}>
