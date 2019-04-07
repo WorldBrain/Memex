@@ -1,11 +1,5 @@
 @import url('/fonts/Inter/inter.css');
 
-.tooltip {
-    position: relative;
-    display: flex;
-    z-index: 2;
-}
-
 .tooltipTrigger {
     display: inline-block;
 }
@@ -36,19 +30,18 @@
 }
 
 .tooltipRightContentTooltip {
-    left: 8px;
+    left: 30px;
     top: -10px;
     justify-content: flex-start;
 }
 
 .tooltipBottom {
-    transform: translateY(33px);
+    transform: translateY(30px);
     justify-content: center;
+    align-items: flex-start;
 
-    & .tooltipMessage {
-        position: relative;
-        display: flex;
-        align-self: flex-start;
+    &.tooltipBubble {
+        align-items: flex-start;
     }
 }
 
@@ -84,4 +77,14 @@
     text-align: center;
     width: fit-content;
     font-family: 'Inter', sans-serif;
+}
+
+.tooltipContainer {
+    position: relative;
+    display: flex;
+    z-index: 2;
+}
+
+.tooltipContainerBottom {
+    justify-content: center;
 }

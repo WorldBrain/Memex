@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color7, color14, color4, color6, color9 from colors;
+
 .navbar {
     display: grid;
     flex: 1;
@@ -144,18 +147,11 @@
     font-weight: 500;
     cursor: pointer;
     margin-right: -8px;
+    outline: none;
+}
 
-    &:hover {
-        opacity: 1;
-    }
-
-    &:active {
-        opacity: 1;
-    }
-
-    &:focus {
-        outline: none;
-    }
+.activeButton {
+    background-color: color7;
 }
 
 .clearFilters {

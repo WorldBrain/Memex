@@ -1,7 +1,7 @@
 import React from 'react'
 import cx from 'classnames'
 import PropTypes from 'prop-types'
-
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import styles from './CreateListForm.css'
 
 const CreateListForm = props => (
@@ -23,14 +23,24 @@ const CreateListForm = props => (
                 required
             />
             <span className={styles.buttonBox}>
-                <button 
-                    type="submit" 
-                    className={cx(styles.tick, styles.button)} 
-                />
-                <button
-                    onClick={props.closeCreateListForm}
-                    className={cx(styles.deleteButton, styles.button)}
-                />
+                <ButtonTooltip
+                    tooltipText="Save"
+                    position="bottom"
+                >
+                    <button 
+                        type="submit" 
+                        className={cx(styles.tick, styles.button)} 
+                    />
+                </ButtonTooltip>
+                <ButtonTooltip
+                    tooltipText="Cancel"
+                    position="right"
+                >
+                    <button
+                        onClick={props.closeCreateListForm}
+                        className={cx(styles.deleteButton, styles.button)}
+                    />
+                </ButtonTooltip>
             </span>
         </form>
         {props.showWarning && (

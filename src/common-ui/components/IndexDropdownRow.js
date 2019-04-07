@@ -2,10 +2,9 @@ import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import styles from './IndexDropdown.css'
 
-import localStyles from './IndexDropdown.css'
-import sidebarStyles from './IndexDropdownSidebar.css'
-import annotationStyles from './IndexDropdownAnnotation.css'
 /**
  * @augments {PureComponent<{onClick: any, scrollIntoView: any, isForSidebar: any}, {isForAnnotation: bool}, *>}
  */
@@ -21,10 +20,10 @@ class IndexDropdownRow extends PureComponent {
         onClick: PropTypes.func.isRequired,
         onExcClick: PropTypes.func,
         focused: PropTypes.bool,
-        isForAnnotation: PropTypes.bool,
+        // isForAnnotation: PropTypes.bool,
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,
-        isForRibbon: PropTypes.bool,
+        // isForRibbon: PropTypes.bool,
         scrollIntoView: PropTypes.func.isRequired,
         isNew: PropTypes.bool,
         isList: PropTypes.bool,
@@ -62,15 +61,6 @@ class IndexDropdownRow extends PureComponent {
         })
     }
 
-    get styles() {
-        if (this.props.isForAnnotation) {
-            return annotationStyles
-        } else if (this.props.isForSidebar || this.props.isForRibbon) {
-            return sidebarStyles
-        }
-        return localStyles
-    }
-
     // Scroll with key navigation
     ensureVisible = () => {
         if (this.props.focused) {
@@ -79,9 +69,9 @@ class IndexDropdownRow extends PureComponent {
     }
 
     get mainClass() {
-        return cx(this.styles.menuItem, {
-            [this.styles.menuItemFocused]: this.props.focused,
-            [this.styles.commentBox]: this.props.allowAdd,
+        return cx(styles.menuItem, {
+            [styles.menuItemFocused]: this.props.focused,
+            [styles.commentBox]: this.props.allowAdd,
         })
     }
 
@@ -90,7 +80,7 @@ class IndexDropdownRow extends PureComponent {
             <div
                 ref={ref => (this.ref = ref)}
                 className={cx(this.mainClass, {
-                    [this.styles.isNew]: this.props.isNew,
+                    [styles.isNew]: this.props.isNew,
                 })}
                 onClick={e => {
                     e.stopPropagation()
@@ -98,40 +88,45 @@ class IndexDropdownRow extends PureComponent {
                 }}
             >
                 <span
-                    className={cx(this.styles.isNewNoteInvisible, {
-                        [this.styles.isNewNote]: this.props.isNew,
+                    className={cx(styles.isNewNoteInvisible, {
+                        [styles.isNewNote]: this.props.isNew,
                     })}
                 >
                     Add New:
                 </span>
                 <span
-                    className={cx(this.styles.tagPill, {
-                        [localStyles.isList]:
+                    className={cx(styles.tagPill, {
+                        [styles.isList]:
                             this.props.isList || this.props.source === 'domain',
                     })}
                 >
                     {(this.props.isList && this.props.value.name) ||
                         this.props.value}
                 </span>
-                <span className={this.styles.selectionOption}>
+                <span className={styles.selectionOption}>
                     {this.props.active && (
-                        <span className={this.styles.check} />
+                        <span className={styles.check} />
                     )}
-                    {this.props.isForSidebar &&
+                    {!this.props.allowAdd && this.props.isForSidebar &&
                         !this.props.active && (
+                            <ButtonTooltip
+                                tooltipText="Exclude from search"
+                                position="left"
+                            >
                             <span
                                 onClick={e => {
                                     e.stopPropagation()
                                     this.props.onExcClick()
                                 }}
                                 className={cx({
-                                    [this.styles.excludeInactive]:
+                                    [styles.excludeInactive]:
                                         this.state.displayExcIcon &&
                                         !this.props.excActive,
-                                    [this.styles.excluded]: this.props
+                                    [styles.excluded]: this.props
                                         .excActive,
                                 })}
                             />
+                            </ButtonTooltip>
                         )}
                 </span>
             </div>

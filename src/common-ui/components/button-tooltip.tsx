@@ -50,7 +50,13 @@ class ButtonTooltip extends React.Component<Props, State> {
         const { tooltipText, position } = this.props
 
         return (
-            <div ref={this.setTooltipRef} className={styles.tooltip}>
+            <div 
+                ref={this.setTooltipRef} 
+                className={cx(styles.tooltipContainer, {
+                            [styles.tooltipContainerBottom]:
+                                this.props.position === 'bottom',
+                            })}
+            >
                 {this.state.displayTooltip && (
                     <div
                         className={cx(styles.tooltipBubble, {

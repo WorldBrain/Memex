@@ -4,6 +4,8 @@ import React, {
     KeyboardEventHandler,
 } from 'react'
 import { Link } from 'react-router'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import cx from 'classnames'
 
 import { OutLink } from '../../../common-ui/containers'
 import InboxButton from '../../../notifications/components/InboxButton'
@@ -81,15 +83,22 @@ class Header extends PureComponent<Props> {
                             />
                         </div>
                         <button
-                            className={styles.button}
+                            className={cx(styles.button, {
+                                [styles.activeButton]: this.props.showClearFiltersBtn,
+                            })}
                             onClick={this.props.toggleFilterBar}
                         >
                             Filters
                             {this.props.showClearFiltersBtn && (
-                                <span
-                                    className={styles.clearFilters}
-                                    onClick={this.props.clearFilters}
-                                />
+                                <ButtonTooltip
+                                    tooltipText="Clear all Filters"
+                                    position="bottom"
+                                >
+                                    <span
+                                        className={styles.clearFilters}
+                                        onClick={this.props.clearFilters}
+                                    />
+                                </ButtonTooltip>
                             )}
                         </button>
                     </div>

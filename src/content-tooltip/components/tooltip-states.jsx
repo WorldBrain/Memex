@@ -20,7 +20,7 @@ export const InitialComponent = ({ createLink, createAnnotation }) => (
         </div>
         </ButtonTooltip>
          <ButtonTooltip
-            tooltipText="Create Link (L)"
+            tooltipText="Create Link to Highlight (L)"
             position="bottom"
         >
         <div

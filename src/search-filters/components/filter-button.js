@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import OnClickOutside from 'react-onclickoutside'
 import styles from './filter-button.css'
 import moment from 'moment'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 class FilterButton extends PureComponent {
     static propTypes = {
@@ -63,10 +64,15 @@ class FilterButton extends PureComponent {
                             <span className={styles.detailsFilter}>
                                 {this.props.filteredItems.length}
                             </span>
+                            <ButtonTooltip
+                                tooltipText="Clear this Filter"
+                                position="bottom"
+                            >
                             <span
                                 className={styles.clearFilters}
                                 onClick={this.props.clearFilters}
                             />
+                            </ButtonTooltip>
                         </React.Fragment>
                     )}
                 </React.Fragment>
