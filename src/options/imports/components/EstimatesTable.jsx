@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { LoadingIndicator } from 'src/common-ui/components'
-import { IMPORT_TYPE as TYPE } from '../constants'
+import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
 import classNames from 'classnames'
 
 import localStyles from './Import.css'
@@ -10,6 +10,7 @@ const EstimatesTable = ({
     onAllowHistoryClick,
     onAllowBookmarksClick,
     onAllowPocketClick,
+    onAllowHTMLClick,
     onInputImport,
     estimates,
     allowTypes,
@@ -103,7 +104,7 @@ const EstimatesTable = ({
                         name="pocket"
                         id="pocket"
                         onChange={onAllowPocketClick}
-                        checked={allowTypes[TYPE.POCKET]}
+                        checked={allowTypes[TYPE.OTHERS] === SERVICES.POCKET}
                     />{' '}
                     <label className={localStyles.label} htmlFor="pocket">
                         <span className={localStyles.checkboxText}>
@@ -116,13 +117,13 @@ const EstimatesTable = ({
                     </label>
                 </td>
                 {!isLoading &&
-                    estimates[TYPE.POCKET].remaining === 0 && (
+                    estimates[TYPE.OTHERS].remaining === 0 && (
                         <td>
                             <label
                                 className={classNames(localStyles.selectFile, {
-                                    [localStyles.hidden]: !allowTypes[
-                                        TYPE.POCKET
-                                    ],
+                                    [localStyles.hidden]:
+                                        allowTypes[TYPE.OTHERS] !==
+                                        SERVICES.POCKET,
                                 })}
                                 htmlFor="file-upload"
                             >
@@ -133,21 +134,88 @@ const EstimatesTable = ({
                                 name="file-upload"
                                 id="file-upload"
                                 onChange={onInputImport}
-                                disabled={!allowTypes[TYPE.POCKET]}
+                                disabled={
+                                    allowTypes[TYPE.OTHERS] !== SERVICES.POCKET
+                                }
                             />{' '}
                         </td>
                     )}
-                {isLoading && allowTypes[TYPE.POCKET] && <LoadingIndicator />}
-                {estimates[TYPE.POCKET].remaining > 0 && (
-                    <React.Fragment>
-                        <td>{estimates[TYPE.POCKET].complete}</td>
-                        <td>{estimates[TYPE.POCKET].remaining}</td>
+                {isLoading &&
+                    allowTypes[TYPE.OTHERS] === SERVICES.POCKET && (
+                        <LoadingIndicator />
+                    )}
+                {allowTypes[TYPE.OTHERS] === SERVICES.POCKET &&
+                    estimates[TYPE.OTHERS].remaining > 0 && (
+                        <React.Fragment>
+                            <td>{estimates[TYPE.OTHERS].complete}</td>
+                            <td>{estimates[TYPE.OTHERS].remaining}</td>
+                            <td>
+                                {'~'}
+                                {estimates[TYPE.OTHERS].timeRemaining}
+                            </td>
+                        </React.Fragment>
+                    )}
+            </tr>
+            <tr className={localStyles.importTableRow}>
+                <td>
+                    <input
+                        className={localStyles.checkbox}
+                        type="checkbox"
+                        name="html"
+                        id="html"
+                        onChange={onAllowHTMLClick}
+                        checked={allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE}
+                    />{' '}
+                    <label className={localStyles.label} htmlFor="html">
+                        <span className={localStyles.checkboxText}>
+                            HTML File
+                        </span>
+                        <br />
+                        <span className={localStyles.checkboxSubText}>
+                            Bookmarks, Collections
+                        </span>
+                    </label>
+                </td>
+                {!isLoading &&
+                    estimates[TYPE.OTHERS].remaining === 0 && (
                         <td>
-                            {'~'}
-                            {estimates[TYPE.POCKET].timeRemaining}
+                            <label
+                                className={classNames(localStyles.selectFile, {
+                                    [localStyles.hidden]:
+                                        allowTypes[TYPE.OTHERS] !==
+                                        SERVICES.NETSCAPE,
+                                })}
+                                htmlFor="netscape-file-upload"
+                            >
+                                Select export file
+                            </label>
+                            <input
+                                type="file"
+                                name="netscape-file-upload"
+                                id="netscape-file-upload"
+                                onChange={onInputImport}
+                                disabled={
+                                    allowTypes[TYPE.OTHERS] !==
+                                    SERVICES.NETSCAPE
+                                }
+                            />{' '}
                         </td>
-                    </React.Fragment>
-                )}
+                    )}
+                {isLoading &&
+                    allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
+                        <LoadingIndicator />
+                    )}
+                {allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE &&
+                    estimates[TYPE.OTHERS].remaining > 0 && (
+                        <React.Fragment>
+                            <td>{estimates[TYPE.OTHERS].complete}</td>
+                            <td>{estimates[TYPE.OTHERS].remaining}</td>
+                            <td>
+                                {'~'}
+                                {estimates[TYPE.OTHERS].timeRemaining}
+                            </td>
+                        </React.Fragment>
+                    )}
             </tr>
         </tbody>
     </table>
@@ -164,7 +232,7 @@ EstimatesTable.propTypes = {
     allowTypes: PropTypes.shape({
         [TYPE.HISTORY]: PropTypes.bool.isRequired,
         [TYPE.BOOKMARK]: PropTypes.bool.isRequired,
-        [TYPE.POCKET]: PropTypes.bool.isRequired,
+        [TYPE.OTHERS]: PropTypes.string.isRequired,
     }).isRequired,
     isLoading: PropTypes.bool.isRequired,
 
@@ -172,13 +240,14 @@ EstimatesTable.propTypes = {
     onAllowHistoryClick: PropTypes.func.isRequired,
     onAllowBookmarksClick: PropTypes.func.isRequired,
     onAllowPocketClick: PropTypes.func.isRequired,
+    onAllowHTMLClick: PropTypes.func.isRequired,
     onInputImport: PropTypes.func.isRequired,
 
     // Data
     estimates: PropTypes.shape({
         [TYPE.HISTORY]: estimatesShape.isRequired,
         [TYPE.BOOKMARK]: estimatesShape.isRequired,
-        [TYPE.POCKET]: estimatesShape.isRequired,
+        [TYPE.OTHERS]: estimatesShape.isRequired,
     }).isRequired,
 }
 

@@ -12,7 +12,7 @@ import {
 const defaultStats = {
     [TYPE.HISTORY]: 0,
     [TYPE.BOOKMARK]: 0,
-    [TYPE.POCKET]: 0,
+    [TYPE.OTHERS]: 0,
 }
 
 const defaultState = {
@@ -31,7 +31,7 @@ const defaultState = {
     allowTypes: {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
-        [TYPE.POCKET]: false,
+        [TYPE.OTHERS]: '',
     },
     showDownloadDetails: false,
     blobUrl: null,
@@ -73,6 +73,14 @@ const toggleAllowTypeReducer = (state, type) => ({
     allowTypes: {
         ...state.allowTypes,
         [type]: !state.allowTypes[type],
+    },
+})
+
+const setAllowTypeReducer = (state, value) => ({
+    ...state,
+    allowTypes: {
+        ...state.allowTypes,
+        [TYPE.OTHERS]: state.allowTypes[TYPE.OTHERS].length === 0 ? value : '',
     },
 })
 
@@ -128,6 +136,7 @@ export default createReducer(
         [actions.resumeImport]: setImportState(STATUS.RUNNING),
         [actions.addImportItem]: addDownloadDetailsReducer,
         [actions.toggleAllowType]: toggleAllowTypeReducer,
+        [actions.setAllowType]: setAllowTypeReducer,
         [actions.filterDownloadDetails]: payloadReducer('downloadDataFilter'),
         [actions.initImportState]: payloadReducer('importStatus'),
         [actions.initEstimateCounts]: initEstimateCounts,
@@ -146,9 +155,9 @@ export default createReducer(
                 [TYPE.HISTORY]:
                     allowTypes[TYPE.HISTORY] ||
                     defaultState.allowTypes[TYPE.HISTORY],
-                [TYPE.POCKET]:
-                    allowTypes[TYPE.POCKET] ||
-                    defaultState.allowTypes[TYPE.POCKET],
+                [TYPE.OTHERS]:
+                    allowTypes[TYPE.OTHERS] ||
+                    defaultState.allowTypes[TYPE.OTHERS],
             },
         }),
         [actions.setConcurrency]: (state, concurrency) => ({

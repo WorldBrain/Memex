@@ -24,7 +24,7 @@ export class ImportStateManager {
     static DEF_ALLOW_TYPES = {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
-        [TYPE.POCKET]: false,
+        [TYPE.OTHERS]: false,
     }
 
     _includeErrs = false
@@ -100,7 +100,7 @@ export class ImportStateManager {
         this.completed = {
             [TYPE.HISTORY]: this._itemCreator.completedHistCount,
             [TYPE.BOOKMARK]: this._itemCreator.completedBmCount,
-            [TYPE.POCKET]: this._itemCreator.completedPocketCount,
+            [TYPE.OTHERS]: this._itemCreator.completedServicesCount,
         }
     }
 

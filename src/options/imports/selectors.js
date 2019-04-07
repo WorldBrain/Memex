@@ -135,7 +135,7 @@ export const progress = createSelector(
     (...args) => ({
         [TYPE.HISTORY]: getProgress(...args.map(arg => arg[TYPE.HISTORY])),
         [TYPE.BOOKMARK]: getProgress(...args.map(arg => arg[TYPE.BOOKMARK])),
-        [TYPE.POCKET]: getProgress(...args.map(arg => arg[TYPE.POCKET])),
+        [TYPE.OTHERS]: getProgress(...args.map(arg => arg[TYPE.OTHERS])),
     }),
 )
 
@@ -145,7 +145,7 @@ export const successCount = createSelector(
     (progress, allowTypes) =>
         (allowTypes.h ? progress[TYPE.HISTORY].success : 0) +
         (allowTypes.b ? progress[TYPE.BOOKMARK].success : 0) +
-        (allowTypes.p ? progress[TYPE.POCKET].success : 0),
+        (allowTypes.o ? progress[TYPE.OTHERS].success : 0),
 )
 
 export const failCount = createSelector(
@@ -154,7 +154,7 @@ export const failCount = createSelector(
     (progress, allowTypes) =>
         (allowTypes.h ? progress[TYPE.HISTORY].fail : 0) +
         (allowTypes.b ? progress[TYPE.BOOKMARK].fail : 0) +
-        (allowTypes.p ? progress[TYPE.POCKET].fail : 0),
+        (allowTypes.o ? progress[TYPE.OTHERS].fail : 0),
 )
 
 export const progressPercent = createSelector(
@@ -164,12 +164,12 @@ export const progressPercent = createSelector(
         const total =
             (allowTypes[TYPE.HISTORY] ? progress[TYPE.HISTORY].total : 0) +
             (allowTypes[TYPE.BOOKMARK] ? progress[TYPE.BOOKMARK].total : 0) +
-            (allowTypes[TYPE.POCKET] ? progress[TYPE.POCKET].total : 0)
+            (allowTypes[TYPE.OTHERS] ? progress[TYPE.OTHERS].total : 0)
 
         const complete =
             (allowTypes[TYPE.HISTORY] ? progress[TYPE.HISTORY].complete : 0) +
             (allowTypes[TYPE.BOOKMARK] ? progress[TYPE.BOOKMARK].complete : 0) +
-            (allowTypes[TYPE.POCKET] ? progress[TYPE.POCKET].complete : 0)
+            (allowTypes[TYPE.OTHERS] ? progress[TYPE.OTHERS].complete : 0)
         return (complete / total) * 100
     },
 )
@@ -207,7 +207,7 @@ export const estimates = createSelector(
             completed[TYPE.BOOKMARK],
             totals[TYPE.BOOKMARK],
         ),
-        [TYPE.POCKET]: getEstimate(completed[TYPE.POCKET], totals[TYPE.POCKET]),
+        [TYPE.OTHERS]: getEstimate(completed[TYPE.OTHERS], totals[TYPE.OTHERS]),
     }),
 )
 
@@ -215,7 +215,9 @@ export const isStartBtnDisabled = createSelector(
     allowTypes,
     estimates,
     (allowTypes, estimates) => {
-        const pickByAllowedTypes = pickBy((isAllowed, type) => isAllowed)
+        const pickByAllowedTypes = pickBy(
+            (isAllowed, type) => isAllowed || isAllowed !== '',
+        )
 
         // Map-reduce the remaining (allowed) estimates to disable button when remaining is 0
         const noImportsRemaining = Object.keys(pickByAllowedTypes(allowTypes))
@@ -225,7 +227,7 @@ export const isStartBtnDisabled = createSelector(
         const allCheckboxesDisabled =
             !allowTypes[TYPE.HISTORY] &&
             !allowTypes[TYPE.BOOKMARK] &&
-            !allowTypes[TYPE.POCKET]
+            allowTypes[TYPE.OTHERS] === ''
 
         return allCheckboxesDisabled || noImportsRemaining
     },

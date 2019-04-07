@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { IMPORT_TYPE as TYPE } from '../constants'
+import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
 
 import localStyles from './Import.css'
 
@@ -59,8 +59,11 @@ const ProgressTable = ({ progress, allowTypes }) => (
             {allowTypes[TYPE.BOOKMARK] && (
                 <ProgressRow label="Bookmarks" {...progress[TYPE.BOOKMARK]} />
             )}
-            {allowTypes[TYPE.POCKET] && (
-                <ProgressRow label="Pocket" {...progress[TYPE.POCKET]} />
+            {allowTypes[TYPE.OTHERS] === SERVICES.POCKET && (
+                <ProgressRow label="Pocket" {...progress[TYPE.OTHERS]} />
+            )}
+            {allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
+                <ProgressRow label="HTML" {...progress[TYPE.OTHERS]} />
             )}
         </tbody>
     </table>
@@ -78,7 +81,7 @@ ProgressTable.propTypes = {
     progress: PropTypes.shape({
         [TYPE.HISTORY]: progressShape.isRequired,
         [TYPE.BOOKMARK]: progressShape.isRequired,
-        [TYPE.POCKET]: progressShape.isRequired,
+        [TYPE.OTHERS]: progressShape.isRequired,
     }).isRequired,
     allowTypes: PropTypes.object.isRequired,
 }

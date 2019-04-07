@@ -47,7 +47,7 @@ export default class ImportItemCreator {
     static DEF_LIMITS = {
         histLimit: Infinity,
         bmLimit: Infinity,
-        pocketLimit: Infinity,
+        servicesLimit: Infinity,
     }
 
     /**
@@ -69,11 +69,11 @@ export default class ImportItemCreator {
     set limits({
         histLimit = ImportItemCreator.DEF_LIMITS.histLimit,
         bmLimit = ImportItemCreator.DEF_LIMITS.bmLimit,
-        pocketLimit = ImportItemCreator.DEF_LIMITS.pocketLimit,
+        servicesLimit = ImportItemCreator.DEF_LIMITS.servicesLimit,
     }) {
         this._histLimit = histLimit
         this._bmLimit = bmLimit
-        this._pocketLimit = pocketLimit
+        this._servicesLimit = servicesLimit
     }
 
     get completedBmCount() {
@@ -84,8 +84,8 @@ export default class ImportItemCreator {
         return this._histKeys.size - this.completedBmCount
     }
 
-    get completedPocketCount() {
-        return this._completedPocketKeys.size
+    get completedServicesCount() {
+        return this._completedServicesKeys.size
     }
 
     static _limitMap = (items, limit) => new Map([...items].slice(0, limit))
@@ -109,9 +109,9 @@ export default class ImportItemCreator {
         })
 
         await this.existingDataReady
-        this._pocketData = data
-        this._completedPocketKeys = new Set(
-            this._pocketData
+        this._servicesData = data
+        this._completedServicesKeys = new Set(
+            this._servicesData
                 .filter(item => this._histKeys.has(normalizeUrl(item.url)))
                 .map(item => item.url),
         )
@@ -225,17 +225,17 @@ export default class ImportItemCreator {
             )
         }
 
-        if (this._pocketData && this._pocketLimit > 0) {
+        if (this._servicesData && this._servicesLimit > 0) {
             const itemsFilter = this._filterItemsByUrl(
-                deriveServicesImportItem(TYPE.POCKET),
+                deriveServicesImportItem(TYPE.OTHERS),
                 new Set(),
             )
 
             yield* this._iterateItems(
-                this.chunks(this._pocketData, 10),
+                this.chunks(this._servicesData, 10),
                 itemsFilter,
-                this._pocketLimit,
-                TYPE.POCKET,
+                this._servicesLimit,
+                TYPE.OTHERS,
             )
         }
     }

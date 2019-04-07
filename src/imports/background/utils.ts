@@ -1,4 +1,7 @@
-import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
+import {
+    IMPORT_TYPE as TYPE,
+    IMPORT_SERVICES as SERVICES,
+} from 'src/options/imports/constants'
 import { Annotation } from 'src/direct-linking/types'
 
 interface Item {
@@ -21,7 +24,7 @@ export const parsePocket = doc => {
     const lists = document.getElementsByTagName('ul')
 
     for (const element of collectionElements) {
-        collections.push(element.innerText)
+        collections.push(element.textContent)
     }
 
     for (const [index, list] of Object.entries(lists)) {
@@ -32,7 +35,7 @@ export const parsePocket = doc => {
             }
             const item: Item = {
                 url: link.getAttribute('href'),
-                title: link.innerText || link.getAttribute('href'),
+                title: link.textContent || link.getAttribute('href'),
                 tags: link.hasAttribute('tags')
                     ? link.getAttribute('tags').length !== 0
                         ? link.getAttribute('tags').split(',')
@@ -48,6 +51,33 @@ export const parsePocket = doc => {
             items.push(item)
         }
     }
+    return items
+}
+
+const parseNetscape = doc => {
+    const links = doc.getElementsByTagName('a')
+    const collectionName = 'Bookmarks Bar'
+    const items: Item[] = []
+    for (const link of links) {
+        if (!link.hasAttribute('href')) {
+            continue
+        }
+        const item: Item = {
+            url: link.getAttribute('href'),
+            title: link.textContent || link.getAttribute('href'),
+            tags: link.hasAttribute('tags')
+                ? link.getAttribute('tags').length !== 0
+                    ? link.getAttribute('tags').split(',')
+                    : []
+                : [],
+            collections: [collectionName],
+            timeAdded: link.hasAttribute('add_date')
+                ? Number(link.getAttribute('add_date'))
+                : null,
+        }
+        items.push(item)
+    }
+
     return items
 }
 
@@ -72,11 +102,26 @@ const loadBlob = ({
 }
 
 export const parseFile = async (url, allowTypes) => {
-    const contents = await loadBlob({
-        url,
-        timeout: 10000,
-        responseType: 'document',
-    })
+    let contents
+    let items = []
 
-    return parsePocket(contents)
+    if (!allowTypes || !url) {
+        return items
+    }
+
+    if (allowTypes[TYPE.OTHERS] === SERVICES.POCKET || SERVICES.NETSCAPE) {
+        contents = await loadBlob({
+            url,
+            timeout: 10000,
+            responseType: 'document',
+        })
+    }
+
+    if (allowTypes[TYPE.OTHERS] === SERVICES.POCKET) {
+        items = parsePocket(contents)
+    } else if (allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE) {
+        items = parseNetscape(contents)
+    }
+
+    return items
 }

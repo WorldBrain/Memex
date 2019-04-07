@@ -94,6 +94,8 @@ class ImportContainer extends Component {
     handleEstTableCheck = type => () =>
         this.props.boundActions.toggleAllowType(type)
 
+    setAllowType = type => () => this.props.boundActions.setAllowType(type)
+
     renderHelpText = () =>
         this.state.waitingOnCancelConfirm ? 'Press cancel again to confirm' : ''
 
@@ -186,8 +188,11 @@ class ImportContainer extends Component {
             onAllowHistoryClick={this.handleEstTableCheck(
                 constants.IMPORT_TYPE.HISTORY,
             )}
-            onAllowPocketClick={this.handleEstTableCheck(
-                constants.IMPORT_TYPE.POCKET,
+            onAllowPocketClick={this.setAllowType(
+                constants.IMPORT_SERVICES.POCKET,
+            )}
+            onAllowHTMLClick={this.setAllowType(
+                constants.IMPORT_SERVICES.NETSCAPE,
             )}
             onInputImport={this.handleInputFile}
         />

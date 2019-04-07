@@ -257,7 +257,7 @@ export default class ImportItemProcessor {
             case IMPORT_TYPE.BOOKMARK:
             case IMPORT_TYPE.HISTORY:
                 return this._processHistory(importItem)
-            case IMPORT_TYPE.POCKET:
+            case IMPORT_TYPE.OTHERS:
                 return this._processImportItem(importItem, options)
             default:
                 throw new Error('Unknown import type')

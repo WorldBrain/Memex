@@ -20,12 +20,12 @@ export default class ImportCache {
         completed: {
             [TYPE.BOOKMARK]: 0,
             [TYPE.HISTORY]: 0,
-            [TYPE.POCKET]: 0,
+            [TYPE.OTHERS]: 0,
         },
         remaining: {
             [TYPE.BOOKMARK]: 0,
             [TYPE.HISTORY]: 0,
-            [TYPE.POCKET]: 0,
+            [TYPE.OTHERS]: 0,
         },
     }
 
