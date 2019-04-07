@@ -165,6 +165,7 @@ class ListContainer extends Component {
                     </div>
                 </div>
                 <DeleteConfirmModal
+                    message="Delete collection? This does not delete the pages in it"
                     isShown={this.props.isDeleteConfShown}
                     onClose={this.props.resetListDeleteModal}
                     deleteDocs={this.props.handleDeleteList}

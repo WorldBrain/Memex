@@ -25,6 +25,7 @@ import {
     actions as filterActs,
     selectors as filters,
 } from '../../../search-filters'
+import { selectors as searchBar } from '../../search-bar'
 import { PageUrlsByDay } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
@@ -280,7 +281,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     resultsClusteredByDay: selectors.resultsClusteredByDay(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
-    isFilterBarActive: filters.showFilterBar(state),
+    isFilterBarActive: searchBar.showFilterBar(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({

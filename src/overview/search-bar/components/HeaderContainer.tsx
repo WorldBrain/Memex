@@ -19,8 +19,8 @@ const mapState = state => ({
     startDate: selectors.startDate(state),
     endDate: selectors.endDate(state),
     query: selectors.query(state),
-    showFilterBar: filters.showFilterBar(state),
-    showClearFiltersBtn: filters.showClearFiltersBtn(state),
+    showFilterBar: selectors.showFilterBar(state),
+    showClearFiltersBtn: selectors.showClearFiltersBtn(state),
 })
 
 const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
@@ -53,7 +53,11 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
         })
         dispatch(filterActs.toggleFilterBar())
     },
-    clearFilters: () => dispatch(filterActs.resetFilters()),
+    clearFilters: () => {
+        dispatch(filterActs.resetFilters())
+        dispatch(acts.setStartDate(undefined))
+        dispatch(acts.setEndDate(undefined))
+    },
 })
 
 export default connect(

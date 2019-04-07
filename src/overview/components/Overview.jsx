@@ -44,7 +44,7 @@ class Overview extends PureComponent {
                         <Header />
                         <SidebarLeft />
                         <Results />
-                        <DeleteConfirmModal />
+                        <DeleteConfirmModal message="Delete page and related note" />
                         <DragElement />
                         <SidebarContainer
                             env="overview"

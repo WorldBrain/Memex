@@ -91,14 +91,14 @@ describe('Custom List Integrations', () => {
             expect(lists[0].id).not.toBe(2)
         })
 
-        // test('fetch lists with limits', async () => {
-        //     const lists = await bg.fetchAllLists({
-        //         limit: 1,
-        //     })
+        test('fetch lists with limits', async () => {
+            const lists = await bg.fetchAllLists({
+                limit: 1,
+            })
 
-        //     checkDefined(lists)
-        //     expect(lists.length).toBe(1)
-        // })
+            checkDefined(lists)
+            expect(lists.length).toBe(1)
+        })
     })
 
     describe('update ops', () => {
