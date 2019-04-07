@@ -139,6 +139,7 @@ class ListContainer extends Component {
         )
 
     render() {
+
         return (
             <React.Fragment>
                 <MyCollection
@@ -155,7 +156,7 @@ class ListContainer extends Component {
                         className={cx({
                             [extStyles.wrapper]: this.props.isSidebarOpen,
                             [extStyles.allListsInner]: this.props.isSidebarOpen,
-                            [extStyles.allListsInnerLocked]: this.props
+                            [extStyles.wrapperLocked]: this.props
                                 .isSidebarLocked,
                         })}
                     >

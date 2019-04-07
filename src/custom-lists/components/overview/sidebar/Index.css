@@ -61,7 +61,6 @@
 }
 
 .allListsInner {
-    height: 100%;
     width: 100%;
     overflow-y: scroll;
     height: 90vh;
@@ -70,11 +69,11 @@
 
 .wrapper {
     overflow-y: scroll;
-    height: 85vh;
+    height: 83vh;
     padding-bottom: 50px;
 }
 
-.wrapperLocked {
+.wrapperLocked {
     overflow-y: scroll;
     height: 90vh;
     padding-bottom: 50px;
