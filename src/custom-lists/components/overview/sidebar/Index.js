@@ -12,7 +12,6 @@ import ListItem from './ListItem'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { actions as filterActs } from '../../../../search-filters'
 import * as sidebar from '../../../../overview/sidebar-left/selectors'
-import { acts as searchBarActs } from 'src/overview/search-bar'
 
 class ListContainer extends Component {
     static propTypes = {
@@ -139,7 +138,6 @@ class ListContainer extends Component {
         )
 
     render() {
-
         return (
             <React.Fragment>
                 <MyCollection
@@ -214,8 +212,7 @@ const mapDispatchToProps = (dispatch, getState) => ({
     handleDeleteList: e => {
         e.preventDefault()
         dispatch(actions.deletePageList())
-        dispatch(filterActs.resetFilters())
-        dispatch(searchBarActs.clearFilters())
+        dispatch(filterActs.delListFilter())
     },
 })
 
