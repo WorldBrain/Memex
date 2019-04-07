@@ -55,6 +55,8 @@ class ButtonTooltip extends React.Component<Props, State> {
                 className={cx(styles.tooltipContainer, {
                             [styles.tooltipContainerBottom]:
                                 this.props.position === 'bottom',
+                            [styles.tooltipContainerCenterCenter]:
+                                this.props.position === 'CenterCenter',
                             })}
             >
                 {this.state.displayTooltip && (
@@ -76,6 +78,8 @@ class ButtonTooltip extends React.Component<Props, State> {
                                 this.props.position === 'top',
                             [styles.tooltipRightContentTooltip]:
                                 this.props.position === 'rightContentTooltip',
+                            [styles.tooltipCenterCenter]:
+                                this.props.position === 'CenterCenter',
                         })}
                     >
                         <div className={styles.tooltipMessage}>

@@ -88,3 +88,8 @@
 .tooltipContainerBottom {
     justify-content: center;
 }
+
+.tooltipContainerCenterCenter {
+    justify-content: center;
+    align-items: center;
+}

@@ -113,6 +113,10 @@ class PageResultItem extends PureComponent<Props> {
                         draggable
                     >
                         <div className={styles.screenshotContainer}>
+                            <ButtonTooltip
+                                position='CenterCenter'
+                                tooltipText="This can happen when you switch away from the page too quickly."
+                            >
                             <img
                                 className={styles.screenshot}
                                 src={
@@ -121,6 +125,7 @@ class PageResultItem extends PureComponent<Props> {
                                         : this.props.screenshot
                                 }
                             />
+                            </ButtonTooltip>
                         </div>
                         <div className={styles.infoContainer}>
                             <div className={styles.firstlineContainer}>
