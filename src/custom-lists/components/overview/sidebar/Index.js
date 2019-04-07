@@ -12,6 +12,7 @@ import ListItem from './ListItem'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { actions as filterActs } from '../../../../search-filters'
 import * as sidebar from '../../../../overview/sidebar-left/selectors'
+import { acts as searchBarActs } from 'src/overview/search-bar'
 
 class ListContainer extends Component {
     static propTypes = {
@@ -154,7 +155,8 @@ class ListContainer extends Component {
                         className={cx({
                             [extStyles.wrapper]: this.props.isSidebarOpen,
                             [extStyles.allListsInner]: this.props.isSidebarOpen,
-                            [extStyles.allListsInnerLocked]: this.props.isSidebarLocked,
+                            [extStyles.allListsInnerLocked]: this.props
+                                .isSidebarLocked,
                         })}
                     >
                         {this.renderAllLists()}
@@ -177,6 +179,7 @@ const mapStateToProps = state => ({
     showCreateList: selectors.showCreateListForm(state),
     showCommonNameWarning: selectors.showCommonNameWarning(state),
     isSidebarOpen: sidebar.isSidebarOpen(state),
+    isSidebarLocked: sidebar.sidebarLocked(state),
 })
 
 const mapDispatchToProps = (dispatch, getState) => ({
@@ -210,6 +213,8 @@ const mapDispatchToProps = (dispatch, getState) => ({
     handleDeleteList: e => {
         e.preventDefault()
         dispatch(actions.deletePageList())
+        dispatch(filterActs.resetFilters())
+        dispatch(searchBarActs.clearFilters())
     },
 })
 

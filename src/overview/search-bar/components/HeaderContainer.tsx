@@ -47,8 +47,7 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
     },
     clearFilters: () => {
         dispatch(filterActs.resetFilters())
-        dispatch(acts.setStartDate(undefined))
-        dispatch(acts.setEndDate(undefined))
+        dispatch(acts.clearFilters())
     },
 })
 

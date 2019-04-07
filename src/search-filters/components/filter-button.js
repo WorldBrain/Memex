@@ -26,6 +26,11 @@ class FilterButton extends PureComponent {
         this.props.hidePopup()
     }
 
+    handleClearFilers = () => {
+        this.props.clearFilters()
+        this.props.hidePopup()
+    }
+
     renderCount = () => {
         if (this.props.source === 'Types' && this.state.typesCount) {
             return (
@@ -35,7 +40,7 @@ class FilterButton extends PureComponent {
                     </span>
                     <span
                         className={styles.clearFilters}
-                        onClick={this.props.clearFilters}
+                        onClick={this.handleClearFilers}
                     />
                 </React.Fragment>
             )
@@ -52,7 +57,7 @@ class FilterButton extends PureComponent {
                     </span>
                     <span
                         className={styles.clearFilters}
-                        onClick={this.props.clearFilters}
+                        onClick={this.handleClearFilers}
                     />
                 </React.Fragment>
             )
@@ -68,10 +73,10 @@ class FilterButton extends PureComponent {
                                 tooltipText="Clear this Filter"
                                 position="bottom"
                             >
-                            <span
-                                className={styles.clearFilters}
-                                onClick={this.props.clearFilters}
-                            />
+                                <span
+                                    className={styles.clearFilters}
+                                    onClick={this.handleClearFilers}
+                                />
                             </ButtonTooltip>
                         </React.Fragment>
                     )}

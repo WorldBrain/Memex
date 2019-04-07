@@ -48,4 +48,9 @@ reducer.on(acts.setEndDateText, (state, payload) => ({
     endDateText: payload,
 }))
 
+reducer.on(acts.clearFilters, state => ({
+    ...defState,
+    query: '',
+}))
+
 export default reducer

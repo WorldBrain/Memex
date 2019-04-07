@@ -24,6 +24,7 @@ export const setStartDate = createAction<number>('header/setStartDate')
 export const setEndDate = createAction<number>('header/setEndDate')
 export const setStartDateText = createAction<string>('header/setStartDateText')
 export const setEndDateText = createAction<string>('header/setEndDateText')
+export const clearFilters = createAction('header/clearFilters')
 
 const stripTagPattern = tag =>
     tag
