@@ -26,6 +26,8 @@ import {
     selectors as filters,
 } from '../../../search-filters'
 import { PageUrlsByDay } from 'src/search/background/types'
+import { getLocalStorage } from 'src/util/storage'
+import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 
 const styles = require('./ResultList.css')
 
@@ -75,6 +77,15 @@ class ResultListContainer extends PureComponent<Props> {
     private setTagButtonRef = (el: HTMLButtonElement) =>
         this.tagBtnRefs.push(el)
 
+    state = {
+        tagSuggestions: [],
+    }
+
+    async componentWillMount() {
+        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+        this.setState({ tagSuggestions: tagSuggestions.reverse() })
+    }
+
     componentDidMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
     }
@@ -115,6 +126,9 @@ class ResultListContainer extends PureComponent<Props> {
                 onFilterDel={this.props.delTag(index)}
                 setTagDivRef={this.setTagDivRef}
                 initFilters={tags}
+                initSuggestions={[
+                    ...new Set([...tags, ...this.state.tagSuggestions]),
+                ]}
                 source="tag"
                 isForRibbon
                 hover

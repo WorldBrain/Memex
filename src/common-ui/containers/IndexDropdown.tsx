@@ -10,6 +10,9 @@ import {
     IndexDropdownRow,
 } from '../components'
 import { ClickHandler } from '../../popup/types'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { TAG_SUGGESTIONS_KEY } from 'src/constants'
+
 export interface Props {
     env?: 'inpage' | 'overview'
     source: 'tag' | 'domain'
@@ -246,6 +249,13 @@ class IndexDropdownContainer extends Component<Props, State> {
         })
 
         this.props.onFilterAdd(newTag)
+
+        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+
+        if (!tagSuggestions.includes(newTag)) {
+            tagSuggestions.push(newTag)
+            await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
+        }
     }
 
     private async handleSingleTagEdit(tag: string) {
@@ -317,6 +327,13 @@ class IndexDropdownContainer extends Component<Props, State> {
             focused: 0,
             clearFieldBtn: false,
         })
+
+        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+
+        if (!tagSuggestions.includes(tag)) {
+            tagSuggestions.push(tag)
+            await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
+        }
     }
 
     private handleExcTagSelection = (
