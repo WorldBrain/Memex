@@ -9,6 +9,11 @@ const searchBar = (state: RootState) => state.searchBar
 export const query = createSelector(searchBar, state => state.query)
 export const endDate = createSelector(searchBar, state => state.endDate)
 export const startDate = createSelector(searchBar, state => state.startDate)
+export const endDateText = createSelector(searchBar, state => state.endDateText)
+export const startDateText = createSelector(
+    searchBar,
+    state => state.startDateText,
+)
 
 export const isEmptyQuery = createSelector(
     query,

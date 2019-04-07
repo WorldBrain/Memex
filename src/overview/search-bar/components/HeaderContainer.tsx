@@ -16,8 +16,6 @@ const mapState = state => ({
     unreadNotifCount: notifs.unreadNotifCount(state),
     showUnreadCount: notifs.showUnreadCount(state),
     showInbox: notifs.showInbox(state),
-    startDate: selectors.startDate(state),
-    endDate: selectors.endDate(state),
     query: selectors.query(state),
     showFilterBar: selectors.showFilterBar(state),
     showClearFiltersBtn: selectors.showClearFiltersBtn(state),
@@ -25,8 +23,6 @@ const mapState = state => ({
 
 const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
     toggleInbox: () => dispatch(notifActs.toggleInbox()),
-    onStartDateChange: date => dispatch(acts.setStartDate(date)),
-    onEndDateChange: date => dispatch(acts.setEndDate(date)),
     onQueryChange: e => {
         const el = e.target as HTMLInputElement
         dispatch(acts.setQueryTagsDomains(el.value, false))
@@ -38,10 +34,6 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
         }
         // Close search-bar tooltip in overview
         dispatch(tooltipActs.setTooltip('time-filters'))
-    },
-    changeTooltip: () => {
-        // Change tooltip notification to more filters once the user selects date
-        dispatch(tooltipActs.setTooltip('more-filters'))
     },
     toggleFilterBar: () => {
         // Remove and reset onboarding tooltip

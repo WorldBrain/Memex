@@ -29,16 +29,11 @@ export interface Props {
     showUnreadCount: boolean
     showInbox: boolean
     unreadNotifCount: number
-    startDate: number
-    endDate: number
     showFilterBar: boolean
     showClearFiltersBtn: boolean
     onQueryKeyDown: KeyboardEventHandler<HTMLInputElement>
     onQueryChange: ReactEventHandler<HTMLInputElement>
-    onStartDateChange: (date: number) => void
-    onEndDateChange: (date: number) => void
     toggleInbox: () => void
-    changeTooltip: () => void
     toggleFilterBar: () => void
     clearFilters: () => void
 }
@@ -67,7 +62,7 @@ class Header extends PureComponent<Props> {
         return (
             <React.Fragment>
                 <div className={styles.navbar}>
-                    <div/>
+                    <div />
                     <div className={styles.container}>
                         <div className={styles.searchField}>
                             <input
@@ -84,7 +79,8 @@ class Header extends PureComponent<Props> {
                         </div>
                         <button
                             className={cx(styles.button, {
-                                [styles.activeButton]: this.props.showClearFiltersBtn,
+                                [styles.activeButton]: this.props
+                                    .showClearFiltersBtn,
                             })}
                             onClick={this.props.toggleFilterBar}
                         >

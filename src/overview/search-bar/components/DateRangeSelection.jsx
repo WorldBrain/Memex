@@ -20,8 +20,12 @@ class DateRangeSelection extends Component {
     static propTypes = {
         startDate: PropTypes.number,
         endDate: PropTypes.number,
+        startDateText: PropTypes.string,
+        endDateText: PropTypes.string,
         onStartDateChange: PropTypes.func,
         onEndDateChange: PropTypes.func,
+        onStartDateTextChange: PropTypes.func.isRequired,
+        onEndDateTextChange: PropTypes.func.isRequired,
         disabled: PropTypes.bool,
         changeTooltip: PropTypes.func,
         env: PropTypes.oneOf(['overview', 'inpage']).isRequired,
@@ -53,10 +57,14 @@ class DateRangeSelection extends Component {
         event.preventDefault()
         const stateKey = isStartDate ? 'startDateText' : 'endDateText'
         const refKey = isStartDate ? 'startDatePicker' : 'endDatePicker'
+        const updateDateText = isStartDate
+            ? this.props.onStartDateTextChange
+            : this.props.onEndDateTextChange
 
         // Update both states
         this[refKey].props.onChange(null, event)
         this.setState(state => ({ ...state, [stateKey]: '' }))
+        updateDateText('')
     }
 
     /**
@@ -71,11 +79,17 @@ class DateRangeSelection extends Component {
             event.preventDefault()
             event.stopPropagation()
             const stateKey = isStartDate ? 'startDateText' : 'endDateText'
+            const updateDateText = isStartDate
+                ? this.props.onStartDateTextChange
+                : this.props.onEndDateTextChange
 
             this.setState(state => ({
                 ...state,
                 [stateKey]: state[stateKey] + event.key,
             }))
+
+            updateDateText(this.state[stateKey] + event.key)
+
             return
         }
         if (event.key === 'Enter') {
@@ -163,8 +177,12 @@ class DateRangeSelection extends Component {
      */
     handleRawInputChange = ({ isStartDate }) => event => {
         const stateKey = isStartDate ? 'startDateText' : 'endDateText'
+        const updateDateText = isStartDate
+            ? this.props.onStartDateTextChange
+            : this.props.onEndDateTextChange
 
         const input = event.target
+        updateDateText(input.value)
         this.setState(state => ({ ...state, [stateKey]: input.value }))
     }
 
@@ -190,7 +208,14 @@ class DateRangeSelection extends Component {
         const updateDate = isStartDate
             ? this.props.onStartDateChange
             : this.props.onEndDateChange
+
+        const updateDateText = isStartDate
+            ? this.props.onStartDateTextChange
+            : this.props.onEndDateTextChange
+
         const stateKey = isStartDate ? 'startDateText' : 'endDateText'
+
+        updateDateText(date ? date.format(FORMAT) : '')
 
         this.setState(state => ({
             ...state,
@@ -209,30 +234,41 @@ class DateRangeSelection extends Component {
     }
 
     render() {
-        const { startDate, endDate, disabled } = this.props
+        const {
+            startDate,
+            endDate,
+            disabled,
+            startDateText,
+            endDateText,
+        } = this.props
 
         return (
             <div className={styles.dateRangeDiv}>
                 {/* <div className={styles.dateRangeSelection} id="date-picker">
                     <img src="/img/to-icon.png" className={styles.toIcon} />
                 </div> */}
-                <div className={classnames(styles.pickerContainer, styles.borderRight)}>
+                <div
+                    className={classnames(
+                        styles.pickerContainer,
+                        styles.borderRight,
+                    )}
+                >
                     <div className={styles.dateTitleContainer}>
-                            <span className={styles.dateTitle}>From</span>
+                        <span className={styles.dateTitle}>From</span>
                         <DatePickerInput
-                        placeholder="🕒 type time..."
-                        value={this.state.startDateText}
-                        name="from"
-                        onChange={this.handleRawInputChange({
-                            isStartDate: true,
-                        })}
-                        onSearchEnter={this.handleKeydown({
-                            isStartDate: true,
-                        })}
-                        disabled={disabled}
-                        clearFilter={this.handleClearClick({
-                            isStartDate: true,
-                        })}
+                            placeholder="🕒 type time..."
+                            value={startDateText}
+                            name="from"
+                            onChange={this.handleRawInputChange({
+                                isStartDate: true,
+                            })}
+                            onSearchEnter={this.handleKeydown({
+                                isStartDate: true,
+                            })}
+                            disabled={disabled}
+                            clearFilter={this.handleClearClick({
+                                isStartDate: true,
+                            })}
                         />
                     </div>
                     <div className={styles.datePickerDiv}>
@@ -260,19 +296,19 @@ class DateRangeSelection extends Component {
                     <div className={styles.dateTitleContainer}>
                         <span className={styles.dateTitle}>To</span>
                         <DatePickerInput
-                        placeholder="🕒 type time..."
-                        value={this.state.endDateText}
-                        name="from"
-                        onChange={this.handleRawInputChange({
-                            isStartDate: false,
-                        })}
-                        onSearchEnter={this.handleKeydown({
-                            isStartDate: false,
-                        })}
-                        disabled={disabled}
-                        clearFilter={this.handleClearClick({
-                            isStartDate: false,
-                        })}
+                            placeholder="🕒 type time..."
+                            value={endDateText}
+                            name="to"
+                            onChange={this.handleRawInputChange({
+                                isStartDate: false,
+                            })}
+                            onSearchEnter={this.handleKeydown({
+                                isStartDate: false,
+                            })}
+                            disabled={disabled}
+                            clearFilter={this.handleClearClick({
+                                isStartDate: false,
+                            })}
                         />
                     </div>
                     <div className={styles.datePickerDiv}>

@@ -9,12 +9,16 @@ export interface State {
     startDate: number
     /** Holds the current upper-bound time query. */
     endDate: number
+    startDateText: string
+    endDateText: string
 }
 
 const defState: State = {
     query: '',
     startDate: undefined,
     endDate: undefined,
+    startDateText: '',
+    endDateText: '',
 }
 
 const reducer = createReducer<State>({}, defState)
@@ -32,6 +36,16 @@ reducer.on(acts.setStartDate, (state, payload) => ({
 reducer.on(acts.setEndDate, (state, payload) => ({
     ...state,
     endDate: payload,
+}))
+
+reducer.on(acts.setStartDateText, (state, payload) => ({
+    ...state,
+    startDateText: payload,
+}))
+
+reducer.on(acts.setEndDateText, (state, payload) => ({
+    ...state,
+    endDateText: payload,
 }))
 
 export default reducer
