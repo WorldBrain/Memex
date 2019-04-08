@@ -28,7 +28,7 @@ class ResultList extends PureComponent<Props> {
     }
 
     get mainClass() {
-        return cx(styles.root, { [styles.noScroll]: this.props.scrollDisabled })
+        return cx(styles.root, { [styles.lessHeight]: this.props.isFilterBarActive })
     }
 
     render() {
