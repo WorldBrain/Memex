@@ -75,6 +75,11 @@
     }
 }
 
+.tooltipBottomLeft {
+    right: -150px;
+    z-index: 1;
+}
+
 .tooltipright {
     top: 50%;
     left: 100%;

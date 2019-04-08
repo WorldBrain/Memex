@@ -206,7 +206,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                     onKeyDown={this.handleTagBtnKeyDown}
                 >
                     {this.state.showTagsPicker && (
-                        <Tooltip position="bottom">
+                        <Tooltip position="bottomLeft">
                             <TagsContainer env={env} />
                         </Tooltip>
                     )}

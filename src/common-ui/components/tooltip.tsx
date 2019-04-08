@@ -33,6 +33,8 @@ class Tooltip extends React.PureComponent<Props> {
                                 this.props.position === 'top',
                             [styles.tooltipDate]: 
                                 this.props.position === 'tooltipDate',
+                            [styles.tooltipBottomLeft]: 
+                                this.props.position === 'bottomLeft',
                         },
                     )}
                 >
