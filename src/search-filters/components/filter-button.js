@@ -26,7 +26,8 @@ class FilterButton extends PureComponent {
         this.props.hidePopup()
     }
 
-    handleClearFilers = () => {
+    handleClearFilers = e => {
+        e.stopPropagation()
         this.props.clearFilters()
         this.props.hidePopup()
     }
