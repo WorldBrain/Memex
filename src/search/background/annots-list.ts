@@ -77,24 +77,55 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
     }
 
     private async filterByTags(urls: string[], params: AnnotSearchParams) {
-        let tags = await this.backend.dexieInstance
+        const tagsExc =
+            params.tagsExc && params.tagsExc.length
+                ? new Set(params.tagsExc)
+                : null
+        const tagsInc =
+            params.tagsInc && params.tagsInc.length
+                ? new Set(params.tagsInc)
+                : null
+
+        let tagsForUrls = new Map<string, string[]>()
+
+        await this.backend.dexieInstance
             .table<any, [string, string]>(AnnotsStorage.TAGS_COLL)
             .where('url')
             .anyOf(urls)
-            .primaryKeys()
+            .eachPrimaryKey(([tag, url]) => {
+                const curr = tagsForUrls.get(url) || []
+                tagsForUrls.set(url, [...curr, tag])
+            })
 
-        if (params.tagsExc && params.tagsExc.length) {
-            const tagsExc = new Set(params.tagsExc)
-            tags = tags.filter(([name]) => !tagsExc.has(name))
+        if (tagsExc) {
+            tagsForUrls = new Map(
+                [...tagsForUrls].filter(([, tags]) =>
+                    tags.reduce((acc, curr) => acc && !tagsExc.has(curr), true),
+                ),
+            )
         }
 
-        if (params.tagsInc && params.tagsInc.length) {
-            const tagsInc = new Set(params.tagsInc)
-            tags = tags.filter(([name]) => tagsInc.has(name))
+        if (tagsInc) {
+            tagsForUrls = new Map(
+                [...tagsForUrls].filter(([, tags]) =>
+                    tags.reduce((acc, curr) => acc || tagsInc.has(curr), false),
+                ),
+            )
         }
 
-        const tagUrls = new Set(tags.map(([, url]) => url))
-        return urls.filter(url => tagUrls.has(url))
+        return urls.filter(url => {
+            if (!tagsInc) {
+                // Make sure current url doesn't have any excluded tag
+                const urlTags = tagsForUrls.get(url) || []
+
+                return urlTags.reduce(
+                    (acc, curr) => acc && !tagsExc.has(curr),
+                    true,
+                )
+            }
+
+            return tagsForUrls.has(url)
+        })
     }
 
     private async filterByCollections(
