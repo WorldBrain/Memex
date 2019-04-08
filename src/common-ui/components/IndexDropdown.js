@@ -64,7 +64,6 @@ class IndexDropdown extends PureComponent {
     }
 
     render() {
-        // console.log(this.placeholder)
         return (
             <div className={this.mainClass} ref={this.props.setTagDivRef}>
                 <div
@@ -97,23 +96,24 @@ class IndexDropdown extends PureComponent {
                 )}
                 <div
                     className={cx(styles.tagContainer, {
-                        [styles.tagContainerAnnotations]: this.props.isForAnnotation,
+                        [styles.tagContainerAnnotations]: this.props
+                            .isForAnnotation,
                     })}
                 >
-                    <div className={styles.TagBox}>
-                        {this.props.children}
-                    </div>
+                    <div className={styles.TagBox}>{this.props.children}</div>
                 </div>
-                {!this.props.isForSidebar && !this.props.isForAnnotation && !this.props.isForRibbon && (
-                    <div className={styles.summaryTagContainer}>
-                        <button
-                            className={styles.backButton}
-                            onClick={this.props.onBackBtnClick}
-                        >
-                            Back
-                        </button>
-                    </div>
-                )}
+                {!this.props.isForSidebar &&
+                    !this.props.isForAnnotation &&
+                    !this.props.isForRibbon && (
+                        <div className={styles.summaryTagContainer}>
+                            <button
+                                className={styles.backButton}
+                                onClick={this.props.onBackBtnClick}
+                            >
+                                Back
+                            </button>
+                        </div>
+                    )}
             </div>
         )
     }

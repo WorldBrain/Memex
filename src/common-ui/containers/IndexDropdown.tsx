@@ -125,7 +125,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             this.setState({
                 displayFilters: this.props.initSuggestions
                     ? this.props.initSuggestions
-                    : this.props.initFilters,
+                    : [...this.props.initFilters, ...this.props.initExcFilters],
                 filters: this.props.initFilters,
                 excFilters: new Set<string>(this.props.initExcFilters),
             })
@@ -171,10 +171,17 @@ class IndexDropdownContainer extends Component<Props, State> {
     /**
      * Selector for derived display tags state
      */
-    private getDisplayTags(displayTags = true) {
-        const filters = displayTags
-            ? this.state.displayFilters
-            : [...this.state.filters, ...this.state.excFilters] // to display queried selected tags as well
+    private getDisplayTags() {
+        const filters =
+            this.state.searchVal.length > 0
+                ? this.state.displayFilters
+                : [
+                      ...new Set([
+                          ...this.state.filters,
+                          ...this.state.excFilters,
+                          ...this.state.displayFilters,
+                      ]),
+                  ]
 
         return filters.map((value, i) => ({
             value,
@@ -250,11 +257,16 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         this.props.onFilterAdd(newTag)
 
-        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+        if (this.props.source === 'tag') {
+            const tagSuggestions = await getLocalStorage(
+                TAG_SUGGESTIONS_KEY,
+                [],
+            )
 
-        if (!tagSuggestions.includes(newTag)) {
-            tagSuggestions.push(newTag)
-            await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
+            if (!tagSuggestions.includes(newTag)) {
+                tagSuggestions.push(newTag)
+                await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
+            }
         }
     }
 
@@ -328,11 +340,16 @@ class IndexDropdownContainer extends Component<Props, State> {
             clearFieldBtn: false,
         })
 
-        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+        if (this.props.source === 'tag') {
+            const tagSuggestions = await getLocalStorage(
+                TAG_SUGGESTIONS_KEY,
+                [],
+            )
 
-        if (!tagSuggestions.includes(tag)) {
-            tagSuggestions.push(tag)
-            await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
+            if (!tagSuggestions.includes(tag)) {
+                tagSuggestions.push(tag)
+                await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
+            }
         }
     }
 
@@ -510,7 +527,6 @@ class IndexDropdownContainer extends Component<Props, State> {
                 {...this.props}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 isForSidebar={this.props.isForSidebar}
-                isForRibbon={this.props.isForRibbon}
             />
         ))
 
@@ -549,9 +565,6 @@ class IndexDropdownContainer extends Component<Props, State> {
                 tagSearchValue={this.state.searchVal}
                 clearSearchField={this.clearSearchField}
                 showClearfieldBtn={this.showClearfieldBtn()}
-                tags={this.getDisplayTags(false)}
-                onTagClick={this.handleTagSelection}
-                onExcTagClick={this.handleExcTagSelection}
                 {...this.props}
             >
                 {this.renderTags()}
