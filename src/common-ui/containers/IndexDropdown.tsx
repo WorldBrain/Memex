@@ -188,7 +188,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             active: this.props.allTabs
                 ? this.state.multiEdit.has(value)
                 : this.pageHasTag(value),
-            focused: this.state.focused === i,
+            focused: this.state.focused === i + 1,
             excActive: this.state.excFilters.has(value),
         }))
     }
@@ -213,13 +213,7 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         const searchVal = this.getSearchVal()
 
-        return (
-            !!searchVal.length &&
-            !this.state.displayFilters.reduce(
-                (acc, tag) => acc || tag === searchVal,
-                false,
-            )
-        )
+        return !!searchVal.length
     }
 
     /**
@@ -379,10 +373,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     ) {
         event.preventDefault()
 
-        if (
-            this.canCreateTag() &&
-            this.state.focused === this.state.displayFilters.length
-        ) {
+        if (this.canCreateTag() && this.state.focused === 0) {
             return this.addTag()
         }
 
@@ -518,27 +509,29 @@ class IndexDropdownContainer extends Component<Props, State> {
     private renderTags() {
         const tags = this.getDisplayTags()
 
-        const tagOptions = tags.map((tag, i) => (
-            <IndexDropdownRow
-                {...tag}
-                key={i}
-                onClick={this.handleTagSelection(i)}
-                onExcClick={this.handleExcTagSelection(i)}
-                {...this.props}
-                scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                isForSidebar={this.props.isForSidebar}
-            />
-        ))
+        const tagOptions = tags.map((tag, i) => {
+            if (tag.value !== this.state.searchVal) {
+                return (
+                    <IndexDropdownRow
+                        {...tag}
+                        key={i}
+                        onClick={this.handleTagSelection(i)}
+                        onExcClick={this.handleExcTagSelection(i)}
+                        {...this.props}
+                        scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                        isForSidebar={this.props.isForSidebar}
+                    />
+                )
+            }
+        })
 
         if (this.canCreateTag()) {
-            tagOptions.push(
+            tagOptions.unshift(
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
                     onClick={this.addTag}
-                    focused={
-                        this.state.focused === this.state.displayFilters.length
-                    }
+                    focused={this.state.focused === 0}
                     isForAnnotation={this.props.isForAnnotation}
                     allowAdd={this.props.allowAdd}
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}

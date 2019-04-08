@@ -139,7 +139,7 @@ class ResultListContainer extends PureComponent<Props> {
 
     private renderTagHolder = ({ tags }, resultIndex) => (
         <TagHolder
-            tags={tags}
+            tags={[...new Set([...tags])]}
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
