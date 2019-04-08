@@ -49,7 +49,6 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
                 },
             },
         ]
-        console.log('Queuing Countly event', event)
         this.countlyQueue.push(event)
     }
 
