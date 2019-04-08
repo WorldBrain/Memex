@@ -13,7 +13,6 @@ import {
 } from '../../search-filters'
 import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
-import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -32,23 +31,12 @@ const stripTagPattern = tag =>
         .split('+')
         .join(' ')
 
-const BEFORE_REGEX = /before:[''"](.+)['"]/i
-const AFTER_REGEX = /after:['"](.+)['"]/i
-
 export const setQueryTagsDomains: (
     input: string,
     isEnter?: boolean,
 ) => Thunk = (input, isEnter = true) => dispatch => {
     const removeFromInputVal = term =>
         (input = input.replace(isEnter ? term : `${term} `, ''))
-
-    if (input.match(BEFORE_REGEX) || input.match(AFTER_REGEX)) {
-        const queryFilters = extractTimeFiltersFromQuery(input)
-        input = input.replace(BEFORE_REGEX, '')
-        input = input.replace(AFTER_REGEX, '')
-        dispatch(setStartDate(queryFilters.startDate))
-        dispatch(setEndDate(queryFilters.endDate))
-    }
 
     if (input[input.length - 1] === ' ' || isEnter) {
         // Split input into terms and try to extract any tag/domain patterns to add to filters
