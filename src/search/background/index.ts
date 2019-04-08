@@ -127,8 +127,8 @@ export default class SearchBackground {
     private processSearchParams(
         {
             query,
-            domainsInc,
-            domainsExc,
+            domains,
+            domainsExclude,
             tagsInc,
             lists,
             contentTypes = { notes: true, highlights: true, pages: true },
@@ -141,8 +141,8 @@ export default class SearchBackground {
         // Extract query terms and in-query-filters via QueryBuilder
         const qb = this.queryBuilderFactory()
             .searchTerm(query)
-            .filterDomains(domainsInc)
-            .filterExcDomains(domainsExc)
+            .filterDomains(domains)
+            .filterExcDomains(domainsExclude)
             .filterTags(tagsInc)
             .filterLists(lists)
             .get()

@@ -4,7 +4,8 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import diff from 'lodash/difference'
 
 import { INSTALL_TIME_KEY } from 'src/constants'
-import { AnnotSearchParams } from 'src/search/background/types'
+import { AnnotSearchParams } from './types'
+import { transformUrl } from '../pipeline'
 import { Annotation } from 'src/direct-linking/types'
 import AnnotsStorage from 'src/direct-linking/background/storage'
 const moment = require('moment-timezone')
@@ -123,6 +124,24 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return urls.filter(url => entryUrls.has(url))
     }
 
+    private async filterByDomains(
+        urls: string[],
+        { domainsInc, domainsExc }: AnnotSearchParams,
+    ) {
+        const inc = domainsInc && domainsInc.length ? new Set(domainsInc) : null
+        const exc = new Set(domainsExc)
+
+        return urls.filter(url => {
+            const { hostname } = transformUrl(url)
+
+            if (!inc) {
+                return !exc.has(hostname)
+            }
+
+            return inc.has(hostname) && !exc.has(hostname)
+        })
+    }
+
     private async mapUrlsToAnnots(urls: string[]): Promise<Annotation[]> {
         const annotUrlMap = new Map<string, Annotation>()
 
@@ -150,6 +169,13 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
 
         if (params.collections && params.collections.length) {
             results = await this.filterByCollections(results, params)
+        }
+
+        if (
+            (params.domainsExc && params.domainsInc.length) ||
+            (params.domainsExc && params.domainsExc.length)
+        ) {
+            results = await this.filterByDomains(results, params)
         }
 
         return results
