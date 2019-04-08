@@ -59,6 +59,10 @@
     display: none;
 }
 
+.menuItemFocused {
+    background-color: color14;
+}
+
 .isNewNote {
     composes: darkBlue from 'src/common-ui/colors.css';
     font-weight: bold;
