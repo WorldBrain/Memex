@@ -33,6 +33,10 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
         this.countlyConnector.init()
     }
 
+    private get countlyQueue() {
+        return this.countlyConnector.q
+    }
+
     private enqueueEvent({ key, id, value }) {
         const event = [
             'add_event',
@@ -46,7 +50,7 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
             },
         ]
         console.log('Queuing Countly event', event)
-        this.countlyConnector.q.push(event)
+        this.countlyQueue.push(event)
     }
 
     async trackEvent(

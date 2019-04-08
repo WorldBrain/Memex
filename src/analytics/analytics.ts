@@ -22,7 +22,7 @@ export default class AnalyticsManager implements Analytics {
     ) {
         const shouldTrackValue = await this._shouldTrack()
         if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
-            console.log('Tracking event', shouldTrackValue, event, options)
+            console.log('Tracking event', shouldTrackValue, event, options) // tslint:disable-line
         }
         if (!shouldTrackValue) {
             return
