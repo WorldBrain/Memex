@@ -188,7 +188,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             active: this.props.allTabs
                 ? this.state.multiEdit.has(value)
                 : this.pageHasTag(value),
-            focused: this.state.focused === i + 1,
+            focused: this.state.focused === i,
             excActive: this.state.excFilters.has(value),
         }))
     }
@@ -213,7 +213,21 @@ class IndexDropdownContainer extends Component<Props, State> {
 
         const searchVal = this.getSearchVal()
 
-        return !!searchVal.length
+        return (
+            !!searchVal.length &&
+            !this.state.displayFilters.reduce(
+                (acc, tag) => acc || tag === searchVal,
+                false,
+            )
+        )
+    }
+
+    private addExistingTag() {
+        const searchVal = this.getSearchVal()
+
+        return (
+            !!searchVal.length && this.state.displayFilters.includes(searchVal)
+        )
     }
 
     /**
@@ -373,7 +387,10 @@ class IndexDropdownContainer extends Component<Props, State> {
     ) {
         event.preventDefault()
 
-        if (this.canCreateTag() && this.state.focused === 0) {
+        if (
+            (this.canCreateTag() || this.addExistingTag()) &&
+            this.state.focused === 0
+        ) {
             return this.addTag()
         }
 
@@ -531,6 +548,27 @@ class IndexDropdownContainer extends Component<Props, State> {
                     key="+"
                     value={this.state.searchVal}
                     onClick={this.addTag}
+                    focused={this.state.focused === 0}
+                    isForAnnotation={this.props.isForAnnotation}
+                    allowAdd={this.props.allowAdd}
+                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                    isForSidebar={this.props.isForSidebar}
+                    source={this.props.source}
+                />,
+            )
+        }
+
+        if (this.addExistingTag()) {
+            tagOptions.unshift(
+                <IndexDropdownRow
+                    key="++"
+                    value={this.state.searchVal}
+                    onClick={this.addTag}
+                    active={
+                        this.props.allTabs
+                            ? this.state.multiEdit.has(this.state.searchVal)
+                            : this.pageHasTag(this.state.searchVal)
+                    }
                     focused={this.state.focused === 0}
                     isForAnnotation={this.props.isForAnnotation}
                     allowAdd={this.props.allowAdd}
