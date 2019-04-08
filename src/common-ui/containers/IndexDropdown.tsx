@@ -526,21 +526,17 @@ class IndexDropdownContainer extends Component<Props, State> {
     private renderTags() {
         const tags = this.getDisplayTags()
 
-        const tagOptions = tags.map((tag, i) => {
-            if (tag.value !== this.state.searchVal) {
-                return (
-                    <IndexDropdownRow
-                        {...tag}
-                        key={i}
-                        onClick={this.handleTagSelection(i)}
-                        onExcClick={this.handleExcTagSelection(i)}
-                        {...this.props}
-                        scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                        isForSidebar={this.props.isForSidebar}
-                    />
-                )
-            }
-        })
+        const tagOptions = tags.map((tag, i) => (
+            <IndexDropdownRow
+                {...tag}
+                key={i}
+                onClick={this.handleTagSelection(i)}
+                onExcClick={this.handleExcTagSelection(i)}
+                {...this.props}
+                scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                isForSidebar={this.props.isForSidebar}
+            />
+        ))
 
         if (this.canCreateTag()) {
             tagOptions.unshift(
