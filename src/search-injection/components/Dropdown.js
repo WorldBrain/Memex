@@ -34,7 +34,7 @@ class Dropdown extends React.Component {
                         className={styles.dropdownElement}
                         onClick={this.props.rerender}
                     >
-                        Change position of Memex
+                        Change position of results
                     </li>
                     <li
                         className={styles.dropdownElement}

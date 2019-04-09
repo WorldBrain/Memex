@@ -14,7 +14,7 @@ const Results = props => {
             )}
         >
             <div className={styles.header}>
-                <p className={styles.resultsText}>
+                <span className={styles.resultsText}>
                     <span className={styles.resultLength}>
                         {props.totalCount}
                     </span>{' '}
@@ -22,7 +22,7 @@ const Results = props => {
                     <a className={styles.links} onClick={props.seeMoreResults}>
                         See all
                     </a>
-                </p>
+                </span>
                 <div className={styles.linksContainer}>
                     
                     <a

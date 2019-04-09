@@ -12,12 +12,18 @@
     /* Base size of the children elements */
     position: relative;
     animation: fadeIn 1s ease-in;
-    margin-top: -20px;
+    margin-top: 5px;
     display: flex;
     flex-direction: column;
     border-bottom: #dedede solid 1px;
     margin-bottom: 20px;
     padding-bottom: 10px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
 }
 
 .resultLength {
@@ -29,8 +35,6 @@
 
 .linksContainer {
     display: inline-block;
-    margin-bottom: 10px;
-    margin-top: 6px;
     margin-left: 10px;
 }
 
@@ -54,7 +58,6 @@
 .settingsButton {
     composes: hoverColor from '../../common-ui/colors.css';
     position: absolute;
-    top: 15px;
     border: none;
     cursor: pointer;
     background-image: url('/img/settings.svg');
@@ -65,7 +68,6 @@
     width: 25px;
     background-position: center;
     vertical-align: middle;
-    margin-top: -2px;
     border-radius: 3px;
     margin-right: 5px;
 
@@ -77,7 +79,6 @@
 .resultsText {
     composes: darkBlue from '../../common-ui/colors.css';
     display: inline-block;
-    margin-bottom: 3px;
     font-size: 16px;
     font-weight: 600;
     width: 71%;
@@ -117,7 +118,6 @@
 .google_above {
     & .settingsButton {
         right: -10px;
-        top: 16px;
     }
 
     & .resultsText {
@@ -141,8 +141,7 @@
     width: 454px;
 
     & .settingsButton {
-        right: -5px;
-        top: 8px;
+        right: -7px;
     }
 
     & .mainContainer {

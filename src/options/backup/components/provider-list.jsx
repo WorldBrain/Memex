@@ -15,7 +15,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                     <span style={{ cursor: 'pointer' }}>
                         <span className={Styles.title}>Local Backup</span>
                         <p className={Styles.description}>
-                            Backup & restore your data locally, or to any cloud provider with a syncing folder on your computer (e.g. Dropbox, Spideroak, GDrive) <a className={Styles.link} target="_blank" href="https://www.notion.so/worldbrain/Backup-Restore-locally-and-to-any-cloud-provider-7b7e470247c548eeb3e9601a03e246a7">Learn More ▸</a>
+                            Backup & restore your data locally, or to any cloud provider with a syncing folder on your computer (e.g. Dropbox, Spideroak, GDrive) <a className={Styles.link} target="_blank" href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59">Learn More ▸</a>
                         </p>
                     </span>
                     {backupPath !== null ? (
