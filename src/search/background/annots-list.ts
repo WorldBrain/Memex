@@ -428,7 +428,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             }
 
             let annots = await this.queryAnnotsByDay(
-                dateCursor.valueOf(),
+                dateCursor.toDate(),
                 upperBound.toDate(),
             )
 
