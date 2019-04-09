@@ -6,6 +6,7 @@ const shortcut = 'img/shortcut.svg'
 
 export interface Props {
     scrollDisabled?: boolean
+    isFilterBarActive?: boolean
     children: ReactChild[] | ReactChild
 }
 
@@ -27,12 +28,17 @@ class ResultList extends PureComponent<Props> {
     }
 
     get mainClass() {
-        return cx(styles.root, { [styles.noScroll]: this.props.scrollDisabled })
+        return cx(styles.root, { [styles.lessHeight]: this.props.isFilterBarActive })
     }
 
     render() {
         return (
-            <ul className={this.mainClass} style={this.listHeightStyles}>
+            <ul
+                className={cx(this.mainClass, {
+                    [styles.filterBarActive]: this.props.isFilterBarActive,
+                })}
+                style={this.listHeightStyles}
+            >
                 {this.props.children}
                 <div className={styles.infoBox}>
                     <span className={styles.emoji}>🤓</span>

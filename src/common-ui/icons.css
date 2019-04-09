@@ -42,6 +42,12 @@
     background-position: center;
     background-repeat: no-repeat;
     background-image: url('/img/check.svg');
+}
+
+.starMark {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/star_blue_full.svg');
     opacity: 0.7;
     background-size: 100%;
 }
@@ -161,4 +167,9 @@
 .arrowUpRight {
     composes: iconPosition;
     background-image: url('/img/arrowUp.svg');
+}
+
+.excluded {
+    composes: iconPosition;
+    background-image: url('/img/exclusion.svg');
 }

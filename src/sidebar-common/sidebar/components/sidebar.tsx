@@ -15,7 +15,7 @@ interface Props {
     env: 'inpage' | 'overview'
     isOpen: boolean
     isLoading: boolean
-    needsWaypoint: boolean
+    needsWaypoint?: boolean
     appendLoader: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
@@ -114,9 +114,7 @@ class Sidebar extends React.Component<Props, State> {
                     <Topbar
                         disableAddCommentBtn={showCommentBox}
                         handleCloseBtnClick={closeSidebar}
-                        handleSettingsBtnClick={
-                            this._handleSettingsBtnClick
-                        }
+                        handleSettingsBtnClick={this._handleSettingsBtnClick}
                         handleAddCommentBtnClick={handleAddCommentBtnClick}
                     />
                     <div className={styles.sidebar}>

@@ -3,6 +3,8 @@ import * as React from 'react'
 import { TagInput } from '../components'
 import AllModesFooter from './all-modes-footer'
 import * as constants from '../comment-box/constants'
+import { getLocalStorage } from 'src/util/storage'
+import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 
 const styles = require('./edit-mode-content.css')
 
@@ -19,6 +21,7 @@ interface State {
     tagsInput: string[]
     rows: number
     isTagInputActive: boolean
+    tagSuggestions: string[]
 }
 
 class EditModeContent extends React.Component<Props, State> {
@@ -29,6 +32,12 @@ class EditModeContent extends React.Component<Props, State> {
         tagsInput: this.props.tags ? this.props.tags : [],
         rows: constants.NUM_DEFAULT_ROWS,
         isTagInputActive: false,
+        tagSuggestions: [],
+    }
+
+    async componentWillMount() {
+        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+        this.setState({ tagSuggestions: tagSuggestions.reverse() })
     }
 
     componentDidMount() {
@@ -148,6 +157,12 @@ class EditModeContent extends React.Component<Props, State> {
                     <TagInput
                         env={this.props.env}
                         tags={this.state.tagsInput}
+                        initTagSuggestions={[
+                            ...new Set([
+                                ...this.state.tagsInput,
+                                ...this.state.tagSuggestions,
+                            ]),
+                        ]}
                         isTagInputActive={this.state.isTagInputActive}
                         setTagInputActive={this._setTagInputActive}
                         addTag={this._addTag}

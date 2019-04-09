@@ -25,7 +25,10 @@ import {
     actions as filterActs,
     selectors as filters,
 } from '../../../search-filters'
+import { selectors as searchBar } from '../../search-bar'
 import { PageUrlsByDay } from 'src/search/background/types'
+import { getLocalStorage } from 'src/util/storage'
+import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 
 const styles = require('./ResultList.css')
 
@@ -42,11 +45,11 @@ export interface StateProps {
     searchResults: Result[]
     resultsByUrl: ResultsByUrl
     annotsByDay: PageUrlsByDay
+    isFilterBarActive: boolean
 }
 
 export interface DispatchProps {
     resetUrlDragged: () => void
-    hideSearchFilters: () => void
     resetActiveTagIndex: () => void
     setUrlDragged: (url: string) => void
     addTag: (i: number) => (f: string) => void
@@ -74,6 +77,15 @@ class ResultListContainer extends PureComponent<Props> {
     private setTagDivRef = (el: HTMLDivElement) => (this.tagDivRef = el)
     private setTagButtonRef = (el: HTMLButtonElement) =>
         this.tagBtnRefs.push(el)
+
+    state = {
+        tagSuggestions: [],
+    }
+
+    async componentWillMount() {
+        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+        this.setState({ tagSuggestions: tagSuggestions.reverse() })
+    }
 
     componentDidMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
@@ -115,8 +127,11 @@ class ResultListContainer extends PureComponent<Props> {
                 onFilterDel={this.props.delTag(index)}
                 setTagDivRef={this.setTagDivRef}
                 initFilters={tags}
+                initSuggestions={[
+                    ...new Set([...tags, ...this.state.tagSuggestions]),
+                ]}
                 source="tag"
-                isForRibbon={true}
+                isForRibbon
                 hover
             />
         )
@@ -124,7 +139,7 @@ class ResultListContainer extends PureComponent<Props> {
 
     private renderTagHolder = ({ tags }, resultIndex) => (
         <TagHolder
-            tags={tags}
+            tags={[...new Set([...tags])]}
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
@@ -152,7 +167,6 @@ class ResultListContainer extends PureComponent<Props> {
                 tagManager={this.renderTagsManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}
                 onTagBtnClick={this.props.handleTagBtnClick(index)}
-                hideSearchFilters={this.props.hideSearchFilters}
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
@@ -167,10 +181,10 @@ class ResultListContainer extends PureComponent<Props> {
         )
     }
 
-    /* 
-     * Switch rendering method based on annotsSearch value. 
+    /*
+     * Switch rendering method based on annotsSearch value.
      * If it's a page search, a simple map to PageResult items is enough.
-     * For Annotation search, docs and annotsByDay are merged to render a 
+     * For Annotation search, docs and annotsByDay are merged to render a
      * clustered view
      */
     private resultsStateToItems() {
@@ -244,7 +258,10 @@ class ResultListContainer extends PureComponent<Props> {
 
     render() {
         return (
-            <ResultList scrollDisabled={this.props.isScrollDisabled}>
+            <ResultList
+                scrollDisabled={this.props.isScrollDisabled}
+                isFilterBarActive={this.props.isFilterBarActive}
+            >
                 {this.renderResultItems()}
             </ResultList>
         )
@@ -264,6 +281,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     resultsClusteredByDay: selectors.resultsClusteredByDay(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
+    isFilterBarActive: searchBar.showFilterBar(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
@@ -274,7 +292,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     handleCommentBtnClick: ({ url, title }, index) => event => {
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
-        dispatch(sidebarActs.openSidebar(url, title))
+        dispatch(sidebarActs.openSidebar({ url, title }))
     },
     handleToggleBm: ({ url }, index) => event => {
         event.preventDefault()
@@ -294,7 +312,6 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetActiveTagIndex: () => dispatch(acts.resetActiveTagIndex()),
     setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
-    hideSearchFilters: () => dispatch(sidebarLeftActs.openSidebarListMode()),
     handleCrossRibbonClick: ({ url }) => event => {
         event.preventDefault()
         dispatch(listActs.delPageFromList(url))

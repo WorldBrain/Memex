@@ -142,12 +142,24 @@ export default class SearchStorage extends FeatureStorage {
         ])
 
         reverseAnnotMap.forEach(([day, pageUrl, annot]) => {
+            // Delete any annots containing excluded tags
+            const tags = annotsToTags.get(annot.url) || []
+
+            // Skip current annot if contains filtered tags
+            if (
+                params.tagsExc &&
+                params.tagsExc.length &&
+                params.tagsExc.some(tag => tags.includes(tag))
+            ) {
+                return
+            }
+
             const current = clusteredResults[day][pageUrl] || []
             clusteredResults[day][pageUrl] = [
                 ...current,
                 {
                     ...annot,
-                    tags: annotsToTags.get(annot.url) || [],
+                    tags,
                     hasBookmark: bmUrls.has(annot.url),
                 } as any,
             ]
@@ -156,6 +168,12 @@ export default class SearchStorage extends FeatureStorage {
         // Remove any annots without matching pages (keep data integrity regardless of DB)
         const validUrls = new Set(pages.map(page => page.url))
         for (const day of Object.keys(clusteredResults)) {
+            // Remove any empty days (they might have had all annots filtered out due to excluded tags)
+            if (!Object.keys(clusteredResults[day]).length) {
+                delete clusteredResults[day]
+                continue
+            }
+
             for (const url of Object.keys(clusteredResults[day])) {
                 if (!validUrls.has(url)) {
                     delete clusteredResults[day][url]
@@ -216,8 +234,12 @@ export default class SearchStorage extends FeatureStorage {
 
         const { ids } = await this.legacySearch(searchParams)
 
+        if (!ids.length) {
+            return []
+        }
+
         // Terms search requires lookup of the latest interaction times for scoring,
-        //  so it returns triple. The 3rd index is the latest time (to avoid redoing those queries).
+        //  so it returns triples. The 3rd index is the latest time (to avoid redoing those queries).
         const latestTimes =
             ids[0].length === 3 ? ids.map(([, , time]) => time) : undefined
 

@@ -1,0 +1,28 @@
+.container {
+    position: absolute;
+    width: 232px;
+    background: #fff;
+    border: 1px solid #b5b8b6;
+    box-sizing: border-box;
+    border-radius: 6px;
+    display: grid;
+    margin-top: 20px;
+}
+
+.clearFilters {
+    background-image: url('/img/removeIcon.svg');
+    background-size: 10px;
+    display: inline-block;
+    cursor: pointer;
+    width: 10px;
+    height: 10px;
+    margin-left: 10px;
+}
+
+.typeBox {
+    padding: 5px 0px;
+}
+
+.typeTooltip {
+    margin-top: 5px;
+}

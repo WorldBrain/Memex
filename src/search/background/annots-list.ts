@@ -4,7 +4,8 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import diff from 'lodash/difference'
 
 import { INSTALL_TIME_KEY } from 'src/constants'
-import { AnnotSearchParams } from 'src/search/background/types'
+import { AnnotSearchParams } from './types'
+import { transformUrl } from '../pipeline'
 import { Annotation } from 'src/direct-linking/types'
 import AnnotsStorage from 'src/direct-linking/background/storage'
 const moment = require('moment-timezone')
@@ -76,24 +77,51 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
     }
 
     private async filterByTags(urls: string[], params: AnnotSearchParams) {
-        let tags = await this.backend.dexieInstance
+        const tagsExc =
+            params.tagsExc && params.tagsExc.length
+                ? new Set(params.tagsExc)
+                : null
+        const tagsInc =
+            params.tagsInc && params.tagsInc.length
+                ? new Set(params.tagsInc)
+                : null
+
+        let tagsForUrls = new Map<string, string[]>()
+
+        await this.backend.dexieInstance
             .table<any, [string, string]>(AnnotsStorage.TAGS_COLL)
             .where('url')
             .anyOf(urls)
-            .primaryKeys()
+            .eachPrimaryKey(([tag, url]) => {
+                const curr = tagsForUrls.get(url) || []
+                tagsForUrls.set(url, [...curr, tag])
+            })
 
-        if (params.tagsExc && params.tagsExc.length) {
-            const tagsExc = new Set(params.tagsExc)
-            tags = tags.filter(([name]) => !tagsExc.has(name))
+        if (tagsExc) {
+            tagsForUrls = new Map(
+                [...tagsForUrls].filter(([, tags]) =>
+                    tags.some(tag => !tagsExc.has(tag)),
+                ),
+            )
         }
 
-        if (params.tagsInc && params.tagsInc.length) {
-            const tagsInc = new Set(params.tagsInc)
-            tags = tags.filter(([name]) => tagsInc.has(name))
+        if (tagsInc) {
+            tagsForUrls = new Map(
+                [...tagsForUrls].filter(([, tags]) =>
+                    tags.some(tag => tagsInc.has(tag)),
+                ),
+            )
         }
 
-        const tagUrls = new Set(tags.map(([, url]) => url))
-        return urls.filter(url => tagUrls.has(url))
+        return urls.filter(url => {
+            if (!tagsInc) {
+                // Make sure current url doesn't have any excluded tag
+                const urlTags = tagsForUrls.get(url) || []
+                return urlTags.some(tag => !tagsExc.has(tag))
+            }
+
+            return tagsForUrls.has(url)
+        })
     }
 
     private async filterByCollections(
@@ -123,6 +151,24 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return urls.filter(url => entryUrls.has(url))
     }
 
+    private async filterByDomains(
+        urls: string[],
+        { domainsInc, domainsExc }: AnnotSearchParams,
+    ) {
+        const inc = domainsInc && domainsInc.length ? new Set(domainsInc) : null
+        const exc = new Set(domainsExc)
+
+        return urls.filter(url => {
+            const { domain } = transformUrl(url)
+
+            if (!inc) {
+                return !exc.has(domain)
+            }
+
+            return inc.has(domain) && !exc.has(domain)
+        })
+    }
+
     private async mapUrlsToAnnots(urls: string[]): Promise<Annotation[]> {
         const annotUrlMap = new Map<string, Annotation>()
 
@@ -150,6 +196,13 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
 
         if (params.collections && params.collections.length) {
             results = await this.filterByCollections(results, params)
+        }
+
+        if (
+            (params.domainsExc && params.domainsInc.length) ||
+            (params.domainsExc && params.domainsExc.length)
+        ) {
+            results = await this.filterByDomains(results, params)
         }
 
         return results
@@ -371,7 +424,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             }
 
             let annots = await this.queryAnnotsByDay(
-                dateCursor.valueOf(),
+                dateCursor.toDate(),
                 upperBound.toDate(),
             )
 

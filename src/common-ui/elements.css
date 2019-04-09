@@ -16,7 +16,7 @@
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.5px;
-    height: 100%;
+    height: 21px;
     color: black;
     margin-right: 3px;
     display: flex;
@@ -25,7 +25,6 @@
 
 .tagPillSuggestions {
 	composes: tagPill;
-	opacity: 0.8;
 }
 
 .tagPillRemove {

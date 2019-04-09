@@ -15,7 +15,7 @@ interface Props {
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     highlightAll: (
         highlights: Annotation[],
-        openSidebar: () => void,
+        openSidebar: (args: { activeUrl?: string }) => void,
         focusOnAnnotation: (url: string) => void,
         hoverAnnotationContainer: (url: string) => void,
     ) => void

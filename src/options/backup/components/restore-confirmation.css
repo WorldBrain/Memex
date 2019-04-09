@@ -33,12 +33,13 @@
 .closeIcon {
     composes: removeIcon from 'src/common-ui/icons.css';
     composes: nakedSquareButton from 'src/common-ui/elements.css';
-    height: 15px;
-    width: 15px;
-    position: absolute;
-    top: 20px;
-    right: 20px;
     cursor: pointer;
+    height: 24px;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 24px;
+    background-size: 55%;
 }
 
 .normal {

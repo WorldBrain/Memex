@@ -1,34 +1,40 @@
+@value colors: 'src/common-ui/colors.css';
+@value color11, color14, color4, color6, color9 from colors;
+
+.tagContainer * {
+    font-family: 'Inter', sans-serif;
+}
+
 .menuItem {
-    composes: hoverColor from '../../common-ui/colors.css';
+    composes: hoverColor from 'src/common-ui/colors.css';
     align-items: center;
     display: flex;
     padding: 8px 15px 8px 20px;
     cursor: pointer;
-    border-bottom: 1px solid #eaecef;
+    border-bottom: 1px solid color9;
     word-wrap: break-word;
-    height: 35px;
     font-size: 14px;
-    min-height: 20px;
     justify-content: space-between;
 
     &:hover,
     &:focus,
     &:active {
-        background-color: #f7f7f7;
+        background-color: color14;
         outline: none;
     }
 
     &.isNew {
         justify-content: flex-start;
+        align-items: center;
     }
 }
 
 .tagPill {
-    composes: tagPillSuggestions from '../../common-ui/elements.css';
+    composes: tagPillSuggestions from 'src/common-ui/elements.css';
 }
 
 .menuItemFocused {
-    composes: selectedColor from '../../common-ui/colors.css';
+    composes: selectedColor from 'src/common-ui/colors.css';
     align-items: center;
     display: flex;
 }
@@ -44,13 +50,45 @@
 
 .tagContainer {
     width: 100%;
-    max-height: 40vh;
+    height: 350px;
     overflow-y: scroll;
-    height: max-content;
+    background-color: white;
 
     &:focus {
         outline: none;
     }
+}
+
+.TagBox {
+    overflow-x: hidden;
+    height: 190px;
+    display: initial;
+}
+
+.tagContainerSB {
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    /* min-height: max-content; */
+    height: 350px;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.backButton {
+    composes: nakedButton from 'src/common-ui/elements.css';
+    border: none;
+    outline: none;
+    grid-area: backButton;
+    justify-self: center;
+    align-self: center;
+    font-size: 15px;
+    margin-top: 3px;
+    color: color4;
+    cursor: pointer;
 }
 
 .numberTags {
@@ -81,6 +119,7 @@
 .searchIcon {
     display: flex;
     composes: searchIcon from '../../common-ui/icons.css';
+    background-image: url('/img/searchGrey.svg');
     width: 25px;
     height: 25px;
     background-size: 20px;
@@ -106,18 +145,6 @@
     box-shadow: none;
 }
 
-.tagDivFromOverview {
-    position: absolute;
-    width: 300px;
-    z-index: 1;
-    background-color: #fff;
-    margin-left: 500px;
-
-    @media (max-width: 835px) {
-        right: 10px;
-    }
-}
-
 .tagDivForFilter {
     z-index: 1;
     width: 99.7%;
@@ -127,6 +154,25 @@
     composes: checkMark from '../../common-ui/icons.css';
     width: 20px;
     height: 20px;
+    margin-left: 5px;
+    background-size: 80%;
+}
+
+.excluded {
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: excluded from 'src/common-ui/icons.css';
+    background-size: 16px;
+    width: 20px;
+    height: 20px;
+}
+
+.excludeInactive {
+    composes: excluded;
+    opacity: 0.5;
+
+    &:hover {
+        opacity: 0.75;
+    }
 }
 
 .value {
@@ -152,4 +198,8 @@
     color: black;
     padding: 0;
     background-color: transparent;
+}
+
+.selectionOption {
+    display: flex;
 }

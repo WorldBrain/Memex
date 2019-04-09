@@ -110,7 +110,6 @@ class SidebarContainer extends React.Component<Props> {
             activeAnnotationUrl,
             hoverAnnotationUrl,
             handleAddCommentBtnClick,
-            // sortAnnotationsByPosition,
             showCommentBox,
             showCongratsMessage,
         } = this.props
@@ -120,11 +119,6 @@ class SidebarContainer extends React.Component<Props> {
                 env={env}
                 isOpen={isOpen}
                 isLoading={isLoading}
-                // annotations={
-                //     sortAnnotationsByPosition
-                //         ? sortAnnotationsByPosition(annotations)
-                //         : annotations
-                // }
                 annotations={annotations}
                 activeAnnotationUrl={activeAnnotationUrl}
                 hoverAnnotationUrl={hoverAnnotationUrl}
@@ -142,7 +136,6 @@ class SidebarContainer extends React.Component<Props> {
                 handleEditAnnotation={this.props.handleEditAnnotation}
                 handleDeleteAnnotation={this.props.handleDeleteAnnotation}
                 handleScrollPagination={this.props.handleScrollPagination}
-                needsWaypoint={this.props.needsWaypoint}
                 appendLoader={this.props.appendLoader}
                 handleBookmarkToggle={this.props.handleBookmarkToggle}
             />
@@ -157,7 +150,9 @@ const mapStateToProps: MapStateToProps<
 > = state => ({
     isOpen: selectors.isOpen(state),
     isLoading: selectors.isLoading(state),
-    needsWaypoint: selectors.needsPagWaypoint(state),
+    // Disable pagination for now
+    // needsWaypoint: selectors.needsPagWaypoint(state),
+    needsWaypoint: false,
     appendLoader: selectors.shouldAppendLoader(state),
     annotations: selectors.annotations(state),
     activeAnnotationUrl: selectors.activeAnnotationUrl(state),

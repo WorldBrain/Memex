@@ -10,6 +10,8 @@ import {
     IndexDropdownRow,
 } from '../components'
 import { ClickHandler } from '../../popup/types'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -24,10 +26,15 @@ export interface Props {
     allowAdd?: boolean
     /** Tag Filters that are previously present in the location. */
     initFilters?: string[]
+    initExcFilters?: string[]
     /** Opt. cb to run when new tag added to state. */
     onFilterAdd?: (filter: string) => void
     /** Opt. cb to run when tag deleted from state. */
     onFilterDel?: (filter: string) => void
+    /** Opt. cb to run when new tag added to state. */
+    onExcFilterAdd?: (filter: string) => void
+    /** Opt. cb to run when tag deleted from state. */
+    onExcFilterDel?: (filter: string) => void
     /** Opt. cb with new tag to be added to a new annotation */
     onNewTagAdd?: (filter: string) => void
     setTagDivRef?: (el: HTMLDivElement) => void
@@ -37,6 +44,7 @@ export interface Props {
     isForRibbon?: boolean
     onBackBtnClick?: ClickHandler<HTMLButtonElement>
     allTabs?: boolean
+    isForFilters?: boolean
 }
 
 export interface State {
@@ -47,15 +55,20 @@ export interface State {
     focused: number
     clearFieldBtn: boolean
     multiEdit: Set<string>
+    excFilters: Set<string>
 }
 
 class IndexDropdownContainer extends Component<Props, State> {
     static defaultProps: Partial<Props> = {
         onFilterAdd: noop,
         onFilterDel: noop,
+        onExcFilterAdd: noop,
+        onExcFilterDel: noop,
         initFilters: [],
+        initExcFilters: [],
         isForAnnotation: false,
         isForRibbon: false,
+        isForFilters: false,
     }
 
     private suggestRPC
@@ -65,7 +78,6 @@ class IndexDropdownContainer extends Component<Props, State> {
     private delTagsFromOpenTabsRPC
     private processEvent
     private inputEl: HTMLInputElement
-    private multiEdit: Set<string>
 
     constructor(props: Props) {
         super(props)
@@ -94,6 +106,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             focused: props.initFilters.length ? 0 : -1,
             clearFieldBtn: false,
             multiEdit: new Set<string>(),
+            excFilters: new Set<string>(props.initExcFilters),
         }
     }
 
@@ -102,15 +115,21 @@ class IndexDropdownContainer extends Component<Props, State> {
         // when a filter is added or deleted, which implies that the length of
         // props.initFilters will differ across two updates.
         if (
-            prevProps.initFilters !== undefined &&
-            this.props.initFilters !== undefined &&
-            prevProps.initFilters.length !== this.props.initFilters.length
+            (prevProps.initFilters !== undefined &&
+                this.props.initFilters !== undefined &&
+                prevProps.initFilters.length !==
+                    this.props.initFilters.length) ||
+            (prevProps.initExcFilters !== undefined &&
+                this.props.initExcFilters !== undefined &&
+                prevProps.initExcFilters.length !==
+                    this.props.initExcFilters.length)
         ) {
             this.setState({
                 displayFilters: this.props.initSuggestions
                     ? this.props.initSuggestions
-                    : this.props.initFilters,
+                    : [...this.props.initFilters, ...this.props.initExcFilters],
                 filters: this.props.initFilters,
+                excFilters: new Set<string>(this.props.initExcFilters),
             })
         }
     }
@@ -151,17 +170,28 @@ class IndexDropdownContainer extends Component<Props, State> {
             }
         }
     }
-
     /**
      * Selector for derived display tags state
      */
     private getDisplayTags() {
-        return this.state.displayFilters.map((value, i) => ({
+        const filters =
+            this.state.searchVal.length > 0
+                ? this.state.displayFilters
+                : [
+                      ...new Set([
+                          ...this.state.filters,
+                          ...this.state.excFilters,
+                          ...this.state.displayFilters,
+                      ]),
+                  ]
+
+        return filters.map((value, i) => ({
             value,
             active: this.props.allTabs
                 ? this.state.multiEdit.has(value)
                 : this.pageHasTag(value),
             focused: this.state.focused === i,
+            excActive: this.state.excFilters.has(value),
         }))
     }
 
@@ -191,6 +221,14 @@ class IndexDropdownContainer extends Component<Props, State> {
                 (acc, tag) => acc || tag === searchVal,
                 false,
             )
+        )
+    }
+
+    private addExistingTag() {
+        const searchVal = this.getSearchVal()
+
+        return (
+            !!searchVal.length && this.state.displayFilters.includes(searchVal)
         )
     }
 
@@ -228,6 +266,18 @@ class IndexDropdownContainer extends Component<Props, State> {
         })
 
         this.props.onFilterAdd(newTag)
+
+        if (this.props.source === 'tag') {
+            const tagSuggestions = await getLocalStorage(
+                TAG_SUGGESTIONS_KEY,
+                [],
+            )
+
+            if (!tagSuggestions.includes(newTag)) {
+                tagSuggestions.push(newTag)
+                await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
+            }
+        }
     }
 
     private async handleSingleTagEdit(tag: string) {
@@ -278,7 +328,16 @@ class IndexDropdownContainer extends Component<Props, State> {
      * depending on their current status as assoc. tags or not.
      */
     private handleTagSelection = (index: number) => async event => {
-        const tag = this.state.displayFilters[index]
+        const tag =
+            this.state.searchVal.length > 0
+                ? this.state.displayFilters[index]
+                : [
+                      ...new Set([
+                          ...this.state.filters,
+                          ...this.state.excFilters,
+                          ...this.state.displayFilters,
+                      ]),
+                  ][index]
 
         if (this.props.allTabs) {
             await this.handleMultiTagEdit(tag)
@@ -294,6 +353,48 @@ class IndexDropdownContainer extends Component<Props, State> {
             focused: 0,
             clearFieldBtn: false,
         })
+
+        if (this.props.source === 'tag') {
+            const tagSuggestions = await getLocalStorage(
+                TAG_SUGGESTIONS_KEY,
+                [],
+            )
+
+            if (!tagSuggestions.includes(tag)) {
+                tagSuggestions.push(tag)
+                await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
+            }
+        }
+    }
+
+    private handleExcTagSelection = (index: number) => event => {
+        const tag =
+            this.state.searchVal.length > 0
+                ? this.state.displayFilters[index]
+                : [
+                      ...new Set([
+                          ...this.state.filters,
+                          ...this.state.excFilters,
+                          ...this.state.displayFilters,
+                      ]),
+                  ][index]
+
+        const excFilters = this.state.excFilters
+
+        if (!excFilters.has(tag)) {
+            this.props.onExcFilterAdd(tag)
+            excFilters.add(tag)
+        } else {
+            this.props.onExcFilterDel(tag)
+            excFilters.delete(tag)
+        }
+
+        this.setState({
+            excFilters,
+            searchVal: '',
+            focused: 0,
+            clearFieldBtn: false,
+        })
     }
 
     private handleSearchEnterPress(
@@ -302,8 +403,8 @@ class IndexDropdownContainer extends Component<Props, State> {
         event.preventDefault()
 
         if (
-            this.canCreateTag() &&
-            this.state.focused === this.state.displayFilters.length
+            (this.canCreateTag() || this.addExistingTag()) &&
+            this.state.focused === 0
         ) {
             return this.addTag()
         }
@@ -356,7 +457,10 @@ class IndexDropdownContainer extends Component<Props, State> {
         ) {
             event.preventDefault()
             event.stopPropagation()
-            this.setState(state => ({ searchVal: state.searchVal + event.key }), this.fetchTagSuggestions)
+            this.setState(
+                state => ({ searchVal: state.searchVal + event.key }),
+                this.fetchTagSuggestions,
+            )
             return
         }
 
@@ -434,7 +538,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
     }
 
-    private renderTags() {
+    private renderFilterTags() {
         const tags = this.getDisplayTags()
 
         const tagOptions = tags.map((tag, i) => (
@@ -442,22 +546,63 @@ class IndexDropdownContainer extends Component<Props, State> {
                 {...tag}
                 key={i}
                 onClick={this.handleTagSelection(i)}
+                onExcClick={this.handleExcTagSelection(i)}
                 {...this.props}
                 scrollIntoView={this.scrollElementIntoViewIfNeeded}
                 isForSidebar={this.props.isForSidebar}
             />
         ))
 
+        return tagOptions
+    }
+
+    private renderTags() {
+        const tags = this.getDisplayTags()
+
+        const tagOptions = tags.map((tag, i) => {
+            if (tag.value !== this.state.searchVal) {
+                return (
+                    <IndexDropdownRow
+                        {...tag}
+                        key={i}
+                        onClick={this.handleTagSelection(i)}
+                        onExcClick={this.handleExcTagSelection(i)}
+                        {...this.props}
+                        scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                        isForSidebar={this.props.isForSidebar}
+                    />
+                )
+            }
+        })
+
         if (this.canCreateTag()) {
-            tagOptions.push(
+            tagOptions.unshift(
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
                     onClick={this.addTag}
-                    focused={
-                        this.state.focused === this.state.displayFilters.length
-                    }
+                    focused={this.state.focused === 0}
                     isForAnnotation={this.props.isForAnnotation}
+                    allowAdd={this.props.allowAdd}
+                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                    isForSidebar={this.props.isForSidebar}
+                    source={this.props.source}
+                />,
+            )
+        }
+
+        if (this.addExistingTag()) {
+            tagOptions.unshift(
+                <IndexDropdownRow
+                    key="++"
+                    value={this.state.searchVal}
+                    onClick={this.addTag}
+                    active={
+                        this.props.allTabs
+                            ? this.state.multiEdit.has(this.state.searchVal)
+                            : this.pageHasTag(this.state.searchVal)
+                    }
+                    focused={this.state.focused === 0}
                     allowAdd={this.props.allowAdd}
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
                     isForSidebar={this.props.isForSidebar}
@@ -485,7 +630,9 @@ class IndexDropdownContainer extends Component<Props, State> {
                 showClearfieldBtn={this.showClearfieldBtn()}
                 {...this.props}
             >
-                {this.renderTags()}
+                {this.props.isForFilters
+                    ? this.renderFilterTags()
+                    : this.renderTags()}
             </IndexDropdown>
         )
     }

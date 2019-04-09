@@ -86,7 +86,11 @@ export default class DirectLinkingBackground {
 
     async toggleSidebarOverlay(
         { tab },
-        { anchor, override } = { anchor: null, override: false },
+        { anchor, override, activeUrl } = {
+            anchor: null,
+            override: false,
+            activeUrl: undefined,
+        },
     ) {
         const [currentTab] = await browser.tabs.query({
             active: true,
@@ -97,7 +101,7 @@ export default class DirectLinkingBackground {
         // Make sure that the ribbon is inserted before trying to open the
         // sidebar.
         await remoteFunction('insertRibbon', { tabId })({ override })
-        await remoteFunction('openSidebar', { tabId })(anchor)
+        await remoteFunction('openSidebar', { tabId })({ anchor, activeUrl })
     }
 
     followAnnotationRequest({ tab }: TabArg) {
@@ -124,7 +128,7 @@ export default class DirectLinkingBackground {
 
     async getAllAnnotationsByUrl(
         { tab }: TabArg,
-        { url, limit = 10, skip = 0, ...params }: AnnotSearchParams,
+        { url, limit = 1000, skip = 0, ...params }: AnnotSearchParams,
     ) {
         url = url == null && tab != null ? tab.url : url
 

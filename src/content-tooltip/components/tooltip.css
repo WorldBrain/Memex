@@ -9,7 +9,7 @@
     position: absolute;
     font-size: 13px;
     background-color: #fff;
-    height: 40px;
+    height: 35px;
     width: max-content;
     min-width: 50px;
     padding: 2px 6px;
@@ -74,9 +74,10 @@
 .tooltip.statePristine {
     border-radius: 3px;
     width: 105px;
-    display: flex;
+    display: grid;
     justify-content: space-between;
     align-items: center;
+    grid-template-columns: 60% 30%;
 
     &::after {
         left: 50%;
@@ -107,15 +108,16 @@
 
 .createButtons {
     z-index: 10;
-    width: 80px;
     height: 100%;
     margin-left: 10px;
+    width: inherit;
     display: grid;
     justify-content: flex-start;
     align-items: center;
-    column-gap: 8px;
+    column-gap: 10px;
     grid-auto-flow: column;
     animation: slideIn 0.05s ease-in-out;
+    grid-template-columns: 50% 50%;
 
     & div {
         cursor: pointer;
@@ -191,9 +193,9 @@
         background-image: url('/img/checked_green.svg');
         background-repeat: no-repeat;
         background-position: center;
-        background-size: 28px;
-        width: 30px;
-        height: 30px;
+        background-size: 25px;
+        width: 25px;
+        height: 25px;
         animation: slideIn 0.05s ease-in-out 0.3s;
         animation-fill-mode: both;
         margin-left: 8px;
@@ -202,7 +204,9 @@
     & .copiedTextContainer {
         height: 35px;
         padding-left: 4px;
-        padding-top: 7px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         animation: slideIn 0.05s ease-in-out 0.3s;
         animation-fill-mode: both;
         text-align: left;

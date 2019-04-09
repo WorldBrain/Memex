@@ -32,7 +32,7 @@ const menuStyles = (env: 'inpage' | 'overview') => {
         ;((baseStyles.bmMenu.top as unknown) as string) = '55px'
         ;((baseStyles.bmMenuWrap.top as unknown) as string) = '0px'
         ;((baseStyles.bmMenu.right as unknown) as string) = '0px'
-        ;((baseStyles.bmMenuWrap.zIndex as unknown) as string) = '30000px'
+        ;((baseStyles.bmMenuWrap.zIndex as unknown) as string) = '999'
     }
 
     return baseStyles

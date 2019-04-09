@@ -58,21 +58,16 @@ class FilteredRow extends PureComponent {
                     >
                         {this.props.value}
                     </div>
-                    {this.props.isExclusive && 
-                        this.props.available && (
-                        <button
-                            title={'Results from this domain excluded'}
-                            className={cx(styles.exclusion, styles.button)}
-                        />
-                    )}
-                    {this.props.active &&
+                    {this.props.isExclusive &&
                         this.props.available && (
                             <button
-                                className={cx(
-                                    styles.tick,
-                                    styles.button,
-                                )}
+                                title={'Results from this domain excluded'}
+                                className={cx(styles.exclusion, styles.button)}
                             />
+                        )}
+                    {this.props.active &&
+                        this.props.available && (
+                            <button className={cx(styles.button)} />
                         )}
                     {this.props.active &&
                         !this.props.available && (

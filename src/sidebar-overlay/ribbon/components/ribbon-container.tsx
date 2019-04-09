@@ -59,7 +59,7 @@ interface OwnProps {
     isRibbonEnabled: boolean
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
-    openSidebar: () => void
+    openSidebar: (args: any) => void
     closeSidebar: () => void
     isCommentSaved: boolean
     commentText: string

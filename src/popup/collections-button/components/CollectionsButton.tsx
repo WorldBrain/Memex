@@ -37,14 +37,13 @@ class CollectionsButton extends PureComponent<Props> {
 
                 <ButtonTooltip
                     tooltipText="Add all tabs in window"
-                    position="left"
+                    position="popupLeft"
                 >
                 <Button
                     onClick={this.props.toggleAllTabsPopup}
                     disabled={this.props.isDisabled}
                     btnClass={styles.allTabs}
                     itemClass={styles.buttonBulk}
-                    title="Add all tabs in this window to Collection(s)"
                 />
                 </ButtonTooltip>
             </div>

@@ -19,5 +19,5 @@ export const BACKUP_STATUS_MESSAGES: any = {
     automatic_backup_message:
         'Automatic backups every 15 minutes. Worry-free.',
     automatic_backup_disabled_first_backup_done:
-        'Remember to regularly backup your data',
+        'All data is only stored on your computer. Remember to regularly back it up.',
 }

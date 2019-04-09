@@ -24,7 +24,7 @@ export default class RestoreConfirmation extends React.Component<Props, {}> {
         return (
             <div className={styles.container}>
                 <div className={styles.box}>
-                    <img
+                    <span
                         className={styles.closeIcon}
                         onClick={this.props.onClose}
                     />

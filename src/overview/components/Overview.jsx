@@ -9,7 +9,7 @@ import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
 import {
     SidebarContainer as SidebarLeft,
-    SidebarIconsContainer as SidebarIcons,
+    CollectionsContainer as CollectionsButton,
 } from '../sidebar-left'
 import { Header, acts as searchBarActs } from '../search-bar'
 import { Results } from '../results'
@@ -35,16 +35,16 @@ class Overview extends PureComponent {
     render() {
         return (
             <React.Fragment>
-            {isDuringInstall() ?
-                    <Onboarding /> 
-                    :
+                {isDuringInstall() ? (
+                    <Onboarding />
+                ) : (
                     <div>
                         <Head />
+                        <CollectionsButton />
                         <Header />
-                        <SidebarIcons />
                         <SidebarLeft />
                         <Results />
-                        <DeleteConfirmModal />
+                        <DeleteConfirmModal message="Delete page and related note" />
                         <DragElement />
                         <SidebarContainer
                             env="overview"
@@ -53,7 +53,7 @@ class Overview extends PureComponent {
                         />
                         <Tooltip />
                     </div>
-            }
+                )}
             </React.Fragment>
         )
     }

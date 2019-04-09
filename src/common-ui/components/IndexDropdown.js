@@ -3,8 +3,6 @@ import PropTypes from 'prop-types'
 import cx from 'classnames'
 
 import styles from './IndexDropdown.css'
-import annotationStyles from './IndexDropdownAnnotation.css'
-import sidebarStyles from './IndexDropdownSidebar.css'
 
 /**
  * @augments {PureComponent<{onTagSearchChange: any, onTagSearchKeyDown: any, setInputRef: any, numberOfTags: any, tagSearchValue: any, clearSearchField?: any, showClearfieldBtn?: any}, *>}
@@ -14,7 +12,6 @@ class IndexDropdown extends PureComponent {
         children: PropTypes.array.isRequired,
         onTagSearchChange: PropTypes.func.isRequired,
         onTagSearchKeyDown: PropTypes.func.isRequired,
-        numberOfTags: PropTypes.number.isRequired,
         setTagDivRef: PropTypes.func,
         setInputRef: PropTypes.func.isRequired,
         tagSearchValue: PropTypes.string.isRequired,
@@ -32,20 +29,12 @@ class IndexDropdown extends PureComponent {
         allTabsCollection: PropTypes.bool,
     }
 
-    get styles() {
-        if (this.props.isForAnnotation) {
-            return annotationStyles
-        } else if (this.props.isForSidebar) {
-            return sidebarStyles
-        }
-        return styles
-    }
-
     get mainClass() {
-        return cx(this.styles.tagDiv, {
-            [this.styles.tagDivFromOverview]: this.props.hover,
-            [this.styles.tagDivForFilter]: !this.props.url,
-            [this.styles.tagDivForFilterSB]: this.props.isForSidebar,
+        return cx(styles.tagDiv, {
+            [styles.tagDivFromOverview]: this.props.hover,
+            [styles.tagDivForAnnotations]: this.props.isForAnnotation,
+            [styles.tagDivForFilter]: !this.props.url,
+            [styles.tagDivForFilterSB]: this.props.isForSidebar,
         })
     }
 
@@ -78,13 +67,13 @@ class IndexDropdown extends PureComponent {
         return (
             <div className={this.mainClass} ref={this.props.setTagDivRef}>
                 <div
-                    className={cx(this.styles.searchContainer, {
-                        [this.styles.commentBox]: this.props.allowAdd,
+                    className={cx(styles.searchContainer, {
+                        [styles.commentBox]: this.props.allowAdd,
                     })}
                 >
                     <span className={styles.searchIcon} />
                     <input
-                        className={this.styles.search}
+                        className={styles.search}
                         name="query"
                         placeholder={this.searchPlaceholder}
                         onChange={this.props.onTagSearchChange}
@@ -106,34 +95,25 @@ class IndexDropdown extends PureComponent {
                     </p>
                 )}
                 <div
-                    className={cx(this.styles.tagContainerSB, {
-                        [this.styles.tagContainer]: this.props.isForSidebar,
-                        [this.styles.remove]: !this.props.children.length,
+                    className={cx(styles.tagContainer, {
+                        [styles.tagContainerAnnotations]: this.props
+                            .isForAnnotation,
                     })}
-                >   
-                <div className={styles.TagBox}>
-                    {this.props.children}
+                >
+                    <div className={styles.TagBox}>{this.props.children}</div>
                 </div>
-                </div>
-                {!this.props.isForSidebar && (
-                    <div className={this.styles.summaryTagContainer}>
-                        {!this.props.isForAnnotation &&
-                            !this.props.isForRibbon && (
-                                <button
-                                    className={this.styles.backButton}
-                                    onClick={this.props.onBackBtnClick}
-                                >
-                                    Back
-                                </button>
-                            )}
-                        <div className={this.styles.numberTags}>
-                            <span className={this.styles.bold}>
-                                {this.props.numberOfTags}
-                            </span>{' '}
-                            {this.unit} selected
+                {!this.props.isForSidebar &&
+                    !this.props.isForAnnotation &&
+                    !this.props.isForRibbon && (
+                        <div className={styles.summaryTagContainer}>
+                            <button
+                                className={styles.backButton}
+                                onClick={this.props.onBackBtnClick}
+                            >
+                                Back
+                            </button>
                         </div>
-                    </div>
-                )}
+                    )}
             </div>
         )
     }

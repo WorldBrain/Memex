@@ -1,0 +1,123 @@
+.listButton {
+    composes: collectionsIconFull from 'src/common-ui/icons.css';
+    width: 30px;
+    height: 30px;
+    opacity: 0.8;
+    background-size: 24px;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.collectionEnabled {
+    composes: collectionsIconFull from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+}
+
+.title {
+    font-size: 15px;
+    margin-left: 10px;
+    white-space: nowrap;
+    text-align: center;
+    max-width: 164px;
+    overflow-x: scroll;
+
+    &::-webkit-scrollbar {
+        height: 0px;  /* Remove scrollbar space */
+        background: transparent;  /* Optional: just make scrollbar invisible */
+    }
+}
+
+.longTitle {
+    overflow-x: unset;
+    max-width: fit-content;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    outline: none;
+    padding: 0px;
+    background-size: 26px;
+}
+
+.buttonContainerOverview {
+    position: fixed;
+    display: flex !important; /* stylelint-disable-line declaration-no-important */
+    flex-direction: column;
+    align-items: center;
+    top: 80px;
+    left: -8px;
+    z-index: 500;
+    width: 105px;
+    justify-content: space-evenly;
+
+    @media (max-width: 835px) {
+        display: none !important; /* stylelint-disable-line declaration-no-important */
+    }
+}
+
+.buttonContainer {
+    position: fixed;
+    display: flex !important; /* stylelint-disable-line declaration-no-important */
+    justify-content: flex-start;
+    flex-direction: column;
+    align-items: center;
+    height: 55px;
+    z-index: 1200;
+    padding-left: 10px;
+    padding-right: 10px;
+    max-width: 205px;
+}
+
+.longContainer {
+    max-width: fit-content;
+}
+
+.sidebarLocked {
+    composes: hoversidebaropen from 'src/common-ui/colors.css';
+}
+
+.smallButton {
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #767676;
+    padding: 2px 4px;
+    border-radius: 3%;
+    animation: appear 0.2s forwards 0s;
+    top: 33px;
+    left: 41px;
+    position: relative;
+
+    &:hover {
+        color: #111;
+    }
+}
+
+.enabled {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+    outline: none;
+    composes: nakedButton from 'src/common-ui/elements.css';
+    margin-top: 9px;
+    position: absolute;
+    left: 7px;
+}
+
+@keyframes appear {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}

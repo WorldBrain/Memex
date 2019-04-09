@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color1, color 2, color3, color6, color4, color13 from colors;
+
 .filterButton {
     background-image: url('/img/filter.svg');
     width: 40px;
@@ -40,4 +43,112 @@
 .container {
     height: 100%;
     padding-bottom: 10vh;
+}
+
+.arrowButton {
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 26px;
+    height: 26px;
+    border-radius: 3px;
+    opacity: 0.8;
+    background-size: 16px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.arrow {
+    background-image: url('/img/doubleArrow.svg');
+    animation: changeLoc 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
+    composes: hoversidebaropen from 'src/common-ui/colors.css';
+}
+
+.arrowBox {
+    float: right;
+    margin-right: 5px;
+    margin-top: 5px;
+}
+
+.arrowBoxLocked {
+    margin-top: -61px;
+}
+
+.arrowReverse {
+    background-image: url('/img/doubleArrow.svg');
+    transform: rotate(180deg);
+}
+
+.triggerDiv {
+    height: 100%;
+    display: flex;
+    width: 10px;
+    position: absolute;
+    background: transparent;
+    z-index: 3000;
+}
+
+.sidebarLocked {
+    &.sidebarExpanded {
+        box-shadow: none;
+        background: color13;
+        animation: background 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
+    }
+}
+
+.sidebar {
+    position: absolute;
+    height: 90vh;
+    transform: translate(0, 0);
+    transition: all 0.1s ease-in-out;
+    line-height: normal;
+    text-align: start;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: white;
+}
+
+.sidebarExpanded {
+    margin-top: 10px;
+    width: 250px;
+    border-radius: 3px;
+    display: grid;
+    background: white;
+    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+}
+
+@keyframes changeLoc {
+    0% {
+        opacity: 1;
+        background: none;
+    }
+
+    25% {
+        opacity: 0;
+        background: none;
+    }
+
+    75% {
+        opacity: 1;
+        background: none;
+    }
+
+    100% {
+        opacity: 1;
+        background: none;
+    }
 }

@@ -49,7 +49,6 @@
     width: 100%;
     padding: 15px 40px;
     background-color: color12;
-    composes: toolTips from 'src/common-ui/elements.css';
     align-items: center;
 }
 

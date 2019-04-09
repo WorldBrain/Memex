@@ -1,5 +1,8 @@
+@value colors: 'src/common-ui/colors.css';
+@value color7, color14, color4, color6, color9 from colors;
+
 .navbar {
-    display: flex;
+    display: grid;
     flex: 1;
     align-items: center;
     justify-content: space-between;
@@ -8,37 +11,24 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 300001;
+    grid-template-columns: 25% 800px 25%;
+    z-index: 1000;
+
+    /* z-index: 300001;
     background-color: #fff;
-    padding: 0 60px;
+    padding: 0 60px; */
+
     border-bottom: 1px solid #ebebeb;
 
     @media (max-width: 1000px) {
-        justify-content: center;
+        justify-content: flex-end;
         padding: 0;
-    }
-}
-
-.logo {
-    background-image: url('/img/worldbrain-logo.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 131px;
-    height: 33px;
-
-    @media (max-width: 1200px) {
-        width: 24px;
-        background-image: url('/img/worldbrain-logo-narrow.png');
-    }
-
-    @media (max-width: 1000px) {
-        display: none;
+        display: flex;
     }
 }
 
 .searchField {
-    composes: searchField from '../../../common-ui/elements.css';
+    composes: searchField from 'src/common-ui/elements.css';
     display: flex;
     justify-content: space-between;
     width: 100%;
@@ -53,7 +43,7 @@
 }
 
 .query {
-    composes: searchField from '../../../common-ui/elements.css';
+    composes: searchField from 'src/common-ui/elements.css';
     flex: 1;
     background-image: url('/img/searchIcon.svg');
     background-repeat: no-repeat;
@@ -73,17 +63,22 @@
     background-color: #fff;
     transition: all 200ms ease-out;
     border-right: none;
+    align-items: center;
+
+     @media (max-width: 1000px) {
+        width: 65%;
+        margin-right: 20px;
+    }
 }
 
 .links {
     display: flex;
     justify-content: flex-end;
     align-content: center;
-    width: 360px;
-    margin-left: -230px;
     height: 100%;
     font-weight: normal;
     align-items: center;
+    padding-right: 20px;
 
     @media (max-width: 1200px) {
         margin-left: 0;
@@ -94,7 +89,7 @@
         display: none;
     }
 
-    > a {
+    & > a {
         height: 25px;
     }
 }
@@ -106,8 +101,8 @@
 }
 
 .upgrade {
-    composes: h2Color from '../../../common-ui/colors.css';
-    composes: nakedButton from '../../../common-ui/elements.css';
+    composes: h2Color from 'src/common-ui/colors.css';
+    composes: nakedButton from 'src/common-ui/elements.css';
     display: none;
     font-size: 15px;
     text-decoration: none;
@@ -120,8 +115,8 @@
 }
 
 .settingsIcon {
-    composes: settingsIcon from '../../../common-ui/icons.css';
-    composes: nakedSquareButton from '../../../common-ui/elements.css';
+    composes: settingsIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
     height: 25px;
     width: 25px;
     padding: 5px;
@@ -138,4 +133,44 @@
     @media (max-width: 1260px) {
         display: none;
     }
+}
+
+.button {
+    composes: nakedButton from 'src/common-ui/elements.css';
+    border: none;
+    padding: 4px 6px 3px 8px;
+    display: flex;
+    align-items: center;
+    margin-left: 25px;
+    height: 25px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-right: -8px;
+    outline: none;
+}
+
+.activeButton {
+    background-color: color7;
+}
+
+.clearFilters {
+    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: onHoverDark from 'src/common-ui/colors.css';
+    border-radius: 3px;
+    background-size: 10px;
+    display: inline-block;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    margin-left: 5px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.collectionsBtn {
+    width: 250px;
+    height: 55px;
+    align-items: center;
+    display: flex;
 }

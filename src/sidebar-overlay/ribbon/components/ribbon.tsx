@@ -27,7 +27,7 @@ interface Props {
     isBookmarked: boolean
     tagManager: ReactNode
     collectionsManager: ReactNode
-    openSidebar: () => void
+    openSidebar: (args: any) => void
     closeSidebar: () => void
     handleRibbonToggle: () => void
     handleTooltipToggle: () => void
@@ -122,7 +122,6 @@ class Ribbon extends Component<Props, State> {
     private fetchAndHighlightAnnotations = async () => {
         const annotations = await remoteFunction('getAllAnnotationsByUrl')({
             url: window.location.href,
-            limit: 1000,
         })
         const highlights = annotations.filter(annotation => annotation.selector)
         highlightAnnotations(highlights, this.props.openSidebar)
@@ -205,7 +204,7 @@ class Ribbon extends Component<Props, State> {
                                     })}
                                     onClick={() =>
                                         !this.props.isSidebarOpen
-                                            ? this.props.openSidebar()
+                                            ? this.props.openSidebar({})
                                             : this.props.closeSidebar()
                                     }
                                 />

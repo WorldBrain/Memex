@@ -1,14 +1,13 @@
+@value colors: 'src/common-ui/colors.css';
+@value color6, color12 from colors;
+
 .listForm {
     height: 30px;
-    width: 70%;
-    border: 0px solid transparent;
-    border-top: none;
-    box-shadow: inset 1px 1px 3px #3eb995;
+    width: 100%;
+    border: none;
     outline: none;
     padding-left: 15px;
     font-size: 13px;
-    font-style: italic;
-    padding-top: 4px;
 }
 
 .createListForm {
@@ -20,48 +19,38 @@
     position: relative;
 }
 
-.tick {
-    background-image: url('/img/tick.svg');
-    width: 28px;
-    height: 28px;
-    float: right;
-    right: 4px;
-    position: absolute;
+.button {
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 24px;
+    height: 24px;
+    display: inline;
+    border: none;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    outline: none;
+    background-color: transparent;
+}
 
-    &:hover {
-        background-image: url('/img/tick_green.svg');
-    }
+.tick {
+    composes: checkMark from 'src/common-ui/icons.css';
+    background-size: 75%;
 }
 
 .deleteButton {
-    background-image: url('/img/cross_circle.svg');
-    width: 21px;
-    height: 21px;
-    float: right;
-    position: absolute;
-    right: 35px;
-    top: 12px;
-
-    &:hover {
-        background-color: #3eb995;
-        border-radius: 50%;
-    }
+    composes: removeIcon from 'src/common-ui/icons.css';
+    background-size: 50%;
+    margin-left: 5px;
 }
 
-.button {
-    display: inline;
-    border: none;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-size: contain;
-    cursor: pointer;
-    outline: none;
-    margin-top: -2px;
+.buttonBox {
+    display: flex;
+    margin-right: 5px;
 }
 
 .sameNameWarning {
     display: flex;
     justify-content: center;
-    color: red;
+    color: color12;
     font-weight: 400;
+    font-size: 14px;
 }

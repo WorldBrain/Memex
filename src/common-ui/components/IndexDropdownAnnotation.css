@@ -47,7 +47,7 @@
 
 .tagContainer {
     width: 100%;
-    max-height: 400px;
+    max-height: 250px;
     overflow-y: scroll;
 
     &::-webkit-scrollbar {
@@ -75,13 +75,24 @@
 }
 
 .searchContainer {
-    background: color11;
-    display: flex;
+    /* background: color11; */
+    display: initial;
+    height: 190px;
     align-items: center;
     justify-content: space-between;
     padding: 2px 10px 2px 10px;
     border-radius: 3px;
     margin: 5px 5px 5px 5px;
+    background: #fff;
+}
+
+.searchIcon {
+    display: flex;
+    composes: searchIcon from '../../common-ui/icons.css';
+    background-image: url('../../../img/searchGrey.svg');
+    width: 25px;
+    height: 25px;
+    background-size: 20px;
 }
 
 .search {
@@ -90,7 +101,8 @@
     font-size: 14px;
     padding: 10px 0;
     border: none;
-    background-color: color11;
+
+    /* background-color: color11; */
     margin-left: 10px;
     box-sizing: border-box;
 
@@ -103,6 +115,8 @@
     &::placeholder {
         color: #888;
     }
+
+    background: #fff;
 
     &:focus {
         outline: none;

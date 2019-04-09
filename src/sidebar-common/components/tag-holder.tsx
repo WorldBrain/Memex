@@ -51,7 +51,8 @@ class TagHolder extends React.Component<Props, State> {
     }
 
     private _renderTags() {
-        return this.props.tags.map((tag, index) => {
+        const tags = [...new Set([...this.props.tags])]
+        return tags.map((tag, index) => {
             if (index >= this.state.maxTagsAllowed) {
                 return null
             }
@@ -69,7 +70,7 @@ class TagHolder extends React.Component<Props, State> {
 
     private _renderNumberOfRemainingTags() {
         const { maxTagsAllowed } = this.state
-        const { tags } = this.props
+        const tags = [...new Set([...this.props.tags])]
 
         const numRemainingTags = tags.length - maxTagsAllowed
         if (!maxTagsAllowed || numRemainingTags < 1) {
@@ -85,7 +86,10 @@ class TagHolder extends React.Component<Props, State> {
         return (
             <div className={styles.tagHolder} onClick={clickHandler}>
                 {!tags.length && (
-                    <span className={styles.placeholder}><span className={styles.tagIcon}/>Add tag</span>
+                    <span className={styles.placeholder}>
+                        <span className={styles.tagIcon} />
+                        Add tag
+                    </span>
                 )}
 
                 {this._renderTags()}

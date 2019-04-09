@@ -1,6 +1,8 @@
 .tooltip {
     position: relative;
     border-radius: 3px;
+    display: flex;
+    justify-content: flex-start;
 }
 
 .tooltipBubble {
@@ -14,6 +16,14 @@
     line-height: 1.4;
     width: 300px;
     border-radius: 3px;
+}
+
+.tooltipContentDate {
+    width: fit-content;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /*    &::after {
@@ -37,10 +47,6 @@
 }
 
 .tooltipbottom {
-    top: 1px;
-    left: 50%;
-    transform: translateX(-50%);
-
     /*    &::after {
         border-left: 9px solid transparent;
         border-right: 9px solid transparent;
@@ -48,6 +54,10 @@
         top: 0;
         transform: translateX(-50%);
     } */
+}
+
+.tooltipbottomRight {
+    background-color: blue;
 }
 
 .tooltipleft {
@@ -60,9 +70,14 @@
     } */
 
     &.tooltipBubble {
-        right: 25px;
-        top: -17px;
+        right: 30px;
+        top: -3px;
     }
+}
+
+.tooltipBottomLeft {
+    right: -150px;
+    z-index: 1;
 }
 
 .tooltipright {

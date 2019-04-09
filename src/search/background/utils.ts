@@ -17,9 +17,10 @@ export const contentTypeChecks = {
 export const reshapeParamsForOldSearch = (params): OldSearchParams => ({
     lists: params.collections,
     bookmarks: params.bookmarksOnly,
-    domains: params.domains,
+    domains: params.domainsInc,
     domainsExclude: params.domainsExc,
     tags: params.tagsInc,
+    tagsExc: params.tagsExc,
     terms: params.termsInc,
     termsExclude: params.termsExc,
     limit: params.limit,

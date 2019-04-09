@@ -43,6 +43,12 @@
     transition: border 0.3s ease;
     outline: none;
 
+    /* background-image: url('../../../img/check-solid.svg'); */
+
+    /* background-repeat: no-repeat; */
+
+    /* background-position: center; */
+
     &:hover {
         outline: none;
     }

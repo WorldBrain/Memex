@@ -2,10 +2,9 @@ import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import styles from './IndexDropdown.css'
 
-import localStyles from './IndexDropdown.css'
-import sidebarStyles from './IndexDropdownSidebar.css'
-import annotationStyles from './IndexDropdownAnnotation.css'
 /**
  * @augments {PureComponent<{onClick: any, scrollIntoView: any, isForSidebar: any}, {isForAnnotation: bool}, *>}
  */
@@ -17,32 +16,49 @@ class IndexDropdownRow extends PureComponent {
             PropTypes.element,
         ]).isRequired,
         active: PropTypes.bool,
+        excActive: PropTypes.bool,
         onClick: PropTypes.func.isRequired,
+        onExcClick: PropTypes.func,
         focused: PropTypes.bool,
-        isForAnnotation: PropTypes.bool,
+        // isForAnnotation: PropTypes.bool,
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,
+        // isForRibbon: PropTypes.bool,
         scrollIntoView: PropTypes.func.isRequired,
         isNew: PropTypes.bool,
         isList: PropTypes.bool,
         source: PropTypes.string,
     }
 
+    state = {
+        displayExcIcon: false,
+    }
+
     componentDidMount() {
         this.ensureVisible()
+        this.ref.addEventListener('mouseenter', this.handleMouseEnter)
+        this.ref.addEventListener('mouseleave', this.handleMouseLeave)
     }
 
     componentDidUpdate() {
         this.ensureVisible()
     }
 
-    get styles() {
-        if (this.props.isForAnnotation) {
-            return annotationStyles
-        } else if (this.props.isForSidebar) {
-            return sidebarStyles
-        }
-        return localStyles
+    componentWillUnmount() {
+        this.ref.removeEventListener('mouseenter', this.handleMouseEnter)
+        this.ref.removeEventListener('mouseleave', this.handleMouseLeave)
+    }
+
+    handleMouseEnter = () => {
+        this.setState({
+            displayExcIcon: true,
+        })
+    }
+
+    handleMouseLeave = () => {
+        this.setState({
+            displayExcIcon: false,
+        })
     }
 
     // Scroll with key navigation
@@ -53,37 +69,66 @@ class IndexDropdownRow extends PureComponent {
     }
 
     get mainClass() {
-        return cx(this.styles.menuItem, {
-            [this.styles.menuItemFocused]: this.props.focused,
-            [this.styles.commentBox]: this.props.allowAdd,
+        return cx(styles.menuItem, {
+            [styles.menuItemFocused]: this.props.focused,
+            [styles.commentBox]: this.props.allowAdd,
         })
     }
 
     render() {
         return (
             <div
+                ref={ref => (this.ref = ref)}
                 className={cx(this.mainClass, {
-                    [this.styles.isNew]: this.props.isNew,
+                    [styles.isNew]: this.props.isNew,
                 })}
-                onClick={this.props.onClick}
+                onClick={e => {
+                    e.stopPropagation()
+                    !this.props.excActive && this.props.onClick()
+                }}
             >
                 <span
-                    className={cx(this.styles.isNewNoteInvisible, {
-                        [this.styles.isNewNote]: this.props.isNew,
+                    className={cx(styles.isNewNoteInvisible, {
+                        [styles.isNewNote]: this.props.isNew,
                     })}
                 >
                     Add New:
                 </span>
                 <span
-                    className={cx(this.styles.tagPill, {
-                        [localStyles.isList]:
+                    className={cx(styles.tagPill, {
+                        [styles.isList]:
                             this.props.isList || this.props.source === 'domain',
                     })}
                 >
                     {(this.props.isList && this.props.value.name) ||
                         this.props.value}
                 </span>
-                {this.props.active && <span className={this.styles.check} />}
+                <span className={styles.selectionOption}>
+                    {this.props.active && (
+                        <span className={styles.check} />
+                    )}
+                    {!this.props.allowAdd && this.props.isForSidebar &&
+                        !this.props.active && (
+                            <ButtonTooltip
+                                tooltipText="Exclude from search"
+                                position="left"
+                            >
+                            <span
+                                onClick={e => {
+                                    e.stopPropagation()
+                                    this.props.onExcClick()
+                                }}
+                                className={cx({
+                                    [styles.excludeInactive]:
+                                        this.state.displayExcIcon &&
+                                        !this.props.excActive,
+                                    [styles.excluded]: this.props
+                                        .excActive,
+                                })}
+                            />
+                            </ButtonTooltip>
+                        )}
+                </span>
             </div>
         )
     }

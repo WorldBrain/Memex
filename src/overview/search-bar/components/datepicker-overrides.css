@@ -1,5 +1,5 @@
 @value colors: '../../../common-ui/colors.css';
-@value color1, color 2, color4 from colors;
+@value color1, color 2, color4, color7 from colors;
 
 /* stylelint-disable  declaration-no-important, selector-pseudo-class-no-unknown */
 
@@ -28,8 +28,6 @@
     border-radius: 4px !important;
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
-    box-shadow: 0 2px 4px 1px rgba(220, 220, 220, 0.7) !important;
-    padding: 10px !important;
 }
 
 :global .react-datepicker__header {
@@ -44,24 +42,26 @@
 
 :global .react-datepicker__navigation {
     background-repeat: no-repeat !important;
-    background-size: 6px 10px !important;
+    background-size: 12px !important;
     background-position: center !important;
-    height: 24px !important;
-    width: 18px !important;
+    height: 20px !important;
+    width: 20px !important;
     border-color: transparent !important;
-    padding-top: 26px;
-}
+    display: flex;
+    border-radius: 3px;
 
-:global .react-datepicker__navigation:hover {
-    border-color: transparent !important;
+    &:hover {
+        background-color: color7;
+    }
 }
 
 :global .react-datepicker__navigation--previous {
-    background-image: url('/img/previous-arrow-icon.png') !important;
+    background-image: url('/img/arrow.svg') !important;
 }
 
 :global .react-datepicker__navigation--next {
-    background-image: url('/img/next-arrow-icon.png') !important;
+    background-image: url('/img/arrow.svg') !important;
+    transform: rotate(180deg);
 }
 
 :global .react-datepicker__day {
@@ -72,7 +72,7 @@
 }
 
 :global .react-datepicker__day-name {
-    font-weight: 400;
+    font-weight: bold;
 }
 
 :global .react-datepicker__day:hover {
@@ -100,6 +100,7 @@
     border-top-left-radius: 50% !important;
     border-bottom-left-radius: 50% !important;
     background-color: color2 !important;
+    font-weight: bold;
 }
 
 :global .react-datepicker__day--selecting-range-end,
@@ -110,6 +111,7 @@
     border-top-right-radius: 50% !important;
     border-bottom-right-radius: 50% !important;
     background-color: color2 !important;
+    font-weight: bold;
 }
 
 :global .react-datepicker__day--range-start:hover {
@@ -144,4 +146,11 @@
     > .react-datepicker__day--in-range:last-of-type {
     border-top-right-radius: 3px !important;
     border-bottom-right-radius: 3px !important;
+}
+
+:global
+    .react-datepicker__day--today {
+    font-weight: bold;
+    background: #5cd9a6;
+    color: white;
 }

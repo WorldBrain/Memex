@@ -1,13 +1,5 @@
 @import url('/fonts/Inter/inter.css');
 
-.tooltip {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-}
-
 .tooltipTrigger {
     display: inline-block;
 }
@@ -28,9 +20,8 @@
 }
 
 .tooltipRight {
-    left: 40px;
-    top: 15px;
-    justify-content: flex-start;
+    margin-left: 40px;
+    margin-top: 2px;
 }
 
 .tooltipRightCentered {
@@ -39,25 +30,33 @@
 }
 
 .tooltipRightContentTooltip {
-    left: 8px;
+    left: 30px;
     top: -10px;
     justify-content: flex-start;
 }
 
 .tooltipBottom {
-    transform: translateY(33px);
+    transform: translateY(30px);
     justify-content: center;
+    align-items: flex-start;
 
-    & .tooltipMessage {
-        position: relative;
-        display: flex;
-        align-self: flex-start;
+    &.tooltipBubble {
+        align-items: flex-start;
     }
+}
+
+.popupLeft {
+    justify-content: flex-end;
+    right: 50px;
+    align-items: center;
+    top: 9px;
 }
 
 .tooltipLeft {
     justify-content: flex-end;
     right: 30px;
+    align-items: center;
+    top: 3px;
 }
 
 .tooltipLeftBig {
@@ -87,4 +86,23 @@
     text-align: center;
     width: fit-content;
     font-family: 'Inter', sans-serif;
+}
+
+.tooltipContainer {
+    position: relative;
+    display: flex;
+    z-index: 2;
+}
+
+.tooltipContainerBottom {
+    justify-content: center;
+}
+
+.tooltipContainerCenterCenter {
+    justify-content: center;
+    align-items: center;
+}
+
+.tooltipContainerLeft {
+    align-items: center;
 }

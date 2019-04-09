@@ -1,0 +1,95 @@
+.cross {
+    width: 7px;
+    height: 7px;
+    position: absolute;
+    background-image: url('/img/times-solid.svg');
+    background-repeat: no-repeat;
+    border-color: transparent;
+    background-color: #5cd9a6;
+    border-width: 0px;
+    margin-left: 47px;
+    margin-top: 12px;
+
+    &:focus {
+        outline: 0;
+    }
+}
+
+.tooltip {
+    margin-top: 5px;
+    height: 400px;
+}
+
+.tagsPopup {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #d5d8d6;
+    box-sizing: border-box;
+    border-radius: 6px;
+    z-index: 3;
+}
+
+.selected {
+    position: absolute;
+    width: 85px;
+    height: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+    color: #bcc2bd;
+}
+
+.selectedTags {
+    margin-top: 15px;
+}
+
+/* .cross {
+    width: 7px;
+    height: 7px;
+    position: relative;
+
+    background-image: url('/img/times-solid.svg');
+    background-repeat: no-repeat;
+    border-color: transparent;
+    background-color: #83c9f4;
+    border-width: 0px;
+
+    margin-top: 3px;
+    margin-left: 3px;
+
+     &:focus{
+        outline: 0;
+    }
+} */
+
+.tagPill {
+    background-color: #83c9f4;
+    padding: 2px 9px 3px 9px;
+
+    /* border-radius: 3px; */
+    font-size: 13px;
+    font-weight: 500;
+    width: fit-content;
+    letter-spacing: 0.5px;
+    height: 100%;
+    color: black;
+    margin-right: 3px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 50px;
+}
+
+.searchField {
+    composes: searchField from 'src/common-ui/elements.css';
+    margin-left: 55px;
+    border-width: 0px;
+}
+
+.searchField:focus {
+    outline: none;
+}
+
+.searchIcon {
+    margin-left: 31px;
+    margin-top: 24px;
+}

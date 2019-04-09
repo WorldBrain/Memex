@@ -6,6 +6,7 @@ const styles = require('./search-type-switch.css')
 
 export interface Props {
     annotsFolded: boolean
+    isFilterBarActive: boolean
     searchType: 'page' | 'annot'
     pageCount?: number
     annotCount?: number
@@ -32,13 +33,21 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.container}>
+            <div
+                className={cx(styles.container, {
+                    [styles.filterBarActive]: this.props.isFilterBarActive,
+                })}
+            >
                 <div className={styles.switchContainer}>
                     <button
-                        className={cx(styles.searchSwitchBtn, styles.btn, styles.pages)}
+                        className={cx(
+                            styles.searchSwitchBtn,
+                            styles.btn,
+                            styles.pages,
+                        )}
                         onClick={this.props.handleSearchTypeClick}
                         disabled={this.isPageSearch}
-                        id='pages'
+                        id="pages"
                     >
                         {this.renderSearchCount(this.props.pageCount)}
                         Pages
@@ -51,13 +60,13 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                         {this.renderSearchCount(this.props.annotCount)}
                         Notes
                         <span className={styles.betaBox}>
-                         <ButtonTooltip
-                            tooltipText="Searching notes is in beta mode. Bugs may appear. Let us know: support@worldbrain.io or github.com/worldbrain"
-                            position="bottom"
-                        >
-                        <span className={styles.beta}>beta</span>
-                        </ButtonTooltip>
-                    </span>
+                            <ButtonTooltip
+                                tooltipText="Searching notes is in beta mode. Bugs may appear. Let us know: support@worldbrain.io or github.com/worldbrain"
+                                position="bottom"
+                            >
+                                <span className={styles.beta}>beta</span>
+                            </ButtonTooltip>
+                        </span>
                     </button>
                 </div>
                 <button

@@ -28,6 +28,11 @@
     height: 25px;
 }
 
+.iconBox {
+    display: flex;
+    align-items: center;
+}
+
 .icon {
     width: 20px;
     height: 20px;

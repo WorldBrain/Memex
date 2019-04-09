@@ -8,7 +8,10 @@ import * as constants from './constants'
 import { selectors as filters, actions as filterActs } from '../search-filters'
 import { selectors as searchBar, acts as searchBarActs } from './search-bar'
 import { selectors as results, acts as resultsActs } from './results'
-
+import {
+    selectors as sidebarLeft,
+    actions as sidebarLeftActs,
+} from './sidebar-left'
 const parseBool = str => str === 'true'
 const parseNumber = str => Number(str)
 const stringifyArr = arr => arr.join(',')
@@ -35,9 +38,15 @@ const locationSync = ReduxQuerySync.enhancer({
             stringToValue: parseBool,
             defaultValue: false,
         },
-        tags: {
+        tagsInc: {
             selector: filters.tags,
             action: filterActs.setTagFilters,
+            valueToString: stringifyArr,
+            defaultValue: [],
+        },
+        tagsExc: {
+            selector: filters.tagsExc,
+            action: filterActs.setExcTagFilters,
             valueToString: stringifyArr,
             defaultValue: [],
         },
@@ -106,6 +115,7 @@ const hydrateStateFromStorage = store => {
         constants.ANNOTATIONS_EXPANDED_KEY,
         resultsActs.setAreAnnotationsExpanded,
     )
+    hydrate(constants.SIDEBAR_LOCKED_KEY, sidebarLeftActs.setSidebarLocked)
 }
 
 const syncStateToStorage = store =>
@@ -119,6 +129,7 @@ const syncStateToStorage = store =>
             constants.ANNOTATIONS_EXPANDED_KEY,
             results.areAnnotationsExpanded(state),
         )
+        dump(constants.SIDEBAR_LOCKED_KEY, sidebarLeft.sidebarLocked(state))
     })
 
 const storageSync = storeCreator => (reducer, initState, enhancer) => {

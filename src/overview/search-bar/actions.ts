@@ -5,7 +5,6 @@ import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { actions as sidebarLeftActs } from '../sidebar-left'
 import { actions as sidebarActs } from 'src/sidebar-common/sidebar'
 import { acts as resultsActs, selectors as results } from '../results'
 import {
@@ -22,6 +21,9 @@ const annotSearchRPC = remoteFunction('searchAnnotations')
 export const setQuery = createAction<string>('header/setQuery')
 export const setStartDate = createAction<number>('header/setStartDate')
 export const setEndDate = createAction<number>('header/setEndDate')
+export const setStartDateText = createAction<string>('header/setStartDateText')
+export const setEndDateText = createAction<string>('header/setEndDateText')
+export const clearFilters = createAction('header/clearFilters')
 
 const stripTagPattern = tag =>
     tag
@@ -94,9 +96,6 @@ export const search: (args?: any) => Thunk = (
     const endDate = selectors.endDate(firstState)
 
     // const showTooltip = selectors.showTooltip(firstState)
-    if (filters.showClearFiltersBtn(getState())) {
-        dispatch(sidebarLeftActs.openSidebarFilterMode())
-    }
 
     if (query.includes('#')) {
         return
@@ -128,6 +127,7 @@ export const search: (args?: any) => Thunk = (
         endDate,
         showOnlyBookmarks: filters.onlyBookmarks(state),
         tagsInc: filters.tags(state),
+        tagsExc: filters.tagsExc(state),
         domains: filters.domainsInc(state),
         domainsExclude: filters.domainsExc(state),
         limit: constants.PAGE_SIZE,

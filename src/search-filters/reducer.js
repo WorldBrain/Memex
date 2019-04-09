@@ -18,12 +18,15 @@ import * as actions from './actions'
 
 const defaultState = {
     showTagFilter: false,
+    showDatesFilter: false,
+    showFilterBar: false,
     showDomainFilter: false,
     showFilterTypes: false,
     showFilters: false,
     onlyBookmarks: false,
     popup: '', // Blank is no popup shown, 'tag' is tags filter, 'domain' is domains filter
     tags: [],
+    tagsExc: [],
     domainsInc: [],
     domainsExc: [],
     // Will contain **ID** only one list for now
@@ -47,6 +50,16 @@ const hideDomainFilter = state => ({
 const showDomainFilter = state => ({
     ...state,
     showDomainFilter: true,
+})
+
+const hideDatesFilter = state => ({
+    ...state,
+    showDatesFilter: false,
+})
+
+const showDatesFilter = state => ({
+    ...state,
+    showDatesFilter: true,
 })
 
 const hideTagFilter = state => ({
@@ -98,6 +111,11 @@ const toggleNotesFilter = state => ({
     },
 })
 
+const toggleFilterBar = state => ({
+    ...state,
+    showFilterBar: !state.showFilterBar,
+})
+
 /**
  * Setting annotations involves setting both notes and highlights
  */
@@ -107,6 +125,15 @@ const setAnnotationsFilter = (state, value) => ({
         ...state.contentTypes,
         highlights: value,
         notes: value,
+    },
+})
+
+const clearFilterTypes = state => ({
+    ...state,
+    contentTypes: {
+        pages: false,
+        notes: false,
+        highlights: false,
     },
 })
 
@@ -191,6 +218,7 @@ const setFilters = filterKey => (state, filters) => {
 
     newState.showFilters =
         newState.tags.length > 0 ||
+        newState.tagsExc.length > 0 ||
         newState.domainsExc.length > 0 ||
         newState.domainsInc.length > 0 ||
         newState.onlyBookmarks
@@ -223,14 +251,19 @@ export default createReducer(
     {
         [actions.hideDomainFilter]: hideDomainFilter,
         [actions.showDomainFilter]: showDomainFilter,
+        [actions.hideDatesFilter]: hideDatesFilter,
+        [actions.showDatesFilter]: showDatesFilter,
         [actions.hideTagFilter]: hideTagFilter,
         [actions.showTagFilter]: showTagFilter,
         [actions.showFilterTypes]: showFilterTypes,
         [actions.hideFilterTypes]: hideFilterTypes,
         [actions.toggleFilterTypes]: toggleFilterTypes,
+        [actions.toggleFilterBar]: toggleFilterBar,
         [actions.resetFilters]: resetFilters,
         [actions.addTagFilter]: addFilter('tags'),
         [actions.delTagFilter]: delFilter('tags'),
+        [actions.addExcTagFilter]: addFilter('tagsExc'),
+        [actions.delExcTagFilter]: delFilter('tagsExc'),
         [actions.toggleTagFilter]: toggleFilter('tags'),
         [actions.addListFilter]: addFilter('lists'),
         [actions.delListFilter]: delFilter('lists'),
@@ -242,6 +275,7 @@ export default createReducer(
         [actions.toggleIncDomainFilter]: toggleFilter('domainsInc'),
         [actions.toggleExcDomainFilter]: toggleFilter('domainsExc'),
         [actions.setTagFilters]: setFilters('tags'),
+        [actions.setExcTagFilters]: setFilters('tagsExc'),
         [actions.setListFilters]: setFilters('lists'),
         [actions.setIncDomainFilters]: setFilters('domainsInc'),
         [actions.setExcDomainFilters]: setFilters('domainsExc'),
@@ -256,6 +290,7 @@ export default createReducer(
         [actions.toggleHighlightsFilter]: toggleHighlightsFilter,
         [actions.toggleNotesFilter]: toggleNotesFilter,
         [actions.setAnnotationsFilter]: setAnnotationsFilter,
+        [actions.clearFilterTypes]: clearFilterTypes,
     },
     defaultState,
 )

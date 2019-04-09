@@ -92,3 +92,14 @@ export const showCrowdFundingModal = createSelector(
     customLists,
     state => state.showCrowdFundingModal,
 )
+
+export const activeCollectionName = createSelector(
+    selectors.listFilter,
+    allLists,
+    (listFilterId, lists) =>
+        listFilterId
+            ? lists
+                  .filter(list => list.id === Number(listFilterId))
+                  .map(list => list.name)[0]
+            : undefined,
+)
