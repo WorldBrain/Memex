@@ -5,7 +5,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1554069006280
+export const releaseTime: number = 1554816049946
 
 /* Example Notification:
 {
@@ -60,15 +60,15 @@ export const releaseTime: number = 1554069006280
 
 export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
-        id: 'annotation_search_01.04.2019',
+        id: 'new_filters_09.04.2019',
         search: {
-            title: "🔍Annotation Search & Timeline",
-            message: "You can now full-text search & filter your annotations & highlights and see a timeline of everything you've done",
+            title: "🗄 Updated collection sidebar and filters + exclusion filters",
+            message: "You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard",
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/3f22ac13107347bc9ea1f6e1095b703e',
+                        url: 'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -76,13 +76,13 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
             ],
         },
         overview: {
-            title: "🔍Annotation Search & Timeline",
-            message: "You can now full-text search & filter your annotations & highlights and see a timeline of everything you've done",
+            title: "🗄 Updated collection sidebar and filters + exclusion filters",
+            message: "You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard",
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/3f22ac13107347bc9ea1f6e1095b703e',
+                        url: 'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
