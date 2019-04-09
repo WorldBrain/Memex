@@ -277,7 +277,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             () => {
                 annotationBoxNode.scrollIntoView({
                     block: 'center',
-                    behavior: 'smooth',
+                    behavior: 'auto',
                 })
             },
             {

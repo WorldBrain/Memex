@@ -80,6 +80,8 @@ class ButtonTooltip extends React.Component<Props, State> {
                                 this.props.position === 'rightContentTooltip',
                             [styles.tooltipCenterCenter]:
                                 this.props.position === 'CenterCenter',
+                            [styles.popupLeft]:
+                                this.props.position === 'popupLeft',
                         })}
                     >
                         <div className={styles.tooltipMessage}>

@@ -45,9 +45,18 @@
     }
 }
 
+.popupLeft {
+    justify-content: flex-end;
+    right: 50px;
+    align-items: center;
+    top: 9px;
+}
+
 .tooltipLeft {
     justify-content: flex-end;
     right: 30px;
+    align-items: center;
+    top: 3px;
 }
 
 .tooltipLeftBig {
@@ -91,5 +100,9 @@
 
 .tooltipContainerCenterCenter {
     justify-content: center;
+    align-items: center;
+}
+
+.tooltipContainerLeft {
     align-items: center;
 }

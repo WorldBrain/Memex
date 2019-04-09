@@ -240,10 +240,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     height: 100%;
-
-    &:focus {
-        outline: none;
-    }
+    max-height: 300px;
 }
 
 .clearFilters {

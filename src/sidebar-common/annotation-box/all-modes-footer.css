@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color11, color14, color4, color7, color9 from colors;
+
 .annotationBoxFooter {
     display: flex;
     align-items: center;
@@ -16,6 +19,10 @@
     font-weight: 700;
     outline: none;
     background: none;
+
+    &:focus {
+        background-color: color7;
+    }
 }
 
 .footerText {
@@ -27,6 +34,10 @@
     outline: none;
     margin-right: -6px;
     background: transparent;
+
+    &:focus {
+        background-color: color7;
+    }
 }
 
 .deleteReally {
