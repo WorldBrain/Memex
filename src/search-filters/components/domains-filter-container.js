@@ -90,6 +90,7 @@ class DomainsPopup extends PureComponent {
                             )}
                             source="domain"
                             isForSidebar
+                            isForFilters
                         />
                     </Tooltip>
                 )}

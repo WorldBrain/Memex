@@ -60,6 +60,7 @@ class TagsFilter extends PureComponent {
                             initSuggestions={this.props.suggestedTags}
                             source="tag"
                             isForSidebar
+                            isForFilters
                         />
                     </Tooltip>
                 )}

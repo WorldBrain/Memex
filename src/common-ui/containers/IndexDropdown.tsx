@@ -44,6 +44,7 @@ export interface Props {
     isForRibbon?: boolean
     onBackBtnClick?: ClickHandler<HTMLButtonElement>
     allTabs?: boolean
+    isForFilters?: boolean
 }
 
 export interface State {
@@ -67,6 +68,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         initExcFilters: [],
         isForAnnotation: false,
         isForRibbon: false,
+        isForFilters: false,
     }
 
     private suggestRPC
@@ -325,13 +327,17 @@ class IndexDropdownContainer extends Component<Props, State> {
      * Used for clicks on displayed tags. Will either add or remove tags to the page
      * depending on their current status as assoc. tags or not.
      */
-    private handleTagSelection = (
-        index: number,
-        displayFilters = true,
-    ) => async event => {
-        const tag = displayFilters
-            ? this.state.displayFilters[index]
-            : [...this.state.filters, ...this.state.excFilters][index]
+    private handleTagSelection = (index: number) => async event => {
+        const tag =
+            this.state.searchVal.length > 0
+                ? this.state.displayFilters[index]
+                : [
+                      ...new Set([
+                          ...this.state.filters,
+                          ...this.state.excFilters,
+                          ...this.state.displayFilters,
+                      ]),
+                  ][index]
 
         if (this.props.allTabs) {
             await this.handleMultiTagEdit(tag)
@@ -361,13 +367,17 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    private handleExcTagSelection = (
-        index: number,
-        displayFilters = true,
-    ) => event => {
-        const tag = displayFilters
-            ? this.state.displayFilters[index]
-            : [...this.state.filters, ...this.state.excFilters][index]
+    private handleExcTagSelection = (index: number) => event => {
+        const tag =
+            this.state.searchVal.length > 0
+                ? this.state.displayFilters[index]
+                : [
+                      ...new Set([
+                          ...this.state.filters,
+                          ...this.state.excFilters,
+                          ...this.state.displayFilters,
+                      ]),
+                  ][index]
 
         const excFilters = this.state.excFilters
 
@@ -379,7 +389,12 @@ class IndexDropdownContainer extends Component<Props, State> {
             excFilters.delete(tag)
         }
 
-        this.setState(() => ({ excFilters }))
+        this.setState({
+            excFilters,
+            searchVal: '',
+            focused: 0,
+            clearFieldBtn: false,
+        })
     }
 
     private handleSearchEnterPress(
@@ -523,7 +538,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
     }
 
-    private renderTags() {
+    private renderFilterTags() {
         const tags = this.getDisplayTags()
 
         const tagOptions = tags.map((tag, i) => (
@@ -537,6 +552,28 @@ class IndexDropdownContainer extends Component<Props, State> {
                 isForSidebar={this.props.isForSidebar}
             />
         ))
+
+        return tagOptions
+    }
+
+    private renderTags() {
+        const tags = this.getDisplayTags()
+
+        const tagOptions = tags.map((tag, i) => {
+            if (tag.value !== this.state.searchVal) {
+                return (
+                    <IndexDropdownRow
+                        {...tag}
+                        key={i}
+                        onClick={this.handleTagSelection(i)}
+                        onExcClick={this.handleExcTagSelection(i)}
+                        {...this.props}
+                        scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                        isForSidebar={this.props.isForSidebar}
+                    />
+                )
+            }
+        })
 
         if (this.canCreateTag()) {
             tagOptions.unshift(
@@ -566,7 +603,6 @@ class IndexDropdownContainer extends Component<Props, State> {
                             : this.pageHasTag(this.state.searchVal)
                     }
                     focused={this.state.focused === 0}
-                    isForAnnotation={this.props.isForAnnotation}
                     allowAdd={this.props.allowAdd}
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
                     isForSidebar={this.props.isForSidebar}
@@ -594,7 +630,9 @@ class IndexDropdownContainer extends Component<Props, State> {
                 showClearfieldBtn={this.showClearfieldBtn()}
                 {...this.props}
             >
-                {this.renderTags()}
+                {this.props.isForFilters
+                    ? this.renderFilterTags()
+                    : this.renderTags()}
             </IndexDropdown>
         )
     }
