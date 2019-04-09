@@ -32,7 +32,7 @@ interface StateProps {
 interface DispatchProps {
     onInit: () => void
     handleToggleFullScreen: (e: Event) => void
-    openSidebar: () => void
+    openSidebar: (args: { activeUrl?: string }) => void
     closeSidebar: () => void
     openCommentBoxWithHighlight: (anchor: Anchor) => void
     setRibbonEnabled: (isRibbonEnabled: boolean) => void
@@ -48,7 +48,7 @@ interface OwnProps {
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     highlightAll: (
         highlights: Annotation[],
-        openSidebar: () => void,
+        openSidebar: (args: { activeUrl?: string }) => void,
         focusOnAnnotation: (url: string) => void,
         hoverAnnotationContainer: (url: string) => void,
     ) => void
@@ -187,10 +187,21 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         }
     }
 
-    private _openSidebar = async (anchor: Anchor = null) => {
-        await this.props.openSidebar()
+    private _openSidebar = async ({
+        anchor = null,
+        activeUrl,
+    }: {
+        anchor: Anchor
+        activeUrl?: string
+    }) => {
+        await this.props.openSidebar({ activeUrl })
+
         if (anchor) {
             this.props.openCommentBoxWithHighlight(anchor)
+        }
+
+        if (activeUrl) {
+            this._focusOnAnnotation(activeUrl)
         }
 
         // Highlight any annotations with anchor.
@@ -207,7 +218,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     private _goToAnnotation = async (annotation: Annotation) => {
         if (!this.props.isSidebarOpen) {
             setTimeout(async () => {
-                await this.props.openSidebar()
+                await this.props.openSidebar({ activeUrl: annotation.url })
                 setTimeout(() => {
                     this.props.highlightAndScroll(annotation)
                     this._focusOnAnnotation(annotation.url)
@@ -348,9 +359,9 @@ const mapDispatchToProps: MapDispatchToProps<
         e.stopPropagation()
         dispatch(ribbonActions.toggleFullScreen())
     },
-    openSidebar: () => {
+    openSidebar: ({ activeUrl }: { activeUrl?: string } = {}) => {
         dispatch(ribbonActions.setIsExpanded(false))
-        dispatch(sidebarActions.openSidebar())
+        return dispatch(sidebarActions.openSidebar({ activeUrl }))
     },
     closeSidebar: () => dispatch(sidebarActions.closeSidebar()),
     openCommentBoxWithHighlight: anchor =>

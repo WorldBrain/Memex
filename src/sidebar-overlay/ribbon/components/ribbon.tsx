@@ -27,7 +27,7 @@ interface Props {
     isBookmarked: boolean
     tagManager: ReactNode
     collectionsManager: ReactNode
-    openSidebar: () => void
+    openSidebar: (args: any) => void
     closeSidebar: () => void
     handleRibbonToggle: () => void
     handleTooltipToggle: () => void
@@ -204,7 +204,7 @@ class Ribbon extends Component<Props, State> {
                                     })}
                                     onClick={() =>
                                         !this.props.isSidebarOpen
-                                            ? this.props.openSidebar()
+                                            ? this.props.openSidebar({})
                                             : this.props.closeSidebar()
                                     }
                                 />

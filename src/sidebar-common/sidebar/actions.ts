@@ -54,15 +54,23 @@ export const setShowCongratsMessage = createAction<boolean>(
  */
 export const initState: () => Thunk = () => dispatch => {
     dispatch(resetResultsPage())
-    dispatch(fetchAnnotations())
 }
 
-export const openSidebar: (url?: string, title?: string) => Thunk = (
-    url = null,
-    title = null,
-) => async dispatch => {
+export const openSidebar: (
+    args: { url?: string; title?: string; activeUrl?: string },
+) => Thunk = ({ url, title, activeUrl } = {}) => async (dispatch, getState) => {
     dispatch(setPage({ url, title }))
     dispatch(setSidebarOpen(true))
+
+    const annots = selectors.annotations(getState())
+    if (!annots.length) {
+        await dispatch(fetchAnnotations())
+    }
+
+    if (activeUrl) {
+        dispatch(setActiveAnnotationUrl(activeUrl))
+    }
+
     await processEventRPC({ type: EVENT_NAMES.OPEN_SIDEBAR_PAGE })
 }
 

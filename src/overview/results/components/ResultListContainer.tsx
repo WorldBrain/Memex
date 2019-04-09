@@ -292,7 +292,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     handleCommentBtnClick: ({ url, title }, index) => event => {
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
-        dispatch(sidebarActs.openSidebar(url, title))
+        dispatch(sidebarActs.openSidebar({ url, title }))
     },
     handleToggleBm: ({ url }, index) => event => {
         event.preventDefault()
