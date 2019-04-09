@@ -19,6 +19,8 @@ import StatusReport from './components/StatusReport'
 import AdvSettingCheckbox from './components/AdvSettingsCheckbox'
 // import ShowDownloadDetails from './components/ShowDownloadDetails'
 
+import styles from './components/ActionButton.css'
+
 class ImportContainer extends Component {
     static propTypes = {
         // State
@@ -301,7 +303,7 @@ class ImportContainer extends Component {
                             handleClick={this.props.recalcEsts}
                             customClass="recalc"
                         >
-                            <i className="material-icons">autorenew</i>
+                            <span className={styles.reCalc}/>
                         </ActionButton>
                     </ButtonTooltip>
                 </React.Fragment>

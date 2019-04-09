@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 import Concurrency from './Concurrency'
 import PrevFailedCheckbox from './PrevFailedCheckbox'
@@ -24,16 +25,22 @@ const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
                         />
                     </li>
                     <li className={styles.settingsListItem}>
-                        <label htmlFor="index-imports">
-                            Only import title, urls and metadata
-                        </label>
-                        <input
-                            className={styles.prevFailedCheckbox}
-                            id="index-imports"
-                            type="checkbox"
-                            checked={props.indexTitle}
-                            onChange={props.onIndexTitleToggle}
-                        />
+                        
+                            <label htmlFor="index-imports">
+                                Only import title, urls and metadata
+                            </label>
+                        <ButtonTooltip
+                            tooltipText="Fast, but not full-text searchable"
+                            position="bottom"
+                        >
+                            <input
+                                className={styles.prevFailedCheckbox}
+                                id="index-imports"
+                                type="checkbox"
+                                checked={props.indexTitle}
+                                onChange={props.onIndexTitleToggle}
+                            />
+                        </ButtonTooltip>
                     </li>
                     <li className={styles.settingsListItem}>
                         <Concurrency {...props} />

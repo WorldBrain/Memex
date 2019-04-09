@@ -1,0 +1,8 @@
+.reCalc {
+	composes: reload from 'src/common-ui/icons.css';
+	width: 24px;
+	height: 24px;
+	background-size: 16px;
+	background-position: center center;
+	display: flex;
+}

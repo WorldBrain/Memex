@@ -1,5 +1,5 @@
 @value colors: '../../../common-ui/colors.css';
-@value color1, color2, color4, color6, color12 from colors;
+@value color1, color2, color3, color4, color6, color12 from colors;
 
 .importTable {
     width: 100%;
@@ -323,4 +323,12 @@
 
 input[type='file'] {
     display: none;
+}
+
+.tutorial a {
+    font-size: 14px;
+    color: color3;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 5px;
 }

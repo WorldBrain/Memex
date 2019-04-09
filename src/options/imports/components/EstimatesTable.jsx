@@ -112,13 +112,13 @@ const EstimatesTable = ({
                         </span>
                         <br />
                         <span className={localStyles.checkboxSubText}>
-                            Bookmarks, Tags
+                            Bookmarks, tags, time, reading list, archive
                         </span>
                     </label>
                 </td>
                 {!isLoading &&
                     estimates[TYPE.OTHERS].remaining === 0 && (
-                        <td>
+                        <td colSpan="3">
                             <label
                                 className={classNames(localStyles.selectFile, {
                                     [localStyles.hidden]:
@@ -138,6 +138,9 @@ const EstimatesTable = ({
                                     allowTypes[TYPE.OTHERS] !== SERVICES.POCKET
                                 }
                             />{' '}
+                            <span className={localStyles.tutorial}>
+                                <a target="_blank" href="https://getpocket.com/export">How to get that file?</a>
+                            </span>
                         </td>
                     )}
                 {isLoading &&
@@ -172,13 +175,13 @@ const EstimatesTable = ({
                         </span>
                         <br />
                         <span className={localStyles.checkboxSubText}>
-                            Bookmarks, Collections
+                            Bookmarks, tags, time
                         </span>
                     </label>
                 </td>
                 {!isLoading &&
                     estimates[TYPE.OTHERS].remaining === 0 && (
-                        <td>
+                        <td colSpan="3">
                             <label
                                 className={classNames(localStyles.selectFile, {
                                     [localStyles.hidden]:
@@ -199,6 +202,9 @@ const EstimatesTable = ({
                                     SERVICES.NETSCAPE
                                 }
                             />{' '}
+                            <span className={localStyles.tutorial}>
+                                <a target="_blank" href="https://www.notion.so/worldbrain/7a12d7a019094785a14ff109e99a531d">How to get that file?</a>
+                            </span>
                         </td>
                     )}
                 {isLoading &&
