@@ -1,31 +1,45 @@
 import React, { PureComponent } from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
+import { connect, MapStateToProps } from 'react-redux'
+import { RootState } from 'src/options/types'
+import { MapDispatchToProps } from 'src/util/types'
 import { actions, selectors } from 'src/search-filters'
+
 import { Tooltip } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
-import styles from './tags-filter.css'
 import FilterButton from './filter-button'
+
 import cx from 'classnames'
 
-class TagsFilter extends PureComponent {
-    static propTypes = {
-        env: PropTypes.oneOf(['overview', 'inpage']).isRequired,
-        tagsInc: PropTypes.arrayOf(PropTypes.string).isRequired,
-        tagsExc: PropTypes.arrayOf(PropTypes.string).isRequired,
-        displayTags: PropTypes.arrayOf(PropTypes.object).isRequired,
-        suggestedTags: PropTypes.arrayOf(PropTypes.string).isRequired,
-        tagFilterDropdown: PropTypes.bool.isRequired,
-        tooltipPosition: PropTypes.string.isRequired,
-        showTagFilter: PropTypes.func.isRequired,
-        hideTagFilter: PropTypes.func.isRequired,
-        addIncTagFilter: PropTypes.func.isRequired,
-        delIncTagFilter: PropTypes.func.isRequired,
-        addExcTagFilter: PropTypes.func.isRequired,
-        delExcTagFilter: PropTypes.func.isRequired,
-        clearTagFilters: PropTypes.func.isRequired,
-    }
+const styles = require('./tags-filter.css')
 
+interface StateProps {
+    tagFilterDropdown: boolean
+    tagsInc: string[]
+    tagsExc: string[]
+    displayTags: object[]
+    suggestedTags: string[]
+}
+
+interface DispatchProps {
+    showTagFilter: () => void
+    hideTagFilter: () => void
+    addIncTagFilter: (tag: string) => void
+    delIncTagFilter: (tag: string) => void
+    addExcTagFilter: (tag: string) => void
+    delExcTagFilter: (tag: string) => void
+    clearTagFilters: () => void
+}
+
+interface OwnProps {
+    env: 'inpage' | 'overview'
+    tooltipPosition: string
+}
+
+type Props = StateProps & DispatchProps & OwnProps
+
+interface State {}
+
+class TagsFilter extends PureComponent<Props, State> {
     togglePopup = () => {
         this.props.tagFilterDropdown
             ? this.props.hideTagFilter()
@@ -40,7 +54,6 @@ class TagsFilter extends PureComponent {
                 togglePopup={this.togglePopup}
                 hidePopup={this.props.hideTagFilter}
                 clearFilters={this.props.clearTagFilters}
-                onFilterDel={this.toggleDelTagFilter}
             >
                 {this.props.tagFilterDropdown && (
                     <Tooltip
@@ -69,7 +82,9 @@ class TagsFilter extends PureComponent {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+    state,
+): StateProps => ({
     tagsInc: selectors.tags(state),
     tagsExc: selectors.tagsExc(state),
     displayTags: selectors.displayTags(state),
@@ -77,7 +92,11 @@ const mapStateToProps = state => ({
     tagFilterDropdown: selectors.tagFilter(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<
+    DispatchProps,
+    OwnProps,
+    RootState
+> = dispatch => ({
     addIncTagFilter: tag => {
         dispatch(actions.addTagFilter(tag))
         dispatch(actions.fetchSuggestedTags())

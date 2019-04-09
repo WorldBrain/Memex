@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react'
-import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux'
+import { connect, MapStateToProps } from 'react-redux'
+import { MapDispatchToProps } from 'src/util/types'
 import { RootState } from 'src/options/types'
-import { actions, selectors } from '../'
+import { actions, selectors } from 'src/search-filters'
 
 import cx from 'classnames'
 
@@ -23,25 +24,13 @@ class BookmarkFilter extends PureComponent<Props> {
     render() {
         return (
             <div className={styles.container}>
-                <label className={styles.label} htmlFor="toggle-bookmark">
-                    <input
-                        id="toggle-bookmark"
-                        className={styles.label__checkbox}
-                        type="checkbox"
-                        checked={this.props.bookmarkFilter}
-                        onChange={this.props.onShowOnlyBookmarksChange}
-                    />
-                    <span className={styles.label__text}>
-                        <span className={styles.label__check}>
-                            <span
-                                className={cx(styles.icon, {
-                                    [styles.checkedIcon]: this.props
-                                        .bookmarkFilter,
-                                })}
-                            />
-                        </span>
-                    </span>
-                </label>
+                <button
+                    className={cx(styles.button, {
+                        [styles.bookmark]: this.props.bookmarkFilter,
+                        [styles.notBookmark]: !this.props.bookmarkFilter,
+                    })}
+                    onClick={this.props.onShowOnlyBookmarksChange}
+                />
             </div>
         )
     }
@@ -55,11 +44,10 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
 
 const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
-    OwnProps
+    OwnProps,
+    RootState
 > = dispatch => ({
-    onShowOnlyBookmarksChange: () => {
-        dispatch(actions.toggleBookmarkFilter())
-    },
+    onShowOnlyBookmarksChange: () => dispatch(actions.toggleBookmarkFilter()),
 })
 
 export default connect(

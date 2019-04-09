@@ -1,34 +1,45 @@
 import React, { PureComponent } from 'react'
-import { connect } from 'react-redux'
-import { actions, selectors } from '../'
+import { connect, MapStateToProps } from 'react-redux'
+import { RootState } from 'src/options/types'
+import { MapDispatchToProps } from 'src/util/types'
+import { actions, selectors } from 'src/search-filters'
 
 import { Tooltip } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
 import FilterButton from './filter-button'
+
 import cx from 'classnames'
 
-import PropTypes from 'prop-types'
+const styles = require('./domains-filter.css')
 
-import styles from './domains-filter.css'
+interface StateProps {
+    domainFilterDropdown: boolean
+    domainsInc: string[]
+    domainsExc: string[]
+    displayDomains: any
+    suggestedDomains: any
+}
 
-class DomainsPopup extends PureComponent {
-    static propTypes = {
-        env: PropTypes.oneOf(['overview', 'inpage']).isRequired,
-        displayDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
-        suggestedDomains: PropTypes.arrayOf(PropTypes.object).isRequired,
-        domainsInc: PropTypes.arrayOf(PropTypes.string).isRequired,
-        domainsExc: PropTypes.arrayOf(PropTypes.string).isRequired,
-        domainFilterDropdown: PropTypes.bool.isRequired,
-        tooltipPosition: PropTypes.string.isRequired,
-        showDomainFilter: PropTypes.func.isRequired,
-        hideDomainFilter: PropTypes.func.isRequired,
-        addIncDomainFilter: PropTypes.func.isRequired,
-        delIncDomainFilter: PropTypes.func.isRequired,
-        addExcDomainFilter: PropTypes.func.isRequired,
-        delExcDomainFilter: PropTypes.func.isRequired,
-        clearDomainFilters: PropTypes.func.isRequired,
-    }
+interface DispatchProps {
+    showDomainFilter: () => void
+    hideDomainFilter: () => void
+    addIncDomainFilter: (domain: string) => void
+    delIncDomainFilter: (domain: string) => void
+    addExcDomainFilter: (domain: string) => void
+    delExcDomainFilter: (domain: string) => void
+    clearDomainFilters: () => void
+}
 
+interface OwnProps {
+    env: 'inpage' | 'overview'
+    tooltipPosition: string
+}
+
+type Props = StateProps & DispatchProps & OwnProps
+
+interface State {}
+
+class DomainsPopup extends PureComponent<Props, State> {
     togglePopup = () => {
         this.props.domainFilterDropdown
             ? this.props.hideDomainFilter()
@@ -99,7 +110,9 @@ class DomainsPopup extends PureComponent {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+    state,
+): StateProps => ({
     displayDomains: selectors.displayDomains(state),
     suggestedDomains: selectors.suggestedDomains(state),
     domainFilterDropdown: selectors.domainFilter(state),
@@ -107,7 +120,11 @@ const mapStateToProps = state => ({
     domainsExc: selectors.domainsExc(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<
+    DispatchProps,
+    OwnProps,
+    RootState
+> = dispatch => ({
     showDomainFilter: () => dispatch(actions.showDomainFilter()),
     hideDomainFilter: () => dispatch(actions.hideDomainFilter()),
     addIncDomainFilter: domain => dispatch(actions.addIncDomainFilter(domain)),
