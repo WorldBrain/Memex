@@ -26,7 +26,8 @@ export class FilteredURLsManager implements FilteredURLs {
     constructor({
         incDomainUrls,
         excDomainUrls,
-        tagUrls,
+        incTagUrls,
+        excTagUrls,
         listUrls,
     }: {
         [key: string]: Set<string>
@@ -34,7 +35,7 @@ export class FilteredURLsManager implements FilteredURLs {
         // Exclude any undefined URLs filters
         const allUrls = [
             incDomainUrls ? [...incDomainUrls] : incDomainUrls,
-            tagUrls ? [...tagUrls] : tagUrls,
+            incTagUrls ? [...incTagUrls] : incTagUrls,
             listUrls ? [...listUrls] : listUrls,
         ].filter(urls => urls != null)
 
@@ -44,11 +45,18 @@ export class FilteredURLsManager implements FilteredURLs {
 
         // Ensure no excluded URLs in included sets
         this.include = new Set(
-            difference(initInclude, [...(excDomainUrls || [])]),
+            difference(initInclude, [
+                ...(excDomainUrls || []),
+                ...(excTagUrls || []),
+            ]),
         )
 
-        this.exclude = excDomainUrls || new Set()
-        this.isDataFiltered = !!(incDomainUrls || tagUrls || listUrls)
+        this.exclude = new Set([
+            ...(excDomainUrls || []),
+            ...(excTagUrls || []),
+        ])
+
+        this.isDataFiltered = !!(incDomainUrls || incTagUrls || listUrls)
     }
 
     private isIncluded(url: string) {
@@ -64,9 +72,7 @@ export class FilteredURLsManager implements FilteredURLs {
     }
 }
 
-const tagSearch = (getDb: () => Promise<Dexie>) => async ({
-    tags,
-}: Partial<SearchParams>) => {
+const tagSearch = (getDb: () => Promise<Dexie>) => async (tags: string[]) => {
     const db = await getDb()
     if (!tags || !tags.length) {
         return undefined
@@ -81,6 +87,13 @@ const tagSearch = (getDb: () => Promise<Dexie>) => async ({
 
     return urls
 }
+
+const incTagSearch = (getDb: () => Promise<Dexie>) => ({
+    tags,
+}: Partial<SearchParams>) => tagSearch(getDb)(tags)
+const excTagSearch = (getDb: () => Promise<Dexie>) => ({
+    tagsExc,
+}: Partial<SearchParams>) => tagSearch(getDb)(tagsExc)
 
 /**
  * Grabs all URLs associated with given domains; either matching in `domain` or `hostname` fields.
@@ -137,17 +150,23 @@ const listSearch = (getDb: () => Promise<Dexie>) => async ({
 export const findFilteredUrls = (getDb: () => Promise<Dexie>) => async (
     params: Partial<SearchParams>,
 ): Promise<FilteredURLs> => {
-    const [incDomainUrls, excDomainUrls, tagUrls, listUrls] = await Promise.all(
-        [
-            incDomainSearch(getDb)(params),
-            excDomainSearch(getDb)(params),
-            tagSearch(getDb)(params),
-            listSearch(getDb)(params),
-        ],
-    )
+    const [
+        incDomainUrls,
+        excDomainUrls,
+        incTagUrls,
+        excTagUrls,
+        listUrls,
+    ] = await Promise.all([
+        incDomainSearch(getDb)(params),
+        excDomainSearch(getDb)(params),
+        incTagSearch(getDb)(params),
+        excTagSearch(getDb)(params),
+        listSearch(getDb)(params),
+    ])
 
     return new FilteredURLsManager({
-        tagUrls,
+        incTagUrls,
+        excTagUrls,
         incDomainUrls,
         excDomainUrls,
         listUrls,
