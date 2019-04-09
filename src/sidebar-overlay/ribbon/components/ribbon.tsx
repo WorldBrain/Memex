@@ -122,7 +122,6 @@ class Ribbon extends Component<Props, State> {
     private fetchAndHighlightAnnotations = async () => {
         const annotations = await remoteFunction('getAllAnnotationsByUrl')({
             url: window.location.href,
-            limit: 1000,
         })
         const highlights = annotations.filter(annotation => annotation.selector)
         highlightAnnotations(highlights, this.props.openSidebar)

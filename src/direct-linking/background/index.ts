@@ -124,7 +124,7 @@ export default class DirectLinkingBackground {
 
     async getAllAnnotationsByUrl(
         { tab }: TabArg,
-        { url, limit = 10, skip = 0, ...params }: AnnotSearchParams,
+        { url, limit = 1000, skip = 0, ...params }: AnnotSearchParams,
     ) {
         url = url == null && tab != null ? tab.url : url
 

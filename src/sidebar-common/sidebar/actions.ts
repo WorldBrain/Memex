@@ -63,7 +63,6 @@ export const openSidebar: (url?: string, title?: string) => Thunk = (
 ) => async dispatch => {
     dispatch(setPage({ url, title }))
     dispatch(setSidebarOpen(true))
-    dispatch(fetchAnnotations())
     await processEventRPC({ type: EVENT_NAMES.OPEN_SIDEBAR_PAGE })
 }
 
