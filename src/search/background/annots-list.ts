@@ -163,13 +163,13 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         const exc = new Set(domainsExc)
 
         return urls.filter(url => {
-            const { hostname } = transformUrl(url)
+            const { domain } = transformUrl(url)
 
             if (!inc) {
-                return !exc.has(hostname)
+                return !exc.has(domain)
             }
 
-            return inc.has(hostname) && !exc.has(hostname)
+            return inc.has(domain) && !exc.has(domain)
         })
     }
 
