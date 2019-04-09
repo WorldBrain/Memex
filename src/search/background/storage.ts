@@ -234,8 +234,12 @@ export default class SearchStorage extends FeatureStorage {
 
         const { ids } = await this.legacySearch(searchParams)
 
+        if (!ids.length) {
+            return []
+        }
+
         // Terms search requires lookup of the latest interaction times for scoring,
-        //  so it returns triple. The 3rd index is the latest time (to avoid redoing those queries).
+        //  so it returns triples. The 3rd index is the latest time (to avoid redoing those queries).
         const latestTimes =
             ids[0].length === 3 ? ids.map(([, , time]) => time) : undefined
 
