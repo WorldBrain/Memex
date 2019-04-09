@@ -37,7 +37,7 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
         return this.countlyConnector.q
     }
 
-    private enqueueEvent({ key, id, value }) {
+    private enqueueEvent({ key, id, value = null }) {
         const event = [
             'add_event',
             {
@@ -61,10 +61,13 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
             return
         }
 
-        return this.enqueueEvent({
-            id: userId,
-            key: `${event.category}:${event.action}`,
-            value: event.value,
-        })
+        const isEvent = (wanted: { category: string; action: string }) =>
+            event.category === wanted.category && event.action === wanted.action
+        if (isEvent({ category: 'Global', action: 'Install' })) {
+            this.enqueueEvent({
+                id: userId,
+                key: 'install',
+            })
+        } // Add other events to send to Countly as else if (isEvent(...)) { ... } statements
     }
 }
