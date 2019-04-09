@@ -100,7 +100,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         if (tagsExc) {
             tagsForUrls = new Map(
                 [...tagsForUrls].filter(([, tags]) =>
-                    tags.reduce((acc, curr) => acc && !tagsExc.has(curr), true),
+                    tags.some(tag => !tagsExc.has(tag)),
                 ),
             )
         }
@@ -108,7 +108,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         if (tagsInc) {
             tagsForUrls = new Map(
                 [...tagsForUrls].filter(([, tags]) =>
-                    tags.reduce((acc, curr) => acc || tagsInc.has(curr), false),
+                    tags.some(tag => tagsInc.has(tag)),
                 ),
             )
         }
@@ -117,11 +117,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             if (!tagsInc) {
                 // Make sure current url doesn't have any excluded tag
                 const urlTags = tagsForUrls.get(url) || []
-
-                return urlTags.reduce(
-                    (acc, curr) => acc && !tagsExc.has(curr),
-                    true,
-                )
+                return urlTags.some(tag => !tagsExc.has(tag))
             }
 
             return tagsForUrls.has(url)
