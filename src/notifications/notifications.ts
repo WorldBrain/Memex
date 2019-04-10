@@ -105,6 +105,55 @@ interface EventNotifsDict {
 export const EVENT_NOTIFS: EventNotifsDict = {
     quota_warning: {
         id: 'quota_warning',
+        system: {
+            title: 
+                '⚠️ Low storage space',
+            message: 
+                'Data might be deleted. Click to backup & free up space.',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/overview?showInbox=true',
+                        context: 'self',
+                    },
+                    label: 'Learn more',
+                },
+            ],
+        },
+        overview: {
+            title: 
+                '⚠️ Your almost out of storage space. Your browser may delete Memex data',
+            message: 
+                'Due to the browsers policy to evict local storage when space gets low it might happen that your Memex data gets deleted. Free up disk space and make sure to backup your data for the worst case',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/backup',
+                        context: 'self',
+                    },
+                    label: 'Backup Now',
+                },
+            ],
+        },
+        search: {
+            title:
+                '⚠️ Your almost out of disk space. Your browser might delete Memex data',
+            message:
+                'Due to the browsers policy to evict local storage on low disc space it might happen that your Memex data gets deleted. Free up disk space and make sure to backup your data for the worst case',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url:
+                            'https://www.notion.so/worldbrain/2318f14ceeb741d6b7aa6c0ff00cb607',
+                        context: 'new-tab',
+                    },
+                    label: 'Find out more',
+                },
+            ],
+        },
     },
     backup_error: {
         id: 'backup_error',
