@@ -129,6 +129,10 @@ class BackgroundScript {
         )
     }
 
+    sendNotification(notifId: string) {
+        return this.notifsBackground.dispatchNotification(notifId)
+    }
+
     setupRemoteFunctions() {
         makeRemotelyCallable({
             openOverviewTab: this.utils.openOverviewURL,

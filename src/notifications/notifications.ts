@@ -62,13 +62,16 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
         id: 'new_filters_09.04.2019',
         search: {
-            title: "🗄 Updated collection sidebar and filters + exclusion filters",
-            message: "You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard",
+            title:
+                '🗄 Updated collection sidebar and filters + exclusion filters',
+            message:
+                'You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
+                        url:
+                            'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -76,13 +79,16 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
             ],
         },
         overview: {
-            title: "🗄 Updated collection sidebar and filters + exclusion filters",
-            message: "You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard",
+            title:
+                '🗄 Updated collection sidebar and filters + exclusion filters',
+            message:
+                'You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
+                        url:
+                            'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -92,7 +98,14 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
     },
 ]
 
-export const EVENT_NOTIFS: object = {
+interface EventNotifsDict {
+    [name: string]: NotifDefinition
+}
+
+export const EVENT_NOTIFS: EventNotifsDict = {
+    quota_warning: {
+        id: 'quota_warning',
+    },
     backup_error: {
         id: 'backup_error',
         system: {
