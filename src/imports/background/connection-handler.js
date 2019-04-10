@@ -1,7 +1,6 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
 import ProgressManager from './progress-manager'
 import stateManager from './state-manager'
-import { parseFile } from 'src/imports/background/utils'
 
 export default class ImportConnectionHandler {
     static IMPORTS_PROGRESS_KEY = 'is-imports-in-progress'
@@ -113,10 +112,10 @@ export default class ImportConnectionHandler {
 
     async recalcState(allowTypes, blobUrl = null) {
         stateManager.dirtyEstsCache()
+        stateManager.allowTypes = allowTypes
 
-        const parsedData = await parseFile(blobUrl, allowTypes)
         const estimateCounts = await stateManager.fetchEsts(
-            parsedData,
+            blobUrl,
             this._quickMode,
             this._includeErrs,
         )
@@ -132,10 +131,8 @@ export default class ImportConnectionHandler {
         stateManager.allowTypes = allowTypes
         stateManager.options = options
 
-        const parsedData = await parseFile(blobUrl, allowTypes)
-
         if (!(await this.getImportInProgressFlag())) {
-            await stateManager.fetchEsts(parsedData, this._quickMode)
+            await stateManager.fetchEsts(blobUrl, this._quickMode)
         }
 
         this.port.postMessage({ cmd: CMDS.START }) // Tell UI to finish loading state and move into progress view
@@ -152,7 +149,10 @@ export default class ImportConnectionHandler {
         this.setImportInProgressFlag(false)
 
         // Re-init the estimates view with updated estimates data
-        const estimateCounts = await stateManager.fetchEsts([], this._quickMode)
+        const estimateCounts = await stateManager.fetchEsts(
+            null,
+            this._quickMode,
+        )
         this.port.postMessage({ cmd: CMDS.INIT, ...estimateCounts })
     }
 

@@ -24,7 +24,7 @@ export class ImportStateManager {
     static DEF_ALLOW_TYPES = {
         [TYPE.HISTORY]: false,
         [TYPE.BOOKMARK]: false,
-        [TYPE.OTHERS]: false,
+        [TYPE.OTHERS]: '',
     }
 
     _includeErrs = false
@@ -137,12 +137,13 @@ export class ImportStateManager {
 
     /**
      * Main count calculation method which will create import items, and set state counts and item chunks.
+     * @param {string} blobUrl
      */
-    async _calcCounts(data) {
+    async _calcCounts(blobUrl) {
         await this.clearItems() // Reset current counts
 
         // Create new ImportItemCreator to create import items from which we derive counts
-        await this._itemCreator.initData(data)
+        await this._itemCreator.initData(blobUrl, this.allowTypes)
 
         await this._calcCompletedCounts()
         await this._calcRemainingCounts()
@@ -159,20 +160,20 @@ export class ImportStateManager {
     /**
      * Attempts to fetch the estimate counts from local state or does a complete state recalculation
      * if it deems current state to be out-of-date.
-     *
+     * @param {string} blobUrl
      * @param {boolean} [quick=false] Determines if quick mode is set (only limited recent history).
      * @param {boolean} [includeErrs=false]
      * @return {EstimateCounts}
      */
-    async fetchEsts(data, quick = false, includeErrs = false) {
+    async fetchEsts(blobUrl, quick = false, includeErrs = false) {
         this._itemCreator.limits = quick
             ? ImportStateManager.QUICK_MODE_ITEM_LIMITS
             : {}
 
-        if (this._cache.expired || data) {
+        if (this._cache.expired || blobUrl) {
             this._includeErrs = includeErrs
             // Perform calcs to update counts state
-            await this._calcCounts(data)
+            await this._calcCounts(blobUrl)
             await this._cache.persistEsts(this.counts)
 
             if (quick) {

@@ -199,7 +199,7 @@ export default class ImportItemProcessor {
         return { status: DOWNLOAD_STATUS.SUCC }
     }
 
-    async _processImportItem(importItem, options = {}) {
+    async _processService(importItem, options = {}) {
         await checkVisitItemTransitionTypes(importItem)
         const {
             url,
@@ -258,7 +258,7 @@ export default class ImportItemProcessor {
             case IMPORT_TYPE.HISTORY:
                 return this._processHistory(importItem)
             case IMPORT_TYPE.OTHERS:
-                return this._processImportItem(importItem, options)
+                return this._processService(importItem, options)
             default:
                 throw new Error('Unknown import type')
         }

@@ -1,5 +1,11 @@
 import moment from 'moment'
 import browserIsChrome from '../../util/check-browser'
+import {
+    IMPORT_TYPE as TYPE,
+    IMPORT_SERVICES as SERVICES,
+} from 'src/options/imports/constants'
+import { loadBlob } from 'src/imports/background/utils'
+import { parsePocket, parseNetscape } from './service-parsers'
 
 export default class ImportDataSources {
     static LOOKBACK_WEEKS = 12 // Browser history is limited to the last 3 months
@@ -80,5 +86,39 @@ export default class ImportDataSources {
         for (const dir of childGroups.dirs) {
             yield* this.bookmarks(dir)
         }
+    }
+
+    /**
+     * Parses file contents and returns import items
+     * @param {string} url Blob URL
+     * @param {object} allowTypes
+     * @return {Item[]} Parsed Items
+     */
+    async parseFile(url, allowTypes) {
+        let contents
+        let items = []
+
+        if (!allowTypes || !url) {
+            return items
+        }
+
+        if (
+            allowTypes[TYPE.OTHERS] === SERVICES.POCKET ||
+            allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE
+        ) {
+            contents = await loadBlob({
+                url,
+                timeout: 10000,
+                responseType: 'document',
+            })
+        }
+
+        if (allowTypes[TYPE.OTHERS] === SERVICES.POCKET) {
+            items = parsePocket(contents)
+        } else if (allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE) {
+            items = parseNetscape(contents)
+        }
+
+        return items
     }
 }

@@ -254,7 +254,7 @@ export default class ImportCache {
      */
     async persistItems(itemsMap, type, includeErrs = false) {
         let filteredItems =
-            type === (TYPE.HISTORY || TYPE.BOOKMARK)
+            type === TYPE.HISTORY || type === TYPE.BOOKMARK
                 ? await this._diffAgainstStored(itemsMap, includeErrs)
                 : itemsMap
 

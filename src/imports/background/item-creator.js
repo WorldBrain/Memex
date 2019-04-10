@@ -92,8 +92,10 @@ export default class ImportItemCreator {
 
     /**
      * Sets up existing data states which are used for filtering out items.
+     * @param {string} blobUrl
+     * @param {any} allowTypes
      */
-    async initData(data = []) {
+    async initData(blobUrl, allowTypes) {
         this.existingDataReady = new Promise(async (resolve, reject) => {
             try {
                 this._isBlacklisted = await checkWithBlacklist()
@@ -109,7 +111,10 @@ export default class ImportItemCreator {
         })
 
         await this.existingDataReady
-        this._servicesData = data
+        this._servicesData = blobUrl
+            ? await this._dataSources.parseFile(blobUrl, allowTypes)
+            : []
+
         this._completedServicesKeys = new Set(
             this._servicesData
                 .filter(item => this._histKeys.has(normalizeUrl(item.url)))

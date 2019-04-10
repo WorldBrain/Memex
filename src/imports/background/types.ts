@@ -1,3 +1,5 @@
+import { Annotation } from 'src/direct-linking/types'
+
 export type ImportItemType = 'h' | 'b'
 
 export interface ImportItem {
@@ -11,3 +13,15 @@ export interface BrowserItem {
     url: string
     type: ImportItemType
 }
+
+export interface Item {
+    url: string
+    title?: string
+    collections?: string[]
+    tags?: string[]
+    annotations?: Annotation[]
+    comments?: string
+    timeAdded?: number
+}
+
+export type ServiceParser = (doc: Document) => Item[]
