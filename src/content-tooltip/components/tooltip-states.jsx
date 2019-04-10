@@ -53,12 +53,12 @@ export const CopiedComponent = () => (
     <div className={styles.copiedMessage}>
         <span className={styles.check}/>
         <div className={styles.copiedTextContainer}>
-            <p className={styles.greenText}>
+            <span className={styles.greenText}>
                 Highlight link copied to clipboard
-            </p>
-            <p className={styles.greyText}>
+            </span>
+            <span className={styles.greyText}>
                 Everyone opening it can see this quote
-            </p>
+            </span>
         </div>
     </div>
 )

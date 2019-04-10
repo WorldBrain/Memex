@@ -9,13 +9,10 @@
     position: absolute;
     font-size: 13px;
     background-color: #fff;
-    height: 35px;
-    width: max-content;
-    min-width: 50px;
-    padding: 2px 6px;
+    height: 36px;
+    min-width: fit-content;
     border-radius: 3px;
     text-align: center;
-    line-height: 1.2em;
     transform: translate(-50%, 50%);
     z-index: 100000;
     opacity: 1;
@@ -26,12 +23,16 @@
         margin-bottom: 0px !important; /* stylelint-disable-line declaration-no-important */
         padding: 0px !important; /* stylelint-disable-line declaration-no-important */
     }
+
+    & > * {
+        font-family: 'Inter';
+    }
 }
 
 .tooltip::after {
     box-sizing: content-box;
-    bottom: 84%;
     left: calc(50% - 5px);
+    top: -6px;
     border: solid transparent;
     content: ' ';
     height: 10px;
@@ -49,9 +50,8 @@
 }
 
 .tooltip.tooltipWithCloseMessage {
-    &,
     &.statePristine {
-        height: 100px;
+        height: 36px;
         width: 345px;
         display: flex;
         justify-content: center;
@@ -60,6 +60,7 @@
 
 .tooltipWithCloseMessage::after {
     bottom: calc(80px - 5px);
+    top: -6px;
 }
 
 .tooltip.stateCopied {
@@ -67,20 +68,23 @@
     animation-fill-mode: forwards;
 
     &::after {
-        left: 50%;
+        left: calc(50% - 5px);
+        top: -6;
     }
 }
 
 .tooltip.statePristine {
     border-radius: 3px;
-    width: 105px;
+    width: 100px;
+    height: 36px;
     display: grid;
     justify-content: space-between;
     align-items: center;
-    grid-template-columns: 60% 30%;
+    grid-template-columns: max-content 30px;
+    grid-gap: 6px;
 
     &::after {
-        left: 50%;
+        left: calc(50% - 5px);
         top: -6px;
     }
 }
@@ -96,63 +100,57 @@
 .progressIndicator,
 .copiedMessage,
 .doneComponent {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 40px;
+    position: relative;
+    height: 36px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+}
+
+.animationWrapper {
+    width: 100%;
 }
 
 .createButtons {
     z-index: 10;
-    height: 100%;
-    margin-left: 10px;
-    width: inherit;
-    display: grid;
+    height: 36px;
+    width: 60px;
+    display: flex;
+    top: 0px;
     justify-content: flex-start;
     align-items: center;
-    column-gap: 10px;
-    grid-auto-flow: column;
+    margin-left: 5px;
     animation: slideIn 0.05s ease-in-out;
-    grid-template-columns: 50% 50%;
 
     & div {
         cursor: pointer;
         display: flex;
-        width: auto;
         flex-direction: row;
         align-items: center;
         justify-content: center;
+        margin-right: 2px;
     }
 }
 
 .annotateIcon {
-        composes: nakedButton from '../../common-ui/elements.css';
-        padding: 3px;
+        composes: nakedSquareButton from '../../common-ui/elements.css';
         background-image: url('/img/comment_add.svg');
-        background-size: 23px;
         background-repeat: no-repeat;
-        background-position: center;
-        height: 25px;
-        width: 25px;
-        margin-top: 0px;
-        margin-right: -4px;
+        background-position: center center;
+        background-size: 20px;
+        height: 24px;
+        width: 24px;
 }
 
 .shareIcon {
-        composes: nakedButton from '../../common-ui/elements.css';
+        composes: nakedSquareButton from '../../common-ui/elements.css';
         background-image: url('/img/share.svg');
-        padding: 3px;
-        background-size: 21px;
         background-repeat: no-repeat;
-        background-position: center;
-        height: 25px;
-        margin-top: 0px;
-        margin-right: 0px;
-        width: 25px;
+        background-position: center center;
+        background-size: 20px;
+        height: 24px;
+        width: 24px;
 }
 
 .progressIndicator {
@@ -187,7 +185,7 @@
 
 .copiedMessage {
     width: max-content;
-    height: 100%;
+    height: 36px;
 
     & .check {
         background-image: url('/img/checked_green.svg');
@@ -198,12 +196,11 @@
         height: 25px;
         animation: slideIn 0.05s ease-in-out 0.3s;
         animation-fill-mode: both;
-        margin-left: 8px;
+        margin-left: 10px;
     }
 
     & .copiedTextContainer {
-        height: 35px;
-        padding-left: 4px;
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -211,38 +208,36 @@
         animation-fill-mode: both;
         text-align: left;
         text-shadow: none;
-        margin-left: 3px;
+        margin: 0 10px;
     }
 }
 
 .greenText {
     color: color4;
-    margin: 0;
-    padding: 0;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
+    line-height: 1.2;
 }
 
 .greyText {
-    margin: 0;
-    padding: 0;
-    font-size: 11px;
+    font-size: 12px;
     color: color6;
     font-weight: 400;
+    line-height: 1.2;
 }
 
 /* Right side buttons */
 .buttons {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    width: 22px;
+    width: 25px;
     height: 25px;
+    justify-content: center;
+    align-items: center;
     position: absolute;
-    right: 4px;
-    top: -13px;
     z-index: 100001;
+    top: -12px;
+    cursor: pointer;
     animation: slideIn 0.05s ease-in-out;
 }
 
@@ -255,7 +250,6 @@
     height: 15px;
     margin-right: 15px;
     vertical-align: top;
-    margin-top: -1px;
 }
 
 .closeMessageDisableTooltip {
@@ -264,9 +258,7 @@
     cursor: pointer;
     font-size: 15px;
     width: 60%;
-    margin-top: 15px;
     border-radius: 4px;
-    padding: 10px 5px 10px 5px;
 }
 
 .titleMessage {
@@ -282,26 +274,29 @@
 .imgCross {
     composes: nakedButton from '../../common-ui/elements.css';
     background-image: url('/img/removeIcon.svg');
-    padding: 2px;
+    padding: 0px;
     width: 20px;
     height: 20px;
     background-repeat: no-repeat;
-    margin-right: 2px;
     background-position: center;
     background-size: 12px 12px;
 }
 
 /* Loading CSS */
 .ldsEllipsis {
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
-    width: 40px;
-    height: 100%;
-    margin-top: 14px;
+    width: 60px;
+    height: 36px;
+
+    &.button {
+        display: none;
+    }
 
     & div {
         position: absolute;
-        top: 10px;
         width: 8px;
         height: 8px;
         border-radius: 50%;
