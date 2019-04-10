@@ -112,7 +112,7 @@ class PageResultItem extends PureComponent<Props> {
                             {this.props.screenshot == null ? (
                                 <ButtonTooltip
                                     position='CenterCenter'
-                                    tooltipText="This can happen when you switch away from the page too quickly."
+                                    tooltipText="Screenshots are not captured when importing, or when you switch away from a tab too quickly."
                                 >
                                     <img
                                         className={styles.screenshot}

@@ -3,14 +3,13 @@
 
 .ldsEllipsis {
     position: relative;
-    display: block;
-    width: 120px;
-    height: 120px;
+    display: flex;
+    width: 50px;
+    height: 20px;
     margin: 20px auto;
 
     & div {
         position: absolute;
-        top: 10px;
         width: 12px;
         height: 12px;
         border-radius: 50%;

@@ -145,7 +145,9 @@ const EstimatesTable = ({
                     )}
                 {isLoading &&
                     allowTypes[TYPE.OTHERS] === SERVICES.POCKET && (
-                        <LoadingIndicator />
+                        <td colSpan="3">
+                            <LoadingIndicator />
+                        </td>
                     )}
                 {allowTypes[TYPE.OTHERS] === SERVICES.POCKET &&
                     estimates[TYPE.OTHERS].remaining > 0 && (
@@ -209,7 +211,9 @@ const EstimatesTable = ({
                     )}
                 {isLoading &&
                     allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
-                        <LoadingIndicator />
+                        <td colSpan="3">
+                            <LoadingIndicator />
+                        </td>
                     )}
                 {allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE &&
                     estimates[TYPE.OTHERS].remaining > 0 && (
