@@ -57,13 +57,21 @@ export const initState: () => Thunk = () => dispatch => {
 }
 
 export const openSidebar: (
-    args: { url?: string; title?: string; activeUrl?: string },
-) => Thunk = ({ url, title, activeUrl } = {}) => async (dispatch, getState) => {
+    args: {
+        url?: string
+        title?: string
+        activeUrl?: string
+        forceFetch?: boolean
+    },
+) => Thunk = ({ url, title, activeUrl, forceFetch } = {}) => async (
+    dispatch,
+    getState,
+) => {
     dispatch(setPage({ url, title }))
     dispatch(setSidebarOpen(true))
 
     const annots = selectors.annotations(getState())
-    if (!annots.length) {
+    if (forceFetch || !annots.length) {
         await dispatch(fetchAnnotations())
     }
 

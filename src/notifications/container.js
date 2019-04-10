@@ -41,7 +41,7 @@ class NotificationContainer extends Component {
     }
 
     static defaultProps = {
-        messageCharLimit: 150,
+        messageCharLimit: 250,
         tabs: browser.tabs,
     }
 

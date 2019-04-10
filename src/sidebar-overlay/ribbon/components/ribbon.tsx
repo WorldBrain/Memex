@@ -170,10 +170,6 @@ class Ribbon extends Component<Props, State> {
                 {(this.props.isExpanded || this.props.isSidebarOpen) && (
                     <React.Fragment>
                         <div className={styles.generalActions}>
-                            <button
-                                onClick={() => this.openOverviewTabRPC()}
-                                className={cx(styles.button, styles.logo)}
-                            />
                             <ButtonTooltip
                                 tooltipText="Open Dashboard"
                                 position="left"
@@ -182,7 +178,7 @@ class Ribbon extends Component<Props, State> {
                                     onClick={() => this.openOverviewTabRPC()}
                                     className={cx(
                                         styles.button,
-                                        styles.dashboard,
+                                        styles.logo,
                                     )}
                                 />
                             </ButtonTooltip>
@@ -379,7 +375,7 @@ class Ribbon extends Component<Props, State> {
                                 tooltipText={
                                     'Remove Toolbar once. Disable permanently with button below.'
                                 }
-                                position="leftBig"
+                                position="left"
                             >
                                 <button
                                     className={cx(styles.button, styles.cancel)}

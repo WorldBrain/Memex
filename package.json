@@ -1,11 +1,11 @@
 {
     "name": "worldbrain-extension",
-    "version": "0.17.0",
+    "version": "0.17.1",
     "homepage": "https://worldbrain.io",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/WorldBrain/WebMemex"
+        "url": "https://github.com/WorldBrain/Memex"
     },
     "scripts": {
         "build": "npm run build:clean && webpack",

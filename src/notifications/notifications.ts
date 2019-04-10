@@ -62,13 +62,16 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
         id: 'new_filters_09.04.2019',
         search: {
-            title: "🗄 Updated collection sidebar and filters + exclusion filters",
-            message: "You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard",
+            title:
+                '🗄 Updated collection sidebar and filters + exclusion filters',
+            message:
+                'You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
+                        url:
+                            'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -76,13 +79,16 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
             ],
         },
         overview: {
-            title: "🗄 Updated collection sidebar and filters + exclusion filters",
-            message: "You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard",
+            title:
+                '🗄 Updated collection sidebar and filters + exclusion filters',
+            message:
+                'You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url: 'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
+                        url:
+                            'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -92,7 +98,63 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
     },
 ]
 
-export const EVENT_NOTIFS: object = {
+interface EventNotifsDict {
+    [name: string]: NotifDefinition
+}
+
+export const EVENT_NOTIFS: EventNotifsDict = {
+    quota_warning: {
+        id: 'quota_warning',
+        system: {
+            title: 
+                '⚠️ Low storage space',
+            message: 
+                'Data might be deleted. Click to backup & free up space.',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/overview?showInbox=true',
+                        context: 'self',
+                    },
+                    label: 'Learn more',
+                },
+            ],
+        },
+        overview: {
+            title: 
+                '⚠️ Your almost out of storage space. Your browser may delete Memex data',
+            message: 
+                'Due to the browsers policy to evict local storage when space gets low it might happen that your Memex data gets deleted. Free up disk space and make sure to backup your data for the worst case',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: '/options.html#/backup',
+                        context: 'self',
+                    },
+                    label: 'Backup Now',
+                },
+            ],
+        },
+        search: {
+            title:
+                '⚠️ Your almost out of disk space. Your browser might delete Memex data',
+            message:
+                'Due to the browsers policy to evict local storage on low disc space it might happen that your Memex data gets deleted. Free up disk space and make sure to backup your data for the worst case',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url:
+                            'https://www.notion.so/worldbrain/2318f14ceeb741d6b7aa6c0ff00cb607',
+                        context: 'new-tab',
+                    },
+                    label: 'Find out more',
+                },
+            ],
+        },
+    },
     backup_error: {
         id: 'backup_error',
         system: {

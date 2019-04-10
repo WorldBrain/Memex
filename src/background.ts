@@ -16,6 +16,7 @@ import SearchBackground from './search/background'
 import * as backup from './backup/background'
 import * as backupStorage from './backup/background/storage'
 import BackgroundScript from './background-script'
+import alarms from './background-script/alarms'
 import TagsBackground from './tags/background'
 
 // Features that auto-setup
@@ -86,6 +87,7 @@ storageManager.finishInitialization().then(() => {
     })
     bgScript.setupRemoteFunctions()
     bgScript.setupWebExtAPIHandlers()
+    bgScript.setupAlarms(alarms)
 })
 
 // Attach interesting features onto global window scope for interested users
