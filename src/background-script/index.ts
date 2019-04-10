@@ -1,4 +1,10 @@
-import { browser, Runtime, Commands, Storage } from 'webextension-polyfill-ts'
+import {
+    browser,
+    Alarms,
+    Runtime,
+    Commands,
+    Storage,
+} from 'webextension-polyfill-ts'
 
 import * as utils from './utils'
 import { UNINSTALL_URL } from './constants'
@@ -12,6 +18,7 @@ import {
 } from '../util/storage-changes'
 import { StorageManager } from 'src/search/types'
 import { migrations } from './quick-and-dirty-migrations'
+import { AlarmsConfig } from './alarms'
 
 class BackgroundScript {
     private utils: typeof utils
@@ -21,6 +28,8 @@ class BackgroundScript {
     private storageAPI: Storage.Static
     private runtimeAPI: Runtime.Static
     private commandsAPI: Commands.Static
+    private alarmsAPI: Alarms.Static
+    private alarmsListener
 
     constructor({
         storageManager,
@@ -30,6 +39,7 @@ class BackgroundScript {
         storageAPI = browser.storage,
         runtimeAPI = browser.runtime,
         commandsAPI = browser.commands,
+        alarmsAPI = browser.alarms,
     }: {
         storageManager: StorageManager
         notifsBackground: NotifsBackground
@@ -38,6 +48,7 @@ class BackgroundScript {
         storageAPI?: Storage.Static
         runtimeAPI?: Runtime.Static
         commandsAPI?: Commands.Static
+        alarmsAPI?: Alarms.Static
     }) {
         this.storageManager = storageManager
         this.notifsBackground = notifsBackground
@@ -46,6 +57,7 @@ class BackgroundScript {
         this.storageAPI = storageAPI
         this.runtimeAPI = runtimeAPI
         this.commandsAPI = commandsAPI
+        this.alarmsAPI = alarmsAPI
     }
 
     get defaultUninstallURL() {
@@ -129,6 +141,31 @@ class BackgroundScript {
         this.setupInstallHooks()
         this.setupCommands()
         this.setupUninstallURL()
+    }
+
+    setupAlarms(alarms: AlarmsConfig) {
+        const alarmListeners = new Map()
+
+        for (const [name, { listener, ...alarmInfo }] of Object.entries(
+            alarms,
+        )) {
+            this.alarmsAPI.create(name, alarmInfo)
+            alarmListeners.set(name, listener)
+        }
+
+        this.alarmsListener = ({ name }) => {
+            const listener = alarmListeners.get(name)
+            if (typeof listener === 'function') {
+                listener(this)
+            }
+        }
+
+        this.alarmsAPI.onAlarm.addListener(this.alarmsListener)
+    }
+
+    clearAlarms() {
+        this.alarmsAPI.clearAll()
+        this.alarmsAPI.onAlarm.removeListener(this.alarmsListener)
     }
 }
 
