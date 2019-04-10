@@ -62,7 +62,7 @@ class Header extends PureComponent<Props> {
         return (
             <React.Fragment>
                 <div className={styles.navbar}>
-                    <div />
+                    <div className={styles.collectionsPlaceholder} />
                     <div className={styles.container}>
                         <div className={styles.searchField}>
                             <input
@@ -100,15 +100,6 @@ class Header extends PureComponent<Props> {
                     </div>
                     <div className={styles.links}>
                         <BackupStatus className={styles.backupStatus} />
-                        {!this.props.automaticBackupEnalbled && (
-                            <OutLink
-                                className={styles.upgrade}
-                                to={this.props.pricingUrl}
-                            >
-                                <span className={styles.upgradeIcon} />
-                                ⭐️ Upgrade
-                            </OutLink>
-                        )}
                         <InboxButton
                             toggleInbox={this.props.toggleInbox}
                             showInbox={this.props.showInbox}

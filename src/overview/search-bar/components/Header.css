@@ -2,7 +2,7 @@
 @value color7, color14, color4, color6, color9 from colors;
 
 .navbar {
-    display: grid;
+    display: flex;
     flex: 1;
     align-items: center;
     justify-content: space-between;
@@ -11,7 +11,6 @@
     top: 0;
     left: 0;
     right: 0;
-    grid-template-columns: 25% 800px 25%;
     z-index: 1000;
 
     /* z-index: 300001;
@@ -20,10 +19,18 @@
 
     border-bottom: 1px solid #ebebeb;
 
-    @media (max-width: 1000px) {
+    @media (max-width: 1150px) {
         justify-content: flex-end;
-        padding: 0;
+        padding-right: 20px;
         display: flex;
+    }
+}
+
+.collectionsPlaceholder {
+    width: 18vw;
+
+        @media (max-width: 1150px) {
+        display: none;
     }
 }
 
@@ -36,10 +43,6 @@
     height: 40px;
     border-radius: 35px;
     border-radius: 3px;
-
-    @media (max-width: 724px) {
-        margin: 0 8px;
-    }
 }
 
 .query {
@@ -65,7 +68,7 @@
     border-right: none;
     align-items: center;
 
-     @media (max-width: 1000px) {
+     @media (max-width: 1150px) {
         width: 65%;
         margin-right: 20px;
     }
@@ -79,38 +82,14 @@
     font-weight: normal;
     align-items: center;
     padding-right: 20px;
+    width: 18vw;
 
-    @media (max-width: 1200px) {
-        margin-left: 0;
-        width: 24px;
-    }
-
-    @media (max-width: 1000px) {
+    @media (max-width: 1150px) {
         display: none;
     }
 
     & > a {
         height: 25px;
-    }
-}
-
-.backupStatus {
-    @media (max-width: 1400px) {
-        display: none;
-    }
-}
-
-.upgrade {
-    composes: h2Color from 'src/common-ui/colors.css';
-    composes: nakedButton from 'src/common-ui/elements.css';
-    display: none;
-    font-size: 15px;
-    text-decoration: none;
-    margin-left: 15px;
-    padding: 0px 10px 2px 10px;
-
-    @media (max-width: 1260px) {
-        display: none;
     }
 }
 
@@ -123,16 +102,6 @@
     display: flex;
     margin-left: 15px;
     background-size: 21px;
-}
-
-.upgradeIcon {
-    width: 20px;
-    height: 20px;
-    vertical-align: top;
-
-    @media (max-width: 1260px) {
-        display: none;
-    }
 }
 
 .button {
