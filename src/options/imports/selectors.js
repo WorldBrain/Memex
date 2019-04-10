@@ -51,11 +51,6 @@ export const showDownloadDetails = () => false
 // )
 
 // Adv settings mode
-export const advMode = createSelector(imports, state => state.isAdvEnabled)
-export const isUploading = createSelector(
-    imports,
-    state => state.isFileUploading,
-)
 export const concurrency = createSelector(imports, state => state.concurrency)
 export const processErrors = createSelector(
     imports,

@@ -88,6 +88,7 @@ const finishImportsReducer = ({ loading = false, finish = true }) => state => ({
     ...state,
     allowTypes: finish ? defaultState.allowTypes : state.allowTypes,
     importStatus: loading ? STATUS.LOADING : STATUS.IDLE,
+    blobUrl: finish ? null : state.blobUrl,
     downloadData: [],
     success: defaultStats,
     fail: defaultStats,
@@ -104,6 +105,7 @@ const prepareImportReducer = state => {
 const cancelImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
+    blobUrl: null,
     loadingMsg: 'Please wait as import progress gets recorded.',
 })
 
@@ -163,10 +165,6 @@ export default createReducer(
         [actions.setConcurrency]: (state, concurrency) => ({
             ...state,
             concurrency,
-        }),
-        [actions.toggleAdvMode]: state => ({
-            ...state,
-            isAdvEnabled: !state.isAdvEnabled,
         }),
         [actions.showDownloadDetails]: state => ({
             ...state,

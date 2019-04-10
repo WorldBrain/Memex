@@ -35,7 +35,6 @@ export const pauseImport = createAction('imports/pauseImport')
 export const resumeImport = createAction('imports/resumeImport')
 
 // Adv settings mode actions
-export const toggleAdvMode = createAction('imports-adv/toggleAdvMode')
 export const setConcurrency = createAction('imports-adv/setConcurrency')
 export const setProcessErrs = createAction('imports-adv/setProcessErrs')
 export const toggleBookmarkImports = createAction(

@@ -15,6 +15,7 @@ const EstimatesTable = ({
     estimates,
     allowTypes,
     isLoading,
+    blobUrl,
 }) => (
     <table className={localStyles.importTable}>
         <colgroup>
@@ -117,7 +118,7 @@ const EstimatesTable = ({
                     </label>
                 </td>
                 {!isLoading &&
-                    estimates[TYPE.OTHERS].remaining === 0 && (
+                    blobUrl === null && (
                         <td colSpan="3">
                             <label
                                 className={classNames(localStyles.selectFile, {
@@ -139,7 +140,12 @@ const EstimatesTable = ({
                                 }
                             />{' '}
                             <span className={localStyles.tutorial}>
-                                <a target="_blank" href="https://getpocket.com/export">How to get that file?</a>
+                                <a
+                                    target="_blank"
+                                    href="https://getpocket.com/export"
+                                >
+                                    How to get that file?
+                                </a>
                             </span>
                         </td>
                     )}
@@ -150,7 +156,8 @@ const EstimatesTable = ({
                         </td>
                     )}
                 {allowTypes[TYPE.OTHERS] === SERVICES.POCKET &&
-                    estimates[TYPE.OTHERS].remaining > 0 && (
+                    estimates[TYPE.OTHERS].remaining > 0 &&
+                    blobUrl !== null && (
                         <React.Fragment>
                             <td>{estimates[TYPE.OTHERS].complete}</td>
                             <td>{estimates[TYPE.OTHERS].remaining}</td>
@@ -182,7 +189,7 @@ const EstimatesTable = ({
                     </label>
                 </td>
                 {!isLoading &&
-                    estimates[TYPE.OTHERS].remaining === 0 && (
+                    blobUrl === null && (
                         <td colSpan="3">
                             <label
                                 className={classNames(localStyles.selectFile, {
@@ -205,7 +212,12 @@ const EstimatesTable = ({
                                 }
                             />{' '}
                             <span className={localStyles.tutorial}>
-                                <a target="_blank" href="https://www.notion.so/worldbrain/7a12d7a019094785a14ff109e99a531d">How to get that file?</a>
+                                <a
+                                    target="_blank"
+                                    href="https://www.notion.so/worldbrain/7a12d7a019094785a14ff109e99a531d"
+                                >
+                                    How to get that file?
+                                </a>
                             </span>
                         </td>
                     )}
@@ -216,7 +228,8 @@ const EstimatesTable = ({
                         </td>
                     )}
                 {allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE &&
-                    estimates[TYPE.OTHERS].remaining > 0 && (
+                    estimates[TYPE.OTHERS].remaining > 0 &&
+                    blobUrl !== null && (
                         <React.Fragment>
                             <td>{estimates[TYPE.OTHERS].complete}</td>
                             <td>{estimates[TYPE.OTHERS].remaining}</td>
@@ -245,7 +258,7 @@ EstimatesTable.propTypes = {
         [TYPE.OTHERS]: PropTypes.string.isRequired,
     }).isRequired,
     isLoading: PropTypes.bool.isRequired,
-
+    blobUrl: PropTypes.string,
     // Event handlers
     onAllowHistoryClick: PropTypes.func.isRequired,
     onAllowBookmarksClick: PropTypes.func.isRequired,

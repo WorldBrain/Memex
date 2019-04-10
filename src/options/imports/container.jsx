@@ -16,9 +16,8 @@ import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
-import AdvSettingCheckbox from './components/AdvSettingsCheckbox'
 // import ShowDownloadDetails from './components/ShowDownloadDetails'
-
+import { acts as searchBarActs } from 'src/overview/search-bar'
 import styles from './components/ActionButton.css'
 
 class ImportContainer extends Component {
@@ -36,8 +35,10 @@ class ImportContainer extends Component {
         downloadDataFilter: PropTypes.string.isRequired,
         recalcEsts: PropTypes.func.isRequired,
         allowTypes: PropTypes.object.isRequired,
+        blobUrl: PropTypes.string,
         // Misc
         boundActions: PropTypes.object.isRequired,
+        search: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -63,6 +64,7 @@ class ImportContainer extends Component {
         ) {
             this.props.boundActions.prepareImport()
         }
+        this.props.search()
     }
 
     setCancelState = waitingOnCancelConfirm =>
@@ -123,7 +125,20 @@ class ImportContainer extends Component {
     )
 
     renderImportButton() {
-        const { boundActions } = this.props
+        const {
+            boundActions,
+            blobUrl,
+            allowTypes,
+            isStartBtnDisabled,
+        } = this.props
+
+        const isDisabled =
+            allowTypes[constants.IMPORT_TYPE.OTHERS] ===
+                constants.IMPORT_SERVICES.POCKET ||
+            allowTypes[constants.IMPORT_TYPE.OTHERS] ===
+                constants.IMPORT_SERVICES.NETSCAPE
+                ? !blobUrl
+                : isStartBtnDisabled
 
         if (this.props.isRunning) {
             return (
@@ -162,7 +177,7 @@ class ImportContainer extends Component {
         return (
             <ActionButton
                 handleClick={this.handleBtnClick(boundActions.start)}
-                isDisabled={this.props.isStartBtnDisabled}
+                isDisabled={isDisabled}
                 customClass={'startImport'}
                 type="submit"
             >
@@ -294,7 +309,6 @@ class ImportContainer extends Component {
         <ButtonBar helpText={this.renderHelpText()} {...this.props}>
             {this.props.shouldRenderEsts && (
                 <React.Fragment>
-                    <AdvSettingCheckbox {...this.props} />
                     <ButtonTooltip
                         tooltipText="Recalculate Numbers"
                         position="bottom"
@@ -303,7 +317,7 @@ class ImportContainer extends Component {
                             handleClick={this.props.recalcEsts}
                             customClass="recalc"
                         >
-                            <span className={styles.reCalc}/>
+                            <span className={styles.reCalc} />
                         </ActionButton>
                     </ButtonTooltip>
                 </React.Fragment>
@@ -339,7 +353,7 @@ const mapStateToProps = state => ({
     failCount: selectors.failCount(state),
     allowTypes: selectors.allowTypes(state),
     loadingMsg: selectors.loadingMsg(state),
-    advMode: selectors.advMode(state),
+    blobUrl: selectors.blobUrl(state),
     showDownloadDetails: selectors.showDownloadDetails(state),
     downloadDataFilter: selectors.downloadDataFilter(state),
 })
@@ -347,7 +361,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
     recalcEsts: () => dispatch(actions.recalcEsts()),
-    toggleAdvMode: () => dispatch(actions.toggleAdvMode()),
+    search: () => dispatch(searchBarActs.search({ overwrite: true })),
 })
 
 export default connect(
