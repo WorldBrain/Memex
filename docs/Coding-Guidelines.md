@@ -20,16 +20,21 @@ Memex is a codebase that grew out of a codebase not developed by us, meaning tha
 
 -   **Write all new code in Typescript:** Strong typing prevents a lot of stupid mistakes and gives IDEs superpowers like helping you rename stuff throughout the whole project.
 -   **Think really, really hard about how you name stuff:** Always think of descriptive names, **no abbreviations**. This means no `l`, but `userList`. No `events` for single `event`. No `userDef`, but `defaultUser` or `userDefinition` (note the ambiguity the abbreviation can introduce.) Sometimes it'll be really hard to come up with a good name for something, but really sit and try hard, since this is one of the hardest problems in computer science. Sometimes it means you actually have to re-organize your code because a single function/class is doing too many things, which you cannot find a good descriptive name for. But coming up with good names improves code quality dramatically both short- and long-term.
--   **No globals, ever:** Globals tightly couple different parts of the program and creates implicity relationships between components that can be hard to understand. Also, it makes unit testing hard and dirty. Also, what if you want use two seperate database instead of one for example? If you explicitly pass things around through dependency inject, you can easily make these kind of changes in 1 hour instead of 1 month. This rule include module-level variables, which are also factual globals.
+-   **No globals, ever:** Globals tightly couple different parts of the program and creates implicity relationships between components that can be hard to understand. Also, it makes unit testing hard and dirty. Also, what if you want use two seperate database instead of one for example? If you explicitly pass things around through dependency injection, you can easily make these kind of changes in 1 hour instead of 1 month. This rule include module-level variables, which are also factual globals.
 -   **No import-time code, ever:** If I import something, I expect nothing to run or be instantiated. This prevents unexpected surprises and hidden relationships.
 -   **Relationships and flows in programs should be easy to follow:** If I start at the program entry point, I should be able to drill down bit by bit and easily understand what depends on what. In other words, when somebody new looks at a program, they should be able to open the main entry point and easily understand the flow of the whole program by drinning down from there.
+-   **Force named parameters where callsites might become amgiuous:** Object instantiations or function call like `inspect(object, null, 4, false)` are not fun to read. Instead, use objects for all parameters either can be hard to read, or which have no intrinsic order. For example `inspect(obj, { customReporter: null, indentationSpaces: 4, colorize: false })` is much easier to understand without needing to go to the documentation or source code. Also, if the order is not immediately obvious like `backup({ device: 'one' }, { device: 'two' })` rewrite it as `backup({ source: { device: 'one' }, target: { device: 'two' } })`.
 
 # TDD tips and tools
 
 -   **Writing React components:** Testing React sucks and is usually way to complicated. We've written some tools that allow you to seperate UI logic from React code, making React only responsible for rendering and input collection. You don't have to test that React layer, but do write your UI logic TDD-style. More [here](./Writing-React-Components.md)
 -   **Testing cross-script communication:** TBD
--   **Testing things involving the current time:** TBD
+-   **Testing things involving the current time:** Here you there's two strategies: 1) if you're testing a class, include a `_getNow() : Date` method that you can override from the tests, or 2) pass in the current time from the callsite, meaning having functions like `logAction(action : Action, now : Date)`.
 -   **Testing storage logic:** TBD
 -   **Test data fixtures:** TBD
 -   **Testing data schema migrations:** TBD
 -   **Integration tests:** Using all of the above tools, you should be able to set up tests in such way that entire workflows can be tested from the UI logic to an in-memory database using test data.
+
+# Required resources to understand
+
+https://youtu.be/o_TH-Y78tt4?t=644
