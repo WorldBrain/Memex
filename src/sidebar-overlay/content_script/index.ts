@@ -3,6 +3,7 @@ import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as interactions from './ribbon-interactions'
 import { getSidebarState } from '../utils'
 import AnnotationsManager from 'src/sidebar-common/annotations-manager'
+import { runOnScriptShutdown } from 'src/content-tooltip/utils'
 
 const onKeydown = (
     e: KeyboardEvent,
@@ -28,6 +29,7 @@ const initRibbonAndSidebar = async ({
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
 }) => {
+    runOnScriptShutdown(() => interactions.removeRibbon())
     interactions.setupRPC({ annotationsManager, toolbarNotifications })
 
     const isSidebarEnabled = await getSidebarState()

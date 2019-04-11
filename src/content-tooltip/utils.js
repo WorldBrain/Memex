@@ -74,3 +74,17 @@ export const convertKeyboardEventToKeyString = e => {
         (isAlpha(e.key) ? e.key.toLowerCase() : e.key)
     )
 }
+
+/**
+ * Sets up a callback to run on content script shutdown (when a new script starts up).
+ * More info: https://stackoverflow.com/questions/25840674/chrome-runtime-sendmessage-throws-exception-from-content-script-after-reloading/25844023#25844023
+ */
+export function runOnScriptShutdown(callback) {
+    const destroyEvent = `destroy-${browser.runtime.id}`
+    document.dispatchEvent(new CustomEvent(destroyEvent))
+
+    document.addEventListener(destroyEvent, function() {
+        document.removeEventListener(destroyEvent, this)
+        callback()
+    })
+}

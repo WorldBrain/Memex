@@ -78,7 +78,7 @@ const _removeRibbonViaRibbonCross = async ({
     toolbarNotifications: ToolbarNotifications
 }) => {
     manualOverride = true
-    _removeRibbon()
+    removeRibbon()
 
     const closeMessageShown = await _getCloseMessageShown()
     if (!closeMessageShown) {
@@ -91,7 +91,7 @@ const _removeRibbonViaRibbonCross = async ({
  * Removes the ribbon and sidebar from the DOM (if it is present) after
  * removing the highlights from the page. Also destroys the container.
  */
-const _removeRibbon = () => {
+export const removeRibbon = () => {
     if (!target) {
         return
     }
@@ -125,7 +125,7 @@ const _insertOrRemoveRibbon = async ({
     if (isRibbonEnabled && !isRibbonPresent) {
         insertRibbon({ annotationsManager, toolbarNotifications })
     } else if (!isRibbonEnabled && isRibbonPresent) {
-        _removeRibbon()
+        removeRibbon()
     }
 }
 
@@ -173,7 +173,7 @@ export const setupRPC = ({
          */
         removeRibbon: ({ override } = { override: false }) => {
             manualOverride = !!override
-            _removeRibbon()
+            removeRibbon()
         },
         /**
          * Inserts or removes the ribbon from the page depending on whether it
