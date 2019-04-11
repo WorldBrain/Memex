@@ -9,14 +9,16 @@ export const addBookmark = (getDb: () => Promise<Dexie>) => async ({
     url,
     timestamp = Date.now(),
     tabId,
+    fromOverview = false,
 }: {
     url: string
     timestamp?: number
     tabId?: number
+    fromOverview?: boolean
 }) => {
     let page = await getPage(getDb)(url)
 
-    if (page == null || page.isStub) {
+    if (!fromOverview && (page == null || page.isStub)) {
         page = await createPageViaBmTagActs(getDb)({ url, tabId })
     }
 

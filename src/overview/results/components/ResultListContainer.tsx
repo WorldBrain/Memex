@@ -133,6 +133,7 @@ class ResultListContainer extends PureComponent<Props> {
                 source="tag"
                 isForRibbon
                 hover
+                fromOverview
             />
         )
     }

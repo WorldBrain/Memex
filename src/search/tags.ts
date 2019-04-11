@@ -7,14 +7,18 @@ interface Props {
     url: string
     tag: string
     tabId?: number
+    fromOverview?: boolean
 }
 
 const modifyTag = (shouldAdd: boolean) => (getDb: () => Promise<Dexie>) =>
-    async function({ url, tag, tabId }: Props) {
+    async function({ url, tag, tabId, fromOverview }: Props) {
         let page = await getPage(getDb)(url)
 
-        if (page == null || page.isStub) {
-            page = await createPageViaBmTagActs(getDb)({ url, tabId })
+        if (!fromOverview && (page == null || page.isStub)) {
+            page = await createPageViaBmTagActs(getDb)({
+                url,
+                tabId,
+            })
         }
 
         // Add new visit if none, else page won't appear in results

@@ -45,6 +45,8 @@ export interface Props {
     onBackBtnClick?: ClickHandler<HTMLButtonElement>
     allTabs?: boolean
     isForFilters?: boolean
+    /** Add tags from dashboard */
+    fromOverview?: boolean
 }
 
 export interface State {
@@ -69,6 +71,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         isForAnnotation: false,
         isForRibbon: false,
         isForFilters: false,
+        fromOverview: false,
     }
 
     private suggestRPC
@@ -251,6 +254,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                     url: this.props.url,
                     tag: newTag,
                     tabId: this.props.tabId,
+                    fromOverview: this.props.fromOverview,
                 }).catch(console.error)
             }
         }
@@ -287,6 +291,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                     url: this.props.url,
                     tag,
                     tabId: this.props.tabId,
+                    fromOverview: this.props.fromOverview,
                 }).catch(console.error)
             }
 
@@ -298,6 +303,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                     url: this.props.url,
                     tag,
                     tabId: this.props.tabId,
+                    fromOverview: this.props.fromOverview,
                 }).catch(console.error)
             }
 
