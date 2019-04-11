@@ -148,11 +148,23 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
 describe('Import progress manager', () => {
     describe(
         'hist: 200+, bm:30',
-        runSuite(initData(urlLists.med, urlLists.med.slice(0, 30))),
+        runSuite(
+            initData(urlLists.med, urlLists.med.slice(0, 30), {
+                h: true,
+                b: true,
+                o: '',
+            }),
+        ),
     )
     describe(
         'hist: 30, bm:200+ - no bm intersection',
-        runSuite(initData(urlLists.large.slice(0, 30), urlLists.med)),
+        runSuite(
+            initData(urlLists.large.slice(0, 30), urlLists.med, {
+                h: true,
+                b: true,
+                o: '',
+            }),
+        ),
     )
     // describe(
     //     'hist: 500, bm:200+ - no bm intersection',
@@ -160,15 +172,15 @@ describe('Import progress manager', () => {
     // )
     describe(
         'hist: 200+, bm:disabled',
-        runSuite(initData(urlLists.med, [], { h: true, b: false })),
+        runSuite(initData(urlLists.med, [], { h: true, b: false, o: '' })),
     )
     describe(
         'hist: disabled, bm:200+',
-        runSuite(initData([], urlLists.med, { h: false, b: true })),
+        runSuite(initData([], urlLists.med, { h: false, b: true, o: '' })),
     )
     describe(
         'hist: disabled, bm: disabled',
-        runSuite(initData([], [], { h: false, b: false })),
+        runSuite(initData([], [], { h: false, b: false, o: '' })),
     )
 
     // describe(
