@@ -118,28 +118,16 @@ export default class ImportItemProcessor {
     async _storeOtherData({ url, tags, collections, annotations }) {
         this._checkCancelled()
         try {
+            const listIds = await listStorage.insertMissingLists({
+                names: collections,
+            })
             await Promise.all(
-                collections.map(async coll => {
-                    const list = await listStorage.fetchListByName({
-                        name: coll,
+                listIds.map(async listId => {
+                    await listStorage.insertPageToList({
+                        id: listId,
+                        url,
                     })
-                    if (list) {
-                        await listStorage.insertPageToList({
-                            id: list.id,
-                            url,
-                        })
-                    } else {
-                        const newList = await listStorage.createCustomList({
-                            name: coll,
-                        })
-
-                        await listStorage.insertPageToList({
-                            id: newList.id,
-                            url,
-                        })
-                    }
                 }),
-
                 tags.map(async tag => {
                     await tagStorage.addTag({ url, name: tag })
                 }),

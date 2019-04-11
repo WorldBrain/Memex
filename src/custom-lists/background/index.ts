@@ -84,6 +84,33 @@ export default class CustomListBackground {
         return this.storage.fetchListByName(name)
     }
 
+    async insertMissingLists({ names }: { names: string[] }) {
+        const existingLists = new Map<string, number>()
+
+        for (const { name, id } of await this.storage.fetchListByNames(names)) {
+            existingLists.set(name, id)
+        }
+
+        const missing = names.filter(name => !existingLists.has(name))
+
+        const missingEntries = await Promise.all(
+            missing.map(async name => {
+                let id: number
+                try {
+                    id = await this.createCustomList({ name })
+                } catch (err) {
+                    const list = await this.fetchListByName({ name })
+                    id = list.id
+                }
+                return [name, id] as [string, number]
+            }),
+        )
+
+        const listIds = new Map([...existingLists, ...missingEntries])
+
+        return names.map(name => listIds.get(name))
+    }
+
     async fetchListPagesById({ id }: { id: number }) {
         return this.storage.fetchListPagesById({
             listId: id,
@@ -96,7 +123,7 @@ export default class CustomListBackground {
         })
     }
 
-    async createCustomList({ name }: { name: string }) {
+    async createCustomList({ name }: { name: string }): Promise<number> {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.CREATE_COLLECTION,
         })
