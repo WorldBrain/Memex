@@ -91,6 +91,18 @@ export default class CustomListStorage extends FeatureStorage {
         }
     }
 
+    async fetchListByName(name: string) {
+        return this.storageManager
+            .collection(CustomListStorage.CUSTOM_LISTS_COLL)
+            .findOneObject<PageList>({ name })
+    }
+
+    async fetchListByNames(names: string[]) {
+        return this.storageManager
+            .collection(CustomListStorage.CUSTOM_LISTS_COLL)
+            .findObjects<PageList>({ name: { $in: names } })
+    }
+
     async fetchListPagesById({ listId }: { listId: number }) {
         return this.storageManager
             .collection(CustomListStorage.LIST_ENTRIES_COLL)

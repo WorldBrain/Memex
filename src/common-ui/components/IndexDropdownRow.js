@@ -104,28 +104,26 @@ class IndexDropdownRow extends PureComponent {
                         this.props.value}
                 </span>
                 <span className={styles.selectionOption}>
-                    {this.props.active && (
-                        <span className={styles.check} />
-                    )}
-                    {!this.props.allowAdd && this.props.isForSidebar &&
+                    {this.props.active && <span className={styles.check} />}
+                    {!this.props.allowAdd &&
+                        this.props.isForSidebar &&
                         !this.props.active && (
                             <ButtonTooltip
                                 tooltipText="Exclude from search"
                                 position="left"
                             >
-                            <span
-                                onClick={e => {
-                                    e.stopPropagation()
-                                    this.props.onExcClick()
-                                }}
-                                className={cx({
-                                    [styles.excludeInactive]:
-                                        this.state.displayExcIcon &&
-                                        !this.props.excActive,
-                                    [styles.excluded]: this.props
-                                        .excActive,
-                                })}
-                            />
+                                <span
+                                    onClick={e => {
+                                        e.stopPropagation()
+                                        this.props.onExcClick()
+                                    }}
+                                    className={cx({
+                                        [styles.excludeInactive]:
+                                            this.state.displayExcIcon &&
+                                            !this.props.excActive,
+                                        [styles.excluded]: this.props.excActive,
+                                    })}
+                                />
                             </ButtonTooltip>
                         )}
                 </span>

@@ -169,6 +169,11 @@
     background-image: url('/img/arrowUp.svg');
 }
 
+.reload {
+    composes: iconPosition;
+    background-image: url('/img/reload.svg');
+}
+
 .excluded {
     composes: iconPosition;
     background-image: url('/img/exclusion.svg');

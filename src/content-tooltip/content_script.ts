@@ -1,6 +1,12 @@
 import * as Mousetrap from 'mousetrap'
+
 import { bodyLoader } from '../util/loader'
-import { setupRPC, insertTooltip, userSelectedText } from './interactions'
+import {
+    setupRPC,
+    insertTooltip,
+    userSelectedText,
+    removeTooltip,
+} from './interactions'
 import ToolbarNotifications from '../toolbar-notification/content_script'
 import {
     conditionallyShowOnboardingNotifications,
@@ -10,6 +16,7 @@ import {
     getTooltipState,
     getKeyboardShortcutsState,
     convertKeyboardEventToKeyString,
+    runOnScriptShutdown,
 } from './utils'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import {
@@ -29,6 +36,7 @@ export default async function init({
 }: {
     toolbarNotifications?: ToolbarNotifications
 }) {
+    runOnScriptShutdown(() => removeTooltip())
     // Set up the RPC calls even if the tooltip is enabled or not.
     setupRPC({ toolbarNotifications })
     await conditionallyShowOnboardingNotifications({

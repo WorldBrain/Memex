@@ -23,12 +23,11 @@
 
 .concurrencyInput {
     position: relative;
-    right: 200px;
 }
 
 .prevFailedCheckbox {
     position: relative;
-    right: 220px;
+    margin-right: 40px;
 }
 
 .settingsList {
@@ -37,8 +36,8 @@
 
 .settingsListItem {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
     align-items: center;
     margin: 1em 0;
     color: #777;

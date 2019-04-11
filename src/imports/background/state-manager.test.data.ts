@@ -1,7 +1,7 @@
 import { BrowserItem } from './types'
 
 interface AllowTypes {
-    [key: string]: boolean
+    [key: string]: boolean | string
 }
 
 export interface TestData {

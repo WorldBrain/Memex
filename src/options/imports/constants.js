@@ -25,11 +25,18 @@ export const STATUS = {
 export const IMPORT_TYPE = {
     BOOKMARK: 'b',
     HISTORY: 'h',
+    OTHERS: 'o',
+}
+
+export const IMPORT_SERVICES = {
+    POCKET: 'p',
+    NETSCAPE: 'n',
 }
 
 export const IMPORT_TYPE_DISPLAY = {
     [IMPORT_TYPE.BOOKMARK]: 'bookmarks',
     [IMPORT_TYPE.HISTORY]: 'history',
+    [IMPORT_TYPE.OTHERS]: 'pocket',
 }
 
 /** Keys used for local storage. */
@@ -69,6 +76,7 @@ export const DOC_TIME_EST = 0.5
 export const DEF_CONCURRENCY = 10
 
 export const DEF_ALLOW = {
-    [IMPORT_TYPE.HISTORY]: true,
-    [IMPORT_TYPE.BOOKMARK]: true,
+    [IMPORT_TYPE.HISTORY]: false,
+    [IMPORT_TYPE.BOOKMARK]: false,
+    [IMPORT_TYPE.OTHERS]: false,
 }

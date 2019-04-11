@@ -16,8 +16,9 @@ import ButtonBar from './components/ButtonBar'
 import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
-import AdvSettingCheckbox from './components/AdvSettingsCheckbox'
 // import ShowDownloadDetails from './components/ShowDownloadDetails'
+import { acts as searchBarActs } from 'src/overview/search-bar'
+import styles from './components/ActionButton.css'
 
 class ImportContainer extends Component {
     static propTypes = {
@@ -33,9 +34,11 @@ class ImportContainer extends Component {
         showDownloadDetails: PropTypes.bool.isRequired,
         downloadDataFilter: PropTypes.string.isRequired,
         recalcEsts: PropTypes.func.isRequired,
-
+        allowTypes: PropTypes.object.isRequired,
+        blobUrl: PropTypes.string,
         // Misc
         boundActions: PropTypes.object.isRequired,
+        search: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -54,9 +57,14 @@ class ImportContainer extends Component {
     componentWillUnmount() {
         if (this.props.isRunning) {
             this.props.boundActions.pause()
-        } else if (!this.props.isPaused) {
+        } else if (
+            (!this.props.isPaused &&
+                this.props.allowTypes[constants.IMPORT_TYPE.HISTORY]) ||
+            this.props.allowTypes[constants.IMPORT_TYPE.BOOKMARK]
+        ) {
             this.props.boundActions.prepareImport()
         }
+        this.props.search()
     }
 
     setCancelState = waitingOnCancelConfirm =>
@@ -90,8 +98,21 @@ class ImportContainer extends Component {
     handleEstTableCheck = type => () =>
         this.props.boundActions.toggleAllowType(type)
 
+    setAllowType = type => () => this.props.boundActions.setAllowType(type)
+
     renderHelpText = () =>
         this.state.waitingOnCancelConfirm ? 'Press cancel again to confirm' : ''
+
+    handleInputFile = event => {
+        const input = event.target
+        if (!input.files[0]) {
+            return
+        }
+        const file = input.files[0]
+        this.props.boundActions.prepareImport()
+        this.props.boundActions.setBlobUrl(URL.createObjectURL(file))
+        setTimeout(() => this.props.recalcEsts(), 500)
+    }
 
     renderCancelButton = () => (
         <ActionButton
@@ -104,7 +125,20 @@ class ImportContainer extends Component {
     )
 
     renderImportButton() {
-        const { boundActions } = this.props
+        const {
+            boundActions,
+            blobUrl,
+            allowTypes,
+            isStartBtnDisabled,
+        } = this.props
+
+        const isDisabled =
+            allowTypes[constants.IMPORT_TYPE.OTHERS] ===
+                constants.IMPORT_SERVICES.POCKET ||
+            allowTypes[constants.IMPORT_TYPE.OTHERS] ===
+                constants.IMPORT_SERVICES.NETSCAPE
+                ? !blobUrl
+                : isStartBtnDisabled
 
         if (this.props.isRunning) {
             return (
@@ -143,7 +177,7 @@ class ImportContainer extends Component {
         return (
             <ActionButton
                 handleClick={this.handleBtnClick(boundActions.start)}
-                isDisabled={this.props.isStartBtnDisabled}
+                isDisabled={isDisabled}
                 customClass={'startImport'}
                 type="submit"
             >
@@ -171,6 +205,13 @@ class ImportContainer extends Component {
             onAllowHistoryClick={this.handleEstTableCheck(
                 constants.IMPORT_TYPE.HISTORY,
             )}
+            onAllowPocketClick={this.setAllowType(
+                constants.IMPORT_SERVICES.POCKET,
+            )}
+            onAllowHTMLClick={this.setAllowType(
+                constants.IMPORT_SERVICES.NETSCAPE,
+            )}
+            onInputImport={this.handleInputFile}
         />
     )
 
@@ -268,7 +309,6 @@ class ImportContainer extends Component {
         <ButtonBar helpText={this.renderHelpText()} {...this.props}>
             {this.props.shouldRenderEsts && (
                 <React.Fragment>
-                    <AdvSettingCheckbox {...this.props} />
                     <ButtonTooltip
                         tooltipText="Recalculate Numbers"
                         position="bottom"
@@ -277,7 +317,7 @@ class ImportContainer extends Component {
                             handleClick={this.props.recalcEsts}
                             customClass="recalc"
                         >
-                            <i className="material-icons">autorenew</i>
+                            <span className={styles.reCalc} />
                         </ActionButton>
                     </ButtonTooltip>
                 </React.Fragment>
@@ -313,7 +353,7 @@ const mapStateToProps = state => ({
     failCount: selectors.failCount(state),
     allowTypes: selectors.allowTypes(state),
     loadingMsg: selectors.loadingMsg(state),
-    advMode: selectors.advMode(state),
+    blobUrl: selectors.blobUrl(state),
     showDownloadDetails: selectors.showDownloadDetails(state),
     downloadDataFilter: selectors.downloadDataFilter(state),
 })
@@ -321,7 +361,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     boundActions: bindActionCreators(actions, dispatch),
     recalcEsts: () => dispatch(actions.recalcEsts()),
-    toggleAdvMode: () => dispatch(actions.toggleAdvMode()),
+    search: () => dispatch(searchBarActs.search({ overwrite: true })),
 })
 
 export default connect(

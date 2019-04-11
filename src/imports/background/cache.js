@@ -20,10 +20,12 @@ export default class ImportCache {
         completed: {
             [TYPE.BOOKMARK]: 0,
             [TYPE.HISTORY]: 0,
+            [TYPE.OTHERS]: 0,
         },
         remaining: {
             [TYPE.BOOKMARK]: 0,
             [TYPE.HISTORY]: 0,
+            [TYPE.OTHERS]: 0,
         },
     }
 
@@ -251,7 +253,11 @@ export default class ImportCache {
      * @returns {number} The amount of items added to cache, post-filtering.
      */
     async persistItems(itemsMap, type, includeErrs = false) {
-        let filteredItems = await this._diffAgainstStored(itemsMap, includeErrs)
+        let filteredItems =
+            type === TYPE.HISTORY || type === TYPE.BOOKMARK
+                ? await this._diffAgainstStored(itemsMap, includeErrs)
+                : itemsMap
+
         const numItemsToAdd = filteredItems.size
 
         if (!numItemsToAdd) {
@@ -273,7 +279,9 @@ export default class ImportCache {
 
     async *getItems(includeErrs = false) {
         for (const chunkKey of this.storageKeyStack) {
-            const { chunk: { entries } } = await ImportCache._getChunk(chunkKey)
+            const {
+                chunk: { entries },
+            } = await ImportCache._getChunk(chunkKey)
             yield { chunk: entries, chunkKey }
         }
 

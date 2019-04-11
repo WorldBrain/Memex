@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import AdvSettings from './AdvSettingsContainer'
 import { LoadingIndicator } from 'src/common-ui/components'
 import localStyles from './Import.css'
-
+import { IMPORT_TYPE } from '../constants'
 const Warning = ({ children }) => (
     <div className={localStyles.warning}>
         <img src="/img/caution.png" className={localStyles.icon} />{' '}
@@ -19,6 +19,7 @@ const Import = ({
     shouldRenderEsts,
     shouldRenderProgress,
     children,
+    allowTypes,
 }) => (
     <form>
         {shouldRenderEsts && (
@@ -28,22 +29,24 @@ const Import = ({
                 </div>
                 <div className={localStyles.stepText}>
                     <Warning>
-                        Re-downloading urls may slow down your web browsing.<br/>
-                        With more than 10.000 links it is suggested to let this run overnight. 
+                        Re-downloading urls may slow down your web browsing.
+                        <br />
+                        With more than 10.000 links it is suggested to let this
+                        run overnight.
                     </Warning>
                 </div>
             </div>
         )}
         {shouldRenderProgress && (
             <div>
-                <div className={localStyles.stepNumber}>
-                    Import Progress{' '}
-                </div>
+                <div className={localStyles.stepNumber}>Import Progress </div>
                 <div className={localStyles.warningContainer}>
                     <Warning>
-                        The import may freeze because of a browser setting.<br/>
+                        The import may freeze because of a browser setting.
+                        <br />
                         No need to worry. Go to{' '}
-                        <a className={localStyles.link}
+                        <a
+                            className={localStyles.link}
                             target="_blank"
                             href="http://memex.link/2Jw-R3BQh/worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway"
                         >
@@ -55,18 +58,18 @@ const Import = ({
             </div>
         )}
         {isStopped && (
-            <div className={localStyles.stepNumber}>
-                Status Report{' '}
-            </div>
+            <div className={localStyles.stepNumber}>Status Report </div>
         )}
         <div className={localStyles.mainContainer}>
             <div className={localStyles.importTableContainer}>{children}</div>
-            {isLoading && (
-                <div className={localStyles.loadingBlocker}>
-                    <p className={localStyles.loadingMsg}>{loadingMsg}</p>
-                    <LoadingIndicator />
-                </div>
-            )}
+            {isLoading &&
+                (allowTypes[IMPORT_TYPE.HISTORY] ||
+                    allowTypes[IMPORT_TYPE.BOOKMARK]) && (
+                    <div className={localStyles.loadingBlocker}>
+                        <p className={localStyles.loadingMsg}>{loadingMsg}</p>
+                        <LoadingIndicator />
+                    </div>
+                )}
         </div>
         {shouldRenderEsts && <AdvSettings />}
     </form>
@@ -86,6 +89,7 @@ Import.propTypes = {
     isStopped: PropTypes.bool.isRequired,
     shouldRenderEsts: PropTypes.bool.isRequired,
     shouldRenderProgress: PropTypes.bool.isRequired,
+    allowTypes: PropTypes.object.isRequired,
 }
 
 export default Import

@@ -95,7 +95,10 @@ class ImportProgressManager {
 
             // Save reference to processor for cancelling later
             this.processors[this._nextProcIndex()] = processor
-            const res = await processor.process(importItem)
+            const res = await processor.process(
+                importItem,
+                this._stateManager.options,
+            )
             msg.status = res.status
         } catch (err) {
             // Throw execution was cancelled, throw error up the stack
