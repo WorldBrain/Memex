@@ -1,0 +1,45 @@
+.menuSeparator {
+    margin-bottom: 1px;
+}
+
+.menuItem {
+    padding: 5px;
+
+    &:hover {
+        background: grey;
+    }
+}
+
+.text {
+    color: black;
+    text-decoration: none;
+    font-size: 1em;
+}
+
+.smallText {
+    color: darkgrey;
+    font-size: 0.8em;
+}
+
+.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menuContainer {
+    background: white;
+    font-size: 14px;
+    position: fixed;
+    bottom: 4.5em;
+    right: 1em;
+    border-radius: 3px;
+    padding: 10px;
+    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+}
+
+.footerText {
+    color: darkgrey;
+    font-size: 0.8em;
+}
