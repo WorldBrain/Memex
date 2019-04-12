@@ -2,6 +2,8 @@ import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import * as searchIndex from 'src/search'
 import { tags as tagStorage, customList as listStorage } from 'src/background'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -239,6 +241,12 @@ export default class ImportItemProcessor {
             rejectNoContent: false,
         })
         await this._storeOtherData({ url, tags, collections, annotations })
+
+        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+
+        await setLocalStorage(TAG_SUGGESTIONS_KEY, [
+            ...new Set([...tagSuggestions, ...tags]),
+        ])
 
         this._checkCancelled()
         // If we finally got here without an error being thrown, return the success status message + pageDoc data

@@ -409,8 +409,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         event.preventDefault()
 
         if (
-            (this.canCreateTag() || this.addExistingTag()) &&
-            this.state.focused === 0
+            (this.canCreateTag() &&
+                this.state.focused === this.state.displayFilters.length) ||
+            (this.addExistingTag() && this.state.focused === 0)
         ) {
             return this.addTag()
         }
@@ -582,12 +583,14 @@ class IndexDropdownContainer extends Component<Props, State> {
         })
 
         if (this.canCreateTag()) {
-            tagOptions.unshift(
+            tagOptions.push(
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
                     onClick={this.addTag}
-                    focused={this.state.focused === 0}
+                    focused={
+                        this.state.focused === this.state.displayFilters.length
+                    }
                     isForAnnotation={this.props.isForAnnotation}
                     allowAdd={this.props.allowAdd}
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
