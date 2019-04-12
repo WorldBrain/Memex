@@ -92,9 +92,9 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
 
     // Either perform adding or removal of bookmark; do not wait for ops to complete
     if (hasBookmark) {
-        removeBookmarkRPC({ url }).catch(errHandler)
+        removeBookmarkRPC({ url, fromOverview: true }).catch(errHandler)
     } else {
-        createBookmarkRPC({ url }).catch(errHandler)
+        createBookmarkRPC({ url, fromOverview: true }).catch(errHandler)
     }
 }
 

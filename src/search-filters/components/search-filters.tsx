@@ -1,19 +1,21 @@
 import React, { PureComponent } from 'react'
-import PropTypes from 'prop-types'
 import cx from 'classnames'
-import styles from './SearchFilters.css'
 import { ButtonTooltip } from 'src/common-ui/components/'
 
-class SearchFilters extends PureComponent {
-    static propTypes = {
-        tagFilter: PropTypes.node.isRequired,
-        dateFilter: PropTypes.node.isRequired,
-        domainFilter: PropTypes.node.isRequired,
-        contentFilter: PropTypes.node.isRequired,
-        bookmarkFilter: PropTypes.node.isRequired,
-        toggleFilterBar: PropTypes.func.isRequired,
-    }
+const styles = require('./search-filters.css')
 
+interface Props {
+    tagFilter: React.ReactNode
+    dateFilter: React.ReactNode
+    domainFilter: React.ReactNode
+    contentFilter: React.ReactNode
+    bookmarkFilter: React.ReactNode
+    toggleFilterBar: () => void
+}
+
+interface State {}
+
+class SearchFilters extends PureComponent<Props, State> {
     render() {
         return (
             <div className={styles.filterBar}>

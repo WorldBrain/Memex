@@ -18,14 +18,22 @@ const parsePocket: ServiceParser = doc => {
             if (!link.hasAttribute('href')) {
                 continue
             }
+
+            const tags = link.hasAttribute('tags')
+                ? link.getAttribute('tags').length !== 0
+                    ? link.getAttribute('tags').split(',')
+                    : []
+                : []
+
             const item: Item = {
                 url: link.getAttribute('href'),
                 title: link.textContent || link.getAttribute('href'),
-                tags: link.hasAttribute('tags')
-                    ? link.getAttribute('tags').length !== 0
-                        ? link.getAttribute('tags').split(',')
-                        : []
-                    : [],
+                tags: tags.map(tag =>
+                    tag
+                        .trim()
+                        .replace(/\s\s+/g, ' ')
+                        .toLowerCase(),
+                ),
                 collections: collections[index]
                     ? [POCKET_PRE + collections[index]]
                     : [],

@@ -1,36 +1,50 @@
 import React, { PureComponent } from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { actions, selectors } from 'src/search-filters'
+import { connect, MapStateToProps } from 'react-redux'
+import { MapDispatchToProps } from 'src/util/types'
+import { RootState } from 'src/options/types'
+
 import { Tooltip } from 'src/common-ui/components'
 import DateRangeSelection from 'src/overview/search-bar/components/DateRangeSelection'
 import FilterButton from './filter-button'
+import { actions, selectors } from 'src/search-filters'
 import {
     acts as searchBarActs,
     selectors as searchBar,
 } from 'src/overview/search-bar'
-import cx from 'classnames'
-import styles from './dates-filter.css'
 import { acts as tooltipActs } from 'src/overview/tooltips'
 
-class DatesFilter extends PureComponent {
-    static propTypes = {
-        env: PropTypes.oneOf(['overview', 'inpage']).isRequired,
-        startDate: PropTypes.number,
-        endDate: PropTypes.number,
-        startDateText: PropTypes.string,
-        endDateText: PropTypes.string,
-        datesFilterDropdown: PropTypes.bool.isRequired,
-        tooltipPosition: PropTypes.string.isRequired,
-        showDatesFilter: PropTypes.func.isRequired,
-        hideDatesFilter: PropTypes.func.isRequired,
-        onStartDateChange: PropTypes.func.isRequired,
-        onEndDateChange: PropTypes.func.isRequired,
-        onStartDateTextChange: PropTypes.func.isRequired,
-        onEndDateTextChange: PropTypes.func.isRequired,
-        changeTooltip: PropTypes.func.isRequired,
-    }
+import cx from 'classnames'
 
+const styles = require('./dates-filter.css')
+
+interface StateProps {
+    startDate: number
+    endDate: number
+    startDateText: string
+    endDateText: string
+    datesFilterDropdown: boolean
+}
+
+interface DispatchProps {
+    showDatesFilter: () => void
+    hideDatesFilter: () => void
+    onStartDateChange: (date: number) => void
+    onEndDateChange: (date: number) => void
+    onStartDateTextChange: (date: string) => void
+    onEndDateTextChange: (date: string) => void
+    changeTooltip: () => void
+}
+
+interface OwnProps {
+    env: 'inpage' | 'overview'
+    tooltipPosition: string
+}
+
+type Props = StateProps & DispatchProps & OwnProps
+
+interface State {}
+
+class DatesFilter extends PureComponent<Props, State> {
     togglePopup = () => {
         this.props.datesFilterDropdown
             ? this.props.hideDatesFilter()
@@ -84,7 +98,9 @@ class DatesFilter extends PureComponent {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+    state,
+): StateProps => ({
     startDate: searchBar.startDate(state),
     endDate: searchBar.endDate(state),
     startDateText: searchBar.startDateText(state),
@@ -92,7 +108,11 @@ const mapStateToProps = state => ({
     datesFilterDropdown: selectors.datesFilter(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<
+    DispatchProps,
+    OwnProps,
+    RootState
+> = dispatch => ({
     onStartDateChange: date => dispatch(searchBarActs.setStartDate(date)),
     onEndDateChange: date => dispatch(searchBarActs.setEndDate(date)),
     onStartDateTextChange: date =>

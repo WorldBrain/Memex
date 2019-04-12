@@ -9,6 +9,7 @@ import DataSources from './data-sources'
 const deriveImportItem = type => item => ({
     browserId: item.id,
     url: item.url,
+    title: item.title,
     type,
 })
 

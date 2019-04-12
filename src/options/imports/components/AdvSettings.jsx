@@ -14,38 +14,36 @@ const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
             <ul className={styles.settingsList}>
                 {(props.allowTypes[TYPE.OTHERS] === SERVICES.POCKET ||
                     props.allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE) && (
-                    <React.Fragment>
-                        <li className={styles.settingsListItem}>
-                            <label htmlFor="star-imports">
-                                'Star' all imported urls
-                            </label>
-                            <input
-                                className={styles.prevFailedCheckbox}
-                                id="star-imports"
-                                type="checkbox"
-                                checked={props.bookmarkImports}
-                                onChange={props.onBookmarImportsToggle}
-                            />
-                        </li>
-                        <li className={styles.settingsListItem}>
-                            <label htmlFor="index-imports">
-                                Only import title, urls and metadata
-                            </label>
-                            <ButtonTooltip
-                                tooltipText="Fast, but not full-text searchable"
-                                position="bottom"
-                            >
-                                <input
-                                    className={styles.prevFailedCheckbox}
-                                    id="index-imports"
-                                    type="checkbox"
-                                    checked={props.indexTitle}
-                                    onChange={props.onIndexTitleToggle}
-                                />
-                            </ButtonTooltip>
-                        </li>
-                    </React.Fragment>
+                    <li className={styles.settingsListItem}>
+                        <label htmlFor="star-imports">
+                            'Star' all imported urls
+                        </label>
+                        <input
+                            className={styles.prevFailedCheckbox}
+                            id="star-imports"
+                            type="checkbox"
+                            checked={props.bookmarkImports}
+                            onChange={props.onBookmarImportsToggle}
+                        />
+                    </li>
                 )}
+                <li className={styles.settingsListItem}>
+                    <label htmlFor="index-imports">
+                        Only import title, urls and metadata
+                    </label>
+                    <ButtonTooltip
+                        tooltipText="Fast, but not full-text searchable"
+                        position="bottom"
+                    >
+                        <input
+                            className={styles.prevFailedCheckbox}
+                            id="index-imports"
+                            type="checkbox"
+                            checked={props.indexTitle}
+                            onChange={props.onIndexTitleToggle}
+                        />
+                    </ButtonTooltip>
+                </li>
                 <li className={styles.settingsListItem}>
                     <Concurrency {...props} />
                 </li>

@@ -16,10 +16,14 @@ export const toggleFilterTypes = createAction(
     'search-filters/toggleFilterTypes',
 )
 
-export const addTagFilter = createAction('search-filters/addTagFilter')
-export const delTagFilter = createAction('search-filters/delTagFilter')
-export const addExcTagFilter = createAction('search-filters/addExcTagFilter')
-export const delExcTagFilter = createAction('search-filters/delExcTagFilter')
+export const addTagFilter = createAction<string>('search-filters/addTagFilter')
+export const delTagFilter = createAction<string>('search-filters/delTagFilter')
+export const addExcTagFilter = createAction<string>(
+    'search-filters/addExcTagFilter',
+)
+export const delExcTagFilter = createAction<string>(
+    'search-filters/delExcTagFilter',
+)
 export const toggleTagFilter = createAction(
     'search-filters/toggleTagFilter',
     a => a,
@@ -28,16 +32,16 @@ export const toggleExcTagFilter = createAction(
     'search-filters/toggleExcTagFilter',
     a => a,
 )
-export const addIncDomainFilter = createAction(
+export const addIncDomainFilter = createAction<string>(
     'search-filters/addIncDomainFilter',
 )
-export const addExcDomainFilter = createAction(
+export const addExcDomainFilter = createAction<string>(
     'search-filters/addExcDomainFilter',
 )
-export const delIncDomainFilter = createAction(
+export const delIncDomainFilter = createAction<string>(
     'search-filters/delIncDomainFilter',
 )
-export const delExcDomainFilter = createAction(
+export const delExcDomainFilter = createAction<string>(
     'search-filters/delExcDomainFilter',
 )
 export const toggleIncDomainFilter = createAction(
@@ -48,13 +52,17 @@ export const toggleExcDomainFilter = createAction(
     'search-filters/toggleExcDomainFilter',
     a => a,
 )
-export const setTagFilters = createAction('search-filters/setTagFilters')
-export const setExcTagFilters = createAction('search-filters/setExcTagFilters')
+export const setTagFilters = createAction<string[]>(
+    'search-filters/setTagFilters',
+)
+export const setExcTagFilters = createAction<string[]>(
+    'search-filters/setExcTagFilters',
+)
 export const setListFilters = createAction('searc-filters/setListFilters')
-export const setIncDomainFilters = createAction(
+export const setIncDomainFilters = createAction<string[]>(
     'search-filters/setIncDomainFilters',
 )
-export const setExcDomainFilters = createAction(
+export const setExcDomainFilters = createAction<string[]>(
     'search-filters/setExcDomainFilters',
 )
 
@@ -68,8 +76,10 @@ export const addListFilter = createAction('search-filters/addListFilter')
 export const delListFilter = createAction('search-filters/delListFilter')
 export const toggleListFilter = createAction('search-filters/toggleListFilter')
 
-export const setSuggestedTags = createAction('search-filters/setSuggestedTags')
-export const setSuggestedDomains = createAction(
+export const setSuggestedTags = createAction<string[]>(
+    'search-filters/setSuggestedTags',
+)
+export const setSuggestedDomains = createAction<string[]>(
     'search-filters/setSuggestedDomains',
 )
 export const toggleWebsitesFilter = createAction(
@@ -81,7 +91,7 @@ export const toggleHighlightsFilter = createAction(
 export const toggleNotesFilter = createAction(
     'search-filters/toggleNotesFilter',
 )
-export const setAnnotationsFilter = createAction(
+export const setAnnotationsFilter = createAction<boolean>(
     'search-filters/setAnnotationsFilter',
 )
 export const clearFilterTypes = createAction('search-filters/clearFilterTypes')

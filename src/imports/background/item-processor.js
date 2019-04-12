@@ -2,6 +2,8 @@ import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import * as searchIndex from 'src/search'
 import { tags as tagStorage, customList as listStorage } from 'src/background'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -171,10 +173,18 @@ export default class ImportItemProcessor {
      * @returns {any} Status string denoting the outcome of import processing as `status`
      *  + optional filled-out page doc as `pageDoc` field.
      */
-    async _processHistory(importItem) {
+    async _processHistory(importItem, options = {}) {
         await checkVisitItemTransitionTypes(importItem)
 
-        const pageDoc = await this._createPageDoc(importItem)
+        const pageDoc = !options.indexTitle
+            ? await this._createPageDoc(importItem)
+            : {
+                  url: importItem.url,
+                  content: {
+                      title: importItem.title,
+                  },
+              }
+
         const visits = await getVisitTimes(importItem)
 
         let bookmark
@@ -182,7 +192,12 @@ export default class ImportItemProcessor {
             bookmark = await getBookmarkTime(importItem)
         }
 
-        await this._storeDocs({ pageDoc, visits, bookmark })
+        await this._storeDocs({
+            pageDoc,
+            visits,
+            bookmark,
+            rejectNoContent: false,
+        })
 
         this._checkCancelled()
         // If we finally got here without an error being thrown, return the success status message + pageDoc data
@@ -227,6 +242,12 @@ export default class ImportItemProcessor {
         })
         await this._storeOtherData({ url, tags, collections, annotations })
 
+        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+
+        await setLocalStorage(TAG_SUGGESTIONS_KEY, [
+            ...new Set([...tagSuggestions, ...tags]),
+        ])
+
         this._checkCancelled()
         // If we finally got here without an error being thrown, return the success status message + pageDoc data
         return { status: DOWNLOAD_STATUS.SUCC }
@@ -246,7 +267,7 @@ export default class ImportItemProcessor {
         switch (importItem.type) {
             case IMPORT_TYPE.BOOKMARK:
             case IMPORT_TYPE.HISTORY:
-                return this._processHistory(importItem)
+                return this._processHistory(importItem, options)
             case IMPORT_TYPE.OTHERS:
                 return this._processService(importItem, options)
             default:
