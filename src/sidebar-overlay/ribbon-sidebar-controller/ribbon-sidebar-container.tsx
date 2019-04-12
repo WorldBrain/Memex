@@ -4,7 +4,7 @@ import { connect, MapStateToProps } from 'react-redux'
 
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import * as actions from '../actions'
-import RootState, { MapDispatchToProps } from '../types'
+import RootState, { MapDispatchToProps, OpenSidebarArgs } from '../types'
 import RibbonContainer, {
     actions as ribbonActions,
     selectors as ribbonSelectors,
@@ -32,7 +32,7 @@ interface StateProps {
 interface DispatchProps {
     onInit: () => void
     handleToggleFullScreen: (e: Event) => void
-    openSidebar: (args: { activeUrl?: string }) => void
+    openSidebar: (args: OpenSidebarArgs) => void
     closeSidebar: () => void
     openCommentBoxWithHighlight: (anchor: Anchor) => void
     setRibbonEnabled: (isRibbonEnabled: boolean) => void
@@ -48,7 +48,7 @@ interface OwnProps {
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     highlightAll: (
         highlights: Annotation[],
-        openSidebar: (args: { activeUrl?: string }) => void,
+        openSidebar: (args: OpenSidebarArgs) => void,
         focusOnAnnotation: (url: string) => void,
         hoverAnnotationContainer: (url: string) => void,
     ) => void
@@ -190,11 +190,16 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     private _openSidebar = async ({
         anchor = null,
         activeUrl,
-    }: {
-        anchor: Anchor
-        activeUrl?: string
-    }) => {
-        await this.props.openSidebar({ activeUrl })
+        openToTags,
+        openToComment,
+        openToCollections,
+    }: OpenSidebarArgs & { anchor: Anchor }) => {
+        await this.props.openSidebar({
+            activeUrl,
+            openToTags,
+            openToComment,
+            openToCollections,
+        })
 
         if (anchor) {
             this.props.openCommentBoxWithHighlight(anchor)
@@ -359,9 +364,9 @@ const mapDispatchToProps: MapDispatchToProps<
         e.stopPropagation()
         dispatch(ribbonActions.toggleFullScreen())
     },
-    openSidebar: ({ activeUrl }: { activeUrl?: string } = {}) => {
+    openSidebar: (args = {}) => {
         dispatch(ribbonActions.setIsExpanded(false))
-        return dispatch(sidebarActions.openSidebar({ activeUrl }))
+        return dispatch(sidebarActions.openSidebar(args))
     },
     closeSidebar: () => dispatch(sidebarActions.closeSidebar()),
     openCommentBoxWithHighlight: anchor =>

@@ -19,6 +19,10 @@ import {
 const styles = require('./ribbon.css')
 
 interface Props {
+    initShowCommentBox?: boolean
+    initShowSearchBox?: boolean
+    initShowTagsPicker?: boolean
+    initShowCollsPicker?: boolean
     isExpanded: boolean
     isRibbonEnabled: boolean
     isTooltipEnabled: boolean
@@ -57,6 +61,13 @@ const defaultState: State = {
 }
 
 class Ribbon extends Component<Props, State> {
+    static defaultProps = {
+        initShowCollsPicker: defaultState.showCollectionsPicker,
+        initShowTagsPicker: defaultState.showTagsPicker,
+        initShowCommentBox: defaultState.showCommentBox,
+        initShowSearchBox: defaultState.showSearchBox,
+    }
+
     private openOverviewTabRPC
     private openOptionsTabRPC
     private ribbonRef: HTMLElement
@@ -69,7 +80,14 @@ class Ribbon extends Component<Props, State> {
         super(props)
         this.openOverviewTabRPC = remoteFunction('openOverviewTab')
         this.openOptionsTabRPC = remoteFunction('openOptionsTab')
-        this.state = defaultState
+
+        this.state = {
+            ...defaultState,
+            showCommentBox: props.initShowCommentBox,
+            showSearchBox: props.initShowSearchBox,
+            showTagsPicker: props.initShowTagsPicker,
+            showCollectionsPicker: props.initShowCollsPicker,
+        }
     }
 
     componentDidMount() {
@@ -176,10 +194,7 @@ class Ribbon extends Component<Props, State> {
                             >
                                 <button
                                     onClick={() => this.openOverviewTabRPC()}
-                                    className={cx(
-                                        styles.button,
-                                        styles.logo,
-                                    )}
+                                    className={cx(styles.button, styles.logo)}
                                 />
                             </ButtonTooltip>
 

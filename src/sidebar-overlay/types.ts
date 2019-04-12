@@ -42,3 +42,10 @@ export type MapDispatchToProps<DispatchProps, OwnProps> = (
     dispatch: ThunkDispatch<RootState, void, any>,
     ownProps: OwnProps,
 ) => DispatchProps
+
+export interface OpenSidebarArgs {
+    activeUrl?: string
+    openToTags?: boolean
+    openToComment?: boolean
+    openToCollections?: boolean
+}

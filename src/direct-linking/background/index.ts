@@ -9,6 +9,7 @@ import AnnotationStorage from './storage'
 import normalize from '../../util/encode-url-for-id'
 import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
+import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -86,10 +87,20 @@ export default class DirectLinkingBackground {
 
     async toggleSidebarOverlay(
         { tab },
-        { anchor, override, activeUrl } = {
+        {
+            anchor,
+            override,
+            activeUrl,
+            openToCollections,
+            openToComment,
+            openToTags,
+        }: OpenSidebarArgs & { anchor?: any; override?: boolean } = {
             anchor: null,
             override: false,
             activeUrl: undefined,
+            openToTags: false,
+            openToComment: false,
+            openToCollections: false,
         },
     ) {
         const [currentTab] = await browser.tabs.query({
@@ -101,7 +112,13 @@ export default class DirectLinkingBackground {
         // Make sure that the ribbon is inserted before trying to open the
         // sidebar.
         await remoteFunction('insertRibbon', { tabId })({ override })
-        await remoteFunction('openSidebar', { tabId })({ anchor, activeUrl })
+        await remoteFunction('openSidebar', { tabId })({
+            anchor,
+            activeUrl,
+            openToCollections,
+            openToComment,
+            openToTags,
+        })
     }
 
     followAnnotationRequest({ tab }: TabArg) {
