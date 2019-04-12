@@ -17,7 +17,9 @@
     text-decoration: none;
     cursor: pointer;
     margin-right: 5px;
+    text-align: right;
     align-self: inherit;
+    width: max-content;
 }
 
 .headerBox {

@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
+import { Checkbox } from 'src/common-ui/components'
 
 import Concurrency from './Concurrency'
 import PrevFailedCheckbox from './PrevFailedCheckbox'
@@ -10,38 +11,39 @@ import styles from './AdvSettings.css'
 
 const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
     <section className={styles.container}>
+        <div className={styles.title}> 
+            SETTINGS
+        </div>
         <div className={styles.advFunctionality}>
             <ul className={styles.settingsList}>
                 {(props.allowTypes[TYPE.OTHERS] === SERVICES.POCKET ||
                     props.allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE) && (
                     <li className={styles.settingsListItem}>
-                        <label htmlFor="star-imports">
-                            'Star' all imported urls
-                        </label>
-                        <input
-                            className={styles.prevFailedCheckbox}
-                            id="star-imports"
-                            type="checkbox"
-                            checked={props.bookmarkImports}
-                            onChange={props.onBookmarImportsToggle}
-                        />
+                        <Checkbox
+                                id="star-imports"
+                                handleChange={props.onBookmarImportsToggle}
+                                isChecked={props.bookmarkImports}
+                        >
+                            <label htmlFor="star-imports">
+                                'Star' all imported urls
+                             </label>
+                        </Checkbox>
                     </li>
                 )}
                 <li className={styles.settingsListItem}>
-                    <label htmlFor="index-imports">
-                        Only import title, urls and metadata
-                    </label>
                     <ButtonTooltip
                         tooltipText="Fast, but not full-text searchable"
                         position="bottom"
                     >
-                        <input
-                            className={styles.prevFailedCheckbox}
+                        <Checkbox
                             id="index-imports"
-                            type="checkbox"
-                            checked={props.indexTitle}
-                            onChange={props.onIndexTitleToggle}
-                        />
+                            handleChange={props.onIndexTitleToggle}
+                            isChecked={props.indexTitle}
+                        >
+                            <label htmlFor="index-imports">
+                                Only import title, urls and metadata
+                            </label>
+                        </Checkbox>
                     </ButtonTooltip>
                 </li>
                 <li className={styles.settingsListItem}>

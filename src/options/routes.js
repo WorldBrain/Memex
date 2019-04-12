@@ -65,8 +65,8 @@ export default [
     },
     {
         name: 'Tutorial',
-        pathname: '/tutorial',
-        component: Tutorial,
+        pathname: 'https://www.notion.so/worldbrain/Tutorials-fa44dcbf41654ceb910c5952b6097f8d',
+        isExternal: true,
         icon: 'info',
     },
 ]

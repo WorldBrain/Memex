@@ -9,10 +9,10 @@
     display: flex;
     padding: 5px;
     background-size: 19px;
-    margin-left: 15px;
+    margin-left: 10px;
     cursor: pointer;
 
-    @media (max-width: 1650px) {
+    @media (max-width: 1150px) {
         display: none;
     }
 }

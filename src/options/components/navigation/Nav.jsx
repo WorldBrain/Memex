@@ -11,7 +11,7 @@ const Nav = ({ children }) => {
             <div className={styles.icon_div}>
                 <Link to="/overview">
                     <img
-                        src="/img/worldbrain-logo.png"
+                        src="/img/memex-logo.png"
                         className={styles.icon}
                     />
                 </Link>

@@ -27,7 +27,7 @@
 }
 
 .collectionsPlaceholder {
-    width: 18vw;
+    width: 20vw;
 
         @media (max-width: 1150px) {
         display: none;
@@ -61,7 +61,7 @@
 .container {
     display: flex;
     justify-content: space-between;
-    width: 100%;
+    width: 55%;
     max-width: 800px;
     background-color: #fff;
     transition: all 200ms ease-out;
@@ -82,7 +82,7 @@
     font-weight: normal;
     align-items: center;
     padding-right: 20px;
-    width: 18vw;
+    width: 20vw;
 
     @media (max-width: 1150px) {
         display: none;

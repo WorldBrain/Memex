@@ -1,7 +1,7 @@
 @import url('/fonts/Inter/inter.css');
 
 .tooltipTrigger {
-    display: inline-block;
+    display: inline-flex;
 }
 
 .tooltipBubble {
@@ -90,7 +90,7 @@
 
 .tooltipContainer {
     position: relative;
-    display: flex;
+    display: inline-flex;
     z-index: 2;
 }
 

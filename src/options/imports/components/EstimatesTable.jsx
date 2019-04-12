@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { LoadingIndicator } from 'src/common-ui/components'
+import { LoadingIndicator, Checkbox } from 'src/common-ui/components'
 import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
 import classNames from 'classnames'
-
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import localStyles from './Import.css'
 
 const EstimatesTable = ({
@@ -45,23 +45,21 @@ const EstimatesTable = ({
         <tbody>
             <tr className={localStyles.importTableRow}>
                 <td>
-                    <input
-                        className={localStyles.checkbox}
-                        type="checkbox"
-                        name="history"
+                    <Checkbox
                         id="history"
-                        onChange={onAllowHistoryClick}
-                        checked={allowTypes[TYPE.HISTORY]}
-                    />
-                    <label className={localStyles.label} htmlFor="history">
-                        <span className={localStyles.checkboxText}>
-                            Browser History
-                        </span>
-                        <br />
-                        <span className={localStyles.checkboxSubText}>
-                            (from last 90 days)
-                        </span>
-                    </label>
+                        name="history"
+                        isChecked={allowTypes[TYPE.HISTORY]}
+                        handleChange={onAllowHistoryClick}
+                    >
+                        <div className={localStyles.labelContainer}>
+                            <span className={localStyles.checkboxText}>
+                                Browser History
+                            </span>
+                            <span className={localStyles.checkboxSubText}>
+                                from last 90 days
+                            </span>
+                        </div>
+                    </Checkbox>
                 </td>
                 <td>{estimates[TYPE.HISTORY].complete}</td>
                 <td>{estimates[TYPE.HISTORY].remaining}</td>
@@ -72,23 +70,21 @@ const EstimatesTable = ({
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>
-                    <input
-                        className={localStyles.checkbox}
-                        type="checkbox"
-                        name="bookmarks"
-                        id="bookmarks"
-                        onChange={onAllowBookmarksClick}
-                        checked={allowTypes[TYPE.BOOKMARK]}
-                    />{' '}
-                    <label className={localStyles.label} htmlFor="bookmarks">
-                        <span className={localStyles.checkboxText}>
-                            Browser Bookmarks
-                        </span>
-                        <br />
-                        <span className={localStyles.checkboxSubText}>
-                            (from forever)
-                        </span>
-                    </label>
+                    <Checkbox
+                            name="bookmarks"
+                            id="bookmarks"
+                            handleChange={onAllowBookmarksClick}
+                            isChecked={allowTypes[TYPE.BOOKMARK]}
+                    >{' '}
+                        <div className={localStyles.labelContainer}>
+                            <span className={localStyles.checkboxText}>
+                                Browser Bookmarks
+                            </span>
+                            <span className={localStyles.checkboxSubText}>
+                                from forever
+                            </span>
+                        </div>
+                    </Checkbox>
                 </td>
                 <td>{estimates[TYPE.BOOKMARK].complete}</td>
                 <td>{estimates[TYPE.BOOKMARK].remaining}</td>
@@ -99,23 +95,22 @@ const EstimatesTable = ({
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>
-                    <input
-                        className={localStyles.checkbox}
-                        type="checkbox"
-                        name="pocket"
-                        id="pocket"
-                        onChange={onAllowPocketClick}
-                        checked={allowTypes[TYPE.OTHERS] === SERVICES.POCKET}
-                    />{' '}
-                    <label className={localStyles.label} htmlFor="pocket">
-                        <span className={localStyles.checkboxText}>
-                            Pocket import
-                        </span>
-                        <br />
-                        <span className={localStyles.checkboxSubText}>
-                            Bookmarks, tags, time, reading list, archive
-                        </span>
-                    </label>
+                    <Checkbox
+                            type="checkbox"
+                            name="pocket"
+                            id="pocket"
+                            handleChange={onAllowPocketClick}
+                            isChecked={allowTypes[TYPE.OTHERS] === SERVICES.POCKET}
+                    >
+                        <div className={localStyles.labelContainer}>
+                            <span className={localStyles.checkboxText}>
+                                Pocket import
+                            </span>
+                            <span className={localStyles.checkboxSubText}>
+                                Bookmarks, tags, time, reading list, archive
+                            </span>
+                        </div>
+                    </Checkbox>
                 </td>
                 {!isLoading &&
                     blobUrl === null && (
@@ -139,14 +134,17 @@ const EstimatesTable = ({
                                     allowTypes[TYPE.OTHERS] !== SERVICES.POCKET
                                 }
                             />{' '}
-                            <span className={localStyles.tutorial}>
-                                <a
-                                    target="_blank"
+                            <ButtonTooltip
+                                tooltipText="How can I get that file?"
+                                position="right"
+                            >
+                                <a 
                                     href="https://getpocket.com/export"
-                                >
-                                    How to get that file?
+                                    taget="_blank"
+                                > 
+                                    <span className={localStyles.tutorial}/>
                                 </a>
-                            </span>
+                            </ButtonTooltip>
                         </td>
                     )}
                 {isLoading &&
@@ -170,23 +168,21 @@ const EstimatesTable = ({
             </tr>
             <tr className={localStyles.importTableRow}>
                 <td>
-                    <input
-                        className={localStyles.checkbox}
-                        type="checkbox"
+                    <Checkbox
                         name="html"
                         id="html"
-                        onChange={onAllowHTMLClick}
-                        checked={allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE}
-                    />{' '}
-                    <label className={localStyles.label} htmlFor="html">
-                        <span className={localStyles.checkboxText}>
-                            HTML File
-                        </span>
-                        <br />
-                        <span className={localStyles.checkboxSubText}>
-                            Bookmarks, tags, time
-                        </span>
-                    </label>
+                        isChecked={allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE}
+                        handleChange={onAllowHTMLClick}
+                    >
+                        <div className={localStyles.labelContainer}>
+                            <span className={localStyles.checkboxText}>
+                                HTML File
+                            </span>
+                            <span className={localStyles.checkboxSubText}>
+                                Bookmarks, tags, time
+                            </span>
+                        </div>
+                    </Checkbox>
                 </td>
                 {!isLoading &&
                     blobUrl === null && (
@@ -211,14 +207,17 @@ const EstimatesTable = ({
                                     SERVICES.NETSCAPE
                                 }
                             />{' '}
-                            <span className={localStyles.tutorial}>
-                                <a
-                                    target="_blank"
+                            <ButtonTooltip
+                                tooltipText="How can I get that file?"
+                                position="right"
+                            >
+                                <a 
                                     href="https://www.notion.so/worldbrain/7a12d7a019094785a14ff109e99a531d"
-                                >
-                                    How to get that file?
+                                    taget="_blank"
+                                > 
+                                    <span className={localStyles.tutorial}/>
                                 </a>
-                            </span>
+                            </ButtonTooltip>
                         </td>
                     )}
                 {isLoading &&
