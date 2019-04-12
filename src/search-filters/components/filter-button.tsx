@@ -1,28 +1,36 @@
 import React, { PureComponent } from 'react'
-import PropTypes from 'prop-types'
 import OnClickOutside from 'react-onclickoutside'
-import styles from './filter-button.css'
 import moment from 'moment'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { ButtonTooltip } from 'src/common-ui/components/'
 
-class FilterButton extends PureComponent {
-    static propTypes = {
-        children: PropTypes.node,
-        source: PropTypes.string.isRequired,
-        filteredItems: PropTypes.arrayOf(PropTypes.object),
-        togglePopup: PropTypes.func.isRequired,
-        hidePopup: PropTypes.func.isRequired,
-        clearFilters: PropTypes.func.isRequired,
-        startDate: PropTypes.number,
-        endDate: PropTypes.number,
-    }
+const styles = require('./filter-button.css')
 
-    state = {
+interface Props {
+    chidren?: React.ReactNode
+    source: string
+    filteredItems: object[]
+    displayFilters?: React.ReactNode
+    startDate?: number
+    endDate?: number
+    togglePopup: () => void
+    hidePopup: () => void
+    clearFilters: () => void
+    onFilterDel?: (args: any) => void
+}
+
+interface State {
+    typesCount: number
+    showDatesClearBtn: boolean
+}
+
+class FilterButton extends PureComponent<Props, State> {
+    state: State = {
         typesCount: null,
         showDatesClearBtn: false,
     }
 
-    handleClickOutside = () => {
+    handleClickOutside = (e: Event) => {
+        e.stopPropagation()
         this.props.hidePopup()
     }
 
@@ -32,7 +40,7 @@ class FilterButton extends PureComponent {
         this.props.hidePopup()
     }
 
-    renderCount = () => {
+    private renderCount() {
         if (this.props.source === 'Types' && this.state.typesCount) {
             return (
                 <React.Fragment>

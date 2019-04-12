@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react'
-import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import { MapDispatchToProps } from 'src/util/types'
+import { RootState } from 'src/options/types'
+
 import {
     SearchFilters,
     BookmarkFilter,
@@ -12,16 +14,22 @@ import {
 
 import * as actions from './actions'
 
-class SearchFiltersContainer extends PureComponent {
-    static propTypes = {
-        fetchSuggestedTags: PropTypes.func.isRequired,
-        fetchSuggestedDomains: PropTypes.func.isRequired,
-        toggleFilterBar: PropTypes.func.isRequired,
-    }
+interface StateProps {}
 
+interface DispatchProps {
+    fetchSuggestedTags: () => void
+    fetchSuggestedDomains: () => void
+    toggleFilterBar: () => void
+}
+
+interface OwnProps {}
+
+type Props = StateProps & DispatchProps & OwnProps
+
+interface State {}
+
+class SearchFiltersContainer extends PureComponent<Props, State> {
     componentDidMount() {
-        /** fetch initial suggested tags and domains to prepopulate
-         filter dropdown **/
         this.props.fetchSuggestedTags()
         this.props.fetchSuggestedDomains()
     }
@@ -58,7 +66,11 @@ class SearchFiltersContainer extends PureComponent {
     }
 }
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<
+    DispatchProps,
+    OwnProps,
+    RootState
+> = dispatch => ({
     fetchSuggestedTags: () => dispatch(actions.fetchSuggestedTags()),
     fetchSuggestedDomains: () => dispatch(actions.fetchSuggestedDomains()),
     toggleFilterBar: () => dispatch(actions.toggleFilterBar()),
