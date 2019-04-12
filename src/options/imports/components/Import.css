@@ -307,7 +307,7 @@
     border: none;
     transition: all 0.1s ease-in;
     vertical-align: super;
-    
+
     &[disabled] {
         opacity: 0.4;
         cursor: not-allowed;
