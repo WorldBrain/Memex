@@ -52,6 +52,10 @@ export default async function init({
             toggleSidebarShortcut,
             toggleHighlightsShortcut,
             createAnnotationShortcut,
+            createBookmarkShortcut,
+            addTagShortcut,
+            addToCollectionShortcut,
+            addCommentShortcut,
         } = shortcutsState
         Mousetrap.bind(
             [
@@ -60,6 +64,10 @@ export default async function init({
                 toggleHighlightsShortcut,
                 createAnnotationShortcut,
                 toggleSidebarShortcut,
+                createBookmarkShortcut,
+                addTagShortcut,
+                addToCollectionShortcut,
+                addCommentShortcut,
             ],
             handleKeyboardShortcuts(shortcutsState),
         )
@@ -71,21 +79,24 @@ export default async function init({
 }
 
 let highlightsOn = false
-const handleKeyboardShortcuts = settingsState => async e => {
+const handleKeyboardShortcuts = ({
+    highlightShortcut,
+    linkShortcut,
+    toggleSidebarShortcut,
+    toggleHighlightsShortcut,
+    createAnnotationShortcut,
+    highlightShortcutEnabled,
+    linkShortcutEnabled,
+    toggleSidebarShortcutEnabled,
+    toggleHighlightsShortcutEnabled,
+    createAnnotationShortcutEnabled,
+    createBookmarkShortcut,
+    addTagShortcut,
+    addToCollectionShortcut,
+    addCommentShortcut,
+}) => async e => {
     const isTooltipEnabled = await getTooltipState()
     if (!isTooltipEnabled) {
-        const {
-            highlightShortcut,
-            linkShortcut,
-            toggleSidebarShortcut,
-            toggleHighlightsShortcut,
-            createAnnotationShortcut,
-            highlightShortcutEnabled,
-            linkShortcutEnabled,
-            toggleSidebarShortcutEnabled,
-            toggleHighlightsShortcutEnabled,
-            createAnnotationShortcutEnabled,
-        } = settingsState
         if (!userSelectedText()) {
             switch (convertKeyboardEventToKeyString(e)) {
                 case toggleSidebarShortcut:
@@ -96,6 +107,24 @@ const handleKeyboardShortcuts = settingsState => async e => {
                     break
                 case toggleHighlightsShortcut:
                     toggleHighlightsShortcutEnabled && toggleHighlights()
+                    break
+                case addTagShortcut:
+                    toggleSidebarOverlay({ override: true, openToTags: true })
+                    break
+                case addToCollectionShortcut:
+                    toggleSidebarOverlay({
+                        override: true,
+                        openToCollections: true,
+                    })
+                    break
+                case addCommentShortcut:
+                    toggleSidebarOverlay({
+                        override: true,
+                        openToComment: true,
+                    })
+                    break
+                case createBookmarkShortcut:
+                    toggleSidebarOverlay({ override: true })
                     break
                 default:
             }
