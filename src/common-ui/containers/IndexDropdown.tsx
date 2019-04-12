@@ -534,10 +534,10 @@ class IndexDropdownContainer extends Component<Props, State> {
         // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
     }
 
-    private renderTags() {
+     private renderTags() {
         const tags = this.getDisplayTags()
 
-        const tagOptions = tags.map((tag, i) => (
+        const tagOptions: React.ReactNode[] = tags.map((tag, i) => (
             <IndexDropdownRow
                 {...tag}
                 key={i}
@@ -550,7 +550,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         ))
 
         if (this.canCreateTag()) {
-            tagOptions.push(
+            const addRow: React.ReactNode = (
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
@@ -563,8 +563,10 @@ class IndexDropdownContainer extends Component<Props, State> {
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
                     isForSidebar={this.props.isForSidebar}
                     source={this.props.source}
-                />,
+                />
             )
+
+            return [addRow, ...tagOptions]
         }
 
         return tagOptions
