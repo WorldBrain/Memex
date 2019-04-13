@@ -174,7 +174,9 @@ export default class ImportItemProcessor {
      *  + optional filled-out page doc as `pageDoc` field.
      */
     async _processHistory(importItem, options = {}) {
-        await checkVisitItemTransitionTypes(importItem)
+        if (!options.indexTitle) {
+            await checkVisitItemTransitionTypes(importItem)
+        }
 
         const pageDoc = !options.indexTitle
             ? await this._createPageDoc(importItem)
@@ -205,7 +207,6 @@ export default class ImportItemProcessor {
     }
 
     async _processService(importItem, options = {}) {
-        await checkVisitItemTransitionTypes(importItem)
         const {
             url,
             title,
