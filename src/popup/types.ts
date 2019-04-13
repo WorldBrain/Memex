@@ -11,14 +11,14 @@ import { State as TooltipBtnState } from './tooltip-button/reducer'
 import { State as PopupState } from './reducer'
 
 export interface RootState {
-    blacklistBtn: BlacklistBtnState
+    blacklistBtn?: BlacklistBtnState
     bookmarkBtn: BookmarkBtnState
     tagsBtn: TagsBtnState
     collectionsBtn: CollectionsBtnState
     pauseBtn: PauseBtnState
-    sidebarBtn: SidebarBtnState
-    tooltipBtn: TooltipBtnState
-    notifsBtn: NotifsBtnState
+    sidebarBtn?: SidebarBtnState
+    tooltipBtn?: TooltipBtnState
+    notifsBtn?: NotifsBtnState
     popup: PopupState
 }
 
