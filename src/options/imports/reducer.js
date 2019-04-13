@@ -22,7 +22,7 @@ const defaultState = {
     fail: defaultStats, // Fail counts for completed import items
     success: defaultStats, // Success counts for completed import items
     totals: defaultStats, // Static state to use to derive remaining counts from
-    importStatus: STATUS.IDLE,
+    importStatus: STATUS.LOADING,
     loadingMsg:
         'Analysing your browsing history & bookmarks for importing. This can take a few moments.',
     downloadDataFilter: FILTERS.ALL,

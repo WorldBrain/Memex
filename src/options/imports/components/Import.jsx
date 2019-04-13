@@ -5,6 +5,7 @@ import AdvSettings from './AdvSettingsContainer'
 import { LoadingIndicator } from 'src/common-ui/components'
 import localStyles from './Import.css'
 import { IMPORT_TYPE } from '../constants'
+
 const Warning = ({ children }) => (
     <div className={localStyles.warning}>
         <img src="/img/caution.png" className={localStyles.icon} />{' '}
@@ -63,8 +64,7 @@ const Import = ({
         <div className={localStyles.mainContainer}>
             <div className={localStyles.importTableContainer}>{children}</div>
             {isLoading &&
-                (allowTypes[IMPORT_TYPE.HISTORY] ||
-                    allowTypes[IMPORT_TYPE.BOOKMARK]) && (
+                !allowTypes[IMPORT_TYPE.OTHERS].length && (
                     <div className={localStyles.loadingBlocker}>
                         <p className={localStyles.loadingMsg}>{loadingMsg}</p>
                         <LoadingIndicator />

@@ -57,11 +57,7 @@ class ImportContainer extends Component {
     componentWillUnmount() {
         if (this.props.isRunning) {
             this.props.boundActions.pause()
-        } else if (
-            (!this.props.isPaused &&
-                this.props.allowTypes[constants.IMPORT_TYPE.HISTORY]) ||
-            this.props.allowTypes[constants.IMPORT_TYPE.BOOKMARK]
-        ) {
+        } else if (!this.props.isPaused) {
             this.props.boundActions.prepareImport()
         }
         this.props.search()
