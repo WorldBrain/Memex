@@ -37,14 +37,14 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
         return this.countlyConnector.q
     }
 
-    private enqueueEvent({ key, id, value = null }) {
+    private enqueueEvent({ key, userId, value = null }) {
         const event = [
             'add_event',
             {
                 key,
                 count: 1,
                 segmentation: {
-                    id,
+                    userId,
                     ...(value ? { value } : {}),
                 },
             },
@@ -63,11 +63,20 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
 
         const isEvent = (wanted: { category: string; action: string }) =>
             event.category === wanted.category && event.action === wanted.action
+
         if (isEvent({ category: 'Global', action: 'Install' })) {
             this.enqueueEvent({
-                id: userId,
+                userId,
                 key: 'install',
             })
-        } // Add other events to send to Countly as else if (isEvent(...)) { ... } statements
+            // Add other events to send to Countly as else if (isEvent(...)) { ... } statements
+        } else {
+            // Generic fallback
+            this.enqueueEvent({
+                userId,
+                key: `${event.category}::${event.action}`,
+                value: event.value,
+            })
+        }
     }
 }
