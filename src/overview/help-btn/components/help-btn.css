@@ -22,6 +22,7 @@
     right: 1em;
     cursor: pointer;
     outline: none;
+    background-color: transparent;
 }
 
 .logo {

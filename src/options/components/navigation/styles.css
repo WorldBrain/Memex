@@ -1,7 +1,7 @@
 .root {
     composes: sideBarColorOpen from '../../../common-ui/colors.css';
     max-width: 280px;
-    min-width: 230px;
+    min-width: 260px;
     height: 100vh;
     position: sticky;
     top: 0px;
@@ -24,7 +24,7 @@
 }
 
 .icon {
-    width: 70%;
+    width: 50%;
     height: auto;
     margin: 20px 0px;
 }

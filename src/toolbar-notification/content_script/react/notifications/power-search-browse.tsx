@@ -6,7 +6,7 @@ import { getExtURL } from '../utils.js'
 const styles = require('./power-search-browse.css')
 const externalStyles = require('src/overview/onboarding/components/checklist.css')
 
-export default function PowerSearchBrowse({ onCloseRequested, openDashboard }) {
+export default function PowerSearchBrowse({ onCloseRequested }) {
     return (
         <div className={styles.container}>
             <NotificationLayout
@@ -34,5 +34,4 @@ export default function PowerSearchBrowse({ onCloseRequested, openDashboard }) {
 
 PowerSearchBrowse['propTypes'] = {
     onCloseRequested: PropTypes.func.isRequired,
-    openDashboard: PropTypes.func.isRequired,
 }

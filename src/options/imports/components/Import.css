@@ -99,7 +99,9 @@
     justify-content: center;
     align-items: center;
     height: 750px;
-    width: 830px;
+    width: 100%;
+    text-align: center;
+    padding: 0px 100px;
     z-index: 25000000;
     background: #fbfafa;
     opacity: 0.8;

@@ -15,9 +15,9 @@
 }
 
 .logo {
-    background-image: url('/img/memex_beta_logo.png');
+    background-image: url('/img/memex-logo.png');
     width: 210px;
-    height: 50px;
+    height: 55px;
     display: flex;
     background-size: 100%;
     background-repeat: no-repeat;
@@ -47,17 +47,17 @@
 .footer {
     display: flex;
     flex-direction: column;
-    margin: 0px auto;
+    margin: 20px auto;
     justify-content: space-evenly;
     align-items: center;
 }
 
 .bold {
     composes: h2Color from '../../../common-ui/colors.css';
-    font-size: 1rem;
+    font-size: 22px;
     font-weight: 600;
     margin-top: 20px;
-    margin-bottom: 0px;
+    margin-bottom: 10px;
 }
 
 .subtextGreen {
@@ -76,6 +76,47 @@
     margin-top: 6px;
     margin-bottom: 72px;
     margin-right: 4px;
+}
+
+.iconBox {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.icon {
+    background-position: center center;
+    width: 40px;
+    height: 40px;
+    background-size: 40px;
+    display: flex;
+    background-repeat: no-repeat;
+    margin: 10px;
+    background-color: transparent;
+    z-index: 5000;
+}
+
+.pocket {
+    background-image: url('/img/pocket.svg');
+}
+
+.diigo {
+    background-image: url('/img/diigo.png');
+}
+
+.chrome {
+    background-image: url('/img/chrome.svg');
+}
+
+.firefox {
+    background-image: url('/img/firefox.png');
+}
+
+.raindrop {
+    background-image: url('/img/raindrop.png');
+}
+
+.instapaper {
+    background-image: url('/img/instapaper.svg');
 }
 
 /* .settings {
@@ -124,3 +165,24 @@
     }
 }
 
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    25% {
+        transform: translateY(10px);
+    }
+
+    50% {
+        transform: translateY(0px);
+    }
+
+    75% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}

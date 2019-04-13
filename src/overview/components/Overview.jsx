@@ -37,7 +37,10 @@ class Overview extends PureComponent {
         return (
             <React.Fragment>
                 {isDuringInstall() ? (
-                    <Onboarding />
+                    <div>
+                        <Onboarding />
+                        <HelpBtn />
+                    </div>
                 ) : (
                     <div>
                         <Head />

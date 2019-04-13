@@ -53,11 +53,6 @@ const handler = toolbarNotifications => async () => {
     processEventRPC({
         type: EVENT_NAMES.POWERSEARCH_BROWSE_PAGE,
     })
-
-    await utils.setOnboardingStage(
-        FLOWS.powerSearch,
-        STAGES.powerSearch.overviewTooltips,
-    )
 }
 
 /**
@@ -101,10 +96,6 @@ export const conditionallyShowOnboardingNotifications = async ({
             position,
             triggerNextNotification: handler(toolbarNotifications),
         })
-        await utils.setOnboardingStage(
-            FLOWS.powerSearch,
-            STAGES.powerSearch.notifiedBrowsePage,
-        )
     }
 
     if (taggingStage === STAGES.redirected) {

@@ -1,6 +1,7 @@
 .container,
 .container * {
     box-sizing: border-box;
+    display: flex;
 }
 
 .screen {

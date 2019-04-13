@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
-
+import { HelpBtn } from 'src/overview/help-btn/components/help-btn'
 import Navigation from './components/navigation'
 import routes from './routes'
 import Head from './containers/Head'
@@ -19,6 +19,7 @@ class Layout extends Component {
                     routes={routes}
                 />
                 <div className={styles.route}>{this.props.children}</div>
+                <HelpBtn />
             </div>
         )
     }
