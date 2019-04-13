@@ -1,12 +1,20 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6, color14, radius3 from colors;
+
 .menuSeparator {
-    margin-bottom: 1px;
+    margin: 0;
+    border: 1px solid #efefef;
 }
 
 .menuItem {
-    padding: 5px;
+    padding: 10px 20px;
 
     &:hover {
-        background: grey;
+        background-color: color14;
+    }
+
+    &.smallMenuItem {
+        padding: 5px 20px;
     }
 }
 
@@ -17,7 +25,7 @@
 }
 
 .smallText {
-    color: darkgrey;
+    color: color6;
     font-size: 0.8em;
 }
 
@@ -28,18 +36,20 @@
 }
 
 .menuContainer {
+    composes: toolTips from 'src/common-ui/elements.css';
     background: white;
     font-size: 14px;
     position: fixed;
     bottom: 4.5em;
     right: 1em;
     border-radius: 3px;
-    padding: 10px;
-    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
-        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+    font-weight: 500;
+    width: 190px;
+    padding: 5px 0px;
 }
 
 .footerText {
-    color: darkgrey;
+    color: color6;
     font-size: 0.8em;
+    padding: 5px 10px 0px 20px;
 }

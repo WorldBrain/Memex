@@ -2,35 +2,35 @@ import { MenuOptions } from './types'
 
 export const menuItems: MenuOptions = [
     {
-        text: 'Guides & FAQs ✍️',
-        link: 'https://worldbrain.io',
+        text: 'Tutorials and FAQs',
+        link: 'https://www.notion.so/worldbrain/fa44dcbf41654ceb910c5952b6097f8d',
     },
     '-',
     {
-        text: 'Join Us 🚩️',
-        link: 'https://worldbrain.io',
+        text: 'GitHub',
+        link: 'https://github.com/worldbrain/memex',
     },
     '-',
     {
-        text: 'Chat With Us️',
-        link: 'https://worldbrain.io',
+        text: 'Contact Support ',
+        link: 'https://worldbrain.io/help',
     },
     {
         text: 'Keyboard Shortcuts',
-        link: 'https://worldbrain.io',
+        link: '#/settings',
     },
     {
         text: "What's New?",
-        link: 'https://worldbrain.io',
+        link: 'https://www.notion.so/262a367f7a2a48ff8115d2c71f700c14',
     },
     {
         text: 'Terms & Privacy',
-        link: 'https://worldbrain.io',
+        link: 'https://worldbrain.io/tos',
         small: true,
     },
     {
-        text: 'Twitter - @NotionHQ',
-        link: 'https://worldbrain.io',
+        text: 'Twitter - @worldbrain',
+        link: 'https://twitter.com/worldbrain',
         small: true,
     },
     '-',

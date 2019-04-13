@@ -36,12 +36,11 @@ export class HelpBtn extends React.PureComponent<Props, State> {
 
     render() {
         return (
-            <>
+            <div className={styles.footerBar}>
                 {this.renderMenu()}
-                <button onClick={this.handleClick} className={styles.btn}>
-                    ?
-                </button>
-            </>
+                <span className={styles.logo}/>
+                <button onClick={this.handleClick} className={styles.btn}/>
+            </div>
         )
     }
 }

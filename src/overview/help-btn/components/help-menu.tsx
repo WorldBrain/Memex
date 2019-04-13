@@ -23,7 +23,7 @@ export class HelpMenu extends React.PureComponent<Props> {
         { text, link, small }: MenuOption,
         i: number,
     ) => (
-        <li key={i} className={styles.menuItem}>
+        <li key={i} className={cx(styles.menuItem, { [styles.smallMenuItem]: small })}>
             <a
                 className={cx(styles.text, { [styles.smallText]: small })}
                 target="_blank"

@@ -9,6 +9,9 @@ import styles from './settings.css'
 
 export default () => (
     <React.Fragment>
+        <div className={styles.block}>
+        <KeyboardShortcutsContainer />
+        </div>
     	<div className={styles.block}>
         <SearchInjection />
         </div>
@@ -20,9 +23,6 @@ export default () => (
         </div>
         <div className={styles.block}>
         <IndexingPrefs />
-        </div>
-        <div className={styles.block}>
-        <KeyboardShortcutsContainer />
         </div>
     </React.Fragment>
 )
