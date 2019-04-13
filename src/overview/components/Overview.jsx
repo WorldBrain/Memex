@@ -11,6 +11,7 @@ import {
     SidebarContainer as SidebarLeft,
     CollectionsContainer as CollectionsButton,
 } from '../sidebar-left'
+import { HelpBtn } from '../help-btn'
 import { Header, acts as searchBarActs } from '../search-bar'
 import { Results } from '../results'
 import Head from '../../options/containers/Head'
@@ -52,6 +53,7 @@ class Overview extends PureComponent {
                             goToAnnotation={goToAnnotation(this.props.pageUrl)}
                         />
                         <Tooltip />
+                        <HelpBtn />
                     </div>
                 )}
             </React.Fragment>
