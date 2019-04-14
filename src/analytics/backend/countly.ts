@@ -69,7 +69,7 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
                 userId,
                 key: 'install',
             })
-            // Add other events to send to Countly as else if (isEvent(...)) { ... } statements
+            // Add other events to send to customize before send to Countly as else if (isEvent(...)) { ... } statements
         } else {
             // Generic fallback
             this.enqueueEvent({
