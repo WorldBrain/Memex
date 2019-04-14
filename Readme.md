@@ -60,7 +60,7 @@ All personal data is stored and processed on your own computer and will **never 
 
 ## Project Status
 Memex is [available for Chrome and Firefox](https://worldbrain.io) and under active development by [our wonderful team](https://worldbrain.io/team).
-Memex is currently in beta status and serves almost 10.000 users. We still have some non-critical bugs, but all in all Memex runs smoothly. (Found another bug? [Please do tell](#report-bugs-&-feature-requests))
+Memex is currently in beta status and serves almost 10.000 users. We still have some non-critical bugs, but all in all Memex runs smoothly. (Found another bug? [Please do tell](#report-bugs))
 
 
 ### Changelog and Roadmap:
@@ -92,18 +92,20 @@ The question for us was: How can we create an ecosystem, in which it is more pro
 
 ## Contributing
 
+Thanks a lot for your interest to contribute to Memex in one way or another.
+
 ### Report Bugs 
 
-Thanks for taking the effort to report that something does not work. Just open an issue here on [GitHub](https://github.com/WorldBrain/Memex/issues/new).
+Just open an issue here on [GitHub](https://github.com/WorldBrain/Memex/issues/new).
 
-## Feature Requests
+### Feature Requests
 Head over to [our community board](https://worldbrain.helprace.com/s1-general/ideas), so that other people can vote on them too.
 
 ### Open Tasks
-Wanna contribute making Memex better? Great! That's the spirit :)
+Wanna help in the development to make Memex better? Great! That's the spirit :)
 
 #### How to get started:
-1. Head over to the our Notion roadmap document and grab one of the "[Newcomer Tasks](https://www.notion.so/worldbrain/Release-Notes-Roadmap-262a367f7a2a48ff8115d2c71f700c14). 
+1. Head over to the our Notion roadmap document and grab one of the "[Newcomer Tasks](https://www.notion.so/worldbrain/Release-Notes-Roadmap-262a367f7a2a48ff8115d2c71f700c14)". 
 2. Once you found one please [get in touch with the team via Slack](http://join-worldbrain.herokuapp.com/). Just leave a message in #dev about the project you're most interested in. 
 3. We'll try to sync up on project definitions and then you can get started :)
 
@@ -111,7 +113,7 @@ Wanna contribute making Memex better? Great! That's the spirit :)
 
 1. [Click here](./GETTING-STARTED.md#installation) for all instructions on how to build Memex so you can hack on it.
 2. [Click here](./GETTING-STARTED.md#code-overview) to get an overview of Memex code anatomy. 
-    * [A brief overview of Web Extensions](./GETTING-STARTED.md#a-brief-overview-of-web-e)
+    * [A brief overview of Web Extensions](./GETTING-STARTED.md#a-brief-overview-of-web-extensions)
     * [Application Structure](./GETTING-STARTED.md#application-structure)
     * [Dependencies](./GETTING-STARTED.md#dependencies)
 
