@@ -1,18 +1,16 @@
 # <a id="worldbrain" href="#worldbrain">WorldBrain's Memex</a>
 
-### Table Of Content
+## Table Of Content
 
 1. [Vision & Mission](#vision--mission)
 1. [Memex Features](#memex-features)
 1. [Values](#values)
 1. [Project Status](#project-status)
-    1. [Roadmap](#roadmap)
-1. [Our Economy](#our-economy)
+    1. [Changelog and Roadmap](#changelog-and-roadmap)
 1. [Contributing](#contributing)
-    1. [Report Bugs & Feature Requests](#report-bugs--feature-requests)
+    1. [Report Bugs](#report-bugs)
+    1. [Feature Requests](#feature-requests)
     1. [Open Tasks](#open-tasks)
-    1. [Funding Memex](#funding-memex)
-    1. [Becoming a collaboration partner](#becoming-a-collaboration-partner)
     1. [Getting started as a developer](#getting-started-as-a-developer)
 1. [Contact](#contact)
 1. [License + Privacy Policy](#license--privacy-policy)
@@ -24,74 +22,90 @@
 
 **Our mission** is to help battle information overload by making it effortless for you and your peers to organise, share and discover the most useful and perspective rich content online.
 
-## Memex' Features
-The Memex we build is a browser extension allowing you to create, search and share your personal web of knowledge.
+## Our first product: Memex
+A fully private memory-boosting extension to eliminate time spent bookmarking, retracing steps to recall an old webpage, or copy-pasting notes into scattered documents.
 Its name and functionalities are heavily inspired by [Vannevar Bush's vision of a Memex](http://memex.link/S1zVMgKzX/en.wikipedia.org/wiki/Memex). 
+![](https://user-images.githubusercontent.com/7870039/56098504-6b38c780-5f01-11e9-8b80-b5c82d8fed19.png)
 
-![](https://worldbrain.io/wp-content/uploads/2018/09/Combo4.png)
+### Full-Text Search in Web History & Bookmarks:
+Search with every word of all websites & PDFs you visited & filter by time, domain, tags or bookmarks. 
+ ![](https://user-images.githubusercontent.com/7870039/56098492-50fee980-5f01-11e9-976b-9fa6256b7af8.gif)
+ 
+### Web Annotations:
+Add notes to websites and pieces of text in them 
+ ![](https://user-images.githubusercontent.com/7870039/56098493-53614380-5f01-11e9-94ee-c42477f1cafa.gif)
 
- - **Full-Text-Search:** Search with every word of all websites & PDFs you visited. Up to 5 years of your personal web-research locally and in the browser. ([60s Tutorial](https://www.youtube.com/watch?v=GwOMrTh_q9M))
- - **Associative filtering:** Remember only visit time, domain or custom tags?**
- - **Web Annotations:** Add notes to websites and pieces of text in them ([60s Tutorial](https://www.youtube.com/watch?v=uEMmZ77IltE&feature=youtu.be))
- - **Memex.Link** Share links to specific pieces of text in any website, instead of copy-pasting the segements and urls you want to show someone. ([30s Tutorial](https://www.youtube.com/watch?v=lLcOVTqsMC8))
- - **Flexible Organisation**: Add bookmarks, tags or sort websites into lists. ([60s Tutorial](https://www.youtube.com/watch?v=6BOKwluMjKg))
- - **Google & DuckDuckGo integration:** See Memex results while searching with your favorite search engine. 
- - **Full Data Ownership** All personal data is stored and processed on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at WorldBrain, we are highly concerned about your privacy, data ownership and security. For more info please see our [privacy policy](#privacy-policy) for more details.
+### Blazing fast and flexible organisation
+Add bookmarks, tags or sort websites into lists on the fly.
+![](https://user-images.githubusercontent.com/7870039/56098496-55c39d80-5f01-11e9-9886-c10716426440.gif)
+
+### Full Data Ownership
+All personal data is stored and processed on your own computer and will **never ever ever EVER** be shared or used without your consent. Here at WorldBrain, we are highly concerned about your privacy, data ownership and security. For more info please see our [privacy policy](#privacy-policy)
+
+### Other:
+⭗ Google & DuckDuckGo integration: See Memex results while searching with your favorite search engine.
+
+🔍Timeline and Full-Text searching of notes and annotations
+
+⛅Backup and restore your data to any of your favorite cloud providers
+
+📲Import bookmarks and history from any bookmarking service that supports an HTML export
+
+🗂Sidebar on pages to quickly tag, star and sort pages into collections
+
+⌨ Keyboard Shortcuts to toggle and create highlights
+
+🗂Tab manager: add all open tabs to a collection or tag
+
 
 ## Project Status
 Memex is [available for Chrome and Firefox](https://worldbrain.io) and under active development by [our wonderful team](https://worldbrain.io/team).
 Memex is currently in beta status and serves almost 10.000 users. We still have some non-critical bugs, but all in all Memex runs smoothly. (Found another bug? [Please do tell](#report-bugs-&-feature-requests))
 
-### Roadmap:
-- [Automatic Backup to Memex Cloud](https://worldbrain.io/product/cloud-backup/)
-- [Making Annotations searchable](https://github.com/WorldBrain/Memex/issues/580)
-- [Saving & searching social posts and comments on Facebook and Twitter](https://worldbrain.io/product/search_social_feeds/)
-- [Collaborative Collections](https://worldbrain.io/product/collaborative-collections/)
-- [Sharing & Discussing Annotations](https://worldbrain.io/product/collaborative-annotations/)
-- [Integration with Pocket](https://worldbrain.io/product/integration-with-pocket)
+
+### Changelog and Roadmap:
+Let us know what you want to see in Memex. We plan to release these new features in 2019:
+**Full Changelog Roadmap:** worldbrain.io/roadmap
+
+✅ Leave annotations on web-based PDF document
+
+✅ Save, tag, annotate and search Tweets in Memex
+
+✅ Sync your Memex across multiple devices
+
+✅ Mobile apps for iOS and Android
+
+✅ Pocket/Readability-like archive and full-page snapshots
+
+✅ Share and publish Memex collections of pages, posts and annotations so others can discover your personal knowledge base 
+
 
 
 ## Values
 
 ### Your data is none of our business
-With most free software tools you and your data are the product. Not with us. Our approach to decentralisation and our economic model allow us to offer most of Memex services for free. Your data is stored on your computer or can be synced with servers of your choice (#selfhosting). Our business model is based on providing real services to you through subscription based cloud support.
+With most free software tools you and your data are the product. Not with us. Our practical approach to decentralisation and our economic model allow us to offer most of Memex services without causing costs on our side. 
 
-### Interoperability & No lock-ins
-We believe that users should be able to freely chose the providers of software they want. Even when switching to other providers of Memex, they should still be able to communicate with people using other Memexes.
-
-### Collaboration, not monopolisation
+### Interoperability, freedom of choice and less monopolisation
 In 10 years time we envision 100s of Memex-y tools that are all adapted to the individual workflows different professions and people have. To get there, it is necessary to remove the incentives for Memex providers to lock-in their users and monopolise. 
-The question for us was: How can we create an ecosystem, in which it is more profitable to collaborate than to compete, and where monopolisation is almost impossible. To get there we combine interoperability with our financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11). While interoperability will make it harder for providers to monopolise, because users have less lock-ins, Steward Ownership provides a company with the intrinsic motivations to stay profitable and be OK not to grow as much. Instead they are able to focus on providing profit generating service to less users, and reduce costs by collaborating with other Memex providers on core infrastructure. More details on this you find [on our manifesto](https://worldbrain.io/preorder#why).
-
-## Our Economy
-
-*worldbrain.io* does not take Venture Capital money in order to finance the development and growth of Memex. 
-Instead we have 2 funding mechanism that aim to make us a fully community- and user-focussed service. 
-On the one hand we fund ourselves through the community that [pre-orders premium features](https://worldbrain.io/preorder/).
-On the other hand we use a financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11) which will provide investors and collaborators with a fixed return on invest that is paid with the profits we are making. With that we prevent worldbrain.io to become a speculative commodity with a need to become a monopoly, be sold and provide investors with an exit in order for them to have a financial return. WorldBrain/Memex cannot be sold. 
-
+The question for us was: How can we create an ecosystem, in which it is more profitable to collaborate than to compete, and where monopolisation is by an order of magnitudes harder. To get there we combine data interoperability with our financial model called [Steward Ownership](https://blog.p2pfoundation.net/steward-ownership-is-capitalism-2-0/2018/05/11). While interoperability will make it harder for providers to monopolise, because users have less lock-ins, Steward Ownership provides a company with the intrinsic motivations to stay profitable and be OK not to grow as much. Instead they are able to focus on providing profit generating service to less users, and reduce costs by collaborating with other Memex providers on core infrastructure. More details on this you find [on our manifesto](https://worldbrain.io/preorder#why).
 
 ## Contributing
 
-### Report Bugs & Feature Requests
+### Report Bugs 
 
 Thanks for taking the effort to report that something does not work. Just open an issue here on [GitHub](https://github.com/WorldBrain/Memex/issues/new).
-For **feature requests** best head over to [our community board](https://worldbrain.helprace.com/s1-general/ideas), so that other people can vote on them too.
+
+## Feature Requests
+Head over to [our community board](https://worldbrain.helprace.com/s1-general/ideas), so that other people can vote on them too.
 
 ### Open Tasks
-
 Wanna contribute making Memex better? Great! That's the spirit :)
-Just head over to the issues section and grab one of the "[Newcomer Tasks](https://github.com/WorldBrain/Memex/issues?q=is%3Aissue+is%3Aopen+label%3A%22Newcomer+Task%22)". We wanna avoid unnecessary work on both sides due to miscommunications. So before you start, please leave a comment in the issue you are most interested tackling, and clarify what you understand needs to be done and voice any open questions you have. For questions not directly related to the task, you can also [contact the team via Slack](http://join-worldbrain.herokuapp.com/). 
 
-### Funding Memex
-
-Interested in helping to fund our development? 
-- **For anything under 200€**, please check out our [premium preorder](https://worldbrain.io/preorder) where you can help supporting the development and in return get 75% discount on premium features and an invite to the preview releases. 
-- **For more than 1000€**, please [get in touch with Oliver](mailto:oli@worldbrain.io) to learn more about how we fund our business and the modes of investing money into worldbrain.io
-
-### Becoming a collaboration partner
-
-We are all about how to create holistic incentives for more collaboration between business, as you can see in [this section](#collaboration-not-monopolisation). If you're interested in collaborating on Memex development or integrating with it, please [get in touch with Oliver](mailto:oli@worldbrain.io)
+#### How to get started:
+1. Head over to the our Notion roadmap document and grab one of the "[Newcomer Tasks](https://www.notion.so/worldbrain/Release-Notes-Roadmap-262a367f7a2a48ff8115d2c71f700c14). 
+2. Once you found one please [get in touch with the team via Slack](http://join-worldbrain.herokuapp.com/). Just leave a message in #dev about the project you're most interested in. 
+3. We'll try to sync up on project definitions and then you can get started :)
 
 ### Getting started as a developer
 
@@ -112,18 +126,12 @@ Find us in [our Team chat](https://join-worldbrain.herokuapp.com/) or contact us
 
 ### Privacy Policy
 
-We truly care about your privacy. We will never retain or sell your data. 
-It is actually not possible for us to get your data because Memex runs locally. When you create Memex.Links (explained in [the features section](#memex-features), we store the highlighted text and the url, so we can deliver it to recipients. However we do not store any IP of people creating, nor requesting them. 
+We truly care about your privacy. We will never retain or sell your personal data. 
+It is actually not possible for us to get your personal data because Memex runs locally. When you create Memex.Links we store the highlighted text and the url, so we can deliver it to recipients. However we do not store any IP of people creating, nor requesting them. 
 
 Apart from that, the only data we obtain are some anonymous analytics on how people use the features of Memex, this data will never be attributable to you or contain any personal data like URLs you visit, terms you search or annotations you made. Also you can completely opt out from that and become a ghost for us. We then have no indication that you even exist.
 
 For a complete list of things we track, visit our [privacy policy](https://worldbrain.io/privacy-policy/).
 
-testwordtotestrestore
-
 ## Thanks to
 [Sentry.io](https://sentry.io) for offering free error tracking to open-source projects and generally having an awesome product
-
-[BrowserStack](http://www.browserstack.com) for helping us face the complexity of building a quality tool that has to work with many different kinds of devices.
-
-<img alt="BrowserStack logo" src="https://raw.githubusercontent.com/WorldBrain/Memex/develop/browserstack.png" width="300" height="70">
