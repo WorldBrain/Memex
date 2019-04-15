@@ -34,24 +34,17 @@ export const insertRibbon = async ({
     annotationsManager,
     toolbarNotifications,
     forceExpandRibbon = false,
-    openToCollections,
-    openToComment,
-    openToTags,
+    ...args
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
     forceExpandRibbon?: boolean
-    openToTags?: boolean
-    openToComment?: boolean
-    openToCollections?: boolean
 }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
         await updateRibbon({
             openRibbon: forceExpandRibbon,
-            openToCollections,
-            openToComment,
-            openToTags,
+            ...args,
         })
         return
     }

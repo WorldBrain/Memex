@@ -19,6 +19,7 @@ import AnnotationsManager from 'src/sidebar-common/annotations-manager'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { retryUntilErrorResolves } from '../utils'
 import { selectors as commentBoxselectors } from '../../sidebar-common/comment-box'
+import * as bookmarkActs from 'src/popup/bookmark-button/actions'
 
 interface StateProps {
     isPageFullScreen: boolean
@@ -44,6 +45,7 @@ interface DispatchProps {
     setShowCommentBox: (value: boolean) => void
     setShowTagsPicker: (value: boolean) => void
     setShowCollectionsPicker: (value: boolean) => void
+    toggleBookmark: () => void
 }
 
 interface OwnProps {
@@ -106,6 +108,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         isTooltipEnabled,
         openRibbon,
         openToCollections,
+        openToBookmark,
         openToComment,
         openToTags,
     }: {
@@ -113,24 +116,30 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         isTooltipEnabled: boolean
         openRibbon: boolean
         openToCollections: boolean
+        openToBookmark: boolean
         openToComment: boolean
         openToTags: boolean
     }) => {
         this.props.setRibbonEnabled(isRibbonEnabled)
         this.props.setTooltipEnabled(isTooltipEnabled)
 
-        if (openRibbon) {
-            this.props.openRibbon()
+        if (!openRibbon) {
+            return
+        }
 
-            if (openToCollections) {
-                this.props.setShowCollectionsPicker(true)
-            }
-            if (openToTags) {
-                this.props.setShowTagsPicker(true)
-            }
-            if (openToComment) {
-                this.props.setShowCommentBox(true)
-            }
+        this.props.openRibbon()
+
+        if (openToCollections) {
+            this.props.setShowCollectionsPicker(true)
+        }
+        if (openToTags) {
+            this.props.setShowTagsPicker(true)
+        }
+        if (openToComment) {
+            this.props.setShowCommentBox(true)
+        }
+        if (openToBookmark) {
+            this.props.toggleBookmark()
         }
     }
 
@@ -415,6 +424,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     setShowSidebarCommentBox: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
     openRibbon: () => dispatch(ribbonActions.setIsExpanded(true)),
+    toggleBookmark: () => dispatch(bookmarkActs.toggleBookmark()),
 })
 
 export default connect<StateProps, DispatchProps, OwnProps>(
