@@ -124,7 +124,7 @@ class BackgroundScript {
 
         this.storageChangesMan.addListener('local', USER_ID, ({ newValue }) =>
             this.runtimeAPI.setUninstallURL(
-                `${UNINSTALL_URL}?user=${newValue}`,
+                `${this.defaultUninstallURL}?user=${newValue}`,
             ),
         )
     }
