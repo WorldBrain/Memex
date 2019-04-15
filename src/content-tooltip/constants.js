@@ -27,4 +27,8 @@ export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
     toggleSidebarShortcutEnabled: true,
     toggleHighlightsShortcutEnabled: true,
     createAnnotationShortcutEnabled: true,
+    createBookmarkShortcutEnabled: true,
+    addTagShortcutEnabled: true,
+    addToCollectionShortcutEnabled: true,
+    addCommentShortcutEnabled: true,
 }

@@ -26,10 +26,11 @@ import {
 import { STAGES } from 'src/overview/onboarding/constants'
 import {
     toggleSidebarOverlay,
-    createAnnotation,
+    createAnnotation as createAnnotationAct,
     createAndCopyDirectLink,
     createHighlight,
 } from 'src/direct-linking/content_script/interactions'
+import { KeyboardShortcuts } from './types'
 
 export default async function init({
     toolbarNotifications,
@@ -44,32 +45,14 @@ export default async function init({
     })
     const isTooltipEnabled = await getTooltipState()
     if (!isTooltipEnabled) {
-        const shortcutsState = await getKeyboardShortcutsState()
         const {
             shortcutsEnabled,
-            highlightShortcut,
-            linkShortcut,
-            toggleSidebarShortcut,
-            toggleHighlightsShortcut,
-            createAnnotationShortcut,
-            createBookmarkShortcut,
-            addTagShortcut,
-            addToCollectionShortcut,
-            addCommentShortcut,
-        } = shortcutsState
+            ...shortcuts
+        } = await getKeyboardShortcutsState()
+
         Mousetrap.bind(
-            [
-                highlightShortcut,
-                linkShortcut,
-                toggleHighlightsShortcut,
-                createAnnotationShortcut,
-                toggleSidebarShortcut,
-                createBookmarkShortcut,
-                addTagShortcut,
-                addToCollectionShortcut,
-                addCommentShortcut,
-            ],
-            handleKeyboardShortcuts(shortcutsState),
+            Object.values(shortcuts).map(val => val.shortcut),
+            handleKeyboardShortcuts(shortcuts),
         )
         return
     }
@@ -80,68 +63,69 @@ export default async function init({
 
 let highlightsOn = false
 const handleKeyboardShortcuts = ({
-    highlightShortcut,
-    linkShortcut,
-    toggleSidebarShortcut,
-    toggleHighlightsShortcut,
-    createAnnotationShortcut,
-    highlightShortcutEnabled,
-    linkShortcutEnabled,
-    toggleSidebarShortcutEnabled,
-    toggleHighlightsShortcutEnabled,
-    createAnnotationShortcutEnabled,
-    createBookmarkShortcut,
-    addTagShortcut,
-    addToCollectionShortcut,
-    addCommentShortcut,
-}) => async e => {
+    addComment,
+    addTag,
+    addToCollection,
+    createAnnotation,
+    createBookmark,
+    highlight,
+    link,
+    toggleHighlights,
+    toggleSidebar,
+}: KeyboardShortcuts) => async e => {
     const isTooltipEnabled = await getTooltipState()
     if (!isTooltipEnabled) {
         if (!userSelectedText()) {
             switch (convertKeyboardEventToKeyString(e)) {
-                case toggleSidebarShortcut:
-                    toggleSidebarShortcutEnabled &&
+                case toggleSidebar.shortcut:
+                    toggleSidebar.enabled &&
                         toggleSidebarOverlay({
                             override: true,
                         })
                     break
-                case toggleHighlightsShortcut:
-                    toggleHighlightsShortcutEnabled && toggleHighlights()
+                case toggleHighlights.shortcut:
+                    toggleHighlights.enabled && toggleHighlightsAct()
                     break
-                case addTagShortcut:
-                    toggleSidebarOverlay({ override: true, openToTags: true })
+                case addTag.shortcut:
+                    addTag.enabled &&
+                        toggleSidebarOverlay({
+                            override: true,
+                            openToTags: true,
+                        })
                     break
-                case addToCollectionShortcut:
-                    toggleSidebarOverlay({
-                        override: true,
-                        openToCollections: true,
-                    })
+                case addToCollection.shortcut:
+                    addToCollection.enabled &&
+                        toggleSidebarOverlay({
+                            override: true,
+                            openToCollections: true,
+                        })
                     break
-                case addCommentShortcut:
-                    toggleSidebarOverlay({
-                        override: true,
-                        openToComment: true,
-                    })
+                case addComment.shortcut:
+                    addComment.enabled &&
+                        toggleSidebarOverlay({
+                            override: true,
+                            openToComment: true,
+                        })
                     break
-                case createBookmarkShortcut:
-                    toggleSidebarOverlay({ override: true })
+                case createBookmark.shortcut:
+                    createBookmark.enabled &&
+                        toggleSidebarOverlay({ override: true })
                     break
                 default:
             }
         } else {
             switch (convertKeyboardEventToKeyString(e)) {
-                case linkShortcut:
-                    linkShortcutEnabled && (await createLink())
+                case link.shortcut:
+                    link.enabled && (await createLink())
                     break
-                case highlightShortcut:
-                    if (highlightShortcutEnabled) {
+                case highlight.shortcut:
+                    if (highlight.enabled) {
                         await createHighlight()
-                        toggleHighlights()
+                        toggleHighlightsAct()
                     }
                     break
-                case createAnnotationShortcut:
-                    createAnnotationShortcutEnabled &&
-                        (await createNewAnnotation(e))
+                case createAnnotation.shortcut:
+                    createAnnotation.enabled && (await createNewAnnotation(e))
                     break
                 default:
             }
@@ -149,7 +133,7 @@ const handleKeyboardShortcuts = ({
     }
 }
 
-const toggleHighlights = () => {
+const toggleHighlightsAct = () => {
     highlightsOn ? removeHighlights() : fetchAndHighlightAnnotations()
     highlightsOn = !highlightsOn
 }
@@ -164,7 +148,7 @@ const fetchAndHighlightAnnotations = async () => {
 const createNewAnnotation = async e => {
     e.preventDefault()
     e.stopPropagation()
-    await createAnnotation()
+    await createAnnotationAct()
 
     // Remove onboarding select option notification if it's present
     await conditionallyRemoveSelectOption(STAGES.annotation.annotationCreated)
