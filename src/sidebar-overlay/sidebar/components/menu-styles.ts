@@ -12,9 +12,10 @@ const baseStyles = {
         right: '35px',
         top: '0px',
         zIndex: 2147483646,
-        overflow: 'hidden',
+        overflow: 'hidden scroll',
         width: '350px',
         height: '100%',
+        background: '#fff',
         transition: 'all 0.3s cubic-bezier(0.65, 0.05, 0.36, 1)',
         boxShadow:
             'rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px',

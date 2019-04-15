@@ -63,3 +63,7 @@
 .tooltip {
     margin-top: 5px;
 }
+
+.inpagetooltip {
+    width: 600px;
+}

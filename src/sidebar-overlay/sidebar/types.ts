@@ -55,6 +55,10 @@ export default interface State {
     showCongratsMessage: boolean
     /** Represents the latest page of annotations being fetched. */
     currentResultPage: number
+    /** Denotes the type of search performed */
+    searchType: 'notes' | 'pages'
+    /** Denotes whether the search is on current page or all pages */
+    pageType: 'page' | 'all'
 }
 
 export interface KeyboardActions {

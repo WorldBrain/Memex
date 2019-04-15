@@ -14,6 +14,9 @@ import {
     setOnboardingStage,
 } from 'src/overview/onboarding/utils'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
+import { AnnotSearchParams } from 'src/search/background/types'
+import normalizeUrl from 'src/util/encode-url-for-id'
+import { isLoggable } from 'src/activity-logger'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -49,6 +52,12 @@ export const setHoverAnnotationUrl = createAction<string>(
 export const setShowCongratsMessage = createAction<boolean>(
     'setShowCongratsMessage',
 )
+
+export const setMouseOverSidebar = createAction<boolean>('setMouseOverSidebar')
+
+export const setPageType = createAction<'page' | 'all'>('setPageType')
+
+export const setSearchType = createAction<'notes' | 'pages'>('setSearchType')
 
 /**
  * Hydrates the initial state of the sidebar.
@@ -277,4 +286,86 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
         ...annotations.slice(index + 1),
     ]
     dispatch(setAnnotations(newAnnotations))
+}
+
+export const toggleSearchType: () => Thunk = () => (dispatch, getState) => {
+    const currSearchType = selectors.searchType(getState())
+    const newSearchType = currSearchType === 'notes' ? 'pages' : 'notes'
+    dispatch(setSearchType(newSearchType))
+}
+
+export const togglePageType: () => Thunk = () => (dispatch, getState) => {
+    const currPageType = selectors.pageType(getState())
+    const newPageType = currPageType === 'page' ? 'all' : 'page'
+    dispatch(setPageType(newPageType))
+}
+
+export const searchAnnotations: () => Thunk = () => async (
+    dispatch,
+    getState,
+) => {
+    dispatch(setIsLoading(true))
+
+    const state = getState()
+    let { url } = selectors.page(state)
+
+    url = url ? url : window.location.href
+
+    if (!isLoggable({ url }) || selectors.pageType(state) !== 'page') {
+        dispatch(setIsLoading(false))
+        return
+    }
+
+    const searchParams: AnnotSearchParams = {
+        query: state.searchBar.query,
+        startDate: state.searchBar.startDate,
+        endDate: state.searchBar.endDate,
+        bookmarksOnly: state.searchFilters.onlyBookmarks,
+        tagsInc: state.searchFilters.tags,
+        tagsExc: state.searchFilters.tagsExc,
+        domainsInc: state.searchFilters.domainsInc,
+        domainsExc: state.searchFilters.domainsExc,
+        limit: RES_PAGE_SIZE,
+        collections: [state.searchFilters.lists],
+        url,
+    }
+
+    const annotationsManager = selectors.annotationsManager(state)
+    const annotations: Annotation[] = []
+
+    if (annotationsManager) {
+        const annotSearchResult = await annotationsManager.searchAnnotations(
+            searchParams,
+        )
+
+        if (!searchParams.query) {
+            const { annotsByDay } = annotSearchResult
+
+            const sortedKeys = Object.keys(annotsByDay)
+                .sort()
+                .reverse()
+
+            for (const day of sortedKeys) {
+                const cluster = annotsByDay[day]
+                for (const pageUrl of Object.keys(cluster)) {
+                    if (pageUrl === normalizeUrl(searchParams.url)) {
+                        annotations.push(...cluster[pageUrl])
+                    }
+                }
+            }
+        } else {
+            const { docs } = annotSearchResult
+
+            for (const doc of docs) {
+                if (doc.url === normalizeUrl(searchParams.url)) {
+                    annotations.push(...doc.annotations)
+                }
+            }
+        }
+
+        dispatch(setAnnotations(annotations))
+        dispatch(setResultsExhausted(annotSearchResult.resultsExhausted))
+    }
+
+    dispatch(setIsLoading(false))
 }

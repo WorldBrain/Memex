@@ -56,3 +56,7 @@ export const needsPagWaypoint = createSelector(
 )
 
 export const shouldAppendLoader = createSelector(currentPage, page => page > 0)
+
+export const searchType = createSelector(sidebar, state => state.searchType)
+
+export const pageType = createSelector(sidebar, state => state.pageType)

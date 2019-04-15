@@ -5,19 +5,21 @@ import { bindActionCreators } from 'redux'
 import cx from 'classnames'
 
 import { actions, selectors } from 'src/custom-lists'
-import extStyles from './Index.css'
-import MyCollection from './my-collections'
-import CreateListForm from './CreateListForm'
-import ListItem from './list-item'
+import extStyles from 'src/custom-lists/components/overview/sidebar/Index.css'
+import MyCollection from 'src/custom-lists/components/overview/sidebar/my-collections'
+import CreateListForm from 'src/custom-lists/components/overview/sidebar/CreateListForm'
+import ListItem from 'src/custom-lists/components/overview/sidebar/list-item'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
-import { actions as filterActs } from '../../../../search-filters'
-import * as sidebar from '../../../../overview/sidebar-left/selectors'
+import { CrowdfundingModal } from 'src/common-ui/crowdfunding'
+import { actions as filterActs } from 'src/search-filters'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 
 class ListContainer extends Component {
     static propTypes = {
         getListFromDB: PropTypes.func.isRequired,
         lists: PropTypes.array.isRequired,
         handleEditBtnClick: PropTypes.func.isRequired,
+        setShowCrowdFundingModal: PropTypes.func.isRequired,
         isDeleteConfShown: PropTypes.bool.isRequired,
         resetListDeleteModal: PropTypes.func.isRequired,
         handleCrossBtnClick: PropTypes.func.isRequired,
@@ -29,8 +31,7 @@ class ListContainer extends Component {
         toggleCreateListForm: PropTypes.func.isRequired,
         showCreateList: PropTypes.bool.isRequired,
         showCommonNameWarning: PropTypes.bool.isRequired,
-        isSidebarOpen: PropTypes.bool.isRequired,
-        isSidebarLocked: PropTypes.bool.isRequired,
+        showCrowdFundingModal: PropTypes.bool.isRequired,
         closeCreateListForm: PropTypes.func.isRequired,
         resetUrlDragged: PropTypes.func.isRequired,
     }
@@ -126,7 +127,7 @@ class ListContainer extends Component {
     }
 
     renderCreateList = (shouldDisplayForm, value = null) =>
-        shouldDisplayForm && (
+        shouldDisplayForm ? (
             <CreateListForm
                 onCheckboxClick={this.handleCreateListSubmit}
                 handleNameChange={this.handleSearchChange('listName')}
@@ -135,28 +136,23 @@ class ListContainer extends Component {
                 setInputRef={this.setInputRef}
                 closeCreateListForm={this.props.closeCreateListForm}
             />
-        )
+        ) : null
 
     render() {
         return (
             <React.Fragment>
                 <MyCollection
+                    isForInpage
                     handleRenderCreateList={this.props.toggleCreateListForm}
                 />
 
                 {this.renderCreateList(this.props.showCreateList)}
-                <div
-                    className={cx({
-                        [extStyles.allLists]: this.props.isSidebarOpen,
-                    })}
-                >
+                <div className={extStyles.allLists}>
                     <div
-                        className={cx({
-                            [extStyles.wrapper]: this.props.isSidebarOpen,
-                            [extStyles.allListsInner]: this.props.isSidebarOpen,
-                            [extStyles.wrapperLocked]: this.props
-                                .isSidebarLocked,
-                        })}
+                        className={cx(
+                            extStyles.wrapper,
+                            extStyles.allListsInner,
+                        )}
                     >
                         {this.renderAllLists()}
                     </div>
@@ -167,6 +163,13 @@ class ListContainer extends Component {
                     onClose={this.props.resetListDeleteModal}
                     deleteDocs={this.props.handleDeleteList}
                 />
+                {this.props.showCrowdFundingModal && (
+                    <CrowdfundingModal
+                        onClose={this.props.setShowCrowdFundingModal(false)}
+                        context="collections"
+                        learnMoreUrl="https://worldbrain.io/pricing/"
+                    />
+                )}
             </React.Fragment>
         )
     }
@@ -175,10 +178,9 @@ class ListContainer extends Component {
 const mapStateToProps = state => ({
     lists: selectors.results(state),
     isDeleteConfShown: selectors.isDeleteConfShown(state),
+    showCrowdFundingModal: selectors.showCrowdFundingModal(state),
     showCreateList: selectors.showCreateListForm(state),
     showCommonNameWarning: selectors.showCommonNameWarning(state),
-    isSidebarOpen: sidebar.isSidebarOpen(state),
-    isSidebarLocked: sidebar.sidebarLocked(state),
 })
 
 const mapDispatchToProps = (dispatch, getState) => ({
@@ -198,13 +200,19 @@ const mapDispatchToProps = (dispatch, getState) => ({
         event.preventDefault()
         dispatch(actions.showEditBox(index))
     },
+    setShowCrowdFundingModal: value => e => {
+        e.preventDefault()
+        e.stopPropagation()
+        dispatch(actions.setShowCrowdFundingModal(value))
+    },
     handleCrossBtnClick: ({ id }, index) => event => {
         event.preventDefault()
         dispatch(actions.showListDeleteModal(id, index))
     },
     handleListItemClick: ({ id }, index) => () => {
-        dispatch(actions.toggleListFilterIndex(index))
-        dispatch(filterActs.toggleListFilter(id))
+        dispatch(sidebarActs.setSearchType('pages'))
+        dispatch(actions.toggleListFilterIndex(index.toString()))
+        dispatch(filterActs.toggleListFilter(id.toString()))
     },
     handleAddPageList: ({ id }, index) => url => {
         dispatch(actions.addUrltoList(url, index, id))
@@ -212,7 +220,6 @@ const mapDispatchToProps = (dispatch, getState) => ({
     handleDeleteList: e => {
         e.preventDefault()
         dispatch(actions.deletePageList())
-        dispatch(filterActs.delListFilter())
     },
 })
 

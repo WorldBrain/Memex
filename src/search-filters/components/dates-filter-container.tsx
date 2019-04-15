@@ -74,6 +74,7 @@ class DatesFilter extends PureComponent<Props, State> {
                         position={this.props.tooltipPosition}
                         itemClass={cx({
                             [styles.tooltip]: this.props.env === 'overview',
+                            [styles.inpagetooltip]: this.props.env === 'inpage',
                         })}
                     >
                         <DateRangeSelection

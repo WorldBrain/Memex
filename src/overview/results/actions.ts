@@ -35,7 +35,7 @@ export const appendSearchResult = createAction<SearchResult>(
     'results/appendSearchResult',
 )
 export const setLoading = createAction<boolean>('results/setLoading')
-export const setAreAnnotationsExpanded = createAction(
+export const setAreAnnotationsExpanded = createAction<boolean>(
     'results/setAreAnnotationsExpanded',
 )
 export const toggleAreAnnotationsExpanded = createAction(

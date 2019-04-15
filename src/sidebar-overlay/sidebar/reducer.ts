@@ -24,6 +24,8 @@ export const defaultState: State = {
     showCongratsMessage: false,
     currentResultPage: 0,
     resultsExhausted: false,
+    searchType: 'notes',
+    pageType: 'page',
 }
 
 const setAnnotationsManager = (
@@ -91,6 +93,14 @@ const resultsExhausted = createReducer(on => {
     on(actions.setResultsExhausted, (state, payload) => payload)
 }, defaultState.resultsExhausted)
 
+const pageTypeReducer = createReducer(on => {
+    on(actions.setPageType, (state, payload) => payload)
+}, defaultState.pageType)
+
+const searchTypeReducer = createReducer(on => {
+    on(actions.setSearchType, (state, payload) => payload)
+}, defaultState.searchType)
+
 const reducer = combineReducers<State>({
     annotationsManager: annotationsManagerReducer,
     isOpen: isOpenReducer,
@@ -103,6 +113,8 @@ const reducer = combineReducers<State>({
     showCongratsMessage: showCongratsMessageReducer,
     currentResultPage,
     resultsExhausted,
+    searchType: searchTypeReducer,
+    pageType: pageTypeReducer,
 })
 
 export default reducer

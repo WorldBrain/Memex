@@ -4,6 +4,7 @@ import { Omit } from './types'
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import analytics from 'src/analytics'
+import { AnnotSearchParams } from 'src/search/background/types'
 
 export default class AnnotationsManager {
     private readonly _processEventRPC = remoteFunction('processEvent')
@@ -24,6 +25,8 @@ export default class AnnotationsManager {
     private readonly bookmarkAnnotationRPC = remoteFunction(
         'toggleAnnotBookmark',
     )
+
+    private readonly searchAnnotationsRPC = remoteFunction('searchAnnotations')
 
     public createAnnotation = async ({
         url,
@@ -173,5 +176,10 @@ export default class AnnotationsManager {
             tagsToBeAdded,
             tagsToBeDeleted,
         }
+    }
+
+    public searchAnnotations = async (searchParams: AnnotSearchParams) => {
+        const annotations = await this.searchAnnotationsRPC(searchParams)
+        return annotations
     }
 }

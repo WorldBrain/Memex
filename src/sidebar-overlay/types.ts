@@ -13,6 +13,11 @@ import { State as TagsBtnState } from 'src/popup/tags-button/reducer'
 import { State as CollectionsBtnState } from 'src/popup/collections-button/reducer'
 import { State as PauseBtnState } from 'src/popup/pause-button/reducer'
 import { State as PopupState } from 'src/popup/reducer'
+import { State as SearchBarState } from 'src/overview/search-bar/reducer'
+import { RootState as searchFiltersState } from 'src/search-filters/types'
+import { State as ResultsState } from 'src/overview/results/reducer'
+import { State as deleteConfModalState } from 'src/overview/delete-confirm-modal/reducer'
+import { State as CustomListsState } from 'src/custom-lists/types'
 
 export default interface RootState {
     ribbon: RibbonState
@@ -22,6 +27,11 @@ export default interface RootState {
     collectionsBtn: CollectionsBtnState
     pauseBtn: PauseBtnState
     popup: PopupState
+    searchBar: SearchBarState
+    searchFilters: searchFiltersState
+    results: ResultsState
+    customLists: CustomListsState
+    deleteConfModal: deleteConfModalState
 }
 
 export type ClickHandler<T extends HTMLElement> = (

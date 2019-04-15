@@ -5,7 +5,8 @@ import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { actions as sidebarActs } from 'src/sidebar-common/sidebar'
+import { actions as sidebarLeftActs } from '../sidebar-left'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { acts as resultsActs, selectors as results } from '../results'
 import {
     actions as filterActs,
@@ -13,6 +14,7 @@ import {
 } from '../../search-filters'
 import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { isLoggable } from 'src/activity-logger'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -101,7 +103,12 @@ export const search: (args?: any) => Thunk = (
         return
     }
 
-    dispatch(sidebarActs.closeSidebar())
+    const isLoggableURL = isLoggable({ url: window.location.href })
+
+    if (!isLoggableURL) {
+        dispatch(sidebarActs.closeSidebar())
+    }
+
     dispatch(resultsActs.resetActiveSidebarIndex())
     dispatch(resultsActs.setLoading(true))
 
@@ -134,6 +141,7 @@ export const search: (args?: any) => Thunk = (
         skip: results.resultsSkip(state),
         lists: filters.listFilterParam(state),
         contentTypes: filters.contentType(state),
+        base64Img: isLoggableURL,
     }
 
     try {

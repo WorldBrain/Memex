@@ -21,10 +21,20 @@
     }
 }
 
+.collectionSidebar {
+    padding: 5px;
+    width: 200px;
+}
+
 .myCollection {
     font-size: 1.45em;
     font-weight: 500;
     padding: 0px 70px 0px 0px;
+}
+
+.myCollectionSidebar {
+    font-size: 1.25em;
+    font-weight: 500;
 }
 
 .plus {

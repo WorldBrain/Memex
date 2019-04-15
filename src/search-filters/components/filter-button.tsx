@@ -29,12 +29,14 @@ class FilterButton extends PureComponent<Props, State> {
         showDatesClearBtn: false,
     }
 
-    handleClickOutside = (e: Event) => {
+    private handleClickOutside = (e: Event) => {
         e.stopPropagation()
         this.props.hidePopup()
     }
 
-    handleClearFilers = e => {
+    private handleClearFilters: React.MouseEventHandler<
+        HTMLSpanElement
+    > = e => {
         e.stopPropagation()
         this.props.clearFilters()
         this.props.hidePopup()
@@ -49,7 +51,7 @@ class FilterButton extends PureComponent<Props, State> {
                     </span>
                     <span
                         className={styles.clearFilters}
-                        onClick={this.handleClearFilers}
+                        onClick={this.handleClearFilters}
                     />
                 </React.Fragment>
             )
@@ -66,7 +68,7 @@ class FilterButton extends PureComponent<Props, State> {
                     </span>
                     <span
                         className={styles.clearFilters}
-                        onClick={this.handleClearFilers}
+                        onClick={this.handleClearFilters}
                     />
                 </React.Fragment>
             )
@@ -84,7 +86,7 @@ class FilterButton extends PureComponent<Props, State> {
                             >
                                 <span
                                     className={styles.clearFilters}
-                                    onClick={this.handleClearFilers}
+                                    onClick={this.handleClearFilters}
                                 />
                             </ButtonTooltip>
                         </React.Fragment>
@@ -116,4 +118,4 @@ class FilterButton extends PureComponent<Props, State> {
     }
 }
 
-export default OnClickOutside(FilterButton)
+export default FilterButton

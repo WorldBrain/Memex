@@ -259,7 +259,7 @@ class DateRangeSelection extends Component<Props> {
                         <span className={styles.dateTitle}>From</span>
                         <DatePickerInput
                             placeholder="🕒 type time..."
-                            value={startDateText}
+                            value={this.state.startDateText || startDateText}
                             name="from"
                             onChange={this.handleRawInputChange({
                                 isStartDate: true,
@@ -299,7 +299,7 @@ class DateRangeSelection extends Component<Props> {
                         <span className={styles.dateTitle}>To</span>
                         <DatePickerInput
                             placeholder="🕒 type time..."
-                            value={endDateText}
+                            value={this.state.endDateText || endDateText}
                             name="to"
                             onChange={this.handleRawInputChange({
                                 isStartDate: false,

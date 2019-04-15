@@ -1,0 +1,43 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6, color2, radius3, color7, color3 from colors;
+
+.container {
+    display: flex;
+    align-self: center;
+    justify-content: space-between;
+    float: right;
+    margin-top: -10px;
+}
+
+.unfoldAllBtn {
+    margin-right: -8px;
+    color: color3;
+
+    &:disabled {
+        display: none;
+    }
+}
+
+/* Nice if we move this type of stuff somewhere for easier re-use, like colors, fonts, etc. */
+.btn {
+    composes: nakedButton from 'src/common-ui/elements.css';
+    color: color3;
+    font-size: 15px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+
+    &:disabled {
+        background-color: color7;
+        cursor: auto;
+    }
+}
+
+.pages {
+    margin-right: 10px;
+}
+
+.pageSwitch {
+    margin-top: 15px;
+}

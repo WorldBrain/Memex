@@ -11,6 +11,7 @@ import Sidebar from './sidebar'
 import SidebarState, { Annotation } from '../types'
 import RootState, { MapDispatchToProps } from '../../types'
 import AnnotationsManager from '../../annotations-manager'
+import { acts as searchBarActs } from 'src/overview/search-bar'
 
 interface StateProps {
     isOpen: boolean
@@ -22,6 +23,8 @@ interface StateProps {
     hoverAnnotationUrl: string
     showCommentBox: boolean
     showCongratsMessage: boolean
+    pageType: 'page' | 'all'
+    searchType: 'notes' | 'pages'
 }
 
 interface DispatchProps {
@@ -34,6 +37,10 @@ interface DispatchProps {
     handleDeleteAnnotation: (url: string) => void
     handleScrollPagination: () => void
     handleBookmarkToggle: (url: string) => void
+    onQueryKeyDown: (searchValue: string) => void
+    onQueryChange: (searchValue: string) => void
+    handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
+    handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
 }
 
 interface OwnProps {
@@ -138,6 +145,11 @@ class SidebarContainer extends React.Component<Props> {
                 handleScrollPagination={this.props.handleScrollPagination}
                 appendLoader={this.props.appendLoader}
                 handleBookmarkToggle={this.props.handleBookmarkToggle}
+                onQueryChange={this.props.onQueryChange}
+                onQueryKeyDown={this.props.onQueryKeyDown}
+                pageType={this.props.pageType}
+                searchType={this.props.searchType}
+                handleSearchTypeClick={this.props.handleSearchTypeClick}
             />
         )
     }
@@ -159,6 +171,8 @@ const mapStateToProps: MapStateToProps<
     hoverAnnotationUrl: selectors.hoverAnnotationUrl(state),
     showCommentBox: commentBoxSelectors.showCommentBox(state),
     showCongratsMessage: selectors.showCongratsMessage(state),
+    pageType: selectors.pageType(state),
+    searchType: selectors.searchType(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
@@ -188,6 +202,18 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
     handleScrollPagination: () => dispatch(actions.fetchMoreAnnotations()),
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
+    onQueryChange: searchValue =>
+        dispatch(searchBarActs.setQueryTagsDomains(searchValue, false)),
+    onQueryKeyDown: searchValue =>
+        dispatch(searchBarActs.setQueryTagsDomains(searchValue, true)),
+    handleSearchTypeClick: e => {
+        e.preventDefault()
+        dispatch(actions.toggleSearchType())
+    },
+    handlePageTypeClick: e => {
+        e.preventDefault()
+        dispatch(actions.togglePageType())
+    },
 })
 
 export default connect(
