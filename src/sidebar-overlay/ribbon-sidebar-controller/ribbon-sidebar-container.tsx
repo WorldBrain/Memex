@@ -39,8 +39,11 @@ interface DispatchProps {
     setTooltipEnabled: (isTooltipEnabled: boolean) => void
     setActiveAnnotationUrl: (url: string) => void
     setHoverAnnotationUrl: (url: string) => void
-    setShowCommentBox: () => void
+    setShowSidebarCommentBox: () => void
     openRibbon: () => void
+    setShowCommentBox: (value: boolean) => void
+    setShowTagsPicker: (value: boolean) => void
+    setShowCollectionsPicker: (value: boolean) => void
 }
 
 interface OwnProps {
@@ -102,16 +105,32 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         isRibbonEnabled,
         isTooltipEnabled,
         openRibbon,
+        openToCollections,
+        openToComment,
+        openToTags,
     }: {
         isRibbonEnabled: boolean
         isTooltipEnabled: boolean
         openRibbon: boolean
+        openToCollections: boolean
+        openToComment: boolean
+        openToTags: boolean
     }) => {
         this.props.setRibbonEnabled(isRibbonEnabled)
         this.props.setTooltipEnabled(isTooltipEnabled)
 
         if (openRibbon) {
             this.props.openRibbon()
+
+            if (openToCollections) {
+                this.props.setShowCollectionsPicker(true)
+            }
+            if (openToTags) {
+                this.props.setShowTagsPicker(true)
+            }
+            if (openToComment) {
+                this.props.setShowCommentBox(true)
+            }
         }
     }
 
@@ -198,15 +217,9 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     private _openSidebar = async ({
         anchor = null,
         activeUrl,
-        openToTags,
-        openToComment,
-        openToCollections,
     }: OpenSidebarArgs & { anchor: Anchor }) => {
         await this.props.openSidebar({
             activeUrl,
-            openToTags,
-            openToComment,
-            openToCollections,
         })
 
         if (anchor) {
@@ -314,7 +327,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             closeSidebar,
             isCommentSaved,
             commentText,
-            setShowCommentBox,
+            setShowSidebarCommentBox,
         } = this.props
 
         return (
@@ -330,7 +343,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
                         closeSidebar={closeSidebar}
                         isCommentSaved={isCommentSaved}
                         commentText={commentText}
-                        setShowSidebarCommentBox={setShowCommentBox}
+                        setShowSidebarCommentBox={setShowSidebarCommentBox}
                     />
                 )}
 
@@ -389,11 +402,17 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
         dispatch(ribbonActions.setRibbonEnabled(isRibbonEnabled)),
     setTooltipEnabled: isTooltipEnabled =>
         dispatch(ribbonActions.setTooltipEnabled(isTooltipEnabled)),
+    setShowCommentBox: (value: boolean) =>
+        dispatch(ribbonActions.setShowCommentBox(value)),
+    setShowTagsPicker: (value: boolean) =>
+        dispatch(ribbonActions.setShowTagsPicker(value)),
+    setShowCollectionsPicker: (value: boolean) =>
+        dispatch(ribbonActions.setShowCollsPicker(value)),
     setActiveAnnotationUrl: url =>
         dispatch(sidebarActions.setActiveAnnotationUrl(url)),
     setHoverAnnotationUrl: url =>
         dispatch(sidebarActions.setHoverAnnotationUrl(url)),
-    setShowCommentBox: () =>
+    setShowSidebarCommentBox: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
     openRibbon: () => dispatch(ribbonActions.setIsExpanded(true)),
 })

@@ -34,14 +34,25 @@ export const insertRibbon = async ({
     annotationsManager,
     toolbarNotifications,
     forceExpandRibbon = false,
+    openToCollections,
+    openToComment,
+    openToTags,
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
     forceExpandRibbon?: boolean
+    openToTags?: boolean
+    openToComment?: boolean
+    openToCollections?: boolean
 }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
-        await updateRibbon(forceExpandRibbon)
+        await updateRibbon({
+            openRibbon: forceExpandRibbon,
+            openToCollections,
+            openToComment,
+            openToTags,
+        })
         return
     }
 
@@ -137,7 +148,14 @@ const _insertOrRemoveRibbon = async ({
  * Fetches whether the sidebar and tooltip are enabled.
  * Tells the ribbon to update its state with those values.
  */
-const updateRibbon = async (openRibbon?: boolean) => {
+const updateRibbon = async (
+    args: {
+        openRibbon?: boolean
+        openToCollections?: boolean
+        openToComment?: boolean
+        openToTags?: boolean
+    } = {},
+) => {
     if (!target) {
         return
     }
@@ -150,7 +168,7 @@ const updateRibbon = async (openRibbon?: boolean) => {
         ribbonSidebarRef.getWrappedInstance().updateRibbonState({
             isRibbonEnabled,
             isTooltipEnabled,
-            openRibbon,
+            ...args,
         })
     }
 }
@@ -170,10 +188,7 @@ export const setupRPC = ({
          * Used for inserting the ribbon.
          */
         insertRibbon: (
-            {
-                override,
-                forceExpandRibbon,
-            }: { override: boolean; forceExpandRibbon?: boolean } = {
+            { override, ...args }: { override: boolean } = {
                 override: false,
             },
         ) => {
@@ -181,7 +196,7 @@ export const setupRPC = ({
             insertRibbon({
                 annotationsManager,
                 toolbarNotifications,
-                forceExpandRibbon,
+                ...args,
             })
         },
         /**

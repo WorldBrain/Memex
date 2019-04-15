@@ -15,19 +15,33 @@ const defaultState: State = {
     searchValue: '',
 }
 
-const boolReducer = (stateKey: string) => (state: State, payload: boolean) => ({
-    ...state,
-    [stateKey]: payload,
-})
+const boolReducer = (stateKey: string, reset = false) => (
+    state: State,
+    payload: boolean,
+) => {
+    const resettableStates: Partial<State> = reset
+        ? {
+              showCommentBox: defaultState.showCommentBox,
+              showTagsPicker: defaultState.showTagsPicker,
+              showCollectionsPicker: defaultState.showCollectionsPicker,
+          }
+        : {}
+
+    return {
+        ...state,
+        ...resettableStates,
+        [stateKey]: payload,
+    }
+}
 
 const setIsPageFullScreen = boolReducer('isPageFullScreen')
 const setIsExpanded = boolReducer('isExpanded')
 const setRibbonEnabled = boolReducer('isRibbonEnabled')
 const setTooltipEnabled = boolReducer('isTooltipEnabled')
-const setShowCommentBox = boolReducer('showCommentBox')
+const setShowCommentBox = boolReducer('showCommentBox', true)
 const setShowSearchBox = boolReducer('showSearchBox')
-const setShowTagsPicker = boolReducer('showTagsPicker')
-const setShowCollectionsPicker = boolReducer('showCollectionsPicker')
+const setShowTagsPicker = boolReducer('showTagsPicker', true)
+const setShowCollectionsPicker = boolReducer('showCollectionsPicker', true)
 const setSearchValue = (state: State, searchValue: string) => ({
     ...state,
     searchValue,
