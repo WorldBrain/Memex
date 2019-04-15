@@ -13,6 +13,13 @@ export const setRibbonEnabled = createAction<boolean>('setRibbonEnabled')
 
 export const setTooltipEnabled = createAction<boolean>('setTooltipEnabled')
 
+export const setShowCommentBox = createAction<boolean>('setShowCommentBox')
+export const setShowSearchBox = createAction<boolean>('setShowSearchBox')
+export const setShowTagsPicker = createAction<boolean>('setShowTagsPicker')
+export const setShowCollsPicker = createAction<boolean>('setShowCollsPicker')
+export const setShowHighlights = createAction<boolean>('setShowHighlights')
+export const setSearchValue = createAction<string>('setSearchValue')
+
 export const toggleFullScreen: () => Thunk = () => (dispatch, getState) => {
     const isPageFullScreen = selectors.isPageFullScreen(getState())
     dispatch(setIsPageFullScreen(!isPageFullScreen))

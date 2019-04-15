@@ -35,6 +35,12 @@ interface StateProps {
     initTagSuggs: string[]
     collections: PageList[]
     initCollSuggs: PageList[]
+    showCommentBox: boolean
+    showSearchBox: boolean
+    showTagsPicker: boolean
+    showCollectionsPicker: boolean
+    showHighlights?: boolean
+    searchValue: string
 }
 
 interface DispatchProps {
@@ -50,19 +56,25 @@ interface DispatchProps {
     onTagDel: (tag: string) => void
     onCollectionAdd: (collection: PageList) => void
     onCollectionDel: (collection: PageList) => void
+    setShowCommentBox: (value: boolean) => void
+    setShowTagsPicker: (value: boolean) => void
+    setShowCollectionsPicker: (value: boolean) => void
+    setShowSearchBox: (value: boolean) => void
+    setShowHighlights: (value: boolean) => void
+    setSearchValue: (value: string) => void
 }
 
 interface OwnProps {
-    annotationsManager: AnnotationsManager
+    commentText: string
     isSidebarOpen: boolean
     isRibbonEnabled: boolean
-    handleRemoveRibbon: () => void
-    insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
-    openSidebar: (args: any) => void
-    closeSidebar: () => void
     isCommentSaved: boolean
-    commentText: string
-    setShowCommentBox: () => void
+    annotationsManager: AnnotationsManager
+    closeSidebar: () => void
+    handleRemoveRibbon: () => void
+    openSidebar: (args: any) => void
+    setShowSidebarCommentBox: () => void
+    insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -141,45 +153,13 @@ class RibbonContainer extends Component<Props> {
     }
 
     render() {
-        const {
-            isExpanded,
-            isRibbonEnabled,
-            isTooltipEnabled,
-            openSidebar,
-            handleRibbonToggle,
-            handleRemoveRibbon,
-            isSidebarOpen,
-            isPaused,
-            isBookmarked,
-            closeSidebar,
-            handlePauseToggle,
-            handleBookmarkToggle,
-            isCommentSaved,
-            commentText,
-            setShowCommentBox,
-        } = this.props
-
         return (
             <div ref={this._setRibbonRef}>
                 <Ribbon
-                    isExpanded={isExpanded}
-                    isRibbonEnabled={isRibbonEnabled}
-                    isTooltipEnabled={isTooltipEnabled}
-                    isSidebarOpen={isSidebarOpen}
-                    isPaused={isPaused}
-                    isBookmarked={isBookmarked}
-                    isCommentSaved={isCommentSaved}
-                    commentText={commentText}
+                    {...this.props}
                     tagManager={this.renderTagsManager()}
                     collectionsManager={this.renderCollectionsManager()}
-                    openSidebar={openSidebar}
-                    closeSidebar={closeSidebar}
-                    handleRibbonToggle={handleRibbonToggle}
                     handleTooltipToggle={this._handleTooltipToggle}
-                    handleRemoveRibbon={handleRemoveRibbon}
-                    handlePauseToggle={handlePauseToggle}
-                    handleBookmarkToggle={handleBookmarkToggle}
-                    setShowCommentBox={setShowCommentBox}
                 />
             </div>
         )
@@ -193,6 +173,11 @@ const mapStateToProps: MapStateToProps<
 > = state => ({
     isExpanded: selectors.isExpanded(state),
     isTooltipEnabled: selectors.isTooltipEnabled(state),
+    showCollectionsPicker: selectors.showCollectionsPicker(state),
+    showCommentBox: selectors.showCommentBox(state),
+    showSearchBox: selectors.showSearchBox(state),
+    showTagsPicker: selectors.showTagsPicker(state),
+    searchValue: selectors.searchValue(state),
     isPaused: pause.isPaused(state),
     isBookmarked: bookmark.isBookmarked(state),
     url: popup.url(state),
@@ -221,6 +206,17 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(collectionActs.addCollectionToPage(collection)),
     onCollectionDel: (collection: PageList) =>
         dispatch(collectionActs.deleteCollection(collection)),
+    setSearchValue: (value: string) => dispatch(actions.setSearchValue(value)),
+    setShowCommentBox: (value: boolean) =>
+        dispatch(actions.setShowCommentBox(value)),
+    setShowSearchBox: (value: boolean) =>
+        dispatch(actions.setShowSearchBox(value)),
+    setShowTagsPicker: (value: boolean) =>
+        dispatch(actions.setShowTagsPicker(value)),
+    setShowCollectionsPicker: (value: boolean) =>
+        dispatch(actions.setShowCollsPicker(value)),
+    setShowHighlights: (value: boolean) =>
+        dispatch(actions.setShowHighlights(value)),
 })
 
 export default connect(

@@ -8,4 +8,10 @@ export default interface State {
     isExpanded: boolean
     isRibbonEnabled: boolean
     isTooltipEnabled: boolean
+    showCommentBox: boolean
+    showSearchBox: boolean
+    showTagsPicker: boolean
+    showCollectionsPicker: boolean
+    showHighlights?: boolean
+    searchValue: string
 }

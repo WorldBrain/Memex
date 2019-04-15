@@ -8,26 +8,29 @@ const defaultState: State = {
     isExpanded: false,
     isRibbonEnabled: true,
     isTooltipEnabled: true,
+    showCommentBox: false,
+    showSearchBox: false,
+    showTagsPicker: false,
+    showCollectionsPicker: false,
+    searchValue: '',
 }
 
-const setIsPageFullScreen = (state: State, isPageFullScreen: boolean) => ({
+const boolReducer = (stateKey: string) => (state: State, payload: boolean) => ({
     ...state,
-    isPageFullScreen,
+    [stateKey]: payload,
 })
 
-const setIsExpanded = (state: State, isExpanded: boolean) => ({
+const setIsPageFullScreen = boolReducer('isPageFullScreen')
+const setIsExpanded = boolReducer('isExpanded')
+const setRibbonEnabled = boolReducer('isRibbonEnabled')
+const setTooltipEnabled = boolReducer('isTooltipEnabled')
+const setShowCommentBox = boolReducer('showCommentBox')
+const setShowSearchBox = boolReducer('showSearchBox')
+const setShowTagsPicker = boolReducer('showTagsPicker')
+const setShowCollectionsPicker = boolReducer('showCollectionsPicker')
+const setSearchValue = (state: State, searchValue: string) => ({
     ...state,
-    isExpanded,
-})
-
-const setRibbonEnabled = (state: State, isRibbonEnabled: boolean) => ({
-    ...state,
-    isRibbonEnabled,
-})
-
-const setTooltipEnabled = (state: State, isTooltipEnabled: boolean) => ({
-    ...state,
-    isTooltipEnabled,
+    searchValue,
 })
 
 const reducer = createReducer<State>(on => {
@@ -35,6 +38,11 @@ const reducer = createReducer<State>(on => {
     on(actions.setIsExpanded, setIsExpanded)
     on(actions.setRibbonEnabled, setRibbonEnabled)
     on(actions.setTooltipEnabled, setTooltipEnabled)
+    on(actions.setShowCommentBox, setShowCommentBox)
+    on(actions.setShowSearchBox, setShowSearchBox)
+    on(actions.setShowTagsPicker, setShowTagsPicker)
+    on(actions.setShowCollsPicker, setShowCollectionsPicker)
+    on(actions.setSearchValue, setSearchValue)
 }, defaultState)
 
 export default reducer
