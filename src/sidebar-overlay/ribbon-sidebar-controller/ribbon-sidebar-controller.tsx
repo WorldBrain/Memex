@@ -25,6 +25,7 @@ interface Props {
     removeMediumHighlights: () => void
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     setRibbonSidebarRef: any
+    forceExpand?: boolean
 }
 
 /* tslint:disable-next-line variable-name */

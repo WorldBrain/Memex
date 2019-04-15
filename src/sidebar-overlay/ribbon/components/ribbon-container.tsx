@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
-import RootState, { MapDispatchToProps, ClickHandler } from '../../types'
+import RootState, { MapDispatchToProps } from '../../types'
 import Ribbon from './ribbon'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -11,7 +11,6 @@ import {
     AddListDropdownContainer,
 } from 'src/common-ui/containers'
 import * as popup from 'src/popup/selectors'
-import * as popupActs from 'src/popup/actions'
 import { selectors as pause, acts as pauseActs } from 'src/popup/pause-button'
 import { acts as tagActs, selectors as tags } from 'src/popup/tags-button'
 import {

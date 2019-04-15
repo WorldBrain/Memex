@@ -91,15 +91,17 @@ export default class DirectLinkingBackground {
             anchor,
             override,
             activeUrl,
-            openToCollections,
-            openToComment,
             openToTags,
+            openToComment,
+            openToBookmark,
+            openToCollections,
         }: OpenSidebarArgs & { anchor?: any; override?: boolean } = {
             anchor: null,
             override: false,
             activeUrl: undefined,
             openToTags: false,
             openToComment: false,
+            openToBookmark: false,
             openToCollections: false,
         },
     ) {
@@ -109,16 +111,26 @@ export default class DirectLinkingBackground {
         })
 
         const { id: tabId } = currentTab
+
+        const forceExpandRibbon =
+            openToTags || openToComment || openToCollections || openToBookmark
+
         // Make sure that the ribbon is inserted before trying to open the
         // sidebar.
-        await remoteFunction('insertRibbon', { tabId })({ override })
-        await remoteFunction('openSidebar', { tabId })({
-            anchor,
-            activeUrl,
-            openToCollections,
-            openToComment,
-            openToTags,
+        await remoteFunction('insertRibbon', { tabId })({
+            override,
+            forceExpandRibbon,
         })
+
+        if (!forceExpandRibbon) {
+            await remoteFunction('openSidebar', { tabId })({
+                anchor,
+                activeUrl,
+                openToCollections,
+                openToComment,
+                openToTags,
+            })
+        }
     }
 
     followAnnotationRequest({ tab }: TabArg) {

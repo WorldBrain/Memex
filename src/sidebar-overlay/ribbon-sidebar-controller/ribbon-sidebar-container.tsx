@@ -40,9 +40,11 @@ interface DispatchProps {
     setActiveAnnotationUrl: (url: string) => void
     setHoverAnnotationUrl: (url: string) => void
     setShowCommentBox: () => void
+    openRibbon: () => void
 }
 
 interface OwnProps {
+    forceExpand?: boolean
     annotationsManager: AnnotationsManager
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
@@ -99,12 +101,18 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     public updateRibbonState = ({
         isRibbonEnabled,
         isTooltipEnabled,
+        openRibbon,
     }: {
         isRibbonEnabled: boolean
         isTooltipEnabled: boolean
+        openRibbon: boolean
     }) => {
         this.props.setRibbonEnabled(isRibbonEnabled)
         this.props.setTooltipEnabled(isTooltipEnabled)
+
+        if (openRibbon) {
+            this.props.openRibbon()
+        }
     }
 
     private _setupRPC = () => {
@@ -355,11 +363,17 @@ const mapStateToProps: MapStateToProps<
     isRibbonEnabled: ribbonSelectors.isRibbonEnabled(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
-    onInit: () => dispatch(actions.initState()),
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+    props,
+) => ({
+    onInit: () => {
+        if (props.forceExpand) {
+            dispatch(ribbonActions.setIsExpanded(true))
+        }
+
+        dispatch(actions.initState())
+    },
     handleToggleFullScreen: e => {
         e.stopPropagation()
         dispatch(ribbonActions.toggleFullScreen())
@@ -381,6 +395,7 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(sidebarActions.setHoverAnnotationUrl(url)),
     setShowCommentBox: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
+    openRibbon: () => dispatch(ribbonActions.setIsExpanded(true)),
 })
 
 export default connect<StateProps, DispatchProps, OwnProps>(
