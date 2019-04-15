@@ -21,7 +21,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
     state: State = {
         shortcutsEnabled: true,
-        highlight: { shortcut: 'h', enabled: true },
+        highlight: { shortcut: 'n', enabled: true },
         link: { shortcut: 'l', enabled: true },
         toggleSidebar: { shortcut: 'r', enabled: true },
         toggleHighlights: { shortcut: 'h', enabled: true },
@@ -41,9 +41,15 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         const name = e.target.name as string
         const value = e.target.checked as boolean
 
-        this.setState(
-            state => ({ [name]: { ...state[name], enabled: value } } as any),
-            () => utils.setKeyboardShortcutsState({ ...this.state }),
+        const reducer = state => {
+            if (name === 'shortcutsEnabled') {
+                return { shortcutsEnabled: value }
+            }
+            return { [name]: { ...state[name], enabled: value } } as any
+        }
+
+        this.setState(reducer, () =>
+            utils.setKeyboardShortcutsState({ ...this.state }),
         )
     }
 
@@ -68,6 +74,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                 id={id}
                 isChecked={this.state[name].enabled}
                 handleChange={this.handleEnabledToggle}
+                isDisabled={!this.state.shortcutsEnabled}
                 name={name}
             >
                 {children}
