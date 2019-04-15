@@ -64,6 +64,11 @@
     animation: annotationLoad 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
+.annotationBoxInpage {
+    width: 100%;
+    animation: annotationLoad 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
 .commentIcon {
     background-image: url('/img/comment.svg');
     width: 10px;

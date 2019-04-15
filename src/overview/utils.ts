@@ -11,6 +11,7 @@ import { Annotation } from 'src/sidebar-overlay/sidebar/types'
  */
 export const goToAnnotation = (pageUrl: string) => async (
     annotation: Annotation,
+    env: 'inpage' | 'overview',
 ) => {
     if (!annotation.body) {
         return
@@ -18,20 +19,27 @@ export const goToAnnotation = (pageUrl: string) => async (
 
     pageUrl = pageUrl.startsWith('http') ? pageUrl : `https://${pageUrl}`
 
-    const tab = await browser.tabs.create({
-        active: true,
-        url: pageUrl,
-    })
+    if (env === 'overview') {
+        const tab = await browser.tabs.create({
+            active: true,
+            url: pageUrl,
+        })
 
-    const listener = async (tabId, changeInfo) => {
-        if (tabId === tab.id && changeInfo.status === 'complete') {
-            // Necessary to insert the ribbon/sidebar in case the user has turned
-            // it off.
-            await remoteFunction('insertRibbon', { tabId })()
-            await remoteFunction('goToAnnotation', { tabId })(annotation)
-            browser.tabs.onUpdated.removeListener(listener)
+        const listener = async (tabId, changeInfo) => {
+            if (tabId === tab.id && changeInfo.status === 'complete') {
+                // Necessary to insert the ribbon/sidebar in case the user has turned
+                // it off.
+                await remoteFunction('insertRibbon', { tabId })()
+                await remoteFunction('goToAnnotation', { tabId })(annotation)
+                browser.tabs.onUpdated.removeListener(listener)
+            }
         }
-    }
 
-    browser.tabs.onUpdated.addListener(listener)
+        browser.tabs.onUpdated.addListener(listener)
+    } else {
+        await remoteFunction('goToAnnotationFromSidebar')({
+            url: pageUrl,
+            annotation,
+        })
+    }
 }
