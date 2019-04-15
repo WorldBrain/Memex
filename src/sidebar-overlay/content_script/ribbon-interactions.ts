@@ -33,13 +33,15 @@ let manualOverride = false
 export const insertRibbon = async ({
     annotationsManager,
     toolbarNotifications,
+    forceExpandRibbon = false,
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
+    forceExpandRibbon?: boolean
 }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
-        await updateRibbon()
+        await updateRibbon(forceExpandRibbon)
         return
     }
 
@@ -69,6 +71,7 @@ export const insertRibbon = async ({
         setRibbonSidebarRef: ref => {
             ribbonSidebarRef = ref
         },
+        forceExpandRibbon,
     })
 }
 
@@ -134,7 +137,7 @@ const _insertOrRemoveRibbon = async ({
  * Fetches whether the sidebar and tooltip are enabled.
  * Tells the ribbon to update its state with those values.
  */
-const updateRibbon = async () => {
+const updateRibbon = async (openRibbon?: boolean) => {
     if (!target) {
         return
     }
@@ -144,9 +147,11 @@ const updateRibbon = async () => {
     const isTooltipEnabled = await getTooltipState()
 
     if (ribbonSidebarRef && ribbonSidebarRef.getWrappedInstance()) {
-        ribbonSidebarRef
-            .getWrappedInstance()
-            .updateRibbonState({ isRibbonEnabled, isTooltipEnabled })
+        ribbonSidebarRef.getWrappedInstance().updateRibbonState({
+            isRibbonEnabled,
+            isTooltipEnabled,
+            openRibbon,
+        })
     }
 }
 
@@ -164,9 +169,20 @@ export const setupRPC = ({
         /**
          * Used for inserting the ribbon.
          */
-        insertRibbon: ({ override } = { override: false }) => {
+        insertRibbon: (
+            {
+                override,
+                forceExpandRibbon,
+            }: { override: boolean; forceExpandRibbon?: boolean } = {
+                override: false,
+            },
+        ) => {
             manualOverride = !!override
-            insertRibbon({ annotationsManager, toolbarNotifications })
+            insertRibbon({
+                annotationsManager,
+                toolbarNotifications,
+                forceExpandRibbon,
+            })
         },
         /**
          * Used for removing the ribbon.

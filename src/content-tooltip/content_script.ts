@@ -109,7 +109,10 @@ const handleKeyboardShortcuts = ({
                     break
                 case createBookmark.shortcut:
                     createBookmark.enabled &&
-                        toggleSidebarOverlay({ override: true })
+                        toggleSidebarOverlay({
+                            override: true,
+                            openToBookmark: true,
+                        })
                     break
                 default:
             }

@@ -46,6 +46,8 @@ export type MapDispatchToProps<DispatchProps, OwnProps> = (
 export interface OpenSidebarArgs {
     activeUrl?: string
     openToTags?: boolean
+    openSidebar?: boolean
     openToComment?: boolean
+    openToBookmark?: boolean
     openToCollections?: boolean
 }

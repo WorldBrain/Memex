@@ -19,11 +19,13 @@ export const setupRibbonAndSidebarUI = (
         handleRemoveRibbon,
         insertOrRemoveTooltip,
         setRibbonSidebarRef,
+        forceExpandRibbon = false,
     }: {
         annotationsManager: AnnotationsManager
         handleRemoveRibbon: () => void
         insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
         setRibbonSidebarRef: any
+        forceExpandRibbon?: boolean
     },
 ) => {
     ReactDOM.render(
@@ -38,6 +40,7 @@ export const setupRibbonAndSidebarUI = (
             makeHighlightMedium={makeHighlightMedium}
             removeMediumHighlights={removeMediumHighlights}
             sortAnnotationsByPosition={sortAnnotationsByPosition}
+            forceExpand={forceExpandRibbon}
         />,
         target,
     )
