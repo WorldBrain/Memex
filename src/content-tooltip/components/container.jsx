@@ -46,72 +46,83 @@ class TooltipContainer extends React.Component {
     async componentDidMount() {
         this.props.onInit(this.showTooltip)
 
-        const shortcutsState = await getKeyboardShortcutsState()
         const {
             shortcutsEnabled,
-            highlightShortcut,
-            linkShortcut,
-            toggleSidebarShortcut,
-            toggleHighlightsShortcut,
-            createAnnotationShortcut,
-        } = shortcutsState
+            ...shortcuts
+        } = await getKeyboardShortcutsState()
 
         if (shortcutsEnabled) {
             Mousetrap.bind(
-                [
-                    highlightShortcut,
-                    linkShortcut,
-                    toggleHighlightsShortcut,
-                    createAnnotationShortcut,
-                    toggleSidebarShortcut,
-                ],
-                this.initHandleKeyboardShortcuts(shortcutsState),
+                Object.values(shortcuts).map(val => val.shortcut),
+                this.initHandleKeyboardShortcuts(shortcuts),
             )
         }
     }
 
-    initHandleKeyboardShortcuts = settingsState => async e => {
-        const {
-            highlightShortcut,
-            linkShortcut,
-            toggleSidebarShortcut,
-            toggleHighlightsShortcut,
-            createAnnotationShortcut,
-            highlightShortcutEnabled,
-            linkShortcutEnabled,
-            toggleSidebarShortcutEnabled,
-            toggleHighlightsShortcutEnabled,
-            createAnnotationShortcutEnabled,
-        } = settingsState
+    initHandleKeyboardShortcuts = ({
+        addComment,
+        addTag,
+        addToCollection,
+        createAnnotation,
+        createBookmark,
+        highlight,
+        link,
+        toggleHighlights,
+        toggleSidebar,
+    }) => async e => {
         if (!userSelectedText()) {
             switch (convertKeyboardEventToKeyString(e)) {
-                case toggleSidebarShortcut:
-                    toggleSidebarShortcutEnabled &&
+                case toggleSidebar.shortcut:
+                    toggleSidebar.enabled &&
                         toggleSidebarOverlay({
                             override: true,
                         })
                     break
-                case toggleHighlightsShortcut:
-                    toggleHighlightsShortcutEnabled && this.toggleHighlights()
+                case toggleHighlights.shortcut:
+                    toggleHighlights.enabled && this.toggleHighlightsAct()
                     break
+                case addTag.shortcut:
+                    addTag.enabled &&
+                        toggleSidebarOverlay({
+                            override: true,
+                            openToTags: true,
+                        })
+                    break
+                case addToCollection.shortcut:
+                    addToCollection.enabled &&
+                        toggleSidebarOverlay({
+                            override: true,
+                            openToCollections: true,
+                        })
+                    break
+                case addComment.shortcut:
+                    addComment.enabled &&
+                        toggleSidebarOverlay({
+                            override: true,
+                            openToComment: true,
+                        })
+                    break
+                case createBookmark.shortcut:
+                    createBookmark.enabled &&
+                        toggleSidebarOverlay({ override: true })
+                    break
+                default:
             }
         } else {
             switch (convertKeyboardEventToKeyString(e)) {
-                case linkShortcut:
-                    linkShortcutEnabled && (await this.createLink())
+                case link.shortcut:
+                    link.enabled && (await this.createLink())
                     break
-                case highlightShortcut:
-                    if (highlightShortcutEnabled) {
-                        this.props.createHighlight()
-                        this.setState({
-                            highlightsOn: true,
-                        })
+                case highlight.shortcut:
+                    if (highlight.enabled) {
+                        await this.props.createHighlight()
+                        this.toggleHighlightsAct()
                     }
                     break
-                case createAnnotationShortcut:
-                    createAnnotationShortcutEnabled &&
-                        (await this.createAnnotation(e))
+                case createAnnotation.shortcut:
+                    createAnnotation.enabled && (await this.createAnnotation(e))
                     break
+                default:
             }
         }
     }
@@ -126,7 +137,7 @@ class TooltipContainer extends React.Component {
         highlightAnnotations(highlightables, toggleSidebarOverlay)
     }
 
-    toggleHighlights = () => {
+    toggleHighlightsAct = () => {
         this.state.highlightsOn
             ? removeHighlights()
             : this.fetchAndHighlightAnnotations()
