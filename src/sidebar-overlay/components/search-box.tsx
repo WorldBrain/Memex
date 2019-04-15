@@ -10,12 +10,13 @@ export interface Props {
     onSearchEnter?: (e: SyntheticEvent<HTMLInputElement>) => void
     onSearchChange?: (e: SyntheticEvent<HTMLInputElement>) => void
     onClearBtn?: ClickHandler<HTMLElement>
+    placeholder: string
 }
 
 class SearchBox extends PureComponent<Props> {
     render() {
         return (
-            <form className={styles.formContainer}>
+            <div className={styles.formContainer}>
                 <button className={styles.button}>
                     <span className={styles.searchIcon} />
                 </button>
@@ -23,7 +24,7 @@ class SearchBox extends PureComponent<Props> {
                     autoFocus
                     className={styles.inputBox}
                     name="query"
-                    placeholder="Search Memex (confirm with ENTER)"
+                    placeholder={this.props.placeholder}
                     autoComplete="off"
                     onKeyDown={this.props.onSearchEnter}
                     onChange={this.props.onSearchChange}
@@ -35,7 +36,7 @@ class SearchBox extends PureComponent<Props> {
                         title={'Clear search'}
                     />
                 )}
-            </form>
+            </div>
         )
     }
 }

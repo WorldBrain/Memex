@@ -12,6 +12,7 @@ import niceTime from '../../util/nice-time'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
+import { actions as filterActs } from 'src/search-filters'
 
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')
@@ -268,16 +269,11 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     }
 }
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
-    dispatch,
-    props,
-) => ({
-    handleTagClick: tag => {
-        if (props.env === 'overview') {
-            const { toggleTagFilter } = require('src/search-filters/actions')
-            dispatch(toggleTagFilter(tag))
-        }
-    },
+const mapDispatchToProps: MapDispatchToProps<
+    DispatchProps,
+    OwnProps
+> = dispatch => ({
+    handleTagClick: tag => dispatch(filterActs.toggleTagFilter(tag)),
 })
 
 export default connect(
