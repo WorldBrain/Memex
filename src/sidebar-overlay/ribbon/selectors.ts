@@ -20,3 +20,21 @@ export const isTooltipEnabled = createSelector(
     ribbon,
     state => state.isTooltipEnabled,
 )
+
+export const showCommentBox = createSelector(
+    ribbon,
+    state => state.showCommentBox,
+)
+export const showSearchBox = createSelector(
+    ribbon,
+    state => state.showSearchBox,
+)
+export const showTagsPicker = createSelector(
+    ribbon,
+    state => state.showTagsPicker,
+)
+export const showCollectionsPicker = createSelector(
+    ribbon,
+    state => state.showCollectionsPicker,
+)
+export const searchValue = createSelector(ribbon, state => state.searchValue)

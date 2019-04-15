@@ -330,7 +330,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
                         closeSidebar={closeSidebar}
                         isCommentSaved={isCommentSaved}
                         commentText={commentText}
-                        setShowCommentBox={setShowCommentBox}
+                        setShowSidebarCommentBox={setShowCommentBox}
                     />
                 )}
 
