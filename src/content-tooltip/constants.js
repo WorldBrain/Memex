@@ -13,7 +13,7 @@ export const KEYBOARDSHORTCUTS_STORAGE_NAME = 'memex-keyboardshortcuts'
 
 export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
     shortcutsEnabled: true,
-    highlightShortcut: 'h',
+    highlightShortcut: 'n',
     linkShortcut: 'l',
     toggleSidebarShortcut: 'r',
     toggleHighlightsShortcut: 'h',

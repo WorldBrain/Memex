@@ -105,7 +105,10 @@ const shortcutStateToStorage = ({
 }: KeyboardShortcuts) => {
     const defaults = constants.KEYBOARDSHORTCUTS_DEFAULT_STATE
     const storage = {
-        shortcutsEnabled: shortcutsEnabled || defaults.shortcutsEnabled,
+        shortcutsEnabled:
+            shortcutsEnabled != null
+                ? shortcutsEnabled
+                : defaults.shortcutsEnabled,
     }
 
     for (const [key, { enabled, shortcut }] of Object.entries<Shortcut>(
