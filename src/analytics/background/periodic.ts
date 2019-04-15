@@ -65,12 +65,14 @@ const attemptPeriodicPing = async (
     // If last ping was before the last milestone, try to track event for this period
     if (moment(lastActivityPing).isBefore(lastMilestone)) {
         // Only send the event if last search done within current period (active user)
-        if (moment(lastActive).isAfter(lastMilestone)) {
-            analytics.trackEvent({
-                category: 'Periodic',
-                action: `${action} activity ping`,
-            })
-        }
+
+        // Commented out for now, since we're deriving this on the back-end
+        // if (moment(lastActive).isAfter(lastMilestone)) {
+        //     analytics.trackEvent({
+        //         category: 'Periodic',
+        //         action: `${action} activity ping`,
+        //     })
+        // }
 
         // Update last ping time to stop further attempts in current period, regardless if active event was sent
         await window['browser'].storage.local.set({ [activityKey]: Date.now() })
