@@ -11,6 +11,7 @@ import * as actions from '../actions'
 import * as selectors from '../selectors'
 import * as tooltipsActs from '../../tooltips/actions'
 import * as resultSelectors from '../../results/selectors'
+import analytics from 'src/analytics'
 
 export interface StateProps {
     showOnboardingBox: boolean
@@ -33,12 +34,19 @@ export interface DispatchProps {
 export type Props = StateProps & DispatchProps
 
 class OnboardingChecklist extends React.Component<Props> {
-    processEvent = remoteFunction('processEvent')
+    trackEventInternally = remoteFunction('processEvent')
     openOptionsTab = remoteFunction('openOptionsTab')
 
     async componentDidMount() {
         await this.props.fetchShowOnboarding()
         await this.props.fetchOnboardingStages()
+    }
+
+    private trackEvent(event: { type: string }) {
+        this.trackEventInternally({
+            type: event.type,
+        })
+        analytics.trackEvent({ category: 'OnboardingTut', action: event.type })
     }
 
     private handleAnnotationStage = async () => {
@@ -49,7 +57,7 @@ class OnboardingChecklist extends React.Component<Props> {
         await utils.setOnboardingStage(FLOWS.annotation, STAGES.redirected)
         await utils.openDemoPage()
 
-        this.processEvent({
+        this.trackEvent({
             type: EVENT_NAMES.START_ANNOTATION_ONBOARDING,
         })
     }
@@ -61,7 +69,7 @@ class OnboardingChecklist extends React.Component<Props> {
         await utils.setOnboardingStage(FLOWS.powerSearch, STAGES.redirected)
         await utils.openDemoPage()
 
-        this.processEvent({
+        this.trackEvent({
             type: EVENT_NAMES.START_POWERSEARCH_ONBOARDING,
         })
     }
@@ -74,7 +82,7 @@ class OnboardingChecklist extends React.Component<Props> {
         await utils.setOnboardingStage(FLOWS.tagging, STAGES.redirected)
         await utils.openDemoPage()
 
-        this.processEvent({
+        this.trackEvent({
             type: EVENT_NAMES.START_TAGGING_ONBOARDING,
         })
     }
@@ -87,7 +95,7 @@ class OnboardingChecklist extends React.Component<Props> {
         this.openOptionsTab('backup')
         await this.props.setBackupStageDone()
 
-        this.processEvent({
+        this.trackEvent({
             type: EVENT_NAMES.FINISH_BACKUP_ONBOARDING,
         })
     }
