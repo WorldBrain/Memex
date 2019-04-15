@@ -3,9 +3,11 @@ import OnClickOutside from 'react-onclickoutside'
 import moment from 'moment'
 import { ButtonTooltip } from 'src/common-ui/components/'
 
-const styles = require('./filter-button.css')
+const dashboardStyles = require('./filter-button.css')
+const sidebarStyles = require('./filter-button-sidebar.css')
 
 interface Props {
+    env: 'overview' | 'inpage'
     chidren?: React.ReactNode
     source: string
     filteredItems: object[]
@@ -29,6 +31,13 @@ class FilterButton extends PureComponent<Props, State> {
         showDatesClearBtn: false,
     }
 
+    get styles() {
+        if (this.props.env === 'overview') {
+            return dashboardStyles
+        }
+        return sidebarStyles
+    }
+
     private handleClickOutside = (e: Event) => {
         e.stopPropagation()
         this.props.hidePopup()
@@ -46,11 +55,11 @@ class FilterButton extends PureComponent<Props, State> {
         if (this.props.source === 'Types' && this.state.typesCount) {
             return (
                 <React.Fragment>
-                    <span className={styles.tagCount}>
+                    <span className={this.styles.tagCount}>
                         {this.state.typesCount + '/ 2'}
                     </span>
                     <span
-                        className={styles.clearFilters}
+                        className={this.styles.clearFilters}
                         onClick={this.handleClearFilters}
                     />
                 </React.Fragment>
@@ -61,13 +70,13 @@ class FilterButton extends PureComponent<Props, State> {
         ) {
             return (
                 <React.Fragment>
-                    <span className={styles.detailsFilter}>
+                    <span className={this.styles.detailsFilter}>
                         {moment(this.props.startDate).format('MMM DD, YYYY') +
                             ' - ' +
                             moment(this.props.endDate).format('MMM DD, YYYY')}
                     </span>
                     <span
-                        className={styles.clearFilters}
+                        className={this.styles.clearFilters}
                         onClick={this.handleClearFilters}
                     />
                 </React.Fragment>
@@ -77,7 +86,7 @@ class FilterButton extends PureComponent<Props, State> {
                 <React.Fragment>
                     {this.props.filteredItems.length > 0 && (
                         <React.Fragment>
-                            <span className={styles.detailsFilter}>
+                            <span className={this.styles.detailsFilter}>
                                 {this.props.filteredItems.length}
                             </span>
                             <ButtonTooltip
@@ -85,7 +94,7 @@ class FilterButton extends PureComponent<Props, State> {
                                 position="bottom"
                             >
                                 <span
-                                    className={styles.clearFilters}
+                                    className={this.styles.clearFilters}
                                     onClick={this.handleClearFilters}
                                 />
                             </ButtonTooltip>
@@ -104,8 +113,8 @@ class FilterButton extends PureComponent<Props, State> {
                         this.props.filteredItems.length ||
                         this.props.startDate ||
                         this.props.endDate
-                            ? styles.tagButtonSelected
-                            : styles.tagButton
+                            ? this.styles.tagButtonSelected
+                            : this.styles.tagButton
                     }
                     onClick={this.props.togglePopup}
                 >
@@ -118,4 +127,4 @@ class FilterButton extends PureComponent<Props, State> {
     }
 }
 
-export default FilterButton
+export default OnClickOutside(FilterButton)

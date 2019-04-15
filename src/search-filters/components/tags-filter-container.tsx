@@ -49,11 +49,13 @@ class TagsFilter extends PureComponent<Props, State> {
     render() {
         return (
             <FilterButton
+                env={this.props.env}
                 source="Tags"
                 filteredItems={this.props.displayTags}
                 togglePopup={this.togglePopup}
                 hidePopup={this.props.hideTagFilter}
                 clearFilters={this.props.clearTagFilters}
+                disableOnClickOutside={this.props.env === 'inpage'}
             >
                 {this.props.tagFilterDropdown && (
                     <Tooltip

@@ -73,12 +73,14 @@ class DomainsPopup extends PureComponent<Props, State> {
     render() {
         return (
             <FilterButton
+                env={this.props.env}
                 source="Domains"
                 filteredItems={this.props.displayDomains}
                 togglePopup={this.togglePopup}
                 hidePopup={this.props.hideDomainFilter}
                 clearFilters={this.props.clearDomainFilters}
                 onFilterDel={this.toggleDomainFilter}
+                disableOnClickOutside={this.props.env === 'inpage'}
             >
                 {this.props.domainFilterDropdown && (
                     <Tooltip

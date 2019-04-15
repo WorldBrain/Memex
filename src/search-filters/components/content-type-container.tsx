@@ -100,12 +100,14 @@ class ContentTypeContainer extends PureComponent<Props, State> {
 
         return (
             <FilterButton
+                env={this.props.env}
                 source="Types"
                 filteredItems={[]}
                 togglePopup={this.props.toggleFilterTypes}
                 hidePopup={this.props.hideFilterTypes}
                 clearFilters={this.props.clearFilterTypes}
                 displayFilters={this.renderDisplayFilters}
+                disableOnClickOutside={this.props.env === 'inpage'}
             >
                 {/* The Content Type checklist */}
                 {this.props.showFilteredTypes && (

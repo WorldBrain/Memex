@@ -61,6 +61,7 @@ class DatesFilter extends PureComponent<Props, State> {
     render() {
         return (
             <FilterButton
+                env={this.props.env}
                 source="Dates"
                 filteredItems={[]}
                 togglePopup={this.togglePopup}
@@ -68,6 +69,7 @@ class DatesFilter extends PureComponent<Props, State> {
                 clearFilters={this.clearFilters}
                 startDate={this.props.startDate}
                 endDate={this.props.endDate}
+                disableOnClickOutside={this.props.env === 'inpage'}
             >
                 {this.props.datesFilterDropdown && (
                     <Tooltip
