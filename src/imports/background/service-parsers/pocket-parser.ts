@@ -1,6 +1,7 @@
 import { Item, ServiceParser } from '../types'
 
 const POCKET_PRE = 'Pocket-'
+const readingTimePattern = /^[0-9]+\s+\bmin\b/
 
 const parsePocket: ServiceParser = doc => {
     const collections = []
@@ -28,12 +29,14 @@ const parsePocket: ServiceParser = doc => {
             const item: Item = {
                 url: link.getAttribute('href'),
                 title: link.textContent || link.getAttribute('href'),
-                tags: tags.map(tag =>
-                    tag
-                        .trim()
-                        .replace(/\s\s+/g, ' ')
-                        .toLowerCase(),
-                ),
+                tags: tags
+                    .map(tag =>
+                        tag
+                            .trim()
+                            .replace(/\s\s+/g, ' ')
+                            .toLowerCase(),
+                    )
+                    .filter(tag => !tag.match(readingTimePattern)),
                 collections: collections[index]
                     ? [POCKET_PRE + collections[index]]
                     : [],
