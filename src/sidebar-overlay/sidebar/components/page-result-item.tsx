@@ -53,7 +53,11 @@ class PageResultItem extends PureComponent<Props> {
         const { url, setUrlDragged } = this.props
 
         setUrlDragged(url)
-        const crt = document.getElementById('dragged-element')
+
+        const crt = document
+            .querySelector('.memex-ribbon-sidebar-container')
+            .shadowRoot.querySelector('#dragged-element') as HTMLElement
+
         crt.style.display = 'block'
 
         e.dataTransfer.setData('text/plain', url)

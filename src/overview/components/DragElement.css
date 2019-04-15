@@ -15,4 +15,5 @@
     padding: 5px 10px;
     position: absolute;
     margin-left: 25px;
+    z-index: 2147483646;
 }

@@ -51,7 +51,7 @@ export function createShadowRootIfSupported(
 
     let shadow = null
     if (container.attachShadow) {
-        shadow = container.attachShadow({ mode: 'closed' })
+        shadow = container.attachShadow({ mode: 'open' })
         shadow.appendChild(rootElement)
         injectCSS(cssFile, shadow)
     } else {
