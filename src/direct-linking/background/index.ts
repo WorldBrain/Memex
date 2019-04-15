@@ -124,6 +124,7 @@ export default class DirectLinkingBackground {
             override,
             forceExpandRibbon,
             openToCollections,
+            openToBookmark,
             openToComment,
             openToTags,
         })

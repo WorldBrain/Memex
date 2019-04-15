@@ -34,7 +34,7 @@ export const shortcuts: ShortcutElData[] = [
     {
         id: 'create-bm-shortcut',
         name: 'createBookmark',
-        children: 'Bookmark current page',
+        children: 'Star current page',
     },
     {
         id: 'add-tag-shortcut',
