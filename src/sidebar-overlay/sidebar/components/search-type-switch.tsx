@@ -95,7 +95,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                         Pages
                     </button>
                     <button
-                        className={cx(styles.searchSwitchBtn, styles.btn)}
+                        className={cx(styles.searchSwitchBtn, styles.btn, styles.notesBtn)}
                         onClick={this.handleNotesBtnClick}
                         disabled={!this.isPageSearch}
                     >
@@ -104,29 +104,33 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                 </div>
                 {!this.isPageSearch && (
                     <div className={styles.pageSwitch}>
-                        <button
-                            className={cx(styles.searchSwitchBtn, styles.btn)}
-                            onClick={this.props.handlePageTypeClick}
-                            disabled={!this.isCurrentPageSearch}
-                        >
-                            This page
-                        </button>
-                        <button
-                            className={cx(styles.searchSwitchBtn, styles.btn)}
-                            onClick={this.handleAllBtnClick}
-                            disabled={this.isCurrentPageSearch}
-                        >
-                            All
-                        </button>
-                        {this.isCurrentPageSearch && (
+                        <span>
                             <button
-                                className={cx(styles.unfoldAllBtn, styles.btn)}
-                                onClick={this.props.handleUnfoldAllClick}
-                                disabled={this.isPageSearch}
+                                className={cx(styles.searchSwitchBtn, styles.btn)}
+                                onClick={this.props.handlePageTypeClick}
+                                disabled={!this.isCurrentPageSearch}
                             >
-                                {this.unfoldBtnText}
+                                This page
                             </button>
-                        )}
+                            <button
+                                className={cx(styles.searchSwitchBtn, styles.btn)}
+                                onClick={this.handleAllBtnClick}
+                                disabled={this.isCurrentPageSearch}
+                            >
+                                All
+                            </button>
+                        </span>
+                        <span>
+                            {this.isCurrentPageSearch && (
+                                <button
+                                    className={cx(styles.unfoldAllBtn, styles.btn)}
+                                    onClick={this.props.handleUnfoldAllClick}
+                                    disabled={this.isPageSearch}
+                                >
+                                    {this.unfoldBtnText}
+                                </button>
+                            )}
+                        </span>
                     </div>
                 )}
             </React.Fragment>

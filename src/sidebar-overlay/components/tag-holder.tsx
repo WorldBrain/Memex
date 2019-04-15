@@ -20,7 +20,7 @@ interface State {
  */
 class TagHolder extends React.Component<Props, State> {
     state = {
-        maxTagsAllowed: 0,
+        maxTagsAllowed: 100,
     }
 
     componentDidMount() {

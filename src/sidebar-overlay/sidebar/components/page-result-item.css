@@ -33,7 +33,7 @@
     z-index: 0;
     margin-bottom: 18px;
     width: 100%;
-    height: var(--height);
+    min-height: var(--height);
 
     &:hover .crossRibbon {
         display: block;
@@ -63,8 +63,9 @@
     box-sizing: content-box;
     justify-content: space-between;
     overflow: hidden;
+    padding: 6px 10px;
     width: 100%;
-    height: 100%;
+    height: auto;
     text-decoration: none;
     flex-direction: row;
 }
@@ -146,11 +147,16 @@
     }
 }
 
+.tagContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
 .infoContainer {
     display: flex;
     flex-direction: column;
-    max-width: calc(100% - var(--imgWidth));
-    padding: 6px 14px;
+    max-width: 100%;
     justify-content: space-between;
     width: 100%;
 }
@@ -200,7 +206,6 @@
     align-items: center;
     max-width: 100%;
     margin-bottom: 8px;
-    margin-top: -30px;
 }
 
 .url a {
@@ -229,7 +234,6 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-top: -27px;
     height: 30px;
 }
 
@@ -296,12 +300,12 @@
     background-image: url('/img/tag.svg');
     background-size: 17px;
     margin-left: 1px;
+    margin-top: 2px;
 }
 
 .tagList {
     display: flex;
     flex-grow: 2;
-    margin-left: 10px;
 }
 
 .isDeleting {

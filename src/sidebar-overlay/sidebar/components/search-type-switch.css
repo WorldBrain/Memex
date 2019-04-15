@@ -3,10 +3,8 @@
 
 .container {
     display: flex;
-    align-self: center;
-    justify-content: space-between;
-    float: right;
-    margin-top: -10px;
+    align-self: flex-start;
+    margin-top: 5px;
 }
 
 .unfoldAllBtn {
@@ -34,10 +32,28 @@
     }
 }
 
+.notesBtn:disabled {
+    
+    &::after {
+        width: 10px;
+        height: 10px;
+        background-color: black;
+        display: flex;
+        position: absolute;
+        top: 1px;
+    }
+}
+
 .pages {
     margin-right: 10px;
 }
 
 .pageSwitch {
-    margin-top: 15px;
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+
+    & * {
+        font-size: 11px;
+    }
 }

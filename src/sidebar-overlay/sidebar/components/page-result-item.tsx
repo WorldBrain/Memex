@@ -133,15 +133,16 @@ class PageResultItem extends PureComponent<Props> {
                                 </ButtonTooltip>
                             </div>
                             <div className={styles.url}>{this.props.url}</div>
-
+                             <div className={styles.tagContainer}>
+                                    {/* Tag Holder */}
+                                    {this.props.tagHolder}
+                            </div>
                             <div className={styles.detailsContainer}>
                                 <div className={styles.detailsBox}>
                                     <div className={styles.displayTime}>
                                         {' '}
                                         {niceTime(this.props.displayTime)}{' '}
                                     </div>
-                                    {/* Tag Holder */}
-                                    {this.props.tagHolder}
                                 </div>
                                 <div
                                     className={styles.buttonsContainer}
