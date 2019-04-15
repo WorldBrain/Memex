@@ -3,6 +3,7 @@ import { createReducer } from 'redux-act'
 import * as acts from './actions'
 import { SearchResult, Result } from '../types'
 import { PageUrlsByDay } from 'src/search/background/types'
+import analytics from 'src/analytics'
 
 export interface State {
     /** Holds the current search results used to render to the UI. */
@@ -96,6 +97,8 @@ reducer.on(acts.addTag, (state, { tag, index }) => {
 })
 
 reducer.on(acts.delTag, (state, { tag, index }) => {
+    analytics.trackEvent({ category: 'Tag', action: 'fromResults' })
+
     const doc = state.results[index]
     const removalIndex = doc.tags.findIndex(val => val === tag)
 

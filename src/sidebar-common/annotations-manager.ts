@@ -3,6 +3,7 @@ import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { Omit } from './types'
 import { Annotation } from './sidebar/types'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
+import analytics from 'src/analytics'
 
 export default class AnnotationsManager {
     private readonly _processEventRPC = remoteFunction('processEvent')
@@ -42,6 +43,18 @@ export default class AnnotationsManager {
         bookmarked?: boolean
     }) => {
         this._processEventRPC({ type: EVENT_NAMES.CREATE_ANNOTATION })
+
+        if (tags && tags.length) {
+            analytics.trackEvent({
+                category: 'Annotations',
+                action: 'createWithTags',
+            })
+        } else {
+            analytics.trackEvent({
+                category: 'Annotations',
+                action: 'createWithoutTags',
+            })
+        }
 
         // Write annotation to database.
         const uniqueUrl = await this._createAnnotationRPC({
@@ -115,6 +128,13 @@ export default class AnnotationsManager {
             tagsToBeDeleted,
             url,
         })
+
+        if (tagsToBeAdded) {
+            analytics.trackEvent({
+                category: 'Tag',
+                action: 'addToExistingAnnotation',
+            })
+        }
     }
 
     public deleteAnnotation = async (url: string) => {
