@@ -2,10 +2,16 @@ import * as React from 'react'
 import cx from 'classnames'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
 import CloseButton from './close-button'
+import SearchBox from './search-box'
 
 const styles = require('./topbar.css')
 
 interface Props {
+    searchValue: string
+    handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    handleSearchKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+    handleClearBtn: (e: React.MouseEvent<HTMLButtonElement>) => void
+    handleFilterBtnClick: () => void
     disableAddCommentBtn: boolean
     handleCloseBtnClick: () => void
     handleSettingsBtnClick: () => void
@@ -18,6 +24,7 @@ const Topbar = ({
     handleCloseBtnClick,
     handleSettingsBtnClick,
     handleAddCommentBtnClick,
+    ...props
 }: Props) => (
     <div className={styles.topbar}>
         {/* Button to close sidebar. */}
@@ -31,7 +38,14 @@ const Topbar = ({
                 }}
             />
         </ButtonTooltip>
-
+        <SearchBox
+            placeholder={'Search Memex (confirm with ENTER)'}
+            searchValue={props.searchValue}
+            onSearchChange={props.handleChange}
+            onSearchEnter={props.handleSearchKeyDown}
+            onClearBtn={props.handleClearBtn}
+        />
+        <button onClick={props.handleFilterBtnClick}>Filters</button>
         <div className={styles.right}>
             {/* Button to add a comment. */}
             <ButtonTooltip

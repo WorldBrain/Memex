@@ -8,7 +8,6 @@ import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
 import { Annotation } from '../types'
 import { openSettings } from '../../utils'
-import SearchBox from '../../components/search-box'
 import FiltersSidebar from './filters-sidebar-container'
 import ResultsContainer from './results-container'
 import DragElement from 'src/overview/components/DragElement'
@@ -92,7 +91,7 @@ class Sidebar extends React.Component<Props, State> {
         this.props.onQueryChange(this.state.searchValue)
     }
 
-    private handleClearBtn = (e: React.ChangeEvent<HTMLInputElement>) => {
+    private handleClearBtn = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         e.stopPropagation()
         this.setState({ searchValue: '' })
@@ -189,26 +188,13 @@ class Sidebar extends React.Component<Props, State> {
                         handleCloseBtnClick={this.handleCloseBtnClick}
                         handleSettingsBtnClick={this._handleSettingsBtnClick}
                         handleAddCommentBtnClick={handleAddCommentBtnClick}
+                        searchValue={this.state.searchValue}
+                        handleChange={this.handleChange}
+                        handleSearchKeyDown={this.handleSearchKeyDown}
+                        handleClearBtn={this.handleClearBtn}
+                        handleFilterBtnClick={this.toggleShowFilters}
                     />
                     <div className={styles.sidebar}>
-                        <SearchBox
-                            placeholder={'Search Memex (confirm with ENTER)'}
-                            searchValue={this.state.searchValue}
-                            onSearchChange={this.handleChange}
-                            onSearchEnter={this.handleSearchKeyDown}
-                            onClearBtn={this.handleClearBtn}
-                        />
-                        <div className={styles.navBar}>
-                            <a
-                                className={cx(
-                                    styles.filterNav,
-                                    styles.navLinks,
-                                )}
-                                onClick={this.toggleShowFilters}
-                            >
-                                Filters
-                            </a>
-                        </div>
                         <SearchTypeSwitch />
 
                         {showCommentBox && (
