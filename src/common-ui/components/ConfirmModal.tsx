@@ -9,8 +9,8 @@ const styles = require('./ConfirmModal.css')
 export interface Props {
     isShown: boolean
     message: string
-    isLoading: boolean
-    children: ReactChild | ReactChild[]
+    isLoading?: boolean
+    children?: ReactChild | ReactChild[]
     onClose: () => void
 }
 

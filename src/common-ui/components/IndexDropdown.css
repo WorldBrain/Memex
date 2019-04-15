@@ -181,6 +181,16 @@
     width: 100%;
 }
 
+.tagDivForSidebarResults {
+    composes: toolTips from '../../common-ui/elements.css';
+    margin-top: -10px;
+    position: absolute;
+    width: 300px;
+    z-index: 1;
+    background-color: #fff;
+    border-radius: 3px;
+}
+
 .tagDivForFilter {
     width: 300px;
     z-index: 1;

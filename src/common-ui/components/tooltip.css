@@ -96,6 +96,11 @@
     } */
 }
 
+.inPageTooltip {
+    right: 190px;
+    top: -25px;
+}
+
 .searchBar .tooltipBubble {
     border-radius: 3px;
 }
