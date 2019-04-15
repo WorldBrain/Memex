@@ -95,14 +95,17 @@ export default class DirectLinkingBackground {
             openToComment,
             openToBookmark,
             openToCollections,
-        }: OpenSidebarArgs & { anchor?: any; override?: boolean } = {
+        }: OpenSidebarArgs & {
+            anchor?: any
+            override?: boolean
+            openToTags?: boolean
+            openToComment?: boolean
+            openToBookmark?: boolean
+            openToCollections?: boolean
+        } = {
             anchor: null,
             override: false,
             activeUrl: undefined,
-            openToTags: false,
-            openToComment: false,
-            openToBookmark: false,
-            openToCollections: false,
         },
     ) {
         const [currentTab] = await browser.tabs.query({
@@ -120,15 +123,15 @@ export default class DirectLinkingBackground {
         await remoteFunction('insertRibbon', { tabId })({
             override,
             forceExpandRibbon,
+            openToCollections,
+            openToComment,
+            openToTags,
         })
 
         if (!forceExpandRibbon) {
             await remoteFunction('openSidebar', { tabId })({
                 anchor,
                 activeUrl,
-                openToCollections,
-                openToComment,
-                openToTags,
             })
         }
     }

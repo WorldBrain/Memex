@@ -68,9 +68,6 @@ export const openSidebar: (
     title,
     activeUrl,
     forceFetch,
-    openToCollections,
-    openToComment,
-    openToTags,
 }: OpenSidebarArgs & {
     url?: string
     title?: string
@@ -78,16 +75,6 @@ export const openSidebar: (
 } = {}) => async (dispatch, getState) => {
     dispatch(setPage({ url, title }))
     dispatch(setSidebarOpen(true))
-
-    if (openToCollections) {
-        console.log('triggered "open to collections"')
-    }
-    if (openToComment) {
-        console.log('triggered "open to comment"')
-    }
-    if (openToTags) {
-        console.log('triggered "open to tags"')
-    }
 
     const annots = selectors.annotations(getState())
     if (forceFetch || !annots.length) {
