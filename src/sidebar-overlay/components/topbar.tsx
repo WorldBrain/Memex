@@ -27,25 +27,19 @@ const Topbar = ({
     ...props
 }: Props) => (
     <div className={styles.topbar}>
-        {/* Button to close sidebar. */}
-
-        <ButtonTooltip tooltipText="Close (ESC)" position="rightCentered">
-            <CloseButton
-                title="Close sidebar once. Disable via Memex icon in the extension toolbar."
-                clickHandler={e => {
-                    e.stopPropagation()
-                    handleCloseBtnClick()
-                }}
-            />
-        </ButtonTooltip>
         <SearchBox
-            placeholder={'Search Memex (confirm with ENTER)'}
+            placeholder={'Search Memex'}
             searchValue={props.searchValue}
             onSearchChange={props.handleChange}
             onSearchEnter={props.handleSearchKeyDown}
             onClearBtn={props.handleClearBtn}
         />
-        <button onClick={props.handleFilterBtnClick}>Filters</button>
+        <button 
+            onClick={props.handleFilterBtnClick}
+            className={styles.filterButton}
+        >
+            Filters
+        </button>
         <div className={styles.right}>
             {/* Button to add a comment. */}
             <ButtonTooltip

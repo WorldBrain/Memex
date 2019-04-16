@@ -12,7 +12,7 @@ const baseStyles = {
         right: '35px',
         top: '0px',
         zIndex: 2147483646,
-        overflow: 'hidden scroll',
+        overflow: 'hidden',
         width: '350px',
         height: '100%',
         background: '#fff',
@@ -25,6 +25,10 @@ const baseStyles = {
     },
     bmCrossButton: {
         display: 'none',
+    },
+    bmItem: {
+        display: 'block',
+        overflow: 'hidden scroll',
     },
 }
 

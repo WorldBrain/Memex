@@ -5,9 +5,21 @@
 }
 
 .sidebar {
-    height: 100%;
+    height: 100vh;
     background: #fff;
-    padding: 0px 5px 150px 5px;
+    padding: 0px 8px 150px 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.searchSwitch {
+    height: fit-content;
+}
+
+.resultsContainer {
+    flex: 1;
+    position: relative;
+    top: 60px;
 }
 
 .annotationsSection {

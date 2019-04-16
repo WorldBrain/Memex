@@ -28,7 +28,51 @@
 .tagButtonSelected {
     composes: tagButton;
     background-color: color2;
+    padding: 0px 4px 1px 7px;
+}
+
+.dateBox {
+    flex-direction: column;
+}
+
+.dateTopBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: fill-available;
+}
+
+.tagButtonDate {
+    composes: tagButtonSelected;
+    background-color: color2;
     padding: 1px 4px 2px 7px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+
+    &.dateBox {
+        flex-direction: column-reverse;
+        display: flex;
+    }
+
+    &.detailsFilter {
+        margin-left: 0px;
+        margin-top: 3px;
+    }
+}
+
+.pillContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.renderCount {
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
 }
 
 .tagButton:focus {
@@ -65,7 +109,7 @@
     display: grid;
     color: color4;
     font-size: 14px;
-    margin-left: 10px;
+    margin-top: 2px;
 }
 
 .spanInc {

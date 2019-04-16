@@ -53,8 +53,11 @@ class FiltersSidebar extends Component<Props> {
             >
                 <div className={styles.filtersDiv}>
                     <div className={styles.filtersNav}>
-                        <span>Filters</span>
-                        {this.props.showClearFiltersBtn && (
+                        <span
+                            className={styles.filterTitle}
+                        >
+                            Filters
+                            {this.props.showClearFiltersBtn && (
                             <ButtonTooltip
                                 position="right"
                                 tooltipText={'Clear filters'}
@@ -65,6 +68,7 @@ class FiltersSidebar extends Component<Props> {
                                 />
                             </ButtonTooltip>
                         )}
+                        </span>
                         <ButtonTooltip
                             tooltipText={'Close filters sidebar'}
                             position="right"

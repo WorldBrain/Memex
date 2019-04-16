@@ -1,6 +1,14 @@
 @value colors: 'src/common-ui/colors.css';
 @value color4, color6, color2, radius3, color7, color3 from colors;
 
+.masterContainer {
+    position: fixed;
+    background-color: white;
+    z-index: 2;
+    padding-bottom: 5px;
+    width: 334px;
+}
+
 .container {
     display: flex;
     align-self: flex-start;
@@ -32,15 +40,16 @@
     }
 }
 
-.notesBtn:disabled {
-    
-    &::after {
-        width: 10px;
-        height: 10px;
-        background-color: black;
-        display: flex;
-        position: absolute;
-        top: 1px;
+.notesBtn {
+    &:disabled {
+        &::after {
+            width: 10px;
+            height: 10px;
+            background-color: black;
+            display: flex;
+            position: absolute;
+            top: 1px;
+        }
     }
 }
 

@@ -1,9 +1,9 @@
 .parentExpanded {
-    padding-left: 20px;
+    padding-left: 9px;
     border-left: 6px solid #ededed; /* MAN - Manual Adjustment Needed */
-    margin-top: -20px;
-    padding-top: 12px;
-    margin-left: 8px;
+    margin-top: -13px;
+    padding-top: 9px;
+    margin-left: 2px;
     margin-bottom: 35px;
     display: flex;
     flex-direction: column;
@@ -11,13 +11,12 @@
 
 .resultCount {
     composes: subTitleColor nakedButton hoverColor from '../../../common-ui/colors.css';
-    margin: -13px 0 0 0;
+    margin: -10px 0 0 0;
     text-align: start;
     font-size: 13px;
     align-self: center;
     justify-content: center;
     cursor: pointer;
-    width: 100%;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
     display: flex;
 }

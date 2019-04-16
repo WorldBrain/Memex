@@ -97,8 +97,9 @@
 }
 
 .inPageTooltip {
-    right: 190px;
-    top: -25px;
+    right: 220px;
+    top: -24px;
+    z-index: 1;
 }
 
 .searchBar .tooltipBubble {

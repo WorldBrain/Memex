@@ -18,6 +18,7 @@
     &:active {
         background-color: color14;
         outline: none;
+        height: 38px;
     }
 
     &.isNew {

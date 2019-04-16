@@ -147,7 +147,7 @@ class ListContainer extends Component {
                 />
 
                 {this.renderCreateList(this.props.showCreateList)}
-                <div className={extStyles.allLists}>
+                <div className={extStyles.allListsInPage}>
                     <div
                         className={cx(
                             extStyles.wrapper,

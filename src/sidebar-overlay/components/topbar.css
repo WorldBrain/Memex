@@ -2,7 +2,6 @@
     position: sticky;
     top: 0;
     background: #fff;
-    width: calc(100% + 10px);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -11,12 +10,24 @@
     height: 40px;
     box-sizing: border-box;
     margin-left: -5px;
+    margin-top: 3px;
 }
 
 .right {
     display: flex;
     align-items: center;
     justify-content: space-around;
+}
+
+.filterButton {
+    composes: filterText from 'src/common-ui/elements.css';
+    font-size: 12px;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+    outline: none;
+    cursor: pointer;
+    border: none;
 }
 
 .button {

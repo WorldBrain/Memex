@@ -3,12 +3,14 @@
     top: 0px;
     right: 385px;
     z-index: 2147483646;
-    width: 200px;
-    height: 100%;
+    width: 230px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
     margin-left: 5px;
     background: #fff;
-    border-right: 1px solid rgb(26, 47, 88, 0.3);
-    box-shadow: 0 6px 31px -11px rgba(34, 12, 12, 0.32157);
+    border-right: 1px solid #efefef;
+    box-shadow: -4px 0px 20px -11px rgba(34, 12, 12, 0.32157);
 }
 
 .filtersSidebarOverview {
@@ -17,16 +19,19 @@
 }
 
 .filtersDiv {
-    margin-top: 5px;
+    margin-top: 10px;
 }
 
 .filtersNav {
     display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    width: fill-available;
+    align-items: center;
 }
 
 .filters {
-    margin-left: 30px;
-    margin-top: 5px;
+    margin-left: 15px;
     display: grid;
     color: #1a2f58;
 }
@@ -48,33 +53,41 @@
 }
 
 .clearFilters {
-    background-image: url('/img/removeIcon.svg');
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: removeIcon from 'src/common-ui/icons.css';
     background-size: 10px;
     display: inline-block;
     cursor: pointer;
-    width: 10px;
-    height: 10px;
-    margin-left: 5px;
+    width: 15px;
+    height: 15px;
+    margin-left: 10px;
+}
+
+.filterTitle {
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
 }
 
 .arrow {
-    background-image: url('/img/arrow.svg');
-    background-repeat: no-repeat;
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: arrowTriangle from 'src/common-ui/icons.css';
     background-size: 18px 18px;
     background-color: transparent;
     transform: rotate(180deg);
-    background-position: center;
+    background-position: center center;
     width: 25px;
     height: 25px;
     cursor: pointer;
-    margin-left: 65px;
     border: none;
-    border-radius: 3px;
-    opacity: 0.6;
 }
 
 .listsDiv {
-    height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
 }
 
 .filterDiv {

@@ -10,7 +10,6 @@
 .collection {
     color: color4;
     cursor: pointer;
-    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -22,8 +21,7 @@
 }
 
 .collectionSidebar {
-    padding: 5px;
-    width: 200px;
+    padding: 5px 10px;
 }
 
 .myCollection {
@@ -33,7 +31,7 @@
 }
 
 .myCollectionSidebar {
-    font-size: 1.25em;
+    font-size: 18px;
     font-weight: 500;
 }
 
@@ -64,22 +62,26 @@
 }
 
 .allLists {
-    overflow: scroll;
+    overflow-y: scroll;
     width: max-content;
     width: 100%;
-    height: 120%;
+    flex: 1;
+}
+
+.allListsInPage {
+    width: 100%;
+    flex: 1;
+    overflow-y: scroll;
 }
 
 .allListsInner {
     width: 100%;
     overflow-y: scroll;
-    height: 90vh;
     padding-bottom: 50px;
 }
 
 .wrapper {
     overflow-y: scroll;
-    height: 83vh;
     padding-bottom: 50px;
 }
 

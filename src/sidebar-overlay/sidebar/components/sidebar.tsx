@@ -195,13 +195,15 @@ class Sidebar extends React.Component<Props, State> {
                         handleFilterBtnClick={this.toggleShowFilters}
                     />
                     <div className={styles.sidebar}>
-                        <SearchTypeSwitch />
-
+                        <div className={styles.searchSwitch}>
+                            <SearchTypeSwitch />
+                        </div>
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
                                 <CommentBoxContainer env={env} />
                             </div>
                         )}
+                        <div className={styles.resultsContainer}>
                         {this.isPageSearch || !this.isCurrentPageSearch ? (
                             this.renderResults()
                         ) : this.props.isLoading && !this.props.appendLoader ? (
@@ -214,6 +216,7 @@ class Sidebar extends React.Component<Props, State> {
                                 {showCongratsMessage && <CongratsMessage />}
                             </div>
                         )}
+                        </div>
                     </div>
                 </Menu>
                 {this.state.showFiltersSidebar && (
