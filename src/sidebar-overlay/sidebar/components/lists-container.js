@@ -34,6 +34,7 @@ class ListContainer extends Component {
         showCrowdFundingModal: PropTypes.bool.isRequired,
         closeCreateListForm: PropTypes.func.isRequired,
         resetUrlDragged: PropTypes.func.isRequired,
+        env: PropTypes.oneOf(['overview', 'inpage']).isRequired,
     }
 
     constructor(props) {
@@ -59,6 +60,23 @@ class ListContainer extends Component {
             ...state,
             [field]: value,
         }))
+    }
+
+    handleSearchKeyDown = (field, listName = '') => e => {
+        if (
+            this.props.env === 'inpage' &&
+            !(e.ctrlKey || e.metaKey) &&
+            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
+        ) {
+            e.preventDefault()
+            e.stopPropagation()
+
+            this.setState(state => ({
+                ...state,
+                [field]:
+                    (state[field] !== null ? state[field] : listName) + e.key,
+            }))
+        }
     }
 
     getSearchVal = value => value.trim().replace(/\s\s+/g, ' ')
@@ -101,6 +119,10 @@ class ListContainer extends Component {
                         handleNameChange={this.handleSearchChange(
                             'updatedListName',
                         )}
+                        handleNameKeyDown={this.handleSearchKeyDown(
+                            'updatedListName',
+                            list.name,
+                        )}
                         value={
                             typeof this.state.updatedListName === 'string'
                                 ? this.state.updatedListName
@@ -131,6 +153,7 @@ class ListContainer extends Component {
             <CreateListForm
                 onCheckboxClick={this.handleCreateListSubmit}
                 handleNameChange={this.handleSearchChange('listName')}
+                handleNameKeyDown={this.handleSearchKeyDown('listName')}
                 value={this.state.listName}
                 showWarning={this.props.showCommonNameWarning}
                 setInputRef={this.setInputRef}

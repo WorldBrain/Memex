@@ -53,21 +53,19 @@ class FiltersSidebar extends Component<Props> {
             >
                 <div className={styles.filtersDiv}>
                     <div className={styles.filtersNav}>
-                        <span
-                            className={styles.filterTitle}
-                        >
+                        <span className={styles.filterTitle}>
                             Filters
                             {this.props.showClearFiltersBtn && (
-                            <ButtonTooltip
-                                position="right"
-                                tooltipText={'Clear filters'}
-                            >
-                                <span
-                                    className={styles.clearFilters}
-                                    onClick={this.props.clearAllFilters}
-                                />
-                            </ButtonTooltip>
-                        )}
+                                <ButtonTooltip
+                                    position="right"
+                                    tooltipText={'Clear filters'}
+                                >
+                                    <span
+                                        className={styles.clearFilters}
+                                        onClick={this.props.clearAllFilters}
+                                    />
+                                </ButtonTooltip>
+                            )}
                         </span>
                         <ButtonTooltip
                             tooltipText={'Close filters sidebar'}
@@ -107,7 +105,7 @@ class FiltersSidebar extends Component<Props> {
                     </div>
                 </div>
                 <div className={styles.listsDiv}>
-                    <ListSideBar />
+                    <ListSideBar env={this.props.env} />
                 </div>
             </div>
         )
