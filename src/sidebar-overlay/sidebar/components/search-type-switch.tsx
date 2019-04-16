@@ -75,6 +75,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         this.props.handleSearchTypeClick(event)
+        this.props.setResultsSearchType('annot')
         this.props.setPageType('page')
     }
 
@@ -96,7 +97,11 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                             Pages
                         </button>
                         <button
-                            className={cx(styles.searchSwitchBtn, styles.btn, styles.notesBtn)}
+                            className={cx(
+                                styles.searchSwitchBtn,
+                                styles.btn,
+                                styles.notesBtn,
+                            )}
                             onClick={this.handleNotesBtnClick}
                             disabled={!this.isPageSearch}
                         >
@@ -107,14 +112,20 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                         <div className={styles.pageSwitch}>
                             <span>
                                 <button
-                                    className={cx(styles.searchSwitchBtn, styles.btn)}
+                                    className={cx(
+                                        styles.searchSwitchBtn,
+                                        styles.btn,
+                                    )}
                                     onClick={this.props.handlePageTypeClick}
                                     disabled={!this.isCurrentPageSearch}
                                 >
                                     This page
                                 </button>
                                 <button
-                                    className={cx(styles.searchSwitchBtn, styles.btn)}
+                                    className={cx(
+                                        styles.searchSwitchBtn,
+                                        styles.btn,
+                                    )}
                                     onClick={this.handleAllBtnClick}
                                     disabled={this.isCurrentPageSearch}
                                 >
@@ -124,8 +135,13 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                             <span>
                                 {this.isCurrentPageSearch && (
                                     <button
-                                        className={cx(styles.unfoldAllBtn, styles.btn)}
-                                        onClick={this.props.handleUnfoldAllClick}
+                                        className={cx(
+                                            styles.unfoldAllBtn,
+                                            styles.btn,
+                                        )}
+                                        onClick={
+                                            this.props.handleUnfoldAllClick
+                                        }
                                         disabled={this.isPageSearch}
                                     >
                                         {this.unfoldBtnText}

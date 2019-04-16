@@ -27,6 +27,7 @@ interface Props {
     activeAnnotationUrl: string
     hoverAnnotationUrl: string
     showCommentBox: boolean
+    searchValue: string
     showCongratsMessage: boolean
     pageType: 'page' | 'all'
     searchType: 'notes' | 'pages'
@@ -86,16 +87,17 @@ class Sidebar extends React.Component<Props, State> {
         e.preventDefault()
         e.stopPropagation()
 
+        this.props.onQueryChange(e.target.value)
         const searchValue = e.target.value
         this.setState({ searchValue })
-        this.props.onQueryChange(this.state.searchValue)
     }
 
     private handleClearBtn = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         e.stopPropagation()
+
         this.setState({ searchValue: '' })
-        this.props.onQueryChange(this.state.searchValue)
+        this.props.onQueryChange('')
     }
 
     private toggleShowFilters = () => {
@@ -188,7 +190,7 @@ class Sidebar extends React.Component<Props, State> {
                         handleCloseBtnClick={this.handleCloseBtnClick}
                         handleSettingsBtnClick={this._handleSettingsBtnClick}
                         handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        searchValue={this.state.searchValue}
+                        searchValue={this.props.searchValue}
                         handleChange={this.handleChange}
                         handleSearchKeyDown={this.handleSearchKeyDown}
                         handleClearBtn={this.handleClearBtn}
@@ -204,18 +206,19 @@ class Sidebar extends React.Component<Props, State> {
                             </div>
                         )}
                         <div className={styles.resultsContainer}>
-                        {this.isPageSearch || !this.isCurrentPageSearch ? (
-                            this.renderResults()
-                        ) : this.props.isLoading && !this.props.appendLoader ? (
-                            <Loader />
-                        ) : annotations.length === 0 ? (
-                            <EmptyMessage />
-                        ) : (
-                            <div className={styles.annotationsSection}>
-                                {this.renderAnnots()}
-                                {showCongratsMessage && <CongratsMessage />}
-                            </div>
-                        )}
+                            {this.isPageSearch || !this.isCurrentPageSearch ? (
+                                this.renderResults()
+                            ) : this.props.isLoading &&
+                            !this.props.appendLoader ? (
+                                <Loader />
+                            ) : annotations.length === 0 ? (
+                                <EmptyMessage />
+                            ) : (
+                                <div className={styles.annotationsSection}>
+                                    {this.renderAnnots()}
+                                    {showCongratsMessage && <CongratsMessage />}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </Menu>

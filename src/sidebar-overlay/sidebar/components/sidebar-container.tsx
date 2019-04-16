@@ -11,7 +11,10 @@ import Sidebar from './sidebar'
 import SidebarState, { Annotation } from '../types'
 import RootState, { MapDispatchToProps } from '../../types'
 import AnnotationsManager from '../../annotations-manager'
-import { acts as searchBarActs } from 'src/overview/search-bar'
+import {
+    acts as searchBarActs,
+    selectors as searchBar,
+} from 'src/overview/search-bar'
 
 interface StateProps {
     isOpen: boolean
@@ -25,6 +28,7 @@ interface StateProps {
     showCongratsMessage: boolean
     pageType: 'page' | 'all'
     searchType: 'notes' | 'pages'
+    searchValue: string
 }
 
 interface DispatchProps {
@@ -109,29 +113,12 @@ class SidebarContainer extends React.Component<Props> {
     }
 
     render() {
-        const {
-            env,
-            isOpen,
-            isLoading,
-            annotations,
-            activeAnnotationUrl,
-            hoverAnnotationUrl,
-            handleAddCommentBtnClick,
-            showCommentBox,
-            showCongratsMessage,
-        } = this.props
-
         return (
             <Sidebar
-                env={env}
-                isOpen={isOpen}
-                isLoading={isLoading}
-                annotations={annotations}
-                activeAnnotationUrl={activeAnnotationUrl}
-                hoverAnnotationUrl={hoverAnnotationUrl}
-                showCommentBox={showCommentBox}
-                showCongratsMessage={showCongratsMessage && !isLoading}
-                handleAddCommentBtnClick={handleAddCommentBtnClick}
+                {...this.props}
+                showCongratsMessage={
+                    this.props.showCongratsMessage && !this.props.isLoading
+                }
                 closeSidebar={this._closeSidebar}
                 handleGoToAnnotation={this._handleGoToAnnotation}
                 handleAnnotationBoxMouseEnter={
@@ -140,16 +127,6 @@ class SidebarContainer extends React.Component<Props> {
                 handleAnnotationBoxMouseLeave={
                     this._handleAnnotationBoxMouseLeave
                 }
-                handleEditAnnotation={this.props.handleEditAnnotation}
-                handleDeleteAnnotation={this.props.handleDeleteAnnotation}
-                handleScrollPagination={this.props.handleScrollPagination}
-                appendLoader={this.props.appendLoader}
-                handleBookmarkToggle={this.props.handleBookmarkToggle}
-                onQueryChange={this.props.onQueryChange}
-                onQueryKeyDown={this.props.onQueryKeyDown}
-                pageType={this.props.pageType}
-                searchType={this.props.searchType}
-                handleSearchTypeClick={this.props.handleSearchTypeClick}
             />
         )
     }
@@ -173,6 +150,7 @@ const mapStateToProps: MapStateToProps<
     showCongratsMessage: selectors.showCongratsMessage(state),
     pageType: selectors.pageType(state),
     searchType: selectors.searchType(state),
+    searchValue: searchBar.query(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
