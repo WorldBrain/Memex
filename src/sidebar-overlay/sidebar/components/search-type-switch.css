@@ -6,13 +6,14 @@
     background-color: white;
     z-index: 2;
     padding-bottom: 5px;
-    width: 334px;
+    width: 350px;
+    margin-left: -8px;
 }
 
 .container {
     display: flex;
     align-self: flex-start;
-    margin-top: 5px;
+    margin: 5px 3px;
 }
 
 .unfoldAllBtn {
@@ -61,6 +62,7 @@
     margin-top: 4px;
     display: flex;
     justify-content: space-between;
+    margin: 0 10px 0px 3px;
 
     & * {
         font-size: 11px;

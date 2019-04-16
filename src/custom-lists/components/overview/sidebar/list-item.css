@@ -69,8 +69,9 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0px 15px 0px 25px;
-    font-size: 0.75rem;
+    padding: 0px 15px 0px 15px;
+    font-size: 14px;
+    color: color4;
     font-weight: 400;
     cursor: pointer;
     width: 100%;
