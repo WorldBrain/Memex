@@ -11,21 +11,29 @@ const getMatchingPageCount = remoteFunction('getMatchingPageCount')
 const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 const processEvent = remoteFunction('processEvent')
 
-export const setMatchedCount = createAction('settings/setMatchedCount')
-export const setModalShow = createAction('settings/setModalShow')
-export const setIsLoading = createAction('settings/setIsLoading')
-export const setSiteInputValue = createAction('settings/setSiteInputValue')
-export const resetSiteInputValue = createAction('settings/resetSiteInputValue')
-export const setBlacklist = createAction('settings/setBlacklist')
-export const addSiteToBlacklist = createAction('settings/addSiteToBlacklist')
+export const setMatchedCount = createAction('settings/setMatchedCount') as any
+export const setModalShow = createAction('settings/setModalShow') as any
+export const setIsLoading = createAction('settings/setIsLoading') as any
+export const setSiteInputValue = createAction(
+    'settings/setSiteInputValue',
+) as any
+export const resetSiteInputValue = createAction(
+    'settings/resetSiteInputValue',
+) as any
+export const setBlacklist = createAction('settings/setBlacklist') as any
+export const addSiteToBlacklist = createAction(
+    'settings/addSiteToBlacklist',
+) as any
 export const removeSiteFromBlacklist = createAction(
     'settings/removeSiteFromBlacklist',
-)
+) as any
 
 export const initBlacklist = () => async dispatch => {
     dispatch(setIsLoading(true))
     try {
-        const { [STORAGE_KEY]: blacklist } = await browser.storage.local.get({
+        const { [STORAGE_KEY]: blacklist } = await window[
+            'browser'
+        ].storage.local.get({
             [STORAGE_KEY]: '[]',
         })
 
@@ -58,7 +66,7 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
     dispatch(resetSiteInputValue())
     dispatch(setIsLoading(true))
     try {
-        await browser.storage.local.set({
+        await window['browser'].storage.local.set({
             [STORAGE_KEY]: JSON.stringify([newEntry, ...oldBlacklist]),
         })
         const count = await getMatchingPageCount(expression)
@@ -91,7 +99,7 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
         ...oldBlacklist.slice(index + 1),
     ]
 
-    await browser.storage.local.set({
+    await window['browser'].storage.local.set({
         [STORAGE_KEY]: JSON.stringify(newBlacklist),
     })
 

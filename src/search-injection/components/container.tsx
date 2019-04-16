@@ -17,13 +17,19 @@ import OptIn from '../../notifications/components/OptIn'
 import { ToggleSwitch } from '../../common-ui/components'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 
-class Container extends React.Component {
+class Container extends React.Component<any, any> {
     static propTypes = {
         results: PropTypes.arrayOf(PropTypes.object).isRequired,
         len: PropTypes.number.isRequired,
         rerender: PropTypes.func.isRequired,
         searchEngine: PropTypes.string.isRequired,
     }
+
+    trackEvent: any
+    readNotification: any
+    fetchNotifById: any
+    processEvent: any
+    openOverviewRPC: any
 
     constructor(props) {
         super(props)
@@ -43,7 +49,7 @@ class Container extends React.Component {
         this.openOverviewRPC = remoteFunction('openOverviewTab')
     }
 
-    state = {
+    state: any = {
         hideResults: true,
         dropdown: false,
         removed: false,

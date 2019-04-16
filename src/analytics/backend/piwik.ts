@@ -1,7 +1,9 @@
 /* eslint no-console: 0 */
 import { idleManager } from 'src/util/idle'
 import randomString from 'src/util/random-string'
-import { shouldTrack } from './utils'
+import { shouldTrack } from '../utils'
+import { AnalyticsBackend } from './types'
+import { AnalyticsTrackEventOptions } from '../types'
 
 /**
  * @typedef {Object} EventTrackInfo
@@ -17,13 +19,13 @@ import { shouldTrack } from './utils'
  * @property {'link'|'download'} [linkType='link'] Signifies if link is to a page or download.
  */
 
-class Analytics {
-    static API_PATH = '/piwik.php'
-    static JSON_HEADERS = {
-        Accept: 'application/json, text/plain, */*',
-        'Content-Type': 'application/json',
-    }
+const JSON_HEADERS = {
+    Accept: 'application/json, text/plain, */*',
+    'Content-Type': 'application/json',
+}
 
+export default class PiwikAnalyticsBackend implements AnalyticsBackend {
+    static API_PATH = '/piwik.php'
     static DEF_TRACKING = true
 
     /**
@@ -31,6 +33,8 @@ class Analytics {
      *  periodically cleared and sent off in bulk.
      */
     _pool = new Set()
+    _siteId: any
+    _host: any
 
     /**
      * @param {Object} args
@@ -39,7 +43,7 @@ class Analytics {
      */
     constructor({ url, siteId }) {
         this._siteId = siteId
-        this._host = url + Analytics.API_PATH
+        this._host = url + PiwikAnalyticsBackend.API_PATH
 
         // Schedule sending of network req when user is idle or locks screen
         idleManager.scheduleIdleCbs({
@@ -104,14 +108,17 @@ class Analytics {
      * @return {Promise<boolean>}
      */
     _sendBulkReq = async () => {
-        if (!this._pool.size || !(await shouldTrack(Analytics.DEF_TRACKING))) {
+        if (
+            !this._pool.size ||
+            !(await shouldTrack(PiwikAnalyticsBackend.DEF_TRACKING))
+        ) {
             this._pool.clear() // Clear pool if user turned off tracking
             return
         }
 
         const res = await fetch(this._host, {
             method: 'POST',
-            header: Analytics.JSON_HEADER,
+            headers: JSON_HEADERS,
             body: JSON.stringify({ requests: this._serializePoolReqs() }),
         })
 
@@ -126,15 +133,7 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
-    async trackEvent(eventArgs, force = false) {
-        const shouldTrackValue = await shouldTrack(Analytics.DEF_TRACKING)
-        if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
-            console.log('Tracking event', shouldTrackValue, eventArgs, force)
-        }
-        if (!shouldTrackValue) {
-            return
-        }
-
+    async trackEvent(eventArgs, options: AnalyticsTrackEventOptions) {
         const params = {
             e_c: eventArgs.category,
             e_a: eventArgs.action,
@@ -142,7 +141,7 @@ class Analytics {
             e_v: eventArgs.value,
         }
 
-        if (force) {
+        if (options.waitForCompletion) {
             await this._sendReq(params).catch(console.error)
         } else {
             this._poolReq(params)
@@ -155,7 +154,7 @@ class Analytics {
      * @param {LinkTrackInfo} linkArgs
      */
     async trackLink({ linkType, url }) {
-        if (!(await shouldTrack(Analytics.DEF_TRACKING))) {
+        if (!(await this._shouldTrack())) {
             return
         }
 
@@ -169,12 +168,14 @@ class Analytics {
      * @param {string} args.title The title of the page to track
      */
     async trackPage({ title }) {
-        if (!(await shouldTrack(Analytics.DEF_TRACKING))) {
+        if (!(await this._shouldTrack())) {
             return
         }
 
         return this._poolReq({ action_name: encodeURIComponent(title) })
     }
-}
 
-export default Analytics
+    async _shouldTrack() {
+        return shouldTrack(PiwikAnalyticsBackend.DEF_TRACKING)
+    }
+}

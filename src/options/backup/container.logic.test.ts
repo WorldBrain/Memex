@@ -64,7 +64,6 @@ describe('Backup settings container logic', () => {
                     category: 'Backup',
                     action: 'onboarding-triggered',
                 },
-                force: true,
             },
         ])
 
@@ -89,7 +88,6 @@ describe('Backup settings container logic', () => {
                     category: 'Backup',
                     action: 'onboarding-where-chosen',
                 },
-                force: true,
             },
         ])
         expect(localStorage.popChanges()).toEqual([
@@ -117,7 +115,6 @@ describe('Backup settings container logic', () => {
                     action: 'onboarding-how-chosen',
                     value: { type: 'manual' },
                 },
-                force: true,
             },
         ])
 
@@ -140,7 +137,6 @@ describe('Backup settings container logic', () => {
                     category: 'Backup',
                     action: 'onboarding-login-requested',
                 },
-                force: true,
             },
         ])
         expect(localStorage.popChanges()).toEqual([
@@ -264,7 +260,6 @@ describe('Backup settings container logic', () => {
                     category: 'Backup',
                     action: 'onboarding-backup-requested',
                 },
-                force: true,
             },
         ])
 

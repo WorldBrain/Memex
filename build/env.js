@@ -14,12 +14,20 @@ export default ({ mode }) => {
         BACKUP_TEST_SIZE_ESTIMATION: '',
     }
 
-    if (mode === 'development') {
+    if (mode === 'development' && process.env.DEV_ANALYTICS !== 'true') {
+        console.warn(
+            `Turing off analytics for extension development, set DEV_ANALYTICS=true if you're hacking on analytics`,
+        )
         env.PIWIK_HOST = 'http://localhost:1234'
         env.SENTRY_DSN = ''
         env.COUNTLY_HOST = 'http://localhost:1234'
         env.COUNTLY_APP_KEY = ''
-    } else if (mode === 'production') {
+    } else if (mode === 'production' || process.env.DEV_ANALYTICS === 'true') {
+        if (process.env.DEV_ANALYTICS === 'true') {
+            console.warn(
+                `Forcing analytics to be enabled, but BE CAREFUL: this will send events to the production analytics backend`,
+            )
+        }
         env.PIWIK_HOST = 'https://analytics.worldbrain.io'
         env.SENTRY_DSN =
             'https://205014a0f65e4160a29db2935250b47c@sentry.io/305612'

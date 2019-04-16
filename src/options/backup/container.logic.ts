@@ -4,12 +4,16 @@ import {
     redirectToGDriveLogin,
     redirectToAutomaticBackupPurchase,
 } from 'src/options/backup/utils'
-import { browser } from 'webextension-polyfill-ts'
+import { Analytics } from 'src/analytics/types'
 
 export async function getInitialState({
     analytics,
     localStorage,
     remoteFunction,
+}: {
+    analytics: Analytics
+    localStorage: any
+    remoteFunction: any
 }) {
     const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
     return {
@@ -28,6 +32,11 @@ export async function getStartScreen({
     analytics,
     remoteFunction,
     isAuthenticated,
+}: {
+    analytics: Analytics
+    localStorage: any
+    remoteFunction: any
+    isAuthenticated: boolean
 }) {
     const hasScreenOverride =
         process.env.BACKUP_START_SCREEN &&
@@ -85,14 +94,11 @@ export async function processEvent({
     remoteFunction,
 }) {
     const _onBlobPreferenceChange = () => {
-        analytics.trackEvent(
-            {
-                category: 'Backup',
-                action: 'onboarding-blob-pref-change',
-                value: event.saveBlobs,
-            },
-            true,
-        )
+        analytics.trackEvent({
+            category: 'Backup',
+            action: 'onboarding-blob-pref-change',
+            value: event.saveBlobs,
+        })
         remoteFunction('setBackupBlobs')(event.saveBlobs)
         return {}
     }
@@ -116,13 +122,10 @@ export async function processEvent({
                 if (needsOnBoarding || changeBackupRequested === true) {
                     localStorage.setItem('backup.onboarding', true)
                     localStorage.setItem('backup.onboarding.where', true)
-                    analytics.trackEvent(
-                        {
-                            category: 'Backup',
-                            action: 'onboarding-triggered',
-                        },
-                        true,
-                    )
+                    analytics.trackEvent({
+                        category: 'Backup',
+                        action: 'onboarding-triggered',
+                    })
                     return { screen: 'onboarding-where' }
                 }
 
@@ -154,13 +157,10 @@ export async function processEvent({
                 // initializing the backend of the users choice
                 const location = event.choice
                 remoteFunction('setBackendLocation')(location)
-                analytics.trackEvent(
-                    {
-                        category: 'Backup',
-                        action: 'onboarding-where-chosen',
-                    },
-                    true,
-                )
+                analytics.trackEvent({
+                    category: 'Backup',
+                    action: 'onboarding-where-chosen',
+                })
                 localStorage.removeItem('backup.onboarding.where')
 
                 const isAutomaticBackupEnabled = await remoteFunction(
@@ -180,14 +180,11 @@ export async function processEvent({
             onChoice: async () => {
                 const { choice } = event
 
-                await analytics.trackEvent(
-                    {
-                        category: 'Backup',
-                        action: 'onboarding-how-chosen',
-                        value: choice,
-                    },
-                    true,
-                )
+                await analytics.trackEvent({
+                    category: 'Backup',
+                    action: 'onboarding-how-chosen',
+                    value: choice,
+                })
 
                 if (choice.type === 'automatic') {
                     localStorage.setItem('backup.onboarding.payment', true)
@@ -206,24 +203,18 @@ export async function processEvent({
         'onboarding-size': {
             onBlobPreferenceChange: _onBlobPreferenceChange,
             onLoginRequested: () => {
-                analytics.trackEvent(
-                    {
-                        category: 'Backup',
-                        action: 'onboarding-login-requested',
-                    },
-                    true,
-                )
+                analytics.trackEvent({
+                    category: 'Backup',
+                    action: 'onboarding-login-requested',
+                })
                 localStorage.setItem('backup.onboarding.authenticating', true)
                 return { redirect: { to: 'gdrive-login' } }
             },
             onBackupRequested: () => {
-                analytics.trackEvent(
-                    {
-                        category: 'Backup',
-                        action: 'onboarding-backup-requested',
-                    },
-                    true,
-                )
+                analytics.trackEvent({
+                    category: 'Backup',
+                    action: 'onboarding-backup-requested',
+                })
                 return { screen: 'running-backup' }
             },
         },
@@ -235,13 +226,10 @@ export async function processEvent({
         },
         'restore-where': {
             onChoice: async () => {
-                analytics.trackEvent(
-                    {
-                        category: 'Backup',
-                        action: 'restore-where-chosen',
-                    },
-                    true,
-                )
+                analytics.trackEvent({
+                    category: 'Backup',
+                    action: 'restore-where-chosen',
+                })
                 const location = event.choice
                 await remoteFunction('initRestoreProcedure')(location)
 

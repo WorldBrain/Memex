@@ -9,7 +9,6 @@ import {
     blacklist,
 } from '../blacklist/background'
 import { trackExistingTabs } from '../activity-logger/background/tab-bridge'
-import countlyAnalytics from '../analytics/countly'
 
 export async function onInstall() {
     const now = Date.now()
@@ -17,9 +16,7 @@ export async function onInstall() {
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
 
-    analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
-
-    countlyAnalytics.trackEvent({ type: 'install' })
+    analytics.trackEvent({ category: 'Global', action: 'Install' })
 
     // Open onboarding page
     browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })

@@ -4,6 +4,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 
 import { selectors as filters } from 'src/search-filters'
+import analytics from 'src/analytics'
 
 export const fetchAllLists = createAction('custom-lists/listData')
 export const createList = createAction('custom-lists/addList')
@@ -114,6 +115,8 @@ export const createPageList = (name, cb) => async (dispatch, getState) => {
     // gets id from DB after it is added
 
     try {
+        analytics.trackEvent({ category: 'Collections', action: 'create' })
+
         // Create List
         const listExist = Boolean(
             await remoteFunction('fetchListIgnoreCase')({ name }),

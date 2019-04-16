@@ -8,7 +8,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from '../constants'
-import styles from './DateRangeSelection.css'
+const styles = require('./DateRangeSelection.css')
 import './datepicker-overrides.css'
 import { EVENT_NAMES } from '../../../analytics/internal/constants'
 import DatePickerInput from './datepicker-input'
@@ -16,20 +16,22 @@ import DatePickerInput from './datepicker-input'
 const processEvent = remoteFunction('processEvent')
 // const stylesPro = require('../../tooltips/components/tooltip.css')
 
-class DateRangeSelection extends Component {
-    static propTypes = {
-        startDate: PropTypes.number,
-        endDate: PropTypes.number,
-        startDateText: PropTypes.string,
-        endDateText: PropTypes.string,
-        onStartDateChange: PropTypes.func,
-        onEndDateChange: PropTypes.func,
-        onStartDateTextChange: PropTypes.func.isRequired,
-        onEndDateTextChange: PropTypes.func.isRequired,
-        disabled: PropTypes.bool,
-        changeTooltip: PropTypes.func,
-        env: PropTypes.oneOf(['overview', 'inpage']).isRequired,
-    }
+interface Props {
+    env: 'inpage' | 'overview'
+    startDate: number
+    startDateText: string
+    endDate: number
+    endDateText: string
+    onStartDateChange: (...args) => void
+    onStartDateTextChange: (...args) => void
+    onEndDateChange: (...args) => void
+    onEndDateTextChange: (...args) => void
+    disabled: boolean
+    changeTooltip: (...args) => void
+}
+class DateRangeSelection extends Component<Props> {
+    startDatePicker: any
+    endDatePicker: any
 
     state = {
         startDateText: this.props.startDate

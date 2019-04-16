@@ -6,11 +6,15 @@ import analytics from 'src/analytics'
 /**
  * Wraps standard <a> to track outgoing link on `click`.
  */
-class OutLink extends React.PureComponent {
+class OutLink extends React.PureComponent<any> {
     static propTypes = { to: PropTypes.string.isRequired }
 
     trackLinkClick = () =>
-        analytics.trackLink({ linkType: 'link', url: this.props.to })
+        analytics.trackEvent({
+            category: 'Global',
+            action: 'External Link',
+            value: this.props.to,
+        })
 
     render() {
         const { to, ...props } = this.props
