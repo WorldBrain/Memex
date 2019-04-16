@@ -90,6 +90,7 @@
         "storybook": "^1.0.0",
         "through2": "^2.0.3",
         "url-regex": "^4.1.1",
+        "uuid": "^3.3.2",
         "webextension-polyfill": "^0.3.0",
         "when-all-settled": "^0.1.1"
     },
