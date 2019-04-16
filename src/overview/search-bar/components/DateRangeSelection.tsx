@@ -22,10 +22,10 @@ interface Props {
     startDateText: string
     endDate: number
     endDateText: string
-    onStartDateChange: Function
-    onStartDateTextChange: Function
-    onEndDateChange: Function
-    onEndDateTextChange: Function
+    onStartDateChange: (...args) => void
+    onStartDateTextChange: (...args) => void
+    onEndDateChange: (...args) => void
+    onEndDateTextChange: (...args) => void
     disabled: boolean
     changeTooltip: (...args) => void
 }
