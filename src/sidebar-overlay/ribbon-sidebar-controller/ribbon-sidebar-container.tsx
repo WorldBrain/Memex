@@ -215,19 +215,26 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
 
     private handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
-            this.props.closeRibbon()
+            this.handleRibbonClose()
         }
     }
 
     private handleClick = (e: MouseEvent) => {
         if (!this.mouseInsideRibbon) {
-            this.props.closeRibbon()
+            this.handleRibbonClose()
         }
+    }
+
+    private handleRibbonClose = () => {
+        this.props.setShowCollectionsPicker(false)
+        this.props.setShowTagsPicker(false)
+        this.props.setShowCommentBox(false)
+        this.props.closeRibbon()
     }
 
     private closeRibbonAfterTimeout() {
         this.timeoutId = setTimeout(
-            this.props.closeRibbon,
+            this.handleRibbonClose,
             this.props.closeTimeoutMs,
         )
     }
