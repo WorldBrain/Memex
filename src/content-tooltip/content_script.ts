@@ -81,6 +81,7 @@ const handleKeyboardShortcuts = ({
                     toggleSidebar.enabled &&
                         toggleSidebarOverlay({
                             override: true,
+                            openSidebar: true,
                         })
                     break
                 case toggleHighlights.shortcut:
