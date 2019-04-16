@@ -76,6 +76,7 @@ class TooltipContainer extends React.Component {
                     toggleSidebar.enabled &&
                         toggleSidebarOverlay({
                             override: true,
+                            openSidebar: true,
                         })
                     break
                 case toggleHighlights.shortcut:

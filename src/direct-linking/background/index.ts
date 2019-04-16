@@ -92,6 +92,7 @@ export default class DirectLinkingBackground {
             anchor,
             override,
             activeUrl,
+            openSidebar,
             openToTags,
             openToComment,
             openToBookmark,
@@ -100,6 +101,7 @@ export default class DirectLinkingBackground {
             Partial<KeyboardActions> & {
                 anchor?: any
                 override?: boolean
+                openSidebar?: boolean
             } = {
             anchor: null,
             override: false,
@@ -114,7 +116,11 @@ export default class DirectLinkingBackground {
         const { id: tabId } = currentTab
 
         const forceExpandRibbon =
-            openToTags || openToComment || openToCollections || openToBookmark
+            openToTags ||
+            openToComment ||
+            openToCollections ||
+            openToBookmark ||
+            openSidebar
 
         // Make sure that the ribbon is inserted before trying to open the
         // sidebar.
@@ -127,7 +133,7 @@ export default class DirectLinkingBackground {
             openToTags,
         })
 
-        if (!forceExpandRibbon) {
+        if (!forceExpandRibbon || openSidebar) {
             await remoteFunction('openSidebar', { tabId })({
                 anchor,
                 activeUrl,
