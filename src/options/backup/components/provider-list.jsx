@@ -13,9 +13,9 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                         onChange={() => onChange('local')}
                     />
                     <span style={{ cursor: 'pointer' }}>
-                        <span className={Styles.title}>Local Backup</span>
+                        <span className={Styles.title}>Backup locally or to any cloud provider</span>
                         <p className={Styles.description}>
-                            Backup & restore your data locally, or to any cloud provider with a syncing folder on your computer (e.g. Dropbox, Spideroak, GDrive) <a className={Styles.link} target="_blank" href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59">Learn More ▸</a>
+                            Backup your data to your hard drive, or to any cloud provider with a syncing folder on your computer (e.g. Dropbox, Spideroak, GDrive) <a className={Styles.link} target="_blank" href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59">Learn More ▸</a>
                         </p>
                     </span>
                     {backupPath !== null ? (
@@ -56,6 +56,9 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             src={'img/google-drive.png'}
                         />
                     </span>
+                    <p className={Styles.description}>
+                            Make sure you are trying to backup your data to the same Google Account than the one logged into your browser profile.
+                    </p>
                 </label>
                 <br />
             </form>

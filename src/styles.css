@@ -16,3 +16,19 @@
     width: 60%;
     min-width: 450px;
 }
+
+.productHuntBatch {
+    width: 250px;
+    height: 54px;
+
+    @media (max-width: 1100px) {
+        display: none;
+    }
+}
+
+.productHuntContainer {
+    position: absolute;
+    top: 70px;
+    float: right;
+    right: 10px;
+}

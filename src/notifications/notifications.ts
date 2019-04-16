@@ -5,7 +5,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1555098075133
+export const releaseTime: number = 1555456496395
 
 /* Example Notification:
 {
@@ -60,18 +60,18 @@ export const releaseTime: number = 1555098075133
 
 export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
-        id: 'imports_12.04.2019',
+        id: 'keyboard_shortcuts_12.04.2019',
         search: {
             title:
-                '📲 Import bookmarks from Pocket or any other bookmarking service',
+                '🎹 Tag, Star and sort pages with keyboard shortcuts',
             message:
-                'Import bookmarks and tags from Pocket or any other service with an HTML export file',
+                'Organise your knowledge blazingly fast!',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
                         url:
-                            'https://www.notion.so/worldbrain/3c245cee785540dfb3722f0e3c4db47e',
+                            'https://www.notion.so/worldbrain/7eeac673006b4878895da791f4cbcf90',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -80,15 +80,15 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
         },
         overview: {
             title:
-                '📲 Import bookmarks from Pocket or any other bookmarking service',
+                '🎹 Tag, Star and sort pages with keyboard shortcuts',
             message:
-                'Import bookmarks and tags from Pocket or any other service with an HTML export file',
+                'Organise your knowledge blazingly fast!',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
                         url:
-                            'https://www.notion.so/worldbrain/3c245cee785540dfb3722f0e3c4db47e',
+                            'https://www.notion.so/worldbrain/7eeac673006b4878895da791f4cbcf90',
                         context: 'new-tab',
                     },
                     label: 'Find out more',

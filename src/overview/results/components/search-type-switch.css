@@ -8,6 +8,8 @@
     width: 800px;
     align-items: center;
     padding-top: 60px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #efefef;
 }
 
 .unfoldAllBtn {

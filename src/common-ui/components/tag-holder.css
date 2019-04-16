@@ -4,7 +4,6 @@
 .tagList {
     display: flex;
     flex-grow: 2;
-    margin-left: 10px;
 }
 
 .tagname {

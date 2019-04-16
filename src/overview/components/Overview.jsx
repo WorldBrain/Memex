@@ -21,6 +21,8 @@ import { isDuringInstall } from '../onboarding/utils'
 import AnnotationsManager from '../../sidebar-common/annotations-manager'
 import { goToAnnotation } from '../utils'
 
+import styles from 'src/styles.css'
+
 class Overview extends PureComponent {
     static propTypes = {
         init: propTypes.func.isRequired,
@@ -50,6 +52,9 @@ class Overview extends PureComponent {
                         <Results />
                         <DeleteConfirmModal message="Delete page and related note" />
                         <DragElement />
+                        <div className={styles.productHuntContainer}>
+                            <a href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=151367&theme=dark" alt="Memex 1.0 - Annotate, search and organize what you've read online. | Product Hunt Embed" className={styles.productHuntBatch} /></a>
+                        </div>
                         <SidebarContainer
                             env="overview"
                             annotationsManager={this._annotationsManager}
