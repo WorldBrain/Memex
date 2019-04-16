@@ -5,11 +5,11 @@ import configureStore from '../store'
 import RibbonSidebarContainer from './ribbon-sidebar-container'
 import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
 import AnnotationsManager from 'src/sidebar-common/annotations-manager'
-import { Annotation } from 'src/sidebar-common/sidebar/types'
+import { Annotation, KeyboardActions } from 'src/sidebar-common/sidebar/types'
 
 const store = configureStore()
 
-interface Props {
+interface Props extends Partial<KeyboardActions> {
     annotationsManager: AnnotationsManager
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
