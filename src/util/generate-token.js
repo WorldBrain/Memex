@@ -1,4 +1,5 @@
 import { API_HOST } from 'src/analytics/internal/constants'
+import { INSTALL_TIME_KEY } from 'src/constants'
 const uuidv4 = require('uuid/v4')
 
 const API_PATH = '/user-token'
@@ -19,6 +20,11 @@ export async function generateTokenIfNot({
     const userId = (await browser.storage.local.get(USER_ID))[USER_ID]
     if (userId) {
         return userId
+    }
+
+    if (!installTime) {
+        installTime = Date.now()
+        browser.storage.local.set({ [INSTALL_TIME_KEY]: installTime })
     }
 
     return uuidv4()
