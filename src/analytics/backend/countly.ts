@@ -61,22 +61,13 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
             return
         }
 
-        const isEvent = (wanted: { category: string; action: string }) =>
-            event.category === wanted.category && event.action === wanted.action
+        // const isEvent = (wanted: { category: string; action: string }) =>
+        //     event.category === wanted.category && event.action === wanted.action
 
-        if (isEvent({ category: 'Global', action: 'Install' })) {
-            this.enqueueEvent({
-                userId,
-                key: 'install',
-            })
-            // Add other events to send to customize before send to Countly as else if (isEvent(...)) { ... } statements
-        } else {
-            // Generic fallback
-            this.enqueueEvent({
-                userId,
-                key: `${event.category}::${event.action}`,
-                value: event.value,
-            })
-        }
+        this.enqueueEvent({
+            userId,
+            key: `${event.category}::${event.action}`,
+            value: event.value,
+        })
     }
 }
