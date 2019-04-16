@@ -56,3 +56,10 @@ export default interface State {
     /** Represents the latest page of annotations being fetched. */
     currentResultPage: number
 }
+
+export interface KeyboardActions {
+    openToCollections: boolean
+    openToBookmark: boolean
+    openToComment: boolean
+    openToTags: boolean
+}

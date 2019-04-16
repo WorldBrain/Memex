@@ -13,14 +13,22 @@ export const KEYBOARDSHORTCUTS_STORAGE_NAME = 'memex-keyboardshortcuts'
 
 export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
     shortcutsEnabled: true,
-    highlightShortcut: 'h',
+    highlightShortcut: 'n',
     linkShortcut: 'l',
     toggleSidebarShortcut: 'r',
     toggleHighlightsShortcut: 'h',
     createAnnotationShortcut: 'a',
+    createBookmarkShortcut: 'b',
+    addTagShortcut: 't',
+    addToCollectionShortcut: 'u',
+    addCommentShortcut: 'c',
     highlightShortcutEnabled: true,
     linkShortcutEnabled: true,
     toggleSidebarShortcutEnabled: true,
     toggleHighlightsShortcutEnabled: true,
     createAnnotationShortcutEnabled: true,
+    createBookmarkShortcutEnabled: true,
+    addTagShortcutEnabled: true,
+    addToCollectionShortcutEnabled: true,
+    addCommentShortcutEnabled: true,
 }

@@ -33,13 +33,19 @@ let manualOverride = false
 export const insertRibbon = async ({
     annotationsManager,
     toolbarNotifications,
+    forceExpandRibbon = false,
+    ...args
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
+    forceExpandRibbon?: boolean
 }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
-        await updateRibbon()
+        await updateRibbon({
+            openRibbon: forceExpandRibbon,
+            ...args,
+        })
         return
     }
 
@@ -69,6 +75,8 @@ export const insertRibbon = async ({
         setRibbonSidebarRef: ref => {
             ribbonSidebarRef = ref
         },
+        forceExpandRibbon,
+        ...args,
     })
 }
 
@@ -134,7 +142,14 @@ const _insertOrRemoveRibbon = async ({
  * Fetches whether the sidebar and tooltip are enabled.
  * Tells the ribbon to update its state with those values.
  */
-const updateRibbon = async () => {
+const updateRibbon = async (
+    args: {
+        openRibbon?: boolean
+        openToCollections?: boolean
+        openToComment?: boolean
+        openToTags?: boolean
+    } = {},
+) => {
     if (!target) {
         return
     }
@@ -144,9 +159,11 @@ const updateRibbon = async () => {
     const isTooltipEnabled = await getTooltipState()
 
     if (ribbonSidebarRef && ribbonSidebarRef.getWrappedInstance()) {
-        ribbonSidebarRef
-            .getWrappedInstance()
-            .updateRibbonState({ isRibbonEnabled, isTooltipEnabled })
+        ribbonSidebarRef.getWrappedInstance().updateRibbonState({
+            isRibbonEnabled,
+            isTooltipEnabled,
+            ...args,
+        })
     }
 }
 
@@ -164,9 +181,17 @@ export const setupRPC = ({
         /**
          * Used for inserting the ribbon.
          */
-        insertRibbon: ({ override } = { override: false }) => {
+        insertRibbon: (
+            { override, ...args }: { override: boolean } = {
+                override: false,
+            },
+        ) => {
             manualOverride = !!override
-            insertRibbon({ annotationsManager, toolbarNotifications })
+            insertRibbon({
+                annotationsManager,
+                toolbarNotifications,
+                ...args,
+            })
         },
         /**
          * Used for removing the ribbon.

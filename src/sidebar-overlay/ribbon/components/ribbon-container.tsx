@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
-import RootState, { MapDispatchToProps, ClickHandler } from '../../types'
+import RootState, { MapDispatchToProps } from '../../types'
 import Ribbon from './ribbon'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -11,7 +11,6 @@ import {
     AddListDropdownContainer,
 } from 'src/common-ui/containers'
 import * as popup from 'src/popup/selectors'
-import * as popupActs from 'src/popup/actions'
 import { selectors as pause, acts as pauseActs } from 'src/popup/pause-button'
 import { acts as tagActs, selectors as tags } from 'src/popup/tags-button'
 import {
@@ -36,6 +35,12 @@ interface StateProps {
     initTagSuggs: string[]
     collections: PageList[]
     initCollSuggs: PageList[]
+    showCommentBox: boolean
+    showSearchBox: boolean
+    showTagsPicker: boolean
+    showCollectionsPicker: boolean
+    showHighlights?: boolean
+    searchValue: string
 }
 
 interface DispatchProps {
@@ -43,73 +48,46 @@ interface DispatchProps {
     setAnnotationsManager: (annotationsManager: AnnotationsManager) => void
     handleRibbonToggle: () => void
     handleTooltipToggle: () => void
-    handleMouseEnter: () => void
-    handleMouseLeave: () => void
     handlePauseToggle: () => void
     handleBookmarkToggle: () => void
     onTagAdd: (tag: string) => void
     onTagDel: (tag: string) => void
     onCollectionAdd: (collection: PageList) => void
     onCollectionDel: (collection: PageList) => void
+    setShowCommentBox: (value: boolean) => void
+    setShowTagsPicker: (value: boolean) => void
+    setShowCollectionsPicker: (value: boolean) => void
+    setShowSearchBox: (value: boolean) => void
+    setShowHighlights: (value: boolean) => void
+    setSearchValue: (value: string) => void
+    openRibbon: () => void
 }
 
 interface OwnProps {
-    annotationsManager: AnnotationsManager
+    commentText: string
     isSidebarOpen: boolean
     isRibbonEnabled: boolean
-    handleRemoveRibbon: () => void
-    insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
-    openSidebar: (args: any) => void
-    closeSidebar: () => void
     isCommentSaved: boolean
-    commentText: string
-    setShowCommentBox: () => void
+    annotationsManager: AnnotationsManager
+    setRibbonRef: (e: HTMLElement) => void
+    closeSidebar: () => void
+    handleRemoveRibbon: () => void
+    openSidebar: (args: any) => void
+    setShowSidebarCommentBox: () => void
+    insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
 
 class RibbonContainer extends Component<Props> {
-    private ribbonRef: HTMLElement
-
     componentDidMount() {
-        this._setupHoverListeners()
         this.props.onInit()
         this.props.setAnnotationsManager(this.props.annotationsManager)
-    }
-
-    componentWillUnmount() {
-        this._removeHoverListeners()
-    }
-
-    private _setupHoverListeners() {
-        this.ribbonRef.addEventListener(
-            'mouseenter',
-            this.props.handleMouseEnter,
-        )
-        this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
-    }
-
-    private _removeHoverListeners() {
-        this.ribbonRef.removeEventListener(
-            'mouseenter',
-            this.props.handleMouseEnter,
-        )
-        this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
-    }
-
-    private _setRibbonRef = (ref: HTMLElement) => {
-        this.ribbonRef = ref
     }
 
     private _handleTooltipToggle = () => {
         this.props.insertOrRemoveTooltip(this.props.isTooltipEnabled)
         this.props.handleTooltipToggle()
-    }
-
-    private handleMouseLeave = () => {
-        if (this.props.commentText.length === 0) {
-            this.props.handleMouseLeave()
-        }
     }
 
     private renderTagsManager() {
@@ -142,45 +120,13 @@ class RibbonContainer extends Component<Props> {
     }
 
     render() {
-        const {
-            isExpanded,
-            isRibbonEnabled,
-            isTooltipEnabled,
-            openSidebar,
-            handleRibbonToggle,
-            handleRemoveRibbon,
-            isSidebarOpen,
-            isPaused,
-            isBookmarked,
-            closeSidebar,
-            handlePauseToggle,
-            handleBookmarkToggle,
-            isCommentSaved,
-            commentText,
-            setShowCommentBox,
-        } = this.props
-
         return (
-            <div ref={this._setRibbonRef}>
+            <div ref={this.props.setRibbonRef}>
                 <Ribbon
-                    isExpanded={isExpanded}
-                    isRibbonEnabled={isRibbonEnabled}
-                    isTooltipEnabled={isTooltipEnabled}
-                    isSidebarOpen={isSidebarOpen}
-                    isPaused={isPaused}
-                    isBookmarked={isBookmarked}
-                    isCommentSaved={isCommentSaved}
-                    commentText={commentText}
+                    {...this.props}
                     tagManager={this.renderTagsManager()}
                     collectionsManager={this.renderCollectionsManager()}
-                    openSidebar={openSidebar}
-                    closeSidebar={closeSidebar}
-                    handleRibbonToggle={handleRibbonToggle}
                     handleTooltipToggle={this._handleTooltipToggle}
-                    handleRemoveRibbon={handleRemoveRibbon}
-                    handlePauseToggle={handlePauseToggle}
-                    handleBookmarkToggle={handleBookmarkToggle}
-                    setShowCommentBox={setShowCommentBox}
                 />
             </div>
         )
@@ -194,6 +140,11 @@ const mapStateToProps: MapStateToProps<
 > = state => ({
     isExpanded: selectors.isExpanded(state),
     isTooltipEnabled: selectors.isTooltipEnabled(state),
+    showCollectionsPicker: selectors.showCollectionsPicker(state),
+    showCommentBox: selectors.showCommentBox(state),
+    showSearchBox: selectors.showSearchBox(state),
+    showTagsPicker: selectors.showTagsPicker(state),
+    searchValue: selectors.searchValue(state),
     isPaused: pause.isPaused(state),
     isBookmarked: bookmark.isBookmarked(state),
     url: popup.url(state),
@@ -208,12 +159,11 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps
 > = dispatch => ({
     onInit: () => dispatch(actions.initState()),
+    openRibbon: () => dispatch(actions.setIsExpanded(true)),
     setAnnotationsManager: annotationsManager =>
         dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     handleRibbonToggle: () => dispatch(actions.toggleRibbon()),
     handleTooltipToggle: () => dispatch(actions.toggleTooltip()),
-    handleMouseEnter: () => dispatch(actions.setIsExpanded(true)),
-    handleMouseLeave: () => dispatch(actions.setIsExpanded(false)),
     handlePauseToggle: () => dispatch(pauseActs.togglePaused()),
     handleBookmarkToggle: () => dispatch(bookmarkActs.toggleBookmark()),
     onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
@@ -222,6 +172,17 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(collectionActs.addCollectionToPage(collection)),
     onCollectionDel: (collection: PageList) =>
         dispatch(collectionActs.deleteCollection(collection)),
+    setSearchValue: (value: string) => dispatch(actions.setSearchValue(value)),
+    setShowCommentBox: (value: boolean) =>
+        dispatch(actions.setShowCommentBox(value)),
+    setShowSearchBox: (value: boolean) =>
+        dispatch(actions.setShowSearchBox(value)),
+    setShowTagsPicker: (value: boolean) =>
+        dispatch(actions.setShowTagsPicker(value)),
+    setShowCollectionsPicker: (value: boolean) =>
+        dispatch(actions.setShowCollsPicker(value)),
+    setShowHighlights: (value: boolean) =>
+        dispatch(actions.setShowHighlights(value)),
 })
 
 export default connect(

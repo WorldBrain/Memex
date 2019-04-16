@@ -15,12 +15,15 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
     const url = popup.url(state)
     const tabId = popup.tabId(state)
     const isBookmarked = selectors.isBookmarked(state)
-
-    if (!isBookmarked) {
-        await createBookmarkRPC({ url, tabId })
-    } else {
-        await deleteBookmarkRPC({ url })
-    }
-
     dispatch(setIsBookmarked(!isBookmarked))
+
+    try {
+        if (!isBookmarked) {
+            await createBookmarkRPC({ url, tabId })
+        } else {
+            await deleteBookmarkRPC({ url })
+        }
+    } catch (err) {
+        dispatch(setIsBookmarked(isBookmarked))
+    }
 }

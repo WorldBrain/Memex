@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom'
 
 import RibbonSidebarController from './ribbon-sidebar-controller'
 import AnnotationsManager from 'src/sidebar-common/annotations-manager'
+import { KeyboardActions } from 'src/sidebar-common/sidebar/types'
 import {
     highlightAnnotations,
     highlightAndScroll,
@@ -19,12 +20,15 @@ export const setupRibbonAndSidebarUI = (
         handleRemoveRibbon,
         insertOrRemoveTooltip,
         setRibbonSidebarRef,
+        forceExpandRibbon = false,
+        ...props
     }: {
         annotationsManager: AnnotationsManager
         handleRemoveRibbon: () => void
         insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
         setRibbonSidebarRef: any
-    },
+        forceExpandRibbon?: boolean
+    } & Partial<KeyboardActions>,
 ) => {
     ReactDOM.render(
         <RibbonSidebarController
@@ -38,6 +42,8 @@ export const setupRibbonAndSidebarUI = (
             makeHighlightMedium={makeHighlightMedium}
             removeMediumHighlights={removeMediumHighlights}
             sortAnnotationsByPosition={sortAnnotationsByPosition}
+            forceExpand={forceExpandRibbon}
+            {...props}
         />,
         target,
     )

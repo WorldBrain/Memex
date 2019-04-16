@@ -13,6 +13,7 @@ import {
     fetchOnboardingStage,
     setOnboardingStage,
 } from 'src/overview/onboarding/utils'
+import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -60,13 +61,18 @@ export const openSidebar: (
     args: {
         url?: string
         title?: string
-        activeUrl?: string
         forceFetch?: boolean
-    },
-) => Thunk = ({ url, title, activeUrl, forceFetch } = {}) => async (
-    dispatch,
-    getState,
-) => {
+    } & OpenSidebarArgs,
+) => Thunk = ({
+    url,
+    title,
+    activeUrl,
+    forceFetch,
+}: OpenSidebarArgs & {
+    url?: string
+    title?: string
+    forceFetch?: boolean
+} = {}) => async (dispatch, getState) => {
     dispatch(setPage({ url, title }))
     dispatch(setSidebarOpen(true))
 

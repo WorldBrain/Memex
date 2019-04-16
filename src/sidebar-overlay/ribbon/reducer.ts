@@ -8,26 +8,43 @@ const defaultState: State = {
     isExpanded: false,
     isRibbonEnabled: true,
     isTooltipEnabled: true,
+    showCommentBox: false,
+    showSearchBox: false,
+    showTagsPicker: false,
+    showCollectionsPicker: false,
+    searchValue: '',
 }
 
-const setIsPageFullScreen = (state: State, isPageFullScreen: boolean) => ({
-    ...state,
-    isPageFullScreen,
-})
+const boolReducer = (stateKey: string, reset = false) => (
+    state: State,
+    payload: boolean,
+) => {
+    const resettableStates: Partial<State> = reset
+        ? {
+              showCommentBox: defaultState.showCommentBox,
+              showTagsPicker: defaultState.showTagsPicker,
+              showCollectionsPicker: defaultState.showCollectionsPicker,
+          }
+        : {}
 
-const setIsExpanded = (state: State, isExpanded: boolean) => ({
-    ...state,
-    isExpanded,
-})
+    return {
+        ...state,
+        ...resettableStates,
+        [stateKey]: payload,
+    }
+}
 
-const setRibbonEnabled = (state: State, isRibbonEnabled: boolean) => ({
+const setIsPageFullScreen = boolReducer('isPageFullScreen')
+const setIsExpanded = boolReducer('isExpanded')
+const setRibbonEnabled = boolReducer('isRibbonEnabled')
+const setTooltipEnabled = boolReducer('isTooltipEnabled')
+const setShowCommentBox = boolReducer('showCommentBox', true)
+const setShowSearchBox = boolReducer('showSearchBox')
+const setShowTagsPicker = boolReducer('showTagsPicker', true)
+const setShowCollectionsPicker = boolReducer('showCollectionsPicker', true)
+const setSearchValue = (state: State, searchValue: string) => ({
     ...state,
-    isRibbonEnabled,
-})
-
-const setTooltipEnabled = (state: State, isTooltipEnabled: boolean) => ({
-    ...state,
-    isTooltipEnabled,
+    searchValue,
 })
 
 const reducer = createReducer<State>(on => {
@@ -35,6 +52,11 @@ const reducer = createReducer<State>(on => {
     on(actions.setIsExpanded, setIsExpanded)
     on(actions.setRibbonEnabled, setRibbonEnabled)
     on(actions.setTooltipEnabled, setTooltipEnabled)
+    on(actions.setShowCommentBox, setShowCommentBox)
+    on(actions.setShowSearchBox, setShowSearchBox)
+    on(actions.setShowTagsPicker, setShowTagsPicker)
+    on(actions.setShowCollsPicker, setShowCollectionsPicker)
+    on(actions.setSearchValue, setSearchValue)
 }, defaultState)
 
 export default reducer

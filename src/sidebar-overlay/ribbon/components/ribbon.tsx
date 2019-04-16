@@ -25,6 +25,14 @@ interface Props {
     isSidebarOpen: boolean
     isPaused: boolean
     isBookmarked: boolean
+    showCommentBox: boolean
+    showSearchBox: boolean
+    showTagsPicker: boolean
+    showCollectionsPicker: boolean
+    showHighlights?: boolean
+    searchValue: string
+    isCommentSaved: boolean
+    commentText: string
     tagManager: ReactNode
     collectionsManager: ReactNode
     openSidebar: (args: any) => void
@@ -34,29 +42,16 @@ interface Props {
     handleRemoveRibbon: () => void
     handleBookmarkToggle: () => void
     handlePauseToggle: () => void
-    isCommentSaved: boolean
-    commentText: string
-    setShowCommentBox: () => void
+    setShowSidebarCommentBox: () => void
+    setShowCommentBox: (value: boolean) => void
+    setShowTagsPicker: (value: boolean) => void
+    setShowCollectionsPicker: (value: boolean) => void
+    setShowSearchBox: (value: boolean) => void
+    setShowHighlights: (value: boolean) => void
+    setSearchValue: (value: string) => void
 }
 
-interface State {
-    showCommentBox: boolean
-    showSearchBox: boolean
-    showTagsPicker: boolean
-    showCollectionsPicker: boolean
-    showHighlights?: boolean
-    searchValue: string
-}
-
-const defaultState: State = {
-    showCommentBox: false,
-    showSearchBox: false,
-    showTagsPicker: false,
-    showCollectionsPicker: false,
-    searchValue: '',
-}
-
-class Ribbon extends Component<Props, State> {
+class Ribbon extends Component<Props> {
     private openOverviewTabRPC
     private openOptionsTabRPC
     private ribbonRef: HTMLElement
@@ -69,7 +64,6 @@ class Ribbon extends Component<Props, State> {
         super(props)
         this.openOverviewTabRPC = remoteFunction('openOverviewTab')
         this.openOptionsTabRPC = remoteFunction('openOptionsTab')
-        this.state = defaultState
     }
 
     componentDidMount() {
@@ -81,19 +75,15 @@ class Ribbon extends Component<Props, State> {
     }
 
     private handleMouseLeave = () => {
-        this.props.commentText.length > 0
-            ? this.setState({
-                  ...defaultState,
-                  showCommentBox: true,
-              })
-            : this.setState(defaultState)
+        const value = this.props.commentText.length > 0
+        this.props.setShowCommentBox(value)
     }
 
     private handleSearchEnterPress: KeyboardEventHandler<
         HTMLInputElement
     > = event => {
         event.preventDefault()
-        const queryFilters = extractQueryFilters(this.state.searchValue)
+        const queryFilters = extractQueryFilters(this.props.searchValue)
         const queryParams = qs.stringify(queryFilters)
 
         this.openOverviewTabRPC(queryParams)
@@ -101,22 +91,21 @@ class Ribbon extends Component<Props, State> {
 
     private handleCommentIconBtnClick = () => {
         if (this.props.isSidebarOpen) {
-            this.props.setShowCommentBox()
+            this.props.setShowSidebarCommentBox()
             return
         }
-        this.setState(prevState => ({
-            ...defaultState,
-            showCommentBox: !prevState.showCommentBox,
-        }))
+        this.props.setShowCommentBox(!this.props.showCommentBox)
     }
 
     private toggleHighlights = () => {
-        this.state.showHighlights
-            ? removeHighlights()
-            : this.fetchAndHighlightAnnotations()
-        this.setState(prevState => ({
-            showHighlights: !prevState.showHighlights,
-        }))
+        const { showHighlights } = this.props
+
+        if (showHighlights) {
+            removeHighlights()
+        } else {
+            this.fetchAndHighlightAnnotations()
+        }
+        this.props.setShowHighlights(!showHighlights)
     }
 
     private fetchAndHighlightAnnotations = async () => {
@@ -136,10 +125,7 @@ class Ribbon extends Component<Props, State> {
         ) {
             event.preventDefault()
             event.stopPropagation()
-            this.setState(state => ({
-                ...state,
-                searchValue: state.searchValue + event.key,
-            }))
+            this.props.setSearchValue(this.props.searchValue + event.key)
             return
         }
 
@@ -155,7 +141,7 @@ class Ribbon extends Component<Props, State> {
     ) => {
         const searchValue = event.target.value
 
-        this.setState(state => ({ ...state, searchValue }))
+        this.props.setSearchValue(searchValue)
     }
 
     render() {
@@ -176,10 +162,7 @@ class Ribbon extends Component<Props, State> {
                             >
                                 <button
                                     onClick={() => this.openOverviewTabRPC()}
-                                    className={cx(
-                                        styles.button,
-                                        styles.logo,
-                                    )}
+                                    className={cx(styles.button, styles.logo)}
                                 />
                             </ButtonTooltip>
 
@@ -217,14 +200,13 @@ class Ribbon extends Component<Props, State> {
                                             styles.search,
                                         )}
                                         onClick={() => {
-                                            this.setState(prevState => ({
-                                                ...defaultState,
-                                                showSearchBox: !prevState.showSearchBox,
-                                            }))
+                                            this.props.setShowSearchBox(
+                                                !this.props.showSearchBox,
+                                            )
                                             this.inputQueryEl.focus()
                                         }}
                                     />
-                                    {this.state.showSearchBox && (
+                                    {this.props.showSearchBox && (
                                         <Tooltip
                                             position="left"
                                             itemClass={styles.tooltipLeft}
@@ -250,7 +232,7 @@ class Ribbon extends Component<Props, State> {
                                                         this.handleSearchChange
                                                     }
                                                     value={
-                                                        this.state.searchValue
+                                                        this.props.searchValue
                                                     }
                                                 />
                                             </form>
@@ -263,8 +245,8 @@ class Ribbon extends Component<Props, State> {
                             <ButtonTooltip
                                 tooltipText={
                                     !this.props.isBookmarked
-                                        ? 'Star page'
-                                        : 'Un-Star page'
+                                        ? 'Star page (b)'
+                                        : 'Un-Star page (b)'
                                 }
                                 position="left"
                             >
@@ -282,7 +264,7 @@ class Ribbon extends Component<Props, State> {
                             </ButtonTooltip>
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add notes to page"
+                                    tooltipText="Add notes to page (c)"
                                     position="left"
                                 >
                                     <button
@@ -292,7 +274,7 @@ class Ribbon extends Component<Props, State> {
                                         )}
                                         onClick={this.handleCommentIconBtnClick}
                                     />
-                                    {this.state.showCommentBox && (
+                                    {this.props.showCommentBox && (
                                         <Tooltip position="left">
                                             <CommentBoxContainer env="inpage" />
                                         </Tooltip>
@@ -319,7 +301,7 @@ class Ribbon extends Component<Props, State> {
 
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add tags to page"
+                                    tooltipText="Add tags to page (t)"
                                     position="left"
                                 >
                                     <button
@@ -328,13 +310,12 @@ class Ribbon extends Component<Props, State> {
                                             styles.tag,
                                         )}
                                         onClick={() =>
-                                            this.setState(prevState => ({
-                                                ...defaultState,
-                                                showTagsPicker: !prevState.showTagsPicker,
-                                            }))
+                                            this.props.setShowTagsPicker(
+                                                !this.props.showTagsPicker,
+                                            )
                                         }
                                     />
-                                    {this.state.showTagsPicker && (
+                                    {this.props.showTagsPicker && (
                                         <Tooltip position="left">
                                             {this.props.tagManager}
                                         </Tooltip>
@@ -344,7 +325,7 @@ class Ribbon extends Component<Props, State> {
 
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add page to collections"
+                                    tooltipText="Add page to collections (u)"
                                     position="left"
                                 >
                                     <button
@@ -353,13 +334,13 @@ class Ribbon extends Component<Props, State> {
                                             styles.collection,
                                         )}
                                         onClick={() =>
-                                            this.setState(prevState => ({
-                                                ...defaultState,
-                                                showCollectionsPicker: !prevState.showCollectionsPicker,
-                                            }))
+                                            this.props.setShowCollectionsPicker(
+                                                !this.props
+                                                    .showCollectionsPicker,
+                                            )
                                         }
                                     />
-                                    {this.state.showCollectionsPicker && (
+                                    {this.props.showCollectionsPicker && (
                                         <Tooltip
                                             position="left"
                                             itemClass={styles.collectionDiv}
@@ -386,7 +367,7 @@ class Ribbon extends Component<Props, State> {
                             </ButtonTooltip>
 
                             <ButtonTooltip
-                                tooltipText="Disable this Toolbar"
+                                tooltipText="Disable this Toolbar (You can still use keyboard shortcuts)"
                                 position="left"
                             >
                                 <button
@@ -415,9 +396,9 @@ class Ribbon extends Component<Props, State> {
                                         styles.button,
                                         styles.ribbonIcon,
                                         {
-                                            [styles.highlightsOn]: this.state
+                                            [styles.highlightsOn]: this.props
                                                 .showHighlights,
-                                            [styles.highlightsOff]: !this.state
+                                            [styles.highlightsOff]: !this.props
                                                 .showHighlights,
                                         },
                                     )}

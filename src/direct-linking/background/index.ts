@@ -9,6 +9,8 @@ import AnnotationStorage from './storage'
 import normalize from '../../util/encode-url-for-id'
 import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
+import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
+import { KeyboardActions } from 'src/sidebar-common/sidebar/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -86,7 +88,21 @@ export default class DirectLinkingBackground {
 
     async toggleSidebarOverlay(
         { tab },
-        { anchor, override, activeUrl } = {
+        {
+            anchor,
+            override,
+            activeUrl,
+            openSidebar,
+            openToTags,
+            openToComment,
+            openToBookmark,
+            openToCollections,
+        }: OpenSidebarArgs &
+            Partial<KeyboardActions> & {
+                anchor?: any
+                override?: boolean
+                openSidebar?: boolean
+            } = {
             anchor: null,
             override: false,
             activeUrl: undefined,
@@ -98,10 +114,31 @@ export default class DirectLinkingBackground {
         })
 
         const { id: tabId } = currentTab
+
+        const forceExpandRibbon =
+            openToTags ||
+            openToComment ||
+            openToCollections ||
+            openToBookmark ||
+            openSidebar
+
         // Make sure that the ribbon is inserted before trying to open the
         // sidebar.
-        await remoteFunction('insertRibbon', { tabId })({ override })
-        await remoteFunction('openSidebar', { tabId })({ anchor, activeUrl })
+        await remoteFunction('insertRibbon', { tabId })({
+            override,
+            forceExpandRibbon,
+            openToCollections,
+            openToBookmark,
+            openToComment,
+            openToTags,
+        })
+
+        if (!forceExpandRibbon || openSidebar) {
+            await remoteFunction('openSidebar', { tabId })({
+                anchor,
+                activeUrl,
+            })
+        }
     }
 
     followAnnotationRequest({ tab }: TabArg) {
