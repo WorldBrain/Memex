@@ -10,6 +10,7 @@ import normalize from '../../util/encode-url-for-id'
 import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
+import { KeyboardActions } from 'src/sidebar-common/sidebar/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -95,14 +96,11 @@ export default class DirectLinkingBackground {
             openToComment,
             openToBookmark,
             openToCollections,
-        }: OpenSidebarArgs & {
-            anchor?: any
-            override?: boolean
-            openToTags?: boolean
-            openToComment?: boolean
-            openToBookmark?: boolean
-            openToCollections?: boolean
-        } = {
+        }: OpenSidebarArgs &
+            Partial<KeyboardActions> & {
+                anchor?: any
+                override?: boolean
+            } = {
             anchor: null,
             override: false,
             activeUrl: undefined,

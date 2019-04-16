@@ -13,7 +13,7 @@ import SidebarContainer, {
     actions as sidebarActions,
     selectors as sidebarSelectors,
 } from 'src/sidebar-common'
-import { Annotation } from 'src/sidebar-common/sidebar/types'
+import { Annotation, KeyboardActions } from 'src/sidebar-common/sidebar/types'
 import { actions as commentBoxActions } from 'src/sidebar-common/comment-box'
 import AnnotationsManager from 'src/sidebar-common/annotations-manager'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
@@ -49,7 +49,7 @@ interface DispatchProps {
     toggleBookmark: () => void
 }
 
-interface OwnProps {
+interface OwnProps extends Partial<KeyboardActions> {
     closeTimeoutMs?: number
     forceExpand?: boolean
     annotationsManager: AnnotationsManager
@@ -98,6 +98,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         this.props.onInit()
         this._setupRPC()
         this.addEventListeners()
+        this.handleKeyboardActions(this.props, this.props.forceExpand)
     }
 
     componentWillUnmount() {
@@ -116,39 +117,48 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         isRibbonEnabled,
         isTooltipEnabled,
         openRibbon,
-        openToCollections,
-        openToBookmark,
-        openToComment,
-        openToTags,
+        ...keyboardActions
     }: {
         isRibbonEnabled: boolean
         isTooltipEnabled: boolean
         openRibbon: boolean
-        openToCollections: boolean
-        openToBookmark: boolean
-        openToComment: boolean
-        openToTags: boolean
-    }) => {
+    } & Partial<KeyboardActions>) => {
         this.props.setRibbonEnabled(isRibbonEnabled)
         this.props.setTooltipEnabled(isTooltipEnabled)
 
+        this.handleKeyboardActions(keyboardActions, openRibbon)
+    }
+
+    private handleKeyboardActions(
+        {
+            openToCollections,
+            openToBookmark,
+            openToComment,
+            openToTags,
+        }: Partial<KeyboardActions>,
+        openRibbon: boolean,
+    ) {
         if (!openRibbon) {
             return
         }
 
+        this.props.setRibbonEnabled(true)
         this.props.openRibbon()
+        this.resetTimeout()
 
         if (openToCollections) {
             this.props.setShowCollectionsPicker(true)
         }
+
         if (openToTags) {
             this.props.setShowTagsPicker(true)
         }
+
         if (openToComment) {
             this.props.setShowCommentBox(true)
         }
+
         if (openToBookmark) {
-            this.resetTimeout()
             this.props.toggleBookmark()
             this.closeRibbonAfterTimeout()
         }

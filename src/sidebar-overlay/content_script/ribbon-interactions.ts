@@ -76,6 +76,7 @@ export const insertRibbon = async ({
             ribbonSidebarRef = ref
         },
         forceExpandRibbon,
+        ...args,
     })
 }
 
