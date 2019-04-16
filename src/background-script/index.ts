@@ -19,6 +19,7 @@ import {
 import { StorageManager } from 'src/search/types'
 import { migrations } from './quick-and-dirty-migrations'
 import { AlarmsConfig } from './alarms'
+import { fetchUserId } from 'src/analytics/utils'
 
 class BackgroundScript {
     private utils: typeof utils
@@ -121,6 +122,12 @@ class BackgroundScript {
      */
     private setupUninstallURL() {
         this.runtimeAPI.setUninstallURL(this.defaultUninstallURL)
+        setTimeout(async () => {
+            const userId = await fetchUserId()
+            this.runtimeAPI.setUninstallURL(
+                `${this.defaultUninstallURL}?user=${userId}`,
+            )
+        }, 1000)
 
         this.storageChangesMan.addListener('local', USER_ID, ({ newValue }) =>
             this.runtimeAPI.setUninstallURL(
