@@ -71,7 +71,7 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
                     action: {
                         type: actionTypes.OPEN_URL,
                         url:
-                            'https://www.notion.so/worldbrain/7eeac673006b4878895da791f4cbcf90',
+                            'https://www.notion.so/worldbrain/be6c9e64d8fd45bdafebb2cc6b2c929f',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -88,7 +88,7 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
                     action: {
                         type: actionTypes.OPEN_URL,
                         url:
-                            'https://www.notion.so/worldbrain/7eeac673006b4878895da791f4cbcf90',
+                            'https://www.notion.so/worldbrain/be6c9e64d8fd45bdafebb2cc6b2c929f',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
