@@ -4,6 +4,8 @@ import { ClickHandler } from '../../types'
 import * as constants from '../constants'
 import TagsContainer from './tag-input-container'
 import { Tooltip } from 'src/common-ui/components'
+import { getLocalStorage } from 'src/util/storage'
+import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import cx from 'classnames'
 
 const styles = require('./comment-box-form.css')
@@ -23,6 +25,7 @@ interface State {
     rows: number
     isTagInputActive: boolean
     showTagsPicker: boolean
+    tagSuggestions: string[]
 }
 
 class CommentBoxForm extends React.Component<Props, State> {
@@ -35,13 +38,19 @@ class CommentBoxForm extends React.Component<Props, State> {
         rows: constants.NUM_DEFAULT_ROWS,
         isTagInputActive: false,
         showTagsPicker: false,
+        tagSuggestions: [],
+    }
+
+    async componentWillMount() {
+        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+        this.setState({ tagSuggestions: tagSuggestions.reverse() })
     }
 
     componentDidMount() {
         // Auto resize text area.
         if (this._textAreaRef) {
             this._textAreaRef.focus()
-                this._textAreaRef.addEventListener('scroll', (e: UIEvent) => {
+            this._textAreaRef.addEventListener('scroll', (e: UIEvent) => {
                 const targetElement = e.target as HTMLElement
 
                 let { rows } = this.state
@@ -103,9 +112,9 @@ class CommentBoxForm extends React.Component<Props, State> {
     private handleBookmarkBtnClick = (
         e: React.MouseEvent<HTMLButtonElement>,
     ) => {
-            e.preventDefault()
-            e.stopPropagation()
-            this.props.toggleBookmark(e)
+        e.preventDefault()
+        e.stopPropagation()
+        this.props.toggleBookmark(e)
     }
 
     private _handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -149,7 +158,10 @@ class CommentBoxForm extends React.Component<Props, State> {
 
         return (
             <Tooltip position="bottomLeft">
-                <TagsContainer env={this.props.env} />
+                <TagsContainer
+                    env={this.props.env}
+                    tagSuggestions={this.state.tagSuggestions}
+                />
             </Tooltip>
         )
     }
@@ -167,8 +179,8 @@ class CommentBoxForm extends React.Component<Props, State> {
                     value={commentText}
                     placeholder="Add your comment... (save with cmd/ctrl+enter)"
                     onClick={() => {
-                      this.setTagInputActive(false)
-                      this.setState(state => ({ showTagsPicker: false }))
+                        this.setTagInputActive(false)
+                        this.setState(state => ({ showTagsPicker: false }))
                     }}
                     onChange={this._handleChange}
                     onKeyDown={this._handleTextAreaKeyDown}

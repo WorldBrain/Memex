@@ -19,6 +19,8 @@ interface DispatchProps {
 
 interface OwnProps {
     env?: 'inpage' | 'overview'
+    /* tags from local storage */
+    tagSuggestions: string[]
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -30,7 +32,9 @@ const TagsContainer = (props: Props) => (
         isForAnnotation
         allowAdd
         initFilters={props.tags}
-        initSuggestions={props.initTagSuggestions}
+        initSuggestions={[
+            ...new Set([...props.initTagSuggestions, ...props.tagSuggestions]),
+        ]}
         onFilterAdd={props.addTag}
         onFilterDel={props.deleteTag}
         source="tag"
