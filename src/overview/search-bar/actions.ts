@@ -105,10 +105,6 @@ export const search: (args?: any) => Thunk = (
 
     const isLoggableURL = isLoggable({ url: window.location.href })
 
-    if (!isLoggableURL) {
-        dispatch(sidebarActs.closeSidebar())
-    }
-
     dispatch(resultsActs.resetActiveSidebarIndex())
     dispatch(resultsActs.setLoading(true))
 
