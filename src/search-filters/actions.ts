@@ -67,6 +67,9 @@ export const setExcDomainFilters = createAction<string[]>(
 )
 
 export const resetFilters = createAction('search-filters/resetFilters')
+export const resetFilterPopups = createAction(
+    'search-filters/resetFilterPopups',
+)
 export const showFilter = createAction('search-filters/showFilter')
 export const toggleBookmarkFilter = createAction(
     'search-filters/toggleBookmarkFilter',

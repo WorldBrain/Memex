@@ -28,6 +28,7 @@ interface DispatchProps {
     clearAllFilters: React.MouseEventHandler<HTMLButtonElement>
     fetchSuggestedTags: () => void
     fetchSuggestedDomains: () => void
+    resetFilterPopups: () => void
 }
 
 interface OwnProps {
@@ -38,14 +39,30 @@ interface OwnProps {
 type Props = StateProps & DispatchProps & OwnProps
 
 class FiltersSidebar extends Component<Props> {
+    private filtersRef: HTMLElement
+
     componentDidMount() {
         this.props.fetchSuggestedTags()
         this.props.fetchSuggestedDomains()
+        this.filtersRef.addEventListener('mouseleave', this.handleMouseLeave)
+    }
+
+    componentWillUnmount() {
+        this.filtersRef.removeEventListener('mouseleave', this.handleMouseLeave)
+    }
+
+    private setFiltersRef = (ref: HTMLElement) => {
+        this.filtersRef = ref
+    }
+
+    private handleMouseLeave = () => {
+        this.props.resetFilterPopups()
     }
 
     render() {
         return (
             <div
+                ref={this.setFiltersRef}
                 className={cx(styles.filtersSidebar, {
                     [styles.filtersSidebarOverview]:
                         this.props.env === 'overview',
@@ -131,6 +148,7 @@ const mapDispatchToProps: MapDispatchToProps<
     },
     fetchSuggestedTags: () => dispatch(filterActs.fetchSuggestedTags()),
     fetchSuggestedDomains: () => dispatch(filterActs.fetchSuggestedDomains()),
+    resetFilterPopups: () => dispatch(filterActs.resetFilterPopups()),
 })
 
 export default connect(

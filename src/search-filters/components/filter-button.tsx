@@ -15,7 +15,7 @@ interface Props {
     displayFilters?: React.ReactNode
     startDate?: number
     endDate?: number
-    togglePopup: () => void
+    togglePopup: React.MouseEventHandler<HTMLButtonElement>
     hidePopup: () => void
     clearFilters: () => void
     onFilterDel?: (args: any) => void
@@ -73,9 +73,13 @@ class FilterButton extends PureComponent<Props, State> {
                 <React.Fragment>
                     <div className={this.styles.dateBox}>
                         <span className={this.styles.detailsFilter}>
-                            {moment(this.props.startDate).format('MMM DD, YYYY') +
+                            {moment(this.props.startDate).format(
+                                'MMM DD, YYYY',
+                            ) +
                                 ' - ' +
-                                moment(this.props.endDate).format('MMM DD, YYYY')}
+                                moment(this.props.endDate).format(
+                                    'MMM DD, YYYY',
+                                )}
                         </span>
                     </div>
                 </React.Fragment>
@@ -85,9 +89,7 @@ class FilterButton extends PureComponent<Props, State> {
                 <React.Fragment>
                     {this.props.filteredItems.length > 0 && (
                         <React.Fragment>
-                            <span>
-                                {this.props.filteredItems.length}
-                            </span>
+                            <span>{this.props.filteredItems.length}</span>
                             <ButtonTooltip
                                 tooltipText="Clear this Filter"
                                 position="bottom"
@@ -109,34 +111,35 @@ class FilterButton extends PureComponent<Props, State> {
             <div>
                 <button
                     className={classNames(this.styles.tagButton, {
-                        [this.styles.tagButtonSelected] : this.props.filteredItems.length,
-                        [this.styles.tagButtonDate] : this.props.startDate || this.props.endDate,
+                        [this.styles.tagButtonSelected]: this.props
+                            .filteredItems.length,
+                        [this.styles.tagButtonDate]:
+                            this.props.startDate || this.props.endDate,
                     })}
                     onClick={this.props.togglePopup}
                 >
                     {this.props.source === 'Dates' ? (
                         <React.Fragment>
                             <div className={this.styles.dateTopBox}>
-                                {this.props.source} 
-                                {(this.props.startDate || this.props.endDate) && (
-                                        <span
-                                            className={this.styles.clearFilters}
-                                            onClick={this.handleClearFilters}
-                                        />
-                                    )
-                                }
+                                {this.props.source}
+                                {(this.props.startDate ||
+                                    this.props.endDate) && (
+                                    <span
+                                        className={this.styles.clearFilters}
+                                        onClick={this.handleClearFilters}
+                                    />
+                                )}
                             </div>
                             {this.renderCount()}
                         </React.Fragment>
-                        ) : (
-                            <div className={this.styles.pillContent}>
-                                {this.props.source}
-                                <span className={this.styles.renderCount}>
-                                    {this.renderCount()}
-                                </span>
-                            </div>
-                        )
-                    }
+                    ) : (
+                        <div className={this.styles.pillContent}>
+                            {this.props.source}
+                            <span className={this.styles.renderCount}>
+                                {this.renderCount()}
+                            </span>
+                        </div>
+                    )}
                 </button>
                 {this.props.children}
             </div>

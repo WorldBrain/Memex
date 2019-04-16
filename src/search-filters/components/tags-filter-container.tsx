@@ -28,6 +28,7 @@ interface DispatchProps {
     addExcTagFilter: (tag: string) => void
     delExcTagFilter: (tag: string) => void
     clearTagFilters: () => void
+    resetFilterPopups: () => void
 }
 
 interface OwnProps {
@@ -40,7 +41,11 @@ type Props = StateProps & DispatchProps & OwnProps
 interface State {}
 
 class TagsFilter extends PureComponent<Props, State> {
-    togglePopup = () => {
+    private togglePopup: React.MouseEventHandler<HTMLButtonElement> = e => {
+        if (this.props.env === 'inpage' && !this.props.tagFilterDropdown) {
+            this.props.resetFilterPopups()
+        }
+
         this.props.tagFilterDropdown
             ? this.props.hideTagFilter()
             : this.props.showTagFilter()
@@ -111,6 +116,7 @@ const mapDispatchToProps: MapDispatchToProps<
     },
     showTagFilter: () => dispatch(actions.showTagFilter()),
     hideTagFilter: () => dispatch(actions.hideTagFilter()),
+    resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
 export default connect(
