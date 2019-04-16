@@ -27,5 +27,7 @@ export async function generateTokenIfNot({
         browser.storage.local.set({ [INSTALL_TIME_KEY]: installTime })
     }
 
-    return uuidv4()
+    const newId = uuidv4()
+    browser.storage.local.set({ [USER_ID]: newId })
+    return newId
 }
