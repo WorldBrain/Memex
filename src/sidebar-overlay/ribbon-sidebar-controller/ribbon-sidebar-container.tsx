@@ -42,7 +42,6 @@ interface DispatchProps {
     setHoverAnnotationUrl: (url: string) => void
     setShowSidebarCommentBox: () => void
     openRibbon: () => void
-    closeRibbon: () => void
     setShowCommentBox: (value: boolean) => void
     setShowTagsPicker: (value: boolean) => void
     setShowCollectionsPicker: (value: boolean) => void
@@ -89,13 +88,11 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         this._setupFullScreenListener()
         this._setupRPC()
         this.attachEventListeners()
-        document.addEventListener('keydown', this.handleKeyDown)
     }
 
     componentWillUnmount() {
         this._removeFullScreenListener()
         this.removeEventListeners()
-        document.removeEventListener('keydown', this.handleKeyDown)
     }
 
     componentDidUpdate(prevProps: Props) {
@@ -103,12 +100,6 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         if (prevProps.annotations !== annotations && isSidebarOpen) {
             this.props.removeHighlights()
             this._highlightAnnotations()
-        }
-    }
-
-    private handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-            this.props.closeRibbon()
         }
     }
 
@@ -433,7 +424,6 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     setShowSidebarCommentBox: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
     openRibbon: () => dispatch(ribbonActions.setIsExpanded(true)),
-    closeRibbon: () => dispatch(ribbonActions.setIsExpanded(false)),
     toggleBookmark: () => dispatch(bookmarkActs.toggleBookmark()),
 })
 

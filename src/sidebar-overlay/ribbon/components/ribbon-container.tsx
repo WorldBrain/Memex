@@ -101,12 +101,14 @@ class RibbonContainer extends Component<Props> {
         this.ribbonRef.addEventListener('mouseenter', this.handleMouseEnter)
         this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
         document.addEventListener('click', this.handleClick)
+        document.addEventListener('keydown', this.handleKeyDown)
     }
 
     private _removeEventListeners() {
         this.ribbonRef.removeEventListener('mouseenter', this.handleMouseEnter)
         this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
         document.removeEventListener('click', this.handleClick)
+        document.removeEventListener('keydown', this.handleKeyDown)
     }
 
     private _setRibbonRef = (ref: HTMLElement) => {
@@ -116,6 +118,12 @@ class RibbonContainer extends Component<Props> {
     private _handleTooltipToggle = () => {
         this.props.insertOrRemoveTooltip(this.props.isTooltipEnabled)
         this.props.handleTooltipToggle()
+    }
+
+    private handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            this.props.closeRibbon()
+        }
     }
 
     private handleClick = (e: MouseEvent) => {
