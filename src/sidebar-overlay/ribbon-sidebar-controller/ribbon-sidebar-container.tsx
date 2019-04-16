@@ -42,6 +42,7 @@ interface DispatchProps {
     setHoverAnnotationUrl: (url: string) => void
     setShowSidebarCommentBox: () => void
     openRibbon: () => void
+    closeRibbon: () => void
     setShowCommentBox: (value: boolean) => void
     setShowTagsPicker: (value: boolean) => void
     setShowCollectionsPicker: (value: boolean) => void
@@ -49,6 +50,7 @@ interface DispatchProps {
 }
 
 interface OwnProps {
+    closeTimeoutMs?: number
     forceExpand?: boolean
     annotationsManager: AnnotationsManager
     handleRemoveRibbon: () => void
@@ -73,10 +75,19 @@ interface State {
 }
 
 class RibbonSidebarContainer extends React.Component<Props, State> {
-    private ribbonSidebarRef: HTMLDivElement = null
+    static defaultProps = { closeTimeoutMs: 1000 }
 
-    private setRibbonSidebarRef = (ref: HTMLDivElement) => {
-        this.ribbonSidebarRef = ref
+    private containerRef: HTMLDivElement
+    private ribbonRef: HTMLElement
+    private mouseInsideRibbon: boolean
+    private timeoutId
+
+    private setContainerRef = (ref: HTMLDivElement) => {
+        this.containerRef = ref
+    }
+
+    private setRibbonRef = (ref: HTMLElement) => {
+        this.ribbonRef = ref
     }
 
     state: State = {
@@ -85,13 +96,11 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
 
     componentDidMount() {
         this.props.onInit()
-        this._setupFullScreenListener()
         this._setupRPC()
-        this.attachEventListeners()
+        this.addEventListeners()
     }
 
     componentWillUnmount() {
-        this._removeFullScreenListener()
         this.removeEventListeners()
     }
 
@@ -139,7 +148,9 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             this.props.setShowCommentBox(true)
         }
         if (openToBookmark) {
+            this.resetTimeout()
             this.props.toggleBookmark()
+            this.closeRibbonAfterTimeout()
         }
     }
 
@@ -150,42 +161,92 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         })
     }
 
-    private _setupFullScreenListener = () => {
-        const { handleToggleFullScreen } = this.props
-        document.addEventListener('fullscreenchange', handleToggleFullScreen)
-    }
-
-    private _removeFullScreenListener = () => {
-        const { handleToggleFullScreen } = this.props
-        document.removeEventListener('fullscreenchange', handleToggleFullScreen)
-    }
-
-    private attachEventListeners() {
+    private addEventListeners() {
+        document.addEventListener(
+            'fullscreenchange',
+            this.props.handleToggleFullScreen,
+        )
         document.addEventListener('click', this.handleOutsideClick, false)
         document.addEventListener('keydown', this.onKeydown, false)
+        document.addEventListener('click', this.handleClick)
+        document.addEventListener('keydown', this.handleKeyDown)
 
-        this.ribbonSidebarRef.addEventListener(
+        this.ribbonRef.addEventListener(
             'mouseenter',
-            this.handleMouseEnter,
+            this.handleRibbonMouseEnter,
         )
-        this.ribbonSidebarRef.addEventListener(
+        this.ribbonRef.addEventListener(
             'mouseleave',
-            this.handleMouseLeave,
+            this.handleRibbonMouseLeave,
         )
+
+        this.containerRef.addEventListener('mouseenter', this.handleMouseEnter)
+        this.containerRef.addEventListener('mouseleave', this.handleMouseLeave)
     }
 
     private removeEventListeners() {
+        document.removeEventListener(
+            'fullscreenchange',
+            this.props.handleToggleFullScreen,
+        )
         document.removeEventListener('click', this.handleOutsideClick, false)
         document.removeEventListener('keydown', this.onKeydown, false)
+        document.removeEventListener('click', this.handleClick)
+        document.removeEventListener('keydown', this.handleKeyDown)
 
-        this.ribbonSidebarRef.removeEventListener(
+        this.ribbonRef.removeEventListener(
+            'mouseenter',
+            this.handleRibbonMouseEnter,
+        )
+        this.ribbonRef.removeEventListener(
+            'mouseleave',
+            this.handleRibbonMouseLeave,
+        )
+
+        this.containerRef.removeEventListener(
             'mouseenter',
             this.handleMouseEnter,
         )
-        this.ribbonSidebarRef.removeEventListener(
+        this.containerRef.removeEventListener(
             'mouseleave',
             this.handleMouseLeave,
         )
+    }
+
+    private handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            this.props.closeRibbon()
+        }
+    }
+
+    private handleClick = (e: MouseEvent) => {
+        if (!this.mouseInsideRibbon) {
+            this.props.closeRibbon()
+        }
+    }
+
+    private closeRibbonAfterTimeout() {
+        this.timeoutId = setTimeout(
+            this.props.closeRibbon,
+            this.props.closeTimeoutMs,
+        )
+    }
+
+    private resetTimeout = () => clearTimeout(this.timeoutId)
+
+    private handleRibbonMouseEnter = () => {
+        this.mouseInsideRibbon = true
+
+        this.resetTimeout()
+        this.props.openRibbon()
+    }
+
+    private handleRibbonMouseLeave = () => {
+        this.mouseInsideRibbon = false
+
+        if (this.props.commentText.length === 0) {
+            this.closeRibbonAfterTimeout()
+        }
     }
 
     private handleMouseEnter = (e: Event) => {
@@ -294,7 +355,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     }
 
     private _ensureAnnotationIsVisible = (url: string) => {
-        const containerNode: Node = ReactDOM.findDOMNode(this.ribbonSidebarRef)
+        const containerNode: Node = ReactDOM.findDOMNode(this.containerRef)
 
         // Find the root node as it may/may not be a shadow DOM.
         // 'any' prevents compilation error.
@@ -340,9 +401,10 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         } = this.props
 
         return (
-            <div ref={this.setRibbonSidebarRef}>
+            <div ref={this.setContainerRef}>
                 {isRibbonEnabled && (
                     <RibbonContainer
+                        setRibbonRef={this.setRibbonRef}
                         annotationsManager={annotationsManager}
                         isSidebarOpen={isSidebarOpen}
                         isRibbonEnabled={isRibbonEnabled}
@@ -424,6 +486,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     setShowSidebarCommentBox: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),
     openRibbon: () => dispatch(ribbonActions.setIsExpanded(true)),
+    closeRibbon: () => dispatch(ribbonActions.setIsExpanded(false)),
     toggleBookmark: () => dispatch(bookmarkActs.toggleBookmark()),
 })
 

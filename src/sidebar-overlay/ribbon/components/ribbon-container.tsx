@@ -61,16 +61,15 @@ interface DispatchProps {
     setShowHighlights: (value: boolean) => void
     setSearchValue: (value: string) => void
     openRibbon: () => void
-    closeRibbon: () => void
 }
 
 interface OwnProps {
-    closeTimeoutMs?: number
     commentText: string
     isSidebarOpen: boolean
     isRibbonEnabled: boolean
     isCommentSaved: boolean
     annotationsManager: AnnotationsManager
+    setRibbonRef: (e: HTMLElement) => void
     closeSidebar: () => void
     handleRemoveRibbon: () => void
     openSidebar: (args: any) => void
@@ -81,73 +80,14 @@ interface OwnProps {
 type Props = StateProps & DispatchProps & OwnProps
 
 class RibbonContainer extends Component<Props> {
-    static defaultProps = { closeTimeoutMs: 1000 }
-
-    private mouseInsideRibbon: boolean
-    private ribbonRef: HTMLElement
-    private timeoutId
-
     componentDidMount() {
-        this._addEventListeners()
         this.props.onInit()
         this.props.setAnnotationsManager(this.props.annotationsManager)
-    }
-
-    componentWillUnmount() {
-        this._removeEventListeners()
-    }
-
-    private _addEventListeners() {
-        this.ribbonRef.addEventListener('mouseenter', this.handleMouseEnter)
-        this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
-        document.addEventListener('click', this.handleClick)
-        document.addEventListener('keydown', this.handleKeyDown)
-    }
-
-    private _removeEventListeners() {
-        this.ribbonRef.removeEventListener('mouseenter', this.handleMouseEnter)
-        this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
-        document.removeEventListener('click', this.handleClick)
-        document.removeEventListener('keydown', this.handleKeyDown)
-    }
-
-    private _setRibbonRef = (ref: HTMLElement) => {
-        this.ribbonRef = ref
     }
 
     private _handleTooltipToggle = () => {
         this.props.insertOrRemoveTooltip(this.props.isTooltipEnabled)
         this.props.handleTooltipToggle()
-    }
-
-    private handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-            this.props.closeRibbon()
-        }
-    }
-
-    private handleClick = (e: MouseEvent) => {
-        if (!this.mouseInsideRibbon) {
-            this.props.closeRibbon()
-        }
-    }
-
-    private handleMouseEnter = () => {
-        this.mouseInsideRibbon = true
-
-        clearTimeout(this.timeoutId)
-        this.props.openRibbon()
-    }
-
-    private handleMouseLeave = () => {
-        this.mouseInsideRibbon = false
-
-        if (this.props.commentText.length === 0) {
-            this.timeoutId = setTimeout(
-                this.props.closeRibbon,
-                this.props.closeTimeoutMs,
-            )
-        }
     }
 
     private renderTagsManager() {
@@ -181,7 +121,7 @@ class RibbonContainer extends Component<Props> {
 
     render() {
         return (
-            <div ref={this._setRibbonRef}>
+            <div ref={this.props.setRibbonRef}>
                 <Ribbon
                     {...this.props}
                     tagManager={this.renderTagsManager()}
@@ -220,7 +160,6 @@ const mapDispatchToProps: MapDispatchToProps<
 > = dispatch => ({
     onInit: () => dispatch(actions.initState()),
     openRibbon: () => dispatch(actions.setIsExpanded(true)),
-    closeRibbon: () => dispatch(actions.setIsExpanded(false)),
     setAnnotationsManager: annotationsManager =>
         dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     handleRibbonToggle: () => dispatch(actions.toggleRibbon()),
