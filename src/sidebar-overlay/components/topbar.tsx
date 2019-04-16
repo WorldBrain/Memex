@@ -7,6 +7,7 @@ import SearchBox from './search-box'
 const styles = require('./topbar.css')
 
 interface Props {
+    env: 'inpage' | 'overview'
     searchValue: string
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
     handleSearchKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
@@ -27,19 +28,35 @@ const Topbar = ({
     ...props
 }: Props) => (
     <div className={styles.topbar}>
-        <SearchBox
-            placeholder={'Search Memex'}
-            searchValue={props.searchValue}
-            onSearchChange={props.handleChange}
-            onSearchEnter={props.handleSearchKeyDown}
-            onClearBtn={props.handleClearBtn}
-        />
-        <button 
-            onClick={props.handleFilterBtnClick}
-            className={styles.filterButton}
-        >
-            Filters
-        </button>
+        {props.env === 'overview' && (
+            <ButtonTooltip tooltipText="Close (ESC)" position="rightCentered">
+                <CloseButton
+                    title="Close sidebar once. Disable via Memex icon in the extension toolbar."
+                    clickHandler={e => {
+                        e.stopPropagation()
+                        handleCloseBtnClick()
+                    }}
+                />
+            </ButtonTooltip>
+        )}
+        {props.env === 'inpage' && (
+            <React.Fragment>
+                <SearchBox
+                    placeholder={'Search Memex'}
+                    searchValue={props.searchValue}
+                    onSearchChange={props.handleChange}
+                    onSearchEnter={props.handleSearchKeyDown}
+                    onClearBtn={props.handleClearBtn}
+                />
+                <button
+                    onClick={props.handleFilterBtnClick}
+                    className={styles.filterButton}
+                >
+                    Filters
+                </button>
+            </React.Fragment>
+        )}
+
         <div className={styles.right}>
             {/* Button to add a comment. */}
             <ButtonTooltip

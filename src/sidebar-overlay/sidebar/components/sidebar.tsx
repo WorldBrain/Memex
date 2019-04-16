@@ -186,6 +186,7 @@ class Sidebar extends React.Component<Props, State> {
                     disableCloseOnEsc
                 >
                     <Topbar
+                        env={env}
                         disableAddCommentBtn={showCommentBox}
                         handleCloseBtnClick={this.handleCloseBtnClick}
                         handleSettingsBtnClick={this._handleSettingsBtnClick}
@@ -197,9 +198,11 @@ class Sidebar extends React.Component<Props, State> {
                         handleFilterBtnClick={this.toggleShowFilters}
                     />
                     <div className={styles.sidebar}>
-                        <div className={styles.searchSwitch}>
-                            <SearchTypeSwitch />
-                        </div>
+                        {env === 'inpage' && (
+                            <div className={styles.searchSwitch}>
+                                <SearchTypeSwitch />
+                            </div>
+                        )}
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
                                 <CommentBoxContainer env={env} />

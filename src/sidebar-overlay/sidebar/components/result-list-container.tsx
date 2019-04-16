@@ -118,6 +118,7 @@ class ResultListContainer extends PureComponent<Props, State> {
 
         return (
             <IndexDropdown
+                env="inpage"
                 url={url}
                 onFilterAdd={this.props.addTag(index)}
                 onFilterDel={this.props.delTag(index)}
