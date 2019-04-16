@@ -33,8 +33,8 @@
     display: grid;
     width: 35px;
     z-index: 2147483647;
-    grid-template-rows: 25% 50% 25%;
-    grid-row-gap: 30px;
+    grid-template-rows: 20% 50% 20%;
+    grid-row-gap: 5%;
     transition: all 0.2s ease-in-out;
 }
 
@@ -62,7 +62,7 @@
     display: grid;
     flex-direction: column;
     align-self: flex-end;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     justify-content: center;
 }
 
@@ -293,10 +293,14 @@
 
     .logo {
         background-size: 16px;
+
+        &:hover {
+            background-size: 12px;
+        }
     }
 
     .ribbonExpanded {
-        grid-row-gap: 3px;
+        grid-row-gap: 5%;
     }
 
     .generalActions {
@@ -327,11 +331,15 @@
     }
 
     .ribbonExpanded {
-        grid-row-gap: 15px;
+        grid-row-gap: 5%;
     }
 
     .logo {
         background-size: 16px;
+
+        &:hover {
+            background-size: 12px;
+        }
     }
 
     .generalActions {

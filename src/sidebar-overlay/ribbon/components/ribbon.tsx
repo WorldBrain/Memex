@@ -245,8 +245,8 @@ class Ribbon extends Component<Props> {
                             <ButtonTooltip
                                 tooltipText={
                                     !this.props.isBookmarked
-                                        ? 'Star page'
-                                        : 'Un-Star page'
+                                        ? 'Star page (b)'
+                                        : 'Un-Star page (b)'
                                 }
                                 position="left"
                             >
@@ -264,7 +264,7 @@ class Ribbon extends Component<Props> {
                             </ButtonTooltip>
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add notes to page"
+                                    tooltipText="Add notes to page (c)"
                                     position="left"
                                 >
                                     <button
@@ -301,7 +301,7 @@ class Ribbon extends Component<Props> {
 
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add tags to page"
+                                    tooltipText="Add tags to page (t)"
                                     position="left"
                                 >
                                     <button
@@ -325,7 +325,7 @@ class Ribbon extends Component<Props> {
 
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add page to collections"
+                                    tooltipText="Add page to collections (u)"
                                     position="left"
                                 >
                                     <button
@@ -367,7 +367,7 @@ class Ribbon extends Component<Props> {
                             </ButtonTooltip>
 
                             <ButtonTooltip
-                                tooltipText="Disable this Toolbar"
+                                tooltipText="Disable this Toolbar (You can still use keyboard shortcuts)"
                                 position="left"
                             >
                                 <button
