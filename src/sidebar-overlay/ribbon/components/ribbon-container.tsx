@@ -83,27 +83,30 @@ type Props = StateProps & DispatchProps & OwnProps
 class RibbonContainer extends Component<Props> {
     static defaultProps = { closeTimeoutMs: 1000 }
 
+    private mouseInsideRibbon: boolean
     private ribbonRef: HTMLElement
     private timeoutId
 
     componentDidMount() {
-        this._setupHoverListeners()
+        this._addEventListeners()
         this.props.onInit()
         this.props.setAnnotationsManager(this.props.annotationsManager)
     }
 
     componentWillUnmount() {
-        this._removeHoverListeners()
+        this._removeEventListeners()
     }
 
-    private _setupHoverListeners() {
+    private _addEventListeners() {
         this.ribbonRef.addEventListener('mouseenter', this.handleMouseEnter)
         this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
+        document.addEventListener('click', this.handleClick)
     }
 
-    private _removeHoverListeners() {
+    private _removeEventListeners() {
         this.ribbonRef.removeEventListener('mouseenter', this.handleMouseEnter)
         this.ribbonRef.removeEventListener('mouseleave', this.handleMouseLeave)
+        document.removeEventListener('click', this.handleClick)
     }
 
     private _setRibbonRef = (ref: HTMLElement) => {
@@ -115,12 +118,22 @@ class RibbonContainer extends Component<Props> {
         this.props.handleTooltipToggle()
     }
 
+    private handleClick = (e: MouseEvent) => {
+        if (!this.mouseInsideRibbon) {
+            this.props.closeRibbon()
+        }
+    }
+
     private handleMouseEnter = () => {
+        this.mouseInsideRibbon = true
+
         clearTimeout(this.timeoutId)
         this.props.openRibbon()
     }
 
     private handleMouseLeave = () => {
+        this.mouseInsideRibbon = false
+
         if (this.props.commentText.length === 0) {
             this.timeoutId = setTimeout(
                 this.props.closeRibbon,
