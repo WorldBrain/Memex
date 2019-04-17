@@ -54,6 +54,8 @@
 
 .editIcon {
     background-image: url('/img/edit.svg');
+    background-size: 17px;
+    margin-left: 3px;
 }
 
 .trashIcon {

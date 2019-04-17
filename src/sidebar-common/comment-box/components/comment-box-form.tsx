@@ -41,8 +41,7 @@ class CommentBoxForm extends React.Component<Props, State> {
         // Auto resize text area.
         if (this._textAreaRef) {
             this._textAreaRef.focus()
-
-            this._textAreaRef.addEventListener('scroll', (e: UIEvent) => {
+                this._textAreaRef.addEventListener('scroll', (e: UIEvent) => {
                 const targetElement = e.target as HTMLElement
 
                 let { rows } = this.state
@@ -57,6 +56,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                 this._textAreaRef.focus()
             })
         }
+        this._textAreaRef.focus()
     }
 
     private _setTextAreaRef = (ref: HTMLTextAreaElement) => {
@@ -93,6 +93,8 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     private handleTagBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault()
+        e.stopPropagation()
         this.setState(prevState => ({
             showTagsPicker: !prevState.showTagsPicker,
         }))
@@ -101,9 +103,9 @@ class CommentBoxForm extends React.Component<Props, State> {
     private handleBookmarkBtnClick = (
         e: React.MouseEvent<HTMLButtonElement>,
     ) => {
-        if (this.props.commentText.length > 0) {
+            e.preventDefault()
+            e.stopPropagation()
             this.props.toggleBookmark(e)
-        }
     }
 
     private _handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -164,7 +166,10 @@ class CommentBoxForm extends React.Component<Props, State> {
                     className={styles.textArea}
                     value={commentText}
                     placeholder="Add your comment... (save with cmd/ctrl+enter)"
-                    onClick={() => this.setTagInputActive(false)}
+                    onClick={() => {
+                      this.setTagInputActive(false)
+                      this.setState(state => ({ showTagsPicker: false }))
+                    }}
                     onChange={this._handleChange}
                     onKeyDown={this._handleTextAreaKeyDown}
                     ref={this._setTextAreaRef}
@@ -194,22 +199,20 @@ class CommentBoxForm extends React.Component<Props, State> {
                             }
                         />
                     </div>
-                    {commentText.length > 0 && (
-                        <div className={styles.confirmButtons}>
-                            <button
-                                className={styles.cancelBtn}
-                                onClick={cancelComment}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className={styles.saveBtn}
-                                onClick={e => this.saveComment(e)}
-                            >
-                                Save
-                            </button>
-                        </div>
-                    )}
+                    <div className={styles.confirmButtons}>
+                        <button
+                            className={styles.cancelBtn}
+                            onClick={cancelComment}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className={styles.saveBtn}
+                            onClick={e => this.saveComment(e)}
+                        >
+                            Save
+                        </button>
+                    </div>
                 </div>
                 <span
                     className={styles.tagDropdown}

@@ -75,8 +75,10 @@ class Ribbon extends Component<Props> {
     }
 
     private handleMouseLeave = () => {
-        const value = this.props.commentText.length > 0
-        this.props.setShowCommentBox(value)
+        if (!this.props.isSidebarOpen) {
+            const value = this.props.commentText.length > 0
+            this.props.setShowCommentBox(value)
+        }
     }
 
     private handleSearchEnterPress: KeyboardEventHandler<

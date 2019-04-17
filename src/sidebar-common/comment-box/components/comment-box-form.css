@@ -91,9 +91,9 @@
 }
 
 .tagDropdown {
-    position: absolute;
-    align-self: center;
-    margin-top: 142px;
+    position: relative;
+    top: 3px;
+    right: 44%;
 }
 
 @keyframes slideIn {
