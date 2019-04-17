@@ -20,9 +20,14 @@
 .productHuntBatch {
     width: 250px;
     height: 54px;
+    opacity: 0.7;
 
     @media (max-width: 1100px) {
         display: none;
+    }
+
+    &:hover {
+        opacity: 1;
     }
 }
 

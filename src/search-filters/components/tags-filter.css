@@ -17,7 +17,7 @@
 
 .tooltip {
     margin-top: 5px;
-    height: 400px;
+    max-height: 400px;
 }
 
 .tagsPopup {

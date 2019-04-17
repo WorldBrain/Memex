@@ -52,7 +52,7 @@
     font-weight: 400;
     color: black;
     padding: 0;
-    background-color: transparent;
+    background-color: transparent !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .isNewNoteInvisible {
@@ -139,7 +139,7 @@
 
 .tagContainer {
     width: 100%;
-    height: 350px;
+    max-height: 350px;
     overflow-y: scroll;
     background-color: white;
 

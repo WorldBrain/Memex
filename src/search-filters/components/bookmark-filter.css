@@ -119,21 +119,18 @@
 }
 
 .button {
-    composes: nakedButton from 'src/common-ui/elements.css';
-    composes: hoversidebaropen from 'src/common-ui/colors.css';
-    width: 26px;
-    height: 26px;
+    border: 1px solid color9;
+    width: 24px;
+    height: 24px;
     border-radius: 3px;
-    opacity: 0.8;
     background-size: 16px;
     background-repeat: no-repeat;
     background-position: center;
-    border: none;
     background-color: transparent;
     cursor: pointer;
 
     &:hover {
-        opacity: 1;
+        background-color: color1;
     }
 
     &:active {
