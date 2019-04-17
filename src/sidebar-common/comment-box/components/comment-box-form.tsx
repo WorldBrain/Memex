@@ -27,7 +27,7 @@ interface State {
 
 class CommentBoxForm extends React.Component<Props, State> {
     /** Ref of the text area element to listen for `scroll` events. */
-    private _textAreaRef: HTMLElement
+    private _textAreaRef: HTMLTextAreaElement
     /** Ref of the tag button element to focus on it when tabbing. */
     private tagBtnRef: HTMLElement
 
@@ -59,7 +59,7 @@ class CommentBoxForm extends React.Component<Props, State> {
         }
     }
 
-    private _setTextAreaRef = (ref: HTMLElement) => {
+    private _setTextAreaRef = (ref: HTMLTextAreaElement) => {
         this._textAreaRef = ref
     }
 
@@ -93,11 +93,9 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     private handleTagBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (this.props.commentText.length > 0) {
-            this.setState(prevState => ({
-                showTagsPicker: !prevState.showTagsPicker,
-            }))
-        }
+        this.setState(prevState => ({
+            showTagsPicker: !prevState.showTagsPicker,
+        }))
     }
 
     private handleBookmarkBtnClick = (
@@ -142,8 +140,20 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.setState({ isTagInputActive })
     }
 
+    renderTagsTooltip() {
+        if (!this.state.showTagsPicker) {
+            return null
+        }
+
+        return (
+            <Tooltip position="bottomLeft">
+                <TagsContainer env={this.props.env} />
+            </Tooltip>
+        )
+    }
+
     render() {
-        const { env, commentText, cancelComment } = this.props
+        const { commentText, cancelComment } = this.props
         const { rows } = this.state
 
         return (
@@ -205,11 +215,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                     className={styles.tagDropdown}
                     onKeyDown={this.handleTagBtnKeyDown}
                 >
-                    {this.state.showTagsPicker && (
-                        <Tooltip position="bottomLeft">
-                            <TagsContainer env={env} />
-                        </Tooltip>
-                    )}
+                    {this.renderTagsTooltip()}
                 </span>
             </React.Fragment>
         )
