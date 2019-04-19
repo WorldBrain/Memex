@@ -41,12 +41,10 @@ class CommentBoxForm extends React.Component<Props, State> {
         tagSuggestions: [],
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
-    }
 
-    componentDidMount() {
         // Auto resize text area.
         if (this._textAreaRef) {
             this._textAreaRef.focus()

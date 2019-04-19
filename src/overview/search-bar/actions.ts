@@ -14,7 +14,6 @@ import {
 } from '../../search-filters'
 import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
-import { isLoggable } from 'src/activity-logger'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -88,9 +87,10 @@ export const setQueryTagsDomains: (
  * state will also be used to perform relevant pagination logic.
  *
  * @param [overwrite=false] Denotes whether to overwrite existing results or just append.
+ * @param [fromOverview=true] Denotes whether search is done from overview or inpage.
  */
 export const search: (args?: any) => Thunk = (
-    { overwrite } = { overwrite: false },
+    { fromOverview, overwrite } = { fromOverview: true, overwrite: false },
 ) => async (dispatch, getState) => {
     const firstState = getState()
     const query = selectors.query(firstState)
@@ -103,9 +103,7 @@ export const search: (args?: any) => Thunk = (
         return
     }
 
-    const isLoggableURL = isLoggable({ url: window.location.href })
-
-    if (!isLoggableURL) {
+    if (fromOverview) {
         dispatch(sidebarActs.closeSidebar())
     }
 
@@ -141,7 +139,7 @@ export const search: (args?: any) => Thunk = (
         skip: results.resultsSkip(state),
         lists: filters.listFilterParam(state),
         contentTypes: filters.contentType(state),
-        base64Img: isLoggableURL,
+        base64Img: !fromOverview,
     }
 
     try {

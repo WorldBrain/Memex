@@ -2,9 +2,10 @@ import 'rxjs/add/operator/debounceTime'
 import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/filter'
 
-import { acts as searchBarActs } from './search-bar'
-import { acts as resultActs } from './results'
-import { actions as filterActs } from '../search-filters'
+import { acts as searchBarActs } from 'src/overview/search-bar'
+import { acts as resultActs } from 'src/overview/results'
+import { actions as filterActs } from 'src/search-filters'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 
 const searchUpdateActions = [
     searchBarActs.setQuery.getType(),
@@ -40,4 +41,12 @@ export const refreshSearchResultsUponQueryChange = action$ =>
     action$
         .filter(action => searchUpdateActions.includes(action.type))
         .debounceTime(500) // wait until typing stops for 500ms
-        .map(() => searchBarActs.search({ overwrite: true })) // Schedule new fresh (overwriting) search
+        .map(() =>
+            searchBarActs.search({ overwrite: true, fromOverview: false }),
+        ) // Schedule new fresh (overwriting) search
+
+export const refreshSidebarSearchResultsUponQueryChange = action$ =>
+    action$
+        .filter(action => searchUpdateActions.includes(action.type))
+        .debounceTime(500) // wait until typing stops for 500ms
+        .map(() => sidebarActs.searchAnnotations())

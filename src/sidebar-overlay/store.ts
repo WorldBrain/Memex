@@ -5,10 +5,10 @@ import { createEpicMiddleware, combineEpics } from 'redux-observable'
 
 import rootReducer from './reducer'
 
-import * as overviewPage from 'src/overview/'
+import * as epics from './epics'
 
 const configureStore = () => {
-    const rootEpic = combineEpics(...Object.values(overviewPage.epics))
+    const rootEpic = combineEpics(...Object.values(epics))
 
     const middlewares = [createEpicMiddleware(rootEpic), thunk]
 

@@ -51,6 +51,9 @@ export function createShadowRootIfSupported(
 
     let shadow = null
     if (container.attachShadow) {
+        /** 'open' mode to access shadow dom elements from outisde the shadow root.
+         * More info: https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#Parameters
+         */
         shadow = container.attachShadow({ mode: 'open' })
         shadow.appendChild(rootElement)
         injectCSS(cssFile, shadow)

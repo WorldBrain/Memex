@@ -78,12 +78,10 @@ class ResultListContainer extends PureComponent<Props, State> {
         tagSuggestions: [],
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
-    }
 
-    componentDidMount() {
         this.resultsDivRef.addEventListener('click', this.handleOutsideClick)
     }
 
@@ -289,7 +287,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
         event.preventDefault()
         dispatch(deleteConfActs.show(url, index))
     },
-    handleScrollPagination: args => dispatch(resultActs.getMoreResults()),
+    handleScrollPagination: args => dispatch(resultActs.getMoreResults(false)),
     handlePillClick: tag => event => {
         event.preventDefault()
         dispatch(filterActs.toggleTagFilter(tag))

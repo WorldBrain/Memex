@@ -82,12 +82,10 @@ class ResultListContainer extends PureComponent<Props> {
         tagSuggestions: [],
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
-    }
 
-    componentDidMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
     }
 

@@ -35,12 +35,10 @@ class EditModeContent extends React.Component<Props, State> {
         tagSuggestions: [],
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
-    }
 
-    componentDidMount() {
         if (this._textAreaRef) {
             if (this.state.commentText.length !== 0) {
                 this.setState({ rows: constants.NUM_MIN_ROWS })

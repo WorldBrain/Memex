@@ -8,7 +8,7 @@ import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
 import { Annotation } from '../types'
 import { openSettings } from '../../utils'
-import FiltersSidebar from './filters-sidebar-container'
+import FiltersSidebarContainer from './filters-sidebar-container'
 import ResultsContainer from './results-container'
 import DragElement from 'src/overview/components/DragElement'
 import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
@@ -226,7 +226,7 @@ class Sidebar extends React.Component<Props, State> {
                     </div>
                 </Menu>
                 {this.state.showFiltersSidebar && (
-                    <FiltersSidebar
+                    <FiltersSidebarContainer
                         env={this.props.env}
                         toggleShowFilters={this.toggleShowFilters}
                     />

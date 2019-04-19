@@ -7,7 +7,7 @@ import * as actions from 'src/sidebar-overlay/sidebar/actions'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 
-import { goToAnnotation } from '../../utils'
+import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 
 const styles = require('./annotation-list.css')
 

@@ -3,7 +3,7 @@ import cx from 'classnames'
 
 const styles = require('./list-item.css')
 
-interface Props {
+export interface Props {
     listName: string
     isFiltered: boolean
     onEditButtonClick: React.MouseEventHandler<HTMLButtonElement>
@@ -70,46 +70,32 @@ class PageList extends Component<Props, State> {
 
     private handleMouseEnter = () => {
         this.setState(state => ({
-            ...state,
             isMouseInside: true,
         }))
     }
 
     private handleMouseLeave = () => {
         this.setState(state => ({
-            ...state,
             isMouseInside: false,
-        }))
-    }
-
-    private handleDragEnter = () => {
-        this.setState(state => ({
-            ...state,
-            isDragInside: true,
         }))
     }
 
     private handleDragOver = e => {
         e.preventDefault()
         this.setState(state => ({
-            ...state,
             isDragInside: true,
         }))
     }
 
     private handleDragLeave = () => {
         this.setState(state => ({
-            ...state,
             isDragInside: false,
         }))
     }
 
     private handleDrop: DragEventHandler = e => {
         e.preventDefault()
-        this.setState(state => ({
-            ...state,
-            isDragInside: false,
-        }))
+        this.handleDragLeave()
         // const url = e.dataTransfer.getData('URL')
         // Gets the URL of the dropped list item
         const url = e.dataTransfer.getData('text/plain')
@@ -140,7 +126,7 @@ class PageList extends Component<Props, State> {
                 onDragOver={this.handleDragOver}
                 onDrop={this.handleDrop}
                 title={this.props.listName}
-                onDragEnter={this.handleDragEnter}
+                onDragEnter={this.handleDragOver}
                 onDragLeave={this.handleDragLeave}
             >
                 <div className={styles.listName}>{this.props.listName}</div>

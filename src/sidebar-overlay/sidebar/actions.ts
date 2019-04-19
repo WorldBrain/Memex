@@ -16,7 +16,6 @@ import {
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import normalizeUrl from 'src/util/encode-url-for-id'
-import { isLoggable } from 'src/activity-logger'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -311,7 +310,7 @@ export const searchAnnotations: () => Thunk = () => async (
 
     url = url ? url : window.location.href
 
-    if (!isLoggable({ url }) || selectors.pageType(state) !== 'page') {
+    if (selectors.pageType(state) !== 'page') {
         dispatch(setIsLoading(false))
         return
     }
