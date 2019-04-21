@@ -69,9 +69,7 @@
     align-items: center;
     height: 55px;
     z-index: 1200;
-    padding-left: 10px;
-    padding-right: 10px;
-    max-width: 205px;
+    width: 250px;
 }
 
 .longContainer {
@@ -89,10 +87,10 @@
     color: #767676;
     padding: 2px 4px;
     border-radius: 3%;
-    animation: appear 0.2s forwards 0s;
     top: 33px;
-    left: 41px;
-    position: relative;
+    left: 50px;
+    width: max-content;
+    position: absolute;
 
     &:hover {
         color: #111;
@@ -107,9 +105,9 @@
     cursor: pointer;
     outline: none;
     composes: nakedButton from 'src/common-ui/elements.css';
-    margin-top: 9px;
+    top: 9px;
     position: absolute;
-    left: 7px;
+    left: 6px;
 }
 
 @keyframes appear {

@@ -1,7 +1,7 @@
 .parentExpanded {
-    padding-left: 9px;
+    padding-left: 15px;
     border-left: 6px solid #ededed; /* MAN - Manual Adjustment Needed */
-    margin-top: -13px;
+    margin-top: -17px;
     padding-top: 9px;
     margin-left: 2px;
     margin-bottom: 35px;
@@ -11,7 +11,7 @@
 
 .resultCount {
     composes: subTitleColor nakedButton hoverColor from '../../../common-ui/colors.css';
-    margin: -10px 0 0 0;
+    margin: -13px 0 15px 0;
     text-align: start;
     font-size: 13px;
     align-self: center;
@@ -36,7 +36,7 @@
 }
 
 .expandedCount {
-    margin-top: -5px;
+    margin: -5px 0 0 0;
     width: fill-available;
 }
 

@@ -15,18 +15,6 @@ class ResultList extends PureComponent<Props> {
         scrollDisabled: false,
     }
 
-    get listHeightStyles() {
-        if (!this.props.scrollDisabled) {
-            return {}
-        }
-
-        // Calculate height of the list to prevent scrolling
-        // Height = 90vh + amount of height scrolled
-        return {
-            height: 0.9 * window.innerHeight + window.pageYOffset - 10,
-        }
-    }
-
     get mainClass() {
         return cx(styles.root, { [styles.lessHeight]: this.props.isFilterBarActive })
     }
@@ -37,7 +25,6 @@ class ResultList extends PureComponent<Props> {
                 className={cx(this.mainClass, {
                     [styles.filterBarActive]: this.props.isFilterBarActive,
                 })}
-                style={this.listHeightStyles}
             >
                 {this.props.children}
                 <div className={styles.infoBox}>

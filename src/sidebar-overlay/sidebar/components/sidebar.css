@@ -5,7 +5,7 @@
 }
 
 .sidebar {
-    height: 100vh;
+    height: 80%;
     background: #fff;
     padding: 0px 8px 150px 8px;
     display: flex;
@@ -19,7 +19,7 @@
 .resultsContainer {
     flex: 1;
     position: relative;
-    top: 60px;
+    top: 30px;
 }
 
 .annotationsSection {
@@ -35,8 +35,10 @@
 .commentBoxContainer {
     composes: annotationCard from '../../../common-ui/elements.css';
     background: white;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     border-radius: 3px;
+    top: 70px;
+    position: relative;
 
     &:hover {
         background: white;

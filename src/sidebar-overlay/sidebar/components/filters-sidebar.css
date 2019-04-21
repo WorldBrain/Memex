@@ -25,7 +25,7 @@
 .filtersNav {
     display: flex;
     justify-content: space-between;
-    padding: 0 10px;
+    padding: 10px 10px 0 15px;
     width: fill-available;
     align-items: center;
 }
@@ -73,7 +73,7 @@
 .arrow {
     composes: nakedSquareButton from 'src/common-ui/elements.css';
     composes: arrowTriangle from 'src/common-ui/icons.css';
-    background-size: 18px 18px;
+    background-size: 16px 16px;
     background-color: transparent;
     transform: rotate(180deg);
     background-position: center center;
@@ -81,6 +81,7 @@
     height: 25px;
     cursor: pointer;
     border: none;
+    outline: none;
 }
 
 .listsDiv {

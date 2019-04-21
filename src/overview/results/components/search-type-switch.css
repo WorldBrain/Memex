@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6, color2, radius3, color7, color3, color12 from colors;
+@value color4, color6, color2, radius3, color7, color3, color12, color14 from colors;
 
 .container {
     display: flex;
@@ -9,7 +9,7 @@
     align-items: center;
     padding-top: 60px;
     padding-bottom: 5px;
-    border-bottom: 1px solid #efefef;
+    border-bottom: 1px solid color14;
 }
 
 .unfoldAllBtn {

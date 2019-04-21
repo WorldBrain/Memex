@@ -12,7 +12,7 @@ const baseStyles = {
         right: '35px',
         top: '0px',
         zIndex: 2147483646,
-        overflow: 'hidden',
+        overflowY: 'hidden',
         width: '350px',
         height: '100%',
         background: '#fff',
@@ -28,7 +28,8 @@ const baseStyles = {
     },
     bmItem: {
         display: 'block',
-        overflow: 'hidden scroll',
+        overflowY: 'scroll',
+        height: '100%',
     },
 }
 

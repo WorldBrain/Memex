@@ -10,6 +10,7 @@
     border-bottom: 1px solid color9;
     word-wrap: break-word;
     font-size: 14px;
+    height: 38px;
     justify-content: space-between;
     box-sizing: border-box;
 
@@ -18,7 +19,6 @@
     &:active {
         background-color: color14;
         outline: none;
-        height: 38px;
     }
 
     &.isNew {
@@ -140,6 +140,7 @@
 
 .tagContainer {
     width: 100%;
+    height: fit-content;
     max-height: 350px;
     overflow-y: scroll;
     background-color: white;

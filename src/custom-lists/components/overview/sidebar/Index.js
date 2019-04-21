@@ -148,6 +148,8 @@ class ListContainer extends Component {
                 <div
                     className={cx({
                         [extStyles.allLists]: this.props.isSidebarOpen,
+                        [extStyles.allListsLocked]: this.props
+                                .isSidebarLocked,
                     })}
                 >
                     <div

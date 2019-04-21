@@ -30,6 +30,10 @@
     border: none;
 }
 
+.clearFilters {
+    composes: clearFilters from 'src/sidebar-overlay/sidebar/components/filters-sidebar.css';
+}
+
 .button {
     composes: nakedSquareButton from '../../common-ui/elements.css';
     width: 25px;

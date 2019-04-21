@@ -13,21 +13,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 10px 5px 20px;
+    padding: 5px 10px 5px 15px;
 
     &:hover {
         background-color: color14;
     }
 }
 
-.collectionSidebar {
-    padding: 5px 10px;
-}
-
 .myCollection {
     font-size: 1.45em;
     font-weight: 500;
-    padding: 0px 70px 0px 0px;
 }
 
 .myCollectionSidebar {
@@ -63,9 +58,14 @@
 
 .allLists {
     overflow-y: scroll;
+    overflow-x: visible;
     width: max-content;
     width: 100%;
     flex: 1;
+}
+
+.allListsLocked {
+    overflow-y: scroll;
 }
 
 .allListsInPage {
@@ -86,8 +86,6 @@
 }
 
 .wrapperLocked {
-    overflow-y: scroll;
-    height: 90vh;
     padding-bottom: 50px;
 }
 

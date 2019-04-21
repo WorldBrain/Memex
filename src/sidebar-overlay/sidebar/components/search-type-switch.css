@@ -1,13 +1,15 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6, color2, radius3, color7, color3 from colors;
+@value color4, color6, color2, radius3, color7, color3, color14 from colors;
 
 .masterContainer {
     position: fixed;
     background-color: white;
     z-index: 2;
-    padding-bottom: 5px;
     width: 350px;
     margin-left: -8px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid color14;
 }
 
 .container {
@@ -34,6 +36,7 @@
     font-weight: 600;
     cursor: pointer;
     outline: none;
+    margin-right: 1px;
 
     &:disabled {
         background-color: color7;
@@ -61,7 +64,8 @@
 .pageSwitch {
     display: flex;
     justify-content: space-between;
-    margin: 0 10px 0px 3px;
+    margin: 0 2px 0px 3px;
+    width: 100%;
 
     & * {
         font-size: 11px;
