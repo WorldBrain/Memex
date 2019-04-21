@@ -22,6 +22,11 @@ class PageInfo extends React.Component<Props> {
         )
     }
 
+    get hrefToPage() {
+        const { url } = this.props.page
+        return `https://${url}`
+    }
+
     render() {
         const { url, title } = this.props.page
         return (
@@ -34,9 +39,14 @@ class PageInfo extends React.Component<Props> {
                         >
                             Go back
                         </button>
-                        <span className={styles.pageInfo}>
-                            {title} - {url}
-                        </span>
+                        <div className={styles.pageInfo}>
+                            <a target="_blank" href={this.hrefToPage} className={styles.title}>
+                                {title}
+                            </a>
+                            <a target="_blank" href={this.hrefToPage} className={styles.url}>
+                                {url}
+                            </a>
+                        </div>
                     </div>
                 )}
             </React.Fragment>

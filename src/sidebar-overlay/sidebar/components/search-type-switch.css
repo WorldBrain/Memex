@@ -15,7 +15,7 @@
 .container {
     display: flex;
     align-self: flex-start;
-    margin: 5px 3px;
+    margin: 5px 3px 4px 3px;
 }
 
 .unfoldAllBtn {

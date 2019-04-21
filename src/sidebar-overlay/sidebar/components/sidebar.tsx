@@ -233,7 +233,9 @@ class Sidebar extends React.Component<Props, State> {
                                 <CommentBoxContainer env={env} />
                             </div>
                         )}
-                        <div className={styles.resultsContainer}>
+                        <div className={cx(styles.resultsContainer, {
+                            [styles.resultsContainerPage] : env === 'overview',
+                        })}>
                             {this.isPageSearch || !this.isCurrentPageSearch ? (
                                 this.renderResults()
                             ) : this.props.isLoading &&

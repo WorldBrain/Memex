@@ -60,6 +60,7 @@
 
 .trashIcon {
     background-image: url('/img/trash.svg');
+    background-position-y: 4px;
 }
 
 .goToPageIcon {

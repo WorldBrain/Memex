@@ -24,10 +24,12 @@
     font-size: 12px;
     font-weight: 600;
     position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
     outline: none;
     cursor: pointer;
     border: none;
+    margin-left: 1px;
 }
 
 .clearFilters {

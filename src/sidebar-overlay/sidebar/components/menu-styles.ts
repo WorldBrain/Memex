@@ -31,6 +31,11 @@ const baseStyles = {
         overflowY: 'scroll',
         flex: '1',
     },
+    bmItemList: {
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+    },
 }
 
 const menuStyles = (env: 'inpage' | 'overview') => {

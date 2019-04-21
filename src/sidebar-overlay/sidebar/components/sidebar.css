@@ -22,6 +22,10 @@
     top: 45px;
 }
 
+.resultsContainerPage {
+    top: 2px;
+}
+
 .annotationsSection {
     width: 100%;
     background: #fff;

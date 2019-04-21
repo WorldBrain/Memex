@@ -57,7 +57,7 @@ const Topbar = ({
                     Filters
                     {props.showClearFiltersBtn && (
                         <ButtonTooltip
-                            position="right"
+                            position="bottom"
                             tooltipText={'Clear filters'}
                         >
                             <span

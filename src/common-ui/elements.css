@@ -144,7 +144,7 @@
     font-weight: 600;
     composes: darkBlue from './colors.css';
     composes: nakedButton;
-    display: inline-block;
+    display: inline-flex;
 }
 
 .searchField {

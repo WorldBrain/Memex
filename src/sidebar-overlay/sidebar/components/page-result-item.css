@@ -32,6 +32,7 @@
     text-decoration: none;
     z-index: 0;
     margin-bottom: 14px;
+    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
     background-color: white;
     width: 100%;
     min-height: var(--height);
@@ -364,4 +365,15 @@
 
 .annotsCount {
     color: white;
+}
+
+@keyframes onload {
+    0% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
