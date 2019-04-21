@@ -8,13 +8,14 @@ import {
     selectors as commentBoxSelectors,
 } from '../../comment-box'
 import Sidebar from './sidebar'
-import SidebarState, { Annotation } from '../types'
+import SidebarState, { Annotation, Page } from '../types'
 import RootState, { MapDispatchToProps } from '../../types'
 import AnnotationsManager from '../../annotations-manager'
 import {
     acts as searchBarActs,
     selectors as searchBar,
 } from 'src/overview/search-bar'
+import { actions as filterActs } from 'src/search-filters'
 
 interface StateProps {
     isOpen: boolean
@@ -29,6 +30,8 @@ interface StateProps {
     pageType: 'page' | 'all'
     searchType: 'notes' | 'pages'
     searchValue: string
+    showClearFiltersBtn: boolean
+    page: Page
 }
 
 interface DispatchProps {
@@ -45,6 +48,8 @@ interface DispatchProps {
     onQueryChange: (searchValue: string) => void
     handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
     handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
+    clearAllFilters: () => void
+    resetPage: React.MouseEventHandler<HTMLButtonElement>
 }
 
 interface OwnProps {
@@ -151,6 +156,8 @@ const mapStateToProps: MapStateToProps<
     pageType: selectors.pageType(state),
     searchType: selectors.searchType(state),
     searchValue: searchBar.query(state),
+    showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
+    page: selectors.page(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
@@ -191,6 +198,20 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     handlePageTypeClick: e => {
         e.preventDefault()
         dispatch(actions.togglePageType())
+    },
+    clearAllFilters: () => {
+        dispatch(filterActs.resetFilters())
+        dispatch(searchBarActs.clearFilters())
+    },
+    resetPage: e => {
+        e.preventDefault()
+        dispatch(
+            actions.setPage({
+                url: null,
+                title: null,
+            }),
+        )
+        dispatch(actions.fetchAnnotations())
     },
 })
 

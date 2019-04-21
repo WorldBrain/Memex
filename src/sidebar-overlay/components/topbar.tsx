@@ -9,6 +9,7 @@ const styles = require('./topbar.css')
 interface Props {
     env: 'inpage' | 'overview'
     searchValue: string
+    showClearFiltersBtn: boolean
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
     handleSearchKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
     handleClearBtn: (e: React.MouseEvent<HTMLButtonElement>) => void
@@ -17,6 +18,7 @@ interface Props {
     handleCloseBtnClick: () => void
     handleSettingsBtnClick: () => void
     handleAddCommentBtnClick: () => void
+    handleClearFiltersBtnClick: React.MouseEventHandler<HTMLSpanElement>
 }
 
 /* tslint:disable-next-line variable-name */
@@ -53,6 +55,17 @@ const Topbar = ({
                     className={styles.filterButton}
                 >
                     Filters
+                    {props.showClearFiltersBtn && (
+                        <ButtonTooltip
+                            position="right"
+                            tooltipText={'Clear filters'}
+                        >
+                            <span
+                                className={styles.clearFilters}
+                                onClick={props.handleClearFiltersBtnClick}
+                            />
+                        </ButtonTooltip>
+                    )}
                 </button>
             </React.Fragment>
         )}

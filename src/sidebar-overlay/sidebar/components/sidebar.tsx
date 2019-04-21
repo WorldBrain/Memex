@@ -6,13 +6,14 @@ import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
-import { Annotation } from '../types'
+import { Annotation, Page } from '../types'
 import { openSettings } from '../../utils'
 import FiltersSidebarContainer from './filters-sidebar-container'
 import ResultsContainer from './results-container'
 import DragElement from 'src/overview/components/DragElement'
 import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
 import SearchTypeSwitch from './search-type-switch'
+import PageInfo from './page-info'
 import cx from 'classnames'
 
 const styles = require('./sidebar.css')
@@ -29,6 +30,8 @@ interface Props {
     showCommentBox: boolean
     searchValue: string
     showCongratsMessage: boolean
+    showClearFiltersBtn: boolean
+    page: Page
     pageType: 'page' | 'all'
     searchType: 'notes' | 'pages'
     closeSidebar: () => void
@@ -47,6 +50,8 @@ interface Props {
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
     handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
+    clearAllFilters: () => void
+    resetPage: React.MouseEventHandler<HTMLButtonElement>
 }
 
 interface State {
@@ -109,6 +114,17 @@ class Sidebar extends React.Component<Props, State> {
     private handleCloseBtnClick = () => {
         this.props.closeSidebar()
         this.setState({ showFiltersSidebar: false })
+    }
+
+    private handleClearFiltersBtnClick = (
+        e: React.MouseEvent<HTMLSpanElement>,
+    ) => {
+        e.preventDefault()
+        e.stopPropagation()
+        this.setState(state => ({
+            showFiltersSidebar: false,
+        }))
+        this.props.clearAllFilters()
     }
 
     get isPageSearch() {
@@ -186,22 +202,31 @@ class Sidebar extends React.Component<Props, State> {
                     disableCloseOnEsc
                 >
                     <Topbar
-                        env={env}
+                        {...this.props}
                         disableAddCommentBtn={showCommentBox}
                         handleCloseBtnClick={this.handleCloseBtnClick}
                         handleSettingsBtnClick={this._handleSettingsBtnClick}
                         handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        searchValue={this.props.searchValue}
                         handleChange={this.handleChange}
                         handleSearchKeyDown={this.handleSearchKeyDown}
                         handleClearBtn={this.handleClearBtn}
                         handleFilterBtnClick={this.toggleShowFilters}
+                        handleClearFiltersBtnClick={
+                            this.handleClearFiltersBtnClick
+                        }
                     />
                     <div className={styles.sidebar}>
                         {env === 'inpage' && (
-                            <div className={styles.searchSwitch}>
-                                <SearchTypeSwitch />
-                            </div>
+                            <React.Fragment>
+                                <div className={styles.searchSwitch}>
+                                    <SearchTypeSwitch />
+                                </div>
+                                <PageInfo
+                                    page={this.props.page}
+                                    isCurrentPage={this.isCurrentPageSearch}
+                                    resetPage={this.props.resetPage}
+                                />
+                            </React.Fragment>
                         )}
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
