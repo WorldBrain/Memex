@@ -99,6 +99,9 @@ export const setAnnotationsFilter = createAction<boolean>(
 )
 export const clearFilterTypes = createAction('search-filters/clearFilterTypes')
 export const toggleFilterBar = createAction('search-filters/toggleFilterBar')
+export const setShowFilterBar = createAction<boolean>(
+    'search-filters/setShowFilterBar',
+)
 
 /**
  * Action to toggle annotation content filter.

@@ -280,7 +280,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     resultsClusteredByDay: selectors.resultsClusteredByDay(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
-    isFilterBarActive: searchBar.showFilterBar(state),
+    isFilterBarActive: filters.showFilterBar(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({

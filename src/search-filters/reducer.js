@@ -116,6 +116,11 @@ const toggleFilterBar = state => ({
     showFilterBar: !state.showFilterBar,
 })
 
+const setShowFilterBar = (state, value) => ({
+    ...state,
+    showFilterBar: value,
+})
+
 /**
  * Setting annotations involves setting both notes and highlights
  */
@@ -267,6 +272,7 @@ export default createReducer(
         [actions.hideFilterTypes]: hideFilterTypes,
         [actions.toggleFilterTypes]: toggleFilterTypes,
         [actions.toggleFilterBar]: toggleFilterBar,
+        [actions.setShowFilterBar]: setShowFilterBar,
         [actions.resetFilters]: resetFilters,
         [actions.resetFilterPopups]: resetFilterPopups,
         [actions.addTagFilter]: addFilter('tags'),
