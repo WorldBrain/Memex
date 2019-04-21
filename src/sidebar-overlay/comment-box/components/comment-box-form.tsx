@@ -175,7 +175,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                     rows={rows}
                     className={styles.textArea}
                     value={commentText}
-                    placeholder="Add your comment... (save with cmd/ctrl+enter)"
+                    placeholder="Add a private note... (save with cmd/ctrl+enter)"
                     onClick={() => {
                         this.setTagInputActive(false)
                         this.setState(state => ({ showTagsPicker: false }))

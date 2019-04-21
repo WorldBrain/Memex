@@ -144,7 +144,7 @@ class EditModeContent extends React.Component<Props, State> {
                     rows={this.state.rows}
                     className={styles.textArea}
                     value={this.state.commentText}
-                    placeholder="Add your comment... (save with cmd/ctrl+enter)"
+                    placeholder="Add a private note... (save with cmd/ctrl+enter)"
                     onClick={() => this._setTagInputActive(false)}
                     onChange={this._handleChange}
                     onKeyDown={this._handleTextAreaKeyDown}

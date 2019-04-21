@@ -29,7 +29,7 @@ const baseStyles = {
     bmItem: {
         display: 'block',
         overflowY: 'scroll',
-        height: '100%',
+        flex: '1',
     },
 }
 

@@ -19,7 +19,7 @@
 .resultsContainer {
     flex: 1;
     position: relative;
-    top: 30px;
+    top: 45px;
 }
 
 .annotationsSection {
@@ -35,9 +35,9 @@
 .commentBoxContainer {
     composes: annotationCard from '../../../common-ui/elements.css';
     background: white;
-    margin-bottom: 20px;
     border-radius: 3px;
-    top: 70px;
+    top: 50px;
+    margin-bottom: 70px;
     position: relative;
 
     &:hover {

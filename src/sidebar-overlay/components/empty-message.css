@@ -6,6 +6,7 @@
     margin: 0px auto;
     text-align: center;
     margin-top: 90px;
+    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 
     & .emoji {
         font-size: 20px;
@@ -23,4 +24,15 @@
 
 .learnHow {
     composes: CTA from '../../common-ui/elements.css';
+}
+
+@keyframes onload {
+    0% {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
