@@ -31,6 +31,10 @@
     padding: 1px 4px 2px 7px;
 }
 
+.tagButtonDate {
+    composes: tagButtonSelected;
+}
+
 .tagButton:focus {
     background-color: color1;
 }
@@ -53,12 +57,17 @@
     cursor: pointer;
     width: 18px;
     height: 18px;
-    margin-left: 10px;
+    margin-left: 5px;
     background-position: center center;
 
     &:hover {
         background-color: color8;
     }
+}
+
+.dateBox {
+    display: flex;
+    align-items: center;
 }
 
 .detailsFilter {

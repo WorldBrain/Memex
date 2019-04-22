@@ -25,6 +25,7 @@ export interface DispatchProps {
     toggleFilterTypes?: () => void
     clearFilterTypes?: () => void
     hideFilterTypes?: () => void
+    resetFilterPopups?: () => void
     toggleWebsitesFilter: () => void
     toggleHighlightsFilter: () => void
     toggleNotesFilter: () => void
@@ -93,6 +94,13 @@ class ContentTypeContainer extends PureComponent<Props, State> {
         return filterNodes
     }
 
+    private togglePopup: React.MouseEventHandler<HTMLButtonElement> = e => {
+        if (this.props.env === 'inpage' && !this.props.showFilteredTypes) {
+            this.props.resetFilterPopups()
+        }
+        this.props.toggleFilterTypes()
+    }
+
     render() {
         if (!this.props.isAnnotsSearch) {
             return null
@@ -100,12 +108,14 @@ class ContentTypeContainer extends PureComponent<Props, State> {
 
         return (
             <FilterButton
+                env={this.props.env}
                 source="Types"
                 filteredItems={[]}
-                togglePopup={this.props.toggleFilterTypes}
+                togglePopup={this.togglePopup}
                 hidePopup={this.props.hideFilterTypes}
                 clearFilters={this.props.clearFilterTypes}
                 displayFilters={this.renderDisplayFilters}
+                disableOnClickOutside={this.props.env === 'inpage'}
             >
                 {/* The Content Type checklist */}
                 {this.props.showFilteredTypes && (
@@ -155,6 +165,7 @@ const mapDispatchToProps: MapDispatchToProps<
     toggleHighlightsFilter: () => dispatch(actions.toggleHighlightsFilter()),
     toggleNotesFilter: () => dispatch(actions.toggleNotesFilter()),
     toggleAnnotationsFilter: () => dispatch(actions.toggleAnnotationsFilter()),
+    resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
 export default connect<StateProps, DispatchProps, OwnProps>(

@@ -27,6 +27,7 @@ class IndexDropdown extends PureComponent {
         onBackBtnClick: PropTypes.func,
         allTabs: PropTypes.bool,
         allTabsCollection: PropTypes.bool,
+        sidebarTagDiv: PropTypes.bool,
     }
 
     get mainClass() {
@@ -35,6 +36,7 @@ class IndexDropdown extends PureComponent {
             [styles.tagDivForAnnotations]: this.props.isForAnnotation,
             [styles.tagDivForFilter]: !this.props.url,
             [styles.tagDivForFilterSB]: this.props.isForSidebar,
+            [styles.tagDivForSidebarResults]: this.props.sidebarTagDiv,
         })
     }
 

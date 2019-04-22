@@ -33,6 +33,7 @@ interface DispatchProps {
     onStartDateTextChange: (date: string) => void
     onEndDateTextChange: (date: string) => void
     changeTooltip: () => void
+    resetFilterPopups: () => void
 }
 
 interface OwnProps {
@@ -45,7 +46,11 @@ type Props = StateProps & DispatchProps & OwnProps
 interface State {}
 
 class DatesFilter extends PureComponent<Props, State> {
-    togglePopup = () => {
+    private togglePopup: React.MouseEventHandler<HTMLButtonElement> = e => {
+        if (this.props.env === 'inpage' && !this.props.datesFilterDropdown) {
+            this.props.resetFilterPopups()
+        }
+
         this.props.datesFilterDropdown
             ? this.props.hideDatesFilter()
             : this.props.showDatesFilter()
@@ -61,6 +66,7 @@ class DatesFilter extends PureComponent<Props, State> {
     render() {
         return (
             <FilterButton
+                env={this.props.env}
                 source="Dates"
                 filteredItems={[]}
                 togglePopup={this.togglePopup}
@@ -68,12 +74,14 @@ class DatesFilter extends PureComponent<Props, State> {
                 clearFilters={this.clearFilters}
                 startDate={this.props.startDate}
                 endDate={this.props.endDate}
+                disableOnClickOutside={this.props.env === 'inpage'}
             >
                 {this.props.datesFilterDropdown && (
                     <Tooltip
                         position={this.props.tooltipPosition}
                         itemClass={cx({
                             [styles.tooltip]: this.props.env === 'overview',
+                            [styles.inpagetooltip]: this.props.env === 'inpage',
                         })}
                     >
                         <DateRangeSelection
@@ -124,6 +132,7 @@ const mapDispatchToProps: MapDispatchToProps<
         // Change tooltip notification to more filters once the user selects date
         dispatch(tooltipActs.setTooltip('more-filters'))
     },
+    resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
 export default connect(

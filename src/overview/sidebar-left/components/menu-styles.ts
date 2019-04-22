@@ -6,7 +6,7 @@ const baseStyles = {
         display: 'none',
     },
     bmMenu: {
-        overflow: 'hidden',
+        overflowY: 'hidden',
     },
     bmMenuWrap: {
         position: 'fixed',

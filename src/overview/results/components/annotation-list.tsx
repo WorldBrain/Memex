@@ -2,16 +2,17 @@ import React, { Component, MouseEventHandler } from 'react'
 import { connect } from 'react-redux'
 import cx from 'classnames'
 
-import { MapDispatchToProps } from 'src/sidebar-common/types'
-import * as actions from 'src/sidebar-common/sidebar/actions'
-import AnnotationBox from 'src/sidebar-common/annotation-box'
-import { Annotation } from 'src/sidebar-common/sidebar/types'
+import { MapDispatchToProps } from 'src/sidebar-overlay/types'
+import * as actions from 'src/sidebar-overlay/sidebar/actions'
+import AnnotationBox from 'src/sidebar-overlay/annotation-box'
+import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 
-import { goToAnnotation } from '../../utils'
+import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 
 const styles = require('./annotation-list.css')
 
 interface OwnProps {
+    env: 'inpage' | 'overview'
     /** Override for expanding annotations by default */
     isExpandedOverride: boolean
     /** Array of matched annotations, limited to 3 */
@@ -147,14 +148,17 @@ class AnnotationList extends Component<Props, State> {
     ) => {
         e.preventDefault()
         e.stopPropagation()
-        this.goToAnnotation(annotation)
+        this.goToAnnotation(annotation, this.props.env)
     }
 
     private renderAnnotations() {
         return this.state.annotations.map(annot => (
             <AnnotationBox
                 key={annot.url}
-                className={styles.annotation}
+                className={cx({
+                    [styles.annotation]: this.props.env === 'overview',
+                    [styles.annotationBoxInpage]: this.props.env === 'inpage',
+                })}
                 env="overview"
                 handleGoToAnnotation={this.handleGoToAnnotation(annot)}
                 handleDeleteAnnotation={this.handleDeleteAnnotation}
@@ -180,7 +184,8 @@ class AnnotationList extends Component<Props, State> {
                     })}
                     onClick={this.toggleIsExpanded}
                 >
-                    <b>{this.props.annotations.length}</b> <span className={styles.resultsText}>results</span>
+                    <b>{this.props.annotations.length}</b>{' '}
+                    <span className={styles.resultsText}>results</span>
                     <span
                         className={cx(styles.icon, {
                             [styles.inverted]: this.state.isExpanded,

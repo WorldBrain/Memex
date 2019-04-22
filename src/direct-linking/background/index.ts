@@ -10,7 +10,7 @@ import normalize from '../../util/encode-url-for-id'
 import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
-import { KeyboardActions } from 'src/sidebar-common/sidebar/types'
+import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -65,6 +65,9 @@ export default class DirectLinkingBackground {
                 toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
                 insertAnnotToList: this.insertAnnotToList.bind(this),
                 removeAnnotFromList: this.removeAnnotFromList.bind(this),
+                goToAnnotationFromSidebar: this.goToAnnotationFromSidebar.bind(
+                    this,
+                ),
             },
             { insertExtraArg: true },
         )
@@ -84,6 +87,30 @@ export default class DirectLinkingBackground {
         })
 
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
+    }
+
+    async goToAnnotationFromSidebar(
+        { tab }: TabArg,
+        {
+            url,
+            annotation,
+        }: {
+            url: string
+            annotation: Annotation
+        },
+    ) {
+        const activeTab = await browser.tabs.create({ active: true, url })
+
+        const listener = async (tabId, changeInfo) => {
+            if (tabId === activeTab.id && changeInfo.status === 'complete') {
+                // Necessary to insert the ribbon/sidebar in case the user has turned
+                // it off.
+                await remoteFunction('insertRibbon', { tabId })()
+                await remoteFunction('goToAnnotation', { tabId })(annotation)
+                browser.tabs.onUpdated.removeListener(listener)
+            }
+        }
+        browser.tabs.onUpdated.addListener(listener)
     }
 
     async toggleSidebarOverlay(

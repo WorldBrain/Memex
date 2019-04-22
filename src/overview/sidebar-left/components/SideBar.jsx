@@ -51,7 +51,10 @@ class Sidebar extends PureComponent {
                                 .isSidebarLocked,
                         })}
                     >
-                        <div className={localStyles.container}>
+                        <div className={cx(localStyles.container, {
+                                [localStyles.containerLocked]:this.props.isSidebarLocked,
+                            })}
+                        >
                             {(this.props.isSidebarOpen ||
                                 this.props.isSidebarLocked) && (
                                 <React.Fragment>

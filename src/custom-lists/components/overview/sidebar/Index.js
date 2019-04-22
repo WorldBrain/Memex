@@ -6,9 +6,9 @@ import cx from 'classnames'
 
 import { actions, selectors } from 'src/custom-lists'
 import extStyles from './Index.css'
-import MyCollection from './MyCollections'
+import MyCollection from './my-collections'
 import CreateListForm from './CreateListForm'
-import ListItem from './ListItem'
+import ListItem from './list-item'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import { actions as filterActs } from '../../../../search-filters'
 import * as sidebar from '../../../../overview/sidebar-left/selectors'
@@ -148,6 +148,8 @@ class ListContainer extends Component {
                 <div
                     className={cx({
                         [extStyles.allLists]: this.props.isSidebarOpen,
+                        [extStyles.allListsLocked]: this.props
+                                .isSidebarLocked,
                     })}
                 >
                     <div

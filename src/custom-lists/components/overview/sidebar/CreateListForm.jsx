@@ -18,24 +18,19 @@ const CreateListForm = props => (
                 placeholder="List Name"
                 value={props.value || ''}
                 onChange={props.handleNameChange}
+                onKeyDown={props.handleNameKeyDown}
                 ref={props.setInputRef}
                 autoFocus
                 required
             />
             <span className={styles.buttonBox}>
-                <ButtonTooltip
-                    tooltipText="Save"
-                    position="bottom"
-                >
-                    <button 
-                        type="submit" 
-                        className={cx(styles.tick, styles.button)} 
+                <ButtonTooltip tooltipText="Save" position="bottom">
+                    <button
+                        type="submit"
+                        className={cx(styles.tick, styles.button)}
                     />
                 </ButtonTooltip>
-                <ButtonTooltip
-                    tooltipText="Cancel"
-                    position="right"
-                >
+                <ButtonTooltip tooltipText="Cancel" position="right">
                     <button
                         onClick={props.closeCreateListForm}
                         className={cx(styles.deleteButton, styles.button)}
@@ -55,6 +50,7 @@ CreateListForm.propTypes = {
     onCheckboxClick: PropTypes.func.isRequired,
     value: PropTypes.string,
     handleNameChange: PropTypes.func.isRequired,
+    handleNameKeyDown: PropTypes.func,
     showWarning: PropTypes.bool,
     setInputRef: PropTypes.func.isRequired,
     closeCreateListForm: PropTypes.func,

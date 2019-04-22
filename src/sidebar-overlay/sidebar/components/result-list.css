@@ -1,0 +1,95 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6, color3 from colors;
+
+.root {
+    list-style: none;
+    width: 100%;
+    padding: 0;
+}
+
+.clusterTime {
+    font-weight: 600;
+    font-size: 0.7rem;
+    font-size: 18px;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    align-self: center;
+}
+
+.timestamp {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 5px;
+    color: #9b9ba2;
+}
+
+.noScroll {
+    overflow: hidden;
+}
+
+.main {
+    margin-top: -10px;
+    font-size: 0.65rem;
+    font-weight: normal;
+}
+
+.proTip {
+    margin-left: 1px;
+    font-size: 11px;
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.emoji {
+    font-size: 15px;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.infoBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 500px;
+    margin: 30px auto 50px auto;
+    font-size: 11px;
+    color: color4;
+}
+
+.tutorial {
+    display: flex;
+    flex-direction: row;
+    margin: 0 5px;
+}
+
+.keyboardM {
+    box-shadow: 0px 1px 4px #bababa;
+    color: color4;
+    font-size: 12px;
+    margin: 0px 5px;
+    display: flex;
+    height: 25px;
+    width: 25px;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    border-radius: 3px;
+}
+
+.keyboardPlus {
+    color: color4;
+    font-size: 11px;
+    margin: 0 5px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    height: 25px;
+    vertical-align: middle;
+}
+
+.keyboardSpace {
+    composes: keyboardM;
+    width: 90px;
+}

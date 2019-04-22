@@ -1,41 +1,42 @@
 @value colors: '../../common-ui/colors.css';
-@value color6 from colors;
+@value color15 from colors;
 
 .ldsEllipsis {
+    display: block;
     position: relative;
-    display: flex;
-    width: 50px;
-    height: 20px;
-    margin: 20px auto;
+    width: 64px;
+    height: 64px;
+    margin: 0px auto;
+}
 
-    & div {
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: color6;
-        animation-timing-function: cubic-bezier(0, 1, 1, 0);
-    }
+.ldsEllipsis div {
+    position: absolute;
+    top: 27px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: color15;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
 
-    & div:nth-child(1) {
-        left: 20px;
-        animation: lds-ellipsis1 0.6s infinite 0.2s;
-    }
+.ldsEllipsis div:nth-child(1) {
+    left: 6px;
+    animation: lds-ellipsis1 0.6s infinite;
+}
 
-    & div:nth-child(2) {
-        left: 20px;
-        animation: lds-ellipsis2 0.6s infinite 0.2s;
-    }
+.ldsEllipsis div:nth-child(2) {
+    left: 6px;
+    animation: lds-ellipsis2 0.6s infinite;
+}
 
-    & div:nth-child(3) {
-        left: 40px;
-        animation: lds-ellipsis2 0.6s infinite 0.2s;
-    }
+.ldsEllipsis div:nth-child(3) {
+    left: 26px;
+    animation: lds-ellipsis2 0.6s infinite;
+}
 
-    & div:nth-child(4) {
-        left: 50px;
-        animation: lds-ellipsis3 0.6s infinite 0.2s;
-    }
+.ldsEllipsis div:nth-child(4) {
+    left: 45px;
+    animation: lds-ellipsis3 0.6s infinite;
 }
 
 @keyframes lds-ellipsis1 {
@@ -64,6 +65,6 @@
     }
 
     100% {
-        transform: translate(17px, 0);
+        transform: translate(19px, 0);
     }
 }

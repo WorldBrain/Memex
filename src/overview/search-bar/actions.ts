@@ -5,7 +5,8 @@ import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { actions as sidebarActs } from 'src/sidebar-common/sidebar'
+import { actions as sidebarLeftActs } from '../sidebar-left'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { acts as resultsActs, selectors as results } from '../results'
 import {
     actions as filterActs,
@@ -86,9 +87,10 @@ export const setQueryTagsDomains: (
  * state will also be used to perform relevant pagination logic.
  *
  * @param [overwrite=false] Denotes whether to overwrite existing results or just append.
+ * @param [fromOverview=true] Denotes whether search is done from overview or inpage.
  */
 export const search: (args?: any) => Thunk = (
-    { overwrite } = { overwrite: false },
+    { fromOverview, overwrite } = { fromOverview: true, overwrite: false },
 ) => async (dispatch, getState) => {
     const firstState = getState()
     const query = selectors.query(firstState)
@@ -101,7 +103,10 @@ export const search: (args?: any) => Thunk = (
         return
     }
 
-    dispatch(sidebarActs.closeSidebar())
+    if (fromOverview) {
+        dispatch(sidebarActs.closeSidebar())
+    }
+
     dispatch(resultsActs.resetActiveSidebarIndex())
     dispatch(resultsActs.setLoading(true))
 
@@ -134,6 +139,7 @@ export const search: (args?: any) => Thunk = (
         skip: results.resultsSkip(state),
         lists: filters.listFilterParam(state),
         contentTypes: filters.contentType(state),
+        base64Img: !fromOverview,
     }
 
     try {

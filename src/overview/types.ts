@@ -1,4 +1,4 @@
-import { Annotation } from 'src/sidebar-common/sidebar/types'
+import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { PageUrlsByDay } from 'src/search/background/types'
 
 export interface Result {

@@ -9,7 +9,7 @@ import cx from 'classnames'
 import qs from 'query-string'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import extractQueryFilters from 'src/util/nlp-time-filter'
-import CommentBoxContainer from 'src/sidebar-common/comment-box'
+import CommentBoxContainer from 'src/sidebar-overlay/comment-box'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
 import {
     highlightAnnotations,

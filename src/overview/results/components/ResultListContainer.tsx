@@ -16,7 +16,7 @@ import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { actions as listActs } from '../../../custom-lists'
 import { acts as deleteConfActs } from '../../delete-confirm-modal'
-import { actions as sidebarActs } from '../../../sidebar-common'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import {
     actions as sidebarLeftActs,
     selectors as sidebarLeft,
@@ -82,12 +82,10 @@ class ResultListContainer extends PureComponent<Props> {
         tagSuggestions: [],
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
-    }
 
-    componentDidMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
     }
 
@@ -282,7 +280,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     resultsClusteredByDay: selectors.resultsClusteredByDay(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
-    isFilterBarActive: searchBar.showFilterBar(state),
+    isFilterBarActive: filters.showFilterBar(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({

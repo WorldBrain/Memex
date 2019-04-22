@@ -6,7 +6,7 @@
     width: 100%;
     border: none;
     outline: none;
-    padding-left: 15px;
+    padding-left: 10px;
     font-size: 13px;
 }
 
@@ -14,9 +14,15 @@
     display: flex;
     background: #d7d7d7;
     height: 40px;
-    width: 100%;
+    width: fill-available;
     align-items: center;
     position: relative;
+    padding: 2px 5px 2px 15px;
+
+    & input {
+        margin-right: 0px;
+        margin-left: 0px;
+    }
 }
 
 .button {
@@ -44,7 +50,7 @@
 
 .buttonBox {
     display: flex;
-    margin-right: 5px;
+    margin-left: 5px;
 }
 
 .sameNameWarning {

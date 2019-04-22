@@ -46,6 +46,7 @@ export interface Props {
     allTabs?: boolean
     /** Add tags from dashboard */
     fromOverview?: boolean
+    sidebarTagDiv?: boolean
 }
 
 export interface State {
@@ -534,7 +535,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         // parentNode.scrollTop = domNode.offsetTop - parentNode.offsetTop
     }
 
-     private renderTags() {
+    private renderTags() {
         const tags = this.getDisplayTags()
 
         const tagOptions: React.ReactNode[] = tags.map((tag, i) => (

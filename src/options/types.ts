@@ -11,8 +11,8 @@ export interface RootState {
     deleteConfModal: DeleteConfModalState
     searchBar: SearchBarState
     results: ResultsState
-    tooltips: TooltipsState
-    onboarding: OnboardingState
+    tooltips?: TooltipsState
+    onboarding?: OnboardingState
     searchFilters: SearchFiltersState
 }
 
