@@ -15,11 +15,10 @@
     border-radius: 3px;
     font-size: 13px;
     font-weight: 500;
-    margin: 2px 0px;
     letter-spacing: 0.5px;
     height: 21px;
     color: black;
-    margin-right: 3px;
+    margin: 2px 3px 2px 0;
     display: flex;
     align-items: center;
 }
@@ -145,7 +144,7 @@
     font-weight: 600;
     composes: darkBlue from './colors.css';
     composes: nakedButton;
-    display: inline-block;
+    display: inline-flex;
 }
 
 .searchField {

@@ -23,6 +23,7 @@ class Modal extends PureComponent {
                     <button
                         className={cx(styles.close, styles.button)}
                         onClick={this.props.onClose}
+                        data-annotation="sidebar"
                     />
                 )}
                 <div className={styles.content}>{this.props.children}</div>

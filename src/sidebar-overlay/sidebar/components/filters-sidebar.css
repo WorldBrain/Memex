@@ -1,0 +1,100 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color3, color1 from colors;
+
+.filtersSidebar {
+    position: fixed;
+    top: 0px;
+    right: 385px;
+    z-index: 2147483646;
+    width: 230px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin-left: 5px;
+    background: #fff;
+    border-right: 1px solid #efefef;
+    box-shadow: -4px 0px 20px -11px rgba(34, 12, 12, 0.32157);
+}
+
+.filtersSidebarOverview {
+    right: 350px;
+    top: 55px;
+}
+
+.filtersDiv {
+    margin-top: 10px;
+}
+
+.filtersNav {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 10px 0 15px;
+    width: fill-available;
+    align-items: center;
+}
+
+.filters {
+    margin-left: 15px;
+    display: grid;
+    color: color3;
+}
+
+.filterButtons {
+    background: #fff;
+    margin-bottom: 10px;
+    margin-left: 15px;
+    border: 3px solid #d0d5e0;
+    border-radius: 5px;
+    margin-right: 15px;
+    width: 100px;
+    height: 25px;
+    text-align: center;
+
+    &:focus {
+        background-color: color1;
+    }
+}
+
+.clearFilters {
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: removeIcon from 'src/common-ui/icons.css';
+    background-size: 10px;
+    display: inline-block;
+    cursor: pointer;
+    width: 15px;
+    height: 15px;
+    margin-left: 5px;
+}
+
+.filterTitle {
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    color: color4;
+}
+
+.arrow {
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: arrowTriangle from 'src/common-ui/icons.css';
+    background-size: 16px 16px;
+    background-color: transparent;
+    transform: rotate(180deg);
+    background-position: center center;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+.listsDiv {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.filterDiv {
+    margin-top: 10px;
+}

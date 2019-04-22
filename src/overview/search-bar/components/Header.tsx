@@ -35,7 +35,7 @@ export interface Props {
     onQueryChange: ReactEventHandler<HTMLInputElement>
     toggleInbox: () => void
     toggleFilterBar: () => void
-    clearFilters: () => void
+    clearFilters: React.MouseEventHandler<HTMLSpanElement>
 }
 
 class Header extends PureComponent<Props> {

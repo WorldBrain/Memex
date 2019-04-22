@@ -67,6 +67,9 @@ export const setExcDomainFilters = createAction<string[]>(
 )
 
 export const resetFilters = createAction('search-filters/resetFilters')
+export const resetFilterPopups = createAction(
+    'search-filters/resetFilterPopups',
+)
 export const showFilter = createAction('search-filters/showFilter')
 export const toggleBookmarkFilter = createAction(
     'search-filters/toggleBookmarkFilter',
@@ -96,6 +99,9 @@ export const setAnnotationsFilter = createAction<boolean>(
 )
 export const clearFilterTypes = createAction('search-filters/clearFilterTypes')
 export const toggleFilterBar = createAction('search-filters/toggleFilterBar')
+export const setShowFilterBar = createAction<boolean>(
+    'search-filters/setShowFilterBar',
+)
 
 /**
  * Action to toggle annotation content filter.

@@ -7,29 +7,31 @@
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
 import { State as RibbonState } from './ribbon'
-import { State as SidebarState } from 'src/sidebar-common'
-import { State as BlacklistBtnState } from 'src/popup/blacklist-button/reducer'
+import { State as SidebarState } from './sidebar'
 import { State as BookmarkBtnState } from 'src/popup/bookmark-button/reducer'
 import { State as TagsBtnState } from 'src/popup/tags-button/reducer'
 import { State as CollectionsBtnState } from 'src/popup/collections-button/reducer'
 import { State as PauseBtnState } from 'src/popup/pause-button/reducer'
-import { State as NotifsBtnState } from 'src/popup/notif-button/reducer'
-import { State as SidebarBtnState } from 'src/popup/sidebar-button/reducer'
-import { State as TooltipBtnState } from 'src/popup/tooltip-button/reducer'
 import { State as PopupState } from 'src/popup/reducer'
+import { State as SearchBarState } from 'src/overview/search-bar/reducer'
+import { RootState as searchFiltersState } from 'src/search-filters/types'
+import { State as ResultsState } from 'src/overview/results/reducer'
+import { State as deleteConfModalState } from 'src/overview/delete-confirm-modal/reducer'
+import { State as CustomListsState } from 'src/custom-lists/types'
 
 export default interface RootState {
     ribbon: RibbonState
     sidebar: SidebarState
-    blacklistBtn: BlacklistBtnState
     bookmarkBtn: BookmarkBtnState
     tagsBtn: TagsBtnState
     collectionsBtn: CollectionsBtnState
     pauseBtn: PauseBtnState
-    sidebarBtn: SidebarBtnState
-    tooltipBtn: TooltipBtnState
-    notifsBtn: NotifsBtnState
     popup: PopupState
+    searchBar: SearchBarState
+    searchFilters: searchFiltersState
+    results: ResultsState
+    customLists: CustomListsState
+    deleteConfModal: deleteConfModalState
 }
 
 export type ClickHandler<T extends HTMLElement> = (
@@ -37,6 +39,12 @@ export type ClickHandler<T extends HTMLElement> = (
 ) => void
 
 export type Thunk<R = void> = ThunkAction<R, RootState, void, any>
+
+/**
+ * Allows omission of a key in T.
+ * Taken from: https://stackoverflow.com/a/48216010
+ */
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
 
 export type MapDispatchToProps<DispatchProps, OwnProps> = (
     dispatch: ThunkDispatch<RootState, void, any>,

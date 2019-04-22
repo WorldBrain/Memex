@@ -1,0 +1,94 @@
+@import url('/fonts/Inter/inter.css');
+
+.sidebar * {
+    font-family: 'Inter', sans-serif;
+}
+
+.sidebar {
+    height: 80%;
+    background: #fff;
+    padding: 0px 8px 150px 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.searchSwitch {
+    height: fit-content;
+}
+
+.resultsContainer {
+    flex: 1;
+    position: relative;
+    top: 45px;
+}
+
+.resultsContainerPage {
+    top: 2px;
+}
+
+.annotationsSection {
+    width: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.commentBoxContainer {
+    composes: annotationCard from '../../../common-ui/elements.css';
+    background: white;
+    border-radius: 3px;
+    top: 50px;
+    margin-bottom: 70px;
+    position: relative;
+
+    &:hover {
+        background: white;
+    }
+}
+
+.navBar {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 10px;
+    font-weight: 600;
+}
+
+.navLinks {
+    composes: filterText from '../../../common-ui/elements.css';
+    font-size: 12px;
+    font-weight: 600;
+    position: relative;
+    display: inline-block;
+    outline: none;
+    cursor: pointer;
+}
+
+.navBtn {
+    composes: filterText from '../../../common-ui/elements.css';
+    font-size: 12px;
+    font-weight: 600;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    &:disabled {
+        cursor: auto;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.bookmark {
+    background-image: url('/img/star_blue_full.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+}
+
+.allResultsDiv {
+    margin-top: 50px;
+}

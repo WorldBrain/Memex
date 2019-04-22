@@ -1,0 +1,121 @@
+@value colors: 'src/common-ui/colors.css';
+@value color1, color2, color3, color4, color8, color12, color9 from colors;
+
+.tagButton {
+    height: 24px;
+
+    /* ultra-light */
+    border: 1px solid color9;
+    box-sizing: border-box;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: color3;
+    width: fit-content;
+    cursor: pointer;
+    text-align: center;
+    background-color: #fff;
+    outline: none;
+    padding: 1px 7px 2px 7px;
+
+    &:hover {
+        background-color: color1;
+    }
+}
+
+.tagButtonSelected {
+    composes: tagButton;
+    background-color: color2;
+    padding: 0px 4px 1px 7px;
+}
+
+.dateBox {
+    flex-direction: column;
+}
+
+.dateTopBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: fill-available;
+}
+
+.tagButtonDate {
+    composes: tagButtonSelected;
+    background-color: color2;
+    padding: 1px 4px 2px 7px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+
+    &.dateBox {
+        flex-direction: column-reverse;
+        display: flex;
+    }
+
+    &.detailsFilter {
+        margin-left: 0px;
+        margin-top: 3px;
+    }
+}
+
+.pillContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.renderCount {
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+.tagButton:focus {
+    background-color: color1;
+}
+
+.buttonFocus {
+    background-color: color2;
+}
+
+.buttonFocusSelected {
+    text-align: left;
+    width: 101px;
+    height: 24px;
+    background-color: color2;
+}
+
+.clearFilters {
+    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    background-size: 10px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    margin-left: 10px;
+    background-position: center center;
+
+    &:hover {
+        background-color: color8;
+    }
+}
+
+.detailsFilter {
+    display: grid;
+    color: color4;
+    font-size: 14px;
+    margin-top: 2px;
+}
+
+.spanInc {
+    background: #83c9f4;
+}
+
+.spanExc {
+    background: #f29d9d;
+}

@@ -64,13 +64,6 @@ export const showClearFiltersBtn = createSelector(
         endDate,
 )
 
-export const showFilterBar = createSelector(
-    filterSelectors.showFilterBar,
-    showClearFiltersBtn,
-    (showFilterBar, showClearFiltersBtn) =>
-        showFilterBar || showClearFiltersBtn,
-)
-
 export const queryParamsDisplay = createSelector(
     query,
     startDate,

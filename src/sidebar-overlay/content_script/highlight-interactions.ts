@@ -1,6 +1,6 @@
 import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
 import { getOffsetTop } from '../utils'
-import { Annotation } from 'src/sidebar-common/sidebar/types'
+import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 
 const styles = require('src/direct-linking/content_script/styles.css')
 

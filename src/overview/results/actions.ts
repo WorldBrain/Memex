@@ -35,7 +35,7 @@ export const appendSearchResult = createAction<SearchResult>(
     'results/appendSearchResult',
 )
 export const setLoading = createAction<boolean>('results/setLoading')
-export const setAreAnnotationsExpanded = createAction(
+export const setAreAnnotationsExpanded = createAction<boolean>(
     'results/setAreAnnotationsExpanded',
 )
 export const toggleAreAnnotationsExpanded = createAction(
@@ -146,9 +146,11 @@ export const showTags: (i: number) => Thunk = index => (dispatch, getState) => {
 /**
  * Increments the page state before scheduling another search.
  */
-export const getMoreResults: () => Thunk = () => dispatch => {
+export const getMoreResults: (fromOverview?: boolean) => Thunk = (
+    fromOverview = true,
+) => dispatch => {
     dispatch(nextPage())
-    dispatch(searchBarActs.search())
+    dispatch(searchBarActs.search({ fromOverview }))
 }
 
 // Analytics use

@@ -6,6 +6,7 @@ import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { SearchTypeSwitch } from './search-type-switch'
 import { selectors as searchBar } from '../../search-bar'
+import { selectors as filters } from 'src/search-filters'
 
 export interface StateProps {
     annotsFolded: boolean
@@ -25,7 +26,7 @@ export type Props = StateProps & DispatchProps & OwnProps
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     annotsFolded: selectors.areAnnotationsExpanded(state),
     searchType: selectors.searchType(state),
-    isFilterBarActive: searchBar.showFilterBar(state),
+    isFilterBarActive: filters.showFilterBar(state),
 })
 
 const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = dispatch => ({

@@ -7,7 +7,7 @@ import { getSidebarState } from '../utils'
 import { getTooltipState } from 'src/content-tooltip/utils'
 import { createRootElement, destroyRootElement } from './rendering'
 import { removeHighlights } from './highlight-interactions'
-import AnnotationsManager from 'src/sidebar-common/annotations-manager'
+import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import { insertTooltip, removeTooltip } from 'src/content-tooltip/interactions'
 

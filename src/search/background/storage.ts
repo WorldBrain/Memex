@@ -249,6 +249,7 @@ export default class SearchStorage extends FeatureStorage {
             {
                 upperTimeBound: params.endDate,
                 latestTimes,
+                base64Img: params.base64Img,
             },
         )
     }

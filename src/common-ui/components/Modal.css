@@ -14,7 +14,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 99999;
+    z-index: 2147483646;
     background: rgba(0, 0, 0, 0.3);
     cursor: pointer;
     padding-top: 200px;

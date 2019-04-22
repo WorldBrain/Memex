@@ -4,7 +4,7 @@ import propTypes from 'prop-types'
 
 import SidebarContainer, {
     selectors as sidebarSelectors,
-} from '../../sidebar-common'
+} from 'src/sidebar-overlay/sidebar'
 import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
 import {
@@ -18,8 +18,8 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import AnnotationsManager from '../../sidebar-common/annotations-manager'
-import { goToAnnotation } from '../utils'
+import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 
 import styles from 'src/styles.css'
 
@@ -53,7 +53,16 @@ class Overview extends PureComponent {
                         <DeleteConfirmModal message="Delete page and related note" />
                         <DragElement />
                         <div className={styles.productHuntContainer}>
-                            <a href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=151367&theme=dark" alt="Memex 1.0 - Annotate, search and organize what you've read online. | Product Hunt Embed" className={styles.productHuntBatch} /></a>
+                            <a
+                                href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
+                                target="_blank"
+                            >
+                                <img
+                                    src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=151367&theme=dark"
+                                    alt="Memex 1.0 - Annotate, search and organize what you've read online. | Product Hunt Embed"
+                                    className={styles.productHuntBatch}
+                                />
+                            </a>
                         </div>
                         <SidebarContainer
                             env="overview"

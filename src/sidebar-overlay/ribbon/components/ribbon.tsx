@@ -9,13 +9,19 @@ import cx from 'classnames'
 import qs from 'query-string'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import extractQueryFilters from 'src/util/nlp-time-filter'
-import CommentBoxContainer from 'src/sidebar-common/comment-box'
+import CommentBoxContainer from 'src/sidebar-overlay/comment-box'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
+import {
+    shortcuts,
+    ShortcutElData,
+} from 'src/options/settings/keyboard-shortcuts'
 import {
     highlightAnnotations,
     removeHighlights,
 } from '../../content_script/highlight-interactions'
-
+import * as utils from 'src/content-tooltip/utils'
+import { TooltipButton } from 'src/popup/tooltip-button'
+import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
 const styles = require('./ribbon.css')
 
 interface Props {
@@ -52,21 +58,26 @@ interface Props {
 }
 
 class Ribbon extends Component<Props> {
+    private keyboardShortcuts: KeyboardShortcuts
+    private shortcutsData?: Map<string, ShortcutElData>
     private openOverviewTabRPC
     private openOptionsTabRPC
     private ribbonRef: HTMLElement
-
     private inputQueryEl: HTMLInputElement
 
     private setInputRef = (el: HTMLInputElement) => (this.inputQueryEl = el)
 
     constructor(props: Props) {
         super(props)
+        this.shortcutsData = new Map()
+        shortcuts.forEach(s => {
+            this.shortcutsData.set(s.name, s)
+        })
         this.openOverviewTabRPC = remoteFunction('openOverviewTab')
         this.openOptionsTabRPC = remoteFunction('openOptionsTab')
     }
-
-    componentDidMount() {
+    async componentDidMount() {
+        this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
         this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
     }
 
@@ -144,6 +155,26 @@ class Ribbon extends Component<Props> {
         const searchValue = event.target.value
 
         this.props.setSearchValue(searchValue)
+    }
+    private getTooltipText(name: string): string {
+        const toTooltipText = (tooltip: string) => {
+            const short: Shortcut = this.keyboardShortcuts[name]
+            return short.shortcut && short.enabled
+                ? tooltip + ' ' + '(' + short.shortcut + ')'
+                : tooltip
+        }
+        const elData: ShortcutElData = this.shortcutsData.get(name)
+        if (!elData) {
+            return ''
+        }
+        switch (name) {
+            case 'createBookmark':
+                return this.props.isBookmarked
+                    ? toTooltipText(elData.turnOff)
+                    : toTooltipText(elData.turnOn)
+            default:
+                return toTooltipText(elData.tooltip)
+        }
     }
 
     render() {
@@ -245,11 +276,9 @@ class Ribbon extends Component<Props> {
                         </div>
                         <div className={styles.pageActions}>
                             <ButtonTooltip
-                                tooltipText={
-                                    !this.props.isBookmarked
-                                        ? 'Star page (b)'
-                                        : 'Un-Star page (b)'
-                                }
+                                tooltipText={this.getTooltipText(
+                                    'createBookmark',
+                                )}
                                 position="left"
                             >
                                 <button
@@ -266,7 +295,9 @@ class Ribbon extends Component<Props> {
                             </ButtonTooltip>
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add notes to page (c)"
+                                    tooltipText={this.getTooltipText(
+                                        'addComment',
+                                    )}
                                     position="left"
                                 >
                                     <button
@@ -303,7 +334,7 @@ class Ribbon extends Component<Props> {
 
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add tags to page (t)"
+                                    tooltipText={this.getTooltipText('addTag')}
                                     position="left"
                                 >
                                     <button
@@ -327,7 +358,9 @@ class Ribbon extends Component<Props> {
 
                             <div>
                                 <ButtonTooltip
-                                    tooltipText="Add page to collections (u)"
+                                    tooltipText={this.getTooltipText(
+                                        'addToCollection',
+                                    )}
                                     position="left"
                                 >
                                     <button
@@ -390,7 +423,9 @@ class Ribbon extends Component<Props> {
                             </ButtonTooltip>
 
                             <ButtonTooltip
-                                tooltipText="Toggle highlights (h)"
+                                tooltipText={this.getTooltipText(
+                                    'toggleHighlights',
+                                )}
                                 position="left"
                             >
                                 <button

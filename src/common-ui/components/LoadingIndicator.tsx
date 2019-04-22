@@ -11,10 +11,10 @@ class LoadingIndicator extends PureComponent<Props> {
     render() {
         return (
             <div className={styles.ldsEllipsis}>
-            <div />
-            <div />
-            <div />
-            <div />
+                <div />
+                <div />
+                <div />
+                <div />
             </div>
         )
     }

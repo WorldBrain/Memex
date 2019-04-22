@@ -76,6 +76,7 @@ class PageResultItem extends PureComponent<Props> {
 
         return (
             <AnnotationList
+                env="overview"
                 isExpandedOverride={this.props.areAnnotationsExpanded}
                 openAnnotationSidebar={this.props.onCommentBtnClick}
                 pageUrl={this.hrefToPage}
@@ -111,7 +112,7 @@ class PageResultItem extends PureComponent<Props> {
                         <div className={styles.screenshotContainer}>
                             {this.props.screenshot == null ? (
                                 <ButtonTooltip
-                                    position='CenterCenter'
+                                    position="CenterCenter"
                                     tooltipText="Screenshots are not captured when importing, or when you switch away from a tab too quickly."
                                 >
                                     <img
@@ -119,8 +120,7 @@ class PageResultItem extends PureComponent<Props> {
                                         src={this.props.nullImg}
                                     />
                                 </ButtonTooltip>
-
-                            ): (
+                            ) : (
                                 <img
                                     className={styles.screenshot}
                                     src={this.props.screenshot}

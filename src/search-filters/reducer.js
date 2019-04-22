@@ -116,6 +116,11 @@ const toggleFilterBar = state => ({
     showFilterBar: !state.showFilterBar,
 })
 
+const setShowFilterBar = (state, value) => ({
+    ...state,
+    showFilterBar: value,
+})
+
 /**
  * Setting annotations involves setting both notes and highlights
  */
@@ -247,6 +252,14 @@ const resetFilters = state => ({
     showFilters: state.showFilters,
 })
 
+const resetFilterPopups = state => ({
+    ...state,
+    showDomainFilter: false,
+    showTagFilter: false,
+    showFilterTypes: false,
+    showDatesFilter: false,
+})
+
 export default createReducer(
     {
         [actions.hideDomainFilter]: hideDomainFilter,
@@ -259,7 +272,9 @@ export default createReducer(
         [actions.hideFilterTypes]: hideFilterTypes,
         [actions.toggleFilterTypes]: toggleFilterTypes,
         [actions.toggleFilterBar]: toggleFilterBar,
+        [actions.setShowFilterBar]: setShowFilterBar,
         [actions.resetFilters]: resetFilters,
+        [actions.resetFilterPopups]: resetFilterPopups,
         [actions.addTagFilter]: addFilter('tags'),
         [actions.delTagFilter]: delFilter('tags'),
         [actions.addExcTagFilter]: addFilter('tagsExc'),
