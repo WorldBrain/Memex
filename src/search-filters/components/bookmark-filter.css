@@ -37,15 +37,10 @@
     justify-content: center;
     outline: none;
     background-image: url('/img/star_blue_empty1.svg');
-
     background-repeat: no-repeat;
     background-position: center;
 
     &:hover {
-        outline: none;
-    }
-
-    &:focus {
         outline: none;
     }
 }
@@ -128,6 +123,7 @@
     background-position: center;
     background-color: transparent;
     cursor: pointer;
+    outline: none;
 
     &:hover {
         background-color: color1;
@@ -138,7 +134,7 @@
     }
 
     &:focus {
-        outline: none;
+        background-color: color1;
     }
 }
 

@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color3, color1 from colors;
+
 .filtersSidebar {
     position: fixed;
     top: 0px;
@@ -33,7 +36,7 @@
 .filters {
     margin-left: 15px;
     display: grid;
-    color: #1a2f58;
+    color: color3;
 }
 
 .filterButtons {
@@ -48,7 +51,7 @@
     text-align: center;
 
     &:focus {
-        outline: none;
+        background-color: color1;
     }
 }
 
@@ -60,7 +63,7 @@
     cursor: pointer;
     width: 15px;
     height: 15px;
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 .filterTitle {
@@ -68,6 +71,7 @@
     font-weight: 500;
     display: flex;
     align-items: center;
+    color: color4;
 }
 
 .arrow {
