@@ -5,8 +5,8 @@ export interface ShortcutElData {
     name: string
     children: string
     tooltip?: string
-    turnOn?: string
-    turnOff?: string
+    toggleOn?: string
+    toggleOff?: string
 }
 
 export const shortcuts: ShortcutElData[] = [
@@ -25,7 +25,9 @@ export const shortcuts: ShortcutElData[] = [
     {
         id: 'sidebar-shortcut',
         name: 'toggleSidebar',
-        children: 'Toggle sidebar',
+        children: 'Open Sidebar',
+        toggleOn: 'Open Sidebar',
+        toggleOff: 'Close Sidebar',
     },
     {
         id: 'annotation-shortcut',
@@ -42,8 +44,8 @@ export const shortcuts: ShortcutElData[] = [
         id: 'create-bm-shortcut',
         name: 'createBookmark',
         children: 'Star current page',
-        turnOn: 'Star page',
-        turnOff: 'Unstar page',
+        toggleOn: 'Star page',
+        toggleOff: 'Unstar page',
     },
     {
         id: 'add-tag-shortcut',

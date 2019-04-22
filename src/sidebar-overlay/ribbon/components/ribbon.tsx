@@ -22,6 +22,7 @@ import {
 import * as utils from 'src/content-tooltip/utils'
 import { TooltipButton } from 'src/popup/tooltip-button'
 import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
+import tooltip from 'src/overview/tooltips/components/tooltip'
 const styles = require('./ribbon.css')
 
 interface Props {
@@ -157,11 +158,17 @@ class Ribbon extends Component<Props> {
         this.props.setSearchValue(searchValue)
     }
     private getTooltipText(name: string): string {
-        const toTooltipText = (tooltip: string) => {
+        const getShortcutKey: () => string = () => {
             const short: Shortcut = this.keyboardShortcuts[name]
-            return short.shortcut && short.enabled
-                ? tooltip + ' ' + '(' + short.shortcut + ')'
-                : tooltip
+            return short.shortcut && short.enabled ? short.shortcut : null
+        }
+        const toTooltipText = (tt: string, shortcutKey?: string) => {
+            const key = shortcutKey ? shortcutKey : getShortcutKey()
+            if (key) {
+                return tt + ' ' + '(' + key + ')'
+            } else {
+                return tt
+            }
         }
         const elData: ShortcutElData = this.shortcutsData.get(name)
         if (!elData) {
@@ -170,8 +177,12 @@ class Ribbon extends Component<Props> {
         switch (name) {
             case 'createBookmark':
                 return this.props.isBookmarked
-                    ? toTooltipText(elData.turnOff)
-                    : toTooltipText(elData.turnOn)
+                    ? toTooltipText(elData.toggleOff)
+                    : toTooltipText(elData.toggleOn)
+            case 'toggleSidebar':
+                return this.props.isSidebarOpen
+                    ? toTooltipText(elData.toggleOff, 'Esc')
+                    : toTooltipText(elData.toggleOn)
             default:
                 return toTooltipText(elData.tooltip)
         }
@@ -200,11 +211,9 @@ class Ribbon extends Component<Props> {
                             </ButtonTooltip>
 
                             <ButtonTooltip
-                                tooltipText={
-                                    !this.props.isSidebarOpen
-                                        ? 'Open Sidebar (R)'
-                                        : 'Close Sidebar (ESC)'
-                                }
+                                tooltipText={this.getTooltipText(
+                                    'toggleSidebar',
+                                )}
                                 position="left"
                             >
                                 <button
