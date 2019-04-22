@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color3, color4, color6, color8, color12, color9 from colors;
+@value color1, color2, color3, color4, color8, color12, color9 from colors;
 
 .tagButton {
     height: 24px;

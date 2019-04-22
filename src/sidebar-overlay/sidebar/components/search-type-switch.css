@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6, color2, radius3, color7, color3, color14 from colors;
+@value color1, color4, color6, color2, radius3, color7, color3, color14 from colors;
 
 .masterContainer {
     position: fixed;
@@ -32,8 +32,8 @@
     composes: nakedButton from 'src/common-ui/elements.css';
     color: color3;
     font-size: 15px;
-    border: none;
     font-weight: 600;
+    border: none;
     cursor: pointer;
     outline: none;
     margin-right: 1px;
@@ -41,6 +41,10 @@
     &:disabled {
         background-color: color7;
         cursor: auto;
+    }
+
+    &:focus {
+        background-color: color1;
     }
 }
 
@@ -58,7 +62,7 @@
 }
 
 .pages {
-    margin-right: 10px;
+    margin-right: 5px;
 }
 
 .pageSwitch {

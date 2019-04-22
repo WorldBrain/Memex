@@ -52,7 +52,9 @@ const Topbar = ({
                 />
                 <button
                     onClick={props.handleFilterBtnClick}
-                    className={styles.filterButton}
+                    className={cx(styles.filterButton, {
+                        [styles.filterButtonActive] : props.showClearFiltersBtn,
+                    })}
                 >
                     Filters
                     {props.showClearFiltersBtn && (

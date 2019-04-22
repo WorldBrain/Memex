@@ -84,6 +84,7 @@ class Sidebar extends React.Component<Props, State> {
 
         if (e.key === 'Enter') {
             e.preventDefault()
+            e.stopPropagation()
             this.props.onQueryKeyDown(this.state.searchValue)
         }
     }

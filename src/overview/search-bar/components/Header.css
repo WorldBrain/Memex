@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color7, color14, color4, color6, color9 from colors;
+@value color1, color7, color14, color4, color6, color9 from colors;
 
 .navbar {
     display: flex;
@@ -106,8 +106,7 @@
 
 .button {
     composes: nakedButton from 'src/common-ui/elements.css';
-    border: none;
-    padding: 4px 6px 3px 8px;
+    padding: 3px 6px 3px 8px;
     display: flex;
     align-items: center;
     margin-left: 25px;
@@ -117,6 +116,11 @@
     cursor: pointer;
     margin-right: -7px;
     outline: none;
+    border: none;
+
+    &:focus {
+        background-color: color1;
+    }
 }
 
 .activeButton {

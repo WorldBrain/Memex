@@ -272,6 +272,11 @@
     background-image: url('/img/comment.svg');
     margin-left: 1px;
     background-size: 17px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-position: 3px center;
 }
 
 .commentActive {
@@ -365,6 +370,7 @@
 
 .annotsCount {
     color: white;
+    font-size: 10px;
 }
 
 @keyframes onload {
