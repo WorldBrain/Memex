@@ -80,6 +80,7 @@ class TagsFilter extends PureComponent<Props, State> {
                             initSuggestions={this.props.suggestedTags}
                             source="tag"
                             isForSidebar
+                            isForRibbon={this.props.env === 'inpage'}
                         />
                     </Tooltip>
                 )}

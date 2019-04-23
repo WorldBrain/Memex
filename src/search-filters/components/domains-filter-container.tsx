@@ -108,6 +108,7 @@ class DomainsPopup extends PureComponent<Props, State> {
                             )}
                             source="domain"
                             isForSidebar
+                            isForRibbon={this.props.env === 'inpage'}
                         />
                     </Tooltip>
                 )}
