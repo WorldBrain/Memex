@@ -29,7 +29,7 @@ interface OwnProps {
     body?: string
     comment?: string
     tags: string[]
-    hasBookmark: boolean
+    hasBookmark?: boolean
     handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
     handleMouseEnter?: (e: Event) => void
     handleMouseLeave?: (e: Event) => void

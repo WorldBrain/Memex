@@ -24,21 +24,18 @@
 }
 
 .rootContainer {
-    composes: boxShadow from '../../../common-ui/colors.css';
+    composes: boxShadow from 'src/common-ui/colors.css';
     display: flex;
     flex-direction: row;
     position: relative;
     color: inherit;
     text-decoration: none;
     z-index: 0;
-    margin-bottom: 18px;
-    width: 800px;
-    height: var(--height);
+    margin-bottom: 17px;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
-
-    &.isSidebarOpen {
-        border-right: solid #5cd9a4 5px;
-    }
+    background-color: white;
+    width: 100%;
+    min-height: var(--height);
 
     &:hover .crossRibbon {
         display: block;
@@ -46,7 +43,7 @@
     }
 
     &:hover .button {
-        opacity: 0.5;
+        opacity: 0.3;
     }
 
     &:hover .commentActive {
@@ -62,16 +59,26 @@
     } */
 }
 
+.rootContainerOverview {
+    width: 800px;
+    height: 100px;
+}
+
 .root {
     position: relative;
     display: flex;
     box-sizing: content-box;
     justify-content: space-between;
     overflow: hidden;
+    padding: 6px 10px;
     width: 100%;
-    height: 100%;
+    height: auto;
     text-decoration: none;
     flex-direction: row;
+}
+
+.rootOverview {
+    padding: 0;
 }
 
 .crossRibbon {
@@ -143,7 +150,6 @@
     border-right: solid 1px #ebebeb;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
-    background-color: white;
 
     & .screenshot {
         max-width: 100%;
@@ -152,13 +158,22 @@
     }
 }
 
+.tagContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
 .infoContainer {
     display: flex;
     flex-direction: column;
-    max-width: calc(100% - var(--imgWidth));
-    padding: 6px 14px;
+    max-width: 100%;
     justify-content: space-between;
     width: 100%;
+}
+
+.infoContainerOverview {
+    padding: 6px 14px;
 }
 
 .firstlineContainer {
@@ -206,7 +221,6 @@
     align-items: center;
     max-width: 100%;
     margin-bottom: 8px;
-    margin-top: -30px;
 }
 
 .url a {
@@ -223,7 +237,7 @@
     flex-direction: row;
     float: right;
     align-items: center;
-    width: 110px;
+    width: 120px;
     height: 30px;
     justify-content: flex-end;
     margin-top: 0px;
@@ -235,7 +249,6 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-top: -27px;
     height: 30px;
 }
 
@@ -243,7 +256,6 @@
     font-size: 12px;
     color: color6;
     min-width: fit-content;
-    margin-right: 10px;
 }
 
 .button {
@@ -259,7 +271,6 @@
     background-size: 16px;
     border-radius: 3px;
     opacity: 0.2;
-    background-color: transparent;
 
     &:hover .trash {
         opacity: 0.8;
@@ -274,6 +285,11 @@
     background-image: url('/img/comment.svg');
     margin-left: 1px;
     background-size: 17px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-position: 3px center;
 }
 
 .commentActive {
@@ -304,12 +320,12 @@
     background-image: url('/img/tag.svg');
     background-size: 17px;
     margin-left: 1px;
+    margin-top: 2px;
 }
 
 .tagList {
     display: flex;
     flex-grow: 2;
-    margin-left: 5px;
 }
 
 .isDeleting {
@@ -368,7 +384,6 @@
 .annotsCount {
     color: white;
     font-size: 10px;
-    padding-left: 1px;
 }
 
 @keyframes onload {

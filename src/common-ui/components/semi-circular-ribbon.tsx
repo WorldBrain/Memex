@@ -1,6 +1,6 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
 
-const styles = require('./SemiCircularRibbon.css')
+const styles = require('./semi-circular-ribbon.css')
 
 export interface Props {
     crossIconSrc?: string
@@ -16,8 +16,8 @@ class SemiCircularRibbon extends PureComponent<Props> {
 
     render() {
         return (
-            <div 
-                title={this.props.title} 
+            <div
+                title={this.props.title}
                 className={styles.ribbon}
                 onClick={this.props.onClick}
             />

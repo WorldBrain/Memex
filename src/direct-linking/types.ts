@@ -1,15 +1,18 @@
+import { Anchor } from 'src/direct-linking/content_script/interactions'
+
 export interface Annotation {
     pageTitle: string
     pageUrl: string
-    body: string
-    selector: object
+    body?: string
+    selector?: Anchor
     createdWhen?: Date
     lastEdited?: Date
-    url?: string
+    url: string
     comment?: string
     _body_terms?: string[]
     _comment_terms?: string[]
     hasBookmark?: boolean
+    tags?: string[]
 }
 
 export interface AnnotListEntry {
@@ -32,10 +35,12 @@ export interface StoredAnnotationRequestMap {
     [tabId: string]: StoredAnnotationRequest
 }
 
-export type AnnotationSender = ({
-    annotation,
-    tabId,
-}: {
-    annotation: Annotation
-    tabId: number
-}) => void
+export type AnnotationSender = (
+    {
+        annotation,
+        tabId,
+    }: {
+        annotation: Annotation
+        tabId: number
+    },
+) => void

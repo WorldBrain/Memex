@@ -30,7 +30,7 @@ describe('Annotations storage', () => {
                 canonicalUrl: annot.url,
             })
 
-            await annotationStorage.createAnnotation(annot)
+            await annotationStorage.createAnnotation(annot as any)
         }
 
         // Insert bookmarks

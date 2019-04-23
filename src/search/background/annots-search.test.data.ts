@@ -23,7 +23,6 @@ export const ANNOTS: TestAnnot[] = [
         title: "Victor's Justice",
         url: 'http://www.test.com/page0',
         pageUrl: 'test.com/page0',
-        selector: {},
         hasBookmark: true,
         lists: [LIST1],
     },
@@ -35,7 +34,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Legitimacy',
         url: 'http://www.test.com/page1',
         pageUrl: 'test.com/page1',
-        selector: {},
         hasBookmark: true,
         tags: [TAG1],
     },
@@ -47,7 +45,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Divine right of kings',
         url: 'http://www.test.com/page2#2',
         pageUrl: 'test.com/page2',
-        selector: {},
         lists: [LIST1],
     },
     {
@@ -58,7 +55,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Divine right of kings',
         url: 'http://www.test.com/page2#3',
         pageUrl: 'test.com/page2',
-        selector: {},
         tags: [TAG1, TAG2],
     },
     {
@@ -69,7 +65,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Divine right of kings',
         url: 'http://www.test.com/page2#4',
         pageUrl: 'test.com/page2',
-        selector: {},
         hasBookmark: true,
     },
     {
@@ -80,7 +75,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Mandate of Heaven',
         url: 'http://www.test.com/page5#asdf',
         pageUrl: 'test.com/page5',
-        selector: {},
         tags: [TAG1, TAG2],
         lists: [LIST1, LIST2],
     },
@@ -92,7 +86,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Mandate of Heaven',
         url: 'http://www.test.com/page5',
         pageUrl: 'test.com/page5',
-        selector: {},
         lists: [LIST1, LIST2],
     },
     {
@@ -103,7 +96,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Sphere of influence',
         url: 'http://www.test.com/page3#1',
         pageUrl: 'test.com/page3',
-        selector: {},
         tags: [TAG1, TAG2, TAG3],
         lists: [LIST1, LIST2],
     },
@@ -115,7 +107,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Sphere of influence',
         url: 'http://www.test.com/page3#2',
         pageUrl: 'test.com/page3',
-        selector: {},
         hasBookmark: true,
     },
     {
@@ -126,7 +117,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Warsaw Pact',
         url: 'http://www.test.com/page7#1',
         pageUrl: 'test.com/page7',
-        selector: {},
         lists: [LIST2],
     },
     {
@@ -137,7 +127,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Warsaw Pact',
         url: 'http://www.test.com/page7#2',
         pageUrl: 'test.com/page7',
-        selector: {},
     },
     {
         createdWhen: new Date('2018-09-11T01:12'),
@@ -147,7 +136,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Collective defense',
         url: 'http://www.test.com/page9#1',
         pageUrl: 'test.com/page9',
-        selector: {},
         tags: [TAG1, TAG3],
         lists: [LIST2],
     },
@@ -158,7 +146,6 @@ export const ANNOTS: TestAnnot[] = [
         title: 'Collective defense',
         url: 'http://www.test.com/page9#2',
         pageUrl: 'test.com/page9',
-        selector: {},
         hasBookmark: true,
         lists: [LIST1],
     },

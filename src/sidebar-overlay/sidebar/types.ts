@@ -12,7 +12,6 @@ export interface Page {
     title: string | null
 }
 
-// TODO: Update this once annotation search's backend is complete.
 export interface Annotation {
     /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
     url: string
@@ -24,10 +23,10 @@ export interface Annotation {
     comment?: string
     /** Selector required for highlighting annotations. */
     selector: Anchor
-    createdWhen: number // Since backend returns number and not the actual date.
-    lastEdited: number | null // Since backend returns number/null and not the actual date.
+    createdWhen: number
+    lastEdited: number
     tags: string[]
-    hasBookmark: boolean
+    hasBookmark?: boolean
 }
 
 export default interface State {

@@ -54,7 +54,7 @@ describe.skip('Annotations search', () => {
                 time: new Date(annot.createdWhen.getTime() - 300000).getTime(),
             })
 
-            await annotsStorage.createAnnotation(annot)
+            await annotsStorage.createAnnotation(annot as any)
         }
 
         // Insert bookmarks

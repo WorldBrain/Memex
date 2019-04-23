@@ -1,0 +1,9 @@
+.ribbon {
+    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: nakedButton hoverColor from 'src/common-ui/colors.css';
+    display: flex;
+    background-size: 12px;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+}
