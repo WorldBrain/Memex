@@ -14,6 +14,7 @@ const styles = require('./search-type-switch.css')
 
 export interface StateProps {
     annotsFolded: boolean
+    resultsSearchType: 'page' | 'annot'
     searchType: 'notes' | 'pages'
     pageType: 'page' | 'all'
     pageCount?: number
@@ -58,7 +59,9 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         this.props.handlePageTypeClick(event)
-        this.props.setResultsSearchType('annot')
+        if (this.props.resultsSearchType !== 'annot') {
+            this.props.setResultsSearchType('annot')
+        }
         this.props.setAnnotationsExpanded(true)
     }
 
@@ -159,13 +162,13 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     annotsFolded: resultsSelectors.areAnnotationsExpanded(state),
     searchType: selectors.searchType(state),
     pageType: selectors.pageType(state),
+    resultsSearchType: resultsSelectors.searchType(state),
 })
 
 const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = dispatch => ({
     handleSearchTypeClick: e => {
         e.preventDefault()
         dispatch(actions.toggleSearchType() as any)
-        dispatch(resultsActs.setLoading(true))
     },
     handlePageTypeClick: e => {
         e.preventDefault()
@@ -178,7 +181,10 @@ const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = dispatch => ({
         e.preventDefault()
         dispatch(resultsActs.toggleAreAnnotationsExpanded())
     },
-    setResultsSearchType: value => dispatch(resultsActs.setSearchType(value)),
+    setResultsSearchType: value => {
+        dispatch(resultsActs.setLoading(true))
+        dispatch(resultsActs.setSearchType(value))
+    },
     setAnnotationsExpanded: value =>
         dispatch(resultsActs.setAreAnnotationsExpanded(value)),
 })
