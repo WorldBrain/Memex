@@ -25,5 +25,10 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
         }
     } catch (err) {
         dispatch(setIsBookmarked(isBookmarked))
+        remoteFunction('createNotification')({
+            requireInteraction: false,
+            title: 'Starring page error',
+            message: err.message,
+        })
     }
 }

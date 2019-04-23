@@ -1,4 +1,5 @@
 import { browser, Notifications } from 'webextension-polyfill-ts'
+import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import browserIsChrome from './check-browser'
 export const DEF_ICON_URL = '/img/worldbrain-logo-narrow.png'
 export const DEF_TYPE = 'basic'
@@ -51,3 +52,5 @@ async function createNotification(
 }
 
 export default createNotification
+
+makeRemotelyCallable({ createNotification })
