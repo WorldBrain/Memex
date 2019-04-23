@@ -75,7 +75,6 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         this.props.handleSearchTypeClick(event)
-        this.props.setResultsSearchType('annot')
         this.props.setPageType('page')
     }
 

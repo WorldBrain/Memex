@@ -90,12 +90,10 @@ class Sidebar extends React.Component<Props, State> {
     }
 
     private handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        this.props.onQueryChange(e.target.value)
-        const searchValue = e.target.value
-        this.setState({ searchValue })
+        if (this.state.searchValue !== e.target.value) {
+            this.props.onQueryChange(e.target.value)
+        }
+        this.setState({ searchValue: e.target.value })
     }
 
     private handleClearBtn = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -124,6 +122,7 @@ class Sidebar extends React.Component<Props, State> {
         e.stopPropagation()
         this.setState(state => ({
             showFiltersSidebar: false,
+            searchValue: '',
         }))
         this.props.clearAllFilters()
     }
@@ -234,9 +233,12 @@ class Sidebar extends React.Component<Props, State> {
                                 <CommentBoxContainer env={env} />
                             </div>
                         )}
-                        <div className={cx(styles.resultsContainer, {
-                            [styles.resultsContainerPage] : env === 'overview',
-                        })}>
+                        <div
+                            className={cx(styles.resultsContainer, {
+                                [styles.resultsContainerPage]:
+                                    env === 'overview',
+                            })}
+                        >
                             {this.isPageSearch || !this.isCurrentPageSearch ? (
                                 this.renderResults()
                             ) : this.props.isLoading &&
