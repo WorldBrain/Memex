@@ -18,6 +18,7 @@ const addToBlacklistRPC: (url: string) => Promise<void> = remoteFunction(
 const processEventRPC: (args: any) => Promise<void> = remoteFunction(
     'processEvent',
 )
+const createNotifRPC = remoteFunction('createNotification')
 const deletePagesRPC = remoteFunction('delPages')
 const deletePagesByDomainRPC = remoteFunction('delPagesByDomain')
 
@@ -63,7 +64,10 @@ export const addURLToBlacklist: (
     dispatch(setIsBlacklisted(true))
 }
 
-export const deleteBlacklistData: () => Thunk = () => (dispatch, getState) => {
+export const deleteBlacklistData: () => Thunk = () => async (
+    dispatch,
+    getState,
+) => {
     const state = getState()
 
     analytics.trackEvent({
@@ -74,11 +78,19 @@ export const deleteBlacklistData: () => Thunk = () => (dispatch, getState) => {
     const url = popup.url(state)
     const domainDelete = selectors.domainDelete(state)
 
-    if (domainDelete) {
-        deletePagesByDomainRPC(deriveDomain(url))
-    } else {
-        deletePagesRPC([url])
-    }
+    try {
+        if (domainDelete) {
+            await deletePagesByDomainRPC(deriveDomain(url))
+        } else {
+            await deletePagesRPC([url])
+        }
 
-    dispatch(setShowBlacklistDelete(false))
+        dispatch(setShowBlacklistDelete(false))
+    } catch (err) {
+        createNotifRPC({
+            requireInteraction: false,
+            title: 'Memex error: deleting page',
+            message: err.message,
+        })
+    }
 }

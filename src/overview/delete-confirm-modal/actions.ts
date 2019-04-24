@@ -18,6 +18,7 @@ export const resetDeleteIndex = createAction('deleteConf/resetDeleteIndex')
 
 const processEventRPC = remoteFunction('processEvent')
 const deletePagesRPC = remoteFunction('delPages')
+const createNotifRPC = remoteFunction('createNotification')
 
 export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     const url = selectors.urlToDelete(getState())
@@ -37,12 +38,14 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
         // Remove all assoc. docs from the database + index
         await deletePagesRPC([url])
 
-        // Hide the result item + confirm modal directly (optimistically)
         dispatch(resultsActs.hideResultItem(url))
-    } catch (error) {
-        // Do nothing
-    } finally {
-        dispatch(searchFilterActs.removeTagFromFilter())
-        dispatch(resetDeleteIndex())
+    } catch (err) {
+        createNotifRPC({
+            requireInteraction: false,
+            title: 'Memex error: deleting page',
+            message: err.message,
+        })
     }
+    dispatch(searchFilterActs.removeTagFromFilter())
+    dispatch(resetDeleteIndex())
 }
