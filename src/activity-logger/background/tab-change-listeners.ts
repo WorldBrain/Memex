@@ -196,7 +196,7 @@ export default class TabChangeListeners {
     private handlePageLogErrors = (err: Error) =>
         this._createNotif({
             requireInteraction: false,
-            title: 'Page logging error',
+            title: 'Memex error: page logging',
             message: err.message,
         })
 

@@ -25,7 +25,7 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
         dispatch(setIsBookmarked(hasBookmark))
         createNotifRPC({
             requireInteraction: false,
-            title: 'Starring page error',
+            title: 'Memex error: starring page',
             message: err.message,
         })
     }

@@ -95,7 +95,7 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
         dispatch(changeHasBookmark(index))
         createNotifRPC({
             requireInteraction: false,
-            title: 'Starring page error',
+            title: 'Memex error: starring page',
             message: err.message,
         })
     }

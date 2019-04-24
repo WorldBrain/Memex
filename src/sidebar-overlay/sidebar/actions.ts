@@ -284,7 +284,7 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
         dispatch(toggleBookmarkState(index))
         createNotifRPC({
             requireInteraction: false,
-            title: 'Starring annotation error',
+            title: 'Memex error: starring page',
             message: err.message,
         })
     }
