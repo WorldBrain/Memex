@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color11, color14, color4, color6, color9 from colors;
+@value color11, color12, color14, color4, color6, color9 from colors;
 
 .menuItem {
     composes: hoverColor from 'src/common-ui/colors.css';
@@ -315,6 +315,13 @@
     padding: 0;
     cursor: pointer;
     animation: appear 0.4s forwards 0s;
+}
+
+.isError {
+    background-color: color12 !important; /* stylelint-disable-line declaration-no-important */
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 @keyframes appear {
