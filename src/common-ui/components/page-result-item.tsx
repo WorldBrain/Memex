@@ -230,7 +230,7 @@ export class PageResultItem extends PureComponent<Props> {
                                         onClick={
                                             this.props.onToggleBookmarkClick
                                         }
-                                        title="Bookmark this page"
+                                        title="Star this page"
                                     />
                                 </div>
                             </div>

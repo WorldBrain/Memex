@@ -7,6 +7,7 @@ import * as popup from '../selectors'
 
 const createBookmarkRPC = remoteFunction('addBookmark')
 const deleteBookmarkRPC = remoteFunction('delBookmark')
+const createNotifRPC = remoteFunction('createNotification')
 
 export const setIsBookmarked = createAction<boolean>('bookmark/setIsBookmarked')
 
@@ -14,18 +15,15 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
     const state = getState()
     const url = popup.url(state)
     const tabId = popup.tabId(state)
-    const isBookmarked = selectors.isBookmarked(state)
-    dispatch(setIsBookmarked(!isBookmarked))
+    const hasBookmark = selectors.isBookmarked(state)
+    dispatch(setIsBookmarked(!hasBookmark))
 
+    const bookmarkRPC = hasBookmark ? deleteBookmarkRPC : createBookmarkRPC
     try {
-        if (!isBookmarked) {
-            await createBookmarkRPC({ url, tabId })
-        } else {
-            await deleteBookmarkRPC({ url })
-        }
+        await bookmarkRPC({ url, tabId })
     } catch (err) {
-        dispatch(setIsBookmarked(isBookmarked))
-        remoteFunction('createNotification')({
+        dispatch(setIsBookmarked(hasBookmark))
+        createNotifRPC({
             requireInteraction: false,
             title: 'Starring page error',
             message: err.message,
