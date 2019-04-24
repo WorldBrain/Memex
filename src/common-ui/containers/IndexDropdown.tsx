@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import ReactDOM from 'react-dom'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
@@ -50,6 +49,8 @@ export interface Props {
 }
 
 export interface State {
+    showError: boolean
+    errMsg: string
     searchVal: string
     isLoading: boolean
     displayFilters: string[]
@@ -99,8 +100,10 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
 
         this.state = {
+            errMsg: '',
             searchVal: '',
             isLoading: false,
+            showError: false,
             displayFilters: props.initSuggestions
                 ? props.initSuggestions
                 : props.initFilters, // Display state objects; will change all the time
@@ -231,22 +234,26 @@ class IndexDropdownContainer extends Component<Props, State> {
      */
     private addTag = async () => {
         const newTag = this.getSearchVal()
+        this.props.onFilterAdd(newTag)
 
         if (this.allowIndexUpdate) {
-            if (this.props.allTabs) {
-                this.setState(state => ({
-                    multiEdit: state.multiEdit.add(newTag),
-                }))
-                await this.addTagsToOpenTabsRPC({ name: newTag }).catch(
-                    console.error,
-                )
-            } else {
-                await this.addTagRPC({
-                    url: this.props.url,
-                    tag: newTag,
-                    tabId: this.props.tabId,
-                    fromOverview: this.props.fromOverview,
-                }).catch(console.error)
+            try {
+                if (this.props.allTabs) {
+                    this.setState(state => ({
+                        multiEdit: state.multiEdit.add(newTag),
+                    }))
+                    await this.addTagsToOpenTabsRPC({ name: newTag })
+                } else {
+                    await this.addTagRPC({
+                        url: this.props.url,
+                        tag: newTag,
+                        tabId: this.props.tabId,
+                        fromOverview: this.props.fromOverview,
+                    })
+                }
+            } catch (err) {
+                this.setState(() => ({ showError: true, errMsg: err.message }))
+                this.props.onFilterDel(newTag)
             }
         }
         await this.storeTrackEvent(true)
@@ -259,8 +266,6 @@ class IndexDropdownContainer extends Component<Props, State> {
             focused: -1,
             clearFieldBtn: false,
         })
-
-        this.props.onFilterAdd(newTag)
 
         if (this.props.source === 'tag') {
             const tagSuggestions = await getLocalStorage(
@@ -276,30 +281,34 @@ class IndexDropdownContainer extends Component<Props, State> {
     }
 
     private async handleSingleTagEdit(tag: string) {
-        if (!this.pageHasTag(tag)) {
-            if (this.allowIndexUpdate) {
-                await this.addTagRPC({
-                    url: this.props.url,
-                    tag,
-                    tabId: this.props.tabId,
-                    fromOverview: this.props.fromOverview,
-                }).catch(console.error)
-            }
+        const pageHasTag = this.pageHasTag(tag)
+        let updateState
+        let revertState
+        let updateDb
 
-            await this.storeTrackEvent(true)
-            this.props.onFilterAdd(tag)
+        if (pageHasTag) {
+            updateState = this.props.onFilterDel
+            revertState = this.props.onFilterAdd
+            updateDb = this.delTagRPC
         } else {
-            if (this.allowIndexUpdate) {
-                await this.delTagRPC({
-                    url: this.props.url,
-                    tag,
-                    tabId: this.props.tabId,
-                    fromOverview: this.props.fromOverview,
-                }).catch(console.error)
-            }
+            updateState = this.props.onFilterAdd
+            revertState = this.props.onFilterDel
+            updateDb = this.addTagRPC
+        }
 
-            await this.storeTrackEvent(false)
-            this.props.onFilterDel(tag)
+        updateState(tag)
+
+        try {
+            await updateDb({
+                url: this.props.url,
+                tag,
+                tabId: this.props.tabId,
+                fromOverview: this.props.fromOverview,
+            })
+            await this.storeTrackEvent(!pageHasTag)
+        } catch (err) {
+            this.setState(() => ({ showError: true, errMsg: err.message }))
+            revertState(tag)
         }
     }
 
@@ -536,22 +545,22 @@ class IndexDropdownContainer extends Component<Props, State> {
     }
 
     private renderTags() {
-        const tags = this.getDisplayTags()
-
-        const tagOptions: React.ReactNode[] = tags.map((tag, i) => (
-            <IndexDropdownRow
-                {...tag}
-                key={i}
-                onClick={this.handleTagSelection(i)}
-                onExcClick={this.handleExcTagSelection(i)}
-                {...this.props}
-                scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                isForSidebar={this.props.isForSidebar}
-            />
-        ))
+        let tagOptions: React.ReactNode[] = this.getDisplayTags().map(
+            (tag, i) => (
+                <IndexDropdownRow
+                    {...tag}
+                    key={i}
+                    onClick={this.handleTagSelection(i)}
+                    onExcClick={this.handleExcTagSelection(i)}
+                    {...this.props}
+                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                    isForSidebar={this.props.isForSidebar}
+                />
+            ),
+        )
 
         if (this.canCreateTag()) {
-            const addRow: React.ReactNode = (
+            tagOptions = [
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
@@ -564,10 +573,27 @@ class IndexDropdownContainer extends Component<Props, State> {
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
                     isForSidebar={this.props.isForSidebar}
                     source={this.props.source}
-                />
-            )
+                />,
+                ...tagOptions,
+            ]
+        }
 
-            return [addRow, ...tagOptions]
+        if (this.state.showError) {
+            tagOptions = [
+                ...tagOptions,
+                <IndexDropdownRow
+                    key="err"
+                    value={this.state.errMsg}
+                    onClick={() => this.setState(() => ({ showError: false }))}
+                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                    focused={
+                        this.state.focused ===
+                        this.state.displayFilters.length + 1
+                    }
+                    isError
+                    {...{} as any}
+                />,
+            ]
         }
 
         return tagOptions
