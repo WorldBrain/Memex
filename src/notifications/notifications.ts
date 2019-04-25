@@ -63,7 +63,7 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
         id: 'sidebar_search-22.04.2019',
         search: {
             title:
-                'Search your knowledge now straigt from the sidebar',
+                'Search your knowledge now straight from the sidebar',
             message:
                 'Open the sidebar (r) and start typing. Blazing fast search through your knowledge.',
             buttons: [
@@ -80,7 +80,7 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
         },
         overview: {
             title:
-                'Search your knowledge now straigt from the sidebar',
+                'Search your knowledge now straight from the sidebar',
             message:
                 'Open the sidebar (r) and start typing. Blazing fast search through your knowledge.',
             buttons: [

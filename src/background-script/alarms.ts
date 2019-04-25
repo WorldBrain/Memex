@@ -19,7 +19,7 @@ export default {
             const { usage, quota } = await navigator.storage.estimate()
             const percUsed = Math.trunc((usage / quota) * 100)
 
-            if (percUsed >= QUOTA_USAGE_WARN_PERC || quota <= 3000000000) {
+            if (percUsed >= QUOTA_USAGE_WARN_PERC) {
                 await bg.sendNotification(EVENT_NOTIFS.quota_warning.id)
             }
         },
