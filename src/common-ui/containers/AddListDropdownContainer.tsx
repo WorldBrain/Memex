@@ -422,24 +422,6 @@ class AddListDropdownContainer extends Component<Props, State> {
             ]
         }
 
-        if (this.state.showError) {
-            listOpts = [
-                ...listOpts,
-                <IndexDropdownRow
-                    key="err"
-                    value={this.state.errMsg}
-                    onClick={() => this.setState(() => ({ showError: false }))}
-                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                    focused={
-                        this.state.focused ===
-                        this.state.displayFilters.length + 1
-                    }
-                    isError
-                    {...{} as any}
-                />,
-            ]
-        }
-
         return listOpts
     }
 
@@ -456,6 +438,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 }
                 tagSearchValue={this.state.searchVal}
                 source="list"
+                {...this.state}
                 {...this.props}
             >
                 {this.renderLists()}

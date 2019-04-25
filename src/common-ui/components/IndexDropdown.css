@@ -317,11 +317,11 @@
     animation: appear 0.4s forwards 0s;
 }
 
-.isError {
-    background-color: color12 !important; /* stylelint-disable-line declaration-no-important */
-    width: 100%;
-    display: flex;
-    justify-content: center;
+.errMsg {
+    background-color: color12;
+    text-align: center;
+    margin: 0;
+    padding: 0.8em 0;
 }
 
 @keyframes appear {

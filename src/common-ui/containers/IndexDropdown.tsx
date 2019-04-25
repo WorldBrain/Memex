@@ -578,24 +578,6 @@ class IndexDropdownContainer extends Component<Props, State> {
             ]
         }
 
-        if (this.state.showError) {
-            tagOptions = [
-                ...tagOptions,
-                <IndexDropdownRow
-                    key="err"
-                    value={this.state.errMsg}
-                    onClick={() => this.setState(() => ({ showError: false }))}
-                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                    focused={
-                        this.state.focused ===
-                        this.state.displayFilters.length + 1
-                    }
-                    isError
-                    {...{} as any}
-                />,
-            ]
-        }
-
         return tagOptions
     }
 
@@ -613,6 +595,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 tagSearchValue={this.state.searchVal}
                 clearSearchField={this.clearSearchField}
                 showClearfieldBtn={this.showClearfieldBtn()}
+                {...this.state}
                 {...this.props}
             >
                 {this.renderTags()}

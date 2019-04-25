@@ -16,7 +16,6 @@ class IndexDropdownRow extends PureComponent {
             PropTypes.element,
         ]).isRequired,
         active: PropTypes.bool,
-        isError: PropTypes.bool,
         excActive: PropTypes.bool,
         onClick: PropTypes.func.isRequired,
         onExcClick: PropTypes.func,
@@ -99,7 +98,6 @@ class IndexDropdownRow extends PureComponent {
                     className={cx(styles.tagPill, {
                         [styles.isList]:
                             this.props.isList || this.props.source === 'domain',
-                        [styles.isError]: this.props.isError,
                     })}
                 >
                     {(this.props.isList && this.props.value.name) ||
