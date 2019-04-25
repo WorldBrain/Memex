@@ -49,6 +49,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         isForRibbon: false,
     }
 
+    private err: { timestamp: number; err: Error }
     private addListRPC
     private addPageToListRPC
     private deletePageFromListRPC
@@ -56,6 +57,7 @@ class AddListDropdownContainer extends Component<Props, State> {
     private removeOpenTabsFromListRPC
     private fetchListByIdRPC
     private fetchListNameSuggestionsRPC
+    private createNotif
     private inputEl: HTMLInputElement
 
     constructor(props: Props) {
@@ -72,6 +74,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         this.fetchListNameSuggestionsRPC = remoteFunction(
             'fetchListNameSuggestions',
         )
+        this.createNotif = remoteFunction('createNotification')
 
         this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
 
@@ -89,10 +92,20 @@ class AddListDropdownContainer extends Component<Props, State> {
         }
     }
 
-    componentWillMount() {
+    componentDidMount() {
         // The temporary list array gets updated.
         if (this.overviewMode) {
             this.props.setTempLists()
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.err && Date.now() - this.err.timestamp <= 1000) {
+            this.createNotif({
+                requireInteraction: false,
+                title: 'Memex error: list adding',
+                message: this.err.err.message,
+            })
         }
     }
 
@@ -154,7 +167,13 @@ class AddListDropdownContainer extends Component<Props, State> {
         )
     }
 
-    // private addPageToList = () => {}
+    private handleError = (err: Error) => {
+        this.setState(() => ({ showError: true, errMsg: err.message }))
+        this.err = {
+            timestamp: Date.now(),
+            err,
+        }
+    }
 
     /**
      * Used for 'Enter' presses or 'Add new tag' clicks.
@@ -179,7 +198,7 @@ class AddListDropdownContainer extends Component<Props, State> {
 
                 this.props.onFilterAdd(newList)
             } catch (err) {
-                this.setState(() => ({ showError: true, errMsg: err.message }))
+                this.handleError(err)
             }
         }
 
@@ -268,7 +287,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         try {
             await updateDb({ id: list.id, url: this.props.url })
         } catch (err) {
-            this.setState(() => ({ showError: true, errMsg: err.message }))
+            this.handleError(err)
             revertState(list)
         }
     }

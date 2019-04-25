@@ -74,12 +74,14 @@ class IndexDropdownContainer extends Component<Props, State> {
         fromOverview: false,
     }
 
+    private err: { timestamp: number; err: Error }
     private suggestRPC
     private addTagRPC
     private delTagRPC
     private addTagsToOpenTabsRPC
     private delTagsFromOpenTabsRPC
     private processEvent
+    private createNotif
     private inputEl: HTMLInputElement
 
     constructor(props: Props) {
@@ -91,6 +93,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
         this.processEvent = remoteFunction('processEvent')
+        this.createNotif = remoteFunction('createNotification')
 
         if (this.props.isForAnnotation) {
             this.addTagRPC = remoteFunction('addAnnotationTag')
@@ -112,6 +115,16 @@ class IndexDropdownContainer extends Component<Props, State> {
             clearFieldBtn: false,
             multiEdit: new Set<string>(),
             excFilters: new Set<string>(props.initExcFilters),
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.err && Date.now() - this.err.timestamp <= 1000) {
+            this.createNotif({
+                requireInteraction: false,
+                title: 'Memex error: tag adding',
+                message: this.err.err.message,
+            })
         }
     }
 
@@ -229,6 +242,14 @@ class IndexDropdownContainer extends Component<Props, State> {
         )
     }
 
+    private handleError = (err: Error) => {
+        this.setState(() => ({ showError: true, errMsg: err.message }))
+        this.err = {
+            timestamp: Date.now(),
+            err,
+        }
+    }
+
     /**
      * Used for 'Enter' presses or 'Add new tag' clicks.
      */
@@ -252,7 +273,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                     })
                 }
             } catch (err) {
-                this.setState(() => ({ showError: true, errMsg: err.message }))
+                this.handleError(err)
                 this.props.onFilterDel(newTag)
             }
         }
@@ -307,7 +328,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             })
             await this.storeTrackEvent(!pageHasTag)
         } catch (err) {
-            this.setState(() => ({ showError: true, errMsg: err.message }))
+            this.handleError(err)
             revertState(tag)
         }
     }
