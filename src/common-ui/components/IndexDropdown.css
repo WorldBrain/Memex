@@ -319,9 +319,10 @@
 
 .errMsg {
     background-color: color12;
+    color: white;
     text-align: center;
     margin: 0;
-    padding: 0.8em 0;
+    padding: 0.8em 0.2em;
 }
 
 @keyframes appear {
