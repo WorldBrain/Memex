@@ -27,19 +27,7 @@ class ResultList extends PureComponent<Props> {
                 })}
             >
                 {this.props.children}
-                <div className={styles.infoBox}>
-                    <span className={styles.emoji}>🤓</span>
-                    <span>
-                        <b>Pro Tip: </b>
-                        Search by typing
-                    </span>
-                    <div className={styles.tutorial}>
-                        <div className={styles.keyboardM}>M</div>
-                        <div className={styles.keyboardPlus}>then</div>
-                        <div className={styles.keyboardSpace}>Space</div>
-                    </div>
-                    <span>into the browser's address bar</span>
-                </div>
+                <div className={styles.infoBox}/>
             </ul>
         )
     }

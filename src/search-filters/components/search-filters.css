@@ -55,7 +55,6 @@
 }
 
 .filters {
-    align-items: flex-start;
     height: auto;
     padding: 5px 0px;
     display: grid;
@@ -64,6 +63,7 @@
     grid-column-start: unset;
     grid-template-columns: max-content max-content max-content max-content;
     grid-gap: 20px;
+    align-items: center;
 }
 
 .button {

@@ -56,7 +56,7 @@ class FilterButton extends PureComponent<Props, State> {
         if (this.props.source === 'Types' && this.state.typesCount) {
             return (
                 <React.Fragment>
-                    <span className={this.styles.tagCount}>
+                    <span className={this.styles.renderCount}>
                         {this.state.typesCount + '/ 2'}
                     </span>
                     <span
@@ -89,7 +89,11 @@ class FilterButton extends PureComponent<Props, State> {
                 <React.Fragment>
                     {this.props.filteredItems.length > 0 && (
                         <React.Fragment>
-                            <span>{this.props.filteredItems.length}</span>
+                            <span
+                                className={this.styles.renderCount}
+                            >
+                                {this.props.filteredItems.length}
+                            </span>
                             <ButtonTooltip
                                 tooltipText="Clear this Filter"
                                 position="bottom"

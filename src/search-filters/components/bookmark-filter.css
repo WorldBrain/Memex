@@ -53,8 +53,8 @@
 .label__checkbox:checked + .label__text .label__check {
     transform-origin: center center;
     border: none;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     outline: none;
     background-image: url('/img/star_blue_full.svg');
 }
@@ -140,8 +140,10 @@
 
 .bookmark {
     background-image: url('/img/star_full.svg');
+    margin-top: 1px;
 }
 
 .notBookmark {
     background-image: url('/img/star_empty.svg');
+    margin-top: 1px;
 }

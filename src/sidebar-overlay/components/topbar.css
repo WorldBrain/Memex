@@ -33,6 +33,7 @@
     cursor: pointer;
     margin-left: 2px;
     border: none;
+    background-color: transparent;
 
     &:focus {
         background-color: color1;
