@@ -7,11 +7,7 @@
     position: fixed;
     display: flex;
     flex-direction: row;
-    top: 90px;
     justify-content: space-evenly;
-    padding: 11px 13px 10px 13px;
-    margin-left: 20px;
-    margin-top: -10px;
     cursor: pointer;
     text-decoration: none;
     align-items: center;

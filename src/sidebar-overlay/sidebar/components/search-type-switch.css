@@ -37,6 +37,7 @@
     cursor: pointer;
     outline: none;
     margin-right: 1px;
+    background-color: transparent;
 
     &:disabled {
         background-color: color7;

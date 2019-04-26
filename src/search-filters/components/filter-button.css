@@ -2,7 +2,7 @@
 @value color1, color2, color3, color4, color6, color8, color12, color9 from colors;
 
 .tagButton {
-    height: 24px;
+    height: 26px;
 
     /* ultra-light */
     border: 1px solid color9;
@@ -43,6 +43,17 @@
     background-color: color2;
 }
 
+.renderCount {
+    margin-left: 5px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.pillContent {
+    display: flex;
+    align-items: center;
+}
+
 .buttonFocusSelected {
     text-align: left;
     width: 101px;
@@ -59,13 +70,14 @@
     height: 18px;
     margin-left: 5px;
     background-position: center center;
+    display: inline-flex;
 
     &:hover {
         background-color: color8;
     }
 }
 
-.dateBox {
+.dateTopBox {
     display: flex;
     align-items: center;
 }
@@ -74,7 +86,7 @@
     display: grid;
     color: color4;
     font-size: 14px;
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 .spanInc {

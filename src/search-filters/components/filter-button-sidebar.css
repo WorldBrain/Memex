@@ -95,10 +95,12 @@
     composes: nakedSquareButton from 'src/common-ui/elements.css';
     background-size: 10px;
     cursor: pointer;
-    width: 18px;
-    height: 18px;
-    margin-left: 10px;
+    width: 14px;
+    height: 14px;
+    position: relative;
+    margin-left: 5px;
     background-position: center center;
+    right: -1px;
 
     &:hover {
         background-color: color8;

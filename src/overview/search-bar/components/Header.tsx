@@ -11,6 +11,7 @@ import { OutLink } from '../../../common-ui/containers'
 import InboxButton from '../../../notifications/components/InboxButton'
 import BackupStatus from '../../../notifications/components/BackupStatusContainer'
 import { OVERVIEW_URL } from '../../../constants'
+import BackToSearch from 'src/overview/sidebar-left/components/BackToSearch'
 import SearchFilters from 'src/search-filters'
 
 const styles = require('./Header.css')
@@ -63,7 +64,14 @@ class Header extends PureComponent<Props> {
             <React.Fragment>
                 <div className={styles.navbar}>
                     <div className={styles.collectionsPlaceholder} />
-                    <div className={styles.container}>
+                    <div className={cx(styles.backtosearch, {
+                        [styles.hideContainer]: !this.props.showInbox,
+                    })}>
+                        {this.props.showInbox && <BackToSearch />}
+                    </div>
+                    <div className={cx(styles.container, {
+                        [styles.hideContainer]: this.props.showInbox,
+                    })}>
                         <div className={styles.searchField}>
                             <input
                                 id="query-search-bar"

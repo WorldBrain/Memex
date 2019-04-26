@@ -18,6 +18,7 @@
     padding: 0 60px; */
 
     border-bottom: 1px solid #ebebeb;
+    background-color: white;
 
     @media (max-width: 1150px) {
         justify-content: flex-end;
@@ -72,6 +73,16 @@
         width: 65%;
         margin-right: 20px;
     }
+}
+
+.hideContainer {
+    display: none;
+}
+
+.backtosearch {
+    position: absolute;
+    top: 65px;
+    left: 10px;
 }
 
 .links {
