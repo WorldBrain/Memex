@@ -123,7 +123,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
         },
         overview: {
             title: 
-                '⚠️ Your almost out of storage space. Your browser may delete Memex data',
+                "⚠️ You're almost out of storage space. Your browser may delete Memex data",
             message: 
                 'Due to the browsers policy to evict local storage when space gets low it might happen that your Memex data gets deleted. Free up disk space and make sure to backup your data for the worst case',
             buttons: [
@@ -139,7 +139,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
         },
         search: {
             title:
-                '⚠️ Your almost out of disk space. Your browser might delete Memex data',
+                "⚠️ You're almost out of storage space. Your browser may delete Memex data",
             message:
                 'Due to the browsers policy to evict local storage on low disc space it might happen that your Memex data gets deleted. Free up disk space and make sure to backup your data for the worst case',
             buttons: [
