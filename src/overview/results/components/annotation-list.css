@@ -11,10 +11,9 @@
 
 .resultCount {
     composes: subTitleColor nakedButton hoverColor from '../../../common-ui/colors.css';
-    margin: -13px 0 15px 0;
+    margin: -10px 0 15px 0;
     text-align: start;
     font-size: 13px;
-    align-self: center;
     justify-content: center;
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -36,7 +35,7 @@
 }
 
 .expandedCount {
-    margin: -5px 0 0 0;
+    margin: -5px 0 -5px 0;
     width: fill-available;
 }
 
