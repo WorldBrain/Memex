@@ -317,15 +317,16 @@ class IndexDropdownContainer extends Component<Props, State> {
             updateDb = this.addTagRPC
         }
 
-        updateState(tag)
-
         try {
-            await updateDb({
-                url: this.props.url,
-                tag,
-                tabId: this.props.tabId,
-                fromOverview: this.props.fromOverview,
-            })
+            if (this.allowIndexUpdate) {
+                await updateDb({
+                    url: this.props.url,
+                    tag,
+                    tabId: this.props.tabId,
+                    fromOverview: this.props.fromOverview,
+                })
+            }
+            updateState(tag)
             await this.storeTrackEvent(!pageHasTag)
         } catch (err) {
             this.handleError(err)
