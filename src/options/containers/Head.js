@@ -26,7 +26,7 @@ const renderHeadContent = location => {
             return <title>Settings - Privacy</title>
         case '/import':
             return <title>Settings - Imports</title>
-        case '/blacklist':
+        case '/blocklist':
             return <title>Settings - Blacklist</title>
         default:
             return <title>Settings</title>

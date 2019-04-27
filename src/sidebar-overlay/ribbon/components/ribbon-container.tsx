@@ -20,6 +20,7 @@ import {
     acts as bookmarkActs,
     selectors as bookmark,
 } from 'src/popup/bookmark-button'
+import * as popup from 'src/popup/selectors'
 import { PageList } from 'src/custom-lists/background/types'
 import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar/'
@@ -29,6 +30,7 @@ interface StateProps {
     isTooltipEnabled: boolean
     isPaused: boolean
     isBookmarked: boolean
+    tabId: number
     tags: string[]
     initTagSuggs: string[]
     collections: PageList[]
@@ -94,6 +96,7 @@ class RibbonContainer extends Component<Props> {
             <IndexDropdown
                 env="inpage"
                 url={this.props.getUrl()}
+                tabId={this.props.tabId}
                 initFilters={this.props.tags}
                 initSuggestions={this.props.initTagSuggs}
                 source="tag"
@@ -146,6 +149,7 @@ const mapStateToProps: MapStateToProps<
     searchValue: selectors.searchValue(state),
     isPaused: pause.isPaused(state),
     isBookmarked: bookmark.isBookmarked(state),
+    tabId: popup.tabId(state),
     tags: tags.tags(state),
     initTagSuggs: tags.initTagSuggestions(state),
     collections: collections.collections(state),
