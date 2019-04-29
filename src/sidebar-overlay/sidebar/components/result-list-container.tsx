@@ -4,25 +4,22 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 
-import { LoadingIndicator } from 'src/common-ui/components'
+import { LoadingIndicator, PageResultItem } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
-import PageResultItem from './page-result-item'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from 'src/sidebar-overlay/sidebar/constants'
 import RootState from 'src/sidebar-overlay/types'
-import { Result, ResultsByUrl } from 'src/overview/types'
+import { Result, ResultsByUrl, ResultWithIndex } from 'src/overview/types'
 import { selectors as results, acts as resultActs } from 'src/overview/results'
 import { actions as listActs } from 'src/custom-lists'
 import { acts as deleteConfActs } from 'src/overview/delete-confirm-modal'
-import {
-    actions as sidebarActs,
-    selectors as sidebar,
-} from 'src/sidebar-overlay/sidebar'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { actions as filterActs, selectors as filters } from 'src/search-filters'
-import { PageUrlsByDay } from 'src/search/background/types'
+import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
+import niceTime from 'src/util/nice-time'
 
 const styles = require('./result-list.css')
 
@@ -138,6 +135,7 @@ class ResultListContainer extends PureComponent<Props, State> {
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
+            env={'sidebar'}
             handleTagBtnClick={this.props.handleTagBtnClick(resultIndex)}
         />
     )
@@ -168,6 +166,7 @@ class ResultListContainer extends PureComponent<Props, State> {
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
                 {...doc}
+                displayTime={niceTime(doc.displayTime)}
             />
         )
     }
@@ -198,7 +197,7 @@ class ResultListContainer extends PureComponent<Props, State> {
                 </p>,
             )
 
-            const currentCluster = this.props.annotsByDay[day]
+            const currentCluster: AnnotsByPageUrl = this.props.annotsByDay[day]
             for (const [pageUrl, annotations] of Object.entries(
                 currentCluster,
             )) {

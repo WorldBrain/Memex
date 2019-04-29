@@ -10,8 +10,8 @@
 }
 
 .resultCount {
-    composes: subTitleColor nakedButton hoverColor from '../../../common-ui/colors.css';
-    margin: -10px 0 15px 0;
+    composes: subTitleColor nakedButton hoverColor from 'src/common-ui/colors.css';
+    margin: -13px 0 15px 0;
     text-align: start;
     font-size: 13px;
     justify-content: center;

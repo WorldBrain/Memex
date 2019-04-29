@@ -16,34 +16,26 @@ export const addPage = (getDb: () => Promise<Dexie>) => async ({
     pageDoc,
     rejectNoContent,
 }: Partial<PageAddRequest>) => {
-    const db = await getDb()
-
     const { favIconURI, ...pageData } = await pipeline({
         pageDoc,
         rejectNoContent,
     })
 
-    try {
-        const page = new Page(pageData)
-        await page.loadRels(getDb)
+    const page = new Page(pageData)
+    await page.loadRels(getDb)
 
-        // Create Visits for each specified time, or a single Visit for "now" if no assoc event
-        visits = !visits.length && bookmark == null ? [Date.now()] : visits
-        visits.forEach(time => page.addVisit(time))
+    // Create Visits for each specified time, or a single Visit for "now" if no assoc event
+    visits = !visits.length && bookmark == null ? [Date.now()] : visits
+    visits.forEach(time => page.addVisit(time))
 
-        if (bookmark != null) {
-            page.setBookmark(bookmark)
-        }
-
-        if (favIconURI != null) {
-            await new FavIcon({ hostname: page.hostname, favIconURI }).save(
-                getDb,
-            )
-        }
-        await page.save(getDb)
-    } catch (error) {
-        console.error(error)
+    if (bookmark != null) {
+        page.setBookmark(bookmark)
     }
+
+    if (favIconURI != null) {
+        await new FavIcon({ hostname: page.hostname, favIconURI }).save(getDb)
+    }
+    await page.save(getDb)
 }
 
 export const addPageTerms = (getDb: () => Promise<Dexie>) => async (
@@ -52,15 +44,11 @@ export const addPageTerms = (getDb: () => Promise<Dexie>) => async (
     const db = await getDb()
     const pageData = await pipeline(pipelineReq)
 
-    try {
-        await db.transaction('rw', db.tables, async () => {
-            const page = new Page(pageData)
-            await page.loadRels(getDb)
-            await page.save(getDb)
-        })
-    } catch (error) {
-        console.error(error)
-    }
+    await db.transaction('rw', db.tables, async () => {
+        const page = new Page(pageData)
+        await page.loadRels(getDb)
+        await page.save(getDb)
+    })
 }
 
 /**

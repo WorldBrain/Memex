@@ -25,6 +25,8 @@ import {
     BookmarkChecker,
     TabIndexer,
 } from './types'
+import createNotification from 'src/util/notifications'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 interface Props {
     tabManager: TabManager
@@ -38,6 +40,7 @@ interface Props {
     bookmarkCheck?: BookmarkChecker
     tabActiveCheck?: TabEventChecker
     loggableTabCheck?: LoggableTabChecker
+    createNotif?: typeof createNotification
     contentScriptPaths?: string[]
 }
 
@@ -65,6 +68,7 @@ export default class TabChangeListeners {
     private _pageDOMLoaded: TabEventChecker
     private _tabActive: TabEventChecker
     private _pageVisitLogger: PageVisitLogger
+    private _createNotif: typeof createNotification
     public checkBookmark: BookmarkChecker
 
     /**
@@ -92,6 +96,7 @@ export default class TabChangeListeners {
         tabActiveCheck = whenTabActive,
         bookmarkCheck = searchIndex.pageHasBookmark(searchIndex.getDb),
         contentScriptPaths = TabChangeListeners.DEF_CONTENT_SCRIPTS,
+        createNotif = createNotification,
     }: Props) {
         this._tabManager = tabManager
         this._pageVisitLogger = pageVisitLogger
@@ -105,6 +110,7 @@ export default class TabChangeListeners {
         this._tabActive = tabActiveCheck
         this.checkBookmark = bookmarkCheck
         this._contentScriptPaths = contentScriptPaths
+        this._createNotif = createNotif
     }
 
     private getOrCreateTabIndexers(tabId: number) {
@@ -188,6 +194,15 @@ export default class TabChangeListeners {
         }
     }
 
+    private _handlePageLogErrors = (err: Error) =>
+        this._createNotif({
+            requireInteraction: false,
+            title: 'Memex error: page logging',
+            message: err.message,
+        })
+
+    private handlePageLogErrors = handleDBQuotaErrors(this._handlePageLogErrors)
+
     public async injectContentScripts(tab: Tabs.Tab) {
         const isLoggable = await this._checkTabLoggable(tab)
 
@@ -223,10 +238,9 @@ export default class TabChangeListeners {
         // Run stage 1 of visit indexing immediately (depends on user settings)
         await this._pageDOMLoaded({ tabId })
         if (indexingPrefs.shouldLogStubs) {
-            await this._pageVisitLogger.logPageStub(
-                tab,
-                indexingPrefs.shouldCaptureScreenshots,
-            )
+            await this._pageVisitLogger
+                .logPageStub(tab, indexingPrefs.shouldCaptureScreenshots)
+                .catch(this.handlePageLogErrors)
         }
 
         // Schedule stage 2 of visit indexing soon after - if user stays on page
@@ -242,7 +256,7 @@ export default class TabChangeListeners {
                                 indexingPrefs.shouldLogStubs,
                             ),
                         )
-                        .catch(console.error),
+                        .catch(this.handlePageLogErrors),
                 indexingPrefs.logDelay,
             )
         }

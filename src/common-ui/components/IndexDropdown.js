@@ -28,6 +28,8 @@ class IndexDropdown extends PureComponent {
         allTabs: PropTypes.bool,
         allTabsCollection: PropTypes.bool,
         sidebarTagDiv: PropTypes.bool,
+        showError: PropTypes.bool,
+        errMsg: PropTypes.string,
     }
 
     get mainClass() {
@@ -65,6 +67,18 @@ class IndexDropdown extends PureComponent {
         return this.placeholder.toLowerCase()
     }
 
+    get errMsg() {
+        return `ERROR: ${this.props.errMsg}`
+    }
+
+    renderError() {
+        if (!this.props.showError) {
+            return null
+        }
+
+        return <p className={styles.errMsg}>{this.errMsg}</p>
+    }
+
     render() {
         return (
             <div className={this.mainClass} ref={this.props.setTagDivRef}>
@@ -86,6 +100,7 @@ class IndexDropdown extends PureComponent {
                         autoFocus
                     />
                 </div>
+                {this.renderError()}
                 {this.props.allTabs && (
                     <p className={styles.allTabs}>
                         Add tags to all tabs in window

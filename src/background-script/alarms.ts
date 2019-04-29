@@ -25,4 +25,4 @@ export const storageQuotaCheck: AlarmConfig = {
 }
 
 // Schedule alarm configs to run in here:
-export default {} as AlarmsConfig
+export default { storageQuotaCheck } as AlarmsConfig

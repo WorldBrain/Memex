@@ -10,6 +10,7 @@ import {
 } from '../components'
 import { PageList } from '../../custom-lists/background/types'
 import { ClickHandler } from '../../popup/types'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -31,6 +32,8 @@ export interface Props {
 }
 
 export interface State {
+    showError: boolean
+    errMsg: string
     searchVal: string
     isLoading: boolean
     displayFilters: PageList[]
@@ -47,6 +50,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         isForRibbon: false,
     }
 
+    private err: { timestamp: number; err: Error }
     private addListRPC
     private addPageToListRPC
     private deletePageFromListRPC
@@ -54,6 +58,7 @@ class AddListDropdownContainer extends Component<Props, State> {
     private removeOpenTabsFromListRPC
     private fetchListByIdRPC
     private fetchListNameSuggestionsRPC
+    private createNotif
     private inputEl: HTMLInputElement
 
     constructor(props: Props) {
@@ -70,12 +75,15 @@ class AddListDropdownContainer extends Component<Props, State> {
         this.fetchListNameSuggestionsRPC = remoteFunction(
             'fetchListNameSuggestions',
         )
+        this.createNotif = remoteFunction('createNotification')
 
         this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
 
         this.state = {
+            errMsg: '',
             searchVal: '',
             isLoading: false,
+            showError: false,
             displayFilters: props.initSuggestions
                 ? props.initSuggestions
                 : props.initLists, // Display state objects; will change all the time
@@ -85,10 +93,22 @@ class AddListDropdownContainer extends Component<Props, State> {
         }
     }
 
-    componentWillMount() {
+    componentDidMount() {
         // The temporary list array gets updated.
         if (this.overviewMode) {
             this.props.setTempLists()
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.err && Date.now() - this.err.timestamp <= 1000) {
+            handleDBQuotaErrors(err =>
+                this.createNotif({
+                    requireInteraction: false,
+                    title: 'Memex error: list adding',
+                    message: err.message,
+                }),
+            )(this.err.err)
         }
     }
 
@@ -150,7 +170,13 @@ class AddListDropdownContainer extends Component<Props, State> {
         )
     }
 
-    // private addPageToList = () => {}
+    private handleError = (err: Error) => {
+        this.setState(() => ({ showError: true, errMsg: err.message }))
+        this.err = {
+            timestamp: Date.now(),
+            err,
+        }
+    }
 
     /**
      * Used for 'Enter' presses or 'Add new tag' clicks.
@@ -175,7 +201,7 @@ class AddListDropdownContainer extends Component<Props, State> {
 
                 this.props.onFilterAdd(newList)
             } catch (err) {
-                console.error(err)
+                this.handleError(err)
             }
         }
 
@@ -245,24 +271,27 @@ class AddListDropdownContainer extends Component<Props, State> {
     }
 
     private async handleSingleCollectionEdit(list) {
-        if (!this.pageBelongsToList(list)) {
-            if (this.allowIndexUpdate) {
-                await this.addPageToListRPC({
-                    id: list.id,
-                    url: this.props.url,
-                }).catch(console.error)
-            }
+        let updateState
+        let revertState
+        let updateDb
 
-            this.props.onFilterAdd(list)
+        if (this.pageBelongsToList(list)) {
+            updateState = this.props.onFilterDel
+            revertState = this.props.onFilterAdd
+            updateDb = this.deletePageFromListRPC
         } else {
-            if (this.allowIndexUpdate) {
-                await this.deletePageFromListRPC({
-                    id: list.id,
-                    url: this.props.url,
-                }).catch(console.error)
-            }
+            updateState = this.props.onFilterAdd
+            revertState = this.props.onFilterDel
+            updateDb = this.addPageToListRPC
+        }
 
-            this.props.onFilterDel(list)
+        updateState(list)
+
+        try {
+            await updateDb({ id: list.id, url: this.props.url })
+        } catch (err) {
+            this.handleError(err)
+            revertState(list)
         }
     }
 
@@ -348,7 +377,10 @@ class AddListDropdownContainer extends Component<Props, State> {
         ) {
             event.preventDefault()
             event.stopPropagation()
-            this.setState(state => ({ searchVal: state.searchVal + event.key }), this.fetchListSuggestions)
+            this.setState(
+                state => ({ searchVal: state.searchVal + event.key }),
+                this.fetchListSuggestions,
+            )
             return
         }
         switch (event.key) {
@@ -383,21 +415,21 @@ class AddListDropdownContainer extends Component<Props, State> {
     }
 
     private renderLists() {
-        const lists = this.getDisplayLists()
-
-        const listOptions: React.ReactNode[] = lists.map((list, i) => (
-            <IndexDropdownRow
-                {...list}
-                key={i}
-                onClick={this.handleListClick(i)}
-                scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                isForSidebar={false}
-                isList
-            />
-        ))
+        let listOpts: React.ReactNode[] = this.getDisplayLists().map(
+            (list, i) => (
+                <IndexDropdownRow
+                    {...list}
+                    key={i}
+                    onClick={this.handleListClick(i)}
+                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                    isForSidebar={false}
+                    isList
+                />
+            ),
+        )
 
         if (this.canCreateList()) {
-            const addRow: React.ReactNode = (
+            listOpts = [
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
@@ -407,12 +439,12 @@ class AddListDropdownContainer extends Component<Props, State> {
                         this.state.focused === this.state.displayFilters.length
                     }
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                />
-            )
-            return [addRow, ...listOptions]
+                />,
+                ...listOpts,
+            ]
         }
 
-        return listOptions
+        return listOpts
     }
 
     render() {
@@ -428,6 +460,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 }
                 tagSearchValue={this.state.searchVal}
                 source="list"
+                {...this.state}
                 {...this.props}
             >
                 {this.renderLists()}

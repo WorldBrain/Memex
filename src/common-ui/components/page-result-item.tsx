@@ -1,18 +1,17 @@
 import React, {
     PureComponent,
-    ReactNode,
     MouseEventHandler,
+    ReactNode,
     DragEventHandler,
 } from 'react'
-import classNames from 'classnames'
+import cx from 'classnames'
 
-import { LoadingIndicator } from '../../../common-ui/components'
-import niceTime from '../../../util/nice-time'
-import SemiCircularRibbon from './SemiCircularRibbon'
-import ButtonTooltip from '../../../common-ui/components/button-tooltip'
+import SemiCircularRibbon from './semi-circular-ribbon'
+import LoadingIndicator from './LoadingIndicator'
 import AnnotationList from './annotation-list'
+import ButtonTooltip from './button-tooltip'
 
-const styles = require('./PageResultItem.css')
+const styles = require('./page-result-item.css')
 
 export interface Props {
     url: string
@@ -20,15 +19,15 @@ export interface Props {
     favIcon: string
     nullImg?: string
     screenshot: string
-    displayTime: number
-    isDeleting: boolean
-    hasBookmark: boolean
-    isSidebarOpen: boolean
-    isListFilterActive: boolean
-    areAnnotationsExpanded: boolean
-    isResponsibleForSidebar: boolean
-    annotations: any[]
+    displayTime: string
     annotsCount: number
+    isDeleting?: boolean
+    isOverview?: boolean
+    hasBookmark?: boolean
+    isListFilterActive?: boolean
+    areAnnotationsExpanded?: boolean
+    isResponsibleForSidebar?: boolean
+    annotations: any[]
     tagHolder: ReactNode
     tagManager: ReactNode
     onTagBtnClick: MouseEventHandler
@@ -36,18 +35,18 @@ export interface Props {
     onCommentBtnClick: MouseEventHandler
     onToggleBookmarkClick: MouseEventHandler
     handleCrossRibbonClick: MouseEventHandler
-    resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
+    resetUrlDragged: () => void
     setTagButtonRef: (el: HTMLButtonElement) => void
 }
 
-class PageResultItem extends PureComponent<Props> {
+export class PageResultItem extends PureComponent<Props> {
     static defaultProps = {
         nullImg: '/img/null-icon.png',
     }
 
     get bookmarkClass() {
-        return classNames(styles.button, {
+        return cx(styles.button, {
             [styles.bookmark]: this.props.hasBookmark,
             [styles.notBookmark]: !this.props.hasBookmark,
         })
@@ -57,19 +56,23 @@ class PageResultItem extends PureComponent<Props> {
         return `http://${this.props.url}`
     }
 
-    dragStart: DragEventHandler = e => {
+    private dragStart: DragEventHandler = e => {
         const { url, setUrlDragged } = this.props
 
         setUrlDragged(url)
-        const crt = document.getElementById('dragged-element')
+        const crt = this.props.isOverview
+            ? document.getElementById('dragged-element')
+            : (document
+                  .querySelector('.memex-ribbon-sidebar-container')
+                  .shadowRoot.querySelector('#dragged-element') as HTMLElement)
+
         crt.style.display = 'block'
 
         e.dataTransfer.setData('text/plain', url)
-
         e.dataTransfer.setDragImage(crt, 10, 10)
     }
 
-    renderAnnotsList() {
+    private renderAnnotsList() {
         if (!(this.props.annotations && this.props.annotations.length)) {
             return null
         }
@@ -85,10 +88,37 @@ class PageResultItem extends PureComponent<Props> {
         )
     }
 
+    private renderScreenshot() {
+        if (!this.props.isOverview) {
+            return null
+        }
+
+        return (
+            <div className={styles.screenshotContainer}>
+                {this.props.screenshot == null ? (
+                    <ButtonTooltip
+                        position="CenterCenter"
+                        tooltipText="Screenshots are not captured when importing, or when you switch away from a tab too quickly."
+                    >
+                        <img
+                            className={styles.screenshot}
+                            src={this.props.nullImg}
+                        />
+                    </ButtonTooltip>
+                ) : (
+                    <img
+                        className={styles.screenshot}
+                        src={this.props.screenshot}
+                    />
+                )}
+            </div>
+        )
+    }
+
     render() {
         return (
             <li
-                className={classNames({
+                className={cx({
                     [styles.isDeleting]: this.props.isDeleting,
                 })}
             >
@@ -96,7 +126,8 @@ class PageResultItem extends PureComponent<Props> {
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
                 <div
-                    className={classNames(styles.rootContainer, {
+                    className={cx(styles.rootContainer, {
+                        [styles.rootContainerOverview]: this.props.isOverview,
                         [styles.isSidebarOpen]: this.props
                             .isResponsibleForSidebar,
                     })}
@@ -104,30 +135,20 @@ class PageResultItem extends PureComponent<Props> {
                     <a
                         onDragStart={this.dragStart}
                         onDragEnd={this.props.resetUrlDragged}
-                        className={styles.root}
+                        className={cx(styles.root, {
+                            [styles.rootOverview]: this.props.isOverview,
+                        })}
                         href={this.hrefToPage}
                         target="_blank"
                         draggable
                     >
-                        <div className={styles.screenshotContainer}>
-                            {this.props.screenshot == null ? (
-                                <ButtonTooltip
-                                    position="CenterCenter"
-                                    tooltipText="Screenshots are not captured when importing, or when you switch away from a tab too quickly."
-                                >
-                                    <img
-                                        className={styles.screenshot}
-                                        src={this.props.nullImg}
-                                    />
-                                </ButtonTooltip>
-                            ) : (
-                                <img
-                                    className={styles.screenshot}
-                                    src={this.props.screenshot}
-                                />
-                            )}
-                        </div>
-                        <div className={styles.infoContainer}>
+                        {this.renderScreenshot()}
+                        <div
+                            className={cx(styles.infoContainer, {
+                                [styles.infoContainerOverview]: this.props
+                                    .isOverview,
+                            })}
+                        >
                             <div className={styles.firstlineContainer}>
                                 <div
                                     className={styles.title}
@@ -160,15 +181,15 @@ class PageResultItem extends PureComponent<Props> {
                                 </ButtonTooltip>
                             </div>
                             <div className={styles.url}>{this.props.url}</div>
+                            {!this.props.isOverview && this.props.tagHolder}
 
                             <div className={styles.detailsContainer}>
                                 <div className={styles.detailsBox}>
                                     <div className={styles.displayTime}>
-                                        {' '}
-                                        {niceTime(this.props.displayTime)}{' '}
+                                        {this.props.displayTime}
                                     </div>
-                                    {/* Tag Holder */}
-                                    {this.props.tagHolder}
+                                    {this.props.isOverview &&
+                                        this.props.tagHolder}
                                 </div>
                                 <div
                                     className={styles.buttonsContainer}
@@ -176,7 +197,7 @@ class PageResultItem extends PureComponent<Props> {
                                 >
                                     <button
                                         disabled={this.props.isDeleting}
-                                        className={classNames(
+                                        className={cx(
                                             styles.button,
                                             styles.trash,
                                         )}
@@ -184,7 +205,7 @@ class PageResultItem extends PureComponent<Props> {
                                         title="Delete this page & all related content"
                                     />
                                     <button
-                                        className={classNames(
+                                        className={cx(
                                             styles.button,
                                             styles.tag,
                                         )}
@@ -193,7 +214,7 @@ class PageResultItem extends PureComponent<Props> {
                                         title="Add/View Tags"
                                     />
                                     <button
-                                        className={classNames(
+                                        className={cx(
                                             styles.button,
                                             styles.comment,
                                             {
@@ -214,7 +235,7 @@ class PageResultItem extends PureComponent<Props> {
                                         onClick={
                                             this.props.onToggleBookmarkClick
                                         }
-                                        title="Bookmark this page"
+                                        title="Star this page"
                                     />
                                 </div>
                             </div>
@@ -227,5 +248,3 @@ class PageResultItem extends PureComponent<Props> {
         )
     }
 }
-
-export default PageResultItem

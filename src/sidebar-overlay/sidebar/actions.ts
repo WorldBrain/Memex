@@ -16,9 +16,11 @@ import {
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import normalizeUrl from 'src/util/encode-url-for-id'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
+const createNotifRPC = remoteFunction('createNotification')
 
 export const setAnnotationsManager = createAction<AnnotationsManager>(
     'setAnnotationsManager',
@@ -274,17 +276,38 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const annotations = selectors.annotations(state)
-
-    await annotationsManager.toggleBookmark(url)
-
     const index = annotations.findIndex(annot => annot.url === url)
-    const annotation: Annotation = annotations[index]
-    const newAnnotations: Annotation[] = [
-        ...annotations.slice(0, index),
-        { ...annotation, hasBookmark: !annotation.hasBookmark },
-        ...annotations.slice(index + 1),
-    ]
-    dispatch(setAnnotations(newAnnotations))
+    dispatch(toggleBookmarkState(index))
+
+    try {
+        await annotationsManager.toggleBookmark(url)
+    } catch (err) {
+        dispatch(toggleBookmarkState(index))
+        handleDBQuotaErrors(error =>
+            createNotifRPC({
+                requireInteraction: false,
+                title: 'Memex error: starring page',
+                message: error.message,
+            }),
+        )(err)
+    }
+}
+
+// Only toggles UI state; no DB side-effects
+export const toggleBookmarkState: (i: number) => Thunk = i => (
+    dispatch,
+    getState,
+) => {
+    const state = getState()
+    const annotations = selectors.annotations(state)
+    const annotation = annotations[i]
+    dispatch(
+        setAnnotations([
+            ...annotations.slice(0, i),
+            { ...annotation, hasBookmark: !annotation.hasBookmark },
+            ...annotations.slice(i + 1),
+        ]),
+    )
 }
 
 export const toggleSearchType: () => Thunk = () => (dispatch, getState) => {

@@ -7,6 +7,7 @@ import * as selectors from './selectors'
 import { acts as resultsActs } from '../results'
 import { actions as searchFilterActs } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 export const show = createAction<{ url: string; index: number }>(
     'deleteConf/show',
@@ -18,6 +19,7 @@ export const resetDeleteIndex = createAction('deleteConf/resetDeleteIndex')
 
 const processEventRPC = remoteFunction('processEvent')
 const deletePagesRPC = remoteFunction('delPages')
+const createNotifRPC = remoteFunction('createNotification')
 
 export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     const url = selectors.urlToDelete(getState())
@@ -37,12 +39,16 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
         // Remove all assoc. docs from the database + index
         await deletePagesRPC([url])
 
-        // Hide the result item + confirm modal directly (optimistically)
         dispatch(resultsActs.hideResultItem(url))
-    } catch (error) {
-        // Do nothing
-    } finally {
-        dispatch(searchFilterActs.removeTagFromFilter())
-        dispatch(resetDeleteIndex())
+    } catch (err) {
+        handleDBQuotaErrors(error =>
+            this.createNotif({
+                requireInteraction: false,
+                title: 'Memex error: deleting page',
+                message: error.message,
+            }),
+        )(err)
     }
+    dispatch(searchFilterActs.removeTagFromFilter())
+    dispatch(resetDeleteIndex())
 }

@@ -9,10 +9,12 @@ import { SearchResult } from '../types'
 import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 const processEventRPC = remoteFunction('processEvent')
 const createBookmarkRPC = remoteFunction('addBookmark')
-const removeBookmarkRPC = remoteFunction('delBookmark')
+const deleteBookmarkRPC = remoteFunction('delBookmark')
+const createNotifRPC = remoteFunction('createNotification')
 
 export const addTag = createAction('results/localAddTag', (tag, index) => ({
     tag,
@@ -72,7 +74,7 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
 ) => async (dispatch, getState) => {
     const results = selectors.results(getState())
     const { hasBookmark } = results[index]
-    dispatch(changeHasBookmark(index)) // Reset UI state in case of error
+    dispatch(changeHasBookmark(index))
 
     analytics.trackEvent({
         category: 'Overview',
@@ -87,14 +89,18 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
             : EVENT_NAMES.CREATE_RESULT_BOOKMARK,
     })
 
-    // Reset UI state in case of error
-    const errHandler = err => dispatch(changeHasBookmark(index))
-
-    // Either perform adding or removal of bookmark; do not wait for ops to complete
-    if (hasBookmark) {
-        removeBookmarkRPC({ url, fromOverview: true }).catch(errHandler)
-    } else {
-        createBookmarkRPC({ url, fromOverview: true }).catch(errHandler)
+    const bookmarkRPC = hasBookmark ? deleteBookmarkRPC : createBookmarkRPC
+    try {
+        await bookmarkRPC({ url, fromOverview: true })
+    } catch (err) {
+        dispatch(changeHasBookmark(index))
+        handleDBQuotaErrors(error =>
+            this.createNotif({
+                requireInteraction: false,
+                title: 'Memex error: starring page',
+                message: error.message,
+            }),
+        )(err)
     }
 }
 

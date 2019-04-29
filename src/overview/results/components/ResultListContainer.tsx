@@ -4,9 +4,8 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 
-import { LoadingIndicator } from '../../../common-ui/components'
+import { LoadingIndicator, PageResultItem } from '../../../common-ui/components'
 import { IndexDropdown } from '../../../common-ui/containers'
-import PageResultItem from './PageResultItem'
 import ResultList from './ResultList'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
@@ -17,18 +16,16 @@ import * as acts from '../actions'
 import { actions as listActs } from '../../../custom-lists'
 import { acts as deleteConfActs } from '../../delete-confirm-modal'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
-import {
-    actions as sidebarLeftActs,
-    selectors as sidebarLeft,
-} from '../../sidebar-left'
+import { Annotation } from 'src/sidebar-overlay/sidebar/types'
+import { selectors as sidebarLeft } from '../../sidebar-left'
 import {
     actions as filterActs,
     selectors as filters,
 } from '../../../search-filters'
-import { selectors as searchBar } from '../../search-bar'
-import { PageUrlsByDay } from 'src/search/background/types'
+import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
+import niceTime from 'src/util/nice-time'
 
 const styles = require('./ResultList.css')
 
@@ -143,6 +140,7 @@ class ResultListContainer extends PureComponent<Props> {
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
             handleTagBtnClick={this.props.handleTagBtnClick(resultIndex)}
+            env={'overview'}
         />
     )
 
@@ -155,13 +153,13 @@ class ResultListContainer extends PureComponent<Props> {
         })
     }
 
-    private attachDocWithPageResultItem(doc, index, key) {
+    private attachDocWithPageResultItem(doc: Result, index, key) {
         return (
             <PageResultItem
                 key={key}
+                isOverview
                 setTagButtonRef={this.setTagButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
-                isSidebarOpen={this.props.isSidebarOpen}
                 setUrlDragged={this.props.setUrlDragged}
                 tagManager={this.renderTagsManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}
@@ -176,6 +174,7 @@ class ResultListContainer extends PureComponent<Props> {
                     this.props.activeSidebarIndex === index
                 }
                 {...doc}
+                displayTime={niceTime(doc.displayTime)}
             />
         )
     }
@@ -206,7 +205,8 @@ class ResultListContainer extends PureComponent<Props> {
                 </p>,
             )
 
-            const currentCluster = this.props.annotsByDay[day]
+            const currentCluster: { [key: string]: Annotation[] } = this.props
+                .annotsByDay[day]
             for (const [pageUrl, annotations] of Object.entries(
                 currentCluster,
             )) {
@@ -218,7 +218,7 @@ class ResultListContainer extends PureComponent<Props> {
 
                 els.push(
                     this.attachDocWithPageResultItem(
-                        { ...page, annotations },
+                        { ...page, annotations } as any,
                         page.index,
                         `${day}${pageUrl}`,
                     ),

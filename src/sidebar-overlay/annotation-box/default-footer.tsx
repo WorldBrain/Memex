@@ -67,7 +67,7 @@ const DefaultFooter = ({
                     [styles.bookmark]: hasBookmark,
                     [styles.notBookmark]: !hasBookmark,
                 })}
-                title="Toggle bookmark"
+                title="Toggle star"
                 onClick={e => {
                     e.stopPropagation()
                     handleBookmarkToggle()

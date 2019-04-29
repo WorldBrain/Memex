@@ -5,9 +5,11 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')
+const createNotifRPC = remoteFunction('createNotification')
 const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 const processEvent = remoteFunction('processEvent')
 
@@ -111,13 +113,23 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
     dirtyEstsCache() // Force import ests to recalc next visit
 }
 
-export const removeMatchingDocs = expression => (dispatch, getState) => {
+export const removeMatchingDocs = expression => async (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Blacklist',
         action: 'Delete matching pages',
         value: selectors.matchedDocCount(getState()),
     })
-
-    deletePagesByPattern(expression) // To be run in background; can take long
     dispatch(setModalShow(false))
+
+    try {
+        await deletePagesByPattern(expression) // To be run in background; can take long
+    } catch (err) {
+        handleDBQuotaErrors(error =>
+            createNotifRPC({
+                requireInteraction: false,
+                title: 'Memex error: deleting page',
+                message: error.message,
+            }),
+        )(err)
+    }
 }
