@@ -10,7 +10,6 @@ import {
     IndexDropdown,
     AddListDropdownContainer,
 } from 'src/common-ui/containers'
-import * as popup from 'src/popup/selectors'
 import { selectors as pause, acts as pauseActs } from 'src/popup/pause-button'
 import { acts as tagActs, selectors as tags } from 'src/popup/tags-button'
 import {
@@ -30,7 +29,6 @@ interface StateProps {
     isTooltipEnabled: boolean
     isPaused: boolean
     isBookmarked: boolean
-    url: string
     tags: string[]
     initTagSuggs: string[]
     collections: PageList[]
@@ -69,6 +67,7 @@ interface OwnProps {
     isRibbonEnabled: boolean
     isCommentSaved: boolean
     annotationsManager: AnnotationsManager
+    getUrl: () => string
     setRibbonRef: (e: HTMLElement) => void
     closeSidebar: () => void
     handleRemoveRibbon: () => void
@@ -94,7 +93,7 @@ class RibbonContainer extends Component<Props> {
         return (
             <IndexDropdown
                 env="inpage"
-                url={this.props.url}
+                url={this.props.getUrl()}
                 initFilters={this.props.tags}
                 initSuggestions={this.props.initTagSuggs}
                 source="tag"
@@ -109,7 +108,7 @@ class RibbonContainer extends Component<Props> {
         return (
             <AddListDropdownContainer
                 env="inpage"
-                url={this.props.url}
+                url={this.props.getUrl()}
                 initLists={this.props.collections}
                 initSuggestions={this.props.initCollSuggs}
                 onFilterAdd={this.props.onCollectionAdd}
@@ -147,7 +146,6 @@ const mapStateToProps: MapStateToProps<
     searchValue: selectors.searchValue(state),
     isPaused: pause.isPaused(state),
     isBookmarked: bookmark.isBookmarked(state),
-    url: popup.url(state),
     tags: tags.tags(state),
     initTagSuggs: tags.initTagSuggestions(state),
     collections: collections.collections(state),

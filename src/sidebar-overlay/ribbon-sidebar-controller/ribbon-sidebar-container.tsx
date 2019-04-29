@@ -55,6 +55,7 @@ interface OwnProps extends Partial<KeyboardActions> {
     closeTimeoutMs?: number
     forceExpand?: boolean
     annotationsManager: AnnotationsManager
+    getUrl?: () => string
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
     highlightAll: (
@@ -77,7 +78,9 @@ interface State {
 }
 
 class RibbonSidebarContainer extends React.Component<Props, State> {
-    static defaultProps = { closeTimeoutMs: 1000 }
+    static defaultProps = {
+        closeTimeoutMs: 1000,
+    }
 
     private containerRef: HTMLDivElement
     private ribbonRef: HTMLElement
@@ -114,6 +117,8 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             this._highlightAnnotations()
         }
     }
+
+    private getUrl = () => location.href
 
     public updateRibbonState = ({
         isRibbonEnabled,
@@ -434,6 +439,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
                         isCommentSaved={isCommentSaved}
                         commentText={commentText}
                         setShowSidebarCommentBox={setShowSidebarCommentBox}
+                        getUrl={this.getUrl}
                     />
                 )}
 
