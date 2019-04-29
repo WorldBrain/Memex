@@ -4,6 +4,7 @@ import { checkWithBlacklist } from 'src/blacklist/background/interface'
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import DataSources from './data-sources'
+import { chunk } from 'src/util/chunk'
 
 // Binds an import type to a function that transforms a history/bookmark doc to an import item.
 const deriveImportItem = type => item => ({
@@ -188,15 +189,6 @@ export default class ImportItemCreator {
         }
     }
 
-    chunks = (array, size) => {
-        const result = []
-        for (let i = 0; i < array.length; i += size) {
-            const chunk = array.slice(i, i + size)
-            result.push(chunk)
-        }
-        return result
-    }
-
     /**
      * Main interface method, allowing incremental creation of different import item types.
      *
@@ -238,7 +230,7 @@ export default class ImportItemCreator {
             )
 
             yield* this._iterateItems(
-                this.chunks(this._servicesData, 10),
+                chunk(this._servicesData, 10),
                 itemsFilter,
                 this._servicesLimit,
                 TYPE.OTHERS,

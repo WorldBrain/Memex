@@ -4,6 +4,8 @@ import tabManager from './tab-manager'
 import TabChangeListeners from './tab-change-listeners'
 import PageVisitLogger from './log-page-visit'
 import { TabChangeListener } from './types'
+import { chunk, mapChunks } from 'src/util/chunk'
+import { CONCURR_TAB_LOAD } from '../constants'
 
 const pageVisitLogger = new PageVisitLogger({ tabManager })
 const tabChangeListener = new TabChangeListeners({
@@ -42,7 +44,7 @@ export async function trackExistingTabs({ isNewInstall = false }) {
     tabQueryP = new Promise(resolve => (resolveTabQueryP = resolve))
     const tabs = await browser.tabs.query({})
 
-    for (const browserTab of tabs) {
+    await mapChunks<Tabs.Tab>(tabs, CONCURR_TAB_LOAD, async browserTab => {
         tabManager.trackTab(browserTab, {
             isLoaded: isTabLoaded(browserTab),
             isBookmarked: await tabChangeListener.checkBookmark(browserTab.url),
@@ -51,7 +53,7 @@ export async function trackExistingTabs({ isNewInstall = false }) {
         await tabChangeListener.injectContentScripts(browserTab).catch(e => e)
 
         if (!isNewInstall) {
-            continue
+            return
         }
 
         if (browserTab.url) {
@@ -61,7 +63,7 @@ export async function trackExistingTabs({ isNewInstall = false }) {
                 browserTab,
             )
         }
-    }
+    })
 
     resolveTabQueryP()
 }

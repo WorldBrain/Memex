@@ -8,7 +8,10 @@ import {
     whenTabActive,
 } from '../../util/tab-events'
 import PageVisitLogger from './log-page-visit'
-import { fetchFavIcon } from '../../page-analysis/background/get-fav-icon'
+import {
+    fetchFavIcon,
+    FavIconFetchError,
+} from '../../page-analysis/background/get-fav-icon'
 import { shouldLogTab, updateVisitInteractionData } from './util'
 import { TabManager } from './tab-manager'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
@@ -259,7 +262,9 @@ export default class TabChangeListeners {
                 await this._createFavIcon(tab.url, favIconDataUrl)
             }
         } catch (err) {
-            console.error(err)
+            if (!(err instanceof FavIconFetchError)) {
+                throw err
+            }
         }
     }
 }
