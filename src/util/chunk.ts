@@ -24,9 +24,11 @@ export async function mapChunks<T = any, R = any>(
     cb: (t: T, i: number, arr: T[]) => Promise<R>,
 ) {
     const result = []
+
     for (const items of chunk(array, size)) {
         const res = await Promise.all(items.map(cb))
         result.push(...res)
     }
+
     return result
 }
