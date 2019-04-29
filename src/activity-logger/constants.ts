@@ -1,1 +1,1 @@
-export const CONCURR_TAB_LOAD = 5
+export const CONCURR_TAB_LOAD = 10
