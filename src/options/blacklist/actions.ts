@@ -5,6 +5,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')
@@ -123,10 +124,12 @@ export const removeMatchingDocs = expression => async (dispatch, getState) => {
     try {
         await deletePagesByPattern(expression) // To be run in background; can take long
     } catch (err) {
-        createNotifRPC({
-            requireInteraction: false,
-            title: 'Memex error: deleting page',
-            message: err.message,
-        })
+        handleDBQuotaErrors(error =>
+            createNotifRPC({
+                requireInteraction: false,
+                title: 'Memex error: deleting page',
+                message: error.message,
+            }),
+        )(err)
     }
 }

@@ -10,6 +10,7 @@ import {
 } from '../components'
 import { PageList } from '../../custom-lists/background/types'
 import { ClickHandler } from '../../popup/types'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -101,11 +102,13 @@ class AddListDropdownContainer extends Component<Props, State> {
 
     componentWillUnmount() {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
-            this.createNotif({
-                requireInteraction: false,
-                title: 'Memex error: list adding',
-                message: this.err.err.message,
-            })
+            handleDBQuotaErrors(err =>
+                this.createNotif({
+                    requireInteraction: false,
+                    title: 'Memex error: list adding',
+                    message: err.message,
+                }),
+            )(this.err.err)
         }
     }
 

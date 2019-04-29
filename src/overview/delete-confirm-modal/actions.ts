@@ -7,6 +7,7 @@ import * as selectors from './selectors'
 import { acts as resultsActs } from '../results'
 import { actions as searchFilterActs } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 export const show = createAction<{ url: string; index: number }>(
     'deleteConf/show',
@@ -40,11 +41,13 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
 
         dispatch(resultsActs.hideResultItem(url))
     } catch (err) {
-        createNotifRPC({
-            requireInteraction: false,
-            title: 'Memex error: deleting page',
-            message: err.message,
-        })
+        handleDBQuotaErrors(error =>
+            this.createNotif({
+                requireInteraction: false,
+                title: 'Memex error: deleting page',
+                message: error.message,
+            }),
+        )(err)
     }
     dispatch(searchFilterActs.removeTagFromFilter())
     dispatch(resetDeleteIndex())

@@ -11,6 +11,7 @@ import {
 import { ClickHandler } from '../../popup/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -120,11 +121,13 @@ class IndexDropdownContainer extends Component<Props, State> {
 
     componentWillUnmount() {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
-            this.createNotif({
-                requireInteraction: false,
-                title: 'Memex error: tag adding',
-                message: this.err.err.message,
-            })
+            handleDBQuotaErrors(err =>
+                this.createNotif({
+                    requireInteraction: false,
+                    title: 'Memex error: tag adding',
+                    message: err.message,
+                }),
+            )(this.err.err)
         }
     }
 

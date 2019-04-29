@@ -4,6 +4,7 @@ import { remoteFunction } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 const createBookmarkRPC = remoteFunction('addBookmark')
 const deleteBookmarkRPC = remoteFunction('delBookmark')
@@ -23,10 +24,12 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
         await bookmarkRPC({ url, tabId })
     } catch (err) {
         dispatch(setIsBookmarked(hasBookmark))
-        createNotifRPC({
-            requireInteraction: false,
-            title: 'Memex error: starring page',
-            message: err.message,
-        })
+        handleDBQuotaErrors(error =>
+            createNotifRPC({
+                requireInteraction: false,
+                title: 'Memex error: starring page',
+                message: error.message,
+            }),
+        )(err)
     }
 }

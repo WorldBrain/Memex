@@ -6,6 +6,7 @@ import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 function deriveDomain(url: string) {
     const { hostname } = new URL(url)
@@ -87,10 +88,12 @@ export const deleteBlacklistData: () => Thunk = () => async (
 
         dispatch(setShowBlacklistDelete(false))
     } catch (err) {
-        createNotifRPC({
-            requireInteraction: false,
-            title: 'Memex error: deleting page',
-            message: err.message,
-        })
+        handleDBQuotaErrors(error =>
+            createNotifRPC({
+                requireInteraction: false,
+                title: 'Memex error: deleting page',
+                message: error.message,
+            }),
+        )(err)
     }
 }

@@ -26,6 +26,7 @@ import {
     TabIndexer,
 } from './types'
 import createNotification from 'src/util/notifications'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 interface Props {
     tabManager: TabManager
@@ -193,12 +194,14 @@ export default class TabChangeListeners {
         }
     }
 
-    private handlePageLogErrors = (err: Error) =>
+    private _handlePageLogErrors = (err: Error) =>
         this._createNotif({
             requireInteraction: false,
             title: 'Memex error: page logging',
             message: err.message,
         })
+
+    private handlePageLogErrors = handleDBQuotaErrors(this._handlePageLogErrors)
 
     public async injectContentScripts(tab: Tabs.Tab) {
         const isLoggable = await this._checkTabLoggable(tab)

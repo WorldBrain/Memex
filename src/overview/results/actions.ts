@@ -9,6 +9,7 @@ import { SearchResult } from '../types'
 import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 const processEventRPC = remoteFunction('processEvent')
 const createBookmarkRPC = remoteFunction('addBookmark')
@@ -93,11 +94,13 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
         await bookmarkRPC({ url, fromOverview: true })
     } catch (err) {
         dispatch(changeHasBookmark(index))
-        createNotifRPC({
-            requireInteraction: false,
-            title: 'Memex error: starring page',
-            message: err.message,
-        })
+        handleDBQuotaErrors(error =>
+            this.createNotif({
+                requireInteraction: false,
+                title: 'Memex error: starring page',
+                message: error.message,
+            }),
+        )(err)
     }
 }
 

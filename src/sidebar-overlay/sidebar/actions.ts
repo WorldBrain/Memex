@@ -16,6 +16,7 @@ import {
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import normalizeUrl from 'src/util/encode-url-for-id'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -282,11 +283,13 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
         await annotationsManager.toggleBookmark(url)
     } catch (err) {
         dispatch(toggleBookmarkState(index))
-        createNotifRPC({
-            requireInteraction: false,
-            title: 'Memex error: starring page',
-            message: err.message,
-        })
+        handleDBQuotaErrors(error =>
+            createNotifRPC({
+                requireInteraction: false,
+                title: 'Memex error: starring page',
+                message: error.message,
+            }),
+        )(err)
     }
 }
 
