@@ -16,11 +16,12 @@
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.5px;
-    height: 21px;
+    height: auto;
     color: black;
     margin: 2px 3px 2px 0;
     display: flex;
     align-items: center;
+    white-space: nowrap;
 }
 
 .tagPillSuggestions {

@@ -140,6 +140,7 @@ class ResultListContainer extends PureComponent<Props> {
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
             handleTagBtnClick={this.props.handleTagBtnClick(resultIndex)}
+            env={'overview'}
         />
     )
 

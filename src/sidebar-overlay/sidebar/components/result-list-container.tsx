@@ -135,6 +135,7 @@ class ResultListContainer extends PureComponent<Props, State> {
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
+            env={'sidebar'}
             handleTagBtnClick={this.props.handleTagBtnClick(resultIndex)}
         />
     )

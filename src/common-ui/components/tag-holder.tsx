@@ -1,5 +1,6 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
 import TagPill from './tag-pill'
+import cx from 'classnames'
 
 const styles = require('./tag-holder.css')
 
@@ -9,6 +10,7 @@ interface Props {
     setTagManagerRef?: (e: HTMLSpanElement) => any
     handlePillClick: (tag: string) => MouseEventHandler
     handleTagBtnClick: MouseEventHandler
+    env: string
 }
 
 class TagHolder extends PureComponent<Props, {}> {
@@ -19,6 +21,7 @@ class TagHolder extends PureComponent<Props, {}> {
             setTagManagerRef,
             handlePillClick,
             handleTagBtnClick,
+            env,
         } = this.props
 
         if (!(tags && tags.length)) {
@@ -38,7 +41,11 @@ class TagHolder extends PureComponent<Props, {}> {
     }
 
     render() {
-        return <div className={styles.tagList}>{this.renderTagPills()}</div>
+        return <div className={cx(styles.tagList, {
+            [styles.tagListSidebar]: this.props.env === "sidebar",
+        })}>
+            {this.renderTagPills()}
+        </div>
     }
 }
 

@@ -62,6 +62,10 @@
 .rootContainerOverview {
     width: 800px;
     height: 100px;
+
+    & .displayTime {
+        margin-right: 10px;
+    }
 }
 
 .root {
@@ -174,6 +178,7 @@
 
 .infoContainerOverview {
     padding: 6px 14px;
+    width: calc(100% - var(--imgWidth));
 }
 
 .firstlineContainer {
@@ -230,6 +235,8 @@
 .detailsBox {
     display: flex;
     align-items: center;
+    width: 80%;
+    overflow: hidden;
 }
 
 .buttonsContainer {
