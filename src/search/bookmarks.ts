@@ -1,11 +1,14 @@
 import { Bookmarks } from 'webextension-polyfill-ts'
 
-import tabManager from '../activity-logger/background/tab-manager'
+import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { createPageViaBmTagActs } from './on-demand-indexing'
 import { getPage } from './util'
 import { Dexie } from './types'
 
-export const addBookmark = (getDb: () => Promise<Dexie>) => async ({
+export const addBookmark = (
+    getDb: () => Promise<Dexie>,
+    tabManager: TabManager,
+) => async ({
     url,
     timestamp = Date.now(),
     tabId,
@@ -27,9 +30,10 @@ export const addBookmark = (getDb: () => Promise<Dexie>) => async ({
     tabManager.setBookmarkState(url, true)
 }
 
-export const delBookmark = (getDb: () => Promise<Dexie>) => async ({
-    url,
-}: Partial<Bookmarks.BookmarkTreeNode>) => {
+export const delBookmark = (
+    getDb: () => Promise<Dexie>,
+    tabManager: TabManager,
+) => async ({ url }: Partial<Bookmarks.BookmarkTreeNode>) => {
     const page = await getPage(getDb)(url)
 
     if (page != null) {
