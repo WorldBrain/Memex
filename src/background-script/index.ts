@@ -8,6 +8,7 @@ import {
 
 import * as utils from './utils'
 import { UNINSTALL_URL } from './constants'
+import ActivityLoggerBackground from 'src/activity-logger/background'
 import NotifsBackground from '../notifications/background'
 import { onInstall, onUpdate } from './on-install-hooks'
 import { makeRemotelyCallable } from '../util/webextensionRPC'
@@ -24,6 +25,7 @@ import { fetchUserId } from 'src/analytics/utils'
 class BackgroundScript {
     private utils: typeof utils
     private notifsBackground: NotifsBackground
+    private activityLoggerBackground: ActivityLoggerBackground
     private storageChangesMan: StorageChangesManager
     private storageManager: StorageManager
     private storageAPI: Storage.Static
@@ -35,6 +37,7 @@ class BackgroundScript {
     constructor({
         storageManager,
         notifsBackground,
+        loggerBackground,
         utilFns = utils,
         storageChangesMan = storageChangesManager,
         storageAPI = browser.storage,
@@ -44,6 +47,7 @@ class BackgroundScript {
     }: {
         storageManager: StorageManager
         notifsBackground: NotifsBackground
+        loggerBackground: ActivityLoggerBackground
         utilFns?: typeof utils
         storageChangesMan?: StorageChangesManager
         storageAPI?: Storage.Static
@@ -53,6 +57,7 @@ class BackgroundScript {
     }) {
         this.storageManager = storageManager
         this.notifsBackground = notifsBackground
+        this.activityLoggerBackground = loggerBackground
         this.utils = utilFns
         this.storageChangesMan = storageChangesMan
         this.storageAPI = storageAPI
@@ -90,9 +95,15 @@ class BackgroundScript {
             switch (details.reason) {
                 case 'install':
                     this.notifsBackground.deliverStaticNotifications()
+                    this.activityLoggerBackground.trackExistingTabs({
+                        isNewInstall: true,
+                    })
                     return onInstall()
                 case 'update':
                     this.notifsBackground.deliverStaticNotifications()
+                    this.activityLoggerBackground.trackExistingTabs({
+                        isNewInstall: false,
+                    })
                     this.runQuickAndDirtyMigrations()
                     return onUpdate()
                 default:
