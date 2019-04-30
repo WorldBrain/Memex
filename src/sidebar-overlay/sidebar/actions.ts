@@ -283,12 +283,14 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
         await annotationsManager.toggleBookmark(url)
     } catch (err) {
         dispatch(toggleBookmarkState(index))
-        handleDBQuotaErrors(error =>
-            createNotifRPC({
-                requireInteraction: false,
-                title: 'Memex error: starring page',
-                message: error.message,
-            }),
+        handleDBQuotaErrors(
+            error =>
+                createNotifRPC({
+                    requireInteraction: false,
+                    title: 'Memex error: starring page',
+                    message: error.message,
+                }),
+            () => remoteFunction('dispatchNotification')('db_error'),
         )(err)
     }
 }

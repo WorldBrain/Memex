@@ -62,8 +62,7 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
         id: 'sidebar_search-22.04.2019',
         search: {
-            title:
-                'Search your knowledge now straight from the sidebar',
+            title: 'Search your knowledge now straight from the sidebar',
             message:
                 'Open the sidebar (r) and start typing. Blazing fast search through your knowledge.',
             buttons: [
@@ -79,8 +78,7 @@ export const UPDATE_NOTIFS: NotifDefinition[] = [
             ],
         },
         overview: {
-            title:
-                'Search your knowledge now straight from the sidebar',
+            title: 'Search your knowledge now straight from the sidebar',
             message:
                 'Open the sidebar (r) and start typing. Blazing fast search through your knowledge.',
             buttons: [
@@ -103,13 +101,19 @@ interface EventNotifsDict {
 }
 
 export const EVENT_NOTIFS: EventNotifsDict = {
+    db_error: {
+        id: 'db_error',
+        overview: {
+            title: 'Database errors encountered.',
+            message:
+                'Your memex may be functioning unexpectedly due to issues with your database. It may be low on space.',
+        },
+    },
     quota_warning: {
         id: 'quota_warning',
         system: {
-            title: 
-                '⚠️ Low storage space',
-            message: 
-                'Data might be deleted. Click to backup & free up space.',
+            title: '⚠️ Low storage space',
+            message: 'Data might be deleted. Click to backup & free up space.',
             buttons: [
                 {
                     action: {
@@ -122,9 +126,9 @@ export const EVENT_NOTIFS: EventNotifsDict = {
             ],
         },
         overview: {
-            title: 
+            title:
                 "⚠️ You're almost out of storage space. Your browser may delete Memex data",
-            message: 
+            message:
                 'Due to the browsers policy to evict local storage when space gets low it might happen that your Memex data gets deleted. Free up disk space and make sure to backup your data for the worst case',
             buttons: [
                 {

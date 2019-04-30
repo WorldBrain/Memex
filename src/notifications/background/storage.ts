@@ -107,6 +107,7 @@ export default class NotificationStorage extends FeatureStorage {
                 {
                     title: notification.system.title,
                     message: notification.system.message,
+                    requireInteraction: false,
                 },
                 () => {
                     return browser.tabs.create({

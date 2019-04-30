@@ -27,6 +27,7 @@ import {
 } from './types'
 import createNotification from 'src/util/notifications'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { remoteFunction } from 'src/util/webextensionRPC'
 
 interface Props {
     tabManager: TabManager
@@ -201,7 +202,10 @@ export default class TabChangeListeners {
             message: err.message,
         })
 
-    private handlePageLogErrors = handleDBQuotaErrors(this._handlePageLogErrors)
+    private handlePageLogErrors = handleDBQuotaErrors(
+        this._handlePageLogErrors,
+        () => remoteFunction('dispatchNotification')('db_error'),
+    )
 
     public async injectContentScripts(tab: Tabs.Tab) {
         const isLoggable = await this._checkTabLoggable(tab)

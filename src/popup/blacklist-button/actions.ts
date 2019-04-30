@@ -88,12 +88,14 @@ export const deleteBlacklistData: () => Thunk = () => async (
 
         dispatch(setShowBlacklistDelete(false))
     } catch (err) {
-        handleDBQuotaErrors(error =>
-            createNotifRPC({
-                requireInteraction: false,
-                title: 'Memex error: deleting page',
-                message: error.message,
-            }),
+        handleDBQuotaErrors(
+            error =>
+                createNotifRPC({
+                    requireInteraction: false,
+                    title: 'Memex error: deleting page',
+                    message: error.message,
+                }),
+            () => remoteFunction('dispatchNotification')('db_error'),
         )(err)
     }
 }

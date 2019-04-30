@@ -41,12 +41,14 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
 
         dispatch(resultsActs.hideResultItem(url))
     } catch (err) {
-        handleDBQuotaErrors(error =>
-            this.createNotif({
-                requireInteraction: false,
-                title: 'Memex error: deleting page',
-                message: error.message,
-            }),
+        handleDBQuotaErrors(
+            error =>
+                this.createNotif({
+                    requireInteraction: false,
+                    title: 'Memex error: deleting page',
+                    message: error.message,
+                }),
+            () => remoteFunction('dispatchNotification')('db_error'),
         )(err)
     }
     dispatch(searchFilterActs.removeTagFromFilter())

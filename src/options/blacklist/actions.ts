@@ -124,12 +124,14 @@ export const removeMatchingDocs = expression => async (dispatch, getState) => {
     try {
         await deletePagesByPattern(expression) // To be run in background; can take long
     } catch (err) {
-        handleDBQuotaErrors(error =>
-            createNotifRPC({
-                requireInteraction: false,
-                title: 'Memex error: deleting page',
-                message: error.message,
-            }),
+        handleDBQuotaErrors(
+            error =>
+                createNotifRPC({
+                    requireInteraction: false,
+                    title: 'Memex error: deleting page',
+                    message: error.message,
+                }),
+            () => remoteFunction('dispatchNotification')('db_error'),
         )(err)
     }
 }

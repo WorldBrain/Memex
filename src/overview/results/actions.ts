@@ -94,12 +94,14 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
         await bookmarkRPC({ url, fromOverview: true })
     } catch (err) {
         dispatch(changeHasBookmark(index))
-        handleDBQuotaErrors(error =>
-            this.createNotif({
-                requireInteraction: false,
-                title: 'Memex error: starring page',
-                message: error.message,
-            }),
+        handleDBQuotaErrors(
+            error =>
+                this.createNotif({
+                    requireInteraction: false,
+                    title: 'Memex error: starring page',
+                    message: error.message,
+                }),
+            () => remoteFunction('dispatchNotification')('db_error'),
         )(err)
     }
 }
