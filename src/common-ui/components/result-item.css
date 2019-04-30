@@ -37,6 +37,10 @@
     width: 100%;
     min-height: var(--height);
 
+    &:hover {
+        cursor: pointer;
+    }
+
     &:hover .crossRibbon {
         display: block;
         margin-right: -4px;
@@ -406,4 +410,89 @@
     100% {
         opacity: 1;
     }
+}
+
+.tweetRootContainer {
+    height: fit-content;
+}
+
+.tweetInfoContainer {
+    width: 100%;
+    margin-left: 58px;
+    padding: 9px 12px;
+}
+
+.header {
+    display: flex;
+}
+
+.accountGroup {
+    color: #14171a;
+    display: inline-flex;
+    text-decoration: none;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-top: 3px;
+    margin-left: -58px;
+    position: absolute;
+}
+
+.fullNameGroup {
+    display: flex;
+    max-width: 100%;
+}
+
+.fullName {
+    color: #14171a;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.username {
+    font-size: 14px;
+    color: color6;
+}
+
+.verified {
+    background-image: url('/img/twitter-verified-icon.svg');
+    width: 15px;
+    height: 15px;
+}
+
+.hiddenVisually {
+    border: 0;
+    clip: rect(1px, 1px, 1px, 1px);
+    font-size: 1px;
+    height: 1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+.tweetText {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: normal;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #14171a;
+}
+
+.timeStamp {
+    font-size: 14px;
+    line-height: 24px;
+    color: color6;
+}
+
+.closeContainer {
+    display: inline-flex;
+}
+
+.tweetDetailsContainer {
+    margin-top: -5px;
 }

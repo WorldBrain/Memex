@@ -10,13 +10,15 @@ import { selectors as filters } from 'src/search-filters'
 
 export interface StateProps {
     annotsFolded: boolean
-    searchType: 'page' | 'annot'
+    searchType: 'page' | 'annot' | 'social'
     isFilterBarActive: boolean
 }
 
 export interface DispatchProps {
     handleUnfoldAllClick: React.MouseEventHandler<HTMLButtonElement>
-    handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
+    handleSearchTypeClick: (
+        searchType: 'page' | 'annot' | 'social',
+    ) => React.MouseEventHandler<HTMLButtonElement>
 }
 
 export interface OwnProps {}
@@ -30,9 +32,10 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
 })
 
 const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = dispatch => ({
-    handleSearchTypeClick: e => {
+    handleSearchTypeClick: searchType => e => {
         e.preventDefault()
-        dispatch(acts.toggleSearchType() as any)
+        dispatch(acts.setLoading(true))
+        dispatch(acts.setSearchType(searchType))
     },
     handleUnfoldAllClick: e => {
         e.preventDefault()
