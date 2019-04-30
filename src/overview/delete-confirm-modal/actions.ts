@@ -4,7 +4,7 @@ import { remoteFunction } from '../../util/webextensionRPC'
 import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as selectors from './selectors'
-import { acts as resultsActs } from '../results'
+import { acts as resultsActs, selectors as results } from '../results'
 import { actions as searchFilterActs } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
@@ -20,9 +20,11 @@ export const resetDeleteIndex = createAction('deleteConf/resetDeleteIndex')
 const processEventRPC = remoteFunction('processEvent')
 const deletePagesRPC = remoteFunction('delPages')
 const createNotifRPC = remoteFunction('createNotification')
+const deleteTweetsRPC = remoteFunction('delTweets')
 
 export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     const url = selectors.urlToDelete(getState())
+    const isForSocial = results.isSocialSearch(getState())
 
     analytics.trackEvent({
         category: 'Overview',
@@ -36,8 +38,10 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     try {
         dispatch(hide())
 
+        const deleteRPC = isForSocial ? deleteTweetsRPC : deletePagesRPC
+
         // Remove all assoc. docs from the database + index
-        await deletePagesRPC([url])
+        await deleteRPC([url])
 
         dispatch(resultsActs.hideResultItem(url))
     } catch (err) {
