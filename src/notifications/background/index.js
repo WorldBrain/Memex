@@ -7,8 +7,16 @@ import { EVENT_NAMES } from '../../analytics/internal/constants'
 export default class NotificationBackground {
     static LAST_NOTIF_TIME = 'last-notif-proc-timestamp'
 
-    constructor({ storageManager }) {
+    constructor({
+        storageManager,
+        eventNotifs = notifications.EVENT_NOTIFS,
+        updateNotifs = notifications.UPDATE_NOTIFS,
+        releaseTime = notifications.releaseTime,
+    }) {
         this.storage = new NotificationStorage(storageManager)
+        this.eventNotifs = eventNotifs
+        this.updateNotifs = updateNotifs
+        this.releaseTime = releaseTime
     }
 
     setupRemoteFunctions() {
@@ -66,7 +74,8 @@ export default class NotificationBackground {
 
     async dispatchNotification(notifId) {
         await this.storage.dispatchNotification(
-            notifications.EVENT_NOTIFS[notifId],
+            this.eventNotifs[notifId],
+            this.releaseTime,
         )
     }
 
@@ -75,7 +84,7 @@ export default class NotificationBackground {
             NotificationBackground.LAST_NOTIF_TIME,
         ))[NotificationBackground.LAST_NOTIF_TIME]
 
-        for (let notification of notifications.UPDATE_NOTIFS) {
+        for (let notification of this.updateNotifs) {
             if (notification.system) {
                 if (
                     !lastReleaseTime ||
@@ -110,7 +119,7 @@ export default class NotificationBackground {
                     ...notification.overview,
                     id: notification.id,
                     deliveredTime: Date.now(),
-                    sentTime: notifications.releaseTime,
+                    sentTime: this.releaseTime,
                 }
 
                 if (

@@ -28,9 +28,11 @@ import {
 import createNotification from 'src/util/notifications'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import NotificationBackground from 'src/notifications/background'
 
 interface Props {
     tabManager: TabManager
+    notifsBackground: NotificationBackground
     pageVisitLogger: PageVisitLogger
     storageArea?: Storage.StorageArea
     visitUpdate?: VisitInteractionUpdater
@@ -60,6 +62,7 @@ export default class TabChangeListeners {
 
     private _contentScriptPaths: string[]
     private _tabManager: TabManager
+    private _notifsBackground: NotificationBackground
     private _storage: Storage.StorageArea
     private _checkTabLoggable: LoggableTabChecker
     private _updateTabVisit: VisitInteractionUpdater
@@ -87,6 +90,7 @@ export default class TabChangeListeners {
     constructor({
         tabManager,
         pageVisitLogger,
+        notifsBackground,
         storageArea = browser.storage.local,
         loggableTabCheck = shouldLogTab,
         visitUpdate = updateVisitInteractionData,
@@ -100,6 +104,7 @@ export default class TabChangeListeners {
         createNotif = createNotification,
     }: Props) {
         this._tabManager = tabManager
+        this._notifsBackground = notifsBackground
         this._pageVisitLogger = pageVisitLogger
         this._storage = storageArea
         this._checkTabLoggable = loggableTabCheck
@@ -204,7 +209,7 @@ export default class TabChangeListeners {
 
     private handlePageLogErrors = handleDBQuotaErrors(
         this._handlePageLogErrors,
-        () => remoteFunction('dispatchNotification')('db_error'),
+        () => this._notifsBackground.dispatchNotification('db_error'),
     )
 
     public async injectContentScripts(tab: Tabs.Tab) {

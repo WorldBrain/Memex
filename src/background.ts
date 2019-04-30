@@ -40,7 +40,10 @@ export const directLinking = new DirectLinkingBackground({
 directLinking.setupRemoteFunctions()
 directLinking.setupRequestInterceptor()
 
-const activityLogger = new ActivityLoggerBackground({ storageManager })
+const activityLogger = new ActivityLoggerBackground({
+    storageManager,
+    notifsBackground: notifications,
+})
 activityLogger.setupRemoteFunctions()
 activityLogger.setupWebExtAPIHandlers()
 

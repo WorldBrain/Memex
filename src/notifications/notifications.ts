@@ -1,11 +1,10 @@
 // Use these keys in case of action buttons, import the keys in the storage-keys-notif module
-import * as storageKeys from './storage-keys-notif'
 import * as actionTypes from './action-types'
 
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1555933522599
+const releaseTime: number = 1555933522599
 
 /* Example Notification:
 {
@@ -58,7 +57,7 @@ export const releaseTime: number = 1555933522599
     },
 */
 
-export const UPDATE_NOTIFS: NotifDefinition[] = [
+const UPDATE_NOTIFS: NotifDefinition[] = [
     {
         id: 'sidebar_search-22.04.2019',
         search: {
@@ -100,7 +99,7 @@ interface EventNotifsDict {
     [name: string]: NotifDefinition
 }
 
-export const EVENT_NOTIFS: EventNotifsDict = {
+const EVENT_NOTIFS: EventNotifsDict = {
     db_error: {
         id: 'db_error',
         overview: {
@@ -255,3 +254,5 @@ export const EVENT_NOTIFS: EventNotifsDict = {
         },
     },
 }
+
+export { releaseTime, EVENT_NOTIFS, UPDATE_NOTIFS }
