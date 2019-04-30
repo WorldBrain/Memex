@@ -271,17 +271,13 @@ export default class TabChangeListeners {
         }
     }
 
-    private _handleFavIcon: TabChangeListener = async (
-        tabId,
-        { favIconUrl },
-        tab,
-    ) => {
+    private _handleFavIcon: TabChangeListener = async (tabId, _, tab) => {
         try {
             if (
                 (await this._checkTabLoggable(tab)) &&
                 !(await this._checkFavIcon(tab.url))
             ) {
-                const favIconDataUrl = await this._fetchFavIcon(favIconUrl)
+                const favIconDataUrl = await this._fetchFavIcon(tab.favIconUrl)
                 await this._createFavIcon(tab.url, favIconDataUrl)
             }
         } catch (err) {
