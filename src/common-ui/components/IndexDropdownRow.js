@@ -2,7 +2,8 @@ import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { ButtonTooltip } from '.'
+import IndexDropdownUserRow from './IndexDropdownUserRow'
 import styles from './IndexDropdown.css'
 
 /**
@@ -81,6 +82,7 @@ class IndexDropdownRow extends PureComponent {
                 ref={ref => (this.ref = ref)}
                 className={cx(this.mainClass, {
                     [styles.isNew]: this.props.isNew,
+                    [styles.isUser]: this.props.source === 'user',
                 })}
                 onClick={e => {
                     e.stopPropagation()
@@ -94,15 +96,20 @@ class IndexDropdownRow extends PureComponent {
                 >
                     Add New:
                 </span>
-                <span
-                    className={cx(styles.tagPill, {
-                        [styles.isList]:
-                            this.props.isList || this.props.source === 'domain',
-                    })}
-                >
-                    {(this.props.isList && this.props.value.name) ||
-                        this.props.value}
-                </span>
+                {this.props.source === 'user' ? (
+                    <IndexDropdownUserRow {...this.props} />
+                ) : (
+                    <span
+                        className={cx(styles.tagPill, {
+                            [styles.isList]:
+                                this.props.isList ||
+                                this.props.source === 'domain',
+                        })}
+                    >
+                        {(this.props.isList && this.props.value.name) ||
+                            this.props.value}
+                    </span>
+                )}
                 <span className={styles.selectionOption}>
                     {this.props.active && <span className={styles.check} />}
                     {!this.props.allowAdd &&

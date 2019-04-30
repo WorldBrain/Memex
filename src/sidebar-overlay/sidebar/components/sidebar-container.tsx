@@ -28,7 +28,7 @@ interface StateProps {
     showCommentBox: boolean
     showCongratsMessage: boolean
     pageType: 'page' | 'all'
-    searchType: 'notes' | 'pages'
+    searchType: 'notes' | 'pages' | 'social'
     searchValue: string
     showClearFiltersBtn: boolean
     page: Page

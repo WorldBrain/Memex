@@ -9,6 +9,7 @@ import {
     TagsFilter,
     DomainsFilter,
     DatesFilter,
+    UsersFilter,
     ContentTypeContainer,
 } from './components'
 
@@ -19,6 +20,7 @@ interface StateProps {}
 interface DispatchProps {
     fetchSuggestedTags: () => void
     fetchSuggestedDomains: () => void
+    fetchSuggestedUsers: () => void
     toggleFilterBar: () => void
 }
 
@@ -32,6 +34,7 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
     componentDidMount() {
         this.props.fetchSuggestedTags()
         this.props.fetchSuggestedDomains()
+        this.props.fetchSuggestedUsers()
     }
 
     renderContentFilter = () => (
@@ -52,6 +55,10 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
         <DatesFilter tooltipPosition="tooltipDate" env="overview" />
     )
 
+    renderUsersFilter = () => (
+        <UsersFilter tooltipPosition="bottom" env="overview" />
+    )
+
     render() {
         return (
             <SearchFilters
@@ -60,6 +67,7 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
                 tagFilter={this.renderTagFilter()}
                 domainFilter={this.renderDomainFilter()}
                 contentFilter={this.renderContentFilter()}
+                userFilter={this.renderUsersFilter()}
                 toggleFilterBar={this.props.toggleFilterBar}
             />
         )
@@ -73,6 +81,7 @@ const mapDispatchToProps: MapDispatchToProps<
 > = dispatch => ({
     fetchSuggestedTags: () => dispatch(actions.fetchSuggestedTags()),
     fetchSuggestedDomains: () => dispatch(actions.fetchSuggestedDomains()),
+    fetchSuggestedUsers: () => dispatch(actions.fetchSuggestedUsers()),
     toggleFilterBar: () => dispatch(actions.toggleFilterBar()),
 })
 

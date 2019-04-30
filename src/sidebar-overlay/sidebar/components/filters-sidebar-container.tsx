@@ -16,6 +16,7 @@ interface DispatchProps {
     clearAllFilters: React.MouseEventHandler<HTMLButtonElement>
     fetchSuggestedTags: () => void
     fetchSuggestedDomains: () => void
+    fetchSuggestedUsers: () => void
     resetFilterPopups: () => void
 }
 
@@ -45,6 +46,7 @@ const mapDispatchToProps: MapDispatchToProps<
     },
     fetchSuggestedTags: () => dispatch(filterActs.fetchSuggestedTags()),
     fetchSuggestedDomains: () => dispatch(filterActs.fetchSuggestedDomains()),
+    fetchSuggestedUsers: () => dispatch(filterActs.fetchSuggestedUsers(true)),
     resetFilterPopups: () => dispatch(filterActs.resetFilterPopups()),
 })
 

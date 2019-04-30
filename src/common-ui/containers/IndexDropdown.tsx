@@ -15,7 +15,7 @@ import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 export interface Props {
     env?: 'inpage' | 'overview'
-    source: 'tag' | 'domain'
+    source: 'tag' | 'domain' | 'user'
     /** The URL to use for dis/associating new tags with; set this to keep in sync with index. */
     url?: string
     hover?: boolean
@@ -25,21 +25,21 @@ export interface Props {
     /** Manual flag to display "Add tag" without creating a tag */
     allowAdd?: boolean
     /** Tag Filters that are previously present in the location. */
-    initFilters?: string[]
-    initExcFilters?: string[]
+    initFilters?: any[]
+    initExcFilters?: any[]
     /** Opt. cb to run when new tag added to state. */
-    onFilterAdd?: (filter: string) => void
+    onFilterAdd?: (filter: any) => void
     /** Opt. cb to run when tag deleted from state. */
-    onFilterDel?: (filter: string) => void
+    onFilterDel?: (filter: any) => void
     /** Opt. cb to run when new tag added to state. */
-    onExcFilterAdd?: (filter: string) => void
+    onExcFilterAdd?: (filter: any) => void
     /** Opt. cb to run when tag deleted from state. */
-    onExcFilterDel?: (filter: string) => void
+    onExcFilterDel?: (filter: any) => void
     /** Opt. cb with new tag to be added to a new annotation */
     onNewTagAdd?: (filter: string) => void
     setTagDivRef?: (el: HTMLDivElement) => void
     /** initial suggestions from the popup */
-    initSuggestions?: string[]
+    initSuggestions?: any[]
     isForSidebar?: boolean
     isForRibbon?: boolean
     onBackBtnClick?: ClickHandler<HTMLButtonElement>
@@ -54,12 +54,12 @@ export interface State {
     errMsg: string
     searchVal: string
     isLoading: boolean
-    displayFilters: string[]
-    filters: string[]
+    displayFilters: any[]
+    filters: any[]
     focused: number
     clearFieldBtn: boolean
     multiEdit: Set<string>
-    excFilters: Set<string>
+    excFilters: any[]
 }
 
 class IndexDropdownContainer extends Component<Props, State> {
@@ -115,7 +115,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             focused: -1,
             clearFieldBtn: false,
             multiEdit: new Set<string>(),
-            excFilters: new Set<string>(props.initExcFilters),
+            excFilters: props.initExcFilters,
         }
     }
 
@@ -152,7 +152,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                     ? this.props.initSuggestions
                     : [...this.props.initFilters, ...this.props.initExcFilters],
                 filters: this.props.initFilters,
-                excFilters: new Set<string>(this.props.initExcFilters),
+                excFilters: this.props.initExcFilters,
             })
         }
     }
@@ -212,13 +212,18 @@ class IndexDropdownContainer extends Component<Props, State> {
             value,
             active: this.props.allTabs
                 ? this.state.multiEdit.has(value)
-                : this.pageHasTag(value),
+                : this.pageHasTag(value, true),
             focused: this.state.focused === i,
-            excActive: this.state.excFilters.has(value),
+            excActive: this.pageHasTag(value, false),
         }))
     }
 
-    private pageHasTag = (value: string) => this.state.filters.includes(value)
+    private pageHasTag = (value: any, inc: boolean) => {
+        const filters = inc ? this.state.filters : this.state.excFilters
+        return this.props.source === 'user'
+            ? filters.find(user => user.id === value.id)
+            : filters.includes(value)
+    }
     private setInputRef = (el: HTMLInputElement) => (this.inputEl = el)
 
     /**
@@ -306,8 +311,8 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    private async handleSingleTagEdit(tag: string) {
-        const pageHasTag = this.pageHasTag(tag)
+    private async handleSingleTagEdit(tag: any) {
+        const pageHasTag = this.pageHasTag(tag, true)
         let updateState
         let revertState
         let updateDb
@@ -412,14 +417,18 @@ class IndexDropdownContainer extends Component<Props, State> {
                       ]),
                   ][index]
 
-        const excFilters = this.state.excFilters
+        const pageHasExcTag = this.pageHasTag(tag, false)
 
-        if (!excFilters.has(tag)) {
+        let excFilters = this.state.excFilters
+        if (!pageHasExcTag) {
             this.props.onExcFilterAdd(tag)
-            excFilters.add(tag)
+            excFilters.push(tag)
         } else {
             this.props.onExcFilterDel(tag)
-            excFilters.delete(tag)
+            excFilters =
+                this.props.source === 'user'
+                    ? excFilters.filter(user => user.id !== tag.id)
+                    : excFilters.filter(a => a !== tag)
         }
 
         this.setState({

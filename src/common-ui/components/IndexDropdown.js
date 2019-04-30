@@ -17,7 +17,7 @@ class IndexDropdown extends PureComponent {
         tagSearchValue: PropTypes.string.isRequired,
         hover: PropTypes.bool,
         isForAnnotation: PropTypes.bool,
-        source: PropTypes.oneOf(['tag', 'domain', 'list']).isRequired,
+        source: PropTypes.oneOf(['tag', 'domain', 'list', 'user']).isRequired,
         url: PropTypes.string,
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,
@@ -57,6 +57,9 @@ class IndexDropdown extends PureComponent {
                 break
             case 'list':
                 placeholder = 'Lists'
+                break
+            case 'user':
+                placeholder = 'Users'
                 break
             default:
         }

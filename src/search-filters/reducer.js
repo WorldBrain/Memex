@@ -21,6 +21,7 @@ const defaultState = {
     showDatesFilter: false,
     showFilterBar: false,
     showDomainFilter: false,
+    showUserFilter: false,
     showFilterTypes: false,
     showFilters: false,
     onlyBookmarks: false,
@@ -29,10 +30,13 @@ const defaultState = {
     tagsExc: [],
     domainsInc: [],
     domainsExc: [],
+    usersInc: [],
+    usersExc: [],
     // Will contain **ID** only one list for now
     lists: '',
     suggestedTags: [],
     suggestedDomains: [],
+    suggestedUsers: [],
 
     /* Object way */
     contentTypes: {
@@ -70,6 +74,16 @@ const hideTagFilter = state => ({
 const showTagFilter = state => ({
     ...state,
     showTagFilter: true,
+})
+
+const hideUserFilter = state => ({
+    ...state,
+    showUserFilter: false,
+})
+
+const showUserFilter = state => ({
+    ...state,
+    showUserFilter: true,
 })
 
 const hideFilterTypes = state => ({
@@ -246,6 +260,11 @@ const setSuggestedDomains = (state, domains) => ({
     suggestedDomains: domains,
 })
 
+const setSuggestedUsers = (state, users) => ({
+    ...state,
+    suggestedUsers: users,
+})
+
 const resetFilters = state => ({
     ...defaultState,
     lists: state.lists,
@@ -268,6 +287,8 @@ export default createReducer(
         [actions.showDatesFilter]: showDatesFilter,
         [actions.hideTagFilter]: hideTagFilter,
         [actions.showTagFilter]: showTagFilter,
+        [actions.hideUserFilter]: hideUserFilter,
+        [actions.showUserFilter]: showUserFilter,
         [actions.showFilterTypes]: showFilterTypes,
         [actions.hideFilterTypes]: hideFilterTypes,
         [actions.toggleFilterTypes]: toggleFilterTypes,
@@ -287,6 +308,10 @@ export default createReducer(
         [actions.delExcDomainFilter]: delFilter('domainsExc'),
         [actions.addIncDomainFilter]: addFilter('domainsInc'),
         [actions.delIncDomainFilter]: delFilter('domainsInc'),
+        [actions.addExcUserFilter]: addFilter('usersExc'),
+        [actions.delExcUserFilter]: delFilter('usersExc'),
+        [actions.addIncUserFilter]: addFilter('usersInc'),
+        [actions.delIncUserFilter]: delFilter('usersInc'),
         [actions.toggleIncDomainFilter]: toggleFilter('domainsInc'),
         [actions.toggleExcDomainFilter]: toggleFilter('domainsExc'),
         [actions.setTagFilters]: setFilters('tags'),
@@ -294,9 +319,12 @@ export default createReducer(
         [actions.setListFilters]: setFilters('lists'),
         [actions.setIncDomainFilters]: setFilters('domainsInc'),
         [actions.setExcDomainFilters]: setFilters('domainsExc'),
+        [actions.setIncUserFilters]: setFilters('usersInc'),
+        [actions.setExcUserFilters]: setFilters('usersExc'),
         [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
         [actions.setSuggestedTags]: setSuggestedTags,
         [actions.setSuggestedDomains]: setSuggestedDomains,
+        [actions.setSuggestedUsers]: setSuggestedUsers,
         [actions.showFilter]: state => ({
             ...state,
             showFilters: !state.showFilters,

@@ -58,7 +58,9 @@ export const setMouseOverSidebar = createAction<boolean>('setMouseOverSidebar')
 
 export const setPageType = createAction<'page' | 'all'>('setPageType')
 
-export const setSearchType = createAction<'notes' | 'pages'>('setSearchType')
+export const setSearchType = createAction<'notes' | 'pages' | 'social'>(
+    'setSearchType',
+)
 
 /**
  * Hydrates the initial state of the sidebar.
