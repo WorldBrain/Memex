@@ -3,6 +3,7 @@ export const tweet = {
     text: 'This is a tweet',
     url: 'tweet.url/username/12',
     userId: '1',
+    hashtags: [],
     createdAt: 1556025857000,
     createdWhen: new Date('2019-04-29T10:02Z'),
 }

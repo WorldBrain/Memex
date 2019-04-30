@@ -89,9 +89,7 @@ export default class TwitterStorage extends FeatureStorage {
             .collection(this.tweetsColl)
             .createObject({ url, createdWhen, ...rest })
 
-        if (hashtags.length) {
-            await this.addHashtags({ hashtags, url })
-        }
+        await this.addHashtags({ hashtags, url })
 
         return object.id
     }
