@@ -37,6 +37,7 @@
         }
     },
     "dependencies": {
+        "append-react-dom": "^1.0.1",
         "babel-polyfill": "^6.26.0",
         "blob-util": "^1.2.1",
         "cheerio": "^1.0.0-rc.2",
@@ -77,6 +78,7 @@
         "react-redux": "^5.0.7",
         "react-router": "^3.2.1",
         "react-shadow-dom-retarget-events": "^1.0.8",
+        "react-string-replace": "^0.4.4",
         "react-waypoint": "^8.0.3",
         "redux": "^4.0.0",
         "redux-act": "^1.7.4",

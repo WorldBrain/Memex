@@ -13,6 +13,11 @@
             "js": ["lib/browser-polyfill.js", "content_script.js"],
             "css": ["/content_script.css"],
             "run_at": "document_start"
+        },
+        {
+            "matches": ["*://twitter.com/*"],
+            "js": ["twitter.js"],
+            "css": ["/twitter.css"]
         }
     ],
     "browser_action": {

@@ -1,0 +1,41 @@
+.container {
+    display: contents;
+}
+
+.memexIcon {
+    display: inline-block;
+    height: 18px;
+    width: 18px;
+    cursor: pointer;
+    border: none;
+    vertical-align: bottom;
+    background-size: 20px;
+    fill: currentColor;
+
+    &:hover {
+        fill: #5cd9a6;
+    }
+}
+
+.saved {
+    fill: #5cd9a6;
+}
+
+.iconsContainer {
+    height: 36px;
+    width: 300px;
+    background-color: #fff;
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    border-radius: 3px;
+    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+}
+
+.icons {
+    display: grid;
+    align-items: center;
+    grid-template-columns: max-content 30px;
+    grid-gap: 6px;
+}
