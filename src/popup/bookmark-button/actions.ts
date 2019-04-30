@@ -6,8 +6,8 @@ import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 
-const createBookmarkRPC = remoteFunction('addBookmark')
-const deleteBookmarkRPC = remoteFunction('delBookmark')
+const createBookmarkRPC = remoteFunction('addPageBookmark')
+const deleteBookmarkRPC = remoteFunction('delPageBookmark')
 const createNotifRPC = remoteFunction('createNotification')
 
 export const setIsBookmarked = createAction<boolean>('bookmark/setIsBookmarked')

@@ -226,7 +226,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                 const page = pageMap.get(url)
 
                 // Data integrity issue; no matching page in the DB. Fail nicely
-                if (!page) {
+                if (!page || !page.url) {
                     return null
                 }
 
