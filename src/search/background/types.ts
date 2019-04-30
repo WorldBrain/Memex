@@ -1,4 +1,5 @@
 import { Annotation } from 'src/direct-linking/types'
+import { User } from 'src/social-integration/types'
 
 export interface AnnotPage {
     url: string
@@ -87,4 +88,9 @@ export interface PagesByUrl {
 
 export interface AnnotsByPageUrl {
     [pageUrl: string]: Annotation[]
+}
+
+export interface SocialSearchParams extends AnnotSearchParams {
+    usersInc?: User[]
+    usersExc?: User[]
 }

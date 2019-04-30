@@ -4,11 +4,18 @@ import {
     SearchParams as OldSearchParams,
     SearchResult as OldSearchResult,
 } from '../types'
-import { AnnotSearchParams, AnnotPage, PageUrlsByDay } from './types'
+import {
+    AnnotSearchParams,
+    AnnotPage,
+    PageUrlsByDay,
+    SocialSearchParams,
+} from './types'
 import { Annotation } from 'src/direct-linking/types'
 import { PageUrlMapperPlugin } from './page-url-mapper'
 import { reshapeParamsForOldSearch } from './utils'
 import { AnnotationsListPlugin } from './annots-list'
+import { TweetsSearchPlugin } from './tweets-search'
+import { Tweet } from 'src/social-integration/types'
 import { Tag, Bookmark } from 'src/search/models'
 
 export interface SearchStorageProps {
@@ -251,6 +258,23 @@ export default class SearchStorage extends FeatureStorage {
                 latestTimes,
                 base64Img: params.base64Img,
             },
+        )
+    }
+
+    async searchTweets(params: SocialSearchParams) {
+        const results = await this.storageManager.operation(
+            TweetsSearchPlugin.SEARCH_OP_ID,
+            params,
+        )
+
+        if (!results.length) {
+            return []
+        }
+
+        return this.storageManager.operation(
+            PageUrlMapperPlugin.MAP_OP_TWEET,
+            results,
+            { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
     }
 }

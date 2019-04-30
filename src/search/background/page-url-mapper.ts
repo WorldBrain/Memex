@@ -4,11 +4,13 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import { Page } from 'src/search'
 import { reshapePageForDisplay } from './utils'
 import { AnnotPage } from './types'
+import { Tweet, User } from 'src/social-integration/types'
 
 export class PageUrlMapperPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
     static MAP_OP_ID = 'memex:dexie.mapUrlsToPages'
+    static MAP_OP_TWEET = 'memex:dexie.mapUrlsToTweets'
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
@@ -16,6 +18,11 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         backend.registerOperation(
             PageUrlMapperPlugin.MAP_OP_ID,
             this.findMatchingPages.bind(this),
+        )
+
+        backend.registerOperation(
+            PageUrlMapperPlugin.MAP_OP_TWEET,
+            this.findMatchingTweets.bind(this),
         )
     }
 
@@ -78,6 +85,52 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                     await this.encodeImage(fav.favIcon, base64Img),
                 ),
             ),
+        )
+    }
+
+    private async lookupTweets(
+        pageUrls: string[],
+        tweetMap: Map<string, Tweet>,
+    ) {
+        const tweets = await this.backend.dexieInstance
+            .table('tweets')
+            .where('url')
+            .anyOf(pageUrls)
+            .limit(pageUrls.length)
+            .toArray()
+
+        return Promise.all(
+            tweets.map(async tweet => {
+                tweetMap.set(tweet.url, {
+                    ...tweet,
+                    hasBookmark: false,
+                })
+            }),
+        )
+    }
+
+    private async lookupUsers(
+        userIds: string[],
+        userMap: Map<string, User>,
+        base64Img?: boolean,
+    ) {
+        const users = await this.backend.dexieInstance
+            .table('users')
+            .where('id')
+            .anyOf(userIds)
+            .limit(userIds.length)
+            .toArray()
+
+        return Promise.all(
+            users.map(async user => {
+                const profilePic = user.profilePic
+                    ? await this.encodeImage(user.profilePic, base64Img)
+                    : undefined
+                userMap.set(user.id, {
+                    ...user,
+                    profilePic,
+                })
+            }),
         )
     }
 
@@ -242,5 +295,56 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             })
             .filter(page => page != null)
             .map(reshapePageForDisplay)
+    }
+
+    async findMatchingTweets(
+        tweetUrls: string[],
+        {
+            base64Img,
+            upperTimeBound,
+            latestTimes,
+        }: {
+            base64Img?: boolean
+            upperTimeBound?: number
+            latestTimes?: number[]
+        },
+    ): Promise<Tweet[]> {
+        const tweetMap = new Map<string, Tweet>()
+        const countMap = new Map<string, number>()
+        const tagMap = new Map<string, string[]>()
+        const userMap = new Map<string, User>()
+
+        // Run the first set of queries to get display data
+        await Promise.all([
+            this.lookupTweets(tweetUrls, tweetMap),
+            this.lookupTags(tweetUrls, tagMap),
+            this.lookupAnnotsCounts(tweetUrls, countMap),
+        ])
+
+        const userIds = new Set(
+            [...tweetMap.values()].map(tweet => tweet.userId),
+        )
+
+        await this.lookupUsers([...userIds], userMap, base64Img)
+
+        // Map page results back to original input
+        return tweetUrls
+            .map((url, i) => {
+                const tweet = tweetMap.get(url)
+
+                // Data integrity issue; no matching page in the DB. Fail nicely
+                if (!tweet) {
+                    return null
+                }
+
+                return {
+                    ...tweet,
+                    user: userMap.get(tweet.userId),
+                    displayTime: new Date(tweet.createdWhen).getTime(),
+                    tags: tagMap.get(url) || [],
+                    annotsCount: countMap.get(url),
+                }
+            })
+            .filter(tweet => tweet !== null)
     }
 }
