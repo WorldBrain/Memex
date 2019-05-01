@@ -19,7 +19,7 @@ import BackgroundScript from './background-script'
 import alarms from './background-script/alarms'
 import TagsBackground from './tags/background'
 import ActivityLoggerBackground from './activity-logger/background'
-import { TwitterBackground } from './social-integration'
+import SocialBackground from './social-integration/background'
 import BookmarksBackground from './bookmarks/background'
 
 // Features that auto-setup
@@ -80,8 +80,8 @@ export const bookmarks = new BookmarksBackground({
 })
 bookmarks.setupRemoteFunctions()
 
-const twitter = new TwitterBackground({ storageManager })
-twitter.setupRemoteFunctions()
+const social = new SocialBackground({ storageManager })
+social.setupRemoteFunctions()
 
 const backupModule = new backup.BackupBackgroundModule({
     storageManager,

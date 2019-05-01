@@ -14,8 +14,8 @@ import { Annotation } from 'src/direct-linking/types'
 import { PageUrlMapperPlugin } from './page-url-mapper'
 import { reshapeParamsForOldSearch } from './utils'
 import { AnnotationsListPlugin } from './annots-list'
-import { TweetsSearchPlugin } from './tweets-search'
-import { Tweet } from 'src/social-integration/types'
+import { SocialSearchPlugin } from './social-search'
+import { SocialPage } from 'src/social-integration/types'
 import { Tag, Bookmark } from 'src/search/models'
 
 export interface SearchStorageProps {
@@ -261,18 +261,21 @@ export default class SearchStorage extends FeatureStorage {
         )
     }
 
-    async searchTweets(params: SocialSearchParams) {
-        const results = await this.storageManager.operation(
-            TweetsSearchPlugin.SEARCH_OP_ID,
+    async searchSocial(params: SocialSearchParams) {
+        const results: Map<
+            string,
+            SocialPage
+        > = await this.storageManager.operation(
+            SocialSearchPlugin.SEARCH_OP_ID,
             params,
         )
 
-        if (!results.length) {
+        if (!results.size) {
             return []
         }
 
         return this.storageManager.operation(
-            PageUrlMapperPlugin.MAP_OP_TWEET,
+            PageUrlMapperPlugin.MAP_OP_SOCIAL,
             results,
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )

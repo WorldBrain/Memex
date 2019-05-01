@@ -4,13 +4,13 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import { Page } from 'src/search'
 import { reshapePageForDisplay } from './utils'
 import { AnnotPage } from './types'
-import { Tweet, User } from 'src/social-integration/types'
+import { User, SocialPage } from 'src/social-integration/types'
 
 export class PageUrlMapperPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
     static MAP_OP_ID = 'memex:dexie.mapUrlsToPages'
-    static MAP_OP_TWEET = 'memex:dexie.mapUrlsToTweets'
+    static MAP_OP_SOCIAL = 'memex:dexie.mapUrlsToSocial'
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
@@ -21,8 +21,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         )
 
         backend.registerOperation(
-            PageUrlMapperPlugin.MAP_OP_TWEET,
-            this.findMatchingTweets.bind(this),
+            PageUrlMapperPlugin.MAP_OP_SOCIAL,
+            this.findMatchingSocialPages.bind(this),
         )
     }
 
@@ -88,27 +88,6 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         )
     }
 
-    private async lookupTweets(
-        pageUrls: string[],
-        tweetMap: Map<string, Tweet>,
-    ) {
-        const tweets = await this.backend.dexieInstance
-            .table('tweets')
-            .where('url')
-            .anyOf(pageUrls)
-            .limit(pageUrls.length)
-            .toArray()
-
-        return Promise.all(
-            tweets.map(async tweet => {
-                tweetMap.set(tweet.url, {
-                    ...tweet,
-                    hasBookmark: false,
-                })
-            }),
-        )
-    }
-
     private async lookupUsers(
         userIds: string[],
         userMap: Map<string, User>,
@@ -148,6 +127,23 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             const current = tagMap.get(url) || []
             tagMap.set(url, [...current, name])
         })
+    }
+
+    private async lookupBookmarks(
+        pageUrls: string[],
+        socialMap: Map<string, SocialPage>,
+    ) {
+        const bms = await this.backend.dexieInstance
+            .table('bookmarks')
+            .where('url')
+            .anyOf(pageUrls)
+            .limit(pageUrls.length)
+            .toArray()
+
+        for (const { _, url } of bms) {
+            const page = socialMap.get(url)
+            socialMap.set(url, { ...page, hasBookmark: true })
+        }
     }
 
     private async lookupAnnotsCounts(
@@ -297,8 +293,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .map(reshapePageForDisplay)
     }
 
-    async findMatchingTweets(
-        tweetUrls: string[],
+    async findMatchingSocialPages(
+        socialMap: Map<string, SocialPage>,
         {
             base64Img,
             upperTimeBound,
@@ -308,43 +304,45 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             upperTimeBound?: number
             latestTimes?: number[]
         },
-    ): Promise<Tweet[]> {
-        const tweetMap = new Map<string, Tweet>()
+    ): Promise<SocialPage[]> {
+        const pageUrls = [...socialMap.keys()]
         const countMap = new Map<string, number>()
         const tagMap = new Map<string, string[]>()
         const userMap = new Map<string, User>()
 
         // Run the first set of queries to get display data
         await Promise.all([
-            this.lookupTweets(tweetUrls, tweetMap),
-            this.lookupTags(tweetUrls, tagMap),
-            this.lookupAnnotsCounts(tweetUrls, countMap),
+            this.lookupTags(pageUrls, tagMap),
+            this.lookupAnnotsCounts(pageUrls, countMap),
         ])
 
         const userIds = new Set(
-            [...tweetMap.values()].map(tweet => tweet.userId),
+            [...socialMap.values()].map(page => page.userId),
         )
 
-        await this.lookupUsers([...userIds], userMap, base64Img)
+        await Promise.all([
+            this.lookupUsers([...userIds], userMap, base64Img),
+            this.lookupBookmarks(pageUrls, socialMap),
+        ])
 
         // Map page results back to original input
-        return tweetUrls
+        return pageUrls
             .map((url, i) => {
-                const tweet = tweetMap.get(url)
+                const socialPage = socialMap.get(url)
 
                 // Data integrity issue; no matching page in the DB. Fail nicely
-                if (!tweet) {
+                if (!socialPage) {
                     return null
                 }
 
                 return {
-                    ...tweet,
-                    user: userMap.get(tweet.userId),
-                    displayTime: new Date(tweet.createdWhen).getTime(),
+                    ...socialPage,
+                    user: userMap.get(socialPage.userId),
+                    displayTime: socialPage.createdWhen.getTime(),
                     tags: tagMap.get(url) || [],
                     annotsCount: countMap.get(url),
                 }
             })
-            .filter(tweet => tweet !== null)
+            .filter(page => page !== null)
     }
 }

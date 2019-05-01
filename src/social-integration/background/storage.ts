@@ -3,7 +3,7 @@ import { StorageManager } from 'src/search'
 
 import { Tweet, User } from 'src/social-integration/types'
 
-export interface TwitterStorageProps {
+export interface SocialStorageProps {
     storageManager: StorageManager
     tweetsColl?: string
     usersColl?: string
@@ -11,7 +11,7 @@ export interface TwitterStorageProps {
     bookmarksColl?: string
 }
 
-export default class TwitterStorage extends FeatureStorage {
+export default class SocialStorage extends FeatureStorage {
     static TWEETS_COLL = 'tweets'
     static USERS_COLL = 'users'
     static TAGS_COLL = 'tags'
@@ -24,11 +24,11 @@ export default class TwitterStorage extends FeatureStorage {
 
     constructor({
         storageManager,
-        tweetsColl = TwitterStorage.TWEETS_COLL,
-        usersColl = TwitterStorage.USERS_COLL,
-        tagsColl = TwitterStorage.TAGS_COLL,
-        bookmarksColl = TwitterStorage.BMS_COLL,
-    }: TwitterStorageProps) {
+        tweetsColl = SocialStorage.TWEETS_COLL,
+        usersColl = SocialStorage.USERS_COLL,
+        tagsColl = SocialStorage.TAGS_COLL,
+        bookmarksColl = SocialStorage.BMS_COLL,
+    }: SocialStorageProps) {
         super(storageManager)
 
         this.tweetsColl = tweetsColl

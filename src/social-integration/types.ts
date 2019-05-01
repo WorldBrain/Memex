@@ -18,7 +18,10 @@ export interface Tweet {
     createdWhen?: Date
 
     user?: User
-    hasBookmark?: boolean
 
     _text_terms?: string[]
+}
+
+export interface SocialPage extends Tweet {
+    hasBookmark?: boolean
 }

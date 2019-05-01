@@ -1,29 +1,29 @@
 import initStorageManager from 'src/search/memory-storex'
-import TwitterBackground from './'
-import TwitterStorage from './storage'
+import SocialBackground from './'
+import SocialStorage from './storage'
 import { StorageManager } from 'src/search'
 import * as DATA from './storage.test.data'
 import TagStorage from 'src/tags/background/storage'
 
 describe('Twitter storage', () => {
-    let twitterStorage: TwitterStorage
+    let socialStorage: SocialStorage
     let storageManager: StorageManager
-    let twitterBg: TwitterBackground
+    let socialBg: SocialBackground
     let tagStorage: TagStorage
 
     async function insertTestData() {
         for (const tweet of [DATA.tweet, DATA.tweet2]) {
-            await twitterStorage.addTweet({ ...tweet })
+            await socialStorage.addTweet({ ...tweet })
         }
     }
 
     beforeEach(async () => {
         storageManager = initStorageManager()
-        twitterBg = new TwitterBackground({
+        socialBg = new SocialBackground({
             storageManager,
         })
 
-        twitterStorage = twitterBg['storage']
+        socialStorage = socialBg['storage']
         tagStorage = new TagStorage({ storageManager })
 
         await storageManager.finishInitialization()
@@ -51,11 +51,11 @@ describe('Twitter storage', () => {
         describe('Delete operations: ', () => {
             test('delete tweet', async () => {
                 const url = DATA.tweet.url
-                const tweet = await twitterStorage.getTweetByUrl(url)
+                const tweet = await socialStorage.getTweetByUrl(url)
                 assertTweet(tweet, DATA.tweet)
-                await twitterStorage.delTweets([url])
+                await socialStorage.delTweets([url])
 
-                const afterDeletion = await twitterStorage.getTweetByUrl(url)
+                const afterDeletion = await socialStorage.getTweetByUrl(url)
 
                 expect(tweet).toBeDefined()
                 expect(tweet).not.toBeNull()

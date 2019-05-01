@@ -3,20 +3,20 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import intersection from 'lodash/fp/intersection'
 
 import { SocialSearchParams } from './types'
-import { Tweet } from 'src/social-integration/types'
-import TweetsStorage from 'src/social-integration/twitter/background/storage'
+import { Tweet, SocialPage } from 'src/social-integration/types'
+import SocialStorage from 'src/social-integration/background/storage'
 
-export class TweetsSearchPlugin extends StorageBackendPlugin<
+export class SocialSearchPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
-    static SEARCH_OP_ID = 'memex:dexie.searchTweets'
+    static SEARCH_OP_ID = 'memex:dexie.searchSocial'
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
 
         backend.registerOperation(
-            TweetsSearchPlugin.SEARCH_OP_ID,
-            this.searchTweets.bind(this),
+            SocialSearchPlugin.SEARCH_OP_ID,
+            this.searchSocial.bind(this),
         )
     }
 
@@ -41,7 +41,7 @@ export class TweetsSearchPlugin extends StorageBackendPlugin<
         let tagsForUrls = new Map<string, string[]>()
 
         await this.backend.dexieInstance
-            .table<any, [string, string]>(TweetsStorage.TAGS_COLL)
+            .table<any, [string, string]>(SocialStorage.TAGS_COLL)
             .where('url')
             .anyOf(urls)
             .eachPrimaryKey(([tag, url]) => {
@@ -113,17 +113,22 @@ export class TweetsSearchPlugin extends StorageBackendPlugin<
         return intersection(urls, [...pageUrls])
     }
 
-    private async mapUrlsToTweets(urls: string[]): Promise<Tweet[]> {
-        const tweetUrlMap = new Map<string, Tweet>()
+    private async mapUrlsToSocialPages(
+        urls: string[],
+    ): Promise<Map<string, SocialPage>> {
+        const socialUrlMap = new Map<string, SocialPage>()
 
         await this.backend.dexieInstance
-            .table(TweetsStorage.TWEETS_COLL)
+            .table(SocialStorage.TWEETS_COLL)
             .where('url')
             .anyOf(urls)
-            .each(tweet => tweetUrlMap.set(tweet.url, tweet))
+            .each(socialPage => socialUrlMap.set(socialPage.url, socialPage))
 
         // Ensure original order of input is kept
-        return urls.map(url => tweetUrlMap.get(url))
+        const pageMap = new Map<string, SocialPage>()
+        urls.map(url => pageMap.set(url, socialUrlMap.get(url)))
+
+        return pageMap
     }
 
     private async filterResults(results: string[], params: SocialSearchParams) {
@@ -160,7 +165,7 @@ export class TweetsSearchPlugin extends StorageBackendPlugin<
         { startDate, endDate }: SocialSearchParams,
     ): Promise<string[]> {
         let coll = this.backend.dexieInstance
-            .table<Tweet>(TweetsStorage.TWEETS_COLL)
+            .table<Tweet>(SocialStorage.TWEETS_COLL)
             .where(args.field)
             .equals(args.term)
 
@@ -206,7 +211,7 @@ export class TweetsSearchPlugin extends StorageBackendPlugin<
         const latestVisits: Map<string, number> = new Map()
 
         await this.backend.dexieInstance
-            .table(TweetsStorage.TWEETS_COLL)
+            .table(SocialStorage.TWEETS_COLL)
             .where('url')
             .between('', String.fromCharCode(65535), true, true)
             .filter(
@@ -234,7 +239,9 @@ export class TweetsSearchPlugin extends StorageBackendPlugin<
         return results
     }
 
-    async searchTweets(params: SocialSearchParams) {
+    async searchSocial(
+        params: SocialSearchParams,
+    ): Promise<Map<string, SocialPage>> {
         let urlScoresMap: Map<string, number>
         let filteredResults
 
@@ -260,6 +267,10 @@ export class TweetsSearchPlugin extends StorageBackendPlugin<
             params.skip + params.limit,
         )
 
-        return results
+        const pages: Map<string, SocialPage> = await this.mapUrlsToSocialPages(
+            results,
+        )
+
+        return pages
     }
 }

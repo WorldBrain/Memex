@@ -1,15 +1,15 @@
-import TwitterStorage from './storage'
+import SocialStorage from './storage'
 import { StorageManager } from 'src/search/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { Tweet, User } from 'src/social-integration/types'
 import fetchImage from 'src/social-integration/fetch-image'
 const dataURLtoBlob = require('dataurl-to-blob')
 
-export default class TwitterBackground {
-    private storage: TwitterStorage
+export default class SocialBackground {
+    private storage: SocialStorage
 
     constructor({ storageManager }: { storageManager: StorageManager }) {
-        this.storage = new TwitterStorage({ storageManager })
+        this.storage = new SocialStorage({ storageManager })
     }
 
     setupRemoteFunctions() {

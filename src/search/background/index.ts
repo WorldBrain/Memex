@@ -9,7 +9,6 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import {
     PageSearchParams,
     AnnotSearchParams,
-    AnnotPage,
     SocialSearchParams,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
@@ -126,7 +125,7 @@ export default class SearchBackground {
             getMatchingPageCount: this.backend.getMatchingPageCount,
             searchAnnotations: this.searchAnnotations.bind(this),
             searchPages: this.searchPages.bind(this),
-            searchTweets: this.searchTweets.bind(this),
+            searchSocial: this.searchSocial.bind(this),
         })
     }
 
@@ -217,7 +216,7 @@ export default class SearchBackground {
         return SearchBackground.shapePageResult(docs, searchParams.limit)
     }
 
-    async searchTweets(params: SocialSearchParams) {
+    async searchSocial(params: SocialSearchParams) {
         let searchParams
         try {
             searchParams = this.processSearchParams(params)
@@ -225,7 +224,7 @@ export default class SearchBackground {
             return SearchBackground.handleSearchError(e)
         }
 
-        const docs = await this.storage.searchTweets(searchParams)
+        const docs = await this.storage.searchSocial(searchParams)
         return SearchBackground.shapePageResult(docs, searchParams.limit)
     }
 
