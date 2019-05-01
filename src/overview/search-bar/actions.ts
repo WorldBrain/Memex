@@ -17,7 +17,7 @@ import { EVENT_NAMES } from '../../analytics/internal/constants'
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
 const annotSearchRPC = remoteFunction('searchAnnotations')
-const tweetSearchRPC = remoteFunction('searchTweets')
+const socialSearchRPC = remoteFunction('searchSocial')
 
 export const setQuery = createAction<string>('header/setQuery')
 export const setStartDate = createAction<number>('header/setStartDate')
@@ -146,12 +146,11 @@ export const search: (args?: any) => Thunk = (
     }
 
     try {
-        const searchRPC =
-            results.searchType(state) === 'social'
-                ? tweetSearchRPC
-                : results.searchType(state) === 'page'
-                    ? pageSearchRPC
-                    : annotSearchRPC
+        const searchRPC = results.isSocialSearch(state)
+            ? socialSearchRPC
+            : results.isAnnotsSearch(state)
+                ? annotSearchRPC
+                : pageSearchRPC
 
         // Tell background script to search
         const searchResult = await searchRPC(searchParams)
