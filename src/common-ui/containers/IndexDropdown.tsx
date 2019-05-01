@@ -84,6 +84,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private processEvent
     private createNotif
     private inputEl: HTMLInputElement
+    private fetchUserSuggestionsRPC
 
     constructor(props: Props) {
         super(props)
@@ -99,6 +100,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
         this.processEvent = remoteFunction('processEvent')
         this.createNotif = remoteFunction('createNotification')
+        this.fetchUserSuggestionsRPC = remoteFunction('fetchUserSuggestions')
 
         if (this.props.isForAnnotation) {
             this.addTagRPC = remoteFunction('addAnnotationTag')
@@ -560,7 +562,17 @@ class IndexDropdownContainer extends Component<Props, State> {
         let suggestions = this.state.filters
 
         try {
-            suggestions = await this.suggestRPC(searchVal, this.props.source)
+            if (this.props.source === 'user') {
+                suggestions = await this.fetchUserSuggestionsRPC({
+                    name: searchVal,
+                    base64Img: this.props.isForRibbon,
+                })
+            } else {
+                suggestions = await this.suggestRPC(
+                    searchVal,
+                    this.props.source,
+                )
+            }
         } catch (err) {
             console.error(err)
         } finally {

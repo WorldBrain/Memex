@@ -120,6 +120,28 @@ export default class SocialStorage extends FeatureStorage {
         )
     }
 
+    async delTweets(urls: string[]) {
+        return urls.map(async url => {
+            await Promise.all([
+                this.storageManager
+                    .collection(this.tweetsColl)
+                    .deleteObjects({ url }),
+                this.storageManager
+                    .collection(this.tagsColl)
+                    .deleteObjects({ url }),
+                this.storageManager
+                    .collection(this.bookmarksColl)
+                    .deleteObjects({ url }),
+            ])
+        })
+    }
+
+    async getTweetByUrl(url: string) {
+        return this.storageManager
+            .collection(this.tweetsColl)
+            .findOneObject<Tweet>({ url })
+    }
+
     private encodeImage = (img: Blob, base64Img?: boolean) =>
         new Promise<string>((resolve, reject) => {
             if (!base64Img) {
@@ -131,6 +153,24 @@ export default class SocialStorage extends FeatureStorage {
             reader.onload = () => resolve(reader.result as string)
             reader.readAsDataURL(img)
         })
+
+    private async attachImage(
+        users: User[],
+        base64Img: boolean,
+    ): Promise<User[]> {
+        return Promise.all(
+            users.map(async user => {
+                const profilePic = user.profilePic
+                    ? await this.encodeImage(user.profilePic, base64Img)
+                    : undefined
+
+                return {
+                    ...user,
+                    profilePic,
+                }
+            }),
+        )
+    }
 
     async fetchUserSuggestions({
         name,
@@ -148,46 +188,13 @@ export default class SocialStorage extends FeatureStorage {
 
         const userIds = suggestions.map(({ pk }) => pk)
 
-        const users = await Promise.all(
-            userIds
-                .map(async userId => {
-                    const user = await this.storageManager
-                        .collection(this.usersColl)
-                        .findObject<User>({ id: userId })
+        const users = await this.storageManager
+            .collection(this.usersColl)
+            .findObjects<User>({
+                id: { $in: userIds },
+            })
 
-                    if (!user) {
-                        return null
-                    }
-
-                    return {
-                        ...user,
-                        profilePic: user.profilePic
-                            ? await this.encodeImage(user.profilePic, base64Img)
-                            : undefined,
-                    }
-                })
-                .filter(user => user !== null),
-        )
-
-        return users
-    }
-
-    async delTweets(urls: string[]) {
-        urls.map(async url => {
-            await Promise.all([
-                this.storageManager
-                    .collection(this.tweetsColl)
-                    .deleteObjects({ url }),
-                this.storageManager
-                    .collection(this.tagsColl)
-                    .deleteObjects({ url }),
-                this.storageManager
-                    .collection(this.bookmarksColl)
-                    .deleteObjects({ url }),
-            ])
-        })
-
-        return true
+        return this.attachImage(users, base64Img)
     }
 
     async fetchAllUsers({
@@ -201,24 +208,6 @@ export default class SocialStorage extends FeatureStorage {
             .collection(this.usersColl)
             .findObjects<User>(query, opts)
 
-        return Promise.all(
-            users.map(async user => {
-                return {
-                    ...user,
-                    profilePic: user.profilePic
-                        ? await this.encodeImage(
-                              user.profilePic,
-                              opts.base64Img,
-                          )
-                        : undefined,
-                }
-            }),
-        )
-    }
-
-    async getTweetByUrl(url: string) {
-        return this.storageManager
-            .collection(this.tweetsColl)
-            .findOneObject<Tweet>({ url })
+        return this.attachImage(users, opts.base64Img)
     }
 }
