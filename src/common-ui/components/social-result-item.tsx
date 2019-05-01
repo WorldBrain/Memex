@@ -21,7 +21,11 @@ class SocialResultItem extends PureComponent<Props> {
 
         let replacedText
         replacedText = reactStringReplace(text, URL_PATTERN, (match, i) => (
-            <a key={match + i} href={match} target="_blank">
+            <a
+                key={match + i}
+                href={match.startsWith('http') ? match : 'https://' + match}
+                target="_blank"
+            >
                 {match}
             </a>
         ))

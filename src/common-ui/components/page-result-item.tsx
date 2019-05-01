@@ -1,8 +1,7 @@
-import React, { PureComponent, DragEventHandler } from 'react'
+import React, { PureComponent } from 'react'
 import cx from 'classnames'
 
 import SemiCircularRibbon from './semi-circular-ribbon'
-import AnnotationList from './annotation-list'
 import ButtonTooltip from './button-tooltip'
 import ResultItemActions from './result-item-actions'
 import { Props } from './result-item'
