@@ -30,6 +30,7 @@ export const hideResultItem = createAction<string>('results/hideResultItem')
 export const changeHasBookmark = createAction<number>(
     'results/changeHasBookmark',
 )
+export const resetSearchResult = createAction('results/resetSearchResult')
 export const setSearchResult = createAction<SearchResult>(
     'results/setSearchResult',
 )
