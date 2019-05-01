@@ -126,6 +126,7 @@ class ResultListContainer extends PureComponent<Props, State> {
                 source="tag"
                 isForRibbon
                 sidebarTagDiv
+                fromOverview
             />
         )
     }

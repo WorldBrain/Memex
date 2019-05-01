@@ -112,8 +112,8 @@ export default class SearchBackground {
     setupRemoteFunctions() {
         makeRemotelyCallable({
             search: this.backend.search,
-            addTag: this.backend.addTag,
-            delTag: this.backend.delTag,
+            addPageTag: this.backend.addTag,
+            delPageTag: this.backend.delTag,
             suggest: this.backend.suggest,
             delPages: this.backend.delPages,
             addPageBookmark: this.backend.addBookmark,

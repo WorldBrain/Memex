@@ -89,8 +89,12 @@ class IndexDropdownContainer extends Component<Props, State> {
         super(props)
 
         this.suggestRPC = remoteFunction('suggest')
-        this.addTagRPC = remoteFunction('addTag')
-        this.delTagRPC = remoteFunction('delTag')
+        this.addTagRPC = this.props.fromOverview
+            ? remoteFunction('addTag')
+            : remoteFunction('addPageTag')
+        this.delTagRPC = this.props.fromOverview
+            ? remoteFunction('delTag')
+            : remoteFunction('delPageTag')
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
         this.processEvent = remoteFunction('processEvent')
@@ -279,7 +283,6 @@ class IndexDropdownContainer extends Component<Props, State> {
                         url: this.props.url,
                         tag: newTag,
                         tabId: this.props.tabId,
-                        fromOverview: this.props.fromOverview,
                     })
                 }
             } catch (err) {
