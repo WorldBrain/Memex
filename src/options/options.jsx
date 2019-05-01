@@ -9,10 +9,10 @@ import Router from './router'
 import routes from './routes'
 
 // Include development tools if we are not building for production
-const ReduxDevTools = undefined
-    // process.env.NODE_ENV !== 'production'
-    //     ? require('src/dev/redux-devtools-component').default
-    //     : undefined
+const ReduxDevTools =
+    process.env.NODE_ENV !== 'production'
+        ? require('src/dev/redux-devtools-component').default
+        : undefined
 
 const store = configureStore({ ReduxDevTools })
 
