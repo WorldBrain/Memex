@@ -1,9 +1,4 @@
-import React, {
-    Component,
-    ReactNode,
-    KeyboardEventHandler,
-    SyntheticEvent,
-} from 'react'
+import React, { Component, ReactNode, KeyboardEventHandler } from 'react'
 import cx from 'classnames'
 
 import qs from 'query-string'

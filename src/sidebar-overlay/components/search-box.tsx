@@ -1,7 +1,6 @@
 import React, { PureComponent, SyntheticEvent } from 'react'
 import { ClickHandler } from '../types'
 import CloseButton from './close-button'
-import Search from 'src/popup/components/Search'
 
 const styles = require('./search-box.css')
 

@@ -1,4 +1,3 @@
-import React, { Component } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import RootState, { MapDispatchToProps } from 'src/sidebar-overlay/types'
 import { actions as filterActs } from 'src/search-filters'

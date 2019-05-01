@@ -1,11 +1,10 @@
 import React from 'react'
 import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux'
 
-import { RootState } from '../../../options/types'
+import { RootState } from 'src/options/types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { SearchTypeSwitch } from './search-type-switch'
-import { selectors as searchBar } from '../../search-bar'
 import { selectors as filters } from 'src/search-filters'
 
 export interface StateProps {

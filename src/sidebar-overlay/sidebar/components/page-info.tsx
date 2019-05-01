@@ -2,8 +2,6 @@ import * as React from 'react'
 import { Page } from '../types'
 import normalizeUrl from 'src/util/encode-url-for-id'
 
-import cx from 'classnames'
-
 const styles = require('./page-info.css')
 
 interface Props {
@@ -40,10 +38,18 @@ class PageInfo extends React.Component<Props> {
                             Go back
                         </button>
                         <div className={styles.pageInfo}>
-                            <a target="_blank" href={this.hrefToPage} className={styles.title}>
+                            <a
+                                target="_blank"
+                                href={this.hrefToPage}
+                                className={styles.title}
+                            >
                                 {title}
                             </a>
-                            <a target="_blank" href={this.hrefToPage} className={styles.url}>
+                            <a
+                                target="_blank"
+                                href={this.hrefToPage}
+                                className={styles.url}
+                            >
                                 {url}
                             </a>
                         </div>

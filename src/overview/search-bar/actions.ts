@@ -5,7 +5,6 @@ import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { actions as sidebarLeftActs } from '../sidebar-left'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { acts as resultsActs, selectors as results } from '../results'
 import {
