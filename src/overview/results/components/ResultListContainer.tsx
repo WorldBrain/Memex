@@ -6,6 +6,7 @@ import moment from 'moment'
 
 import { LoadingIndicator, PageResultItem } from '../../../common-ui/components'
 import { IndexDropdown } from '../../../common-ui/containers'
+import { selectors as opt } from 'src/options/settings'
 import ResultList from './ResultList'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
@@ -38,6 +39,7 @@ export interface StateProps {
     isListFilterActive: boolean
     resultsClusteredByDay: boolean
     areAnnotationsExpanded: boolean
+    areScreenshotsEnabled: boolean
     activeSidebarIndex: number
     searchResults: Result[]
     resultsByUrl: ResultsByUrl
@@ -170,6 +172,7 @@ class ResultListContainer extends PureComponent<Props> {
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc, index)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
+                areScreenshotsEnabled={this.props.areScreenshotsEnabled}
                 isResponsibleForSidebar={
                     this.props.activeSidebarIndex === index
                 }
@@ -273,6 +276,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     resultsByUrl: selectors.resultsByUrl(state),
     annotsByDay: selectors.annotsByDay(state),
     isSidebarOpen: sidebarLeft.isSidebarOpen(state),
+    areScreenshotsEnabled: opt.screenshots(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
     isListFilterActive: filters.listFilterActive(state),
     isScrollDisabled: selectors.isScrollDisabled(state),

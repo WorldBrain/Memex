@@ -25,6 +25,7 @@ export interface Props {
     isOverview?: boolean
     hasBookmark?: boolean
     isListFilterActive?: boolean
+    areScreenshotsEnabled?: boolean
     areAnnotationsExpanded?: boolean
     isResponsibleForSidebar?: boolean
     annotations: any[]
@@ -89,7 +90,7 @@ export class PageResultItem extends PureComponent<Props> {
     }
 
     private renderScreenshot() {
-        if (!this.props.isOverview) {
+        if (!this.props.isOverview || !this.props.areScreenshotsEnabled) {
             return null
         }
 
@@ -147,6 +148,8 @@ export class PageResultItem extends PureComponent<Props> {
                             className={cx(styles.infoContainer, {
                                 [styles.infoContainerOverview]: this.props
                                     .isOverview,
+                                [styles.noScreenshot]: !this.props
+                                    .areScreenshotsEnabled,
                             })}
                         >
                             <div className={styles.firstlineContainer}>

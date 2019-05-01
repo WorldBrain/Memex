@@ -181,6 +181,10 @@
     width: calc(100% - var(--imgWidth));
 }
 
+.noScreenshot {
+    width: 100%;
+}
+
 .firstlineContainer {
     display: flex;
     flex-direction: row;
