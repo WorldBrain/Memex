@@ -69,8 +69,8 @@ class SaveToMemex extends Component<Props, State> {
         }
     }
 
-    private saveTweet = async doc => {
-        const tweet = getTweetInfo(doc)
+    private saveTweet = async () => {
+        const tweet = getTweetInfo(this.props.element)
         try {
             const id = await this.addTweetRPC(tweet)
         } catch (e) {
@@ -96,15 +96,11 @@ class SaveToMemex extends Component<Props, State> {
 
     private handleClick: React.MouseEventHandler<HTMLButtonElement> = e => {
         e.preventDefault()
-        this.saveTweet(this.props.element)
+        this.saveTweet()
     }
 
     render() {
-        const permalink = this.props.element.getAttribute('data-permalink-path')
-        const elementId = this.props.element.getAttribute('data-item-id')
-        const actionList = this.props.element.querySelector(
-            '.ProfileTweet-actionList',
-        )
+        const id = this.props.element.getAttribute('data-item-id')
         return (
             <div
                 onMouseEnter={this.handleMouseEnter}
@@ -121,9 +117,8 @@ class SaveToMemex extends Component<Props, State> {
                         <div
                             className="IconContainer js-tooltip"
                             data-original-title="Save To Memex"
-                            id={`memexButton-${elementId}`}
-                            data-permanlink-path={permalink}
-                            data-item-id={elementId}
+                            id={`memexButton-${id}`}
+                            data-item-id={id}
                         >
                             <span className="Icon Icon--medium Icon--saveToMemex">
                                 <svg

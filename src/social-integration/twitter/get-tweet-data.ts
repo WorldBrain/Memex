@@ -1,7 +1,7 @@
 import { Tweet, User } from 'src/social-integration/types'
 import normalizeUrl from 'src/util/encode-url-for-id'
 
-export const getTweetInfo = element => {
+export function getTweetInfo(element): Tweet {
     const hashtags = []
     const baseTwitter = 'https://twitter.com'
 
@@ -23,7 +23,7 @@ export const getTweetInfo = element => {
     const hashtagNodes = element.querySelectorAll('.twitter-hashtag')
 
     for (const i of hashtagNodes) {
-        hashtags.push(i.textContent.toLowerCase())
+        hashtags.push(i.textContent.toLowerCase().replace('#', ''))
     }
 
     const isVerified = element.querySelector('.Icon.Icon--verified') !== null
