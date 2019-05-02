@@ -1,11 +1,6 @@
 @value colors: 'src/common-ui/colors.css';
 @value color4, color6 from colors;
 
-* {
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-}
-
 html,
 body {
     margin: 0;
@@ -17,6 +12,11 @@ body {
     background-color: white;
     display: flex;
     flex-direction: row;
+
+    & * {
+        box-sizing: border-box;
+        font-family: 'Inter', sans-serif;
+    }
 }
 
 .route {
