@@ -57,6 +57,14 @@ export class PageResultItem extends PureComponent<Props> {
         return `http://${this.props.url}`
     }
 
+    get environment() {
+        if (this.props.isOverview) {
+            return 'overview'
+        } else {
+            return 'inpage'
+        }
+    }
+
     private dragStart: DragEventHandler = e => {
         const { url, setUrlDragged } = this.props
 
@@ -80,7 +88,7 @@ export class PageResultItem extends PureComponent<Props> {
 
         return (
             <AnnotationList
-                env="overview"
+                env={this.environment}
                 isExpandedOverride={this.props.areAnnotationsExpanded}
                 openAnnotationSidebar={this.props.onCommentBtnClick}
                 pageUrl={this.hrefToPage}

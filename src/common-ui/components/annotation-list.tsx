@@ -159,7 +159,7 @@ class AnnotationList extends Component<Props, State> {
                     [styles.annotation]: this.props.env === 'overview',
                     [styles.annotationBoxInpage]: this.props.env === 'inpage',
                 })}
-                env="overview"
+                env={this.props.env}
                 handleGoToAnnotation={this.handleGoToAnnotation(annot)}
                 handleDeleteAnnotation={this.handleDeleteAnnotation}
                 handleEditAnnotation={this.handleEditAnnotation}
