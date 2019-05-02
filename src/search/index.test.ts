@@ -537,7 +537,9 @@ describe('Search index integration', () => {
             ) // Base test data expectation
 
             // Add bm to 3rd test page
-            await idx.addBookmark(getDb)({
+            await idx.addBookmark(getDb, {
+                setBookmarkState: () => undefined,
+            } as any)({
                 url: DATA.PAGE_1.url,
                 timestamp: tmpBm,
             } as any)
@@ -558,7 +560,9 @@ describe('Search index integration', () => {
             expect(before[0]).toEqual([DATA.PAGE_ID_2, DATA.BOOKMARK_1])
 
             // Add bm to 3rd test page
-            await idx.delBookmark(getDb)({ url: DATA.PAGE_2.url })
+            await idx.delBookmark(getDb, {
+                setBookmarkState: () => undefined,
+            } as any)({ url: DATA.PAGE_2.url })
 
             const { docs: after } = await search({ showOnlyBookmarks: true })
             expect(after.length).toBe(0) // Bye

@@ -18,9 +18,9 @@ import * as backupStorage from './backup/background/storage'
 import BackgroundScript from './background-script'
 import alarms from './background-script/alarms'
 import TagsBackground from './tags/background'
+import ActivityLoggerBackground from './activity-logger/background'
 
 // Features that auto-setup
-import { tabManager } from './activity-logger/background'
 import './analytics/background'
 import './imports/background'
 import './omnibar'
@@ -40,10 +40,17 @@ export const directLinking = new DirectLinkingBackground({
 directLinking.setupRemoteFunctions()
 directLinking.setupRequestInterceptor()
 
+const activityLogger = new ActivityLoggerBackground({
+    storageManager,
+    notifsBackground: notifications,
+})
+activityLogger.setupRemoteFunctions()
+activityLogger.setupWebExtAPIHandlers()
+
 const search = new SearchBackground({
     storageManager,
     getDb,
-    tabMan: tabManager,
+    tabMan: activityLogger.tabManager,
 })
 search.setupRemoteFunctions()
 
@@ -53,7 +60,7 @@ eventLog.setupRemoteFunctions()
 export const customList = new CustomListBackground({
     storageManager,
     getDb,
-    tabMan: tabManager,
+    tabMan: activityLogger.tabManager,
     windows: browser.windows,
 })
 customList.setupRemoteFunctions()
@@ -61,7 +68,7 @@ customList.setupRemoteFunctions()
 export const tags = new TagsBackground({
     storageManager,
     getDb,
-    tabMan: tabManager,
+    tabMan: activityLogger.tabManager,
     windows: browser.windows,
 })
 tags.setupRemoteFunctions()
@@ -88,6 +95,7 @@ storageManager.finishInitialization().then(() => {
     bgScript = new BackgroundScript({
         storageManager,
         notifsBackground: notifications,
+        loggerBackground: activityLogger,
     })
     bgScript.setupRemoteFunctions()
     bgScript.setupWebExtAPIHandlers()
@@ -105,3 +113,5 @@ window['search'] = search
 window['customList'] = customList
 window['notifications'] = notifications
 window['analytics'] = analytics
+window['logger'] = activityLogger
+window['tabMan'] = activityLogger.tabManager

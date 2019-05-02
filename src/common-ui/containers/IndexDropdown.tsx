@@ -121,12 +121,14 @@ class IndexDropdownContainer extends Component<Props, State> {
 
     componentWillUnmount() {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
-            handleDBQuotaErrors(err =>
-                this.createNotif({
-                    requireInteraction: false,
-                    title: 'Memex error: tag adding',
-                    message: err.message,
-                }),
+            handleDBQuotaErrors(
+                err =>
+                    this.createNotif({
+                        requireInteraction: false,
+                        title: 'Memex error: tag adding',
+                        message: err.message,
+                    }),
+                () => remoteFunction('dispatchNotification')('db_error'),
             )(this.err.err)
         }
     }

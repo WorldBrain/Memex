@@ -6,7 +6,7 @@ import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { PageSearchParams, AnnotSearchParams, AnnotPage } from './types'
+import { PageSearchParams, AnnotSearchParams } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 
 export default class SearchBackground {
@@ -90,8 +90,8 @@ export default class SearchBackground {
             addTag: idx.addTag(this.getDb),
             delTag: idx.delTag(this.getDb),
             fetchPageTags: idx.fetchPageTags(this.getDb),
-            addBookmark: idx.addBookmark(this.getDb),
-            delBookmark: idx.delBookmark(this.getDb),
+            addBookmark: idx.addBookmark(this.getDb, this.tabMan),
+            delBookmark: idx.delBookmark(this.getDb, this.tabMan),
             pageHasBookmark: idx.pageHasBookmark(this.getDb),
             getPage: idx.getPage(this.getDb),
             grabExistingKeys: idx.grabExistingKeys(this.getDb),

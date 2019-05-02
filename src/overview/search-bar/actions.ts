@@ -117,6 +117,7 @@ export const search: (args?: any) => Thunk = (
     // Overwrite of results should always reset the current page before searching
     if (overwrite) {
         dispatch(resultsActs.resetPage())
+        dispatch(resultsActs.resetSearchResult())
     }
 
     if (/thank you/i.test(query)) {

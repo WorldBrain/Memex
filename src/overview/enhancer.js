@@ -12,6 +12,12 @@ import {
     selectors as sidebarLeft,
     actions as sidebarLeftActs,
 } from './sidebar-left'
+import {
+    constants as optConsts,
+    actions as optActs,
+    defaultState as defOptState,
+} from 'src/options/settings'
+
 const parseBool = str => str === 'true'
 const parseNumber = str => Number(str)
 const stringifyArr = arr => arr.join(',')
@@ -116,6 +122,11 @@ const hydrateStateFromStorage = store => {
         resultsActs.setAreAnnotationsExpanded,
     )
     hydrate(constants.SIDEBAR_LOCKED_KEY, sidebarLeftActs.setSidebarLocked)
+    hydrate(
+        optConsts.STORAGE_KEYS.SCREENSHOTS,
+        optActs.initScreenshots,
+        defOptState.screenshots,
+    )
 }
 
 const syncStateToStorage = store =>

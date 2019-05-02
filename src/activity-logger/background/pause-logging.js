@@ -72,7 +72,7 @@ function handlePause(timeout) {
  * Main entrypoint for activity-logging pause from the popup. Keeps track of a running pause timeout
  * which will reset the pause flag in local storage.
  *
- * @return {(number?) => void} A function that allows pause state to be toggled, and optional
+ * @return {(minutes?: number) => void} A function that allows pause state to be toggled, and optional
  *  specifying of a number of minutes for timeout.
  */
 export default function initPauser() {

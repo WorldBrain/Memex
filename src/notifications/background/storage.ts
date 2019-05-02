@@ -1,5 +1,4 @@
 import { FeatureStorage } from '../../search/storage'
-import * as notifications from '../notifications'
 import createNotif from '../../util/notifications'
 import { browser } from 'webextension-polyfill-ts'
 
@@ -88,13 +87,13 @@ export default class NotificationStorage extends FeatureStorage {
             .findOneObject({ id })
     }
 
-    async dispatchNotification(notification) {
+    async dispatchNotification(notification, releaseTime) {
         if (notification.overview) {
             const newNotification = {
                 ...notification.overview,
                 id: notification.id,
                 deliveredTime: Date.now(),
-                sentTime: notifications.releaseTime,
+                sentTime: releaseTime,
             }
             // Store the notification so that it displays in the inbox
             await this.storeNotification(newNotification)
@@ -107,6 +106,7 @@ export default class NotificationStorage extends FeatureStorage {
                 {
                     title: notification.system.title,
                     message: notification.system.message,
+                    requireInteraction: false,
                 },
                 () => {
                     return browser.tabs.create({

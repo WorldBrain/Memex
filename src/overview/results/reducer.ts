@@ -208,6 +208,16 @@ reducer.on(acts.setLoading, (state, payload) => ({
     isLoading: payload,
 }))
 reducer.on(acts.appendSearchResult, handleSearchResult(false))
+reducer.on(acts.resetSearchResult, state => ({
+    ...state,
+    resultsExhausted: defState.resultsExhausted,
+    totalCount: defState.totalCount,
+    isBadTerm: defState.isBadTerm,
+    isInvalidSearch: defState.isInvalidSearch,
+    isAnnotsSearch: defState.isAnnotsSearch,
+    results: defState.results,
+    annotsByDay: defState.annotsByDay,
+}))
 reducer.on(acts.setSearchResult, handleSearchResult(true))
 reducer.on(acts.setSearchType, (state, searchType) => ({
     ...state,
