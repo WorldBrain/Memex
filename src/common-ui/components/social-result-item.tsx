@@ -8,6 +8,7 @@ import {
     URL_PATTERN,
     TWEET_DATE_FORMAT,
 } from 'src/social-integration/constants'
+import Link from './link'
 
 const styles = require('./result-item.css')
 
@@ -21,13 +22,10 @@ class SocialResultItem extends PureComponent<Props> {
 
         let replacedText
         replacedText = reactStringReplace(text, URL_PATTERN, (match, i) => (
-            <a
+            <Link
                 key={match + i}
-                href={match.startsWith('http') ? match : 'https://' + match}
-                target="_blank"
-            >
-                {match}
-            </a>
+                url={match.startsWith('http') ? match : 'https://' + match}
+            />
         ))
 
         // Match @-mentions
@@ -35,13 +33,11 @@ class SocialResultItem extends PureComponent<Props> {
             replacedText,
             /@(\w+)/g,
             (match, i) => (
-                <a
+                <Link
                     key={match + i}
-                    href={`https://twitter.com/${match}`}
-                    target="_blank"
-                >
-                    @{match}
-                </a>
+                    url={`https://twitter.com/${match}`}
+                    text={`@${match}`}
+                />
             ),
         )
 
@@ -50,13 +46,11 @@ class SocialResultItem extends PureComponent<Props> {
             replacedText,
             /#(\w+)/g,
             (match, i) => (
-                <a
+                <Link
                     key={match + i}
-                    href={`https://twitter.com/hashtag/${match}`}
-                    target="_blank"
-                >
-                    #{match}
-                </a>
+                    url={`https://twitter.com/hashtag/${match}`}
+                    text={`#${match}`}
+                />
             ),
         )
 

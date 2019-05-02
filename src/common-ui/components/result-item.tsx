@@ -24,6 +24,7 @@ export interface Props extends Partial<SocialPage> {
     hasBookmark?: boolean
     isSidebarOpen?: boolean
     isListFilterActive: boolean
+    areScreenshotsEnabled?: boolean
     areAnnotationsExpanded?: boolean
     isResponsibleForSidebar?: boolean
     isOverview?: boolean
@@ -75,7 +76,9 @@ class ResultItem extends PureComponent<Props> {
         )
     }
 
-    private handleClickOpenNewTabButton(url: string) {
+    private handleClickOpenNewTab = (url: string) => (
+        e: React.MouseEvent<HTMLDivElement>,
+    ) => {
         window.open(url, '_blank').focus()
     }
 
@@ -103,10 +106,7 @@ class ResultItem extends PureComponent<Props> {
                         className={cx(styles.root, {
                             [styles.rootOverview]: this.props.isOverview,
                         })}
-                        onClick={e => {
-                            e.preventDefault()
-                            this.handleClickOpenNewTabButton(this.hrefToPage)
-                        }}
+                        onClick={this.handleClickOpenNewTab(this.hrefToPage)}
                         draggable
                     >
                         {this.props.isSocial ? (
