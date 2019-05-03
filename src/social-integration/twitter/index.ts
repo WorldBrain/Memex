@@ -1,5 +1,7 @@
 import appendReactDOM from 'append-react-dom'
 import SaveToMemex from './components/save-to-memex'
+import { injectCSS } from 'src/search-injection/dom'
+import { browser } from 'webextension-polyfill-ts'
 
 const observerConfig: MutationObserverInit = {
     childList: true,
@@ -45,5 +47,7 @@ const startIntegration = () => {
 }
 
 const observer: MutationObserver = new MutationObserver(appMutationHandler)
+
+injectCSS(browser.extension.getURL('/twitter.css'))
 
 startIntegration()
