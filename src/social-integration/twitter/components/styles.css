@@ -21,9 +21,14 @@
     fill: #5cd9a6;
 }
 
+.saveToMemex {
+    margin-bottom: -6px;
+}
+
 .iconsContainer {
     height: 36px;
     width: 300px;
+    margin-bottom: -6px;
     background-color: #fff;
     position: relative;
     z-index: 1;

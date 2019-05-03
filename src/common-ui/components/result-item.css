@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color1, color2, color3, color6 from colors;
+@value color4, color1, color2, color3, color5, color6 from colors;
 
 :root {
     --height: 100px;
@@ -233,7 +233,6 @@
     text-overflow: ellipsis;
     align-items: center;
     max-width: 100%;
-    margin-bottom: 8px;
 }
 
 .url a {
@@ -243,7 +242,7 @@
 .detailsBox {
     display: flex;
     align-items: center;
-    width: 80%;
+    width: 90%;
     overflow: hidden;
 }
 
@@ -418,49 +417,78 @@
 
 .tweetInfoContainer {
     width: 100%;
-    margin-left: 58px;
-    padding: 9px 12px;
 }
 
 .header {
     display: flex;
+    padding: 9px 9px 0px 9px;
+    justify-content: space-between;
+}
+
+.twitterLogo {
+    background-image: url('/img/twitterLogo.svg');
+    display: flex;
+    width: 30px;
+    height: 30px;
+    background-position: center center;
+    background-size: 80%;
+    background-repeat: no-repeat;
+}
+
+.tweetContent {
+    padding: 5px 9px 4px;
+}
+
+.footer {
+    padding: 4px 9px 2px 9px;
+    border-top: 1px solid #efefef;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .accountGroup {
-    color: #14171a;
+    color: color3;
     display: inline-flex;
     text-decoration: none;
+    align-items: center;
 }
 
 .avatar {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    margin-top: 3px;
-    margin-left: -58px;
-    position: absolute;
+    margin-right: 10px;
 }
 
 .fullNameGroup {
     display: flex;
+    flex-direction: column;
     max-width: 100%;
 }
 
 .fullName {
-    color: #14171a;
+    color: color4;
     font-size: 14px;
     font-weight: bold;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .username {
     font-size: 14px;
     color: color6;
+    font-weight: 500;
 }
 
 .verified {
     background-image: url('/img/twitter-verified-icon.svg');
     width: 15px;
     height: 15px;
+    display: flex;
+    margin-left: 5px;
 }
 
 .hiddenVisually {
@@ -475,12 +503,24 @@
 }
 
 .tweetText {
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 15px;
+    line-height: 22px;
     font-weight: normal;
     white-space: pre-wrap;
     word-wrap: break-word;
-    color: #14171a;
+    color: color5;
+    margin: 10px 0px 5px 0px;
+}
+
+.topRow {
+    display: flex;
+    justify-content: space-between;
+    height: 25px;
+    align-items: center;
+}
+
+.bottomRow {
+    display: flex;
 }
 
 .timeStamp {
@@ -495,4 +535,5 @@
 
 .tweetDetailsContainer {
     margin-top: -5px;
+    width: fill-available;
 }

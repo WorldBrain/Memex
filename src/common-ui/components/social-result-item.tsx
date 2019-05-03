@@ -72,26 +72,25 @@ class SocialResultItem extends PureComponent<Props> {
                                 src={this.props.user.profilePic as string}
                             />
                         )}
-                        <span className={styles.fullNameGroup}>
-                            <strong className={styles.fullName}>
-                                {this.props.user.name}
-                            </strong>
-                            <span>‏&nbsp;</span>
-                            {this.props.user.isVerified && (
-                                <span className={styles.verified}>
-                                    <span className={styles.hiddenVisually}>
-                                        Verified account
+                        <div className={styles.fullNameGroup}>
+                            <div className={styles.fullName}>
+                                {this.props.user.name}  
+                                {this.props.user.isVerified && (
+                                    <span className={styles.verified}>
+                                        <span className={styles.hiddenVisually}>
+                                            Verified account
+                                        </span>
                                     </span>
-                                </span>
-                            )}
-                            <span>‏&nbsp;</span>
-                        </span>
-                        <span className={styles.username}>
-                            @<b>{this.props.user.username}</b>
-                        </span>
+                                )}
+                            </div>
+                            <div className={styles.username}>
+                                @<b>{this.props.user.username}</b>
+                            </div>
+                        </div>
                     </a>
+                    <div className={styles.twitterLogo}/>
                 </div>
-                <div>
+                <div className={styles.tweetContent}>
                     {this.renderText()}
                     {this.props.createdAt && (
                         <span className={styles.timeStamp}>
@@ -101,16 +100,24 @@ class SocialResultItem extends PureComponent<Props> {
                         </span>
                     )}
                 </div>
-                <div className={styles.closeContainer}>
-                    <div className={styles.url}>{this.props.url}</div>
-                    {this.props.isListFilterActive && (
-                        <SemiCircularRibbon
-                            onClick={this.props.handleCrossRibbonClick}
-                        />
-                    )}
+                <div className={styles.footer}>
+                    <div className={styles.topRow}>
+                        <div className={styles.url}>
+                            {this.props.url}
+                        </div>
+                        <div className={styles.close}>
+                            {this.props.isListFilterActive && (
+                                <SemiCircularRibbon
+                                    onClick={this.props.handleCrossRibbonClick}
+                                />
+                            )}
+                        </div>
+                    </div>
+                    <div className={styles.bottomRow}>
+                        {!this.props.isOverview && this.props.tagHolder}
+                        <ResultItemActions {...this.props} />
+                    </div>
                 </div>
-                {!this.props.isOverview && this.props.tagHolder}
-                <ResultItemActions {...this.props} />
             </div>
         )
     }
