@@ -28,7 +28,10 @@ class ResultItemActions extends PureComponent<Props> {
                 </div>
                 <div
                     className={styles.buttonsContainer}
-                    onClick={e => e.preventDefault()}
+                    onClick={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                    }}
                 >
                     <button
                         disabled={this.props.isDeleting}

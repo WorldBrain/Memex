@@ -1,4 +1,3 @@
-import 'babel-polyfill'
 import React, { Component } from 'react'
 import { getTweetInfo } from '../get-tweet-data'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -100,7 +99,6 @@ class SaveToMemex extends Component<Props, State> {
     }
 
     render() {
-        const id = this.props.element.getAttribute('data-item-id')
         return (
             <div
                 onMouseEnter={this.handleMouseEnter}
@@ -117,7 +115,6 @@ class SaveToMemex extends Component<Props, State> {
                         <div
                             className="IconContainer js-tooltip"
                             data-original-title="Save To Memex"
-                            id={`memexButton-${id}`}
                         >
                             <span
                                 className={cx(

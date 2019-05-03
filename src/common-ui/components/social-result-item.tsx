@@ -57,14 +57,21 @@ class SocialResultItem extends PureComponent<Props> {
         return <p className={styles.tweetText}>{replacedText}</p>
     }
 
+    private handleClickOpenNewTab = (url: string) => (
+        e: React.MouseEvent<HTMLAnchorElement>,
+    ) => {
+        e.preventDefault()
+        e.stopPropagation()
+        window.open(url, '_blank').focus()
+    }
+
     render() {
         return (
             <div className={styles.tweetInfoContainer}>
                 <div className={styles.header}>
                     <a
                         className={styles.accountGroup}
-                        href={this.hrefToUser}
-                        target="_blank"
+                        onClick={this.handleClickOpenNewTab(this.hrefToUser)}
                     >
                         {this.props.user.profilePic && (
                             <img
@@ -74,7 +81,7 @@ class SocialResultItem extends PureComponent<Props> {
                         )}
                         <div className={styles.fullNameGroup}>
                             <div className={styles.fullName}>
-                                {this.props.user.name}  
+                                {this.props.user.name}
                                 {this.props.user.isVerified && (
                                     <span className={styles.verified}>
                                         <span className={styles.hiddenVisually}>
@@ -88,7 +95,7 @@ class SocialResultItem extends PureComponent<Props> {
                             </div>
                         </div>
                     </a>
-                    <div className={styles.twitterLogo}/>
+                    <div className={styles.twitterLogo} />
                 </div>
                 <div className={styles.tweetContent}>
                     {this.renderText()}
@@ -102,9 +109,7 @@ class SocialResultItem extends PureComponent<Props> {
                 </div>
                 <div className={styles.footer}>
                     <div className={styles.topRow}>
-                        <div className={styles.url}>
-                            {this.props.url}
-                        </div>
+                        <div className={styles.url}>{this.props.url}</div>
                         <div className={styles.close}>
                             {this.props.isListFilterActive && (
                                 <SemiCircularRibbon
