@@ -537,3 +537,24 @@
     margin-top: -5px;
     width: fill-available;
 }
+
+.tweetInfoContainerSidebar {
+    .header {
+        padding: 3px 0px 0px 0px;
+    }
+
+    .tweetContent {
+        padding: 5px 0px 4px;
+    }
+
+    .footer {
+        padding: 4px 10px 0px 10px;
+        border-top: 1px solid #efefef;
+        margin: 0 -10px -3px -10px;
+        height: auto;
+    }
+
+    .bottomRow {
+        flex-direction: column;
+    }
+}

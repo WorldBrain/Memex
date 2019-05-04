@@ -5,12 +5,14 @@
 .memexIcon {
     display: inline-block;
     background-image: url('/img/memex_logo_black.svg');
-    height: 20px;
+    height: 18px;
     width: 18px;
     cursor: pointer;
     border: none;
     vertical-align: bottom;
-    background-size: 20px;
+    background-size: 18px;
+    margin-left: -5px;
+    margin-bottom: -3px;
 }
 
 .saved {

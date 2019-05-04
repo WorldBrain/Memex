@@ -9,6 +9,7 @@ import {
     TWEET_DATE_FORMAT,
 } from 'src/social-integration/constants'
 import Link from './link'
+import cx from 'classnames'
 
 const styles = require('./result-item.css')
 
@@ -67,8 +68,12 @@ class SocialResultItem extends PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.tweetInfoContainer}>
-                <div className={styles.header}>
+            <div className={cx(styles.tweetInfoContainer, {
+                [styles.tweetInfoContainerSidebar] : !this.props.isOverview,
+            })}>
+                <div className={cx(styles.header, {
+                    [styles.tweetHeaderSidebar] : this.props.isOverview,
+                })}>
                     <a
                         className={styles.accountGroup}
                         onClick={this.handleClickOpenNewTab(this.hrefToUser)}
@@ -97,7 +102,9 @@ class SocialResultItem extends PureComponent<Props> {
                     </a>
                     <div className={styles.twitterLogo} />
                 </div>
-                <div className={styles.tweetContent}>
+                <div className={cx(styles.tweetContent, {
+                    [styles.tweetContentSidebar] : this.props.isOverview,
+                })}>
                     {this.renderText()}
                     {this.props.createdAt && (
                         <span className={styles.timeStamp}>
