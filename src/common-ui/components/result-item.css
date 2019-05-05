@@ -539,22 +539,22 @@
 }
 
 .tweetInfoContainerSidebar {
-    .header {
+    & .header {
         padding: 3px 0px 0px 0px;
     }
 
-    .tweetContent {
+    & .tweetContent {
         padding: 5px 0px 4px;
     }
 
-    .footer {
+    & .footer {
         padding: 4px 10px 0px 10px;
         border-top: 1px solid #efefef;
         margin: 0 -10px -3px -10px;
         height: auto;
     }
 
-    .bottomRow {
+    & .bottomRow {
         flex-direction: column;
     }
 }

@@ -340,16 +340,18 @@
 }
 
 .socialContainer {
-    display: block;
+    display: flex;
     overflow: hidden;
     color: #66757f;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 14px;
+    align-items: center;
 }
 
 .userGroup {
     display: flex;
+    align-items: center;
 }
 
 .avatar {
@@ -363,7 +365,7 @@
     display: flex;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-top: 8px;
+    flex-direction: column;
 }
 
 .fullName {
@@ -371,12 +373,15 @@
     color: #14171a;
     font-size: 14px;
     font-weight: bold;
+    display: flex;
+    align-items: center;
 }
 
 .verified {
     background-image: url('/img/twitter-verified-icon.svg');
     width: 15px;
     height: 15px;
+    margin-left: 5px;
 }
 
 .username {

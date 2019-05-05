@@ -100,12 +100,11 @@ class SaveToMemex extends Component<Props, State> {
 
     render() {
         return (
-            <div
-                onMouseEnter={this.handleMouseEnter}
-                onMouseLeave={this.handleMouseLeave}
-                className={styles.container}
-            >
-                <div className="ProfileTweet-action ProfileTweet-action--stm">
+                <div 
+                    onMouseEnter={this.handleMouseEnter}
+                    onMouseLeave={this.handleMouseLeave}
+                    className="ProfileTweet-action ProfileTweet-action--stm"
+                >
                     <button
                         className="ProfileTweet-actionButton u-textUserColorHover js-actionButton"
                         type="button"
@@ -130,9 +129,8 @@ class SaveToMemex extends Component<Props, State> {
                             </span>
                         </div>
                     </button>
-                </div>
                 {/*{this.state.isMouseInside && <ActionBar url={this.url} />}*/}
-            </div>
+                </div>
         )
     }
 }

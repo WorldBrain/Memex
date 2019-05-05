@@ -1,5 +1,5 @@
 .container {
-    display: contents;
+    display: flex;
 }
 
 .memexIcon {

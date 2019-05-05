@@ -27,10 +27,10 @@
 
 .logo {
 	composes: logo from 'src/common-ui/icons.css';
-	width: 150px;
+	width: 100px;
     display: inline-flex;
     height: 30px;
-    position: relative;
+    position: fixed;
     left: 0.2em;
-    bottom: 2.5em;
+    bottom: 1em;
 }

@@ -16,17 +16,17 @@ class IndexDropdownUserRow extends React.PureComponent<Props> {
                     {profilePic && (
                         <img className={styles.avatar} src={profilePic} />
                     )}
-                    <span className={styles.accountGroup}>
-                        <span className={styles.fullName}>{name}</span>
-                        {isVerified && (
-                            <React.Fragment>
-                                <span>&nbsp;</span>
-                                <span className={styles.verified} />
-                            </React.Fragment>
-                        )}
-                        <span>&nbsp;</span>
+                    <div className={styles.accountGroup}>
+                        <span className={styles.fullName}>
+                            <span>{name}</span>
+                            {isVerified && (
+                                <React.Fragment>
+                                    <span className={styles.verified} />
+                                </React.Fragment>
+                            )}
+                        </span>
                         <span className={styles.username}>@{username}</span>
-                    </span>
+                    </div>
                 </div>
             </div>
         )
