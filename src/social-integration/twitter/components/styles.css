@@ -1,5 +1,5 @@
 .container {
-    display: flex;
+    display: contents;
 }
 
 .memexIcon {
@@ -29,7 +29,7 @@
     margin-bottom: -6px;
     background-color: #fff;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     display: inline-block;
     border-radius: 3px;
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
@@ -37,20 +37,31 @@
 }
 
 .icons {
-    display: grid;
-    align-items: center;
-    grid-template-columns: max-content 30px;
-    grid-gap: 6px;
+    display: flex;
+}
+
+.button {
+    height: 20px;
+    width: 20px;
+    margin-right: 15px;
 }
 
 .commentIcon {
     background-image: url('/img/comment_add.svg');
-    height: 18px;
-    width: 18px;
 }
 
 .tagIcon {
     background-image: url('/img/tag.svg');
-    height: 18px;
-    width: 18px;
+}
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+}
+
+.collIcon {
+    background-image: url('/img/collections_add.svg');
 }

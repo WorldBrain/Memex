@@ -302,6 +302,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
     handleCrossRibbonClick: ({ url }) => event => {
         event.preventDefault()
+        event.stopPropagation()
         dispatch(listActs.delPageFromList(url))
         dispatch(resultActs.hideResultItem(url))
     },

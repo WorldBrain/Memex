@@ -1,4 +1,4 @@
-import appendReactDOM from 'append-react-dom'
+import appendReactDOM from 'src/social-integration/append-react-dom'
 
 export default class TwitterObserver {
     private observer: MutationObserver
@@ -41,6 +41,7 @@ export default class TwitterObserver {
     private addButton = element => {
         const actionList = element.querySelector('.ProfileTweet-actionList')
         if (actionList) {
+            actionList.addEventListener('click', e => e.stopPropagation())
             appendReactDOM(this.component, actionList, { element })
             element.classList.add('MemexAdded')
         }

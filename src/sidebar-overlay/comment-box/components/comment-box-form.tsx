@@ -16,7 +16,7 @@ interface Props {
     isCommentBookmarked: boolean
     handleCommentTextChange: (comment: string) => void
     saveComment: React.EventHandler<React.SyntheticEvent>
-    cancelComment: ClickHandler<HTMLElement>
+    cancelComment: ClickHandler<HTMLButtonElement>
     toggleBookmark: ClickHandler<HTMLButtonElement>
     isAnnotation: boolean
 }
@@ -33,8 +33,11 @@ class CommentBoxForm extends React.Component<Props, State> {
     private _textAreaRef: HTMLTextAreaElement
     /** Ref of the tag button element to focus on it when tabbing. */
     private tagBtnRef: HTMLElement
+    private saveBtnRef: HTMLButtonElement
+    private cancelBtnRef: HTMLButtonElement
+    private bmBtnRef: HTMLButtonElement
 
-    state = {
+    state: State = {
         rows: constants.NUM_DEFAULT_ROWS,
         isTagInputActive: false,
         showTagsPicker: false,
@@ -42,6 +45,7 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     async componentDidMount() {
+        this.attachEventListeners()
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
 
@@ -64,6 +68,27 @@ class CommentBoxForm extends React.Component<Props, State> {
             })
         }
         this._textAreaRef.focus()
+    }
+
+    componentWillUnmount() {
+        this.removeEventListeners()
+    }
+
+    private attachEventListeners() {
+        this.saveBtnRef.addEventListener('click', e => this.saveComment(e))
+        this.cancelBtnRef.addEventListener('click', this.handleCancelBtnClick)
+        this.bmBtnRef.addEventListener('click', this.handleBookmarkBtnClick)
+        this.tagBtnRef.addEventListener('click', this.handleTagBtnClick)
+    }
+
+    private removeEventListeners() {
+        this.saveBtnRef.removeEventListener('click', e => this.saveComment(e))
+        this.cancelBtnRef.removeEventListener(
+            'click',
+            this.handleCancelBtnClick,
+        )
+        this.bmBtnRef.removeEventListener('click', this.handleBookmarkBtnClick)
+        this.tagBtnRef.removeEventListener('click', this.handleTagBtnClick)
     }
 
     private _setTextAreaRef = (ref: HTMLTextAreaElement) => {
@@ -99,7 +124,7 @@ class CommentBoxForm extends React.Component<Props, State> {
         }
     }
 
-    private handleTagBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    private handleTagBtnClick = e => {
         e.preventDefault()
         e.stopPropagation()
         this.setState(prevState => ({
@@ -107,9 +132,13 @@ class CommentBoxForm extends React.Component<Props, State> {
         }))
     }
 
-    private handleBookmarkBtnClick = (
-        e: React.MouseEvent<HTMLButtonElement>,
-    ) => {
+    private handleCancelBtnClick = e => {
+        e.preventDefault()
+        e.stopPropagation()
+        this.props.cancelComment(e)
+    }
+
+    private handleBookmarkBtnClick = e => {
         e.preventDefault()
         e.stopPropagation()
         this.props.toggleBookmark(e)
@@ -132,11 +161,7 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.props.handleCommentTextChange(comment)
     }
 
-    private saveComment = (
-        e:
-            | React.KeyboardEvent<HTMLTextAreaElement>
-            | React.MouseEvent<HTMLButtonElement>,
-    ) => {
+    private saveComment = e => {
         this.props.saveComment(e)
         if (this.state.showTagsPicker) {
             this.setState({
@@ -191,17 +216,16 @@ class CommentBoxForm extends React.Component<Props, State> {
                         <button
                             ref={this.setTagButtonRef}
                             className={cx(styles.button, styles.tag)}
-                            onClick={this.handleTagBtnClick}
                             title={'Add tags'}
                         />
                         <button
+                            ref={ref => (this.bmBtnRef = ref)}
                             className={cx(styles.button, {
                                 [styles.bookmark]: this.props
                                     .isCommentBookmarked,
                                 [styles.notBookmark]: !this.props
                                     .isCommentBookmarked,
                             })}
-                            onClick={this.handleBookmarkBtnClick}
                             title={
                                 !this.props.isCommentBookmarked
                                     ? 'Bookmark'
@@ -211,14 +235,14 @@ class CommentBoxForm extends React.Component<Props, State> {
                     </div>
                     <div className={styles.confirmButtons}>
                         <button
+                            ref={ref => (this.cancelBtnRef = ref)}
                             className={styles.cancelBtn}
-                            onClick={cancelComment}
                         >
                             Cancel
                         </button>
                         <button
                             className={styles.saveBtn}
-                            onClick={e => this.saveComment(e)}
+                            ref={ref => (this.saveBtnRef = ref)}
                         >
                             Save
                         </button>

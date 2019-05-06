@@ -8,7 +8,7 @@ import State from '../types'
 import { AnnotationHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
-import { MapDispatchToProps, ClickHandler } from '../../types'
+import { MapDispatchToProps } from '../../types'
 
 const styles = require('./comment-box-container.css')
 
@@ -27,8 +27,8 @@ interface DispatchProps {
         tags: string[],
         bookmarked: boolean,
     ) => void
-    cancelComment: ClickHandler<HTMLElement>
-    toggleBookmark: ClickHandler<HTMLButtonElement>
+    cancelComment: () => void
+    toggleBookmark: () => void
 }
 
 interface OwnProps {
@@ -37,9 +37,8 @@ interface OwnProps {
 
 type Props = StateProps & DispatchProps & OwnProps
 
-// TODO: Fetch initial tag suggestions when the component is mounted.
 class CommentBoxContainer extends React.PureComponent<Props> {
-    save = (e: React.SyntheticEvent) => {
+    save = e => {
         e.preventDefault()
         e.stopPropagation()
 
@@ -80,7 +79,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
                     cancelComment={cancelComment}
                     isCommentBookmarked={isCommentBookmarked}
                     toggleBookmark={toggleBookmark}
-                    isAnnotation={true} // TODO: we need to pass the right state here 
+                    isAnnotation={true} // TODO: we need to pass the right state here
                 />
             </div>
         )
@@ -106,11 +105,7 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(actions.setCommentText(comment)),
     saveComment: (anchor, commentText, tags, bookmarked) =>
         dispatch(actions.saveComment(anchor, commentText, tags, bookmarked)),
-    cancelComment: e => {
-        e.preventDefault()
-        e.stopPropagation()
-        dispatch(actions.cancelComment())
-    },
+    cancelComment: () => dispatch(actions.cancelComment()),
     toggleBookmark: () => dispatch(actions.toggleBookmark()),
 })
 

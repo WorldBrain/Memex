@@ -4,44 +4,47 @@ import {
     AddListDropdownContainer,
 } from 'src/common-ui/containers'
 import CommentBoxContainer from 'src/sidebar-overlay/comment-box'
-import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
+import ActionBarItems from './action-bar-items'
+import { StateProps, DispatchProps } from './save-to-memex-container'
+import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 
-import cx from 'classnames'
-
-const styles = require('./styles.css')
-
-interface Props {
+interface OwnProps {
     url: string
 }
 
-interface State {
-    showCommentBox: boolean
-    showTagsPicker: boolean
-}
+type Props = StateProps & DispatchProps & OwnProps
 
-class ActionBar extends Component<Props, State> {
-    constructor(props) {
+class ActionBar extends Component<Props> {
+    private annotationsManager: AnnotationsManager
+
+    constructor(props: Props) {
         super(props)
-        this.state = {
-            showCommentBox: false,
-            showTagsPicker: false,
-        }
+        this.annotationsManager = new AnnotationsManager()
     }
 
-    private handleClick: React.MouseEventHandler<HTMLButtonElement> = e => {
-        e.preventDefault()
+    componentDidMount() {
+        this.props.onInit()
+        this.props.setAnnotationsManager(this.annotationsManager)
+    }
+
+    componentWillUnMount() {
+        this.props.setPage({
+            url: null,
+            title: null,
+        })
     }
 
     private renderTagsManager() {
         return (
             <IndexDropdown
-                env="inpage"
                 url={this.props.url}
-                initFilters={[]}
-                initSuggestions={[]}
                 source="tag"
-                onFilterAdd={() => {}}
-                onFilterDel={() => {}}
+                initFilters={this.props.tags}
+                initSuggestions={this.props.initTagSuggs}
+                onFilterAdd={this.props.onTagAdd}
+                onFilterDel={this.props.onTagDel}
+                isForRibbon
+                fromOverview
             />
         )
     }
@@ -49,57 +52,34 @@ class ActionBar extends Component<Props, State> {
     private renderCollectionsManager() {
         return (
             <AddListDropdownContainer
-                env="inpage"
                 url={this.props.url}
-                initLists={[]}
-                initSuggestions={[]}
-                onFilterAdd={() => {}}
-                onFilterDel={() => {}}
+                initLists={this.props.collections}
+                initSuggestions={this.props.initCollSuggs}
+                onFilterAdd={this.props.onCollectionAdd}
+                onFilterDel={this.props.onCollectionDel}
                 isForRibbon
             />
         )
     }
 
-    private handleCommentIconBtnClick: React.MouseEventHandler<
-        HTMLButtonElement
-    > = e => {
-        this.setState(prevState => ({
-            showCommentBox: !prevState.showCommentBox,
-        }))
+    private renderCommentBox() {
+        this.props.setPage({
+            url: this.props.url,
+            title: null,
+        })
+
+        return <CommentBoxContainer env="inpage" />
     }
 
     render() {
         return (
-            <div className={styles.iconsContainer}>
-                <div className={styles.icons}>
-                    <div>
-                        <button
-                            onClick={this.handleCommentIconBtnClick}
-                            className={styles.commentIcon}
-                        />
-                        {this.state.showCommentBox && (
-                            <Tooltip position="bottom">
-                                <CommentBoxContainer env="inpage" />
-                            </Tooltip>
-                        )}
-                    </div>
-                    <div>
-                        <button
-                            onClick={() => {
-                                this.setState(prevState => ({
-                                    showTagsPicker: !prevState.showTagsPicker,
-                                }))
-                            }}
-                            className={styles.tagIcon}
-                        />
-                        {this.state.showTagsPicker && (
-                            <Tooltip position="bottom">
-                                {this.renderTagsManager()}
-                            </Tooltip>
-                        )}
-                    </div>
-                </div>
-            </div>
+            <ActionBarItems
+                url={this.props.url}
+                commentBox={this.renderCommentBox()}
+                tagManager={this.renderTagsManager()}
+                collectionsManager={this.renderCollectionsManager()}
+                toggleBookmark={this.props.toggleBookmark}
+            />
         )
     }
 }

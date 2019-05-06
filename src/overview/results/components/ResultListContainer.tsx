@@ -290,29 +290,24 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     handleTagBtnClick: index => event => {
         event.preventDefault()
-        event.stopPropagation()
         dispatch(acts.showTags(index))
     },
     handleCommentBtnClick: ({ url, title }, index) => event => {
         event.preventDefault()
-        event.stopPropagation()
         dispatch(acts.setActiveSidebarIndex(index))
         dispatch(sidebarActs.openSidebar({ url, title, forceFetch: true }))
     },
     handleToggleBm: ({ url }, index) => event => {
         event.preventDefault()
-        event.stopPropagation()
         dispatch(acts.toggleBookmark(url, index))
     },
     handleTrashBtnClick: ({ url }, index) => event => {
         event.preventDefault()
-        event.stopPropagation()
         dispatch(deleteConfActs.show(url, index))
     },
     handleScrollPagination: args => dispatch(acts.getMoreResults()),
     handlePillClick: tag => event => {
         event.preventDefault()
-        event.stopPropagation()
         dispatch(filterActs.toggleTagFilter(tag))
     },
     addTag: resultIndex => tag => dispatch(acts.addTag(tag, resultIndex)),
@@ -322,6 +317,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
     handleCrossRibbonClick: ({ url }) => event => {
         event.preventDefault()
+        event.stopPropagation()
         dispatch(listActs.delPageFromList(url))
         dispatch(acts.hideResultItem(url))
     },

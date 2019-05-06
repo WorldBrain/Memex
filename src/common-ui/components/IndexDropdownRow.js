@@ -37,15 +37,26 @@ class IndexDropdownRow extends PureComponent {
 
     componentDidMount() {
         this.ensureVisible()
+        this.ref.addEventListener('click', this.handleClick)
+        if (this.excRef) {
+            this.excRef.addEventListener('click', this.handleExcClick)
+        }
         this.ref.addEventListener('mouseenter', this.handleMouseEnter)
         this.ref.addEventListener('mouseleave', this.handleMouseLeave)
     }
 
     componentDidUpdate() {
+        if (this.excRef) {
+            this.excRef.addEventListener('click', this.handleExcClick)
+        }
         this.ensureVisible()
     }
 
     componentWillUnmount() {
+        this.ref.removeEventListener('click', this.handleClick)
+        if (this.excRef) {
+            this.excRef.removeEventListener('click', this.handleExcClick)
+        }
         this.ref.removeEventListener('mouseenter', this.handleMouseEnter)
         this.ref.removeEventListener('mouseleave', this.handleMouseLeave)
     }
@@ -60,6 +71,15 @@ class IndexDropdownRow extends PureComponent {
         this.setState({
             displayExcIcon: false,
         })
+    }
+
+    handleClick = e => {
+        !this.props.excActive && this.props.onClick()
+    }
+
+    handleExcClick = e => {
+        e.stopPropagation()
+        this.props.onExcClick()
     }
 
     // Scroll with key navigation
@@ -84,10 +104,6 @@ class IndexDropdownRow extends PureComponent {
                     [styles.isNew]: this.props.isNew,
                     [styles.isUser]: this.props.source === 'user',
                 })}
-                onClick={e => {
-                    e.stopPropagation()
-                    !this.props.excActive && this.props.onClick()
-                }}
             >
                 <span
                     className={cx(styles.isNewNoteInvisible, {
@@ -120,10 +136,7 @@ class IndexDropdownRow extends PureComponent {
                                 position="left"
                             >
                                 <span
-                                    onClick={e => {
-                                        e.stopPropagation()
-                                        this.props.onExcClick()
-                                    }}
+                                    ref={ref => (this.excRef = ref)}
                                     className={cx({
                                         [styles.excludeInactive]:
                                             this.state.displayExcIcon &&

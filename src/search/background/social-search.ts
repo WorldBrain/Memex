@@ -3,8 +3,10 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import intersection from 'lodash/fp/intersection'
 
 import { SocialSearchParams } from './types'
-import { Tweet, SocialPage } from 'src/social-integration/types'
+import { Tweet, SocialPage, User } from 'src/social-integration/types'
 import SocialStorage from 'src/social-integration/background/storage'
+import { FilteredURLsManager } from 'src/search/search/filters'
+import { FilteredURLs, PageResultsMap } from '..'
 
 export class SocialSearchPlugin extends StorageBackendPlugin<
     DexieStorageBackend
@@ -20,97 +22,79 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         )
     }
 
-    private async filterByBookmarks(urls: string[]) {
-        return this.backend.dexieInstance
-            .table<any, string>('bookmarks')
-            .where('url')
-            .anyOf(urls)
-            .primaryKeys()
-    }
-
-    private async filterByTags(urls: string[], params: SocialSearchParams) {
-        const tagsExc =
-            params.tagsExc && params.tagsExc.length
-                ? new Set(params.tagsExc)
-                : null
-        const tagsInc =
-            params.tagsInc && params.tagsInc.length
-                ? new Set(params.tagsInc)
-                : null
-
-        let tagsForUrls = new Map<string, string[]>()
-
-        await this.backend.dexieInstance
-            .table<any, [string, string]>(SocialStorage.TAGS_COLL)
-            .where('url')
-            .anyOf(urls)
-            .eachPrimaryKey(([tag, url]) => {
-                const curr = tagsForUrls.get(url) || []
-                tagsForUrls.set(url, [...curr, tag])
-            })
-
-        if (tagsExc) {
-            tagsForUrls = new Map(
-                [...tagsForUrls].filter(([, tags]) =>
-                    tags.some(tag => !tagsExc.has(tag)),
-                ),
-            )
+    private async listSearch(lists: string[]) {
+        if (!lists || !lists.length || !lists[0].length) {
+            return undefined
         }
 
-        if (tagsInc) {
-            tagsForUrls = new Map(
-                [...tagsForUrls].filter(([, tags]) =>
-                    tags.some(tag => tagsInc.has(tag)),
-                ),
-            )
-        }
+        const urls = new Set<string>()
 
-        return urls.filter(url => {
-            if (!tagsInc) {
-                // Make sure current url doesn't have any excluded tag
-                const urlTags = tagsForUrls.get(url) || []
-                return urlTags.some(tag => !tagsExc.has(tag))
-            }
-
-            return tagsForUrls.has(url)
-        })
-    }
-
-    private async filterByUsers(
-        urls: string[],
-        { usersInc, usersExc }: SocialSearchParams,
-    ) {
-        const inc =
-            usersInc && usersInc.length
-                ? new Set(usersInc.map(user => user.username))
-                : null
-        const exc = new Set(usersExc.map(user => user.username))
-
-        return urls.filter(url => {
-            const username = url.split('/')[1]
-            if (!inc) {
-                return !exc.has(username)
-            }
-
-            return inc.has(username) && !exc.has(username)
-        })
-    }
-
-    private async filterByCollections(
-        urls: string[],
-        params: SocialSearchParams,
-    ) {
-        const ids = params.collections.map(id => Number(id))
-
-        const pageEntries = await this.backend.dexieInstance
+        const listEntries = await this.backend.dexieInstance
             .table('pageListEntries')
             .where('listId')
-            .anyOf(ids)
+            .equals(Number(lists[0]))
+            .toArray()
+
+        listEntries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
+
+        return urls
+    }
+
+    private async tagSearch(tags: string[]) {
+        if (!tags || !tags.length) {
+            return undefined
+        }
+
+        const urls = new Set<string>()
+        await this.backend.dexieInstance
+            .table('tags')
+            .where('name')
+            .anyOf(tags)
+            .eachPrimaryKey(([name, url]) => urls.add(url))
+
+        return urls
+    }
+
+    private async userSearch(users: User[]) {
+        if (!users || !users.length) {
+            return undefined
+        }
+
+        const userIds = users.map(user => user.id)
+
+        const urls = await this.backend.dexieInstance
+            .table('tweets')
+            .where('userId')
+            .anyOf(userIds)
             .primaryKeys()
 
-        const pageUrls = new Set(pageEntries.map(([, url]) => url))
+        return new Set<string>([...urls])
+    }
 
-        return intersection(urls, [...pageUrls])
+    private async findFilteredUrls(params: SocialSearchParams) {
+        const [
+            incTagUrls,
+            excTagUrls,
+            incUserUrls,
+            excUserUrls,
+            listUrls,
+        ] = await Promise.all([
+            this.tagSearch(params.tagsInc),
+            this.tagSearch(params.tagsExc),
+            this.userSearch(params.usersInc),
+            this.userSearch(params.usersExc),
+            this.listSearch(params.collections),
+        ])
+
+        return new FilteredURLsManager({
+            incDomainUrls: undefined,
+            excDomainUrls: undefined,
+            incTagUrls,
+            excTagUrls,
+            listUrls,
+            incUserUrls,
+            excUserUrls,
+        })
     }
 
     private async mapUrlsToSocialPages(
@@ -126,35 +110,14 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         // Ensure original order of input is kept
         const pageMap = new Map<string, SocialPage>()
-        urls.map(url => pageMap.set(url, socialUrlMap.get(url)))
+        urls.map(url => {
+            const socialPage = socialUrlMap.get(url)
+            if (socialPage !== undefined) {
+                pageMap.set(url, socialPage)
+            }
+        })
 
         return pageMap
-    }
-
-    private async filterResults(results: string[], params: SocialSearchParams) {
-        if (params.bookmarksOnly) {
-            results = await this.filterByBookmarks(results)
-        }
-
-        if (
-            (params.tagsInc && params.tagsInc.length) ||
-            (params.tagsExc && params.tagsExc.length)
-        ) {
-            results = await this.filterByTags(results, params)
-        }
-
-        if (params.collections && params.collections.length) {
-            results = await this.filterByCollections(results, params)
-        }
-
-        if (
-            (params.usersInc && params.usersInc.length) ||
-            (params.usersExc && params.usersExc.length)
-        ) {
-            results = await this.filterByUsers(results, params)
-        }
-
-        return results
     }
 
     private async queryTermsField(
@@ -202,13 +165,16 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         return intersected
     }
 
-    private async lookbackFromEndDate({
-        startDate = 0,
-        endDate = Date.now(),
-        skip = 0,
-        limit = 10,
-    }: SocialSearchParams) {
-        const latestVisits: Map<string, number> = new Map()
+    private async lookbackFromEndDate(
+        {
+            startDate = 0,
+            endDate = Date.now(),
+            skip = 0,
+            limit = 10,
+        }: SocialSearchParams,
+        filteredUrls: FilteredURLs,
+    ) {
+        const latestVisits: PageResultsMap = new Map()
 
         await this.backend.dexieInstance
             .table(SocialStorage.TWEETS_COLL)
@@ -222,7 +188,10 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .reverse()
             .until(() => latestVisits.size >= skip + limit)
             .each(tweet => {
-                if (!latestVisits.has(tweet.url)) {
+                if (
+                    !latestVisits.has(tweet.url) &&
+                    filteredUrls.isAllowed(tweet.url)
+                ) {
                     latestVisits.set(tweet.url, tweet.createdWhen.getTime())
                 }
             })
@@ -239,30 +208,137 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         return results
     }
 
+    private async lookbackBookmarksTime({
+        startDate = 0,
+        endDate = Date.now(),
+        skip = 0,
+        limit = 10,
+    }: Partial<SocialSearchParams>) {
+        let bmsExhausted = false
+        let results: PageResultsMap = new Map()
+        let upperBound = Date.now()
+
+        while (results.size < skip + limit && !bmsExhausted) {
+            const bms: PageResultsMap = new Map()
+
+            await this.backend.dexieInstance
+                .table('bookmarks')
+                .where('time')
+                .belowOrEqual(upperBound)
+                .reverse()
+                .until(() => bms.size >= skip + limit)
+                .each(({ time, url }) => bms.set(url, time))
+
+            if (bms.size < skip + limit) {
+                bmsExhausted = true
+            }
+
+            upperBound = Math.min(...bms.values()) - 1
+
+            results = new Map([
+                ...results,
+                ...[...bms].filter(
+                    ([, time]) => time >= startDate && time <= endDate,
+                ),
+            ])
+        }
+
+        return results
+    }
+
+    private async mapUrlsToLatestEvents(
+        { endDate, startDate, bookmarksOnly }: Partial<SocialSearchParams>,
+        urls: string[],
+    ) {
+        function attemptAdd(urlTimeMap: PageResultsMap, skipDateCheck = false) {
+            return (time: number, url: string) => {
+                const existing = urlTimeMap.get(url) || 0
+
+                if (
+                    existing > time ||
+                    (!skipDateCheck && endDate != null && endDate < time) ||
+                    (!skipDateCheck && startDate != null && startDate > time)
+                ) {
+                    return false
+                }
+
+                urlTimeMap.set(url, time)
+                return true
+            }
+        }
+
+        const latestBookmarks: PageResultsMap = new Map()
+        await this.backend.dexieInstance
+            .table('bookmarks')
+            .where('url')
+            .anyOf(urls)
+            .each(({ time, url }) =>
+                attemptAdd(latestBookmarks, bookmarksOnly)(time, url),
+            )
+
+        const latestVisits: PageResultsMap = new Map()
+        const urlsToCheck = bookmarksOnly ? [...latestBookmarks.keys()] : urls
+
+        const visitsPerPage = new Map<string, number>()
+
+        await this.backend.dexieInstance
+            .table(SocialStorage.TWEETS_COLL)
+            .where('url')
+            .anyOf(urlsToCheck)
+            .each(tweet =>
+                latestVisits.set(tweet.url, tweet.createdWhen.getTime()),
+            )
+
+        const latestEvents: PageResultsMap = new Map()
+        latestVisits.forEach(attemptAdd(latestEvents))
+        latestBookmarks.forEach(attemptAdd(latestEvents))
+
+        return latestEvents
+    }
+
+    private async groupLatestEventsByUrl(
+        params: SocialSearchParams,
+        filteredUrls: FilteredURLs,
+    ) {
+        return params.bookmarksOnly
+            ? this.lookbackBookmarksTime(params)
+            : this.lookbackFromEndDate(params, filteredUrls)
+    }
+
     async searchSocial(
         params: SocialSearchParams,
     ): Promise<Map<string, SocialPage>> {
-        let urlScoresMap: Map<string, number>
-        let filteredResults
+        let urlScoresMap: PageResultsMap
+        const filteredUrls = await this.findFilteredUrls(params)
 
-        if (!params.termsInc || !params.termsInc.length) {
-            urlScoresMap = await this.lookbackFromEndDate(params)
-            urlScoresMap = new Map(
-                [...urlScoresMap.entries()].sort(([, a], [, b]) => b - a),
-            )
-            filteredResults = await this.filterResults(
-                [...urlScoresMap.keys()],
+        if (
+            (!params.termsInc || !params.termsInc.length) &&
+            filteredUrls.isDataFiltered
+        ) {
+            urlScoresMap = await this.mapUrlsToLatestEvents(params, [
+                ...filteredUrls.include,
+            ])
+        } else if (!params.termsInc || !params.termsInc.length) {
+            urlScoresMap = await this.groupLatestEventsByUrl(
                 params,
+                filteredUrls,
             )
         } else {
             const termsSearchResults = await this.lookupTerms(params)
-            filteredResults = await this.filterResults(
-                termsSearchResults,
+            const fileredResults = termsSearchResults.filter(url =>
+                filteredUrls.isAllowed(url),
+            )
+            urlScoresMap = await this.mapUrlsToLatestEvents(
                 params,
+                fileredResults,
             )
         }
 
-        const results = filteredResults.slice(
+        urlScoresMap = new Map(
+            [...urlScoresMap.entries()].sort(([, a], [, b]) => b - a),
+        )
+
+        const results = [...urlScoresMap.keys()].slice(
             params.skip,
             params.skip + params.limit,
         )

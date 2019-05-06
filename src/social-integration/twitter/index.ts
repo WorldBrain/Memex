@@ -1,6 +1,6 @@
 import 'babel-polyfill'
 import { TwitterObserver } from '../observers'
-import SaveToMemex from './components/save-to-memex'
+import SaveToMemex from './components'
 import { injectCSS } from 'src/search-injection/dom'
 import { browser } from 'webextension-polyfill-ts'
 
