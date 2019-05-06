@@ -57,6 +57,21 @@ const handleSearchResult = (overwrite: boolean) => (
     state: State,
     payload: SearchResult,
 ): State => {
+    const commonState = {
+        resultsExhausted: payload.resultsExhausted,
+        totalCount: payload.totalCount,
+        isBadTerm: payload.isBadTerm,
+        isInvalidSearch: payload.isInvalidSearch,
+        isAnnotsSearch: payload.isAnnotsSearch,
+    }
+
+    if (state.searchType === 'social' && payload.docs.every(doc => !doc.user)) {
+        return {
+            ...state,
+            ...commonState,
+        }
+    }
+
     const results = overwrite
         ? payload.docs
         : [...state.results, ...payload.docs]
@@ -68,11 +83,7 @@ const handleSearchResult = (overwrite: boolean) => (
 
     return {
         ...state,
-        resultsExhausted: payload.resultsExhausted,
-        totalCount: payload.totalCount,
-        isBadTerm: payload.isBadTerm,
-        isInvalidSearch: payload.isInvalidSearch,
-        isAnnotsSearch: payload.isAnnotsSearch,
+        ...commonState,
         results,
         annotsByDay,
     }
