@@ -38,6 +38,7 @@ interface Props {
     searchValue: string
     isCommentSaved: boolean
     commentText: string
+    shortcutsData?: ShortcutElData[]
     tagManager: ReactNode
     collectionsManager: ReactNode
     openSidebar: (args: any) => void
@@ -57,8 +58,10 @@ interface Props {
 }
 
 class Ribbon extends Component<Props> {
+    static defaultProps = { shortcutsData: shortcuts }
+
     private keyboardShortcuts: KeyboardShortcuts
-    private shortcutsData?: Map<string, ShortcutElData>
+    private shortcutsData: Map<string, ShortcutElData>
     private openOverviewTabRPC
     private openOptionsTabRPC
     private ribbonRef: HTMLElement
@@ -68,13 +71,14 @@ class Ribbon extends Component<Props> {
 
     constructor(props: Props) {
         super(props)
-        this.shortcutsData = new Map()
-        shortcuts.forEach(s => {
-            this.shortcutsData.set(s.name, s)
-        })
+        this.shortcutsData = new Map(props.shortcutsData.map(s => [
+            s.name,
+            s,
+        ]) as [string, ShortcutElData][])
         this.openOverviewTabRPC = remoteFunction('openOverviewTab')
         this.openOptionsTabRPC = remoteFunction('openOptionsTab')
     }
+
     async componentDidMount() {
         this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
         this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
@@ -166,7 +170,7 @@ class Ribbon extends Component<Props> {
 
         let source = elData.tooltip
 
-        if (name === 'createBookmark') {
+        if (['createBookmark', 'toggleSidebar'].includes(name)) {
             source = this.props.isBookmarked
                 ? elData.toggleOff
                 : elData.toggleOn
