@@ -1,18 +1,14 @@
 import appendReactDOM from 'src/social-integration/append-react-dom'
+import { EventEmitter } from 'events'
+import { getTweetInfo } from './get-tweet-data'
 
 export default class TwitterObserver {
     private observer: MutationObserver
     private observerConfig: MutationObserverInit
-    private component: React.ReactNode
+    public events: EventEmitter
 
-    constructor({
-        document,
-        component,
-    }: {
-        document: Document
-        component: React.ReactNode
-    }) {
-        this.component = component
+    constructor({ document }: { document: Document }) {
+        this.events = new EventEmitter()
 
         this.observerConfig = {
             childList: true,
@@ -30,7 +26,12 @@ export default class TwitterObserver {
                     if (!tweets.length) {
                         return
                     }
-                    Array.from(tweets, this.addButton)
+                    tweets.forEach(element =>
+                        this.events.emit('newTweet', {
+                            tweet: getTweetInfo(element),
+                            element,
+                        }),
+                    )
                 }
             })
         })
@@ -38,16 +39,29 @@ export default class TwitterObserver {
         this.observer.observe(document, this.observerConfig)
     }
 
-    private addButton = element => {
-        const actionList = element.querySelector('.ProfileTweet-actionList')
-        if (actionList) {
-            actionList.addEventListener('click', e => e.stopPropagation())
-            appendReactDOM(this.component, actionList, { element })
-            element.classList.add('MemexAdded')
-        }
-    }
-
     public stop() {
         this.observer.disconnect()
     }
+}
+
+export const addPostButton = ({
+    target,
+    element,
+    destroy,
+}: {
+    target: Element
+    element: Element
+    destroy: () => void
+}) => {
+    const actionList = element.querySelector('.ProfileTweet-actionList')
+    if (!actionList) {
+        return
+    }
+
+    actionList.addEventListener('click', e => e.stopPropagation())
+
+    destroy()
+
+    actionList.appendChild(target)
+    element.classList.add('MemexAdded')
 }

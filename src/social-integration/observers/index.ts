@@ -1,1 +1,1 @@
-export { default as TwitterObserver } from './twitter-observer'
+export { default as TwitterObserver, addPostButton } from './twitter-observer'
