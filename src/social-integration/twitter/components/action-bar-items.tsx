@@ -9,6 +9,7 @@ interface Props {
     tagManager: ReactNode
     collectionsManager: ReactNode
     commentBox: ReactNode
+    isCommentSaved: boolean
     toggleBookmark: (url: string, isBookmarked: boolean) => void
 }
 
@@ -107,6 +108,19 @@ class ActionBarItems extends Component<Props, State> {
                         {this.state.showCommentBox && (
                             <Tooltip position="bottom">
                                 {this.props.commentBox}
+                            </Tooltip>
+                        )}
+                        {this.props.isCommentSaved && (
+                            <Tooltip
+                                position="left"
+                                itemClass={styles.commentSaved}
+                            >
+                                <div className={styles.saveBox}>
+                                    <span className={styles.saveIcon} />
+                                    <span className={styles.saveText}>
+                                        Saved!
+                                    </span>
+                                </div>
                             </Tooltip>
                         )}
                     </div>

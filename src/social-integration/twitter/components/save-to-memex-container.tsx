@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import { MapDispatchToProps } from 'src/util/types'
-import RootState from 'src/social-integration/types'
+import RootState, { Tweet } from 'src/social-integration/types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import appendReactDOM from 'src/social-integration/append-react-dom'
 import { TagHolder } from 'src/common-ui/components'
@@ -16,6 +16,8 @@ import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import * as acts from 'src/social-integration/actions'
 import ActionBar from './action-bar'
 import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import { selectors as commentBox } from 'src/sidebar-overlay/comment-box'
+import normalizeUrl from 'src/util/encode-url-for-id'
 
 import cx from 'classnames'
 
@@ -26,6 +28,7 @@ export interface StateProps {
     initTagSuggs: string[]
     collections: PageList[]
     initCollSuggs: PageList[]
+    isCommentSaved: boolean
 }
 
 export interface DispatchProps {
@@ -42,6 +45,7 @@ export interface DispatchProps {
 
 interface OwnProps {
     element: Element
+    tweet: Tweet
     url: string
 }
 
@@ -83,7 +87,7 @@ class SaveToMemexContainer extends Component<Props, State> {
 
     private attachTagHolder() {
         if (
-            window.location.href === this.props.url &&
+            normalizeUrl(window.location.href) === this.props.url &&
             !this.state.setTagHolder
         ) {
             const tweetFooter = this.props.element.querySelector(
@@ -173,6 +177,7 @@ const mapStateToProps: MapStateToProps<
     initTagSuggs: tags.initTagSuggestions(state),
     collections: collections.collections(state),
     initCollSuggs: collections.initCollSuggestions(state),
+    isCommentSaved: commentBox.isCommentSaved(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<
@@ -183,7 +188,7 @@ const mapDispatchToProps: MapDispatchToProps<
     onInit: () => dispatch(acts.initState(props.url)),
     toggleBookmark: (url, isBookmarked) =>
         dispatch(acts.toggleBookmark(url, isBookmarked)),
-    saveTweet: () => dispatch(acts.saveTweet(props.element)),
+    saveTweet: () => dispatch(acts.saveTweet(props.tweet)),
     setAnnotationsManager: annotationsManager =>
         dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     setPage: (page: Page) => dispatch(sidebarActs.setPage(page)),

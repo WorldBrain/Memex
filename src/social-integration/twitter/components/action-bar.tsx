@@ -75,6 +75,7 @@ class ActionBar extends Component<Props> {
         return (
             <ActionBarItems
                 url={this.props.url}
+                isCommentSaved={this.props.isCommentSaved}
                 commentBox={this.renderCommentBox()}
                 tagManager={this.renderTagsManager()}
                 collectionsManager={this.renderCollectionsManager()}

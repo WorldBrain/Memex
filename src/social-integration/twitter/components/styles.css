@@ -65,3 +65,29 @@
 .collIcon {
     background-image: url('/img/collections_add.svg');
 }
+
+.commentSaved {
+    border-radius: 50px;
+    border: 1px solid #5cd9a6;
+    width: 100px;
+    height: 35px;
+}
+
+.saveBox {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.saveIcon {
+    background-image: url('/img/saveIcon.svg');
+    width: 35px;
+    height: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.saveText {
+    font-weight: 600;
+    margin-left: 10px;
+}
