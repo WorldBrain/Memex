@@ -1,5 +1,7 @@
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { browser } from 'webextension-polyfill-ts'
+
+import { PDF_VIEWER_URL } from 'src/constants'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import normalize from 'src/util/encode-url-for-id'
 
 /* eslint eqeqeq: 0 */
@@ -19,9 +21,7 @@ export async function setPdfFingerprintForURL(url, fingerprint) {
         setLocalStorage(normalize(url), fingerprint),
         setLocalStorage(
             normalize(
-                browser.extension.getURL(
-                    `web/viewer.html?file=${encodeURI(url)}`,
-                ),
+                browser.extension.getURL(PDF_VIEWER_URL + encodeURI(url)),
             ),
             fingerprint,
         ),

@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { browser } from 'webextension-polyfill-ts'
 
+import { PDF_VIEWER_URL } from 'src/constants'
 import Button from '../../components/Button'
 
 const styles = require('./AnnotatePDFButton.css')
@@ -14,7 +15,7 @@ export default class AnnotatePDFButton extends PureComponent<Props> {
         e.preventDefault()
         browser.tabs.query({ active: true }).then(tabs => {
             browser.tabs.update(tabs[0].id, {
-                url: `web/viewer.html?file=${encodeURI(this.props.pdfURL)}`,
+                url: PDF_VIEWER_URL + encodeURI(this.props.pdfURL),
             })
         })
     }

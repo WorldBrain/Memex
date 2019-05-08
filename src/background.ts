@@ -19,6 +19,7 @@ import BackgroundScript from './background-script'
 import alarms from './background-script/alarms'
 import TagsBackground from './tags/background'
 import ActivityLoggerBackground from './activity-logger/background'
+import { PDF_VIEWER_URL } from 'src/constants'
 
 // Features that auto-setup
 import './analytics/background'
@@ -119,7 +120,7 @@ window['tabMan'] = activityLogger.tabManager
 browser.runtime.onMessage.addListener((msg, sender) => {
     if (msg.request === 'open-pdf-viewer') {
         browser.tabs.update(sender.tab.id, {
-            url: `web/viewer.html?file=${encodeURI(sender.tab.url)}`,
+            url: PDF_VIEWER_URL + encodeURI(sender.tab.url),
         })
     }
 })
