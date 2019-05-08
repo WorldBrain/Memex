@@ -6,8 +6,7 @@ import normalize from 'src/util/encode-url-for-id'
 
 /* eslint eqeqeq: 0 */
 export default async function getPdfFingerprint(pdfURL) {
-    const PDFJS = require('../../build/pdf')
-    PDFJS.GlobalWorkerOptions.workerSrc = '../../build/pdf.worker.js'
+    const PDFJS = require('pdfjs-dist')
     try {
         const pdf = await PDFJS.getDocument(pdfURL)
         return pdf.fingerprint

@@ -45,8 +45,4 @@ export const copyPatterns = [
         from: 'src/pdf-viewer',
         to: './pdf-viewer',
     },
-    {
-        from: 'src/build',
-        to: './build',
-    },
 ]

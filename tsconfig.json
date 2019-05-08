@@ -33,11 +33,5 @@
         "lib": ["es2017", "dom", "dom.iterable", "esnext.asynciterable"]
     },
     "include": ["./src/**/*"],
-    "exclude": [
-        "node_modules",
-        "./src/**/*.js",
-        "./src/**/*.jsx",
-        "src/build",
-        "src/web"
-    ]
+    "exclude": ["node_modules", "./src/**/*.js", "./src/**/*.jsx"]
 }
