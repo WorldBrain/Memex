@@ -3,7 +3,7 @@ import { User } from 'src/social-integration/types'
 
 export interface AnnotPage {
     url: string
-    title: string
+    title?: string
     hasBookmark: boolean
     /** Object URL to the in-memory location of the assoc. screenshot. */
     screenshot?: string

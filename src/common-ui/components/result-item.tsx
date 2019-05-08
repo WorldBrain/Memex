@@ -48,7 +48,7 @@ class ResultItem extends PureComponent<Props> {
         return `http://${this.props.url}`
     }
 
-    get environment() {
+    get environment() {
         if (this.props.isOverview) {
             return 'overview'
         } else {
@@ -102,7 +102,8 @@ class ResultItem extends PureComponent<Props> {
                 )}
                 <div
                     className={cx(styles.rootContainer, {
-                        [styles.tweetRootContainer]: this.props.isSocial,
+                        [styles.tweetRootContainer]:
+                            this.props.isSocial || this.props.user,
                         [styles.rootContainerOverview]: this.props.isOverview,
                         [styles.isSidebarOpen]: this.props
                             .isResponsibleForSidebar,
@@ -117,7 +118,7 @@ class ResultItem extends PureComponent<Props> {
                         onClick={this.handleClickOpenNewTab(this.hrefToPage)}
                         draggable
                     >
-                        {this.props.isSocial ? (
+                        {this.props.isSocial || this.props.user ? (
                             <SocialResultItem {...this.props} />
                         ) : (
                             <PageResultItem {...this.props} />

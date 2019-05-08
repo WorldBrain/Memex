@@ -1,4 +1,3 @@
-import appendReactDOM from 'src/social-integration/append-react-dom'
 import { EventEmitter } from 'events'
 import { getTweetInfo } from './get-tweet-data'
 
@@ -57,8 +56,6 @@ export const addPostButton = ({
     if (!actionList) {
         return
     }
-
-    actionList.addEventListener('click', e => e.stopPropagation())
 
     destroy()
 

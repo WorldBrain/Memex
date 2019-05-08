@@ -29,6 +29,8 @@ twitterObserver.events.on(
         )
         target.setAttribute('style', 'display:contents')
 
+        target.addEventListener('click', e => e.stopPropagation())
+
         const destroy = () => {
             const btn = element.querySelector('#memexButton')
 

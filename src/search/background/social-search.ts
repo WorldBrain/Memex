@@ -12,6 +12,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
     static SEARCH_OP_ID = 'memex:dexie.searchSocial'
+    static MAP_URLS_OP_ID = 'memex:dexie.mapUrlsToSocialPages'
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
@@ -19,6 +20,11 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         backend.registerOperation(
             SocialSearchPlugin.SEARCH_OP_ID,
             this.searchSocial.bind(this),
+        )
+
+        backend.registerOperation(
+            SocialSearchPlugin.MAP_URLS_OP_ID,
+            this.mapUrlsToSocialPages.bind(this),
         )
     }
 
@@ -108,7 +114,6 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .anyOf(urls)
             .each(socialPage => socialUrlMap.set(socialPage.url, socialPage))
 
-        // Ensure original order of input is kept
         const pageMap = new Map<string, SocialPage>()
         urls.map(url => {
             const socialPage = socialUrlMap.get(url)

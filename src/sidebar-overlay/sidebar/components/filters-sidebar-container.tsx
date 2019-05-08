@@ -5,10 +5,12 @@ import {
     acts as searchBarActs,
     selectors as searchBar,
 } from 'src/overview/search-bar'
+import { selectors as results } from 'src/overview/results'
 import FiltersSidebar from './filters-sidebar'
 
 interface StateProps {
     showClearFiltersBtn: boolean
+    isSocialSearch: boolean
 }
 
 interface DispatchProps {
@@ -31,6 +33,7 @@ const mapStateToProps: MapStateToProps<
     OwnProps,
     RootState
 > = state => ({
+    isSocialSearch: results.isSocialSearch(state),
     showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
 })
 

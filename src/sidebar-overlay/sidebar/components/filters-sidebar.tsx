@@ -90,9 +90,14 @@ class FiltersSidebar extends Component<Props, State> {
                     <div className={styles.filterDiv}>
                         <TagsFilter tooltipPosition="inpage" env="inpage" />
                     </div>
-                    <div className={styles.filterDiv}>
-                        <DomainsFilter tooltipPosition="inpage" env="inpage" />
-                    </div>
+                    {!this.props.isSocialSearch && (
+                        <div className={styles.filterDiv}>
+                            <DomainsFilter
+                                tooltipPosition="inpage"
+                                env="inpage"
+                            />
+                        </div>
+                    )}
                     <div className={styles.filterDiv}>
                         <UsersFilter tooltipPosition="inpage" env="inpage" />
                     </div>

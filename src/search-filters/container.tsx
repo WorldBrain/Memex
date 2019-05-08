@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react'
-import { connect } from 'react-redux'
+import { connect, MapStateToProps } from 'react-redux'
 import { MapDispatchToProps } from 'src/util/types'
 import { RootState } from 'src/options/types'
-
+import { selectors as results } from 'src/overview/results'
 import {
     SearchFilters,
     BookmarkFilter,
@@ -15,7 +15,9 @@ import {
 
 import * as actions from './actions'
 
-interface StateProps {}
+interface StateProps {
+    isSocialSearch: boolean
+}
 
 interface DispatchProps {
     fetchSuggestedTags: () => void
@@ -45,9 +47,12 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
         <TagsFilter tooltipPosition="bottom" env="overview" />
     )
 
-    renderDomainFilter = () => (
-        <DomainsFilter tooltipPosition="bottom" env="overview" />
-    )
+    renderDomainFilter() {
+        if (this.props.isSocialSearch) {
+            return null
+        }
+        return <DomainsFilter tooltipPosition="bottom" env="overview" />
+    }
 
     renderBookmarkFilter = () => <BookmarkFilter />
 
@@ -74,6 +79,12 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
     }
 }
 
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+    state,
+): StateProps => ({
+    isSocialSearch: results.isSocialSearch(state),
+})
+
 const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps,
@@ -86,6 +97,6 @@ const mapDispatchToProps: MapDispatchToProps<
 })
 
 export default connect(
-    null,
+    mapStateToProps,
     mapDispatchToProps,
 )(SearchFiltersContainer)

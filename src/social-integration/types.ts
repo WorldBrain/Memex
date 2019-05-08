@@ -23,10 +23,10 @@ export interface User {
 }
 
 export interface Tweet {
-    id: string
-    userId: string
-    createdAt: number
-    text: string
+    id?: string
+    userId?: string
+    createdAt?: number
+    text?: string
     url: string
     hashtags?: Array<string>
     createdWhen?: Date
@@ -38,4 +38,5 @@ export interface Tweet {
 
 export interface SocialPage extends Tweet {
     hasBookmark?: boolean
+    annotsCount?: number
 }
