@@ -25,7 +25,7 @@ class ActionBar extends Component<Props> {
     }
 
     componentDidMount() {
-        this.props.onInit()
+        this.props.onInit(this.props.url)
         this.props.setAnnotationsManager(this.annotationsManager)
     }
 

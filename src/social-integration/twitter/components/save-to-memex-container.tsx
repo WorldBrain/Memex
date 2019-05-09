@@ -32,7 +32,7 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
-    onInit: () => void
+    onInit: (url: string) => void
     toggleBookmark: (url: string, isBookmarked: boolean) => void
     saveTweet: () => void
     setAnnotationsManager: (annotationsManager: AnnotationsManager) => void
@@ -45,8 +45,8 @@ export interface DispatchProps {
 
 interface OwnProps {
     element: Element
-    tweet: Tweet
-    url: string
+    tweet?: Tweet
+    url?: string
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -60,17 +60,25 @@ interface State {
 
 class SaveToMemexContainer extends Component<Props, State> {
     private memexBtnRef: HTMLButtonElement
+    private url: string
 
-    state: State = {
-        isMouseInside: false,
-        saved: false,
-        setTagHolder: false,
-        tags: [],
+    constructor(props: Props) {
+        super(props)
+        this.url =
+            'twitter.com' +
+            this.props.element.getAttribute('data-permalink-path')
+
+        this.state = {
+            isMouseInside: false,
+            saved: false,
+            setTagHolder: false,
+            tags: [],
+        }
     }
 
     async componentDidMount() {
         this.memexBtnRef.addEventListener('click', this.saveTweet)
-        const pageTags = await remoteFunction('fetchPageTags')(this.props.url)
+        const pageTags = await remoteFunction('fetchPageTags')(this.url)
         this.setState(state => ({
             tags: pageTags,
         }))
@@ -87,7 +95,7 @@ class SaveToMemexContainer extends Component<Props, State> {
 
     private attachTagHolder() {
         if (
-            normalizeUrl(window.location.href) === this.props.url &&
+            normalizeUrl(window.location.href) === normalizeUrl(this.url) &&
             !this.state.setTagHolder
         ) {
             const tweetFooter = this.props.element.querySelector(
@@ -142,9 +150,10 @@ class SaveToMemexContainer extends Component<Props, State> {
             >
                 <button
                     ref={ref => (this.memexBtnRef = ref)}
-                    className={cx("ProfileTweet-actionButton u-textUserColorHover js-actionButton", 
+                    className={cx(
+                        'ProfileTweet-actionButton u-textUserColorHover js-actionButton',
                         styles.actionButton,
-                        )}
+                    )}
                     type="button"
                     data-nav="share_tweet_to_memex"
                 >
@@ -164,7 +173,9 @@ class SaveToMemexContainer extends Component<Props, State> {
                         <span className="u-hiddenVisually">Save To Memex</span>
                     </div>
                 </button>
-                {this.state.isMouseInside && <ActionBar {...this.props} />}
+                {this.state.isMouseInside && (
+                    <ActionBar {...this.props} url={this.url} />
+                )}
             </div>
         )
     }
@@ -187,10 +198,10 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps,
     RootState
 > = (dispatch, props) => ({
-    onInit: () => dispatch(acts.initState(props.url)),
+    onInit: url => dispatch(acts.initState(url)),
     toggleBookmark: (url, isBookmarked) =>
         dispatch(acts.toggleBookmark(url, isBookmarked)),
-    saveTweet: () => dispatch(acts.saveTweet(props.tweet)),
+    saveTweet: () => dispatch(acts.saveTweet(props.element)),
     setAnnotationsManager: annotationsManager =>
         dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     setPage: (page: Page) => dispatch(sidebarActs.setPage(page)),

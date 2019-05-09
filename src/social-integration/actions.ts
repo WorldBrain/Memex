@@ -2,6 +2,7 @@ import { Thunk, Tweet } from './types'
 import { acts as tagActs } from 'src/popup/tags-button'
 import { acts as collectionActs } from 'src/popup/collections-button'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { getTweetInfo } from './observers/get-tweet-data'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
@@ -41,8 +42,11 @@ export const toggleBookmark: (url: string, isBookmarked: boolean) => Thunk = (
     } catch (err) {}
 }
 
-export const saveTweet: (tweet: Tweet) => Thunk = tweet => async dispatch => {
+export const saveTweet: (
+    element: Element,
+) => Thunk = element => async dispatch => {
     try {
+        const tweet = getTweetInfo(element)
         const id = await addTweetRPC(tweet)
         return id
     } catch (err) {}

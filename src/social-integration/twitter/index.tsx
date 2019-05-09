@@ -18,40 +18,31 @@ const twitterObserver = new TwitterObserver({
     document,
 })
 
-twitterObserver.events.on(
-    'newTweet',
-    ({ tweet, element }: { tweet: Tweet; element: Element }) => {
-        const target = document.createElement('div')
+twitterObserver.events.on('newTweet', ({ element }: { element: Element }) => {
+    const target = document.createElement('div')
 
-        target.setAttribute('id', 'memexButton')
-        target.classList.add(
-            ...['ProfileTweet-action', 'ProfileTweet-action--stm'],
-        )
-        target.setAttribute('style', 'display:contents')
+    target.setAttribute('id', 'memexButton')
+    target.classList.add(...['ProfileTweet-action', 'ProfileTweet-action--stm'])
+    target.setAttribute('style', 'display:contents')
 
-        target.addEventListener('click', e => e.stopPropagation())
+    target.addEventListener('click', e => e.stopPropagation())
 
-        const destroy = () => {
-            const btn = element.querySelector('#memexButton')
+    const destroy = () => {
+        const btn = element.querySelector('#memexButton')
 
-            if (btn) {
-                btn.parentNode.removeChild(btn)
-            }
+        if (btn) {
+            btn.parentNode.removeChild(btn)
         }
+    }
 
-        ReactDOM.render(
-            <Provider store={store}>
-                <ErrorBoundary component={RuntimeError}>
-                    <SaveToMemexContainer
-                        element={element}
-                        tweet={tweet}
-                        url={tweet.url}
-                    />
-                </ErrorBoundary>
-            </Provider>,
-            target,
-        )
+    ReactDOM.render(
+        <Provider store={store}>
+            <ErrorBoundary component={RuntimeError}>
+                <SaveToMemexContainer element={element} />
+            </ErrorBoundary>
+        </Provider>,
+        target,
+    )
 
-        addPostButton({ target, element, destroy })
-    },
-)
+    addPostButton({ target, element, destroy })
+})
