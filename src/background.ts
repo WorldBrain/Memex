@@ -123,11 +123,3 @@ window['analytics'] = analytics
 window['logger'] = activityLogger
 window['tabMan'] = activityLogger.tabManager
 window['pdfViewer'] = pdfViewer
-
-browser.runtime.onMessage.addListener((msg, sender) => {
-    if (msg.request === 'open-pdf-viewer') {
-        browser.tabs.update(sender.tab.id, {
-            url: PDF_VIEWER_URL + encodeURI(sender.tab.url),
-        })
-    }
-})

@@ -1,14 +1,19 @@
-import { browser, Extension, Storage } from 'webextension-polyfill-ts'
+import { browser, Extension, Storage, Tabs } from 'webextension-polyfill-ts'
 import PDFJS from 'pdfjs-dist'
 
 import normalize from 'src/util/encode-url-for-id'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { PDFJS_WORKER_PATH } from '../constants'
+import { PDFJS_WORKER_PATH, PDF_VIEWER_URL } from '../constants'
 import { Metadata, PDFData } from './types'
+
+interface TabArg {
+    tab: Tabs.Tab
+}
 
 export interface Props {
     storageAPI?: Storage.Static
     extAPI?: Extension.Static
+    tabsAPI?: Tabs.Static
     pdfJs?: PDFJS
     pdfJsWorkerPath?: string
     normalizer?: typeof normalize
@@ -17,6 +22,7 @@ export interface Props {
 export default class PDFViewerBackground {
     private storageAPI: Storage.Static
     private extAPI: Extension.Static
+    private tabsAPI: Tabs.Static
     private pdfJs: PDFJS
     private pdfJsWorkerPath: string
     private urlNormalizer: typeof normalize
@@ -24,12 +30,14 @@ export default class PDFViewerBackground {
     constructor({
         storageAPI = browser.storage,
         extAPI = browser.extension,
+        tabsAPI = browser.tabs,
         pdfJs = PDFJS,
         pdfJsWorkerPath = PDFJS_WORKER_PATH,
         normalizer = normalize,
     }: Props) {
         this.storageAPI = storageAPI
         this.extAPI = extAPI
+        this.tabsAPI = tabsAPI
         this.pdfJs = pdfJs
         this.pdfJsWorkerPath = pdfJsWorkerPath
         this.urlNormalizer = normalizer
@@ -46,11 +54,16 @@ export default class PDFViewerBackground {
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable({
-            getPdfFingerprint: this.getPdfFingerprintForUrl.bind(this),
-            getPdfUrl: this.getPdfUrlForFingerprint.bind(this),
-            getPdfData: this.getPdfData.bind(this),
-        })
+        makeRemotelyCallable(
+            {
+                getPdfFingerprint: (_, url) =>
+                    this.getPdfFingerprintForUrl(url),
+                getPdfUrl: (_, print) => this.getPdfUrlForFingerprint(print),
+                getPdfData: (_, url) => this.getPdfData(url),
+                openPdfViewer: this.openPdfViewer.bind(this),
+            },
+            { insertExtraArg: true },
+        )
     }
 
     private async fetchPdfFingerprint(url: string) {
@@ -116,5 +129,11 @@ export default class PDFViewerBackground {
         const text = await this.getPdfText(pdf)
 
         return { ...metadata, text }
+    }
+
+    async openPdfViewer({ tab }: TabArg) {
+        this.tabsAPI.update(tab.id, {
+            url: PDF_VIEWER_URL + encodeURI(tab.url),
+        })
     }
 }
