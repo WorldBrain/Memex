@@ -8,7 +8,6 @@ export const PAGE_1 = {
         fullText: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         title: 'page 3 dummy',
     },
-    isPDF: false,
     pdfFingerprint: null,
 }
 export const PAGE_2 = {
@@ -17,7 +16,6 @@ export const PAGE_2 = {
         fullText: 'Lorem Ipsum is simply dummy text of the printing industry',
         title: 'page 2',
     },
-    isPDF: false,
     pdfFingerprint: null,
 }
 export const PAGE_3 = {
@@ -26,7 +24,6 @@ export const PAGE_3 = {
         fullText: 'the wild fox jumped over the hairy red hen',
         title: 'page',
     },
-    isPDF: false,
     pdfFingerprint: null,
 }
 export const PAGE_4 = { ...PAGE_3, url: 'https://test.com/tmp' }

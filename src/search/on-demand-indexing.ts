@@ -35,7 +35,7 @@ export const createPageFromTab = (getDb: () => Promise<Dexie>) => async ({
     }
 
     const pageData = await pipeline({
-        pageDoc: { ...analysisRes, url, isPDF: false, pdfFingerprint: null },
+        pageDoc: { ...analysisRes, url, pdfFingerprint: null },
         rejectNoContent: !stubOnly,
     })
 
