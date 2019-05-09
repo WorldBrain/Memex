@@ -16,7 +16,7 @@ import DragElement from 'src/overview/components/DragElement'
 import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
 import SearchTypeSwitch from './search-type-switch'
 import PageInfo from './page-info'
-import isPDFJSViewer from 'src/util/pdf-viewer'
+import { isPdfViewer } from 'src/pdf-viewer/util'
 
 const styles = require('./sidebar.css')
 
@@ -235,22 +235,20 @@ class Sidebar extends React.Component<Props, State> {
                                 <CommentBoxContainer env={env} />
                             </div>
                         )}
-                        {!isPDFJSViewer() &&
-                        window.location.href.endsWith('.pdf') ? (
-                            <button
-                                className={cx(styles.annotatePDFButton)}
-                                onClick={e => {
-                                    e.preventDefault()
-                                    browser.runtime.sendMessage({
-                                        request: 'open-pdf-viewer',
-                                    })
-                                }}
-                            >
-                                Annotate PDF
-                            </button>
-                        ) : (
-                            ''
-                        )}
+                        {!isPdfViewer() &&
+                            window.location.href.endsWith('.pdf') && (
+                                <button
+                                    className={cx(styles.annotatePDFButton)}
+                                    onClick={e => {
+                                        e.preventDefault()
+                                        browser.runtime.sendMessage({
+                                            request: 'open-pdf-viewer',
+                                        })
+                                    }}
+                                >
+                                    Annotate PDF
+                                </button>
+                            )}
                         <div
                             className={cx(styles.resultsContainer, {
                                 [styles.resultsContainerPage]:

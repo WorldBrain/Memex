@@ -1,6 +1,8 @@
 /* tslint:disable:no-shadowed-variable */
 import { createSelector } from 'reselect'
 
+import { isPdfViewer, getPdfUrlFromViewerUrl } from 'src/pdf-viewer/util'
+
 import State from './types'
 // NOTE: Any parent reducer will need to define state for the sidebar in a
 // property called `sidebar`.
@@ -60,3 +62,11 @@ export const shouldAppendLoader = createSelector(currentPage, page => page > 0)
 export const searchType = createSelector(sidebar, state => state.searchType)
 
 export const pageType = createSelector(sidebar, state => state.pageType)
+
+export const title = createSelector(page, state => state.title)
+export const url = createSelector(page, state => {
+    if (isPdfViewer(state.url)) {
+        return getPdfUrlFromViewerUrl(state.url)
+    }
+    return state.url
+})

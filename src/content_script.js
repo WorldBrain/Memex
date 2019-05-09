@@ -9,7 +9,7 @@ import 'src/direct-linking/content_script'
 import initRibbonAndSidebar from './sidebar-overlay/content_script'
 import 'src/backup/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
-import isPDFJSViewer from 'src/util/pdf-viewer'
+import { isPdfViewer } from 'src/pdf-viewer/util'
 
 const remoteFunctionRegistry = new RemoteFunctionRegistry()
 
@@ -23,6 +23,6 @@ const annotationsManager = new AnnotationsManager()
 initContentTooltip({ toolbarNotifications })
 initRibbonAndSidebar({ annotationsManager, toolbarNotifications })
 
-if (isPDFJSViewer()) {
+if (isPdfViewer()) {
     remoteFunction('toggleSidebarOverlay')()
 }
