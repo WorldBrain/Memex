@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events'
-import { getTweetInfo } from './get-tweet-data'
 
 export default class TwitterObserver {
     private observer: MutationObserver
@@ -27,7 +26,6 @@ export default class TwitterObserver {
                     }
                     tweets.forEach(element =>
                         this.events.emit('newTweet', {
-                            tweet: getTweetInfo(element),
                             element,
                         }),
                     )
