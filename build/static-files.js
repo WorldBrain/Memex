@@ -42,7 +42,7 @@ export const copyPatterns = [
         toType: 'template',
     },
     {
-        from: 'src/pdf-viewer',
-        to: './pdf-viewer',
+        from: 'src/pdf-viewer/index.{html,js,css}',
+        to: './pdf-viewer/index.[ext]',
     },
 ]
