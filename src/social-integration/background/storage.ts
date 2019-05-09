@@ -9,6 +9,7 @@ export interface SocialStorageProps {
     usersColl?: string
     tagsColl?: string
     bookmarksColl?: string
+    visitsColl?: string
 }
 
 export default class SocialStorage extends FeatureStorage {
@@ -16,11 +17,13 @@ export default class SocialStorage extends FeatureStorage {
     static USERS_COLL = 'users'
     static TAGS_COLL = 'tags'
     static BMS_COLL = 'bookmarks'
+    static VISTS_COLL = 'visits'
 
     private tweetsColl: string
     private usersColl: string
     private bookmarksColl: string
     private tagsColl: string
+    private visitsColl: string
 
     constructor({
         storageManager,
@@ -28,6 +31,7 @@ export default class SocialStorage extends FeatureStorage {
         usersColl = SocialStorage.USERS_COLL,
         tagsColl = SocialStorage.TAGS_COLL,
         bookmarksColl = SocialStorage.BMS_COLL,
+        visitsColl = SocialStorage.VISTS_COLL,
     }: SocialStorageProps) {
         super(storageManager)
 
@@ -35,6 +39,7 @@ export default class SocialStorage extends FeatureStorage {
         this.usersColl = usersColl
         this.tagsColl = tagsColl
         this.bookmarksColl = bookmarksColl
+        this.visitsColl = visitsColl
 
         this.storageManager.registry.registerCollection(this.tweetsColl, [
             {
@@ -85,6 +90,8 @@ export default class SocialStorage extends FeatureStorage {
         createdWhen = new Date(),
         ...rest
     }: Tweet) {
+        await this.addSocialVisit({ url, time: createdWhen.getTime() })
+
         const { object } = await this.storageManager
             .collection(this.tweetsColl)
             .createObject({ url, createdWhen, ...rest })
@@ -118,6 +125,20 @@ export default class SocialStorage extends FeatureStorage {
                 }),
             ),
         )
+    }
+
+    async addSocialVisit({
+        url,
+        time = Date.now(),
+    }: {
+        url: string
+        time?: number
+    }) {
+        return this.storageManager.collection(this.visitsColl).createObject({
+            url,
+            time,
+            pageType: 'social',
+        })
     }
 
     async delTweets(urls: string[]) {

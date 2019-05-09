@@ -182,17 +182,23 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         const latestVisits: PageResultsMap = new Map()
 
         await this.backend.dexieInstance
-            .table(SocialStorage.TWEETS_COLL)
-            .where('url')
-            .between('', String.fromCharCode(65535), true, true)
-            .each(tweet => {
+            .table('visits')
+            .where('[time+url]')
+            .between(
+                [startDate, ''],
+                [endDate, String.fromCharCode(65535)],
+                true,
+                true,
+            )
+            .reverse()
+            .until(() => latestVisits.size >= skip + limit)
+            .each(({ time, url, pageType }) => {
                 if (
-                    !latestVisits.has(tweet.url) &&
-                    filteredUrls.isAllowed(tweet.url) &&
-                    tweet.createdWhen >= new Date(startDate) &&
-                    tweet.createdWhen <= new Date(endDate)
+                    pageType === 'social' &&
+                    !latestVisits.has(url) &&
+                    filteredUrls.isAllowed(url)
                 ) {
-                    latestVisits.set(tweet.url, tweet.createdWhen.getTime())
+                    latestVisits.set(url, time)
                 }
             })
 
@@ -203,7 +209,11 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .between(startDate, endDate, true, true)
             .reverse()
             .until(() => latestBookmarks.size >= skip + limit)
-            .each(({ time, url }) => latestBookmarks.set(url, time))
+            .each(({ time, url, pageType }) => {
+                if (pageType === 'social') {
+                    latestBookmarks.set(url, time)
+                }
+            })
 
         const results: Map<string, number> = new Map()
         const addToMap = (time, url) => {
@@ -237,11 +247,38 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
                 .belowOrEqual(upperBound)
                 .reverse()
                 .until(() => bms.size >= skip + limit)
-                .each(({ time, url }) => bms.set(url, time))
+                .each(({ time, url, pageType }) => {
+                    if (pageType === 'social') {
+                        bms.set(url, time)
+                    }
+                })
 
             if (bms.size < skip + limit) {
                 bmsExhausted = true
             }
+
+            await Promise.all(
+                [...bms].map(async ([currentUrl, currentTime]) => {
+                    if (currentTime > endDate || currentTime < startDate) {
+                        let done = false
+                        await this.backend.dexieInstance
+                            .table('visits')
+                            .where('url')
+                            .equals(currentUrl)
+                            .reverse()
+                            .until(() => done)
+                            .eachPrimaryKey(([visitTime]) => {
+                                if (
+                                    visitTime >= startDate &&
+                                    visitTime <= endDate
+                                ) {
+                                    bms.set(currentUrl, visitTime)
+                                    done = true
+                                }
+                            })
+                    }
+                }),
+            )
 
             upperBound = Math.min(...bms.values()) - 1
 
@@ -288,16 +325,33 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const latestVisits: PageResultsMap = new Map()
         const urlsToCheck = bookmarksOnly ? [...latestBookmarks.keys()] : urls
+        const doneFlags = urlsToCheck.map(url => false)
 
-        const visitsPerPage = new Map<string, number>()
+        const visitsPerPage = new Map<string, number[]>()
 
-        await this.backend.dexieInstance
-            .table(SocialStorage.TWEETS_COLL)
+        const visits = await this.backend.dexieInstance
+            .table('visits')
             .where('url')
             .anyOf(urlsToCheck)
-            .each(tweet =>
-                latestVisits.set(tweet.url, tweet.createdWhen.getTime()),
-            )
+            .reverse()
+            .primaryKeys()
+
+        visits.forEach(([time, url]) => {
+            const current = visitsPerPage.get(url) || []
+            visitsPerPage.set(url, [...current, time])
+        })
+
+        urlsToCheck.forEach((url, i) => {
+            const currVisits = visitsPerPage.get(url) || []
+            // `currVisits` array assumed sorted latest first
+            currVisits.forEach(visit => {
+                if (doneFlags[i]) {
+                    return
+                }
+
+                doneFlags[i] = attemptAdd(latestVisits)(visit, url)
+            })
+        })
 
         const latestEvents: PageResultsMap = new Map()
         latestVisits.forEach(attemptAdd(latestEvents))
@@ -313,40 +367,6 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         return params.bookmarksOnly
             ? this.lookbackBookmarksTime(params)
             : this.lookbackFromEndDate(params, filteredUrls)
-    }
-
-    private async paginate(
-        results: string[],
-        { skip, limit }: SocialSearchParams,
-    ) {
-        const internalPageSize = limit * 2
-        const socialPages = new Map<string, SocialPage>()
-        const seenPages = new Set<string>()
-        let internalSkip = 0
-
-        while (socialPages.size < limit) {
-            const resSlice = results.slice(
-                internalSkip,
-                internalSkip + internalPageSize,
-            )
-
-            if (!resSlice.length) {
-                break
-            }
-
-            const pages = await this.mapUrlsToSocialPages(resSlice)
-
-            pages.forEach(page => {
-                seenPages.add(page.url)
-                if (socialPages.size !== limit && seenPages.size > skip) {
-                    socialPages.set(page.url, page)
-                }
-            })
-
-            internalSkip += internalPageSize
-        }
-
-        return socialPages
     }
 
     async searchSocial(
@@ -378,13 +398,12 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             )
         }
 
-        urlScoresMap = new Map(
-            [...urlScoresMap.entries()].sort(([, a], [, b]) => b - a),
-        )
+        const ids = [...urlScoresMap.entries()]
+            .sort(([, a], [, b]) => b - a)
+            .slice(params.skip, params.skip + params.limit)
 
-        const pages: Map<string, SocialPage> = await this.paginate(
-            [...urlScoresMap.keys()],
-            params,
+        const pages: Map<string, SocialPage> = await this.mapUrlsToSocialPages(
+            ids.map(([url]) => url),
         )
 
         return pages
