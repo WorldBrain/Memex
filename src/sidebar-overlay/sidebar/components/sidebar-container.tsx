@@ -17,7 +17,7 @@ import {
 } from 'src/overview/search-bar'
 import { actions as filterActs } from 'src/search-filters'
 
-interface StateProps {
+interface StateProps extends Page {
     isOpen: boolean
     isLoading: boolean
     needsWaypoint: boolean
@@ -31,7 +31,6 @@ interface StateProps {
     searchType: 'notes' | 'pages'
     searchValue: string
     showClearFiltersBtn: boolean
-    page: Page
 }
 
 interface DispatchProps {
@@ -157,7 +156,8 @@ const mapStateToProps: MapStateToProps<
     searchType: selectors.searchType(state),
     searchValue: searchBar.query(state),
     showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
-    page: selectors.page(state),
+    url: selectors.url(state),
+    title: selectors.title(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (

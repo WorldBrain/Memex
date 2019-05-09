@@ -20,7 +20,7 @@ import { isPdfViewer } from 'src/pdf-viewer/util'
 
 const styles = require('./sidebar.css')
 
-interface Props {
+interface Props extends Page {
     env: 'inpage' | 'overview'
     isOpen: boolean
     isLoading: boolean
@@ -33,7 +33,6 @@ interface Props {
     searchValue: string
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
-    page: Page
     pageType: 'page' | 'all'
     searchType: 'notes' | 'pages'
     closeSidebar: () => void
@@ -224,7 +223,8 @@ class Sidebar extends React.Component<Props, State> {
                                     <SearchTypeSwitch />
                                 </div>
                                 <PageInfo
-                                    page={this.props.page}
+                                    url={this.props.url}
+                                    title={this.props.title}
                                     isCurrentPage={this.isCurrentPageSearch}
                                     resetPage={this.props.resetPage}
                                 />

@@ -14,8 +14,8 @@ export const defaultState: State = {
     isOpen: false,
     isLoading: false,
     page: {
-        url: null,
-        title: null,
+        url: location.href,
+        title: document.title,
     },
     annotations: [],
     activeAnnotationUrl: null,
@@ -37,7 +37,10 @@ const setSidebarOpen = (state: boolean, isOpen: boolean) => isOpen
 
 const setIsLoading = (state: boolean, isLoading: boolean) => isLoading
 
-const setPage = (state: Page, page: Page) => page
+const setPage = (state: Page, next: Page) => ({
+    title: next.title || state.title,
+    url: next.url || state.url,
+})
 
 const setAnnotations = (state: Annotation[], annotations: Annotation[]) =>
     annotations

@@ -201,14 +201,14 @@ export default class DirectLinkingBackground {
     ) {
         url = url == null && tab != null ? tab.url : url
 
-        const annotations = url.endsWith('.pdf')
-            ? await this.annotationStorage.getAnnotationsByFingerprint(url)
-            : await this.annotationStorage.getAllAnnotationsByUrl({
-                  url: normalize(url),
-                  limit,
-                  skip,
-                  ...params,
-              })
+        const annotations = await this.annotationStorage.getAllAnnotationsByUrl(
+            {
+                url: normalize(url),
+                limit,
+                skip,
+                ...params,
+            },
+        )
 
         const annotResults = await Promise.all(
             annotations.map(

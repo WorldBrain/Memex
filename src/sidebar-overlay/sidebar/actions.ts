@@ -113,7 +113,7 @@ export const fetchAnnotations: () => Thunk = () => async (
 
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
-    const { url } = selectors.page(state)
+    const url = selectors.url(state)
 
     if (annotationsManager) {
         const annotations = await annotationsManager.fetchAnnotationsWithTags(
@@ -136,7 +136,7 @@ export const fetchMoreAnnotations: () => Thunk = () => async (
 
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
-    const { url } = selectors.page(state)
+    const url = selectors.url(state)
     const currentPage = selectors.currentPage(state)
 
     if (annotationsManager) {
@@ -166,7 +166,9 @@ export const createAnnotation: (
 ) => {
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
-    const { url, title } = selectors.page(state)
+    const title = selectors.title(state)
+    const url = selectors.url(state)
+
     const pdfFingerprint = await getPdfFingerprintRPC(url)
 
     if (annotationsManager) {
@@ -334,7 +336,7 @@ export const searchAnnotations: () => Thunk = () => async (
     dispatch(setIsLoading(true))
 
     const state = getState()
-    let { url } = selectors.page(state)
+    let url = selectors.url(state)
 
     url = url ? url : window.location.href
 

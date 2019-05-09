@@ -6,29 +6,27 @@ import cx from 'classnames'
 
 const styles = require('./page-info.css')
 
-interface Props {
-    page: Page
+interface Props extends Page {
     isCurrentPage: boolean
     resetPage: React.MouseEventHandler<HTMLButtonElement>
 }
 
 class PageInfo extends React.Component<Props> {
     get showPageInfo() {
-        const { url } = this.props.page
         return (
-            url &&
-            url !== normalizeUrl(window.location.href) &&
+            this.props.url &&
+            this.props.url !== normalizeUrl(location.href) &&
             this.props.isCurrentPage
         )
     }
 
     get hrefToPage() {
-        const { url } = this.props.page
-        return `https://${url}`
+        return this.props.url.startsWith('https://')
+            ? this.props.url
+            : `https://${this.props.url}`
     }
 
     render() {
-        const { url, title } = this.props.page
         return (
             <React.Fragment>
                 {this.showPageInfo && (
@@ -40,11 +38,19 @@ class PageInfo extends React.Component<Props> {
                             Go back
                         </button>
                         <div className={styles.pageInfo}>
-                            <a target="_blank" href={this.hrefToPage} className={styles.title}>
-                                {title}
+                            <a
+                                target="_blank"
+                                href={this.hrefToPage}
+                                className={styles.title}
+                            >
+                                {this.props.title}
                             </a>
-                            <a target="_blank" href={this.hrefToPage} className={styles.url}>
-                                {url}
+                            <a
+                                target="_blank"
+                                href={this.hrefToPage}
+                                className={styles.url}
+                            >
+                                {this.props.url}
                             </a>
                         </div>
                     </div>
