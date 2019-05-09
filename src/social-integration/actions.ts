@@ -38,7 +38,7 @@ export const toggleBookmark: (url: string, isBookmarked: boolean) => Thunk = (
 ) => async dispatch => {
     const bookmarkRPC = isBookmarked ? delBookmarkRPC : addBookmarkRPC
     try {
-        await bookmarkRPC({ url })
+        await bookmarkRPC({ url, pageType: 'social' })
     } catch (err) {}
 }
 

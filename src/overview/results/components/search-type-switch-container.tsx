@@ -34,6 +34,7 @@ const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = dispatch => ({
     handleSearchTypeClick: searchType => e => {
         e.preventDefault()
         dispatch(acts.setLoading(true))
+        dispatch(acts.resetSearchResult())
         dispatch(acts.setSearchType(searchType))
     },
     handleUnfoldAllClick: e => {
