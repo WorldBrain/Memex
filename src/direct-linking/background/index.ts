@@ -11,7 +11,7 @@ import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
-import { getPdfFingerprintForURL } from 'src/activity-logger/background/pdffingerprint'
+import PDFBackground from 'src/pdf-viewer/background'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -22,15 +22,19 @@ export default class DirectLinkingBackground {
     private annotationStorage: AnnotationStorage
     private sendAnnotation: AnnotationSender
     private requests: AnnotationRequests
+    private pdfBackground: PDFBackground
 
     constructor({
         storageManager,
         getDb,
+        pdfBackground,
     }: {
         storageManager: StorageManager
         getDb: () => Promise<Dexie>
+        pdfBackground: PDFBackground
     }) {
         this.backend = new DirectLinkingBackend()
+        this.pdfBackground = pdfBackground
 
         this.annotationStorage = new AnnotationStorage({
             storageManager,
@@ -232,8 +236,9 @@ export default class DirectLinkingBackground {
         const pageUrl: string = url == null ? tab.url : url
         const pageTitle = title == null ? tab.title : title
         const uniqueUrl = `${pageUrl}/#${Date.now()}`
+
         const pdfFingerprint = pageUrl.endsWith('.pdf')
-            ? await getPdfFingerprintForURL(pageUrl)
+            ? await this.pdfBackground.getPdfFingerprintForUrl(pageUrl)
             : null
 
         await this.annotationStorage.createAnnotation({

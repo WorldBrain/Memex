@@ -11,6 +11,8 @@ import { PageUrlsByDay } from './types'
 
 const mockEvent = { addListener: () => undefined }
 
+const mockPdfBg = { getPdfFingerprintForUrl: url => url }
+
 const countAnnots = res => {
     const results: PageUrlsByDay = res.docs[0]
     let count = 0
@@ -95,6 +97,7 @@ describe.skip('Annotations search', () => {
         annotsBg = new AnnotsBg({
             storageManager,
             getDb,
+            pdfBackground: mockPdfBg as any,
         })
 
         searchBg = new SearchBg({

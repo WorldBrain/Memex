@@ -9,6 +9,8 @@ import normalize from 'src/util/encode-url-for-id'
 import { Annotation } from 'src/direct-linking/types'
 import { AnnotSearchParams } from './types'
 
+const mockPdfBg = { getPdfFingerprintForUrl: url => url }
+
 const countAnnots = (res: Map<number, Map<string, Annotation[]>>) => {
     let count = 0
     for (const [, pageMap] of res) {
@@ -88,7 +90,11 @@ describe.skip('annots search plugin', () => {
 
     beforeEach(async () => {
         storageManager = initStorageManager()
-        annotsBg = new AnnotsBg({ storageManager, getDb })
+        annotsBg = new AnnotsBg({
+            storageManager,
+            getDb,
+            pdfBackground: mockPdfBg as any,
+        })
         customListsBg = new CustomListBg({ storageManager, getDb })
 
         await storageManager.finishInitialization()

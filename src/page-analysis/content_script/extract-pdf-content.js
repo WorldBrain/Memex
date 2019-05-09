@@ -3,7 +3,7 @@ import transformPageText from 'src/util/transform-page-text'
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData) {
     // Import PDF.js only when needed, as it is large.
-    require('pdfjs-dist') /* global PDFJS */
+    const PDFJS = require('pdfjs-dist')
 
     // Point PDF.js to its worker code, a static file in the extension.
     PDFJS.workerSrc = browser.extension.getURL('/lib/pdf.worker.min.js')

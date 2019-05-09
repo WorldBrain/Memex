@@ -11,6 +11,7 @@ import TabChangeListeners from './tab-change-listeners'
 import PageVisitLogger from './log-page-visit'
 import { CONCURR_TAB_LOAD } from '../constants'
 import NotificationBackground from 'src/notifications/background'
+import PDFBackground from 'src/pdf-viewer/background'
 
 export default class ActivityLoggerBackground {
     static SCROLL_UPDATE_FN = 'updateScrollState'
@@ -31,12 +32,14 @@ export default class ActivityLoggerBackground {
 
     constructor({
         storageManager,
+        pdfBackground,
         notifsBackground,
         tabsAPI = browser.tabs,
         runtimeAPI = browser.runtime,
         webNavAPI = browser.webNavigation,
     }: {
         storageManager: Storex
+        pdfBackground: PDFBackground
         notifsBackground: NotificationBackground
         tabsAPI?: Tabs.Static
         runtimeAPI?: Runtime.Static
@@ -49,6 +52,7 @@ export default class ActivityLoggerBackground {
 
         this.pageVisitLogger = new PageVisitLogger({
             tabManager: this.tabManager,
+            pdfBackground,
         })
         this.tabChangeListener = new TabChangeListeners({
             tabManager: this.tabManager,
