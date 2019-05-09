@@ -8,6 +8,7 @@
     height: 18px;
     width: 18px;
     cursor: pointer;
+    z-index: 3;
     border: none;
     vertical-align: bottom;
     background-size: 18px;
@@ -23,14 +24,28 @@
     margin-bottom: -6px;
 }
 
-.iconsContainer {
-    height: 36px;
-    width: 300px;
-    margin-bottom: -6px;
-    background-color: #fff;
-    position: relative;
+.iconsContainerTransparent {
+    background-color: transparent;
     z-index: 2;
-    display: inline-block;
+    position: absolute;
+    height: 50px;
+    width: 120px;
+    bottom: -30px;
+    left: 335px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.iconsContainer {
+    grid-template-columns: max-content;
+    height: 36px;
+    width: 120px;
+    background-color: #fff;
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 3px;
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
@@ -38,12 +53,21 @@
 
 .icons {
     display: flex;
+    outline: none;
+}
+
+.loadingSpinner {
+    width: fill-available;
 }
 
 .button {
-    height: 20px;
-    width: 20px;
-    margin-right: 15px;
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    height: 25px;
+    width: 25px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 18px;
+    outline: none;
 }
 
 .commentIcon {
@@ -66,6 +90,10 @@
     background-image: url('/img/collections_add.svg');
 }
 
+.actionButton {
+    z-index: 1;
+}
+
 .commentSaved {
     border-radius: 50px;
     border: 1px solid #5cd9a6;
@@ -85,6 +113,7 @@
     height: 35px;
     background-repeat: no-repeat;
     background-position: center;
+    outline: none;
 }
 
 .saveText {

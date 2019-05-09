@@ -8,6 +8,8 @@ import ActionBarItems from './action-bar-items'
 import { StateProps, DispatchProps } from './save-to-memex-container'
 import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 
+const styles = require('./styles.css')
+
 interface OwnProps {
     url: string
 }
@@ -73,14 +75,16 @@ class ActionBar extends Component<Props> {
 
     render() {
         return (
-            <ActionBarItems
-                url={this.props.url}
-                isCommentSaved={this.props.isCommentSaved}
-                commentBox={this.renderCommentBox()}
-                tagManager={this.renderTagsManager()}
-                collectionsManager={this.renderCollectionsManager()}
-                toggleBookmark={this.props.toggleBookmark}
-            />
+            <div className={styles.iconsContainerTransparent}>
+                <ActionBarItems
+                    url={this.props.url}
+                    isCommentSaved={this.props.isCommentSaved}
+                    commentBox={this.renderCommentBox()}
+                    tagManager={this.renderTagsManager()}
+                    collectionsManager={this.renderCollectionsManager()}
+                    toggleBookmark={this.props.toggleBookmark}
+                />
+            </div>
         )
     }
 }

@@ -126,7 +126,7 @@ class SaveToMemexContainer extends Component<Props, State> {
 
     private handleMouseLeave = () => {
         this.setState(state => ({
-            isMouseInside: false,
+            isMouseInside: true,
         }))
     }
 
@@ -142,7 +142,9 @@ class SaveToMemexContainer extends Component<Props, State> {
             >
                 <button
                     ref={ref => (this.memexBtnRef = ref)}
-                    className="ProfileTweet-actionButton u-textUserColorHover js-actionButton"
+                    className={cx("ProfileTweet-actionButton u-textUserColorHover js-actionButton", 
+                        styles.actionButton,
+                        )}
                     type="button"
                     data-nav="share_tweet_to_memex"
                 >

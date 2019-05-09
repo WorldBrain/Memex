@@ -3,6 +3,7 @@
 .textArea {
     composes: TextArea from '../../../common-ui/elements.css';
     min-height: 100px;
+    width: auto;
 
     &:focus {
         outline: none;

@@ -126,12 +126,14 @@ class ActionBarItems extends Component<Props, State> {
                     </div>
                     <div>
                         <button
-                            ref={ref => (this.bmBtnRef = ref)}
-                            className={cx(styles.button, {
-                                [styles.bookmark]: this.state.isBookmarked,
-                                [styles.notBookmark]: !this.state.isBookmarked,
-                            })}
+                            ref={ref => (this.collBtnRef = ref)}
+                            className={cx(styles.button, styles.collIcon)}
                         />
+                        {this.state.showCollPicker && (
+                            <Tooltip position="bottom">
+                                {this.props.collectionsManager}
+                            </Tooltip>
+                        )}
                     </div>
                     <div>
                         <button
@@ -146,14 +148,12 @@ class ActionBarItems extends Component<Props, State> {
                     </div>
                     <div>
                         <button
-                            ref={ref => (this.collBtnRef = ref)}
-                            className={cx(styles.button, styles.collIcon)}
+                            ref={ref => (this.bmBtnRef = ref)}
+                            className={cx(styles.button, {
+                                [styles.bookmark]: this.state.isBookmarked,
+                                [styles.notBookmark]: !this.state.isBookmarked,
+                            })}
                         />
-                        {this.state.showCollPicker && (
-                            <Tooltip position="bottom">
-                                {this.props.collectionsManager}
-                            </Tooltip>
-                        )}
                     </div>
                 </div>
             </div>
