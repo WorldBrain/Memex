@@ -30,8 +30,8 @@
     position: absolute;
     height: 50px;
     width: 120px;
-    bottom: -30px;
-    left: 335px;
+    bottom: -45px;
+    left: -51px;
     display: flex;
     align-items: flex-end;
 }
@@ -91,7 +91,7 @@
 }
 
 .actionButton {
-    z-index: 1;
+    z-index: 3;
 }
 
 .commentSaved {

@@ -134,7 +134,7 @@ class SaveToMemexContainer extends Component<Props, State> {
 
     private handleMouseLeave = () => {
         this.setState(state => ({
-            isMouseInside: true,
+            isMouseInside: false,
         }))
     }
 
@@ -172,10 +172,10 @@ class SaveToMemexContainer extends Component<Props, State> {
                         />
                         <span className="u-hiddenVisually">Save To Memex</span>
                     </div>
+                    {this.state.isMouseInside && (
+                        <ActionBar {...this.props} url={this.url} />
+                    )}
                 </button>
-                {this.state.isMouseInside && (
-                    <ActionBar {...this.props} url={this.url} />
-                )}
             </div>
         )
     }

@@ -27,7 +27,7 @@
 
 .logo {
 	composes: logo from 'src/common-ui/icons.css';
-	width: 100px;
+	width: 130px;
     display: inline-flex;
     height: 30px;
     position: fixed;

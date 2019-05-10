@@ -123,6 +123,8 @@
 
     &:focus {
         outline: none;
+        box-shadow: none;
+        border: none;
     }
 }
 
@@ -164,5 +166,6 @@
     &:focus {
         outline: none;
         border: none;
+        box-shadow: none;
     }
 }
