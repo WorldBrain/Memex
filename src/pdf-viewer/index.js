@@ -1,7 +1,6 @@
 /* eslint no-undef: 0 */
 
-async function renderPageContent(parentDiv, page, scale) {
-    const viewport = page.getViewport(scale)
+async function renderPageContent({ parentDiv, page, scale }) {
     const div = document.createElement('div')
 
     div.setAttribute('id', 'page-' + (page.pageIndex + 1))
@@ -10,6 +9,7 @@ async function renderPageContent(parentDiv, page, scale) {
     parentDiv.appendChild(div)
 
     const canvas = document.createElement('canvas')
+    const viewport = page.getViewport(scale)
 
     div.appendChild(canvas)
 
@@ -33,13 +33,16 @@ async function renderPageContent(parentDiv, page, scale) {
     })
 }
 
-async function renderPDFViewer({ pdfUrl, containerId, scale }) {
+async function renderPDFViewer({ pdfUrl, containerId, ...args }) {
     const pdf = await PDFJS.getDocument(pdfUrl)
-
     const container = document.getElementById(containerId)
 
     for (let pageNum = 1; pageNum <= pdf.numPages; ++pageNum) {
-        renderPageContent(container, await pdf.getPage(pageNum), scale)
+        await renderPageContent({
+            parentDiv: container,
+            page: await pdf.getPage(pageNum),
+            ...args,
+        })
     }
 }
 
@@ -51,5 +54,5 @@ function derivePdfUrl() {
 renderPDFViewer({
     pdfUrl: derivePdfUrl(),
     containerId: 'pdf-container',
-    scale: 1.5,
+    scale: 2,
 })
