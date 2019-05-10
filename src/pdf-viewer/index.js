@@ -1,10 +1,18 @@
 /* eslint no-undef: 0 */
 
-async function renderPageContent({ parentDiv, page, scale }) {
+async function renderPageContent({
+    parentDiv,
+    page,
+    scale,
+    pageClass,
+    canvasClass,
+    textLayerClass,
+}) {
     const div = document.createElement('div')
 
     div.setAttribute('id', 'page-' + (page.pageIndex + 1))
     div.setAttribute('style', 'position: relative')
+    div.setAttribute('class', pageClass)
 
     parentDiv.appendChild(div)
 
@@ -13,6 +21,7 @@ async function renderPageContent({ parentDiv, page, scale }) {
 
     div.appendChild(canvas)
 
+    canvas.setAttribute('class', canvasClass)
     canvas.height = viewport.height
     canvas.width = viewport.width
 
@@ -23,7 +32,7 @@ async function renderPageContent({ parentDiv, page, scale }) {
 
     // Render a text layer so text is selectable
     const textLayerDiv = document.createElement('div')
-    textLayerDiv.setAttribute('class', 'textLayer')
+    textLayerDiv.setAttribute('class', `textLayer ${textLayerClass}`)
     div.appendChild(textLayerDiv)
 
     await PDFJS.renderTextLayer({
@@ -53,6 +62,9 @@ function derivePdfUrl() {
 
 renderPDFViewer({
     pdfUrl: derivePdfUrl(),
-    containerId: 'pdf-container',
+    containerId: 'pdf-viewer-container',
     scale: 2,
+    pageClass: 'pdf-viewer__page',
+    canvasClass: 'pdf-viewer__canvas',
+    textLayerClass: 'pdf-viewer__text-layer',
 })
