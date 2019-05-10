@@ -20,7 +20,6 @@ import alarms from './background-script/alarms'
 import TagsBackground from './tags/background'
 import ActivityLoggerBackground from './activity-logger/background'
 import PdfViewerBackground from './pdf-viewer/background'
-import { PDF_VIEWER_URL } from './pdf-viewer/constants'
 
 // Features that auto-setup
 import './analytics/background'
