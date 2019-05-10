@@ -26,6 +26,8 @@ interface Props extends Page {
     isLoading: boolean
     needsWaypoint?: boolean
     appendLoader: boolean
+    showPageInfo: boolean
+    isCurrentPageSearch: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
     hoverAnnotationUrl: string
@@ -132,10 +134,6 @@ class Sidebar extends React.Component<Props, State> {
         return this.props.searchType === 'pages'
     }
 
-    get isCurrentPageSearch() {
-        return this.props.pageType === 'page'
-    }
-
     private renderAnnots() {
         const annots = this.props.annotations.map(annot => (
             <AnnotationBox
@@ -181,6 +179,24 @@ class Sidebar extends React.Component<Props, State> {
         )
     }
 
+    private renderAnnotatePdfBtn() {
+        if (isPdfViewer() || !this.props.url.endsWith('.pdf')) {
+            return null
+        }
+
+        return (
+            <button
+                className={cx(styles.annotatePDFButton)}
+                onClick={e => {
+                    e.preventDefault()
+                    remoteFunction('openPdfViewer')(this.props.url)
+                }}
+            >
+                Annotate PDF
+            </button>
+        )
+    }
+
     render() {
         const {
             env,
@@ -222,12 +238,13 @@ class Sidebar extends React.Component<Props, State> {
                                 <div className={styles.searchSwitch}>
                                     <SearchTypeSwitch />
                                 </div>
-                                <PageInfo
-                                    url={this.props.url}
-                                    title={this.props.title}
-                                    isCurrentPage={this.isCurrentPageSearch}
-                                    resetPage={this.props.resetPage}
-                                />
+                                {this.props.showPageInfo && (
+                                    <PageInfo
+                                        url={this.props.url}
+                                        title={this.props.title}
+                                        resetPage={this.props.resetPage}
+                                    />
+                                )}
                             </React.Fragment>
                         )}
                         {showCommentBox && (
@@ -235,25 +252,15 @@ class Sidebar extends React.Component<Props, State> {
                                 <CommentBoxContainer env={env} />
                             </div>
                         )}
-                        {!isPdfViewer() &&
-                            window.location.href.endsWith('.pdf') && (
-                                <button
-                                    className={cx(styles.annotatePDFButton)}
-                                    onClick={e => {
-                                        e.preventDefault()
-                                        remoteFunction('openPdfViewer')()
-                                    }}
-                                >
-                                    Annotate PDF
-                                </button>
-                            )}
+                        {this.renderAnnotatePdfBtn()}
                         <div
                             className={cx(styles.resultsContainer, {
                                 [styles.resultsContainerPage]:
                                     env === 'overview',
                             })}
                         >
-                            {this.isPageSearch || !this.isCurrentPageSearch ? (
+                            {this.isPageSearch ||
+                            !this.props.isCurrentPageSearch ? (
                                 this.renderResults()
                             ) : this.props.isLoading &&
                             !this.props.appendLoader ? (

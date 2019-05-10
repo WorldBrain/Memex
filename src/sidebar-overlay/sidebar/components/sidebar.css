@@ -94,6 +94,8 @@
 }
 
 .annotatePDFButton {
+    position: relative;
+    top: 2em;
     width: 80%;
     height: 2em;
     background: #3eb995;

@@ -70,3 +70,20 @@ export const url = createSelector(page, state => {
     }
     return state.url
 })
+
+export const isCurrentPageSearch = createSelector(
+    pageType,
+    type => type === 'page',
+)
+
+export const showPageInfo = createSelector(
+    isCurrentPageSearch,
+    url,
+    (isCurrentPage, url) => {
+        const currUrl = isPdfViewer()
+            ? getPdfUrlFromViewerUrl(location.href)
+            : location.href
+
+        return url !== currUrl && isCurrentPage
+    },
+)

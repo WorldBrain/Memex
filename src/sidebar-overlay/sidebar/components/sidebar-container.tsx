@@ -22,6 +22,8 @@ interface StateProps extends Page {
     isLoading: boolean
     needsWaypoint: boolean
     appendLoader: boolean
+    showPageInfo: boolean
+    isCurrentPageSearch: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
     hoverAnnotationUrl: string
@@ -158,6 +160,8 @@ const mapStateToProps: MapStateToProps<
     showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
     url: selectors.url(state),
     title: selectors.title(state),
+    showPageInfo: selectors.showPageInfo(state),
+    isCurrentPageSearch: selectors.isCurrentPageSearch(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
@@ -207,8 +211,8 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
         e.preventDefault()
         dispatch(
             actions.setPage({
-                url: null,
-                title: null,
+                url: location.href,
+                title: document.title,
             }),
         )
         dispatch(actions.fetchAnnotations())

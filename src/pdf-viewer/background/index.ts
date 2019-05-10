@@ -131,9 +131,15 @@ export default class PDFViewerBackground {
         return { ...metadata, text }
     }
 
-    async openPdfViewer({ tab }: TabArg) {
-        this.tabsAPI.update(tab.id, {
-            url: PDF_VIEWER_URL + encodeURI(tab.url),
+    async openPdfViewer({ tab }: TabArg, url?: string) {
+        url = url || tab.url
+
+        if (!url.startsWith('http')) {
+            url = `https://${url}`
+        }
+
+        return this.tabsAPI.update(tab.id, {
+            url: PDF_VIEWER_URL + encodeURI(url),
         })
     }
 }
