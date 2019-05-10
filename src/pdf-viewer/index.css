@@ -1,6 +1,13 @@
+/* stylelint-disable declaration-no-important */
+/* stylelint-disable selector-type-no-unknown */
+
 .container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+memex-highlight {
+    background: #ff8fcb !important;
 }
