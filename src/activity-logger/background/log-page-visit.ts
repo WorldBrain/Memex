@@ -108,12 +108,9 @@ export default class PageVisitLogger {
             // Don't index full-text in this stage
             delete analysisRes.content.fullText
 
-            let pdfFingerprint = null
-            if (tab.url.endsWith('.pdf')) {
-                pdfFingerprint = await this.pdfBackground.getPdfFingerprintForUrl(
-                    tab.url,
-                )
-            }
+            const pdfFingerprint = await this.pdfBackground.getPdfFingerprintForUrl(
+                tab.url,
+            )
             console.log({
                 url: tab.url,
                 pdfFingerprint,

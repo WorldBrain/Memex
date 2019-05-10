@@ -311,6 +311,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     private _openSidebar = async ({
         anchor = null,
         activeUrl,
+        showHighlights,
     }: OpenSidebarArgs & { anchor: Anchor }) => {
         await this.props.openSidebar({
             activeUrl,
@@ -324,9 +325,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             this._focusOnAnnotation(activeUrl)
         }
 
-        // Highlight any annotations with anchor.
-        // (Done here as only in-page sidebar requires to do this.)
-        if (!window.location.href.endsWith('.pdf')) {
+        if (showHighlights) {
             await this._highlightAnnotations()
         }
     }

@@ -24,5 +24,5 @@ initContentTooltip({ toolbarNotifications })
 initRibbonAndSidebar({ annotationsManager, toolbarNotifications })
 
 if (isPdfViewer()) {
-    remoteFunction('toggleSidebarOverlay')()
+    remoteFunction('toggleSidebarOverlay')({ showHighlights: true })
 }

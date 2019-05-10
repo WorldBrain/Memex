@@ -53,4 +53,5 @@ export type MapDispatchToProps<DispatchProps, OwnProps> = (
 
 export interface OpenSidebarArgs {
     activeUrl?: string
+    showHighlights?: boolean
 }

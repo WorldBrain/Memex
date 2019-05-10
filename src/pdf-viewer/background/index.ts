@@ -5,6 +5,7 @@ import normalize from 'src/util/encode-url-for-id'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { PDFJS_WORKER_PATH, PDF_VIEWER_URL } from '../constants'
 import { Metadata, PDFData } from './types'
+import { isUrlToPdf } from '../util'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -67,6 +68,10 @@ export default class PDFViewerBackground {
     }
 
     private async fetchPdfFingerprint(url: string) {
+        if (!isUrlToPdf(url)) {
+            return null
+        }
+
         const pdf = await this.pdfJs.getDocument(url)
         return pdf.fingerprint
     }

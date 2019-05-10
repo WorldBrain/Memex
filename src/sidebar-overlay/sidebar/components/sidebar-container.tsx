@@ -23,6 +23,7 @@ interface StateProps extends Page {
     needsWaypoint: boolean
     appendLoader: boolean
     showPageInfo: boolean
+    renderAnnotPdfBtn: boolean
     isCurrentPageSearch: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
@@ -162,6 +163,7 @@ const mapStateToProps: MapStateToProps<
     title: selectors.title(state),
     showPageInfo: selectors.showPageInfo(state),
     isCurrentPageSearch: selectors.isCurrentPageSearch(state),
+    renderAnnotPdfBtn: selectors.renderAnnotPdfBtn(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (

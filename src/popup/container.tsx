@@ -46,6 +46,7 @@ export interface OwnProps {}
 interface StateProps {
     blacklistConfirm: boolean
     showTagsPicker: boolean
+    renderAnnotPdfBtn: boolean
     showCollectionsPicker: boolean
     tabId: number
     url: string
@@ -155,7 +156,7 @@ class PopupContainer extends PureComponent<Props> {
                     </LinkButton>
                 </div>
                 <hr />
-                {this.props.url.endsWith('.pdf') && (
+                {this.props.renderAnnotPdfBtn && (
                     <div className={styles.item}>
                         <AnnotatePDFButton pdfURL={this.props.url} />
                     </div>
@@ -217,6 +218,7 @@ class PopupContainer extends PureComponent<Props> {
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     tabId: selectors.tabId(state),
     url: selectors.url(state),
+    renderAnnotPdfBtn: selectors.renderAnnotPdfBtn(state),
     searchValue: selectors.searchValue(state),
     blacklistConfirm: blacklist.showDeleteConfirm(state),
     showCollectionsPicker: collections.showCollectionsPicker(state),

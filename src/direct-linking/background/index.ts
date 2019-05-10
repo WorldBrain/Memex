@@ -12,6 +12,7 @@ import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import PDFBackground from 'src/pdf-viewer/background'
+import { isUrlToPdf } from 'src/pdf-viewer/util'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -129,6 +130,7 @@ export default class DirectLinkingBackground {
             openToComment,
             openToBookmark,
             openToCollections,
+            showHighlights,
         }: OpenSidebarArgs &
             Partial<KeyboardActions> & {
                 anchor?: any
@@ -169,6 +171,7 @@ export default class DirectLinkingBackground {
             await remoteFunction('openSidebar', { tabId })({
                 anchor,
                 activeUrl,
+                showHighlights,
             })
         }
     }
@@ -237,7 +240,7 @@ export default class DirectLinkingBackground {
         const pageTitle = title == null ? tab.title : title
         const uniqueUrl = `${pageUrl}/#${Date.now()}`
 
-        const pdfFingerprint = pageUrl.endsWith('.pdf')
+        const pdfFingerprint = isUrlToPdf(pageUrl)
             ? await this.pdfBackground.getPdfFingerprintForUrl(pageUrl)
             : null
 

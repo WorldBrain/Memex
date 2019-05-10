@@ -1,7 +1,11 @@
 /* tslint:disable:no-shadowed-variable */
 import { createSelector } from 'reselect'
 
-import { isPdfViewer, getPdfUrlFromViewerUrl } from 'src/pdf-viewer/util'
+import {
+    isPdfViewer,
+    getPdfUrlFromViewerUrl,
+    isUrlToPdf,
+} from 'src/pdf-viewer/util'
 
 import State from './types'
 // NOTE: Any parent reducer will need to define state for the sidebar in a
@@ -86,4 +90,9 @@ export const showPageInfo = createSelector(
 
         return url !== currUrl && isCurrentPage
     },
+)
+
+export const renderAnnotPdfBtn = createSelector(
+    url,
+    url => isUrlToPdf(url) && !isPdfViewer(),
 )

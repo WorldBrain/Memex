@@ -15,7 +15,6 @@ import DragElement from 'src/overview/components/DragElement'
 import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
 import SearchTypeSwitch from './search-type-switch'
 import PageInfo from './page-info'
-import { isPdfViewer } from 'src/pdf-viewer/util'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 const styles = require('./sidebar.css')
@@ -25,6 +24,7 @@ interface Props extends Page {
     isOpen: boolean
     isLoading: boolean
     needsWaypoint?: boolean
+    renderAnnotPdfBtn: boolean
     appendLoader: boolean
     showPageInfo: boolean
     isCurrentPageSearch: boolean
@@ -180,7 +180,7 @@ class Sidebar extends React.Component<Props, State> {
     }
 
     private renderAnnotatePdfBtn() {
-        if (isPdfViewer() || !this.props.url.endsWith('.pdf')) {
+        if (!this.props.renderAnnotPdfBtn) {
             return null
         }
 
