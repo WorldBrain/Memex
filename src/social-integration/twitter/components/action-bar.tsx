@@ -31,8 +31,8 @@ class ActionBar extends Component<Props> {
 
     componentWillUnMount() {
         this.props.setPage({
-            url: null,
-            title: null,
+            url: location.href,
+            title: document.title,
         })
     }
 
@@ -67,7 +67,7 @@ class ActionBar extends Component<Props> {
     private renderCommentBox() {
         this.props.setPage({
             url: this.props.url,
-            title: null,
+            title: document.title,
         })
 
         return <CommentBoxContainer env="inpage" />

@@ -145,6 +145,9 @@ export default class SocialStorage extends FeatureStorage {
         return urls.map(async url => {
             await Promise.all([
                 this.storageManager
+                    .collection(this.visitsColl)
+                    .deleteObjects({ url }),
+                this.storageManager
                     .collection(this.tweetsColl)
                     .deleteObjects({ url }),
                 this.storageManager
