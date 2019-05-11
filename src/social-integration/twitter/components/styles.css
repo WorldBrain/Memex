@@ -1,5 +1,6 @@
 .container {
-    display: contents;
+    display: inline-block;
+    position: relative;
 }
 
 .memexIcon {

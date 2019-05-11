@@ -23,8 +23,6 @@ twitterObserver.events.on('newTweet', ({ element }: { element: Element }) => {
 
     target.setAttribute('id', 'memexButton')
     target.classList.add(...['ProfileTweet-action', 'ProfileTweet-action--stm'])
-    target.setAttribute('style', 'display:contents')
-
     target.addEventListener('click', e => e.stopPropagation())
 
     const destroy = () => {
