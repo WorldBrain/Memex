@@ -9,7 +9,7 @@ interface Props {
     maxTagsLimit: number
     setTagManagerRef?: (e: HTMLSpanElement) => any
     handlePillClick: (tag: string) => MouseEventHandler
-    handleTagBtnClick: MouseEventHandler
+    handleTagBtnClick?: MouseEventHandler
     env: string
 }
 
@@ -35,17 +35,19 @@ class TagHolder extends PureComponent<Props, {}> {
             ))
 
         // Append Add Tag manager and return
-        return [
-            ...pills,
-        ]
+        return [...pills]
     }
 
     render() {
-        return <div className={cx(styles.tagList, {
-            [styles.tagListSidebar]: this.props.env === "sidebar",
-        })}>
-            {this.renderTagPills()}
-        </div>
+        return (
+            <div
+                className={cx(styles.tagList, {
+                    [styles.tagListSidebar]: this.props.env === 'sidebar',
+                })}
+            >
+                {this.renderTagPills()}
+            </div>
+        )
     }
 }
 

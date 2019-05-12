@@ -4,11 +4,13 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import { Page } from 'src/search'
 import { reshapePageForDisplay } from './utils'
 import { AnnotPage } from './types'
+import { User, SocialPage } from 'src/social-integration/types'
 
 export class PageUrlMapperPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
     static MAP_OP_ID = 'memex:dexie.mapUrlsToPages'
+    static MAP_OP_SOCIAL = 'memex:dexie.mapUrlsToSocial'
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
@@ -16,6 +18,11 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         backend.registerOperation(
             PageUrlMapperPlugin.MAP_OP_ID,
             this.findMatchingPages.bind(this),
+        )
+
+        backend.registerOperation(
+            PageUrlMapperPlugin.MAP_OP_SOCIAL,
+            this.findMatchingSocialPages.bind(this),
         )
     }
 
@@ -81,6 +88,31 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         )
     }
 
+    private async lookupUsers(
+        userIds: string[],
+        userMap: Map<string, User>,
+        base64Img?: boolean,
+    ) {
+        const users = await this.backend.dexieInstance
+            .table('users')
+            .where('id')
+            .anyOf(userIds)
+            .limit(userIds.length)
+            .toArray()
+
+        return Promise.all(
+            users.map(async user => {
+                const profilePic = user.profilePic
+                    ? await this.encodeImage(user.profilePic, base64Img)
+                    : undefined
+                userMap.set(user.id, {
+                    ...user,
+                    profilePic,
+                })
+            }),
+        )
+    }
+
     private async lookupTags(
         pageUrls: string[],
         tagMap: Map<string, string[]>,
@@ -95,6 +127,23 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             const current = tagMap.get(url) || []
             tagMap.set(url, [...current, name])
         })
+    }
+
+    private async lookupBookmarks(
+        pageUrls: string[],
+        socialMap: Map<string, SocialPage>,
+    ) {
+        const bms = await this.backend.dexieInstance
+            .table('bookmarks')
+            .where('url')
+            .anyOf(pageUrls)
+            .limit(pageUrls.length)
+            .toArray()
+
+        for (const { _, url } of bms) {
+            const page = socialMap.get(url)
+            socialMap.set(url, { ...page, hasBookmark: true })
+        }
     }
 
     private async lookupAnnotsCounts(
@@ -226,7 +275,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                 const page = pageMap.get(url)
 
                 // Data integrity issue; no matching page in the DB. Fail nicely
-                if (!page) {
+                if (!page || !page.url) {
                     return null
                 }
 
@@ -242,5 +291,58 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             })
             .filter(page => page != null)
             .map(reshapePageForDisplay)
+    }
+
+    async findMatchingSocialPages(
+        socialMap: Map<string, SocialPage>,
+        {
+            base64Img,
+            upperTimeBound,
+            latestTimes,
+        }: {
+            base64Img?: boolean
+            upperTimeBound?: number
+            latestTimes?: number[]
+        },
+    ): Promise<SocialPage[]> {
+        const pageUrls = [...socialMap.keys()]
+        const countMap = new Map<string, number>()
+        const tagMap = new Map<string, string[]>()
+        const userMap = new Map<string, User>()
+
+        // Run the first set of queries to get display data
+        await Promise.all([
+            this.lookupTags(pageUrls, tagMap),
+            this.lookupAnnotsCounts(pageUrls, countMap),
+        ])
+
+        const userIds = new Set(
+            [...socialMap.values()].map(page => page.userId),
+        )
+
+        await Promise.all([
+            this.lookupUsers([...userIds], userMap, base64Img),
+            this.lookupBookmarks(pageUrls, socialMap),
+        ])
+
+        // Map page results back to original input
+        return pageUrls
+            .map((url, i) => {
+                const socialPage = socialMap.get(url)
+
+                // Data integrity issue; no matching page in the DB. Fail nicely
+                if (!socialPage) {
+                    return null
+                }
+
+                return {
+                    ...socialPage,
+                    user: userMap.get(socialPage.userId),
+                    displayTime: socialPage.createdWhen.getTime(),
+                    tags: tagMap.get(url) || [],
+                    annotsCount: countMap.get(url),
+                }
+            })
+            .filter(page => page !== null)
     }
 }

@@ -1,5 +1,6 @@
 export { default as BookmarkFilter } from './bookmark-filter-container'
 export { default as TagsFilter } from './tags-filter-container'
+export { default as UsersFilter } from './users-filter-container'
 export { default as DomainsFilter } from './domains-filter-container'
 export { default as DatesFilter } from './dates-filter-container'
 export { default as ToggleSwitch } from './toggle-switch'

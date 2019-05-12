@@ -49,6 +49,12 @@
     background-image: url('/img/check.svg');
 }
 
+.checkRound {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/checkRound.svg');
+}
+
 .starMark {
     background-position: center;
     background-repeat: no-repeat;

@@ -5,7 +5,6 @@ import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { actions as sidebarLeftActs } from '../sidebar-left'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { acts as resultsActs, selectors as results } from '../results'
 import {
@@ -18,6 +17,7 @@ import { EVENT_NAMES } from '../../analytics/internal/constants'
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
 const annotSearchRPC = remoteFunction('searchAnnotations')
+const socialSearchRPC = remoteFunction('searchSocial')
 
 export const setQuery = createAction<string>('header/setQuery')
 export const setStartDate = createAction<number>('header/setStartDate')
@@ -141,13 +141,16 @@ export const search: (args?: any) => Thunk = (
         lists: filters.listFilterParam(state),
         contentTypes: filters.contentType(state),
         base64Img: !fromOverview,
+        usersInc: filters.usersInc(state),
+        usersExc: filters.usersExc(state),
     }
 
     try {
-        const searchRPC =
-            results.searchType(state) === 'page'
-                ? pageSearchRPC
-                : annotSearchRPC
+        const searchRPC = results.isSocialSearch(state)
+            ? socialSearchRPC
+            : results.isAnnotsSearch(state)
+                ? annotSearchRPC
+                : pageSearchRPC
 
         // Tell background script to search
         const searchResult = await searchRPC(searchParams)

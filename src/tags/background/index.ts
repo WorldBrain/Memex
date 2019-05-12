@@ -37,12 +37,14 @@ export default class TagsBackground {
 
     setupRemoteFunctions() {
         makeRemotelyCallable({
+            addTag: this.addTag.bind(this),
+            delTag: this.delTag.bind(this),
             addTagsToOpenTabs: this.addTagsToOpenTabs.bind(this),
             delTagsFromOpenTabs: this.delTagsFromOpenTabs.bind(this),
         })
     }
 
-    async addTagsToOpenTabs({ name, tabs }: { name: string; tabs?: Tabs[] }) {
+    async addTagsToOpenTabs({ tag, tabs }: { tag: string; tabs?: Tabs[] }) {
         if (!tabs) {
             const currentWindow = await this.windows.getCurrent()
             tabs = this.tabMan.getTabUrls(currentWindow.id)
@@ -91,12 +93,12 @@ export default class TagsBackground {
         return this.storage.fetchPageTags({ url: normalizeUrl(url) })
     }
 
-    async addTag({ name, url }: { name: string; url: string }) {
-        return this.storage.addTag({ name, url: normalizeUrl(url) })
+    async addTag({ tag, url }: { tag: string; url: string }) {
+        return this.storage.addTag({ name: tag, url: normalizeUrl(url) })
     }
 
-    async delTag({ name, url }: { name: string; url: string }) {
-        return this.storage.delTag({ name, url: normalizeUrl(url) })
+    async delTag({ tag, url }: { tag: string; url: string }) {
+        return this.storage.delTag({ name: tag, url: normalizeUrl(url) })
     }
 
     async fetchPages({ name }: { name: string }) {

@@ -93,6 +93,14 @@ function calcObjectSize(storeName: string, obj): SizeEst {
         return { bytesWithBlobs: size, bytesWithoutBlobs: size }
     }
 
+    if (storeName === 'users' && obj.profilePic != null) {
+        const { profilePic, ...rest } = obj
+        const bytesWithoutBlobs = JSON.stringify(rest).length
+        const bytesWithBlobs = bytesWithoutBlobs + calcBlobSize(profilePic)
+
+        return { bytesWithBlobs, bytesWithoutBlobs }
+    }
+
     const bytes = JSON.stringify(obj).length
     return { bytesWithBlobs: bytes, bytesWithoutBlobs: bytes }
 }

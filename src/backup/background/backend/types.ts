@@ -25,6 +25,7 @@ export interface ObjectChangeBatch {
 
 export interface ObjectChangeImages {
     screenshot: string
+    profilePic: string
 }
 
 export abstract class BackupBackend {

@@ -117,9 +117,13 @@ const lookbackFromEndDate = (getDb: () => Promise<Dexie>) => async (
         // Stop iterating once we have enough
         .until(() => latestVisits.size >= skip + limit)
         // For each visit PK, reduce down into Map of URL keys to latest visit time
-        .eachPrimaryKey(([time, url]) => {
+        .each(({ time, url, pageType }) => {
             // Only ever record the latest visit for each URL (first due to IndexedDB reverse keys ordering)
-            if (!latestVisits.has(url) && filteredUrls.isAllowed(url)) {
+            if (
+                pageType !== 'social' &&
+                !latestVisits.has(url) &&
+                filteredUrls.isAllowed(url)
+            ) {
                 latestVisits.set(url, time)
             }
         })
@@ -131,7 +135,11 @@ const lookbackFromEndDate = (getDb: () => Promise<Dexie>) => async (
         .between(startDate, endDate, true, true)
         .reverse()
         .until(() => latestBookmarks.size >= skip + limit)
-        .each(({ time, url }) => latestBookmarks.set(url, time))
+        .each(({ time, url, pageType }) => {
+            if (pageType !== 'social') {
+                latestBookmarks.set(url, time)
+            }
+        })
 
     // Merge results
     const results: PageResultsMap = new Map()
@@ -174,7 +182,11 @@ const lookbackBookmarksTime = (getDb: () => Promise<Dexie>) => async ({
             .belowOrEqual(upperBound)
             .reverse() // Latest first
             .until(() => bms.size >= skip + limit)
-            .each(({ time, url }) => bms.set(url, time))
+            .each(({ time, url, pageType }) => {
+                if (pageType !== 'social') {
+                    bms.set(url, time)
+                }
+            })
 
         if (bms.size < skip + limit) {
             bmsExhausted = true

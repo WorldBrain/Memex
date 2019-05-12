@@ -154,6 +154,11 @@ export const isAnnotsSearch = createSelector(
     state => state === 'annot',
 )
 
+export const isSocialSearch = createSelector(
+    searchType,
+    state => state === 'social',
+)
+
 export const resultsClusteredByDay = createSelector(
     isAnnotsSearch,
     query,

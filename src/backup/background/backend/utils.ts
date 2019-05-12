@@ -56,5 +56,18 @@ export async function _prepareBackupChangeForStorage(change: ObjectChange) {
         }
     }
 
+    if (
+        change.collection === 'users' &&
+        change.object != null &&
+        change.object.profilePic != null
+    ) {
+        try {
+            images.profilePic = await encodeBlob(change.object.profilePic)
+        } catch (e) {
+            Raven.captureException(e)
+        }
+        change.object.profilePic = undefined
+    }
+
     return images
 }

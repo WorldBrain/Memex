@@ -4,7 +4,7 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 
-import { LoadingIndicator, PageResultItem } from 'src/common-ui/components'
+import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
@@ -33,6 +33,7 @@ export interface StateProps {
     resultsByUrl: ResultsByUrl
     resultsClusteredByDay: boolean
     annotsByDay: PageUrlsByDay
+    isSocialSearch: boolean
 }
 
 export interface DispatchProps {
@@ -125,6 +126,7 @@ class ResultListContainer extends PureComponent<Props, State> {
                 source="tag"
                 isForRibbon
                 sidebarTagDiv
+                fromOverview
             />
         )
     }
@@ -151,7 +153,7 @@ class ResultListContainer extends PureComponent<Props, State> {
 
     private attachDocWithPageResultItem(doc, index, key) {
         return (
-            <PageResultItem
+            <ResultItem
                 key={key}
                 setTagButtonRef={this.setTagButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
@@ -165,6 +167,7 @@ class ResultListContainer extends PureComponent<Props, State> {
                 onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
+                isSocial={this.props.isSocialSearch}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />
@@ -265,6 +268,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isNewSearchLoading: results.isNewSearchLoading(state),
     resultsClusteredByDay: results.resultsClusteredByDay(state),
     areAnnotationsExpanded: results.areAnnotationsExpanded(state),
+    isSocialSearch: results.isSocialSearch(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
@@ -298,6 +302,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
     handleCrossRibbonClick: ({ url }) => event => {
         event.preventDefault()
+        event.stopPropagation()
         dispatch(listActs.delPageFromList(url))
         dispatch(resultActs.hideResultItem(url))
     },

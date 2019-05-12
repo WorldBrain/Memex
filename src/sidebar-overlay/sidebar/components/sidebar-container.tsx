@@ -8,7 +8,7 @@ import {
     selectors as commentBoxSelectors,
 } from '../../comment-box'
 import Sidebar from './sidebar'
-import SidebarState, { Annotation, Page } from '../types'
+import { Annotation, Page } from '../types'
 import RootState, { MapDispatchToProps } from '../../types'
 import AnnotationsManager from '../../annotations-manager'
 import {
@@ -28,7 +28,7 @@ interface StateProps {
     showCommentBox: boolean
     showCongratsMessage: boolean
     pageType: 'page' | 'all'
-    searchType: 'notes' | 'pages'
+    searchType: 'notes' | 'pages' | 'social'
     searchValue: string
     showClearFiltersBtn: boolean
     page: Page

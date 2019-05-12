@@ -4,25 +4,22 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 
-import { LoadingIndicator, PageResultItem } from '../../../common-ui/components'
-import { IndexDropdown } from '../../../common-ui/containers'
 import { selectors as opt } from 'src/options/settings'
+import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
+import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './ResultList'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
-import { RootState } from '../../../options/types'
+import { RootState } from 'src/options/types'
 import { Result, ResultsByUrl } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
-import { actions as listActs } from '../../../custom-lists'
+import { actions as listActs } from 'src/custom-lists'
 import { acts as deleteConfActs } from '../../delete-confirm-modal'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { selectors as sidebarLeft } from '../../sidebar-left'
-import {
-    actions as filterActs,
-    selectors as filters,
-} from '../../../search-filters'
+import { actions as filterActs, selectors as filters } from 'src/search-filters'
 import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
@@ -45,6 +42,7 @@ export interface StateProps {
     resultsByUrl: ResultsByUrl
     annotsByDay: PageUrlsByDay
     isFilterBarActive: boolean
+    isSocialSearch: boolean
 }
 
 export interface DispatchProps {
@@ -157,7 +155,7 @@ class ResultListContainer extends PureComponent<Props> {
 
     private attachDocWithPageResultItem(doc: Result, index, key) {
         return (
-            <PageResultItem
+            <ResultItem
                 key={key}
                 isOverview
                 setTagButtonRef={this.setTagButtonRef}
@@ -176,6 +174,7 @@ class ResultListContainer extends PureComponent<Props> {
                 isResponsibleForSidebar={
                     this.props.activeSidebarIndex === index
                 }
+                isSocial={this.props.isSocialSearch}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />
@@ -285,6 +284,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     resultsClusteredByDay: selectors.resultsClusteredByDay(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
     isFilterBarActive: filters.showFilterBar(state),
+    isSocialSearch: selectors.isSocialSearch(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
@@ -317,6 +317,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
     handleCrossRibbonClick: ({ url }) => event => {
         event.preventDefault()
+        event.stopPropagation()
         dispatch(listActs.delPageFromList(url))
         dispatch(acts.hideResultItem(url))
     },

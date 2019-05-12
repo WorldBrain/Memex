@@ -282,6 +282,16 @@ export function _filterBadChange({
         return { ...change, object, operation: null }
     }
 
+    if (
+        change.collection === 'users' &&
+        object != null &&
+        isBadBlob(object.profilePic)
+    ) {
+        // Users can exist without profilePic Blobs; omit bad value
+        const { profilePic, ...objectMod } = object
+        return { ...change, object: objectMod }
+    }
+
     return { ...change, object }
 }
 
@@ -317,7 +327,7 @@ export function _deserializeChangeFields(change: ObjectChange) {
         object.favIcon = _blobFromPngString(object.favIcon)
     }
 
-    if (checkSerializedExists(['annotations'], 'createdWhen')) {
+    if (checkSerializedExists(['annotations', 'tweets'], 'createdWhen')) {
         object.createdWhen = new Date(object.createdWhen)
     }
 

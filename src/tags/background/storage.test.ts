@@ -35,8 +35,8 @@ describe('Tags', () => {
 
     describe('delete ops', () => {
         test('Remove tags', async () => {
-            const { name, url } = DATA.TAGS_1
-            await bg.delTag({ name, url })
+            const { tag, url } = DATA.TAGS_1
+            await bg.delTag({ tag, url })
             const tags = await bg.fetchPageTags({ url })
             expect(tags.length).toBe(0)
         })

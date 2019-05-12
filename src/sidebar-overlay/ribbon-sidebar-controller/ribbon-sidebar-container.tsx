@@ -284,8 +284,6 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     }
 
     private handleOutsideClick: EventListener = e => {
-        e.stopPropagation()
-
         // Only close the sidebar when all of the following conditions are met:
         // 1. Sidebar is open.
         // 2. Mouse is not inside the sidebar.

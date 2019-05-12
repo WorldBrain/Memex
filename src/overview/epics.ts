@@ -22,6 +22,12 @@ const searchUpdateActions = [
     filterActs.delExcDomainFilter.getType(),
     filterActs.setIncDomainFilters.getType(),
     filterActs.setExcDomainFilters.getType(),
+    filterActs.addIncUserFilter.getType(),
+    filterActs.addExcUserFilter.getType(),
+    filterActs.delIncUserFilter.getType(),
+    filterActs.delExcUserFilter.getType(),
+    filterActs.setIncUserFilters.getType(),
+    filterActs.setExcUserFilters.getType(),
     filterActs.setTagFilters.getType(),
     filterActs.setExcTagFilters.getType(),
     filterActs.resetFilters.getType(),
@@ -40,4 +46,6 @@ export const refreshSearchResultsUponQueryChange = action$ =>
     action$
         .filter(action => searchUpdateActions.includes(action.type))
         .debounceTime(500) // wait until typing stops for 500ms
-        .map(() => searchBarActs.search({ overwrite: true })) // Schedule new fresh (overwriting) search
+        .map(() =>
+            searchBarActs.search({ overwrite: true, fromOverview: true }),
+        ) // Schedule new fresh (overwriting) search

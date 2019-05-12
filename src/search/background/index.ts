@@ -6,7 +6,11 @@ import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { PageSearchParams, AnnotSearchParams } from './types'
+import {
+    PageSearchParams,
+    AnnotSearchParams,
+    SocialSearchParams,
+} from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 
 export default class SearchBackground {
@@ -108,12 +112,12 @@ export default class SearchBackground {
     setupRemoteFunctions() {
         makeRemotelyCallable({
             search: this.backend.search,
-            addTag: this.backend.addTag,
-            delTag: this.backend.delTag,
+            addPageTag: this.backend.addTag,
+            delPageTag: this.backend.delTag,
             suggest: this.backend.suggest,
             delPages: this.backend.delPages,
-            addBookmark: this.backend.addBookmark,
-            delBookmark: this.backend.delBookmark,
+            addPageBookmark: this.backend.addBookmark,
+            delPageBookmark: this.backend.delBookmark,
             fetchPageTags: this.backend.fetchPageTags,
             extendedSuggest: this.backend.extendedSuggest,
             delPagesByDomain: this.backend.delPagesByDomain,
@@ -121,6 +125,7 @@ export default class SearchBackground {
             getMatchingPageCount: this.backend.getMatchingPageCount,
             searchAnnotations: this.searchAnnotations.bind(this),
             searchPages: this.searchPages.bind(this),
+            searchSocial: this.searchSocial.bind(this),
         })
     }
 
@@ -207,6 +212,19 @@ export default class SearchBackground {
         }
 
         const docs = await this.storage.searchPages(searchParams)
+
+        return SearchBackground.shapePageResult(docs, searchParams.limit)
+    }
+
+    async searchSocial(params: SocialSearchParams) {
+        let searchParams
+        try {
+            searchParams = this.processSearchParams(params)
+        } catch (e) {
+            return SearchBackground.handleSearchError(e)
+        }
+
+        const docs = await this.storage.searchSocial(searchParams)
         return SearchBackground.shapePageResult(docs, searchParams.limit)
     }
 

@@ -13,6 +13,10 @@
             "js": ["lib/browser-polyfill.js", "content_script.js"],
             "css": ["/content_script.css"],
             "run_at": "document_start"
+        },
+        {
+            "matches": ["*://twitter.com/*"],
+            "js": ["twitter.js"]
         }
     ],
     "browser_action": {
@@ -54,6 +58,7 @@
         "/lib/pdf.worker.min.js",
         "/img/*",
         "/content_script.css",
+        "/twitter.css",
         "/fonts/*",
         "sidebar.html"
     ],

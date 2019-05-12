@@ -56,7 +56,7 @@ export const setActiveSidebarIndex = createAction<number>(
 )
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
-export const setSearchType = createAction<'page' | 'annot'>(
+export const setSearchType = createAction<'page' | 'annot' | 'social'>(
     'results/setSearchType',
 )
 export const initSearchCount = createAction('overview/initSearchCount')
@@ -74,7 +74,7 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
     index,
 ) => async (dispatch, getState) => {
     const results = selectors.results(getState())
-    const { hasBookmark } = results[index]
+    const { hasBookmark, user } = results[index]
     dispatch(changeHasBookmark(index))
 
     analytics.trackEvent({
@@ -92,7 +92,7 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
 
     const bookmarkRPC = hasBookmark ? deleteBookmarkRPC : createBookmarkRPC
     try {
-        await bookmarkRPC({ url, fromOverview: true })
+        await bookmarkRPC({ url, pageType: user ? 'social' : undefined })
     } catch (err) {
         dispatch(changeHasBookmark(index))
         handleDBQuotaErrors(

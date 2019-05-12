@@ -47,6 +47,8 @@
 }
 
 .tooltipbottom {
+    top: 6px;
+
     /*    &::after {
         border-left: 9px solid transparent;
         border-right: 9px solid transparent;

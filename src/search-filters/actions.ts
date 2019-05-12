@@ -3,6 +3,8 @@ import { createAction } from 'redux-act'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { selectors } from './'
 import { results } from '../overview/results/selectors'
+import { User } from 'src/social-integration/types'
+import { Thunk } from 'src/options/types'
 
 export const showTagFilter = createAction('search-filters/showTagFilter')
 export const hideTagFilter = createAction('search-filters/hideTagFilter')
@@ -15,6 +17,8 @@ export const hideFilterTypes = createAction('search-filters/hideTypeFilters')
 export const toggleFilterTypes = createAction(
     'search-filters/toggleFilterTypes',
 )
+export const showUserFilter = createAction('search-filters/showUserFilter')
+export const hideUserFilter = createAction('search-filters/hideUserFilter')
 
 export const addTagFilter = createAction<string>('search-filters/addTagFilter')
 export const delTagFilter = createAction<string>('search-filters/delTagFilter')
@@ -102,6 +106,27 @@ export const toggleFilterBar = createAction('search-filters/toggleFilterBar')
 export const setShowFilterBar = createAction<boolean>(
     'search-filters/setShowFilterBar',
 )
+export const addIncUserFilter = createAction<User>(
+    'search-filters/addIncUserFilter',
+)
+export const delIncUserFilter = createAction<User>(
+    'search-filters/delIncUserFilter',
+)
+export const addExcUserFilter = createAction<User>(
+    'search-filters/addExcUserFilter',
+)
+export const delExcUserFilter = createAction<User>(
+    'search-filters/delExcUserFilter',
+)
+export const setIncUserFilters = createAction<User[]>(
+    'search-filters/setIncUserFilters',
+)
+export const setExcUserFilters = createAction<User[]>(
+    'search-filters/setExcUserFilters',
+)
+export const setSuggestedUsers = createAction<User[]>(
+    'search-filters/setSuggestedUsers',
+)
 
 /**
  * Action to toggle annotation content filter.
@@ -141,6 +166,24 @@ export const fetchSuggestedDomains = () => async (dispatch, getState) => {
                 value: domain,
                 isExclusive: false,
             })),
+        ]),
+    )
+}
+
+export const fetchSuggestedUsers: (base64Img?: boolean) => Thunk = (
+    base64Img = false,
+) => async (dispatch, getState) => {
+    const filteredUsers = selectors.displayUsers(getState())
+    const users = filteredUsers.map(({ value }) => value)
+    const suggestedUsers: User[] = await remoteFunction('fetchAllUsers')({
+        limit: 20,
+        base64Img,
+    })
+
+    dispatch(
+        setSuggestedUsers([
+            ...(filteredUsers || []),
+            ...(suggestedUsers || []),
         ]),
     )
 }

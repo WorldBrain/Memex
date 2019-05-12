@@ -33,7 +33,7 @@ interface Props {
     showClearFiltersBtn: boolean
     page: Page
     pageType: 'page' | 'all'
-    searchType: 'notes' | 'pages'
+    searchType: 'notes' | 'pages' | 'social'
     closeSidebar: () => void
     handleGoToAnnotation: (
         annotation: Annotation,

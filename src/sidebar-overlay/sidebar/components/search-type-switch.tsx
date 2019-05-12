@@ -14,8 +14,8 @@ const styles = require('./search-type-switch.css')
 
 export interface StateProps {
     annotsFolded: boolean
-    resultsSearchType: 'page' | 'annot'
-    searchType: 'notes' | 'pages'
+    resultsSearchType: 'page' | 'annot' | 'social'
+    searchType: 'notes' | 'pages' | 'social'
     pageType: 'page' | 'all'
     pageCount?: number
     annotCount?: number
@@ -25,8 +25,9 @@ export interface DispatchProps {
     handleUnfoldAllClick: React.MouseEventHandler<HTMLButtonElement>
     handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
     handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
+    setSearchType: (value: 'notes' | 'pages' | 'social') => void
     setPageType: (value: 'page' | 'all') => void
-    setResultsSearchType: (value: 'page' | 'annot') => void
+    setResultsSearchType: (value: 'page' | 'annot' | 'social') => void
     setAnnotationsExpanded: (value: boolean) => void
 }
 
@@ -68,7 +69,10 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
     private handlePagesBtnClick = (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
-        this.props.handleSearchTypeClick(event)
+        event.preventDefault()
+        this.props.setSearchType('pages')
+
+        // this.props.handleSearchTypeClick(event)
         this.props.setResultsSearchType('page')
         this.props.setPageType('all')
         this.props.setAnnotationsExpanded(false)
@@ -77,8 +81,21 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
     private handleNotesBtnClick = (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
-        this.props.handleSearchTypeClick(event)
+        event.preventDefault()
+        this.props.setSearchType('notes')
+        // this.props.handleSearchTypeClick(event)
         this.props.setPageType('page')
+    }
+
+    private handleSocialBtnClick = (
+        event: React.MouseEvent<HTMLButtonElement>,
+    ) => {
+        event.preventDefault()
+        this.props.setSearchType('social')
+        // this.props.handleSearchTypeClick(event)
+        this.props.setResultsSearchType('social')
+        this.props.setPageType('all')
+        this.props.setAnnotationsExpanded(false)
     }
 
     render() {
@@ -102,15 +119,27 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                             className={cx(
                                 styles.searchSwitchBtn,
                                 styles.btn,
+                                styles.pages,
+                            )}
+                            onClick={this.handleSocialBtnClick}
+                            disabled={this.props.searchType === 'social'}
+                            id="social"
+                        >
+                            Social
+                        </button>
+                        <button
+                            className={cx(
+                                styles.searchSwitchBtn,
+                                styles.btn,
                                 styles.notesBtn,
                             )}
                             onClick={this.handleNotesBtnClick}
-                            disabled={!this.isPageSearch}
+                            disabled={this.props.searchType === 'notes'}
                         >
                             Notes
                         </button>
                     </div>
-                    {!this.isPageSearch && (
+                    {this.props.searchType === 'notes' && (
                         <div className={styles.pageSwitch}>
                             <span>
                                 <button
@@ -173,6 +202,9 @@ const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = dispatch => ({
     handlePageTypeClick: e => {
         e.preventDefault()
         dispatch(actions.togglePageType() as any)
+    },
+    setSearchType: value => {
+        dispatch(actions.setSearchType(value))
     },
     setPageType: value => {
         dispatch(actions.setPageType(value))

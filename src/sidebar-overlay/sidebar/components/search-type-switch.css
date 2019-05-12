@@ -31,13 +31,14 @@
 .btn {
     composes: nakedButton from 'src/common-ui/elements.css';
     color: color3;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     border: none;
     cursor: pointer;
     outline: none;
     margin-right: 1px;
     background-color: transparent;
+    white-space: nowrap;
 
     &:disabled {
         background-color: color7;
@@ -63,13 +64,13 @@
 }
 
 .pages {
-    margin-right: 5px;
+    margin-right: 2px;
 }
 
 .pageSwitch {
     display: flex;
     justify-content: space-between;
-    margin: 0 2px 0px 3px;
+    margin: 0 2px 0px -3px;
     width: 100%;
 
     & * {

@@ -5,6 +5,7 @@ import {
     TagsFilter,
     DomainsFilter,
     DatesFilter,
+    UsersFilter,
     ContentTypeContainer,
 } from 'src/search-filters/components'
 import { ButtonTooltip } from 'src/common-ui/components/'
@@ -21,6 +22,7 @@ class FiltersSidebar extends Component<Props, State> {
     componentDidMount() {
         this.props.fetchSuggestedTags()
         this.props.fetchSuggestedDomains()
+        this.props.fetchSuggestedUsers()
         this.filtersRef.addEventListener('mouseleave', this.handleMouseLeave)
     }
 
@@ -88,8 +90,16 @@ class FiltersSidebar extends Component<Props, State> {
                     <div className={styles.filterDiv}>
                         <TagsFilter tooltipPosition="inpage" env="inpage" />
                     </div>
+                    {!this.props.isSocialSearch && (
+                        <div className={styles.filterDiv}>
+                            <DomainsFilter
+                                tooltipPosition="inpage"
+                                env="inpage"
+                            />
+                        </div>
+                    )}
                     <div className={styles.filterDiv}>
-                        <DomainsFilter tooltipPosition="inpage" env="inpage" />
+                        <UsersFilter tooltipPosition="inpage" env="inpage" />
                     </div>
                     <div className={styles.filterDiv}>
                         <ContentTypeContainer
