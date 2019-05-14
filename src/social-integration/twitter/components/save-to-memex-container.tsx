@@ -54,6 +54,7 @@ export type Props = StateProps & DispatchProps & OwnProps
 interface State {
     isMouseInside: boolean
     saved: boolean
+    saving: boolean
     setTagHolder: boolean
     tags: string[]
 }
@@ -71,6 +72,7 @@ class SaveToMemexContainer extends Component<Props, State> {
         this.state = {
             isMouseInside: false,
             saved: false,
+            saving: false,
             setTagHolder: false,
             tags: [],
         }
@@ -116,6 +118,7 @@ class SaveToMemexContainer extends Component<Props, State> {
 
     private saveTweet = async e => {
         e.preventDefault()
+        this.setState(state => ({ saving: true }))
         try {
             const id = await this.props.saveTweet()
             this.setState(state => ({
@@ -124,6 +127,7 @@ class SaveToMemexContainer extends Component<Props, State> {
         } catch (e) {
             console.error(e)
         }
+        this.setState(state => ({ saving: false }))
     }
 
     private handleMouseEnter = () => {
@@ -167,6 +171,7 @@ class SaveToMemexContainer extends Component<Props, State> {
                                 styles.memexIcon,
                                 {
                                     [styles.saved]: this.state.saved,
+                                    [styles.saving]: this.state.saving,
                                 },
                             )}
                         />

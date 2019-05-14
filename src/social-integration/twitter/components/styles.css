@@ -21,6 +21,10 @@
     background-image: url('/img/checkRound.svg');
 }
 
+.saving {
+    background-image: url('/img/loading_spinner.svg');
+}
+
 .saveToMemex {
     margin-bottom: -6px;
 }
