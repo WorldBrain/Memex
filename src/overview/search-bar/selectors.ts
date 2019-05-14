@@ -44,6 +44,8 @@ export const showClearFiltersBtn = createSelector(
     filterSelectors.tagsExc,
     filterSelectors.domainsInc,
     filterSelectors.domainsExc,
+    filterSelectors.usersInc,
+    filterSelectors.usersExc,
     startDate,
     endDate,
     (
@@ -52,6 +54,8 @@ export const showClearFiltersBtn = createSelector(
         tagsExc,
         domainsInc,
         domainsExc,
+        usersInc,
+        usersExc,
         startDate,
         endDate,
     ) =>
@@ -60,6 +64,8 @@ export const showClearFiltersBtn = createSelector(
         !!tagsExc.length ||
         !!domainsInc.length ||
         !!domainsExc.length ||
+        !!usersInc.length ||
+        !!usersExc.length ||
         startDate ||
         endDate,
 )

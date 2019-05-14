@@ -43,7 +43,7 @@ class ActionBarItems extends Component<Props, State> {
     }
 
     componentWillUnMount() {
-        this.removeEventListeners
+        this.removeEventListeners()
     }
 
     private attachEventListeners() {

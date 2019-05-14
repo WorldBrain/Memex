@@ -131,7 +131,9 @@ export default class SearchStorage extends FeatureStorage {
         const mergeResutls = [...pages, ...socialPages]
         mergeResutls.map(page => results.set(page.url, page))
 
-        return pageUrls.map(url => results.get(url))
+        return pageUrls
+            .map(url => results.get(url))
+            .filter(page => page !== undefined)
     }
 
     /**
