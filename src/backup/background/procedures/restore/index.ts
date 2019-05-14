@@ -335,6 +335,10 @@ export function _deserializeChangeFields(change: ObjectChange) {
         object.lastEdited = new Date(object.lastEdited)
     }
 
+    if (checkSerializedExists(['tweets'], 'createdAt')) {
+        object.createdAt = new Date(object.createdAt)
+    }
+
     if (
         checkSerializedExists(['customLists', 'pageListEntries'], 'createdAt')
     ) {

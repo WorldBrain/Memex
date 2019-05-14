@@ -40,7 +40,7 @@ export function getTweetInfo(element): Tweet {
     const tweet: Tweet = {
         id: tweetId,
         userId,
-        createdAt: Number(tweetTimeMs),
+        createdAt: new Date(Number(tweetTimeMs)),
         text: tweetContent,
         url: normalizeUrl(baseTwitter + permalinkPath),
         hashtags,

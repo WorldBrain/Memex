@@ -25,7 +25,7 @@ export interface User {
 export interface Tweet {
     id?: string
     userId?: string
-    createdAt?: number
+    createdAt?: Date
     text?: string
     url: string
     hashtags?: Array<string>

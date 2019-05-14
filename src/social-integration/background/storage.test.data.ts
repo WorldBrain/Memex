@@ -4,7 +4,7 @@ export const tweet = {
     url: 'tweet.url/username/12',
     userId: '1',
     hashtags: [],
-    createdAt: 1556025857000,
+    createdAt: new Date(1556025857000),
     createdWhen: new Date('2019-04-29T10:02Z'),
 }
 
@@ -14,6 +14,6 @@ export const tweet2 = {
     url: 'tweet.url/username/123',
     userId: '2',
     hashtags: ['#hashtag', '#test'],
-    createdAt: 1555578729000,
+    createdAt: new Date(1555578729000),
     createdWhen: new Date('2019-04-29T10:03Z'),
 }

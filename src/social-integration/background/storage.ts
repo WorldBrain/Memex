@@ -47,7 +47,7 @@ export default class SocialStorage extends FeatureStorage {
                 fields: {
                     id: { type: 'string' },
                     userId: { type: 'string' },
-                    createdAt: { type: 'int' },
+                    createdAt: { type: 'datetime' },
                     text: { type: 'text' },
                     url: { type: 'string' },
                     createdWhen: { type: 'datetime' },
