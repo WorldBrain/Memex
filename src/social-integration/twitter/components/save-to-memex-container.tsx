@@ -29,6 +29,7 @@ export interface StateProps {
     collections: PageList[]
     initCollSuggs: PageList[]
     isCommentSaved: boolean
+    commentText: string
 }
 
 export interface DispatchProps {
@@ -137,9 +138,11 @@ class SaveToMemexContainer extends Component<Props, State> {
     }
 
     private handleMouseLeave = () => {
-        this.setState(state => ({
-            isMouseInside: false,
-        }))
+        if (!this.props.commentText.length) {
+            this.setState(state => ({
+                isMouseInside: false,
+            }))
+        }
     }
 
     render() {
@@ -196,6 +199,7 @@ const mapStateToProps: MapStateToProps<
     collections: collections.collections(state),
     initCollSuggs: collections.initCollSuggestions(state),
     isCommentSaved: commentBox.isCommentSaved(state),
+    commentText: commentBox.commentText(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<
