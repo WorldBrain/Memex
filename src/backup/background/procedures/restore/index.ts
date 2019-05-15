@@ -4,7 +4,7 @@ import BackupStorage from '../../storage'
 import { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
-import { collections } from 'src/popup/collections-button/selectors'
+import { USERS_COLL } from 'src/social-integration/constants'
 const dataURLtoBlob = require('dataurl-to-blob')
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
@@ -283,7 +283,7 @@ export function _filterBadChange({
     }
 
     if (
-        change.collection === 'users' &&
+        change.collection === USERS_COLL &&
         object != null &&
         isBadBlob(object.profilePic)
     ) {

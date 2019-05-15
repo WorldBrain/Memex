@@ -1,9 +1,11 @@
 import * as AllRaven from 'raven-js'
+
 import {
     ObjectChangeImages,
     ObjectChange,
 } from 'src/backup/background/backend/types'
 import encodeBlob from 'src/util/encode-blob'
+import { USERS_COLL } from 'src/social-integration/constants'
 
 // tslint:disable-next-line:variable-name
 const Raven = AllRaven['default']
@@ -57,7 +59,7 @@ export async function _prepareBackupChangeForStorage(change: ObjectChange) {
     }
 
     if (
-        change.collection === 'users' &&
+        change.collection === USERS_COLL &&
         change.object != null &&
         change.object.profilePic != null
     ) {

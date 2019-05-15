@@ -1,5 +1,6 @@
 import { StorageManager } from '../../search/types'
 import { isExcludedFromBackup } from './utils'
+import { USERS_COLL } from 'src/social-integration/constants'
 
 export interface SizeEst {
     bytesWithBlobs: number
@@ -93,7 +94,7 @@ function calcObjectSize(storeName: string, obj): SizeEst {
         return { bytesWithBlobs: size, bytesWithoutBlobs: size }
     }
 
-    if (storeName === 'users' && obj.profilePic != null) {
+    if (storeName === USERS_COLL && obj.profilePic != null) {
         const { profilePic, ...rest } = obj
         const bytesWithoutBlobs = JSON.stringify(rest).length
         const bytesWithBlobs = bytesWithoutBlobs + calcBlobSize(profilePic)

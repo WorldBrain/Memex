@@ -5,6 +5,7 @@ import { Page } from 'src/search'
 import { reshapePageForDisplay } from './utils'
 import { AnnotPage } from './types'
 import { User, SocialPage } from 'src/social-integration/types'
+import { USERS_COLL } from 'src/social-integration/constants'
 
 export class PageUrlMapperPlugin extends StorageBackendPlugin<
     DexieStorageBackend
@@ -94,7 +95,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         base64Img?: boolean,
     ) {
         const users = await this.backend.dexieInstance
-            .table('users')
+            .table(USERS_COLL)
             .where('id')
             .anyOf(userIds)
             .limit(userIds.length)

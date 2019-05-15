@@ -1,7 +1,7 @@
 import { FeatureStorage } from 'src/search/storage'
 import { StorageManager } from 'src/search'
-
-import { Tweet, User } from 'src/social-integration/types'
+import { Tweet, User } from '../types'
+import * as consts from '../constants'
 
 export interface SocialStorageProps {
     storageManager: StorageManager
@@ -13,11 +13,11 @@ export interface SocialStorageProps {
 }
 
 export default class SocialStorage extends FeatureStorage {
-    static TWEETS_COLL = 'tweets'
-    static USERS_COLL = 'users'
-    static TAGS_COLL = 'tags'
-    static BMS_COLL = 'bookmarks'
-    static VISTS_COLL = 'visits'
+    static TWEETS_COLL = consts.TWEETS_COLL
+    static USERS_COLL = consts.USERS_COLL
+    static TAGS_COLL = consts.TAGS_COLL
+    static BMS_COLL = consts.BMS_COLL
+    static VISTS_COLL = consts.VISITS_COLL
 
     private tweetsColl: string
     private usersColl: string
