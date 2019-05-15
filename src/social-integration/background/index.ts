@@ -15,7 +15,7 @@ export default class SocialBackground {
     setupRemoteFunctions() {
         makeRemotelyCallable({
             addTweet: this.addTweet.bind(this),
-            delTweets: this.delTweets.bind(this),
+            delSocialPages: this.delSocialPages.bind(this),
             fetchUserSuggestions: this.fetchUserSuggestions.bind(this),
             fetchAllUsers: this.fetchAllUsers.bind(this),
         })
@@ -26,8 +26,8 @@ export default class SocialBackground {
         return this.storage.addTweet(tweet)
     }
 
-    async delTweets(urls: string[]) {
-        return this.storage.delTweets(urls)
+    async delSocialPages(urls: string[]) {
+        return this.storage.delSocialPages(urls)
     }
 
     async addUser({ profilePicUrl, ...rest }: User) {

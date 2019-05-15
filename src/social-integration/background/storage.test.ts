@@ -53,7 +53,7 @@ describe('Twitter storage', () => {
                 const url = DATA.tweet.url
                 const tweet = await socialStorage.getTweetByUrl(url)
                 assertTweet(tweet, DATA.tweet)
-                await socialStorage.delTweets([url])
+                await socialStorage.delSocialPages([url])
 
                 const afterDeletion = await socialStorage.getTweetByUrl(url)
 
