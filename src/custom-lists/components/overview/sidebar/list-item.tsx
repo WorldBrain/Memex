@@ -93,10 +93,16 @@ class PageList extends Component<Props, State> {
         }))
     }
 
+    private handleDragStart: DragEventHandler = e => {
+        this.handleMouseLeave()
+        e.dataTransfer.dropEffect = 'move'
+        const listName = this.props.listName
+        e.dataTransfer.setData('text/plain', listName)
+    }
+
     private handleDrop: DragEventHandler = e => {
         e.preventDefault()
         this.handleDragLeave()
-        // const url = e.dataTransfer.getData('URL')
         // Gets the URL of the dropped list item
         const { url, isSocialPost } = JSON.parse(
             e.dataTransfer.getData('text/plain'),
@@ -130,6 +136,8 @@ class PageList extends Component<Props, State> {
                 title={this.props.listName}
                 onDragEnter={this.handleDragOver}
                 onDragLeave={this.handleDragLeave}
+                onDragStart={this.handleDragStart}
+                draggable
             >
                 <div className={styles.listName}>{this.props.listName}</div>
                 <div className={styles.buttonContainer}>
