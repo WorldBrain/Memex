@@ -5,7 +5,6 @@ export interface Props {
     url: string
     /** The time at which the event took place. */
     time: number
-    pageType?: string
 }
 
 /**
@@ -15,13 +14,11 @@ export interface Props {
 abstract class EventModel extends AbstractModel implements Props {
     url: string
     time: number
-    pageType?: string
 
-    constructor({ url, time, pageType }: Props) {
+    constructor({ url, time }: Props) {
         super()
         this.url = url
         this.time = typeof time === 'number' ? time : +time
-        this.pageType = pageType
     }
 }
 

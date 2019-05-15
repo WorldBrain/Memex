@@ -17,7 +17,7 @@ export default class SocialStorage extends FeatureStorage {
     static USERS_COLL = consts.USERS_COLL
     static TAGS_COLL = consts.TAGS_COLL
     static BMS_COLL = consts.BMS_COLL
-    static VISTS_COLL = consts.VISITS_COLL
+    static VISITS_COLL = consts.VISITS_COLL
 
     private tweetsColl: string
     private usersColl: string
@@ -31,7 +31,7 @@ export default class SocialStorage extends FeatureStorage {
         usersColl = SocialStorage.USERS_COLL,
         tagsColl = SocialStorage.TAGS_COLL,
         bookmarksColl = SocialStorage.BMS_COLL,
-        visitsColl = SocialStorage.VISTS_COLL,
+        visitsColl = SocialStorage.VISITS_COLL,
     }: SocialStorageProps) {
         super(storageManager)
 
@@ -41,47 +41,64 @@ export default class SocialStorage extends FeatureStorage {
         this.bookmarksColl = bookmarksColl
         this.visitsColl = visitsColl
 
-        this.storageManager.registry.registerCollection(this.tweetsColl, [
-            {
-                version: new Date(2019, 4, 22),
-                fields: {
-                    id: { type: 'string' },
-                    userId: { type: 'string' },
-                    createdAt: { type: 'datetime' },
-                    text: { type: 'text' },
-                    url: { type: 'string' },
-                    createdWhen: { type: 'datetime' },
-                },
-                indices: [
-                    { field: 'url', pk: true },
-                    { field: 'userId' },
-                    { field: 'text' },
-                    { field: 'createdAt' },
-                    { field: 'createdWhen' },
-                ],
+        this.storageManager.registry.registerCollection(this.tweetsColl, {
+            version: new Date('2019-04-22'),
+            fields: {
+                id: { type: 'string' },
+                userId: { type: 'string' },
+                createdAt: { type: 'datetime' },
+                text: { type: 'text' },
+                url: { type: 'string' },
+                createdWhen: { type: 'datetime' },
             },
-        ])
+            indices: [
+                { field: 'url', pk: true },
+                { field: 'userId' },
+                { field: 'text' },
+                { field: 'createdAt' },
+                { field: 'createdWhen' },
+            ],
+        })
 
-        this.storageManager.registry.registerCollection(this.usersColl, [
-            {
-                version: new Date(2019, 4, 22),
-                fields: {
-                    id: { type: 'string' },
-                    name: { type: 'string' },
-                    username: { type: 'string' },
-                    isVerified: { type: 'boolean' },
-                    profilePic: { type: 'blob' },
-                    type: { type: 'string' },
-                },
-                indices: [
-                    { field: 'id', pk: true },
-                    { field: 'name' },
-                    { field: 'username' },
-                    { field: 'isVerified' },
-                    { field: 'type' },
-                ],
+        this.storageManager.registry.registerCollection(this.usersColl, {
+            version: new Date('2019-04-22'),
+            fields: {
+                id: { type: 'string' },
+                name: { type: 'string' },
+                username: { type: 'string' },
+                isVerified: { type: 'boolean' },
+                profilePic: { type: 'blob' },
+                type: { type: 'string' },
             },
-        ])
+            indices: [
+                { field: 'id', pk: true },
+                { field: 'name' },
+                { field: 'username' },
+                { field: 'isVerified' },
+                { field: 'type' },
+            ],
+        })
+
+        this.storageManager.registry.registerCollection(this.visitsColl, {
+            version: new Date('2019-05-15'),
+            fields: {
+                url: { type: 'string' },
+                createdAt: { type: 'datetime' },
+            },
+            indices: [
+                { field: ['createdAt', 'url'], pk: true },
+                { field: 'url' },
+            ],
+        })
+
+        this.storageManager.registry.registerCollection(this.bookmarksColl, {
+            version: new Date('2019-05-15'),
+            fields: {
+                url: { type: 'string' },
+                createdAt: { type: 'datetime' },
+            },
+            indices: [{ field: 'url', pk: true }, { field: 'createdAt' }],
+        })
     }
 
     async addTweet({
@@ -90,7 +107,7 @@ export default class SocialStorage extends FeatureStorage {
         createdWhen = new Date(),
         ...rest
     }: Tweet) {
-        await this.addSocialVisit({ url, time: createdWhen.getTime() })
+        await this.addSocialVisit({ url, time: createdWhen })
 
         const { object } = await this.storageManager
             .collection(this.tweetsColl)
@@ -129,16 +146,34 @@ export default class SocialStorage extends FeatureStorage {
 
     async addSocialVisit({
         url,
-        time = Date.now(),
+        time = new Date(),
     }: {
         url: string
-        time?: number
+        time?: Date
     }) {
         return this.storageManager.collection(this.visitsColl).createObject({
             url,
-            time,
-            pageType: 'social',
+            createdAt: time,
         })
+    }
+
+    async addSocialBookmark({
+        url,
+        time = new Date(),
+    }: {
+        url: string
+        time?: Date
+    }) {
+        return this.storageManager.collection(this.bookmarksColl).createObject({
+            url,
+            createdAt: time,
+        })
+    }
+
+    async delSocialBookmark({ url }: { url: string }) {
+        return this.storageManager
+            .collection(this.bookmarksColl)
+            .deleteOneObject({ url })
     }
 
     async delSocialPages(urls: string[]) {

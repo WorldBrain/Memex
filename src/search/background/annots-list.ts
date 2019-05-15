@@ -290,7 +290,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return annotsByPage
     }
 
-    private async queryAnnotsByDay(startDate: number, endDate: null) {
+    private async queryAnnotsByDay(startDate: Date, endDate: Date) {
         const collection = this.backend.dexieInstance
             .table<Annotation>(AnnotsStorage.ANNOTS_COLL)
             .where('lastEdited')

@@ -123,7 +123,7 @@ export default class SearchStorage extends FeatureStorage {
         )
 
         const socialPages: SocialPage[] = await this.storageManager.operation(
-            PageUrlMapperPlugin.MAP_OP_SOCIAL,
+            PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
             socialResults,
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
@@ -308,7 +308,7 @@ export default class SearchStorage extends FeatureStorage {
         }
 
         return this.storageManager.operation(
-            PageUrlMapperPlugin.MAP_OP_SOCIAL,
+            PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
             results,
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )

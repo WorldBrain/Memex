@@ -17,10 +17,10 @@ export default class BookmarksStorage extends FeatureStorage {
         this.bookmarksColl = bookmarksColl
     }
 
-    async addBookmark({ url, pageType }: { url: string; pageType?: string }) {
+    async addBookmark({ url }: { url: string }) {
         return this.storageManager
             .collection(this.bookmarksColl)
-            .createObject({ url, time: Date.now(), pageType })
+            .createObject({ url, time: Date.now() })
     }
 
     async delBookmark({ url }: { url: string }) {

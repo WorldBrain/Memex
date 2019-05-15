@@ -17,8 +17,8 @@ export default class BookmarksBackground {
         })
     }
 
-    async addBookmark({ url, pageType }: { url: string; pageType: string }) {
-        return this.storage.addBookmark({ url: normalizeUrl(url), pageType })
+    async addBookmark({ url }: { url: string }) {
+        return this.storage.addBookmark({ url: normalizeUrl(url) })
     }
 
     async delBookmark({ url }: { url: string }) {

@@ -14,6 +14,8 @@ import { handleDBQuotaErrors } from 'src/util/error-handler'
 const processEventRPC = remoteFunction('processEvent')
 const createBookmarkRPC = remoteFunction('addBookmark')
 const deleteBookmarkRPC = remoteFunction('delBookmark')
+const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
+const deleteSocialBookmarkRPC = remoteFunction('delSocialBookmark')
 const createNotifRPC = remoteFunction('createNotification')
 
 export const addTag = createAction('results/localAddTag', (tag, index) => ({
@@ -90,9 +92,16 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
             : EVENT_NAMES.CREATE_RESULT_BOOKMARK,
     })
 
-    const bookmarkRPC = hasBookmark ? deleteBookmarkRPC : createBookmarkRPC
+    let bookmarkRPC: (args: { url: string }) => Promise<void>
+    // tslint:disable-next-line: prefer-conditional-expression
+    if (hasBookmark) {
+        bookmarkRPC = user ? deleteSocialBookmarkRPC : deleteBookmarkRPC
+    } else {
+        bookmarkRPC = user ? createSocialBookmarkRPC : createBookmarkRPC
+    }
+
     try {
-        await bookmarkRPC({ url, pageType: user ? 'social' : undefined })
+        await bookmarkRPC({ url })
     } catch (err) {
         dispatch(changeHasBookmark(index))
         handleDBQuotaErrors(

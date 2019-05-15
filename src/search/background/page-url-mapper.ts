@@ -5,13 +5,13 @@ import { Page } from 'src/search'
 import { reshapePageForDisplay } from './utils'
 import { AnnotPage } from './types'
 import { User, SocialPage } from 'src/social-integration/types'
-import { USERS_COLL } from 'src/social-integration/constants'
+import { USERS_COLL, BMS_COLL } from 'src/social-integration/constants'
 
 export class PageUrlMapperPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
     static MAP_OP_ID = 'memex:dexie.mapUrlsToPages'
-    static MAP_OP_SOCIAL = 'memex:dexie.mapUrlsToSocial'
+    static MAP_OP_SOCIAL_ID = 'memex:dexie.mapUrlsToSocial'
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
@@ -22,7 +22,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         )
 
         backend.registerOperation(
-            PageUrlMapperPlugin.MAP_OP_SOCIAL,
+            PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
             this.findMatchingSocialPages.bind(this),
         )
     }
@@ -130,12 +130,12 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         })
     }
 
-    private async lookupBookmarks(
+    private async lookupSocialBookmarks(
         pageUrls: string[],
         socialMap: Map<string, SocialPage>,
     ) {
         const bms = await this.backend.dexieInstance
-            .table('bookmarks')
+            .table(BMS_COLL)
             .where('url')
             .anyOf(pageUrls)
             .limit(pageUrls.length)
@@ -323,7 +323,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
 
         await Promise.all([
             this.lookupUsers([...userIds], userMap, base64Img),
-            this.lookupBookmarks(pageUrls, socialMap),
+            this.lookupSocialBookmarks(pageUrls, socialMap),
         ])
 
         // Map page results back to original input

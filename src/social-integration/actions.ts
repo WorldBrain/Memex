@@ -8,8 +8,8 @@ const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
 const fetchAllListsRPC = remoteFunction('fetchAllLists')
-const addBookmarkRPC = remoteFunction('addBookmark')
-const delBookmarkRPC = remoteFunction('delBookmark')
+const addBookmarkRPC = remoteFunction('addSocialBookmark')
+const delBookmarkRPC = remoteFunction('delSocialBookmark')
 const addTweetRPC = remoteFunction('addTweet')
 
 export const initState: (url: string) => Thunk = url => async dispatch => {
@@ -38,7 +38,7 @@ export const toggleBookmark: (url: string, isBookmarked: boolean) => Thunk = (
 ) => async dispatch => {
     const bookmarkRPC = isBookmarked ? delBookmarkRPC : addBookmarkRPC
     try {
-        await bookmarkRPC({ url, pageType: 'social' })
+        await bookmarkRPC({ url })
     } catch (err) {}
 }
 

@@ -16,6 +16,8 @@ export default class SocialBackground {
         makeRemotelyCallable({
             addTweet: this.addTweet.bind(this),
             delSocialPages: this.delSocialPages.bind(this),
+            addSocialBookmark: this.addSocialBookmark.bind(this),
+            delSocialBookmark: this.delSocialBookmark.bind(this),
             fetchUserSuggestions: this.fetchUserSuggestions.bind(this),
             fetchAllUsers: this.fetchAllUsers.bind(this),
         })
@@ -28,6 +30,14 @@ export default class SocialBackground {
 
     async delSocialPages(urls: string[]) {
         return this.storage.delSocialPages(urls)
+    }
+
+    async addSocialBookmark({ url, time }: { url: string; time?: Date }) {
+        return this.storage.addSocialBookmark({ url, time })
+    }
+
+    async delSocialBookmark({ url }: { url: string }) {
+        return this.storage.delSocialBookmark({ url })
     }
 
     async addUser({ profilePicUrl, ...rest }: User) {
