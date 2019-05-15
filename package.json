@@ -72,8 +72,6 @@
         "react": "^16.4.1",
         "react-burger-menu": "^2.4.4",
         "react-datepicker": "^1.6.0",
-        "react-dnd": "^7.4.5",
-        "react-dnd-html5-backend": "^7.4.4",
         "react-dom": "^16.4.1",
         "react-helmet": "^5.2.0",
         "react-onclickoutside": "^6.7.1",
