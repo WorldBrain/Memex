@@ -50,7 +50,7 @@ export const cssModulesLoader = {
 }
 
 export const localIdentName = {
-    localIdentName: '[path]__[local]--[hash:base64:5]',
+    localIdentName: '[path][name]__[local]--[hash:base64:5]',
 }
 
 export const cssVanillaLoader = {
