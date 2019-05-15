@@ -157,7 +157,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const results = new Map<string, string[]>()
 
-        // Run all needed queries for each term and on each field concurrently
+        // Run all needed queries for each term and on each field sequentially
         for (const term of termsInc) {
             const termRes = await this.queryTermsField({ field, term }, params)
 

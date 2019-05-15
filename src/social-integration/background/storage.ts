@@ -55,8 +55,6 @@ export default class SocialStorage extends FeatureStorage {
                 { field: 'url', pk: true },
                 { field: 'userId' },
                 { field: 'text' },
-                { field: 'createdAt' },
-                { field: 'createdWhen' },
             ],
         })
 
@@ -74,8 +72,6 @@ export default class SocialStorage extends FeatureStorage {
                 { field: 'id', pk: true },
                 { field: 'name' },
                 { field: 'username' },
-                { field: 'isVerified' },
-                { field: 'type' },
             ],
         })
 
