@@ -80,7 +80,7 @@ class SaveToMemexContainer extends Component<Props, State> {
     }
 
     async componentDidMount() {
-        this.memexBtnRef.addEventListener('click', this.saveTweet)
+        this.memexBtnRef.addEventListener('click', this.toggleTweet)
         const pageTags = await remoteFunction('fetchPageTags')(this.url)
         this.setState(state => ({
             tags: pageTags,
@@ -92,8 +92,8 @@ class SaveToMemexContainer extends Component<Props, State> {
         this.attachTagHolder()
     }
 
-    componentWillUnMount() {
-        this.memexBtnRef.removeEventListener('click', this.saveTweet)
+    componentWillUnmount() {
+        this.memexBtnRef.removeEventListener('click', this.toggleTweet)
     }
 
     private attachTagHolder() {
@@ -117,18 +117,20 @@ class SaveToMemexContainer extends Component<Props, State> {
         }
     }
 
-    private saveTweet = async e => {
+    private toggleTweet = async e => {
         e.preventDefault()
         this.setState(state => ({ saving: true }))
         try {
-            const id = await this.props.saveTweet()
-            this.setState(state => ({
-                saved: true,
+            const id = this.state.saved
+                ? await remoteFunction('delSocialPages')([this.url])
+                : await this.props.saveTweet()
+            this.setState(prevState => ({
+                saved: !prevState.saved,
+                saving: false,
             }))
         } catch (e) {
             console.error(e)
         }
-        this.setState(state => ({ saving: false }))
     }
 
     private handleMouseEnter = () => {
@@ -157,10 +159,7 @@ class SaveToMemexContainer extends Component<Props, State> {
             >
                 <button
                     ref={ref => (this.memexBtnRef = ref)}
-                    className={cx(
-                        'ProfileTweet-actionButton u-textUserColorHover js-actionButton',
-                        styles.actionButton,
-                    )}
+                    className="ProfileTweet-actionButton u-textUserColorHover js-actionButton"
                     type="button"
                     data-nav="share_tweet_to_memex"
                 >

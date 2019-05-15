@@ -9,7 +9,6 @@
     height: 18px;
     width: 18px;
     cursor: pointer;
-    z-index: 3;
     border: none;
     vertical-align: bottom;
     background-size: 18px;
@@ -47,7 +46,6 @@
     width: 120px;
     background-color: #fff;
     position: absolute;
-    z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -93,10 +91,6 @@
 
 .collIcon {
     background-image: url('/img/collections_add.svg');
-}
-
-.actionButton {
-    z-index: 3;
 }
 
 .commentSaved {

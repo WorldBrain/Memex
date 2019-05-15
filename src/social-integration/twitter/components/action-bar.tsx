@@ -29,7 +29,7 @@ class ActionBar extends Component<Props> {
         this.props.setAnnotationsManager(this.annotationsManager)
     }
 
-    componentWillUnMount() {
+    componentWillUnmount() {
         this.props.setPage({
             url: location.href,
             title: document.title,
