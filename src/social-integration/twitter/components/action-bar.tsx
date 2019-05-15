@@ -5,28 +5,14 @@ import {
 } from 'src/common-ui/containers'
 import CommentBoxContainer from 'src/sidebar-overlay/comment-box'
 import ActionBarItems from './action-bar-items'
-import { StateProps, DispatchProps } from './save-to-memex-container'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import { Props } from './save-to-memex-container'
 
 const styles = require('./styles.css')
 
-interface OwnProps {
-    url: string
-}
-
-type Props = StateProps & DispatchProps & OwnProps
-
 class ActionBar extends Component<Props> {
-    private annotationsManager: AnnotationsManager
-
-    constructor(props: Props) {
-        super(props)
-        this.annotationsManager = new AnnotationsManager()
-    }
-
     componentDidMount() {
         this.props.onInit(this.props.url)
-        this.props.setAnnotationsManager(this.annotationsManager)
+        this.props.setAnnotationsManager(this.props.annotationsManager)
     }
 
     componentWillUnmount() {
