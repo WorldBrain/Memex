@@ -4,7 +4,12 @@ import BackupStorage from '../../storage'
 import { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
-import { USERS_COLL } from 'src/social-integration/constants'
+import {
+    USERS_COLL,
+    TWEETS_COLL,
+    BMS_COLL,
+    VISITS_COLL,
+} from 'src/social-integration/constants'
 const dataURLtoBlob = require('dataurl-to-blob')
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
@@ -327,7 +332,7 @@ export function _deserializeChangeFields(change: ObjectChange) {
         object.favIcon = _blobFromPngString(object.favIcon)
     }
 
-    if (checkSerializedExists(['annotations', 'tweets'], 'createdWhen')) {
+    if (checkSerializedExists(['annotations', TWEETS_COLL], 'createdWhen')) {
         object.createdWhen = new Date(object.createdWhen)
     }
 
@@ -335,12 +340,17 @@ export function _deserializeChangeFields(change: ObjectChange) {
         object.lastEdited = new Date(object.lastEdited)
     }
 
-    if (checkSerializedExists(['tweets'], 'createdAt')) {
-        object.createdAt = new Date(object.createdAt)
-    }
-
     if (
-        checkSerializedExists(['customLists', 'pageListEntries'], 'createdAt')
+        checkSerializedExists(
+            [
+                'customLists',
+                'pageListEntries',
+                TWEETS_COLL,
+                BMS_COLL,
+                VISITS_COLL,
+            ],
+            'createdAt',
+        )
     ) {
         object.createdAt = new Date(object.createdAt)
     }
