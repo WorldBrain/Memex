@@ -6,7 +6,7 @@ import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
 import {
     USERS_COLL,
-    TWEETS_COLL,
+    POSTS_COLL,
     BMS_COLL,
     VISITS_COLL,
 } from 'src/social-integration/constants'
@@ -332,7 +332,7 @@ export function _deserializeChangeFields(change: ObjectChange) {
         object.favIcon = _blobFromPngString(object.favIcon)
     }
 
-    if (checkSerializedExists(['annotations', TWEETS_COLL], 'createdWhen')) {
+    if (checkSerializedExists(['annotations', POSTS_COLL], 'createdWhen')) {
         object.createdWhen = new Date(object.createdWhen)
     }
 
@@ -345,7 +345,7 @@ export function _deserializeChangeFields(change: ObjectChange) {
             [
                 'customLists',
                 'pageListEntries',
-                TWEETS_COLL,
+                POSTS_COLL,
                 BMS_COLL,
                 VISITS_COLL,
             ],

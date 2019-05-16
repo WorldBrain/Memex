@@ -13,13 +13,13 @@ export interface SocialStorageProps {
 }
 
 export default class SocialStorage extends FeatureStorage {
-    static TWEETS_COLL = consts.TWEETS_COLL
+    static TWEETS_COLL = consts.POSTS_COLL
     static USERS_COLL = consts.USERS_COLL
     static TAGS_COLL = consts.TAGS_COLL
     static BMS_COLL = consts.BMS_COLL
     static VISITS_COLL = consts.VISITS_COLL
 
-    private tweetsColl: string
+    private postsColl: string
     private usersColl: string
     private bookmarksColl: string
     private tagsColl: string
@@ -35,20 +35,20 @@ export default class SocialStorage extends FeatureStorage {
     }: SocialStorageProps) {
         super(storageManager)
 
-        this.tweetsColl = tweetsColl
+        this.postsColl = tweetsColl
         this.usersColl = usersColl
         this.tagsColl = tagsColl
         this.bookmarksColl = bookmarksColl
         this.visitsColl = visitsColl
 
-        this.storageManager.registry.registerCollection(this.tweetsColl, {
+        this.storageManager.registry.registerCollection(this.postsColl, {
             version: new Date('2019-04-22'),
             fields: {
                 id: { type: 'string' },
                 userId: { type: 'string' },
-                createdAt: { type: 'datetime' },
                 text: { type: 'text' },
                 url: { type: 'string' },
+                createdAt: { type: 'datetime' },
                 createdWhen: { type: 'datetime' },
             },
             indices: [
@@ -56,6 +56,7 @@ export default class SocialStorage extends FeatureStorage {
                 { field: 'userId' },
                 { field: 'text' },
             ],
+            relationships: [{ childOf: this.usersColl, alias: 'author' }],
         })
 
         this.storageManager.registry.registerCollection(this.usersColl, {
@@ -85,6 +86,12 @@ export default class SocialStorage extends FeatureStorage {
                 { field: ['createdAt', 'url'], pk: true },
                 { field: 'url' },
             ],
+            relationships: [
+                {
+                    childOf: this.postsColl,
+                    alias: 'visits',
+                },
+            ],
         })
 
         this.storageManager.registry.registerCollection(this.bookmarksColl, {
@@ -94,6 +101,9 @@ export default class SocialStorage extends FeatureStorage {
                 createdAt: { type: 'datetime' },
             },
             indices: [{ field: 'url', pk: true }, { field: 'createdAt' }],
+            relationships: [
+                { singleChildOf: this.postsColl, alias: 'bookmark' },
+            ],
         })
     }
 
@@ -106,7 +116,7 @@ export default class SocialStorage extends FeatureStorage {
         await this.addSocialVisit({ url, time: createdWhen })
 
         const { object } = await this.storageManager
-            .collection(this.tweetsColl)
+            .collection(this.postsColl)
             .createObject({ url, createdWhen, ...rest })
 
         await this.addHashtags({ hashtags, url })
@@ -179,7 +189,7 @@ export default class SocialStorage extends FeatureStorage {
                     .collection(this.visitsColl)
                     .deleteObjects({ url }),
                 this.storageManager
-                    .collection(this.tweetsColl)
+                    .collection(this.postsColl)
                     .deleteObjects({ url }),
                 this.storageManager
                     .collection(this.tagsColl)
@@ -193,7 +203,7 @@ export default class SocialStorage extends FeatureStorage {
 
     async getTweetByUrl(url: string) {
         return this.storageManager
-            .collection(this.tweetsColl)
+            .collection(this.postsColl)
             .findOneObject<Tweet>({ url })
     }
 

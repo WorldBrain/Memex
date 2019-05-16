@@ -4,7 +4,7 @@ import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import { SocialSearchParams } from './types'
 import { Tweet, SocialPage, User } from 'src/social-integration/types'
 import {
-    TWEETS_COLL,
+    POSTS_COLL,
     BMS_COLL,
     VISITS_COLL,
     TAGS_COLL,
@@ -73,7 +73,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         const userIds = users.map(user => user.id)
 
         const urls = await this.backend.dexieInstance
-            .table(TWEETS_COLL)
+            .table(POSTS_COLL)
             .where('userId')
             .anyOf(userIds)
             .primaryKeys()
@@ -113,7 +113,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         const socialUrlMap = new Map<string, SocialPage>()
 
         await this.backend.dexieInstance
-            .table(TWEETS_COLL)
+            .table(POSTS_COLL)
             .where('url')
             .anyOf(urls)
             .each(socialPage => socialUrlMap.set(socialPage.url, socialPage))
@@ -137,7 +137,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         { startDate, endDate }: SocialSearchParams,
     ): Promise<string[]> {
         let coll = this.backend.dexieInstance
-            .table<Tweet>(TWEETS_COLL)
+            .table<Tweet>(POSTS_COLL)
             .where(args.field)
             .equals(args.term)
 
