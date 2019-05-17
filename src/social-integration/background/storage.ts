@@ -93,6 +93,15 @@ export default class SocialStorage extends FeatureStorage {
             indices: [{ field: 'createdAt' }],
             relationships: [{ singleChildOf: this.postsColl, alias: 'url' }],
         })
+
+        this.storageManager.registry.registerCollection(this.tagsColl, {
+            version: new Date('2019-05-17'),
+            fields: {
+                name: { type: 'string' },
+            },
+            indices: [{ field: 'name' }],
+            relationships: [{ childOf: this.postsColl, alias: 'url' }],
+        })
     }
 
     async addTweet({
@@ -262,5 +271,27 @@ export default class SocialStorage extends FeatureStorage {
             .findObjects<User>(query, opts)
 
         return this.attachImage(users, opts.base64Img)
+    }
+
+    async fetchAllHashtags({
+        query = {},
+        opts = {},
+    }: {
+        query?: any
+        opts?: any
+    }) {
+        const hashtags = await this.storageManager
+            .collection(this.tagsColl)
+            .findObjects(query, opts)
+
+        return hashtags.map(({ name }) => name)
+    }
+
+    async fetchHashtagSuggestions({ name }: { name: string }) {
+        const suggestions = await this.storageManager
+            .collection(this.tagsColl)
+            .suggestObjects<string, string>({ name }, { ignoreCase: ['name'] })
+
+        return suggestions.map(({ suggestion }) => suggestion)
     }
 }

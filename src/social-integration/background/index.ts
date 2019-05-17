@@ -20,6 +20,8 @@ export default class SocialBackground {
             delSocialBookmark: this.delSocialBookmark.bind(this),
             fetchUserSuggestions: this.fetchUserSuggestions.bind(this),
             fetchAllUsers: this.fetchAllUsers.bind(this),
+            fetchAllHashtags: this.fetchAllHashtags.bind(this),
+            fetchHashtagSuggestions: this.fetchHashtagSuggestions.bind(this),
         })
     }
 
@@ -84,5 +86,27 @@ export default class SocialBackground {
             query,
             opts,
         })
+    }
+
+    async fetchAllHashtags({ excludeIds = [], skip = 0, limit = 20 }) {
+        const query = {
+            name: {
+                $nin: excludeIds,
+            },
+        }
+
+        const opts = {
+            limit,
+            skip,
+        }
+
+        return this.storage.fetchAllHashtags({
+            query,
+            opts,
+        })
+    }
+
+    async fetchHashtagSuggestions({ name }: { name: string }) {
+        return this.storage.fetchHashtagSuggestions({ name })
     }
 }
