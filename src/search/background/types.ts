@@ -93,4 +93,6 @@ export interface AnnotsByPageUrl {
 export interface SocialSearchParams extends AnnotSearchParams {
     usersInc?: User[]
     usersExc?: User[]
+    hashtagsInc?: string[]
+    hashtagsExc?: string[]
 }

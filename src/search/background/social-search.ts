@@ -57,10 +57,25 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const urls = new Set<string>()
         await this.backend.dexieInstance
-            .table(TAGS_COLL)
+            .table('tags')
             .where('name')
             .anyOf(tags)
             .eachPrimaryKey(([name, url]) => urls.add(url))
+
+        return urls
+    }
+
+    private async socialTagSearch(tags: string[]) {
+        if (!tags || !tags.length) {
+            return undefined
+        }
+
+        const urls = new Set<string>()
+        await this.backend.dexieInstance
+            .table(TAGS_COLL)
+            .where('name')
+            .anyOf(tags)
+            .each(({ url }) => urls.add(url))
 
         return urls
     }
@@ -74,7 +89,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const urls = await this.backend.dexieInstance
             .table(POSTS_COLL)
-            .where('userId')
+            .where('userIdRel')
             .anyOf(userIds)
             .primaryKeys()
 
@@ -87,23 +102,27 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             excTagUrls,
             incUserUrls,
             excUserUrls,
+            incHashtagUrls,
+            excHashtagUrls,
             listUrls,
         ] = await Promise.all([
             this.tagSearch(params.tagsInc),
             this.tagSearch(params.tagsExc),
             this.userSearch(params.usersInc),
             this.userSearch(params.usersExc),
+            this.socialTagSearch(params.hashtagsInc),
+            this.socialTagSearch(params.hashtagsExc),
             this.listSearch(params.collections),
         ])
 
         return new FilteredURLsManager({
-            incDomainUrls: undefined,
-            excDomainUrls: undefined,
             incTagUrls,
             excTagUrls,
             listUrls,
             incUserUrls,
             excUserUrls,
+            incHashtagUrls,
+            excHashtagUrls,
         })
     }
 

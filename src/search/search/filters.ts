@@ -31,6 +31,8 @@ export class FilteredURLsManager implements FilteredURLs {
         listUrls,
         incUserUrls,
         excUserUrls,
+        incHashtagUrls,
+        excHashtagUrls,
     }: {
         [key: string]: Set<string>
     }) {
@@ -40,6 +42,7 @@ export class FilteredURLsManager implements FilteredURLs {
             incTagUrls ? [...incTagUrls] : incTagUrls,
             listUrls ? [...listUrls] : listUrls,
             incUserUrls ? [...incUserUrls] : incUserUrls,
+            incHashtagUrls ? [...incHashtagUrls] : incHashtagUrls,
         ].filter(urls => urls != null)
 
         // Depends on no. of applied filters whether to take intersection or just flatten.
@@ -52,6 +55,7 @@ export class FilteredURLsManager implements FilteredURLs {
                 ...(excUserUrls || []),
                 ...(excDomainUrls || []),
                 ...(excTagUrls || []),
+                ...(excHashtagUrls || []),
             ]),
         )
 
@@ -59,13 +63,15 @@ export class FilteredURLsManager implements FilteredURLs {
             ...(excUserUrls || []),
             ...(excDomainUrls || []),
             ...(excTagUrls || []),
+            ...(excHashtagUrls || []),
         ])
 
         this.isDataFiltered = !!(
             incDomainUrls ||
             incTagUrls ||
             listUrls ||
-            incUserUrls
+            incUserUrls ||
+            incHashtagUrls
         )
     }
 
@@ -180,7 +186,5 @@ export const findFilteredUrls = (getDb: () => Promise<Dexie>) => async (
         incDomainUrls,
         excDomainUrls,
         listUrls,
-        incUserUrls: undefined,
-        excUserUrls: undefined,
     })
 }
