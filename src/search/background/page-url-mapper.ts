@@ -136,7 +136,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
     ) {
         const bms = await this.backend.dexieInstance
             .table(BMS_COLL)
-            .where('url')
+            .where('urlRel')
             .anyOf(pageUrls)
             .limit(pageUrls.length)
             .toArray()

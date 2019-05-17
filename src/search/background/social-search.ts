@@ -187,13 +187,8 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         await this.backend.dexieInstance
             .table(VISITS_COLL)
-            .where('[createdAt+url]')
-            .between(
-                [new Date(startDate), ''],
-                [new Date(endDate), String.fromCharCode(65535)],
-                true,
-                true,
-            )
+            .where('createdAt')
+            .between(new Date(startDate), new Date(endDate), true, true)
             .reverse()
             .until(() => latestVisits.size >= skip + limit)
             .each(({ createdAt, url }) => {
@@ -259,7 +254,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
                         let done = false
                         await this.backend.dexieInstance
                             .table(VISITS_COLL)
-                            .where('url')
+                            .where('urlRel')
                             .equals(currentUrl)
                             .reverse()
                             .until(() => done)
@@ -316,7 +311,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         const latestBookmarks: PageResultsMap = new Map()
         await this.backend.dexieInstance
             .table(BMS_COLL)
-            .where('url')
+            .where('urlRel')
             .anyOf(urls)
             .each(({ createdAt, url }) =>
                 attemptAdd(latestBookmarks, bookmarksOnly)(
@@ -333,12 +328,12 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const visits = await this.backend.dexieInstance
             .table(VISITS_COLL)
-            .where('url')
+            .where('urlRel')
             .anyOf(urlsToCheck)
             .reverse()
             .primaryKeys()
 
-        visits.forEach(([createdAt, url]) => {
+        visits.forEach(({ createdAt, url }) => {
             const current = visitsPerPage.get(url) || []
             visitsPerPage.set(url, [...current, createdAt.valueOf()])
         })
