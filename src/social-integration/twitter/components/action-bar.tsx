@@ -5,7 +5,11 @@ import {
 } from 'src/common-ui/containers'
 import CommentBoxContainer from 'src/sidebar-overlay/comment-box'
 import ActionBarItems from './action-bar-items'
-import { Props } from './save-to-memex-container'
+import { Props as RootProps } from './save-to-memex-container'
+
+interface Props extends RootProps {
+    saveTweet: (callback?: boolean) => (e: Event) => void
+}
 
 const styles = require('./styles.css')
 
@@ -69,6 +73,7 @@ class ActionBar extends Component<Props> {
                     tagManager={this.renderTagsManager()}
                     collectionsManager={this.renderCollectionsManager()}
                     toggleBookmark={this.props.toggleBookmark}
+                    saveTweet={this.props.saveTweet(true)}
                 />
             </div>
         )

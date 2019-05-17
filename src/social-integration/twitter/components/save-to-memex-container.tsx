@@ -81,7 +81,7 @@ class SaveToMemexContainer extends Component<Props, State> {
     }
 
     async componentDidMount() {
-        this.memexBtnRef.addEventListener('click', this.toggleTweet)
+        this.memexBtnRef.addEventListener('click', this.toggleTweet())
         const pageTags = await remoteFunction('fetchPageTags')(this.url)
         this.setState(state => ({
             tags: pageTags,
@@ -94,7 +94,7 @@ class SaveToMemexContainer extends Component<Props, State> {
     }
 
     componentWillUnmount() {
-        this.memexBtnRef.removeEventListener('click', this.toggleTweet)
+        this.memexBtnRef.removeEventListener('click', this.toggleTweet())
     }
 
     private attachTagHolder() {
@@ -118,8 +118,11 @@ class SaveToMemexContainer extends Component<Props, State> {
         }
     }
 
-    private toggleTweet = async e => {
+    private toggleTweet = (isCallback?: boolean) => async (e: Event) => {
         e.preventDefault()
+        if (isCallback && this.state.saved) {
+            return
+        }
         this.setState(state => ({ saving: true }))
         try {
             const id = this.state.saved
@@ -182,7 +185,11 @@ class SaveToMemexContainer extends Component<Props, State> {
                     </div>
                 </button>
                 {this.state.isMouseInside && (
-                    <ActionBar {...this.props} url={this.url} />
+                    <ActionBar
+                        {...this.props}
+                        url={this.url}
+                        saveTweet={this.toggleTweet}
+                    />
                 )}
             </div>
         )
