@@ -15,7 +15,7 @@ import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 export interface Props {
     env?: 'inpage' | 'overview'
-    source: 'tag' | 'domain' | 'user'
+    source: 'tag' | 'domain' | 'user' | 'hashtag'
     /** The URL to use for dis/associating new tags with; set this to keep in sync with index. */
     url?: string
     hover?: boolean
@@ -85,6 +85,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private createNotif
     private inputEl: HTMLInputElement
     private fetchUserSuggestionsRPC
+    private fetchHashtagSuggestionsRPC
 
     constructor(props: Props) {
         super(props)
@@ -101,6 +102,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.processEvent = remoteFunction('processEvent')
         this.createNotif = remoteFunction('createNotification')
         this.fetchUserSuggestionsRPC = remoteFunction('fetchUserSuggestions')
+        this.fetchHashtagSuggestionsRPC = remoteFunction(
+            'fetchHashtagSuggestions',
+        )
 
         if (this.props.isForAnnotation) {
             this.addTagRPC = remoteFunction('addAnnotationTag')
@@ -227,7 +231,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private pageHasTag = (value: any, inc: boolean) => {
         const filters = inc ? this.state.filters : this.state.excFilters
         return this.props.source === 'user'
-            ? filters.find(user => user.id === value.id)
+            ? filters.find(user => user.id === value.id) !== undefined
             : filters.includes(value)
     }
     private setInputRef = (el: HTMLInputElement) => (this.inputEl = el)
@@ -566,6 +570,10 @@ class IndexDropdownContainer extends Component<Props, State> {
                 suggestions = await this.fetchUserSuggestionsRPC({
                     name: searchVal,
                     base64Img: this.props.isForRibbon,
+                })
+            } else if (this.props.source === 'hashtag') {
+                suggestions = await this.fetchHashtagSuggestionsRPC({
+                    name: searchVal,
                 })
             } else {
                 suggestions = await this.suggestRPC(

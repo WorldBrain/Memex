@@ -7,6 +7,7 @@ import { actions, selectors } from 'src/search-filters'
 import { Tooltip } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
 import FilterButton from './filter-button'
+import { selectors as results } from 'src/overview/results'
 
 import cx from 'classnames'
 
@@ -14,18 +15,19 @@ const styles = require('./tags-filter.css')
 
 interface StateProps {
     tagFilterDropdown: boolean
-    tagsInc: string[]
-    tagsExc: string[]
-    displayTags: object[]
-    suggestedTags: string[]
+    hashtagsInc: string[]
+    hashtagsExc: string[]
+    displayHashtags: object[]
+    suggestedHashtags: string[]
+    isSocialSearch: boolean
 }
 
 interface DispatchProps {
-    setTagFilter: (value: boolean) => void
-    addIncTagFilter: (tag: string) => void
-    delIncTagFilter: (tag: string) => void
-    addExcTagFilter: (tag: string) => void
-    delExcTagFilter: (tag: string) => void
+    setHashtagFilter: (value: boolean) => void
+    addIncHashtagFilter: (tag: string) => void
+    delIncHashtagFilter: (tag: string) => void
+    addExcHashtagFilter: (tag: string) => void
+    delExcHashtagFilter: (tag: string) => void
     clearTagFilters: () => void
     resetFilterPopups: () => void
 }
@@ -39,25 +41,29 @@ type Props = StateProps & DispatchProps & OwnProps
 
 interface State {}
 
-class TagsFilter extends PureComponent<Props, State> {
+class HashtagsFilter extends PureComponent<Props, State> {
     private togglePopup: React.MouseEventHandler<HTMLButtonElement> = e => {
         if (this.props.env === 'inpage' && !this.props.tagFilterDropdown) {
             this.props.resetFilterPopups()
         }
 
         this.props.tagFilterDropdown
-            ? this.props.setTagFilter(false)
-            : this.props.setTagFilter(true)
+            ? this.props.setHashtagFilter(false)
+            : this.props.setHashtagFilter(true)
     }
 
     render() {
+        if (!this.props.isSocialSearch) {
+            return null
+        }
+
         return (
             <FilterButton
                 env={this.props.env}
-                source="Tags"
-                filteredItems={this.props.displayTags}
+                source="Hashtags"
+                filteredItems={this.props.displayHashtags}
                 togglePopup={this.togglePopup}
-                showPopup={this.props.setTagFilter}
+                showPopup={this.props.setHashtagFilter}
                 clearFilters={this.props.clearTagFilters}
                 disableOnClickOutside={this.props.env === 'inpage'}
             >
@@ -70,14 +76,14 @@ class TagsFilter extends PureComponent<Props, State> {
                     >
                         <IndexDropdown
                             env={this.props.env}
-                            onFilterAdd={this.props.addIncTagFilter}
-                            onFilterDel={this.props.delIncTagFilter}
-                            onExcFilterAdd={this.props.addExcTagFilter}
-                            onExcFilterDel={this.props.delExcTagFilter}
-                            initFilters={this.props.tagsInc}
-                            initExcFilters={this.props.tagsExc}
-                            initSuggestions={this.props.suggestedTags}
-                            source="tag"
+                            onFilterAdd={this.props.addIncHashtagFilter}
+                            onFilterDel={this.props.delIncHashtagFilter}
+                            onExcFilterAdd={this.props.addExcHashtagFilter}
+                            onExcFilterDel={this.props.delExcHashtagFilter}
+                            initFilters={this.props.hashtagsInc}
+                            initExcFilters={this.props.hashtagsExc}
+                            initSuggestions={this.props.suggestedHashtags}
+                            source="hashtag"
                             isForSidebar
                             isForRibbon={this.props.env === 'inpage'}
                         />
@@ -91,11 +97,12 @@ class TagsFilter extends PureComponent<Props, State> {
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
     state,
 ): StateProps => ({
-    tagsInc: selectors.tags(state),
-    tagsExc: selectors.tagsExc(state),
-    displayTags: selectors.displayTags(state),
-    suggestedTags: selectors.suggestedTags(state),
-    tagFilterDropdown: selectors.tagFilter(state),
+    hashtagsInc: selectors.hashtagsInc(state),
+    hashtagsExc: selectors.hashtagsExc(state),
+    displayHashtags: selectors.displayHashtags(state),
+    suggestedHashtags: selectors.suggestedHashtags(state),
+    tagFilterDropdown: selectors.hashtagFilter(state),
+    isSocialSearch: results.isSocialSearch(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<
@@ -103,22 +110,19 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps,
     RootState
 > = dispatch => ({
-    addIncTagFilter: tag => {
-        dispatch(actions.addTagFilter(tag))
-        dispatch(actions.fetchSuggestedTags())
-    },
-    delIncTagFilter: tag => dispatch(actions.delTagFilter(tag)),
-    addExcTagFilter: tag => dispatch(actions.addExcTagFilter(tag)),
-    delExcTagFilter: tag => dispatch(actions.delExcTagFilter(tag)),
+    addIncHashtagFilter: tag => dispatch(actions.addIncHashtagFilter(tag)),
+    delIncHashtagFilter: tag => dispatch(actions.delIncHashtagFilter(tag)),
+    addExcHashtagFilter: tag => dispatch(actions.addExcHashtagFilter(tag)),
+    delExcHashtagFilter: tag => dispatch(actions.delExcHashtagFilter(tag)),
     clearTagFilters: () => {
-        dispatch(actions.setTagFilters([]))
-        dispatch(actions.setExcTagFilters([]))
+        dispatch(actions.setIncHashtagFilters([]))
+        dispatch(actions.setExcHashtagFilters([]))
     },
-    setTagFilter: value => dispatch(actions.setTagFilter(value)),
+    setHashtagFilter: value => dispatch(actions.setHashtagFilter(value)),
     resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-)(TagsFilter)
+)(HashtagsFilter)

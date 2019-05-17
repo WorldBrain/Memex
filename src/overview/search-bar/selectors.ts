@@ -22,6 +22,8 @@ export const isEmptyQuery = createSelector(
     filterSelectors.onlyBookmarks,
     filterSelectors.displayTags,
     filterSelectors.displayDomains,
+    filterSelectors.displayUsers,
+    filterSelectors.displayHashtags,
     (
         q,
         startDateVal,
@@ -29,13 +31,17 @@ export const isEmptyQuery = createSelector(
         showOnlyBookmarks,
         filterTags,
         filterDomains,
+        filterUsers,
+        filterHashtags,
     ) =>
         !q.length &&
         !startDateVal &&
         !endDateVal &&
         !showOnlyBookmarks &&
         !filterTags.length &&
-        !filterDomains.length,
+        !filterDomains.length &&
+        !filterUsers.length &&
+        !filterHashtags.length,
 )
 
 export const showClearFiltersBtn = createSelector(
@@ -46,6 +52,8 @@ export const showClearFiltersBtn = createSelector(
     filterSelectors.domainsExc,
     filterSelectors.usersInc,
     filterSelectors.usersExc,
+    filterSelectors.hashtagsInc,
+    filterSelectors.hashtagsExc,
     startDate,
     endDate,
     (
@@ -56,6 +64,8 @@ export const showClearFiltersBtn = createSelector(
         domainsExc,
         usersInc,
         usersExc,
+        hashtagsInc,
+        hashtagsExc,
         startDate,
         endDate,
     ) =>
@@ -66,6 +76,8 @@ export const showClearFiltersBtn = createSelector(
         !!domainsExc.length ||
         !!usersInc.length ||
         !!usersExc.length ||
+        !!hashtagsInc.length ||
+        !!hashtagsExc.length ||
         startDate ||
         endDate,
 )

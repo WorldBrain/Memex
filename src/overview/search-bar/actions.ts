@@ -143,6 +143,8 @@ export const search: (args?: any) => Thunk = (
         base64Img: !fromOverview,
         usersInc: filters.usersInc(state),
         usersExc: filters.usersExc(state),
+        hashtagsInc: filters.hashtagsInc(state),
+        hashtagsExc: filters.hashtagsExc(state),
     }
 
     try {
