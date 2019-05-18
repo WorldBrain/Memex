@@ -1,5 +1,8 @@
+@import url('/fonts/Inter/inter.css');
+
 * {
     box-sizing: border-box;
+    font-family: Inter, sans-serif;
 }
 
 html,
