@@ -97,18 +97,22 @@ class PageList extends Component<Props, State> {
         this.handleMouseLeave()
         e.dataTransfer.dropEffect = 'move'
         const listName = this.props.listName
-        e.dataTransfer.setData('text/plain', listName)
+        e.dataTransfer.setData('list-item', listName)
     }
 
     private handleDrop: DragEventHandler = e => {
         e.preventDefault()
         this.handleDragLeave()
         // Gets the URL of the dropped list item
+        const listItem = e.dataTransfer.getData('list-item')
         const { url, isSocialPost } = JSON.parse(
             e.dataTransfer.getData('text/plain'),
         )
-        // this.props.resetUrlDragged()
-        this.props.onAddPageToList(url, isSocialPost)
+        if (url) {
+            // this.props.resetUrlDragged()
+            this.props.onAddPageToList(url, isSocialPost)
+        } else {
+        }
     }
 
     private handleEditBtnClick: React.MouseEventHandler<
