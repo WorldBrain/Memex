@@ -30,6 +30,14 @@ export const addPagetoList = createAction(
         index,
     }),
 )
+
+export const addSubListToList = createAction(
+    'custom-lists/addSubListToList',
+    (subList, index) => ({
+        subList,
+        index,
+    }),
+)
 export const hidePageFromList = createAction('custom-lists/hidePageFromList')
 export const showListDeleteModal = createAction(
     'custom-lists/showListDeleteModal',
@@ -189,5 +197,18 @@ export const addUrltoList = (
         console.error(err)
     } finally {
         dispatch(addPagetoList(url, index))
+    }
+}
+
+export const addListToList = (subList, index, id) => async (
+    dispatch,
+    getState,
+) => {
+    try {
+        await remoteFunction('insertSubListToList')({ id, subList })
+    } catch (err) {
+        console.error(err)
+    } finally {
+        dispatch(addSubListToList(subList, index))
     }
 }

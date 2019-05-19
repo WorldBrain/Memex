@@ -9,6 +9,7 @@ export interface Props {
     onEditButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onCrossButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onAddPageToList: (url: string, isSocialPost: boolean) => void
+    onAddSubListToList: (subList: string) => void
     onListItemClick: () => void
 }
 
@@ -97,14 +98,14 @@ class PageList extends Component<Props, State> {
         this.handleMouseLeave()
         e.dataTransfer.dropEffect = 'move'
         const listName = this.props.listName
-        e.dataTransfer.setData('list-item', listName)
+        e.dataTransfer.setData('subList', listName)
     }
 
     private handleDrop: DragEventHandler = e => {
         e.preventDefault()
         this.handleDragLeave()
-        // Gets the URL of the dropped list item
-        const listItem = e.dataTransfer.getData('list-item')
+        // Gets subList of the dropped list item
+        const subList = e.dataTransfer.getData('subList')
         const { url, isSocialPost } = JSON.parse(
             e.dataTransfer.getData('text/plain'),
         )
@@ -112,6 +113,7 @@ class PageList extends Component<Props, State> {
             // this.props.resetUrlDragged()
             this.props.onAddPageToList(url, isSocialPost)
         } else {
+            this.props.onAddSubListToList(subList)
         }
     }
 

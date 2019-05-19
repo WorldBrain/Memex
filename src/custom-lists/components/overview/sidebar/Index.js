@@ -25,6 +25,7 @@ class ListContainer extends Component {
         createPageList: PropTypes.func.isRequired,
         updateList: PropTypes.func.isRequired,
         handleAddPageList: PropTypes.func.isRequired,
+        handleAddSubList: PropTypes.func.isRequired,
         handleDeleteList: PropTypes.func.isRequired,
         toggleCreateListForm: PropTypes.func.isRequired,
         showCreateList: PropTypes.bool.isRequired,
@@ -118,6 +119,7 @@ class ListContainer extends Component {
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
                     onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
+                    onAddSublistToList={this.props.handleAddSubList(list, i)}
                     onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
                     resetUrlDragged={this.props.resetUrlDragged}
                 />
@@ -209,6 +211,9 @@ const mapDispatchToProps = (dispatch, getState) => ({
     },
     handleAddPageList: ({ id }, index) => (url, isSocialPost) => {
         dispatch(actions.addUrltoList(url, isSocialPost, index, id))
+    },
+    handleAddSubList: ({ id }, index) => subList => {
+        dispatch(actions.addListToList(subList, index, id))
     },
     handleDeleteList: e => {
         e.preventDefault()
