@@ -88,6 +88,25 @@ const addPageToList = (state, { url, index }) => {
     }
 }
 
+const addSubListToList = (state, { subList, index }) => {
+    const { lists } = state
+    const list = lists[index]
+
+    if (list.subLists && list.subLists.includes(subList)) {
+        return state
+    }
+
+    const newList = {
+        ...list,
+        subLists: [...list.subLists, subList],
+    }
+
+    return {
+        ...state,
+        lists: [...lists.slice(0, index), newList, ...lists.slice(index + 1)],
+    }
+}
+
 const showDeleteConfirm = (state, { id, index }) => {
     return {
         ...state,
@@ -175,6 +194,7 @@ export default createReducer(
         [actions.updateListName]: updateList,
         [actions.deleteList]: deleteList,
         [actions.addPagetoList]: addPageToList,
+        [actions.addSubListToList]: addSubListToList,
         [actions.showListDeleteModal]: showDeleteConfirm,
         [actions.toggleListFilterIndex]: toggleListFilterIndex,
         [actions.resetListDeleteModal]: state => ({
