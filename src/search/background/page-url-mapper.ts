@@ -5,7 +5,12 @@ import { Page } from 'src/search'
 import { reshapePageForDisplay } from './utils'
 import { AnnotPage } from './types'
 import { User, SocialPage } from 'src/social-integration/types'
-import { USERS_COLL, BMS_COLL } from 'src/social-integration/constants'
+import {
+    USERS_COLL,
+    POSTS_COLL,
+    BMS_COLL,
+} from 'src/social-integration/constants'
+import { deriveTweetUrlProps } from 'src/social-integration/util'
 
 export class PageUrlMapperPlugin extends StorageBackendPlugin<
     DexieStorageBackend
@@ -131,14 +136,14 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
     }
 
     private async lookupSocialBookmarks(
-        pageUrls: string[],
+        postIds: string[],
         socialMap: Map<string, SocialPage>,
     ) {
         const bms = await this.backend.dexieInstance
             .table(BMS_COLL)
-            .where('urlRel')
-            .anyOf(pageUrls)
-            .limit(pageUrls.length)
+            .where('postIdRel')
+            .anyOf(postIds)
+            .limit(postIds.length)
             .toArray()
 
         for (const { _, url } of bms) {
@@ -306,15 +311,15 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             latestTimes?: number[]
         },
     ): Promise<SocialPage[]> {
-        const pageUrls = [...socialMap.keys()]
+        const postIds = [...socialMap.keys()]
         const countMap = new Map<string, number>()
         const tagMap = new Map<string, string[]>()
         const userMap = new Map<string, User>()
 
         // Run the first set of queries to get display data
         await Promise.all([
-            this.lookupTags(pageUrls, tagMap),
-            this.lookupAnnotsCounts(pageUrls, countMap),
+            this.lookupTags(postIds, tagMap),
+            this.lookupAnnotsCounts(postIds, countMap),
         ])
 
         const userIds = new Set(
@@ -323,11 +328,11 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
 
         await Promise.all([
             this.lookupUsers([...userIds], userMap, base64Img),
-            this.lookupSocialBookmarks(pageUrls, socialMap),
+            this.lookupSocialBookmarks(postIds, socialMap),
         ])
 
         // Map page results back to original input
-        return pageUrls
+        return postIds
             .map((url, i) => {
                 const socialPage = socialMap.get(url)
 

@@ -16,6 +16,7 @@ import { reshapeParamsForOldSearch } from './utils'
 import { AnnotationsListPlugin } from './annots-list'
 import { SocialSearchPlugin } from './social-search'
 import { SocialPage } from 'src/social-integration/types'
+import { buildTweetUrl } from 'src/social-integration/util'
 import { Tag, Bookmark } from 'src/search/models'
 
 export interface SearchStorageProps {
@@ -113,13 +114,14 @@ export default class SearchStorage extends FeatureStorage {
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
 
+        pages.forEach(page => results.set(page.url, page))
+
         const socialResults: Map<
             number,
             Map<string, SocialPage>
         > = await this.storageManager.operation(
             SocialSearchPlugin.MAP_URLS_OP_ID,
             pageUrls,
-            params,
         )
 
         const socialPages: SocialPage[] = await this.storageManager.operation(
@@ -128,8 +130,8 @@ export default class SearchStorage extends FeatureStorage {
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
 
-        const mergeResutls = [...pages, ...socialPages]
-        mergeResutls.map(page => results.set(page.url, page))
+        console.log(socialPages)
+        socialPages.map(page => results.set(page.id.toString(), page))
 
         return pageUrls
             .map(url => results.get(url))
