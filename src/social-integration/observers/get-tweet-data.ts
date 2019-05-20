@@ -1,13 +1,9 @@
-import { Tweet, TweetUrl, User } from 'src/social-integration/types'
-import normalizeUrl from 'src/util/encode-url-for-id'
+import { Tweet, User } from 'src/social-integration/types'
 
-export type TweetInfo = Partial<Tweet> & TweetUrl
-
-export function getTweetInfo(element: HTMLElement): TweetInfo {
+export function getTweetInfo(element: HTMLElement): Partial<Tweet> {
     const hashtags = []
-    const baseTwitter = 'https://twitter.com'
 
-    const { name, permalinkPath, screenName, tweetId, userId } = element.dataset
+    const { name, screenName, tweetId, userId } = element.dataset
 
     const images = element.getElementsByClassName(
         'Emoji Emoji--forText',
@@ -45,11 +41,10 @@ export function getTweetInfo(element: HTMLElement): TweetInfo {
     }
 
     return {
-        id: tweetId,
+        serviceId: tweetId,
         userId,
         createdAt: new Date(Number(tweetTimeMs)),
         text: tweetContent,
-        url: normalizeUrl(baseTwitter + permalinkPath),
         hashtags,
         user,
     }

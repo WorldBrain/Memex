@@ -147,7 +147,7 @@ export default class SocialStorage extends FeatureStorage {
         postId,
     }: {
         hashtags: string[]
-        postId: string
+        postId: number
     }) {
         await Promise.all(
             hashtags.map(hashtag =>
@@ -163,7 +163,7 @@ export default class SocialStorage extends FeatureStorage {
         postId,
         time = new Date(),
     }: {
-        postId: string
+        postId: number
         time?: Date
     }) {
         return this.storageManager.collection(this.visitsColl).createObject({
@@ -176,7 +176,7 @@ export default class SocialStorage extends FeatureStorage {
         postId,
         time = new Date(),
     }: {
-        postId: string
+        postId: number
         time?: Date
     }) {
         return this.storageManager.collection(this.bookmarksColl).createObject({
@@ -185,13 +185,13 @@ export default class SocialStorage extends FeatureStorage {
         })
     }
 
-    async delSocialBookmark({ postId }: { postId: string }) {
+    async delSocialBookmark({ postId }: { postId: number }) {
         return this.storageManager
             .collection(this.bookmarksColl)
             .deleteOneObject({ postId })
     }
 
-    async delSocialPages({ postIds }: { postIds: string[] }) {
+    async delSocialPages({ postIds }: { postIds: number[] }) {
         for (const postId of postIds) {
             await Promise.all([
                 this.storageManager
@@ -210,7 +210,7 @@ export default class SocialStorage extends FeatureStorage {
         }
     }
 
-    async getSocialPost({ id }: { id: string }): Promise<Tweet> {
+    async getSocialPost({ id }: { id: number }): Promise<Tweet> {
         return this.storageManager
             .collection(this.postsColl)
             .findOneObject<Tweet>({ id })
@@ -220,7 +220,7 @@ export default class SocialStorage extends FeatureStorage {
         serviceId,
     }: {
         serviceId: string
-    }): Promise<string> {
+    }): Promise<number> {
         const post = await this.storageManager
             .collection(this.postsColl)
             .findObject<Tweet>({ serviceId })

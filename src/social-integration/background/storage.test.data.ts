@@ -1,5 +1,5 @@
 export const tweet = {
-    id: '12',
+    id: 12,
     serviceId: '12',
     text: 'This is a tweet',
     userId: '1',
@@ -9,7 +9,7 @@ export const tweet = {
 }
 
 export const tweet2 = {
-    id: '123',
+    id: 123,
     serviceId: '123',
     text: 'This is a tweet with hashtags #hashtag #test',
     userId: '2',

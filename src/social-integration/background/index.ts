@@ -27,19 +27,16 @@ export default class SocialBackground {
         })
     }
 
-    private getPostIdFromUrl = (url: string): Promise<string> => {
+    private getPostIdFromUrl = (url: string): Promise<number> => {
         const { serviceId } = deriveTweetUrlProps({ url })
 
         return this.storage.getPostIdForServiceId({ serviceId })
     }
 
-    async addTweet({ id, url, user, ...tweet }: Tweet & TweetUrl) {
+    async addTweet({ user, ...tweet }: Tweet) {
         await this.addUser(user)
 
-        return this.storage.addSocialPost({
-            ...tweet,
-            serviceId: id,
-        })
+        return this.storage.addSocialPost(tweet)
     }
 
     async delSocialPages(urls: string[]) {
