@@ -44,13 +44,12 @@ export default class SocialStorage extends FeatureStorage {
         this.storageManager.registry.registerCollection(this.postsColl, {
             version: new Date('2019-04-22'),
             fields: {
-                id: { type: 'string' },
                 text: { type: 'text' },
-                url: { type: 'string' },
+                serviceId: { type: 'string' },
                 createdAt: { type: 'datetime' },
                 createdWhen: { type: 'datetime' },
             },
-            indices: [{ field: 'url', pk: true }, { field: 'text' }],
+            indices: [{ field: 'text' }, { field: 'serviceId' }],
             relationships: [{ childOf: this.usersColl, alias: 'userId' }],
         })
 
@@ -80,7 +79,7 @@ export default class SocialStorage extends FeatureStorage {
             relationships: [
                 {
                     childOf: this.postsColl,
-                    alias: 'url',
+                    alias: 'postId',
                 },
             ],
         })
@@ -91,7 +90,7 @@ export default class SocialStorage extends FeatureStorage {
                 createdAt: { type: 'datetime' },
             },
             indices: [{ field: 'createdAt' }],
-            relationships: [{ singleChildOf: this.postsColl, alias: 'url' }],
+            relationships: [{ singleChildOf: this.postsColl, alias: 'postId' }],
         })
 
         this.storageManager.registry.registerCollection(this.tagsColl, {
@@ -100,28 +99,35 @@ export default class SocialStorage extends FeatureStorage {
                 name: { type: 'string' },
             },
             indices: [{ field: 'name' }],
-            relationships: [{ childOf: this.postsColl, alias: 'url' }],
+            relationships: [{ childOf: this.postsColl, alias: 'postId' }],
         })
     }
 
-    async addTweet({
+    async addSocialPost({
         hashtags,
-        url,
         createdWhen = new Date(),
         ...rest
     }: Tweet) {
         const { object } = await this.storageManager
             .collection(this.postsColl)
-            .createObject({ url, createdWhen, ...rest })
+            .createObject({ createdWhen, ...rest })
 
-        await this.addSocialVisit({ url, time: createdWhen })
+        const postId = object.id
 
-        await this.addHashtags({ hashtags, url })
+        await this.addSocialVisit({ postId, time: createdWhen })
+        await this.addSocialTags({ hashtags, postId })
 
-        return object.id
+        return postId
     }
 
-    async addUser({ id, name, username, isVerified, profilePic, type }: User) {
+    async addSocialUser({
+        id,
+        name,
+        username,
+        isVerified,
+        profilePic,
+        type,
+    }: User) {
         const { object } = await this.storageManager
             .collection(this.usersColl)
             .createObject({
@@ -136,72 +142,94 @@ export default class SocialStorage extends FeatureStorage {
         return object.id
     }
 
-    async addHashtags({ hashtags, url }: { hashtags: string[]; url: string }) {
+    async addSocialTags({
+        hashtags,
+        postId,
+    }: {
+        hashtags: string[]
+        postId: string
+    }) {
         await Promise.all(
             hashtags.map(hashtag =>
                 this.storageManager.collection(this.tagsColl).createObject({
                     name: hashtag,
-                    url,
+                    postId,
                 }),
             ),
         )
     }
 
     async addSocialVisit({
-        url,
+        postId,
         time = new Date(),
     }: {
-        url: string
+        postId: string
         time?: Date
     }) {
         return this.storageManager.collection(this.visitsColl).createObject({
-            url,
+            postId,
             createdAt: time,
         })
     }
 
     async addSocialBookmark({
-        url,
+        postId,
         time = new Date(),
     }: {
-        url: string
+        postId: string
         time?: Date
     }) {
         return this.storageManager.collection(this.bookmarksColl).createObject({
-            url,
+            postId,
             createdAt: time,
         })
     }
 
-    async delSocialBookmark({ url }: { url: string }) {
+    async delSocialBookmark({ postId }: { postId: string }) {
         return this.storageManager
             .collection(this.bookmarksColl)
-            .deleteOneObject({ url })
+            .deleteOneObject({ postId })
     }
 
-    async delSocialPages(urls: string[]) {
-        return urls.map(async url => {
+    async delSocialPages({ postIds }: { postIds: string[] }) {
+        for (const postId of postIds) {
             await Promise.all([
                 this.storageManager
-                    .collection(this.visitsColl)
-                    .deleteObjects({ url }),
-                this.storageManager
                     .collection(this.postsColl)
-                    .deleteObjects({ url }),
+                    .deleteObjects({ id: postId }),
+                this.storageManager
+                    .collection(this.visitsColl)
+                    .deleteObjects({ postId }),
                 this.storageManager
                     .collection(this.tagsColl)
-                    .deleteObjects({ url }),
+                    .deleteObjects({ postId }),
                 this.storageManager
                     .collection(this.bookmarksColl)
-                    .deleteObjects({ url }),
+                    .deleteObjects({ postId }),
             ])
-        })
+        }
     }
 
-    async getTweetByUrl(url: string) {
+    async getSocialPost({ id }: { id: string }): Promise<Tweet> {
         return this.storageManager
             .collection(this.postsColl)
-            .findOneObject<Tweet>({ url })
+            .findOneObject<Tweet>({ id })
+    }
+
+    async getPostIdForServiceId({
+        serviceId,
+    }: {
+        serviceId: string
+    }): Promise<string> {
+        const post = await this.storageManager
+            .collection(this.postsColl)
+            .findObject<Tweet>({ serviceId })
+
+        if (post == null) {
+            return null
+        }
+
+        return post.id
     }
 
     private encodeImage = (img: Blob, base64Img?: boolean) =>

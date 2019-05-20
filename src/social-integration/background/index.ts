@@ -1,8 +1,10 @@
 import SocialStorage from './storage'
 import { StorageManager } from 'src/search/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import { Tweet, User } from 'src/social-integration/types'
+import { Tweet, User, TweetUrl } from 'src/social-integration/types'
 import fetchImage from 'src/social-integration/fetch-image'
+import { deriveTweetUrlProps } from '../util'
+
 const dataURLtoBlob = require('dataurl-to-blob')
 
 export default class SocialBackground {
@@ -25,21 +27,34 @@ export default class SocialBackground {
         })
     }
 
-    async addTweet({ user, ...tweet }: Tweet) {
+    private getPostIdFromUrl = (url: string): Promise<string> => {
+        const { serviceId } = deriveTweetUrlProps({ url })
+
+        return this.storage.getPostIdForServiceId({ serviceId })
+    }
+
+    async addTweet({ id, url, user, ...tweet }: Tweet & TweetUrl) {
         await this.addUser(user)
-        return this.storage.addTweet(tweet)
+
+        return this.storage.addSocialPost({
+            ...tweet,
+            serviceId: id,
+        })
     }
 
     async delSocialPages(urls: string[]) {
-        return this.storage.delSocialPages(urls)
+        const postIds = await Promise.all(urls.map(this.getPostIdFromUrl))
+        return this.storage.delSocialPages({ postIds })
     }
 
     async addSocialBookmark({ url, time }: { url: string; time?: Date }) {
-        return this.storage.addSocialBookmark({ url, time })
+        const postId = await this.getPostIdFromUrl(url)
+        return this.storage.addSocialBookmark({ postId, time })
     }
 
     async delSocialBookmark({ url }: { url: string }) {
-        return this.storage.delSocialBookmark({ url })
+        const postId = await this.getPostIdFromUrl(url)
+        return this.storage.delSocialBookmark({ postId })
     }
 
     async addUser({ profilePicUrl, ...rest }: User) {
@@ -48,7 +63,7 @@ export default class SocialBackground {
             ? dataURLtoBlob(profilePicURI)
             : undefined
 
-        return this.storage.addUser({
+        return this.storage.addSocialUser({
             ...rest,
             profilePic,
         })

@@ -7,3 +7,5 @@ export const USERS_COLL = 'socialUsers'
 export const TAGS_COLL = 'socialTags'
 export const BMS_COLL = 'socialBookmarks'
 export const VISITS_COLL = 'socialVisits'
+
+export const TWEET_URL_PATTERN = /twitter\.com\/(.+)\/status\/(.+)/

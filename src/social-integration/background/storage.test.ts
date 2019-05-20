@@ -11,7 +11,7 @@ describe('Twitter storage', () => {
 
     async function insertTestData() {
         for (const tweet of [DATA.tweet, DATA.tweet2]) {
-            await socialStorage.addTweet({ ...tweet })
+            await socialStorage.addSocialPost({ ...tweet })
         }
     }
 
@@ -38,12 +38,12 @@ describe('Twitter storage', () => {
 
         describe('Delete operations: ', () => {
             test('delete tweet', async () => {
-                const url = DATA.tweet.url
-                const tweet = await socialStorage.getTweetByUrl(url)
+                const id = DATA.tweet.id
+                const tweet = await socialStorage.getSocialPost({ id })
                 assertTweet(tweet, DATA.tweet)
-                await socialStorage.delSocialPages([url])
+                await socialStorage.delSocialPages({ postIds: [id] })
 
-                const afterDeletion = await socialStorage.getTweetByUrl(url)
+                const afterDeletion = await socialStorage.getSocialPost({ id })
 
                 expect(tweet).toBeDefined()
                 expect(tweet).not.toBeNull()
