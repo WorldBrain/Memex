@@ -43,7 +43,7 @@ export const toggleBookmark: (url: string, isBookmarked: boolean) => Thunk = (
 }
 
 export const saveTweet: (
-    element: Element,
+    element: HTMLElement,
 ) => Thunk = element => async dispatch => {
     try {
         const tweet = getTweetInfo(element)

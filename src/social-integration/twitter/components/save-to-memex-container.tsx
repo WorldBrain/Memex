@@ -45,7 +45,7 @@ export interface DispatchProps {
 }
 
 interface OwnProps {
-    element: Element
+    element: HTMLElement
     annotationsManager: AnnotationsManager
     tweet?: Tweet
     url?: string

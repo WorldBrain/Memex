@@ -20,7 +20,7 @@ export default function initTwitterIntegration({
 
     twitterObserver.events.on(
         'newTweet',
-        ({ element }: { element: Element }) => {
+        ({ element }: { element: HTMLElement }) => {
             const target = document.createElement('div')
 
             target.setAttribute('id', 'memexButton')

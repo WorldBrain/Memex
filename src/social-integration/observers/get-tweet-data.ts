@@ -1,13 +1,17 @@
-import { Tweet, User } from 'src/social-integration/types'
+import { Tweet, TweetUrl, User } from 'src/social-integration/types'
 import normalizeUrl from 'src/util/encode-url-for-id'
 
-export function getTweetInfo(element): Tweet {
+export type TweetInfo = Partial<Tweet> & TweetUrl
+
+export function getTweetInfo(element: HTMLElement): TweetInfo {
     const hashtags = []
     const baseTwitter = 'https://twitter.com'
 
     const { name, permalinkPath, screenName, tweetId, userId } = element.dataset
 
-    const images = element.getElementsByClassName('Emoji Emoji--forText')
+    const images = element.getElementsByClassName(
+        'Emoji Emoji--forText',
+    ) as HTMLCollectionOf<any>
     for (const img of images) {
         img.replaceWith(img['alt'])
     }
@@ -17,8 +21,11 @@ export function getTweetInfo(element): Tweet {
         .textContent.replace('http', ' http')
         .replace('pic.twitter', ' pic.twitter')
 
-    const profilePicUrl = element.querySelector('.js-action-profile-avatar').src
-    const tweetTimeMs = element.querySelector('._timestamp').dataset.timeMs
+    const profilePicUrl = element.querySelector<HTMLImageElement>(
+        '.js-action-profile-avatar',
+    ).src
+    const tweetTimeMs = element.querySelector<HTMLElement>('._timestamp')
+        .dataset.timeMs
 
     const hashtagNodes = element.querySelectorAll('.twitter-hashtag')
 
@@ -37,7 +44,7 @@ export function getTweetInfo(element): Tweet {
         type: 'twitter',
     }
 
-    const tweet: Tweet = {
+    return {
         id: tweetId,
         userId,
         createdAt: new Date(Number(tweetTimeMs)),
@@ -46,6 +53,4 @@ export function getTweetInfo(element): Tweet {
         hashtags,
         user,
     }
-
-    return tweet
 }
