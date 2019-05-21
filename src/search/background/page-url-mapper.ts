@@ -136,20 +136,18 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
     }
 
     private async lookupSocialBookmarks(
-        postIds: string[],
-        socialMap: Map<string, SocialPage>,
+        postIds: number[],
+        socialMap: Map<number, SocialPage>,
     ) {
-        const bms = await this.backend.dexieInstance
+        return this.backend.dexieInstance
             .table(BMS_COLL)
             .where('postId')
             .anyOf(postIds)
             .limit(postIds.length)
-            .toArray()
-
-        for (const { _, url } of bms) {
-            const page = socialMap.get(url)
-            socialMap.set(url, { ...page, hasBookmark: true })
-        }
+            .each(({ postId }) => {
+                const page = socialMap.get(postId)
+                socialMap.set(postId, { ...page, hasBookmark: true })
+            })
     }
 
     private async lookupAnnotsCounts(
@@ -300,7 +298,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
     }
 
     async findMatchingSocialPages(
-        socialMap: Map<string, SocialPage>,
+        socialMap: Map<number, SocialPage>,
         {
             base64Img,
             upperTimeBound,
@@ -311,7 +309,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             latestTimes?: number[]
         },
     ): Promise<SocialPage[]> {
-        const postIds = [...socialMap.keys()]
+        const postIds = [...socialMap.keys()] as any
         const countMap = new Map<string, number>()
         const tagMap = new Map<string, string[]>()
         const userMap = new Map<string, User>()
@@ -333,8 +331,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
 
         // Map page results back to original input
         return postIds
-            .map((url, i) => {
-                const socialPage = socialMap.get(url)
+            .map((id, i) => {
+                const socialPage = socialMap.get(id)
 
                 // Data integrity issue; no matching page in the DB. Fail nicely
                 if (!socialPage) {
@@ -344,9 +342,12 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                 return {
                     ...socialPage,
                     user: userMap.get(socialPage.userId),
-                    displayTime: socialPage.createdWhen.getTime(),
-                    tags: tagMap.get(url) || [],
-                    annotsCount: countMap.get(url),
+                    displayTime:
+                        socialPage.createdAt instanceof Date
+                            ? socialPage.createdAt.getTime()
+                            : socialPage.createdAt,
+                    tags: tagMap.get(id) || [],
+                    annotsCount: countMap.get(id),
                 }
             })
             .filter(page => page !== null)

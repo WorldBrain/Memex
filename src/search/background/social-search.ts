@@ -89,13 +89,13 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const userIds = users.map(user => user.id)
 
-        const urls = await this.backend.dexieInstance
+        const postIds = await this.backend.dexieInstance
             .table(POSTS_COLL)
             .where('userId')
             .anyOf(userIds)
             .primaryKeys()
 
-        return new Set<string>([...urls])
+        return new Set<string>([...postIds])
     }
 
     private async findFilteredPosts(params: SocialSearchParams) {
@@ -130,7 +130,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
     async mapUrlsToSocialPages(
         urls: string[],
-    ): Promise<Map<string, SocialPage>> {
+    ): Promise<Map<number, SocialPage>> {
         const postIds = await Promise.all(
             urls.map(async url => {
                 const { serviceId } = deriveTweetUrlProps({ url })
@@ -149,12 +149,11 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
     private async mapIdsToSocialPages(
         postIds: number[],
-    ): Promise<Map<string, SocialPage>> {
-        const socialPosts = new Map<string, SocialPage>()
+    ): Promise<Map<number, SocialPage>> {
+        const socialPosts = new Map<number, SocialPage>()
 
-        console.log(postIds)
         await this.backend.dexieInstance
-            .table(POSTS_COLL)
+            .table<Tweet>(POSTS_COLL)
             .where('id')
             .anyOf(postIds)
             .each(post => socialPosts.set(post.id, post))
@@ -168,7 +167,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             term: string
         },
         { startDate, endDate }: SocialSearchParams,
-    ): Promise<string[]> {
+    ): Promise<number[]> {
         let coll = this.backend.dexieInstance
             .table<Tweet>(POSTS_COLL)
             .where(args.field)
@@ -177,8 +176,8 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         if (startDate || endDate) {
             coll = coll.filter(
                 tweet =>
-                    tweet.createdWhen >= new Date(startDate || 0) &&
-                    tweet.createdWhen <= new Date(endDate || Date.now()),
+                    tweet.createdAt >= new Date(startDate || 0) &&
+                    tweet.createdAt <= new Date(endDate || Date.now()),
             )
         }
 
@@ -265,7 +264,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
     }: Partial<SocialSearchParams>) {
         let bmsExhausted = false
         let results = new Map<number, number>()
-        let upperBound = Date.now()
+        let upperBound = new Date()
 
         while (results.size < skip + limit && !bmsExhausted) {
             const bms = new Map<number, number>()
@@ -285,13 +284,13 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             }
 
             await Promise.all(
-                [...bms].map(async ([currentUrl, currentTime]) => {
+                [...bms].map(async ([postId, currentTime]) => {
                     if (currentTime > endDate || currentTime < startDate) {
                         let done = false
                         await this.backend.dexieInstance
                             .table(VISITS_COLL)
-                            .where('urlRel')
-                            .equals(currentUrl)
+                            .where('postId')
+                            .equals(postId)
                             .reverse()
                             .until(() => done)
                             .each(({ createdAt }) => {
@@ -300,7 +299,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
                                     visitTime >= startDate &&
                                     visitTime <= endDate
                                 ) {
-                                    bms.set(currentUrl, visitTime)
+                                    bms.set(postId, visitTime)
                                     done = true
                                 }
                             })
@@ -308,7 +307,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
                 }),
             )
 
-            upperBound = Math.min(...bms.values()) - 1
+            upperBound = new Date(Math.min(...bms.values()) - 1)
 
             results = new Map([
                 ...results,
@@ -364,17 +363,15 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const visitsPerPage = new Map<number, number[]>()
 
-        const visits = await this.backend.dexieInstance
+        await this.backend.dexieInstance
             .table(VISITS_COLL)
             .where('postId')
             .anyOf(idsToCheck)
             .reverse()
-            .primaryKeys()
-
-        visits.forEach(({ createdAt, postId }) => {
-            const current = visitsPerPage.get(postId) || []
-            visitsPerPage.set(postId, [...current, createdAt.valueOf()])
-        })
+            .each(({ createdAt, postId }) => {
+                const current = visitsPerPage.get(postId) || []
+                visitsPerPage.set(postId, [...current, createdAt.valueOf()])
+            })
 
         idsToCheck.forEach((postId, i) => {
             const currVisits = visitsPerPage.get(postId) || []
@@ -406,7 +403,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
     async searchSocial(
         params: SocialSearchParams,
-    ): Promise<Map<string, SocialPage>> {
+    ): Promise<Map<number, SocialPage>> {
         let postScoresMap: Map<number, number>
         const filteredPosts = await this.findFilteredPosts(params)
 
@@ -414,18 +411,15 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             (!params.termsInc || !params.termsInc.length) &&
             filteredPosts.isDataFiltered
         ) {
-            console.log('map urls')
             postScoresMap = await this.mapUrlsToLatestEvents(params, [
                 ...filteredPosts.include,
             ] as any)
         } else if (!params.termsInc || !params.termsInc.length) {
-            console.log('grouping time')
             postScoresMap = await this.groupLatestEventsByUrl(
                 params,
                 filteredPosts,
             )
         } else {
-            console.log('term search')
             const termsSearchResults = await this.lookupTerms(params)
             const filteredResults = termsSearchResults.filter(id =>
                 filteredPosts.isAllowed(id as any),
@@ -440,7 +434,6 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .sort(([, a], [, b]) => b - a)
             .slice(params.skip, params.skip + params.limit)
 
-        console.log(ids)
         const pages = await this.mapIdsToSocialPages(
             ids.map(([postId]) => postId),
         )
