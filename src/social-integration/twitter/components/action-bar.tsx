@@ -49,6 +49,7 @@ class ActionBar extends Component<Props> {
                 initSuggestions={this.props.initCollSuggs}
                 onFilterAdd={this.props.onCollectionAdd}
                 onFilterDel={this.props.onCollectionDel}
+                addPageToListRPC="addPostToList"
                 isForRibbon
             />
         )

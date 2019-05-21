@@ -8,6 +8,7 @@ import {
     BMS_COLL,
     VISITS_COLL,
     TAGS_COLL,
+    LIST_ENTRIES_COLL,
 } from 'src/social-integration/constants'
 import { deriveTweetUrlProps } from 'src/social-integration/util'
 import { FilteredURLsManager } from 'src/search/search/filters'
@@ -41,7 +42,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         const urls = new Set<string>()
 
         const listEntries = await this.backend.dexieInstance
-            .table('pageListEntries')
+            .table(LIST_ENTRIES_COLL)
             .where('listId')
             .equals(Number(lists[0]))
             .toArray()

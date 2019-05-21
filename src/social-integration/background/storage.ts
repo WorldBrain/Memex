@@ -10,6 +10,7 @@ export interface SocialStorageProps {
     tagsColl?: string
     bookmarksColl?: string
     visitsColl?: string
+    listEntriesColl?: string
 }
 
 export default class SocialStorage extends FeatureStorage {
@@ -18,12 +19,14 @@ export default class SocialStorage extends FeatureStorage {
     static TAGS_COLL = consts.TAGS_COLL
     static BMS_COLL = consts.BMS_COLL
     static VISITS_COLL = consts.VISITS_COLL
+    static LIST_ENTRIES_COLL = consts.LIST_ENTRIES_COLL
 
     private postsColl: string
     private usersColl: string
     private bookmarksColl: string
     private tagsColl: string
     private visitsColl: string
+    private listEntriesColl: string
 
     constructor({
         storageManager,
@@ -32,6 +35,7 @@ export default class SocialStorage extends FeatureStorage {
         tagsColl = SocialStorage.TAGS_COLL,
         bookmarksColl = SocialStorage.BMS_COLL,
         visitsColl = SocialStorage.VISITS_COLL,
+        listEntriesColl = SocialStorage.LIST_ENTRIES_COLL,
     }: SocialStorageProps) {
         super(storageManager)
 
@@ -40,6 +44,7 @@ export default class SocialStorage extends FeatureStorage {
         this.tagsColl = tagsColl
         this.bookmarksColl = bookmarksColl
         this.visitsColl = visitsColl
+        this.listEntriesColl = listEntriesColl
 
         this.storageManager.registry.registerCollection(this.postsColl, {
             version: new Date('2019-04-22'),
@@ -120,7 +125,39 @@ export default class SocialStorage extends FeatureStorage {
                 },
             ],
         })
+
+        this.storageManager.registry.registerCollection(this.listEntriesColl, {
+            version: new Date('2019-05-17'),
+            fields: {
+                createdAt: { type: 'datetime' },
+            },
+            relationships: [
+                {
+                    childOf: 'customLists',
+                    alias: 'listId',
+                    fieldName: 'listId',
+                },
+                {
+                    childOf: this.postsColl,
+                    alias: 'postId',
+                    fieldName: 'postId',
+                },
+            ],
         })
+    }
+
+    async addListEntry({
+        createdAt = new Date(),
+        ...entry
+    }: {
+        postId: number
+        listId: number
+        createdAt?: Date
+    }) {
+        const { object } = await this.storageManager
+            .collection(this.listEntriesColl)
+            .createObject({ createdAt, ...entry })
+        return object.id
     }
 
     async addSocialPost({

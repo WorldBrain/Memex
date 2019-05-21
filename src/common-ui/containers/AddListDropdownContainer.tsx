@@ -29,6 +29,7 @@ export interface Props {
     allTabsCollection?: boolean
     isList: boolean
     isForRibbon: boolean
+    addPageToListRPC?: string
 }
 
 export interface State {
@@ -48,6 +49,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         onFilterDel: noop,
         initLists: [],
         isForRibbon: false,
+        addPageToListRPC: 'insertPageToList',
     }
 
     private err: { timestamp: number; err: Error }
@@ -65,7 +67,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         super(props)
 
         this.addListRPC = remoteFunction('createCustomList')
-        this.addPageToListRPC = remoteFunction('insertPageToList')
+        this.addPageToListRPC = remoteFunction(props.addPageToListRPC)
         this.deletePageFromListRPC = remoteFunction('removePageFromList')
         this.addOpenTabsToListRPC = remoteFunction('addOpenTabsToList')
         this.removeOpenTabsFromListRPC = remoteFunction(
