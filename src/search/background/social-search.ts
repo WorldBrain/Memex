@@ -90,7 +90,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const urls = await this.backend.dexieInstance
             .table(POSTS_COLL)
-            .where('userIdRel')
+            .where('userId')
             .anyOf(userIds)
             .primaryKeys()
 
@@ -348,7 +348,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         const latestBookmarks = new Map<number, number>()
         await this.backend.dexieInstance
             .table(BMS_COLL)
-            .where('postIdRel')
+            .where('postId')
             .anyOf(postIds)
             .each(({ createdAt, postId }) =>
                 attemptAdd(latestBookmarks, bookmarksOnly)(
@@ -365,7 +365,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const visits = await this.backend.dexieInstance
             .table(VISITS_COLL)
-            .where('postIdRel')
+            .where('postId')
             .anyOf(idsToCheck)
             .reverse()
             .primaryKeys()

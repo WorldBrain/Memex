@@ -50,7 +50,13 @@ export default class SocialStorage extends FeatureStorage {
                 createdWhen: { type: 'datetime' },
             },
             indices: [{ field: 'text' }, { field: 'serviceId' }],
-            relationships: [{ childOf: this.usersColl, alias: 'userId' }],
+            relationships: [
+                {
+                    childOf: this.usersColl,
+                    alias: 'userId',
+                    fieldName: 'userId',
+                },
+            ],
         })
 
         this.storageManager.registry.registerCollection(this.usersColl, {
@@ -80,6 +86,7 @@ export default class SocialStorage extends FeatureStorage {
                 {
                     childOf: this.postsColl,
                     alias: 'postId',
+                    fieldName: 'postId',
                 },
             ],
         })
@@ -90,7 +97,13 @@ export default class SocialStorage extends FeatureStorage {
                 createdAt: { type: 'datetime' },
             },
             indices: [{ field: 'createdAt' }],
-            relationships: [{ singleChildOf: this.postsColl, alias: 'postId' }],
+            relationships: [
+                {
+                    singleChildOf: this.postsColl,
+                    alias: 'postId',
+                    fieldName: 'postId',
+                },
+            ],
         })
 
         this.storageManager.registry.registerCollection(this.tagsColl, {
@@ -99,7 +112,14 @@ export default class SocialStorage extends FeatureStorage {
                 name: { type: 'string' },
             },
             indices: [{ field: 'name' }],
-            relationships: [{ childOf: this.postsColl, alias: 'postId' }],
+            relationships: [
+                {
+                    childOf: this.postsColl,
+                    alias: 'postId',
+                    fieldName: 'postId',
+                },
+            ],
+        })
         })
     }
 
