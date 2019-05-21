@@ -160,18 +160,14 @@ export default class SocialStorage extends FeatureStorage {
         return object.id
     }
 
-    async addSocialPost({
-        hashtags,
-        createdWhen = new Date(),
-        ...rest
-    }: Tweet) {
+    async addSocialPost({ hashtags, createdAt = new Date(), ...rest }: Tweet) {
         const { object } = await this.storageManager
             .collection(this.postsColl)
-            .createObject({ createdWhen, ...rest })
+            .createObject({ createdAt, ...rest })
 
         const postId = object.id
 
-        await this.addSocialVisit({ postId, time: createdWhen })
+        await this.addSocialVisit({ postId, time: createdAt })
         await this.addSocialTags({ hashtags, postId })
 
         return postId
