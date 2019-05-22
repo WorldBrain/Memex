@@ -28,7 +28,7 @@ export interface Props extends Partial<SocialPage> {
     areAnnotationsExpanded?: boolean
     isResponsibleForSidebar?: boolean
     isOverview?: boolean
-    isSocial: boolean
+    isSocial?: boolean
     annotations?: any[]
     annotsCount?: number
     tagHolder: ReactNode

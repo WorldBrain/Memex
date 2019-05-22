@@ -90,7 +90,7 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
     state,
 ): StateProps => ({
-    isSocialSearch: results.isSocialSearch(state),
+    isSocialSearch: results.isSocialPost(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<

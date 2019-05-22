@@ -42,7 +42,7 @@ export interface StateProps {
     resultsByUrl: ResultsByUrl
     annotsByDay: PageUrlsByDay
     isFilterBarActive: boolean
-    isSocialSearch: boolean
+    isSocialPost: boolean
 }
 
 export interface DispatchProps {
@@ -121,6 +121,7 @@ class ResultListContainer extends PureComponent<Props> {
                 onFilterAdd={this.props.addTag(index)}
                 onFilterDel={this.props.delTag(index)}
                 setTagDivRef={this.setTagDivRef}
+                isSocialPost={this.props.isSocialPost}
                 initFilters={tags}
                 initSuggestions={[
                     ...new Set([...tags, ...this.state.tagSuggestions]),
@@ -174,7 +175,7 @@ class ResultListContainer extends PureComponent<Props> {
                 isResponsibleForSidebar={
                     this.props.activeSidebarIndex === index
                 }
-                isSocial={this.props.isSocialSearch}
+                isSocial={this.props.isSocialPost}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />
@@ -284,7 +285,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     resultsClusteredByDay: selectors.resultsClusteredByDay(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
     isFilterBarActive: filters.showFilterBar(state),
-    isSocialSearch: selectors.isSocialSearch(state),
+    isSocialPost: selectors.isSocialPost(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
@@ -308,6 +309,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     handleScrollPagination: args => dispatch(acts.getMoreResults()),
     handlePillClick: tag => event => {
         event.preventDefault()
+        event.stopPropagation()
         dispatch(filterActs.toggleTagFilter(tag))
     },
     addTag: resultIndex => tag => dispatch(acts.addTag(tag, resultIndex)),

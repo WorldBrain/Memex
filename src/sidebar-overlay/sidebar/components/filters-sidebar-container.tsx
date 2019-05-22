@@ -34,7 +34,7 @@ const mapStateToProps: MapStateToProps<
     OwnProps,
     RootState
 > = state => ({
-    isSocialSearch: results.isSocialSearch(state),
+    isSocialSearch: results.isSocialPost(state),
     showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
 })
 

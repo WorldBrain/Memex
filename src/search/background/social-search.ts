@@ -10,7 +10,10 @@ import {
     TAGS_COLL,
     LIST_ENTRIES_COLL,
 } from 'src/social-integration/constants'
-import { deriveTweetUrlProps } from 'src/social-integration/util'
+import {
+    deriveTweetUrlProps,
+    derivePostUrlIdProps,
+} from 'src/social-integration/util'
 import { FilteredURLsManager } from 'src/search/search/filters'
 import { FilteredURLs, PageResultsMap } from '..'
 
@@ -62,7 +65,13 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .table('tags')
             .where('name')
             .anyOf(tags)
-            .eachPrimaryKey(([name, id]) => ids.add(id))
+            .eachPrimaryKey(([, url]) => {
+                const { postId } = derivePostUrlIdProps({ url })
+
+                if (postId) {
+                    ids.add(postId.toString())
+                }
+            })
 
         return ids
     }
@@ -226,7 +235,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .each(({ createdAt, postId }) => {
                 if (
                     !latestVisits.has(postId) &&
-                    filteredUrls.isAllowed(postId)
+                    filteredUrls.isAllowed(postId.toString())
                 ) {
                     latestVisits.set(postId, createdAt.valueOf())
                 }
@@ -411,9 +420,10 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             (!params.termsInc || !params.termsInc.length) &&
             filteredPosts.isDataFiltered
         ) {
-            postScoresMap = await this.mapUrlsToLatestEvents(params, [
-                ...filteredPosts.include,
-            ] as any)
+            postScoresMap = await this.mapUrlsToLatestEvents(
+                params,
+                [...filteredPosts.include].map(id => Number(id)),
+            )
         } else if (!params.termsInc || !params.termsInc.length) {
             postScoresMap = await this.groupLatestEventsByUrl(
                 params,
@@ -422,7 +432,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         } else {
             const termsSearchResults = await this.lookupTerms(params)
             const filteredResults = termsSearchResults.filter(id =>
-                filteredPosts.isAllowed(id as any),
+                filteredPosts.isAllowed(id.toString()),
             )
             postScoresMap = await this.mapUrlsToLatestEvents(
                 params,

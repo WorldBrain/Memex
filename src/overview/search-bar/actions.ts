@@ -148,7 +148,7 @@ export const search: (args?: any) => Thunk = (
     }
 
     try {
-        const searchRPC = results.isSocialSearch(state)
+        const searchRPC = results.isSocialPost(state)
             ? socialSearchRPC
             : results.isAnnotsSearch(state)
                 ? annotSearchRPC

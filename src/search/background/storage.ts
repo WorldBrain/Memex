@@ -130,7 +130,6 @@ export default class SearchStorage extends FeatureStorage {
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
 
-        console.log(socialPages)
         socialPages.map(page => results.set(page.id.toString(), page))
 
         return pageUrls
@@ -298,7 +297,7 @@ export default class SearchStorage extends FeatureStorage {
 
     async searchSocial(params: SocialSearchParams) {
         const results: Map<
-            string,
+            number,
             SocialPage
         > = await this.storageManager.operation(
             SocialSearchPlugin.SEARCH_OP_ID,

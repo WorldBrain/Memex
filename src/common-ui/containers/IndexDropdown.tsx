@@ -46,6 +46,7 @@ export interface Props {
     allTabs?: boolean
     /** Add tags from dashboard */
     fromOverview?: boolean
+    isSocialPost?: boolean
     sidebarTagDiv?: boolean
 }
 
@@ -91,12 +92,8 @@ class IndexDropdownContainer extends Component<Props, State> {
         super(props)
 
         this.suggestRPC = remoteFunction('suggest')
-        this.addTagRPC = this.props.fromOverview
-            ? remoteFunction('addTag')
-            : remoteFunction('addPageTag')
-        this.delTagRPC = this.props.fromOverview
-            ? remoteFunction('delTag')
-            : remoteFunction('delPageTag')
+        this.addTagRPC = remoteFunction(this.addTagRPCName)
+        this.delTagRPC = remoteFunction(this.delTagRPCName)
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
         this.processEvent = remoteFunction('processEvent')
@@ -105,11 +102,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.fetchHashtagSuggestionsRPC = remoteFunction(
             'fetchHashtagSuggestions',
         )
-
-        if (this.props.isForAnnotation) {
-            this.addTagRPC = remoteFunction('addAnnotationTag')
-            this.delTagRPC = remoteFunction('delAnnotationTag')
-        }
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
 
@@ -167,9 +159,37 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    /**
-     * Domain inputs need to allow '.' while tags shouldn't.
-     */
+    private get addTagRPCName(): string {
+        if (this.props.isSocialPost) {
+            return 'addTagForTweet'
+        }
+
+        if (this.props.isForAnnotation) {
+            return 'addAnnotationTag'
+        }
+
+        if (this.props.fromOverview) {
+            return 'addTag'
+        }
+
+        return 'addPageTag'
+    }
+
+    private get delTagRPCName(): string {
+        if (this.props.isSocialPost) {
+            return 'delTagForTweet'
+        }
+
+        if (this.props.isForAnnotation) {
+            return 'delAnnotationTag'
+        }
+
+        if (this.props.fromOverview) {
+            return 'delTag'
+        }
+
+        return 'delPageTag'
+    }
 
     /**
      * Decides whether or not to allow index update. Currently determined by `props.url` setting.

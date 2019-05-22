@@ -238,6 +238,20 @@ export default class SocialStorage extends FeatureStorage {
         })
     }
 
+    async addTagForPost({ name, url }) {
+        return this.storageManager.collection('tags').createObject({
+            name,
+            url,
+        })
+    }
+
+    async delTagForPost({ name, url }) {
+        return this.storageManager.collection('tags').deleteObjects({
+            name,
+            url,
+        })
+    }
+
     async delSocialBookmark({ postId }: { postId: number }) {
         return this.storageManager
             .collection(this.bookmarksColl)

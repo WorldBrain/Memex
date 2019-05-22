@@ -37,6 +37,7 @@ class ActionBar extends Component<Props> {
                 onFilterDel={this.props.onTagDel}
                 isForRibbon
                 fromOverview
+                isSocialPost
             />
         )
     }

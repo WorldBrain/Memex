@@ -268,7 +268,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isNewSearchLoading: results.isNewSearchLoading(state),
     resultsClusteredByDay: results.resultsClusteredByDay(state),
     areAnnotationsExpanded: results.areAnnotationsExpanded(state),
-    isSocialSearch: results.isSocialSearch(state),
+    isSocialSearch: results.isSocialPost(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({

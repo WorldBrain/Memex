@@ -24,7 +24,7 @@ const deleteSocialPagesRPC = remoteFunction('delSocialPages')
 
 export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     const url = selectors.urlToDelete(getState())
-    const isForSocial = results.isSocialSearch(getState())
+    const isForSocial = results.isSocialPost(getState())
 
     analytics.trackEvent({
         category: 'Overview',

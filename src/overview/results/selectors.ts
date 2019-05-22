@@ -154,7 +154,7 @@ export const isAnnotsSearch = createSelector(
     state => state === 'annot',
 )
 
-export const isSocialSearch = createSelector(
+export const isSocialPost = createSelector(
     searchType,
     state => state === 'social',
 )

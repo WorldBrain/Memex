@@ -9,4 +9,6 @@ export const BMS_COLL = 'socialBookmarks'
 export const VISITS_COLL = 'socialVisits'
 export const LIST_ENTRIES_COLL = 'socialPostListEntries'
 
-export const TWEET_URL_PATTERN = /twitter\.com\/(.+)\/status\/(.+)/
+export const TWEET_URL_MATCH_PATTERN = /^twitter\.com\/(.+)\/status\/(.+)$/
+export const POST_URL_ID_PATTERN = /^socialPosts:\d+$/
+export const POST_URL_ID_MATCH_PATTERN = /^socialPosts:(\d+)$/

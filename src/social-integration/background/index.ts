@@ -3,7 +3,7 @@ import { StorageManager } from 'src/search/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { Tweet, User, TweetUrl } from 'src/social-integration/types'
 import fetchImage from 'src/social-integration/fetch-image'
-import { deriveTweetUrlProps } from '../util'
+import { deriveTweetUrlProps, buildPostUrlId } from '../util'
 
 const dataURLtoBlob = require('dataurl-to-blob')
 
@@ -20,6 +20,8 @@ export default class SocialBackground {
             addPostToList: this.addPostToList.bind(this),
             delSocialPages: this.delSocialPages.bind(this),
             addSocialBookmark: this.addSocialBookmark.bind(this),
+            addTagForTweet: this.addTagForTweet.bind(this),
+            delTagForTweet: this.delTagForTweet.bind(this),
             delSocialBookmark: this.delSocialBookmark.bind(this),
             fetchUserSuggestions: this.fetchUserSuggestions.bind(this),
             fetchAllUsers: this.fetchAllUsers.bind(this),
@@ -49,6 +51,24 @@ export default class SocialBackground {
     async delSocialPages(urls: string[]) {
         const postIds = await Promise.all(urls.map(this.getPostIdFromUrl))
         return this.storage.delSocialPages({ postIds })
+    }
+
+    async addTagForTweet({ url, tag }: { url: string; tag: string }) {
+        const postId = await this.getPostIdFromUrl(url)
+
+        return this.storage.addTagForPost({
+            name: tag,
+            url: buildPostUrlId({ postId }).url,
+        })
+    }
+
+    async delTagForTweet({ url, name }: { url: string; name: string }) {
+        const postId = await this.getPostIdFromUrl(url)
+
+        return this.storage.delTagForPost({
+            name,
+            url: buildPostUrlId({ postId }).url,
+        })
     }
 
     async addSocialBookmark({ url, time }: { url: string; time?: Date }) {

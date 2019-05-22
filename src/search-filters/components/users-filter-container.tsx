@@ -103,7 +103,7 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
     displayUsers: selectors.displayUsers(state),
     suggestedUsers: selectors.suggestedUsers(state),
     userFilterDropdown: selectors.userFilter(state),
-    isSocialSearch: results.isSocialSearch(state),
+    isSocialSearch: results.isSocialPost(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<
