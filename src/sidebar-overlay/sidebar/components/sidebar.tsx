@@ -33,7 +33,7 @@ interface Props {
     showClearFiltersBtn: boolean
     page: Page
     pageType: 'page' | 'all'
-    searchType: 'notes' | 'pages' | 'social'
+    searchType: 'notes' | 'page' | 'social'
     closeSidebar: () => void
     handleGoToAnnotation: (
         annotation: Annotation,
@@ -127,11 +127,15 @@ class Sidebar extends React.Component<Props, State> {
         this.props.clearAllFilters()
     }
 
-    get isPageSearch() {
-        return this.props.searchType === 'pages'
+    get isPageSearch(): boolean {
+        return this.props.searchType === 'page'
     }
 
-    get isCurrentPageSearch() {
+    get isSocialSearch(): boolean {
+        return this.props.searchType === 'social'
+    }
+
+    get isCurrentPageSearch(): boolean {
         return this.props.pageType === 'page'
     }
 
@@ -219,7 +223,11 @@ class Sidebar extends React.Component<Props, State> {
                         {env === 'inpage' && (
                             <React.Fragment>
                                 <div className={styles.searchSwitch}>
-                                    <SearchTypeSwitch />
+                                    <SearchTypeSwitch
+                                        isOverview={
+                                            this.props.env === 'overview'
+                                        }
+                                    />
                                 </div>
                                 <PageInfo
                                     page={this.props.page}
@@ -230,7 +238,10 @@ class Sidebar extends React.Component<Props, State> {
                         )}
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
-                                <CommentBoxContainer env={env} />
+                                <CommentBoxContainer
+                                    env={env}
+                                    isSocialPost={this.isSocialSearch}
+                                />
                             </div>
                         )}
                         <div

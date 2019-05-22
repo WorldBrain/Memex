@@ -62,7 +62,7 @@ class ActionBar extends Component<Props> {
             title: document.title,
         })
 
-        return <CommentBoxContainer env="inpage" />
+        return <CommentBoxContainer isSocialPost env="inpage" />
     }
 
     render() {

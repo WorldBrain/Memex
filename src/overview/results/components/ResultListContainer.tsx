@@ -53,7 +53,11 @@ export interface DispatchProps {
     delTag: (i: number) => (f: string) => void
     handlePillClick: (tag: string) => MouseEventHandler
     handleTagBtnClick: (i: number) => MouseEventHandler
-    handleCommentBtnClick: (doc: Result, index: number) => MouseEventHandler
+    handleCommentBtnClick: (
+        doc: Result,
+        index: number,
+        isSocialPost?: boolean,
+    ) => MouseEventHandler
     handleCrossRibbonClick: (doc: Result) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
@@ -168,7 +172,11 @@ class ResultListContainer extends PureComponent<Props> {
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
-                onCommentBtnClick={this.props.handleCommentBtnClick(doc, index)}
+                onCommentBtnClick={this.props.handleCommentBtnClick(
+                    doc,
+                    index,
+                    this.props.isSocialPost,
+                )}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
                 areScreenshotsEnabled={this.props.areScreenshotsEnabled}
@@ -293,10 +301,17 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
         event.preventDefault()
         dispatch(acts.showTags(index))
     },
-    handleCommentBtnClick: ({ url, title }, index) => event => {
+    handleCommentBtnClick: ({ url, title }, index, isSocialPost) => event => {
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
-        dispatch(sidebarActs.openSidebar({ url, title, forceFetch: true }))
+        dispatch(
+            sidebarActs.openSidebar({
+                url,
+                title,
+                forceFetch: true,
+                isSocialPost,
+            }),
+        )
     },
     handleToggleBm: ({ url }, index) => event => {
         event.preventDefault()

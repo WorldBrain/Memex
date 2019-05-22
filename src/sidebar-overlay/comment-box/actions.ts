@@ -61,11 +61,27 @@ export const saveComment: (
     commentText: string,
     tags: string[],
     bookmarked: boolean,
-) => Thunk = (anchor, commentText, tags, bookmarked) => dispatch => {
+    isSocialPost?: boolean,
+) => Thunk = (
+    anchor,
+    commentText,
+    tags,
+    bookmarked,
+    isSocialPost,
+) => dispatch => {
     if (commentText.length !== 0 || anchor !== null) {
         const body = anchor !== null ? anchor.quote : ''
 
-        dispatch(createAnnotation(anchor, body, commentText, tags, bookmarked))
+        dispatch(
+            createAnnotation(
+                anchor,
+                body,
+                commentText,
+                tags,
+                bookmarked,
+                isSocialPost,
+            ),
+        )
         dispatch(setIsCommentSaved(true))
         dispatch(resetCommentBox())
     }

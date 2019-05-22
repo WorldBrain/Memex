@@ -33,6 +33,7 @@ interface DispatchProps {
 
 interface OwnProps {
     env?: 'inpage' | 'overview'
+    isSocialPost?: boolean
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -97,14 +98,22 @@ const mapStateToProps: MapStateToProps<
     isCommentBookmarked: selectors.isBookmarked(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+    props,
+) => ({
     handleCommentTextChange: comment =>
         dispatch(actions.setCommentText(comment)),
     saveComment: (anchor, commentText, tags, bookmarked) =>
-        dispatch(actions.saveComment(anchor, commentText, tags, bookmarked)),
+        dispatch(
+            actions.saveComment(
+                anchor,
+                commentText,
+                tags,
+                bookmarked,
+                props.isSocialPost,
+            ),
+        ),
     cancelComment: () => dispatch(actions.cancelComment()),
     toggleBookmark: () => dispatch(actions.toggleBookmark()),
 })

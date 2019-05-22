@@ -44,7 +44,10 @@ export interface DispatchProps {
     delTag: (i: number) => (f: string) => void
     handlePillClick: (tag: string) => MouseEventHandler
     handleTagBtnClick: (i: number) => MouseEventHandler
-    handleCommentBtnClick: (doc: Result) => MouseEventHandler
+    handleCommentBtnClick: (
+        doc: Result,
+        isSocialSearch?: boolean,
+    ) => MouseEventHandler
     handleCrossRibbonClick: (doc: Result) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
@@ -164,7 +167,10 @@ class ResultListContainer extends PureComponent<Props, State> {
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
-                onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
+                onCommentBtnClick={this.props.handleCommentBtnClick(
+                    doc,
+                    this.props.isSocialSearch,
+                )}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
                 isSocial={this.props.isSocialSearch}
@@ -276,11 +282,17 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
         event.preventDefault()
         dispatch(resultActs.showTags(index))
     },
-    handleCommentBtnClick: ({ url, title }) => event => {
+    handleCommentBtnClick: ({ url, title }, isSocialPost) => event => {
         event.preventDefault()
-        dispatch(sidebarActs.setSearchType('notes'))
         dispatch(sidebarActs.setPageType('page'))
-        dispatch(sidebarActs.openSidebar({ url, title, forceFetch: true }))
+        dispatch(
+            sidebarActs.openSidebar({
+                url,
+                title,
+                forceFetch: true,
+                isSocialPost,
+            }),
+        )
     },
     handleToggleBm: ({ url }, index) => event => {
         event.preventDefault()

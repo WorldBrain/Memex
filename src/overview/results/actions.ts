@@ -58,18 +58,11 @@ export const setActiveSidebarIndex = createAction<number>(
 )
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
-export const setSearchType = createAction<'page' | 'annot' | 'social'>(
+export const setSearchType = createAction<'page' | 'notes' | 'social'>(
     'results/setSearchType',
 )
 export const initSearchCount = createAction('overview/initSearchCount')
 export const incSearchCount = createAction('overview/incSearchCount')
-
-export const toggleSearchType: () => Thunk = () => (dispatch, getState) => {
-    dispatch(setLoading(true))
-    const currSearchType = selectors.searchType(getState())
-    const newSearchType = currSearchType === 'page' ? 'annot' : 'page'
-    dispatch(setSearchType(newSearchType))
-}
 
 export const toggleBookmark: (url: string, i: number) => Thunk = (
     url,

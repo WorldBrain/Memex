@@ -7,12 +7,12 @@ const styles = require('./search-type-switch.css')
 export interface Props {
     annotsFolded: boolean
     isFilterBarActive: boolean
-    searchType: 'page' | 'annot' | 'social'
+    searchType: 'page' | 'notes' | 'social'
     pageCount?: number
     annotCount?: number
     handleUnfoldAllClick: React.MouseEventHandler<HTMLButtonElement>
     handleSearchTypeClick: (
-        searchType: 'page' | 'annot' | 'social',
+        searchType: 'page' | 'notes' | 'social',
     ) => React.MouseEventHandler<HTMLButtonElement>
 }
 
@@ -26,7 +26,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
     }
 
     get isAnnotSearch() {
-        return this.props.searchType === 'annot'
+        return this.props.searchType === 'notes'
     }
 
     get isSocialSearch() {
@@ -71,7 +71,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                     </button>
                     <button
                         className={cx(styles.searchSwitchBtn, styles.btn)}
-                        onClick={this.props.handleSearchTypeClick('annot')}
+                        onClick={this.props.handleSearchTypeClick('notes')}
                         disabled={this.isAnnotSearch}
                     >
                         {this.renderSearchCount(this.props.annotCount)}

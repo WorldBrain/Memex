@@ -30,7 +30,7 @@ export default class SocialBackground {
         })
     }
 
-    private getPostIdFromUrl = (url: string): Promise<number> => {
+    getPostIdFromUrl = (url: string): Promise<number> => {
         const { serviceId } = deriveTweetUrlProps({ url })
 
         return this.storage.getPostIdForServiceId({ serviceId })

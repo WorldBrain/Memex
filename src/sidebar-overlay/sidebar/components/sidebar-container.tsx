@@ -28,7 +28,7 @@ interface StateProps {
     showCommentBox: boolean
     showCongratsMessage: boolean
     pageType: 'page' | 'all'
-    searchType: 'notes' | 'pages' | 'social'
+    searchType: 'notes' | 'page' | 'social'
     searchValue: string
     showClearFiltersBtn: boolean
     page: Page
@@ -185,19 +185,20 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     handleEditAnnotation: (url, comment, tags) =>
         dispatch(actions.editAnnotation(url, comment, tags)),
     handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
-    handleScrollPagination: () => dispatch(actions.fetchMoreAnnotations()),
+    handleScrollPagination: (isSocialSearch?: boolean) =>
+        dispatch(actions.fetchMoreAnnotations(isSocialSearch)),
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
     onQueryChange: searchValue =>
         dispatch(searchBarActs.setQueryTagsDomains(searchValue, false)),
     onQueryKeyDown: searchValue =>
         dispatch(searchBarActs.setQueryTagsDomains(searchValue, true)),
-    handleSearchTypeClick: e => {
-        e.preventDefault()
-        dispatch(actions.toggleSearchType())
-    },
     handlePageTypeClick: e => {
         e.preventDefault()
         dispatch(actions.togglePageType())
+    },
+    handleSearchTypeClick: e => {
+        e.preventDefault()
+        dispatch(actions.toggleSearchType())
     },
     clearAllFilters: () => {
         dispatch(filterActs.resetFilters())

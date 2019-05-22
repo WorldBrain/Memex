@@ -33,7 +33,7 @@ export interface State {
     /** Holds the clustered annots object */
     annotsByDay: PageUrlsByDay
     /** Denotes the type of search performed */
-    searchType: 'annot' | 'page' | 'social'
+    searchType: 'notes' | 'page' | 'social'
 }
 
 const defState: State = {
