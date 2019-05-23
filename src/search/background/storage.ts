@@ -146,7 +146,18 @@ export default class SearchStorage extends FeatureStorage {
         )
 
         return pageUrls
-            .map(url => results.get(url))
+            .map(url => {
+                const result = results.get(url)
+
+                if (!result) {
+                    return
+                }
+
+                return {
+                    ...result,
+                    pageId: url,
+                }
+            })
             .filter(page => page !== undefined)
     }
 
@@ -221,7 +232,7 @@ export default class SearchStorage extends FeatureStorage {
         })
 
         // Remove any annots without matching pages (keep data integrity regardless of DB)
-        const validUrls = new Set(pages.map(page => page.url))
+        const validUrls = new Set(pages.map(page => page.pageId))
         for (const day of Object.keys(clusteredResults)) {
             // Remove any empty days (they might have had all annots filtered out due to excluded tags)
             if (!Object.keys(clusteredResults[day]).length) {
@@ -265,7 +276,7 @@ export default class SearchStorage extends FeatureStorage {
 
         return {
             docs: pages.map(page => {
-                const annotations = results.get(page.url).map(annot => ({
+                const annotations = results.get(page.pageId).map(annot => ({
                     ...annot,
                     tags: annotsToTags.get(annot.url) || [],
                     hasBookmark: bmUrls.has(annot.url),

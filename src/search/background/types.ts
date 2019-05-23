@@ -13,6 +13,7 @@ export interface AnnotPage {
     /** Total count of annots associated with this page. (regardless of search) */
     annotsCount: number
     annotations: Annotation[]
+    pageId?: string
 }
 
 export interface AnnotSearchParams {

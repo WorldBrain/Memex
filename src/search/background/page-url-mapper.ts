@@ -358,16 +358,17 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         return postIds
             .map((id, i) => {
                 const socialPage = socialMap.get(id)
-                const user = userMap.get(socialPage.userId)
-                const { url } = buildTweetUrl({
-                    serviceId: socialPage.serviceId,
-                    username: user.username,
-                })
 
                 // Data integrity issue; no matching page in the DB. Fail nicely
                 if (!socialPage) {
                     return null
                 }
+
+                const user = userMap.get(socialPage.userId)
+                const { url } = buildTweetUrl({
+                    serviceId: socialPage.serviceId,
+                    username: user.username,
+                })
 
                 return {
                     ...socialPage,

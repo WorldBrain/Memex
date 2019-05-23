@@ -173,7 +173,7 @@ export const resultsByUrl = createSelector(
 
         if (isAnnotsSearch) {
             resultDocs.forEach((doc, index) => {
-                pages.set(doc.url, {
+                pages.set(doc.pageId, {
                     ...doc,
                     index,
                 })
