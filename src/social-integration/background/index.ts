@@ -18,11 +18,14 @@ export default class SocialBackground {
         makeRemotelyCallable({
             addTweet: this.addTweet.bind(this),
             addPostToList: this.addPostToList.bind(this),
+            delPostFromList: this.delPostFromList.bind(this),
+            fetchSocialPostLists: this.fetchSocialPostLists.bind(this),
             delSocialPages: this.delSocialPages.bind(this),
             addSocialBookmark: this.addSocialBookmark.bind(this),
+            delSocialBookmark: this.delSocialBookmark.bind(this),
             addTagForTweet: this.addTagForTweet.bind(this),
             delTagForTweet: this.delTagForTweet.bind(this),
-            delSocialBookmark: this.delSocialBookmark.bind(this),
+            fetchSocialPostTags: this.fetchSocialPostTags.bind(this),
             fetchUserSuggestions: this.fetchUserSuggestions.bind(this),
             fetchAllUsers: this.fetchAllUsers.bind(this),
             fetchAllHashtags: this.fetchAllHashtags.bind(this),
@@ -48,6 +51,22 @@ export default class SocialBackground {
         return this.storage.addListEntry({ listId: id, postId })
     }
 
+    async delPostFromList({ id, url }: TweetUrl & { id: number }) {
+        const postId = await this.getPostIdFromUrl(url)
+
+        return this.storage.delListEntry({ listId: id, postId })
+    }
+
+    async fetchSocialPostLists({ url }: { url: string }) {
+        const postId = await this.getPostIdFromUrl(url)
+
+        if (!postId) {
+            return []
+        }
+
+        return this.storage.fetchListPagesByPostId({ postId })
+    }
+
     async delSocialPages(urls: string[]) {
         const postIds = await Promise.all(urls.map(this.getPostIdFromUrl))
         return this.storage.delSocialPages({ postIds })
@@ -69,6 +88,13 @@ export default class SocialBackground {
             name,
             url: buildPostUrlId({ postId }).url,
         })
+    }
+
+    async fetchSocialPostTags({ url }: { url: string }) {
+        const postId = await this.getPostIdFromUrl(url)
+        const postUrl = buildPostUrlId({ postId }).url
+
+        return this.storage.fetchSocialPostTags({ url: postUrl })
     }
 
     async addSocialBookmark({ url, time }: { url: string; time?: Date }) {

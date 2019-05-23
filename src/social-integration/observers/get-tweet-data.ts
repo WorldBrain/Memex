@@ -43,7 +43,7 @@ export function getTweetInfo(element: HTMLElement): Partial<Tweet> {
     return {
         serviceId: tweetId,
         userId,
-        createdWhen: new Date(Number(tweetTimeMs)),
+        createdWhen: Number(tweetTimeMs),
         text: tweetContent,
         hashtags,
         user,

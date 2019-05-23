@@ -1,6 +1,8 @@
 import { FeatureStorage } from 'src/search/storage'
 import { StorageManager } from 'src/search'
 import { Tweet, User } from '../types'
+import { PageList } from 'src/custom-lists/background/types'
+
 import * as consts from '../constants'
 
 export interface SocialStorageProps {
@@ -160,10 +162,74 @@ export default class SocialStorage extends FeatureStorage {
         return object.id
     }
 
-    async addSocialPost({ hashtags, createdAt = new Date(), ...rest }: Tweet) {
+    async delListEntry({ listId, postId }: { listId: number; postId: number }) {
+        return this.storageManager
+            .collection(this.listEntriesColl)
+            .deleteObjects({
+                listId,
+                postId,
+            })
+    }
+
+    private changeListsBeforeSending(
+        lists: PageList[],
+        pageEntries: any[],
+    ): PageList[] {
+        const mappedLists = lists.map(list => {
+            const page = pageEntries.find(({ listId }) => listId === list.id)
+            delete list['_name_terms']
+            return {
+                ...list,
+                pages: [],
+                active: Boolean(page),
+            }
+        })
+
+        return mappedLists
+    }
+
+    async fetchAllLists({
+        query = {},
+        opts = {},
+    }: {
+        query?: any
+        opts?: any
+    }) {
+        const x = await this.storageManager
+            .collection('customLists')
+            .findObjects<PageList>(query, opts)
+
+        return this.changeListsBeforeSending(x, [])
+    }
+
+    async fetchListPagesByPostId({ postId }: { postId: number }) {
+        const pages = await this.storageManager
+            .collection(this.listEntriesColl)
+            .findObjects({ postId })
+
+        const listIds = pages.map(({ listId }) => listId)
+        const lists = await this.fetchAllLists({
+            query: {
+                id: { $in: listIds },
+            },
+        })
+
+        return this.changeListsBeforeSending(lists, pages)
+    }
+
+    async addSocialPost({
+        hashtags,
+        createdAt = new Date(),
+        createdWhen,
+        ...rest
+    }: Tweet) {
         const { object } = await this.storageManager
             .collection(this.postsColl)
-            .createObject({ createdAt, ...rest })
+            .createObject({
+                createdAt,
+                createdWhen: new Date(createdWhen),
+                ...rest,
+            })
 
         const postId = object.id
 
@@ -250,6 +316,14 @@ export default class SocialStorage extends FeatureStorage {
             name,
             url,
         })
+    }
+
+    async fetchSocialPostTags({ url }: { url: string }) {
+        const tags = await this.storageManager
+            .collection('tags')
+            .findObjects({ url })
+
+        return tags.map(({ name }) => name)
     }
 
     async delSocialBookmark({ postId }: { postId: number }) {

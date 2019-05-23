@@ -51,6 +51,7 @@ class ActionBar extends Component<Props> {
                 onFilterAdd={this.props.onCollectionAdd}
                 onFilterDel={this.props.onCollectionDel}
                 addPageToListRPC="addPostToList"
+                delPageFromListRPC="delPostFromList"
                 isForRibbon
             />
         )
