@@ -105,12 +105,23 @@ export default class SearchStorage extends FeatureStorage {
     async getMergedAnnotsPages(
         pageUrls: string[],
         params: AnnotSearchParams,
+        postPrefix = 'socialPosts:',
     ): Promise<AnnotPage[]> {
         const results: Map<string, any> = new Map()
+        const pageIds: string[] = []
+        const postIds: number[] = []
+
+        // Split into post and page annots
+        pageUrls.forEach(
+            url =>
+                url.startsWith(postPrefix)
+                    ? postIds.push(Number(url.split(postPrefix)[1]))
+                    : pageIds.push(url),
+        )
 
         const pages: AnnotPage[] = await this.storageManager.operation(
             PageUrlMapperPlugin.MAP_OP_ID,
-            pageUrls,
+            pageIds,
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
 
@@ -120,8 +131,8 @@ export default class SearchStorage extends FeatureStorage {
             number,
             Map<string, SocialPage>
         > = await this.storageManager.operation(
-            SocialSearchPlugin.MAP_URLS_OP_ID,
-            pageUrls,
+            SocialSearchPlugin.MAP_POST_IDS_OP_ID,
+            postIds,
         )
 
         const socialPages: SocialPage[] = await this.storageManager.operation(
@@ -130,7 +141,9 @@ export default class SearchStorage extends FeatureStorage {
             { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
 
-        socialPages.map(page => results.set(page.id.toString(), page))
+        socialPages.forEach(page =>
+            results.set(postPrefix + page.id.toString(), page),
+        )
 
         return pageUrls
             .map(url => results.get(url))

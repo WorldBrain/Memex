@@ -21,7 +21,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
     DexieStorageBackend
 > {
     static SEARCH_OP_ID = 'memex:dexie.searchSocial'
-    static MAP_URLS_OP_ID = 'memex:dexie.mapUrlsToSocialPages'
+    static MAP_POST_IDS_OP_ID = 'memex:dexie.mapIdsToSocialPages'
 
     install(backend: DexieStorageBackend) {
         super.install(backend)
@@ -32,8 +32,8 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         )
 
         backend.registerOperation(
-            SocialSearchPlugin.MAP_URLS_OP_ID,
-            this.mapUrlsToSocialPages.bind(this),
+            SocialSearchPlugin.MAP_POST_IDS_OP_ID,
+            this.mapIdsToSocialPages.bind(this),
         )
     }
 
@@ -137,26 +137,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         })
     }
 
-    async mapUrlsToSocialPages(
-        urls: string[],
-    ): Promise<Map<number, SocialPage>> {
-        const postIds = await Promise.all(
-            urls.map(async url => {
-                const { serviceId } = deriveTweetUrlProps({ url })
-                const pks = await this.backend.dexieInstance
-                    .table(POSTS_COLL)
-                    .where('serviceId')
-                    .equals(serviceId)
-                    .primaryKeys()
-
-                return pks[0]
-            }),
-        )
-
-        return this.mapIdsToSocialPages(postIds)
-    }
-
-    private async mapIdsToSocialPages(
+    async mapIdsToSocialPages(
         postIds: number[],
     ): Promise<Map<number, SocialPage>> {
         const socialPosts = new Map<number, SocialPage>()
