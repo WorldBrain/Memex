@@ -32,6 +32,7 @@ interface StateProps {
     searchValue: string
     showClearFiltersBtn: boolean
     page: Page
+    isSocialPost: boolean
 }
 
 interface DispatchProps {
@@ -46,7 +47,6 @@ interface DispatchProps {
     handleBookmarkToggle: (url: string) => void
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
-    handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
     handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
     clearAllFilters: () => void
     resetPage: React.MouseEventHandler<HTMLButtonElement>
@@ -158,6 +158,7 @@ const mapStateToProps: MapStateToProps<
     searchValue: searchBar.query(state),
     showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
     page: selectors.page(state),
+    isSocialPost: selectors.isSocialPost(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
@@ -195,10 +196,6 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     handlePageTypeClick: e => {
         e.preventDefault()
         dispatch(actions.togglePageType())
-    },
-    handleSearchTypeClick: e => {
-        e.preventDefault()
-        dispatch(actions.toggleSearchType())
     },
     clearAllFilters: () => {
         dispatch(filterActs.resetFilters())

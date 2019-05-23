@@ -31,6 +31,7 @@ interface Props {
     searchValue: string
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
+    isSocialPost: boolean
     page: Page
     pageType: 'page' | 'all'
     searchType: 'notes' | 'page' | 'social'
@@ -49,7 +50,6 @@ interface Props {
     handleBookmarkToggle: (url: string) => void
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
-    handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
     clearAllFilters: () => void
     resetPage: React.MouseEventHandler<HTMLButtonElement>
 }
@@ -240,7 +240,7 @@ class Sidebar extends React.Component<Props, State> {
                             <div className={styles.commentBoxContainer}>
                                 <CommentBoxContainer
                                     env={env}
-                                    isSocialPost={this.isSocialSearch}
+                                    isSocialPost={this.props.isSocialPost}
                                 />
                             </div>
                         )}

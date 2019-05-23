@@ -58,6 +58,7 @@ export default interface State {
     searchType: 'notes' | 'page' | 'social'
     /** Denotes whether the search is on current page or all pages */
     pageType: 'page' | 'all'
+    isSocialPost: boolean
 }
 
 export interface KeyboardActions {

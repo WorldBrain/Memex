@@ -190,7 +190,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (
     props,
 ) => ({
     annotsFolded: resultsSelectors.areAnnotationsExpanded(state),
-    searchType: props.isOverview
+    searchType: !props.isOverview
         ? selectors.searchType(state)
         : resultsSelectors.searchType(state),
     pageType: selectors.pageType(state),

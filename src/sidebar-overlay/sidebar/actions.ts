@@ -61,6 +61,7 @@ export const setPageType = createAction<'page' | 'all'>('setPageType')
 export const setSearchType = createAction<'notes' | 'page' | 'social'>(
     'setSearchType',
 )
+export const setIsSocialPost = createAction<boolean>('sidebar/setIsSocialPost')
 
 /**
  * Hydrates the initial state of the sidebar.
@@ -81,10 +82,11 @@ export const openSidebar: (
     title,
     activeUrl,
     forceFetch,
-    isSocialPost,
+    isSocialPost = false,
 } = {}) => async (dispatch, getState) => {
     dispatch(setPage({ url, title }))
     dispatch(setSidebarOpen(true))
+    dispatch(setIsSocialPost(isSocialPost))
 
     const annots = selectors.annotations(getState())
     if (forceFetch || !annots.length) {
@@ -312,12 +314,6 @@ export const toggleBookmarkState: (i: number) => Thunk = i => (
             ...annotations.slice(i + 1),
         ]),
     )
-}
-
-export const toggleSearchType: () => Thunk = () => (dispatch, getState) => {
-    const currSearchType = selectors.searchType(getState())
-    const newSearchType = currSearchType === 'notes' ? 'page' : 'notes'
-    dispatch(setSearchType(newSearchType))
 }
 
 export const togglePageType: () => Thunk = () => (dispatch, getState) => {

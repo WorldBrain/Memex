@@ -159,6 +159,8 @@ class ResultListContainer extends PureComponent<Props> {
     }
 
     private attachDocWithPageResultItem(doc: Result, index, key) {
+        const isSocialPost = doc.hasOwnProperty('user')
+
         return (
             <ResultItem
                 key={key}
@@ -175,7 +177,7 @@ class ResultListContainer extends PureComponent<Props> {
                 onCommentBtnClick={this.props.handleCommentBtnClick(
                     doc,
                     index,
-                    this.props.isSocialPost,
+                    isSocialPost,
                 )}
                 handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}

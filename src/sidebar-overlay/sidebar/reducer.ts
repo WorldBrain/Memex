@@ -26,6 +26,7 @@ export const defaultState: State = {
     resultsExhausted: false,
     searchType: 'notes',
     pageType: 'page',
+    isSocialPost: false,
 }
 
 const setAnnotationsManager = (
@@ -101,6 +102,10 @@ const searchTypeReducer = createReducer(on => {
     on(actions.setSearchType, (state, payload) => payload)
 }, defaultState.searchType)
 
+const isSocialPostReducer = createReducer(on => {
+    on(actions.setIsSocialPost, (state, payload) => payload)
+}, defaultState.isSocialPost)
+
 const reducer = combineReducers<State>({
     annotationsManager: annotationsManagerReducer,
     isOpen: isOpenReducer,
@@ -115,6 +120,7 @@ const reducer = combineReducers<State>({
     resultsExhausted,
     searchType: searchTypeReducer,
     pageType: pageTypeReducer,
+    isSocialPost: isSocialPostReducer,
 })
 
 export default reducer
