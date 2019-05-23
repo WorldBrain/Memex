@@ -203,6 +203,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     },
     resetPage: e => {
         e.preventDefault()
+        dispatch(actions.setPageType('all'))
         dispatch(
             actions.setPage({
                 url: null,

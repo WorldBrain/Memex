@@ -48,7 +48,10 @@ export interface DispatchProps {
         doc: Result,
         isSocialSearch?: boolean,
     ) => MouseEventHandler
-    handleCrossRibbonClick: (doc: Result) => MouseEventHandler
+    handleCrossRibbonClick: (
+        doc: Result,
+        isSocialPost: boolean,
+    ) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
@@ -155,6 +158,8 @@ class ResultListContainer extends PureComponent<Props, State> {
     }
 
     private attachDocWithPageResultItem(doc, index, key) {
+        const isSocialPost = doc.hasOwnProperty('user')
+
         return (
             <ResultItem
                 key={key}
@@ -169,11 +174,14 @@ class ResultListContainer extends PureComponent<Props, State> {
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
                 onCommentBtnClick={this.props.handleCommentBtnClick(
                     doc,
-                    this.props.isSocialSearch,
+                    isSocialPost,
                 )}
-                handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
+                handleCrossRibbonClick={this.props.handleCrossRibbonClick(
+                    doc,
+                    isSocialPost,
+                )}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
-                isSocial={this.props.isSocialSearch}
+                isSocial={isSocialPost}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />
@@ -305,6 +313,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     handleScrollPagination: args => dispatch(resultActs.getMoreResults(false)),
     handlePillClick: tag => event => {
         event.preventDefault()
+        event.stopPropagation()
         dispatch(filterActs.toggleTagFilter(tag))
     },
     addTag: resultIndex => tag => dispatch(resultActs.addTag(tag, resultIndex)),
@@ -312,10 +321,10 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetActiveTagIndex: () => dispatch(resultActs.resetActiveTagIndex()),
     setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
-    handleCrossRibbonClick: ({ url }) => event => {
+    handleCrossRibbonClick: ({ url }, isSocialPost) => event => {
         event.preventDefault()
         event.stopPropagation()
-        dispatch(listActs.delPageFromList(url))
+        dispatch(listActs.delPageFromList(url, isSocialPost))
         dispatch(resultActs.hideResultItem(url))
     },
 })

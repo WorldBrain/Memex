@@ -127,14 +127,6 @@ class Sidebar extends React.Component<Props, State> {
         this.props.clearAllFilters()
     }
 
-    get isPageSearch(): boolean {
-        return this.props.searchType === 'page'
-    }
-
-    get isSocialSearch(): boolean {
-        return this.props.searchType === 'social'
-    }
-
     get isCurrentPageSearch(): boolean {
         return this.props.pageType === 'page'
     }
@@ -250,7 +242,7 @@ class Sidebar extends React.Component<Props, State> {
                                     env === 'overview',
                             })}
                         >
-                            {this.isPageSearch || !this.isCurrentPageSearch ? (
+                            {!this.isCurrentPageSearch ? (
                                 this.renderResults()
                             ) : this.props.isLoading &&
                             !this.props.appendLoader ? (
