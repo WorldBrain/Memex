@@ -42,17 +42,15 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const urls = new Set<string>()
+        const ids = new Set<string>()
 
-        const listEntries = await this.backend.dexieInstance
+        await this.backend.dexieInstance
             .table(LIST_ENTRIES_COLL)
             .where('listId')
             .equals(Number(lists[0]))
-            .toArray()
+            .each(({ postId }) => ids.add(postId))
 
-        listEntries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
-
-        return urls
+        return ids
     }
 
     private async tagSearch(tags: string[]) {
@@ -142,13 +140,22 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
     ): Promise<Map<number, SocialPage>> {
         const socialPosts = new Map<number, SocialPage>()
 
+        const results = new Map<number, SocialPage>()
+
         await this.backend.dexieInstance
             .table<Tweet>(POSTS_COLL)
             .where('id')
             .anyOf(postIds)
             .each(post => socialPosts.set(post.id, post))
 
-        return socialPosts
+        postIds.map(id => {
+            const post = socialPosts.get(id)
+            if (post !== undefined) {
+                results.set(id, post)
+            }
+        })
+
+        return results
     }
 
     private async queryTermsField(
