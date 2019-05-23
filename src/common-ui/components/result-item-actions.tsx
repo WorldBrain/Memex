@@ -16,8 +16,7 @@ class ResultItemActions extends PureComponent<Props> {
         return (
             <div
                 className={cx(styles.detailsContainer, {
-                    [styles.tweetDetailsContainer]:
-                        this.props.isSocial || this.props.user,
+                    [styles.tweetDetailsContainer]: this.props.isSocial,
                 })}
             >
                 <div className={styles.detailsBox}>

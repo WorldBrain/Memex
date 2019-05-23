@@ -58,7 +58,10 @@ export interface DispatchProps {
         index: number,
         isSocialPost?: boolean,
     ) => MouseEventHandler
-    handleCrossRibbonClick: (doc: Result) => MouseEventHandler
+    handleCrossRibbonClick: (
+        doc: Result,
+        isSocialPost: boolean,
+    ) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
@@ -179,13 +182,16 @@ class ResultListContainer extends PureComponent<Props> {
                     index,
                     isSocialPost,
                 )}
-                handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
+                handleCrossRibbonClick={this.props.handleCrossRibbonClick(
+                    doc,
+                    isSocialPost,
+                )}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
                 areScreenshotsEnabled={this.props.areScreenshotsEnabled}
                 isResponsibleForSidebar={
                     this.props.activeSidebarIndex === index
                 }
-                isSocial={this.props.isSocialPost}
+                isSocial={isSocialPost}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />
@@ -334,10 +340,10 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetActiveTagIndex: () => dispatch(acts.resetActiveTagIndex()),
     setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
-    handleCrossRibbonClick: ({ url }) => event => {
+    handleCrossRibbonClick: ({ url }, isSocialPost) => event => {
         event.preventDefault()
         event.stopPropagation()
-        dispatch(listActs.delPageFromList(url))
+        dispatch(listActs.delPageFromList(url, isSocialPost))
         dispatch(acts.hideResultItem(url))
     },
 })

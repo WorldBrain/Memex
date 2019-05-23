@@ -237,8 +237,8 @@ const mapDispatchToProps = (dispatch, getState) => ({
         dispatch(actions.toggleListFilterIndex(index.toString()))
         dispatch(filterActs.toggleListFilter(id.toString()))
     },
-    handleAddPageList: ({ id }, index) => url => {
-        dispatch(actions.addUrltoList(url, index, id))
+    handleAddPageList: ({ id }, index) => (url, isSocialPost) => {
+        dispatch(actions.addUrltoList(url, isSocialPost, index, id))
     },
     handleDeleteList: e => {
         e.preventDefault()

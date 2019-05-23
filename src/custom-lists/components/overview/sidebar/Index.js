@@ -10,8 +10,8 @@ import MyCollection from './my-collections'
 import CreateListForm from './CreateListForm'
 import ListItem from './list-item'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
-import { actions as filterActs } from '../../../../search-filters'
-import * as sidebar from '../../../../overview/sidebar-left/selectors'
+import { actions as filterActs } from 'src/search-filters'
+import { selectors as sidebar } from 'src/overview/sidebar-left'
 
 class ListContainer extends Component {
     static propTypes = {
@@ -148,8 +148,7 @@ class ListContainer extends Component {
                 <div
                     className={cx({
                         [extStyles.allLists]: this.props.isSidebarOpen,
-                        [extStyles.allListsLocked]: this.props
-                                .isSidebarLocked,
+                        [extStyles.allListsLocked]: this.props.isSidebarLocked,
                     })}
                 >
                     <div
@@ -208,8 +207,8 @@ const mapDispatchToProps = (dispatch, getState) => ({
         dispatch(actions.toggleListFilterIndex(index))
         dispatch(filterActs.toggleListFilter(id))
     },
-    handleAddPageList: ({ id }, index) => url => {
-        dispatch(actions.addUrltoList(url, index, id))
+    handleAddPageList: ({ id }, index) => (url, isSocialPost) => {
+        dispatch(actions.addUrltoList(url, isSocialPost, index, id))
     },
     handleDeleteList: e => {
         e.preventDefault()

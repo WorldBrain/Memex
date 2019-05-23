@@ -57,13 +57,22 @@ class ResultItem extends PureComponent<Props> {
     }
 
     dragStart: DragEventHandler = e => {
-        const { url, setUrlDragged } = this.props
+        const { url, setUrlDragged, isSocial } = this.props
 
         setUrlDragged(url)
-        const crt = document.getElementById('dragged-element')
+        const crt = this.props.isOverview
+            ? document.getElementById('dragged-element')
+            : (document
+                  .querySelector('.memex-ribbon-sidebar-container')
+                  .shadowRoot.querySelector('#dragged-element') as HTMLElement)
         crt.style.display = 'block'
 
-        e.dataTransfer.setData('text/plain', url)
+        const data = JSON.stringify({
+            url,
+            isSocialPost: isSocial,
+        })
+
+        e.dataTransfer.setData('text/plain', data)
 
         e.dataTransfer.setDragImage(crt, 10, 10)
     }
@@ -102,8 +111,7 @@ class ResultItem extends PureComponent<Props> {
                 )}
                 <div
                     className={cx(styles.rootContainer, {
-                        [styles.tweetRootContainer]:
-                            this.props.isSocial || this.props.user,
+                        [styles.tweetRootContainer]: this.props.isSocial,
                         [styles.rootContainerOverview]: this.props.isOverview,
                         [styles.isSidebarOpen]: this.props
                             .isResponsibleForSidebar,
@@ -118,7 +126,7 @@ class ResultItem extends PureComponent<Props> {
                         onClick={this.handleClickOpenNewTab(this.hrefToPage)}
                         draggable
                     >
-                        {this.props.isSocial || this.props.user ? (
+                        {this.props.isSocial ? (
                             <SocialResultItem {...this.props} />
                         ) : (
                             <PageResultItem {...this.props} />

@@ -86,12 +86,19 @@ export const showEditBox = index => (dispatch, getState) => {
     }
 }
 
-export const delPageFromList = url => async (dispatch, getState) => {
+export const delPageFromList = (url, isSocialPost) => async (
+    dispatch,
+    getState,
+) => {
     try {
-        // const lists = await remoteFunction('fetchAllLists')()
-        const index = selectors.listFilterIndex(getState())
-        const listId = filters.listFilter(getState())
-        await remoteFunction('removePageFromList')({
+        const state = getState()
+        const index = selectors.listFilterIndex(state)
+        const listId = filters.listFilter(state)
+        const delPageFromListRPC = isSocialPost
+            ? 'delPostFromList'
+            : 'removePageFromList'
+
+        await remoteFunction(delPageFromListRPC)({
             id: Number(listId),
             url,
         })
@@ -168,9 +175,16 @@ export const deletePageList = () => async (dispatch, getState) => {
     }
 }
 
-export const addUrltoList = (url, index, id) => async (dispatch, getState) => {
+export const addUrltoList = (
+    url,
+    isSocialPost,
+    index,
+    id,
+) => async dispatch => {
+    const addPagetoListRPC = isSocialPost ? 'addPostToList' : 'insertPageToList'
+
     try {
-        await remoteFunction('insertPageToList')({ id, url })
+        await remoteFunction(addPagetoListRPC)({ id, url })
     } catch (err) {
         console.error(err)
     } finally {
