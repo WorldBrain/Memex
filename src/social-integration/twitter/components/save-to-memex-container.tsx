@@ -82,9 +82,11 @@ class SaveToMemexContainer extends Component<Props, State> {
 
     async componentDidMount() {
         this.memexBtnRef.addEventListener('click', this.toggleTweet())
-        const pageTags = await remoteFunction('fetchPageTags')(this.url)
+        const postTags = await remoteFunction('fetchSocialPostTags')({
+            url: this.url,
+        })
         this.setState(state => ({
-            tags: pageTags,
+            tags: postTags,
         }))
         this.attachTagHolder()
     }

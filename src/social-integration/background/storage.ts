@@ -205,13 +205,32 @@ export default class SocialStorage extends FeatureStorage {
         hashtags,
         createdAt = new Date(),
         createdWhen,
+        serviceId,
         ...rest
     }: Tweet) {
+        const postExistsId = await this.getPostIdForServiceId({ serviceId })
+
+        if (postExistsId) {
+            return this.storageManager
+                .collection(this.postsColl)
+                .updateOneObject(
+                    {
+                        id: postExistsId,
+                    },
+                    {
+                        $set: {
+                            createdAt,
+                        },
+                    },
+                )
+        }
+
         const { object } = await this.storageManager
             .collection(this.postsColl)
             .createObject({
                 createdAt,
                 createdWhen: new Date(createdWhen),
+                serviceId,
                 ...rest,
             })
 

@@ -211,6 +211,10 @@ class ResultListContainer extends PureComponent<Props> {
             )
         }
 
+        if (!this.props.annotsByDay) {
+            return []
+        }
+
         const els: JSX.Element[] = []
 
         const sortedKeys = Object.keys(this.props.annotsByDay)
