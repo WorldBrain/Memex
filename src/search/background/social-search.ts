@@ -9,12 +9,9 @@ import {
     TAGS_COLL,
     LIST_ENTRIES_COLL,
 } from 'src/social-integration/constants'
-import {
-    deriveTweetUrlProps,
-    derivePostUrlIdProps,
-} from 'src/social-integration/util'
-import { FilteredURLsManager } from 'src/search/search/filters'
-import { FilteredURLs, PageResultsMap } from '..'
+import { derivePostUrlIdProps } from 'src/social-integration/util'
+import { FilteredIDsManager } from 'src/search/search/filters'
+import { FilteredIDs } from '..'
 
 export class SocialSearchPlugin extends StorageBackendPlugin<
     DexieStorageBackend
@@ -36,12 +33,12 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         )
     }
 
-    private async listSearch(lists: string[]) {
+    private async listSearch(lists: string[]): Promise<Set<number>> {
         if (!lists || !lists.length || !lists[0].length) {
             return undefined
         }
 
-        const ids = new Set<string>()
+        const ids = new Set()
 
         await this.backend.dexieInstance
             .table(LIST_ENTRIES_COLL)
@@ -52,12 +49,12 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         return ids
     }
 
-    private async tagSearch(tags: string[]) {
+    private async tagSearch(tags: string[]): Promise<Set<number>> {
         if (!tags || !tags.length) {
             return undefined
         }
 
-        const ids = new Set<string>()
+        const ids = new Set<number>()
         await this.backend.dexieInstance
             .table('tags')
             .where('name')
@@ -66,19 +63,19 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
                 const { postId } = derivePostUrlIdProps({ url })
 
                 if (postId) {
-                    ids.add(postId.toString())
+                    ids.add(postId)
                 }
             })
 
         return ids
     }
 
-    private async socialTagSearch(tags: string[]) {
+    private async socialTagSearch(tags: string[]): Promise<Set<number>> {
         if (!tags || !tags.length) {
             return undefined
         }
 
-        const ids = new Set<string>()
+        const ids = new Set()
         await this.backend.dexieInstance
             .table(TAGS_COLL)
             .where('name')
@@ -88,7 +85,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         return ids
     }
 
-    private async userSearch(users: User[]) {
+    private async userSearch(users: User[]): Promise<Set<number>> {
         if (!users || !users.length) {
             return undefined
         }
@@ -101,7 +98,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .anyOf(userIds)
             .primaryKeys()
 
-        return new Set<string>([...postIds])
+        return new Set([...postIds])
     }
 
     private async findFilteredPosts(params: SocialSearchParams) {
@@ -123,7 +120,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             this.listSearch(params.collections),
         ])
 
-        return new FilteredURLsManager({
+        return new FilteredIDsManager<number>({
             incTagUrls,
             excTagUrls,
             listUrls,
@@ -209,7 +206,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             skip = 0,
             limit = 10,
         }: SocialSearchParams,
-        filteredUrls: FilteredURLs,
+        filteredUrls: FilteredIDs<number>,
     ) {
         const latestVisits = new Map<number, number>()
 
@@ -366,7 +363,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
     private async groupLatestEventsByUrl(
         params: SocialSearchParams,
-        filteredUrls: FilteredURLs,
+        filteredUrls: FilteredIDs<number>,
     ): Promise<Map<number, number>> {
         return params.bookmarksOnly
             ? this.lookbackBookmarksTime(params)
@@ -395,7 +392,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         } else {
             const termsSearchResults = await this.lookupTerms(params)
             const filteredResults = termsSearchResults.filter(id =>
-                filteredPosts.isAllowed(id.toString()),
+                filteredPosts.isAllowed(id),
             )
             postScoresMap = await this.mapUrlsToLatestEvents(
                 params,

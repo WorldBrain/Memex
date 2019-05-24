@@ -1,4 +1,4 @@
-import { Dexie, SearchParams, PageResultsMap, FilteredURLs } from '..'
+import { Dexie, SearchParams, PageResultsMap, FilteredIDs } from '..'
 
 /**
  * Given some URLs, grab the latest assoc. event timestamp for each one within the time filter bounds.
@@ -81,7 +81,7 @@ export const mapUrlsToLatestEvents = (getDb: () => Promise<Dexie>) => async (
  */
 export const groupLatestEventsByUrl = (getDb: () => Promise<Dexie>) => (
     params: Partial<SearchParams>,
-    filteredUrls: FilteredURLs,
+    filteredUrls: FilteredIDs,
 ) => {
     return params.bookmarks
         ? lookbackBookmarksTime(getDb)(params)
@@ -99,7 +99,7 @@ const lookbackFromEndDate = (getDb: () => Promise<Dexie>) => async (
         skip = 0,
         limit = 10,
     }: Partial<SearchParams>,
-    filteredUrls: FilteredURLs,
+    filteredUrls: FilteredIDs,
 ) => {
     const db = await getDb()
     // Lookback from endDate to get needed amount of visits
