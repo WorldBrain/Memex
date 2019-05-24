@@ -56,19 +56,17 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .limit(pageUrls.length)
             .toArray()
 
-        return Promise.all(
-            pages.map(async page => {
-                const screenshot = page.screenshot
-                    ? await this.encodeImage(page.screenshot, base64Img)
-                    : undefined
+        for (const page of pages) {
+            const screenshot = page.screenshot
+                ? await this.encodeImage(page.screenshot, base64Img)
+                : undefined
 
-                pageMap.set(page.url, {
-                    ...page,
-                    screenshot,
-                    hasBookmark: false, // Set later, if needed
-                })
-            }),
-        )
+            pageMap.set(page.url, {
+                ...page,
+                screenshot,
+                hasBookmark: false, // Set later, if needed
+            })
+        }
     }
 
     private async lookupFavIcons(
@@ -84,19 +82,14 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .limit(hostnames.length)
             .toArray()
 
-        await Promise.all(
-            favIcons.map(async fav =>
-                favIconMap.set(
-                    fav.hostname,
-                    await this.encodeImage(fav.favIcon, base64Img),
-                ),
-            ),
-        )
+        for (const { favIcon, hostname } of favIcons) {
+            favIconMap.set(hostname, await this.encodeImage(favIcon, base64Img))
+        }
     }
 
     private async lookupUsers(
-        userIds: string[],
-        userMap: Map<string, User>,
+        userIds: number[],
+        userMap: Map<number, User>,
         base64Img?: boolean,
     ) {
         const users = await this.backend.dexieInstance
@@ -106,17 +99,16 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .limit(userIds.length)
             .toArray()
 
-        return Promise.all(
-            users.map(async user => {
-                const profilePic = user.profilePic
-                    ? await this.encodeImage(user.profilePic, base64Img)
-                    : undefined
-                userMap.set(user.id, {
-                    ...user,
-                    profilePic,
-                })
-            }),
-        )
+        for (const user of users) {
+            const profilePic = user.profilePic
+                ? await this.encodeImage(user.profilePic, base64Img)
+                : undefined
+
+            userMap.set(user.id, {
+                ...user,
+                profilePic,
+            })
+        }
     }
 
     private async lookupTags(
@@ -332,7 +324,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const postIds = [...socialMap.keys()]
         const countMap = new Map<number, number>()
         const tagMap = new Map<number, string[]>()
-        const userMap = new Map<string, User>()
+        const userMap = new Map<number, User>()
 
         const postUrlIds = postIds.map(postId => {
             const { url } = buildPostUrlId({ postId })

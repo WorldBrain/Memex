@@ -68,7 +68,7 @@ export default class SocialStorage extends FeatureStorage {
         this.storageManager.registry.registerCollection(this.usersColl, {
             version: new Date('2019-04-22'),
             fields: {
-                id: { type: 'string' },
+                serviceId: { type: 'string' },
                 name: { type: 'string' },
                 username: { type: 'string' },
                 isVerified: { type: 'boolean' },
@@ -76,7 +76,7 @@ export default class SocialStorage extends FeatureStorage {
                 type: { type: 'string' },
             },
             indices: [
-                { field: 'id', pk: true },
+                { field: 'serviceId' },
                 { field: 'name' },
                 { field: 'username' },
             ],
@@ -223,22 +223,22 @@ export default class SocialStorage extends FeatureStorage {
     }
 
     async addSocialUser({
-        id,
+        serviceId,
         name,
         username,
         isVerified,
         profilePic,
         type,
-    }: User) {
+    }: User): Promise<number> {
         const { object } = await this.storageManager
             .collection(this.usersColl)
             .createObject({
-                id,
                 name,
                 username,
                 isVerified,
                 profilePic,
                 type,
+                serviceId,
             })
 
         return object.id
@@ -324,6 +324,22 @@ export default class SocialStorage extends FeatureStorage {
             .findOneObject<Tweet>({ id })
     }
 
+    async getUserIdForServiceId({
+        serviceId,
+    }: {
+        serviceId: string
+    }): Promise<number> {
+        const user = await this.storageManager
+            .collection(this.usersColl)
+            .findObject<User>({ serviceId })
+
+        if (user == null) {
+            return null
+        }
+
+        return user.id
+    }
+
     async getPostIdForServiceId({
         serviceId,
     }: {
@@ -396,15 +412,22 @@ export default class SocialStorage extends FeatureStorage {
     }
 
     async fetchAllUsers({
-        query = {},
-        opts = {},
+        excludeIds,
+        ...opts
     }: {
-        query?: any
-        opts?: any
+        excludeIds: number[]
+        skip?: number
+        limit?: number
+        base64Img?: boolean
     }) {
         const users = await this.storageManager
             .collection(this.usersColl)
-            .findObjects<User>(query, opts)
+            .findObjects<User>(
+                {
+                    id: { $nin: excludeIds },
+                },
+                opts,
+            )
 
         return this.attachImage(users, opts.base64Img)
     }

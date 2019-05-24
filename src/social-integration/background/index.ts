@@ -40,9 +40,9 @@ export default class SocialBackground {
     }
 
     async addTweet({ user, ...tweet }: Tweet) {
-        await this.addUser(user)
+        const userId = await this.addUser(user)
 
-        return this.storage.addSocialPost(tweet)
+        return this.storage.addSocialPost({ ...tweet, userId })
     }
 
     async addPostToList({ id, url }: TweetUrl & { id: number }) {
@@ -107,7 +107,18 @@ export default class SocialBackground {
         return this.storage.delSocialBookmark({ postId })
     }
 
-    async addUser({ profilePicUrl, ...rest }: User) {
+    async addUser({
+        profilePicUrl,
+        serviceId,
+        ...rest
+    }: User): Promise<number> {
+        // Use existing user if present
+        const userId = await this.storage.getUserIdForServiceId({ serviceId })
+
+        if (userId) {
+            return userId
+        }
+
         const profilePicURI = await fetchImage(profilePicUrl)
         const profilePic: Blob = profilePicURI
             ? dataURLtoBlob(profilePicURI)
@@ -116,6 +127,7 @@ export default class SocialBackground {
         return this.storage.addSocialUser({
             ...rest,
             profilePic,
+            serviceId,
         })
     }
 
@@ -135,21 +147,17 @@ export default class SocialBackground {
         limit = 20,
         base64Img = false,
     }) {
-        const query = {
-            id: {
-                $nin: excludeIds,
-            },
-        }
-
-        const opts = {
-            limit,
-            skip,
-            base64Img,
-        }
+        excludeIds = await Promise.all(
+            excludeIds.map(serviceId =>
+                this.storage.getUserIdForServiceId({ serviceId }),
+            ),
+        )
 
         return this.storage.fetchAllUsers({
-            query,
-            opts,
+            excludeIds,
+            skip,
+            limit,
+            base64Img,
         })
     }
 

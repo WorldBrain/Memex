@@ -13,9 +13,10 @@ export default interface RootState {
 export type Thunk<R = void> = ThunkAction<R, RootState, void, any>
 
 export interface User {
-    id: string
+    id?: number
     name: string
     username: string
+    serviceId?: string
     isVerified?: boolean
     profilePicUrl?: string
     profilePic?: any
@@ -24,7 +25,7 @@ export interface User {
 
 export interface Tweet {
     id?: number
-    userId: string
+    userId: number
     text: string
     hashtags: Array<string>
     createdWhen: Date | number

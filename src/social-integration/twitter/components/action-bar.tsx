@@ -8,7 +8,7 @@ import ActionBarItems from './action-bar-items'
 import { Props as RootProps } from './save-to-memex-container'
 
 interface Props extends RootProps {
-    saveTweet: (callback?: boolean) => (e: Event) => void
+    saveTweet: (callback?: boolean) => (e: Event) => Promise<void>
 }
 
 const styles = require('./styles.css')

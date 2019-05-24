@@ -32,17 +32,16 @@ export function getTweetInfo(element: HTMLElement): Partial<Tweet> {
     const isVerified = element.querySelector('.Icon.Icon--verified') !== null
 
     const user: User = {
-        id: userId,
         name,
         username: screenName,
         isVerified,
         profilePicUrl,
         type: 'twitter',
+        serviceId: userId,
     }
 
     return {
         serviceId: tweetId,
-        userId,
         createdWhen: Number(tweetTimeMs),
         text: tweetContent,
         hashtags,

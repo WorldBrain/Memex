@@ -11,7 +11,7 @@ interface Props {
     commentBox: ReactNode
     isCommentSaved: boolean
     toggleBookmark: (url: string, isBookmarked: boolean) => void
-    saveTweet: (e: Event) => void
+    saveTweet: (e: Event) => Promise<void>
 }
 
 interface State {
@@ -86,7 +86,7 @@ class ActionBarItems extends Component<Props, State> {
     }
 
     private handleBookmarkClick = async e => {
-        this.props.saveTweet(e)
+        await this.props.saveTweet(e)
         try {
             await this.props.toggleBookmark(
                 this.props.url,
