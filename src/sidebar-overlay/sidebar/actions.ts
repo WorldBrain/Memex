@@ -183,7 +183,7 @@ export const createAnnotation: (
         })
 
         // Re-fetch annotations.
-        dispatch(fetchAnnotations())
+        dispatch(fetchAnnotations(isSocialPost))
 
         dispatch(checkAndSetCongratsMessage())
     }
