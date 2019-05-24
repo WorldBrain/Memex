@@ -31,7 +31,6 @@ describe('Twitter storage', () => {
         const assertTweet = (received, expected) => {
             expect(received.id).toEqual(expected.id)
             expect(received.text).toEqual(expected.text)
-            expect(received.url).toEqual(expected.url)
             expect(received.userId).toEqual(expected.userId)
             expect(received.createdAt).toEqual(expected.createdAt)
         }

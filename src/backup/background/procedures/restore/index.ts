@@ -8,7 +8,6 @@ import {
     USERS_COLL,
     POSTS_COLL,
     BMS_COLL,
-    VISITS_COLL,
 } from 'src/social-integration/constants'
 const dataURLtoBlob = require('dataurl-to-blob')
 const sorted = require('lodash/sortBy')
@@ -342,13 +341,7 @@ export function _deserializeChangeFields(change: ObjectChange) {
 
     if (
         checkSerializedExists(
-            [
-                'customLists',
-                'pageListEntries',
-                POSTS_COLL,
-                BMS_COLL,
-                VISITS_COLL,
-            ],
+            ['customLists', 'pageListEntries', POSTS_COLL, BMS_COLL],
             'createdAt',
         )
     ) {

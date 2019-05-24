@@ -6,7 +6,6 @@ export const POSTS_COLL = 'socialPosts'
 export const USERS_COLL = 'socialUsers'
 export const TAGS_COLL = 'socialTags'
 export const BMS_COLL = 'socialBookmarks'
-export const VISITS_COLL = 'socialVisits'
 export const LIST_ENTRIES_COLL = 'socialPostListEntries'
 
 export const TWEET_URL_MATCH_PATTERN = /^twitter\.com\/(.+)\/status\/(.+)$/

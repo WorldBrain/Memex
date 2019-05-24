@@ -6,7 +6,6 @@ import { Tweet, SocialPage, User } from 'src/social-integration/types'
 import {
     POSTS_COLL,
     BMS_COLL,
-    VISITS_COLL,
     TAGS_COLL,
     LIST_ENTRIES_COLL,
 } from 'src/social-integration/constants'
@@ -215,17 +214,17 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         const latestVisits = new Map<number, number>()
 
         await this.backend.dexieInstance
-            .table(VISITS_COLL)
+            .table(POSTS_COLL)
             .where('createdAt')
             .between(new Date(startDate), new Date(endDate), true, true)
             .reverse()
             .until(() => latestVisits.size >= skip + limit)
-            .each(({ createdAt, postId }) => {
+            .each(({ createdAt, id }) => {
                 if (
-                    !latestVisits.has(postId) &&
-                    filteredUrls.isAllowed(postId.toString())
+                    !latestVisits.has(id) &&
+                    filteredUrls.isAllowed(id.toString())
                 ) {
-                    latestVisits.set(postId, createdAt.valueOf())
+                    latestVisits.set(id, createdAt.valueOf())
                 }
             })
 
@@ -279,30 +278,6 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             if (bms.size < skip + limit) {
                 bmsExhausted = true
             }
-
-            await Promise.all(
-                [...bms].map(async ([postId, currentTime]) => {
-                    if (currentTime > endDate || currentTime < startDate) {
-                        let done = false
-                        await this.backend.dexieInstance
-                            .table(VISITS_COLL)
-                            .where('postId')
-                            .equals(postId)
-                            .reverse()
-                            .until(() => done)
-                            .each(({ createdAt }) => {
-                                const visitTime = createdAt.valueOf()
-                                if (
-                                    visitTime >= startDate &&
-                                    visitTime <= endDate
-                                ) {
-                                    bms.set(postId, visitTime)
-                                    done = true
-                                }
-                            })
-                    }
-                }),
-            )
 
             upperBound = new Date(Math.min(...bms.values()) - 1)
 
@@ -361,13 +336,13 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
         const visitsPerPage = new Map<number, number[]>()
 
         await this.backend.dexieInstance
-            .table(VISITS_COLL)
-            .where('postId')
+            .table(POSTS_COLL)
+            .where('id')
             .anyOf(idsToCheck)
             .reverse()
-            .each(({ createdAt, postId }) => {
-                const current = visitsPerPage.get(postId) || []
-                visitsPerPage.set(postId, [...current, createdAt.valueOf()])
+            .each(({ createdAt, id }) => {
+                const current = visitsPerPage.get(id) || []
+                visitsPerPage.set(id, [...current, createdAt.valueOf()])
             })
 
         idsToCheck.forEach((postId, i) => {
