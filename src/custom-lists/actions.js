@@ -145,6 +145,7 @@ export const createPageList = (name, cb) => async (dispatch, getState) => {
                 name,
                 isDeletable: true,
                 pages: [],
+                subLists: [],
             }
 
             dispatch(createList(list))

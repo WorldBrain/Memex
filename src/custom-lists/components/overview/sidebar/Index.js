@@ -119,7 +119,7 @@ class ListContainer extends Component {
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
                     onListItemClick={this.props.handleListItemClick(list, i)}
                     onAddPageToList={this.props.handleAddPageList(list, i)}
-                    onAddSublistToList={this.props.handleAddSubList(list, i)}
+                    onAddSubListToList={this.props.handleAddSubList(list, i)}
                     onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
                     resetUrlDragged={this.props.resetUrlDragged}
                 />
