@@ -241,6 +241,9 @@ export default class DirectLinkingBackground {
             selector,
         })
 
+        // Attempt to (re-)index, if user preference set, but don't wait for it
+        this.annotationStorage.indexPageFromTab(tab)
+
         if (bookmarked) {
             await this.toggleAnnotBookmark({ tab }, { url: uniqueUrl })
         }
