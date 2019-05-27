@@ -4,6 +4,8 @@ import { Tweet, User } from '../types'
 import { PageList } from 'src/custom-lists/background/types'
 
 import * as consts from '../constants'
+import { Annotation } from 'src/direct-linking/types'
+import { buildPostUrlId } from '../util'
 
 export interface SocialStorageProps {
     storageManager: StorageManager
@@ -321,8 +323,49 @@ export default class SocialStorage extends FeatureStorage {
             .deleteOneObject({ postId })
     }
 
+    private async maybeDeletePostAuthor({ postId }: { postId: number }) {
+        const { userId } = await this.storageManager
+            .collection(this.postsColl)
+            .findOneObject<Tweet>({ id: postId })
+
+        const postCount = await this.storageManager
+            .collection(this.postsColl)
+            .countObjects({ userId })
+
+        if (postCount > 1) {
+            return
+        }
+
+        return this.storageManager
+            .collection(this.usersColl)
+            .deleteOneObject({ id: userId })
+    }
+
+    private async deletePostAnnots({ postUrlId }: { postUrlId: string }) {
+        const annots = await this.storageManager
+            .collection('annotations')
+            .findObjects<Annotation>({ pageUrl: postUrlId })
+
+        const annotIds = annots.map(annot => annot.url)
+
+        return Promise.all([
+            this.storageManager
+                .collection('annotBookmarks')
+                .deleteObjects({ url: { $in: annotIds } }),
+            this.storageManager
+                .collection('annotListEntries')
+                .deleteObjects({ url: { $in: annotIds } }),
+            this.storageManager
+                .collection('annotations')
+                .deleteObjects({ pageUrl: postUrlId }),
+        ])
+    }
+
     async delSocialPages({ postIds }: { postIds: number[] }) {
         for (const postId of postIds) {
+            const postUrlId = buildPostUrlId({ postId }).url
+            await this.maybeDeletePostAuthor({ postId })
+
             await Promise.all([
                 this.storageManager
                     .collection(this.postsColl)
@@ -331,8 +374,15 @@ export default class SocialStorage extends FeatureStorage {
                     .collection(this.tagsColl)
                     .deleteObjects({ postId }),
                 this.storageManager
+                    .collection('tags')
+                    .deleteObjects({ url: postUrlId }),
+                this.storageManager
                     .collection(this.bookmarksColl)
                     .deleteObjects({ postId }),
+                this.storageManager
+                    .collection(this.listEntriesColl)
+                    .deleteObjects({ postId }),
+                this.deletePostAnnots({ postUrlId }),
             ])
         }
     }
