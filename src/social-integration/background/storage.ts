@@ -320,7 +320,7 @@ export default class SocialStorage extends FeatureStorage {
     async delSocialBookmark({ postId }: { postId: number }) {
         return this.storageManager
             .collection(this.bookmarksColl)
-            .deleteOneObject({ postId })
+            .deleteObjects({ postId })
     }
 
     private async maybeDeletePostAuthor({ postId }: { postId: number }) {
@@ -376,9 +376,7 @@ export default class SocialStorage extends FeatureStorage {
                 this.storageManager
                     .collection('tags')
                     .deleteObjects({ url: postUrlId }),
-                this.storageManager
-                    .collection(this.bookmarksColl)
-                    .deleteObjects({ postId }),
+                this.delSocialBookmark({ postId }),
                 this.storageManager
                     .collection(this.listEntriesColl)
                     .deleteObjects({ postId }),

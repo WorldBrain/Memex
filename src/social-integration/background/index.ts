@@ -81,11 +81,11 @@ export default class SocialBackground {
         })
     }
 
-    async delTagForTweet({ url, name }: { url: string; name: string }) {
+    async delTagForTweet({ url, tag }: { url: string; tag: string }) {
         const postId = await this.getPostIdFromUrl(url)
 
         return this.storage.delTagForPost({
-            name,
+            name: tag,
             url: buildPostUrlId({ postId }).url,
         })
     }
