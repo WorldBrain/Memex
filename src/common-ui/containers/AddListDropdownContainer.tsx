@@ -31,6 +31,7 @@ export interface Props {
     isForRibbon: boolean
     addPageToListRPC?: string
     delPageFromListRPC?: string
+    onListClickCb?: () => void
 }
 
 export interface State {
@@ -52,6 +53,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         isForRibbon: false,
         addPageToListRPC: 'insertPageToList',
         delPageFromListRPC: 'removePageFromList',
+        onListClickCb: noop,
     }
 
     private err: { timestamp: number; err: Error }
@@ -188,6 +190,8 @@ class AddListDropdownContainer extends Component<Props, State> {
      * Used for 'Enter' presses or 'Add new tag' clicks.
      */
     private createList = async () => {
+        await this.props.onListClickCb()
+
         const listName = this.getSearchVal()
 
         if (this.allowIndexUpdate) {
@@ -323,6 +327,8 @@ class AddListDropdownContainer extends Component<Props, State> {
      * the page depending on their current status as associated lists or not.
      */
     private handleListClick = (index: number) => async event => {
+        await this.props.onListClickCb()
+
         const list = this.state.displayFilters[index]
 
         // Either add or remove the list, let Redux handle the store changes.

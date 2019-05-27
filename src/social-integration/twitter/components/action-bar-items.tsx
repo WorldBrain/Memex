@@ -11,7 +11,7 @@ interface Props {
     commentBox: ReactNode
     isCommentSaved: boolean
     toggleBookmark: (url: string, isBookmarked: boolean) => void
-    saveTweet: (e: Event) => Promise<void>
+    saveTweet: () => Promise<void>
 }
 
 interface State {
@@ -62,7 +62,6 @@ class ActionBarItems extends Component<Props, State> {
     }
 
     private handleTagClick = e => {
-        this.props.saveTweet(e)
         this.setState(prevState => ({
             ...defaultState,
             showTagsPicker: !prevState.showTagsPicker,
@@ -70,7 +69,6 @@ class ActionBarItems extends Component<Props, State> {
     }
 
     private handleCollClick = e => {
-        this.props.saveTweet(e)
         this.setState(prevState => ({
             ...defaultState,
             showCollPicker: !prevState.showCollPicker,
@@ -78,7 +76,6 @@ class ActionBarItems extends Component<Props, State> {
     }
 
     private handleCommentClick = e => {
-        this.props.saveTweet(e)
         this.setState(prevState => ({
             ...defaultState,
             showCommentBox: !prevState.showCommentBox,
@@ -86,7 +83,7 @@ class ActionBarItems extends Component<Props, State> {
     }
 
     private handleBookmarkClick = async e => {
-        await this.props.saveTweet(e)
+        await this.props.saveTweet()
         try {
             await this.props.toggleBookmark(
                 this.props.url,

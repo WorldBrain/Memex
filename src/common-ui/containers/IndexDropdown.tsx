@@ -48,6 +48,7 @@ export interface Props {
     fromOverview?: boolean
     isSocialPost?: boolean
     sidebarTagDiv?: boolean
+    onTagClickCb?: () => void
 }
 
 export interface State {
@@ -74,6 +75,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         isForAnnotation: false,
         isForRibbon: false,
         fromOverview: false,
+        onTagClickCb: noop,
     }
 
     private err: { timestamp: number; err: Error }
@@ -294,6 +296,8 @@ class IndexDropdownContainer extends Component<Props, State> {
      * Used for 'Enter' presses or 'Add new tag' clicks.
      */
     private addTag = async () => {
+        await this.props.onTagClickCb()
+
         const newTag = this.getSearchVal()
         this.props.onFilterAdd(newTag)
 
@@ -395,6 +399,8 @@ class IndexDropdownContainer extends Component<Props, State> {
      * depending on their current status as assoc. tags or not.
      */
     private handleTagSelection = (index: number) => async event => {
+        await this.props.onTagClickCb()
+
         const tag =
             this.state.searchVal.length > 0
                 ? this.state.displayFilters[index]

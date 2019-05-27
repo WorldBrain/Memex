@@ -82,12 +82,6 @@ class SaveToMemexContainer extends Component<Props, State> {
 
     async componentDidMount() {
         this.memexBtnRef.addEventListener('click', this.toggleTweet())
-        const postTags = await remoteFunction('fetchSocialPostTags')({
-            url: this.url,
-        })
-        this.setState(state => ({
-            tags: postTags,
-        }))
         this.attachTagHolder()
     }
 
@@ -99,11 +93,20 @@ class SaveToMemexContainer extends Component<Props, State> {
         this.memexBtnRef.removeEventListener('click', this.toggleTweet())
     }
 
-    private attachTagHolder() {
+    private async attachTagHolder() {
         if (
             normalizeUrl(window.location.href) === normalizeUrl(this.url) &&
             !this.state.setTagHolder
         ) {
+            this.setState(state => ({
+                setTagHolder: true,
+            }))
+            const postTags = await remoteFunction('fetchSocialPostTags')({
+                url: this.url,
+            })
+            this.setState(state => ({
+                tags: postTags,
+            }))
             const tweetFooter = this.props.element.querySelector(
                 '.stream-item-footer',
             )
@@ -114,14 +117,10 @@ class SaveToMemexContainer extends Component<Props, State> {
                     handlePillClick: () => {},
                 })
             }
-            this.setState(state => ({
-                setTagHolder: true,
-            }))
         }
     }
 
-    private toggleTweet = (isCallback?: boolean) => async (e: Event) => {
-        e.preventDefault()
+    private toggleTweet = (isCallback?: boolean) => async () => {
         if (isCallback && this.state.saved) {
             return
         }

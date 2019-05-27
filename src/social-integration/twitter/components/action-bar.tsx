@@ -8,7 +8,7 @@ import ActionBarItems from './action-bar-items'
 import { Props as RootProps } from './save-to-memex-container'
 
 interface Props extends RootProps {
-    saveTweet: (callback?: boolean) => (e: Event) => Promise<void>
+    saveTweet: (callback?: boolean) => () => Promise<void>
 }
 
 const styles = require('./styles.css')
@@ -38,6 +38,7 @@ class ActionBar extends Component<Props> {
                 isForRibbon
                 fromOverview
                 isSocialPost
+                onTagClickCb={this.props.saveTweet(true)}
             />
         )
     }
@@ -53,6 +54,7 @@ class ActionBar extends Component<Props> {
                 addPageToListRPC="addPostToList"
                 delPageFromListRPC="delPostFromList"
                 isForRibbon
+                onListClickCb={this.props.saveTweet(true)}
             />
         )
     }
@@ -63,7 +65,13 @@ class ActionBar extends Component<Props> {
             title: document.title,
         })
 
-        return <CommentBoxContainer isSocialPost env="inpage" />
+        return (
+            <CommentBoxContainer
+                isSocialPost
+                env="inpage"
+                onSaveCb={this.props.saveTweet(true)}
+            />
+        )
     }
 
     render() {
