@@ -93,8 +93,6 @@ export default class SearchBackground {
             addTag: idx.addTag(this.getDb),
             delTag: idx.delTag(this.getDb),
             fetchPageTags: idx.fetchPageTags(this.getDb),
-            addBookmark: idx.addBookmark(this.getDb, this.tabMan),
-            delBookmark: idx.delBookmark(this.getDb, this.tabMan),
             pageHasBookmark: idx.pageHasBookmark(this.getDb),
             getPage: idx.getPage(this.getDb),
             grabExistingKeys: idx.grabExistingKeys(this.getDb),

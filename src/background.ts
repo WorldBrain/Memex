@@ -97,6 +97,7 @@ registerModuleMapCollections(storageManager.registry, {
     annotations: directLinking.annotationStorage,
     notifications: notifications.storage,
     customList: customList.storage,
+    bookmarks: bookmarks.storage,
     backup: backupModule.storage,
     eventLog: eventLog.storage,
     search: search.storage,

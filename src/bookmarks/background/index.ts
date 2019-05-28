@@ -1,12 +1,13 @@
+import Storex from '@worldbrain/storex'
+
 import BookmarksStorage from './storage'
-import { StorageManager } from 'src/search/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import normalizeUrl from 'src/util/encode-url-for-id'
 
 export default class BookmarksBackground {
-    private storage: BookmarksStorage
+    storage: BookmarksStorage
 
-    constructor({ storageManager }: { storageManager: StorageManager }) {
+    constructor({ storageManager }: { storageManager: Storex }) {
         this.storage = new BookmarksStorage({ storageManager })
     }
 
