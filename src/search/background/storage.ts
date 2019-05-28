@@ -68,7 +68,7 @@ export default class SearchStorage extends StorageModule {
             [PageUrlMapperPlugin.MAP_OP_SOCIAL_ID]: {
                 operation: PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
                 args: [
-                    { results: '$results:any' },
+                    '$results:any',
                     {
                         base64Img: '$base64Img:boolean',
                         upperTimeBound: '$endDate:number',
