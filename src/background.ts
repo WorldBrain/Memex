@@ -100,6 +100,7 @@ registerModuleMapCollections(storageManager.registry, {
     backup: backupModule.storage,
     eventLog: eventLog.storage,
     search: search.storage,
+    social: social.storage,
     tags: tags.storage,
 })
 

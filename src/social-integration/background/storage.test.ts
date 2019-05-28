@@ -1,9 +1,10 @@
+import Storex from '@worldbrain/storex'
+
 import initStorageManager from 'src/search/memory-storex'
 import CustomListBg from 'src/custom-lists/background'
 import AnnotsBg from 'src/direct-linking/background'
 import SocialBackground from './'
 import SocialStorage from './storage'
-import { StorageManager } from 'src/search'
 import * as DATA from './storage.test.data'
 import { Tweet, SocialPage } from '../types'
 import { SocialSearchPlugin } from 'src/search/background/social-search'
@@ -18,7 +19,7 @@ const assertTweetsEqual = (received: Tweet, expected: Tweet) => {
 
 describe('Social storage', () => {
     let socialStorage: SocialStorage
-    let storageManager: StorageManager
+    let storageManager: Storex
     let socialBg: SocialBackground
     let customListBg: CustomListBg
     let listId: number
