@@ -1,4 +1,5 @@
 import Storex from '@worldbrain/storex'
+import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
 import initStorageManager from 'src/search/memory-storex'
 import CustomListBg from 'src/custom-lists/background'
@@ -61,6 +62,9 @@ describe('Social storage', () => {
         })
 
         socialStorage = socialBg['storage']
+        registerModuleMapCollections(storageManager.registry, {
+            socialStorage,
+        })
 
         await storageManager.finishInitialization()
         await insertTestData()

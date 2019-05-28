@@ -1,5 +1,7 @@
 import Storex from '@worldbrain/storex'
+import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
+import BookmarksBackground from 'src/bookmarks/background'
 import initStorageManager from './memory-storex'
 import getDb, { setStorex } from './get-db'
 import * as idx from '.'
@@ -52,6 +54,11 @@ describe('Search index integration', () => {
     // Set what index to use for tests + initialize data
     beforeEach(async () => {
         storageManager = initStorageManager()
+        const bmBackground = new BookmarksBackground({ storageManager })
+
+        registerModuleMapCollections(storageManager.registry, {
+            bookmarks: bmBackground.storage,
+        })
         await storageManager.finishInitialization()
         setStorex(storageManager)
         await resetTestData()
