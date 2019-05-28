@@ -1,5 +1,6 @@
+import Storex from '@worldbrain/storex'
+
 import SocialStorage from './storage'
-import { StorageManager } from 'src/search/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { Tweet, User, TweetUrl } from 'src/social-integration/types'
 import fetchImage from 'src/social-integration/fetch-image'
@@ -8,9 +9,9 @@ import { deriveTweetUrlProps, buildPostUrlId } from '../util'
 const dataURLtoBlob = require('dataurl-to-blob')
 
 export default class SocialBackground {
-    private storage: SocialStorage
+    storage: SocialStorage
 
-    constructor({ storageManager }: { storageManager: StorageManager }) {
+    constructor({ storageManager }: { storageManager: Storex }) {
         this.storage = new SocialStorage({ storageManager })
     }
 
@@ -162,20 +163,10 @@ export default class SocialBackground {
     }
 
     async fetchAllHashtags({ excludeIds = [], skip = 0, limit = 20 }) {
-        const query = {
-            name: {
-                $nin: excludeIds,
-            },
-        }
-
-        const opts = {
+        return this.storage.fetchAllHashtags({
+            excludeIds,
             limit,
             skip,
-        }
-
-        return this.storage.fetchAllHashtags({
-            query,
-            opts,
         })
     }
 
