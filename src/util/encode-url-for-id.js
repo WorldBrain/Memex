@@ -6,7 +6,7 @@ export const PROTOCOL_PATTERN = /^\w+:\/\//
 
 export const normalizationOpts = {
     normalizeProtocol: true, // Prepend `http://` if URL is protocol-relative
-    stripFragment: true, // Remove trailing hash fragment
+    stripHash: true, // Remove trailing hash fragment
     stripWWW: true, // Remove any leading `www.`
     removeTrailingSlash: true,
     removeQueryParameters: [/^utm_\w+/i], // Remove each of these query params (default for now)
