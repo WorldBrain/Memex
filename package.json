@@ -58,7 +58,7 @@
         "moment": "^2.18.1",
         "moment-timezone": "^0.5.14",
         "mousetrap": "^1.6.2",
-        "normalize-url": "^1.9.1",
+        "normalize-url": "^4.3.0",
         "page-metadata-parser": "git+https://github.com/Treora/page-metadata-parser.git#npm-testable",
         "pdfjs-dist": "^1.8.492",
         "postcss-modules-values": "^2.0.0",
