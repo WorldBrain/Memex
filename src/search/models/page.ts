@@ -256,39 +256,33 @@ export default class Page extends AbstractModel
     }
 
     async loadRels() {
-        return this.db.backend.operation(
-            'transaction',
-            { collections: this.collections },
-            async () => {
-                this.loadBlobs()
+        this.loadBlobs()
 
-                // Grab DB data
-                const visits = await this.db
-                    .collection('visits')
-                    .findAllObjects<Visit>({ url: this.url })
-                const tags = await this.db
-                    .collection('tags')
-                    .findAllObjects<Tag>({ url: this.url })
-                const bookmark = await this.db
-                    .collection('bookmarks')
-                    .findOneObject<Bookmark>({ url: this.url })
+        // Grab DB data
+        const visits = await this.db
+            .collection('visits')
+            .findAllObjects<Visit>({ url: this.url })
+        const tags = await this.db
+            .collection('tags')
+            .findAllObjects<Tag>({ url: this.url })
+        const bookmark = await this.db
+            .collection('bookmarks')
+            .findOneObject<Bookmark>({ url: this.url })
 
-                this[visitsProp] = visits.map(v => new Visit(this.db, v))
-                this[tagsProp] = tags.map(t => new Tag(this.db, t))
-                this[bookmarkProp] = bookmark
-                    ? new Bookmark(this.db, bookmark)
-                    : undefined
+        this[visitsProp] = visits.map(v => new Visit(this.db, v))
+        this[tagsProp] = tags.map(t => new Tag(this.db, t))
+        this[bookmarkProp] = bookmark
+            ? new Bookmark(this.db, bookmark)
+            : undefined
 
-                // Derive latest time of either bookmark or visits
-                let latest = bookmark != null ? bookmark.time : 0
+        // Derive latest time of either bookmark or visits
+        let latest = bookmark != null ? bookmark.time : 0
 
-                if (latest < (visits[visits.length - 1] || { time: 0 }).time) {
-                    latest = visits[visits.length - 1].time
-                }
+        if (latest < (visits[visits.length - 1] || { time: 0 }).time) {
+            latest = visits[visits.length - 1].time
+        }
 
-                this[latestProp] = latest
-            },
-        )
+        this[latestProp] = latest
     }
 
     async delete() {
@@ -327,7 +321,7 @@ export default class Page extends AbstractModel
     }
 
     async save() {
-        return this.db.backend.operation(
+        return this.db.operation(
             'transaction',
             { collections: this.collections },
             async () => {

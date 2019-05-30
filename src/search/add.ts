@@ -2,7 +2,7 @@ import { VisitInteraction, PageAddRequest } from '.'
 import normalizeUrl from '../util/encode-url-for-id'
 import pipeline, { transformUrl } from './pipeline'
 import { Page, FavIcon } from './models'
-import { getPage, collections } from './util'
+import { getPage } from './util'
 import { PipelineReq, DBGet } from './types'
 import { initErrHandler } from './storage'
 
@@ -22,30 +22,24 @@ export const addPage = (getDb: DBGet) => async ({
         rejectNoContent,
     })
 
-    return db.backend.operation(
-        'transaction',
-        { collections: collections(db) },
-        async () => {
-            const page = new Page(db, pageData)
-            await page.loadRels()
+    const page = new Page(db, pageData)
+    await page.loadRels()
 
-            // Create Visits for each specified time, or a single Visit for "now" if no assoc event
-            visits = !visits.length && bookmark == null ? [Date.now()] : visits
-            visits.forEach(time => page.addVisit(time))
+    // Create Visits for each specified time, or a single Visit for "now" if no assoc event
+    visits = !visits.length && bookmark == null ? [Date.now()] : visits
+    visits.forEach(time => page.addVisit(time))
 
-            if (bookmark != null) {
-                page.setBookmark(bookmark)
-            }
+    if (bookmark != null) {
+        page.setBookmark(bookmark)
+    }
 
-            if (favIconURI != null) {
-                await new FavIcon(db, {
-                    hostname: page.hostname,
-                    favIconURI,
-                }).save()
-            }
-            await page.save()
-        },
-    )
+    if (favIconURI != null) {
+        await new FavIcon(db, {
+            hostname: page.hostname,
+            favIconURI,
+        }).save()
+    }
+    await page.save()
 }
 
 export const addPageTerms = (getDb: DBGet) => async (
@@ -54,15 +48,9 @@ export const addPageTerms = (getDb: DBGet) => async (
     const db = await getDb()
     const pageData = await pipeline(pipelineReq)
 
-    return db.backend.operation(
-        'transaction',
-        { collections: collections(db) },
-        async () => {
-            const page = new Page(db, pageData)
-            await page.loadRels()
-            await page.save()
-        },
-    )
+    const page = new Page(db, pageData)
+    await page.loadRels()
+    await page.save()
 }
 
 /**
