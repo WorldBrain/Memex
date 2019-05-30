@@ -77,7 +77,7 @@ export default class SearchStorage extends StorageModule {
             },
             [SocialSearchPlugin.MAP_POST_IDS_OP_ID]: {
                 operation: SocialSearchPlugin.MAP_POST_IDS_OP_ID,
-                args: { postIds: '$postIds:number[]' },
+                args: ['$postIds:number[]'],
             },
             [SocialSearchPlugin.SEARCH_OP_ID]: {
                 operation: SocialSearchPlugin.SEARCH_OP_ID,
