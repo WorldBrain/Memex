@@ -292,30 +292,38 @@ export default class Page extends AbstractModel
     }
 
     async delete() {
-        return this.db.backend.operation(
-            'transaction',
-            { collections: this.collections },
-            async () => {
-                Promise.all([
-                    this.db
-                        .collection('visits')
-                        .deleteObjects({ url: this.url }),
-                    this.db
-                        .collection('bookmarks')
-                        .deleteObjects({ url: this.url }),
-                    this.db.collection('tags').deleteObjects({ url: this.url }),
-                    this.db
-                        .collection('pages')
-                        .deleteObjects({ url: this.url }),
-                    this.db
-                        .collection('pageListEntries')
-                        .deleteObjects({ pageUrl: this.url }),
-                    this.db
-                        .collection('annotations')
-                        .deleteObjects({ pageUrl: this.url }),
-                ])
+        return this.db.backend.executeBatch([
+            {
+                collection: 'visits',
+                operation: 'deleteObjects',
+                where: { url: this.url },
             },
-        )
+            {
+                collection: 'bookmarks',
+                operation: 'deleteObjects',
+                where: { url: this.url },
+            },
+            {
+                collection: 'tags',
+                operation: 'deleteObjects',
+                where: { url: this.url },
+            },
+            {
+                collection: 'pages',
+                operation: 'deleteObjects',
+                where: { url: this.url },
+            },
+            {
+                collection: 'pageListEntries',
+                operation: 'deleteObjects',
+                where: { pageUrl: this.url },
+            },
+            {
+                collection: 'annotations',
+                operation: 'deleteObjects',
+                where: { pageUrl: this.url },
+            },
+        ])
     }
 
     async save() {
