@@ -12,8 +12,18 @@
     border: none;
     vertical-align: bottom;
     background-size: 18px;
-    margin-left: -5px;
     margin-bottom: -3px;
+    background-repeat: no-repeat;
+}
+
+.hoverButton {
+    z-index: 1;
+    height: 30px;
+    margin-top: -10px;
+}
+
+.hoverArea {
+    width: 23px;
 }
 
 .saved {
@@ -32,10 +42,10 @@
     background-color: transparent;
     z-index: 2;
     position: absolute;
-    height: 50px;
+    height: 40px;
     width: 120px;
-    bottom: -45px;
-    left: -51px;
+    bottom: -35px;
+    left: -47px;
     display: flex;
     align-items: flex-end;
 }

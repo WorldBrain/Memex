@@ -164,13 +164,19 @@ class SaveToMemexContainer extends Component<Props, State> {
             >
                 <button
                     ref={ref => (this.memexBtnRef = ref)}
-                    className="ProfileTweet-actionButton u-textUserColorHover js-actionButton"
+                    className={cx(
+                        'ProfileTweet-actionButton u-textUserColorHover js-actionButton',
+                        styles.hoverButton,
+                    )}
                     type="button"
                     data-nav="share_tweet_to_memex"
                 >
                     <div
-                        className="IconContainer js-tooltip"
-                        data-original-title="Save To Memex"
+                        className={cx(
+                                'IconContainer js-tooltip',
+                                styles.hoverArea,
+                                )}
+                                data-original-title="Save To Memex"
                     >
                         <span
                             className={cx(
