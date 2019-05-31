@@ -23,6 +23,7 @@ describe('Annotations storage', () => {
             // Pages also need to be seeded to match domains filters against
             await storageManager.collection('pages').createObject({
                 url: annot.pageUrl,
+                fullUrl: annot.url,
                 hostname: normalize(annot.pageUrl),
                 domain: normalize(annot.pageUrl),
                 title: annot.pageTitle,
