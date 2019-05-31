@@ -1,4 +1,5 @@
 import initStorageManager from 'src/search/memory-storex'
+import CustomListBg from 'src/custom-lists/background'
 import SocialBackground from './'
 import SocialStorage from './storage'
 import { StorageManager } from 'src/search'
@@ -17,6 +18,10 @@ describe('Twitter storage', () => {
 
     beforeEach(async () => {
         storageManager = initStorageManager()
+        new CustomListBg({
+            storageManager,
+            getDb: () => storageManager['dexieInstance'],
+        })
         socialBg = new SocialBackground({
             storageManager,
         })
