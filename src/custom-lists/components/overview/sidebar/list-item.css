@@ -4,7 +4,8 @@
 .pageList {
     display: flex;
     align-items: center;
-    height: 30px;
+    flex-flow: column nowrap;
+    height: auto;
     position: relative;
     width: 100%;
     cursor: pointer;
@@ -16,6 +17,24 @@
             display: flex;
         }
     }
+
+    & .pageList {
+        padding-top: 0.625rem;
+        padding-bottom: 0.625rem;
+
+        & .listName {
+            padding-left: 2rem;
+        }
+    }
+}
+
+.pageTitle {
+    display: flex;
+    align-items: center;
+    height: auto;
+    position: relative;
+    width: 100%;
+    cursor: pointer;
 }
 
 .pageListDrag {
