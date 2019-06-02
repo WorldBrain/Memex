@@ -19,9 +19,6 @@
     }
 
     & .pageList {
-        padding-top: 0.625rem;
-        padding-bottom: 0.625rem;
-
         & .listName {
             padding-left: 2rem;
         }
@@ -31,7 +28,7 @@
 .pageTitle {
     display: flex;
     align-items: center;
-    height: auto;
+    height: 30px;
     position: relative;
     width: 100%;
     cursor: pointer;
