@@ -145,24 +145,30 @@ class PageList extends Component<Props, State> {
                 onDragStart={this.handleDragStart}
                 draggable
             >
-                <div className={styles.listName}>{this.props.listName}</div>
-                <div className={styles.buttonContainer}>
-                    {this.state.isMouseInside && (
-                        <React.Fragment>
-                            <button
-                                className={cx(styles.editButton, styles.button)}
-                                onClick={this.handleEditBtnClick}
-                            />
-                            <button
-                                className={cx(
-                                    styles.deleteButton,
-                                    styles.button,
-                                )}
-                                onClick={this.handleCrossBtnClick}
-                            />
-                        </React.Fragment>
-                    )}
+                <div className={styles.pageTitle}>
+                    <div className={styles.listName}>{this.props.listName}</div>
+                    <div className={styles.buttonContainer}>
+                        {this.state.isMouseInside && (
+                            <React.Fragment>
+                                <button
+                                    className={cx(
+                                        styles.editButton,
+                                        styles.button,
+                                    )}
+                                    onClick={this.handleEditBtnClick}
+                                />
+                                <button
+                                    className={cx(
+                                        styles.deleteButton,
+                                        styles.button,
+                                    )}
+                                    onClick={this.handleCrossBtnClick}
+                                />
+                            </React.Fragment>
+                        )}
+                    </div>
                 </div>
+                {this.props.children}
             </div>
         )
     }

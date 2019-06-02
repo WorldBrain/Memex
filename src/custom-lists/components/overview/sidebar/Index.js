@@ -91,8 +91,10 @@ class ListContainer extends Component {
         }))
     }
 
-    renderAllLists = () => {
-        return this.props.lists.map((list, i) => {
+    renderAllLists = listItems => {
+        const lists = listItems || this.props.lists
+
+        return lists.map((list, i) => {
             if (list.isEditing) {
                 return (
                     <CreateListForm
@@ -111,6 +113,7 @@ class ListContainer extends Component {
                     />
                 )
             }
+
             return (
                 <ListItem
                     key={i}
@@ -122,7 +125,9 @@ class ListContainer extends Component {
                     onAddSubListToList={this.props.handleAddSubList(list, i)}
                     onCrossButtonClick={this.props.handleCrossBtnClick(list, i)}
                     resetUrlDragged={this.props.resetUrlDragged}
-                />
+                >
+                    {list.subList && this.renderAllLists(list.subList)}
+                </ListItem>
             )
         })
     }
