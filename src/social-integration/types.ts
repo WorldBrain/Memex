@@ -20,7 +20,7 @@ export interface User {
     isVerified?: boolean
     profilePicUrl?: string
     profilePic?: any
-    type: string
+    type: 'twitter'
 }
 
 export interface Tweet {

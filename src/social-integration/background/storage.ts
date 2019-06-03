@@ -141,7 +141,7 @@ export default class SocialStorage extends FeatureStorage {
         postId: number
         listId: number
         createdAt?: Date
-    }) {
+    }): Promise<number> {
         const { object } = await this.storageManager
             .collection(this.listEntriesColl)
             .createObject({ createdAt, ...entry })
@@ -209,7 +209,7 @@ export default class SocialStorage extends FeatureStorage {
         createdWhen,
         serviceId,
         ...rest
-    }: Tweet) {
+    }: Tweet): Promise<number> {
         const postExistsId = await this.getPostIdForServiceId({ serviceId })
 
         if (postExistsId) {
@@ -288,21 +288,25 @@ export default class SocialStorage extends FeatureStorage {
     }: {
         postId: number
         time?: Date
-    }) {
-        return this.storageManager.collection(this.bookmarksColl).createObject({
-            postId,
-            createdAt: time,
-        })
+    }): Promise<number> {
+        const { object } = await this.storageManager
+            .collection(this.bookmarksColl)
+            .createObject({
+                postId,
+                createdAt: time,
+            })
+
+        return object.id
     }
 
-    async addTagForPost({ name, url }) {
+    async addTagForPost({ name, url }: { name: string; url: string }) {
         return this.storageManager.collection('tags').createObject({
             name,
             url,
         })
     }
 
-    async delTagForPost({ name, url }) {
+    async delTagForPost({ name, url }: { name: string; url: string }) {
         return this.storageManager.collection('tags').deleteObjects({
             name,
             url,
