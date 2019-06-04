@@ -42,7 +42,10 @@ describe('Social storage', () => {
         })
 
         for (const tweet of [DATA.tweetA, DATA.tweetB]) {
-            await socialStorage.addSocialPost({ ...tweet })
+            // ID gets auto-assigned on insert.
+            // Grab that and attach it to the test data docs, so we can compare them later.
+            const postId = await socialStorage.addSocialPost({ ...tweet })
+            tweet.id = postId
         }
     }
 
@@ -50,20 +53,20 @@ describe('Social storage', () => {
         storageManager = initStorageManager()
         customListBg = new CustomListBg({
             storageManager,
-            getDb: () => storageManager['dexieInstance'],
         })
         socialBg = new SocialBackground({
             storageManager,
         })
-        new AnnotsBg({
+        const annotsBg = new AnnotsBg({
             storageManager,
-            getDb: () => storageManager['dexieInstance'],
             socialBg,
         })
 
         socialStorage = socialBg['storage']
         registerModuleMapCollections(storageManager.registry, {
             socialStorage,
+            annotsStorage: annotsBg.annotationStorage,
+            customListStorage: customListBg.storage,
         })
 
         await storageManager.finishInitialization()

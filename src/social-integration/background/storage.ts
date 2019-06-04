@@ -161,7 +161,7 @@ export default class SocialStorage extends StorageModule {
             },
             deleteListEntry: {
                 collection: this.listEntriesColl,
-                operation: 'deleteObject',
+                operation: 'deleteObjects',
                 args: { listId: '$listId:number', postId: '$postId:number' },
             },
             deleteSocialBookmark: {
