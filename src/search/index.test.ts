@@ -1,6 +1,9 @@
 import Storex from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
+import AnnotsBg from 'src/direct-linking/background'
+import SocialBackground from 'src/social-integration/background'
+import CustomListBg from 'src/custom-lists/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import initStorageManager from './memory-storex'
 import getDb, { setStorex } from './get-db'
@@ -38,10 +41,6 @@ describe('Search index integration', () => {
         await idx.addTag(getDb)({ url: DATA.PAGE_2.url, tag: 'quality' })
     }
 
-    async function resetTestData() {
-        await insertTestData()
-    }
-
     // Bind projecting-out just ID and score from results to search
     const search = (params = {}) =>
         idx.search(getDb)({
@@ -55,13 +54,26 @@ describe('Search index integration', () => {
     beforeEach(async () => {
         storageManager = initStorageManager()
         const bmBackground = new BookmarksBackground({ storageManager })
+        const customListBg = new CustomListBg({
+            storageManager,
+        })
+        const socialBg = new SocialBackground({
+            storageManager,
+        })
+        const annotsBg = new AnnotsBg({
+            storageManager,
+            socialBg,
+        })
 
         registerModuleMapCollections(storageManager.registry, {
             bookmarks: bmBackground.storage,
+            customLists: customListBg.storage,
+            annotsStorage: annotsBg.annotationStorage,
+            socialStorage: socialBg['storage'],
         })
         await storageManager.finishInitialization()
         setStorex(storageManager)
-        await resetTestData()
+        await insertTestData()
     })
 
     describe('read ops', () => {
@@ -425,7 +437,7 @@ describe('Search index integration', () => {
 
         beforeEach(async () => {
             // These tests will change the index data, so reset each time to avoid side-effects from other tests
-            await resetTestData()
+            await insertTestData()
             origTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
             jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
         })
