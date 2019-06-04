@@ -26,10 +26,6 @@ class SidebarContainer extends PureComponent {
         urlDragged: PropTypes.string.isRequired,
     }
 
-    componentDidMount() {
-        this.makeResizableDiv('#teste')
-    }
-
     // Capture state of the react-burger-menu
     captureStateChange = ({ isOpen }) => {
         // reset mouse over when either close button clicked or esc pressed
@@ -37,24 +33,6 @@ class SidebarContainer extends PureComponent {
             this.props.resetMouseOver()
         }
         this.props.setSidebarState(isOpen)
-    }
-
-    makeResizableDiv(div) {
-        const element = document.querySelector(div)
-        const resizers = document.querySelectorAll(div + ' .resizable')
-        for (let i = 0; i < resizers.length; i++) {
-            const currentResizer = resizers[i]
-            currentResizer.addEventListener('mousedown', function(e) {
-                currentResizer.addEventListener('mousemove', e =>
-                    this.resize(element, e),
-                )
-            })
-        }
-    }
-
-    resize(element, event) {
-        element.style.width =
-            event.pageX - element.getBoundingClientRect().left + 'px'
     }
 
     handleClickOutside = e => {

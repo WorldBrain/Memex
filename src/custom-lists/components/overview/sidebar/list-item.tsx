@@ -31,10 +31,31 @@ class PageList extends Component<Props, State> {
 
     componentDidMount() {
         this.attachEventListeners()
+        this.makeResizableDiv('#teste')
     }
 
     componentWillUnmount() {
         this.removeEventListeners()
+    }
+
+    resize = event => {
+        const element = document.querySelector('#teste')
+        element.style.width =
+            event.pageX - element.getBoundingClientRect().left + 'px'
+    }
+
+    stopResize = () => {
+        window.removeEventListener('mousemove', this.resize)
+    }
+
+    makeResizableDiv = div => {
+        const resizers = document.querySelectorAll(div + ' .resizable')
+        const currentResizer = resizers[0]
+        currentResizer.addEventListener('mousedown', e => {
+            e.preventDefault()
+            window.addEventListener('mousemove', this.resize)
+            window.addEventListener('mouseup', this.stopResize)
+        })
     }
 
     private attachEventListeners() {
