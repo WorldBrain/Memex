@@ -1,7 +1,6 @@
 import { User, Tweet } from '../types'
 
 export const tweetA: Tweet = {
-    id: 12,
     serviceId: '12',
     text: 'This is a tweet',
     userId: 1,
@@ -11,7 +10,6 @@ export const tweetA: Tweet = {
 }
 
 export const tweetB: Tweet = {
-    id: 123,
     serviceId: '123',
     text: 'This is a tweet with hashtags #hashtag #test',
     userId: 2,
