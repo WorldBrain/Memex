@@ -20,11 +20,11 @@ export const resetDeleteIndex = createAction('deleteConf/resetDeleteIndex')
 const processEventRPC = remoteFunction('processEvent')
 const deletePagesRPC = remoteFunction('delPages')
 const createNotifRPC = remoteFunction('createNotification')
-const deleteTweetsRPC = remoteFunction('delTweets')
+const deleteSocialPagesRPC = remoteFunction('delSocialPages')
 
 export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     const url = selectors.urlToDelete(getState())
-    const isForSocial = results.isSocialSearch(getState())
+    const isForSocial = results.isSocialPost(getState())
 
     analytics.trackEvent({
         category: 'Overview',
@@ -38,7 +38,7 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     try {
         dispatch(hide())
 
-        const deleteRPC = isForSocial ? deleteTweetsRPC : deletePagesRPC
+        const deleteRPC = isForSocial ? deleteSocialPagesRPC : deletePagesRPC
 
         // Remove all assoc. docs from the database + index
         await deleteRPC([url])

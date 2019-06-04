@@ -5,31 +5,21 @@ import {
 } from 'src/common-ui/containers'
 import CommentBoxContainer from 'src/sidebar-overlay/comment-box'
 import ActionBarItems from './action-bar-items'
-import { StateProps, DispatchProps } from './save-to-memex-container'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import { Props as RootProps } from './save-to-memex-container'
+
+interface Props extends RootProps {
+    saveTweet: (callback?: boolean) => () => Promise<void>
+}
 
 const styles = require('./styles.css')
 
-interface OwnProps {
-    url: string
-}
-
-type Props = StateProps & DispatchProps & OwnProps
-
 class ActionBar extends Component<Props> {
-    private annotationsManager: AnnotationsManager
-
-    constructor(props: Props) {
-        super(props)
-        this.annotationsManager = new AnnotationsManager()
-    }
-
     componentDidMount() {
         this.props.onInit(this.props.url)
-        this.props.setAnnotationsManager(this.annotationsManager)
+        this.props.setAnnotationsManager(this.props.annotationsManager)
     }
 
-    componentWillUnMount() {
+    componentWillUnmount() {
         this.props.setPage({
             url: location.href,
             title: document.title,
@@ -46,7 +36,8 @@ class ActionBar extends Component<Props> {
                 onFilterAdd={this.props.onTagAdd}
                 onFilterDel={this.props.onTagDel}
                 isForRibbon
-                fromOverview
+                isSocialPost
+                onTagClickCb={this.props.saveTweet(true)}
             />
         )
     }
@@ -59,7 +50,10 @@ class ActionBar extends Component<Props> {
                 initSuggestions={this.props.initCollSuggs}
                 onFilterAdd={this.props.onCollectionAdd}
                 onFilterDel={this.props.onCollectionDel}
+                addPageToListRPC="addPostToList"
+                delPageFromListRPC="delPostFromList"
                 isForRibbon
+                onListClickCb={this.props.saveTweet(true)}
             />
         )
     }
@@ -70,7 +64,13 @@ class ActionBar extends Component<Props> {
             title: document.title,
         })
 
-        return <CommentBoxContainer env="inpage" />
+        return (
+            <CommentBoxContainer
+                isSocialPost
+                env="inpage"
+                onSaveCb={this.props.saveTweet(true)}
+            />
+        )
     }
 
     render() {
@@ -83,6 +83,7 @@ class ActionBar extends Component<Props> {
                     tagManager={this.renderTagsManager()}
                     collectionsManager={this.renderCollectionsManager()}
                     toggleBookmark={this.props.toggleBookmark}
+                    saveTweet={this.props.saveTweet(true)}
                 />
             </div>
         )

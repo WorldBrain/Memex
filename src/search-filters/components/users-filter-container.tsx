@@ -24,8 +24,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    showUserFilter: () => void
-    hideUserFilter: () => void
+    setUserFilter: (value: boolean) => void
     addIncUserFilter: (user: User) => void
     delIncUserFilter: (user: User) => void
     addExcUserFilter: (user: User) => void
@@ -50,8 +49,8 @@ class UsersFilter extends PureComponent<Props, State> {
         }
 
         this.props.userFilterDropdown
-            ? this.props.hideUserFilter()
-            : this.props.showUserFilter()
+            ? this.props.setUserFilter(false)
+            : this.props.setUserFilter(true)
     }
 
     render() {
@@ -65,7 +64,7 @@ class UsersFilter extends PureComponent<Props, State> {
                 source="Users"
                 filteredItems={this.props.displayUsers}
                 togglePopup={this.togglePopup}
-                hidePopup={this.props.hideUserFilter}
+                showPopup={this.props.setUserFilter}
                 clearFilters={this.props.clearUserFilters}
                 disableOnClickOutside={this.props.env === 'inpage'}
             >
@@ -104,7 +103,7 @@ const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
     displayUsers: selectors.displayUsers(state),
     suggestedUsers: selectors.suggestedUsers(state),
     userFilterDropdown: selectors.userFilter(state),
-    isSocialSearch: results.isSocialSearch(state),
+    isSocialSearch: results.isSocialPost(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<
@@ -123,8 +122,7 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(actions.setIncUserFilters([]))
         dispatch(actions.setExcUserFilters([]))
     },
-    showUserFilter: () => dispatch(actions.showUserFilter()),
-    hideUserFilter: () => dispatch(actions.hideUserFilter()),
+    setUserFilter: value => dispatch(actions.setUserFilter(value)),
     resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 

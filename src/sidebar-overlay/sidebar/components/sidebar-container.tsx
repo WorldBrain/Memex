@@ -28,10 +28,11 @@ interface StateProps {
     showCommentBox: boolean
     showCongratsMessage: boolean
     pageType: 'page' | 'all'
-    searchType: 'notes' | 'pages' | 'social'
+    searchType: 'notes' | 'page' | 'social'
     searchValue: string
     showClearFiltersBtn: boolean
     page: Page
+    isSocialPost: boolean
 }
 
 interface DispatchProps {
@@ -46,7 +47,6 @@ interface DispatchProps {
     handleBookmarkToggle: (url: string) => void
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
-    handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
     handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
     clearAllFilters: () => void
     resetPage: React.MouseEventHandler<HTMLButtonElement>
@@ -158,6 +158,7 @@ const mapStateToProps: MapStateToProps<
     searchValue: searchBar.query(state),
     showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
     page: selectors.page(state),
+    isSocialPost: selectors.isSocialPost(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
@@ -185,16 +186,13 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     handleEditAnnotation: (url, comment, tags) =>
         dispatch(actions.editAnnotation(url, comment, tags)),
     handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
-    handleScrollPagination: () => dispatch(actions.fetchMoreAnnotations()),
+    handleScrollPagination: (isSocialSearch?: boolean) =>
+        dispatch(actions.fetchMoreAnnotations(isSocialSearch)),
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
     onQueryChange: searchValue =>
         dispatch(searchBarActs.setQueryTagsDomains(searchValue, false)),
     onQueryKeyDown: searchValue =>
         dispatch(searchBarActs.setQueryTagsDomains(searchValue, true)),
-    handleSearchTypeClick: e => {
-        e.preventDefault()
-        dispatch(actions.toggleSearchType())
-    },
     handlePageTypeClick: e => {
         e.preventDefault()
         dispatch(actions.togglePageType())
@@ -205,6 +203,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     },
     resetPage: e => {
         e.preventDefault()
+        dispatch(actions.setPageType('all'))
         dispatch(
             actions.setPage({
                 url: null,

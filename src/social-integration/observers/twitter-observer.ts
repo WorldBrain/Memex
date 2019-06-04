@@ -19,7 +19,7 @@ export default class TwitterObserver {
             mutations.forEach((mutation: MutationRecord) => {
                 if (mutation.type === 'childList') {
                     const tweets = document.querySelectorAll(
-                        '.tweet:not(.MemexAdded)',
+                        '.tweet.js-actionable-tweet:not(.MemexAdded)',
                     )
                     if (!tweets.length) {
                         return

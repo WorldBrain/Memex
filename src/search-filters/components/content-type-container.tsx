@@ -22,9 +22,8 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
-    toggleFilterTypes?: () => void
+    setFilterTypes?: (value: boolean) => void
     clearFilterTypes?: () => void
-    hideFilterTypes?: () => void
     resetFilterPopups?: () => void
     toggleWebsitesFilter: () => void
     toggleHighlightsFilter: () => void
@@ -98,7 +97,9 @@ class ContentTypeContainer extends PureComponent<Props, State> {
         if (this.props.env === 'inpage' && !this.props.showFilteredTypes) {
             this.props.resetFilterPopups()
         }
-        this.props.toggleFilterTypes()
+        this.props.showFilteredTypes
+            ? this.props.setFilterTypes(false)
+            : this.props.setFilterTypes(true)
     }
 
     render() {
@@ -112,7 +113,7 @@ class ContentTypeContainer extends PureComponent<Props, State> {
                 source="Types"
                 filteredItems={[]}
                 togglePopup={this.togglePopup}
-                hidePopup={this.props.hideFilterTypes}
+                showPopup={this.props.setFilterTypes}
                 clearFilters={this.props.clearFilterTypes}
                 displayFilters={this.renderDisplayFilters}
                 disableOnClickOutside={this.props.env === 'inpage'}
@@ -158,9 +159,8 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps,
     RootState
 > = dispatch => ({
-    toggleFilterTypes: () => dispatch(actions.toggleFilterTypes()),
+    setFilterTypes: value => dispatch(actions.setFilterTypes(value)),
     clearFilterTypes: () => dispatch(actions.clearFilterTypes()),
-    hideFilterTypes: () => dispatch(actions.hideFilterTypes()),
     toggleWebsitesFilter: () => dispatch(actions.toggleWebsitesFilter()),
     toggleHighlightsFilter: () => dispatch(actions.toggleHighlightsFilter()),
     toggleNotesFilter: () => dispatch(actions.toggleNotesFilter()),

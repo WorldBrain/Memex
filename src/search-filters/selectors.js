@@ -7,6 +7,11 @@ export const tagFilter = createSelector(
     state => state.showTagFilter,
 )
 
+export const hashtagFilter = createSelector(
+    searchFilters,
+    state => state.showHashtagFilter,
+)
+
 export const domainFilter = createSelector(
     searchFilters,
     state => state.showDomainFilter,
@@ -31,9 +36,23 @@ export const tags = createSelector(searchFilters, state => state.tags)
 
 export const tagsExc = createSelector(searchFilters, state => state.tagsExc)
 
+export const hashtagsInc = createSelector(
+    searchFilters,
+    state => state.hashtagsInc,
+)
+
+export const hashtagsExc = createSelector(
+    searchFilters,
+    state => state.hashtagsExc,
+)
+
 export const suggestedTags = createSelector(
     searchFilters,
     state => state.suggestedTags,
+)
+export const suggestedHashtags = createSelector(
+    searchFilters,
+    state => state.suggestedHashtags,
 )
 export const suggestedDomains = createSelector(
     searchFilters,
@@ -80,6 +99,15 @@ export const displayTags = createSelector(tags, tagsExc, (inc, exc) => [
     ...exc.map(value => ({ value, isExclusive: true })),
 ])
 
+export const displayHashtags = createSelector(
+    hashtagsInc,
+    hashtagsExc,
+    (inc, exc) => [
+        ...inc.map(value => ({ value, isExclusive: false })),
+        ...exc.map(value => ({ value, isExclusive: true })),
+    ],
+)
+
 export const showFilters = createSelector(
     searchFilters,
     state => state.showFilters,
@@ -106,6 +134,8 @@ export const showClearFiltersBtn = createSelector(
     domainsExc,
     usersInc,
     usersExc,
+    hashtagsInc,
+    hashtagsExc,
     (
         onlyBookmarks,
         tags,
@@ -114,6 +144,8 @@ export const showClearFiltersBtn = createSelector(
         domainsExc,
         usersInc,
         usersExc,
+        hashtagsInc,
+        hashtagsExc,
     ) =>
         onlyBookmarks ||
         !!tags.length ||
@@ -121,7 +153,9 @@ export const showClearFiltersBtn = createSelector(
         !!domainsInc.length ||
         !!domainsExc.length ||
         !!usersInc.length ||
-        !!usersExc.length,
+        !!usersExc.length ||
+        !!hashtagsInc.length ||
+        !!hashtagsExc.length,
 )
 
 export const listFilterActive = createSelector(

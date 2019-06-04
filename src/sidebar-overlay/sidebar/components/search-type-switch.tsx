@@ -14,8 +14,8 @@ const styles = require('./search-type-switch.css')
 
 export interface StateProps {
     annotsFolded: boolean
-    resultsSearchType: 'page' | 'annot' | 'social'
-    searchType: 'notes' | 'pages' | 'social'
+    resultsSearchType: 'page' | 'notes' | 'social'
+    searchType: 'notes' | 'page' | 'social'
     pageType: 'page' | 'all'
     pageCount?: number
     annotCount?: number
@@ -23,15 +23,16 @@ export interface StateProps {
 
 export interface DispatchProps {
     handleUnfoldAllClick: React.MouseEventHandler<HTMLButtonElement>
-    handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
     handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
-    setSearchType: (value: 'notes' | 'pages' | 'social') => void
+    setSearchType: (value: 'notes' | 'page' | 'social') => void
     setPageType: (value: 'page' | 'all') => void
-    setResultsSearchType: (value: 'page' | 'annot' | 'social') => void
+    setResultsSearchType: (value: 'page' | 'notes' | 'social') => void
     setAnnotationsExpanded: (value: boolean) => void
 }
 
-export interface OwnProps {}
+export interface OwnProps {
+    isOverview?: boolean
+}
 
 export type Props = StateProps & DispatchProps & OwnProps
 
@@ -41,7 +42,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
     }
 
     get isPageSearch() {
-        return this.props.searchType === 'pages'
+        return this.props.searchType === 'page'
     }
 
     get isCurrentPageSearch() {
@@ -60,8 +61,8 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         this.props.handlePageTypeClick(event)
-        if (this.props.resultsSearchType !== 'annot') {
-            this.props.setResultsSearchType('annot')
+        if (this.props.resultsSearchType !== 'notes') {
+            this.props.setResultsSearchType('notes')
         }
         this.props.setAnnotationsExpanded(true)
     }
@@ -70,9 +71,8 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        this.props.setSearchType('pages')
+        this.props.setSearchType('page')
 
-        // this.props.handleSearchTypeClick(event)
         this.props.setResultsSearchType('page')
         this.props.setPageType('all')
         this.props.setAnnotationsExpanded(false)
@@ -83,7 +83,6 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
     ) => {
         event.preventDefault()
         this.props.setSearchType('notes')
-        // this.props.handleSearchTypeClick(event)
         this.props.setPageType('page')
     }
 
@@ -92,7 +91,6 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
     ) => {
         event.preventDefault()
         this.props.setSearchType('social')
-        // this.props.handleSearchTypeClick(event)
         this.props.setResultsSearchType('social')
         this.props.setPageType('all')
         this.props.setAnnotationsExpanded(false)
@@ -187,18 +185,19 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (
+    state,
+    props,
+) => ({
     annotsFolded: resultsSelectors.areAnnotationsExpanded(state),
-    searchType: selectors.searchType(state),
+    searchType: !props.isOverview
+        ? selectors.searchType(state)
+        : resultsSelectors.searchType(state),
     pageType: selectors.pageType(state),
     resultsSearchType: resultsSelectors.searchType(state),
 })
 
 const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = dispatch => ({
-    handleSearchTypeClick: e => {
-        e.preventDefault()
-        dispatch(actions.toggleSearchType() as any)
-    },
     handlePageTypeClick: e => {
         e.preventDefault()
         dispatch(actions.togglePageType() as any)

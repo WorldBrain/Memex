@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react'
-import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
+import { Tooltip } from 'src/common-ui/components/'
 import cx from 'classnames'
 
 const styles = require('./styles.css')
@@ -11,6 +11,7 @@ interface Props {
     commentBox: ReactNode
     isCommentSaved: boolean
     toggleBookmark: (url: string, isBookmarked: boolean) => void
+    saveTweet: () => Promise<void>
 }
 
 interface State {
@@ -43,7 +44,7 @@ class ActionBarItems extends Component<Props, State> {
     }
 
     componentWillUnMount() {
-        this.removeEventListeners
+        this.removeEventListeners()
     }
 
     private attachEventListeners() {
@@ -82,6 +83,7 @@ class ActionBarItems extends Component<Props, State> {
     }
 
     private handleBookmarkClick = async e => {
+        await this.props.saveTweet()
         try {
             await this.props.toggleBookmark(
                 this.props.url,

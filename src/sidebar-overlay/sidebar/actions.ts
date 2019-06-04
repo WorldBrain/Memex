@@ -58,9 +58,10 @@ export const setMouseOverSidebar = createAction<boolean>('setMouseOverSidebar')
 
 export const setPageType = createAction<'page' | 'all'>('setPageType')
 
-export const setSearchType = createAction<'notes' | 'pages' | 'social'>(
+export const setSearchType = createAction<'notes' | 'page' | 'social'>(
     'setSearchType',
 )
+export const setIsSocialPost = createAction<boolean>('sidebar/setIsSocialPost')
 
 /**
  * Hydrates the initial state of the sidebar.
@@ -70,27 +71,26 @@ export const initState: () => Thunk = () => dispatch => {
 }
 
 export const openSidebar: (
-    args: {
+    args: OpenSidebarArgs & {
         url?: string
         title?: string
         forceFetch?: boolean
-    } & OpenSidebarArgs,
+        isSocialPost?: boolean
+    },
 ) => Thunk = ({
     url,
     title,
     activeUrl,
     forceFetch,
-}: OpenSidebarArgs & {
-    url?: string
-    title?: string
-    forceFetch?: boolean
+    isSocialPost = false,
 } = {}) => async (dispatch, getState) => {
     dispatch(setPage({ url, title }))
     dispatch(setSidebarOpen(true))
+    dispatch(setIsSocialPost(isSocialPost))
 
     const annots = selectors.annotations(getState())
     if (forceFetch || !annots.length) {
-        await dispatch(fetchAnnotations())
+        await dispatch(fetchAnnotations(isSocialPost))
     }
 
     if (activeUrl) {
@@ -105,10 +105,9 @@ export const closeSidebar: () => Thunk = () => async dispatch => {
     await processEventRPC({ type: EVENT_NAMES.CLOSE_SIDEBAR_PAGE })
 }
 
-export const fetchAnnotations: () => Thunk = () => async (
-    dispatch,
-    getState,
-) => {
+export const fetchAnnotations: (
+    isSocialPost?: boolean,
+) => Thunk = isSocialPost => async (dispatch, getState) => {
     dispatch(setIsLoading(true))
     dispatch(resetResultsPage())
 
@@ -119,6 +118,7 @@ export const fetchAnnotations: () => Thunk = () => async (
     if (annotationsManager) {
         const annotations = await annotationsManager.fetchAnnotationsWithTags(
             url,
+            isSocialPost,
         )
         annotations.reverse()
         dispatch(setAnnotations(annotations))
@@ -129,10 +129,9 @@ export const fetchAnnotations: () => Thunk = () => async (
     dispatch(setIsLoading(false))
 }
 
-export const fetchMoreAnnotations: () => Thunk = () => async (
-    dispatch,
-    getState,
-) => {
+export const fetchMoreAnnotations: (
+    isSocialPost?: boolean,
+) => Thunk = isSocialPost => async (dispatch, getState) => {
     dispatch(setIsLoading(true))
 
     const state = getState()
@@ -143,8 +142,9 @@ export const fetchMoreAnnotations: () => Thunk = () => async (
     if (annotationsManager) {
         const annotations = await annotationsManager.fetchAnnotationsWithTags(
             url,
-            RES_PAGE_SIZE,
-            currentPage * RES_PAGE_SIZE,
+            // RES_PAGE_SIZE,
+            // currentPage * RES_PAGE_SIZE,
+            isSocialPost,
         )
         annotations.reverse()
         dispatch(appendAnnotations(annotations))
@@ -161,7 +161,8 @@ export const createAnnotation: (
     comment: string,
     tags: string[],
     bookmarked?: boolean,
-) => Thunk = (anchor, body, comment, tags, bookmarked) => async (
+    isSocialPost?: boolean,
+) => Thunk = (anchor, body, comment, tags, bookmarked, isSocialPost) => async (
     dispatch,
     getState,
 ) => {
@@ -178,10 +179,11 @@ export const createAnnotation: (
             anchor,
             tags,
             bookmarked,
+            isSocialPost,
         })
 
         // Re-fetch annotations.
-        dispatch(fetchAnnotations())
+        dispatch(fetchAnnotations(isSocialPost))
 
         dispatch(checkAndSetCongratsMessage())
     }
@@ -312,12 +314,6 @@ export const toggleBookmarkState: (i: number) => Thunk = i => (
             ...annotations.slice(i + 1),
         ]),
     )
-}
-
-export const toggleSearchType: () => Thunk = () => (dispatch, getState) => {
-    const currSearchType = selectors.searchType(getState())
-    const newSearchType = currSearchType === 'notes' ? 'pages' : 'notes'
-    dispatch(setSearchType(newSearchType))
 }
 
 export const togglePageType: () => Thunk = () => (dispatch, getState) => {

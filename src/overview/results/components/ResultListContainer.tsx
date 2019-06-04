@@ -42,7 +42,7 @@ export interface StateProps {
     resultsByUrl: ResultsByUrl
     annotsByDay: PageUrlsByDay
     isFilterBarActive: boolean
-    isSocialSearch: boolean
+    isSocialPost: boolean
 }
 
 export interface DispatchProps {
@@ -53,8 +53,15 @@ export interface DispatchProps {
     delTag: (i: number) => (f: string) => void
     handlePillClick: (tag: string) => MouseEventHandler
     handleTagBtnClick: (i: number) => MouseEventHandler
-    handleCommentBtnClick: (doc: Result, index: number) => MouseEventHandler
-    handleCrossRibbonClick: (doc: Result) => MouseEventHandler
+    handleCommentBtnClick: (
+        doc: Result,
+        index: number,
+        isSocialPost?: boolean,
+    ) => MouseEventHandler
+    handleCrossRibbonClick: (
+        doc: Result,
+        isSocialPost: boolean,
+    ) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
@@ -121,6 +128,7 @@ class ResultListContainer extends PureComponent<Props> {
                 onFilterAdd={this.props.addTag(index)}
                 onFilterDel={this.props.delTag(index)}
                 setTagDivRef={this.setTagDivRef}
+                isSocialPost={this.props.isSocialPost}
                 initFilters={tags}
                 initSuggestions={[
                     ...new Set([...tags, ...this.state.tagSuggestions]),
@@ -154,6 +162,8 @@ class ResultListContainer extends PureComponent<Props> {
     }
 
     private attachDocWithPageResultItem(doc: Result, index, key) {
+        const isSocialPost = doc.hasOwnProperty('user')
+
         return (
             <ResultItem
                 key={key}
@@ -167,14 +177,21 @@ class ResultListContainer extends PureComponent<Props> {
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
-                onCommentBtnClick={this.props.handleCommentBtnClick(doc, index)}
-                handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
+                onCommentBtnClick={this.props.handleCommentBtnClick(
+                    doc,
+                    index,
+                    isSocialPost,
+                )}
+                handleCrossRibbonClick={this.props.handleCrossRibbonClick(
+                    doc,
+                    isSocialPost,
+                )}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
                 areScreenshotsEnabled={this.props.areScreenshotsEnabled}
                 isResponsibleForSidebar={
                     this.props.activeSidebarIndex === index
                 }
-                isSocial={this.props.isSocialSearch}
+                isSocial={isSocialPost}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />
@@ -192,6 +209,10 @@ class ResultListContainer extends PureComponent<Props> {
             return this.props.searchResults.map((res, i) =>
                 this.attachDocWithPageResultItem(res, i, i),
             )
+        }
+
+        if (!this.props.annotsByDay) {
+            return []
         }
 
         const els: JSX.Element[] = []
@@ -284,7 +305,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     resultsClusteredByDay: selectors.resultsClusteredByDay(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
     isFilterBarActive: filters.showFilterBar(state),
-    isSocialSearch: selectors.isSocialSearch(state),
+    isSocialPost: selectors.isSocialPost(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
@@ -292,10 +313,17 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
         event.preventDefault()
         dispatch(acts.showTags(index))
     },
-    handleCommentBtnClick: ({ url, title }, index) => event => {
+    handleCommentBtnClick: ({ url, title }, index, isSocialPost) => event => {
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
-        dispatch(sidebarActs.openSidebar({ url, title, forceFetch: true }))
+        dispatch(
+            sidebarActs.openSidebar({
+                url,
+                title,
+                forceFetch: true,
+                isSocialPost,
+            }),
+        )
     },
     handleToggleBm: ({ url }, index) => event => {
         event.preventDefault()
@@ -308,6 +336,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     handleScrollPagination: args => dispatch(acts.getMoreResults()),
     handlePillClick: tag => event => {
         event.preventDefault()
+        event.stopPropagation()
         dispatch(filterActs.toggleTagFilter(tag))
     },
     addTag: resultIndex => tag => dispatch(acts.addTag(tag, resultIndex)),
@@ -315,10 +344,10 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetActiveTagIndex: () => dispatch(acts.resetActiveTagIndex()),
     setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
-    handleCrossRibbonClick: ({ url }) => event => {
+    handleCrossRibbonClick: ({ url }, isSocialPost) => event => {
         event.preventDefault()
         event.stopPropagation()
-        dispatch(listActs.delPageFromList(url))
+        dispatch(listActs.delPageFromList(url, isSocialPost))
         dispatch(acts.hideResultItem(url))
     },
 })

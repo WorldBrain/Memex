@@ -15,6 +15,7 @@ export interface Result extends SocialPage {
     favIcon: string
     annotsCount: number
     annotations: Annotation[]
+    pageId: string
 }
 
 export interface ResultWithIndex extends Result {

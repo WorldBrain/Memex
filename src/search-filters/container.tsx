@@ -11,6 +11,7 @@ import {
     DatesFilter,
     UsersFilter,
     ContentTypeContainer,
+    HashtagsFilter,
 } from './components'
 
 import * as actions from './actions'
@@ -21,6 +22,7 @@ interface StateProps {
 
 interface DispatchProps {
     fetchSuggestedTags: () => void
+    fetchSuggestedHashtags: () => void
     fetchSuggestedDomains: () => void
     fetchSuggestedUsers: () => void
     toggleFilterBar: () => void
@@ -35,6 +37,7 @@ interface State {}
 class SearchFiltersContainer extends PureComponent<Props, State> {
     componentDidMount() {
         this.props.fetchSuggestedTags()
+        this.props.fetchSuggestedHashtags()
         this.props.fetchSuggestedDomains()
         this.props.fetchSuggestedUsers()
     }
@@ -64,12 +67,17 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
         <UsersFilter tooltipPosition="bottom" env="overview" />
     )
 
+    renderHashtagsFilter = () => (
+        <HashtagsFilter tooltipPosition="bottom" env="overview" />
+    )
+
     render() {
         return (
             <SearchFilters
                 bookmarkFilter={this.renderBookmarkFilter()}
                 dateFilter={this.renderDateFilter()}
                 tagFilter={this.renderTagFilter()}
+                hashtagsFilter={this.renderHashtagsFilter()}
                 domainFilter={this.renderDomainFilter()}
                 contentFilter={this.renderContentFilter()}
                 userFilter={this.renderUsersFilter()}
@@ -82,7 +90,7 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
 const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
     state,
 ): StateProps => ({
-    isSocialSearch: results.isSocialSearch(state),
+    isSocialSearch: results.isSocialPost(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<
@@ -91,6 +99,7 @@ const mapDispatchToProps: MapDispatchToProps<
     RootState
 > = dispatch => ({
     fetchSuggestedTags: () => dispatch(actions.fetchSuggestedTags()),
+    fetchSuggestedHashtags: () => dispatch(actions.fetchSuggestedHashtags()),
     fetchSuggestedDomains: () => dispatch(actions.fetchSuggestedDomains()),
     fetchSuggestedUsers: () => dispatch(actions.fetchSuggestedUsers()),
     toggleFilterBar: () => dispatch(actions.toggleFilterBar()),

@@ -88,7 +88,7 @@ describe.skip('annots search plugin', () => {
 
     beforeEach(async () => {
         storageManager = initStorageManager()
-        annotsBg = new AnnotsBg({ storageManager, getDb })
+        annotsBg = new AnnotsBg({ storageManager, getDb, socialBg: {} as any })
         customListsBg = new CustomListBg({ storageManager, getDb })
 
         await storageManager.finishInitialization()

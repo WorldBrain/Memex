@@ -35,9 +35,13 @@ const storageManager = initStorex()
 const notifications = new NotificationBackground({ storageManager })
 notifications.setupRemoteFunctions()
 
+const social = new SocialBackground({ storageManager })
+social.setupRemoteFunctions()
+
 export const directLinking = new DirectLinkingBackground({
     storageManager,
     getDb,
+    socialBg: social,
 })
 directLinking.setupRemoteFunctions()
 directLinking.setupRequestInterceptor()
@@ -79,9 +83,6 @@ export const bookmarks = new BookmarksBackground({
     storageManager,
 })
 bookmarks.setupRemoteFunctions()
-
-const social = new SocialBackground({ storageManager })
-social.setupRemoteFunctions()
 
 const backupModule = new backup.BackupBackgroundModule({
     storageManager,

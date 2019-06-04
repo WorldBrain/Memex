@@ -18,6 +18,7 @@ interface DispatchProps {
     fetchSuggestedTags: () => void
     fetchSuggestedDomains: () => void
     fetchSuggestedUsers: () => void
+    fetchSuggestedHashtags: () => void
     resetFilterPopups: () => void
 }
 
@@ -33,7 +34,7 @@ const mapStateToProps: MapStateToProps<
     OwnProps,
     RootState
 > = state => ({
-    isSocialSearch: results.isSocialSearch(state),
+    isSocialSearch: results.isSocialPost(state),
     showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
 })
 
@@ -49,6 +50,7 @@ const mapDispatchToProps: MapDispatchToProps<
     fetchSuggestedTags: () => dispatch(filterActs.fetchSuggestedTags()),
     fetchSuggestedDomains: () => dispatch(filterActs.fetchSuggestedDomains()),
     fetchSuggestedUsers: () => dispatch(filterActs.fetchSuggestedUsers(true)),
+    fetchSuggestedHashtags: () => dispatch(filterActs.fetchSuggestedHashtags()),
     resetFilterPopups: () => dispatch(filterActs.resetFilterPopups()),
 })
 

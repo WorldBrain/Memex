@@ -17,7 +17,8 @@ class IndexDropdown extends PureComponent {
         tagSearchValue: PropTypes.string.isRequired,
         hover: PropTypes.bool,
         isForAnnotation: PropTypes.bool,
-        source: PropTypes.oneOf(['tag', 'domain', 'list', 'user']).isRequired,
+        source: PropTypes.oneOf(['tag', 'domain', 'list', 'user', 'hashtag'])
+            .isRequired,
         url: PropTypes.string,
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import classNames from 'classnames'
+import noop from 'lodash/fp/noop'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -33,12 +34,18 @@ interface DispatchProps {
 
 interface OwnProps {
     env?: 'inpage' | 'overview'
+    isSocialPost?: boolean
+    onSaveCb?: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
 
 class CommentBoxContainer extends React.PureComponent<Props> {
-    save = e => {
+    static defaultProps: Partial<Props> = {
+        onSaveCb: noop,
+    }
+
+    save = async e => {
         e.preventDefault()
         e.stopPropagation()
 
@@ -48,7 +55,11 @@ class CommentBoxContainer extends React.PureComponent<Props> {
             tags,
             saveComment,
             isCommentBookmarked,
+            onSaveCb,
         } = this.props
+
+        await onSaveCb()
+
         saveComment(anchor, commentText.trim(), tags, isCommentBookmarked)
     }
 
@@ -97,14 +108,22 @@ const mapStateToProps: MapStateToProps<
     isCommentBookmarked: selectors.isBookmarked(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+    props,
+) => ({
     handleCommentTextChange: comment =>
         dispatch(actions.setCommentText(comment)),
     saveComment: (anchor, commentText, tags, bookmarked) =>
-        dispatch(actions.saveComment(anchor, commentText, tags, bookmarked)),
+        dispatch(
+            actions.saveComment(
+                anchor,
+                commentText,
+                tags,
+                bookmarked,
+                props.isSocialPost,
+            ),
+        ),
     cancelComment: () => dispatch(actions.cancelComment()),
     toggleBookmark: () => dispatch(actions.toggleBookmark()),
 })

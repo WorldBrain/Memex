@@ -1,13 +1,13 @@
 import { Tweet, User } from 'src/social-integration/types'
-import normalizeUrl from 'src/util/encode-url-for-id'
 
-export function getTweetInfo(element): Tweet {
+export function getTweetInfo(element: HTMLElement): Partial<Tweet> {
     const hashtags = []
-    const baseTwitter = 'https://twitter.com'
 
-    const { name, permalinkPath, screenName, tweetId, userId } = element.dataset
+    const { name, screenName, tweetId, userId } = element.dataset
 
-    const images = element.getElementsByClassName('Emoji Emoji--forText')
+    const images = element.getElementsByClassName(
+        'Emoji Emoji--forText',
+    ) as HTMLCollectionOf<any>
     for (const img of images) {
         img.replaceWith(img['alt'])
     }
@@ -17,8 +17,11 @@ export function getTweetInfo(element): Tweet {
         .textContent.replace('http', ' http')
         .replace('pic.twitter', ' pic.twitter')
 
-    const profilePicUrl = element.querySelector('.js-action-profile-avatar').src
-    const tweetTimeMs = element.querySelector('._timestamp').dataset.timeMs
+    const profilePicUrl = element.querySelector<HTMLImageElement>(
+        '.js-action-profile-avatar',
+    ).src
+    const tweetTimeMs = element.querySelector<HTMLElement>('._timestamp')
+        .dataset.timeMs
 
     const hashtagNodes = element.querySelectorAll('.twitter-hashtag')
 
@@ -29,23 +32,19 @@ export function getTweetInfo(element): Tweet {
     const isVerified = element.querySelector('.Icon.Icon--verified') !== null
 
     const user: User = {
-        id: userId,
         name,
         username: screenName,
         isVerified,
         profilePicUrl,
         type: 'twitter',
+        serviceId: userId,
     }
 
-    const tweet: Tweet = {
-        id: tweetId,
-        userId,
-        createdAt: Number(tweetTimeMs),
+    return {
+        serviceId: tweetId,
+        createdWhen: Number(tweetTimeMs),
         text: tweetContent,
-        url: normalizeUrl(baseTwitter + permalinkPath),
         hashtags,
         user,
     }
-
-    return tweet
 }

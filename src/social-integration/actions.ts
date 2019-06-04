@@ -4,17 +4,17 @@ import { acts as collectionActs } from 'src/popup/collections-button'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { getTweetInfo } from './observers/get-tweet-data'
 
-const fetchPageTagsRPC = remoteFunction('fetchPageTags')
+const fetchSocialPostTags = remoteFunction('fetchSocialPostTags')
 const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
-const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
+const fetchSocialPostLists = remoteFunction('fetchSocialPostLists')
 const fetchAllListsRPC = remoteFunction('fetchAllLists')
-const addBookmarkRPC = remoteFunction('addBookmark')
-const delBookmarkRPC = remoteFunction('delBookmark')
+const addBookmarkRPC = remoteFunction('addSocialBookmark')
+const delBookmarkRPC = remoteFunction('delSocialBookmark')
 const addTweetRPC = remoteFunction('addTweet')
 
 export const initState: (url: string) => Thunk = url => async dispatch => {
     try {
-        const listsAssocWithPage = await fetchListsRPC({ url })
+        const listsAssocWithPage = await fetchSocialPostLists({ url })
         const lists = await fetchAllListsRPC({
             excludeIds: listsAssocWithPage.map(({ id }) => id),
             limit: 20,
@@ -23,7 +23,7 @@ export const initState: (url: string) => Thunk = url => async dispatch => {
         dispatch(collectionActs.setCollections(listsAssocWithPage))
 
         // Get 20 more tags that are not related related to the list.
-        const pageTags = await fetchPageTagsRPC(url)
+        const pageTags = await fetchSocialPostTags({ url })
         const tags = await fetchInitTagSuggRPC(pageTags, 'tag')
         dispatch(tagActs.setInitTagSuggests([...pageTags, ...tags]))
         dispatch(tagActs.setTags(pageTags))
@@ -38,12 +38,12 @@ export const toggleBookmark: (url: string, isBookmarked: boolean) => Thunk = (
 ) => async dispatch => {
     const bookmarkRPC = isBookmarked ? delBookmarkRPC : addBookmarkRPC
     try {
-        await bookmarkRPC({ url, pageType: 'social' })
+        await bookmarkRPC({ url })
     } catch (err) {}
 }
 
 export const saveTweet: (
-    element: Element,
+    element: HTMLElement,
 ) => Thunk = element => async dispatch => {
     try {
         const tweet = getTweetInfo(element)

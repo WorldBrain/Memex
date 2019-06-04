@@ -29,6 +29,7 @@ export interface StateProps {
     collections: PageList[]
     initCollSuggs: PageList[]
     isCommentSaved: boolean
+    commentText: string
 }
 
 export interface DispatchProps {
@@ -44,7 +45,8 @@ export interface DispatchProps {
 }
 
 interface OwnProps {
-    element: Element
+    element: HTMLElement
+    annotationsManager: AnnotationsManager
     tweet?: Tweet
     url?: string
 }
@@ -54,6 +56,7 @@ export type Props = StateProps & DispatchProps & OwnProps
 interface State {
     isMouseInside: boolean
     saved: boolean
+    saving: boolean
     setTagHolder: boolean
     tags: string[]
 }
@@ -71,17 +74,14 @@ class SaveToMemexContainer extends Component<Props, State> {
         this.state = {
             isMouseInside: false,
             saved: false,
+            saving: false,
             setTagHolder: false,
             tags: [],
         }
     }
 
     async componentDidMount() {
-        this.memexBtnRef.addEventListener('click', this.saveTweet)
-        const pageTags = await remoteFunction('fetchPageTags')(this.url)
-        this.setState(state => ({
-            tags: pageTags,
-        }))
+        this.memexBtnRef.addEventListener('click', this.toggleTweet())
         this.attachTagHolder()
     }
 
@@ -89,15 +89,24 @@ class SaveToMemexContainer extends Component<Props, State> {
         this.attachTagHolder()
     }
 
-    componentWillUnMount() {
-        this.memexBtnRef.removeEventListener('click', this.saveTweet)
+    componentWillUnmount() {
+        this.memexBtnRef.removeEventListener('click', this.toggleTweet())
     }
 
-    private attachTagHolder() {
+    private async attachTagHolder() {
         if (
             normalizeUrl(window.location.href) === normalizeUrl(this.url) &&
             !this.state.setTagHolder
         ) {
+            this.setState(state => ({
+                setTagHolder: true,
+            }))
+            const postTags = await remoteFunction('fetchSocialPostTags')({
+                url: this.url,
+            })
+            this.setState(state => ({
+                tags: postTags,
+            }))
             const tweetFooter = this.props.element.querySelector(
                 '.stream-item-footer',
             )
@@ -108,18 +117,21 @@ class SaveToMemexContainer extends Component<Props, State> {
                     handlePillClick: () => {},
                 })
             }
-            this.setState(state => ({
-                setTagHolder: true,
-            }))
         }
     }
 
-    private saveTweet = async e => {
-        e.preventDefault()
+    private toggleTweet = (isCallback?: boolean) => async () => {
+        if (isCallback && this.state.saved) {
+            return
+        }
+        this.setState(state => ({ saving: true }))
         try {
-            const id = await this.props.saveTweet()
-            this.setState(state => ({
-                saved: true,
+            const id = this.state.saved
+                ? await remoteFunction('delSocialPages')([this.url])
+                : await this.props.saveTweet()
+            this.setState(prevState => ({
+                saved: !prevState.saved,
+                saving: false,
             }))
         } catch (e) {
             console.error(e)
@@ -133,9 +145,11 @@ class SaveToMemexContainer extends Component<Props, State> {
     }
 
     private handleMouseLeave = () => {
-        this.setState(state => ({
-            isMouseInside: false,
-        }))
+        if (!this.props.commentText.length) {
+            this.setState(state => ({
+                isMouseInside: false,
+            }))
+        }
     }
 
     render() {
@@ -152,14 +166,17 @@ class SaveToMemexContainer extends Component<Props, State> {
                     ref={ref => (this.memexBtnRef = ref)}
                     className={cx(
                         'ProfileTweet-actionButton u-textUserColorHover js-actionButton',
-                        styles.actionButton,
+                        styles.hoverButton,
                     )}
                     type="button"
                     data-nav="share_tweet_to_memex"
                 >
                     <div
-                        className="IconContainer js-tooltip"
-                        data-original-title="Save To Memex"
+                        className={cx(
+                                'IconContainer js-tooltip',
+                                styles.hoverArea,
+                                )}
+                                data-original-title="Save To Memex"
                     >
                         <span
                             className={cx(
@@ -167,6 +184,7 @@ class SaveToMemexContainer extends Component<Props, State> {
                                 styles.memexIcon,
                                 {
                                     [styles.saved]: this.state.saved,
+                                    [styles.saving]: this.state.saving,
                                 },
                             )}
                         />
@@ -174,7 +192,11 @@ class SaveToMemexContainer extends Component<Props, State> {
                     </div>
                 </button>
                 {this.state.isMouseInside && (
-                    <ActionBar {...this.props} url={this.url} />
+                    <ActionBar
+                        {...this.props}
+                        url={this.url}
+                        saveTweet={this.toggleTweet}
+                    />
                 )}
             </div>
         )
@@ -191,6 +213,7 @@ const mapStateToProps: MapStateToProps<
     collections: collections.collections(state),
     initCollSuggs: collections.initCollSuggestions(state),
     isCommentSaved: commentBox.isCommentSaved(state),
+    commentText: commentBox.commentText(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<

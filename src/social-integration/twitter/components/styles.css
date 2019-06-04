@@ -9,16 +9,29 @@
     height: 18px;
     width: 18px;
     cursor: pointer;
-    z-index: 3;
     border: none;
     vertical-align: bottom;
     background-size: 18px;
-    margin-left: -5px;
     margin-bottom: -3px;
+    background-repeat: no-repeat;
+}
+
+.hoverButton {
+    z-index: 1;
+    height: 30px;
+    margin-top: -10px;
+}
+
+.hoverArea {
+    width: 23px;
 }
 
 .saved {
     background-image: url('/img/checkRound.svg');
+}
+
+.saving {
+    background-image: url('/img/loading_spinner.svg');
 }
 
 .saveToMemex {
@@ -29,10 +42,10 @@
     background-color: transparent;
     z-index: 2;
     position: absolute;
-    height: 50px;
+    height: 40px;
     width: 120px;
-    bottom: -45px;
-    left: -51px;
+    bottom: -35px;
+    left: -47px;
     display: flex;
     align-items: flex-end;
 }
@@ -43,7 +56,6 @@
     width: 120px;
     background-color: #fff;
     position: absolute;
-    z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -89,10 +101,6 @@
 
 .collIcon {
     background-image: url('/img/collections_add.svg');
-}
-
-.actionButton {
-    z-index: 3;
 }
 
 .commentSaved {

@@ -11,6 +11,8 @@ import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
+import SocialBG from 'src/social-integration/background'
+import { buildPostUrlId } from 'src/social-integration/util'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -21,14 +23,18 @@ export default class DirectLinkingBackground {
     private annotationStorage: AnnotationStorage
     private sendAnnotation: AnnotationSender
     private requests: AnnotationRequests
+    private socialBg: SocialBG
 
     constructor({
         storageManager,
         getDb,
+        socialBg,
     }: {
         storageManager: StorageManager
         getDb: () => Promise<Dexie>
+        socialBg: SocialBG
     }) {
+        this.socialBg = socialBg
         this.backend = new DirectLinkingBackend()
 
         this.annotationStorage = new AnnotationStorage({
@@ -193,8 +199,13 @@ export default class DirectLinkingBackground {
     async getAllAnnotationsByUrl(
         { tab }: TabArg,
         { url, limit = 1000, skip = 0, ...params }: AnnotSearchParams,
+        isSocialPost?: boolean,
     ) {
         url = url == null && tab != null ? tab.url : url
+
+        if (isSocialPost) {
+            url = await this.lookupSocialId(url)
+        }
 
         const annotations = await this.annotationStorage.getAllAnnotationsByUrl(
             {
@@ -226,9 +237,14 @@ export default class DirectLinkingBackground {
 
     async createAnnotation(
         { tab }: TabArg,
-        { url, title, comment, body, selector, bookmarked },
+        { url, title, comment, body, selector, bookmarked, isSocialPost },
     ) {
-        const pageUrl = url == null ? tab.url : url
+        let pageUrl = url == null ? tab.url : url
+
+        if (isSocialPost) {
+            pageUrl = await this.lookupSocialId(pageUrl)
+        }
+
         const pageTitle = title == null ? tab.title : title
         const uniqueUrl = `${pageUrl}/#${Date.now()}`
 
@@ -266,11 +282,19 @@ export default class DirectLinkingBackground {
         return this.annotationStorage.toggleAnnotBookmark({ url })
     }
 
-    async editAnnotation(_, pk, comment) {
+    async editAnnotation(_, pk, comment, isSocialPost?: boolean) {
+        if (isSocialPost) {
+            pk = await this.lookupSocialId(pk)
+        }
+
         return this.annotationStorage.editAnnotation(pk, comment)
     }
 
-    async deleteAnnotation(_, pk) {
+    async deleteAnnotation(_, pk, isSocialPost?: boolean) {
+        if (isSocialPost) {
+            pk = await this.lookupSocialId(pk)
+        }
+
         return this.annotationStorage.deleteAnnotation(pk)
     }
 
@@ -292,5 +316,10 @@ export default class DirectLinkingBackground {
             tagsToBeDeleted,
             url,
         )
+    }
+
+    private async lookupSocialId(id: string): Promise<string> {
+        const postId = await this.socialBg.getPostIdFromUrl(id)
+        return buildPostUrlId({ postId }).url
     }
 }

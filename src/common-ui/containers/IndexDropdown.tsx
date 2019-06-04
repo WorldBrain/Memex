@@ -15,7 +15,7 @@ import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 export interface Props {
     env?: 'inpage' | 'overview'
-    source: 'tag' | 'domain' | 'user'
+    source: 'tag' | 'domain' | 'user' | 'hashtag'
     /** The URL to use for dis/associating new tags with; set this to keep in sync with index. */
     url?: string
     hover?: boolean
@@ -46,7 +46,9 @@ export interface Props {
     allTabs?: boolean
     /** Add tags from dashboard */
     fromOverview?: boolean
+    isSocialPost?: boolean
     sidebarTagDiv?: boolean
+    onTagClickCb?: () => void
 }
 
 export interface State {
@@ -73,6 +75,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         isForAnnotation: false,
         isForRibbon: false,
         fromOverview: false,
+        onTagClickCb: noop,
     }
 
     private err: { timestamp: number; err: Error }
@@ -85,27 +88,22 @@ class IndexDropdownContainer extends Component<Props, State> {
     private createNotif
     private inputEl: HTMLInputElement
     private fetchUserSuggestionsRPC
+    private fetchHashtagSuggestionsRPC
 
     constructor(props: Props) {
         super(props)
 
         this.suggestRPC = remoteFunction('suggest')
-        this.addTagRPC = this.props.fromOverview
-            ? remoteFunction('addTag')
-            : remoteFunction('addPageTag')
-        this.delTagRPC = this.props.fromOverview
-            ? remoteFunction('delTag')
-            : remoteFunction('delPageTag')
+        this.addTagRPC = remoteFunction(this.addTagRPCName)
+        this.delTagRPC = remoteFunction(this.delTagRPCName)
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
         this.processEvent = remoteFunction('processEvent')
         this.createNotif = remoteFunction('createNotification')
         this.fetchUserSuggestionsRPC = remoteFunction('fetchUserSuggestions')
-
-        if (this.props.isForAnnotation) {
-            this.addTagRPC = remoteFunction('addAnnotationTag')
-            this.delTagRPC = remoteFunction('delAnnotationTag')
-        }
+        this.fetchHashtagSuggestionsRPC = remoteFunction(
+            'fetchHashtagSuggestions',
+        )
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
 
@@ -163,9 +161,37 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    /**
-     * Domain inputs need to allow '.' while tags shouldn't.
-     */
+    private get addTagRPCName(): string {
+        if (this.props.isSocialPost) {
+            return 'addTagForTweet'
+        }
+
+        if (this.props.isForAnnotation) {
+            return 'addAnnotationTag'
+        }
+
+        if (this.props.fromOverview) {
+            return 'addTag'
+        }
+
+        return 'addPageTag'
+    }
+
+    private get delTagRPCName(): string {
+        if (this.props.isSocialPost) {
+            return 'delTagForTweet'
+        }
+
+        if (this.props.isForAnnotation) {
+            return 'delAnnotationTag'
+        }
+
+        if (this.props.fromOverview) {
+            return 'delTag'
+        }
+
+        return 'delPageTag'
+    }
 
     /**
      * Decides whether or not to allow index update. Currently determined by `props.url` setting.
@@ -227,7 +253,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     private pageHasTag = (value: any, inc: boolean) => {
         const filters = inc ? this.state.filters : this.state.excFilters
         return this.props.source === 'user'
-            ? filters.find(user => user.id === value.id)
+            ? filters.find(user => user.id === value.id) !== undefined
             : filters.includes(value)
     }
     private setInputRef = (el: HTMLInputElement) => (this.inputEl = el)
@@ -270,6 +296,8 @@ class IndexDropdownContainer extends Component<Props, State> {
      * Used for 'Enter' presses or 'Add new tag' clicks.
      */
     private addTag = async () => {
+        await this.props.onTagClickCb()
+
         const newTag = this.getSearchVal()
         this.props.onFilterAdd(newTag)
 
@@ -371,6 +399,8 @@ class IndexDropdownContainer extends Component<Props, State> {
      * depending on their current status as assoc. tags or not.
      */
     private handleTagSelection = (index: number) => async event => {
+        await this.props.onTagClickCb()
+
         const tag =
             this.state.searchVal.length > 0
                 ? this.state.displayFilters[index]
@@ -566,6 +596,10 @@ class IndexDropdownContainer extends Component<Props, State> {
                 suggestions = await this.fetchUserSuggestionsRPC({
                     name: searchVal,
                     base64Img: this.props.isForRibbon,
+                })
+            } else if (this.props.source === 'hashtag') {
+                suggestions = await this.fetchHashtagSuggestionsRPC({
+                    name: searchVal,
                 })
             } else {
                 suggestions = await this.suggestRPC(

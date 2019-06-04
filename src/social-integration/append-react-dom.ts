@@ -1,3 +1,5 @@
+// Original Source code at https://github.com/towry/append-react-dom
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 

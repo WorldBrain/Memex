@@ -14,6 +14,8 @@ import { handleDBQuotaErrors } from 'src/util/error-handler'
 const processEventRPC = remoteFunction('processEvent')
 const createBookmarkRPC = remoteFunction('addBookmark')
 const deleteBookmarkRPC = remoteFunction('delBookmark')
+const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
+const deleteSocialBookmarkRPC = remoteFunction('delSocialBookmark')
 const createNotifRPC = remoteFunction('createNotification')
 
 export const addTag = createAction('results/localAddTag', (tag, index) => ({
@@ -56,18 +58,11 @@ export const setActiveSidebarIndex = createAction<number>(
 )
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
-export const setSearchType = createAction<'page' | 'annot' | 'social'>(
+export const setSearchType = createAction<'page' | 'notes' | 'social'>(
     'results/setSearchType',
 )
 export const initSearchCount = createAction('overview/initSearchCount')
 export const incSearchCount = createAction('overview/incSearchCount')
-
-export const toggleSearchType: () => Thunk = () => (dispatch, getState) => {
-    dispatch(setLoading(true))
-    const currSearchType = selectors.searchType(getState())
-    const newSearchType = currSearchType === 'page' ? 'annot' : 'page'
-    dispatch(setSearchType(newSearchType))
-}
 
 export const toggleBookmark: (url: string, i: number) => Thunk = (
     url,
@@ -90,9 +85,16 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
             : EVENT_NAMES.CREATE_RESULT_BOOKMARK,
     })
 
-    const bookmarkRPC = hasBookmark ? deleteBookmarkRPC : createBookmarkRPC
+    let bookmarkRPC: (args: { url: string }) => Promise<void>
+    // tslint:disable-next-line: prefer-conditional-expression
+    if (hasBookmark) {
+        bookmarkRPC = user ? deleteSocialBookmarkRPC : deleteBookmarkRPC
+    } else {
+        bookmarkRPC = user ? createSocialBookmarkRPC : createBookmarkRPC
+    }
+
     try {
-        await bookmarkRPC({ url, pageType: user ? 'social' : undefined })
+        await bookmarkRPC({ url })
     } catch (err) {
         dispatch(changeHasBookmark(index))
         handleDBQuotaErrors(

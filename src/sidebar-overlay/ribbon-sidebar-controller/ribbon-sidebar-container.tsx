@@ -22,8 +22,10 @@ import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { retryUntilErrorResolves } from '../utils'
 import * as bookmarkActs from 'src/popup/bookmark-button/actions'
+import * as popup from 'src/popup/selectors'
 
 interface StateProps {
+    url: string
     isPageFullScreen: boolean
     isRibbonEnabled: boolean
     isSidebarOpen: boolean
@@ -115,6 +117,9 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         if (prevProps.annotations !== annotations && isSidebarOpen) {
             this.props.removeHighlights()
             this._highlightAnnotations()
+        }
+        if (prevProps.url !== this.getUrl()) {
+            this.props.onInit()
         }
     }
 
@@ -462,6 +467,7 @@ const mapStateToProps: MapStateToProps<
     OwnProps,
     RootState
 > = state => ({
+    url: popup.url(state),
     isPageFullScreen: ribbonSelectors.isPageFullScreen(state),
     isSidebarOpen: sidebarSelectors.isOpen(state),
     isCommentSaved: commentBoxselectors.isCommentSaved(state),

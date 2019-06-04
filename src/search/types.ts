@@ -92,11 +92,11 @@ export interface SearchParams {
     lists: string[]
 }
 
-export interface FilteredURLs {
-    include: Set<string>
-    exclude: Set<string>
+export interface FilteredIDs<T = string> {
+    include: Set<T>
+    exclude: Set<T>
+    isAllowed(url: T): boolean
     isDataFiltered: boolean
-    isAllowed(url: string): boolean
 }
 
 export interface VisitInteraction {

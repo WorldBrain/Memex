@@ -21,8 +21,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    showDomainFilter: () => void
-    hideDomainFilter: () => void
+    setDomainFilter: (value: boolean) => void
     addIncDomainFilter: (domain: string) => void
     delIncDomainFilter: (domain: string) => void
     addExcDomainFilter: (domain: string) => void
@@ -47,8 +46,8 @@ class DomainsPopup extends PureComponent<Props, State> {
         }
 
         this.props.domainFilterDropdown
-            ? this.props.hideDomainFilter()
-            : this.props.showDomainFilter()
+            ? this.props.setDomainFilter(false)
+            : this.props.setDomainFilter(true)
     }
 
     renderFilteredDomains = () => {
@@ -82,7 +81,7 @@ class DomainsPopup extends PureComponent<Props, State> {
                 source="Domains"
                 filteredItems={this.props.displayDomains}
                 togglePopup={this.togglePopup}
-                hidePopup={this.props.hideDomainFilter}
+                showPopup={this.props.setDomainFilter}
                 clearFilters={this.props.clearDomainFilters}
                 onFilterDel={this.toggleDomainFilter}
                 disableOnClickOutside={this.props.env === 'inpage'}
@@ -132,9 +131,11 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps,
     RootState
 > = dispatch => ({
-    showDomainFilter: () => dispatch(actions.showDomainFilter()),
-    hideDomainFilter: () => dispatch(actions.hideDomainFilter()),
-    addIncDomainFilter: domain => dispatch(actions.addIncDomainFilter(domain)),
+    setDomainFilter: value => dispatch(actions.setDomainFilter(value)),
+    addIncDomainFilter: domain => {
+        dispatch(actions.addIncDomainFilter(domain))
+        dispatch(actions.fetchSuggestedDomains())
+    },
     delIncDomainFilter: domain => dispatch(actions.delIncDomainFilter(domain)),
     addExcDomainFilter: domain => dispatch(actions.addExcDomainFilter(domain)),
     delExcDomainFilter: domain => dispatch(actions.delExcDomainFilter(domain)),

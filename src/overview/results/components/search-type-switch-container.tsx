@@ -9,14 +9,14 @@ import { selectors as filters } from 'src/search-filters'
 
 export interface StateProps {
     annotsFolded: boolean
-    searchType: 'page' | 'annot' | 'social'
+    searchType: 'page' | 'notes' | 'social'
     isFilterBarActive: boolean
 }
 
 export interface DispatchProps {
     handleUnfoldAllClick: React.MouseEventHandler<HTMLButtonElement>
     handleSearchTypeClick: (
-        searchType: 'page' | 'annot' | 'social',
+        searchType: 'page' | 'notes' | 'social',
     ) => React.MouseEventHandler<HTMLButtonElement>
 }
 
