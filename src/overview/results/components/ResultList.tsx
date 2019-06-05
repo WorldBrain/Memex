@@ -2,7 +2,6 @@ import React, { ReactChild, PureComponent } from 'react'
 import cx from 'classnames'
 
 const styles = require('./ResultList.css')
-const shortcut = 'img/shortcut.svg'
 
 export interface Props {
     scrollDisabled?: boolean
@@ -16,7 +15,9 @@ class ResultList extends PureComponent<Props> {
     }
 
     get mainClass() {
-        return cx(styles.root, { [styles.lessHeight]: this.props.isFilterBarActive })
+        return cx(styles.root, {
+            [styles.lessHeight]: this.props.isFilterBarActive,
+        })
     }
 
     render() {
@@ -27,7 +28,7 @@ class ResultList extends PureComponent<Props> {
                 })}
             >
                 {this.props.children}
-                <div className={styles.infoBox}/>
+                <div className={styles.infoBox} />
             </ul>
         )
     }

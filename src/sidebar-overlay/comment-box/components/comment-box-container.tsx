@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import classNames from 'classnames'
+import noop from 'lodash/fp/noop'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -8,7 +9,7 @@ import State from '../types'
 import { AnnotationHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
-import { MapDispatchToProps, ClickHandler } from '../../types'
+import { MapDispatchToProps } from '../../types'
 
 const styles = require('./comment-box-container.css')
 
@@ -27,19 +28,24 @@ interface DispatchProps {
         tags: string[],
         bookmarked: boolean,
     ) => void
-    cancelComment: ClickHandler<HTMLElement>
-    toggleBookmark: ClickHandler<HTMLButtonElement>
+    cancelComment: () => void
+    toggleBookmark: () => void
 }
 
 interface OwnProps {
     env?: 'inpage' | 'overview'
+    isSocialPost?: boolean
+    onSaveCb?: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
 
-// TODO: Fetch initial tag suggestions when the component is mounted.
 class CommentBoxContainer extends React.PureComponent<Props> {
-    save = (e: React.SyntheticEvent) => {
+    static defaultProps: Partial<Props> = {
+        onSaveCb: noop,
+    }
+
+    save = async e => {
         e.preventDefault()
         e.stopPropagation()
 
@@ -49,7 +55,11 @@ class CommentBoxContainer extends React.PureComponent<Props> {
             tags,
             saveComment,
             isCommentBookmarked,
+            onSaveCb,
         } = this.props
+
+        await onSaveCb()
+
         saveComment(anchor, commentText.trim(), tags, isCommentBookmarked)
     }
 
@@ -80,7 +90,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
                     cancelComment={cancelComment}
                     isCommentBookmarked={isCommentBookmarked}
                     toggleBookmark={toggleBookmark}
-                    isAnnotation={true} // TODO: we need to pass the right state here 
+                    isAnnotation={true} // TODO: we need to pass the right state here
                 />
             </div>
         )
@@ -98,19 +108,23 @@ const mapStateToProps: MapStateToProps<
     isCommentBookmarked: selectors.isBookmarked(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+    props,
+) => ({
     handleCommentTextChange: comment =>
         dispatch(actions.setCommentText(comment)),
     saveComment: (anchor, commentText, tags, bookmarked) =>
-        dispatch(actions.saveComment(anchor, commentText, tags, bookmarked)),
-    cancelComment: e => {
-        e.preventDefault()
-        e.stopPropagation()
-        dispatch(actions.cancelComment())
-    },
+        dispatch(
+            actions.saveComment(
+                anchor,
+                commentText,
+                tags,
+                bookmarked,
+                props.isSocialPost,
+            ),
+        ),
+    cancelComment: () => dispatch(actions.cancelComment()),
     toggleBookmark: () => dispatch(actions.toggleBookmark()),
 })
 

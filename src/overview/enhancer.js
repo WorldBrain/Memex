@@ -68,6 +68,18 @@ const locationSync = ReduxQuerySync.enhancer({
             valueToString: stringifyArr,
             defaultValue: [],
         },
+        hashtagsInc: {
+            selector: filters.hashtagsInc,
+            action: filterActs.setIncHashtagFilters,
+            valueToString: stringifyArr,
+            defaultValue: [],
+        },
+        hashtagsExc: {
+            selector: filters.hashtagsExc,
+            action: filterActs.setExcHashtagFilters,
+            valueToString: stringifyArr,
+            defaultValue: [],
+        },
         lists: {
             selector: filters.listFilter,
             action: filterActs.setListFilters,

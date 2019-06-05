@@ -1,5 +1,3 @@
-import stemmer from '@worldbrain/memex-stemmer'
-
 import UrlField from './storage/url-field'
 import schemaPatcher from './storage/dexie-schema'
 import collections from './old-schema'
@@ -7,10 +5,11 @@ import initStorex from './storex'
 import { suggestObjects } from './search/suggest'
 import { StorageManager, Dexie } from './types'
 import { plugins } from './storex-plugins'
+import stemmerSelector from './stemmers'
 
 export default () =>
     initStorex<StorageManager>({
-        stemmer,
+        stemmerSelector,
         collections,
         schemaPatcher,
         dbName: 'memex',

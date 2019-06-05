@@ -31,9 +31,10 @@ interface Props {
     searchValue: string
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
+    isSocialPost: boolean
     page: Page
     pageType: 'page' | 'all'
-    searchType: 'notes' | 'pages'
+    searchType: 'notes' | 'page' | 'social'
     closeSidebar: () => void
     handleGoToAnnotation: (
         annotation: Annotation,
@@ -49,7 +50,6 @@ interface Props {
     handleBookmarkToggle: (url: string) => void
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
-    handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
     clearAllFilters: () => void
     resetPage: React.MouseEventHandler<HTMLButtonElement>
 }
@@ -127,11 +127,7 @@ class Sidebar extends React.Component<Props, State> {
         this.props.clearAllFilters()
     }
 
-    get isPageSearch() {
-        return this.props.searchType === 'pages'
-    }
-
-    get isCurrentPageSearch() {
+    get isCurrentPageSearch(): boolean {
         return this.props.pageType === 'page'
     }
 
@@ -219,7 +215,11 @@ class Sidebar extends React.Component<Props, State> {
                         {env === 'inpage' && (
                             <React.Fragment>
                                 <div className={styles.searchSwitch}>
-                                    <SearchTypeSwitch />
+                                    <SearchTypeSwitch
+                                        isOverview={
+                                            this.props.env === 'overview'
+                                        }
+                                    />
                                 </div>
                                 <PageInfo
                                     page={this.props.page}
@@ -230,7 +230,10 @@ class Sidebar extends React.Component<Props, State> {
                         )}
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
-                                <CommentBoxContainer env={env} />
+                                <CommentBoxContainer
+                                    env={env}
+                                    isSocialPost={this.props.isSocialPost}
+                                />
                             </div>
                         )}
                         <div
@@ -239,7 +242,7 @@ class Sidebar extends React.Component<Props, State> {
                                     env === 'overview',
                             })}
                         >
-                            {this.isPageSearch || !this.isCurrentPageSearch ? (
+                            {!this.isCurrentPageSearch ? (
                                 this.renderResults()
                             ) : this.props.isLoading &&
                             !this.props.appendLoader ? (

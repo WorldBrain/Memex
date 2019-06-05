@@ -26,8 +26,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    showDatesFilter: () => void
-    hideDatesFilter: () => void
+    setDatesFilter: (value: boolean) => void
     onStartDateChange: (date: number) => void
     onEndDateChange: (date: number) => void
     onStartDateTextChange: (date: string) => void
@@ -52,8 +51,8 @@ class DatesFilter extends PureComponent<Props, State> {
         }
 
         this.props.datesFilterDropdown
-            ? this.props.hideDatesFilter()
-            : this.props.showDatesFilter()
+            ? this.props.setDatesFilter(false)
+            : this.props.setDatesFilter(true)
     }
 
     clearFilters = () => {
@@ -70,7 +69,7 @@ class DatesFilter extends PureComponent<Props, State> {
                 source="Dates"
                 filteredItems={[]}
                 togglePopup={this.togglePopup}
-                hidePopup={this.props.hideDatesFilter}
+                showPopup={this.props.setDatesFilter}
                 clearFilters={this.clearFilters}
                 startDate={this.props.startDate}
                 endDate={this.props.endDate}
@@ -126,8 +125,7 @@ const mapDispatchToProps: MapDispatchToProps<
     onStartDateTextChange: date =>
         dispatch(searchBarActs.setStartDateText(date)),
     onEndDateTextChange: date => dispatch(searchBarActs.setEndDateText(date)),
-    showDatesFilter: () => dispatch(actions.showDatesFilter()),
-    hideDatesFilter: () => dispatch(actions.hideDatesFilter()),
+    setDatesFilter: value => dispatch(actions.setDatesFilter(value)),
     changeTooltip: () => {
         // Change tooltip notification to more filters once the user selects date
         dispatch(tooltipActs.setTooltip('more-filters'))

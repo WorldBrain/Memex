@@ -8,7 +8,7 @@ export interface Props {
     isFiltered: boolean
     onEditButtonClick: React.MouseEventHandler<HTMLButtonElement>
     onCrossButtonClick: React.MouseEventHandler<HTMLButtonElement>
-    onAddPageToList: (url: string) => void
+    onAddPageToList: (url: string, isSocialPost: boolean) => void
     onListItemClick: () => void
 }
 
@@ -98,9 +98,11 @@ class PageList extends Component<Props, State> {
         this.handleDragLeave()
         // const url = e.dataTransfer.getData('URL')
         // Gets the URL of the dropped list item
-        const url = e.dataTransfer.getData('text/plain')
+        const { url, isSocialPost } = JSON.parse(
+            e.dataTransfer.getData('text/plain'),
+        )
         // this.props.resetUrlDragged()
-        this.props.onAddPageToList(url)
+        this.props.onAddPageToList(url, isSocialPost)
     }
 
     private handleEditBtnClick: React.MouseEventHandler<

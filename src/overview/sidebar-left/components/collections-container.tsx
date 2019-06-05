@@ -1,4 +1,3 @@
-import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 
 import CollectionsButton from './collections-button'

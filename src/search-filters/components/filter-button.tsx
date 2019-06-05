@@ -16,7 +16,7 @@ interface Props {
     startDate?: number
     endDate?: number
     togglePopup: React.MouseEventHandler<HTMLButtonElement>
-    hidePopup: () => void
+    showPopup: (value: boolean) => void
     clearFilters: () => void
     onFilterDel?: (args: any) => void
 }
@@ -41,7 +41,7 @@ class FilterButton extends PureComponent<Props, State> {
 
     private handleClickOutside = (e: Event) => {
         e.stopPropagation()
-        this.props.hidePopup()
+        this.props.showPopup(false)
     }
 
     private handleClearFilters: React.MouseEventHandler<
@@ -49,7 +49,7 @@ class FilterButton extends PureComponent<Props, State> {
     > = e => {
         e.stopPropagation()
         this.props.clearFilters()
-        this.props.hidePopup()
+        this.props.showPopup(false)
     }
 
     private renderCount() {
@@ -89,9 +89,7 @@ class FilterButton extends PureComponent<Props, State> {
                 <React.Fragment>
                     {this.props.filteredItems.length > 0 && (
                         <React.Fragment>
-                            <span
-                                className={this.styles.renderCount}
-                            >
+                            <span className={this.styles.renderCount}>
                                 {this.props.filteredItems.length}
                             </span>
                             <ButtonTooltip

@@ -1,4 +1,4 @@
-import { Dexie, SearchParams, FilteredURLs } from '..'
+import { Dexie, SearchParams, FilteredIDs } from '..'
 import intersection from 'lodash/fp/intersection'
 import flatten from 'lodash/fp/flatten'
 import difference from 'lodash/fp/difference'
@@ -15,12 +15,12 @@ const pageIndexLookup = (getDb: () => Promise<Dexie>) => async (
 }
 
 /**
- * Affords hiding away of the URL filters (tags, domains inc/exc) and related
- * messy logic behind a more-simple interface to check whether URLs are filtered out or not.
+ * Affords hiding away of the search filters (tags, domains inc/exc) and related
+ * messy logic behind a more-simple interface to check whether IDs are filtered out or not.
  */
-export class FilteredURLsManager implements FilteredURLs {
-    include: Set<string>
-    exclude: Set<string>
+export class FilteredIDsManager<T> implements FilteredIDs<T> {
+    include: Set<T>
+    exclude: Set<T>
     isDataFiltered: boolean
 
     constructor({
@@ -29,14 +29,20 @@ export class FilteredURLsManager implements FilteredURLs {
         incTagUrls,
         excTagUrls,
         listUrls,
+        incUserUrls,
+        excUserUrls,
+        incHashtagUrls,
+        excHashtagUrls,
     }: {
-        [key: string]: Set<string>
+        [key: string]: Set<T>
     }) {
         // Exclude any undefined URLs filters
         const allUrls = [
             incDomainUrls ? [...incDomainUrls] : incDomainUrls,
             incTagUrls ? [...incTagUrls] : incTagUrls,
             listUrls ? [...listUrls] : listUrls,
+            incUserUrls ? [...incUserUrls] : incUserUrls,
+            incHashtagUrls ? [...incHashtagUrls] : incHashtagUrls,
         ].filter(urls => urls != null)
 
         // Depends on no. of applied filters whether to take intersection or just flatten.
@@ -46,28 +52,38 @@ export class FilteredURLsManager implements FilteredURLs {
         // Ensure no excluded URLs in included sets
         this.include = new Set(
             difference(initInclude, [
+                ...(excUserUrls || []),
                 ...(excDomainUrls || []),
                 ...(excTagUrls || []),
+                ...(excHashtagUrls || []),
             ]),
         )
 
         this.exclude = new Set([
+            ...(excUserUrls || []),
             ...(excDomainUrls || []),
             ...(excTagUrls || []),
+            ...(excHashtagUrls || []),
         ])
 
-        this.isDataFiltered = !!(incDomainUrls || incTagUrls || listUrls)
+        this.isDataFiltered = !!(
+            incDomainUrls ||
+            incTagUrls ||
+            listUrls ||
+            incUserUrls ||
+            incHashtagUrls
+        )
     }
 
-    private isIncluded(url: string) {
+    private isIncluded(url: T): boolean {
         return this.isDataFiltered ? this.include.has(url) : true
     }
 
-    private isExcluded(url: string) {
+    private isExcluded(url: T): boolean {
         return this.exclude.size ? this.exclude.has(url) : false
     }
 
-    isAllowed(url: string) {
+    isAllowed(url: T): boolean {
         return this.isIncluded(url) && !this.isExcluded(url)
     }
 }
@@ -149,7 +165,7 @@ const listSearch = (getDb: () => Promise<Dexie>) => async ({
  */
 export const findFilteredUrls = (getDb: () => Promise<Dexie>) => async (
     params: Partial<SearchParams>,
-): Promise<FilteredURLs> => {
+): Promise<FilteredIDs> => {
     const [
         incDomainUrls,
         excDomainUrls,
@@ -164,7 +180,7 @@ export const findFilteredUrls = (getDb: () => Promise<Dexie>) => async (
         listSearch(getDb)(params),
     ])
 
-    return new FilteredURLsManager({
+    return new FilteredIDsManager({
         incTagUrls,
         excTagUrls,
         incDomainUrls,

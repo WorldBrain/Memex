@@ -1,4 +1,4 @@
-import React, { PureComponent, SyntheticEvent } from 'react'
+import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import cx from 'classnames'
 

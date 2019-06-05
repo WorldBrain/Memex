@@ -151,7 +151,12 @@ export const searchType = createSelector(
 
 export const isAnnotsSearch = createSelector(
     searchType,
-    state => state === 'annot',
+    state => state === 'notes',
+)
+
+export const isSocialPost = createSelector(
+    searchType,
+    state => state === 'social',
 )
 
 export const resultsClusteredByDay = createSelector(
@@ -168,7 +173,7 @@ export const resultsByUrl = createSelector(
 
         if (isAnnotsSearch) {
             resultDocs.forEach((doc, index) => {
-                pages.set(doc.url, {
+                pages.set(doc.pageId, {
                     ...doc,
                     index,
                 })

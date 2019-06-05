@@ -2,7 +2,6 @@ import React, { ReactChild, PureComponent } from 'react'
 import cx from 'classnames'
 
 const styles = require('./result-list.css')
-const shortcut = 'img/shortcut.svg'
 
 export interface Props {
     scrollDisabled?: boolean

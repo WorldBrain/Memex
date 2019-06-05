@@ -5,8 +5,8 @@ import Storex, {
 import {
     DexieStorageBackend,
     IndexedDbImplementation,
+    StemmerSelector,
 } from '@worldbrain/storex-backend-dexie'
-import stemmerFn from '@worldbrain/memex-stemmer'
 
 import schemaPatcherFn from './storage/dexie-schema'
 
@@ -17,7 +17,7 @@ export interface CustomField {
 
 export default <T extends Storex = Storex>({
     dbName,
-    stemmer,
+    stemmerSelector,
     schemaPatcher,
     idbImplementation,
     collections,
@@ -25,7 +25,7 @@ export default <T extends Storex = Storex>({
     customFields = [],
     modifyInstance = f => f as any,
 }: {
-    stemmer: typeof stemmerFn
+    stemmerSelector: StemmerSelector
     schemaPatcher: typeof schemaPatcherFn
     dbName: string
     idbImplementation: IndexedDbImplementation
@@ -35,7 +35,7 @@ export default <T extends Storex = Storex>({
     modifyInstance?: (instance: Storex) => T
 }): T => {
     const backend = new DexieStorageBackend({
-        stemmer,
+        stemmerSelector,
         schemaPatcher,
         dbName,
         idbImplementation,

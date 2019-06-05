@@ -1,4 +1,3 @@
-import React, { Component } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import RootState, { MapDispatchToProps } from 'src/sidebar-overlay/types'
 import { actions as filterActs } from 'src/search-filters'
@@ -6,16 +5,20 @@ import {
     acts as searchBarActs,
     selectors as searchBar,
 } from 'src/overview/search-bar'
+import { selectors as results } from 'src/overview/results'
 import FiltersSidebar from './filters-sidebar'
 
 interface StateProps {
     showClearFiltersBtn: boolean
+    isSocialSearch: boolean
 }
 
 interface DispatchProps {
     clearAllFilters: React.MouseEventHandler<HTMLButtonElement>
     fetchSuggestedTags: () => void
     fetchSuggestedDomains: () => void
+    fetchSuggestedUsers: () => void
+    fetchSuggestedHashtags: () => void
     resetFilterPopups: () => void
 }
 
@@ -31,6 +34,7 @@ const mapStateToProps: MapStateToProps<
     OwnProps,
     RootState
 > = state => ({
+    isSocialSearch: results.isSocialPost(state),
     showClearFiltersBtn: searchBar.showClearFiltersBtn(state),
 })
 
@@ -45,6 +49,8 @@ const mapDispatchToProps: MapDispatchToProps<
     },
     fetchSuggestedTags: () => dispatch(filterActs.fetchSuggestedTags()),
     fetchSuggestedDomains: () => dispatch(filterActs.fetchSuggestedDomains()),
+    fetchSuggestedUsers: () => dispatch(filterActs.fetchSuggestedUsers(true)),
+    fetchSuggestedHashtags: () => dispatch(filterActs.fetchSuggestedHashtags()),
     resetFilterPopups: () => dispatch(filterActs.resetFilterPopups()),
 })
 

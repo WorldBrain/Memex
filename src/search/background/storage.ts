@@ -4,11 +4,19 @@ import {
     SearchParams as OldSearchParams,
     SearchResult as OldSearchResult,
 } from '../types'
-import { AnnotSearchParams, AnnotPage, PageUrlsByDay } from './types'
+import {
+    AnnotSearchParams,
+    AnnotPage,
+    PageUrlsByDay,
+    SocialSearchParams,
+} from './types'
 import { Annotation } from 'src/direct-linking/types'
 import { PageUrlMapperPlugin } from './page-url-mapper'
 import { reshapeParamsForOldSearch } from './utils'
 import { AnnotationsListPlugin } from './annots-list'
+import { SocialSearchPlugin } from './social-search'
+import { SocialPage } from 'src/social-integration/types'
+import { buildTweetUrl } from 'src/social-integration/util'
 import { Tag, Bookmark } from 'src/search/models'
 
 export interface SearchStorageProps {
@@ -94,6 +102,65 @@ export default class SearchStorage extends FeatureStorage {
         return { annotsToTags, bmUrls }
     }
 
+    async getMergedAnnotsPages(
+        pageUrls: string[],
+        params: AnnotSearchParams,
+        postPrefix = 'socialPosts:',
+    ): Promise<AnnotPage[]> {
+        const results: Map<string, any> = new Map()
+        const pageIds: string[] = []
+        const postIds: number[] = []
+
+        // Split into post and page annots
+        pageUrls.forEach(
+            url =>
+                url.startsWith(postPrefix)
+                    ? postIds.push(Number(url.split(postPrefix)[1]))
+                    : pageIds.push(url),
+        )
+
+        const pages: AnnotPage[] = await this.storageManager.operation(
+            PageUrlMapperPlugin.MAP_OP_ID,
+            pageIds,
+            { base64Img: params.base64Img, upperTimeBound: params.endDate },
+        )
+
+        pages.forEach(page => results.set(page.url, page))
+
+        const socialResults: Map<
+            number,
+            Map<string, SocialPage>
+        > = await this.storageManager.operation(
+            SocialSearchPlugin.MAP_POST_IDS_OP_ID,
+            postIds,
+        )
+
+        const socialPages: SocialPage[] = await this.storageManager.operation(
+            PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
+            socialResults,
+            { base64Img: params.base64Img, upperTimeBound: params.endDate },
+        )
+
+        socialPages.forEach(page =>
+            results.set(postPrefix + page.id.toString(), page),
+        )
+
+        return pageUrls
+            .map(url => {
+                const result = results.get(url)
+
+                if (!result) {
+                    return
+                }
+
+                return {
+                    ...result,
+                    pageId: url,
+                }
+            })
+            .filter(page => page !== undefined)
+    }
+
     /**
      * Searches for annotations which match the passed params and returns
      * them clustered by day.
@@ -116,10 +183,9 @@ export default class SearchStorage extends FeatureStorage {
             pageUrls = new Set([...pageUrls, ...annotsByPage.keys()])
         }
 
-        const pages: AnnotPage[] = await this.storageManager.operation(
-            PageUrlMapperPlugin.MAP_OP_ID,
+        const pages: AnnotPage[] = await this.getMergedAnnotsPages(
             [...pageUrls],
-            { base64Img: params.base64Img, upperTimeBound: params.endDate },
+            params,
         )
 
         const clusteredResults: PageUrlsByDay = {}
@@ -166,7 +232,7 @@ export default class SearchStorage extends FeatureStorage {
         })
 
         // Remove any annots without matching pages (keep data integrity regardless of DB)
-        const validUrls = new Set(pages.map(page => page.url))
+        const validUrls = new Set(pages.map(page => page.pageId))
         for (const day of Object.keys(clusteredResults)) {
             // Remove any empty days (they might have had all annots filtered out due to excluded tags)
             if (!Object.keys(clusteredResults[day]).length) {
@@ -196,10 +262,9 @@ export default class SearchStorage extends FeatureStorage {
             params,
         )
 
-        const pages: AnnotPage[] = await this.storageManager.operation(
-            PageUrlMapperPlugin.MAP_OP_ID,
+        const pages: AnnotPage[] = await this.getMergedAnnotsPages(
             [...results.keys()],
-            { base64Img: params.base64Img, upperTimeBound: params.endDate },
+            params,
         )
 
         const annotUrls = [].concat(...results.values()).map(annot => annot.url)
@@ -211,7 +276,7 @@ export default class SearchStorage extends FeatureStorage {
 
         return {
             docs: pages.map(page => {
-                const annotations = results.get(page.url).map(annot => ({
+                const annotations = results.get(page.pageId).map(annot => ({
                     ...annot,
                     tags: annotsToTags.get(annot.url) || [],
                     hasBookmark: bmUrls.has(annot.url),
@@ -251,6 +316,26 @@ export default class SearchStorage extends FeatureStorage {
                 latestTimes,
                 base64Img: params.base64Img,
             },
+        )
+    }
+
+    async searchSocial(params: SocialSearchParams) {
+        const results: Map<
+            number,
+            SocialPage
+        > = await this.storageManager.operation(
+            SocialSearchPlugin.SEARCH_OP_ID,
+            params,
+        )
+
+        if (!results.size) {
+            return []
+        }
+
+        return this.storageManager.operation(
+            PageUrlMapperPlugin.MAP_OP_SOCIAL_ID,
+            results,
+            { base64Img: params.base64Img, upperTimeBound: params.endDate },
         )
     }
 }

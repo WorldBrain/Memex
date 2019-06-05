@@ -334,3 +334,57 @@
         transform: scale(1);
     }
 }
+
+.isUser {
+    height: 50px;
+}
+
+.socialContainer {
+    display: flex;
+    overflow: hidden;
+    color: #66757f;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    align-items: center;
+}
+
+.userGroup {
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.accountGroup {
+    display: flex;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-direction: column;
+}
+
+.fullName {
+    word-break: break-all;
+    color: #14171a;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.verified {
+    background-image: url('/img/twitter-verified-icon.svg');
+    width: 15px;
+    height: 15px;
+    margin-left: 5px;
+}
+
+.username {
+    font-size: 14px;
+    color: color6;
+}

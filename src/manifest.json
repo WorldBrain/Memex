@@ -12,7 +12,7 @@
             "matches": ["<all_urls>"],
             "js": ["lib/browser-polyfill.js", "content_script.js"],
             "css": ["/content_script.css"],
-            "run_at": "document_start"
+            "run_at": "document_end"
         }
     ],
     "browser_action": {

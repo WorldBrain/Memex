@@ -33,6 +33,7 @@
     font-weight: 600;
     cursor: pointer;
     outline: none;
+    margin-right: 5px;
     display: flex;
     border: none;
     align-items: center;
@@ -49,7 +50,6 @@
 }
 
 .pages {
-    margin-right: 10px;
     margin-left: -8px;
 }
 

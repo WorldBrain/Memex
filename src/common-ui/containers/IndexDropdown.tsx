@@ -15,7 +15,7 @@ import { handleDBQuotaErrors } from 'src/util/error-handler'
 
 export interface Props {
     env?: 'inpage' | 'overview'
-    source: 'tag' | 'domain'
+    source: 'tag' | 'domain' | 'user' | 'hashtag'
     /** The URL to use for dis/associating new tags with; set this to keep in sync with index. */
     url?: string
     hover?: boolean
@@ -25,28 +25,30 @@ export interface Props {
     /** Manual flag to display "Add tag" without creating a tag */
     allowAdd?: boolean
     /** Tag Filters that are previously present in the location. */
-    initFilters?: string[]
-    initExcFilters?: string[]
+    initFilters?: any[]
+    initExcFilters?: any[]
     /** Opt. cb to run when new tag added to state. */
-    onFilterAdd?: (filter: string) => void
+    onFilterAdd?: (filter: any) => void
     /** Opt. cb to run when tag deleted from state. */
-    onFilterDel?: (filter: string) => void
+    onFilterDel?: (filter: any) => void
     /** Opt. cb to run when new tag added to state. */
-    onExcFilterAdd?: (filter: string) => void
+    onExcFilterAdd?: (filter: any) => void
     /** Opt. cb to run when tag deleted from state. */
-    onExcFilterDel?: (filter: string) => void
+    onExcFilterDel?: (filter: any) => void
     /** Opt. cb with new tag to be added to a new annotation */
     onNewTagAdd?: (filter: string) => void
     setTagDivRef?: (el: HTMLDivElement) => void
     /** initial suggestions from the popup */
-    initSuggestions?: string[]
+    initSuggestions?: any[]
     isForSidebar?: boolean
     isForRibbon?: boolean
     onBackBtnClick?: ClickHandler<HTMLButtonElement>
     allTabs?: boolean
     /** Add tags from dashboard */
     fromOverview?: boolean
+    isSocialPost?: boolean
     sidebarTagDiv?: boolean
+    onTagClickCb?: () => void
 }
 
 export interface State {
@@ -54,12 +56,12 @@ export interface State {
     errMsg: string
     searchVal: string
     isLoading: boolean
-    displayFilters: string[]
-    filters: string[]
+    displayFilters: any[]
+    filters: any[]
     focused: number
     clearFieldBtn: boolean
     multiEdit: Set<string>
-    excFilters: Set<string>
+    excFilters: any[]
 }
 
 class IndexDropdownContainer extends Component<Props, State> {
@@ -73,6 +75,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         isForAnnotation: false,
         isForRibbon: false,
         fromOverview: false,
+        onTagClickCb: noop,
     }
 
     private err: { timestamp: number; err: Error }
@@ -84,22 +87,23 @@ class IndexDropdownContainer extends Component<Props, State> {
     private processEvent
     private createNotif
     private inputEl: HTMLInputElement
+    private fetchUserSuggestionsRPC
+    private fetchHashtagSuggestionsRPC
 
     constructor(props: Props) {
         super(props)
 
         this.suggestRPC = remoteFunction('suggest')
-        this.addTagRPC = remoteFunction('addTag')
-        this.delTagRPC = remoteFunction('delTag')
+        this.addTagRPC = remoteFunction(this.addTagRPCName)
+        this.delTagRPC = remoteFunction(this.delTagRPCName)
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
         this.processEvent = remoteFunction('processEvent')
         this.createNotif = remoteFunction('createNotification')
-
-        if (this.props.isForAnnotation) {
-            this.addTagRPC = remoteFunction('addAnnotationTag')
-            this.delTagRPC = remoteFunction('delAnnotationTag')
-        }
+        this.fetchUserSuggestionsRPC = remoteFunction('fetchUserSuggestions')
+        this.fetchHashtagSuggestionsRPC = remoteFunction(
+            'fetchHashtagSuggestions',
+        )
 
         this.fetchTagSuggestions = debounce(300)(this.fetchTagSuggestions)
 
@@ -115,7 +119,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             focused: -1,
             clearFieldBtn: false,
             multiEdit: new Set<string>(),
-            excFilters: new Set<string>(props.initExcFilters),
+            excFilters: props.initExcFilters,
         }
     }
 
@@ -152,14 +156,42 @@ class IndexDropdownContainer extends Component<Props, State> {
                     ? this.props.initSuggestions
                     : [...this.props.initFilters, ...this.props.initExcFilters],
                 filters: this.props.initFilters,
-                excFilters: new Set<string>(this.props.initExcFilters),
+                excFilters: this.props.initExcFilters,
             })
         }
     }
 
-    /**
-     * Domain inputs need to allow '.' while tags shouldn't.
-     */
+    private get addTagRPCName(): string {
+        if (this.props.isSocialPost) {
+            return 'addTagForTweet'
+        }
+
+        if (this.props.isForAnnotation) {
+            return 'addAnnotationTag'
+        }
+
+        if (this.props.fromOverview) {
+            return 'addTag'
+        }
+
+        return 'addPageTag'
+    }
+
+    private get delTagRPCName(): string {
+        if (this.props.isSocialPost) {
+            return 'delTagForTweet'
+        }
+
+        if (this.props.isForAnnotation) {
+            return 'delAnnotationTag'
+        }
+
+        if (this.props.fromOverview) {
+            return 'delTag'
+        }
+
+        return 'delPageTag'
+    }
 
     /**
      * Decides whether or not to allow index update. Currently determined by `props.url` setting.
@@ -212,13 +244,18 @@ class IndexDropdownContainer extends Component<Props, State> {
             value,
             active: this.props.allTabs
                 ? this.state.multiEdit.has(value)
-                : this.pageHasTag(value),
+                : this.pageHasTag(value, true),
             focused: this.state.focused === i,
-            excActive: this.state.excFilters.has(value),
+            excActive: this.pageHasTag(value, false),
         }))
     }
 
-    private pageHasTag = (value: string) => this.state.filters.includes(value)
+    private pageHasTag = (value: any, inc: boolean) => {
+        const filters = inc ? this.state.filters : this.state.excFilters
+        return this.props.source === 'user'
+            ? filters.find(user => user.id === value.id) !== undefined
+            : filters.includes(value)
+    }
     private setInputRef = (el: HTMLInputElement) => (this.inputEl = el)
 
     /**
@@ -259,6 +296,8 @@ class IndexDropdownContainer extends Component<Props, State> {
      * Used for 'Enter' presses or 'Add new tag' clicks.
      */
     private addTag = async () => {
+        await this.props.onTagClickCb()
+
         const newTag = this.getSearchVal()
         this.props.onFilterAdd(newTag)
 
@@ -274,7 +313,6 @@ class IndexDropdownContainer extends Component<Props, State> {
                         url: this.props.url,
                         tag: newTag,
                         tabId: this.props.tabId,
-                        fromOverview: this.props.fromOverview,
                     })
                 }
             } catch (err) {
@@ -306,8 +344,8 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    private async handleSingleTagEdit(tag: string) {
-        const pageHasTag = this.pageHasTag(tag)
+    private async handleSingleTagEdit(tag: any) {
+        const pageHasTag = this.pageHasTag(tag, true)
         let updateState
         let revertState
         let updateDb
@@ -361,6 +399,8 @@ class IndexDropdownContainer extends Component<Props, State> {
      * depending on their current status as assoc. tags or not.
      */
     private handleTagSelection = (index: number) => async event => {
+        await this.props.onTagClickCb()
+
         const tag =
             this.state.searchVal.length > 0
                 ? this.state.displayFilters[index]
@@ -412,14 +452,18 @@ class IndexDropdownContainer extends Component<Props, State> {
                       ]),
                   ][index]
 
-        const excFilters = this.state.excFilters
+        const pageHasExcTag = this.pageHasTag(tag, false)
 
-        if (!excFilters.has(tag)) {
+        let excFilters = this.state.excFilters
+        if (!pageHasExcTag) {
             this.props.onExcFilterAdd(tag)
-            excFilters.add(tag)
+            excFilters.push(tag)
         } else {
             this.props.onExcFilterDel(tag)
-            excFilters.delete(tag)
+            excFilters =
+                this.props.source === 'user'
+                    ? excFilters.filter(user => user.id !== tag.id)
+                    : excFilters.filter(a => a !== tag)
         }
 
         this.setState({
@@ -548,7 +592,21 @@ class IndexDropdownContainer extends Component<Props, State> {
         let suggestions = this.state.filters
 
         try {
-            suggestions = await this.suggestRPC(searchVal, this.props.source)
+            if (this.props.source === 'user') {
+                suggestions = await this.fetchUserSuggestionsRPC({
+                    name: searchVal,
+                    base64Img: this.props.isForRibbon,
+                })
+            } else if (this.props.source === 'hashtag') {
+                suggestions = await this.fetchHashtagSuggestionsRPC({
+                    name: searchVal,
+                })
+            } else {
+                suggestions = await this.suggestRPC(
+                    searchVal,
+                    this.props.source,
+                )
+            }
         } catch (err) {
             console.error(err)
         } finally {

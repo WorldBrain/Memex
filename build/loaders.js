@@ -49,6 +49,10 @@ export const cssModulesLoader = {
     },
 }
 
+export const localIdentName = {
+    localIdentName: '[path]__[local]--[hash:base64:5]',
+}
+
 export const cssVanillaLoader = {
     loader: 'css-loader',
 }
@@ -123,6 +127,10 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
 
     if (mode !== 'production') {
         main.use = [threadLoader, ...main.use]
+        cssModulesLoader.options = Object.assign(
+            cssModulesLoader.options,
+            localIdentName,
+        )
     }
 
     return [main, coffee, imgLoader, lint, cssModules, cssVanilla]

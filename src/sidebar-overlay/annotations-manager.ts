@@ -36,6 +36,7 @@ export default class AnnotationsManager {
         anchor,
         tags,
         bookmarked,
+        isSocialPost,
     }: {
         url: string
         title: string
@@ -44,6 +45,7 @@ export default class AnnotationsManager {
         anchor: Anchor
         tags: string[]
         bookmarked?: boolean
+        isSocialPost?: boolean
     }) => {
         this._processEventRPC({ type: EVENT_NAMES.CREATE_ANNOTATION })
 
@@ -67,6 +69,7 @@ export default class AnnotationsManager {
             comment,
             selector: anchor,
             bookmarked,
+            isSocialPost,
         })
 
         // Write tags to database.
@@ -77,17 +80,21 @@ export default class AnnotationsManager {
 
     public fetchAnnotationsWithTags = async (
         url: string,
-        limit = 10,
-        skip = 0,
+        // limit = 10,
+        // skip = 0,
+        isSocialPost?: boolean,
     ) => {
         const annotationsWithoutTags: Omit<
             Annotation,
             'tags'
-        >[] = await this._getAllAnnotationsByUrlRPC({
-            url,
-            // limit,
-            // skip,
-        })
+        >[] = await this._getAllAnnotationsByUrlRPC(
+            {
+                url,
+                // limit,
+                // skip,
+            },
+            isSocialPost,
+        )
 
         return Promise.all(
             annotationsWithoutTags.map(async annotation => {
@@ -108,10 +115,12 @@ export default class AnnotationsManager {
         url,
         comment,
         tags,
+        isSocialPost,
     }: {
         url: string
         comment: string
         tags: string[]
+        isSocialPost?: boolean
     }) => {
         // Get the previously tags for the annotation.
         const prevTags = await this._getTagsByAnnotationUrlRPC(url)
@@ -123,7 +132,7 @@ export default class AnnotationsManager {
         )
 
         // Save the edited annotation to the storage.
-        await this._editAnnotationRPC(url, comment)
+        await this._editAnnotationRPC(url, comment, isSocialPost)
 
         // Save the edited tags to the storage.
         await this._editAnnotationTagsRPC({
@@ -140,9 +149,9 @@ export default class AnnotationsManager {
         }
     }
 
-    public deleteAnnotation = async (url: string) => {
+    public deleteAnnotation = async (url: string, isSocialPost?: boolean) => {
         await this._processEventRPC({ type: EVENT_NAMES.DELETE_ANNOTATION })
-        await this._deleteAnnotationRPC(url)
+        await this._deleteAnnotationRPC(url, isSocialPost)
     }
 
     public toggleBookmark = async (url: string) => {

@@ -4,7 +4,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-const releaseTime: number = 1555933522599
+const releaseTime: number = 1559735977587
 
 /* Example Notification:
 {
@@ -59,17 +59,17 @@ const releaseTime: number = 1555933522599
 
 const UPDATE_NOTIFS: NotifDefinition[] = [
     {
-        id: 'sidebar_search-22.04.2019',
+        id: 'twitter_integration-05.06.2019',
         search: {
-            title: 'Search your knowledge now straight from the sidebar',
+            title: '🐦 New Feature: Archive, search & add notes to Tweets',
             message:
-                'Open the sidebar (r) and start typing. Blazing fast search through your knowledge.',
+                'Save any tweet with one click to your Memex, and add tags, collections, notes or stars',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
                         url:
-                            'https://www.notion.so/worldbrain/887c7e552cac47e8b500c23a4676219e',
+                            'https://www.notion.so/worldbrain/01ab6888f7ae4eb8815f09a8911990d8',
                         context: 'new-tab',
                     },
                     label: 'Find out more',
@@ -77,15 +77,15 @@ const UPDATE_NOTIFS: NotifDefinition[] = [
             ],
         },
         overview: {
-            title: 'Search your knowledge now straight from the sidebar',
+            title: '🐦 New Feature: Archive, search & add notes to Tweets',
             message:
-                'Open the sidebar (r) and start typing. Blazing fast search through your knowledge.',
+                'Save any tweet with one click to your Memex, and add tags, collections, notes or stars',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
                         url:
-                            'https://www.notion.so/worldbrain/887c7e552cac47e8b500c23a4676219e',
+                            'https://www.notion.so/worldbrain/01ab6888f7ae4eb8815f09a8911990d8',
                         context: 'new-tab',
                     },
                     label: 'Find out more',

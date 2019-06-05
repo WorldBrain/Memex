@@ -1,6 +1,6 @@
 import {
     SearchParams,
-    FilteredURLs,
+    FilteredIDs,
     TermsIndexName,
     PageResultsMap,
     Dexie,
@@ -58,7 +58,7 @@ const lookupTerm = (excluded: string[], getDb: () => Promise<Dexie>) =>
 /**
  * Handles scoring results for a given term according to which index the results where found in.
  */
-const scoreTermResults = (filteredUrls: FilteredURLs) =>
+const scoreTermResults = (filteredUrls: FilteredIDs) =>
     function(result: TermResults): PageResultsMap {
         const urlScoreMap: PageResultsMap = new Map()
 
@@ -86,7 +86,7 @@ const intersectTermResults = (a: PageResultsMap, b: PageResultsMap) =>
 
 export const textSearch = (getDb: () => Promise<Dexie>) => async (
     { terms, termsExclude }: Partial<SearchParams>,
-    filteredUrls: FilteredURLs,
+    filteredUrls: FilteredIDs,
 ): Promise<PageResultsMap> => {
     // For each term create an object of with props of matched URL arrays for each index: content, title, and url
     const termResults = await Promise.all(

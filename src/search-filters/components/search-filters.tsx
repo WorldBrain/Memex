@@ -6,8 +6,10 @@ const styles = require('./search-filters.css')
 
 interface Props {
     tagFilter: React.ReactNode
+    hashtagsFilter: React.ReactNode
     dateFilter: React.ReactNode
     domainFilter: React.ReactNode
+    userFilter: React.ReactNode
     contentFilter: React.ReactNode
     bookmarkFilter: React.ReactNode
     toggleFilterBar: () => void
@@ -27,6 +29,8 @@ class SearchFilters extends PureComponent<Props, State> {
                         {this.props.dateFilter}
                         {this.props.tagFilter}
                         {this.props.domainFilter}
+                        {this.props.userFilter}
+                        {this.props.hashtagsFilter}
                         {this.props.contentFilter}
                     </div>
                     <ButtonTooltip

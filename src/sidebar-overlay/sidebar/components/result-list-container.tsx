@@ -4,7 +4,7 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 
-import { LoadingIndicator, PageResultItem } from 'src/common-ui/components'
+import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
@@ -33,6 +33,7 @@ export interface StateProps {
     resultsByUrl: ResultsByUrl
     resultsClusteredByDay: boolean
     annotsByDay: PageUrlsByDay
+    isSocialSearch: boolean
 }
 
 export interface DispatchProps {
@@ -43,8 +44,14 @@ export interface DispatchProps {
     delTag: (i: number) => (f: string) => void
     handlePillClick: (tag: string) => MouseEventHandler
     handleTagBtnClick: (i: number) => MouseEventHandler
-    handleCommentBtnClick: (doc: Result) => MouseEventHandler
-    handleCrossRibbonClick: (doc: Result) => MouseEventHandler
+    handleCommentBtnClick: (
+        doc: Result,
+        isSocialSearch?: boolean,
+    ) => MouseEventHandler
+    handleCrossRibbonClick: (
+        doc: Result,
+        isSocialPost: boolean,
+    ) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
@@ -125,6 +132,7 @@ class ResultListContainer extends PureComponent<Props, State> {
                 source="tag"
                 isForRibbon
                 sidebarTagDiv
+                fromOverview
             />
         )
     }
@@ -150,8 +158,10 @@ class ResultListContainer extends PureComponent<Props, State> {
     }
 
     private attachDocWithPageResultItem(doc, index, key) {
+        const isSocialPost = doc.hasOwnProperty('user')
+
         return (
-            <PageResultItem
+            <ResultItem
                 key={key}
                 setTagButtonRef={this.setTagButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
@@ -162,9 +172,16 @@ class ResultListContainer extends PureComponent<Props, State> {
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
-                onCommentBtnClick={this.props.handleCommentBtnClick(doc)}
-                handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
+                onCommentBtnClick={this.props.handleCommentBtnClick(
+                    doc,
+                    isSocialPost,
+                )}
+                handleCrossRibbonClick={this.props.handleCrossRibbonClick(
+                    doc,
+                    isSocialPost,
+                )}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
+                isSocial={isSocialPost}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />
@@ -265,6 +282,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isNewSearchLoading: results.isNewSearchLoading(state),
     resultsClusteredByDay: results.resultsClusteredByDay(state),
     areAnnotationsExpanded: results.areAnnotationsExpanded(state),
+    isSocialSearch: results.isSocialPost(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
@@ -272,11 +290,17 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
         event.preventDefault()
         dispatch(resultActs.showTags(index))
     },
-    handleCommentBtnClick: ({ url, title }) => event => {
+    handleCommentBtnClick: ({ url, title }, isSocialPost) => event => {
         event.preventDefault()
-        dispatch(sidebarActs.setSearchType('notes'))
         dispatch(sidebarActs.setPageType('page'))
-        dispatch(sidebarActs.openSidebar({ url, title, forceFetch: true }))
+        dispatch(
+            sidebarActs.openSidebar({
+                url,
+                title,
+                forceFetch: true,
+                isSocialPost,
+            }),
+        )
     },
     handleToggleBm: ({ url }, index) => event => {
         event.preventDefault()
@@ -289,6 +313,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     handleScrollPagination: args => dispatch(resultActs.getMoreResults(false)),
     handlePillClick: tag => event => {
         event.preventDefault()
+        event.stopPropagation()
         dispatch(filterActs.toggleTagFilter(tag))
     },
     addTag: resultIndex => tag => dispatch(resultActs.addTag(tag, resultIndex)),
@@ -296,9 +321,10 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetActiveTagIndex: () => dispatch(resultActs.resetActiveTagIndex()),
     setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
-    handleCrossRibbonClick: ({ url }) => event => {
+    handleCrossRibbonClick: ({ url }, isSocialPost) => event => {
         event.preventDefault()
-        dispatch(listActs.delPageFromList(url))
+        event.stopPropagation()
+        dispatch(listActs.delPageFromList(url, isSocialPost))
         dispatch(resultActs.hideResultItem(url))
     },
 })

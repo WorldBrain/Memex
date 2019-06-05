@@ -19,6 +19,8 @@ import BackgroundScript from './background-script'
 import alarms from './background-script/alarms'
 import TagsBackground from './tags/background'
 import ActivityLoggerBackground from './activity-logger/background'
+import SocialBackground from './social-integration/background'
+import BookmarksBackground from './bookmarks/background'
 
 // Features that auto-setup
 import './analytics/background'
@@ -33,9 +35,13 @@ const storageManager = initStorex()
 const notifications = new NotificationBackground({ storageManager })
 notifications.setupRemoteFunctions()
 
+const social = new SocialBackground({ storageManager })
+social.setupRemoteFunctions()
+
 export const directLinking = new DirectLinkingBackground({
     storageManager,
     getDb,
+    socialBg: social,
 })
 directLinking.setupRemoteFunctions()
 directLinking.setupRequestInterceptor()
@@ -72,6 +78,11 @@ export const tags = new TagsBackground({
     windows: browser.windows,
 })
 tags.setupRemoteFunctions()
+
+export const bookmarks = new BookmarksBackground({
+    storageManager,
+})
+bookmarks.setupRemoteFunctions()
 
 const backupModule = new backup.BackupBackgroundModule({
     storageManager,

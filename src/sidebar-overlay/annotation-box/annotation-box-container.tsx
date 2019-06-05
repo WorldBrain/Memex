@@ -1,6 +1,5 @@
 import * as React from 'react'
 import cx from 'classnames'
-import moment from 'moment'
 import noop from 'lodash/fp/noop'
 import { connect } from 'react-redux'
 

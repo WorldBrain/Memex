@@ -1,4 +1,4 @@
-import { Dexie, SearchParams, PageResultsMap, FilteredURLs } from '..'
+import { Dexie, SearchParams, PageResultsMap, FilteredIDs } from '..'
 
 /**
  * Given some URLs, grab the latest assoc. event timestamp for each one within the time filter bounds.
@@ -81,7 +81,7 @@ export const mapUrlsToLatestEvents = (getDb: () => Promise<Dexie>) => async (
  */
 export const groupLatestEventsByUrl = (getDb: () => Promise<Dexie>) => (
     params: Partial<SearchParams>,
-    filteredUrls: FilteredURLs,
+    filteredUrls: FilteredIDs,
 ) => {
     return params.bookmarks
         ? lookbackBookmarksTime(getDb)(params)
@@ -99,7 +99,7 @@ const lookbackFromEndDate = (getDb: () => Promise<Dexie>) => async (
         skip = 0,
         limit = 10,
     }: Partial<SearchParams>,
-    filteredUrls: FilteredURLs,
+    filteredUrls: FilteredIDs,
 ) => {
     const db = await getDb()
     // Lookback from endDate to get needed amount of visits
@@ -117,7 +117,7 @@ const lookbackFromEndDate = (getDb: () => Promise<Dexie>) => async (
         // Stop iterating once we have enough
         .until(() => latestVisits.size >= skip + limit)
         // For each visit PK, reduce down into Map of URL keys to latest visit time
-        .eachPrimaryKey(([time, url]) => {
+        .each(({ time, url }) => {
             // Only ever record the latest visit for each URL (first due to IndexedDB reverse keys ordering)
             if (!latestVisits.has(url) && filteredUrls.isAllowed(url)) {
                 latestVisits.set(url, time)
@@ -131,7 +131,9 @@ const lookbackFromEndDate = (getDb: () => Promise<Dexie>) => async (
         .between(startDate, endDate, true, true)
         .reverse()
         .until(() => latestBookmarks.size >= skip + limit)
-        .each(({ time, url }) => latestBookmarks.set(url, time))
+        .each(({ time, url }) => {
+            latestBookmarks.set(url, time)
+        })
 
     // Merge results
     const results: PageResultsMap = new Map()
@@ -174,7 +176,9 @@ const lookbackBookmarksTime = (getDb: () => Promise<Dexie>) => async ({
             .belowOrEqual(upperBound)
             .reverse() // Latest first
             .until(() => bms.size >= skip + limit)
-            .each(({ time, url }) => bms.set(url, time))
+            .each(({ time, url }) => {
+                bms.set(url, time)
+            })
 
         if (bms.size < skip + limit) {
             bmsExhausted = true

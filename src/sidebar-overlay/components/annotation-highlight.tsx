@@ -1,5 +1,4 @@
 import * as React from 'react'
-import cx from 'classnames'
 
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 

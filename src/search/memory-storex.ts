@@ -1,5 +1,3 @@
-import stemmer from '@worldbrain/memex-stemmer'
-
 import UrlField from './storage/url-field'
 import schemaPatcher from './storage/dexie-schema'
 import collections from './old-schema'
@@ -8,11 +6,12 @@ import inMemoryDb from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { suggestObjects } from './search/suggest'
 import { StorageManager } from './types'
 import { plugins } from './storex-plugins'
+import stemmerSelector from './stemmers'
 
 export default () => {
     const idbImplementation = inMemoryDb()
     return initStorex<StorageManager>({
-        stemmer,
+        stemmerSelector,
         collections,
         schemaPatcher,
         dbName: 'test',

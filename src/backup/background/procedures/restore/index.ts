@@ -4,7 +4,11 @@ import BackupStorage from '../../storage'
 import { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
-import { collections } from 'src/popup/collections-button/selectors'
+import {
+    USERS_COLL,
+    POSTS_COLL,
+    BMS_COLL,
+} from 'src/social-integration/constants'
 const dataURLtoBlob = require('dataurl-to-blob')
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
@@ -264,6 +268,15 @@ export function _filterBadChange({
         val != null && !(val instanceof Blob) && !Object.keys(val).length
 
     if (
+        change.operation !== 'delete' &&
+        object != null &&
+        Object.entries(object).length === 0
+    ) {
+        // Empty objects in backups have been causing issues; unset operation to skip write
+        return { ...change, object, operation: null }
+    }
+
+    if (
         change.collection === 'pages' &&
         object != null &&
         isBadBlob(object.screenshot)
@@ -280,6 +293,16 @@ export function _filterBadChange({
     ) {
         // FavIcons cannot exist without favIcon Blobs; unset operation to skip write
         return { ...change, object, operation: null }
+    }
+
+    if (
+        change.collection === USERS_COLL &&
+        object != null &&
+        isBadBlob(object.profilePic)
+    ) {
+        // Users can exist without profilePic Blobs; omit bad value
+        const { profilePic, ...objectMod } = object
+        return { ...change, object: objectMod }
     }
 
     return { ...change, object }
@@ -317,7 +340,7 @@ export function _deserializeChangeFields(change: ObjectChange) {
         object.favIcon = _blobFromPngString(object.favIcon)
     }
 
-    if (checkSerializedExists(['annotations'], 'createdWhen')) {
+    if (checkSerializedExists(['annotations', POSTS_COLL], 'createdWhen')) {
         object.createdWhen = new Date(object.createdWhen)
     }
 
@@ -326,7 +349,10 @@ export function _deserializeChangeFields(change: ObjectChange) {
     }
 
     if (
-        checkSerializedExists(['customLists', 'pageListEntries'], 'createdAt')
+        checkSerializedExists(
+            ['customLists', 'pageListEntries', POSTS_COLL, BMS_COLL],
+            'createdAt',
+        )
     ) {
         object.createdAt = new Date(object.createdAt)
     }

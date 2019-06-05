@@ -3,19 +3,25 @@ import { createAction } from 'redux-act'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { selectors } from './'
 import { results } from '../overview/results/selectors'
+import { User } from 'src/social-integration/types'
+import { Thunk } from 'src/options/types'
 
-export const showTagFilter = createAction('search-filters/showTagFilter')
-export const hideTagFilter = createAction('search-filters/hideTagFilter')
-export const showDomainFilter = createAction('search-filters/showDomainFilter')
-export const hideDomainFilter = createAction('search-filters/hideDomainter')
-export const showDatesFilter = createAction('search-filters/showDatesFilter')
-export const hideDatesFilter = createAction('search-filters/hideDatesFilter')
-export const showFilterTypes = createAction('search-filters/showTypeFilters')
-export const hideFilterTypes = createAction('search-filters/hideTypeFilters')
-export const toggleFilterTypes = createAction(
-    'search-filters/toggleFilterTypes',
+export const setHashtagFilter = createAction<boolean>(
+    'search-filters/setHashtagFilter',
 )
-
+export const setUserFilter = createAction<boolean>(
+    'search-filters/setUserFilter',
+)
+export const setTagFilter = createAction<boolean>('search-filters/setTagFilter')
+export const setDomainFilter = createAction<boolean>(
+    'search-filters/setDomainFilter',
+)
+export const setDatesFilter = createAction<boolean>(
+    'search-filters/setDatesFilter',
+)
+export const setFilterTypes = createAction<boolean>(
+    'search-filters/setFilterTypes',
+)
 export const addTagFilter = createAction<string>('search-filters/addTagFilter')
 export const delTagFilter = createAction<string>('search-filters/delTagFilter')
 export const addExcTagFilter = createAction<string>(
@@ -102,6 +108,48 @@ export const toggleFilterBar = createAction('search-filters/toggleFilterBar')
 export const setShowFilterBar = createAction<boolean>(
     'search-filters/setShowFilterBar',
 )
+export const addIncUserFilter = createAction<User>(
+    'search-filters/addIncUserFilter',
+)
+export const delIncUserFilter = createAction<User>(
+    'search-filters/delIncUserFilter',
+)
+export const addExcUserFilter = createAction<User>(
+    'search-filters/addExcUserFilter',
+)
+export const delExcUserFilter = createAction<User>(
+    'search-filters/delExcUserFilter',
+)
+export const setIncUserFilters = createAction<User[]>(
+    'search-filters/setIncUserFilters',
+)
+export const setExcUserFilters = createAction<User[]>(
+    'search-filters/setExcUserFilters',
+)
+export const setSuggestedUsers = createAction<User[]>(
+    'search-filters/setSuggestedUsers',
+)
+export const addIncHashtagFilter = createAction<string>(
+    'search-filters/addIncHashtagFilter',
+)
+export const delIncHashtagFilter = createAction<string>(
+    'search-filters/delIncHashtagFilter',
+)
+export const addExcHashtagFilter = createAction<string>(
+    'search-filters/addExcHashtagFilter',
+)
+export const delExcHashtagFilter = createAction<string>(
+    'search-filters/delExcHashtagFilter',
+)
+export const setIncHashtagFilters = createAction<string[]>(
+    'search-filters/setIncHashtagFilters',
+)
+export const setExcHashtagFilters = createAction<string[]>(
+    'search-filters/setExcHashtagFilters',
+)
+export const setSuggestedHashtags = createAction<string[]>(
+    'search-filters/setSuggestedHashags',
+)
 
 /**
  * Action to toggle annotation content filter.
@@ -126,6 +174,21 @@ export const fetchSuggestedTags = () => async (dispatch, getState) => {
     dispatch(setSuggestedTags([...(filteredTags || []), ...tags]))
 }
 
+export const fetchSuggestedHashtags = () => async (dispatch, getState) => {
+    const filteredHashtags = selectors.displayHashtags(getState())
+    const hashtags = filteredHashtags.map(({ value }) => value)
+    const suggestedHashtags = await remoteFunction('fetchAllHashtags')({
+        excludeIds: hashtags,
+    })
+
+    dispatch(
+        setSuggestedHashtags([
+            ...(filteredHashtags || []),
+            ...(suggestedHashtags || []),
+        ]),
+    )
+}
+
 export const fetchSuggestedDomains = () => async (dispatch, getState) => {
     const filteredDomains = selectors.displayDomains(getState())
     const domains = filteredDomains.map(({ value }) => value)
@@ -141,6 +204,24 @@ export const fetchSuggestedDomains = () => async (dispatch, getState) => {
                 value: domain,
                 isExclusive: false,
             })),
+        ]),
+    )
+}
+
+export const fetchSuggestedUsers: (base64Img?: boolean) => Thunk = (
+    base64Img = false,
+) => async (dispatch, getState) => {
+    const filteredUsers = selectors.displayUsers(getState())
+    const userIds = filteredUsers.map(({ value }) => value.id)
+    const suggestedUsers: User[] = await remoteFunction('fetchAllUsers')({
+        excludeIds: userIds,
+        base64Img,
+    })
+
+    dispatch(
+        setSuggestedUsers([
+            ...(filteredUsers || []),
+            ...(suggestedUsers || []),
         ]),
     )
 }

@@ -95,6 +95,7 @@ describe.skip('Annotations search', () => {
         annotsBg = new AnnotsBg({
             storageManager,
             getDb,
+            socialBg: {} as any,
         })
 
         searchBg = new SearchBg({

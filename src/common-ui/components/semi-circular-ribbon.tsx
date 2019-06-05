@@ -1,6 +1,8 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
+import ButtonTooltip from './button-tooltip'
 
 const styles = require('./semi-circular-ribbon.css')
+const pageStyles = require('./result-item.css')
 
 export interface Props {
     crossIconSrc?: string
@@ -16,11 +18,18 @@ class SemiCircularRibbon extends PureComponent<Props> {
 
     render() {
         return (
-            <div
-                title={this.props.title}
-                className={styles.ribbon}
-                onClick={this.props.onClick}
-            />
+            <ButtonTooltip
+                tooltipText="Remove from collection"
+                position="leftNarrow"
+            >
+                <div className={pageStyles.crossRibbon}>
+                    <div
+                        title={this.props.title}
+                        className={styles.ribbon}
+                        onClick={this.props.onClick}
+                    />
+                </div>
+            </ButtonTooltip>
         )
     }
 }

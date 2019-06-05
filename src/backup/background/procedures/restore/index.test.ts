@@ -121,6 +121,7 @@ describe('BackupRestoreProcedure', () => {
         expect(restoreProcedure.running).toBe(false)
         expect(reportedInfo).toEqual(expectedInfo)
     })
+
     it('should list and fetch from backend correctly', async () => {
         const lists = []
         const retrievals = []
@@ -345,5 +346,29 @@ describe('BackupRestoreProcedure', () => {
         ])
         const blob = updates[0][2].favIcon
         expect(await encodeBlob(blob)).toEqual('test')
+    })
+
+    it('should not attempt to restore empty objects', async () => {
+        const changes = []
+        const storageManager = {
+            collection: collectionName => ({
+                createObject: async (...args) => {
+                    changes.push([collectionName, ...args])
+                },
+            }),
+        }
+        const restoreProcedure = new BackupRestoreProcedure({
+            backend: null,
+            storageManager: storageManager as any,
+            storage: null,
+        })
+        await restoreProcedure._writeChange({
+            timestamp: 1,
+            collection: 'test',
+            operation: 'create',
+            objectPk: 'test',
+            object: {},
+        })
+        expect(changes).toEqual([])
     })
 })

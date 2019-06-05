@@ -1,7 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
-import diff from 'lodash/difference'
 
 import { INSTALL_TIME_KEY } from 'src/constants'
 import { AnnotSearchParams } from './types'
@@ -291,7 +290,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return annotsByPage
     }
 
-    private async queryAnnotsByDay(startDate: number, endDate: null) {
+    private async queryAnnotsByDay(startDate: Date, endDate: Date) {
         const collection = this.backend.dexieInstance
             .table<Annotation>(AnnotsStorage.ANNOTS_COLL)
             .where('lastEdited')

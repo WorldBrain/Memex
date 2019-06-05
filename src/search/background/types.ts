@@ -1,8 +1,9 @@
 import { Annotation } from 'src/direct-linking/types'
+import { User } from 'src/social-integration/types'
 
 export interface AnnotPage {
     url: string
-    title: string
+    title?: string
     hasBookmark: boolean
     /** Object URL to the in-memory location of the assoc. screenshot. */
     screenshot?: string
@@ -12,6 +13,7 @@ export interface AnnotPage {
     /** Total count of annots associated with this page. (regardless of search) */
     annotsCount: number
     annotations: Annotation[]
+    pageId?: string
 }
 
 export interface AnnotSearchParams {
@@ -87,4 +89,11 @@ export interface PagesByUrl {
 
 export interface AnnotsByPageUrl {
     [pageUrl: string]: Annotation[]
+}
+
+export interface SocialSearchParams extends AnnotSearchParams {
+    usersInc?: User[]
+    usersExc?: User[]
+    hashtagsInc?: string[]
+    hashtagsExc?: string[]
 }

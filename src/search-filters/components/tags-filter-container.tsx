@@ -21,8 +21,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    showTagFilter: () => void
-    hideTagFilter: () => void
+    setTagFilter: (value: boolean) => void
     addIncTagFilter: (tag: string) => void
     delIncTagFilter: (tag: string) => void
     addExcTagFilter: (tag: string) => void
@@ -47,8 +46,8 @@ class TagsFilter extends PureComponent<Props, State> {
         }
 
         this.props.tagFilterDropdown
-            ? this.props.hideTagFilter()
-            : this.props.showTagFilter()
+            ? this.props.setTagFilter(false)
+            : this.props.setTagFilter(true)
     }
 
     render() {
@@ -58,7 +57,7 @@ class TagsFilter extends PureComponent<Props, State> {
                 source="Tags"
                 filteredItems={this.props.displayTags}
                 togglePopup={this.togglePopup}
-                hidePopup={this.props.hideTagFilter}
+                showPopup={this.props.setTagFilter}
                 clearFilters={this.props.clearTagFilters}
                 disableOnClickOutside={this.props.env === 'inpage'}
             >
@@ -115,8 +114,7 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(actions.setTagFilters([]))
         dispatch(actions.setExcTagFilters([]))
     },
-    showTagFilter: () => dispatch(actions.showTagFilter()),
-    hideTagFilter: () => dispatch(actions.hideTagFilter()),
+    setTagFilter: value => dispatch(actions.setTagFilter(value)),
     resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
