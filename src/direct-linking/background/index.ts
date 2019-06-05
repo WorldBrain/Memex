@@ -202,14 +202,11 @@ export default class DirectLinkingBackground {
         isSocialPost?: boolean,
     ) {
         url = url == null && tab != null ? tab.url : url
-
-        if (isSocialPost) {
-            url = await this.lookupSocialId(url)
-        }
+        url = isSocialPost ? await this.lookupSocialId(url) : normalize(url)
 
         const annotations = await this.annotationStorage.getAllAnnotationsByUrl(
             {
-                url: normalize(url),
+                url,
                 limit,
                 skip,
                 ...params,

@@ -1,14 +1,17 @@
-import normalize from '../../util/encode-url-for-id'
+import { Field } from '@worldbrain/storex/lib/fields/types'
+import { PrimitiveFieldType } from '@worldbrain/storex/lib/types'
 
-// TODO: extend from `Field` type once we work out storex exports
-export default class UrlField {
-    primitiveType = 'string'
+import normalize from 'src/util/encode-url-for-id'
+import { POST_URL_ID_MATCH_PATTERN } from 'src/social-integration/constants'
 
-    prepareForStorage(input) {
-        return input && normalize(input)
-    }
+export default class UrlField extends Field {
+    primitiveType = 'string' as PrimitiveFieldType
 
-    prepareFromStorage(stored) {
-        return stored
+    async prepareForStorage(input) {
+        if (!input || POST_URL_ID_MATCH_PATTERN.test(input)) {
+            return input
+        }
+
+        return normalize(input)
     }
 }
