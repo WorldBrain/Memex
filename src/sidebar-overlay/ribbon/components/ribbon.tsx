@@ -1,7 +1,7 @@
 import React, { Component, ReactNode, KeyboardEventHandler } from 'react'
 import cx from 'classnames'
-
 import qs from 'query-string'
+
 import { remoteFunction } from 'src/util/webextensionRPC'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import CommentBoxContainer from 'src/sidebar-overlay/comment-box'
@@ -18,7 +18,7 @@ import * as utils from 'src/content-tooltip/utils'
 import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
 const styles = require('./ribbon.css')
 
-interface Props {
+export interface Props {
     isExpanded: boolean
     isRibbonEnabled: boolean
     isTooltipEnabled: boolean
@@ -52,7 +52,11 @@ interface Props {
     setSearchValue: (value: string) => void
 }
 
-class Ribbon extends Component<Props> {
+interface State {
+    shortcutsReady: boolean
+}
+
+class Ribbon extends Component<Props, State> {
     static defaultProps = { shortcutsData: shortcuts }
 
     private keyboardShortcuts: KeyboardShortcuts
@@ -63,6 +67,8 @@ class Ribbon extends Component<Props> {
     private inputQueryEl: HTMLInputElement
 
     private setInputRef = (el: HTMLInputElement) => (this.inputQueryEl = el)
+
+    state: State = { shortcutsReady: false }
 
     constructor(props: Props) {
         super(props)
@@ -76,6 +82,7 @@ class Ribbon extends Component<Props> {
 
     async componentDidMount() {
         this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
+        this.setState(() => ({ shortcutsReady: true }))
         this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
     }
 
@@ -177,6 +184,10 @@ class Ribbon extends Component<Props> {
     }
 
     render() {
+        if (!this.state.shortcutsReady) {
+            return false
+        }
+
         return (
             <div
                 ref={ref => (this.ribbonRef = ref)}
