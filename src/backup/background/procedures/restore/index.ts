@@ -268,6 +268,15 @@ export function _filterBadChange({
         val != null && !(val instanceof Blob) && !Object.keys(val).length
 
     if (
+        change.operation !== 'delete' &&
+        object != null &&
+        Object.entries(object).length === 0
+    ) {
+        // Empty objects in backups have been causing issues; unset operation to skip write
+        return { ...change, object, operation: null }
+    }
+
+    if (
         change.collection === 'pages' &&
         object != null &&
         isBadBlob(object.screenshot)
