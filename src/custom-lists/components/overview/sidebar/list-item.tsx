@@ -40,6 +40,7 @@ class PageList extends Component<Props, State> {
 
     resize = event => {
         const element = document.querySelector('#teste')
+
         element.style.width =
             event.pageX - element.getBoundingClientRect().left + 'px'
     }
@@ -142,6 +143,7 @@ class PageList extends Component<Props, State> {
         HTMLButtonElement
     > = e => {
         e.stopPropagation()
+
         this.props.onEditButtonClick(e)
     }
 

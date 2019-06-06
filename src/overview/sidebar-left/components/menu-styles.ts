@@ -29,11 +29,13 @@ const menuStyles = (isSidebarLocked, isSidebarOpen) => {
     if (isSidebarOpen) {
         ;((baseStyles.bmMenuWrap.marginLeft as unknown) as string) = '0px'
         ;((baseStyles.bmMenuWrap.opacity as unknown) as string) = '1'
-        ;((baseStyles.bmMenuWrap.background as unknown) as string) = 'transparent'
+        ;((baseStyles.bmMenuWrap
+            .background as unknown) as string) = 'transparent'
     } else {
         ;((baseStyles.bmMenuWrap.marginLeft as unknown) as string) = '-230px'
         ;((baseStyles.bmMenuWrap.opacity as unknown) as string) = '0'
-        ;((baseStyles.bmMenuWrap.background as unknown) as string) = 'transparent'
+        ;((baseStyles.bmMenuWrap
+            .background as unknown) as string) = 'transparent'
     }
 
     if (isSidebarLocked) {
