@@ -1,5 +1,8 @@
 # <a id="contributing" href="#contributing">Contributing</a>
 
+Please be sure to familiarize yourself with our [coding guidelines](docs/Coding-Guidelines.md) before writing any code.
+Note that lots of our existing codebase will not be following these guidelines well. All new code contributions should, however.
+
 ## Installation
 
 **This assumes a basic knowledge of `git`, `npm` and usage of the `command line`.**
@@ -172,7 +175,7 @@ of management. We will treat these on a case-by-case basis and discuss with the 
 
 ## Documenting
 
-We try to encourage documententing module exports using JSDoc with TypeScript, and also higher level overviews of different "feature modules" (directories containing multiple modules related to a particular feature) in README markdown modules.
+We try to encourage documenting module exports using JSDoc with TypeScript, and also higher level overviews of different "feature modules" (directories containing multiple modules related to a particular feature) in README markdown modules.
 
 If you have made changes to any exports in existing modules, please update the corresponding docs if needed.
 
