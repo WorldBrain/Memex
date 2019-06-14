@@ -7,6 +7,7 @@ import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
 import internalAnalytics from './analytics/internal'
 import initSentry from './util/raven'
+import {makeRemotelyCallable} from "src/util/webextensionRPC";
 
 // Features that require manual instantiation to setup
 import DirectLinkingBackground from './direct-linking/background'
@@ -22,6 +23,7 @@ import TagsBackground from './tags/background'
 import ActivityLoggerBackground from './activity-logger/background'
 import SocialBackground from './social-integration/background'
 import BookmarksBackground from './bookmarks/background'
+import createNotification from "src/util/notifications";
 
 // Features that auto-setup
 import './analytics/background'
@@ -78,7 +80,12 @@ tags.setupRemoteFunctions()
 export const bookmarks = new BookmarksBackground({
     storageManager,
 })
-bookmarks.setupRemoteFunctions()
+
+// Gradually moving all remote function registrations here
+function setupRemoteFunctions() {
+    makeRemotelyCallable({ createNotification })
+}
+setupRemoteFunctions();
 
 const backupModule = new backup.BackupBackgroundModule({
     storageManager,

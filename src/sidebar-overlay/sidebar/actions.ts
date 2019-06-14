@@ -6,7 +6,7 @@ import { Annotation, Page } from './types'
 import { Anchor } from 'src/direct-linking/content_script/interactions'
 import * as selectors from './selectors'
 import AnnotationsManager from '../annotations-manager'
-import { remoteFunction, remoteInterface } from 'src/util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { FLOWS, STAGES } from 'src/overview/onboarding/constants'
 import {
@@ -17,12 +17,10 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { NotificationInterface } from 'src/util/notification-types'
+import { notifications } from 'src/util/remote-functions'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
-const createNotifRPC = remoteInterface<NotificationInterface>()
-    .createNotification
 
 export const setAnnotationsManager = createAction<AnnotationsManager>(
     'setAnnotationsManager',
@@ -291,7 +289,7 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
         dispatch(toggleBookmarkState(index))
         handleDBQuotaErrors(
             error =>
-                createNotifRPC({
+                notifications.createNotification({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
                     message: error.message,

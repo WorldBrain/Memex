@@ -1,10 +1,13 @@
-import { CreateNotificationInterface } from 'src/util/notification-types'
+import { NotificationInterface } from 'src/util/notification-types'
+import { remoteInterface } from 'src/util/webextensionRPC'
 
 interface RemoteFunctionsReg {
-    notifications?: {
-        createNotification: CreateNotificationInterface
-    }
+    notifications?: NotificationInterface
     // other modules here
 }
 
-export const remoteFunctions: RemoteFunctionsReg = {}
+export const remoteFunctions: RemoteFunctionsReg = {
+    notifications: remoteInterface<NotificationInterface>(),
+}
+
+export const { notifications } = remoteFunctions

@@ -1,5 +1,4 @@
 import { browser } from 'webextension-polyfill-ts'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import browserIsChrome from './check-browser'
 import {
     CreateNotificationInterface,
@@ -52,5 +51,4 @@ const createNotification: CreateNotificationInterface = async (
     return
 }
 
-makeRemotelyCallable({ createNotification })
 export default createNotification

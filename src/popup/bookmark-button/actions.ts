@@ -1,16 +1,14 @@
 import { createAction } from 'redux-act'
 
-import { remoteFunction, remoteInterface } from '../../util/webextensionRPC'
+import { remoteFunction } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { NotificationInterface } from 'src/util/notification-types'
+import { notifications } from 'src/util/remote-functions'
 
 const createBookmarkRPC = remoteFunction('addPageBookmark')
 const deleteBookmarkRPC = remoteFunction('delPageBookmark')
-const createNotifRPC = remoteInterface<NotificationInterface>()
-    .createNotification
 
 export const setIsBookmarked = createAction<boolean>('bookmark/setIsBookmarked')
 
@@ -28,7 +26,7 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
         dispatch(setIsBookmarked(hasBookmark))
         handleDBQuotaErrors(
             error =>
-                createNotifRPC({
+                notifications.createNotification({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
                     message: error.message,
