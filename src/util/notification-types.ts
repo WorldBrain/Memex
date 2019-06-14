@@ -5,9 +5,7 @@ export interface NotifOpts extends Notifications.CreateNotificationOptions {
     [chromeKeys: string]: any
 }
 
-export interface NotificationInterface {
-    createNotification(
-        notifOptions: Partial<NotifOpts>,
-        onClick?: () => any,
-    ): Promise<void>
-}
+export type CreateNotificationInterface = (
+    notifOptions: Partial<NotifOpts>,
+    onClick?: (f: any) => any,
+) => Promise<void>

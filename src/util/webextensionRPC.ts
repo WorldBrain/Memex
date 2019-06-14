@@ -41,25 +41,6 @@ export class RemoteError extends Error {
 
 // === Initiating side ===
 
-// Create a Proxy object that looks like the real interface but actually calls remote functions
-// Example Usage:
-//      interface AnalyticsInterface { trackEvent() }
-//      const analytics = remoteInterface<AnalyticsInterface>()
-//      analytics.trackEvent(...)
-export function remoteInterface<T extends object>() {
-    // When the Proxy is asked for a property (such as a function of a class)..
-    // return a function that executes that function over the RPC interface, instead of on that object itself
-    return new Proxy<T>({} as T, {
-        get(target: T, property, receiver): any {
-            const methodName = property.toString()
-            return function(...args) {
-                // todo: how to handle tab id? and throwWhenNoReponse?
-                return remoteFunction(methodName)(args)
-            }
-        },
-    })
-}
-
 // Create a proxy function that invokes the specified remote function.
 // Arguments
 // - funcName (required): name of the function as registered on the remote side.

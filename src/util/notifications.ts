@@ -1,7 +1,10 @@
 import { browser } from 'webextension-polyfill-ts'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import browserIsChrome from './check-browser'
-import { NotificationInterface, NotifOpts } from 'src/util/notification-types'
+import {
+    CreateNotificationInterface,
+    NotifOpts,
+} from 'src/util/notification-types'
 export const DEF_ICON_URL = '/img/worldbrain-logo-narrow.png'
 export const DEF_TYPE = 'basic'
 
@@ -31,26 +34,23 @@ function _filterOpts({
     return !browserIsChrome() ? opts : { ...opts, ...rest }
 }
 
-class Notifications implements NotificationInterface {
-    async createNotification(
-        notifOptions: Partial<NotifOpts>,
-        onClick = f => f,
-    ) {
-        const id = await browser.notifications.create(
-            _filterOpts({
-                type: DEF_TYPE,
-                iconUrl: DEF_ICON_URL,
-                requireInteraction: true,
-                ...(notifOptions as NotifOpts),
-            }),
-        )
+const createNotification: CreateNotificationInterface = async (
+    notifOptions: Partial<NotifOpts>,
+    onClick = f => f,
+): Promise<void> => {
+    const id = await browser.notifications.create(
+        _filterOpts({
+            type: DEF_TYPE,
+            iconUrl: DEF_ICON_URL,
+            requireInteraction: true,
+            ...(notifOptions as NotifOpts),
+        }),
+    )
 
-        onClickListeners.set(id, onClick)
-    }
+    onClickListeners.set(id, onClick)
+
+    return
 }
-const notifications = new Notifications()
-const createNotification = notifications.createNotification
-
-export default createNotification
 
 makeRemotelyCallable({ createNotification })
+export default createNotification

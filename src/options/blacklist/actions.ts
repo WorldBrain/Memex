@@ -6,12 +6,12 @@ import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { NotificationInterface } from 'src/util/notification-types'
+
+import { remoteFunctions } from 'src/util/remote-functions'
+const { notifications } = remoteFunctions
 
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')
-const createNotifRPC = remoteInterface<NotificationInterface>()
-    .createNotification
 const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 const processEvent = remoteFunction('processEvent')
 
@@ -128,7 +128,7 @@ export const removeMatchingDocs = expression => async (dispatch, getState) => {
     } catch (err) {
         handleDBQuotaErrors(
             error =>
-                createNotifRPC({
+                notifications.createNotification({
                     requireInteraction: false,
                     title: 'Memex error: deleting page',
                     message: error.message,
