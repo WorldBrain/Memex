@@ -41,6 +41,27 @@ export class RemoteError extends Error {
 
 // === Initiating side ===
 
+type RemoteModule = 'analytics' | '...'
+
+// Create a Proxy object that looks like the real interface but actually calls remote functions
+// Example Usage:
+//      interface AnalyticsInterface { trackEvent() }
+//      const analytics = remoteInterface<AnalyticsInterface>('analytics')
+//      analytics.trackEvent(...)
+export function remoteInterface<T extends object>(moduleName: RemoteModule) {
+    // When the Proxy is asked for a property (such as a function of a class)..
+    // return a function that executes that function over the RPC interface, instead of on that object itself
+    return new Proxy<T>({} as T, {
+        get(target: T, property, receiver): any {
+            const methodName = property.toString()
+            return function(...args) {
+                // todo: how to handle tab id? and throwWhenNoReponse?
+                return remoteFunction(methodName)(args)
+            }
+        },
+    })
+}
+
 // Create a proxy function that invokes the specified remote function.
 // Arguments
 // - funcName (required): name of the function as registered on the remote side.
@@ -192,6 +213,14 @@ export function makeRemotelyCallable(
             (extraArg, ...args) => func(...args),
         )
         functions = wrapFunctions(functions)
+    }
+
+    for (const functionName of Object.keys(functions)) {
+        if (remotelyCallableFunctions.hasOwnProperty(functionName)) {
+            const error = `RPC function with name ${functionName} has already been registered `
+            // throw Error(error);
+            console.warn(error)
+        }
     }
 
     // Add the functions to our global repetoir.
