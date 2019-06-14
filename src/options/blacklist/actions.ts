@@ -1,15 +1,17 @@
 import { createAction } from 'redux-act'
 
 import analytics from 'src/analytics'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { remoteFunction, remoteInterface } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { NotificationInterface } from 'src/util/notification-types'
 
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')
-const createNotifRPC = remoteFunction('createNotification')
+const createNotifRPC = remoteInterface<NotificationInterface>()
+    .createNotification
 const dirtyEstsCache = remoteFunction('dirtyEstsCache')
 const processEvent = remoteFunction('processEvent')
 

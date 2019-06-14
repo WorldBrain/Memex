@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction, remoteInterface } from '../../util/webextensionRPC'
 import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as selectors from './selectors'
@@ -8,6 +8,7 @@ import { acts as resultsActs, selectors as results } from '../results'
 import { actions as searchFilterActs } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { NotificationInterface } from 'src/util/notification-types'
 
 export const show = createAction<{ url: string; index: number }>(
     'deleteConf/show',
@@ -19,7 +20,8 @@ export const resetDeleteIndex = createAction('deleteConf/resetDeleteIndex')
 
 const processEventRPC = remoteFunction('processEvent')
 const deletePagesRPC = remoteFunction('delPages')
-const createNotifRPC = remoteFunction('createNotification')
+const createNotifRPC = remoteInterface<NotificationInterface>()
+    .createNotification
 const deleteSocialPagesRPC = remoteFunction('delSocialPages')
 
 export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {

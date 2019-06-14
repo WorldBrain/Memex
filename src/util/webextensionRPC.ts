@@ -41,14 +41,12 @@ export class RemoteError extends Error {
 
 // === Initiating side ===
 
-type RemoteModule = 'analytics' | '...'
-
 // Create a Proxy object that looks like the real interface but actually calls remote functions
 // Example Usage:
 //      interface AnalyticsInterface { trackEvent() }
-//      const analytics = remoteInterface<AnalyticsInterface>('analytics')
+//      const analytics = remoteInterface<AnalyticsInterface>()
 //      analytics.trackEvent(...)
-export function remoteInterface<T extends object>(moduleName: RemoteModule) {
+export function remoteInterface<T extends object>() {
     // When the Proxy is asked for a property (such as a function of a class)..
     // return a function that executes that function over the RPC interface, instead of on that object itself
     return new Proxy<T>({} as T, {

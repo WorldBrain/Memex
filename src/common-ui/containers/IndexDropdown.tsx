@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction, remoteInterface } from '../../util/webextensionRPC'
 import {
     IndexDropdown,
     IndexDropdownNewRow,
@@ -12,6 +12,7 @@ import { ClickHandler } from '../../popup/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { NotificationInterface } from 'src/util/notification-types'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -99,7 +100,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
         this.processEvent = remoteFunction('processEvent')
-        this.createNotif = remoteFunction('createNotification')
+        this.createNotif = remoteInterface<
+            NotificationInterface
+        >().createNotification
         this.fetchUserSuggestionsRPC = remoteFunction('fetchUserSuggestions')
         this.fetchHashtagSuggestionsRPC = remoteFunction(
             'fetchHashtagSuggestions',

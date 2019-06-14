@@ -1,14 +1,16 @@
 import { createAction } from 'redux-act'
 
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction, remoteInterface } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { NotificationInterface } from 'src/util/notification-types'
 
 const createBookmarkRPC = remoteFunction('addPageBookmark')
 const deleteBookmarkRPC = remoteFunction('delPageBookmark')
-const createNotifRPC = remoteFunction('createNotification')
+const createNotifRPC = remoteInterface<NotificationInterface>()
+    .createNotification
 
 export const setIsBookmarked = createAction<boolean>('bookmark/setIsBookmarked')
 

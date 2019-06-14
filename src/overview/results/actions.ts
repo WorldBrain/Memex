@@ -1,6 +1,6 @@
 import { createAction } from 'redux-act'
 
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction, remoteInterface } from '../../util/webextensionRPC'
 import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as selectors from './selectors'
@@ -10,13 +10,15 @@ import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { NotificationInterface } from 'src/util/notification-types'
 
 const processEventRPC = remoteFunction('processEvent')
 const createBookmarkRPC = remoteFunction('addBookmark')
 const deleteBookmarkRPC = remoteFunction('delBookmark')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
 const deleteSocialBookmarkRPC = remoteFunction('delSocialBookmark')
-const createNotifRPC = remoteFunction('createNotification')
+const createNotifRPC = remoteInterface<NotificationInterface>()
+    .createNotification
 
 export const addTag = createAction('results/localAddTag', (tag, index) => ({
     tag,

@@ -1,12 +1,13 @@
 import { createAction } from 'redux-act'
 
 import analytics from '../../analytics'
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction, remoteInterface } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { NotificationInterface } from 'src/util/notification-types'
 
 function deriveDomain(url: string) {
     const { hostname } = new URL(url)
@@ -19,7 +20,8 @@ const addToBlacklistRPC: (url: string) => Promise<void> = remoteFunction(
 const processEventRPC: (args: any) => Promise<void> = remoteFunction(
     'processEvent',
 )
-const createNotifRPC = remoteFunction('createNotification')
+const createNotifRPC = remoteInterface<NotificationInterface>()
+    .createNotification
 const deletePagesRPC = remoteFunction('delPages')
 const deletePagesByDomainRPC = remoteFunction('delPagesByDomain')
 

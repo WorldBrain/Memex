@@ -1,13 +1,9 @@
-import { browser, Notifications } from 'webextension-polyfill-ts'
+import { browser } from 'webextension-polyfill-ts'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import browserIsChrome from './check-browser'
+import { NotificationInterface, NotifOpts } from 'src/util/notification-types'
 export const DEF_ICON_URL = '/img/worldbrain-logo-narrow.png'
 export const DEF_TYPE = 'basic'
-
-// Chrome allows some extra notif opts that the standard web ext API doesn't support
-export interface NotifOpts extends Notifications.CreateNotificationOptions {
-    [chromeKeys: string]: any
-}
 
 const onClickListeners = new Map<string, (id: string) => void>()
 
@@ -23,7 +19,7 @@ browser.notifications.onClicked.addListener(id => {
  * Firefox supports only a subset of notif options. If you pass unknowns, it throws Errors.
  * So filter them down if browser is FF, else nah.
  */
-function filterOpts({
+function _filterOpts({
     type,
     iconUrl,
     requireInteraction,
@@ -35,21 +31,25 @@ function filterOpts({
     return !browserIsChrome() ? opts : { ...opts, ...rest }
 }
 
-async function createNotification(
-    notifOptions: Partial<NotifOpts>,
-    onClick = f => f,
-) {
-    const id = await browser.notifications.create(
-        filterOpts({
-            type: DEF_TYPE,
-            iconUrl: DEF_ICON_URL,
-            requireInteraction: true,
-            ...(notifOptions as NotifOpts),
-        }),
-    )
+class Notifications implements NotificationInterface {
+    async createNotification(
+        notifOptions: Partial<NotifOpts>,
+        onClick = f => f,
+    ) {
+        const id = await browser.notifications.create(
+            _filterOpts({
+                type: DEF_TYPE,
+                iconUrl: DEF_ICON_URL,
+                requireInteraction: true,
+                ...(notifOptions as NotifOpts),
+            }),
+        )
 
-    onClickListeners.set(id, onClick)
+        onClickListeners.set(id, onClick)
+    }
 }
+const notifications = new Notifications()
+const createNotification = notifications.createNotification
 
 export default createNotification
 
