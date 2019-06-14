@@ -5,10 +5,7 @@ import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications } from 'src/util/remote-functions'
-
-const createBookmarkRPC = remoteFunction('addPageBookmark')
-const deleteBookmarkRPC = remoteFunction('delPageBookmark')
+import { notifications, bookmarks } from 'src/util/remote-functions'
 
 export const setIsBookmarked = createAction<boolean>('bookmark/setIsBookmarked')
 
@@ -19,9 +16,12 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
     const hasBookmark = selectors.isBookmarked(state)
     dispatch(setIsBookmarked(!hasBookmark))
 
-    const bookmarkRPC = hasBookmark ? deleteBookmarkRPC : createBookmarkRPC
+    bookmarks.tabId = tabId
+    const bookmarkRPC = hasBookmark
+        ? bookmarks.delBookmark
+        : bookmarks.addBookmark
     try {
-        await bookmarkRPC({ url, tabId })
+        await bookmarkRPC({ url })
     } catch (err) {
         dispatch(setIsBookmarked(hasBookmark))
         handleDBQuotaErrors(

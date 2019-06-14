@@ -20,7 +20,6 @@
 
 import mapValues from 'lodash/fp/mapValues'
 import { browser } from 'webextension-polyfill-ts'
-import { CreateNotificationInterface } from 'src/util/notification-types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -42,6 +41,12 @@ export class RemoteError extends Error {
 
 // === Initiating side ===
 
+// todo: change it to pass it in the arguments instead
+type WithRemoteOptions<T> = { [P in keyof T]: T[P] } & {
+    tabId?: string
+    throwWhenNoResponse?: string
+}
+
 // Create a Proxy object that looks like the real interface but actually calls remote functions
 // Example Usage:
 //      interface AnalyticsInterface { trackEvent() }
@@ -51,11 +56,20 @@ export function remoteInterface<T extends object>() {
     // When the Proxy is asked for a property (such as a function of a class)..
     // return a function that executes that function over the RPC interface, instead of on that object itself
     return new Proxy<T>({} as T, {
+        set(target: T, property, value, receiver): any {
+            // todo: this isn't an optimal solution as a set tabId will be cached across calls and will need to be reset
+            // todo: change it to pass it in the arguments instead
+            if (property === 'tabId' || property === 'throwWhenNoResponse') {
+                receiver[property] = value
+            }
+        },
         get(target: T, property, receiver): any {
             const methodName = property.toString()
             return function(...args) {
-                // todo: how to handle tab id? and throwWhenNoReponse?
-                return remoteFunction(methodName)(args)
+                return remoteFunction(methodName, {
+                    tabId: receiver.tabId,
+                    throwWhenNoResponse: receiver.throwWhenNoResponse || null,
+                })(args)
             }
         },
     })

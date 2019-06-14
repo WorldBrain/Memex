@@ -10,11 +10,10 @@ import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications } from 'src/util/remote-functions'
+import { bookmarks, notifications } from 'src/util/remote-functions'
+import bookmark from 'src/search/models/bookmark'
 
 const processEventRPC = remoteFunction('processEvent')
-const createBookmarkRPC = remoteFunction('addBookmark')
-const deleteBookmarkRPC = remoteFunction('delBookmark')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
 const deleteSocialBookmarkRPC = remoteFunction('delSocialBookmark')
 
@@ -88,12 +87,13 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
     let bookmarkRPC: (args: { url: string }) => Promise<void>
     // tslint:disable-next-line: prefer-conditional-expression
     if (hasBookmark) {
-        bookmarkRPC = user ? deleteSocialBookmarkRPC : deleteBookmarkRPC
+        bookmarkRPC = user ? deleteSocialBookmarkRPC : bookmarks.delBookmark
     } else {
-        bookmarkRPC = user ? createSocialBookmarkRPC : createBookmarkRPC
+        bookmarkRPC = user ? createSocialBookmarkRPC : bookmarks.addBookmark
     }
 
     try {
+        bookmarks.tabId = undefined
         await bookmarkRPC({ url })
     } catch (err) {
         dispatch(changeHasBookmark(index))
