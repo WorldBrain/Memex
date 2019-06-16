@@ -16,12 +16,11 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
     const hasBookmark = selectors.isBookmarked(state)
     dispatch(setIsBookmarked(!hasBookmark))
 
-    bookmarks.tabId = tabId
     const bookmarkRPC = hasBookmark
         ? bookmarks.delBookmark
         : bookmarks.addBookmark
     try {
-        await bookmarkRPC({ url })
+        await bookmarkRPC({ url, tabId })
     } catch (err) {
         dispatch(setIsBookmarked(hasBookmark))
         handleDBQuotaErrors(

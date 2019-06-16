@@ -41,34 +41,54 @@ export class RemoteError extends Error {
 
 // === Initiating side ===
 
-// todo: change it to pass it in the arguments instead
-type WithRemoteOptions<T> = { [P in keyof T]: T[P] } & {
-    tabId?: string
-    throwWhenNoResponse?: string
+// The extra options available when calling a remote function
+interface RPCOpts {
+    tabId?: number
+    throwWhenNoResponse?: boolean
 }
+
+// Union a type with these extra options
+type WithExtraArgs<T> = T & RPCOpts
+
+// Union a function's options with these extra args
+type FuncWithExtraArgs<FuncT> = FuncT extends (a: infer Params) => infer Ret
+    ? (a: WithExtraArgs<Params>) => Ret
+    : never
+
+// Union each function of an object with these extra args
+type InterafceOfFuncsArgs<T> = { [P in keyof T]: FuncWithExtraArgs<T[P]> }
 
 // Create a Proxy object that looks like the real interface but actually calls remote functions
 // Example Usage:
-//      interface AnalyticsInterface { trackEvent() }
+//      interface AnalyticsInterface { trackEvent({}) => any }
 //      const analytics = remoteInterface<AnalyticsInterface>()
 //      analytics.trackEvent(...)
-export function remoteInterface<T extends object>() {
+export function remoteInterface<T extends object>(): InterafceOfFuncsArgs<T> {
     // When the Proxy is asked for a property (such as a function of a class)..
-    // return a function that executes that function over the RPC interface, instead of on that object itself
-    return new Proxy<T>({} as T, {
-        set(target: T, property, value, receiver): any {
-            // todo: this isn't an optimal solution as a set tabId will be cached across calls and will need to be reset
-            // todo: change it to pass it in the arguments instead
-            if (property === 'tabId' || property === 'throwWhenNoResponse') {
-                receiver[property] = value
-            }
-        },
-        get(target: T, property, receiver): any {
+    // return a function that executes the requested function over the RPC interface, instead of on that object itself
+    return new Proxy<InterafceOfFuncsArgs<T>>({} as InterafceOfFuncsArgs<T>, {
+        get(target, property, receiver): any {
             const methodName = property.toString()
             return function(...args) {
+                let tabId
+                let throwWhenNoResponse = null
+                // todo: we're assuming a object parameter bag as the first argument here, clean that up.
+                const params = args[0]
+                // filter out tabId, pass that along to
+                if (params.hasOwnProperty('tabId')) {
+                    tabId = params.tabId
+                    delete params.tabId
+                }
+
+                // todo: doesn't look like we really use this, audit and remove if we can.
+                if (params.hasOwnProperty('throwWhenNoResponse')) {
+                    throwWhenNoResponse = params.throwWhenNoResponse
+                    delete params.throwWhenNoResponse
+                }
+
                 return remoteFunction(methodName, {
-                    tabId: receiver.tabId,
-                    throwWhenNoResponse: receiver.throwWhenNoResponse || null,
+                    tabId,
+                    throwWhenNoResponse,
                 })(args)
             }
         },

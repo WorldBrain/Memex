@@ -11,7 +11,6 @@ import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { bookmarks, notifications } from 'src/util/remote-functions'
-import bookmark from 'src/search/models/bookmark'
 
 const processEventRPC = remoteFunction('processEvent')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
@@ -93,7 +92,6 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
     }
 
     try {
-        bookmarks.tabId = undefined
         await bookmarkRPC({ url })
     } catch (err) {
         dispatch(changeHasBookmark(index))
