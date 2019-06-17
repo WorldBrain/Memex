@@ -47,6 +47,8 @@ class PageResultItem extends PureComponent<Props> {
                 <div
                     className={cx(styles.infoContainer, {
                         [styles.infoContainerOverview]: this.props.isOverview,
+                        [styles.infoContainerScreenshot]: this.props
+                            .areScreenshotsEnabled,
                     })}
                 >
                     <div className={styles.firstlineContainer}>
