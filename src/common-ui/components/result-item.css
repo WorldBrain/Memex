@@ -182,6 +182,9 @@
 
 .infoContainerOverview {
     padding: 6px 14px;
+}
+
+.infoContainerScreenshot {
     width: calc(100% - var(--imgWidth));
 }
 
