@@ -93,12 +93,6 @@ class ResultItem extends PureComponent<Props> {
         )
     }
 
-    private handleClickOpenNewTab = (url: string) => (
-        e: React.MouseEvent<HTMLDivElement>,
-    ) => {
-        window.open(url, '_blank').focus()
-    }
-
     render() {
         return (
             <li
@@ -117,21 +111,22 @@ class ResultItem extends PureComponent<Props> {
                             .isResponsibleForSidebar,
                     })}
                 >
-                    <div
+                    <a
                         onDragStart={this.dragStart}
                         onDragEnd={this.props.resetUrlDragged}
                         className={cx(styles.root, {
                             [styles.rootOverview]: this.props.isOverview,
                         })}
-                        onClick={this.handleClickOpenNewTab(this.hrefToPage)}
                         draggable
+                        href={this.hrefToPage}
+                        target="_blank"
                     >
                         {this.props.isSocial ? (
                             <SocialResultItem {...this.props} />
                         ) : (
                             <PageResultItem {...this.props} />
                         )}
-                    </div>
+                    </a>
                 </div>
                 {this.props.tagManager}
                 {this.renderAnnotsList()}
