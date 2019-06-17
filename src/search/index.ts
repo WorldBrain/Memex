@@ -8,3 +8,5 @@ export * from './on-demand-indexing'
 export * from './types'
 export * from './models'
 export { default as getDb } from './get-db'
+
+export { PipelineError } from './pipeline'

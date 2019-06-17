@@ -3,6 +3,8 @@ import transformPageText from '../util/transform-page-text'
 import { DEFAULT_TERM_SEPARATOR, extractContent } from './util'
 import { PipelineReq, PipelineRes } from './types'
 
+export class PipelineError extends Error {}
+
 /**
  * Derived from answer in: https://stackoverflow.com/a/23945027
  */
@@ -105,7 +107,9 @@ export default function pipeline({
         rejectNoContent &&
         (content == null || !content.fullText || !content.fullText.length)
     ) {
-        return Promise.reject(new Error('Page has no searchable content'))
+        return Promise.reject(
+            new PipelineError('Page has no searchable content'),
+        )
     }
 
     // Extract all terms out of processed content
