@@ -28,10 +28,17 @@ class SidebarContainer extends PureComponent {
     }
 
     resize = event => {
-        const element = document.querySelector('#teste')
+        // TO-DO: Find a better way to get ref from child component
+        const element = document.querySelector('#resizable')
+        const MINIMUM_SIZE = 249
+        const originalWidth = 0
+        const elementWidth = originalWidth + event.pageX
 
-        element.style.width =
-            event.pageX - element.getBoundingClientRect().left + 'px'
+        event.target.style.cursor = 'ew-resizable'
+
+        if (elementWidth > MINIMUM_SIZE) {
+            element.style.width = `${elementWidth}px`
+        }
     }
 
     stopResize = () => {
@@ -39,15 +46,9 @@ class SidebarContainer extends PureComponent {
     }
 
     setSidebarResizable = e => {
-        e && e.stopPropagation()
-
-        const currentResizer = e.target
-
-        currentResizer.addEventListener('mousedown', e => {
-            e.preventDefault()
-            window.addEventListener('mousemove', this.resize)
-            window.addEventListener('mouseup', this.stopResize)
-        })
+        e.preventDefault()
+        window.addEventListener('mousemove', this.resize)
+        window.addEventListener('mouseup', this.stopResize)
     }
 
     // Capture state of the react-burger-menu
