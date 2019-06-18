@@ -46,7 +46,7 @@ class Sidebar extends PureComponent {
                     onStateChange={this.props.captureStateChange}
                 >
                     <div
-                        id="teste"
+                        id="resizable"
                         className={cx(localStyles.sidebar, {
                             [localStyles.sidebarExpanded]:
                                 this.props.isSidebarOpen ||

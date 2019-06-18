@@ -18,8 +18,6 @@ const baseStyles = {
         opacity: '1',
         marginLeft: '0px',
         transition: 'all 0.2s cubic-bezier(0.65, 0.05, 0.36, 1) 0s',
-        // boxShadow:
-        //     'rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px',
         fontSize: '0.68rem',
         background: 'rgb(255, 255, 255)',
     },
@@ -39,7 +37,6 @@ const menuStyles = (isSidebarLocked, isSidebarOpen) => {
     }
 
     if (isSidebarLocked) {
-        ;((baseStyles.bmMenuWrap.background as unknown) as string) = '#edf0f4'
         ;((baseStyles.bmMenuWrap.marginLeft as unknown) as string) = '0px'
         ;((baseStyles.bmMenuWrap.opacity as unknown) as string) = '1'
     }

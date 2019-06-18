@@ -12,6 +12,7 @@ import { ListSideBar } from '../../../custom-lists/components'
 import Sidebar from './SideBar'
 import crowdfundingModalStyles from 'src/common-ui/crowdfunding/components/CFModal.css'
 import collectionsButtonStyles from './collections-button.css'
+import localStyles from './Sidebar.css'
 
 class SidebarContainer extends PureComponent {
     static propTypes = {
@@ -125,14 +126,8 @@ class SidebarContainer extends PureComponent {
                 openSidebaronMouseEnter={this.openSidebaronMouseEnter}
             >
                 <div
+                    className={localStyles.resizer}
                     onMouseDown={this.setSidebarResizable}
-                    style={{
-                        width: '4px',
-                        backgroundColor: '#e5e5e5',
-                        height: '100%',
-                        position: 'absolute',
-                        right: '-4px',
-                    }}
                 />
                 {this.renderListSidebar()}
             </Sidebar>
