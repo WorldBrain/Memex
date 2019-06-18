@@ -27,12 +27,18 @@ class SidebarContainer extends PureComponent {
         urlDragged: PropTypes.string.isRequired,
     }
 
+    constructor(props) {
+        super(props)
+        this.dragging = false
+    }
+
     resize = event => {
         // TO-DO: Find a better way to get ref from child component
         const element = document.querySelector('#resizable')
         const MINIMUM_SIZE = 249
         const originalWidth = 0
         const elementWidth = originalWidth + event.pageX
+        this.dragging = true
 
         event.target.style.cursor = 'ew-resizable'
 
@@ -42,6 +48,7 @@ class SidebarContainer extends PureComponent {
     }
 
     stopResize = () => {
+        this.dragging = false
         window.removeEventListener('mousemove', this.resize)
     }
 
@@ -101,7 +108,7 @@ class SidebarContainer extends PureComponent {
         const $hoverOvercollections = document.querySelector(
             `.${collectionsButtonStyles.buttonContainer}:hover`,
         )
-        if ($hoverOvercollections) {
+        if ($hoverOvercollections || this.dragging) {
             return
         }
 
