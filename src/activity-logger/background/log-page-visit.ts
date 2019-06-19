@@ -110,10 +110,7 @@ export default class PageVisitLogger {
             })
         } catch (err) {
             this._tabManager.clearScheduledLog(tab.id)
-
-            if (!(err instanceof searchIndex.PipelineError)) {
-                throw err
-            }
+            throw err
         }
     }
 
@@ -147,15 +144,9 @@ export default class PageVisitLogger {
             return
         }
 
-        try {
-            await this._createPage({
-                pageDoc,
-                visits: [internalTabState.visitTime],
-            })
-        } catch (err) {
-            if (!(err instanceof searchIndex.PipelineError)) {
-                throw err
-            }
-        }
+        await this._createPage({
+            pageDoc,
+            visits: [internalTabState.visitTime],
+        })
     }
 }

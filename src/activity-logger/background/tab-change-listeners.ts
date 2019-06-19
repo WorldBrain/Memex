@@ -1,20 +1,20 @@
 import { browser, Storage, Tabs } from 'webextension-polyfill-ts'
 import throttle from 'lodash/throttle'
 
-import * as searchIndex from '../../search'
+import * as searchIndex from 'src/search'
 import {
     TabEventChecker,
     whenPageDOMLoaded,
     whenTabActive,
-} from '../../util/tab-events'
+} from 'src/util/tab-events'
 import PageVisitLogger from './log-page-visit'
 import {
     fetchFavIcon,
     FavIconFetchError,
-} from '../../page-analysis/background/get-fav-icon'
+} from 'src/page-analysis/background/get-fav-icon'
 import { shouldLogTab, updateVisitInteractionData } from './util'
 import { TabManager } from './tab-manager'
-import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
+import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
 import {
     TabChangeListener,
     LoggableTabChecker,
@@ -27,7 +27,6 @@ import {
 } from './types'
 import createNotification from 'src/util/notifications'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { remoteFunction } from 'src/util/webextensionRPC'
 import NotificationBackground from 'src/notifications/background'
 
 interface Props {
@@ -201,11 +200,13 @@ export default class TabChangeListeners {
     }
 
     private _handlePageLogErrors = (err: Error) =>
-        this._createNotif({
-            requireInteraction: false,
-            title: 'Memex error: page logging',
-            message: err.message,
-        })
+        err instanceof searchIndex.PipelineError
+            ? null
+            : this._createNotif({
+                  requireInteraction: false,
+                  title: 'Memex error: page logging',
+                  message: err.message,
+              })
 
     private handlePageLogErrors = handleDBQuotaErrors(
         this._handlePageLogErrors,
