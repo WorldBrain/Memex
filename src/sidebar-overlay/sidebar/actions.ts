@@ -17,7 +17,7 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications } from 'src/util/remote-functions'
+import { notifications } from 'src/util/remote-functions-background'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')

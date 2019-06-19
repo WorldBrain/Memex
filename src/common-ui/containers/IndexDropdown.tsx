@@ -12,7 +12,7 @@ import { ClickHandler } from '../../popup/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications } from 'src/util/remote-functions'
+import { notifications } from 'src/util/remote-functions-background'
 
 export interface Props {
     env?: 'inpage' | 'overview'

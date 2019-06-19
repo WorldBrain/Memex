@@ -5,7 +5,7 @@ import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications, bookmarks } from 'src/util/remote-functions'
+import { notifications, bookmarks } from 'src/util/remote-functions-background'
 
 export const setIsBookmarked = createAction<boolean>('bookmark/setIsBookmarked')
 

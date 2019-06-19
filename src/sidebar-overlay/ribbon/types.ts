@@ -15,3 +15,5 @@ export default interface State {
     showHighlights?: boolean
     searchValue: string
 }
+
+export interface RibbonInterface {}

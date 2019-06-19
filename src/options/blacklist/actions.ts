@@ -6,7 +6,7 @@ import * as selectors from './selectors'
 import { STORAGE_KEY } from './constants'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications } from 'src/util/remote-functions'
+import { notifications } from 'src/util/remote-functions-background'
 
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')

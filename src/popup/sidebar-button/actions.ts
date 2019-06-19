@@ -5,6 +5,7 @@ import { remoteFunction } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
+import { remoteFunctionsInTab } from 'src/util/remote-functions-tabs'
 
 export const setSidebarFlag = createAction<boolean>('tooltip/setSidebarFlag')
 
@@ -29,10 +30,12 @@ export const toggleSidebarFlag: () => Thunk = () => async (
     }
 
     const tabId = popup.tabId(state)
+    const ribbon = remoteFunctionsInTab(tabId).ribbon
+
     if (wasEnabled) {
-        await remoteFunction('removeRibbon', { tabId })()
+        await ribbon.removeRibbon()
     } else {
-        await remoteFunction('insertRibbon', { tabId })()
+        await ribbon.insertRibbon()
     }
 }
 

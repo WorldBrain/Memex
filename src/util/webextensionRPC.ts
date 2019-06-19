@@ -58,39 +58,29 @@ type FuncWithExtraArgs<FuncT> = FuncT extends (a: infer Params) => infer Ret
 // Union each function of an object with these extra args
 type InterafceOfFuncsArgs<T> = { [P in keyof T]: FuncWithExtraArgs<T[P]> }
 
+type InterafceWithTabId<T> = T & { tabId: number }
+
 // Create a Proxy object that looks like the real interface but actually calls remote functions
 // Example Usage:
 //      interface AnalyticsInterface { trackEvent({}) => any }
 //      const analytics = remoteInterface<AnalyticsInterface>()
 //      analytics.trackEvent(...)
-export function remoteInterface<T extends object>(): InterafceOfFuncsArgs<T> {
-    // When the Proxy is asked for a property (such as a function of a class)..
-    // return a function that executes the requested function over the RPC interface, instead of on that object itself
+
+// When the Proxy is asked for a property (such as a function of a class)..
+// return a function that executes the requested function over the RPC interface, instead of on that object itself
+export function runInBackground<T extends object>(): InterafceOfFuncsArgs<T> {
     return new Proxy<InterafceOfFuncsArgs<T>>({} as InterafceOfFuncsArgs<T>, {
-        get(target, property, receiver): any {
-            const methodName = property.toString()
-            return function(...args) {
-                let tabId
-                let throwWhenNoResponse = null
-                // todo: we're assuming a object parameter bag as the first argument here, clean that up.
-                const params = args[0]
-                // filter out tabId, pass that along to
-                if (params.hasOwnProperty('tabId')) {
-                    tabId = params.tabId
-                    delete params.tabId
-                }
+        get(target, property): any {
+            return (...args) => remoteFunction(property.toString())(args)
+        },
+    })
+}
 
-                // todo: doesn't look like we really use this, audit and remove if we can.
-                if (params.hasOwnProperty('throwWhenNoResponse')) {
-                    throwWhenNoResponse = params.throwWhenNoResponse
-                    delete params.throwWhenNoResponse
-                }
-
-                return remoteFunction(methodName, {
-                    tabId,
-                    throwWhenNoResponse,
-                })(args)
-            }
+export function runInTab<T extends object>(tabId): T {
+    return new Proxy<T>({} as T, {
+        get(target, property): any {
+            return (...args) =>
+                remoteFunction(property.toString(), { tabId })(args)
         },
     })
 }

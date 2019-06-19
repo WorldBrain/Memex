@@ -51,11 +51,11 @@
 
     It creates the page if it doesn't exist, performing the indexing, sets that it's bookmarked, in the db, and the tag manager.
 
-    ```typescript
-    if (page == null || page.isStub) {
-        page = await createPageViaBmTagActs(getDb)({ url, tabId })
-    }
-    ```
+```typescript
+if (page == null || page.isStub) {
+    page = await createPageViaBmTagActs(getDb)({ url, tabId })
+}
+```
 
     The reason it accepts a `tabId` is so that it can use that to get a handle on the content of that page.
 

@@ -8,7 +8,7 @@ import { acts as resultsActs, selectors as results } from '../results'
 import { actions as searchFilterActs } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications } from 'src/util/remote-functions'
+import { notifications } from 'src/util/remote-functions-background'
 
 export const show = createAction<{ url: string; index: number }>(
     'deleteConf/show',

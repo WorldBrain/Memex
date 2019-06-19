@@ -10,6 +10,7 @@ import { removeHighlights } from './highlight-interactions'
 import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import { insertTooltip, removeTooltip } from 'src/content-tooltip/interactions'
+import { RibbonInterface } from 'src/sidebar-overlay/ribbon/types'
 
 let target = null /* Target container for the Ribbon. */
 let shadowRoot = null /* Root of the shadow DOM in which ribbon is inserted. */
@@ -167,6 +168,16 @@ const updateRibbon = async (
     }
 }
 
+interface Overridable {
+    override: boolean
+}
+interface RibbonInteractionsInterface {
+    insertRibbon: ({ override, ...args }: Overridable) => any
+    removeRibbon: ({ override }: Overridable) => any
+    insertOrRemoveRibbon: () => any
+    updateRibbon: () => any
+}
+
 /**
  * Setups up RPC functions for the ribbon.
  */
@@ -177,15 +188,11 @@ export const setupRPC = ({
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
 }) => {
-    makeRemotelyCallable({
+    const ribbonFunctions: RibbonInteractionsInterface = {
         /**
          * Used for inserting the ribbon.
          */
-        insertRibbon: (
-            { override, ...args }: { override: boolean } = {
-                override: false,
-            },
-        ) => {
+        insertRibbon: ({ override, ...args } = { override: false }) => {
             manualOverride = !!override
             insertRibbon({
                 annotationsManager,
@@ -214,7 +221,8 @@ export const setupRPC = ({
          * RPC for updating the ribbon's state.
          */
         updateRibbon,
-    })
+    }
+    makeRemotelyCallable(ribbonFunctions)
 }
 
 const CLOSE_MESSAGESHOWN_KEY = 'ribbon.close-message-shown'
