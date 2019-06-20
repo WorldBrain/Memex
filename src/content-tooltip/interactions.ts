@@ -10,6 +10,7 @@ import { setupUIContainer, destroyUIContainer } from './components'
 import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
 import { injectCSS } from '../search-injection/dom'
 import { conditionallyShowHighlightNotification } from './onboarding-interactions'
+import { TooltipInteractionInterface } from 'src/content-tooltip/types'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
@@ -128,7 +129,7 @@ const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
  * Sets up RPC functions to insert and remove Tooltip from Popup.
  */
 export const setupRPC = ({ toolbarNotifications }) => {
-    makeRemotelyCallable({
+    makeRemotelyCallable<TooltipInteractionInterface>({
         showContentTooltip: async () => {
             if (!showTooltip) {
                 await insertTooltip({ toolbarNotifications })
@@ -138,11 +139,11 @@ export const setupRPC = ({ toolbarNotifications }) => {
                 showTooltip(position)
             }
         },
-        insertTooltip: ({ override } = {}) => {
+        insertTooltip: ({ override }) => {
             manualOverride = !!override
             insertTooltip({ toolbarNotifications })
         },
-        removeTooltip: ({ override } = {}) => {
+        removeTooltip: ({ override }) => {
             manualOverride = !!override
             removeTooltip()
         },

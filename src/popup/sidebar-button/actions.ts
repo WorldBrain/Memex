@@ -1,11 +1,11 @@
 import { createAction } from 'redux-act'
 
 import { getSidebarState, setSidebarState } from '../../sidebar-overlay/utils'
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction, runInTab } from 'src/util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
-import { remoteFunctionsInTab } from 'src/util/remote-functions-tabs'
+import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 
 export const setSidebarFlag = createAction<boolean>('tooltip/setSidebarFlag')
 
@@ -30,7 +30,7 @@ export const toggleSidebarFlag: () => Thunk = () => async (
     }
 
     const tabId = popup.tabId(state)
-    const ribbon = remoteFunctionsInTab(tabId).ribbon
+    const ribbon = runInTab<RibbonInteractionsInterface>(tabId)
 
     if (wasEnabled) {
         await ribbon.removeRibbon()

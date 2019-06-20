@@ -1,11 +1,13 @@
 import { createAction } from 'redux-act'
 
 import { getTooltipState, setTooltipState } from '../../content-tooltip/utils'
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction, runInTab } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
+import { TooltipInteractionInterface } from 'src/content-tooltip/types'
 
 const processEventRPC = remoteFunction('processEvent')
 
@@ -39,18 +41,12 @@ export const toggleTooltipFlag: () => Thunk = () => async (
 
     const tabId = popup.tabId(state)
     if (wasEnabled) {
-        await remoteFunction('removeTooltip', { tabId })()
-        await remoteFunction('updateRibbon', {
-            tabId,
-            throwWhenNoResponse: false,
-        })()
+        await runInTab<TooltipInteractionInterface>(tabId).removeTooltip()
+        await runInTab<RibbonInteractionsInterface>(tabId).updateRibbon()
     } else {
-        await remoteFunction('insertTooltip', { tabId })()
-        await remoteFunction('showContentTooltip', { tabId })()
-        await remoteFunction('updateRibbon', {
-            tabId,
-            throwWhenNoResponse: false,
-        })()
+        await runInTab<TooltipInteractionInterface>(tabId).insertTooltip()
+        await runInTab<TooltipInteractionInterface>(tabId).showContentTooltip()
+        await runInTab<RibbonInteractionsInterface>(tabId).updateRibbon()
     }
 }
 
@@ -64,8 +60,10 @@ export const showTooltip: () => Thunk = () => async (dispatch, getState) => {
 
     const isEnabled = await getTooltipState()
     if (!isEnabled) {
-        await remoteFunction('insertTooltip', { tabId })({ override: true })
+        await runInTab<TooltipInteractionInterface>(tabId).insertTooltip({
+            override: true,
+        })
     }
 
-    await remoteFunction('showContentTooltip', { tabId })()
+    await runInTab<TooltipInteractionInterface>(tabId).showContentTooltip()
 }

@@ -4,8 +4,10 @@ import PausableTimer from '../../util/pausable-timer'
 import { SIDEBAR_STORAGE_NAME } from '../../sidebar-overlay/constants'
 import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction, runInTab } from '../../util/webextensionRPC'
 import { isLoggable } from '..'
+import { TooltipInteractionInterface } from 'src/content-tooltip/types'
+import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 
 export interface TabProps extends TabState {
     storageAPI: Storage.Static
@@ -82,10 +84,9 @@ class Tab implements TabState {
             return
         }
 
-        return remoteFunction('insertOrRemoveRibbon', {
-            tabId: this.id,
-            throwWhenNoResponse: false,
-        })()
+        return runInTab<RibbonInteractionsInterface>(
+            this.id,
+        ).insertOrRemoveRibbon()
     }
 
     private async _toggleTooltip() {
@@ -93,10 +94,9 @@ class Tab implements TabState {
             return
         }
 
-        return remoteFunction('insertOrRemoveTooltip', {
-            tabId: this.id,
-            throwWhenNoResponse: false,
-        })()
+        return runInTab<TooltipInteractionInterface>(
+            this.id,
+        ).insertOrRemoveTooltip()
     }
 
     private async _updateRibbonState() {
@@ -104,10 +104,7 @@ class Tab implements TabState {
             return
         }
 
-        return remoteFunction('updateRibbon', {
-            tabId: this.id,
-            throwWhenNoResponse: false,
-        })()
+        return runInTab<RibbonInteractionsInterface>(this.id).updateRibbon()
     }
 
     private _pauseLogTimer() {

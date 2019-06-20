@@ -1,9 +1,10 @@
 import { whenPageDOMLoaded } from 'src/util/tab-events'
-import { remoteFunction } from 'src/util/webextensionRPC'
 import whenAllSettled from 'when-all-settled'
 
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
+import { runInTab } from 'src/util/webextensionRPC'
+import { PageAnalyzerInterface } from 'src/page-analysis/types'
 
 /**
  * @typedef {Object} PageAnalysisResult
@@ -28,10 +29,13 @@ export default async function analysePage({
     await whenPageDOMLoaded({ tabId })
 
     // Set up to run these functions in the content script in the tab.
-    const extractPageContent = remoteFunction('extractPageContent', { tabId })
+    const extractPageContent = runInTab<PageAnalyzerInterface>(tabId)
+        .extractPageContent
 
     // Fetch the data
     const dataFetchingPromises = [
+        // todo: remote-functions-refactor: should extractPageContent ever be called like this without params? is it used?
+        // @ts-ignore
         allowContent ? extractPageContent() : Promise.resolve(),
         allowScreenshot ? makeScreenshot({ tabId }) : Promise.resolve(),
         allowFavIcon ? getFavIcon({ tabId }) : Promise.resolve(),

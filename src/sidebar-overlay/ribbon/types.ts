@@ -16,4 +16,9 @@ export default interface State {
     searchValue: string
 }
 
-export interface RibbonInterface {}
+export interface RibbonInteractionsInterface {
+    insertRibbon: ({ override, ...args }?: { override?: boolean } | any) => any
+    removeRibbon: ({ override }: { override?: boolean }) => any
+    insertOrRemoveRibbon: () => any
+    updateRibbon: () => any
+}
