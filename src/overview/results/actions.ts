@@ -86,9 +86,9 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
     let bookmarkRPC: (args: { url: string }) => Promise<void>
     // tslint:disable-next-line: prefer-conditional-expression
     if (hasBookmark) {
-        bookmarkRPC = user ? deleteSocialBookmarkRPC : bookmarks.delBookmark
+        bookmarkRPC = user ? deleteSocialBookmarkRPC : bookmarks.delPageBookmark
     } else {
-        bookmarkRPC = user ? createSocialBookmarkRPC : bookmarks.addBookmark
+        bookmarkRPC = user ? createSocialBookmarkRPC : bookmarks.addPageBookmark
     }
 
     try {
