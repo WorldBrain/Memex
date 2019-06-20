@@ -30,6 +30,8 @@ import './analytics/background'
 import './imports/background'
 import './omnibar'
 import analytics from './analytics'
+import { BookmarksInterface } from 'src/bookmarks/background/types'
+import { NotificationInterface } from 'src/util/notification-types'
 
 initSentry()
 
@@ -77,14 +79,12 @@ export const tags = new TagsBackground({
 })
 tags.setupRemoteFunctions()
 
-export const bookmarks = new BookmarksBackground({ storageManager })
-
 // Gradually moving all remote function registrations here, can move them somewhere else soon.
 function setupRemoteFunctions() {
-    makeRemotelyCallable({ createNotification })
-    makeRemotelyCallable({
-        addBookmark: bookmarks.addBookmark,
-        delBookmark: bookmarks.delBookmark,
+    makeRemotelyCallable<NotificationInterface>({ createNotification })
+    makeRemotelyCallable<BookmarksInterface>({
+        addPageBookmark: search.remoteFunctions.addPageBookmark,
+        delPageBookmark: search.remoteFunctions.delPageBookmark,
     })
 }
 setupRemoteFunctions()

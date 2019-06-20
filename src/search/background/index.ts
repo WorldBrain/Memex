@@ -20,6 +20,7 @@ export default class SearchBackground {
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
     private getDb: DBGet
+    public remoteFunctions
 
     static handleSearchError(e: SearchError) {
         if (e instanceof BadTermError) {
@@ -104,6 +105,11 @@ export default class SearchBackground {
             createPageFromTab: idx.createPageFromTab(this.getDb),
             createPageFromUrl: idx.createPageFromUrl(this.getDb),
         }
+
+        this.remoteFunctions = {
+            addPageBookmark: this.backend.addBookmark,
+            delPageBookmark: this.backend.delBookmark,
+        }
     }
 
     setupRemoteFunctions() {
@@ -114,8 +120,7 @@ export default class SearchBackground {
             suggest: this.storage.suggest,
             extendedSuggest: this.storage.suggestExtended,
             delPages: this.backend.delPages,
-            addPageBookmark: this.backend.addBookmark,
-            delPageBookmark: this.backend.delBookmark,
+
             fetchPageTags: this.backend.fetchPageTags,
             delPagesByDomain: this.backend.delPagesByDomain,
             delPagesByPattern: this.backend.delPagesByPattern,

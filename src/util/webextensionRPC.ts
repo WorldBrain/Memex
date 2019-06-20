@@ -44,38 +44,44 @@ export class RemoteError extends Error {
 // The extra options available when calling a remote function
 interface RPCOpts {
     tabId?: number
+
+    //todo: remove any references to this
     throwWhenNoResponse?: boolean
 }
 
+/*
+todo: this may no longer be needed
 // Union a type with these extra options
 type WithExtraArgs<T> = T & RPCOpts
-
 // Union a function's options with these extra args
 type FuncWithExtraArgs<FuncT> = FuncT extends (a: infer Params) => infer Ret
     ? (a: WithExtraArgs<Params>) => Ret
     : never
-
 // Union each function of an object with these extra args
-type InterafceOfFuncsArgs<T> = { [P in keyof T]: FuncWithExtraArgs<T[P]> }
+type InterfaceOfFuncsArgs<T> = { [P in keyof T]: FuncWithExtraArgs<T[P]> }
+type InterfaceWithTabId<T> = T & { tabId: number }
+*/
 
-type InterafceWithTabId<T> = T & { tabId: number }
-
-// Create a Proxy object that looks like the real interface but actually calls remote functions
+// runInBackground and runInTab create a Proxy object that looks like the real interface but actually calls remote functions
+//
+// When the Proxy is asked for a property (such as a method)
+// return a function that executes the requested method over the RPC interface
+//
 // Example Usage:
 //      interface AnalyticsInterface { trackEvent({}) => any }
-//      const analytics = remoteInterface<AnalyticsInterface>()
+//      const analytics = runInBackground<AnalyticsInterface>()
 //      analytics.trackEvent(...)
 
-// When the Proxy is asked for a property (such as a function of a class)..
-// return a function that executes the requested function over the RPC interface, instead of on that object itself
-export function runInBackground<T extends object>(): InterafceOfFuncsArgs<T> {
-    return new Proxy<InterafceOfFuncsArgs<T>>({} as InterafceOfFuncsArgs<T>, {
+// Runs a remoteFunction in the background script
+export function runInBackground<T extends object>(): T {
+    return new Proxy<T>({} as T, {
         get(target, property): any {
             return (...args) => remoteFunction(property.toString())(args)
         },
     })
 }
 
+// Runs a remoteFunction in the content script on a certain tab
 export function runInTab<T extends object>(tabId): T {
     return new Proxy<T>({} as T, {
         get(target, property): any {
@@ -85,6 +91,7 @@ export function runInTab<T extends object>(tabId): T {
     })
 }
 
+// todo: iteratively refactoring any invocations of this function to the type safe functions above, either runInBackground or runInTab.
 // Create a proxy function that invokes the specified remote function.
 // Arguments
 // - funcName (required): name of the function as registered on the remote side.
@@ -223,8 +230,8 @@ let enabled = false
 //           the details of the tab that sent the message.
 //   }
 
-export function makeRemotelyCallable(
-    functions: { [fnName: string]: (...args: any[]) => any },
+export function makeRemotelyCallable<T>(
+    functions: { [P in keyof T]: T[P] },
     { insertExtraArg = false } = {},
 ) {
     // Every function is passed an extra argument with sender information,

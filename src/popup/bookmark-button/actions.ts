@@ -1,6 +1,5 @@
 import { createAction } from 'redux-act'
-
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
@@ -16,11 +15,12 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
     const hasBookmark = selectors.isBookmarked(state)
     dispatch(setIsBookmarked(!hasBookmark))
 
-    const bookmarkRPC = hasBookmark
-        ? bookmarks.delBookmark
-        : bookmarks.addBookmark
     try {
-        await bookmarkRPC({ url, tabId })
+        if (hasBookmark) {
+            await bookmarks.delPageBookmark({ url })
+        } else {
+            await bookmarks.addPageBookmark({ url, tabId })
+        }
     } catch (err) {
         dispatch(setIsBookmarked(hasBookmark))
         handleDBQuotaErrors(
