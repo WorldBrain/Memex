@@ -48,7 +48,6 @@ directLinking.setupRequestInterceptor()
 
 const activityLogger = new ActivityLoggerBackground({
     storageManager,
-    notifsBackground: notifications,
 })
 activityLogger.setupRemoteFunctions()
 activityLogger.setupWebExtAPIHandlers()
@@ -126,3 +125,4 @@ window['notifications'] = notifications
 window['analytics'] = analytics
 window['logger'] = activityLogger
 window['tabMan'] = activityLogger.tabManager
+window['socialInt'] = social

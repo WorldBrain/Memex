@@ -25,14 +25,9 @@ import {
     BookmarkChecker,
     TabIndexer,
 } from './types'
-import createNotification from 'src/util/notifications'
-import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import NotificationBackground from 'src/notifications/background'
 
 interface Props {
     tabManager: TabManager
-    notifsBackground: NotificationBackground
     pageVisitLogger: PageVisitLogger
     storageArea?: Storage.StorageArea
     visitUpdate?: VisitInteractionUpdater
@@ -43,7 +38,6 @@ interface Props {
     bookmarkCheck?: BookmarkChecker
     tabActiveCheck?: TabEventChecker
     loggableTabCheck?: LoggableTabChecker
-    createNotif?: typeof createNotification
     contentScriptPaths?: string[]
 }
 
@@ -62,7 +56,6 @@ export default class TabChangeListeners {
 
     private _contentScriptPaths: string[]
     private _tabManager: TabManager
-    private _notifsBackground: NotificationBackground
     private _storage: Storage.StorageArea
     private _checkTabLoggable: LoggableTabChecker
     private _updateTabVisit: VisitInteractionUpdater
@@ -72,7 +65,6 @@ export default class TabChangeListeners {
     private _pageDOMLoaded: TabEventChecker
     private _tabActive: TabEventChecker
     private _pageVisitLogger: PageVisitLogger
-    private _createNotif: typeof createNotification
     public checkBookmark: BookmarkChecker
 
     /**
@@ -90,7 +82,6 @@ export default class TabChangeListeners {
     constructor({
         tabManager,
         pageVisitLogger,
-        notifsBackground,
         storageArea = browser.storage.local,
         loggableTabCheck = shouldLogTab,
         visitUpdate = updateVisitInteractionData,
@@ -101,10 +92,8 @@ export default class TabChangeListeners {
         tabActiveCheck = whenTabActive,
         bookmarkCheck = searchIndex.pageHasBookmark(searchIndex.getDb),
         contentScriptPaths = TabChangeListeners.DEF_CONTENT_SCRIPTS,
-        createNotif = createNotification,
     }: Props) {
         this._tabManager = tabManager
-        this._notifsBackground = notifsBackground
         this._pageVisitLogger = pageVisitLogger
         this._storage = storageArea
         this._checkTabLoggable = loggableTabCheck
@@ -116,7 +105,6 @@ export default class TabChangeListeners {
         this._tabActive = tabActiveCheck
         this.checkBookmark = bookmarkCheck
         this._contentScriptPaths = contentScriptPaths
-        this._createNotif = createNotif
     }
 
     private getOrCreateTabIndexers(tabId: number) {
@@ -200,18 +188,6 @@ export default class TabChangeListeners {
         }
     }
 
-    private _handlePageLogErrors = (err: Error) =>
-        this._createNotif({
-            requireInteraction: false,
-            title: 'Memex error: page logging',
-            message: err.message,
-        })
-
-    private handlePageLogErrors = handleDBQuotaErrors(
-        this._handlePageLogErrors,
-        () => this._notifsBackground.dispatchNotification('db_error'),
-    )
-
     public async injectContentScripts(tab: Tabs.Tab) {
         const isLoggable = await this._checkTabLoggable(tab)
 
@@ -247,9 +223,10 @@ export default class TabChangeListeners {
         // Run stage 1 of visit indexing immediately (depends on user settings)
         await this._pageDOMLoaded({ tabId })
         if (indexingPrefs.shouldLogStubs) {
-            await this._pageVisitLogger
-                .logPageStub(tab, indexingPrefs.shouldCaptureScreenshots)
-                .catch(this.handlePageLogErrors)
+            await this._pageVisitLogger.logPageStub(
+                tab,
+                indexingPrefs.shouldCaptureScreenshots,
+            )
         }
 
         // Schedule stage 2 of visit indexing soon after - if user stays on page
@@ -257,15 +234,13 @@ export default class TabChangeListeners {
             await this._tabManager.scheduleTabLog(
                 tabId,
                 () =>
-                    this._tabActive({ tabId })
-                        .then(() =>
-                            this._pageVisitLogger.logPageVisit(
-                                tab,
-                                indexingPrefs.shouldCaptureScreenshots,
-                                indexingPrefs.shouldLogStubs,
-                            ),
-                        )
-                        .catch(this.handlePageLogErrors),
+                    this._tabActive({ tabId }).then(() =>
+                        this._pageVisitLogger.logPageVisit(
+                            tab,
+                            indexingPrefs.shouldCaptureScreenshots,
+                            indexingPrefs.shouldLogStubs,
+                        ),
+                    ),
                 indexingPrefs.logDelay,
             )
         }
