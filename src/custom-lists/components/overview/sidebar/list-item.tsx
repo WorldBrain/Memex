@@ -1,4 +1,6 @@
 import React, { Component, DragEventHandler } from 'react'
+import { Emoji } from 'emoji-mart'
+
 import cx from 'classnames'
 
 const styles = require('./list-item.css')
@@ -147,6 +149,11 @@ class PageList extends Component<Props, State> {
                 draggable
             >
                 <div className={styles.pageTitle}>
+                    <Emoji
+                        emoji={{ id: 'file_folder' }}
+                        set="emojione"
+                        size={24}
+                    />
                     <div className={styles.listName}>{this.props.listName}</div>
                     <div className={styles.buttonContainer}>
                         {this.state.isMouseInside && (

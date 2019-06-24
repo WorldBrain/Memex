@@ -6,6 +6,7 @@
     align-items: center;
     flex-flow: column nowrap;
     height: auto;
+    padding-left: 1rem;
     position: relative;
     width: 100%;
     cursor: pointer;
@@ -20,7 +21,7 @@
 
     & .pageList {
         & .listName {
-            padding-left: 2rem;
+            padding-left: 1rem;
         }
     }
 }
