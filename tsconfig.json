@@ -25,9 +25,14 @@
             "@worldbrain/storex-backend-dexie/lib/*": [
                 "external/@worldbrain/storex-backend-dexie/ts/*"
             ],
+            "@worldbrain/storex-pattern-modules": [
+                "external/@worldbrain/storex-pattern-modules/ts"
+            ],
             "@worldbrain/memex-stemmer": [
                 "external/@worldbrain/memex-stemmer/ts"
             ],
+            "user-logic": ["external/user-logic/ts"],
+            "user-logic/lib/*": ["external/user-logic/ts/*"],
             "src/*": ["src/*"]
         },
         "lib": ["es2017", "dom", "dom.iterable", "esnext.asynciterable"]

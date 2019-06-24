@@ -1,4 +1,5 @@
-import { Dexie } from '../types'
+import Storex from '@worldbrain/storex'
+
 import AbstractModel from './abstract-model'
 
 const favIcon = Symbol('favIconURI')
@@ -12,14 +13,21 @@ export default class FavIcon extends AbstractModel {
     public hostname: string
     public favIcon: Blob
 
-    constructor({ hostname, favIconURI }: Props) {
-        super()
+    constructor(db: Storex, { hostname, favIconURI }: Props) {
+        super(db)
 
         this.hostname = hostname
         this.favIconURI = favIconURI
 
         // Non-enumerable prop to hold the favIcon in-mem Blob link
         Object.defineProperty(this, favIcon, AbstractModel.DEF_NON_ENUM_PROP)
+    }
+
+    get data() {
+        return {
+            hostname: this.hostname,
+            favIcon: this.favIcon,
+        }
     }
 
     get favIconURI() {
@@ -41,20 +49,18 @@ export default class FavIcon extends AbstractModel {
         }
     }
 
-    public async delete(getDb: () => Promise<Dexie>) {
-        const db = await getDb()
-        return db.transaction('rw', db.favIcons, () =>
-            db.favIcons.delete(this.hostname),
-        )
+    public async delete() {
+        return this.db
+            .collection('favIcons')
+            .deleteOneObject({ hostname: this.hostname })
     }
 
-    public async save(getDb: () => Promise<Dexie>) {
-        const db = await getDb()
-        return db.transaction('rw', db.favIcons, () => {
-            // Could have been errors converting the data url to blob
-            if (this.favIcon !== null) {
-                db.favIcons.put(this)
-            }
-        })
+    public async save() {
+        if (this.favIcon !== null) {
+            const { object } = await this.db
+                .collection('favIcons')
+                .createObject(this.data)
+            return object.hostname
+        }
     }
 }

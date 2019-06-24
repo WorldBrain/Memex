@@ -26,8 +26,8 @@ export default class Visit extends EventModel {
      */
     scrollMaxPerc
 
-    constructor({ url, time, ...props }) {
-        super({ url, time })
+    constructor(db, { url, time, ...props }) {
+        super(db, { url, time })
 
         this.duration = props.duration
         this.scrollPx = props.scrollPx
@@ -55,15 +55,18 @@ export default class Visit extends EventModel {
         )
     }
 
-    async save(getDb) {
-        const db = await getDb()
-
+    async save() {
         // Only update if changes detected between existing visit and this one
-        const existingVisit = await db.visits.get(this.pk)
+        const existingVisit = await this.db
+            .collection('visits')
+            .findOneObject({ time: this.time, url: this.url })
         if (!this._hasChanged(existingVisit)) {
             return this.pk
         }
 
-        return db.visits.put(this)
+        const { object } = await this.db
+            .collection('visits')
+            .createObject(this.data)
+        return [object.time, object.url]
     }
 }

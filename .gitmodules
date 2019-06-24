@@ -7,3 +7,9 @@
 [submodule "external/@worldbrain/memex-stemmer"]
 	path = external/@worldbrain/memex-stemmer
 	url = https://github.com/WorldBrain/memex-stemmer.git
+[submodule "external/@worldbrain/storex-pattern-modules"]
+	path = external/@worldbrain/storex-pattern-modules
+	url = https://github.com/WorldBrain/storex-pattern-modules
+[submodule "external/user-logic"]
+	path = external/user-logic
+	url = https://github.com/ShishKabab/user-logic

@@ -1,9 +1,11 @@
+import Storex from '@worldbrain/storex'
+import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+
 import initStorageManager from 'src/search/memory-storex'
 import CustomListBg from 'src/custom-lists/background'
 import AnnotsBg from 'src/direct-linking/background'
 import SocialBackground from './'
 import SocialStorage from './storage'
-import { StorageManager } from 'src/search'
 import * as DATA from './storage.test.data'
 import { Tweet, SocialPage } from '../types'
 import { SocialSearchPlugin } from 'src/search/background/social-search'
@@ -18,7 +20,7 @@ const assertTweetsEqual = (received: Tweet, expected: Tweet) => {
 
 describe('Social storage', () => {
     let socialStorage: SocialStorage
-    let storageManager: StorageManager
+    let storageManager: Storex
     let socialBg: SocialBackground
     let customListBg: CustomListBg
     let listId: number
@@ -40,7 +42,10 @@ describe('Social storage', () => {
         })
 
         for (const tweet of [DATA.tweetA, DATA.tweetB]) {
-            await socialStorage.addSocialPost({ ...tweet })
+            // ID gets auto-assigned on insert.
+            // Grab that and attach it to the test data docs, so we can compare them later.
+            const postId = await socialStorage.addSocialPost({ ...tweet })
+            tweet.id = postId
         }
     }
 
@@ -48,18 +53,21 @@ describe('Social storage', () => {
         storageManager = initStorageManager()
         customListBg = new CustomListBg({
             storageManager,
-            getDb: () => storageManager['dexieInstance'],
         })
         socialBg = new SocialBackground({
             storageManager,
         })
-        new AnnotsBg({
+        const annotsBg = new AnnotsBg({
             storageManager,
-            getDb: () => storageManager['dexieInstance'],
             socialBg,
         })
 
         socialStorage = socialBg['storage']
+        registerModuleMapCollections(storageManager.registry, {
+            socialStorage,
+            annotsStorage: annotsBg.annotationStorage,
+            customListStorage: customListBg.storage,
+        })
 
         await storageManager.finishInitialization()
         await insertTestData()

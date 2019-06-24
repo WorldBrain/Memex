@@ -1,7 +1,7 @@
 import { createPageViaBmTagActs } from './on-demand-indexing'
 import { getPage } from './util'
 import { initErrHandler } from './storage'
-import { Dexie } from './types'
+import { DBGet } from './types'
 
 interface Props {
     url: string
@@ -9,7 +9,7 @@ interface Props {
     tabId?: number
 }
 
-const modifyTag = (shouldAdd: boolean) => (getDb: () => Promise<Dexie>) =>
+const modifyTag = (shouldAdd: boolean) => (getDb: DBGet) =>
     async function({ url, tag, tabId }: Props) {
         let page = await getPage(getDb)(url)
 
@@ -31,15 +31,13 @@ const modifyTag = (shouldAdd: boolean) => (getDb: () => Promise<Dexie>) =>
             page.delTag(tag)
         }
 
-        await page.save(getDb).catch(initErrHandler())
+        await page.save().catch(initErrHandler())
     }
 
 export const delTag = modifyTag(false)
 export const addTag = modifyTag(true)
 
-export const fetchPageTags = (getDb: () => Promise<Dexie>) => async (
-    url: string,
-) => {
+export const fetchPageTags = (getDb: DBGet) => async (url: string) => {
     const page = await getPage(getDb)(url)
 
     return page != null ? page.tags : []

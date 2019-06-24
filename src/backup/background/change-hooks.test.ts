@@ -1,9 +1,8 @@
-import * as expect from 'expect'
 import Storex from '@worldbrain/storex'
+import * as expect from 'expect'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 
-import { StorageManager } from '../../search/types'
 import setupChangeTracking from './change-hooks'
 
 describe('Backup change hooks', () => {
@@ -14,7 +13,7 @@ describe('Backup change hooks', () => {
         })
         const storageManager = new Storex({
             backend: storageBackend,
-        }) as StorageManager
+        })
         storageManager.registry.registerCollections({
             user: {
                 version: new Date(2018, 11, 11),

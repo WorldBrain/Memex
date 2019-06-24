@@ -1,14 +1,18 @@
-import { FeatureStorage } from 'src/search/storage'
-import { StorageManager } from 'src/search'
+import Storex from '@worldbrain/storex'
+import {
+    StorageModule,
+    StorageModuleConfig,
+} from '@worldbrain/storex-pattern-modules'
+
+import { SuggestPlugin } from 'src/search/plugins'
 import { Tweet, User } from '../types'
 import { PageList } from 'src/custom-lists/background/types'
-
 import * as consts from '../constants'
 import { Annotation } from 'src/direct-linking/types'
 import { buildPostUrlId } from '../util'
 
 export interface SocialStorageProps {
-    storageManager: StorageManager
+    storageManager: Storex
     tweetsColl?: string
     usersColl?: string
     tagsColl?: string
@@ -16,13 +20,14 @@ export interface SocialStorageProps {
     listEntriesColl?: string
 }
 
-export default class SocialStorage extends FeatureStorage {
+export default class SocialStorage extends StorageModule {
     static TWEETS_COLL = consts.POSTS_COLL
     static USERS_COLL = consts.USERS_COLL
     static TAGS_COLL = consts.TAGS_COLL
     static BMS_COLL = consts.BMS_COLL
     static LIST_ENTRIES_COLL = consts.LIST_ENTRIES_COLL
 
+    private storageManager: Storex
     private postsColl: string
     private usersColl: string
     private bookmarksColl: string
@@ -37,102 +42,228 @@ export default class SocialStorage extends FeatureStorage {
         bookmarksColl = SocialStorage.BMS_COLL,
         listEntriesColl = SocialStorage.LIST_ENTRIES_COLL,
     }: SocialStorageProps) {
-        super(storageManager)
+        super({ storageManager })
+        this.storageManager = storageManager
 
         this.postsColl = tweetsColl
         this.usersColl = usersColl
         this.tagsColl = tagsColl
         this.bookmarksColl = bookmarksColl
         this.listEntriesColl = listEntriesColl
-
-        this.storageManager.registry.registerCollection(this.postsColl, {
-            version: new Date('2019-04-22'),
-            fields: {
-                text: { type: 'text' },
-                serviceId: { type: 'string' },
-                createdAt: { type: 'datetime' },
-                createdWhen: { type: 'datetime' },
-            },
-            indices: [
-                { field: 'text' },
-                { field: 'serviceId' },
-                { field: 'createdAt' },
-            ],
-            relationships: [
-                {
-                    childOf: this.usersColl,
-                    alias: 'userId',
-                    fieldName: 'userId',
-                },
-            ],
-        })
-
-        this.storageManager.registry.registerCollection(this.usersColl, {
-            version: new Date('2019-04-22'),
-            fields: {
-                serviceId: { type: 'string' },
-                name: { type: 'string' },
-                username: { type: 'string' },
-                isVerified: { type: 'boolean' },
-                profilePic: { type: 'blob' },
-                type: { type: 'string' },
-            },
-            indices: [
-                { field: 'serviceId' },
-                { field: 'name' },
-                { field: 'username' },
-            ],
-        })
-
-        this.storageManager.registry.registerCollection(this.bookmarksColl, {
-            version: new Date('2019-05-15'),
-            fields: {
-                createdAt: { type: 'datetime' },
-            },
-            indices: [{ field: 'createdAt' }],
-            relationships: [
-                {
-                    singleChildOf: this.postsColl,
-                    alias: 'postId',
-                    fieldName: 'postId',
-                },
-            ],
-        })
-
-        this.storageManager.registry.registerCollection(this.tagsColl, {
-            version: new Date('2019-05-17'),
-            fields: {
-                name: { type: 'string' },
-            },
-            indices: [{ field: 'name' }],
-            relationships: [
-                {
-                    childOf: this.postsColl,
-                    alias: 'postId',
-                    fieldName: 'postId',
-                },
-            ],
-        })
-
-        this.storageManager.registry.registerCollection(this.listEntriesColl, {
-            version: new Date('2019-05-17'),
-            fields: {
-                createdAt: { type: 'datetime' },
-            },
-            relationships: [
-                {
-                    childOf: 'customLists',
-                    alias: 'listId',
-                    fieldName: 'listId',
-                },
-                {
-                    childOf: this.postsColl,
-                    alias: 'postId',
-                    fieldName: 'postId',
-                },
-            ],
-        })
     }
+
+    getConfig = (): StorageModuleConfig => ({
+        collections: {
+            [this.postsColl]: {
+                version: new Date('2019-04-22'),
+                fields: {
+                    text: { type: 'text' },
+                    serviceId: { type: 'string' },
+                    createdAt: { type: 'datetime' },
+                    createdWhen: { type: 'datetime' },
+                },
+                indices: [
+                    { field: 'text' },
+                    { field: 'serviceId' },
+                    { field: 'createdAt' },
+                ],
+                relationships: [
+                    {
+                        childOf: this.usersColl,
+                        alias: 'userId',
+                        fieldName: 'userId',
+                    },
+                ],
+            },
+            [this.usersColl]: {
+                version: new Date('2019-04-22'),
+                fields: {
+                    serviceId: { type: 'string' },
+                    name: { type: 'string' },
+                    username: { type: 'string' },
+                    isVerified: { type: 'boolean' },
+                    profilePic: { type: 'blob' },
+                    type: { type: 'string' },
+                },
+                indices: [
+                    { field: 'serviceId' },
+                    { field: 'name' },
+                    { field: 'username' },
+                ],
+            },
+            [this.bookmarksColl]: {
+                version: new Date('2019-05-15'),
+                fields: {
+                    createdAt: { type: 'datetime' },
+                },
+                indices: [{ field: 'createdAt' }],
+                relationships: [
+                    {
+                        singleChildOf: this.postsColl,
+                        alias: 'postId',
+                        fieldName: 'postId',
+                    },
+                ],
+            },
+            [this.tagsColl]: {
+                version: new Date('2019-05-17'),
+                fields: {
+                    name: { type: 'string' },
+                },
+                indices: [{ field: 'name' }],
+                relationships: [
+                    {
+                        childOf: this.postsColl,
+                        alias: 'postId',
+                        fieldName: 'postId',
+                    },
+                ],
+            },
+            [this.listEntriesColl]: {
+                version: new Date('2019-05-17'),
+                fields: {
+                    createdAt: { type: 'datetime' },
+                },
+                relationships: [
+                    {
+                        childOf: 'customLists',
+                        alias: 'listId',
+                        fieldName: 'listId',
+                    },
+                    {
+                        childOf: this.postsColl,
+                        alias: 'postId',
+                        fieldName: 'postId',
+                    },
+                ],
+            },
+        },
+        operations: {
+            createSocialPost: {
+                collection: this.postsColl,
+                operation: 'createObject',
+            },
+            createSocialUser: {
+                collection: this.usersColl,
+                operation: 'createObject',
+            },
+            createListEntry: {
+                collection: this.listEntriesColl,
+                operation: 'createObject',
+            },
+            createHashTag: {
+                collection: this.tagsColl,
+                operation: 'createObject',
+            },
+            createSocialBookmark: {
+                collection: this.bookmarksColl,
+                operation: 'createObject',
+            },
+            deleteListEntry: {
+                collection: this.listEntriesColl,
+                operation: 'deleteObjects',
+                args: { listId: '$listId:number', postId: '$postId:number' },
+            },
+            deleteSocialBookmark: {
+                collection: this.bookmarksColl,
+                operation: 'deleteObjects',
+                args: { postId: '$postId:number' },
+            },
+            deleteSocialUser: {
+                collection: this.usersColl,
+                operation: 'deleteObject',
+                args: { id: '$id:number' },
+            },
+            deleteListEntriesForPost: {
+                collection: this.listEntriesColl,
+                operation: 'deleteObjects',
+                args: { postId: '$postId:number' },
+            },
+            deleteHashTagsForPost: {
+                collection: this.tagsColl,
+                operation: 'deleteObjects',
+                args: { postId: '$postId:number' },
+            },
+            deleteSocialPost: {
+                collection: this.postsColl,
+                operation: 'deleteObject',
+                args: { id: '$postId:number' },
+            },
+            findSocialPost: {
+                collection: this.postsColl,
+                operation: 'findObject',
+                args: { id: '$id:number' },
+            },
+            findSocialUsers: {
+                collection: this.usersColl,
+                operation: 'findObjects',
+                args: { id: { $in: '$userIds:number[]' } },
+            },
+            findSocialUsersExc: {
+                collection: this.usersColl,
+                operation: 'findObjects',
+                args: [{ id: { $nin: '$userIds:number[]' } }, '$opts:any'],
+            },
+            findPostByServiceId: {
+                collection: this.postsColl,
+                operation: 'findObject',
+                args: { serviceId: '$serviceId:string' },
+            },
+            findUserByServiceId: {
+                collection: this.usersColl,
+                operation: 'findObject',
+                args: { serviceId: '$serviceId:string' },
+            },
+            findListEntriesForPost: {
+                collection: this.listEntriesColl,
+                operation: 'findObjects',
+                args: { postId: '$postId:number' },
+            },
+            findHashTagsExc: {
+                collection: this.tagsColl,
+                operation: 'findObjects',
+                args: [
+                    { name: { $nin: '$excludedIds:number[]' } },
+                    '$opts:any',
+                ],
+            },
+            updateSocialPost: {
+                collection: this.postsColl,
+                operation: 'updateObject',
+                args: [
+                    {
+                        id: '$id:pk',
+                    },
+                    {
+                        $set: {
+                            createdAt: '$createdAt:date',
+                        },
+                    },
+                ],
+            },
+            countSocialPostsForUser: {
+                collection: this.postsColl,
+                operation: 'countObjects',
+                args: { userId: '$userId:number' },
+            },
+            suggestUsers: {
+                operation: SuggestPlugin.SUGGEST_OBJS_OP_ID,
+                args: {
+                    collection: this.usersColl,
+                    query: { name: '$name:string' },
+                    options: { includePks: true, ignoreCase: ['name'] },
+                },
+            },
+            suggestHashTags: {
+                operation: SuggestPlugin.SUGGEST_OBJS_OP_ID,
+                args: {
+                    collection: this.tagsColl,
+                    query: { name: '$name:string' },
+                    options: { ignoreCase: ['name'] },
+                },
+            },
+        },
+    })
 
     async addListEntry({
         createdAt = new Date(),
@@ -142,19 +273,15 @@ export default class SocialStorage extends FeatureStorage {
         listId: number
         createdAt?: Date
     }): Promise<number> {
-        const { object } = await this.storageManager
-            .collection(this.listEntriesColl)
-            .createObject({ createdAt, ...entry })
+        const { object } = await this.operation('createListEntry', {
+            createdAt,
+            ...entry,
+        })
         return object.id
     }
 
     async delListEntry({ listId, postId }: { listId: number; postId: number }) {
-        return this.storageManager
-            .collection(this.listEntriesColl)
-            .deleteObjects({
-                listId,
-                postId,
-            })
+        return this.operation('deleteListEntry', { listId, postId })
     }
 
     private changeListsBeforeSending(
@@ -189,18 +316,18 @@ export default class SocialStorage extends FeatureStorage {
     }
 
     async fetchListPagesByPostId({ postId }: { postId: number }) {
-        const pages = await this.storageManager
-            .collection(this.listEntriesColl)
-            .findObjects({ postId })
+        const entries = await this.operation('findListEntriesForPost', {
+            postId,
+        })
 
-        const listIds = pages.map(({ listId }) => listId)
+        const listIds = entries.map(({ listId }) => listId)
         const lists = await this.fetchAllLists({
             query: {
                 id: { $in: listIds },
             },
         })
 
-        return this.changeListsBeforeSending(lists, pages)
+        return this.changeListsBeforeSending(lists, entries)
     }
 
     async addSocialPost({
@@ -213,28 +340,18 @@ export default class SocialStorage extends FeatureStorage {
         const postExistsId = await this.getPostIdForServiceId({ serviceId })
 
         if (postExistsId) {
-            return this.storageManager
-                .collection(this.postsColl)
-                .updateOneObject(
-                    {
-                        id: postExistsId,
-                    },
-                    {
-                        $set: {
-                            createdAt,
-                        },
-                    },
-                )
+            return this.operation('updateSocialPost', {
+                id: postExistsId,
+                createdAt,
+            })
         }
 
-        const { object } = await this.storageManager
-            .collection(this.postsColl)
-            .createObject({
-                createdAt,
-                createdWhen: new Date(createdWhen),
-                serviceId,
-                ...rest,
-            })
+        const { object } = await this.operation('createSocialPost', {
+            createdAt,
+            createdWhen: new Date(createdWhen),
+            serviceId,
+            ...rest,
+        })
 
         const postId = object.id
 
@@ -251,16 +368,14 @@ export default class SocialStorage extends FeatureStorage {
         profilePic,
         type,
     }: User): Promise<number> {
-        const { object } = await this.storageManager
-            .collection(this.usersColl)
-            .createObject({
-                name,
-                username,
-                isVerified,
-                profilePic,
-                type,
-                serviceId,
-            })
+        const { object } = await this.operation('createSocialUser', {
+            name,
+            username,
+            isVerified,
+            profilePic,
+            type,
+            serviceId,
+        })
 
         return object.id
     }
@@ -274,7 +389,7 @@ export default class SocialStorage extends FeatureStorage {
     }) {
         await Promise.all(
             hashtags.map(hashtag =>
-                this.storageManager.collection(this.tagsColl).createObject({
+                this.operation('createHashTag', {
                     name: hashtag,
                     postId,
                 }),
@@ -289,12 +404,10 @@ export default class SocialStorage extends FeatureStorage {
         postId: number
         time?: Date
     }): Promise<number> {
-        const { object } = await this.storageManager
-            .collection(this.bookmarksColl)
-            .createObject({
-                postId,
-                createdAt: time,
-            })
+        const { object } = await this.operation('createSocialBookmark', {
+            postId,
+            createdAt: time,
+        })
 
         return object.id
     }
@@ -322,27 +435,23 @@ export default class SocialStorage extends FeatureStorage {
     }
 
     async delSocialBookmark({ postId }: { postId: number }) {
-        return this.storageManager
-            .collection(this.bookmarksColl)
-            .deleteObjects({ postId })
+        return this.operation('deleteSocialBookmark', { postId })
     }
 
     private async maybeDeletePostAuthor({ postId }: { postId: number }) {
-        const { userId } = await this.storageManager
-            .collection(this.postsColl)
-            .findOneObject<Tweet>({ id: postId })
+        const { userId } = await this.operation('findSocialPost', {
+            id: postId,
+        })
 
-        const postCount = await this.storageManager
-            .collection(this.postsColl)
-            .countObjects({ userId })
+        const postCount = await this.operation('countSocialPostsForUser', {
+            userId,
+        })
 
         if (postCount > 1) {
             return
         }
 
-        return this.storageManager
-            .collection(this.usersColl)
-            .deleteOneObject({ id: userId })
+        return this.operation('deleteSocialUser', { id: userId })
     }
 
     private async deletePostAnnots({ postUrlId }: { postUrlId: string }) {
@@ -371,28 +480,20 @@ export default class SocialStorage extends FeatureStorage {
             await this.maybeDeletePostAuthor({ postId })
 
             await Promise.all([
-                this.storageManager
-                    .collection(this.postsColl)
-                    .deleteObjects({ id: postId }),
-                this.storageManager
-                    .collection(this.tagsColl)
-                    .deleteObjects({ postId }),
+                this.operation('deleteSocialPost', { postId }),
+                this.operation('deleteHashTagsForPost', { postId }),
+                this.operation('deleteListEntriesForPost', { postId }),
+                this.delSocialBookmark({ postId }),
+                this.deletePostAnnots({ postUrlId }),
                 this.storageManager
                     .collection('tags')
                     .deleteObjects({ url: postUrlId }),
-                this.delSocialBookmark({ postId }),
-                this.storageManager
-                    .collection(this.listEntriesColl)
-                    .deleteObjects({ postId }),
-                this.deletePostAnnots({ postUrlId }),
             ])
         }
     }
 
     async getSocialPost({ id }: { id: number }): Promise<Tweet> {
-        return this.storageManager
-            .collection(this.postsColl)
-            .findOneObject<Tweet>({ id })
+        return this.operation('findSocialPost', { id })
     }
 
     async getUserIdForServiceId({
@@ -400,9 +501,9 @@ export default class SocialStorage extends FeatureStorage {
     }: {
         serviceId: string
     }): Promise<number> {
-        const user = await this.storageManager
-            .collection(this.usersColl)
-            .findObject<User>({ serviceId })
+        const user: User = await this.operation('findUserByServiceId', {
+            serviceId,
+        })
 
         if (user == null) {
             return null
@@ -416,9 +517,9 @@ export default class SocialStorage extends FeatureStorage {
     }: {
         serviceId: string
     }): Promise<number> {
-        const post = await this.storageManager
-            .collection(this.postsColl)
-            .findObject<Tweet>({ serviceId })
+        const post: Tweet = await this.operation('findPostByServiceId', {
+            serviceId,
+        })
 
         if (post == null) {
             return null
@@ -464,20 +565,13 @@ export default class SocialStorage extends FeatureStorage {
         name: string
         base64Img?: boolean
     }) {
-        const suggestions = await this.storageManager
-            .collection(this.usersColl)
-            .suggestObjects<string, string>(
-                { name },
-                { includePks: true, ignoreCase: ['name'] },
-            )
+        const suggestions = await this.operation('suggestUsers', {
+            name,
+        })
 
         const userIds = suggestions.map(({ pk }) => pk)
 
-        const users = await this.storageManager
-            .collection(this.usersColl)
-            .findObjects<User>({
-                id: { $in: userIds },
-            })
+        const users = await this.operation('findSocialUsers', { userIds })
 
         return this.attachImage(users, base64Img)
     }
@@ -491,36 +585,32 @@ export default class SocialStorage extends FeatureStorage {
         limit?: number
         base64Img?: boolean
     }) {
-        const users = await this.storageManager
-            .collection(this.usersColl)
-            .findObjects<User>(
-                {
-                    id: { $nin: excludeIds },
-                },
-                opts,
-            )
+        const users = await this.operation('findSocialUsersExc', {
+            userIds: excludeIds,
+            opts,
+        })
 
         return this.attachImage(users, opts.base64Img)
     }
 
     async fetchAllHashtags({
-        query = {},
-        opts = {},
+        excludeIds,
+        ...opts
     }: {
-        query?: any
-        opts?: any
+        excludeIds: number[]
+        limit: number
+        skip: number
     }) {
-        const hashtags = await this.storageManager
-            .collection(this.tagsColl)
-            .findObjects(query, opts)
+        const hashtags = await this.operation('findHashTagsExc', {
+            excludedIds: excludeIds,
+            opts,
+        })
 
         return hashtags.map(({ name }) => name)
     }
 
     async fetchHashtagSuggestions({ name }: { name: string }) {
-        const suggestions = await this.storageManager
-            .collection(this.tagsColl)
-            .suggestObjects<string, string>({ name }, { ignoreCase: ['name'] })
+        const suggestions = await this.operation('suggestHashTags', { name })
 
         return suggestions.map(({ suggestion }) => suggestion)
     }

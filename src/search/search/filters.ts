@@ -1,17 +1,21 @@
-import { Dexie, SearchParams, FilteredIDs } from '..'
 import intersection from 'lodash/fp/intersection'
 import flatten from 'lodash/fp/flatten'
 import difference from 'lodash/fp/difference'
 
-const pageIndexLookup = (getDb: () => Promise<Dexie>) => async (
+import { DBGet, SearchParams, FilteredIDs } from '..'
+import { DexieUtilsPlugin } from '../plugins/dexie-utils'
+
+const pageIndexLookup = (getDb: DBGet) => async (
     index: string,
     matches: string[],
-) => {
+): Promise<string> => {
     const db = await getDb()
-    return db.pages
-        .where(index)
-        .anyOf(matches)
-        .primaryKeys()
+    return db.operation(DexieUtilsPlugin.GET_PKS_OP, {
+        collection: 'pages',
+        fieldName: index,
+        opName: 'anyOf',
+        opValue: matches,
+    })
 }
 
 /**
@@ -88,7 +92,7 @@ export class FilteredIDsManager<T> implements FilteredIDs<T> {
     }
 }
 
-const tagSearch = (getDb: () => Promise<Dexie>) => async (tags: string[]) => {
+const tagSearch = (getDb: DBGet) => async (tags: string[]) => {
     const db = await getDb()
     if (!tags || !tags.length) {
         return undefined
@@ -96,27 +100,24 @@ const tagSearch = (getDb: () => Promise<Dexie>) => async (tags: string[]) => {
 
     const urls = new Set<string>()
 
-    await db.tags
-        .where('name')
-        .anyOf(tags)
-        .eachPrimaryKey(([name, url]) => urls.add(url))
+    const tagDocs = await db
+        .collection('tags')
+        .findObjects({ name: { $in: tags } })
+
+    tagDocs.forEach(({ url }) => urls.add(url))
 
     return urls
 }
 
-const incTagSearch = (getDb: () => Promise<Dexie>) => ({
-    tags,
-}: Partial<SearchParams>) => tagSearch(getDb)(tags)
-const excTagSearch = (getDb: () => Promise<Dexie>) => ({
-    tagsExc,
-}: Partial<SearchParams>) => tagSearch(getDb)(tagsExc)
+const incTagSearch = (getDb: DBGet) => ({ tags }: Partial<SearchParams>) =>
+    tagSearch(getDb)(tags)
+const excTagSearch = (getDb: DBGet) => ({ tagsExc }: Partial<SearchParams>) =>
+    tagSearch(getDb)(tagsExc)
 
 /**
  * Grabs all URLs associated with given domains; either matching in `domain` or `hostname` fields.
  */
-const domainSearch = (getDb: () => Promise<Dexie>) => async (
-    domains: string[],
-) => {
+const domainSearch = (getDb: DBGet) => async (domains: string[]) => {
     if (!domains || !domains.length) {
         return undefined
     }
@@ -129,14 +130,14 @@ const domainSearch = (getDb: () => Promise<Dexie>) => async (
     return new Set([...domainUrls, ...hostnameUrls])
 }
 
-const incDomainSearch = (getDb: () => Promise<Dexie>) => ({
+const incDomainSearch = (getDb: DBGet) => ({
     domains,
 }: Partial<SearchParams>) => domainSearch(getDb)(domains)
-const excDomainSearch = (getDb: () => Promise<Dexie>) => ({
+const excDomainSearch = (getDb: DBGet) => ({
     domainsExclude,
 }: Partial<SearchParams>) => domainSearch(getDb)(domainsExclude)
 
-const listSearch = (getDb: () => Promise<Dexie>) => async ({
+const listSearch = (getDb: DBGet) => async ({
     lists,
 }: Partial<SearchParams>) => {
     if (!lists || !lists.length || !lists[0].length) {
@@ -150,10 +151,8 @@ const listSearch = (getDb: () => Promise<Dexie>) => async ({
     // It is just a temporary hack until multiple lists for filtering in used.
     // Eg: The list: String i.e = "23" gets converted into ["2", "3"] converting back to 23.
     const listEntries = await db
-        .table('pageListEntries')
-        .where('listId')
-        .equals(Number(lists[0]))
-        .toArray()
+        .collection('pageListEntries')
+        .findObjects({ listId: Number(lists[0]) })
 
     listEntries.forEach(({ pageUrl }: any) => urls.add(pageUrl))
 
@@ -163,7 +162,7 @@ const listSearch = (getDb: () => Promise<Dexie>) => async ({
 /**
  * of URLs that match the filters to use as a white-list.
  */
-export const findFilteredUrls = (getDb: () => Promise<Dexie>) => async (
+export const findFilteredUrls = (getDb: DBGet) => async (
     params: Partial<SearchParams>,
 ): Promise<FilteredIDs> => {
     const [

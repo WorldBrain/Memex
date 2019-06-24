@@ -1,37 +1,34 @@
+import Storex from '@worldbrain/storex'
+import { Windows } from 'webextension-polyfill-ts'
+
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { Windows } from 'webextension-polyfill-ts'
-import { Dexie, StorageManager } from 'src/search/types'
 import { getPage } from 'src/search/util'
-import { createPageFromTab } from 'src/search'
+import { createPageFromTab, DBGet } from 'src/search'
 import { Tab } from './types'
 
 export default class CustomListBackground {
-    private storage: CustomListStorage
-    private getDb: () => Promise<Dexie>
+    storage: CustomListStorage
     private tabMan: TabManager
     private windows: Windows.Static
+    private getDb: DBGet
 
     constructor({
         storageManager,
-        getDb,
         tabMan,
         windows,
     }: {
-        storageManager: StorageManager
-        getDb: () => Promise<Dexie>
+        storageManager: Storex
         tabMan?: TabManager
         windows?: Windows.Static
     }) {
         // Makes the custom list Table in indexed DB.
-        this.storage = new CustomListStorage({
-            storageManager,
-        })
-        this.getDb = getDb
+        this.storage = new CustomListStorage({ storageManager })
+        this.getDb = async () => storageManager
         this.tabMan = tabMan
         this.windows = windows
     }
@@ -59,20 +56,10 @@ export default class CustomListBackground {
     }
 
     async fetchAllLists({ excludeIds = [], skip = 0, limit = 20 }) {
-        const query = {
-            id: {
-                $nin: excludeIds,
-            },
-        }
-
-        const opts = {
+        return this.storage.fetchAllLists({
+            excludedIds: excludeIds,
             limit,
             skip,
-        }
-
-        return this.storage.fetchAllLists({
-            query,
-            opts,
         })
     }
 
@@ -81,7 +68,7 @@ export default class CustomListBackground {
     }
 
     async fetchListByName({ name }: { name: string }) {
-        return this.storage.fetchListByName(name)
+        return this.storage.fetchListIgnoreCase({ name })
     }
 
     async insertMissingLists({ names }: { names: string[] }) {
@@ -223,7 +210,7 @@ export default class CustomListBackground {
                 page.addVisit(time)
             }
 
-            await page.save(this.getDb)
+            await page.save()
         })
 
         await Promise.all(

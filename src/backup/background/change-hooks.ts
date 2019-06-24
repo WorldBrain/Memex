@@ -1,11 +1,11 @@
-import { StorageManager } from '../../search/types'
+import Storex from '@worldbrain/storex'
 
 export type ChangeTracker<PK = any> = (
     args: { collection: string; pk: PK; operation: string },
 ) => void
 
 export default function setupChangeTracking(
-    { registry, backend }: StorageManager,
+    { registry, backend }: Storex,
     track: ChangeTracker,
 ) {
     const dexie = backend['dexieInstance']
