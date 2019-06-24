@@ -84,6 +84,8 @@ export default class SearchBackground {
         this.backend = {
             addPage: idx.addPage(this.getDb),
             addPageTerms: idx.addPageTerms(this.getDb),
+            addBookmark: idx.addBookmark(this.getDb, this.tabMan),
+            delBookmark: idx.delBookmark(this.getDb, this.tabMan),
             updateTimestampMeta: idx.updateTimestampMeta(this.getDb),
             addVisit: idx.addVisit(this.getDb),
             addFavIcon: idx.addFavIcon(this.getDb),
