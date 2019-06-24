@@ -3,8 +3,9 @@ import {
     FilteredIDs,
     TermsIndexName,
     PageResultsMap,
-    Dexie,
+    DBGet,
 } from '..'
+import { DexieUtilsPlugin, GetPksProps } from '../plugins/dexie-utils'
 
 const some = require('lodash/some')
 
@@ -17,17 +18,21 @@ export interface TermResults {
 /**
  * Performs a query for a single term on a given multi-index.
  */
-const termQuery = (
-    term: string,
-    excluded: string[],
-    getDb: () => Promise<Dexie>,
-) => async (index: TermsIndexName) => {
+const termQuery = (term: string, excluded: string[], getDb: DBGet) => async (
+    index: TermsIndexName,
+) => {
     const db = await getDb()
-    let coll = db.pages.where(index).equals(term)
 
-    // Adding a `.filter/.and` clause to a collection means it needs to iterate through
+    const opts: GetPksProps = {
+        collection: 'pages',
+        fieldName: index,
+        opName: 'equals',
+        opValue: term,
+    }
+
     if (excluded.length) {
-        coll = coll.filter(page => {
+        // Adding a `.filter/.and` clause slows down a query a lot
+        opts.filter = page => {
             const uniqueTerms = new Set([
                 ...page.terms,
                 ...page.titleTerms,
@@ -35,16 +40,16 @@ const termQuery = (
             ])
 
             return !some(excluded, t => uniqueTerms.has(t))
-        })
+        }
     }
 
-    return coll.primaryKeys()
+    return db.operation(DexieUtilsPlugin.GET_PKS_OP, opts)
 }
 
 /**
  * Performs a query for a single term on a all terms indexes.
  */
-const lookupTerm = (excluded: string[], getDb: () => Promise<Dexie>) =>
+const lookupTerm = (excluded: string[], getDb: DBGet) =>
     async function(term: string): Promise<TermResults> {
         const queryIndex = termQuery(term, excluded, getDb)
 
@@ -84,7 +89,7 @@ const scoreTermResults = (filteredUrls: FilteredIDs) =>
 const intersectTermResults = (a: PageResultsMap, b: PageResultsMap) =>
     new Map([...a].filter(([url]) => b.has(url)))
 
-export const textSearch = (getDb: () => Promise<Dexie>) => async (
+export const textSearch = (getDb: DBGet) => async (
     { terms, termsExclude }: Partial<SearchParams>,
     filteredUrls: FilteredIDs,
 ): Promise<PageResultsMap> => {

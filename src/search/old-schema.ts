@@ -38,14 +38,6 @@ export default {
         },
         indices: [{ field: ['time', 'url'], pk: true }, { field: 'url' }],
     },
-    bookmarks: {
-        version: new Date(2018, 1, 1),
-        fields: {
-            url: { type: 'string' },
-            time: { type: 'timestamp' },
-        },
-        indices: [{ field: 'url', pk: true }, { field: 'time' }],
-    },
     tags: {
         version: new Date(2018, 1, 1),
         fields: {

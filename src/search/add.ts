@@ -3,26 +3,27 @@ import normalizeUrl from '../util/encode-url-for-id'
 import pipeline, { transformUrl } from './pipeline'
 import { Page, FavIcon } from './models'
 import { getPage } from './util'
-import { PipelineReq, Dexie } from './types'
+import { PipelineReq, DBGet } from './types'
 import { initErrHandler } from './storage'
 
 /**
  * Adds/updates a page + associated visit (pages never exist without either an assoc.
  *  visit or bookmark in current model).
  */
-export const addPage = (getDb: () => Promise<Dexie>) => async ({
+export const addPage = (getDb: DBGet) => async ({
     visits = [],
     bookmark,
     pageDoc,
     rejectNoContent,
 }: Partial<PageAddRequest>) => {
+    const db = await getDb()
     const { favIconURI, ...pageData } = await pipeline({
         pageDoc,
         rejectNoContent,
     })
 
-    const page = new Page(pageData)
-    await page.loadRels(getDb)
+    const page = new Page(db, pageData)
+    await page.loadRels()
 
     // Create Visits for each specified time, or a single Visit for "now" if no assoc event
     visits = !visits.length && bookmark == null ? [Date.now()] : visits
@@ -33,28 +34,29 @@ export const addPage = (getDb: () => Promise<Dexie>) => async ({
     }
 
     if (favIconURI != null) {
-        await new FavIcon({ hostname: page.hostname, favIconURI }).save(getDb)
+        await new FavIcon(db, {
+            hostname: page.hostname,
+            favIconURI,
+        }).save()
     }
-    await page.save(getDb)
+    await page.save()
 }
 
-export const addPageTerms = (getDb: () => Promise<Dexie>) => async (
+export const addPageTerms = (getDb: DBGet) => async (
     pipelineReq: PipelineReq,
 ) => {
     const db = await getDb()
     const pageData = await pipeline(pipelineReq)
 
-    await db.transaction('rw', db.tables, async () => {
-        const page = new Page(pageData)
-        await page.loadRels(getDb)
-        await page.save(getDb)
-    })
+    const page = new Page(db, pageData)
+    await page.loadRels()
+    await page.save()
 }
 
 /**
  * Updates an existing specified visit with interactions data.
  */
-export const updateTimestampMeta = (getDb: () => Promise<Dexie>) => async (
+export const updateTimestampMeta = (getDb: DBGet) => async (
     url: string,
     time: number,
     data: Partial<VisitInteraction>,
@@ -62,17 +64,13 @@ export const updateTimestampMeta = (getDb: () => Promise<Dexie>) => async (
     const db = await getDb()
     const normalized = normalizeUrl(url)
 
-    await db
-        .transaction('rw', db.visits, () =>
-            db.visits
-                .where('[time+url]')
-                .equals([time, normalized])
-                .modify(data),
-        )
+    return db
+        .collection('visits')
+        .updateObjects({ time, url: normalized }, { $set: data })
         .catch(initErrHandler())
 }
 
-export const addVisit = (getDb: () => Promise<Dexie>) => async (
+export const addVisit = (getDb: DBGet) => async (
     url: string,
     time = Date.now(),
 ) => {
@@ -83,16 +81,17 @@ export const addVisit = (getDb: () => Promise<Dexie>) => async (
     }
 
     matchingPage.addVisit(time)
-    return matchingPage.save(getDb).catch(initErrHandler())
+    return matchingPage.save().catch(initErrHandler())
 }
 
-export const addFavIcon = (getDb: () => Promise<Dexie>) => async (
+export const addFavIcon = (getDb: DBGet) => async (
     url: string,
     favIconURI: string,
 ) => {
+    const db = await getDb()
     const { hostname } = transformUrl(url)
 
-    return new FavIcon({ hostname, favIconURI })
-        .save(getDb)
+    return new FavIcon(db, { hostname, favIconURI })
+        .save()
         .catch(initErrHandler())
 }

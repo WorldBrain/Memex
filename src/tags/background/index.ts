@@ -1,11 +1,11 @@
 import TagStorage from './storage'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { Dexie, StorageManager } from 'src/search/types'
+import Storex from '@worldbrain/storex'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import { Windows } from 'webextension-polyfill-ts'
 import { getPage } from 'src/search/util'
-import { createPageFromTab } from 'src/search'
+import { createPageFromTab, DBGet } from 'src/search'
 
 interface Tabs {
     tabId: number
@@ -13,24 +13,22 @@ interface Tabs {
 }
 
 export default class TagsBackground {
-    private storage: TagStorage
-    private getDb: () => Promise<Dexie>
+    storage: TagStorage
+    private getDb: DBGet
     private tabMan: TabManager
     private windows: Windows.Static
 
     constructor({
         storageManager,
-        getDb,
         tabMan,
         windows,
     }: {
-        storageManager: StorageManager
-        getDb: () => Promise<Dexie>
+        storageManager: Storex
         tabMan?: TabManager
         windows?: Windows.Static
     }) {
         this.storage = new TagStorage({ storageManager })
-        this.getDb = getDb
+        this.getDb = async () => storageManager
         this.tabMan = tabMan
         this.windows = windows
     }
@@ -68,7 +66,7 @@ export default class TagsBackground {
                 page.addVisit(time)
             }
 
-            await page.save(this.getDb)
+            await page.save()
         })
 
         return this.storage.addTagsToOpenTabs({
@@ -99,9 +97,5 @@ export default class TagsBackground {
 
     async delTag({ tag, url }: { tag: string; url: string }) {
         return this.storage.delTag({ name: tag, url: normalizeUrl(url) })
-    }
-
-    async fetchPages({ name }: { name: string }) {
-        return this.storage.fetchPages({ name })
     }
 }

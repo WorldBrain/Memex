@@ -58,7 +58,10 @@ export const initState: () => Thunk = () => async dispatch => {
 
         // Get 20 more tags that are not related related to the list.
         const pageTags = await fetchPageTagsRPC(currentTab.url)
-        const tags = await fetchInitTagSuggRPC(pageTags, 'tag')
+        const tags = await fetchInitTagSuggRPC({
+            notInclude: pageTags,
+            type: 'tag',
+        })
         dispatch(tagActs.setInitTagSuggests([...pageTags, ...tags]))
         dispatch(tagActs.setTags(pageTags))
     } catch (err) {

@@ -1,14 +1,16 @@
+import Storex from '@worldbrain/storex'
+import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+
 import initStorageManager from '../../search/memory-storex'
 import normalize from '../../util/encode-url-for-id'
 import AnnotationBackground from './'
 import AnnotationStorage from './storage'
-import { StorageManager, getDb } from '../../search'
 import CustomListBackground from 'src/custom-lists/background'
 import * as DATA from './storage.test.data'
 
 describe('Annotations storage', () => {
     let annotationStorage: AnnotationStorage
-    let storageManager: StorageManager
+    let storageManager: Storex
     let customListsBg: CustomListBackground
     let coll1Id: number
 
@@ -59,11 +61,15 @@ describe('Annotations storage', () => {
         storageManager = initStorageManager()
         const annotBg = new AnnotationBackground({
             storageManager,
-            getDb,
             socialBg: {} as any,
         })
-        customListsBg = new CustomListBackground({ storageManager, getDb })
-        annotationStorage = annotBg['annotationStorage']
+        customListsBg = new CustomListBackground({ storageManager })
+        annotationStorage = annotBg.annotationStorage
+
+        registerModuleMapCollections(storageManager.registry, {
+            annotations: annotationStorage,
+            customList: customListsBg.storage,
+        })
 
         await storageManager.finishInitialization()
         await insertTestData()

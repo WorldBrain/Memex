@@ -15,7 +15,7 @@ export interface CustomField {
     field: any // TODO: type properly after storex exports
 }
 
-export default <T extends Storex = Storex>({
+export default ({
     dbName,
     stemmerSelector,
     schemaPatcher,
@@ -23,7 +23,6 @@ export default <T extends Storex = Storex>({
     collections,
     backendPlugins = [],
     customFields = [],
-    modifyInstance = f => f as any,
 }: {
     stemmerSelector: StemmerSelector
     schemaPatcher: typeof schemaPatcherFn
@@ -32,8 +31,7 @@ export default <T extends Storex = Storex>({
     collections: CollectionDefinitionMap
     backendPlugins?: StorageBackendPlugin<DexieStorageBackend>[]
     customFields?: CustomField[]
-    modifyInstance?: (instance: Storex) => T
-}): T => {
+}): Storex => {
     const backend = new DexieStorageBackend({
         stemmerSelector,
         schemaPatcher,
@@ -54,5 +52,5 @@ export default <T extends Storex = Storex>({
 
     storex.registry.registerCollections(collections)
 
-    return modifyInstance(storex)
+    return storex
 }

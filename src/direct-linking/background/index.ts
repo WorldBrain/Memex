@@ -1,7 +1,7 @@
+import Storex from '@worldbrain/storex'
 import { browser, Tabs } from 'webextension-polyfill-ts'
 
 import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
-import { StorageManager, Dexie, search as searchPages } from 'src/search'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
@@ -20,18 +20,16 @@ interface TabArg {
 
 export default class DirectLinkingBackground {
     private backend: DirectLinkingBackend
-    private annotationStorage: AnnotationStorage
+    annotationStorage: AnnotationStorage
     private sendAnnotation: AnnotationSender
     private requests: AnnotationRequests
     private socialBg: SocialBG
 
     constructor({
         storageManager,
-        getDb,
         socialBg,
     }: {
-        storageManager: StorageManager
-        getDb: () => Promise<Dexie>
+        storageManager: Storex
         socialBg: SocialBG
     }) {
         this.socialBg = socialBg
@@ -39,7 +37,6 @@ export default class DirectLinkingBackground {
 
         this.annotationStorage = new AnnotationStorage({
             storageManager,
-            getDb,
         })
 
         this.sendAnnotation = ({ tabId, annotation }) => {

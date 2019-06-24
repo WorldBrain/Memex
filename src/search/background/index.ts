@@ -1,10 +1,11 @@
+import Storex from '@worldbrain/storex'
 import { browser, Bookmarks } from 'webextension-polyfill-ts'
 
 import * as index from '..'
-import { Dexie, StorageManager } from '../types'
 import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
+import { DBGet } from 'src/search'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import {
     PageSearchParams,
@@ -14,11 +15,11 @@ import {
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 
 export default class SearchBackground {
+    storage: SearchStorage
     private backend
-    private storage: SearchStorage
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
-    private getDb: () => Promise<Dexie>
+    private getDb: DBGet
 
     static handleSearchError(e: SearchError) {
         if (e instanceof BadTermError) {
@@ -50,25 +51,23 @@ export default class SearchBackground {
 
     constructor({
         storageManager,
-        getDb,
         tabMan,
         queryBuilder = () => new QueryBuilder(),
         idx = index,
         bookmarksAPI = browser.bookmarks,
     }: {
-        storageManager: StorageManager
-        getDb: () => Promise<Dexie>
+        storageManager: Storex
         queryBuilder?: () => QueryBuilder
         tabMan: TabManager
         idx?: typeof index
         bookmarksAPI?: Bookmarks.Static
     }) {
         this.tabMan = tabMan
-        this.getDb = getDb
+        this.getDb = async () => storageManager
         this.queryBuilderFactory = queryBuilder
         this.storage = new SearchStorage({
             storageManager,
-            legacySearch: idx.fullSearch(getDb),
+            legacySearch: idx.fullSearch(this.getDb),
         })
         this.initBackend(idx)
 
@@ -85,6 +84,8 @@ export default class SearchBackground {
         this.backend = {
             addPage: idx.addPage(this.getDb),
             addPageTerms: idx.addPageTerms(this.getDb),
+            addBookmark: idx.addBookmark(this.getDb, this.tabMan),
+            delBookmark: idx.delBookmark(this.getDb, this.tabMan),
             updateTimestampMeta: idx.updateTimestampMeta(this.getDb),
             addVisit: idx.addVisit(this.getDb),
             addFavIcon: idx.addFavIcon(this.getDb),
@@ -94,14 +95,10 @@ export default class SearchBackground {
             addTag: idx.addTag(this.getDb),
             delTag: idx.delTag(this.getDb),
             fetchPageTags: idx.fetchPageTags(this.getDb),
-            addBookmark: idx.addBookmark(this.getDb, this.tabMan),
-            delBookmark: idx.delBookmark(this.getDb, this.tabMan),
             pageHasBookmark: idx.pageHasBookmark(this.getDb),
             getPage: idx.getPage(this.getDb),
             grabExistingKeys: idx.grabExistingKeys(this.getDb),
             search: idx.search(this.getDb),
-            suggest: idx.suggest(this.getDb),
-            extendedSuggest: idx.extendedSuggest(this.getDb),
             getMatchingPageCount: idx.getMatchingPageCount(this.getDb),
             domainHasFavIcon: idx.domainHasFavIcon(this.getDb),
             createPageFromTab: idx.createPageFromTab(this.getDb),
@@ -114,12 +111,12 @@ export default class SearchBackground {
             search: this.backend.search,
             addPageTag: this.backend.addTag,
             delPageTag: this.backend.delTag,
-            suggest: this.backend.suggest,
+            suggest: this.storage.suggest,
+            extendedSuggest: this.storage.suggestExtended,
             delPages: this.backend.delPages,
             addPageBookmark: this.backend.addBookmark,
             delPageBookmark: this.backend.delBookmark,
             fetchPageTags: this.backend.fetchPageTags,
-            extendedSuggest: this.backend.extendedSuggest,
             delPagesByDomain: this.backend.delPagesByDomain,
             delPagesByPattern: this.backend.delPagesByPattern,
             getMatchingPageCount: this.backend.getMatchingPageCount,

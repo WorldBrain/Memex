@@ -1,4 +1,6 @@
-import { VisitInteraction, Dexie } from '..'
+import Storex from '@worldbrain/storex'
+
+import { VisitInteraction } from '..'
 import AbstractModel from './abstract-model'
 import Visit from './visit'
 import Bookmark from './bookmark'
@@ -54,8 +56,8 @@ export default class Page extends AbstractModel
     public keywords?: string[]
     public pouchMigrationError?: boolean
 
-    constructor(props: PageConstructorOptions) {
-        super()
+    constructor(db: Storex, props: PageConstructorOptions) {
+        super(db)
         this.url = props.url
         this.fullUrl = props.fullUrl
         this.fullTitle = props.fullTitle
@@ -104,6 +106,21 @@ export default class Page extends AbstractModel
             [screenshot]: AbstractModel.DEF_NON_ENUM_PROP,
             [latestProp]: AbstractModel.DEF_NON_ENUM_PROP,
         })
+    }
+
+    get data() {
+        return {
+            url: this.url,
+            fullUrl: this.fullUrl,
+            fullTitle: this.fullTitle,
+            text: this.text,
+            terms: this.terms,
+            urlTerms: this.urlTerms,
+            titleTerms: this.titleTerms,
+            domain: this.domain,
+            hostname: this.hostname,
+            screenshot: this.screenshot,
+        }
     }
 
     get screenshotURI() {
@@ -171,7 +188,9 @@ export default class Page extends AbstractModel
     }
 
     addVisit(time = Date.now(), data: Partial<VisitInteraction> = {}) {
-        this[visitsProp].push(new Visit({ url: this.url, time, ...data }))
+        this[visitsProp].push(
+            new Visit(this.db, { url: this.url, time, ...data }),
+        )
     }
 
     addTag(name: string) {
@@ -180,7 +199,7 @@ export default class Page extends AbstractModel
         )
 
         if (index === -1) {
-            this[tagsProp].push(new Tag({ url: this.url, name }))
+            this[tagsProp].push(new Tag(this.db, { url: this.url, name }))
         }
     }
 
@@ -198,7 +217,7 @@ export default class Page extends AbstractModel
     }
 
     setBookmark(time = Date.now()) {
-        this[bookmarkProp] = new Bookmark({ url: this.url, time })
+        this[bookmarkProp] = new Bookmark(this.db, { url: this.url, time })
     }
 
     delBookmark() {
@@ -236,89 +255,128 @@ export default class Page extends AbstractModel
         }
     }
 
-    async loadRels(getDb: () => Promise<Dexie>) {
-        const db = await getDb()
-        return db.transaction('r', db.tables, async () => {
-            this.loadBlobs()
+    async loadRels() {
+        this.loadBlobs()
 
-            // Grab DB data
-            const visits = await db.visits.where({ url: this.url }).toArray()
-            const tags = await db.tags.where({ url: this.url }).toArray()
-            const bookmark = await db.bookmarks.get(this.url)
+        // Grab DB data
+        const visits = await this.db
+            .collection('visits')
+            .findAllObjects<Visit>({ url: this.url })
+        const tags = await this.db
+            .collection('tags')
+            .findAllObjects<Tag>({ url: this.url })
+        const bookmark = await this.db
+            .collection('bookmarks')
+            .findOneObject<Bookmark>({ url: this.url })
 
-            this[visitsProp] = visits
-            this[tagsProp] = tags
-            this[bookmarkProp] = bookmark
+        this[visitsProp] = visits.map(v => new Visit(this.db, v))
+        this[tagsProp] = tags.map(t => new Tag(this.db, t))
+        this[bookmarkProp] = bookmark
+            ? new Bookmark(this.db, bookmark)
+            : undefined
 
-            // Derive latest time of either bookmark or visits
-            let latest = bookmark != null ? bookmark.time : 0
+        // Derive latest time of either bookmark or visits
+        let latest = bookmark != null ? bookmark.time : 0
 
-            if (latest < (visits[visits.length - 1] || { time: 0 }).time) {
-                latest = visits[visits.length - 1].time
-            }
+        if (latest < (visits[visits.length - 1] || { time: 0 }).time) {
+            latest = visits[visits.length - 1].time
+        }
 
-            this[latestProp] = latest
-        })
+        this[latestProp] = latest
     }
 
-    async delete(getDb: () => Promise<Dexie>) {
-        const db = await getDb()
-        return db.transaction('rw', db.tables, () =>
-            Promise.all([
-                db.visits.where({ url: this.url }).delete(),
-                db.bookmarks.where({ url: this.url }).delete(),
-                db.tags.where({ url: this.url }).delete(),
-                db.pages.where({ url: this.url }).delete(),
-            ]),
-        )
+    async delete() {
+        return this.db.backend.executeBatch([
+            {
+                collection: 'visits',
+                operation: 'deleteObjects',
+                where: { url: this.url },
+            },
+            {
+                collection: 'bookmarks',
+                operation: 'deleteObjects',
+                where: { url: this.url },
+            },
+            {
+                collection: 'tags',
+                operation: 'deleteObjects',
+                where: { url: this.url },
+            },
+            {
+                collection: 'pages',
+                operation: 'deleteObjects',
+                where: { url: this.url },
+            },
+            {
+                collection: 'pageListEntries',
+                operation: 'deleteObjects',
+                where: { pageUrl: this.url },
+            },
+            {
+                collection: 'annotations',
+                operation: 'deleteObjects',
+                where: { pageUrl: this.url },
+            },
+        ])
     }
 
-    async save(getDb: () => Promise<Dexie>) {
-        const db = await getDb()
-        return db.transaction('rw', db.tables, async () => {
-            this.loadBlobs()
+    async save() {
+        return this.db.operation(
+            'transaction',
+            { collections: this.collections },
+            async () => {
+                this.loadBlobs()
 
-            // Merge any new data with any existing
-            const existing = await db.pages.get(this.url)
-            if (existing) {
-                this._mergeTerms('terms', existing.terms)
-                this._mergeTerms('urlTerms', existing.urlTerms)
-                this._mergeTerms('titleTerms', existing.titleTerms)
+                // Merge any new data with any existing
+                const existing = await this.db
+                    .collection('pages')
+                    .findOneObject<Page>({ url: this.url })
+                if (existing) {
+                    this._mergeTerms('terms', existing.terms)
+                    this._mergeTerms('urlTerms', existing.urlTerms)
+                    this._mergeTerms('titleTerms', existing.titleTerms)
 
-                if (!this.screenshot && existing.screenshot) {
-                    this.screenshot = existing.screenshot
+                    if (!this.screenshot && existing.screenshot) {
+                        this.screenshot = existing.screenshot
+                    }
                 }
-            }
 
-            // Persist current page state
-            await db.pages.put(this)
+                // Persist current page state
+                const { object } = await this.db
+                    .collection('pages')
+                    .createObject(this.data)
 
-            // Insert or update all associated visits + tags
-            const [visitIds, tagIds] = await Promise.all([
-                Promise.all(this[visitsProp].map(visit => visit.save(getDb))),
-                Promise.all(this[tagsProp].map(tag => tag.save(getDb))),
-            ])
+                // Insert or update all associated visits + tags
+                const [visitIds, tagIds] = await Promise.all([
+                    Promise.all(this[visitsProp].map(visit => visit.save())),
+                    Promise.all(this[tagsProp].map(tag => tag.save())),
+                ])
 
-            // Either try to update or delete the assoc. bookmark
-            if (this[bookmarkProp] != null) {
-                this[bookmarkProp].save(getDb)
-            } else {
-                await db.bookmarks.where({ url: this.url }).delete()
-            }
+                // Either try to update or delete the assoc. bookmark
+                if (this[bookmarkProp] != null) {
+                    this[bookmarkProp].save()
+                } else {
+                    await this.db
+                        .collection('bookmarks')
+                        .deleteOneObject({ url: this.url })
+                }
 
-            // Remove any visits no longer associated with this page
-            const visitTimes = new Set(visitIds.map(([time]) => time))
-            const tagNames = new Set(tagIds.map(([name]) => name))
-            await Promise.all([
-                db.visits
-                    .where({ url: this.url })
-                    .filter(visit => !visitTimes.has(visit.time))
-                    .delete(),
-                db.tags
-                    .where({ url: this.url })
-                    .filter(tag => !tagNames.has(tag.name))
-                    .delete(),
-            ])
-        })
+                // Remove any visits no longer associated with this page
+                const visitTimes = visitIds.map(([time]) => time)
+                const tagNames = tagIds.map(([name]) => name)
+                await Promise.all([
+                    this.db.collection('visits').deleteObjects({
+                        url: this.url,
+                        time: { $nin: visitTimes },
+                    }),
+                    this.db.collection('tags').deleteObjects({
+                        url: this.url,
+                        name: { $nin: tagNames },
+                    }),
+                ])
+
+                return object.url
+            },
+        )
     }
 }

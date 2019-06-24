@@ -1,3 +1,4 @@
+import Storex from '@worldbrain/storex'
 import {
     browser,
     Alarms,
@@ -17,7 +18,6 @@ import {
     storageChangesManager,
     StorageChangesManager,
 } from '../util/storage-changes'
-import { StorageManager } from 'src/search/types'
 import { migrations } from './quick-and-dirty-migrations'
 import { AlarmsConfig } from './alarms'
 import { fetchUserId } from 'src/analytics/utils'
@@ -27,7 +27,7 @@ class BackgroundScript {
     private notifsBackground: NotifsBackground
     private activityLoggerBackground: ActivityLoggerBackground
     private storageChangesMan: StorageChangesManager
-    private storageManager: StorageManager
+    private storageManager: Storex
     private storageAPI: Storage.Static
     private runtimeAPI: Runtime.Static
     private commandsAPI: Commands.Static
@@ -45,7 +45,7 @@ class BackgroundScript {
         commandsAPI = browser.commands,
         alarmsAPI = browser.alarms,
     }: {
-        storageManager: StorageManager
+        storageManager: Storex
         notifsBackground: NotifsBackground
         loggerBackground: ActivityLoggerBackground
         utilFns?: typeof utils
