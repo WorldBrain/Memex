@@ -14,9 +14,9 @@ It is currently un-used as previously, only the call to bookmark a search result
 
 ### Remote function usage:
 
-1.  Remote Function call, with only url
+1.  Remote Function call, with only url (note this is `addPageBookmark` not `addBookmark`)
 
-    In `src/overview/results/actions.ts:95` as `bookmarkRPC({ url })`
+    In `src/overview/results/actions.ts:95` as `addPageBookmark({ url })`
 
 2.  Remote Function call, with tabId
 

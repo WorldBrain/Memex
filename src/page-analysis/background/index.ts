@@ -34,8 +34,6 @@ export default async function analysePage({
 
     // Fetch the data
     const dataFetchingPromises = [
-        // todo: remote-functions-refactor: should extractPageContent ever be called like this without params? is it used?
-        // @ts-ignore
         allowContent ? extractPageContent() : Promise.resolve(),
         allowScreenshot ? makeScreenshot({ tabId }) : Promise.resolve(),
         allowFavIcon ? getFavIcon({ tabId }) : Promise.resolve(),

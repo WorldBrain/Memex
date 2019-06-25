@@ -226,9 +226,9 @@ export function userSelectedText() {
     const container = selection.getRangeAt(0).commonAncestorContainer
     const extras = isAnchorOrContentEditable(container)
 
-    const userSelectedText =
+    const userSelectedTextString =
         !!selection && !selection.isCollapsed && !!selectedString && !extras
-    return userSelectedText
+    return userSelectedTextString
 }
 
 function isTargetInsideTooltip(event) {

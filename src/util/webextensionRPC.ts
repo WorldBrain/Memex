@@ -45,7 +45,7 @@ export class RemoteError extends Error {
 interface RPCOpts {
     tabId?: number
 
-    //todo: remove any references to this
+    // todo: remove any references to this
     throwWhenNoResponse?: boolean
 }
 
@@ -76,7 +76,9 @@ type InterfaceWithTabId<T> = T & { tabId: number }
 export function runInBackground<T extends object>(): T {
     return new Proxy<T>({} as T, {
         get(target, property): any {
-            return (...args) => remoteFunction(property.toString())(args)
+            return (...args) => {
+                return remoteFunction(property.toString())(...args)
+            }
         },
     })
 }
@@ -85,8 +87,9 @@ export function runInBackground<T extends object>(): T {
 export function runInTab<T extends object>(tabId): T {
     return new Proxy<T>({} as T, {
         get(target, property): any {
-            return (...args) =>
-                remoteFunction(property.toString(), { tabId })(args)
+            return (...args) => {
+                return remoteFunction(property.toString(), { tabId })(...args)
+            }
         },
     })
 }
