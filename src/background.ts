@@ -79,6 +79,8 @@ export const tags = new TagsBackground({
 })
 tags.setupRemoteFunctions()
 
+export const bookmarks = new BookmarksBackground({ storageManager })
+
 // Gradually moving all remote function registrations here, can move them somewhere else soon.
 function setupRemoteFunctions() {
     makeRemotelyCallable<NotificationInterface>({ createNotification })
