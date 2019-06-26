@@ -126,7 +126,9 @@ class PageList extends Component<Props, State> {
         }
     }
 
-    private addEmoji = emoji => {
+    private addEmoji = (emoji, event) => {
+        event.stopPropagation()
+
         this.setState({
             emoji,
             isEmojiChanging: false,
@@ -187,7 +189,9 @@ class PageList extends Component<Props, State> {
                                 right: '-140px',
                                 zIndex: 9,
                             }}
-                            onSelect={this.addEmoji}
+                            onClick={(emoji, event) =>
+                                this.addEmoji(emoji, event)
+                            }
                         />
                     )}
                     <div className={styles.listName}>{this.props.listName}</div>
