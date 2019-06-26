@@ -7,7 +7,11 @@ import {
     createHighlight,
 } from '../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
-import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
+import {
+    remoteFunction,
+    makeRemotelyCallable,
+    makeRemotelyCallableType,
+} from '../util/webextensionRPC'
 import { injectCSS } from '../search-injection/dom'
 import { conditionallyShowHighlightNotification } from './onboarding-interactions'
 import { TooltipInteractionInterface } from 'src/content-tooltip/types'
@@ -129,7 +133,7 @@ const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
  * Sets up RPC functions to insert and remove Tooltip from Popup.
  */
 export const setupRPC = ({ toolbarNotifications }) => {
-    makeRemotelyCallable<TooltipInteractionInterface>({
+    makeRemotelyCallableType<TooltipInteractionInterface>({
         showContentTooltip: async () => {
             if (!showTooltip) {
                 await insertTooltip({ toolbarNotifications })

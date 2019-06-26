@@ -7,7 +7,10 @@ import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
 import internalAnalytics from './analytics/internal'
 import initSentry from './util/raven'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import {
+    makeRemotelyCallable,
+    makeRemotelyCallableType,
+} from 'src/util/webextensionRPC'
 
 // Features that require manual instantiation to setup
 import DirectLinkingBackground from './direct-linking/background'
@@ -81,16 +84,6 @@ tags.setupRemoteFunctions()
 
 export const bookmarks = new BookmarksBackground({ storageManager })
 
-// Gradually moving all remote function registrations here, can move them somewhere else soon.
-function setupRemoteFunctions() {
-    makeRemotelyCallable<NotificationInterface>({ createNotification })
-    makeRemotelyCallable<BookmarksInterface>({
-        addPageBookmark: search.remoteFunctions.addPageBookmark,
-        delPageBookmark: search.remoteFunctions.delPageBookmark,
-    })
-}
-setupRemoteFunctions()
-
 const backupModule = new backup.BackupBackgroundModule({
     storageManager,
     lastBackupStorage: new backupStorage.LocalLastBackupStorage({
@@ -131,6 +124,16 @@ storageManager.finishInitialization().then(() => {
     bgScript.setupWebExtAPIHandlers()
     bgScript.setupAlarms(alarms)
 })
+
+// Gradually moving all remote function registrations here
+function setupRemoteFunctions() {
+    makeRemotelyCallableType<NotificationInterface>({ createNotification })
+    makeRemotelyCallableType<BookmarksInterface>({
+        addPageBookmark: search.remoteFunctions.addPageBookmark,
+        delPageBookmark: search.remoteFunctions.delPageBookmark,
+    })
+}
+setupRemoteFunctions()
 
 // Attach interesting features onto global window scope for interested users
 window['backup'] = backupModule

@@ -1,4 +1,4 @@
-import { runInTab, runInBackground } from 'src/util/webextensionRPC'
+import { runInBackground } from 'src/util/webextensionRPC'
 import { NotificationInterface } from 'src/util/notification-types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 

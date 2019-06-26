@@ -1,7 +1,10 @@
 import retargetEvents from 'react-shadow-dom-retarget-events'
 import { browser } from 'webextension-polyfill-ts'
 
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import {
+    makeRemotelyCallable,
+    makeRemotelyCallableType,
+} from 'src/util/webextensionRPC'
 import { setupRibbonAndSidebarUI, destroyRibbonAndSidebarUI } from '..'
 import { getSidebarState } from '../utils'
 import { getTooltipState } from 'src/content-tooltip/utils'
@@ -178,7 +181,7 @@ export const setupRPC = ({
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
 }) => {
-    makeRemotelyCallable<RibbonInteractionsInterface>({
+    makeRemotelyCallableType<RibbonInteractionsInterface>({
         /**
          * Used for inserting the ribbon.
          */

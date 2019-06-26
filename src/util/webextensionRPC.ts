@@ -77,7 +77,7 @@ export function runInBackground<T extends object>(): T {
     return new Proxy<T>({} as T, {
         get(target, property): any {
             return (...args) => {
-                return remoteFunction(property.toString())(...args)
+                return _remoteFunction(property.toString())(...args)
             }
         },
     })
@@ -88,13 +88,23 @@ export function runInTab<T extends object>(tabId): T {
     return new Proxy<T>({} as T, {
         get(target, property): any {
             return (...args) => {
-                return remoteFunction(property.toString(), { tabId })(...args)
+                return _remoteFunction(property.toString(), { tabId })(...args)
             }
         },
     })
 }
 
-// todo: iteratively refactoring any invocations of this function to the type safe functions above, either runInBackground or runInTab.
+// @depreciated - Don't call this function directly. Instead use the above typesafe version runInBackground
+export function remoteFunction(
+    funcName: string,
+    {
+        tabId,
+        throwWhenNoResponse,
+    }: { tabId?: number; throwWhenNoResponse?: boolean } = {},
+) {
+    return _remoteFunction(funcName,{tabId,throwWhenNoResponse});
+}
+
 // Create a proxy function that invokes the specified remote function.
 // Arguments
 // - funcName (required): name of the function as registered on the remote side.
@@ -102,7 +112,7 @@ export function runInTab<T extends object>(tabId): T {
 //       tabId: The id of the tab whose content script is the remote side.
 //              Leave undefined to call the background script (from a tab).
 //   }
-export function remoteFunction(
+function _remoteFunction(
     funcName: string,
     {
         tabId,
@@ -232,10 +242,16 @@ let enabled = false
 //           argument before the arguments it was invoked with, an object with
 //           the details of the tab that sent the message.
 //   }
-
-export function makeRemotelyCallable<T>(
+export function makeRemotelyCallableType<T = never>(
     functions: { [P in keyof T]: T[P] },
     { insertExtraArg = false } = {},
+) {
+    return makeRemotelyCallable(functions,{insertExtraArg});
+}
+// @Depreciated to call this directly. Should use the above typesafe version
+export function makeRemotelyCallable<T>(
+    functions: { [P in keyof T]: T[P] },
+    { insertExtraArg = false } = {}, test = true,
 ) {
     // Every function is passed an extra argument with sender information,
     // so remove this from the call if this was not desired.
