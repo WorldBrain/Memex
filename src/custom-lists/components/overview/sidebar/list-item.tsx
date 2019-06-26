@@ -126,16 +126,12 @@ class PageList extends Component<Props, State> {
         }
     }
 
-    // private addEmoji = emoji => {
-    //     // eslint-disable-next-line no-console
-    //     console.log('porra de emoji', emoji)
-    // }
+    private addEmoji = emoji => {
+        this.setState({ emoji })
+    }
 
     private onChangeEmoji = (emoji, event) => {
         event.stopPropagation()
-
-        // eslint-disable-next-line no-console
-        console.log(emoji)
 
         this.setState({
             isEmojiChanging: true,
@@ -188,6 +184,7 @@ class PageList extends Component<Props, State> {
                                 right: '-140px',
                                 zIndex: 9,
                             }}
+                            onSelect={this.addEmoji}
                         />
                     )}
                     <div className={styles.listName}>{this.props.listName}</div>
