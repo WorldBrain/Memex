@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
+
 import cx from 'classnames'
 
 import { actions, selectors } from 'src/custom-lists'

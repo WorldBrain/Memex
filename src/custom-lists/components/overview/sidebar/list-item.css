@@ -18,12 +18,6 @@
             display: flex;
         }
     }
-
-    & .pageList {
-        & .listName {
-            padding-left: 1rem;
-        }
-    }
 }
 
 .pageTitle {
@@ -33,6 +27,12 @@
     position: relative;
     width: 100%;
     cursor: pointer;
+
+    & button {
+        background: transparent;
+        border: 0;
+        outline: transparent;
+    }
 }
 
 .pageListDrag {

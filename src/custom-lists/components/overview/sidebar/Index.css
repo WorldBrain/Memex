@@ -57,31 +57,22 @@
 }
 
 .allLists {
-    overflow-y: scroll;
-    overflow-x: visible;
     width: max-content;
     width: 100%;
     flex: 1;
 }
 
-.allListsLocked {
-    overflow-y: scroll;
-}
-
 .allListsInPage {
     width: 100%;
     flex: 1;
-    overflow-y: scroll;
 }
 
 .allListsInner {
     width: 100%;
-    overflow-y: scroll;
     padding-bottom: 50px;
 }
 
 .wrapper {
-    overflow-y: scroll;
     padding-bottom: 50px;
 }
 
