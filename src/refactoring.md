@@ -1,32 +1,34 @@
 # Current iterative refactoring of the codebase
 
-This document details the current (ongoing) refactoring efforts, along with potential issues to be taken into account for future refactoring.
+This document details the ongoing refactoring efforts, along with potential issues to be taken into account for future refactoring.
 
-## Remote Functions
+## Remote Functions Refactor
 
 ### Overview
 
-Remote functions exist to enable background->tab, and tab->background function delegation (call a function in a tab but run it in the background and vice versa). We have started refactoring these to be interfaced and type safe.
+Remote functions exist to enable background->tab, and tab->background function delegation (i.e. Call a function in a tab, but have it run in the background and vice versa).
+
+Refactoring has been started to make these functions interfaced and type safe.
 
 ### Prior understanding and existing system
 
-Memex exists as scripts that are run in pages on tabs (`content_script.js`), and the extension itself that runs in an 'empty invisible tab' in the background, outside the page (`background.js`).
+Following the format of browser extensions, Memex exists as scripts that are run in pages on tabs (`content_script.js`), and the parts that run in an 'invisible tab' in the background outside of any page (`background.js`).
 
-To communicate between code run on a page and code outside the page. A custom RPC wrapper is setup (`src/util/webextensionRPC.ts`) around the native WebExt API which enables extensions to communicate across scripts.
+To communicate between code on a page and code outside the page, a custom RPC wrapper is setup (`src/util/webextensionRPC.ts`) around the native WebExt API which enables extensions to communicate across scripts.
 
-Currently, code is structured so that functions that are intended to be run in the background script, (AKA 'remote endpoints'),are passed into the function `makeRemotelyCallable` to register the given function name in the global variable `remotelyCallableFunctions` responsible for looking these functions up.
+Currently, code is structured so that functions that are intended to be run in the background script, are passed into the function `makeRemotelyCallable`, which registers the given function name in a variable `remotelyCallableFunctions`, responsible for looking these functions up.
 
-This global variable referencing functions that can be run in the background is referenced by `incomingRPCListener` setup to run on the browser.runtime (the background extension script) with `browser.runtime.onMessage.addListener(incomingRPCListener)`
+This variable referencing functions that can be run in the background is referenced by `incomingRPCListener` setup to run on the browser.runtime (the background extension script) with `browser.runtime.onMessage.addListener(incomingRPCListener)`
 
-The newer location of these background scripts are commonly located in `/src/{feature}/background/index.js` and are registered from `src/background.js`
+Background script functionality commonly resides in `/src/{feature}/background/index.js` and they are registered from `src/background.js`
 
-An example of a background script is as follows:
+An example of how this works is as follows:
 
-The extension starts it's background page, which registers background functions, one of which is done by calling `makeRemotelyCallable({funcA})`, where `funcA` is a function imported from somewhere, e.g. `const funcA = (arg1,arg2) => { return 'done'}`.
+The extension starts it's background page, registering these background functions, one of which is done by calling `makeRemotelyCallable({funcA})`, where `funcA` is a function imported from somewhere, e.g. `const funcA = (arg1,arg2) => { return 'done'}`.
 
 At some point from the content script run in a page, that `funcA` is called but is run not in the content script that calls it, but in the background script, by: `const result = await remoteFunction('funcA')('1','2')`.
 
-Further functionality: These `remoteFunction` calls actually also support running functions the other way around too. If called instead with `const result = await remoteFunction('FuncA',{tabId: 2})` the function `funcA` will actually be run in the script on the page indicated by `tabId`. This is used for example, when needing to extract content on the page, by functionality that is running in the background script.
+Further functionality: These `remoteFunction` calls also support running functions the other way around too. If called instead with `const result = await remoteFunction('FuncA',{tabId: 2})()` the function `funcA` will actually be run in the script on the page indicated by `tabId`. This is used for example, when needing to extract content on the page, by functionality that is running in the background script.
 
 ### New system
 
@@ -43,23 +45,24 @@ will actually call `remoteFunction('example1')()` under the hood.
 
 ### Work description
 
-Refactor these remote functions to be type safe (helping with typechecking, IDE completion, and understanding). Including the setup of these functions (`makeRemotelyCallable`) and the usage of these functions (`remoteFunction`).
+Refactor these remote functions to be type safe. Including the setup of these functions (`makeRemotelyCallable`) and the client usage of these functions (`remoteFunction`).
 
 ### Methodology
 
 -   Identify a set of remote function registrations from the TODO list below.
 
--   Create an interface that describes its functions, arguments and returns, e.g. `NotificationInterface`. Interfaces should be defined in a standalone types file or inside an existing standalone file with only types (such that when importing this interface, it doesn't import the functionality too).
+-   Create an interface that describes the functions, arguments and returns, or a set thereof, e.g. `NotificationInterface`. Interfaces should be defined in a standalone types file or inside an existing standalone file with only types, so that when importing this interface, it doesn't import the functionality too, and remains lightweight.
 
 -   Modify where it is setup via `makeRemotelyCallable` to use `makeRemotelyCallableType<T>` where `T` is this newly created interface.
 
--   Move the registration of this remote function to along side the others in `src/background.js`
+-   Move the registration of this remote function to alongside the others in `src/background.js`
 
--   Search through all usages of this function from `remoteFunction`. (N.B. usage may not be directly done using a string literal e.g. `remoteFunction('exampleFunc')`, it may be using a variable, e.g. `const func = 'exampleFunc'; remoteFunction(func)`).
+-   Search through all usages of this function from `remoteFunction`.
+    (N.B. usage may not be directly done using a string literal e.g. `remoteFunction('exampleFunc')`, it may be using a variable, e.g. `const func = 'exampleFunc'; remoteFunction(func)`).
 
-    -   Change usages to `runInBackground<T>` where `T` is this newly created interface.
+        -   Change usages to `runInBackground<T>` where `T` is this newly created interface.
 
-    -   Change the usages to not use `runInBackground` directly, but instead import from `src/util/remote-functions-background.ts` and use the created proxy object transpearently as if it was an object inheriting the concrete implementation, e.g. instead of `runInBackground('addBookmark`), it uses `bookmarks.addBookmark` where `bookmarks` is defined in `remote-functions-background.ts` in the same manner the others are.
+        -   Change the usages to not each call `runInBackground` to create the function directly, but rather import from `src/util/remote-functions-background.ts`. Using the created proxy object (returned from `runInBackground`) transparently as if it were a concrete implementation. e.g. instead of calling `runInBackground('addBookmark')(args)` from within some feature's functionality, it uses `bookmarks.addBookmark(args)` where `bookmarks` is assigned to the created proxy object in `remote-functions-background.ts`, in the same manner the others are.
 
 -   Test
 
@@ -82,7 +85,6 @@ makeRemotelyCallableType<BookmarksInterface>({
     addPageBookmark: ...,
     delPageBookmark: ...,
 })
-
 ```
 
 src/content-tooltip/interactions.ts:132
@@ -113,7 +115,7 @@ e.g. `await runInTab<RibbonInteractionsInterface>(tabId).insertRibbon()`
 
 ### TODO:
 
-Change the setup, and usages of the following functions, following the outlined methodology and updating this document with progress.
+Change the setup and usages of the following functions, following the outlined methodology and updating this document with progress.
 
 ```typescript
 makeRemotelyCallable(isURLBlacklisted, addToBlacklist)
