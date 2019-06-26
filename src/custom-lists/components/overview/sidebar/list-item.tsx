@@ -127,7 +127,10 @@ class PageList extends Component<Props, State> {
     }
 
     private addEmoji = emoji => {
-        this.setState({ emoji })
+        this.setState({
+            emoji,
+            isEmojiChanging: false,
+        })
     }
 
     private onChangeEmoji = (emoji, event) => {
