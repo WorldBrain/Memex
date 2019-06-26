@@ -1,5 +1,7 @@
 import React, { Component, DragEventHandler } from 'react'
-import { Emoji } from 'emoji-mart'
+
+import { Emoji, Picker } from 'emoji-mart'
+import 'emoji-mart/css/emoji-mart.css'
 
 import cx from 'classnames'
 
@@ -13,11 +15,14 @@ export interface Props {
     onAddPageToList: (url: string, isSocialPost: boolean) => void
     onAddSubListToList: (subList: string) => void
     onListItemClick: () => void
+    onChangeEmoji: (emoji: object) => void
 }
 
 interface State {
+    emoji: string
     isMouseInside: boolean
     isDragInside: boolean
+    isEmojiChanging: boolean
 }
 
 class PageList extends Component<Props, State> {
@@ -26,8 +31,10 @@ class PageList extends Component<Props, State> {
     constructor(props) {
         super(props)
         this.state = {
+            emoji: 'file_folder',
             isMouseInside: false,
             isDragInside: false,
+            isEmojiChanging: false,
         }
     }
 
@@ -119,6 +126,22 @@ class PageList extends Component<Props, State> {
         }
     }
 
+    // private addEmoji = emoji => {
+    //     // eslint-disable-next-line no-console
+    //     console.log('porra de emoji', emoji)
+    // }
+
+    private onChangeEmoji = (emoji, event) => {
+        event.stopPropagation()
+
+        // eslint-disable-next-line no-console
+        console.log(emoji)
+
+        this.setState({
+            isEmojiChanging: true,
+        })
+    }
+
     private handleEditBtnClick: React.MouseEventHandler<
         HTMLButtonElement
     > = e => {
@@ -135,6 +158,8 @@ class PageList extends Component<Props, State> {
     }
 
     render() {
+        const { emoji } = this.state
+
         return (
             <div
                 ref={this.setListItemRef}
@@ -150,10 +175,21 @@ class PageList extends Component<Props, State> {
             >
                 <div className={styles.pageTitle}>
                     <Emoji
-                        emoji={{ id: 'file_folder' }}
+                        emoji={emoji}
                         set="emojione"
                         size={24}
+                        onClick={this.onChangeEmoji}
                     />
+                    {this.state.isEmojiChanging && (
+                        <Picker
+                            style={{
+                                position: 'absolute',
+                                top: '15px',
+                                right: '-140px',
+                                zIndex: 9,
+                            }}
+                        />
+                    )}
                     <div className={styles.listName}>{this.props.listName}</div>
                     <div className={styles.buttonContainer}>
                         {this.state.isMouseInside && (
