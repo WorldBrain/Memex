@@ -44,23 +44,7 @@ export class RemoteError extends Error {
 // The extra options available when calling a remote function
 interface RPCOpts {
     tabId?: number
-
-    // todo: remove any references to this
-    throwWhenNoResponse?: boolean
 }
-
-/*
-todo: this may no longer be needed
-// Union a type with these extra options
-type WithExtraArgs<T> = T & RPCOpts
-// Union a function's options with these extra args
-type FuncWithExtraArgs<FuncT> = FuncT extends (a: infer Params) => infer Ret
-    ? (a: WithExtraArgs<Params>) => Ret
-    : never
-// Union each function of an object with these extra args
-type InterfaceOfFuncsArgs<T> = { [P in keyof T]: FuncWithExtraArgs<T[P]> }
-type InterfaceWithTabId<T> = T & { tabId: number }
-*/
 
 // runInBackground and runInTab create a Proxy object that looks like the real interface but actually calls remote functions
 //
@@ -97,12 +81,9 @@ export function runInTab<T extends object>(tabId): T {
 // @depreciated - Don't call this function directly. Instead use the above typesafe version runInBackground
 export function remoteFunction(
     funcName: string,
-    {
-        tabId,
-        throwWhenNoResponse,
-    }: { tabId?: number; throwWhenNoResponse?: boolean } = {},
+    { tabId }: { tabId?: number } = {},
 ) {
-    return _remoteFunction(funcName,{tabId,throwWhenNoResponse});
+    return _remoteFunction(funcName, { tabId })
 }
 
 // Create a proxy function that invokes the specified remote function.
@@ -112,15 +93,7 @@ export function remoteFunction(
 //       tabId: The id of the tab whose content script is the remote side.
 //              Leave undefined to call the background script (from a tab).
 //   }
-function _remoteFunction(
-    funcName: string,
-    {
-        tabId,
-        throwWhenNoResponse,
-    }: { tabId?: number; throwWhenNoResponse?: boolean } = {},
-) {
-    throwWhenNoResponse =
-        throwWhenNoResponse == null || throwWhenNoResponse === true
+function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
     const otherSide =
         tabId !== undefined
             ? "the tab's content script"
@@ -141,12 +114,6 @@ function _remoteFunction(
                     ? await browser.tabs.sendMessage(tabId, message)
                     : await browser.runtime.sendMessage(message)
         } catch (err) {
-            if (throwWhenNoResponse) {
-                throw new RpcError(
-                    `Got no response when trying to call '${funcName}'. ` +
-                        `Did you enable RPC in ${otherSide}?`,
-                )
-            }
             return
         }
 
@@ -246,12 +213,12 @@ export function makeRemotelyCallableType<T = never>(
     functions: { [P in keyof T]: T[P] },
     { insertExtraArg = false } = {},
 ) {
-    return makeRemotelyCallable(functions,{insertExtraArg});
+    return makeRemotelyCallable(functions, { insertExtraArg })
 }
 // @Depreciated to call this directly. Should use the above typesafe version
 export function makeRemotelyCallable<T>(
     functions: { [P in keyof T]: T[P] },
-    { insertExtraArg = false } = {}, test = true,
+    { insertExtraArg = false } = {},
 ) {
     // Every function is passed an extra argument with sender information,
     // so remove this from the call if this was not desired.
@@ -267,7 +234,6 @@ export function makeRemotelyCallable<T>(
     for (const functionName of Object.keys(functions)) {
         if (remotelyCallableFunctions.hasOwnProperty(functionName)) {
             const error = `RPC function with name ${functionName} has already been registered `
-            // throw Error(error);
             console.warn(error)
         }
     }

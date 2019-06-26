@@ -75,7 +75,6 @@ class Tab implements TabState {
 
         return remoteFunction('toggleIFrameRender', {
             tabId: this.id,
-            throwWhenNoResponse: false,
         })(shouldRender)
     }
 
