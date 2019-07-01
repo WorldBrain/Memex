@@ -13,6 +13,7 @@ import {
     SocialSearchParams,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
+import { BookmarksInterface } from 'src/bookmarks/background/types'
 
 export default class SearchBackground {
     storage: SearchStorage
@@ -20,7 +21,7 @@ export default class SearchBackground {
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
     private getDb: DBGet
-    public remoteFunctions
+    public remoteFunctions: BookmarksInterface
 
     static handleSearchError(e: SearchError) {
         if (e instanceof BadTermError) {
