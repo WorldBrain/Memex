@@ -20,6 +20,7 @@
 
 import mapValues from 'lodash/fp/mapValues'
 import { browser } from 'webextension-polyfill-ts'
+import { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -197,6 +198,14 @@ async function incomingRPCListener(message, sender) {
 
 // A bit of global state to ensure we only attach the event listener once.
 let enabled = false
+
+export function setupRemoteFunctionsImplementations<T>(
+    implementations: RemoteFunctionImplementations,
+): void {
+    for (const [group, functions] of Object.entries(implementations)) {
+        makeRemotelyCallableType<typeof functions>(functions)
+    }
+}
 
 // Register a function to allow remote scripts to call it.
 // Arguments:

@@ -9,7 +9,7 @@ import internalAnalytics from './analytics/internal'
 import initSentry from './util/raven'
 import {
     makeRemotelyCallable,
-    makeRemotelyCallableType,
+    setupRemoteFunctionsImplementations,
 } from 'src/util/webextensionRPC'
 
 // Features that require manual instantiation to setup
@@ -33,8 +33,6 @@ import './analytics/background'
 import './imports/background'
 import './omnibar'
 import analytics from './analytics'
-import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { NotificationInterface } from 'src/util/notification-types'
 
 initSentry()
 
@@ -126,14 +124,13 @@ storageManager.finishInitialization().then(() => {
 })
 
 // Gradually moving all remote function registrations here
-function setupRemoteFunctions() {
-    makeRemotelyCallableType<NotificationInterface>({ createNotification })
-    makeRemotelyCallableType<BookmarksInterface>({
+setupRemoteFunctionsImplementations({
+    notifications: { createNotification },
+    bookmarks: {
         addPageBookmark: search.remoteFunctions.addPageBookmark,
         delPageBookmark: search.remoteFunctions.delPageBookmark,
-    })
-}
-setupRemoteFunctions()
+    },
+})
 
 // Attach interesting features onto global window scope for interested users
 window['backup'] = backupModule
