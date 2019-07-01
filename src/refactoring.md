@@ -274,7 +274,7 @@ makeRemotelyCallable(openOverviewTab, openOptionsTab, openLearnMoreTab)
 
 All the stuff in `src/search/search`, and most of those loose modules in `src/search` (like `src/search/bookmarks` and `src/search/add`), are all legacy parts of the codebase that we’re aiming to eventually refactor out in top-level feature modules (like `src/backup`, `src/custom-lists`, etc) which limit the DB interaction to those `StorageModule` classes.
 
-## `trackEvent`
+## `trackEvent` - two registrations
 
 RPC Function trackEvent is defined in `src/analytics/background/index.js:10` which uses `=> analytics.trackEvent` from the `const analytics: Analytics = new AnalyticsManager({ backend })` exported at `src/analytics/index.ts:24`
 
@@ -298,5 +298,20 @@ This does handle indexing and page creation.
 -   Done: with the remoteFunction refactoring, usages of the remote function `addBookmark` have been changed to `addPageBookmark` such that bookmarking from either a tab or the search result dashboard, uses the same bookmarking code.
 
 -   TODO: Refactor this current `src/search/bookmarks.ts` code in the legacy `src/search/` namespace to this format of the now unused but newer designed `BookmarksBackground`. Retaining the page indexing code.
+
+## Notifications - two systems
+
+`src/util/notif*` should exist somewhere else as it's not a util, but browser interface abstraction. Probably in src/notifications/ somewhere.
+
+There seems to be duplication between the usage of this directly, via the `createNotification` RPC call, usage via the `dispatchNotification` RPC call, and imported directly often as 'createNotif' :
+
+`createNotification` is often imported directly as `createNotif` e.g.
+`import createNotif from 'src/util/notifications'`
+
+`dispatchNotification` seems written in the newer style so it seems everything should be moved to that
+
+## Running in Tabs
+
+Move everything that has to do with tabs to something like src/ipc or src/rpc.
 
 ## Misc
