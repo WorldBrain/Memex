@@ -105,14 +105,48 @@ class CommentBoxForm extends React.Component<Props, State> {
         // Save comment.
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             this.saveComment(e)
-        } else if (
-            !(e.ctrlKey || e.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
-        ) {
-            e.preventDefault()
-            e.stopPropagation()
-            this.props.handleCommentTextChange(this.props.commentText + e.key)
+        } else {
+            if (this.handleControlEvent(e) || this.handleInputTextEvent(e)) {
+                e.preventDefault()
+                e.stopPropagation()
+            }
         }
+    }
+
+    private handleInput(char, selectionStart, selectionEnd) {
+        // todo: change the text according to selection
+        this.props.handleCommentTextChange(this.props.commentText + char)
+    }
+
+    private handleControlEvent(e) {
+        const element = e.path[0]
+        if (e.key === 'Enter') {
+            this.handleInput('\n', element.selectionStart, element.selectionEnd)
+            return true
+        }
+
+        // todo: Handle Arrow events (change the element's selection)
+        // todo: Handle backspace events
+        // todo: Handle delete events
+        // todo: Handle home/end keys
+        // todo: Hadle pageup/pagedown keys
+        return false
+    }
+
+    private handleInputTextEvent(e) {
+        // TODO: This assumes printable characters are not accessible by pressing these modifiers, we should instead check for a printable character (utf8)
+        // TODO: 38,38,39,40 are arrow keys, also page down, page up, home, end keys, F keys
+        if (e.keyCode >= 32 && e.keyCode !== 127 && !(e.ctrlKey || e.metaKey)) {
+            const element = e.path[0]
+            this.handleInput(
+                e.key,
+                element.selectionStart,
+                element.selectionEnd,
+            )
+            return true
+        }
+
+        return false
     }
 
     private handleTagBtnKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
@@ -258,5 +292,10 @@ class CommentBoxForm extends React.Component<Props, State> {
         )
     }
 }
+
+// todo: add all controls we want to handle here
+type ControlKeys = Array<string>
+
+const defaultControlKeys = ['Enter']
 
 export default CommentBoxForm
