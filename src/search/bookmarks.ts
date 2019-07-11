@@ -14,7 +14,6 @@ export const addBookmark = (getDb: DBGet, tabManager: TabManager) => async ({
     timestamp?: number
     tabId?: number
 }) => {
-    // url = normalizeUrl(url);
     let page = await getPage(getDb)(url)
 
     if (page == null || page.isStub) {

@@ -11,13 +11,14 @@ import {
     PageSearchParams,
     AnnotSearchParams,
     SocialSearchParams,
+    SearchBackend,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 
 export default class SearchBackground {
     storage: SearchStorage
-    private backend
+    private backend: SearchBackend
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
     private getDb: DBGet
