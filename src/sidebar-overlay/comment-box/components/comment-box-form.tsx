@@ -100,7 +100,7 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     private _handleTextAreaKeyDown = (
-        e: React.KeyboardEvent<HTMLTextAreaElement>,
+        e: React.KeyboardEvent<HTMLTextAreaElement> & { path: any },
     ) => {
         // Save comment.
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -114,38 +114,60 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     private handleInput(char, selectionStart, selectionEnd) {
-        // todo: change the text according to selection
-        this.props.handleCommentTextChange(this.props.commentText + char)
+        const textBeforeSelection = this.props.commentText.substring(
+            0,
+            selectionStart,
+        )
+        const textAfterSelection = this.props.commentText.substring(
+            selectionEnd,
+        )
+
+        this.props.handleCommentTextChange(
+            textBeforeSelection + char + textAfterSelection,
+        )
     }
 
-    private handleControlEvent(e) {
-        const element = e.path[0]
-        if (e.key === 'Enter') {
-            this.handleInput('\n', element.selectionStart, element.selectionEnd)
-            return true
+    private handleControlEvent(e: RetargetedTextElement) {
+        const el = e.path[0]
+        switch (e.key) {
+            case 'Enter':
+                this.handleInput('\n', el.selectionStart, el.selectionEnd)
+                return true
+            case 'ArrowLeft':
+                moveSelection(el, -1)
+                return true
+            case 'ArrowRight':
+                moveSelection(el, +1)
+                return true
+            case 'ArrowUp':
+                // moveSelectionUp(el);
+                return true
+            case 'ArrowDown':
+                // moveSelectionUp(el);
+                return true
+            case 'End':
+            case 'PageDown':
+                moveSelection(el, el.textLength)
+                return true
+            case 'Home':
+            case 'PageUp':
+                moveSelection(el, 0)
+                return true
+            // case 'Delete':
+            // case 'Backspace':
+            default:
+                return false
         }
-
-        // todo: Handle Arrow events (change the element's selection)
-        // todo: Handle backspace events
-        // todo: Handle delete events
-        // todo: Handle home/end keys
-        // todo: Hadle pageup/pagedown keys
-        return false
     }
 
-    private handleInputTextEvent(e) {
-        // TODO: This assumes printable characters are not accessible by pressing these modifiers, we should instead check for a printable character (utf8)
-        // TODO: 38,38,39,40 are arrow keys, also page down, page up, home, end keys, F keys
-        if (e.keyCode >= 32 && e.keyCode !== 127 && !(e.ctrlKey || e.metaKey)) {
-            const element = e.path[0]
-            this.handleInput(
-                e.key,
-                element.selectionStart,
-                element.selectionEnd,
-            )
+    private handleInputTextEvent(e: RetargetedTextElement) {
+        const el = e.path[0]
+        // Here we take advantage of the the e.key either being a single character descriptor like 'A','?','0',etc or a key description like 'Enter', 'Backspace', etc
+        const printable = e.key.length <= 1
+        if (printable && !(e.ctrlKey || e.metaKey)) {
+            this.handleInput(e.key, el.selectionStart, el.selectionEnd)
             return true
         }
-
         return false
     }
 
@@ -293,9 +315,22 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 }
 
-// todo: add all controls we want to handle here
-type ControlKeys = Array<string>
+function moveSelection(el: HTMLTextAreaElement, move) {
+    const min = 0
+    const max = el.textLength
 
-const defaultControlKeys = ['Enter']
+    if (el.selectionEnd + move <= max && el.selectionStart + move >= min) {
+        changeSelection(el, el.selectionStart + move)
+    }
+}
+
+function changeSelection(el: HTMLTextAreaElement, selection) {
+    el.selectionStart = selection
+    el.selectionEnd = selection
+}
+
+type RetargetedTextElement = React.KeyboardEvent<HTMLTextAreaElement> & {
+    path: HTMLTextAreaElement[]
+}
 
 export default CommentBoxForm
