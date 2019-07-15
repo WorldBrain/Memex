@@ -1,6 +1,5 @@
 import * as React from 'react'
 import ReactDOM from 'react-dom'
-
 import { ClickHandler } from '../../types'
 import * as constants from '../constants'
 import TagsContainer from './tag-input-container'
@@ -29,8 +28,6 @@ interface State {
 }
 
 class CommentBoxForm extends React.Component<Props, State> {
-    /** Ref of the text area element to listen for `scroll` events. */
-    private _textAreaRef: HTMLTextAreaElement
     /** Ref of the tag button element to focus on it when tabbing. */
     private tagBtnRef: HTMLElement
     private saveBtnRef: HTMLButtonElement
@@ -47,8 +44,6 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.attachEventListeners()
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
-
-        this._textAreaRef.focus()
     }
 
     componentWillUnmount() {
@@ -70,10 +65,6 @@ class CommentBoxForm extends React.Component<Props, State> {
         )
         this.bmBtnRef.removeEventListener('click', this.handleBookmarkBtnClick)
         this.tagBtnRef.removeEventListener('click', this.handleTagBtnClick)
-    }
-
-    private _setTextAreaRef = ref => {
-        this._textAreaRef = ref
     }
 
     private setTagButtonRef = (ref: HTMLElement) => {
@@ -150,7 +141,6 @@ class CommentBoxForm extends React.Component<Props, State> {
                 <TextArea
                     // todo: re-implement what is needed here:
                     // todo: value might become default value, check expandRows is actually used, take out textRef if not used, see if tagInput is used.
-                    // setTextRef={this._setTextAreaRef}
                     // expandRows={true}
                     // value={commentText}
                     // onClick={() => {
@@ -269,6 +259,7 @@ class TextArea extends React.Component<
     // -- Methods primarily to do with keeping the selection state in sync --
     componentDidMount() {
         this.registerEventListeners()
+        this.textarea.focus()
     }
 
     componentWillUnmount() {
@@ -326,7 +317,6 @@ class TextArea extends React.Component<
 
     // The main logic intercepting key-presses
     private handleTextAreaKeyDown = (e: ReTargetedTextElementEvent) => {
-        // todo need a real default here, breaks input otherwise
         // First check if we have been given a special handler to check for by the parent component
         // (e.g. Ctrl+Enter to save)
         for (const specialHandler of this.props.specialHandlers) {
@@ -355,7 +345,7 @@ class TextArea extends React.Component<
 
         switch (e.key) {
             case 'Enter':
-                this.handleInput('\n', el)
+                this.handleInput('\n')
                 return true
             case 'ArrowLeft':
                 this.moveSelection(-1)
@@ -383,12 +373,16 @@ class TextArea extends React.Component<
             case 'PageUp':
                 this.jumpSelection(0)
                 return true
-            case 'Delete':
-                // todo: delete is slightly diff than backspace
-                this.deleteInput(el)
-                return true
             case 'Backspace':
-                this.deleteInput(el)
+                this.handleBackspaceInput()
+                return true
+            case 'Delete':
+                // Delete if pressed without a multi char selection deletes the next char
+                // Otherwise for multi char selection, functions same as backspace
+                this.state.selection.endOffset ===
+                this.state.selection.startOffset
+                    ? this.handleDeleteInput()
+                    : this.handleBackspaceInput()
                 return true
             default:
                 return false
@@ -396,20 +390,21 @@ class TextArea extends React.Component<
     }
 
     private handleInputTextEvent(e: ReTargetedTextElementEvent) {
-        const el = e.path[0]
-        // Here we take advantage of the the e.key either being a single character descriptor like 'A','?','0',etc or a key description like 'Enter', 'Backspace', etc
+        // todo: can we change to detecting keypress rather than keydown and therefore get real charCodes
+        // todo: we might then be able to use the code below to detect them a bit more explicitly
+        // if (event.which != 0 && event.charCode != 0)
+        //      char= String.fromCharCode(event.which);
+
+        // Here we take advantage of the the e.key either being a single character descriptor like 'A','?','0',etc
+        // or a key description like 'Enter', 'Backspace', etc. Single chars are for input, others are not.
         const printable = e.key.length <= 1
         if (printable && !(e.ctrlKey || e.metaKey)) {
-            this.handleInput(e.key, el)
+            this.handleInput(e.key)
             // if (this.props.expandRows) {
             //     this.handleRows(e)
             // }
             return true
         }
-        // todo: can we use this if we change to keypress and get real charCodes rather than keydown  ?
-        // if (event.which != 0 && event.charCode != 0)
-        //      char= String.fromCharCode(event.which);
-
         return false
     }
 
@@ -421,6 +416,7 @@ class TextArea extends React.Component<
     }
 
     // todo: there was previously something to do with extending the rows, though it seemed like maybe the styles were overriding it
+    // todo: this happened on key input and on scroll
     private handleRows(e) {
         // const comment = e.target.value
         // const rows =
@@ -433,32 +429,26 @@ class TextArea extends React.Component<
         // }
     }
 
-    // todo: on all these make sure we don't try and set the input back or forward any more than it can, currant bug is with back
-    private handleInput(char, el: HTMLTextAreaElement) {
+    private handleInput(char) {
         const selection = this.getSelectionFromDom()
-        const text = el.value
+        const text = this.textarea.value
 
         const textBeforeSelection = text.substring(0, selection.startOffset)
         const textAfterSelection = text.substring(selection.endOffset)
         const newText = textBeforeSelection + char + textAfterSelection
 
-        if (selection.startOffset === selection.endOffset) {
-            // If selection's are the same:
-            selection.startOffset += 1
-            selection.endOffset += 1
-        } else {
-            // If we've inserted into a selection that was multiple characters, we now reset that
-            selection.endOffset = selection.startOffset + 1
-            selection.startOffset = selection.startOffset + 1
-        }
+        // Whether a single char has been inserted in a single cursor selection or a selection of multiple characters
+        // always move the offset forward by one to account for that added character.
+        selection.endOffset = selection.startOffset + 1
+        selection.startOffset = selection.startOffset + 1
 
         this.updateTextarea({ content: newText, selection })
         this.props.onChange(this.textarea.value)
     }
 
-    private deleteInput(el: HTMLTextAreaElement) {
+    private handleBackspaceInput() {
         const selection = this.getSelectionFromDom()
-        const text = el.value
+        const text = this.textarea.value
 
         const textBeforeSelection = text.substring(0, selection.startOffset)
         const textAfterSelection = text.substring(selection.endOffset)
@@ -470,14 +460,31 @@ class TextArea extends React.Component<
                   ) + textAfterSelection
                 : textBeforeSelection + textAfterSelection
 
-        // Deleting one character moves the selection index back one
-        if (selection.startOffset === selection.endOffset) {
+        // Deleting one character moves the selection index back one if it is not already at the start
+        if (
+            selection.startOffset === selection.endOffset &&
+            selection.startOffset !== 0
+        ) {
             selection.startOffset--
             selection.endOffset--
         } else {
             // Otherwise the highlighted characters are deleted and the index goes to where the first char was
             selection.endOffset = selection.startOffset
         }
+
+        this.updateTextarea({ content: newText, selection })
+        this.props.onChange(this.textarea.value)
+    }
+
+    private handleDeleteInput() {
+        const selection = this.getSelectionFromDom()
+        const text = this.textarea.value
+        const newText =
+            text.substring(0, selection.startOffset) +
+            text.substring(
+                Math.min(text.length, selection.endOffset + 1),
+                text.length,
+            )
 
         this.updateTextarea({ content: newText, selection })
         this.props.onChange(this.textarea.value)
@@ -491,7 +498,7 @@ class TextArea extends React.Component<
         this.updateTextarea({ content: this.textarea.value, selection })
     }
 
-    // Helper method to update the selection by an increment/decrement
+    // Helper method to jump the selection to a specific position
     private jumpSelection(index) {
         const selection = this.state.selection
         selection.endOffset = index
