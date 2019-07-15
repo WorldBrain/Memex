@@ -339,10 +339,6 @@ class TextArea extends React.Component<
 
     // If the input event matches a control character we know how to handle, then handle it manually
     private handleControlEvent(e: ReTargetedTextElementEvent) {
-        // Get the virtual target element this event was intended for, not the 'targetElement' that comes from the event
-        // that is actually the shadow dom root container.
-        const el = e.path[0]
-
         switch (e.key) {
             case 'Enter':
                 this.handleInput('\n')
@@ -362,10 +358,10 @@ class TextArea extends React.Component<
                 // moveSelectionUp(el);
                 return true
             case 'End':
-                this.jumpSelection(el.value.length)
+                this.jumpSelection(this.textarea.value.length)
                 return true
             case 'PageDown':
-                this.jumpSelection(el.value.length)
+                this.jumpSelection(this.textarea.value.length)
                 return true
             case 'Home':
                 this.jumpSelection(0)
