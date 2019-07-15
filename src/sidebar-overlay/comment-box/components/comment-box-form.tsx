@@ -148,20 +148,18 @@ class CommentBoxForm extends React.Component<Props, State> {
         return (
             <React.Fragment>
                 <TextArea
-                    // todo: re-implement what is needed here
+                    // todo: re-implement what is needed here:
+                    // todo: value might become default value, check expandRows is actually used, take out textRef if not used, see if tagInput is used.
                     // setTextRef={this._setTextAreaRef}
                     // expandRows={true}
-                    // onChangeText={this.props.handleCommentTextChange}
-                    // specialHandlers={[
-                    //     this.onEnterSaveHandler
-                    // ]}
-                    // className={styles.textArea}
                     // value={commentText}
-                    // placeholder="Add a private note... (save with cmd/ctrl+enter)"
                     // onClick={() => {
                     //     this.setTagInputActive(false)
                     //     this.setState(state => ({ showTagsPicker: false }))
                     // }}
+                    specialHandlers={[this.onEnterSaveHandler]}
+                    className={styles.textArea}
+                    placeholder="Add a private note... (save with cmd/ctrl+enter)"
                     onChange={this.props.handleCommentTextChange}
                 />
 
@@ -250,8 +248,15 @@ interface TextAreaState {
     content: string
     selection: { startOffset: number; endOffset: number }
 }
-class TextArea extends React.Component<TextAreaProps, TextAreaState> {
+class TextArea extends React.Component<
+    TextAreaProps & Partial<ReactDOM.IntrinsicElements.textarea>,
+    TextAreaState
+> {
     textarea: HTMLTextAreaElement
+
+    static defaultProps = {
+        specialHandlers: [],
+    }
 
     constructor(props) {
         super(props)
@@ -324,12 +329,12 @@ class TextArea extends React.Component<TextAreaProps, TextAreaState> {
         // todo need a real default here, breaks input otherwise
         // First check if we have been given a special handler to check for by the parent component
         // (e.g. Ctrl+Enter to save)
-        /*        for (const specialHandler of this.props.specialHandlers) {
+        for (const specialHandler of this.props.specialHandlers) {
             if (specialHandler.test(e)) {
                 specialHandler.handle(e)
                 return TextArea.stopProp(e)
             }
-        }*/
+        }
 
         // Otherwise, if we class it as a control event we handle it as such
         // Or otherwise, if we class it as an input event we handle it as such
@@ -359,9 +364,11 @@ class TextArea extends React.Component<TextAreaProps, TextAreaState> {
                 this.moveSelection(+1)
                 return true
             case 'ArrowUp':
+                // todo: ArrowUp
                 // moveSelectionUp(el);
                 return true
             case 'ArrowDown':
+                // todo: ArrowDown
                 // moveSelectionUp(el);
                 return true
             case 'End':
@@ -413,7 +420,7 @@ class TextArea extends React.Component<TextAreaProps, TextAreaState> {
         return true
     }
 
-    // todo: there was previously something to do with extending the rows, though it seemed like maybe the styles were overriding it anyway
+    // todo: there was previously something to do with extending the rows, though it seemed like maybe the styles were overriding it
     private handleRows(e) {
         // const comment = e.target.value
         // const rows =
@@ -426,7 +433,7 @@ class TextArea extends React.Component<TextAreaProps, TextAreaState> {
         // }
     }
 
-    //todo: on all these make sure we don't try and set the input back or forward any more than it can, bug is with back
+    // todo: on all these make sure we don't try and set the input back or forward any more than it can, currant bug is with back
     private handleInput(char, el: HTMLTextAreaElement) {
         const selection = this.getSelectionFromDom()
         const text = el.value
@@ -507,6 +514,7 @@ class TextArea extends React.Component<TextAreaProps, TextAreaState> {
     }
 
     render() {
+        const { onChange, specialHandlers, ...props } = this.props
         return (
             <textarea
                 ref={c => {
@@ -515,6 +523,7 @@ class TextArea extends React.Component<TextAreaProps, TextAreaState> {
                 value={this.state.content}
                 onChange={this.handleOnChange}
                 onKeyDown={this.handleTextAreaKeyDown}
+                {...props}
             />
         )
     }
