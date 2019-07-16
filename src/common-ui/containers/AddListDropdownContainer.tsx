@@ -11,6 +11,7 @@ import {
 import { PageList } from '../../custom-lists/background/types'
 import { ClickHandler } from '../../popup/types'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { notifications } from 'src/util/remote-functions-background'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -64,7 +65,6 @@ class AddListDropdownContainer extends Component<Props, State> {
     private removeOpenTabsFromListRPC
     private fetchListByIdRPC
     private fetchListNameSuggestionsRPC
-    private createNotif
     private inputEl: HTMLInputElement
 
     constructor(props: Props) {
@@ -81,7 +81,6 @@ class AddListDropdownContainer extends Component<Props, State> {
         this.fetchListNameSuggestionsRPC = remoteFunction(
             'fetchListNameSuggestions',
         )
-        this.createNotif = remoteFunction('createNotification')
 
         this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
 
@@ -110,7 +109,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
             handleDBQuotaErrors(
                 err =>
-                    this.createNotif({
+                    notifications.createNotification({
                         requireInteraction: false,
                         title: 'Memex error: list adding',
                         message: err.message,

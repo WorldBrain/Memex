@@ -1,7 +1,10 @@
 import retargetEvents from 'react-shadow-dom-retarget-events'
 import { browser } from 'webextension-polyfill-ts'
 
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import {
+    makeRemotelyCallable,
+    makeRemotelyCallableType,
+} from 'src/util/webextensionRPC'
 import { setupRibbonAndSidebarUI, destroyRibbonAndSidebarUI } from '..'
 import { getSidebarState } from '../utils'
 import { getTooltipState } from 'src/content-tooltip/utils'
@@ -10,6 +13,7 @@ import { removeHighlights } from './highlight-interactions'
 import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import { insertTooltip, removeTooltip } from 'src/content-tooltip/interactions'
+import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 
 let target = null /* Target container for the Ribbon. */
 let shadowRoot = null /* Root of the shadow DOM in which ribbon is inserted. */
@@ -177,15 +181,11 @@ export const setupRPC = ({
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
 }) => {
-    makeRemotelyCallable({
+    makeRemotelyCallableType<RibbonInteractionsInterface>({
         /**
          * Used for inserting the ribbon.
          */
-        insertRibbon: (
-            { override, ...args }: { override: boolean } = {
-                override: false,
-            },
-        ) => {
+        insertRibbon: ({ override, ...args } = { override: false }) => {
             manualOverride = !!override
             insertRibbon({
                 annotationsManager,

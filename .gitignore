@@ -13,3 +13,4 @@ stats.json
 .sentryclirc
 .DS_Store
 local-backup
+.idea

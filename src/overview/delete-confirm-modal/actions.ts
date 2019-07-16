@@ -8,6 +8,7 @@ import { acts as resultsActs, selectors as results } from '../results'
 import { actions as searchFilterActs } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { notifications } from 'src/util/remote-functions-background'
 
 export const show = createAction<{ url: string; index: number }>(
     'deleteConf/show',
@@ -19,7 +20,6 @@ export const resetDeleteIndex = createAction('deleteConf/resetDeleteIndex')
 
 const processEventRPC = remoteFunction('processEvent')
 const deletePagesRPC = remoteFunction('delPages')
-const createNotifRPC = remoteFunction('createNotification')
 const deleteSocialPagesRPC = remoteFunction('delSocialPages')
 
 export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
@@ -47,7 +47,7 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     } catch (err) {
         handleDBQuotaErrors(
             error =>
-                this.createNotif({
+                notifications.createNotification({
                     requireInteraction: false,
                     title: 'Memex error: deleting page',
                     message: error.message,

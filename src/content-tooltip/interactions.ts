@@ -7,9 +7,14 @@ import {
     createHighlight,
 } from '../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
-import { remoteFunction, makeRemotelyCallable } from '../util/webextensionRPC'
+import {
+    remoteFunction,
+    makeRemotelyCallable,
+    makeRemotelyCallableType,
+} from '../util/webextensionRPC'
 import { injectCSS } from '../search-injection/dom'
 import { conditionallyShowHighlightNotification } from './onboarding-interactions'
+import { TooltipInteractionInterface } from 'src/content-tooltip/types'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
@@ -128,7 +133,7 @@ const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
  * Sets up RPC functions to insert and remove Tooltip from Popup.
  */
 export const setupRPC = ({ toolbarNotifications }) => {
-    makeRemotelyCallable({
+    makeRemotelyCallableType<TooltipInteractionInterface>({
         showContentTooltip: async () => {
             if (!showTooltip) {
                 await insertTooltip({ toolbarNotifications })
@@ -138,11 +143,11 @@ export const setupRPC = ({ toolbarNotifications }) => {
                 showTooltip(position)
             }
         },
-        insertTooltip: ({ override } = {}) => {
+        insertTooltip: ({ override }) => {
             manualOverride = !!override
             insertTooltip({ toolbarNotifications })
         },
-        removeTooltip: ({ override } = {}) => {
+        removeTooltip: ({ override }) => {
             manualOverride = !!override
             removeTooltip()
         },
@@ -225,9 +230,9 @@ export function userSelectedText() {
     const container = selection.getRangeAt(0).commonAncestorContainer
     const extras = isAnchorOrContentEditable(container)
 
-    const userSelectedText =
+    const userSelectedTextString =
         !!selection && !selection.isCollapsed && !!selectedString && !extras
-    return userSelectedText
+    return userSelectedTextString
 }
 
 function isTargetInsideTooltip(event) {

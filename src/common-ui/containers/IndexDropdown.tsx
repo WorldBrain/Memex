@@ -12,6 +12,7 @@ import { ClickHandler } from '../../popup/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { notifications } from 'src/util/remote-functions-background'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -85,7 +86,6 @@ class IndexDropdownContainer extends Component<Props, State> {
     private addTagsToOpenTabsRPC
     private delTagsFromOpenTabsRPC
     private processEvent
-    private createNotif
     private inputEl: HTMLInputElement
     private fetchUserSuggestionsRPC
     private fetchHashtagSuggestionsRPC
@@ -99,7 +99,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
         this.processEvent = remoteFunction('processEvent')
-        this.createNotif = remoteFunction('createNotification')
         this.fetchUserSuggestionsRPC = remoteFunction('fetchUserSuggestions')
         this.fetchHashtagSuggestionsRPC = remoteFunction(
             'fetchHashtagSuggestions',
@@ -127,7 +126,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
             handleDBQuotaErrors(
                 err =>
-                    this.createNotif({
+                    notifications.createNotification({
                         requireInteraction: false,
                         title: 'Memex error: tag adding',
                         message: err.message,

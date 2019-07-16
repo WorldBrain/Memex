@@ -97,3 +97,28 @@ export interface SocialSearchParams extends AnnotSearchParams {
     hashtagsInc?: string[]
     hashtagsExc?: string[]
 }
+
+// Todo: add proper types and refactor RPC usage in-line with 'refactoring.md'
+export interface SearchBackend {
+    addPage: any
+    addPageTerms: any
+    addBookmark: any
+    delBookmark: any
+    updateTimestampMeta: any
+    addVisit: any
+    addFavIcon: any
+    delPages: any
+    delPagesByDomain: any
+    delPagesByPattern: any
+    addTag: any
+    delTag: any
+    fetchPageTags: any
+    pageHasBookmark: any
+    getPage: any
+    grabExistingKeys: any
+    search: any
+    getMatchingPageCount: any
+    domainHasFavIcon: any
+    createPageFromTab: any
+    createPageFromUrl: any
+}

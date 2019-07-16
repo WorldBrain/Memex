@@ -15,3 +15,10 @@ export default interface State {
     showHighlights?: boolean
     searchValue: string
 }
+
+export interface RibbonInteractionsInterface {
+    insertRibbon: ({ override, ...args }?: { override?: boolean } | any) => any
+    removeRibbon: ({ override }?: { override?: boolean }) => any
+    insertOrRemoveRibbon: () => any
+    updateRibbon: () => any
+}
