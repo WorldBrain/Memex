@@ -522,10 +522,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         }))
     }
 
-    private handleSearchChange = (
-        searchVal: string,
-    ) => {
-
+    private handleSearchChange = (searchVal: string) => {
         // If user backspaces to clear input, show the list of suggested tags again.
         let displayFilters
         let clearFieldBtn
@@ -642,12 +639,12 @@ class IndexDropdownContainer extends Component<Props, State> {
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchSpecialKeyHandlers={[
                     {
-                        test: (e) => e.key === 'Enter',
-                        handle:this.handleSearchEnterPress
+                        test: e => e.key === 'Enter',
+                        handle: this.handleSearchEnterPress,
                     },
                     {
-                        test: (e) => e.key === 'ArrowUp' || e.key === 'ArrowDown',
-                        handle:this.handleSearchArrowPress
+                        test: e => e.key === 'ArrowUp' || e.key === 'ArrowDown',
+                        handle: this.handleSearchArrowPress,
                     },
                 ]}
                 setInputRef={this.setInputRef}

@@ -262,8 +262,6 @@ class AddListDropdownContainer extends Component<Props, State> {
     private handleSearchEnterPress = (
         event: React.KeyboardEvent<HTMLInputElement>,
     ) => {
-        event.preventDefault()
-
         if (
             this.canCreateList() &&
             this.state.focused === this.state.displayFilters.length
