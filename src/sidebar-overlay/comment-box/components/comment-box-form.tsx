@@ -6,7 +6,6 @@ import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import cx from 'classnames'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
-import TextAreaDynamicRows from 'src/common-ui/components/TextAreaDynamicRows'
 
 const styles = require('./comment-box-form.css')
 

@@ -1,17 +1,44 @@
-import React, { PureComponent } from 'react'
+import React, { MouseEventHandler, PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
+import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+const styles = require('./IndexDropdown.css')
 
-import styles from './IndexDropdown.css'
+import { PageList } from 'src/custom-lists/background/types'
+import { ClickHandler } from 'src/popup/types'
 
-/**
- * @augments {PureComponent<{onTagSearchChange: any, onTagSearchKeyDown: any, setInputRef: any, numberOfTags: any, tagSearchValue: any, clearSearchField?: any, showClearfieldBtn?: any}, *>}
- */
-class IndexDropdown extends PureComponent {
+export interface Props {
+    children?: any[]
+    onTagSearchChange?: (s: string) => void
+    onTagSearchSpecialKeyHandlers?: {
+        test: (e) => boolean
+        handle: (e) => void
+    }[]
+    setTagDivRef?: (e: Element) => void
+    setInputRef?: (e: Element) => void
+    tagSearchValue?: string
+    hover?: boolean
+    isForAnnotation?: boolean
+    source?: 'tag' | 'domain' | 'list' | 'user' | 'hashtag'
+    url?: string
+    allowAdd?: boolean
+    isForSidebar?: boolean
+    clearSearchField?: () => void
+    showClearfieldBtn?: boolean
+    isForRibbon?: boolean
+    onBackBtnClick?: (e: any) => void
+    allTabs?: boolean
+    allTabsCollection?: boolean
+    sidebarTagDiv?: boolean
+    showError?: boolean
+    errMsg?: string
+}
+
+class IndexDropdown extends PureComponent<Props> {
     static propTypes = {
         children: PropTypes.array.isRequired,
         onTagSearchChange: PropTypes.func.isRequired,
-        onTagSearchKeyDown: PropTypes.func.isRequired,
+        onTagSearchSpecialKeyHandlers: PropTypes.arrayOf(PropTypes.object),
         setTagDivRef: PropTypes.func,
         setInputRef: PropTypes.func.isRequired,
         tagSearchValue: PropTypes.string.isRequired,
@@ -22,8 +49,8 @@ class IndexDropdown extends PureComponent {
         url: PropTypes.string,
         allowAdd: PropTypes.bool,
         isForSidebar: PropTypes.bool,
-        // clearSearchField: PropTypes.func,
-        // showClearfieldBtn: PropTypes.bool,
+        clearSearchField: PropTypes.func,
+        showClearfieldBtn: PropTypes.bool,
         isForRibbon: PropTypes.bool,
         onBackBtnClick: PropTypes.func,
         allTabs: PropTypes.bool,
@@ -92,16 +119,19 @@ class IndexDropdown extends PureComponent {
                     })}
                 >
                     <span className={styles.searchIcon} />
-                    <input
+                    <TextInputControlled
                         className={styles.search}
                         name="query"
                         placeholder={this.searchPlaceholder}
                         onChange={this.props.onTagSearchChange}
-                        onKeyDown={this.props.onTagSearchKeyDown}
-                        ref={this.props.setInputRef}
+                        updateRef={this.props.setInputRef}
                         autoComplete="off"
-                        value={this.props.tagSearchValue}
+                        defaultValue={this.props.tagSearchValue}
                         autoFocus
+                        specialHandlers={
+                            this.props.onTagSearchSpecialKeyHandlers
+                        }
+                        type={'input'}
                     />
                 </div>
                 {this.renderError()}

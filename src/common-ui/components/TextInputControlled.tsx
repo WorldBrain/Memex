@@ -308,8 +308,8 @@ class TextInputControlled extends React.Component<
 
     // Helper method to update our state with intended content or selection for the textElement
     updateTextElement = ({ content, selection }) => {
-        const updatedContent = content || this.textElement.value
-        const updatedSelection = selection || this.getSelectionFromDom()
+        const updatedContent = content
+        const updatedSelection = selection
         this.setState(
             {
                 content: updatedContent,
@@ -329,7 +329,14 @@ class TextInputControlled extends React.Component<
     }
 
     render() {
-        const { onChange, specialHandlers, type, ...props } = this.props
+        const {
+            onChange,
+            specialHandlers,
+            type,
+            updateRef,
+            defaultValue,
+            ...props
+        } = this.props
 
         return type === 'textarea' ? (
             <textarea
