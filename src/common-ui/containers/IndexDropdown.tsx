@@ -267,7 +267,7 @@ class IndexDropdownContainer extends Component<Props, State> {
             .toLowerCase()
     }
 
-    private canCreateTag() {
+    private canCreateTag = () => {
         if (!this.allowIndexUpdate && !this.props.allowAdd) {
             return false
         }
@@ -473,14 +473,13 @@ class IndexDropdownContainer extends Component<Props, State> {
         })
     }
 
-    private handleSearchEnterPress(
+    private handleSearchEnterPress = (
         event: React.KeyboardEvent<HTMLInputElement>,
-    ) {
-        event.preventDefault()
-
+    ) => {
         if (
             this.canCreateTag() &&
-            this.state.focused === this.state.displayFilters.length
+            this.state.focused === -1 &&
+            this.state.displayFilters.length === 0
         ) {
             return this.addTag()
         }
@@ -492,9 +491,9 @@ class IndexDropdownContainer extends Component<Props, State> {
         return null
     }
 
-    private handleSearchArrowPress(
+    private handleSearchArrowPress = (
         event: React.KeyboardEvent<HTMLInputElement>,
-    ) {
+    ) => {
         event.preventDefault()
 
         // One extra index if the "add new tag" thing is showing
@@ -524,37 +523,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         }))
     }
 
-    handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (
-            this.props.env === 'inpage' &&
-            (this.props.isForRibbon || this.props.isForAnnotation) &&
-            !(event.ctrlKey || event.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
-        ) {
-            event.preventDefault()
-            event.stopPropagation()
-            this.setState(
-                state => ({ searchVal: state.searchVal + event.key }),
-                this.fetchTagSuggestions,
-            )
-            return
-        }
-
-        switch (event.key) {
-            case 'Enter':
-                return this.handleSearchEnterPress(event)
-            case 'ArrowUp':
-            case 'ArrowDown':
-                return this.handleSearchArrowPress(event)
-            default:
-        }
-    }
-
-    private handleSearchChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-        const searchVal = event.target.value
-
+    private handleSearchChange = (searchVal: string) => {
         // If user backspaces to clear input, show the list of suggested tags again.
         let displayFilters
         let clearFieldBtn
@@ -669,13 +638,17 @@ class IndexDropdownContainer extends Component<Props, State> {
         return (
             <IndexDropdown
                 onTagSearchChange={this.handleSearchChange}
-                onTagSearchKeyDown={this.handleSearchKeyDown}
+                onTagSearchSpecialKeyHandlers={[
+                    {
+                        test: e => e.key === 'Enter',
+                        handle: this.handleSearchEnterPress,
+                    },
+                    {
+                        test: e => e.key === 'ArrowUp' || e.key === 'ArrowDown',
+                        handle: this.handleSearchArrowPress,
+                    },
+                ]}
                 setInputRef={this.setInputRef}
-                numberOfTags={
-                    this.props.allTabs
-                        ? this.state.multiEdit.size
-                        : this.state.filters.length
-                }
                 tagSearchValue={this.state.searchVal}
                 clearSearchField={this.clearSearchField}
                 showClearfieldBtn={this.showClearfieldBtn()}

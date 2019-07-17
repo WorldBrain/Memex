@@ -67,34 +67,17 @@ class Sidebar extends React.Component<Props, State> {
         showFiltersSidebar: false,
     }
 
-    private handleSearchKeyDown = (
-        e: React.KeyboardEvent<HTMLInputElement>,
-    ) => {
-        if (
-            this.props.env === 'inpage' &&
-            !(e.ctrlKey || e.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
-        ) {
-            e.preventDefault()
-            e.stopPropagation()
-            this.setState(state => ({ searchValue: state.searchValue + e.key }))
-            this.props.onQueryChange(this.state.searchValue)
-            return
+    private handleSearchChange = (searchQuery: string) => {
+        if (this.state.searchValue !== searchQuery) {
+            this.setState({ searchValue: searchQuery })
+            this.props.onQueryChange(searchQuery)
         }
-
-        if (e.key === 'Enter') {
-            e.preventDefault()
-            e.stopPropagation()
-            this.props.onQueryKeyDown(this.state.searchValue)
-        }
+        this.setState({ searchValue: searchQuery })
     }
 
-    private handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (this.state.searchValue !== e.target.value) {
-            this.props.onQueryChange(e.target.value)
-        }
-        this.setState({ searchValue: e.target.value })
-    }
+    private handleSearchEnter = (
+        e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => this.props.onQueryKeyDown(this.state.searchValue)
 
     private handleClearBtn = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
@@ -203,8 +186,8 @@ class Sidebar extends React.Component<Props, State> {
                         handleCloseBtnClick={this.handleCloseBtnClick}
                         handleSettingsBtnClick={this._handleSettingsBtnClick}
                         handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        handleChange={this.handleChange}
-                        handleSearchKeyDown={this.handleSearchKeyDown}
+                        handleSearchChange={this.handleSearchChange}
+                        handleSearchEnter={this.handleSearchEnter}
                         handleClearBtn={this.handleClearBtn}
                         handleFilterBtnClick={this.toggleShowFilters}
                         handleClearFiltersBtnClick={

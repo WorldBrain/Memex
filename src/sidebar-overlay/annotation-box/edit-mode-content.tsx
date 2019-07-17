@@ -5,6 +5,7 @@ import AllModesFooter from './all-modes-footer'
 import * as constants from '../comment-box/constants'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
+import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 
 const styles = require('./edit-mode-content.css')
 
@@ -25,8 +26,6 @@ interface State {
 }
 
 class EditModeContent extends React.Component<Props, State> {
-    private _textAreaRef: HTMLElement = null
-
     state = {
         commentText: this.props.comment ? this.props.comment : '',
         tagsInput: this.props.tags ? this.props.tags : [],
@@ -38,59 +37,11 @@ class EditModeContent extends React.Component<Props, State> {
     async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
-
-        if (this._textAreaRef) {
-            if (this.state.commentText.length !== 0) {
-                this.setState({ rows: constants.NUM_MIN_ROWS })
-            }
-            this._textAreaRef.focus()
-
-            this._textAreaRef.addEventListener('scroll', (e: UIEvent) => {
-                const targetElement = e.target as HTMLElement
-
-                let { rows: numRows } = this.state
-                while (
-                    targetElement.scrollTop &&
-                    numRows < constants.NUM_MAX_ROWS
-                ) {
-                    numRows += 1
-                }
-
-                if (numRows !== this.state.rows) {
-                    this.setState({ rows: numRows })
-                }
-
-                this._textAreaRef.focus()
-            })
-        }
-    }
-
-    private _setTextAreaRef = (ref: HTMLElement) => {
-        this._textAreaRef = ref
     }
 
     private _handleEditAnnotation = () => {
         const { commentText, tagsInput } = this.state
         this.props.handleEditAnnotation(commentText, tagsInput)
-    }
-
-    private _handleTextAreaKeyDown = (
-        e: React.KeyboardEvent<HTMLTextAreaElement>,
-    ) => {
-        // Save comment.
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            this._handleEditAnnotation()
-        } else if (e.key === 'Tab' && !e.shiftKey) {
-            this._setTagInputActive(true)
-        } else if (
-            this.props.env === 'inpage' &&
-            !(e.ctrlKey || e.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
-        ) {
-            e.preventDefault()
-            e.stopPropagation()
-            this.setState(state => ({ commentText: state.commentText + e.key }))
-        }
     }
 
     private _handleTagInputKeydown = (
@@ -100,19 +51,6 @@ class EditModeContent extends React.Component<Props, State> {
         if (e.key === 'Tab') {
             this._setTagInputActive(false)
         }
-    }
-
-    private _handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        const commentText = e.target.value
-        const rows =
-            commentText.length === 0
-                ? constants.NUM_DEFAULT_ROWS
-                : Math.max(this.state.rows, constants.NUM_MIN_ROWS)
-
-        this.setState({ rows, commentText })
     }
 
     private _setTagInputActive = (isTagInputActive: boolean) => {
@@ -140,15 +78,12 @@ class EditModeContent extends React.Component<Props, State> {
     render() {
         return (
             <React.Fragment>
-                <textarea
-                    rows={this.state.rows}
-                    className={styles.textArea}
-                    value={this.state.commentText}
-                    placeholder="Add a private note... (save with cmd/ctrl+enter)"
+                <TextInputControlled
+                    defaultValue={this.state.commentText}
                     onClick={() => this._setTagInputActive(false)}
-                    onChange={this._handleChange}
-                    onKeyDown={this._handleTextAreaKeyDown}
-                    ref={this._setTextAreaRef}
+                    className={styles.textArea}
+                    placeholder="Add a private note... (save with cmd/ctrl+enter)"
+                    onChange={commentText => this.setState({ commentText })}
                 />
 
                 <div onKeyDown={this._handleTagInputKeydown}>
