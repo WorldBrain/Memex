@@ -478,7 +478,8 @@ class IndexDropdownContainer extends Component<Props, State> {
     ) => {
         if (
             this.canCreateTag() &&
-            this.state.focused === this.state.displayFilters.length
+            this.state.focused === -1 &&
+            this.state.displayFilters.length === 0
         ) {
             return this.addTag()
         }
