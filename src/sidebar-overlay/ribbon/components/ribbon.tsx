@@ -16,6 +16,7 @@ import {
 } from '../../content_script/highlight-interactions'
 import * as utils from 'src/content-tooltip/utils'
 import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
+import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 const styles = require('./ribbon.css')
 
 export interface Props {
@@ -100,7 +101,6 @@ class Ribbon extends Component<Props, State> {
     private handleSearchEnterPress: KeyboardEventHandler<
         HTMLInputElement
     > = event => {
-        event.preventDefault()
         const queryFilters = extractQueryFilters(this.props.searchValue)
         const queryParams = qs.stringify(queryFilters)
 
@@ -132,34 +132,6 @@ class Ribbon extends Component<Props, State> {
         })
         const highlights = annotations.filter(annotation => annotation.selector)
         highlightAnnotations(highlights, this.props.openSidebar)
-    }
-
-    private handleSearchKeyDown = (
-        event: React.KeyboardEvent<HTMLInputElement>,
-    ) => {
-        if (
-            !(event.ctrlKey || event.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
-        ) {
-            event.preventDefault()
-            event.stopPropagation()
-            this.props.setSearchValue(this.props.searchValue + event.key)
-            return
-        }
-
-        switch (event.key) {
-            case 'Enter':
-                return this.handleSearchEnterPress(event)
-            default:
-        }
-    }
-
-    private handleSearchChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-        const searchValue = event.target.value
-
-        this.props.setSearchValue(searchValue)
     }
 
     private getTooltipText(name: string): string {
@@ -257,24 +229,34 @@ class Ribbon extends Component<Props, State> {
                                                 <span
                                                     className={styles.search}
                                                 />
-                                                <input
+                                                <TextInputControlled
                                                     autoFocus={false}
-                                                    ref={this.setInputRef}
+                                                    setRef={this.setInputRef}
                                                     className={
                                                         styles.searchInput
                                                     }
                                                     name="query"
                                                     placeholder="Search your Memex"
                                                     autoComplete="off"
-                                                    onKeyDown={
-                                                        this.handleSearchKeyDown
-                                                    }
                                                     onChange={
-                                                        this.handleSearchChange
+                                                        this.props
+                                                            .setSearchValue
                                                     }
-                                                    value={
+                                                    specialHandlers={[
+                                                        {
+                                                            test: e =>
+                                                                e.key ===
+                                                                'Enter',
+                                                            handle: e =>
+                                                                this.handleSearchEnterPress(
+                                                                    e,
+                                                                ),
+                                                        },
+                                                    ]}
+                                                    defaultValue={
                                                         this.props.searchValue
                                                     }
+                                                    type={'input'}
                                                 />
                                             </form>
                                         </Tooltip>

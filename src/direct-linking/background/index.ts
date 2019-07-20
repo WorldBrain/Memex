@@ -1,7 +1,11 @@
 import Storex from '@worldbrain/storex'
 import { browser, Tabs } from 'webextension-polyfill-ts'
 
-import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
+import {
+    makeRemotelyCallable,
+    remoteFunction,
+    runInTab,
+} from 'src/util/webextensionRPC'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
@@ -13,6 +17,7 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
+import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -108,7 +113,9 @@ export default class DirectLinkingBackground {
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
                 // Necessary to insert the ribbon/sidebar in case the user has turned
                 // it off.
-                await remoteFunction('insertRibbon', { tabId })()
+                await runInTab<RibbonInteractionsInterface>(
+                    tabId,
+                ).insertRibbon()
                 await remoteFunction('goToAnnotation', { tabId })(annotation)
                 browser.tabs.onUpdated.removeListener(listener)
             }
@@ -154,7 +161,7 @@ export default class DirectLinkingBackground {
 
         // Make sure that the ribbon is inserted before trying to open the
         // sidebar.
-        await remoteFunction('insertRibbon', { tabId })({
+        await runInTab<RibbonInteractionsInterface>(tabId).insertRibbon({
             override,
             forceExpandRibbon,
             openToCollections,

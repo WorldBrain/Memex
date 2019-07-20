@@ -7,6 +7,8 @@ import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { NotificationInterface } from 'src/util/notification-types'
+import { notifications } from 'src/util/remote-functions-background'
 
 function deriveDomain(url: string) {
     const { hostname } = new URL(url)
@@ -19,7 +21,7 @@ const addToBlacklistRPC: (url: string) => Promise<void> = remoteFunction(
 const processEventRPC: (args: any) => Promise<void> = remoteFunction(
     'processEvent',
 )
-const createNotifRPC = remoteFunction('createNotification')
+
 const deletePagesRPC = remoteFunction('delPages')
 const deletePagesByDomainRPC = remoteFunction('delPagesByDomain')
 
@@ -90,7 +92,7 @@ export const deleteBlacklistData: () => Thunk = () => async (
     } catch (err) {
         handleDBQuotaErrors(
             error =>
-                createNotifRPC({
+                notifications.createNotification({
                     requireInteraction: false,
                     title: 'Memex error: deleting page',
                     message: error.message,

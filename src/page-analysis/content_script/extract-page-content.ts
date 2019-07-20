@@ -1,5 +1,3 @@
-import pick from 'lodash/fp/pick'
-import keys from 'lodash/fp/keys'
 import { getMetadata } from 'page-metadata-parser'
 
 import transformPageHTML from 'src/util/transform-page-html'
@@ -7,6 +5,9 @@ import PAGE_METADATA_RULES from './page-metadata-rules'
 import extractPdfContent from './extract-pdf-content'
 
 export const DEF_LANG = 'en'
+
+const pick = keys => obj =>
+    Object.assign({}, ...keys.map(key => ({ [key]: obj[key] })))
 
 /**
  * Extracts content from the DOM, both searchable terms and other metadata.
@@ -21,7 +22,7 @@ export default async function extractPageContent(
 ) {
     // If it is a PDF, run code for pdf instead.
     if (url.endsWith('.pdf')) {
-        return extractPdfContent({ url })
+        return extractPdfContent({ url, blob: undefined })
     }
 
     // Apply simple transformations to clean the page's HTML
@@ -35,6 +36,6 @@ export default async function extractPageContent(
         fullText: processedHtml,
         lang: doc.documentElement.lang || DEF_LANG,
         // Picking desired fields, as getMetadata adds some unrequested stuff.
-        ...pick(keys(PAGE_METADATA_RULES))(metadata),
+        ...pick(Object.keys(PAGE_METADATA_RULES))(metadata),
     }
 }

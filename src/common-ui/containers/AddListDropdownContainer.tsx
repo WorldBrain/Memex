@@ -11,6 +11,7 @@ import {
 import { PageList } from '../../custom-lists/background/types'
 import { ClickHandler } from '../../popup/types'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { notifications } from 'src/util/remote-functions-background'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -64,7 +65,6 @@ class AddListDropdownContainer extends Component<Props, State> {
     private removeOpenTabsFromListRPC
     private fetchListByIdRPC
     private fetchListNameSuggestionsRPC
-    private createNotif
     private inputEl: HTMLInputElement
 
     constructor(props: Props) {
@@ -81,7 +81,6 @@ class AddListDropdownContainer extends Component<Props, State> {
         this.fetchListNameSuggestionsRPC = remoteFunction(
             'fetchListNameSuggestions',
         )
-        this.createNotif = remoteFunction('createNotification')
 
         this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
 
@@ -110,7 +109,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
             handleDBQuotaErrors(
                 err =>
-                    this.createNotif({
+                    notifications.createNotification({
                         requireInteraction: false,
                         title: 'Memex error: list adding',
                         message: err.message,
@@ -263,8 +262,6 @@ class AddListDropdownContainer extends Component<Props, State> {
     private handleSearchEnterPress = (
         event: React.KeyboardEvent<HTMLInputElement>,
     ) => {
-        event.preventDefault()
-
         if (
             this.canCreateList() &&
             this.state.focused === this.state.displayFilters.length
@@ -379,40 +376,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         }))
     }
 
-    private handleSearchKeyDown = (
-        event: React.KeyboardEvent<HTMLInputElement>,
-    ) => {
-        if (
-            this.props.env === 'inpage' &&
-            !(event.ctrlKey || event.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
-        ) {
-            event.preventDefault()
-            event.stopPropagation()
-            this.setState(
-                state => ({ searchVal: state.searchVal + event.key }),
-                this.fetchListSuggestions,
-            )
-            return
-        }
-        switch (event.key) {
-            case 'Enter':
-                return this.handleSearchEnterPress(event)
-            case 'ArrowUp':
-            case 'ArrowDown':
-                return this.handleSearchArrowPress(event)
-            default:
-        }
-    }
-
-    private handleSearchChange = (
-        event: React.SyntheticEvent<HTMLInputElement>,
-    ) => {
-        const searchVal =
-            this.props.env === 'inpage'
-                ? this.inputEl.value
-                : event.currentTarget.value
-
+    private handleSearchChange = (searchVal: string) => {
         // If user backspaces to clear input, show the list of suggested lists again.
         const displayFilters = !searchVal.length
             ? this.props.initSuggestions
@@ -463,13 +427,17 @@ class AddListDropdownContainer extends Component<Props, State> {
         return (
             <IndexDropdown
                 onTagSearchChange={this.handleSearchChange}
-                onTagSearchKeyDown={this.handleSearchKeyDown}
+                onTagSearchSpecialKeyHandlers={[
+                    {
+                        test: e => e.key === 'ArrowDown' || e.key === 'ArrowUp',
+                        handle: e => this.handleSearchArrowPress(e),
+                    },
+                    {
+                        test: e => e.key === 'Enter',
+                        handle: e => this.handleSearchEnterPress(e),
+                    },
+                ]}
                 setInputRef={this.setInputRef}
-                numberOfTags={
-                    this.props.allTabsCollection
-                        ? this.state.multiEdit.size
-                        : this.state.filters.length
-                }
                 tagSearchValue={this.state.searchVal}
                 source="list"
                 {...this.state}

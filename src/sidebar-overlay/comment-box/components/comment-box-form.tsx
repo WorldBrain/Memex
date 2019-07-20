@@ -1,12 +1,11 @@
 import * as React from 'react'
-
 import { ClickHandler } from '../../types'
-import * as constants from '../constants'
 import TagsContainer from './tag-input-container'
 import { Tooltip } from 'src/common-ui/components'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import cx from 'classnames'
+import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 
 const styles = require('./comment-box-form.css')
 
@@ -22,15 +21,12 @@ interface Props {
 }
 
 interface State {
-    rows: number
     isTagInputActive: boolean
     showTagsPicker: boolean
     tagSuggestions: string[]
 }
 
 class CommentBoxForm extends React.Component<Props, State> {
-    /** Ref of the text area element to listen for `scroll` events. */
-    private _textAreaRef: HTMLTextAreaElement
     /** Ref of the tag button element to focus on it when tabbing. */
     private tagBtnRef: HTMLElement
     private saveBtnRef: HTMLButtonElement
@@ -38,7 +34,6 @@ class CommentBoxForm extends React.Component<Props, State> {
     private bmBtnRef: HTMLButtonElement
 
     state: State = {
-        rows: constants.NUM_DEFAULT_ROWS,
         isTagInputActive: false,
         showTagsPicker: false,
         tagSuggestions: [],
@@ -48,26 +43,6 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.attachEventListeners()
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
-
-        // Auto resize text area.
-        if (this._textAreaRef) {
-            this._textAreaRef.focus()
-            this._textAreaRef.addEventListener('scroll', (e: UIEvent) => {
-                const targetElement = e.target as HTMLElement
-
-                let { rows } = this.state
-                while (
-                    targetElement.scrollTop &&
-                    rows < constants.NUM_MAX_ROWS
-                ) {
-                    rows += 1
-                    this.setState({ rows })
-                }
-
-                this._textAreaRef.focus()
-            })
-        }
-        this._textAreaRef.focus()
     }
 
     componentWillUnmount() {
@@ -91,28 +66,8 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.tagBtnRef.removeEventListener('click', this.handleTagBtnClick)
     }
 
-    private _setTextAreaRef = (ref: HTMLTextAreaElement) => {
-        this._textAreaRef = ref
-    }
-
     private setTagButtonRef = (ref: HTMLElement) => {
         this.tagBtnRef = ref
-    }
-
-    private _handleTextAreaKeyDown = (
-        e: React.KeyboardEvent<HTMLTextAreaElement>,
-    ) => {
-        // Save comment.
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            this.saveComment(e)
-        } else if (
-            !(e.ctrlKey || e.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(e.keyCode))
-        ) {
-            e.preventDefault()
-            e.stopPropagation()
-            this.props.handleCommentTextChange(this.props.commentText + e.key)
-        }
     }
 
     private handleTagBtnKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
@@ -144,23 +99,6 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.props.toggleBookmark(e)
     }
 
-    private _handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        const comment = e.target.value
-        const rows =
-            comment.length === 0
-                ? constants.NUM_DEFAULT_ROWS
-                : Math.max(this.state.rows, constants.NUM_MIN_ROWS)
-
-        if (rows !== this.state.rows) {
-            this.setState({ rows })
-        }
-
-        this.props.handleCommentTextChange(comment)
-    }
-
     private saveComment = e => {
         this.props.saveComment(e)
         if (this.state.showTagsPicker) {
@@ -189,25 +127,26 @@ class CommentBoxForm extends React.Component<Props, State> {
         )
     }
 
+    onEnterSaveHandler = {
+        test: e => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+        handle: e => this.saveComment(e),
+    }
+
     render() {
         const { commentText, cancelComment } = this.props
-        const { rows } = this.state
 
         return (
             <React.Fragment>
-                {/* Text area to get the actual comment. */}
-                <textarea
-                    rows={rows}
-                    className={styles.textArea}
-                    value={commentText}
-                    placeholder="Add a private note... (save with cmd/ctrl+enter)"
+                <TextInputControlled
+                    defaultValue={commentText}
                     onClick={() => {
                         this.setTagInputActive(false)
                         this.setState(state => ({ showTagsPicker: false }))
                     }}
-                    onChange={this._handleChange}
-                    onKeyDown={this._handleTextAreaKeyDown}
-                    ref={this._setTextAreaRef}
+                    className={styles.textArea}
+                    placeholder="Add a private note... (save with cmd/ctrl+enter)"
+                    onChange={this.props.handleCommentTextChange}
+                    specialHandlers={[this.onEnterSaveHandler]}
                 />
 
                 {/* Save and Cancel buttons. */}

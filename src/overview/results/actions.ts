@@ -10,13 +10,11 @@ import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { bookmarks, notifications } from 'src/util/remote-functions-background'
 
 const processEventRPC = remoteFunction('processEvent')
-const createBookmarkRPC = remoteFunction('addBookmark')
-const deleteBookmarkRPC = remoteFunction('delBookmark')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
 const deleteSocialBookmarkRPC = remoteFunction('delSocialBookmark')
-const createNotifRPC = remoteFunction('createNotification')
 
 export const addTag = createAction('results/localAddTag', (tag, index) => ({
     tag,
@@ -88,9 +86,9 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
     let bookmarkRPC: (args: { url: string }) => Promise<void>
     // tslint:disable-next-line: prefer-conditional-expression
     if (hasBookmark) {
-        bookmarkRPC = user ? deleteSocialBookmarkRPC : deleteBookmarkRPC
+        bookmarkRPC = user ? deleteSocialBookmarkRPC : bookmarks.delPageBookmark
     } else {
-        bookmarkRPC = user ? createSocialBookmarkRPC : createBookmarkRPC
+        bookmarkRPC = user ? createSocialBookmarkRPC : bookmarks.addPageBookmark
     }
 
     try {
@@ -99,7 +97,7 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
         dispatch(changeHasBookmark(index))
         handleDBQuotaErrors(
             error =>
-                this.createNotif({
+                notifications.createNotification({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
                     message: error.message,

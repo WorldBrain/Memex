@@ -17,10 +17,10 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { notifications } from 'src/util/remote-functions-background'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
-const createNotifRPC = remoteFunction('createNotification')
 
 export const setAnnotationsManager = createAction<AnnotationsManager>(
     'setAnnotationsManager',
@@ -289,7 +289,7 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
         dispatch(toggleBookmarkState(index))
         handleDBQuotaErrors(
             error =>
-                createNotifRPC({
+                notifications.createNotification({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
                     message: error.message,
