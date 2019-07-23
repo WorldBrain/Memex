@@ -27,6 +27,7 @@ class IndexDropdownRow extends PureComponent {
         // isForRibbon: PropTypes.bool,
         scrollIntoView: PropTypes.func.isRequired,
         isNew: PropTypes.bool,
+        // TODO: Fix type after refactoring this, passing in only booleans instead of numbers and booleans
         isList: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
         source: PropTypes.string,
     }
