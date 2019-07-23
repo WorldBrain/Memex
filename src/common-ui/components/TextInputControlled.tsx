@@ -36,9 +36,14 @@ export interface ControlledTextInputProps {
     defaultValue?: string
     type?: 'textarea' | 'input'
 }
+export interface Selection {
+    start: number
+    end: number
+    direction: 'forward' | 'backward'
+}
 interface ControlledTextInputState {
-    content: string
-    selection: { startOffset: number; endOffset: number }
+    text: string
+    selection: Selection
 }
 class TextInputControlled extends React.Component<
     ControlledTextInputProps & Partial<ReactDOM.IntrinsicElements.textElement>,
@@ -56,8 +61,8 @@ class TextInputControlled extends React.Component<
     constructor(props) {
         super(props)
         this.state = {
-            content: '',
-            selection: { startOffset: 0, endOffset: 0 },
+            text: '',
+            selection: { start: 0, end: 0, direction: 'forward' },
         }
     }
 
@@ -67,10 +72,10 @@ class TextInputControlled extends React.Component<
         this.textElement.focus()
 
         this.updateTextElement({
-            content: this.props.defaultValue,
+            text: this.props.defaultValue,
             selection: {
-                startOffset: this.props.defaultValue.length,
-                endOffset: this.props.defaultValue.length,
+                start: this.props.defaultValue.length,
+                end: this.props.defaultValue.length,
             },
         })
     }
@@ -118,24 +123,27 @@ class TextInputControlled extends React.Component<
         this.setState({ selection: this.getSelectionFromDom() })
 
     // Get the selection from the HTML component
-    getSelectionFromDom = () => ({
-        startOffset: this.textElement.selectionStart,
-        endOffset: this.textElement.selectionEnd,
-    })
+    getSelectionFromDom = () =>
+        ({
+            start: this.textElement.selectionStart,
+            end: this.textElement.selectionEnd,
+            direction: this.textElement.selectionDirection,
+        } as Selection)
 
     // Important to keep the content (internal state + parent component handler) and the selection (internal state)
     // in sync when changes are made outside of our managed key presses, e.g. Copy/Paste.
     handleOnChange = () => {
         this.updateTextElement({
-            content: this.textElement.value,
+            text: this.textElement.value,
             selection: this.getSelectionFromDom(),
         })
     }
 
     // Set the selection from our state to the HTML component
     syncSelectionToDom = (textElementRef, selection) => {
-        textElementRef.selectionStart = selection.startOffset
-        textElementRef.selectionEnd = selection.endOffset
+        textElementRef.selectionStart = selection.start
+        textElementRef.selectionEnd = selection.end
+        textElementRef.selectionDirection = selection.direction
     }
 
     // -- Methods primarily to do with key presses --
@@ -162,6 +170,12 @@ class TextInputControlled extends React.Component<
         return false
     }
 
+    // Call the given function, passing in the state, and use the result to set the selection
+    private _setSelectionFrom = f => {
+        this.setState({ selection: f(this.state) })
+        this.syncSelectionToDom(this.textElement, this.state.selection)
+    }
+
     // If the input event matches a control character we know how to handle, then handle it manually
     private handleControlEvent(e: ReTargetedTextElementEvent) {
         switch (e.key) {
@@ -169,10 +183,42 @@ class TextInputControlled extends React.Component<
                 this.handleInput('\n')
                 break
             case 'ArrowLeft':
-                this.moveSelection(-1)
+                if (e.ctrlKey && e.shiftKey) {
+                    this._setSelectionFrom(
+                        SelectionModifiers.moveSelectionBackwardByWhitespace,
+                    )
+                } else if (e.ctrlKey) {
+                    this._setSelectionFrom(
+                        SelectionModifiers.jumpSingleCursorBackwardByWhitespace,
+                    )
+                } else if (e.shiftKey) {
+                    this._setSelectionFrom(
+                        SelectionModifiers.moveSelectionBackward,
+                    )
+                } else {
+                    this._setSelectionFrom(
+                        SelectionModifiers.moveSingleCursorBackward,
+                    )
+                }
                 break
             case 'ArrowRight':
-                this.moveSelection(+1)
+                if (e.ctrlKey && e.shiftKey) {
+                    this._setSelectionFrom(
+                        SelectionModifiers.moveSelectionForwardByWhitespace,
+                    )
+                } else if (e.ctrlKey) {
+                    this._setSelectionFrom(
+                        SelectionModifiers.jumpSingleCursorForwardByWhitespace,
+                    )
+                } else if (e.shiftKey) {
+                    this._setSelectionFrom(
+                        SelectionModifiers.moveSelectionForward,
+                    )
+                } else {
+                    this._setSelectionFrom(
+                        SelectionModifiers.moveSingleCursorForward,
+                    )
+                }
                 break
             case 'ArrowUp':
                 // todo: ArrowUp
@@ -195,13 +241,17 @@ class TextInputControlled extends React.Component<
                 this.jumpSelection(0)
                 break
             case 'Backspace':
+                if (e.ctrlKey) {
+                    this._setSelectionFrom(
+                        SelectionModifiers.moveSelectionBackwardByWhitespace,
+                    )
+                }
                 this.handleBackspaceInput()
                 break
             case 'Delete':
                 // Delete if pressed without a multi char selection deletes the next char
                 // Otherwise for multi char selection, functions same as backspace
-                this.state.selection.endOffset ===
-                this.state.selection.startOffset
+                this.state.selection.end === this.state.selection.start
                     ? this.handleDeleteInput()
                     : this.handleBackspaceInput()
                 break
@@ -233,16 +283,16 @@ class TextInputControlled extends React.Component<
         const selection = this.getSelectionFromDom()
         const text = this.textElement.value
 
-        const textBeforeSelection = text.substring(0, selection.startOffset)
-        const textAfterSelection = text.substring(selection.endOffset)
+        const textBeforeSelection = text.substring(0, selection.start)
+        const textAfterSelection = text.substring(selection.end)
         const newText = textBeforeSelection + char + textAfterSelection
 
         // Whether a single char has been inserted in a single cursor selection or a selection of multiple characters
         // always move the offset forward by one to account for that added character.
-        selection.endOffset = selection.startOffset + 1
-        selection.startOffset = selection.startOffset + 1
+        selection.end = selection.start + 1
+        selection.start = selection.start + 1
 
-        this.updateTextElement({ content: newText, selection })
+        this.updateTextElement({ text: newText, selection })
         this.props.onChange(this.textElement.value)
     }
 
@@ -250,10 +300,10 @@ class TextInputControlled extends React.Component<
         const selection = this.getSelectionFromDom()
         const text = this.textElement.value
 
-        const textBeforeSelection = text.substring(0, selection.startOffset)
-        const textAfterSelection = text.substring(selection.endOffset)
+        const textBeforeSelection = text.substring(0, selection.start)
+        const textAfterSelection = text.substring(selection.end)
         const newText =
-            selection.startOffset === selection.endOffset
+            selection.start === selection.end
                 ? textBeforeSelection.substring(
                       0,
                       textBeforeSelection.length - 1,
@@ -261,18 +311,15 @@ class TextInputControlled extends React.Component<
                 : textBeforeSelection + textAfterSelection
 
         // Deleting one character moves the selection index back one if it is not already at the start
-        if (
-            selection.startOffset === selection.endOffset &&
-            selection.startOffset !== 0
-        ) {
-            selection.startOffset--
-            selection.endOffset--
+        if (selection.start === selection.end && selection.start !== 0) {
+            selection.start--
+            selection.end--
         } else {
             // Otherwise the highlighted characters are deleted and the index goes to where the first char was
-            selection.endOffset = selection.startOffset
+            selection.end = selection.start
         }
 
-        this.updateTextElement({ content: newText, selection })
+        this.updateTextElement({ text: newText, selection })
         this.props.onChange(this.textElement.value)
     }
 
@@ -280,44 +327,44 @@ class TextInputControlled extends React.Component<
         const selection = this.getSelectionFromDom()
         const text = this.textElement.value
         const newText =
-            text.substring(0, selection.startOffset) +
+            text.substring(0, selection.start) +
             text.substring(
-                Math.min(text.length, selection.endOffset + 1),
+                Math.min(text.length, selection.end + 1),
                 text.length,
             )
 
-        this.updateTextElement({ content: newText, selection })
+        this.updateTextElement({ text: newText, selection })
         this.props.onChange(this.textElement.value)
     }
 
     // Helper method to update the selection by an increment/decrement
     private moveSelection(move) {
         const selection = this.state.selection
-        selection.endOffset += move
-        selection.startOffset += move
-        this.updateTextElement({ content: this.textElement.value, selection })
+        selection.end += move
+        selection.start += move
+        this.updateTextElement({ text: this.textElement.value, selection })
     }
 
     // Helper method to jump the selection to a specific position
     private jumpSelection(index) {
         const selection = this.state.selection
-        selection.endOffset = index
-        selection.startOffset = index
-        this.updateTextElement({ content: this.textElement.value, selection })
+        selection.end = index
+        selection.start = index
+        this.updateTextElement({ text: this.textElement.value, selection })
     }
 
     // Helper method to update our state with intended content or selection for the textElement
-    updateTextElement = ({ content, selection }) => {
-        const updatedContent = content
+    updateTextElement = ({ text, selection }) => {
+        const updatedContent = text
         const updatedSelection = selection
         this.setState(
             {
-                content: updatedContent,
+                text: updatedContent,
                 selection: updatedSelection,
             },
             () => this.syncSelectionToDom(this.textElement, updatedSelection),
         )
-        this.props.onChange(this.state.content)
+        this.props.onChange(this.state.text)
     }
 
     // Update the ref here as well as any parent components that might want to use it
@@ -339,19 +386,174 @@ class TextInputControlled extends React.Component<
         } = this.props
 
         return type === 'textarea' ? (
-            <textarea
-                {...props}
-                ref={this.updateRef}
-                value={this.state.content}
-            />
+            <textarea {...props} ref={this.updateRef} value={this.state.text} />
         ) : (
             <input
                 type={'text'}
                 {...props}
                 ref={this.updateRef}
-                value={this.state.content}
+                value={this.state.text}
             />
         )
+    }
+}
+
+export interface SelectionState {
+    selection: Selection
+    text: string
+}
+
+export class SelectionModifiers {
+    static _clamp(min, max, val) {
+        return Math.min(Math.max(val, min), max)
+    }
+
+    static _addBounded(
+        state: SelectionState,
+        add: number,
+        which: 'start' | 'end',
+    ) {
+        const result = state.selection[which] + add
+        const min = 0
+        const max = state.text.length
+        return SelectionModifiers._clamp(min, max, result)
+    }
+
+    static _addBoundedBoth(state: SelectionState, add: number) {
+        return {
+            ...state.selection,
+            start: SelectionModifiers._addBounded(state, add, 'start'),
+            end: SelectionModifiers._addBounded(state, add, 'end'),
+        }
+    }
+
+    static _selectionToMoveForForwardMovements(current: SelectionState) {
+        const newSelection = { ...current.selection }
+        if (current.selection.start === current.selection.end) {
+            newSelection.direction = 'forward'
+        }
+        const cursorToMove =
+            newSelection.direction === 'forward' ? 'end' : 'start'
+        return { newSelection, cursorToMove } as {
+            newSelection: Selection
+            cursorToMove: 'start' | 'end'
+        }
+    }
+
+    static _selectionToMoveForBackwardMovements(current: SelectionState) {
+        const newSelection = { ...current.selection }
+        if (current.selection.start === current.selection.end) {
+            newSelection.direction = 'backward'
+        }
+        const cursorToMove =
+            newSelection.direction === 'backward' ? 'start' : 'end'
+        return { newSelection, cursorToMove } as {
+            newSelection: Selection
+            cursorToMove: 'start' | 'end'
+        }
+    }
+
+    static moveSingleCursorForward(current: SelectionState): Selection {
+        current.selection.start = current.selection.end
+        return SelectionModifiers._addBoundedBoth(current, +1)
+    }
+
+    static moveSingleCursorBackward(current: SelectionState): Selection {
+        current.selection.end = current.selection.start
+        return SelectionModifiers._addBoundedBoth(current, -1)
+    }
+
+    static moveSelectionForward(current: SelectionState): Selection {
+        const {
+            newSelection,
+            cursorToMove,
+        } = SelectionModifiers._selectionToMoveForForwardMovements(current)
+        newSelection[cursorToMove] = SelectionModifiers._addBounded(
+            current,
+            +1,
+            cursorToMove,
+        )
+        return newSelection
+    }
+
+    static moveSelectionBackward(current: SelectionState): Selection {
+        const {
+            newSelection,
+            cursorToMove,
+        } = SelectionModifiers._selectionToMoveForBackwardMovements(current)
+        newSelection[cursorToMove] = SelectionModifiers._addBounded(
+            current,
+            -1,
+            cursorToMove,
+        )
+        return newSelection
+    }
+
+    static moveSelectionBackwardByWhitespace(current: SelectionState) {
+        const {
+            newSelection,
+            cursorToMove,
+        } = SelectionModifiers._selectionToMoveForBackwardMovements(current)
+        const lastWhitespace = current.text
+            .substr(0, current.selection[cursorToMove] - 1)
+            .lastIndexOf(' ')
+        newSelection[cursorToMove] =
+            lastWhitespace === -1 ? 0 : lastWhitespace + 1
+        return newSelection
+    }
+
+    static moveSelectionForwardByWhitespace(current: SelectionState) {
+        const {
+            newSelection,
+            cursorToMove,
+        } = SelectionModifiers._selectionToMoveForForwardMovements(current)
+        const nextWhitespace = current.text.indexOf(
+            ' ',
+            current.selection[cursorToMove] + 1,
+        )
+        newSelection[cursorToMove] =
+            nextWhitespace === -1 ? current.text.length : nextWhitespace
+        return newSelection
+    }
+
+    static jumpSingleCursorBackwardByWhitespace(
+        current: SelectionState,
+    ): Selection {
+        const newSelection = { ...current.selection }
+
+        if (current.selection.start !== current.selection.end) {
+            newSelection.end = current.selection.start
+            return newSelection
+        } else {
+            const lastWhitespace = current.text
+                .substr(0, current.selection.end - 1)
+                .lastIndexOf(' ')
+            const cursor = lastWhitespace === -1 ? 0 : lastWhitespace + 1
+            newSelection.start = cursor
+            newSelection.end = cursor
+            return newSelection
+        }
+    }
+
+    static jumpSingleCursorForwardByWhitespace(
+        current: SelectionState,
+    ): Selection {
+        const newSelection = { ...current.selection }
+
+        if (current.selection.start !== current.selection.end) {
+            newSelection.start = current.selection.end
+            return newSelection
+        } else {
+            const nextWhitespace = current.text.indexOf(
+                ' ',
+                newSelection.start + 1,
+            )
+            const cursor =
+                nextWhitespace === -1 ? current.text.length : nextWhitespace
+            newSelection.start = cursor
+            newSelection.end = cursor
+            return newSelection
+        }
     }
 }
 
