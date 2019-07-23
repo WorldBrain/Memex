@@ -5,7 +5,7 @@ import {
 } from 'src/common-ui/components/TextInputControlled'
 
 const createState = (start, end, text, direction = 'forward') =>
-    ({ selection: { start, end, direction }, text: text } as SelectionState)
+    ({ selection: { start, end, direction }, text } as SelectionState)
 const createStateWithSelection = (state, selection) => ({
     selection,
     text: state.text,
