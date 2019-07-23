@@ -183,11 +183,11 @@ class TextInputControlled extends React.Component<
                 this.handleInput('\n')
                 break
             case 'ArrowLeft':
-                if (e.ctrlKey && e.shiftKey) {
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
                     this._setSelectionFrom(
                         SelectionModifiers.moveSelectionBackwardByWhitespace,
                     )
-                } else if (e.ctrlKey) {
+                } else if (e.ctrlKey || e.metaKey) {
                     this._setSelectionFrom(
                         SelectionModifiers.jumpSingleCursorBackwardByWhitespace,
                     )
@@ -202,11 +202,11 @@ class TextInputControlled extends React.Component<
                 }
                 break
             case 'ArrowRight':
-                if (e.ctrlKey && e.shiftKey) {
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
                     this._setSelectionFrom(
                         SelectionModifiers.moveSelectionForwardByWhitespace,
                     )
-                } else if (e.ctrlKey) {
+                } else if (e.ctrlKey || e.metaKey) {
                     this._setSelectionFrom(
                         SelectionModifiers.jumpSingleCursorForwardByWhitespace,
                     )
@@ -241,7 +241,7 @@ class TextInputControlled extends React.Component<
                 this.jumpSelection(0)
                 break
             case 'Backspace':
-                if (e.ctrlKey) {
+                if (e.ctrlKey || e.metaKey) {
                     this._setSelectionFrom(
                         SelectionModifiers.moveSelectionBackwardByWhitespace,
                     )
