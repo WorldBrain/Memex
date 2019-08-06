@@ -487,16 +487,41 @@ export class SelectionModifiers {
         return newSelection
     }
 
+    static _lastWhitespace(current: SelectionState, cursorToMove: string) {
+        const lastWhitespaces: RegExpMatchArray = current.text
+            .substr(0, current.selection[cursorToMove] - 1)
+            ['matchAll'](/(\s)/gm)
+        const lastWhitespaceArray = [...lastWhitespaces]
+        if (lastWhitespaceArray.length === 0) {
+            return 0
+        }
+        return lastWhitespaceArray[lastWhitespaceArray.length - 1]['index'] + 1
+    }
+
+    static _nextWhitespace(current: SelectionState, cursorToMove: string) {
+        const nextWhitespaces = current.text
+            .substr(current.selection[cursorToMove] + 1)
+            ['matchAll'](/(\s)/gm)
+        const nextWhitespaceArray = [...nextWhitespaces] as RegExpMatchArray
+        if (nextWhitespaceArray.length === 0) {
+            return current.text.length
+        }
+        return (
+            current.selection[cursorToMove] +
+            nextWhitespaceArray[0]['index'] +
+            1
+        )
+    }
+
     static moveSelectionBackwardByWhitespace(current: SelectionState) {
         const {
             newSelection,
             cursorToMove,
         } = SelectionModifiers._selectionToMoveForBackwardMovements(current)
-        const lastWhitespace = current.text
-            .substr(0, current.selection[cursorToMove] - 1)
-            .lastIndexOf(' ')
-        newSelection[cursorToMove] =
-            lastWhitespace === -1 ? 0 : lastWhitespace + 1
+        newSelection[cursorToMove] = SelectionModifiers._lastWhitespace(
+            current,
+            cursorToMove,
+        )
         return newSelection
     }
 
@@ -505,28 +530,29 @@ export class SelectionModifiers {
             newSelection,
             cursorToMove,
         } = SelectionModifiers._selectionToMoveForForwardMovements(current)
-        const nextWhitespace = current.text.indexOf(
-            ' ',
-            current.selection[cursorToMove] + 1,
+        newSelection[cursorToMove] = SelectionModifiers._nextWhitespace(
+            current,
+            cursorToMove,
         )
-        newSelection[cursorToMove] =
-            nextWhitespace === -1 ? current.text.length : nextWhitespace
         return newSelection
     }
 
     static jumpSingleCursorBackwardByWhitespace(
         current: SelectionState,
     ): Selection {
-        const newSelection = { ...current.selection }
+        const {
+            newSelection,
+            cursorToMove,
+        } = SelectionModifiers._selectionToMoveForBackwardMovements(current)
 
         if (current.selection.start !== current.selection.end) {
             newSelection.end = current.selection.start
             return newSelection
         } else {
-            const lastWhitespace = current.text
-                .substr(0, current.selection.end - 1)
-                .lastIndexOf(' ')
-            const cursor = lastWhitespace === -1 ? 0 : lastWhitespace + 1
+            const cursor = SelectionModifiers._lastWhitespace(
+                current,
+                cursorToMove,
+            )
             newSelection.start = cursor
             newSelection.end = cursor
             return newSelection
@@ -536,18 +562,19 @@ export class SelectionModifiers {
     static jumpSingleCursorForwardByWhitespace(
         current: SelectionState,
     ): Selection {
-        const newSelection = { ...current.selection }
+        const {
+            newSelection,
+            cursorToMove,
+        } = SelectionModifiers._selectionToMoveForForwardMovements(current)
 
         if (current.selection.start !== current.selection.end) {
             newSelection.start = current.selection.end
             return newSelection
         } else {
-            const nextWhitespace = current.text.indexOf(
-                ' ',
-                newSelection.start + 1,
+            const cursor = SelectionModifiers._nextWhitespace(
+                current,
+                cursorToMove,
             )
-            const cursor =
-                nextWhitespace === -1 ? current.text.length : nextWhitespace
             newSelection.start = cursor
             newSelection.end = cursor
             return newSelection
