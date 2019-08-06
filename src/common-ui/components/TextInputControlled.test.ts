@@ -215,4 +215,185 @@ describe('TextInputControlled', () => {
         state = createStateWithSelection(state, selectionState)
         expectState(state, 23, 23)
     })
+
+    it('should calculate correct distance from newline', async () => {
+        const text =
+            'and the quick brown fox\n' + // 24chars
+            'Jumped over the lazy dog\n' + // 25chars
+            '\n' + // 1chars
+            'And another line for good measure' // 33chars
+
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(0, 0, text)),
+        ).toEqual(0)
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(1, 1, text)),
+        ).toEqual(1)
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(23, 23, text)),
+        ).toEqual(23)
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(24, 24, text)),
+        ).toEqual(0)
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(25, 25, text)),
+        ).toEqual(1)
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(26, 26, text)),
+        ).toEqual(2)
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(49, 49, text)),
+        ).toEqual(0)
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(50, 50, text)),
+        ).toEqual(0)
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(51, 51, text)),
+        ).toEqual(1)
+        expect(
+            SelectionModifiers._distanceFromNewLine(createState(52, 52, text)),
+        ).toEqual(2)
+    })
+
+    it('should find the previous newline', async () => {
+        const text =
+            'and the quick brown fox\n' + // 24chars
+            'Jumped over the lazy dog\n' + // 25chars
+            '\n' + // 1chars
+            'And another line for good measure' // 33chars
+
+        expect(
+            SelectionModifiers._indexOfPreviousLine(createState(0, 0, text)),
+        ).toEqual(0)
+        expect(
+            SelectionModifiers._indexOfPreviousLine(createState(1, 1, text)),
+        ).toEqual(0)
+        expect(
+            SelectionModifiers._indexOfPreviousLine(createState(23, 23, text)),
+        ).toEqual(0)
+        expect(
+            SelectionModifiers._indexOfPreviousLine(createState(24, 24, text)),
+        ).toEqual(0)
+        expect(
+            SelectionModifiers._indexOfPreviousLine(createState(25, 25, text)),
+        ).toEqual(0)
+        expect(
+            SelectionModifiers._indexOfPreviousLine(createState(49, 49, text)),
+        ).toEqual(24)
+        expect(
+            SelectionModifiers._indexOfPreviousLine(createState(50, 50, text)),
+        ).toEqual(49)
+        expect(
+            SelectionModifiers._indexOfPreviousLine(createState(51, 51, text)),
+        ).toEqual(49)
+        expect(
+            SelectionModifiers._indexOfPreviousLine(createState(52, 52, text)),
+        ).toEqual(49)
+    })
+
+    it('should find the next newline', async () => {
+        const text =
+            'and the quick brown fox\n' + // 24chars
+            'Jumped over the lazy dog\n' + // 25chars
+            '\n' + // 1chars
+            'And another line for good measure' // 33chars
+
+        expect(
+            SelectionModifiers._indexOfNextLine(createState(0, 0, text)),
+        ).toEqual(24)
+        expect(
+            SelectionModifiers._indexOfNextLine(createState(1, 1, text)),
+        ).toEqual(24)
+        expect(
+            SelectionModifiers._indexOfNextLine(createState(23, 23, text)),
+        ).toEqual(24)
+        expect(
+            SelectionModifiers._indexOfNextLine(createState(24, 24, text)),
+        ).toEqual(49)
+        expect(
+            SelectionModifiers._indexOfNextLine(createState(25, 25, text)),
+        ).toEqual(49)
+        expect(
+            SelectionModifiers._indexOfNextLine(createState(49, 49, text)),
+        ).toEqual(50)
+        expect(
+            SelectionModifiers._indexOfNextLine(createState(50, 50, text)),
+        ).toEqual(83)
+        expect(
+            SelectionModifiers._indexOfNextLine(createState(51, 51, text)),
+        ).toEqual(83)
+        expect(
+            SelectionModifiers._indexOfNextLine(createState(52, 52, text)),
+        ).toEqual(83)
+    })
+
+    it('should jump the cursor up by a line', async () => {
+        let state = createState(
+            50,
+            50,
+            'and the quick brown fox\n' + // 24chars
+            'Jumped over the lazy dog\n' + // 25chars
+                'And another line for good measure', // 33chars
+        )
+        // Move once
+        let selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 25, 25)
+        // Move again
+        selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 1, 1)
+        // Move again
+        selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 0, 0)
+        // Move again
+        selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 0, 0)
+    })
+
+    it('should jump the cursor up by a line in 0th position', async () => {
+        let state = createState(
+            49,
+            49,
+            'and the quick brown fox\n' + // 24chars
+            'Jumped over the lazy dog\n' + // 25chars
+                'And another line for good measure', // 33chars
+        )
+        // Move once
+        let selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 24, 24)
+        // Move again
+        selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 0, 0)
+        // Move again
+        selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 0, 0)
+    })
+
+    it('should jump the cursor up by a line over a newline', async () => {
+        let state = createState(
+            25,
+            25,
+            'and the quick brown fox\n' + // 24chars
+            '\n' + // 1chars
+                'And another line for good measure', // 33chars
+        )
+        // Move once
+        let selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 24, 24)
+        // Move again
+        selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 0, 0)
+        // Move again
+        selectionState = SelectionModifiers.jumpSingleCursorUp(state)
+        state = createStateWithSelection(state, selectionState)
+        expectState(state, 0, 0)
+    })
 })

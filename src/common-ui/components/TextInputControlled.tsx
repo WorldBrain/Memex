@@ -221,12 +221,10 @@ class TextInputControlled extends React.Component<
                 }
                 break
             case 'ArrowUp':
-                // todo: ArrowUp
-                // moveSelectionUp(el);
+                this._setSelectionFrom(SelectionModifiers.jumpSingleCursorUp)
                 break
             case 'ArrowDown':
-                // todo: ArrowDown
-                // moveSelectionUp(el);
+                this._setSelectionFrom(SelectionModifiers.jumpSingleCursorDown)
                 break
             case 'End':
                 this.jumpSelection(this.textElement.value.length)
@@ -550,6 +548,136 @@ export class SelectionModifiers {
             )
             const cursor =
                 nextWhitespace === -1 ? current.text.length : nextWhitespace
+            newSelection.start = cursor
+            newSelection.end = cursor
+            return newSelection
+        }
+    }
+
+    static _distanceFromNewLine(current: SelectionState): number {
+        // find either a newline or the start if no prev newline
+        const lastNewline = current.text
+            .substr(0, current.selection.end)
+            .lastIndexOf('\n')
+        return lastNewline === -1
+            ? current.selection.end
+            : current.selection.end - lastNewline - 1
+    }
+
+    static _indexOfPreviousLine(current: SelectionState): number {
+        // find either a newline or the start if no prev newline
+        let previousNewLine = current.text
+            .substr(0, current.selection.end)
+            .lastIndexOf('\n')
+        if (previousNewLine === -1) {
+            return 0
+        } else {
+            // If we're on a newline boundary, actually find the one before
+            previousNewLine = current.text
+                .substr(0, previousNewLine)
+                .lastIndexOf('\n')
+        }
+
+        return previousNewLine === -1 ? 0 : previousNewLine + 1
+    }
+
+    static _indexOfNextLine(current: SelectionState): number {
+        const nextNewLine = current.text.indexOf('\n', current.selection.end)
+        return nextNewLine === -1 ? current.text.length : nextNewLine + 1
+    }
+
+    static _newlineIndexes(
+        text: string,
+    ): {
+        start: number
+        text: string
+        newline: string
+        length: number
+    }[] {
+        const regexp = /(?<text>[^\r^\n]*)(?<line>\r\n|\n|\r)?/gm
+        // @ts-ignore
+        const matches = text.matchAll(regexp)
+        const lines = Array.from(matches, (m: any) => ({
+            start: m.index,
+            text: m.groups.text,
+            newline: m.groups.line,
+            length:
+                typeof m.groups.text !== 'undefined' ? m.groups.text.length : 0,
+        }))
+        return lines
+    }
+
+    static _currentLine(lines, index) {
+        for (let i = lines.length - 1; i >= 0; i--) {
+            if (index >= lines[i].start) {
+                return i
+            }
+        }
+        return 0
+    }
+
+    static jumpSingleCursorUp(current: SelectionState): Selection {
+        const newSelection = { ...current.selection }
+
+        if (current.selection.start !== current.selection.end) {
+            newSelection.start = current.selection.end
+            return newSelection
+        } else {
+            let cursor: number
+            const lines = SelectionModifiers._newlineIndexes(current.text)
+            const currentLineIndex = SelectionModifiers._currentLine(
+                lines,
+                current.selection.start,
+            )
+            const currentLineDistance =
+                current.selection.start - lines[currentLineIndex].start
+
+            if (currentLineIndex === 0) {
+                cursor = 0
+            } else {
+                const prevLine = lines[currentLineIndex - 1]
+                cursor = this._clamp(
+                    prevLine.start,
+                    prevLine.start + prevLine.length + 1,
+                    prevLine.start + currentLineDistance,
+                )
+            }
+
+            newSelection.start = cursor
+            newSelection.end = cursor
+            return newSelection
+        }
+    }
+
+    static jumpSingleCursorDown(current: SelectionState): Selection {
+        const newSelection = { ...current.selection }
+
+        if (current.selection.start !== current.selection.end) {
+            newSelection.start = current.selection.end
+            return newSelection
+        } else {
+            let cursor: number
+            const lines = SelectionModifiers._newlineIndexes(current.text)
+            const currentLineIndex = SelectionModifiers._currentLine(
+                lines,
+                current.selection.start,
+            )
+            const currentLineDistance =
+                current.selection.start - lines[currentLineIndex].start
+
+            if (currentLineIndex === lines.length) {
+                cursor =
+                    lines[currentLineIndex].start +
+                    lines[currentLineIndex].length
+            } else {
+                const nextLine = lines[currentLineIndex + 1]
+                cursor = this._clamp(
+                    nextLine.start,
+                    nextLine.start + nextLine.length + 1,
+                    nextLine.start + currentLineDistance,
+                )
+            }
+
             newSelection.start = cursor
             newSelection.end = cursor
             return newSelection
