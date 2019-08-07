@@ -335,14 +335,6 @@ class TextInputControlled extends React.Component<
         this.props.onChange(this.textElement.value)
     }
 
-    // Helper method to update the selection by an increment/decrement
-    private moveSelection(move) {
-        const selection = this.state.selection
-        selection.end += move
-        selection.start += move
-        this.updateTextElement({ text: this.textElement.value, selection })
-    }
-
     // Helper method to jump the selection to a specific position
     private jumpSelection(index) {
         const selection = this.state.selection
@@ -663,7 +655,7 @@ export class SelectionModifiers {
                 cursor = 0
             } else {
                 const prevLine = lines[currentLineIndex - 1]
-                cursor = this._clamp(
+                cursor = SelectionModifiers._clamp(
                     prevLine.start,
                     prevLine.start + prevLine.length + 1,
                     prevLine.start + currentLineDistance,
@@ -698,7 +690,7 @@ export class SelectionModifiers {
                     lines[currentLineIndex].length
             } else {
                 const nextLine = lines[currentLineIndex + 1]
-                cursor = this._clamp(
+                cursor = SelectionModifiers._clamp(
                     nextLine.start,
                     nextLine.start + nextLine.length + 1,
                     nextLine.start + currentLineDistance,
