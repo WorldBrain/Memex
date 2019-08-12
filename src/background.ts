@@ -1,7 +1,6 @@
 import 'babel-polyfill'
 import 'core-js/es7/symbol'
 import { browser } from 'webextension-polyfill-ts'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
@@ -29,7 +28,6 @@ import {
 } from './background-script/setup'
 
 const storageManager = initStorex()
-
 const localStorageChangesManager = new StorageChangesManager({
     storage: browser.storage,
 })
