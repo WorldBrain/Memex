@@ -31,8 +31,14 @@
             "@worldbrain/memex-stemmer": [
                 "external/@worldbrain/memex-stemmer/ts"
             ],
+            "@worldbrain/storex-sync": ["external/@worldbrain/storex-sync/ts"],
+            "@worldbrain/storex-sync/lib/*": [
+                "external/@worldbrain/storex-sync/ts/*"
+            ],
             "user-logic": ["external/user-logic/ts"],
             "user-logic/lib/*": ["external/user-logic/ts/*"],
+            "simple-signalling": ["external/simple-signalling/ts"],
+            "simple-signalling/lib/*": ["external/simple-signalling/ts/*"],
             "src/*": ["src/*"]
         },
         "lib": ["es2017", "dom", "dom.iterable", "esnext.asynciterable"]

@@ -13,3 +13,9 @@
 [submodule "external/user-logic"]
 	path = external/user-logic
 	url = https://github.com/ShishKabab/user-logic
+[submodule "external/@worldbrain/storex-sync"]
+	path = external/@worldbrain/storex-sync
+	url = git@github.com:WorldBrain/storex-sync.git
+[submodule "external/simple-signalling"]
+	path = external/simple-signalling
+	url = git@github.com:WorldBrain/simple-signalling.git
