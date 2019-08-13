@@ -1,6 +1,6 @@
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import ConnHandler from './connection-handler'
-import importStateManager from './state-manager'
+import getImportStateManager from './state-manager'
 import { IMPORT_CONN_NAME as MAIN_CONN } from 'src/options/imports/constants'
 import { IMPORT_CONN_NAME as ONBOARDING_CONN } from 'src/overview/onboarding/constants'
 
@@ -9,7 +9,7 @@ export const importStateStorageKey = 'import_items'
 
 // Allow UI scripts to dirty estimates cache
 makeRemotelyCallable({
-    dirtyEstsCache: () => importStateManager.dirtyEstsCache(),
+    dirtyEstsCache: () => getImportStateManager().dirtyEstsCache(),
 })
 
 // Allow content-script or UI to connect and communicate control of imports

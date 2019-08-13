@@ -12,6 +12,7 @@ import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup/background'
 import * as backupStorage from '../backup/background/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { setupBlacklistRemoteFunctions } from 'src/blacklist/background'
 
 export interface BackgroundModules {
     notifications: NotificationBackground
@@ -85,6 +86,7 @@ export function setupBackgroundModules(backgroundModules: BackgroundModules) {
     backgroundModules.backupModule.setBackendFromStorage()
     backgroundModules.backupModule.setupRemoteFunctions()
     backgroundModules.backupModule.startRecordingChangesIfNeeded()
+    setupBlacklistRemoteFunctions()
 }
 
 export function registerBackgroundModuleCollections(

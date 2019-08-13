@@ -230,6 +230,14 @@ export class ImportStateManager {
     }
 }
 
-const instance = new ImportStateManager({})
+const getImportStateManager = (() => {
+    let manager = null
+    return () => {
+        if (!manager) {
+            manager = new ImportStateManager({})
+        }
+        return manager
+    }
+})()
 
-export default instance
+export default getImportStateManager

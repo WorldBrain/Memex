@@ -7,21 +7,15 @@ import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
 import internalAnalytics from './analytics/internal'
 import initSentry from './util/raven'
-import { createPageViaBmTagActs as createPage, getPage } from 'src/search'
 import { setupRemoteFunctionsImplementations } from 'src/util/webextensionRPC'
 import { StorageChangesManager } from 'src/util/storage-changes'
 
 // Features that require manual instantiation to setup
-import DirectLinkingBackground from './direct-linking/background'
-import EventLogBackground from './analytics/internal/background'
-import CustomListBackground from './custom-lists/background'
-import NotificationBackground from './notifications/background'
-import SearchBackground from './search/background'
-import * as backup from './backup/background'
-import * as backupStorage from './backup/background/storage'
 import BackgroundScript from './background-script'
 import alarms from './background-script/alarms'
-import createNotification from 'src/util/notifications'
+import createNotification, {
+    setupNotificationClickListener,
+} from 'src/util/notifications'
 
 // Features that auto-setup
 import './analytics/background'
@@ -48,11 +42,14 @@ export { tags, customList }
 
 setupBackgroundModules(backgroundModules)
 registerBackgroundModuleCollections(storageManager, backgroundModules)
+setupNotificationClickListener()
 
 let bgScript: BackgroundScript
 
 storageManager.finishInitialization().then(() => {
     setStorex(storageManager)
+
+    // TODO: This stuff should live in src/background-script/setup.ts
     internalAnalytics.registerOperations(backgroundModules.eventLog)
     backgroundModules.backupModule.storage.setupChangeTracking()
 

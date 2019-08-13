@@ -12,6 +12,7 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
         "skipDefaultLibCheck": true,
         "skipLibCheck": true,
         "strictNullChecks": false,
