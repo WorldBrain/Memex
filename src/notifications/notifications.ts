@@ -57,41 +57,28 @@ const releaseTime: number = 1559735977587
     },
 */
 
+const twitterNotif = {
+    title: '🐦 New Feature: Archive, search & add notes to Tweets',
+    message:
+        'Save any tweet with one click to your Memex, and add tags, collections, notes or stars',
+    buttons: [
+        {
+            label: 'Find out more',
+            action: {
+                type: actionTypes.OPEN_URL,
+                url:
+                    'https://www.notion.so/worldbrain/01ab6888f7ae4eb8815f09a8911990d8',
+            },
+        },
+    ],
+}
+
 const UPDATE_NOTIFS: NotifDefinition[] = [
     {
         id: 'twitter_integration-05.06.2019',
-        search: {
-            title: '🐦 New Feature: Archive, search & add notes to Tweets',
-            message:
-                'Save any tweet with one click to your Memex, and add tags, collections, notes or stars',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url:
-                            'https://www.notion.so/worldbrain/01ab6888f7ae4eb8815f09a8911990d8',
-                        context: 'new-tab',
-                    },
-                    label: 'Find out more',
-                },
-            ],
-        },
-        overview: {
-            title: '🐦 New Feature: Archive, search & add notes to Tweets',
-            message:
-                'Save any tweet with one click to your Memex, and add tags, collections, notes or stars',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url:
-                            'https://www.notion.so/worldbrain/01ab6888f7ae4eb8815f09a8911990d8',
-                        context: 'new-tab',
-                    },
-                    label: 'Find out more',
-                },
-            ],
-        },
+        search: twitterNotif,
+        overview: twitterNotif,
+        system: twitterNotif,
     },
 ]
 
