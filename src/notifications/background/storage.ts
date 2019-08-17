@@ -35,7 +35,7 @@ export default class NotificationStorage extends StorageModule {
                 collection: NotificationStorage.NOTIFS_COLL,
                 operation: 'findObjects',
                 args: [
-                    { readTime: { $exists: false } },
+                    { readTime: { $eq: undefined } },
                     {
                         reverse: true,
                     },
@@ -45,7 +45,7 @@ export default class NotificationStorage extends StorageModule {
                 collection: NotificationStorage.NOTIFS_COLL,
                 operation: 'findObjects',
                 args: [
-                    { readTime: { $exists: true } },
+                    { readTime: { $ne: undefined } },
                     {
                         reverse: true,
                         limit: '$limit:int',
@@ -65,8 +65,11 @@ export default class NotificationStorage extends StorageModule {
             },
             readNotification: {
                 collection: NotificationStorage.NOTIFS_COLL,
-                operation: 'countObjects',
-                args: { id: '$id:pk', readTime: '$readTime:any' },
+                operation: 'updateObject',
+                args: [
+                    { id: '$id:pk' },
+                    { $set: { readTime: '$readTime:number' } },
+                ],
             },
         },
     })
