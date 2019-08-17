@@ -105,7 +105,7 @@ export default class NotificationStorage extends StorageModule {
     }
 
     async fetchNotifById(id) {
-        return this.operation('findNotificationForId', { id })
+        return this.operation('findNotificationById', { id })
     }
 
     async dispatchNotification(notification, releaseTime) {
