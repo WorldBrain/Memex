@@ -1,81 +1,93 @@
 import {
+    withHistory,
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 
+import history from './storage.history'
 import createNotif from '../../util/notifications'
 import { browser } from 'webextension-polyfill-ts'
+import { Notification } from '../types'
 
 export default class NotificationStorage extends StorageModule {
     static NOTIFS_COLL = 'notifications'
 
-    getConfig = (): StorageModuleConfig => ({
-        collections: {
-            [NotificationStorage.NOTIFS_COLL]: {
-                version: new Date(2018, 7, 4),
-                fields: {
-                    id: { type: 'string' },
-                    title: { type: 'string' },
-                    message: { type: 'string' },
-                    buttonText: { type: 'string' },
-                    link: { type: 'string' },
-                    sentTime: { type: 'datetime' },
-                    deliveredTime: { type: 'datetime' },
-                    readTime: { type: 'datetime' },
+    getConfig = (): StorageModuleConfig =>
+        withHistory({
+            history,
+            collections: {
+                [NotificationStorage.NOTIFS_COLL]: {
+                    version: new Date('2019-08-18'),
+                    fields: {
+                        id: { type: 'string' },
+                        title: { type: 'string' },
+                        message: { type: 'string' },
+                        buttonText: { type: 'string' },
+                        link: { type: 'string' },
+                        sentTime: { type: 'datetime' },
+                        deliveredTime: { type: 'datetime' },
+                        readTime: { type: 'datetime' },
+                        buttons: { type: 'json' },
+                    },
+                    indices: [{ field: 'id', pk: true }],
                 },
-                indices: [{ field: 'id', pk: true }],
             },
-        },
-        operations: {
-            createNotification: {
-                collection: NotificationStorage.NOTIFS_COLL,
-                operation: 'createObject',
+            operations: {
+                createNotification: {
+                    collection: NotificationStorage.NOTIFS_COLL,
+                    operation: 'createObject',
+                },
+                findUnreadNotifications: {
+                    collection: NotificationStorage.NOTIFS_COLL,
+                    operation: 'findObjects',
+                    args: [
+                        { readTime: { $eq: undefined } },
+                        {
+                            reverse: true,
+                        },
+                    ],
+                },
+                findReadNotifications: {
+                    collection: NotificationStorage.NOTIFS_COLL,
+                    operation: 'findObjects',
+                    args: [
+                        { readTime: { $ne: undefined } },
+                        {
+                            reverse: true,
+                            limit: '$limit:int',
+                            skip: '$skip:int',
+                        },
+                    ],
+                },
+                findNotificationById: {
+                    collection: NotificationStorage.NOTIFS_COLL,
+                    operation: 'findObject',
+                    args: { id: '$id:pk' },
+                },
+                countNotifications: {
+                    collection: NotificationStorage.NOTIFS_COLL,
+                    operation: 'countObjects',
+                    args: { readTime: { $exists: '$isRead:boolean' } },
+                },
+                readNotification: {
+                    collection: NotificationStorage.NOTIFS_COLL,
+                    operation: 'updateObject',
+                    args: [
+                        { id: '$id:pk' },
+                        { $set: { readTime: '$readTime:number' } },
+                    ],
+                },
             },
-            findUnreadNotifications: {
-                collection: NotificationStorage.NOTIFS_COLL,
-                operation: 'findObjects',
-                args: [
-                    { readTime: { $eq: undefined } },
-                    {
-                        reverse: true,
-                    },
-                ],
-            },
-            findReadNotifications: {
-                collection: NotificationStorage.NOTIFS_COLL,
-                operation: 'findObjects',
-                args: [
-                    { readTime: { $ne: undefined } },
-                    {
-                        reverse: true,
-                        limit: '$limit:int',
-                        skip: '$skip:int',
-                    },
-                ],
-            },
-            findNotificationById: {
-                collection: NotificationStorage.NOTIFS_COLL,
-                operation: 'findObject',
-                args: { id: '$id:pk' },
-            },
-            countNotifications: {
-                collection: NotificationStorage.NOTIFS_COLL,
-                operation: 'countObjects',
-                args: { readTime: { $exists: '$isRead:boolean' } },
-            },
-            readNotification: {
-                collection: NotificationStorage.NOTIFS_COLL,
-                operation: 'updateObject',
-                args: [
-                    { id: '$id:pk' },
-                    { $set: { readTime: '$readTime:number' } },
-                ],
-            },
-        },
-    })
+        })
 
-    async storeNotification(notification) {
-        return this.operation('createNotification', notification)
+    async storeNotification(notification: Notification) {
+        if (
+            !(await this.operation('findNotificationById', {
+                id: notification.id,
+            }))
+        ) {
+            return this.operation('createNotification', notification)
+        }
     }
 
     async fetchUnreadNotifications() {
