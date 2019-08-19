@@ -150,10 +150,10 @@ export default class DirectLinkingBackground {
                 override?: boolean
                 openSidebar?: boolean
             } = {
-            anchor: null,
-            override: false,
-            activeUrl: undefined,
-        },
+                anchor: null,
+                override: false,
+                activeUrl: undefined,
+            },
     ) {
         const [currentTab] = await this.options.browserAPIs.tabs.query({
             active: true,
