@@ -10,7 +10,7 @@ import {
     POSTS_COLL,
     BMS_COLL,
 } from 'src/social-integration/constants'
-const dataURLtoBlob = require('dataurl-to-blob')
+import decodeBlob from 'src/util/decode-blob'
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
 
@@ -184,8 +184,8 @@ export class BackupRestoreProcedure {
     _unblockDatabase() {}
 
     async _writeChange(change: ObjectChange) {
-        change = _filterBadChange(change)
-        _deserializeChangeFields(change)
+        change = this._filterBadChange(change)
+        this._deserializeChangeFields(change)
         _migrateObject(change)
 
         const collection = this.storageManager.collection(change.collection)
@@ -212,7 +212,7 @@ export class BackupRestoreProcedure {
         const collection = this.storageManager.collection(image.collection)
         const where = this._getChangeWhere(image)
         const updates = {
-            $set: { [image.type]: _blobFromPngString(image.data) },
+            $set: { [image.type]: this._blobFromPngString(image.data) },
         }
 
         try {
@@ -259,54 +259,104 @@ export class BackupRestoreProcedure {
             return { [pkIndex]: change.objectPk || change['pk'] }
         }
     }
-}
 
-export function _filterBadChange({
-    object,
-    ...change
-}: ObjectChange): ObjectChange {
-    const isBadBlob = val =>
-        val != null && !(val instanceof Blob) && !Object.keys(val).length
+    _filterBadChange({ object, ...change }: ObjectChange): ObjectChange {
+        if (
+            change.operation !== 'delete' &&
+            object != null &&
+            Object.entries(object).length === 0
+        ) {
+            // Empty objects in backups have been causing issues; unset operation to skip write
+            return { ...change, object, operation: null }
+        }
 
-    if (
-        change.operation !== 'delete' &&
-        object != null &&
-        Object.entries(object).length === 0
-    ) {
-        // Empty objects in backups have been causing issues; unset operation to skip write
-        return { ...change, object, operation: null }
+        if (
+            change.collection === 'pages' &&
+            object != null &&
+            this._isBadBlob(object.screenshot)
+        ) {
+            // Pages can exist without screenshot Blobs; omit bad value
+            const { screenshot, ...objectMod } = object
+            return { ...change, object: objectMod }
+        }
+
+        if (
+            change.collection === 'favIcons' &&
+            object != null &&
+            this._isBadBlob(object.favIcon)
+        ) {
+            // FavIcons cannot exist without favIcon Blobs; unset operation to skip write
+            return { ...change, object, operation: null }
+        }
+
+        if (
+            change.collection === USERS_COLL &&
+            object != null &&
+            this._isBadBlob(object.profilePic)
+        ) {
+            // Users can exist without profilePic Blobs; omit bad value
+            const { profilePic, ...objectMod } = object
+            return { ...change, object: objectMod }
+        }
+
+        return { ...change, object }
     }
 
-    if (
-        change.collection === 'pages' &&
-        object != null &&
-        isBadBlob(object.screenshot)
-    ) {
-        // Pages can exist without screenshot Blobs; omit bad value
-        const { screenshot, ...objectMod } = object
-        return { ...change, object: objectMod }
+    _isBadBlob(val) {
+        return (
+            val != null &&
+            !(val instanceof this._getBlobClass()) &&
+            !Object.keys(val).length
+        )
     }
 
-    if (
-        change.collection === 'favIcons' &&
-        object != null &&
-        isBadBlob(object.favIcon)
-    ) {
-        // FavIcons cannot exist without favIcon Blobs; unset operation to skip write
-        return { ...change, object, operation: null }
+    _getBlobClass() {
+        return Blob
     }
 
-    if (
-        change.collection === USERS_COLL &&
-        object != null &&
-        isBadBlob(object.profilePic)
-    ) {
-        // Users can exist without profilePic Blobs; omit bad value
-        const { profilePic, ...objectMod } = object
-        return { ...change, object: objectMod }
+    _getAtobFunction() {
+        return atob
     }
 
-    return { ...change, object }
+    _deserializeChangeFields(change: ObjectChange) {
+        const object = change.object
+        const checkSerializedExists = (colls: string[], field: string) =>
+            colls.includes(change.collection) &&
+            !!object[field] &&
+            typeof object[field] === 'string'
+
+        if (checkSerializedExists(['favIcons'], 'favIcon')) {
+            object.favIcon = this._blobFromPngString(object.favIcon)
+        }
+
+        if (checkSerializedExists(['annotations', POSTS_COLL], 'createdWhen')) {
+            object.createdWhen = new Date(object.createdWhen)
+        }
+
+        if (checkSerializedExists(['annotations'], 'lastEdited')) {
+            object.lastEdited = new Date(object.lastEdited)
+        }
+
+        if (
+            checkSerializedExists(
+                ['customLists', 'pageListEntries', POSTS_COLL, BMS_COLL],
+                'createdAt',
+            )
+        ) {
+            object.createdAt = new Date(object.createdAt)
+        }
+    }
+
+    _blobFromPngString(s: string) {
+        const prefix = 'data:'
+        if (s.substr(0, prefix.length) !== prefix) {
+            s = 'data:image/png;base64,' + s
+        }
+        return decodeBlob(s, {
+            blobClass: this._getBlobClass(),
+            atobFunction: this._getAtobFunction(),
+        })
+    }
 }
 
 export function _migrateObject(change: ObjectChange) {
@@ -328,41 +378,4 @@ export function _migrateObject(change: ObjectChange) {
         field: 'lastEdited',
         value: prev => prev.createdWhen,
     })
-}
-
-export function _deserializeChangeFields(change: ObjectChange) {
-    const object = change.object
-    const checkSerializedExists = (colls: string[], field: string) =>
-        colls.includes(change.collection) &&
-        !!object[field] &&
-        typeof object[field] === 'string'
-
-    if (checkSerializedExists(['favIcons'], 'favIcon')) {
-        object.favIcon = _blobFromPngString(object.favIcon)
-    }
-
-    if (checkSerializedExists(['annotations', POSTS_COLL], 'createdWhen')) {
-        object.createdWhen = new Date(object.createdWhen)
-    }
-
-    if (checkSerializedExists(['annotations'], 'lastEdited')) {
-        object.lastEdited = new Date(object.lastEdited)
-    }
-
-    if (
-        checkSerializedExists(
-            ['customLists', 'pageListEntries', POSTS_COLL, BMS_COLL],
-            'createdAt',
-        )
-    ) {
-        object.createdAt = new Date(object.createdAt)
-    }
-}
-
-export function _blobFromPngString(s: string) {
-    const prefix = 'data:'
-    if (s.substr(0, prefix.length) !== prefix) {
-        s = 'data:image/png;base64,' + s
-    }
-    return dataURLtoBlob(s)
 }

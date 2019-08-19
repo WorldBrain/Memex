@@ -1,5 +1,7 @@
+import BlobPolyfill from 'node-blob'
+import atobPolyfill from 'atob'
 import * as sinon from 'sinon'
-import * as expect from 'expect'
+import expect from 'expect'
 import { BackupBackend, ObjectChange } from '../../backend'
 import { BackupRestoreProcedure } from '.'
 import encodeBlob from 'src/util/encode-blob'
@@ -252,6 +254,10 @@ describe('BackupRestoreProcedure', () => {
             logErrors: false,
             storage: null,
         })
+        restoreProcedure._getBlobClass = () =>
+            typeof Blob !== 'undefined' ? Blob : BlobPolyfill
+        restoreProcedure._getAtobFunction = () =>
+            typeof atob !== 'undefined' ? atob : atobPolyfill
 
         const {
             screenshot,
@@ -299,6 +305,10 @@ describe('BackupRestoreProcedure', () => {
             storageManager: storageManager as any,
             storage: null,
         })
+        restoreProcedure._getBlobClass = () =>
+            typeof Blob !== 'undefined' ? Blob : BlobPolyfill
+        restoreProcedure._getAtobFunction = () =>
+            typeof atob !== 'undefined' ? atob : atobPolyfill
         restoreProcedure._getChangeWhere = () => ({ boo: 'bla' })
         const dataUrl = 'data:text/plain;charset=utf-8;base64,dGVzdA=='
         await restoreProcedure._writeImage({
@@ -331,6 +341,10 @@ describe('BackupRestoreProcedure', () => {
             storageManager: storageManager as any,
             storage: null,
         })
+        restoreProcedure._getBlobClass = () =>
+            typeof Blob !== 'undefined' ? Blob : BlobPolyfill
+        restoreProcedure._getAtobFunction = () =>
+            typeof atob !== 'undefined' ? atob : atobPolyfill
         restoreProcedure._getChangeWhere = () => ({ boo: 'bla' })
         await restoreProcedure._writeChange({
             timestamp: 1,

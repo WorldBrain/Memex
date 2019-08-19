@@ -1,4 +1,4 @@
-import * as expect from 'expect'
+import expect from 'expect'
 import * as logic from './restore-where.logic'
 import { setupUiLogicTest } from 'src/util/ui-logic'
 

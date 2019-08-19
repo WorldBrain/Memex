@@ -1,4 +1,4 @@
-import * as expect from 'expect'
+import expect from 'expect'
 import { DownloadQueue } from './download-queue'
 
 export function createMockFetcher() {

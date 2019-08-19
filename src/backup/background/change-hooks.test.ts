@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import * as expect from 'expect'
+import expect from 'expect'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 
