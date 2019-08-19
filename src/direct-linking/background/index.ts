@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { browser, Tabs } from 'webextension-polyfill-ts'
+import { Tabs, Browser } from 'webextension-polyfill-ts'
 
 import {
     makeRemotelyCallable,
@@ -30,22 +30,26 @@ export default class DirectLinkingBackground {
     private requests: AnnotationRequests
     private socialBg: SocialBG
 
-    constructor({
-        storageManager,
-        socialBg,
-    }: {
-        storageManager: Storex
-        socialBg: SocialBG
-    }) {
-        this.socialBg = socialBg
+    constructor(
+        private options: {
+            browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
+            storageManager: Storex
+            socialBg: SocialBG
+        },
+    ) {
+        this.socialBg = options.socialBg
         this.backend = new DirectLinkingBackend()
 
         this.annotationStorage = new AnnotationStorage({
-            storageManager,
+            storageManager: options.storageManager,
+            browserStorageArea: options.browserAPIs.storage.local,
         })
 
         this.sendAnnotation = ({ tabId, annotation }) => {
-            browser.tabs.sendMessage(tabId, { type: 'direct-link', annotation })
+            options.browserAPIs.tabs.sendMessage(tabId, {
+                type: 'direct-link',
+                annotation,
+            })
         }
 
         this.requests = new AnnotationRequests(
@@ -84,12 +88,12 @@ export default class DirectLinkingBackground {
     setupRequestInterceptor() {
         setupRequestInterceptor({
             requests: this.requests,
-            webRequest: browser.webRequest,
+            webRequest: this.options.browserAPIs.webRequest,
         })
     }
 
     async _triggerSidebar(functionName, ...args) {
-        const [currentTab] = await browser.tabs.query({
+        const [currentTab] = await this.options.browserAPIs.tabs.query({
             active: true,
             currentWindow: true,
         })
@@ -107,7 +111,10 @@ export default class DirectLinkingBackground {
             annotation: Annotation
         },
     ) {
-        const activeTab = await browser.tabs.create({ active: true, url })
+        const activeTab = await this.options.browserAPIs.tabs.create({
+            active: true,
+            url,
+        })
 
         const listener = async (tabId, changeInfo) => {
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
@@ -117,10 +124,10 @@ export default class DirectLinkingBackground {
                     tabId,
                 ).insertRibbon()
                 await remoteFunction('goToAnnotation', { tabId })(annotation)
-                browser.tabs.onUpdated.removeListener(listener)
+                this.options.browserAPIs.tabs.onUpdated.removeListener(listener)
             }
         }
-        browser.tabs.onUpdated.addListener(listener)
+        this.options.browserAPIs.tabs.onUpdated.addListener(listener)
     }
 
     async toggleSidebarOverlay(
@@ -145,7 +152,7 @@ export default class DirectLinkingBackground {
             activeUrl: undefined,
         },
     ) {
-        const [currentTab] = await browser.tabs.query({
+        const [currentTab] = await this.options.browserAPIs.tabs.query({
             active: true,
             currentWindow: true,
         })

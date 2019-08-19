@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import { browser, Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
@@ -21,7 +21,7 @@ export interface BackgroundModules {
     directLinking: DirectLinkingBackground
     search: SearchBackground
     eventLog: EventLogBackground
-    customList: CustomListBackground
+    customLists: CustomListBackground
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
@@ -29,13 +29,14 @@ export interface BackgroundModules {
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
+    browserAPIs: Browser
 }): BackgroundModules {
     const { storageManager } = options
 
     const notifications = new NotificationBackground({ storageManager })
     const social = new SocialBackground({ storageManager })
     const activityLogger = new ActivityLoggerBackground({
-        storageManager,
+        browserAPIs: options.browserAPIs,
     })
 
     return {
@@ -43,15 +44,17 @@ export function createBackgroundModules(options: {
         social,
         activityLogger,
         directLinking: new DirectLinkingBackground({
+            browserAPIs: options.browserAPIs,
             storageManager,
             socialBg: social,
         }),
         search: new SearchBackground({
             storageManager,
             tabMan: activityLogger.tabManager,
+            browserAPIs: options.browserAPIs,
         }),
         eventLog: new EventLogBackground({ storageManager }),
-        customList: new CustomListBackground({
+        customLists: new CustomListBackground({
             storageManager,
             tabMan: activityLogger.tabManager,
             windows: browser.windows,
@@ -81,7 +84,7 @@ export function setupBackgroundModules(backgroundModules: BackgroundModules) {
     backgroundModules.activityLogger.setupWebExtAPIHandlers()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
-    backgroundModules.customList.setupRemoteFunctions()
+    backgroundModules.customLists.setupRemoteFunctions()
     backgroundModules.tags.setupRemoteFunctions()
     backgroundModules.backupModule.setBackendFromStorage()
     backgroundModules.backupModule.setupRemoteFunctions()
@@ -96,7 +99,7 @@ export function registerBackgroundModuleCollections(
     registerModuleMapCollections(storageManager.registry, {
         annotations: backgroundModules.directLinking.annotationStorage,
         notifications: backgroundModules.notifications.storage,
-        customList: backgroundModules.customList.storage,
+        customList: backgroundModules.customLists.storage,
         bookmarks: backgroundModules.bookmarks.storage,
         backup: backgroundModules.backupModule.storage,
         eventLog: backgroundModules.eventLog.storage,

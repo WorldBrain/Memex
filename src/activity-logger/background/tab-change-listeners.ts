@@ -1,4 +1,4 @@
-import { browser, Storage, Tabs } from 'webextension-polyfill-ts'
+import { browser, Storage, Tabs, Browser } from 'webextension-polyfill-ts'
 import throttle from 'lodash/throttle'
 
 import * as searchIndex from '../../search'
@@ -25,21 +25,6 @@ import {
     BookmarkChecker,
     TabIndexer,
 } from './types'
-
-interface Props {
-    tabManager: TabManager
-    pageVisitLogger: PageVisitLogger
-    storageArea?: Storage.StorageArea
-    visitUpdate?: VisitInteractionUpdater
-    favIconFetch?: FavIconFetcher
-    favIconCheck?: FavIconChecker
-    domLoadCheck?: TabEventChecker
-    favIconCreate?: FavIconCreator
-    bookmarkCheck?: BookmarkChecker
-    tabActiveCheck?: TabEventChecker
-    loggableTabCheck?: LoggableTabChecker
-    contentScriptPaths?: string[]
-}
 
 export default class TabChangeListeners {
     /**
@@ -79,32 +64,39 @@ export default class TabChangeListeners {
         { favIcon: TabIndexer; page: TabIndexer }
     >()
 
-    constructor({
-        tabManager,
-        pageVisitLogger,
-        storageArea = browser.storage.local,
-        loggableTabCheck = shouldLogTab,
-        visitUpdate = updateVisitInteractionData,
-        favIconFetch = fetchFavIcon,
-        favIconCheck = searchIndex.domainHasFavIcon(searchIndex.getDb),
-        favIconCreate = searchIndex.addFavIcon(searchIndex.getDb),
-        domLoadCheck = whenPageDOMLoaded,
-        tabActiveCheck = whenTabActive,
-        bookmarkCheck = searchIndex.pageHasBookmark(searchIndex.getDb),
-        contentScriptPaths = TabChangeListeners.DEF_CONTENT_SCRIPTS,
-    }: Props) {
-        this._tabManager = tabManager
-        this._pageVisitLogger = pageVisitLogger
-        this._storage = storageArea
-        this._checkTabLoggable = loggableTabCheck
-        this._updateTabVisit = visitUpdate
-        this._fetchFavIcon = favIconFetch
-        this._checkFavIcon = favIconCheck
-        this._createFavIcon = favIconCreate
-        this._pageDOMLoaded = domLoadCheck
-        this._tabActive = tabActiveCheck
-        this.checkBookmark = bookmarkCheck
-        this._contentScriptPaths = contentScriptPaths
+    constructor(options: {
+        tabManager: TabManager
+        pageVisitLogger: PageVisitLogger
+        browserAPIs: Pick<Browser, 'storage'>
+        storageArea?: Storage.StorageArea
+        visitUpdate?: VisitInteractionUpdater
+        favIconFetch?: FavIconFetcher
+        favIconCheck?: FavIconChecker
+        domLoadCheck?: TabEventChecker
+        favIconCreate?: FavIconCreator
+        bookmarkCheck?: BookmarkChecker
+        tabActiveCheck?: TabEventChecker
+        loggableTabCheck?: LoggableTabChecker
+        contentScriptPaths?: string[]
+    }) {
+        this._tabManager = options.tabManager
+        this._pageVisitLogger = options.pageVisitLogger
+        this._storage = options.storageArea || options.browserAPIs.storage.local
+        this._checkTabLoggable = options.loggableTabCheck || shouldLogTab
+        this._updateTabVisit = options.visitUpdate || updateVisitInteractionData
+        this._fetchFavIcon = options.favIconFetch || fetchFavIcon
+        this._checkFavIcon =
+            options.favIconCheck ||
+            searchIndex.domainHasFavIcon(searchIndex.getDb)
+        this._createFavIcon =
+            options.favIconCreate || searchIndex.addFavIcon(searchIndex.getDb)
+        this._pageDOMLoaded = options.domLoadCheck || whenPageDOMLoaded
+        this._tabActive = options.tabActiveCheck || whenTabActive
+        this.checkBookmark =
+            options.bookmarkCheck ||
+            searchIndex.pageHasBookmark(searchIndex.getDb)
+        this._contentScriptPaths =
+            options.contentScriptPaths || TabChangeListeners.DEF_CONTENT_SCRIPTS
     }
 
     private getOrCreateTabIndexers(tabId: number) {

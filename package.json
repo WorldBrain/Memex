@@ -111,6 +111,7 @@
         "@types/sinon": "^7.0.3",
         "@types/storybook__react": "^4.0.2",
         "@types/url-regex": "^4.1.0",
+        "@types/whatwg-url": "^6.4.0",
         "atob": "^2.1.2",
         "autoprefixer": "^7.1.1",
         "babel-core": "^6.26.3",
@@ -194,6 +195,7 @@
         "webpack-build-notifier": "^0.1.25",
         "webpack-chrome-extension-reloader": "^0.8.3",
         "webpack-cli": "^3.1.0",
+        "whatwg-url": "^7.0.0",
         "zip-webpack-plugin": "^3.0.0"
     }
 }

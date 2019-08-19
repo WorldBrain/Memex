@@ -1,5 +1,4 @@
-import { browser, Runtime, WebNavigation, Tabs } from 'webextension-polyfill-ts'
-import Storex from '@worldbrain/storex'
+import { Runtime, WebNavigation, Tabs, Browser } from 'webextension-polyfill-ts'
 
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { mapChunks } from 'src/util/chunk'
@@ -28,21 +27,16 @@ export default class ActivityLoggerBackground {
      */
     private tabQueryP = new Promise(resolve => resolve())
 
-    constructor({
-        storageManager,
-        tabsAPI = browser.tabs,
-        runtimeAPI = browser.runtime,
-        webNavAPI = browser.webNavigation,
-    }: {
-        storageManager: Storex
-        tabsAPI?: Tabs.Static
-        runtimeAPI?: Runtime.Static
-        webNavAPI?: WebNavigation.Static
+    constructor(options: {
+        browserAPIs: Pick<
+            Browser,
+            'tabs' | 'runtime' | 'webNavigation' | 'storage'
+        >
     }) {
         this.tabManager = new TabManager()
-        this.tabsAPI = tabsAPI
-        this.runtimeAPI = runtimeAPI
-        this.webNavAPI = webNavAPI
+        this.tabsAPI = options.browserAPIs.tabs
+        this.runtimeAPI = options.browserAPIs.runtime
+        this.webNavAPI = options.browserAPIs.webNavigation
 
         this.pageVisitLogger = new PageVisitLogger({
             tabManager: this.tabManager,
@@ -50,6 +44,7 @@ export default class ActivityLoggerBackground {
         this.tabChangeListener = new TabChangeListeners({
             tabManager: this.tabManager,
             pageVisitLogger: this.pageVisitLogger,
+            browserAPIs: options.browserAPIs,
         })
     }
 

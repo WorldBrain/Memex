@@ -1,4 +1,4 @@
-import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
+import { Tabs, Storage } from 'webextension-polyfill-ts'
 import Storex from '@worldbrain/storex'
 import {
     withHistory,
@@ -14,17 +14,6 @@ import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Annotation, AnnotListEntry } from '../types'
 
-export interface AnnotationStorageProps {
-    storageManager: Storex
-    browserStorageArea?: Storage.StorageArea
-    annotationsColl?: string
-    pagesColl?: string
-    tagsColl?: string
-    bookmarksColl?: string
-    listsColl?: string
-    listEntriesColl?: string
-}
-
 // TODO: Move to src/annotations in the future
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = 'pages'
@@ -39,16 +28,22 @@ export default class AnnotationStorage extends StorageModule {
 
     private db: Storex
 
-    constructor({
-        storageManager,
-        browserStorageArea = browser.storage.local,
-    }: AnnotationStorageProps) {
-        super({ storageManager })
+    constructor(options: {
+        storageManager: Storex
+        browserStorageArea: Storage.StorageArea
+        annotationsColl?: string
+        pagesColl?: string
+        tagsColl?: string
+        bookmarksColl?: string
+        listsColl?: string
+        listEntriesColl?: string
+    }) {
+        super({ storageManager: options.storageManager })
 
-        this.db = storageManager
-        this._browserStorageArea = browserStorageArea
+        this.db = options.storageManager
+        this._browserStorageArea = options.browserStorageArea
 
-        this._getDb = async () => storageManager
+        this._getDb = async () => options.storageManager
     }
 
     getConfig = (): StorageModuleConfig =>

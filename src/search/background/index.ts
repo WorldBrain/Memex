@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { browser, Bookmarks } from 'webextension-polyfill-ts'
+import { Browser } from 'webextension-polyfill-ts'
 
 import * as index from '..'
 import SearchStorage from './storage'
@@ -57,13 +57,13 @@ export default class SearchBackground {
         tabMan,
         queryBuilder = () => new QueryBuilder(),
         idx = index,
-        bookmarksAPI = browser.bookmarks,
+        browserAPIs,
     }: {
         storageManager: Storex
         queryBuilder?: () => QueryBuilder
         tabMan: TabManager
         idx?: typeof index
-        bookmarksAPI?: Bookmarks.Static
+        browserAPIs: Pick<Browser, 'bookmarks'>
     }) {
         this.tabMan = tabMan
         this.getDb = async () => storageManager
@@ -75,10 +75,10 @@ export default class SearchBackground {
         this.initBackend(idx)
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
-        bookmarksAPI.onCreated.addListener(
+        browserAPIs.bookmarks.onCreated.addListener(
             this.handleBookmarkCreation.bind(this),
         )
-        bookmarksAPI.onRemoved.addListener(
+        browserAPIs.bookmarks.onRemoved.addListener(
             this.handleBookmarkRemoval.bind(this),
         )
     }

@@ -29,15 +29,19 @@ import {
 } from './background-script/setup'
 
 const storageManager = initStorex()
+
 const localStorageChangesManager = new StorageChangesManager({
     storage: browser.storage,
 })
 
 initSentry({ storageChangesManager: localStorageChangesManager })
-const backgroundModules = createBackgroundModules({ storageManager })
+const backgroundModules = createBackgroundModules({
+    storageManager,
+    browserAPIs: browser,
+})
 
 // TODO: There's still some evil code around that imports this entry point
-const { tags, customList } = backgroundModules
+const { tags, customLists: customList } = backgroundModules
 export { tags, customList }
 
 setupBackgroundModules(backgroundModules)
