@@ -5,38 +5,23 @@ import Storex, {
 import {
     DexieStorageBackend,
     IndexedDbImplementation,
-    StemmerSelector,
 } from '@worldbrain/storex-backend-dexie'
 
-import schemaPatcherFn from './storage/dexie-schema'
+import UrlField from './storage/url-field'
+import schemaPatcher from './storage/dexie-schema'
+import collections from './old-schema'
+import stemmerSelector from './stemmers'
+import { plugins as backendPlugins } from './storex-plugins'
 
-export interface CustomField {
-    key: string
-    field: any // TODO: type properly after storex exports
-}
-
-export default ({
-    dbName,
-    stemmerSelector,
-    schemaPatcher,
-    idbImplementation,
-    collections,
-    backendPlugins = [],
-    customFields = [],
-}: {
-    stemmerSelector: StemmerSelector
-    schemaPatcher: typeof schemaPatcherFn
+export default function initStorex(options: {
     dbName: string
-    idbImplementation: IndexedDbImplementation
-    collections: CollectionDefinitionMap
-    backendPlugins?: StorageBackendPlugin<DexieStorageBackend>[]
-    customFields?: CustomField[]
-}): Storex => {
+    idbImplementation?: IndexedDbImplementation
+}): Storex {
     const backend = new DexieStorageBackend({
         stemmerSelector,
         schemaPatcher,
-        dbName,
-        idbImplementation,
+        dbName: options.dbName,
+        idbImplementation: options.idbImplementation,
     })
 
     for (const plugin of backendPlugins) {
@@ -46,6 +31,7 @@ export default ({
     const storex = new Storex({ backend })
 
     // Override default storex fields with Memex-specific ones
+    const customFields = [{ key: 'url', field: UrlField }]
     for (const { key, field } of customFields) {
         storex.registry.fieldTypes.registerType(key, field)
     }
