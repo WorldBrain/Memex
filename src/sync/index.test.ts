@@ -92,10 +92,8 @@ describe('Sync integration tests', () => {
     function integrationTest(
         description: string,
         test: () => {
-            steps: Array<
-                (context: { setup: TestSetup }) => Promise<void> | void
-            >
-            onFinish?: (context: { setup: TestSetup }) => Promise<void> | void
+            steps: Array<(context: TestContext) => Promise<void> | void>
+            onFinish?: (context: TestContext) => Promise<void> | void
         },
     ) {
         describe(description, () => {
