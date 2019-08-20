@@ -11,7 +11,10 @@ import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup/background'
 import * as backupStorage from '../backup/background/storage'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import {
+    registerModuleMapCollections,
+    StorageModule,
+} from '@worldbrain/storex-pattern-modules'
 import { setupBlacklistRemoteFunctions } from 'src/blacklist/background'
 
 export interface BackgroundModules {
@@ -92,11 +95,10 @@ export function setupBackgroundModules(backgroundModules: BackgroundModules) {
     setupBlacklistRemoteFunctions()
 }
 
-export function registerBackgroundModuleCollections(
-    storageManager: StorageManager,
+export function getBackgroundStorageModules(
     backgroundModules: BackgroundModules,
-) {
-    registerModuleMapCollections(storageManager.registry, {
+): { [moduleName: string]: StorageModule } {
+    return {
         annotations: backgroundModules.directLinking.annotationStorage,
         notifications: backgroundModules.notifications.storage,
         customList: backgroundModules.customLists.storage,
@@ -106,5 +108,15 @@ export function registerBackgroundModuleCollections(
         search: backgroundModules.search.storage,
         social: backgroundModules.social.storage,
         tags: backgroundModules.tags.storage,
-    })
+    }
+}
+
+export function registerBackgroundModuleCollections(
+    storageManager: StorageManager,
+    backgroundModules: BackgroundModules,
+) {
+    registerModuleMapCollections(
+        storageManager.registry,
+        getBackgroundStorageModules(backgroundModules),
+    )
 }
