@@ -22,29 +22,30 @@
 // - reason (optional, only for `reject`):
 //     Like `value`, but for specifying the reason to reject with.
 
-export default function eventToPromise({
-    resolve: resolveOpts,
-    reject: rejectOpts,
-}) {
+export default function eventToPromise(
+    { resolve: resolveOpts, reject: rejectOpts },
+    initListeners = new Set(),
+) {
     // Make an array if we got passed a single options object (or none at all).
     resolveOpts = castToArray(resolveOpts)
     rejectOpts = castToArray(rejectOpts)
 
     return new Promise(function(resolve, reject) {
         // A list of {event, listener} pairs, populated below.
-        const listeners = []
+        const listeners = initListeners
 
         // To clean up our listeners when either resolving or rejecting.
         function removeListeners() {
             listeners.forEach(listener => {
                 listener.event.removeListener(listener.listener)
             })
+            listeners.clear()
         }
 
         // For each of the events in resolveOpts, create an event listener
         // function that resolves (to be hooked up to the event further below).
         resolveOpts.forEach(opts => {
-            listeners.push({
+            listeners.add({
                 event: opts.event,
                 listener: function maybeResolve(...args) {
                     // If a filter was specified, let it decide whether to act.
@@ -63,7 +64,7 @@ export default function eventToPromise({
         })
         // Likewise for the events in rejectOpts.
         rejectOpts.forEach(opts => {
-            listeners.push({
+            listeners.add({
                 event: opts.event,
                 listener: function maybeReject(...args) {
                     if (opts.filter === undefined || opts.filter(...args)) {
