@@ -1,3 +1,5 @@
+import * as omitBy from 'lodash/omitBy'
+import * as endsWith from 'lodash/endsWith'
 import Storex from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
@@ -106,9 +108,17 @@ describe('Annotations storage', () => {
             }
 
             test('update comment', async () => {
+                const stripTerms = comment =>
+                    omitBy(comment, (value, key) => endsWith(key, '_terms'))
+
                 const oldComment = await annotationStorage.getAnnotationByPk(
                     DATA.comment.url,
                 )
+                expect(stripTerms(oldComment)).toEqual({
+                    ...DATA.comment,
+                    lastEdited: expect.any(Date),
+                })
+
                 await annotationStorage.editAnnotation(
                     DATA.comment.url,
                     'Edited comment',
@@ -116,17 +126,14 @@ describe('Annotations storage', () => {
                 const newComment = await annotationStorage.getAnnotationByPk(
                     DATA.comment.url,
                 )
-
-                // Test the name is updated correctly
-                checkIsDefined(oldComment)
-                checkIsDefined(newComment)
-                expect(oldComment.comment).toBe(DATA.comment.comment)
-                expect(newComment.comment).toBe('Edited comment')
-
-                // Test everything else is unchanged
-                expect(newComment.pageUrl).toBe(oldComment.pageUrl)
-                expect(newComment.pageTitle).toBe(oldComment.pageTitle)
-                expect(newComment.url).toBe(oldComment.url)
+                expect(stripTerms(newComment)).toEqual({
+                    ...DATA.comment,
+                    lastEdited: expect.any(Date),
+                    comment: 'Edited comment',
+                })
+                expect(newComment.lastEdited.getTime()).toBeGreaterThan(
+                    oldComment.lastEdited.getTime(),
+                )
             })
 
             test('add comment to highlight', async () => {
