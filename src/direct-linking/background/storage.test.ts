@@ -100,7 +100,7 @@ describe('Annotations storage', () => {
         })
 
         describe('Update operations: ', () => {
-            const runChecks = async annotation => {
+            const checkIsDefined = async annotation => {
                 expect(annotation).toBeDefined()
                 expect(annotation).not.toBeNull()
             }
@@ -118,10 +118,15 @@ describe('Annotations storage', () => {
                 )
 
                 // Test the name is updated correctly
-                runChecks(oldComment)
-                runChecks(newComment)
+                checkIsDefined(oldComment)
+                checkIsDefined(newComment)
                 expect(oldComment.comment).toBe(DATA.comment.comment)
                 expect(newComment.comment).toBe('Edited comment')
+
+                // Test everything else is unchanged
+                expect(newComment.pageUrl).toBe(oldComment.pageUrl)
+                expect(newComment.pageTitle).toBe(oldComment.pageTitle)
+                expect(newComment.url).toBe(oldComment.url)
             })
 
             test('add comment to highlight', async () => {
@@ -136,8 +141,8 @@ describe('Annotations storage', () => {
                     DATA.highlight.url,
                 )
 
-                runChecks(oldHighlight)
-                runChecks(newHighlight)
+                checkIsDefined(oldHighlight)
+                checkIsDefined(newHighlight)
                 expect(oldHighlight.comment).toBe('')
                 expect(newHighlight.comment).toBe(
                     'Adding a comment to the highlight.',
