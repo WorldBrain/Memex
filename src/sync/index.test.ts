@@ -78,6 +78,7 @@ async function setupSharedSyncLog() {
     })
     const sharedSyncLog = new SharedSyncLogStorage({
         storageManager: sharedStorageManager,
+        autoPkType: 'int',
     })
     registerModuleMapCollections(sharedStorageManager.registry, {
         sharedSyncLog,
