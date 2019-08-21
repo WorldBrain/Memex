@@ -108,19 +108,19 @@ describe('Custom List Integrations', () => {
 
     describe('update ops', () => {
         test('update list name', async () => {
-            const updatedList = await bg.updateList({
-                id: 1,
-                name: 'new name',
+            const id = 1
+            const updatedName = 'new name'
+
+            const before = await bg.fetchListById({ id })
+            expect(before.name).not.toEqual(updatedName)
+
+            await bg.updateList({
+                id,
+                name: updatedName,
             })
-            const newName = await bg.fetchListIgnoreCase({
-                name: 'new name',
-            })
-            // checkDefined(updatedList)
-            checkDefined(newName)
-            // No of pages and list updated
-            // expect(updatedList).toBe(1)
-            // Test the name is updated correctly
-            expect(newName.name).toBe('new name')
+
+            const after = await bg.fetchListById({ id })
+            expect(after.name).toEqual(updatedName)
         })
 
         test('fail to update list name', async () => {
