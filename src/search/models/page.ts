@@ -331,7 +331,11 @@ export default class Page extends AbstractModel
                 const existing = await this.db
                     .collection('pages')
                     .findOneObject<Page>({ url: this.url })
+
                 if (existing) {
+                    this.text = this.text + ' ' + existing.text
+                    this.fullTitle = this.fullTitle + ' ' + existing.fullTitle
+                    this.fullUrl = this.fullUrl + ' ' + existing.fullUrl
                     this._mergeTerms('terms', existing.terms)
                     this._mergeTerms('urlTerms', existing.urlTerms)
                     this._mergeTerms('titleTerms', existing.titleTerms)
@@ -341,10 +345,7 @@ export default class Page extends AbstractModel
                     }
                 }
 
-                // Persist current page state
-                const { object } = await this.db
-                    .collection('pages')
-                    .createObject(this.data)
+                await this.db.collection('pages').createObject(this.data)
 
                 // Insert or update all associated visits + tags
                 const [visitIds, tagIds] = await Promise.all([
@@ -375,7 +376,7 @@ export default class Page extends AbstractModel
                     }),
                 ])
 
-                return object.url
+                return this.url
             },
         )
     }
