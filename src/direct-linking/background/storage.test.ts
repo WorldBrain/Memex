@@ -1,3 +1,5 @@
+import * as omitBy from 'lodash/omitBy'
+import * as endsWith from 'lodash/endsWith'
 import Storex from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
@@ -100,15 +102,23 @@ describe('Annotations storage', () => {
         })
 
         describe('Update operations: ', () => {
-            const runChecks = async annotation => {
+            const checkIsDefined = async annotation => {
                 expect(annotation).toBeDefined()
                 expect(annotation).not.toBeNull()
             }
 
             test('update comment', async () => {
+                const stripTerms = comment =>
+                    omitBy(comment, (value, key) => endsWith(key, '_terms'))
+
                 const oldComment = await annotationStorage.getAnnotationByPk(
                     DATA.comment.url,
                 )
+                expect(stripTerms(oldComment)).toEqual({
+                    ...DATA.comment,
+                    lastEdited: expect.any(Date),
+                })
+
                 await annotationStorage.editAnnotation(
                     DATA.comment.url,
                     'Edited comment',
@@ -116,12 +126,14 @@ describe('Annotations storage', () => {
                 const newComment = await annotationStorage.getAnnotationByPk(
                     DATA.comment.url,
                 )
-
-                // Test the name is updated correctly
-                runChecks(oldComment)
-                runChecks(newComment)
-                expect(oldComment.comment).toBe(DATA.comment.comment)
-                expect(newComment.comment).toBe('Edited comment')
+                expect(stripTerms(newComment)).toEqual({
+                    ...DATA.comment,
+                    lastEdited: expect.any(Date),
+                    comment: 'Edited comment',
+                })
+                expect(newComment.lastEdited.getTime()).toBeGreaterThan(
+                    oldComment.lastEdited.getTime(),
+                )
             })
 
             test('add comment to highlight', async () => {
@@ -136,8 +148,8 @@ describe('Annotations storage', () => {
                     DATA.highlight.url,
                 )
 
-                runChecks(oldHighlight)
-                runChecks(newHighlight)
+                checkIsDefined(oldHighlight)
+                checkIsDefined(newHighlight)
                 expect(oldHighlight.comment).toBe('')
                 expect(newHighlight.comment).toBe(
                     'Adding a comment to the highlight.',
