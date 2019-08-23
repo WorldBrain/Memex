@@ -153,10 +153,8 @@ export default class AnnotationStorage extends StorageModule {
                     args: [
                         { url: '$url:pk' },
                         {
-                            $set: {
-                                comment: '$comment:string',
-                                lastEdited: new Date(),
-                            },
+                            comment: '$comment:string',
+                            lastEdited: '$lastEdited:any',
                         },
                     ],
                 },
@@ -298,8 +296,12 @@ export default class AnnotationStorage extends StorageModule {
         })
     }
 
-    async editAnnotation(url: string, comment: string) {
-        return this.operation('editAnnotation', { url, comment })
+    async editAnnotation(
+        url: string,
+        comment: string,
+        lastEdited = new Date(),
+    ) {
+        return this.operation('editAnnotation', { url, comment, lastEdited })
     }
 
     async deleteAnnotation(url: string) {

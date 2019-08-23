@@ -247,7 +247,10 @@ export default class DirectLinkingBackground {
         }
 
         const pageTitle = title == null ? tab.title : title
-        const uniqueUrl = `${pageUrl}/#${Date.now()}`
+        const uniqueUrl = normalize(`${pageUrl}/#${Date.now()}`, {
+            stripHash: false,
+            removeTrailingSlash: false,
+        })
 
         await this.annotationStorage.createAnnotation({
             pageUrl,
