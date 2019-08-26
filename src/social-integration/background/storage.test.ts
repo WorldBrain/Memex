@@ -60,6 +60,7 @@ describe('Social storage', () => {
         const annotsBg = new AnnotsBg({
             storageManager,
             socialBg,
+            browserAPIs: { storage: {} } as any,
         })
 
         socialStorage = socialBg['storage']

@@ -63,6 +63,7 @@ describe('Search index integration', () => {
         const annotsBg = new AnnotsBg({
             storageManager,
             socialBg,
+            browserAPIs: { storage: {} } as any,
         })
 
         registerModuleMapCollections(storageManager.registry, {
