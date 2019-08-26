@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const externalTsModules = require('./build//external').externalTsModules
 
 const externalTsModuleMappings = {}
@@ -8,6 +9,8 @@ for (const externalTsModule of externalTsModules) {
     })
 }
 
+=======
+>>>>>>> Put Jest config in .js file instead of .json
 module.exports = {
     globals: {
         'ts-jest': {
@@ -24,7 +27,26 @@ module.exports = {
     modulePaths: ['<rootDir>'],
     moduleNameMapper: {
         '\\.(css|less)$': 'identity-obj-proxy',
+<<<<<<< HEAD
         ...externalTsModuleMappings,
+=======
+        '^user-logic$': '<rootDir>/external/user-logic/ts',
+        '^user-logic/lib/(.*)': '<rootDir>/external/user-logic/ts/$1',
+        '^@worldbrain/([^/]+)$': '<rootDir>/external/@worldbrain/$1/ts',
+        '^@worldbrain/([^/]+)/lib/(.+)':
+            '<rootDir>/external/@worldbrain/$1/ts/$2',
+        '^xxxx@worldbrain/storex$': '<rootDir>/external/@worldbrain/storex/ts',
+        '^xxxx@worldbrain/memex-stemmer$':
+            '<rootDir>/external/@worldbrain/memex-stemmer/ts',
+        '^xxxx@worldbrain/storex/lib/(.*)':
+            '<rootDir>/external/@worldbrain/storex/ts/$1',
+        '^xxxx@worldbrain/storex-backend-dexie$':
+            '<rootDir>/external/@worldbrain/storex-backend-dexie/ts',
+        '^xxxx@worldbrain/storex-pattern-modules$':
+            '<rootDir>/external/@worldbrain/storex-pattern-modules/ts',
+        '^xxxx@worldbrain/storex-backend-dexie/lib/(.*)':
+            '<rootDir>/external/@worldbrain/storex-backend-dexie/ts/$1',
+>>>>>>> Put Jest config in .js file instead of .json
     },
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
     setupFiles: ['jest-webextension-mock', './setupJest.js'],
