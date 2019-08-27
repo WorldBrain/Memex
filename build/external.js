@@ -17,6 +17,6 @@ function collectModules(basePath, namespaceDir = null) {
     return paths
 }
 
-export const externalTsModules = collectModules(
-    path.join(__dirname, '..', 'external'),
-)
+module.exports = {
+    externalTsModules: collectModules(path.join(__dirname, '..', 'external')),
+}
