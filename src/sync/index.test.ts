@@ -133,7 +133,7 @@ describe('Sync integration tests', () => {
                         sharedSyncLog,
                         storageManager: setup.storageManager,
                         reconciler: reconcileSyncLog,
-                        now: Date.now(),
+                        now: '$now',
                         userId,
                         deviceId,
                     })
@@ -164,6 +164,7 @@ describe('Sync integration tests', () => {
                     lastSyncedDeviceId === firstDeviceId
                         ? secondDeviceId
                         : firstDeviceId
+
                 await sync(
                     unsyncedDeviceId === firstDeviceId
                         ? firstSetup
