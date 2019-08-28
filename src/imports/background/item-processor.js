@@ -124,16 +124,9 @@ export default class ImportItemProcessor {
                 names: collections,
             })
             await Promise.all(
-                listIds.map(async listId => {
-                    await listStorage.insertPageToList({
-                        id: listId,
-                        url,
-                    })
-                }),
-                tags.map(async tag => {
-                    await tagStorage.addTag({ url, name: tag })
-                }),
+                listIds.map(id => listStorage.insertPageToList({ id, url })),
             )
+            await Promise.all(tags.map(tag => tagStorage.addTag({ url, tag })))
         } catch (e) {
             console.error(e, url)
         }
