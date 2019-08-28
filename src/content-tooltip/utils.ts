@@ -135,19 +135,23 @@ export const setKeyboardShortcutsState = async (
 }
 
 function isAlpha(str) {
-    return /^[a-zA-Z]+$/.test(str)
+    return /^[a-zA-Z]$/.test(str)
 }
 
 export const convertKeyboardEventToKeyString = (
     e,
     getKeyVal = event => event.key,
 ) => {
+    if (!isAlpha(e.key)) {
+        return ''
+    }
+
     return (
         (e.altKey ? 'alt+' : '') +
         (e.ctrlKey ? 'ctrl+' : '') +
         (e.metaKey ? 'meta+' : '') +
         (e.shiftKey ? 'shift+' : '') +
-        (isAlpha(e.key) ? getKeyVal(e).toLowerCase() : getKeyVal(e))
+        getKeyVal(e).toLowerCase()
     )
 }
 
