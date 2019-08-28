@@ -89,8 +89,6 @@ class TextInputControlled extends React.Component<
         this.textElement.addEventListener('click', this.clickHandler)
         this.textElement.addEventListener('focus', this.focusHandler)
         this.textElement.addEventListener('keyup', this.keyupHandler)
-
-        this.textElement.addEventListener('onChange', this.handleOnChange)
         this.textElement.addEventListener(
             'keydown',
             this.handleTextElementKeyDown,
@@ -102,8 +100,6 @@ class TextInputControlled extends React.Component<
         this.textElement.removeEventListener('click', this.clickHandler)
         this.textElement.removeEventListener('focus', this.focusHandler)
         this.textElement.removeEventListener('keyup', this.keyupHandler)
-
-        this.textElement.removeEventListener('onChange', this.handleOnChange)
         this.textElement.removeEventListener(
             'keydown',
             this.handleTextElementKeyDown,
@@ -119,8 +115,9 @@ class TextInputControlled extends React.Component<
     keyupHandler = () => this.updateSelectionState()
 
     // Update the internal state representation of the text input's selection
-    updateSelectionState = () =>
-        this.setState({ selection: this.getSelectionFromDom() })
+    updateSelectionState = () => {
+        return this.setState({ selection: this.getSelectionFromDom() })
+    }
 
     // Get the selection from the HTML component
     getSelectionFromDom = () =>
@@ -130,13 +127,21 @@ class TextInputControlled extends React.Component<
             direction: this.textElement.selectionDirection,
         } as Selection)
 
+    getStateFromDom = () => ({
+        selection: this.getSelectionFromDom(),
+        text: this.textElement.textContent,
+    })
+
     // Important to keep the content (internal state + parent component handler) and the selection (internal state)
     // in sync when changes are made outside of our managed key presses, e.g. Copy/Paste.
-    handleOnChange = () => {
+    handleOnChange = e => {
         this.updateTextElement({
             text: this.textElement.value,
             selection: this.getSelectionFromDom(),
         })
+        if (this.props.onChange) {
+            this.props.onChange(this.textElement.value)
+        }
     }
 
     // Set the selection from our state to the HTML component
@@ -376,13 +381,19 @@ class TextInputControlled extends React.Component<
         } = this.props
 
         return type === 'textarea' ? (
-            <textarea {...props} ref={this.updateRef} value={this.state.text} />
+            <textarea
+                {...props}
+                ref={this.updateRef}
+                value={this.state.text}
+                onChange={this.handleOnChange}
+            />
         ) : (
             <input
                 type={'text'}
                 {...props}
                 ref={this.updateRef}
                 value={this.state.text}
+                onChange={this.handleOnChange}
             />
         )
     }
