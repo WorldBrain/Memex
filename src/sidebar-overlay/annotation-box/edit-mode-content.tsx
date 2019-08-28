@@ -75,6 +75,15 @@ class EditModeContent extends React.Component<Props, State> {
         }
     }
 
+    private onEnterSaveHandler = {
+        test: e => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+        handle: e =>
+            this.props.handleEditAnnotation(
+                this.state.commentText,
+                this.state.tagsInput,
+            ),
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -84,6 +93,7 @@ class EditModeContent extends React.Component<Props, State> {
                     className={styles.textArea}
                     placeholder="Add a private note... (save with cmd/ctrl+enter)"
                     onChange={commentText => this.setState({ commentText })}
+                    specialHandlers={[this.onEnterSaveHandler]}
                 />
 
                 <div onKeyDown={this._handleTagInputKeydown}>
