@@ -120,7 +120,7 @@ export default class ImportItemProcessor {
     async _storeOtherData({ url, tags, collections, annotations }) {
         this._checkCancelled()
         try {
-            const listIds = await listStorage.insertMissingLists({
+            const listIds = await listStorage.createCustomLists({
                 names: collections,
             })
             await Promise.all(
