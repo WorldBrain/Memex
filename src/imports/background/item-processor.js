@@ -4,6 +4,7 @@ import * as searchIndex from 'src/search'
 import { tags as tagStorage, customList as listStorage } from 'src/background'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
+import { padShortTimestamp } from './utils'
 
 const fetchPageDataOpts = {
     includePageContent: true,
@@ -199,18 +200,14 @@ export default class ImportItemProcessor {
         return { status: DOWNLOAD_STATUS.SUCC }
     }
 
-    async _processService(importItem, options = {}) {
-        const {
-            url,
-            title,
-            tags,
-            collections,
-            annotations,
-            timeAdded,
-        } = importItem
+    async _processService(
+        { url, title, tags, collections, annotations, timeAdded },
+        options = {},
+    ) {
+        timeAdded = padShortTimestamp(timeAdded)
 
         const pageDoc = !options.indexTitle
-            ? await this._createPageDoc(importItem)
+            ? await this._createPageDoc({ url })
             : {
                   url,
                   content: {
@@ -218,10 +215,10 @@ export default class ImportItemProcessor {
                   },
               }
 
-        const visits = await getVisitTimes(importItem)
+        const visits = await getVisitTimes({ url })
 
         if (timeAdded) {
-            visits.push(timeAdded, Date.now())
+            visits.push(timeAdded)
         }
 
         const bookmark = options.bookmarkImports
