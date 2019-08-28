@@ -118,13 +118,14 @@ const locationSync = ReduxQuerySync.enhancer({
 })
 
 const hydrateStateFromStorage = store => {
-    const hydrate = (key, action) =>
+    const hydrate = (key, action, defaultValue) =>
         browser.storage.local.get(key).then(data => {
-            if (data[key] == null) {
+            if (data[key] == null && defaultValue == null) {
                 return
             }
 
-            store.dispatch(action(data[key]))
+            const value = data[key] == null ? defaultValue : data[key]
+            store.dispatch(action(value))
         })
 
     // Keep each of these storage keys in sync
@@ -133,7 +134,11 @@ const hydrateStateFromStorage = store => {
         constants.ANNOTATIONS_EXPANDED_KEY,
         resultsActs.setAreAnnotationsExpanded,
     )
-    hydrate(constants.SIDEBAR_LOCKED_KEY, sidebarLeftActs.setSidebarLocked)
+    hydrate(
+        constants.SIDEBAR_LOCKED_KEY,
+        sidebarLeftActs.setSidebarLocked,
+        true,
+    )
     hydrate(
         optConsts.STORAGE_KEYS.SCREENSHOTS,
         optActs.initScreenshots,
