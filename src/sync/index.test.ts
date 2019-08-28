@@ -17,6 +17,7 @@ import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { reconcileSyncLog } from '@worldbrain/storex-sync/lib/reconciliation'
+import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
 
 interface TestSetup {
     storageManager: StorageManager
@@ -109,72 +110,82 @@ describe('Sync integration tests', () => {
                 }
             })
 
-            it('should work when synced step by step across two devices in pattern ABABAB...', async () => {
+            it('should work when synced in various patterns across 2 devices', async () => {
                 const userId = 'user'
 
-                const firstSetup = await setupTest()
-                const secondSetup = await setupTest()
-                const sharedSyncLog = await setupSharedSyncLog()
-                const firstDeviceId = await sharedSyncLog.createDeviceId({
-                    userId,
-                    sharedUntil: 0,
-                })
-                const secondDeviceId = await sharedSyncLog.createDeviceId({
-                    userId,
-                    sharedUntil: 0,
-                })
-
-                const sync = async (
-                    setup: TestSetup,
-                    deviceId: number | string,
-                ) => {
-                    await doSync({
-                        clientSyncLog: setup.clientSyncLog,
-                        sharedSyncLog,
-                        storageManager: setup.storageManager,
-                        reconciler: reconcileSyncLog,
-                        now: '$now',
-                        userId,
-                        deviceId,
-                    })
-                }
-
                 const testOptions = await test()
-                for (const [stepIndexAsString, step] of Object.entries(
-                    testOptions.steps,
-                )) {
-                    const stepIndex = parseInt(stepIndexAsString, 10)
-                    const currentSetup =
-                        stepIndex % 2 === 0 ? firstSetup : secondSetup
-                    const deviceId =
-                        stepIndex % 2 === 0 ? firstDeviceId : secondDeviceId
-
-                    if (stepIndex > 0) {
-                        await sync(currentSetup, deviceId)
-                    }
-                    await step({ setup: currentSetup })
-                    await sync(currentSetup, deviceId)
-                }
-
-                const lastSyncedDeviceId =
-                    testOptions.steps.length % 2 === 0
-                        ? secondDeviceId
-                        : firstDeviceId
-                const unsyncedDeviceId =
-                    lastSyncedDeviceId === firstDeviceId
-                        ? secondDeviceId
-                        : firstDeviceId
-
-                await sync(
-                    unsyncedDeviceId === firstDeviceId
-                        ? firstSetup
-                        : secondSetup,
-                    unsyncedDeviceId,
+                const syncPatterns = generateSyncPatterns(
+                    [0, 1],
+                    testOptions.steps.length,
                 )
+                for (const pattern of syncPatterns) {
+                    const getReadablePattern = () =>
+                        pattern.map(idx => (idx === 0 ? 'A' : 'B')).join('')
 
-                if (testOptions.onFinish) {
-                    await testOptions.onFinish({ setup: firstSetup })
-                    await testOptions.onFinish({ setup: secondSetup })
+                    const setups = [await setupTest(), await setupTest()]
+
+                    const sharedSyncLog = await setupSharedSyncLog()
+                    const deviceIds = [
+                        await sharedSyncLog.createDeviceId({
+                            userId,
+                            sharedUntil: 0,
+                        }),
+                        await sharedSyncLog.createDeviceId({
+                            userId,
+                            sharedUntil: 0,
+                        }),
+                    ]
+
+                    const sync = async (
+                        setup: TestSetup,
+                        deviceId: number | string,
+                    ) => {
+                        try {
+                            await doSync({
+                                clientSyncLog: setup.clientSyncLog,
+                                sharedSyncLog,
+                                storageManager: setup.storageManager,
+                                reconciler: reconcileSyncLog,
+                                now: '$now',
+                                userId,
+                                deviceId,
+                            })
+                        } catch (e) {
+                            console.error(
+                                `ERROR: Sync failed for test '${description}', pattern '${getReadablePattern()}', step ${stepIndex}`,
+                            )
+                            throw e
+                        }
+                    }
+
+                    let stepIndex = -1
+                    for (const currentDeviceIndex of pattern) {
+                        stepIndex += 1
+                        const currentDeviceId = deviceIds[currentDeviceIndex]
+                        const currentSetup = setups[currentDeviceIndex]
+
+                        if (stepIndex > 0) {
+                            await sync(currentSetup, currentDeviceId)
+                        }
+
+                        await testOptions.steps[stepIndex]({
+                            setup: currentSetup,
+                        })
+                        await sync(currentSetup, currentDeviceId)
+                    }
+
+                    const lastSyncedDeviceIndex = pattern[pattern.length - 1]
+                    const unsyncedDeviceIndex = (lastSyncedDeviceIndex + 1) % 2
+
+                    await sync(
+                        setups[unsyncedDeviceIndex],
+                        deviceIds[unsyncedDeviceIndex],
+                    )
+
+                    if (testOptions.onFinish) {
+                        await testOptions.onFinish({ setup: setups[0] })
+                        await testOptions.onFinish({ setup: setups[1] })
+                    }
                 }
             })
         })
