@@ -24,6 +24,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     name: 'My Custom List',
                                 })
                             },
+                            exepctedStorageChanges: () => [
+                                {
+                                    type: 'create',
+                                    collection: 'customLists',
+                                    object: {
+                                        name: 'My Custom List',
+                                    },
+                                },
+                            ],
                         },
                         {
                             execute: async ({ setup }) =>
@@ -31,6 +40,16 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: listId,
                                     url: 'http://www.bla.com/',
                                 }),
+                            exepctedStorageChanges: () => [
+                                {
+                                    type: 'create',
+                                    collection: 'pageListEntries',
+                                    object: {
+                                        listId,
+                                        url: 'http://www.bla.com/',
+                                    },
+                                },
+                            ],
                         },
                         {
                             execute: async ({ setup }) =>
@@ -38,6 +57,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     id: listId,
                                     name: 'Updated List Title',
                                 }),
+                            expectedStorageChanges: () => [
+                                {
+                                    type: 'update',
+                                    collection: 'customLists',
+                                    updates: {
+                                        name: 'Updated List Title',
+                                    },
+                                },
+                            ],
                             postCheck: async ({ setup }) => {
                                 expect(
                                     await customLists(setup).fetchListById({
