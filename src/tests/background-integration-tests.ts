@@ -34,8 +34,8 @@ async function setupTest(): Promise<BackgroundIntegrationTestSetup> {
                 local: new MemoryLocalStorage(),
             },
             bookmarks: {
-                onCreated: { addListener: () => {} },
-                onRemoved: { addListener: () => {} },
+                onCreated: { addListener: () => { } },
+                onRemoved: { addListener: () => { } },
             },
         } as any,
     })
@@ -118,7 +118,7 @@ export function registerBackgroundIntegrationTest(
                 } catch (e) {
                     console.error(
                         `Unexpected storage changes in step number ${stepIndex +
-                            1} (counting from 1)`,
+                        1} (counting from 1)`,
                     )
                     throw e
                 }
