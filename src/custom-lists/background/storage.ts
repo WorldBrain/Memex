@@ -17,14 +17,13 @@ export default class CustomListStorage extends StorageModule {
             history,
             collections: {
                 [CustomListStorage.CUSTOM_LISTS_COLL]: {
-                    version: new Date('2019-08-21'),
+                    version: new Date('2019-08-29'),
                     fields: {
                         id: { type: 'string' },
                         name: { type: 'string' },
                         isDeletable: { type: 'boolean' },
                         isNestable: { type: 'boolean' },
                         createdAt: { type: 'datetime' },
-                        updatedAt: { type: 'datetime', optional: true },
                     },
                     indices: [
                         { field: 'id', pk: true },
@@ -123,7 +122,7 @@ export default class CustomListStorage extends StorageModule {
                         },
                         {
                             name: '$name:string',
-                            updatedAt: '$updatedAt:any',
+                            // updatedAt: '$updatedAt:any',
                         },
                     ],
                 },
@@ -265,7 +264,11 @@ export default class CustomListStorage extends StorageModule {
         name: string
         updatedAt?: Date
     }) {
-        return this.operation('updateListName', { id, name, updatedAt })
+        return this.operation('updateListName', {
+            id,
+            name,
+            // updatedAt,
+        })
     }
 
     async removeList({ id }: { id: number }) {
