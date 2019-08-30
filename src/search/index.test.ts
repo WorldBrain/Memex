@@ -616,7 +616,33 @@ describe('Search index integration', () => {
             expect(after.length).toBe(1)
         })
 
-        test('page re-add appends new terms', async () => {
+        test('page does not duplicate text fields on updates', async () => {
+            const pageBefore = await idx.getPage(getDb)(DATA.PAGE_3.url)
+
+            // Try a standard update without any changes
+            await idx.addPage(getDb)({ pageDoc: DATA.PAGE_3 })
+
+            const pageAfter1 = await idx.getPage(getDb)(DATA.PAGE_3.url)
+
+            expect(pageAfter1.text.length).toBe(pageBefore.text.length)
+            expect(pageAfter1.fullTitle.length).toBe(
+                pageBefore.fullTitle.length,
+            )
+            expect(pageAfter1.fullUrl.length).toBe(pageBefore.fullUrl.length)
+
+            // Try an update with a tag data change
+            pageAfter1.addTag('test')
+            await pageAfter1.save()
+
+            const pageAfter2 = await idx.getPage(getDb)(DATA.PAGE_3.url)
+            expect(pageAfter2.text.length).toBe(pageBefore.text.length)
+            expect(pageAfter2.fullTitle.length).toBe(
+                pageBefore.fullTitle.length,
+            )
+            expect(pageAfter2.fullUrl.length).toBe(pageBefore.fullUrl.length)
+        })
+
+        test('page re-add appends new terms on updates', async () => {
             const { docs: before } = await search({ query: 'fox' })
             expect(before.length).toBe(1)
 
