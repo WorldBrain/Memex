@@ -333,9 +333,6 @@ export default class Page extends AbstractModel
                     .findOneObject<Page>({ url: this.url })
 
                 if (existing) {
-                    this.text = this.text + ' ' + existing.text
-                    this.fullTitle = this.fullTitle + ' ' + existing.fullTitle
-                    this.fullUrl = this.fullUrl + ' ' + existing.fullUrl
                     this._mergeTerms('terms', existing.terms)
                     this._mergeTerms('urlTerms', existing.urlTerms)
                     this._mergeTerms('titleTerms', existing.titleTerms)
