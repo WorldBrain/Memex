@@ -1,5 +1,6 @@
 import StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
+import { StorageDiff } from './storage-change-detector'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -19,6 +20,8 @@ export interface IntegrationTestStep<StepContext> {
     preCheck?: (context: StepContext) => Promise<void>
     execute: (context: StepContext) => Promise<void>
     postCheck?: (context: StepContext) => Promise<void>
+
+    expectedStorageChanges?: () => StorageDiff
 }
 
 export interface BackgroundIntegrationTestSetup {
