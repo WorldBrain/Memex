@@ -1,5 +1,5 @@
-import * as omitBy from 'lodash/omitBy'
-import * as endsWith from 'lodash/endsWith'
+import omitBy from 'lodash/omitBy'
+import endsWith from 'lodash/endsWith'
 import Storex from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
