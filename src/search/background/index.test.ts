@@ -96,12 +96,18 @@ describe.skip('Annotations search', () => {
         annotsBg = new AnnotsBg({
             storageManager,
             socialBg: {} as any,
+            browserAPIs: {} as any,
         })
 
         searchBg = new SearchBg({
             storageManager,
             tabMan: { getActiveTab: () => ({ id: 1, url: 'test' }) } as any,
-            bookmarksAPI: { onCreated: mockEvent, onRemoved: mockEvent } as any,
+            browserAPIs: {
+                bookmarks: {
+                    onCreated: mockEvent,
+                    onRemoved: mockEvent,
+                } as any,
+            },
         })
 
         customListsBg = new CustomListBg({ storageManager })

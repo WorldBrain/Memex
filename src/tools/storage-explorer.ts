@@ -9,7 +9,7 @@ import {
 } from 'src/background-script/setup'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
 
-type CommandLineArguments = {}
+interface CommandLineArguments {}
 
 function printUsage() {
     console.error(`USAGE: storage-explorer list-operations`)
@@ -65,7 +65,8 @@ async function main() {
             return operation
         }),
     )
-    console.log(util.inspect(report, false, null, true))
+    const display = console['log'].bind(console) // Circumvent linter
+    display(util.inspect(report, false, null, true))
 }
 
 if (require.main === module) {

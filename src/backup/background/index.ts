@@ -332,8 +332,6 @@ export class BackupBackgroundModule {
                 localStorage.setItem('backup.subscription-end-date', endDate)
             }
 
-            console.log('hasSubscription', hasSubscription)
-
             return hasSubscription
         })()
 
