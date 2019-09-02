@@ -73,9 +73,9 @@ setupRemoteFunctionsImplementations({
     notifications: { createNotification },
     bookmarks: {
         addPageBookmark:
-            backgroundModules.search.remoteFunctions.addPageBookmark,
+            backgroundModules.search.remoteFunctions.bookmarks.addPageBookmark,
         delPageBookmark:
-            backgroundModules.search.remoteFunctions.delPageBookmark,
+            backgroundModules.search.remoteFunctions.bookmarks.delPageBookmark,
     },
 })
 

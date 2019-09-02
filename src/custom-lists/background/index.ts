@@ -8,10 +8,13 @@ import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { PageCreator, Page } from 'src/search'
-import { Tab } from './types'
+import { getPage } from 'src/search/util'
+import { createPageFromTab, DBGet } from 'src/search'
+import { Tab, CustomListsInterface } from './types'
 
 export default class CustomListBackground {
     storage: CustomListStorage
+    public remoteFunctions: CustomListsInterface
     private tabMan: TabManager
     private windows: Windows.Static
     private getPage: (url: string) => Promise<Page>
@@ -36,10 +39,8 @@ export default class CustomListBackground {
         this.windows = windows
         this.getPage = getPage
         this.createPage = createPage
-    }
 
-    setupRemoteFunctions() {
-        makeRemotelyCallable({
+        this.remoteFunctions = {
             createCustomList: this.createCustomList.bind(this),
             insertPageToList: this.insertPageToList.bind(this),
             updateListName: this.updateList.bind(this),
@@ -53,7 +54,11 @@ export default class CustomListBackground {
             fetchListIgnoreCase: this.fetchListIgnoreCase.bind(this),
             addOpenTabsToList: this.addOpenTabsToList.bind(this),
             removeOpenTabsFromList: this.removeOpenTabsFromList.bind(this),
-        })
+        }
+    }
+
+    setupRemoteFunctions() {
+        makeRemotelyCallable(this.remoteFunctions)
     }
 
     generateListId() {

@@ -1,4 +1,4 @@
-import flatten from 'lodash/flatten'
+import mapValues from 'lodash/mapValues'
 import { URL } from 'whatwg-url'
 import StorageManager from '@worldbrain/storex'
 import expect from 'expect'
@@ -111,8 +111,9 @@ export function registerBackgroundIntegrationTest(
             if (step.expectedStorageChanges) {
                 try {
                     expect(await changeDetector.compare()).toEqual(
-                        step.expectedStorageChanges(),
-                        'rawrae',
+                        mapValues(step.expectedStorageChanges, getChanges =>
+                            getChanges(),
+                        ),
                     )
                 } catch (e) {
                     console.error(

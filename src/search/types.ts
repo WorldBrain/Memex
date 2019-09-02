@@ -1,4 +1,11 @@
 import Storex, { FindManyOptions } from '@worldbrain/storex'
+import {
+    SearchBackend,
+    AnnotSearchParams,
+    PageSearchParams,
+    SocialSearchParams,
+} from './background/types'
+import SearchStorage from './background/storage'
 
 export type DBGet = () => Promise<Storex>
 

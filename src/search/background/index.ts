@@ -12,6 +12,7 @@ import {
     AnnotSearchParams,
     SocialSearchParams,
     SearchBackend,
+    SearchInterface,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
@@ -22,7 +23,10 @@ export default class SearchBackground {
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
     private getDb: DBGet
-    public remoteFunctions: BookmarksInterface
+    public remoteFunctions: {
+        bookmarks: BookmarksInterface
+        search: SearchInterface
+    }
 
     static handleSearchError(e: SearchError) {
         if (e instanceof BadTermError) {
@@ -109,28 +113,31 @@ export default class SearchBackground {
         }
 
         this.remoteFunctions = {
-            addPageBookmark: this.backend.addBookmark,
-            delPageBookmark: this.backend.delBookmark,
+            bookmarks: {
+                addPageBookmark: this.backend.addBookmark,
+                delPageBookmark: this.backend.delBookmark,
+            },
+            search: {
+                search: this.backend.search,
+                addPageTag: this.backend.addTag,
+                delPageTag: this.backend.delTag,
+                suggest: this.storage.suggest,
+                extendedSuggest: this.storage.suggestExtended,
+                delPages: this.backend.delPages,
+
+                fetchPageTags: this.backend.fetchPageTags,
+                delPagesByDomain: this.backend.delPagesByDomain,
+                delPagesByPattern: this.backend.delPagesByPattern,
+                getMatchingPageCount: this.backend.getMatchingPageCount,
+                searchAnnotations: this.searchAnnotations.bind(this),
+                searchPages: this.searchPages.bind(this),
+                searchSocial: this.searchSocial.bind(this),
+            },
         }
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable({
-            search: this.backend.search,
-            addPageTag: this.backend.addTag,
-            delPageTag: this.backend.delTag,
-            suggest: this.storage.suggest,
-            extendedSuggest: this.storage.suggestExtended,
-            delPages: this.backend.delPages,
-
-            fetchPageTags: this.backend.fetchPageTags,
-            delPagesByDomain: this.backend.delPagesByDomain,
-            delPagesByPattern: this.backend.delPagesByPattern,
-            getMatchingPageCount: this.backend.getMatchingPageCount,
-            searchAnnotations: this.searchAnnotations.bind(this),
-            searchPages: this.searchPages.bind(this),
-            searchSocial: this.searchSocial.bind(this),
-        })
+        makeRemotelyCallable(this.remoteFunctions.search)
     }
 
     private processSearchParams(

@@ -3,8 +3,13 @@ import StorageManager from '@worldbrain/storex'
 import { getObjectPk } from '@worldbrain/storex-sync/lib/utils'
 
 export interface StorageDiff {
-    [collection: string]: { [pk: string]: StorageDiffEntry }
+    [collection: string]: StorageCollectionDiff
 }
+
+export interface StorageCollectionDiff {
+    [pk: string]: StorageDiffEntry
+}
+
 export type StorageDiffEntry =
     | StorageDiffCreationEntry
     | StorageDiffModificationEntry
