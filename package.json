@@ -92,6 +92,7 @@
         "scroll-to-element": "^2.0.0",
         "storybook": "^1.0.0",
         "strict-uri-encode": "^2.0.0",
+        "string.prototype.matchall": "^3.0.1",
         "through2": "^2.0.3",
         "url-regex": "^4.1.1",
         "uuid": "^3.3.2",

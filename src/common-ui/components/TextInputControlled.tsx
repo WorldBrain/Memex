@@ -22,6 +22,7 @@
 // indicate the intended element)
 import * as React from 'react'
 import ReactDOM from 'react-dom'
+const matchAll = require('string.prototype.matchall')
 
 type ReTargetedTextElementEvent = React.KeyboardEvent<
     HTMLTextAreaElement & HTMLInputElement
@@ -491,9 +492,10 @@ export class SelectionModifiers {
     }
 
     static _lastWhitespace(current: SelectionState, cursorToMove: string) {
-        const lastWhitespaces: RegExpMatchArray = current.text
-            .substr(0, current.selection[cursorToMove] - 1)
-            ['matchAll'](/(\s)/gm)
+        const lastWhitespaces: RegExpMatchArray = matchAll(
+            current.text.substr(0, current.selection[cursorToMove] - 1),
+            /(\s)/gm,
+        )
         const lastWhitespaceArray = [...lastWhitespaces]
         if (lastWhitespaceArray.length === 0) {
             return 0
@@ -502,9 +504,10 @@ export class SelectionModifiers {
     }
 
     static _nextWhitespace(current: SelectionState, cursorToMove: string) {
-        const nextWhitespaces = current.text
-            .substr(current.selection[cursorToMove] + 1)
-            ['matchAll'](/(\s)/gm)
+        const nextWhitespaces = matchAll(
+            current.text.substr(current.selection[cursorToMove] + 1),
+            /(\s)/gm,
+        )
         const nextWhitespaceArray = [...nextWhitespaces] as RegExpMatchArray
         if (nextWhitespaceArray.length === 0) {
             return current.text.length
@@ -626,7 +629,7 @@ export class SelectionModifiers {
     }[] {
         const regexp = /(?<text>[^\r^\n]*)(?<line>\r\n|\n|\r)?/gm
         // @ts-ignore
-        const matches = text.matchAll(regexp)
+        const matches = matchAll(text, regexp)
         const lines = Array.from(matches, (m: any) => ({
             start: m.index,
             text: m.groups.text,
