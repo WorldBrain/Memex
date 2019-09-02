@@ -62,17 +62,18 @@ export default class SocialStorage extends StorageModule {
                     createdAt: { type: 'datetime' },
                     createdWhen: { type: 'datetime' },
                 },
-                indices: [
-                    { field: 'text' },
-                    { field: 'serviceId' },
-                    { field: 'createdAt' },
-                ],
                 relationships: [
                     {
                         childOf: this.usersColl,
                         alias: 'userId',
                         fieldName: 'userId',
                     },
+                ],
+                indices: [
+                    { field: 'text' },
+                    { field: 'serviceId' },
+                    { field: 'createdAt' },
+                    { field: { relationship: 'userId' } },
                 ],
             },
             [this.usersColl]: {
@@ -96,7 +97,6 @@ export default class SocialStorage extends StorageModule {
                 fields: {
                     createdAt: { type: 'datetime' },
                 },
-                indices: [{ field: 'createdAt' }],
                 relationships: [
                     {
                         singleChildOf: this.postsColl,
@@ -104,19 +104,26 @@ export default class SocialStorage extends StorageModule {
                         fieldName: 'postId',
                     },
                 ],
+                indices: [
+                    { field: 'createdAt' },
+                    { field: { relationship: 'postId' } },
+                ],
             },
             [this.tagsColl]: {
                 version: new Date('2019-05-17'),
                 fields: {
                     name: { type: 'string' },
                 },
-                indices: [{ field: 'name' }],
                 relationships: [
                     {
                         childOf: this.postsColl,
                         alias: 'postId',
                         fieldName: 'postId',
                     },
+                ],
+                indices: [
+                    { field: 'name' },
+                    { field: { relationship: 'postId' } },
                 ],
             },
             [this.listEntriesColl]: {
@@ -135,6 +142,10 @@ export default class SocialStorage extends StorageModule {
                         alias: 'postId',
                         fieldName: 'postId',
                     },
+                ],
+                indices: [
+                    { field: { relationship: 'listId' } },
+                    { field: { relationship: 'postId' } },
                 ],
             },
         },
