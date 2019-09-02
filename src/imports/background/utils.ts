@@ -17,3 +17,22 @@ export const loadBlob = ({
         req.send()
     })
 }
+
+export const padShortTimestamp = (timestamp: number) => {
+    const timestampStr = timestamp.toString()
+    const expectedLength = Date.now().toString().length
+    const actualLength = timestampStr.length
+
+    const difference = expectedLength - actualLength
+
+    if (difference === 0) {
+        return timestamp
+    }
+
+    if (difference < 0) {
+        throw new Error(`Invalid timestamp: ${timestamp}`)
+    }
+
+    const newTimestampStr = timestampStr + '0'.repeat(difference)
+    return Number.parseInt(newTimestampStr, 10)
+}

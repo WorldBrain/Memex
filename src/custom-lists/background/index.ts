@@ -71,11 +71,15 @@ export default class CustomListBackground {
         return this.storage.fetchListIgnoreCase({ name })
     }
 
-    async insertMissingLists({ names }: { names: string[] }) {
+    async createCustomLists({ names }: { names: string[] }) {
         const existingLists = new Map<string, number>()
 
-        for (const { name, id } of await this.storage.fetchListByNames(names)) {
-            existingLists.set(name, id)
+        for (const name of names) {
+            const list = await this.fetchListByName({ name })
+
+            if (list) {
+                existingLists.set(list.name, list.id)
+            }
         }
 
         const missing = names.filter(name => !existingLists.has(name))

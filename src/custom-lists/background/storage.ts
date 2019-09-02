@@ -105,14 +105,6 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'findObject',
                     args: [{ name: '$name:string' }, { ignoreCase: ['name'] }],
                 },
-                findListByNames: {
-                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                    operation: 'findObjects',
-                    args: [
-                        { name: { $in: '$names:string' } },
-                        { ignoreCase: ['name'] },
-                    ],
-                },
                 updateListName: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
                     operation: 'updateObject',
@@ -197,10 +189,6 @@ export default class CustomListStorage extends StorageModule {
             pages.map(p => p.fullUrl),
             pages.length > 0,
         )
-    }
-
-    async fetchListByNames(names: string[]) {
-        return this.operation('findListByNames', { names })
     }
 
     async fetchListPagesById({
