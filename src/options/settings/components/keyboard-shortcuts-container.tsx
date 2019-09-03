@@ -55,11 +55,23 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
     recordBinding = async e => {
         e.preventDefault()
-        const shortcut = convertKeyboardEventToKeyString(
-            e,
-            event => event.target.value,
-        )
+
         const name = e.target.name as string
+
+        // Afford way of clearing shortcut
+        if (['Escape', 'Backspace'].includes(e.key)) {
+            this.setState(
+                state => ({ [name]: { ...state[name], shortcut: '' } } as any),
+                () => utils.setKeyboardShortcutsState({ ...this.state }),
+            )
+            return
+        }
+
+        const shortcut = convertKeyboardEventToKeyString(e)
+
+        if (!shortcut.length) {
+            return
+        }
 
         this.setState(
             state => ({ [name]: { ...state[name], shortcut } } as any),
@@ -81,7 +93,8 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                 <input
                     type="text"
                     value={this.state[name].shortcut}
-                    onChange={this.recordBinding}
+                    onKeyDown={this.recordBinding}
+                    onChange={e => e.preventDefault()}
                     name={name}
                 />{' '}
             </Checkbox>
