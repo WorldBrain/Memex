@@ -6,6 +6,7 @@ import {
     SocialSearchParams,
 } from './background/types'
 import SearchStorage from './background/storage'
+import { Bookmarks } from 'webextension-polyfill-ts'
 
 export type DBGet = () => Promise<Storex>
 
@@ -102,4 +103,70 @@ export interface PipelineRes {
     favIconURI?: string
     screenshotURI?: string
     text: string
+}
+
+export interface SearchIndex {
+    search: (
+        params: {
+            query
+            showOnlyBookmarks
+            mapResultsFunc?
+            domains?
+            domainsExclude?
+            tags?
+            lists?
+            [key: string]: any
+        },
+    ) => Promise<{
+        docs
+        isBadTerm?
+        totalCount
+        resultsExhausted: boolean
+    }>
+    getMatchingPageCount: (pattern) => Promise<any>
+    fullSearch: (
+        params: SearchParams,
+    ) => Promise<{
+        ids: Array<[string, number, number]>
+        totalCount: number
+    }>
+
+    getPage: (url: string) => Promise<any>
+    addPage: (params: Partial<PageAddRequest>) => Promise<void>
+    addPageTerms: (pipelineReq: PipelineReq) => Promise<void>
+    delPages: (urls: string[]) => Promise<{ info: any }[]>
+    delPagesByDomain: (url: string) => Promise<any>
+    delPagesByPattern: (pattern: string | RegExp) => Promise<any>
+
+    addBookmark: (
+        params: {
+            url: string
+            timestamp?: number
+            tabId?: number
+        },
+    ) => Promise<void>
+    delBookmark: (params: Partial<Bookmarks.BookmarkTreeNode>) => Promise<void>
+    pageHasBookmark: (url: string) => Promise<boolean>
+
+    updateTimestampMeta: (
+        url: string,
+        time: number,
+        data: Partial<VisitInteraction>,
+    ) => Promise<any>
+    addVisit: (url: string, time?: number) => Promise<any>
+
+    addFavIcon: (url: string, favIconURI: string) => Promise<any>
+
+    addTag: (
+        params: { url: string; tag: string; tabId?: number },
+    ) => Promise<void>
+    delTag: (
+        params: { url: string; tag: string; tabId?: number },
+    ) => Promise<void>
+    fetchPageTags: (url: string) => Promise<any>
+
+    grabExistingKeys: () => Promise<{
+        histKeys: Set<string>
+        bmKeys: Set<string>
+    }>
 }
