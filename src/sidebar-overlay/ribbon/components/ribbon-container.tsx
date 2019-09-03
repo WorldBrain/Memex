@@ -39,7 +39,6 @@ interface StateProps {
     showSearchBox: boolean
     showTagsPicker: boolean
     showCollectionsPicker: boolean
-    showHighlights?: boolean
     searchValue: string
 }
 
@@ -58,7 +57,6 @@ interface DispatchProps {
     setShowTagsPicker: (value: boolean) => void
     setShowCollectionsPicker: (value: boolean) => void
     setShowSearchBox: (value: boolean) => void
-    setShowHighlights: (value: boolean) => void
     setSearchValue: (value: string) => void
     openRibbon: () => void
 }
@@ -183,8 +181,6 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(actions.setShowTagsPicker(value)),
     setShowCollectionsPicker: (value: boolean) =>
         dispatch(actions.setShowCollsPicker(value)),
-    setShowHighlights: (value: boolean) =>
-        dispatch(actions.setShowHighlights(value)),
 })
 
 export default connect(
