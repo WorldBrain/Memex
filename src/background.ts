@@ -1,16 +1,14 @@
 import 'babel-polyfill'
 import 'core-js/es7/symbol'
+import { browser } from 'webextension-polyfill-ts'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
-import { browser } from 'webextension-polyfill-ts'
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
 import internalAnalytics from './analytics/internal'
 import initSentry from './util/raven'
-import {
-    makeRemotelyCallable,
-    setupRemoteFunctionsImplementations,
-} from 'src/util/webextensionRPC'
+import { createPageViaBmTagActs as createPage, getPage } from 'src/search'
+import { setupRemoteFunctionsImplementations } from 'src/util/webextensionRPC'
 
 // Features that require manual instantiation to setup
 import DirectLinkingBackground from './direct-linking/background'
@@ -70,6 +68,8 @@ export const customList = new CustomListBackground({
     storageManager,
     tabMan: activityLogger.tabManager,
     windows: browser.windows,
+    createPage: createPage(getDb),
+    getPage: getPage(getDb),
 })
 customList.setupRemoteFunctions()
 
@@ -83,11 +83,11 @@ tags.setupRemoteFunctions()
 export const bookmarks = new BookmarksBackground({ storageManager })
 
 const backupModule = new backup.BackupBackgroundModule({
+    notifications,
     storageManager,
     lastBackupStorage: new backupStorage.LocalLastBackupStorage({
         key: 'lastBackup',
     }),
-    notifications,
 })
 
 backupModule.setBackendFromStorage()

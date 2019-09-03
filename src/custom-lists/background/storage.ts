@@ -211,7 +211,7 @@ export default class CustomListStorage extends StorageModule {
             entriesByListId.set(page.listId, [...current, page.fullUrl])
         })
 
-        const lists = await this.operation('findListsIncluding', {
+        const lists: PageList[] = await this.operation('findListsIncluding', {
             includedIds: [...listIds],
         })
 
