@@ -46,6 +46,8 @@ class TooltipContainer extends React.Component {
     async componentDidMount() {
         this.props.onInit(this.showTooltip)
 
+        this.fetchAndHighlightAnnotations()
+
         const {
             shortcutsEnabled,
             ...shortcuts
