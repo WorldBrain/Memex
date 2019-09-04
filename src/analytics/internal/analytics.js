@@ -1,5 +1,5 @@
 import { EVENT_TYPES, EVENT_NAMES } from './constants'
-import { updateLastActive, isEventActiveEvent } from '../utils'
+// import { updateLastActive, isEventActiveEvent } from '../utils'
 
 class Analytics {
     _initDataLoaded
@@ -8,9 +8,9 @@ class Analytics {
     constructor({ serverConnector }) {
         this._serverConnector = serverConnector
 
-        this._initDataLoaded = new Promise(
-            resolve => (this._setDataLoaded = resolve),
-        )
+        // this._initDataLoaded = new Promise(
+        //     resolve => (this._setDataLoaded = resolve),
+        // )
     }
 
     _eventStats = {
@@ -56,13 +56,11 @@ class Analytics {
     }
 
     async registerOperations(eventLog) {
-        this.eventLog = eventLog
-
-        for (const event of Object.keys(this._eventStats)) {
-            await this.loadInitialData(event)
-        }
-
-        this._setDataLoaded()
+        // this.eventLog = eventLog
+        // for (const event of Object.keys(this._eventStats)) {
+        //     await this.loadInitialData(event)
+        // }
+        // this._setDataLoaded()
     }
 
     async fromDexie(notifType) {
@@ -128,24 +126,19 @@ class Analytics {
      * @param {EventTrackInfo} eventArgs
      */
     async processEvent(eventArgs) {
-        await this._initDataLoaded
-
-        if (isEventActiveEvent(eventArgs.type)) {
-            updateLastActive()
-        }
-
-        // Prepare the event to store the event in dexie db.
-        const time = Date.now()
-
-        const params = {
-            ...eventArgs,
-            time,
-        }
-
-        await this.storeEventLogStatistics(params)
-
-        // Send the data to analytics server
-        await this._serverConnector.trackEvent(params, params.force)
+        // await this._initDataLoaded
+        // if (isEventActiveEvent(eventArgs.type)) {
+        //     updateLastActive()
+        // }
+        // // Prepare the event to store the event in dexie db.
+        // const time = Date.now()
+        // const params = {
+        //     ...eventArgs,
+        //     time,
+        // }
+        // await this.storeEventLogStatistics(params)
+        // // Send the data to analytics server
+        // await this._serverConnector.trackEvent(params, params.force)
     }
 }
 
