@@ -1,0 +1,188 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color6, color3 from colors;
+
+.container {
+    /* composes: boxShadow from '../../../common-ui/colors.css'; */
+    composes: toolTips from 'src/common-ui/elements.css';
+    width: 95%;
+    max-width: 50rem;
+    margin: 90px auto 30px auto;
+    display: flex;
+    border: solid 1px #f4f4f4;
+    border-radius: 10px;
+    height: 570px;
+    flex-direction: column;
+}
+
+.logo {
+    background-image: url('/img/memex-logo.png');
+    width: 210px;
+    height: 55px;
+    display: flex;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    margin: 40px auto -40px auto;
+}
+
+.text {
+    composes: subTextColor from '../../../common-ui/colors.css';
+    font-size: 0.9rem;
+    text-align: center;
+    letter-spacing: 0.7px;
+}
+
+.privacyImage {
+    background-repeat: no-repeat;
+    display: flex;
+    background-image: url('/img/privacy.svg');
+    fill: white;
+    background-size: contain;
+    width: 65%;
+    height: 100%;
+    margin-left: auto;
+    margin-top: 25px;
+    margin-right: auto;
+}
+
+.footer {
+    display: flex;
+    flex-direction: column;
+    margin: 20px auto;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.bold {
+    composes: h2Color from '../../../common-ui/colors.css';
+    font-size: 22px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.subtextGreen {
+    composes: subTextColor from '../../../common-ui/colors.css';
+    font-size: 0.8125rem;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 13px;
+}
+
+.learnMore {
+    composes: CTA from '../../../common-ui/colors.css';
+    font-size: 0.8125rem;
+    padding: 7px 24px 8px 24px;
+    cursor: pointer;
+    margin-top: 6px;
+    margin-bottom: 72px;
+    margin-right: 4px;
+}
+
+.iconBox {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.icon {
+    background-position: center center;
+    width: 40px;
+    height: 40px;
+    background-size: 40px;
+    display: flex;
+    background-repeat: no-repeat;
+    margin: 10px;
+    background-color: transparent;
+    z-index: 5000;
+}
+
+.pocket {
+    background-image: url('/img/pocket.svg');
+}
+
+.diigo {
+    background-image: url('/img/diigo.png');
+}
+
+.chrome {
+    background-image: url('/img/chrome.svg');
+}
+
+.firefox {
+    background-image: url('/img/firefox.png');
+}
+
+.raindrop {
+    background-image: url('/img/raindrop.png');
+}
+
+.instapaper {
+    background-image: url('/img/instapaper.svg');
+}
+
+/* .settings {
+    background-repeat: no-repeat;
+    display: inline-block;
+    cursor: pointer;
+    background-image: url('/img/settings.svg');
+    fill: white;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-left: -19px;
+    margin-top: 9px;
+} */
+
+@media only screen and (max-width: 820px) {
+    .container {
+        composes: h2Color from '../../../common-ui/colors.css';
+        margin-top: 75px;
+    }
+
+    .welcome {
+        font-size: 1.2rem;
+        line-height: 1.5rem;
+    }
+
+    .logo {
+        width: 90px;
+    }
+
+    .text {
+        font-size: 0.875rem;
+    }
+
+    .leftParent {
+        padding: 40px 30px 30px 30px;
+        width: 50%;
+    }
+
+    .privacyImage {
+        width: 85%;
+        height: 100%;
+        margin-left: 10px;
+        margin-top: 40px;
+        margin-right: auto;
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    25% {
+        transform: translateY(10px);
+    }
+
+    50% {
+        transform: translateY(0px);
+    }
+
+    75% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}

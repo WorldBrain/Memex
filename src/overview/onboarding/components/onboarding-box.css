@@ -1,17 +1,22 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6, color3 from colors;
+@value color1, color4, color6, color3, color5, color16 from colors;
+
+body {
+    background: color16;
+}
 
 .container {
-    /* composes: boxShadow from '../../../common-ui/colors.css'; */
-    composes: toolTips from 'src/common-ui/elements.css';
-    width: 95%;
+    background: #fff;
+    width: 60%;
     max-width: 50rem;
-    margin: 90px auto 30px auto;
+    margin: 30px auto;
+    padding: 20px 40px;
     display: flex;
     border: solid 1px #f4f4f4;
     border-radius: 10px;
-    height: 570px;
     flex-direction: column;
+    box-shadow: 0px 2px 30px rgba(164, 180, 182, 0.5);
+    text-align: center;
 }
 
 .logo {
@@ -24,11 +29,20 @@
     margin: 40px auto -40px auto;
 }
 
+.heading1 {
+    color: color5;
+    font-size: 1.8rem;
+}
+
+.heading2 {
+    color: color5;
+    font-size: 1.4rem;
+}
+
 .text {
-    composes: subTextColor from '../../../common-ui/colors.css';
-    font-size: 0.9rem;
-    text-align: center;
-    letter-spacing: 0.7px;
+    color: color5;
+    font-size: 1rem;
+    margin-bottom: 2rem;
 }
 
 .privacyImage {
@@ -44,6 +58,47 @@
     margin-right: auto;
 }
 
+.center {
+    text-align: center;
+}
+
+.skipTitle {
+    font-size: 1.1rem;
+    text-decoration: underline;
+    margin-bottom: 0.2rem;
+    font-weight: 500;
+}
+
+.skipDesc {
+    font-size: 0.8rem;
+}
+
+.progressWrapper {
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.progressDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
+    background: color6;
+    margin-right: 4px;
+    display: inline-block;
+}
+
+.progressDotSeen {
+    background: color1;
+}
+
+.CTA {
+    composes: CTA from '../../../common-ui/elements.css';
+}
+
+.grayActionButton {
+    composes: grayActionButton from '../../../common-ui/elements.css';
+}
+
 .footer {
     display: flex;
     flex-direction: column;
@@ -52,137 +107,18 @@
     align-items: center;
 }
 
-.bold {
-    composes: h2Color from '../../../common-ui/colors.css';
-    font-size: 22px;
-    font-weight: 600;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-.subtextGreen {
-    composes: subTextColor from '../../../common-ui/colors.css';
-    font-size: 0.8125rem;
-    text-align: center;
-    margin-top: 5px;
-    margin-bottom: 13px;
-}
-
-.learnMore {
-    composes: CTA from '../../../common-ui/colors.css';
-    font-size: 0.8125rem;
-    padding: 7px 24px 8px 24px;
-    cursor: pointer;
-    margin-top: 6px;
-    margin-bottom: 72px;
-    margin-right: 4px;
-}
-
-.iconBox {
-    display: flex;
-    margin-bottom: 10px;
-}
-
-.icon {
-    background-position: center center;
-    width: 40px;
-    height: 40px;
-    background-size: 40px;
-    display: flex;
-    background-repeat: no-repeat;
-    margin: 10px;
-    background-color: transparent;
-    z-index: 5000;
-}
-
-.pocket {
-    background-image: url('/img/pocket.svg');
-}
-
-.diigo {
-    background-image: url('/img/diigo.png');
-}
-
-.chrome {
-    background-image: url('/img/chrome.svg');
-}
-
-.firefox {
-    background-image: url('/img/firefox.png');
-}
-
-.raindrop {
-    background-image: url('/img/raindrop.png');
-}
-
-.instapaper {
-    background-image: url('/img/instapaper.svg');
-}
-
-/* .settings {
-    background-repeat: no-repeat;
-    display: inline-block;
-    cursor: pointer;
-    background-image: url('/img/settings.svg');
-    fill: white;
-    background-size: 20px;
-    width: 20px;
-    height: 20px;
-    margin-left: -19px;
-    margin-top: 9px;
-} */
-
 @media only screen and (max-width: 820px) {
     .container {
-        composes: h2Color from '../../../common-ui/colors.css';
-        margin-top: 75px;
+        margin-top: 4rem;
+        width: 95%;
     }
 
-    .welcome {
+    .heading {
         font-size: 1.2rem;
         line-height: 1.5rem;
     }
 
-    .logo {
-        width: 90px;
-    }
-
     .text {
         font-size: 0.875rem;
-    }
-
-    .leftParent {
-        padding: 40px 30px 30px 30px;
-        width: 50%;
-    }
-
-    .privacyImage {
-        width: 85%;
-        height: 100%;
-        margin-left: 10px;
-        margin-top: 40px;
-        margin-right: auto;
-    }
-}
-
-@keyframes float {
-    0% {
-        transform: translateY(0px);
-    }
-
-    25% {
-        transform: translateY(10px);
-    }
-
-    50% {
-        transform: translateY(0px);
-    }
-
-    75% {
-        transform: translateY(-10px);
-    }
-
-    100% {
-        transform: translateY(0px);
     }
 }

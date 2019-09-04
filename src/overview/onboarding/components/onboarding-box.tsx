@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react'
-import OnboardingChecklist from './checklist-container'
 import classNames from 'classnames'
 
 const styles = require('./onboarding-box.css')
@@ -8,32 +7,61 @@ class OnboardingBox extends PureComponent {
     render() {
         return (
             <React.Fragment>
-                <div className={styles.container}>
-                    <OnboardingChecklist />
-                </div>
-                <div className={styles.footer}>
-                    <div className={styles.textContainer}>
-                        <p className={styles.bold}>
-                            Import your bookmarks and existing history
-                        </p>
-                    </div>
-                    <div className={styles.iconBox}>
-                    <span className={classNames(styles.icon, styles.pocket)}/>
-                    <span className={classNames(styles.icon, styles.diigo)}/>
-                    <span className={classNames(styles.icon, styles.chrome)}/>
-                    <span className={classNames(styles.icon, styles.firefox)}/>
-                    <span className={classNames(styles.icon, styles.raindrop)}/>
-                    <span className={classNames(styles.icon, styles.instapaper)}/>
+                <div>
+                    <div className={styles.container}>
+                        <h1 className={styles.heading1}>
+                            Let us take you through a few key settings to make
+                            sure you get the most out of Memex
+                        </h1>
+                        <img />
+                        <div className={styles.text}>
+                            <p>
+                                Have control over how much of your history is
+                                captured
+                            </p>
+                            <p>Have control over how Memex is displayed</p>
+                        </div>
+                        <div>
+                            <a className={styles.CTA}>Get started</a>
+                        </div>
+                        <div className={styles.progressWrapper}>
+                            <span className={styles.progressDot} />
+                            <span className={styles.progressDot} />
+                            <span className={styles.progressDot} />
+                            <span className={styles.progressDot} />
+                        </div>
                     </div>
 
-                    <a
-                        className={styles.learnMore}
-                        target="_blank"
-                        href="#/import"
-                    >
-                        Import Now
-                    </a>
-                    {/* <a className={styles.settings} href="#privacy" /> */}
+                    <div className={styles.container}>
+                        <h2 className={styles.heading2}>
+                            Can’t remember where you found something but know
+                            the text you are after?
+                        </h2>
+                        <img />
+                        <div className={styles.text}>
+                            <p>
+                                All pages you visited more than 5 seconds are
+                                full-text searchable
+                            </p>
+                            <a className={styles.grayActionButton}>Settings</a>
+                        </div>
+                        <div>
+                            <a className={styles.CTA}>Next</a>
+                        </div>
+                        <div className={styles.progressWrapper}>
+                            <span className={styles.progressDot} />
+                            <span className={styles.progressDot} />
+                            <span className={styles.progressDot} />
+                            <span className={styles.progressDot} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.center}>
+                    <p className={styles.skipTitle}>Skip setup</p>
+                    <p className={styles.skipDesc}>
+                        Give me the default settings
+                    </p>
                 </div>
             </React.Fragment>
         )
