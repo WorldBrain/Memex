@@ -10,6 +10,7 @@ import * as DATA from './storage.test.data'
 import { Tweet, SocialPage } from '../types'
 import { SocialSearchPlugin } from 'src/search/background/social-search'
 import { SocialSearchParams } from 'src/search/background/types'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 const assertTweetsEqual = (received: Tweet, expected: Tweet) => {
     expect(received.id).toEqual(expected.id)
@@ -50,23 +51,27 @@ describe('Social storage', () => {
     }
 
     beforeEach(async () => {
-        storageManager = initStorageManager()
-        customListBg = new CustomListBg({
+        const {
             storageManager,
-        })
-        socialBg = new SocialBackground({
-            storageManager,
-        })
-        const annotsBg = new AnnotsBg({
-            storageManager,
-            socialBg,
-            browserAPIs: { storage: {} } as any,
-        })
+            backgroundModules,
+        } = await setupBackgroundIntegrationTest()
 
-        socialStorage = socialBg['storage']
+        // customListBg = new CustomListBg({
+        //     storageManager,
+        // })
+        // socialBg = new SocialBackground({
+        //     storageManager,
+        // })
+        // const annotsBg = new AnnotsBg({
+        //     storageManager,
+        //     socialBg,
+        //     browserAPIs: { storage: {} } as any,
+        // })
+
+        socialStorage = backgroundModules.social.storage
         registerModuleMapCollections(storageManager.registry, {
             socialStorage,
-            annotsStorage: annotsBg.annotationStorage,
+            annotsStorage: backgroundModules.directLinking.annotationStorage,
             customListStorage: customListBg.storage,
         })
 

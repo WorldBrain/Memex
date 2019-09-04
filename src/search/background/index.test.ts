@@ -97,6 +97,7 @@ describe.skip('Annotations search', () => {
             storageManager,
             socialBg: {} as any,
             browserAPIs: {} as any,
+            searchIndex: {} as any,
         })
 
         searchBg = new SearchBg({
@@ -110,7 +111,10 @@ describe.skip('Annotations search', () => {
             },
         })
 
-        customListsBg = new CustomListBg({ storageManager })
+        customListsBg = new CustomListBg({
+            storageManager,
+            searchIndex: {} as any,
+        })
         annotsStorage = annotsBg['annotationStorage']
 
         await storageManager.finishInitialization()

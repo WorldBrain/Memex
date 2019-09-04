@@ -8,7 +8,7 @@ import {
 
 import history from './storage.history'
 
-import { createPageFromTab, Tag, DBGet } from 'src/search'
+import { Tag, SearchIndex } from 'src/search'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
@@ -24,9 +24,9 @@ export default class AnnotationStorage extends StorageModule {
     static LIST_ENTRIES_COLL = 'annotListEntries'
 
     private _browserStorageArea: Storage.StorageArea
-    private _getDb: DBGet
 
     private db: Storex
+    private searchIndex: SearchIndex
 
     constructor(options: {
         storageManager: Storex
@@ -37,13 +37,13 @@ export default class AnnotationStorage extends StorageModule {
         bookmarksColl?: string
         listsColl?: string
         listEntriesColl?: string
+        searchIndex: SearchIndex
     }) {
         super({ storageManager: options.storageManager })
 
         this.db = options.storageManager
+        this.searchIndex = this.searchIndex
         this._browserStorageArea = options.browserStorageArea
-
-        this._getDb = async () => options.storageManager
     }
 
     getConfig = (): StorageModuleConfig =>
@@ -241,7 +241,7 @@ export default class AnnotationStorage extends StorageModule {
     async indexPageFromTab({ id, url }: Tabs.Tab) {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
-        const page = await createPageFromTab(this._getDb)({
+        const page = await this.searchIndex.createPageFromTab({
             tabId: id,
             url,
             stubOnly: !indexingPrefs.shouldIndexLinks,

@@ -4,7 +4,7 @@
 // export * from './bookmarks'
 export { collections, extractContent } from './util'
 // export * from './search'
-export * from './on-demand-indexing'
+// export * from './on-demand-indexing'
 export * from './types'
 export * from './models'
 export { default as getDb } from './get-db'

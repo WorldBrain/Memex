@@ -1,5 +1,4 @@
 import normalizeUrl from 'src/util/encode-url-for-id'
-import * as searchIndex from 'src/search'
 import { checkWithBlacklist } from 'src/blacklist/background/interface'
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
@@ -52,14 +51,36 @@ export default class ImportItemCreator {
         servicesLimit: Infinity,
     }
 
+    _dataSources: DataSources
+    _existingKeys: () => Promise<{
+        histKeys: Set<string>
+        bmKeys: Set<string>
+    }>
+
+    _histLimit
+    _bmLimit
+    _servicesLimit
+    _bmKeys
+    _histKeys
+    _completedServicesKeys
+    existingDataReady
+    _isBlacklisted
+    _servicesData
+
     /**
      * @param {ItemCreatorParams} args
      */
     constructor({
         limits = ImportItemCreator.DEF_LIMITS,
         dataSources = new DataSources({}),
-        existingKeySource = () =>
-            searchIndex.grabExistingKeys(searchIndex.getDb)(),
+        existingKeySource,
+    }: {
+        limits?
+        dataSources?: DataSources
+        existingKeySource: () => Promise<{
+            histKeys: Set<string>
+            bmKeys: Set<string>
+        }>
     }) {
         this.limits = limits
         this._dataSources = dataSources
@@ -97,7 +118,7 @@ export default class ImportItemCreator {
      * @param {string} blobUrl
      * @param {any} allowTypes
      */
-    async initData(blobUrl, allowTypes) {
+    async initData(blobUrl?, allowTypes?) {
         this.existingDataReady = new Promise(async (resolve, reject) => {
             try {
                 this._isBlacklisted = await checkWithBlacklist()

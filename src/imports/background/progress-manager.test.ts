@@ -1,6 +1,6 @@
 /* eslint-env jest */
 
-import { ImportStateManager as State } from './state-manager'
+import { ImportStateManager } from './state-manager'
 import DataSources from './data-sources'
 import ItemCreator from './item-creator'
 import Progress from './progress-manager'
@@ -33,7 +33,10 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
                 bmKeys: new Set(),
             }),
         })
-        stateManager = new State({ itemCreator })
+        stateManager = new ImportStateManager({
+            itemCreator,
+            searchIndex: null,
+        })
 
         if (DATA.allowTypes) {
             stateManager.allowTypes = DATA.allowTypes
@@ -49,6 +52,9 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
         const observer = { complete: jest.fn(), next: jest.fn() }
         const progress = new Progress({
             stateManager,
+            searchIndex: null,
+            tagsModule: {} as any,
+            customListsModule: {} as any,
             observer,
             concurrency,
             Processor,
@@ -81,6 +87,9 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
         const observer = { complete: jest.fn(), next: jest.fn() }
         const progress = new Progress({
             stateManager,
+            searchIndex: null,
+            tagsModule: {} as any,
+            customListsModule: {} as any,
             observer,
             concurrency,
             Processor,
@@ -93,7 +102,7 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
         // Processors should all be marked as cancelled + unfinished now
         expect(progress.processors.length).toBeLessThanOrEqual(concurrency)
         progress.processors.forEach(proc =>
-            expect(proc).toEqual({ finished: false, cancelled: true }),
+            expect(proc).toMatchObject({ finished: false, cancelled: true }),
         )
 
         // Complete observer should not have been called
@@ -105,6 +114,9 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
         const observer = { complete: jest.fn(), next: jest.fn() }
         const progress = new Progress({
             stateManager,
+            searchIndex: null,
+            tagsModule: {} as any,
+            customListsModule: {} as any,
             observer,
             concurrency,
             Processor,
@@ -117,7 +129,7 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
 
         // Run all the same "full progress" tests; should all pass same as if progress wasn't interrupted
         progress.processors.forEach(proc =>
-            expect(proc).toEqual({ finished: true, cancelled: false }),
+            expect(proc).toMatchObject({ finished: true, cancelled: false }),
         )
         const numProcessed =
             diff(DATA.histUrls, DATA.bmUrls).length + DATA.bmUrls.length

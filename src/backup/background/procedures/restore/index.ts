@@ -11,6 +11,7 @@ import {
     BMS_COLL,
 } from 'src/social-integration/constants'
 import decodeBlob from 'src/util/decode-blob'
+import { SearchIndex } from 'src/search'
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
 
@@ -23,6 +24,7 @@ export interface BackupRestoreInfo {
 export class BackupRestoreProcedure {
     storageManager: Storex
     storage: BackupStorage
+    searchIndex: SearchIndex
     backend: BackupBackend
 
     info?: BackupRestoreInfo = null
@@ -33,17 +35,20 @@ export class BackupRestoreProcedure {
 
     constructor({
         storageManager,
+        searchIndex,
         storage,
         backend,
         logErrors = true,
     }: {
         storageManager: Storex
+        searchIndex: SearchIndex
         storage: BackupStorage
         backend: BackupBackend
         logErrors?: boolean
     }) {
         this.storageManager = storageManager
         this.storage = storage
+        this.searchIndex = searchIndex
         this.backend = backend
         this.logErrors = logErrors
     }
@@ -136,8 +141,7 @@ export class BackupRestoreProcedure {
     }
 
     async _clearDatabase() {
-        const search = require('src/search')
-        await search.dangerousPleaseBeSureDeleteAndRecreateDatabase()
+        await this.searchIndex.dangerousPleaseBeSureDeleteAndRecreateDatabase()
     }
 
     _blockDatabase() {}

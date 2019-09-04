@@ -26,6 +26,7 @@ import {
     setupBackgroundModules,
     registerBackgroundModuleCollections,
 } from './background-script/setup'
+import { combineSearchIndex } from './search/search-index'
 
 const storageManager = initStorex()
 const localStorageChangesManager = new StorageChangesManager({

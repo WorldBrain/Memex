@@ -12,6 +12,7 @@ import { FavIcon } from './models'
 import { SearchIndex } from './types'
 import { combineSearchIndex } from './search-index'
 import { getDb } from '.'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
@@ -20,28 +21,30 @@ jest.mock('lodash/fp/difference')
 
 describe('Search index integration', () => {
     async function setupTest() {
-        const storageManager = initStorageManager()
-        const bmBackground = new BookmarksBackground({ storageManager })
-        const customListBg = new CustomListBg({
-            storageManager,
-        })
-        const socialBg = new SocialBackground({
-            storageManager,
-        })
-        const annotsBg = new AnnotsBg({
-            storageManager,
-            socialBg,
-            browserAPIs: { storage: {} } as any,
-        })
+        const { storageManager } = await setupBackgroundIntegrationTest()
 
-        registerModuleMapCollections(storageManager.registry, {
-            bookmarks: bmBackground.storage,
-            customLists: customListBg.storage,
-            annotsStorage: annotsBg.annotationStorage,
-            socialStorage: socialBg['storage'],
-        })
-        await storageManager.finishInitialization()
-        setStorex(storageManager)
+        // const bmBackground = new BookmarksBackground({ storageManager })
+        // const customListBg = new CustomListBg({
+        //     storageManager,
+        // })
+        // const socialBg = new SocialBackground({
+        //     storageManager,
+        // })
+        // const annotsBg = new AnnotsBg({
+        //     storageManager,
+        //     socialBg,
+        //     browserAPIs: { storage: {} } as any,
+        // })
+
+        // registerModuleMapCollections(storageManager.registry, {
+        //     bookmarks: bmBackground.storage,
+        //     customLists: customListBg.storage,
+        //     annotsStorage: annotsBg.annotationStorage,
+        //     socialStorage: socialBg['storage'],
+        // })
+        // await storageManager.finishInitialization()
+        // setStorex(storageManager)
+
         const idx = combineSearchIndex({
             getDb,
             tabManager: {

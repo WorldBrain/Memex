@@ -3,8 +3,8 @@ import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules
 import BookmarksBackground from 'src/bookmarks/background'
 import initStorageManager from '../../search/memory-storex'
 import CustomListBackground from './'
-import { getPage, createTestPage } from 'src/search'
 import * as DATA from './storage.test.data'
+import { createTestPage } from 'src/search/on-demand-indexing';
 
 describe('Custom List Integrations', () => {
     let bg: CustomListBackground
@@ -27,11 +27,11 @@ describe('Custom List Integrations', () => {
     }
 
     beforeEach(async () => {
-        const storageManager = initStorageManager()
         const getDb = async () => storageManager
+        const storageManager = initStorageManager()
         bg = new CustomListBackground({
             storageManager,
-            getPage: getPage(getDb),
+            searchIndex: {} as any,
             createPage: createTestPage(getDb),
         })
         const bmsBg = new BookmarksBackground({ storageManager })

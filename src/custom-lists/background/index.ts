@@ -7,10 +7,10 @@ import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { PageCreator, Page } from 'src/search'
+import { Page } from 'src/search'
 import { getPage } from 'src/search/util'
-import { createPageFromTab, DBGet } from 'src/search'
 import { Tab, CustomListsInterface } from './types'
+import { SearchIndex } from 'src/search'
 
 export default class CustomListBackground {
     storage: CustomListStorage
@@ -18,7 +18,8 @@ export default class CustomListBackground {
     private tabMan: TabManager
     private windows: Windows.Static
     private getPage: (url: string) => Promise<Page>
-    private createPage: PageCreator
+    private createPage: SearchIndex['createPageFromTab']
+    private searchIndex: SearchIndex
 
     constructor({
         storageManager,
@@ -26,16 +27,19 @@ export default class CustomListBackground {
         windows,
         createPage,
         getPage,
+        searchIndex,
     }: {
         storageManager: Storex
         tabMan?: TabManager
         windows?: Windows.Static
         getPage?: (url: string) => Promise<Page>
-        createPage?: PageCreator
+        createPage?: SearchIndex['createPageFromTab']
+        searchIndex: SearchIndex
     }) {
         // Makes the custom list Table in indexed DB.
         this.storage = new CustomListStorage({ storageManager })
         this.tabMan = tabMan
+        this.searchIndex = searchIndex
         this.windows = windows
         this.getPage = getPage
         this.createPage = createPage
@@ -222,7 +226,7 @@ export default class CustomListBackground {
         const time = Date.now()
 
         tabs.forEach(async tab => {
-            let page = await this.getPage(tab.url)
+            let page = await this.searchIndex.getPage(tab.url)
 
             if (page == null || page.isStub) {
                 page = await this.createPage({

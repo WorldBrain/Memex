@@ -1,8 +1,9 @@
 /* eslint prefer-const: 0 */
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
-import { NUM_IMPORT_ITEMS as ONBOARDING_LIM } from 'src/overview/onboarding/constants'
+import * as onboardingConstants from 'src/overview/onboarding/constants'
 import ItemCreator from './item-creator'
 import ImportCache from './cache'
+import { SearchIndex } from 'src/search'
 
 /**
  * Object with keys for each import item type and corresponding unsigned int values,
@@ -20,7 +21,10 @@ import ImportCache from './cache'
  */
 
 export class ImportStateManager {
-    static QUICK_MODE_ITEM_LIMITS = { histLimit: ONBOARDING_LIM, bmLimit: 0 }
+    static QUICK_MODE_ITEM_LIMITS = {
+        histLimit: onboardingConstants['ONBOARDING_LIM'],
+        bmLimit: 0,
+    }
 
     static DEF_ALLOW_TYPES = {
         [TYPE.HISTORY]: false,
@@ -29,6 +33,8 @@ export class ImportStateManager {
     }
 
     _includeErrs = false
+    _cache: ImportCache
+    _itemCreator: ItemCreator
 
     /**
      * @type {any} Object containing boolean flags for each import item type key, representing whether
@@ -49,11 +55,20 @@ export class ImportStateManager {
     options = {}
 
     constructor({
+        searchIndex,
         cacheBackend = new ImportCache({}),
-        itemCreator = new ItemCreator({}),
+        itemCreator,
+    }: {
+        searchIndex: SearchIndex
+        cacheBackend?: ImportCache
+        itemCreator?: ItemCreator
     }) {
         this._cache = cacheBackend
-        this._itemCreator = itemCreator
+        this._itemCreator =
+            itemCreator ||
+            new ItemCreator({
+                existingKeySource: () => searchIndex.grabExistingKeys(),
+            })
 
         this._initFromCache()
     }
@@ -230,14 +245,12 @@ export class ImportStateManager {
     }
 }
 
-const getImportStateManager = (() => {
-    let manager = null
-    return () => {
-        if (!manager) {
-            manager = new ImportStateManager({})
-        }
-        return manager
-    }
-})()
+let globalImportStateManager: ImportStateManager = null
+function getImportStateManager(): ImportStateManager {
+    return globalImportStateManager
+}
+export function setImportStateManager(importStateManager: ImportStateManager) {
+    globalImportStateManager = importStateManager
+}
 
 export default getImportStateManager

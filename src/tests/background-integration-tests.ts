@@ -21,7 +21,9 @@ import {
 } from './integration-tests'
 import { StorageChangeDetector } from './storage-change-detector'
 
-async function setupTest(): Promise<BackgroundIntegrationTestSetup> {
+export async function setupBackgroundIntegrationTest(): Promise<
+    BackgroundIntegrationTestSetup
+> {
     if (typeof window === 'undefined') {
         global['URL'] = URL
     }
@@ -84,7 +86,7 @@ export function registerBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
 ) {
     it(test.description, async () => {
-        const setup = await setupTest()
+        const setup = await setupBackgroundIntegrationTest()
         const testOptions = await test.instantiate()
 
         const changeDetector = new StorageChangeDetector({

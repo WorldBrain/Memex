@@ -1,7 +1,7 @@
 import Storex from '@worldbrain/storex'
 import { Browser } from 'webextension-polyfill-ts'
 
-import * as index from '..'
+// import * as index from '..'
 import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
@@ -16,10 +16,12 @@ import {
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
+import { SearchIndex } from '../types'
+import { combineSearchIndex } from '../search-index'
 
 export default class SearchBackground {
     storage: SearchStorage
-    private backend: SearchBackend
+    searchIndex: SearchIndex
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
     private getDb: DBGet
@@ -60,23 +62,24 @@ export default class SearchBackground {
         storageManager,
         tabMan,
         queryBuilder = () => new QueryBuilder(),
-        idx = index,
+        idx,
         browserAPIs,
     }: {
         storageManager: Storex
         queryBuilder?: () => QueryBuilder
         tabMan: TabManager
-        idx?: typeof index
+        idx?: SearchIndex
         browserAPIs: Pick<Browser, 'bookmarks'>
     }) {
         this.tabMan = tabMan
         this.getDb = async () => storageManager
+        this.searchIndex =
+            idx || combineSearchIndex({ getDb: this.getDb, tabManager: tabMan })
         this.queryBuilderFactory = queryBuilder
         this.storage = new SearchStorage({
             storageManager,
-            legacySearch: idx.fullSearch(this.getDb),
+            legacySearch: idx.fullSearch,
         })
-        this.initBackend(idx)
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
         browserAPIs.bookmarks.onCreated.addListener(
@@ -85,50 +88,28 @@ export default class SearchBackground {
         browserAPIs.bookmarks.onRemoved.addListener(
             this.handleBookmarkRemoval.bind(this),
         )
+
+        this.initRemoteFunctions()
     }
 
-    private initBackend(idx: typeof index) {
-        this.backend = {
-            addPage: idx.addPage(this.getDb),
-            addPageTerms: idx.addPageTerms(this.getDb),
-            addBookmark: idx.addBookmark(this.getDb, this.tabMan),
-            delBookmark: idx.delBookmark(this.getDb, this.tabMan),
-            updateTimestampMeta: idx.updateTimestampMeta(this.getDb),
-            addVisit: idx.addVisit(this.getDb),
-            addFavIcon: idx.addFavIcon(this.getDb),
-            delPages: idx.delPages(this.getDb),
-            delPagesByDomain: idx.delPagesByDomain(this.getDb),
-            delPagesByPattern: idx.delPagesByPattern(this.getDb),
-            addTag: idx.addTag(this.getDb),
-            delTag: idx.delTag(this.getDb),
-            fetchPageTags: idx.fetchPageTags(this.getDb),
-            pageHasBookmark: idx.pageHasBookmark(this.getDb),
-            getPage: idx.getPage(this.getDb),
-            grabExistingKeys: idx.grabExistingKeys(this.getDb),
-            search: idx.search(this.getDb),
-            getMatchingPageCount: idx.getMatchingPageCount(this.getDb),
-            domainHasFavIcon: idx.domainHasFavIcon(this.getDb),
-            createPageFromTab: idx.createPageFromTab(this.getDb),
-            createPageFromUrl: idx.createPageFromUrl(this.getDb),
-        }
-
+    private initRemoteFunctions() {
         this.remoteFunctions = {
             bookmarks: {
-                addPageBookmark: this.backend.addBookmark,
-                delPageBookmark: this.backend.delBookmark,
+                addPageBookmark: this.searchIndex.addBookmark,
+                delPageBookmark: this.searchIndex.delBookmark,
             },
             search: {
-                search: this.backend.search,
-                addPageTag: this.backend.addTag,
-                delPageTag: this.backend.delTag,
+                search: this.searchIndex.search,
+                addPageTag: this.searchIndex.addTag,
+                delPageTag: this.searchIndex.delTag,
                 suggest: this.storage.suggest,
                 extendedSuggest: this.storage.suggestExtended,
-                delPages: this.backend.delPages,
+                delPages: this.searchIndex.delPages,
 
-                fetchPageTags: this.backend.fetchPageTags,
-                delPagesByDomain: this.backend.delPagesByDomain,
-                delPagesByPattern: this.backend.delPagesByPattern,
-                getMatchingPageCount: this.backend.getMatchingPageCount,
+                fetchPageTags: this.searchIndex.fetchPageTags,
+                delPagesByDomain: this.searchIndex.delPagesByDomain,
+                delPagesByPattern: this.searchIndex.delPagesByPattern,
+                getMatchingPageCount: this.searchIndex.getMatchingPageCount,
                 searchAnnotations: this.searchAnnotations.bind(this),
                 searchPages: this.searchPages.bind(this),
                 searchSocial: this.searchSocial.bind(this),
@@ -245,7 +226,7 @@ export default class SearchBackground {
             return
         }
 
-        return this.backend.delBookmark(node).catch(console.error)
+        return this.searchIndex.delBookmark(node).catch(console.error)
     }
 
     async handleBookmarkCreation(id, node) {
@@ -261,6 +242,6 @@ export default class SearchBackground {
             tabId = activeTab.id
         }
 
-        return this.backend.addBookmark({ url: node.url, tabId })
+        return this.searchIndex.addBookmark({ url: node.url, tabId })
     }
 }

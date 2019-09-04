@@ -1,6 +1,10 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
 import ProgressManager from './progress-manager'
 import getImportStateManager from './state-manager'
+import { SearchIndex } from 'src/search'
+import { browser } from 'webextension-polyfill-ts'
+import TagsBackground from 'src/tags/background'
+import CustomListBackground from 'src/custom-lists/background'
 
 export default class ImportConnectionHandler {
     static IMPORTS_PROGRESS_KEY = 'is-imports-in-progress'
@@ -22,25 +26,34 @@ export default class ImportConnectionHandler {
 
     _includeErrs = false
 
-    constructor({ port, quick = false }) {
+    constructor(options: {
+        port
+        quick?: boolean
+        searchIndex: SearchIndex
+        tagsModule: TagsBackground
+        customListsModule: CustomListBackground
+    }) {
         // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
-        this.port = port
+        this.port = options.port
 
         // Quick mode used to quickly import recent history for onboarding; some functionality differs
-        this._quickMode = quick
+        this._quickMode = options.quick
 
         // Initialize the `ProgressManager` to run the import processing logic on import items state
         this.importer = new ProgressManager({
             concurrency: DEF_CONCURRENCY,
             observer: this.itemObserver,
             stateManager: getImportStateManager(),
+            searchIndex: options.searchIndex,
+            tagsModule: options.tagsModule,
+            customListsModule: options.customListsModule,
         })
 
         // Handle any incoming UI messages to control the importer
-        port.onMessage.addListener(this.messageListener)
+        options.port.onMessage.addListener(this.messageListener)
 
         // Handle UI disconnection by stopping (pausing) progress
-        port.onDisconnect.addListener(() => this.importer.stop())
+        options.port.onDisconnect.addListener(() => this.importer.stop())
 
         this.attemptRehydrate()
     }
@@ -110,7 +123,7 @@ export default class ImportConnectionHandler {
         await this.recalcState()
     }
 
-    async recalcState(allowTypes, blobUrl = null) {
+    async recalcState(allowTypes?, blobUrl = null) {
         getImportStateManager().dirtyEstsCache()
         getImportStateManager().allowTypes = allowTypes
 

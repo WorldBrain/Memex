@@ -1,7 +1,6 @@
 import { browser, Storage, Tabs, Browser } from 'webextension-polyfill-ts'
 import throttle from 'lodash/throttle'
 
-import * as searchIndex from '../../search'
 import {
     TabEventChecker,
     whenPageDOMLoaded,
@@ -25,6 +24,7 @@ import {
     BookmarkChecker,
     TabIndexer,
 } from './types'
+import { SearchIndex } from 'src/search'
 
 export default class TabChangeListeners {
     /**
@@ -41,12 +41,11 @@ export default class TabChangeListeners {
 
     private _contentScriptPaths: string[]
     private _tabManager: TabManager
+    private _searchIndex: SearchIndex
     private _storage: Storage.StorageArea
     private _checkTabLoggable: LoggableTabChecker
     private _updateTabVisit: VisitInteractionUpdater
     private _fetchFavIcon: FavIconFetcher
-    private _checkFavIcon: FavIconChecker
-    private _createFavIcon: FavIconCreator
     private _pageDOMLoaded: TabEventChecker
     private _tabActive: TabEventChecker
     private _pageVisitLogger: PageVisitLogger
@@ -68,13 +67,10 @@ export default class TabChangeListeners {
         tabManager: TabManager
         pageVisitLogger: PageVisitLogger
         browserAPIs: Pick<Browser, 'storage'>
+        searchIndex: SearchIndex
         storageArea?: Storage.StorageArea
-        visitUpdate?: VisitInteractionUpdater
         favIconFetch?: FavIconFetcher
-        favIconCheck?: FavIconChecker
         domLoadCheck?: TabEventChecker
-        favIconCreate?: FavIconCreator
-        bookmarkCheck?: BookmarkChecker
         tabActiveCheck?: TabEventChecker
         loggableTabCheck?: LoggableTabChecker
         contentScriptPaths?: string[]
@@ -82,21 +78,16 @@ export default class TabChangeListeners {
         this._tabManager = options.tabManager
         this._pageVisitLogger = options.pageVisitLogger
         this._storage = options.storageArea || options.browserAPIs.storage.local
+        this._searchIndex = options.searchIndex
         this._checkTabLoggable = options.loggableTabCheck || shouldLogTab
-        this._updateTabVisit = options.visitUpdate || updateVisitInteractionData
+        this._updateTabVisit = updateVisitInteractionData
         this._fetchFavIcon = options.favIconFetch || fetchFavIcon
-        this._checkFavIcon =
-            options.favIconCheck ||
-            searchIndex.domainHasFavIcon(searchIndex.getDb)
-        this._createFavIcon =
-            options.favIconCreate || searchIndex.addFavIcon(searchIndex.getDb)
         this._pageDOMLoaded = options.domLoadCheck || whenPageDOMLoaded
         this._tabActive = options.tabActiveCheck || whenTabActive
-        this.checkBookmark =
-            options.bookmarkCheck ||
-            searchIndex.pageHasBookmark(searchIndex.getDb)
         this._contentScriptPaths =
             options.contentScriptPaths || TabChangeListeners.DEF_CONTENT_SCRIPTS
+
+        this.checkBookmark = options.searchIndex.pageHasBookmark
     }
 
     private getOrCreateTabIndexers(tabId: number) {
@@ -176,7 +167,7 @@ export default class TabChangeListeners {
             oldTab.url !== url &&
             oldTab.activeTime > TabChangeListeners.FAUX_VISIT_THRESHOLD
         ) {
-            await this._updateTabVisit(oldTab)
+            await this._updateTabVisit(oldTab, this._searchIndex)
         }
     }
 
@@ -242,10 +233,10 @@ export default class TabChangeListeners {
         try {
             if (
                 (await this._checkTabLoggable(tab)) &&
-                !(await this._checkFavIcon(tab.url))
+                !(await this._searchIndex.domainHasFavIcon(tab.url))
             ) {
                 const favIconDataUrl = await this._fetchFavIcon(tab.favIconUrl)
-                await this._createFavIcon(tab.url, favIconDataUrl)
+                await this._searchIndex.addFavIcon(tab.url, favIconDataUrl)
             }
         } catch (err) {
             if (!(err instanceof FavIconFetchError)) {

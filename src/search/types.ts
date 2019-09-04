@@ -7,6 +7,7 @@ import {
 } from './background/types'
 import SearchStorage from './background/storage'
 import { Bookmarks } from 'webextension-polyfill-ts'
+import { createPageFromTab } from './on-demand-indexing'
 
 export type DBGet = () => Promise<Storex>
 
@@ -120,6 +121,7 @@ export interface SearchIndex {
     ) => Promise<{
         docs
         isBadTerm?
+        requiresMigration?
         totalCount
         resultsExhausted: boolean
     }>
@@ -156,6 +158,7 @@ export interface SearchIndex {
     addVisit: (url: string, time?: number) => Promise<any>
 
     addFavIcon: (url: string, favIconURI: string) => Promise<any>
+    domainHasFavIcon: (url: string) => Promise<boolean>
 
     addTag: (
         params: { url: string; tag: string; tabId?: number },
@@ -169,4 +172,16 @@ export interface SearchIndex {
         histKeys: Set<string>
         bmKeys: Set<string>
     }>
+
+    createPageFromTab: (params: PageCreationProps) => Promise<any>
+    createPageFromUrl: (params: PageCreationProps) => Promise<any>
+    createPageViaBmTagActs: (params: PageCreationProps) => Promise<any>
+
+    dangerousPleaseBeSureDeleteAndRecreateDatabase: () => Promise<void>
+}
+interface PageCreationProps {
+    url: string
+    tabId?: number
+    stubOnly?: boolean
+    allowScreenshot?: boolean
 }

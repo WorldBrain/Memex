@@ -6,12 +6,23 @@ import {
     addVisit,
     addFavIcon,
 } from './add'
-import { delPages, delPagesByDomain, delPagesByPattern } from './del'
+import {
+    delPages,
+    delPagesByDomain,
+    delPagesByPattern,
+    dangerousPleaseBeSureDeleteAndRecreateDatabase,
+} from './del'
 import { addBookmark, delBookmark, pageHasBookmark } from './bookmarks'
 import { addTag, delTag, fetchPageTags } from './tags'
 import { TabManager } from 'src/activity-logger/background'
 import { getPage, grabExistingKeys } from './util'
 import { search, getMatchingPageCount, fullSearch } from './search'
+import {
+    createPageFromTab,
+    createPageFromUrl,
+    createPageViaBmTagActs,
+} from './on-demand-indexing'
+import { domainHasFavIcon } from './search/fav-icon'
 
 export function combineSearchIndex(dependenices: {
     getDb: DBGet
@@ -33,9 +44,18 @@ export function combineSearchIndex(dependenices: {
         updateTimestampMeta: updateTimestampMeta(dependenices.getDb),
         addVisit: addVisit(dependenices.getDb),
         addFavIcon: addFavIcon(dependenices.getDb),
+        domainHasFavIcon: domainHasFavIcon(dependenices.getDb),
         addTag: addTag(dependenices.getDb),
         delTag: delTag(dependenices.getDb),
         fetchPageTags: fetchPageTags(dependenices.getDb),
         grabExistingKeys: grabExistingKeys(dependenices.getDb),
+
+        createPageFromTab: createPageFromTab(dependenices.getDb),
+        createPageFromUrl: createPageFromUrl(dependenices.getDb),
+        createPageViaBmTagActs: createPageViaBmTagActs(dependenices.getDb),
+
+        dangerousPleaseBeSureDeleteAndRecreateDatabase: dangerousPleaseBeSureDeleteAndRecreateDatabase(
+            dependenices.getDb,
+        ),
     }
 }
