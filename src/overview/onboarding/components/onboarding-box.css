@@ -1,16 +1,12 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color4, color6, color3, color5, color16 from colors;
-
-body {
-    background: color16;
-}
+@value color1, color5, color6 from colors;
 
 .container {
     background: #fff;
     width: 60%;
     max-width: 50rem;
     margin: 30px auto;
-    padding: 20px 40px;
+    padding: 2rem 4rem;
     display: flex;
     border: solid 1px #f4f4f4;
     border-radius: 10px;
@@ -32,6 +28,7 @@ body {
 .heading1 {
     color: color5;
     font-size: 1.8rem;
+    margin-top: 0;
 }
 
 .heading2 {
@@ -73,8 +70,8 @@ body {
     font-size: 0.8rem;
 }
 
-.progressWrapper {
-    margin: 2rem auto;
+.progressContainer {
+    margin: 2rem auto 0;
     text-align: center;
 }
 
@@ -93,6 +90,7 @@ body {
 
 .CTA {
     composes: CTA from '../../../common-ui/elements.css';
+    font-size: 1.2rem;
 }
 
 .grayActionButton {

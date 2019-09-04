@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color3, color4, color5, color6, color7, color11, color12, radius3 from colors;
+@value color1, color2, color3, color4, color5, color6, color7, color11, color12, color16, radius3 from colors;
 
 /* FONTs */
 
@@ -79,7 +79,7 @@
     padding: 0.3rem 0.8rem;
     font-size: 0.9rem;
     line-height: 1.2rem;
-    color: #555;
+    color: color16;
 }
 
 .CTA {

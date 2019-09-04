@@ -1,5 +1,7 @@
 import React, { PureComponent } from 'react'
 import classNames from 'classnames'
+import ProgressDot from './progress-dot'
+import ProgressContainer from './progress-container'
 
 const styles = require('./onboarding-box.css')
 
@@ -24,12 +26,7 @@ class OnboardingBox extends PureComponent {
                         <div>
                             <a className={styles.CTA}>Get started</a>
                         </div>
-                        <div className={styles.progressWrapper}>
-                            <span className={styles.progressDot} />
-                            <span className={styles.progressDot} />
-                            <span className={styles.progressDot} />
-                            <span className={styles.progressDot} />
-                        </div>
+                        <ProgressContainer totalSteps={4} currentStep={0} />
                     </div>
 
                     <div className={styles.container}>
@@ -48,12 +45,7 @@ class OnboardingBox extends PureComponent {
                         <div>
                             <a className={styles.CTA}>Next</a>
                         </div>
-                        <div className={styles.progressWrapper}>
-                            <span className={styles.progressDot} />
-                            <span className={styles.progressDot} />
-                            <span className={styles.progressDot} />
-                            <span className={styles.progressDot} />
-                        </div>
+                        <ProgressContainer totalSteps={4} currentStep={1} />
                     </div>
                 </div>
 
