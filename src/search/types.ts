@@ -1,5 +1,6 @@
 import Storex, { FindManyOptions } from '@worldbrain/storex'
 import { Bookmarks } from 'webextension-polyfill-ts'
+import { createPageFromTab } from './on-demand-indexing'
 
 export type DBGet = () => Promise<Storex>
 

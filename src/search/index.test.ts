@@ -17,7 +17,7 @@ describe('Search index integration', () => {
         const idx = combineSearchIndex({
             getDb,
             tabManager: {
-                setBookmarkState: () => {},
+                setBookmarkState: () => { },
             } as any,
         })
         await insertTestData(idx)
