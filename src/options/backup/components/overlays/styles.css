@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color5, color6 from colors;
+@value color5 from colors;
 
 .linkbox {
     grid-area: linkbox;
