@@ -12,7 +12,7 @@ import initData, { TestData, diff } from './state-manager.test.data'
 jest.mock('src/blacklist/background/interface')
 jest.mock('src/util/encode-url-for-id')
 jest.mock('src/activity-logger')
-jest.mock('./item-processor')
+// jest.mock('./item-processor')
 jest.mock('./cache')
 jest.mock('./data-sources')
 
@@ -71,7 +71,7 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
 
         // Should all be marked as finished now (we awaited the progress to complete)
         progress.processors.forEach(proc =>
-            expect(proc).toEqual({ finished: true, cancelled: false }),
+            expect(proc).toMatchObject({ finished: true, cancelled: false }),
         )
 
         // Should be called # unique inputs
