@@ -320,6 +320,30 @@ export default class Page extends AbstractModel
         ])
     }
 
+    private async saveNewVisits(): Promise<[number, string][]> {
+        const existingVisits = await this.db
+            .collection('visits')
+            .findObjects<Visit>({
+                url: this.url,
+                time: { $in: this[visitsProp].map(v => v.time) },
+            })
+
+        const existingVisitsTimeMap = new Map<number, Visit>()
+        existingVisits.forEach(v => existingVisitsTimeMap.set(v.time, v))
+
+        const newVisitIds = await Promise.all(
+            this[visitsProp].map(v => {
+                if (!v._hasChanged(existingVisitsTimeMap.get(v.time))) {
+                    return v.pk
+                }
+
+                return v.save()
+            }),
+        )
+
+        return newVisitIds as [number, string][]
+    }
+
     async save() {
         return this.db.operation(
             'transaction',
@@ -346,7 +370,7 @@ export default class Page extends AbstractModel
 
                 // Insert or update all associated visits + tags
                 const [visitIds, tagIds] = await Promise.all([
-                    Promise.all(this[visitsProp].map(visit => visit.save())),
+                    this.saveNewVisits(),
                     Promise.all(this[tagsProp].map(tag => tag.save())),
                 ])
 

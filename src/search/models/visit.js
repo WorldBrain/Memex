@@ -62,17 +62,10 @@ export default class Visit extends EventModel {
     }
 
     async save() {
-        // Only update if changes detected between existing visit and this one
-        const existingVisit = await this.db
-            .collection('visits')
-            .findOneObject({ time: this.time, url: this.url })
-        if (!this._hasChanged(existingVisit)) {
-            return this.pk
-        }
-
         const { object } = await this.db
             .collection('visits')
             .createObject(this.data)
+
         return [object.time, object.url]
     }
 }
