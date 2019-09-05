@@ -1,12 +1,3 @@
-import Storex from '@worldbrain/storex'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-
-import AnnotsBg from 'src/direct-linking/background'
-import SocialBackground from 'src/social-integration/background'
-import CustomListBg from 'src/custom-lists/background'
-import BookmarksBackground from 'src/bookmarks/background'
-import initStorageManager from './memory-storex'
-import { setStorex } from './get-db'
 import * as DATA from './index.test.data'
 import { FavIcon } from './models'
 import { SearchIndex } from './types'
@@ -22,28 +13,6 @@ jest.mock('lodash/fp/difference')
 describe('Search index integration', () => {
     async function setupTest() {
         const { storageManager } = await setupBackgroundIntegrationTest()
-
-        // const bmBackground = new BookmarksBackground({ storageManager })
-        // const customListBg = new CustomListBg({
-        //     storageManager,
-        // })
-        // const socialBg = new SocialBackground({
-        //     storageManager,
-        // })
-        // const annotsBg = new AnnotsBg({
-        //     storageManager,
-        //     socialBg,
-        //     browserAPIs: { storage: {} } as any,
-        // })
-
-        // registerModuleMapCollections(storageManager.registry, {
-        //     bookmarks: bmBackground.storage,
-        //     customLists: customListBg.storage,
-        //     annotsStorage: annotsBg.annotationStorage,
-        //     socialStorage: socialBg['storage'],
-        // })
-        // await storageManager.finishInitialization()
-        // setStorex(storageManager)
 
         const idx = combineSearchIndex({
             getDb,

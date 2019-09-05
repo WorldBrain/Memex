@@ -48,6 +48,41 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         },
                         {
                             execute: async ({ setup }) => {
+                                await searchModule(setup).searchIndex.addPage({
+                                    pageDoc: {
+                                        url: 'http://www.bla.com/',
+                                        content: {
+                                            fullText:
+                                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                                            title: 'bla.com title',
+                                        },
+                                    },
+                                    visits: [],
+                                })
+                            },
+                            expectedStorageChanges: {
+                                pages: (): StorageCollectionDiff => ({
+                                    'bla.com': {
+                                        type: 'create',
+                                        object: expect.objectContaining({
+                                            canonicalUrl: undefined,
+                                            domain: 'bla.com',
+                                            fullTitle: 'bla.com title',
+                                            fullUrl: 'http://www.bla.com/',
+                                            hostname: 'bla.com',
+                                            screenshot: undefined,
+                                            text:
+                                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                                            url: 'bla.com',
+                                        }),
+                                    },
+                                }),
+                                visits: (): StorageCollectionDiff =>
+                                    expect.any(Object),
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
                                 listEntry = (await customLists(
                                     setup,
                                 ).insertPageToList({
@@ -116,10 +151,34 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 ])
 
-                                // expect(await setup.backgroundModules.search.remoteFunctions.search.searchPages({
-                                //     contentTypes: { pages: true, notes: false, highlights: false },
-                                //     collections: [listId]
-                                // })).toEqual([])
+                                expect(
+                                    await setup.backgroundModules.search.remoteFunctions.search.searchPages(
+                                        {
+                                            contentTypes: {
+                                                pages: true,
+                                                notes: false,
+                                                highlights: false,
+                                            },
+                                            collections: [listId],
+                                        },
+                                    ),
+                                ).toEqual({
+                                    docs: [
+                                        {
+                                            annotations: [],
+                                            annotsCount: undefined,
+                                            displayTime: expect.any(Number),
+                                            favIcon: undefined,
+                                            hasBookmark: false,
+                                            screenshot: undefined,
+                                            tags: [],
+                                            title: 'bla.com title',
+                                            url: 'bla.com',
+                                        },
+                                    ],
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                })
                             },
                         },
                     ],
