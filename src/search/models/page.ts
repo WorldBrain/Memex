@@ -323,15 +323,12 @@ export default class Page extends AbstractModel
     private async saveNewVisits(): Promise<[number, string][]> {
         const existingVisits = await this.db
             .collection('visits')
-            .findObjects<Visit>({
-                url: this.url,
-                time: { $in: this[visitsProp].map(v => v.time) },
-            })
+            .findObjects<Visit>({ url: this.url })
 
         const existingVisitsTimeMap = new Map<number, Visit>()
         existingVisits.forEach(v => existingVisitsTimeMap.set(v.time, v))
 
-        const newVisitIds = await Promise.all<[number, string]>(
+        return Promise.all<[number, string]>(
             this[visitsProp].map((v: Visit) => {
                 if (!v._hasChanged(existingVisitsTimeMap.get(v.time))) {
                     return v.pk
@@ -340,8 +337,25 @@ export default class Page extends AbstractModel
                 return v.save()
             }),
         )
+    }
 
-        return newVisitIds
+    private async saveNewTags(): Promise<[string, string][]> {
+        const existingTags = await this.db
+            .collection('tags')
+            .findObjects<Tag>({ url: this.url })
+
+        const existingTagsNameMap = new Map<string, Tag>()
+        existingTags.forEach(t => existingTagsNameMap.set(t.name, t))
+
+        return Promise.all<[string, string]>(
+            this[tagsProp].map((t: Tag) => {
+                if (existingTagsNameMap.get(t.name)) {
+                    return [t.name, t.url]
+                }
+
+                return t.save()
+            }),
+        )
     }
 
     async save() {
@@ -369,10 +383,8 @@ export default class Page extends AbstractModel
                 await this.db.collection('pages').createObject(this.data)
 
                 // Insert or update all associated visits + tags
-                const [visitIds, tagIds] = await Promise.all([
-                    this.saveNewVisits(),
-                    Promise.all(this[tagsProp].map(tag => tag.save())),
-                ])
+                const visitIds = await this.saveNewVisits()
+                const tagIds = await this.saveNewTags()
 
                 // Either try to update or delete the assoc. bookmark
                 if (this[bookmarkProp] != null) {
