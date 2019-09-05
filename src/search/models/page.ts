@@ -331,8 +331,8 @@ export default class Page extends AbstractModel
         const existingVisitsTimeMap = new Map<number, Visit>()
         existingVisits.forEach(v => existingVisitsTimeMap.set(v.time, v))
 
-        const newVisitIds = await Promise.all(
-            this[visitsProp].map(v => {
+        const newVisitIds = await Promise.all<[number, string]>(
+            this[visitsProp].map((v: Visit) => {
                 if (!v._hasChanged(existingVisitsTimeMap.get(v.time))) {
                     return v.pk
                 }
@@ -341,7 +341,7 @@ export default class Page extends AbstractModel
             }),
         )
 
-        return newVisitIds as [number, string][]
+        return newVisitIds
     }
 
     async save() {

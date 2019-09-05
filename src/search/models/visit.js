@@ -61,6 +61,9 @@ export default class Visit extends EventModel {
         return this.hasChanged
     }
 
+    /**
+     * @returns {[number, string]}
+     */
     async save() {
         const { object } = await this.db
             .collection('visits')
