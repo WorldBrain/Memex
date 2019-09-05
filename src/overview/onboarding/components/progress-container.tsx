@@ -24,4 +24,4 @@ export default class ProgressWrapper extends PureComponent<Props> {
 }
 
 // TODO set child prop isSeen if current step is equal or less than step count?? or a better way..
-// TODO render as many of these components that exist as steps
+// TODO render as many of these ProgressDot components as manay times as total steps

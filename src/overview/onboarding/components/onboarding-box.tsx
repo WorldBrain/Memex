@@ -61,3 +61,5 @@ class OnboardingBox extends PureComponent {
 }
 
 export default OnboardingBox
+
+// TODO styles.container could be turned into a component taking heading, image, content, onSubmit action
