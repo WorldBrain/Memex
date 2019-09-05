@@ -26,6 +26,11 @@ export default class Visit extends EventModel {
      */
     scrollMaxPerc
 
+    /**
+     * @type {boolean} hasChanged
+     */
+    hasChanged
+
     constructor(db, { url, time, ...props }) {
         super(db, { url, time })
 
@@ -45,14 +50,15 @@ export default class Visit extends EventModel {
      * @returns {boolean}
      */
     _hasChanged(visit) {
-        return (
+        this.hasChanged =
             visit == null ||
             visit.duration !== this.duration ||
             visit.scrollPx !== this.scrollPx ||
             visit.scrollPerc !== this.scrollPerc ||
             visit.scrollMaxPx !== this.scrollMaxPx ||
             visit.scrollMaxPerc !== this.scrollMaxPerc
-        )
+
+        return this.hasChanged
     }
 
     async save() {

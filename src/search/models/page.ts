@@ -139,7 +139,7 @@ export default class Page extends AbstractModel
         return this[tagsProp].map(tag => tag.name)
     }
 
-    get visits() {
+    get visits(): Visit[] {
         return this[visitsProp]
     }
 
