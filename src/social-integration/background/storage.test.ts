@@ -20,66 +20,53 @@ const assertTweetsEqual = (received: Tweet, expected: Tweet) => {
 }
 
 describe('Social storage', () => {
-    let socialStorage: SocialStorage
-    let storageManager: Storex
-    let socialBg: SocialBackground
-    let customListBg: CustomListBg
-    let listId: number
-
-    const search = ({
-        skip = 0,
-        limit = 10,
-        ...args
-    }: SocialSearchParams): Promise<Map<number, SocialPage>> =>
-        storageManager.operation(SocialSearchPlugin.SEARCH_OP_ID, {
-            limit,
-            skip,
-            ...args,
-        })
-
-    async function insertTestData() {
-        listId = await customListBg.createCustomList({
+    async function insertTestData(params: {
+        customListBg: CustomListBg
+        socialStorage: SocialStorage
+    }) {
+        const listId = await params.customListBg.createCustomList({
             name: DATA.customListNameA,
         })
 
         for (const tweet of [DATA.tweetA, DATA.tweetB]) {
             // ID gets auto-assigned on insert.
             // Grab that and attach it to the test data docs, so we can compare them later.
-            const postId = await socialStorage.addSocialPost({ ...tweet })
+            const postId = await params.socialStorage.addSocialPost({
+                ...tweet,
+            })
             tweet.id = postId
         }
+
+        return { listId }
     }
 
-    beforeEach(async () => {
+    async function setupTest() {
         const {
             storageManager,
             backgroundModules,
         } = await setupBackgroundIntegrationTest()
-
-        // customListBg = new CustomListBg({
-        //     storageManager,
-        // })
-        // socialBg = new SocialBackground({
-        //     storageManager,
-        // })
-        // const annotsBg = new AnnotsBg({
-        //     storageManager,
-        //     socialBg,
-        //     browserAPIs: { storage: {} } as any,
-        // })
-
-        socialStorage = backgroundModules.social.storage
-        registerModuleMapCollections(storageManager.registry, {
+        const socialStorage = backgroundModules.social.storage
+        const { listId } = await insertTestData({
             socialStorage,
-            annotsStorage: backgroundModules.directLinking.annotationStorage,
-            customListStorage: customListBg.storage,
+            customListBg: backgroundModules.customLists,
         })
 
-        await storageManager.finishInitialization()
-        await insertTestData()
-    })
+        const search = ({
+            skip = 0,
+            limit = 10,
+            ...args
+        }: SocialSearchParams): Promise<Map<number, SocialPage>> =>
+            storageManager.operation(SocialSearchPlugin.SEARCH_OP_ID, {
+                limit,
+                skip,
+                ...args,
+            })
+
+        return { socialStorage, listId, search }
+    }
 
     const addBookmarkTest = async () => {
+        const { socialStorage, search } = await setupTest()
         const id = await socialStorage.addSocialBookmark({
             postId: DATA.tweetA.id,
         })
@@ -87,10 +74,11 @@ describe('Social storage', () => {
         const results = await search({ bookmarksOnly: true })
         const firstRes = [...results.values()][0]
         assertTweetsEqual(firstRes, DATA.tweetA)
-        return id
+        return { socialStorage, search }
     }
 
     const addListEntryTest = async () => {
+        const { socialStorage, search, listId } = await setupTest()
         const id = await socialStorage.addListEntry({
             postId: DATA.tweetA.id,
             listId,
@@ -99,7 +87,7 @@ describe('Social storage', () => {
         const results = await search({ collections: [listId.toString()] })
         const firstRes = [...results.values()][0]
         assertTweetsEqual(firstRes, DATA.tweetA)
-        return id
+        return { socialStorage, search, listId }
     }
 
     test('add bookmark', addBookmarkTest)
@@ -107,6 +95,8 @@ describe('Social storage', () => {
     test('add list entry', addListEntryTest)
 
     test('add hash tags', async () => {
+        const { socialStorage, search } = await setupTest()
+
         await socialStorage.addSocialTags({
             postId: DATA.tweetA.id,
             hashtags: [DATA.hashTagA],
@@ -134,6 +124,8 @@ describe('Social storage', () => {
     })
 
     test('add tags', async () => {
+        const { socialStorage, search } = await setupTest()
+
         await socialStorage.addTagForPost({
             url: `socialPosts:${DATA.tweetA.id}`,
             name: DATA.tagA,
@@ -159,6 +151,8 @@ describe('Social storage', () => {
     })
 
     test('add user', async () => {
+        const { socialStorage, search } = await setupTest()
+
         await socialStorage.addSocialUser(DATA.userA)
 
         const resultsA = await search({ usersInc: [DATA.userA] })
@@ -167,14 +161,14 @@ describe('Social storage', () => {
     })
 
     test('delete bookmark', async () => {
-        await addBookmarkTest()
+        const { socialStorage, search } = await addBookmarkTest()
         await socialStorage.delSocialBookmark({ postId: DATA.tweetA.id })
         const results = await search({ bookmarksOnly: true })
         expect([...results.values()].length).toBe(0)
     })
 
     test('delete list entry', async () => {
-        await addListEntryTest()
+        const { socialStorage, listId, search } = await addListEntryTest()
         await socialStorage.delListEntry({ postId: DATA.tweetA.id, listId })
 
         const results = await search({ collections: [listId.toString()] })
@@ -182,6 +176,8 @@ describe('Social storage', () => {
     })
 
     test('delete post', async () => {
+        const { socialStorage } = await setupTest()
+
         const id = DATA.tweetA.id
         const tweet = await socialStorage.getSocialPost({ id })
         assertTweetsEqual(tweet, DATA.tweetA)

@@ -78,7 +78,7 @@ export default class SearchBackground {
         this.queryBuilderFactory = queryBuilder
         this.storage = new SearchStorage({
             storageManager,
-            legacySearch: idx.fullSearch,
+            legacySearch: this.searchIndex.fullSearch,
         })
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
