@@ -11,7 +11,6 @@ import {
     PageSearchParams,
     AnnotSearchParams,
     SocialSearchParams,
-    SearchBackend,
     SearchInterface,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'

@@ -1,6 +1,7 @@
 import { Annotation } from 'src/direct-linking/types'
 import { User } from 'src/social-integration/types'
 import SearchStorage from './storage'
+import { SearchIndex } from '../types'
 
 export interface AnnotPage {
     url: string
@@ -125,7 +126,7 @@ export interface SearchBackend {
 }
 
 export interface SearchInterface {
-    search: SearchBackend['search']
+    search: SearchIndex['search']
     searchAnnotations: (params: AnnotSearchParams) => any
     searchPages: (params: PageSearchParams) => any
     searchSocial: (params: SocialSearchParams) => any
@@ -133,12 +134,12 @@ export interface SearchInterface {
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']
 
-    delPages: SearchBackend['delPages']
-    delPagesByDomain: SearchBackend['delPagesByDomain']
-    delPagesByPattern: SearchBackend['delPagesByPattern']
-    getMatchingPageCount: SearchBackend['getMatchingPageCount']
+    delPages: SearchIndex['delPages']
+    delPagesByDomain: SearchIndex['delPagesByDomain']
+    delPagesByPattern: SearchIndex['delPagesByPattern']
+    getMatchingPageCount: SearchIndex['getMatchingPageCount']
 
-    addPageTag: SearchBackend['addTag']
-    delPageTag: SearchBackend['delTag']
-    fetchPageTags: SearchBackend['fetchPageTags']
+    addPageTag: SearchIndex['addTag']
+    delPageTag: SearchIndex['delTag']
+    fetchPageTags: SearchIndex['fetchPageTags']
 }

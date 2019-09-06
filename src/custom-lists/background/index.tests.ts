@@ -52,9 +52,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     pageDoc: {
                                         url: 'http://www.bla.com/',
                                         content: {
-                                            fullText:
-                                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                                            fullText: 'home page content',
                                             title: 'bla.com title',
+                                        },
+                                    },
+                                    visits: [],
+                                })
+                                await searchModule(setup).searchIndex.addPage({
+                                    pageDoc: {
+                                        url: 'http://www.bla.com/foo',
+                                        content: {
+                                            fullText: 'foo page content',
+                                            title: 'bla.com foo title',
                                         },
                                     },
                                     visits: [],
@@ -71,9 +80,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             fullUrl: 'http://www.bla.com/',
                                             hostname: 'bla.com',
                                             screenshot: undefined,
-                                            text:
-                                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                                            text: 'home page content',
                                             url: 'bla.com',
+                                        }),
+                                    },
+                                    'bla.com/foo': {
+                                        type: 'create',
+                                        object: expect.objectContaining({
+                                            canonicalUrl: undefined,
+                                            domain: 'bla.com',
+                                            fullTitle: 'bla.com foo title',
+                                            fullUrl: 'http://www.bla.com/foo',
+                                            hostname: 'bla.com',
+                                            screenshot: undefined,
+                                            text: 'foo page content',
+                                            url: 'bla.com/foo',
                                         }),
                                     },
                                 }),
@@ -152,32 +173,28 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
 
                                 expect(
-                                    await setup.backgroundModules.search.remoteFunctions.search.searchPages(
+                                    await setup.backgroundModules.search.remoteFunctions.search.search(
                                         {
-                                            contentTypes: {
-                                                pages: true,
-                                                notes: false,
-                                                highlights: false,
-                                            },
-                                            collections: [listId],
+                                            query: '',
+                                            showOnlyBookmarks: false,
+                                            lists: [listId.toString()],
                                         },
                                     ),
                                 ).toEqual({
                                     docs: [
                                         {
-                                            annotations: [],
-                                            annotsCount: undefined,
                                             displayTime: expect.any(Number),
                                             favIcon: undefined,
                                             hasBookmark: false,
                                             screenshot: undefined,
                                             tags: [],
                                             title: 'bla.com title',
-                                            url: 'bla.com',
+                                            url: 'http://www.bla.com/',
                                         },
                                     ],
-                                    resultsExhausted: true,
-                                    totalCount: null,
+                                    isBadTerm: false,
+                                    resultsExhausted: false,
+                                    totalCount: 1,
                                 })
                             },
                         },

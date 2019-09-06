@@ -1,13 +1,5 @@
 import Storex, { FindManyOptions } from '@worldbrain/storex'
-import {
-    SearchBackend,
-    AnnotSearchParams,
-    PageSearchParams,
-    SocialSearchParams,
-} from './background/types'
-import SearchStorage from './background/storage'
 import { Bookmarks } from 'webextension-polyfill-ts'
-import { createPageFromTab } from './on-demand-indexing'
 
 export type DBGet = () => Promise<Storex>
 
