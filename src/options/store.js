@@ -60,7 +60,7 @@ const stateTransformer = ({ overview, ...state }) => ({
 export default function configureStore({ ReduxDevTools = undefined } = {}) {
     const middlewares = [createEpicMiddleware(rootEpic), thunk]
 
-    initSentry(middlewares, stateTransformer)
+    initSentry({ reduxMiddlewares: middlewares, stateTransformer })
 
     const enhancers = [
         overviewPage.enhancer,

@@ -9,6 +9,7 @@ import internalAnalytics from './analytics/internal'
 import initSentry from './util/raven'
 import { createPageViaBmTagActs as createPage, getPage } from 'src/search'
 import { setupRemoteFunctionsImplementations } from 'src/util/webextensionRPC'
+import { StorageChangesManager } from 'src/util/storage-changes'
 
 // Features that require manual instantiation to setup
 import DirectLinkingBackground from './direct-linking/background'
@@ -32,9 +33,12 @@ import './imports/background'
 import './omnibar'
 import analytics from './analytics'
 
-initSentry()
-
 const storageManager = initStorex()
+const localStorageChangesManager = new StorageChangesManager({
+    storage: browser.storage,
+})
+
+initSentry({ storageChangesManager: localStorageChangesManager })
 
 const notifications = new NotificationBackground({ storageManager })
 notifications.setupRemoteFunctions()
@@ -117,6 +121,7 @@ storageManager.finishInitialization().then(() => {
         storageManager,
         notifsBackground: notifications,
         loggerBackground: activityLogger,
+        storageChangesMan: localStorageChangesManager,
     })
     bgScript.setupRemoteFunctions()
     bgScript.setupWebExtAPIHandlers()
