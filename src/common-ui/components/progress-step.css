@@ -1,0 +1,26 @@
+@value colors: 'src/common-ui/colors.css';
+@value color2, color6 from colors;
+
+.progressContainer {
+    margin: 2rem auto 0;
+    text-align: center;
+}
+
+.progressStep {
+    background: color6;
+    border-radius: 10px;
+    display: inline-block;
+    height: 10px;
+    margin-right: 4px;
+    width: 10px;
+}
+
+.progressStepSeen {
+    background: color2;
+    cursor: pointer;
+    transition: transform 200ms;
+
+    &:hover {
+        transform: scale(1.3);
+    }
+}

@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color3, color4, color5, color6, color7, color11, color12, color16, radius3 from colors;
+@value color1, color2, color3, color4, color5, color6, color7, color8, color11, color12, color16, radius3 from colors;
 
 /* FONTs */
 
@@ -74,12 +74,18 @@
 }
 
 .grayActionButton {
-    background: color7;
+    background-color: color7;
     border-radius: 22px;
-    padding: 0.3rem 0.8rem;
+    color: color16;
+    cursor: pointer;
     font-size: 0.9rem;
     line-height: 1.2rem;
-    color: color16;
+    padding: 0.3rem 0.8rem;
+    transition: background-color 200ms ease-in-out;
+
+    &:hover {
+        background-color: color8;
+    }
 }
 
 .CTA {
@@ -92,6 +98,7 @@
     cursor: pointer;
     text-decoration: none;
     border: none;
+    transition: background-color 200ms ease-in-out;
 
     &:hover {
         background: color2;
