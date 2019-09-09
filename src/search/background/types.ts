@@ -75,6 +75,32 @@ export interface UrlFilters {
 }
 
 /**
+ * Types for the search functions of the background class
+ */
+export interface BackgroundSearchParams {
+    query?: string
+    domains?: any[]
+    domainsExclude?: any[]
+    tagsInc?: any[]
+    tagsExc?: any[]
+    lists?: any[]
+    contentTypes?: ContentTypes
+    skip?: number
+    limit?: number
+    showOnlyBookmarks?: boolean
+    bookmarksOnly?: boolean
+
+    startDate?: number | Date
+    endDate?: number | Date
+    base64Img?: boolean
+    usersInc?: any
+    usersExc?: any
+    hashtagsInc?: any
+    hashtagsExc?: any
+    url?: string
+}
+
+/**
  * Maps day (start of day timestamp) to list of pages that have annots created/edited
  * on that day.
  */

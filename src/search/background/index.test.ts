@@ -1,14 +1,10 @@
-import Storex from '@worldbrain/storex'
-
-import initStorageManager from '../memory-storex'
-import { setStorex } from '../get-db'
-import SearchBg from './index'
+import StorageManager from '@worldbrain/storex'
 import normalize from 'src/util/encode-url-for-id'
 import CustomListBg from 'src/custom-lists/background'
-import AnnotsBg from 'src/direct-linking/background'
 import AnnotsStorage from 'src/direct-linking/background/storage'
 import * as DATA from 'src/direct-linking/background/storage.test.data'
 import { PageUrlsByDay } from './types'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 const mockEvent = { addListener: () => undefined }
 
@@ -24,14 +20,16 @@ const countAnnots = res => {
 }
 
 // TODO: Make this work somehow...
-describe.skip('Annotations search', () => {
-    let annotsStorage: AnnotsStorage
-    let annotsBg: AnnotsBg
-    let storageManager: Storex
-    let customListsBg: CustomListBg
-    let searchBg: SearchBg
-
-    async function insertTestData() {
+describe('Annotations search', () => {
+    async function insertTestData({
+        storageManager,
+        annotsStorage,
+        customListsBg,
+    }: {
+        storageManager: StorageManager
+        annotsStorage: AnnotsStorage
+        customListsBg: CustomListBg
+    }) {
         for (const annot of [
             DATA.directLink,
             DATA.highlight,
@@ -91,39 +89,27 @@ describe.skip('Annotations search', () => {
         await annotsStorage.modifyTags(true)('dummy', DATA.annotation.url)
     }
 
-    beforeEach(async () => {
-        storageManager = initStorageManager()
-        annotsBg = new AnnotsBg({
-            storageManager,
-            socialBg: {} as any,
-            browserAPIs: {} as any,
-            searchIndex: {} as any,
+    async function setupTest() {
+        const setup = await setupBackgroundIntegrationTest({
+            tabManager: { getActiveTab: () => ({ id: 1, url: 'test' }) } as any,
         })
 
-        searchBg = new SearchBg({
-            storageManager,
-            tabMan: { getActiveTab: () => ({ id: 1, url: 'test' }) } as any,
-            browserAPIs: {
-                bookmarks: {
-                    onCreated: mockEvent,
-                    onRemoved: mockEvent,
-                } as any,
-            },
+        await insertTestData({
+            storageManager: setup.storageManager,
+            annotsStorage:
+                setup.backgroundModules.directLinking.annotationStorage,
+            customListsBg: setup.backgroundModules.customLists,
         })
 
-        customListsBg = new CustomListBg({
-            storageManager,
-            searchIndex: {} as any,
-        })
-        annotsStorage = annotsBg['annotationStorage']
-
-        await storageManager.finishInitialization()
-        setStorex(storageManager)
-        await insertTestData()
-    })
+        return {
+            searchBg: setup.backgroundModules.search,
+            annotsBg: setup.backgroundModules.directLinking,
+        }
+    }
 
     describe('terms search', () => {
         test('test terms', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const results = await searchBg.searchAnnotations({
                 query: 'comment',
             })
@@ -132,6 +118,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('bookmarks only', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const resA = await searchBg.searchAnnotations({
                 query: 'highlight annotation comment',
                 bookmarksOnly: true,
@@ -141,6 +128,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('collections filter', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const resA = await searchBg.searchAnnotations({
                 query: 'quote',
                 lists: [DATA.coll1, DATA.coll2],
@@ -157,6 +145,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('tags filter', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const results = await searchBg.searchAnnotations({
                 query: 'highlight annotation comment',
                 tagsInc: [DATA.tag1],
@@ -166,22 +155,24 @@ describe.skip('Annotations search', () => {
         })
 
         test('domains filter', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const resA = await searchBg.searchAnnotations({
                 query: 'highlight annotation comment',
-                domainsExc: ['annotation.url'],
+                domainsExclude: ['annotation.url'],
             })
 
             expect(countAnnots(resA)).toBe(1)
 
             const resB = await searchBg.searchAnnotations({
                 query: 'highlight annotation comment',
-                domainsInc: ['annotation.url'],
+                domains: ['annotation.url'],
             })
 
             expect(countAnnots(resB)).toBe(3)
         })
 
         test('limit', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const single = await searchBg.searchAnnotations({
                 query: 'highlight annotation comment',
                 limit: 1,
@@ -201,6 +192,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('url scope', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const res = await searchBg.searchAnnotations({
                 query: 'quote',
                 url: normalize(DATA.directLink.pageUrl),
@@ -217,6 +209,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('comment-text-only', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const results = await searchBg.searchAnnotations({
                 query: 'comment',
                 contentTypes: { highlights: false, notes: true, pages: false },
@@ -226,6 +219,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('highlight-text-only', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const results = await searchBg.searchAnnotations({
                 query: 'whooo',
                 contentTypes: { highlights: true, notes: false, pages: false },
@@ -237,6 +231,7 @@ describe.skip('Annotations search', () => {
 
     describe('url-based search', () => {
         test('blank', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const results = await annotsBg.getAllAnnotationsByUrl(
                 { tab: null },
                 { url: DATA.pageUrl },
@@ -246,6 +241,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('bookmark filter', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const results = await annotsBg.getAllAnnotationsByUrl(
                 { tab: null },
                 { url: DATA.pageUrl, bookmarksOnly: true },
@@ -255,6 +251,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('tag inc filter', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const results = await annotsBg.getAllAnnotationsByUrl(
                 { tab: null },
                 {
@@ -267,6 +264,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('tag exc filter', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const results = await annotsBg.getAllAnnotationsByUrl(
                 { tab: null },
                 {
@@ -279,6 +277,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('collection filter', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const resA = await annotsBg.getAllAnnotationsByUrl({ tab: null }, {
                 url: DATA.pageUrl,
                 lists: [DATA.coll2],
@@ -296,6 +295,7 @@ describe.skip('Annotations search', () => {
 
     describe('blank search', () => {
         test('all content types', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const { docs: results } = await searchBg.searchPages({
                 contentTypes: { highlights: true, notes: true, pages: true },
             })
@@ -321,6 +321,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('annots-only', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const {
                 docs: results,
                 resultsExhausted,
@@ -352,6 +353,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('time filters', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             // Should result in only the newest annot
             const { docs: resA } = await searchBg.searchAnnotations({
                 startDate: new Date('2019-01-30'),
@@ -389,6 +391,7 @@ describe.skip('Annotations search', () => {
         })
 
         test('tags filter', async () => {
+            const { searchBg, annotsBg } = await setupTest()
             const {
                 docs: results,
                 resultsExhausted,

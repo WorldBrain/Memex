@@ -20,10 +20,11 @@ import {
     BackgroundIntegrationTest,
 } from './integration-tests'
 import { StorageChangeDetector } from './storage-change-detector'
+import { TabManager } from 'src/activity-logger/background'
 
-export async function setupBackgroundIntegrationTest(): Promise<
-    BackgroundIntegrationTestSetup
-> {
+export async function setupBackgroundIntegrationTest(options?: {
+    tabManager?: TabManager
+}): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
         global['URL'] = URL
     }
@@ -40,6 +41,7 @@ export async function setupBackgroundIntegrationTest(): Promise<
                 onRemoved: { addListener: () => { } },
             },
         } as any,
+        tabManager: options && options.tabManager,
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
     // const clientSyncLog = new ClientSyncLogStorage({ storageManager })

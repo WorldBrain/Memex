@@ -12,6 +12,7 @@ import {
     AnnotSearchParams,
     SocialSearchParams,
     SearchInterface,
+    BackgroundSearchParams,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
@@ -151,6 +152,8 @@ export default class SearchBackground {
             throw new InvalidSearchError()
         }
 
+        console.log(qb)
+
         return {
             ...params,
             tagsInc: qb.tags,
@@ -168,7 +171,7 @@ export default class SearchBackground {
         }
     }
 
-    async searchAnnotations(params: AnnotSearchParams) {
+    async searchAnnotations(params: BackgroundSearchParams) {
         let searchParams
 
         try {
@@ -193,7 +196,7 @@ export default class SearchBackground {
         return SearchBackground.shapePageResult(docs, searchParams.limit, extra)
     }
 
-    async searchPages(params: PageSearchParams) {
+    async searchPages(params: BackgroundSearchParams) {
         let searchParams
 
         try {
@@ -207,7 +210,7 @@ export default class SearchBackground {
         return SearchBackground.shapePageResult(docs, searchParams.limit)
     }
 
-    async searchSocial(params: SocialSearchParams) {
+    async searchSocial(params: BackgroundSearchParams) {
         let searchParams
         try {
             searchParams = this.processSearchParams(params)

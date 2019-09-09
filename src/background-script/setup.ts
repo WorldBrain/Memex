@@ -40,9 +40,10 @@ export interface BackgroundModules {
 export function createBackgroundModules(options: {
     storageManager: StorageManager
     browserAPIs: Browser
+    tabManager?: TabManager
 }): BackgroundModules {
     const { storageManager } = options
-    const tabManager = new TabManager()
+    const tabManager = options.tabManager || new TabManager()
 
     const search = new SearchBackground({
         storageManager,
