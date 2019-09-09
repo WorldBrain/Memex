@@ -8,16 +8,12 @@ import {
 } from 'webextension-polyfill-ts'
 
 import * as utils from './utils'
-import { UNINSTALL_URL } from './constants'
 import ActivityLoggerBackground from 'src/activity-logger/background'
 import NotifsBackground from '../notifications/background'
 import { onInstall, onUpdate } from './on-install-hooks'
 import { makeRemotelyCallable } from '../util/webextensionRPC'
 import { USER_ID } from '../util/generate-token'
-import {
-    storageChangesManager,
-    StorageChangesManager,
-} from '../util/storage-changes'
+import { StorageChangesManager } from '../util/storage-changes'
 import { migrations } from './quick-and-dirty-migrations'
 import { AlarmsConfig } from './alarms'
 import { fetchUserId } from 'src/analytics/utils'
@@ -39,7 +35,7 @@ class BackgroundScript {
         notifsBackground,
         loggerBackground,
         utilFns = utils,
-        storageChangesMan = storageChangesManager,
+        storageChangesMan,
         storageAPI = browser.storage,
         runtimeAPI = browser.runtime,
         commandsAPI = browser.commands,
@@ -49,7 +45,7 @@ class BackgroundScript {
         notifsBackground: NotifsBackground
         loggerBackground: ActivityLoggerBackground
         utilFns?: typeof utils
-        storageChangesMan?: StorageChangesManager
+        storageChangesMan: StorageChangesManager
         storageAPI?: Storage.Static
         runtimeAPI?: Runtime.Static
         commandsAPI?: Commands.Static

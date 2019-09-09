@@ -230,7 +230,7 @@ export default class Page extends AbstractModel
      * @param {TermsIndexName} termProp The name of which terms state to update.
      * @param {string[]} terms Array of terms to merge with current state.
      */
-    _mergeTerms(termProp: TermsIndexName, terms: string[]) {
+    _mergeTerms(termProp: TermsIndexName, terms: string[] = []) {
         this[termProp] = !this[termProp]
             ? terms
             : [...new Set([...this[termProp], ...terms])]

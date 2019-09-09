@@ -31,8 +31,8 @@ export const toggleTooltipFlag: () => Thunk = () => async (
             : EVENT_NAMES.ENABLE_TOOLTIP_POPUP,
     })
 
-    await setTooltipState(!wasEnabled)
     dispatch(setTooltipFlag(!wasEnabled))
+    await setTooltipState(!wasEnabled)
 
     const isLoggable = popup.isLoggable(state)
     if (!isLoggable) {

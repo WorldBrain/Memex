@@ -30,7 +30,6 @@ export interface Props {
     showSearchBox: boolean
     showTagsPicker: boolean
     showCollectionsPicker: boolean
-    showHighlights?: boolean
     searchValue: string
     isCommentSaved: boolean
     commentText: string
@@ -49,7 +48,6 @@ export interface Props {
     setShowTagsPicker: (value: boolean) => void
     setShowCollectionsPicker: (value: boolean) => void
     setShowSearchBox: (value: boolean) => void
-    setShowHighlights: (value: boolean) => void
     setSearchValue: (value: string) => void
 }
 
@@ -116,14 +114,13 @@ class Ribbon extends Component<Props, State> {
     }
 
     private toggleHighlights = () => {
-        const { showHighlights } = this.props
-
-        if (showHighlights) {
+        if (this.props.isTooltipEnabled) {
             removeHighlights()
         } else {
             this.fetchAndHighlightAnnotations()
         }
-        this.props.setShowHighlights(!showHighlights)
+
+        this.props.handleTooltipToggle()
     }
 
     private fetchAndHighlightAnnotations = async () => {
@@ -413,44 +410,21 @@ class Ribbon extends Component<Props, State> {
                             </ButtonTooltip>
 
                             <ButtonTooltip
-                                tooltipText={this.getTooltipText(
-                                    'toggleHighlights',
-                                )}
+                                tooltipText="Toggle highlights"
                                 position="left"
                             >
                                 <button
+                                    onClick={this.toggleHighlights}
                                     className={cx(
                                         styles.button,
                                         styles.ribbonIcon,
                                         {
                                             [styles.highlightsOn]: this.props
-                                                .showHighlights,
+                                                .isTooltipEnabled,
                                             [styles.highlightsOff]: !this.props
-                                                .showHighlights,
+                                                .isTooltipEnabled,
                                         },
                                     )}
-                                    onClick={this.toggleHighlights}
-                                />
-                            </ButtonTooltip>
-
-                            <ButtonTooltip
-                                tooltipText={
-                                    !this.props.isTooltipEnabled
-                                        ? 'Enable Highlighter tooltip'
-                                        : 'Disable Highlighter tooltip'
-                                }
-                                position="left"
-                            >
-                                <button
-                                    className={cx(styles.button, {
-                                        [styles.tooltipOn]: this.props
-                                            .isTooltipEnabled,
-                                        [styles.tooltipOff]: !this.props
-                                            .isTooltipEnabled,
-                                    })}
-                                    onClick={() =>
-                                        this.props.handleTooltipToggle()
-                                    }
                                 />
                             </ButtonTooltip>
 
