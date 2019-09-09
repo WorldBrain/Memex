@@ -152,8 +152,6 @@ export default class SearchBackground {
             throw new InvalidSearchError()
         }
 
-        console.log(qb)
-
         return {
             ...params,
             tagsInc: qb.tags,
@@ -186,11 +184,11 @@ export default class SearchBackground {
 
         const extra = annotsByDay
             ? {
-                  isAnnotsSearch: true,
-                  annotsByDay,
-                  resultsExhausted:
-                      Object.keys(annotsByDay).length < searchParams.limit,
-              }
+                isAnnotsSearch: true,
+                annotsByDay,
+                resultsExhausted:
+                    Object.keys(annotsByDay).length < searchParams.limit,
+            }
             : {}
 
         return SearchBackground.shapePageResult(docs, searchParams.limit, extra)

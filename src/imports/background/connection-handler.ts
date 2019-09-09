@@ -27,7 +27,7 @@ export default class ImportConnectionHandler {
     _includeErrs = false
 
     constructor(options: {
-        port
+        port: any
         quick?: boolean
         searchIndex: SearchIndex
         tagsModule: TagsBackground

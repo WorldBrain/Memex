@@ -75,7 +75,7 @@ export default class ImportItemCreator {
         dataSources = new DataSources({}),
         existingKeySource,
     }: {
-        limits?
+        limits?: any
         dataSources?: DataSources
         existingKeySource: () => Promise<{
             histKeys: Set<string>
@@ -156,19 +156,19 @@ export default class ImportItemCreator {
     _filterItemsByUrl = (transform, existsSet) => items => {
         const importItems = new Map()
 
-        for (let i = 0; i < items.length; i++) {
+        for (const item of items) {
             // Exclude item if any of the standard checks fail
-            if (!isLoggable(items[i]) || this._isBlacklisted(items[i])) {
+            if (!isLoggable(item) || this._isBlacklisted(item)) {
                 continue
             }
 
             try {
                 // Asssociate the item with the encoded URL in results Map
-                const url = normalizeUrl(items[i].url)
+                const url = normalizeUrl(item.url)
 
                 if (!existsSet.has(url)) {
                     existsSet.add(url)
-                    importItems.set(url, transform(items[i]))
+                    importItems.set(url, transform(item))
                 }
             } catch (err) {
                 continue

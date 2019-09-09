@@ -52,10 +52,10 @@ export default class ImportProgressManager {
         searchIndex: SearchIndex
         tagsModule: TagsBackground
         customListsModule: CustomListBackground
-        concurrency?
-        observer?
-        stateManager?
-        Processor?
+        concurrency?: any
+        observer?: any
+        stateManager?: any
+        Processor?: typeof ItemProcessor
     }) {
         this.concurrency = concurrency
         this._observer = observer
@@ -112,7 +112,7 @@ export default class ImportProgressManager {
         })
 
         // Used to build the message to send to observer
-        const msg: { type; url; status?; error? } = {
+        const msg: { type: any; url: any; status?: any; error?: any } = {
             type: importItem.type,
             url: importItem.url,
         }

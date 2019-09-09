@@ -3,8 +3,8 @@ import { URL } from 'whatwg-url'
 import StorageManager from '@worldbrain/storex'
 import expect from 'expect'
 import initStorex from '../search/memory-storex'
-import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
-import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
+// import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
+// import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
 import {
     createBackgroundModules,

@@ -101,20 +101,20 @@ export interface PipelineRes {
 export interface SearchIndex {
     search: (
         params: {
-            query
-            showOnlyBookmarks
-            mapResultsFunc?
-            domains?
-            domainsExclude?
-            tags?
-            lists?
+            query: string
+            showOnlyBookmarks: boolean
+            mapResultsFunc?: any
+            domains?: string[]
+            domainsExclude?: string[]
+            tags?: any[]
+            lists?: any[]
             [key: string]: any
         },
     ) => Promise<{
-        docs
-        isBadTerm?
-        requiresMigration?
-        totalCount
+        docs: any[]
+        isBadTerm?: boolean
+        requiresMigration?: boolean
+        totalCount: number
         resultsExhausted: boolean
     }>
     getMatchingPageCount: (pattern) => Promise<any>

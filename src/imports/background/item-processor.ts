@@ -188,7 +188,7 @@ export default class ImportItemProcessor {
      * @returns {any} Status string denoting the outcome of import processing as `status`
      *  + optional filled-out page doc as `pageDoc` field.
      */
-    async _processHistory(importItem, options: { indexTitle?} = {}) {
+    async _processHistory(importItem, options: { indexTitle?: any } = {}) {
         if (!options.indexTitle) {
             await checkVisitItemTransitionTypes(importItem)
         }
@@ -223,7 +223,7 @@ export default class ImportItemProcessor {
 
     async _processService(
         importItem,
-        options: { indexTitle?; bookmarkImports?} = {},
+        options: { indexTitle?: any; bookmarkImports?: any } = {},
     ) {
         const {
             url,
