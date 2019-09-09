@@ -1,4 +1,3 @@
-import Countly from 'countly-sdk-web'
 import AnalyticsManager from './analytics'
 import { AnalyticsEvent, Analytics, AnalyticsTrackEventOptions } from './types'
 import CountlyAnalyticsBackend from './backend/countly'
@@ -7,7 +6,7 @@ const createBackend = () =>
     new CountlyAnalyticsBackend({
         url: process.env.COUNTLY_HOST,
         appKey: process.env.COUNTLY_APP_KEY,
-        countlyConnector: Countly,
+        countlyConnector: null,
     })
 let realBackend = null
 const backend = new Proxy(

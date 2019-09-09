@@ -627,15 +627,16 @@ export class SelectionModifiers {
         newline: string
         length: number
     }[] {
-        const regexp = /(?<text>[^\r^\n]*)(?<line>\r\n|\n|\r)?/gm
+        const regexp = /([^\r^\n]*)(\r\n|\n|\r)?/gm
         // @ts-ignore
         const matches = matchAll(text, regexp)
+        // console.log("matches",Array.from(matches))
+
         const lines = Array.from(matches, (m: any) => ({
             start: m.index,
-            text: m.groups.text,
-            newline: m.groups.line,
-            length:
-                typeof m.groups.text !== 'undefined' ? m.groups.text.length : 0,
+            text: m[1],
+            newline: m[2],
+            length: typeof m[1] !== 'undefined' ? m[1].length : 0,
         }))
         return lines
     }
@@ -698,7 +699,7 @@ export class SelectionModifiers {
             const currentLineDistance =
                 current.selection.start - lines[currentLineIndex].start
 
-            if (currentLineIndex === lines.length) {
+            if (currentLineIndex === lines.length - 1) {
                 cursor =
                     lines[currentLineIndex].start +
                     lines[currentLineIndex].length
