@@ -410,9 +410,7 @@ class Ribbon extends Component<Props, State> {
                             </ButtonTooltip>
 
                             <ButtonTooltip
-                                tooltipText={this.getTooltipText(
-                                    'toggleHighlights',
-                                )}
+                                tooltipText="Toggle highlights"
                                 position="left"
                             >
                                 <button
