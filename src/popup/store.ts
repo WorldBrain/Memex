@@ -27,7 +27,7 @@ const rootReducer = combineReducers({
 export default function configureStore() {
     const middlewares = [thunk]
 
-    initSentry(middlewares)
+    initSentry({ reduxMiddlewares: middlewares })
 
     const enhancers = [applyMiddleware(...middlewares)]
 

@@ -151,7 +151,7 @@
 }
 
 .highlighterIcon {
-    background-image: url('/img/tooltip.svg');
+    background-image: url('/img/highlightOff.svg');
     background-repeat: no-repeat;
     background-size: 24px;
     float: left;

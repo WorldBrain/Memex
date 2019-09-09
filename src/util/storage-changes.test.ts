@@ -1,10 +1,17 @@
-import { storageChangesManager, StorageAreaName } from './storage-changes'
+import { browser } from 'webextension-polyfill-ts'
+
+import { StorageChangesManager } from 'src/util/storage-changes'
+import { StorageAreaName } from './storage-changes'
 
 const storageAreas: StorageAreaName[] = ['sync', 'local', 'managed']
 const testKeyA = 'testA'
 const testKeyB = 'testB'
 
-describe('Storage changes listeners manager', () =>
+describe('Storage changes listeners manager', () => {
+    const storageChangesManager = new StorageChangesManager({
+        storage: browser.storage,
+    })
+
     storageAreas.forEach(areaName =>
         describe(`${areaName} storage`, () => {
             beforeEach(() => storageChangesManager.resetListeners())
@@ -86,4 +93,5 @@ describe('Storage changes listeners manager', () =>
                 expect(mockListenerB.mock.calls[0][0]).toEqual(change)
             })
         }),
-    ))
+    )
+})

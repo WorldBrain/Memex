@@ -72,7 +72,6 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     props,
 ) => ({
     showTooltip: async e => {
-        // console.log('dispatch')
         e.preventDefault()
         await dispatch(acts.showTooltip())
         setTimeout(props.closePopup, 200)

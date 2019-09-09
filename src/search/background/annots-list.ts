@@ -1,8 +1,6 @@
-import { browser } from 'webextension-polyfill-ts'
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
-import { INSTALL_TIME_KEY } from 'src/constants'
 import { AnnotSearchParams } from './types'
 import { transformUrl } from '../pipeline'
 import { Annotation } from 'src/direct-linking/types'
@@ -224,17 +222,19 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
     }
 
     private async calcHardLowerTimeBound({ startDate }: AnnotSearchParams) {
-        const annotsRelease = startDate
-            ? moment(startDate)
-            : moment('2018-06-01')
+        const earliestAnnot: Annotation = await this.backend.dexieInstance
+            .table(AnnotsStorage.ANNOTS_COLL)
+            .orderBy('lastEdited')
+            .first()
 
-        const {
-            [INSTALL_TIME_KEY]: installTime,
-        } = await browser.storage.local.get(INSTALL_TIME_KEY)
+        if (
+            earliestAnnot &&
+            moment(earliestAnnot.lastEdited).isAfter(startDate || 0)
+        ) {
+            return moment(earliestAnnot.lastEdited)
+        }
 
-        return annotsRelease.isAfter(installTime)
-            ? annotsRelease
-            : moment(installTime)
+        return startDate ? moment(new Date(startDate)) : moment('2018-06-01') // The date annots feature was released
     }
 
     private mergeResults(
