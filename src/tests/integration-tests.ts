@@ -2,6 +2,7 @@ import StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
 import { StorageDiff, StorageCollectionDiff } from './storage-change-detector'
 import { LoggedStorageOperation } from './storage-operation-logger'
+import { registerBackgroundIntegrationTest } from './background-integration-tests'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -46,6 +47,11 @@ export function backgroundIntegrationTestSuite(
     description: string,
     tests: Array<IntegrationTest<BackgroundIntegrationTestContext>>,
 ): IntegrationTestSuite<BackgroundIntegrationTestContext> {
+    describe(description, () => {
+        for (const integrationTest of tests) {
+            registerBackgroundIntegrationTest(integrationTest)
+        }
+    })
     return { description, tests }
 }
 
