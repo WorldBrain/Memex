@@ -1,11 +1,11 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color5 from colors;
+@value color1, color2, color5, color6 from colors;
 
 .container {
     background: white;
     width: 60%;
     max-width: 50rem;
-    margin: 30px auto;
+    margin: 80px auto 30px;
     padding: 2rem 4rem;
     display: flex;
     border: solid 1px #f4f4f4;
@@ -40,16 +40,22 @@
     color: color5;
     font-size: 1rem;
     margin-bottom: 2rem;
+    min-height: 70px;
+}
+
+.placeholder {
+    background: color6;
+    margin: auto;
 }
 
 .backgroundBlob {
     background: url('/img/onboarding/backgroundBlob.svg') no-repeat 100%;
     display: inline-block;
     position: absolute;
-    top: -134px;
-    left: calc(50% - 480px);
+    top: -10px;
+    left: calc(50% - 503px);
     width: 952px;
-    height: 763px;
+    height: 500px;
     z-index: -1;
 }
 
@@ -86,10 +92,16 @@
     font-size: 1.2rem;
     background: color2;
     color: white;
+    display: inline-block;
+
+    &:active {
+        border-radius: 15px;
+        transform: scale(0.9);
+    }
 
     &:hover {
-        background: color1;
-        color: #40c0a1;
+        background: #44bc8b;
+        color: white;
     }
 }
 
@@ -116,12 +128,18 @@
         width: 95%;
     }
 
-    .heading {
-        font-size: 1.2rem;
+    .heading1,
+    .heading2 {
+        font-size: 1rem;
         line-height: 1.5rem;
     }
 
     .text {
         font-size: 0.875rem;
+    }
+
+    .placeholder {
+        width: 100%;
+        max-width: 400px;
     }
 }

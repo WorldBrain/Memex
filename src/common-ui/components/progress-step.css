@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color2, color6 from colors;
+@value color2, color8 from colors;
 
 .progressContainer {
     margin: 2rem auto 0;
@@ -7,7 +7,7 @@
 }
 
 .progressStep {
-    background: color6;
+    background: color8;
     border-radius: 10px;
     display: inline-block;
     height: 10px;

@@ -19,7 +19,6 @@ class OnboardingBox extends PureComponent {
                                 Let us take you through a few key settings to
                                 make sure you get the most out of Memex
                             </h1>
-                            <img />
                             <div className={styles.text}>
                                 <p>
                                     Have control over how much of your history
@@ -27,7 +26,7 @@ class OnboardingBox extends PureComponent {
                                 </p>
                                 <p>Have control over how Memex is displayed</p>
                             </div>
-                            <div>
+                            <div className={styles.CTAWrapper}>
                                 <a className={styles.CTA}>Get started</a>
                             </div>
                             <ProgressStepContainer totalSteps={4} />
@@ -40,7 +39,11 @@ class OnboardingBox extends PureComponent {
                             Can’t remember where you found something but know
                             the text you are after?
                         </h2>
-                        <img />
+                        <img
+                            className={styles.placeholder}
+                            width="400px"
+                            height="200px"
+                        />
                         <div className={styles.text}>
                             <p>
                                 All pages you visited more than 5 seconds are
@@ -62,7 +65,11 @@ class OnboardingBox extends PureComponent {
                             Use the tooltip when browsing the web to allow for
                             quick annotations and sharing
                         </h2>
-                        <img />
+                        <img
+                            className={styles.placeholder}
+                            width="400px"
+                            height="200px"
+                        />
                         <div className={styles.text}>
                             <OnboardingTooltipSettings />
                         </div>
@@ -75,10 +82,14 @@ class OnboardingBox extends PureComponent {
                     <div className={styles.container}>
                         {/* STEP 3 */}
                         <h2 className={styles.heading2}>
-                            Have quick access to key features by enabling the
-                            sidebar
+                            Have quick access to key features by <br />
+                            enabling the sidebar
                         </h2>
-                        <img />
+                        <img
+                            className={styles.placeholder}
+                            width="400px"
+                            height="200px"
+                        />
                         <div className={styles.text}>
                             <OnboardingRibbonSettings />
                         </div>
@@ -91,11 +102,16 @@ class OnboardingBox extends PureComponent {
                     <div className={styles.container}>
                         {/* STEP 2 */}
                         <h2 className={styles.heading2}>
-                            Powerup your indexing with custom keyboard shortcuts
+                            Powerup your indexing with custom <br />
+                            keyboard shortcuts
                         </h2>
-                        <img />
+                        <img
+                            className={styles.placeholder}
+                            width="400px"
+                            height="200px"
+                        />
                         <div className={styles.text}>
-                            <p>Enable quick edit in sidebar</p>
+                            <p>Enable keyboard shortcuts</p>
                         </div>
                         <div>
                             <a className={styles.CTA}>

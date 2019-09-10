@@ -98,7 +98,7 @@
     cursor: pointer;
     text-decoration: none;
     border: none;
-    transition: background-color 200ms ease-in-out;
+    transition: all 200ms ease-in-out;
 
     &:hover {
         background: color2;
