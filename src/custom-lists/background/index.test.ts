@@ -8,7 +8,6 @@ import {
     StorageDiff,
     StorageCollectionDiff,
 } from 'src/tests/storage-change-detector'
-import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Custom lists',
@@ -20,7 +19,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     setup.backgroundModules.customLists.remoteFunctions
                 const searchModule = (setup: BackgroundIntegrationTestSetup) =>
                     setup.backgroundModules.search
-                let listId!: string | number
+                let listId!: any
                 let listEntry!: any
                 return {
                     steps: [
@@ -46,96 +45,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 }),
                             },
-                            expectedStorageOperations: (): LoggedStorageOperation[] => [
-                                {
-                                    operation: [
-                                        'createObject',
-                                        'customLists',
-                                        {
-                                            createdAt: expect.any(Date),
-                                            id: listId,
-                                            isDeletable: true,
-                                            isNestable: true,
-                                            name: 'My Custom List',
-                                        },
-                                    ],
-                                    result: {
-                                        object: expect.objectContaining({
-                                            id: listId,
-                                        }),
-                                    },
-                                },
-                            ],
                         },
                         {
-                            execute: async ({ setup }) => {
-                                await searchModule(setup).searchIndex.addPage({
-                                    pageDoc: {
-                                        url: 'http://www.bla.com/',
-                                        content: {
-                                            fullText: 'home page content',
-                                            title: 'bla.com title',
-                                        },
-                                    },
-                                    visits: [],
-                                })
-                                await searchModule(setup).searchIndex.addPage({
-                                    pageDoc: {
-                                        url: 'http://www.bla.com/foo',
-                                        content: {
-                                            fullText: 'foo page content',
-                                            title: 'bla.com foo title',
-                                        },
-                                    },
-                                    visits: [],
-                                })
-                            },
-                            expectedStorageChanges: {
-                                pages: (): StorageCollectionDiff => ({
-                                    'bla.com': {
-                                        type: 'create',
-                                        object: expect.objectContaining({
-                                            canonicalUrl: undefined,
-                                            domain: 'bla.com',
-                                            fullTitle: 'bla.com title',
-                                            fullUrl: 'http://www.bla.com/',
-                                            hostname: 'bla.com',
-                                            screenshot: undefined,
-                                            text: 'home page content',
-                                            url: 'bla.com',
-                                        }),
-                                    },
-                                    'bla.com/foo': {
-                                        type: 'create',
-                                        object: expect.objectContaining({
-                                            canonicalUrl: undefined,
-                                            domain: 'bla.com',
-                                            fullTitle: 'bla.com foo title',
-                                            fullUrl: 'http://www.bla.com/foo',
-                                            hostname: 'bla.com',
-                                            screenshot: undefined,
-                                            text: 'foo page content',
-                                            url: 'bla.com/foo',
-                                        }),
-                                    },
-                                }),
-                                visits: (): StorageCollectionDiff =>
-                                    expect.any(Object),
-                            },
-                        },
-                        {
-                            execute: async ({ setup }) => {
-                                listEntry = (await customLists(
-                                    setup,
-                                ).insertPageToList({
+                            execute: async ({ setup }) =>
+                                customLists(setup).insertPageToList({
                                     id: listId,
                                     url: 'http://www.bla.com/',
-                                })).object
-                            },
+                                }).object,
                             expectedStorageChanges: {
                                 pageListEntries: (): StorageCollectionDiff => ({
                                     [listEntry &&
-                                    `[${listId},"${listEntry.pageUrl}"]`]: {
+                                        `[${listId},"${listEntry.pageUrl}"]`]: {
                                         type: 'create',
                                         object: {
                                             listId,
@@ -145,8 +65,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     },
                                 }),
-                                visits: (): StorageCollectionDiff =>
-                                    expect.any(Object),
                             },
                         },
                         {
@@ -195,30 +113,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 ])
 
-                                expect(
-                                    await setup.backgroundModules.search.remoteFunctions.search.search(
-                                        {
-                                            query: '',
-                                            showOnlyBookmarks: false,
-                                            lists: [listId.toString()],
-                                        },
-                                    ),
-                                ).toEqual({
-                                    docs: [
-                                        {
-                                            displayTime: expect.any(Number),
-                                            favIcon: undefined,
-                                            hasBookmark: false,
-                                            screenshot: undefined,
-                                            tags: [],
-                                            title: 'bla.com title',
-                                            url: 'http://www.bla.com/',
-                                        },
-                                    ],
-                                    isBadTerm: false,
-                                    resultsExhausted: false,
-                                    totalCount: 1,
-                                })
+                                // expect(await setup.backgroundModules.search.remoteFunctions.search.searchPages({
+                                //     contentTypes: { pages: true, notes: false, highlights: false },
+                                //     collections: [listId]
+                                // })).toEqual([])
                             },
                         },
                     ],
