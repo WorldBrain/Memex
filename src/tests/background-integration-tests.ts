@@ -21,15 +21,20 @@ import {
 } from './integration-tests'
 import { StorageChangeDetector } from './storage-change-detector'
 import { TabManager } from 'src/activity-logger/background'
+import StorageOperationLogger from './storage-operation-logger'
+import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 
 export async function setupBackgroundIntegrationTest(options?: {
+    customMiddleware?: StorageMiddleware[]
     tabManager?: TabManager
 }): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
         global['URL'] = URL
     }
 
-    const storageManager = initStorex()
+    const storageManager = initStorex({
+        customMiddleware: options && options.customMiddleware,
+    })
     const backgroundModules = createBackgroundModules({
         storageManager,
         browserAPIs: {
@@ -88,7 +93,12 @@ export function registerBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
 ) {
     it(test.description, async () => {
-        const setup = await setupBackgroundIntegrationTest()
+        const storageOperationLogger = new StorageOperationLogger({
+            enabled: false,
+        })
+        const setup = await setupBackgroundIntegrationTest({
+            customMiddleware: [storageOperationLogger.asMiddleware()],
+        })
         const testOptions = await test.instantiate()
 
         const changeDetector = new StorageChangeDetector({
@@ -108,9 +118,21 @@ export function registerBackgroundIntegrationTest(
                 await changeDetector.capture()
                 changeDetectorUsed = true
             }
+            if (step.expectedStorageOperations) {
+                storageOperationLogger.enabled = true
+            }
+
             await step.execute({ setup })
+            storageOperationLogger.enabled = false
+
             if (step.postCheck) {
                 await step.postCheck({ setup })
+            }
+            if (step.expectedStorageOperations) {
+                const executedOperations = storageOperationLogger.popOperations()
+                expect(executedOperations).toEqual(
+                    step.expectedStorageOperations(),
+                )
             }
             if (step.expectedStorageChanges) {
                 try {

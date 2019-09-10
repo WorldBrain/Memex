@@ -8,6 +8,7 @@ import {
     StorageDiff,
     StorageCollectionDiff,
 } from 'src/tests/storage-change-detector'
+import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Custom lists',
@@ -19,7 +20,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                     setup.backgroundModules.customLists.remoteFunctions
                 const searchModule = (setup: BackgroundIntegrationTestSetup) =>
                     setup.backgroundModules.search
-                let listId!: any
+                let listId!: string | number
                 let listEntry!: any
                 return {
                     steps: [
@@ -45,6 +46,26 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 }),
                             },
+                            expectedStorageOperations: (): LoggedStorageOperation[] => [
+                                {
+                                    operation: [
+                                        'createObject',
+                                        'customLists',
+                                        {
+                                            createdAt: expect.any(Date),
+                                            id: listId,
+                                            isDeletable: true,
+                                            isNestable: true,
+                                            name: 'My Custom List',
+                                        },
+                                    ],
+                                    result: {
+                                        object: expect.objectContaining({
+                                            id: listId,
+                                        }),
+                                    },
+                                },
+                            ],
                         },
                         {
                             execute: async ({ setup }) => {

@@ -1,6 +1,7 @@
 import StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
 import { StorageDiff, StorageCollectionDiff } from './storage-change-detector'
+import { LoggedStorageOperation } from './storage-operation-logger'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -24,6 +25,7 @@ export interface IntegrationTestStep<StepContext> {
     expectedStorageChanges?: {
         [collection: string]: () => StorageCollectionDiff
     }
+    expectedStorageOperations?: () => LoggedStorageOperation[]
 }
 
 export interface BackgroundIntegrationTestSetup {
