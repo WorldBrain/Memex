@@ -12,6 +12,7 @@ export interface Props {
     screenshots: boolean
     collections: boolean
     showSearchSettings: boolean
+    areAllSettingsChecked: boolean
     toggleAll: CheckboxToggle
     toggleStubs: CheckboxToggle
     toggleAnnotations: CheckboxToggle
@@ -23,15 +24,6 @@ export interface Props {
 }
 
 export default class SearchSettings extends React.PureComponent<Props> {
-    private areAllChecked() {
-        return (
-            this.props.visits &&
-            this.props.bookmarks &&
-            this.props.annotations &&
-            this.props.collections
-        )
-    }
-
     private renderDisabledSettings() {
         return (
             <>
@@ -76,7 +68,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                 </p>
                 <Checkbox
                     id="index-all"
-                    isChecked={this.areAllChecked()}
+                    isChecked={this.props.areAllSettingsChecked}
                     handleChange={this.props.toggleAll}
                 >
                     All

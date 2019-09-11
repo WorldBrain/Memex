@@ -21,6 +21,15 @@ export default class OnboardingScreen extends StatefulUIElement<
         super(props, new Logic())
     }
 
+    private areAllSettingsChecked() {
+        return (
+            this.state.areVisitsEnabled &&
+            this.state.areBookmarksEnabled &&
+            this.state.areAnnotationsEnabled &&
+            this.state.areCollectionsEnabled
+        )
+    }
+
     private renderPlaceholderImage = () => <img width="100%" height="200px" />
 
     private handleTooltipToggle = () => {
@@ -39,30 +48,63 @@ export default class OnboardingScreen extends StatefulUIElement<
         this.processEvent('setStep', { step: this.state.currentStep + 1 })
     }
 
-    private handleSearchSettingsToggle = () => {
+    private handleShowSearchSettingsToggle = () => {
         this.processEvent('setSearchSettingsShown', {
             shown: !this.state.showSearchSettings,
         })
     }
 
+    private handleAllSettingsToggle = () => {
+        const enabled = !this.areAllSettingsChecked()
+        this.processEvent('setAnnotationsEnabled', { enabled })
+        this.processEvent('setVisitsEnabled', { enabled })
+        this.processEvent('setBookmarksEnabled', { enabled })
+        this.processEvent('setCollectionsEnabled', { enabled })
+    }
+
     private renderSearchSettings() {
         return (
             <SearchSettings
-                stubs={this.state.isSidebarEnabled}
-                visits={this.state.isSidebarEnabled}
-                bookmarks={this.state.isSidebarEnabled}
-                annotations={this.state.isSidebarEnabled}
-                screenshots={this.state.isSidebarEnabled}
-                collections={this.state.isSidebarEnabled}
-                toggleAll={this.handleSidebarToggle}
-                toggleAnnotations={this.handleSidebarToggle}
-                toggleStubs={this.handleSidebarToggle}
-                toggleVisits={this.handleSidebarToggle}
-                toggleBookmarks={this.handleSidebarToggle}
-                toggleCollections={this.handleSidebarToggle}
-                toggleScreenshots={this.handleSidebarToggle}
+                stubs={this.state.areStubsEnabled}
+                visits={this.state.areVisitsEnabled}
+                bookmarks={this.state.areBookmarksEnabled}
+                annotations={this.state.areAnnotationsEnabled}
+                screenshots={this.state.areScreenshotsEnabled}
+                collections={this.state.areCollectionsEnabled}
+                toggleAll={this.handleAllSettingsToggle}
                 showSearchSettings={this.state.showSearchSettings}
-                toggleShowSearchSettings={this.handleSearchSettingsToggle}
+                toggleShowSearchSettings={this.handleShowSearchSettingsToggle}
+                areAllSettingsChecked={this.areAllSettingsChecked()}
+                toggleAnnotations={() =>
+                    this.processEvent('setAnnotationsEnabled', {
+                        enabled: !this.state.areAnnotationsEnabled,
+                    })
+                }
+                toggleStubs={() =>
+                    this.processEvent('setStubsEnabled', {
+                        enabled: !this.state.areStubsEnabled,
+                    })
+                }
+                toggleVisits={() =>
+                    this.processEvent('setVisitsEnabled', {
+                        enabled: !this.state.areVisitsEnabled,
+                    })
+                }
+                toggleBookmarks={() =>
+                    this.processEvent('setBookmarksEnabled', {
+                        enabled: !this.state.areBookmarksEnabled,
+                    })
+                }
+                toggleCollections={() =>
+                    this.processEvent('setCollectionsEnabled', {
+                        enabled: !this.state.areCollectionsEnabled,
+                    })
+                }
+                toggleScreenshots={() =>
+                    this.processEvent('setScreenshotsEnabled', {
+                        enabled: !this.state.areScreenshotsEnabled,
+                    })
+                }
             />
         )
     }
