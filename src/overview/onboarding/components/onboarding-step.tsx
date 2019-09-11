@@ -11,6 +11,7 @@ export interface Props {
     currentStep?: number
     renderButton: () => JSX.Element
     renderImage: () => JSX.Element
+    goToStep?: (step: number) => () => void
 }
 
 export default class OnboardingStep extends React.PureComponent<Props> {
@@ -31,6 +32,7 @@ export default class OnboardingStep extends React.PureComponent<Props> {
                 {this.props.renderButton()}
                 {!this.props.isInitStep && (
                     <ProgressStepContainer
+                        onStepClick={this.props.goToStep}
                         totalSteps={this.props.totalSteps}
                         currentStep={this.props.currentStep}
                     />

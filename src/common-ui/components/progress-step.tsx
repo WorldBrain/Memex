@@ -4,19 +4,21 @@ import cx from 'classnames'
 const styles = require('./progress-step.css')
 
 interface Props {
+    onClick: () => void
     isSeen?: boolean
 }
+
+const noop = () => undefined
 
 export default class ProgressStep extends PureComponent<Props> {
     render() {
         return (
-            <React.Fragment>
-                <span
-                    className={cx(styles.progressStep, {
-                        [styles.progressStepSeen]: this.props.isSeen,
-                    })}
-                />
-            </React.Fragment>
+            <span
+                onClick={this.props.isSeen ? this.props.onClick : noop}
+                className={cx(styles.progressStep, {
+                    [styles.progressStepSeen]: this.props.isSeen,
+                })}
+            />
         )
     }
 }

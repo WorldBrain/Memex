@@ -48,6 +48,10 @@ export default class OnboardingScreen extends StatefulUIElement<
         this.processEvent('setStep', { step: this.state.currentStep + 1 })
     }
 
+    private handleStepClick = (step: number) => () => {
+        this.processEvent('setStep', { step })
+    }
+
     private handleShowSearchSettingsToggle = () => {
         this.processEvent('setSearchSettingsShown', {
             shown: !this.state.showSearchSettings,
@@ -134,6 +138,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             case 1:
                 return (
                     <OnboardingStep
+                        goToStep={this.handleStepClick}
                         titleText="Can’t remember where you found something but know the text you are after?"
                         renderButton={() => (
                             <NextStepButton
@@ -157,6 +162,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             case 2:
                 return (
                     <OnboardingStep
+                        goToStep={this.handleStepClick}
                         titleText="Use the tooltip when browsing the web to allow for quick annotations and sharing"
                         renderButton={() => (
                             <NextStepButton
@@ -182,6 +188,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             case 3:
                 return (
                     <OnboardingStep
+                        goToStep={this.handleStepClick}
                         titleText="Have quick access to key features by enabling the sidebar"
                         renderButton={() => (
                             <NextStepButton
@@ -207,6 +214,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             case 4:
                 return (
                     <OnboardingStep
+                        goToStep={this.handleStepClick}
                         titleText="Powerup your indexing with custom keyboard shortcuts"
                         renderButton={() => (
                             <NextStepButton color="purple">
