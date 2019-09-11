@@ -7,8 +7,6 @@
 }
 
 .menuItem {
-    padding: 10px 20px;
-
     &:hover {
         background-color: color14;
     }
@@ -22,11 +20,16 @@
     color: black;
     text-decoration: none;
     font-size: 1em;
+    padding: 10px 20px;
+    display: inline-block;
+    width: 100%;
 }
 
 .smallText {
     color: color6;
     font-size: 0.8em;
+    width: 230px;
+    padding: 0;
 }
 
 .menu {
@@ -44,7 +47,7 @@
     right: 1em;
     border-radius: 3px;
     font-weight: 500;
-    width: 190px;
+    width: 230px;
     padding: 5px 0px;
 }
 
