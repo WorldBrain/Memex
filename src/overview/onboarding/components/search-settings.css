@@ -1,0 +1,12 @@
+.settingsButton {
+    composes: grayActionButton from 'src/common-ui/elements.css';
+}
+
+.settingsHeader {
+    text-align: left;
+}
+
+.textSearchHeader {
+    margin-top: 2em;
+    text-align: left;
+}

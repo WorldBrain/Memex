@@ -6,8 +6,7 @@ import OnboardingBox from '../../components/onboarding-box'
 import OnboardingStep from '../../components/onboarding-step'
 import NextStepButton from '../../components/next-step-button'
 import SettingsCheckbox from '../../components/settings-checkbox'
-
-const styles = require('./styles.css')
+import SearchSettings from '../../components/search-settings'
 
 export interface Props {}
 
@@ -22,9 +21,7 @@ export default class OnboardingScreen extends StatefulUIElement<
         super(props, new Logic())
     }
 
-    private renderPlaceholderImage = () => (
-        <img className={styles.placeholder} width="400px" height="200px" />
-    )
+    private renderPlaceholderImage = () => <img width="100%" height="200px" />
 
     private handleTooltipToggle = () => {
         this.processEvent('setTooltipEnabled', {
@@ -40,6 +37,34 @@ export default class OnboardingScreen extends StatefulUIElement<
 
     private handleNextStepClick = () => {
         this.processEvent('setStep', { step: this.state.currentStep + 1 })
+    }
+
+    private handleSearchSettingsToggle = () => {
+        this.processEvent('setSearchSettingsShown', {
+            shown: !this.state.showSearchSettings,
+        })
+    }
+
+    private renderSearchSettings() {
+        return (
+            <SearchSettings
+                stubs={this.state.isSidebarEnabled}
+                visits={this.state.isSidebarEnabled}
+                bookmarks={this.state.isSidebarEnabled}
+                annotations={this.state.isSidebarEnabled}
+                screenshots={this.state.isSidebarEnabled}
+                collections={this.state.isSidebarEnabled}
+                toggleAll={this.handleSidebarToggle}
+                toggleAnnotations={this.handleSidebarToggle}
+                toggleStubs={this.handleSidebarToggle}
+                toggleVisits={this.handleSidebarToggle}
+                toggleBookmarks={this.handleSidebarToggle}
+                toggleCollections={this.handleSidebarToggle}
+                toggleScreenshots={this.handleSidebarToggle}
+                showSearchSettings={this.state.showSearchSettings}
+                toggleShowSearchSettings={this.handleSearchSettingsToggle}
+            />
+        )
     }
 
     private renderCurrentStep() {
@@ -76,15 +101,15 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 Next
                             </NextStepButton>
                         )}
-                        renderImage={this.renderPlaceholderImage}
+                        renderImage={() => {
+                            if (!this.state.showSearchSettings) {
+                                return this.renderPlaceholderImage()
+                            }
+                        }}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
                     >
-                        <p>
-                            All pages you visited more than 5 seconds are
-                            full-text searchable
-                        </p>
-                        <a className={styles.settingsButton}>Change settings</a>
+                        {this.renderSearchSettings()}
                     </OnboardingStep>
                 )
             case 2:
