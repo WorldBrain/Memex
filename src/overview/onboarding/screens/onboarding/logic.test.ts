@@ -65,6 +65,132 @@ describe('onboarding screen UI logic tests', () => {
         expect(nextStateB.isSidebarEnabled).toBe(false)
     })
 
+    it('should be able to set index page stubs enabled state', () => {
+        const { logic, state } = setupTest()
+
+        const nextStateA = logic.withMutation(
+            state,
+            logic.setStubsEnabled({
+                event: { enabled: true },
+                previousState: state,
+            }),
+        )
+        expect(nextStateA.areStubsEnabled).toBe(true)
+        const nextStateB = logic.withMutation(
+            nextStateA,
+            logic.setStubsEnabled({
+                event: { enabled: false },
+                previousState: nextStateA,
+            }),
+        )
+        expect(nextStateB.areStubsEnabled).toBe(false)
+    })
+
+    it('should be able to set index page visits enabled state', () => {
+        const { logic, state } = setupTest()
+
+        const nextStateA = logic.withMutation(
+            state,
+            logic.setVisitsEnabled({
+                event: { enabled: true },
+                previousState: state,
+            }),
+        )
+        expect(nextStateA.areVisitsEnabled).toBe(true)
+        const nextStateB = logic.withMutation(
+            nextStateA,
+            logic.setVisitsEnabled({
+                event: { enabled: false },
+                previousState: nextStateA,
+            }),
+        )
+        expect(nextStateB.areVisitsEnabled).toBe(false)
+    })
+
+    it('should be able to set index page bookmarks enabled state', () => {
+        const { logic, state } = setupTest()
+
+        const nextStateA = logic.withMutation(
+            state,
+            logic.setBookmarksEnabled({
+                event: { enabled: true },
+                previousState: state,
+            }),
+        )
+        expect(nextStateA.areBookmarksEnabled).toBe(true)
+        const nextStateB = logic.withMutation(
+            nextStateA,
+            logic.setBookmarksEnabled({
+                event: { enabled: false },
+                previousState: nextStateA,
+            }),
+        )
+        expect(nextStateB.areBookmarksEnabled).toBe(false)
+    })
+
+    it('should be able to set index page annotations enabled state', () => {
+        const { logic, state } = setupTest()
+
+        const nextStateA = logic.withMutation(
+            state,
+            logic.setAnnotationsEnabled({
+                event: { enabled: true },
+                previousState: state,
+            }),
+        )
+        expect(nextStateA.areAnnotationsEnabled).toBe(true)
+        const nextStateB = logic.withMutation(
+            nextStateA,
+            logic.setAnnotationsEnabled({
+                event: { enabled: false },
+                previousState: nextStateA,
+            }),
+        )
+        expect(nextStateB.areAnnotationsEnabled).toBe(false)
+    })
+
+    it('should be able to set index page screenshots enabled state', () => {
+        const { logic, state } = setupTest()
+
+        const nextStateA = logic.withMutation(
+            state,
+            logic.setScreenshotsEnabled({
+                event: { enabled: true },
+                previousState: state,
+            }),
+        )
+        expect(nextStateA.areScreenshotsEnabled).toBe(true)
+        const nextStateB = logic.withMutation(
+            nextStateA,
+            logic.setScreenshotsEnabled({
+                event: { enabled: false },
+                previousState: nextStateA,
+            }),
+        )
+        expect(nextStateB.areScreenshotsEnabled).toBe(false)
+    })
+
+    it('should be able to set index page collections enabled state', () => {
+        const { logic, state } = setupTest()
+
+        const nextStateA = logic.withMutation(
+            state,
+            logic.setCollectionsEnabled({
+                event: { enabled: true },
+                previousState: state,
+            }),
+        )
+        expect(nextStateA.areCollectionsEnabled).toBe(true)
+        const nextStateB = logic.withMutation(
+            nextStateA,
+            logic.setCollectionsEnabled({
+                event: { enabled: false },
+                previousState: nextStateA,
+            }),
+        )
+        expect(nextStateB.areCollectionsEnabled).toBe(false)
+    })
+
     it('should be able to set search settings shown state', () => {
         const { logic, state } = setupTest()
 
