@@ -7,30 +7,35 @@ import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { getPage } from 'src/search/util'
-import { createPageFromTab, DBGet } from 'src/search'
+import { PageCreator, Page } from 'src/search'
 import { Tab } from './types'
 
 export default class CustomListBackground {
     storage: CustomListStorage
     private tabMan: TabManager
     private windows: Windows.Static
-    private getDb: DBGet
+    private getPage: (url: string) => Promise<Page>
+    private createPage: PageCreator
 
     constructor({
         storageManager,
         tabMan,
         windows,
+        createPage,
+        getPage,
     }: {
         storageManager: Storex
         tabMan?: TabManager
         windows?: Windows.Static
+        getPage?: (url: string) => Promise<Page>
+        createPage?: PageCreator
     }) {
         // Makes the custom list Table in indexed DB.
         this.storage = new CustomListStorage({ storageManager })
-        this.getDb = async () => storageManager
         this.tabMan = tabMan
         this.windows = windows
+        this.getPage = getPage
+        this.createPage = createPage
     }
 
     setupRemoteFunctions() {
@@ -132,10 +137,23 @@ export default class CustomListBackground {
         })
     }
 
+    private async createPageIfNeeded({ url }: { url: string }) {
+        let page = await this.getPage(url)
+
+        if (!page) {
+            page = await this.createPage({ url })
+        }
+
+        page.addVisit()
+        return page.save()
+    }
+
     async insertPageToList({ id, url }: { id: number; url: string }) {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
+
+        await this.createPageIfNeeded({ url })
 
         return this.storage.insertPageToList({
             listId: id,
@@ -199,10 +217,10 @@ export default class CustomListBackground {
         const time = Date.now()
 
         tabs.forEach(async tab => {
-            let page = await getPage(this.getDb)(tab.url)
+            let page = await this.getPage(tab.url)
 
             if (page == null || page.isStub) {
-                page = await createPageFromTab(this.getDb)({
+                page = await this.createPage({
                     tabId: tab.tabId,
                     url: tab.url,
                     allowScreenshot: false,

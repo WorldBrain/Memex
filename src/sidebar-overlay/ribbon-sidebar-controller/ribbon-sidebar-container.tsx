@@ -335,7 +335,6 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     private _closeSidebarCallback = () => {
         this.props.setActiveAnnotationUrl(null)
         this.props.setHoverAnnotationUrl(null)
-        this.props.removeHighlights()
     }
 
     private _goToAnnotation = async (annotation: Annotation) => {

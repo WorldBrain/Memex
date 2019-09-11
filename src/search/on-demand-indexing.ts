@@ -72,14 +72,26 @@ export const createPageFromUrl = (getDb: DBGet) => async ({
     return page
 }
 
+export const createTestPage = (getDb: DBGet) => async ({ url }: Props) => {
+    const pageData = await pipeline({
+        pageDoc: { url, content: {} },
+        rejectNoContent: false,
+    })
+
+    const db = await getDb()
+    const page = new Page(db, pageData)
+    await page.loadRels()
+    return page
+}
+
 /**
  * Decides which type of on-demand page indexing logic to run based on given props.
  * Also sets the `stubOnly` option based on user bookmark/tag indexing pref.
  * TODO: Better name?
  */
-export const createPageViaBmTagActs = (getDb: DBGet) => async (
-    props: Props,
-) => {
+export const createPageViaBmTagActs: (
+    getDb: DBGet,
+) => PageCreator = getDb => async (props: Props) => {
     const {
         [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,
     } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
@@ -90,3 +102,5 @@ export const createPageViaBmTagActs = (getDb: DBGet) => async (
 
     return createPageFromUrl(getDb)({ stubOnly: !fullyIndex, ...props })
 }
+
+export type PageCreator = (props: Props) => Promise<Page>

@@ -12,7 +12,6 @@ export default interface State {
     showSearchBox: boolean
     showTagsPicker: boolean
     showCollectionsPicker: boolean
-    showHighlights?: boolean
     searchValue: string
 }
 

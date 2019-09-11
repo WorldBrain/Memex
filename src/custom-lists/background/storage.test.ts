@@ -1,7 +1,9 @@
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
+import BookmarksBackground from 'src/bookmarks/background'
 import initStorageManager from '../../search/memory-storex'
 import CustomListBackground from './'
+import { getPage, createTestPage } from 'src/search'
 import * as DATA from './storage.test.data'
 
 describe('Custom List Integrations', () => {
@@ -26,7 +28,13 @@ describe('Custom List Integrations', () => {
 
     beforeEach(async () => {
         const storageManager = initStorageManager()
-        bg = new CustomListBackground({ storageManager })
+        const getDb = async () => storageManager
+        bg = new CustomListBackground({
+            storageManager,
+            getPage: getPage(getDb),
+            createPage: createTestPage(getDb),
+        })
+        const bmsBg = new BookmarksBackground({ storageManager })
 
         // NOTE: Each test starts creating lists at ID `1`
         let fakeListCount = 0
@@ -34,21 +42,51 @@ describe('Custom List Integrations', () => {
 
         registerModuleMapCollections(storageManager.registry, {
             customList: bg.storage,
+            bookmarks: bmsBg.storage,
         })
 
         await storageManager.finishInitialization()
         await insertTestData()
     })
 
+    describe('create ops', () => {
+        test('should be able to create list entry for existing page', async () => {
+            const newPage = await bg['createPage']({
+                url: 'http://www.test.com',
+            })
+            await newPage.save()
+
+            await bg.insertPageToList({ id: 1, url: newPage.url })
+            const lists = await bg.fetchListPagesByUrl({ url: newPage.url })
+            expect(lists.length).toBe(1)
+            expect(lists[0].pages.length).toBe(1)
+            expect(lists[0].pages[0]).toBe(newPage.url)
+        })
+
+        test('list entry creates for non-existing pages should create page', async () => {
+            const url = 'http://www.test.com'
+
+            await bg.insertPageToList({ id: 1, url })
+
+            const lists = await bg.fetchListPagesByUrl({ url })
+            expect(lists.length).toBe(1)
+            expect(lists[0].pages.length).toBe(1)
+            expect(lists[0].pages[0]).toBe(url)
+
+            const newPage = await bg['getPage'](url)
+            expect(newPage.url).toBe(url.substring(11))
+        })
+    })
+
     describe('read ops', () => {
-        test('fetch All Lists', async () => {
+        test('fetch all lists', async () => {
             const lists = await bg.fetchAllLists({})
 
             checkDefined(lists)
             expect(lists.length).toBe(3)
         })
 
-        test('fetch Pages associated with list', async () => {
+        test('fetch pages associated with list', async () => {
             const lists = await bg.fetchListPagesById({ id: 1 })
 
             checkDefined(lists)
