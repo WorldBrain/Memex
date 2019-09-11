@@ -13,15 +13,25 @@ export interface Props {
     name?: string
     isChecked: boolean
     isDisabled?: boolean
+    containerClass?: string
+    textClass?: string
+    inputClass?: string
+    labelClass?: string
 }
 
 class Checkbox extends React.PureComponent<Props> {
     render() {
         return (
-            <div className={styles.container}>
-                <label className={styles.label} htmlFor={this.props.id}>
+            <div className={cx(styles.container, this.props.containerClass)}>
+                <label
+                    className={cx(styles.label, this.props.labelClass)}
+                    htmlFor={this.props.id}
+                >
                     <input
-                        className={styles.label__checkbox}
+                        className={cx(
+                            styles.label__checkbox,
+                            this.props.inputClass,
+                        )}
                         type="checkbox"
                         checked={this.props.isChecked}
                         onChange={this.props.handleChange}
@@ -29,7 +39,9 @@ class Checkbox extends React.PureComponent<Props> {
                         disabled={this.props.isDisabled}
                         name={this.props.name}
                     />
-                    <span className={styles.label__text}>
+                    <span
+                        className={cx(styles.label__text, this.props.textClass)}
+                    >
                         <span className={styles.label__check}>
                             <span
                                 className={cx(styles.icon, {
