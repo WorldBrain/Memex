@@ -1,0 +1,12 @@
+.settingsButton {
+    composes: grayActionButton from 'src/common-ui/elements.css';
+    background-image: url('/img/onboarding/icon-externalLink.svg');
+    background-repeat: no-repeat;
+    background-position: right 7px top 3px;
+    background-size: 19px;
+    padding-right: 30px;
+}
+
+.placeholder {
+    width: 100%;
+}

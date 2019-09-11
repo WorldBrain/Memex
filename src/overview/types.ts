@@ -1,3 +1,6 @@
+import { UIElement } from 'ui-logic-react'
+import { UILogic } from 'ui-logic-core'
+
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { PageUrlsByDay } from 'src/search/background/types'
 import { SocialPage } from 'src/social-integration/types'
@@ -37,4 +40,14 @@ export interface SearchResult {
 export interface Tooltip {
     title: string
     description: string
+}
+
+export abstract class StatefulUIElement<Props, State, Event> extends UIElement<
+    Props,
+    State,
+    Event
+> {
+    constructor(props: Props, logic: UILogic<State, Event>) {
+        super(props, { logic })
+    }
 }
