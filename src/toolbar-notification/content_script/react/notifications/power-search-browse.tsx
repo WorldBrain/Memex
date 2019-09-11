@@ -1,10 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import NotificationLayout from '../layout'
-import { getExtURL } from '../utils.js'
 
 const styles = require('./power-search-browse.css')
-const externalStyles = require('src/overview/onboarding/components/checklist.css')
 
 export default function PowerSearchBrowse({ onCloseRequested }) {
     return (
@@ -19,12 +17,13 @@ export default function PowerSearchBrowse({ onCloseRequested }) {
                         Memex makes every page you visit full-text searchable.
                     </div>
                     <div className={styles.instructions}>
-                        Type this shortcut into the address bar and search with a term you see on this page
+                        Type this shortcut into the address bar and search with
+                        a term you see on this page
                     </div>
                     <div className={styles.tutorial}>
-                        <div className={externalStyles.keyboardM}>M</div>
-                        <div className={externalStyles.keyboardPlus}>then</div>
-                        <div className={externalStyles.keyboardSpace}>Space</div>
+                        <div className={styles.keyboardM}>M</div>
+                        <div className={styles.keyboardPlus}>then</div>
+                        <div className={styles.keyboardSpace}>Space</div>
                     </div>
                 </div>
             </NotificationLayout>
