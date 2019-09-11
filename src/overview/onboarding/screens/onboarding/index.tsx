@@ -8,6 +8,8 @@ import NextStepButton from '../../components/next-step-button'
 import SettingsCheckbox from '../../components/settings-checkbox'
 import SearchSettings from '../../components/search-settings'
 
+const styles = require('../../components/onboarding-box.css')
+
 export interface Props {}
 
 export default class OnboardingScreen extends StatefulUIElement<
@@ -30,7 +32,7 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 
-    private renderPlaceholderImage = () => <img width="100%" height="200px" />
+    private renderPlaceholderImage = () => <img width="100%" height="170px" />
 
     private handleTooltipToggle = () => {
         this.processEvent('setTooltipEnabled', {
@@ -128,11 +130,13 @@ export default class OnboardingScreen extends StatefulUIElement<
                             </NextStepButton>
                         )}
                     >
-                        <p>
+                        <p className={styles.textLarge}>
                             Have control over how much of your history is
                             captured
                         </p>
-                        <p>Have control over how Memex is displayed</p>
+                        <p className={styles.textLarge}>
+                            Have control over how Memex is displayed
+                        </p>
                     </OnboardingStep>
                 )
             case 1:

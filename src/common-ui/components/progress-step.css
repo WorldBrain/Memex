@@ -2,7 +2,7 @@
 @value color2, color8 from colors;
 
 .progressContainer {
-    margin: 2rem auto 0;
+    margin: 1rem auto 0;
     text-align: center;
 }
 
@@ -13,12 +13,12 @@
     height: 10px;
     margin-right: 4px;
     width: 10px;
+    transition: all 200ms;
 }
 
 .progressStepSeen {
     background: color2;
     cursor: pointer;
-    transition: transform 200ms;
 
     &:hover {
         transform: scale(1.3);

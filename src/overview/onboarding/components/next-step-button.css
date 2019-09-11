@@ -5,8 +5,8 @@
     display: inline-block;
 
     &:active {
-        border-radius: 15px;
-        transform: scale(0.9);
+        border-radius: 8px;
+        transform: scale(0.95);
     }
 
     &:hover {

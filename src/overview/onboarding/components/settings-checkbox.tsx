@@ -13,7 +13,7 @@ export default class SettingsCheckbox extends React.PureComponent<Props> {
     render() {
         return (
             <div className={styles.container}>
-                <Checkbox {...this.props} />
+                <Checkbox labelClass={styles.center} {...this.props} />
             </div>
         )
     }
