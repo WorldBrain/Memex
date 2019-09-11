@@ -12,16 +12,14 @@ interface Props {
 export default class ProgressWrapper extends PureComponent<Props> {
     render() {
         return (
-            <React.Fragment>
-                <div className={styles.progressContainer}>
-                    {[...Array(this.props.totalSteps).keys()].map((data, i) => (
-                        <ProgressStep
-                            key={i}
-                            isSeen={i <= this.props.currentStep}
-                        />
-                    ))}
-                </div>
-            </React.Fragment>
+            <div className={styles.progressContainer}>
+                {[...Array(this.props.totalSteps).keys()].map((data, i) => (
+                    <ProgressStep
+                        key={i}
+                        isSeen={i <= this.props.currentStep}
+                    />
+                ))}
+            </div>
         )
     }
 }

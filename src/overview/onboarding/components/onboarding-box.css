@@ -87,24 +87,6 @@
     font-size: 0.8rem;
 }
 
-.CTA {
-    composes: CTA from '../../../common-ui/elements.css';
-    font-size: 1.2rem;
-    background: color2;
-    color: white;
-    display: inline-block;
-
-    &:active {
-        border-radius: 15px;
-        transform: scale(0.9);
-    }
-
-    &:hover {
-        background: #44bc8b;
-        color: white;
-    }
-}
-
 .settingsButton {
     composes: grayActionButton from '../../../common-ui/elements.css';
     background-image: url('/img/onboarding/icon-externalLink.svg');

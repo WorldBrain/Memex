@@ -1,0 +1,32 @@
+.main {
+    composes: CTA from '../../../common-ui/elements.css';
+    font-size: 1.2rem;
+    color: white;
+    display: inline-block;
+
+    &:active {
+        border-radius: 15px;
+        transform: scale(0.9);
+    }
+
+    &:hover {
+        background: #44bc8b;
+        color: white;
+    }
+}
+
+.green {
+    background: color2;
+}
+
+.mint {
+    background: color1;
+}
+
+.blue {
+    background: color3;
+}
+
+.purple {
+    background: color17;
+}

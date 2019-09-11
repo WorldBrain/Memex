@@ -1,125 +1,90 @@
 import React, { PureComponent } from 'react'
-import classNames from 'classnames'
-import { Checkbox, ProgressStepContainer } from 'src/common-ui/components'
+
+import NextStepButton from './next-step-button'
+import OnboardingStep from './onboarding-step'
 import OnboardingRibbonSettings from './onboarding-ribbon-settings'
 import OnboardingTooltipSettings from './onboarding-tooltip-settings'
 
 const styles = require('./onboarding-box.css')
 
 class OnboardingBox extends PureComponent {
+    private get totalSteps() {
+        return 4
+    }
+
+    private renderPlaceholderImage = () => (
+        <img className={styles.placeholder} width="400px" height="200px" />
+    )
+
     render() {
         return (
             <React.Fragment>
                 <div>
-                    {/* we will only have one container, its the onboarding content that will change out. */}
-                    <div className={styles.container}>
-                        {/* STEP 0 */}
-                        <div>
-                            <h1 className={styles.heading1}>
-                                Let us take you through a few key settings to
-                                make sure you get the most out of Memex
-                            </h1>
-                            <div className={styles.text}>
-                                <p>
-                                    Have control over how much of your history
-                                    is captured
-                                </p>
-                                <p>Have control over how Memex is displayed</p>
-                            </div>
-                            <div className={styles.CTAWrapper}>
-                                <a className={styles.CTA}>Get started</a>
-                            </div>
-                            <ProgressStepContainer totalSteps={4} />
-                        </div>
-                    </div>
+                    <OnboardingStep
+                        isInitStep
+                        titleText="Let us take you through a few key settings to make sure you get the most out of Memex"
+                        totalSteps={this.totalSteps}
+                        renderButton={() => (
+                            <NextStepButton>Get started</NextStepButton>
+                        )}
+                    >
+                        <p>
+                            Have control over how much of your history is
+                            captured
+                        </p>
+                        <p>Have control over how Memex is displayed</p>
+                    </OnboardingStep>
+                    <OnboardingStep
+                        titleText="Can’t remember where you found something but know the text you are after?"
+                        renderButton={() => (
+                            <NextStepButton color="mint">Next</NextStepButton>
+                        )}
+                        renderImage={this.renderPlaceholderImage}
+                        totalSteps={this.totalSteps}
+                        currentStep={0}
+                    >
+                        <p>
+                            All pages you visited more than 5 seconds are
+                            full-text searchable
+                        </p>
+                        <a className={styles.settingsButton}>Change settings</a>
+                    </OnboardingStep>
+                    <OnboardingStep
+                        titleText="Use the tooltip when browsing the web to allow for quick annotations and sharing"
+                        renderButton={() => (
+                            <NextStepButton color="blue">Next</NextStepButton>
+                        )}
+                        renderImage={this.renderPlaceholderImage}
+                        totalSteps={this.totalSteps}
+                        currentStep={1}
+                    >
+                        <OnboardingTooltipSettings />
+                    </OnboardingStep>
+                    <OnboardingStep
+                        titleText="Have quick access to key features by enabling the sidebar"
+                        renderButton={() => (
+                            <NextStepButton color="purple">Next</NextStepButton>
+                        )}
+                        renderImage={this.renderPlaceholderImage}
+                        totalSteps={this.totalSteps}
+                        currentStep={2}
+                    >
+                        <OnboardingRibbonSettings />
+                    </OnboardingStep>
 
-                    <div className={styles.container}>
-                        {/* STEP 1 */}
-                        <h2 className={styles.heading2}>
-                            Can’t remember where you found something but know
-                            the text you are after?
-                        </h2>
-                        <img
-                            className={styles.placeholder}
-                            width="400px"
-                            height="200px"
-                        />
-                        <div className={styles.text}>
-                            <p>
-                                All pages you visited more than 5 seconds are
-                                full-text searchable
-                            </p>
-                            <a className={styles.settingsButton}>
-                                Change settings
-                            </a>
-                        </div>
-                        <div>
-                            <a className={styles.CTA}>Next</a>
-                        </div>
-                        <ProgressStepContainer totalSteps={4} currentStep={0} />
-                    </div>
-
-                    <div className={styles.container}>
-                        {/* STEP 2 */}
-                        <h2 className={styles.heading2}>
-                            Use the tooltip when browsing the web to allow for
-                            quick annotations and sharing
-                        </h2>
-                        <img
-                            className={styles.placeholder}
-                            width="400px"
-                            height="200px"
-                        />
-                        <div className={styles.text}>
-                            <OnboardingTooltipSettings />
-                        </div>
-                        <div>
-                            <a className={styles.CTA}>Next</a>
-                        </div>
-                        <ProgressStepContainer totalSteps={4} currentStep={1} />
-                    </div>
-
-                    <div className={styles.container}>
-                        {/* STEP 3 */}
-                        <h2 className={styles.heading2}>
-                            Have quick access to key features by <br />
-                            enabling the sidebar
-                        </h2>
-                        <img
-                            className={styles.placeholder}
-                            width="400px"
-                            height="200px"
-                        />
-                        <div className={styles.text}>
-                            <OnboardingRibbonSettings />
-                        </div>
-                        <div>
-                            <a className={styles.CTA}>Next</a>
-                        </div>
-                        <ProgressStepContainer totalSteps={4} currentStep={2} />
-                    </div>
-
-                    <div className={styles.container}>
-                        {/* STEP 2 */}
-                        <h2 className={styles.heading2}>
-                            Powerup your indexing with custom <br />
-                            keyboard shortcuts
-                        </h2>
-                        <img
-                            className={styles.placeholder}
-                            width="400px"
-                            height="200px"
-                        />
-                        <div className={styles.text}>
-                            <p>Enable keyboard shortcuts</p>
-                        </div>
-                        <div>
-                            <a className={styles.CTA}>
+                    <OnboardingStep
+                        titleText="Powerup your indexing with custom keyboard shortcuts"
+                        renderButton={() => (
+                            <NextStepButton color="purple">
                                 All done! Go to the dashboard
-                            </a>
-                        </div>
-                        <ProgressStepContainer totalSteps={4} currentStep={3} />
-                    </div>
+                            </NextStepButton>
+                        )}
+                        renderImage={this.renderPlaceholderImage}
+                        totalSteps={this.totalSteps}
+                        currentStep={3}
+                    >
+                        <p>Enable keyboard shortcuts</p>
+                    </OnboardingStep>
                 </div>
 
                 <div className={styles.backgroundBlob} />
