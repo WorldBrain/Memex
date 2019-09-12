@@ -8,7 +8,9 @@ class OnboardingBox extends PureComponent {
             <React.Fragment>
                 <div>{this.props.children}</div>
 
-                <div className={styles.backgroundBlob} />
+                <div className={styles.backgroundBlobWrapper}>
+                    <div className={styles.backgroundBlob} />
+                </div>
 
                 <div className={styles.center}>
                     <p className={styles.skipTitle}>Skip setup</p>

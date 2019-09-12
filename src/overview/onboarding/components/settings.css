@@ -26,3 +26,7 @@
     font-size: 14px;
     color: color6;
 }
+
+.center {
+    justify-content: center;
+}

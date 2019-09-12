@@ -35,7 +35,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                     className={styles.settingsButton}
                     onClick={this.props.toggleShowSearchSettings}
                 >
-                    Settings
+                    Change settings
                 </a>
             </>
         )
