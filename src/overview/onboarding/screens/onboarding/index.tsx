@@ -45,6 +45,12 @@ export default class OnboardingScreen extends StatefulUIElement<
         })
     }
 
+    private handleShortcutsToggle = () => {
+        this.processEvent('setShortcutsEnabled', {
+            enabled: !this.state.areShortcutsEnabled,
+        })
+    }
+
     private handleNextStepClick = () => {
         this.processEvent('setStep', { step: this.state.currentStep + 1 })
     }
@@ -138,10 +144,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         goToStep={this.handleStepClick}
                         titleText="Can’t remember where you found something but know the text you are after?"
                         renderButton={() => (
-                            <NextStepButton
-                                onClick={this.handleNextStepClick}
-                                color="mint"
-                            >
+                            <NextStepButton onClick={this.handleNextStepClick}>
                                 Next
                             </NextStepButton>
                         )}
@@ -162,10 +165,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         goToStep={this.handleStepClick}
                         titleText="Use the tooltip when browsing the web to allow for quick annotations and sharing"
                         renderButton={() => (
-                            <NextStepButton
-                                onClick={this.handleNextStepClick}
-                                color="blue"
-                            >
+                            <NextStepButton onClick={this.handleNextStepClick}>
                                 Next
                             </NextStepButton>
                         )}
@@ -188,10 +188,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         goToStep={this.handleStepClick}
                         titleText="Have quick access to key features by enabling the sidebar"
                         renderButton={() => (
-                            <NextStepButton
-                                onClick={this.handleNextStepClick}
-                                color="purple"
-                            >
+                            <NextStepButton onClick={this.handleNextStepClick}>
                                 Next
                             </NextStepButton>
                         )}
@@ -200,7 +197,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         currentStep={this.state.currentStep - 1}
                     >
                         <SettingsCheckbox
-                            id="onboarding-ribbon-toggle"
+                            id="onboarding-sidebar-toggle"
                             isChecked={this.state.isSidebarEnabled}
                             handleChange={this.handleSidebarToggle}
                         >
@@ -214,15 +211,21 @@ export default class OnboardingScreen extends StatefulUIElement<
                         goToStep={this.handleStepClick}
                         titleText="Powerup your indexing with custom keyboard shortcuts"
                         renderButton={() => (
-                            <NextStepButton color="purple">
-                                Close
+                            <NextStepButton>
+                                All done! Go to dashboard
                             </NextStepButton>
                         )}
                         renderImage={this.renderPlaceholderImage}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
                     >
-                        <p>Enable keyboard shortcuts</p>
+                        <SettingsCheckbox
+                            id="onboarding-keyboard-shortcuts-toggle"
+                            isChecked={this.state.areShortcutsEnabled}
+                            handleChange={this.handleShortcutsToggle}
+                        >
+                            Enable keyboard shortcuts
+                        </SettingsCheckbox>
                     </OnboardingStep>
                 )
         }

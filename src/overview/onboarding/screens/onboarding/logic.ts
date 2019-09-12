@@ -6,6 +6,7 @@ export interface State {
     isSidebarEnabled: boolean
     areStubsEnabled: boolean
     areVisitsEnabled: boolean
+    areShortcutsEnabled: boolean
     areBookmarksEnabled: boolean
     areAnnotationsEnabled: boolean
     areScreenshotsEnabled: boolean
@@ -17,6 +18,7 @@ export type Event = UIEvent<{
     setStep: { step: number }
     setTooltipEnabled: { enabled: boolean }
     setSidebarEnabled: { enabled: boolean }
+    setShortcutsEnabled: { enabled: boolean }
     setSearchSettingsShown: { shown: boolean }
     setStubsEnabled: { enabled: boolean }
     setVisitsEnabled: { enabled: boolean }
@@ -32,6 +34,7 @@ export default class Logic extends UILogic<State, Event> {
             currentStep: 0,
             isTooltipEnabled: true,
             isSidebarEnabled: true,
+            areShortcutsEnabled: true,
             areStubsEnabled: true,
             areVisitsEnabled: false,
             areBookmarksEnabled: true,
@@ -58,6 +61,12 @@ export default class Logic extends UILogic<State, Event> {
         incoming: IncomingUIEvent<State, Event, 'setSidebarEnabled'>,
     ): UIMutation<State> {
         return { isSidebarEnabled: { $set: incoming.event.enabled } }
+    }
+
+    setShortcutsEnabled(
+        incoming: IncomingUIEvent<State, Event, 'setShortcutsEnabled'>,
+    ): UIMutation<State> {
+        return { areShortcutsEnabled: { $set: incoming.event.enabled } }
     }
 
     setSearchSettingsShown(

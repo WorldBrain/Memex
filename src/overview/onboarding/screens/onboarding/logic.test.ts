@@ -65,6 +65,27 @@ describe('onboarding screen UI logic tests', () => {
         expect(nextStateB.isSidebarEnabled).toBe(false)
     })
 
+    it('should be able to set keyboard shortcuts enabled state', () => {
+        const { logic, state } = setupTest()
+
+        const nextStateA = logic.withMutation(
+            state,
+            logic.setShortcutsEnabled({
+                event: { enabled: true },
+                previousState: state,
+            }),
+        )
+        expect(nextStateA.areShortcutsEnabled).toBe(true)
+        const nextStateB = logic.withMutation(
+            nextStateA,
+            logic.setShortcutsEnabled({
+                event: { enabled: false },
+                previousState: nextStateA,
+            }),
+        )
+        expect(nextStateB.areShortcutsEnabled).toBe(false)
+    })
+
     it('should be able to set index page stubs enabled state', () => {
         const { logic, state } = setupTest()
 
