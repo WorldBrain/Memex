@@ -10,7 +10,6 @@ export interface Props {
     bookmarks: boolean
     annotations: boolean
     screenshots: boolean
-    collections: boolean
     showSearchSettings: boolean
     areAllSettingsChecked: boolean
     toggleAll: CheckboxToggle
@@ -18,7 +17,6 @@ export interface Props {
     toggleAnnotations: CheckboxToggle
     toggleVisits: CheckboxToggle
     toggleBookmarks: CheckboxToggle
-    toggleCollections: CheckboxToggle
     toggleScreenshots: CheckboxToggle
     toggleShowSearchSettings: () => void
 }
@@ -54,14 +52,14 @@ export default class SearchSettings extends React.PureComponent<Props> {
                     isChecked={this.props.stubs}
                     handleChange={this.props.toggleStubs}
                 >
-                    Make title, visit time and URL always searchable
+                    Make title and URL always searchable (recommended)
                 </Checkbox>
                 <Checkbox
                     id="index-screenshots"
                     isChecked={this.props.screenshots}
                     handleChange={this.props.toggleScreenshots}
                 >
-                    Capture screenshot thumbnails
+                    Capture screenshots (triples disk space requirements)
                 </Checkbox>
                 <p className={styles.textSearchHeader}>
                     Full-text search websites and PDFs
@@ -85,7 +83,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                     isChecked={this.props.bookmarks}
                     handleChange={this.props.toggleBookmarks}
                 >
-                    Bookmarked in browser or starred with Memex
+                    Bookmarked, tagged, or sorted into collections
                 </Checkbox>
                 <Checkbox
                     id="index-annotations"
@@ -93,13 +91,6 @@ export default class SearchSettings extends React.PureComponent<Props> {
                     handleChange={this.props.toggleAnnotations}
                 >
                     Made notes or annotations on
-                </Checkbox>
-                <Checkbox
-                    id="index-collections"
-                    isChecked={this.props.collections}
-                    handleChange={this.props.toggleCollections}
-                >
-                    Tagged or sorted into collections
                 </Checkbox>
                 <a
                     className={styles.settingsButton}

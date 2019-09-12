@@ -27,8 +27,7 @@ export default class OnboardingScreen extends StatefulUIElement<
         return (
             this.state.areVisitsEnabled &&
             this.state.areBookmarksEnabled &&
-            this.state.areAnnotationsEnabled &&
-            this.state.areCollectionsEnabled
+            this.state.areAnnotationsEnabled
         )
     }
 
@@ -76,7 +75,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                 bookmarks={this.state.areBookmarksEnabled}
                 annotations={this.state.areAnnotationsEnabled}
                 screenshots={this.state.areScreenshotsEnabled}
-                collections={this.state.areCollectionsEnabled}
                 toggleAll={this.handleAllSettingsToggle}
                 showSearchSettings={this.state.showSearchSettings}
                 toggleShowSearchSettings={this.handleShowSearchSettingsToggle}
@@ -99,11 +97,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                 toggleBookmarks={() =>
                     this.processEvent('setBookmarksEnabled', {
                         enabled: !this.state.areBookmarksEnabled,
-                    })
-                }
-                toggleCollections={() =>
-                    this.processEvent('setCollectionsEnabled', {
-                        enabled: !this.state.areCollectionsEnabled,
                     })
                 }
                 toggleScreenshots={() =>
