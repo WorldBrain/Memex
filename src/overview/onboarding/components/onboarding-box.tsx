@@ -2,10 +2,14 @@ import React, { PureComponent } from 'react'
 
 const styles = require('./onboarding-box.css')
 
-class OnboardingBox extends PureComponent {
+export interface Props {
+    navToOverview: () => void
+}
+
+class OnboardingBox extends PureComponent<Props> {
     render() {
         return (
-            <React.Fragment>
+            <>
                 <div>{this.props.children}</div>
 
                 <div className={styles.backgroundBlobWrapper}>
@@ -13,12 +17,17 @@ class OnboardingBox extends PureComponent {
                 </div>
 
                 <div className={styles.center}>
-                    <p className={styles.skipTitle}>Skip setup</p>
+                    <p
+                        className={styles.skipTitle}
+                        onClick={this.props.navToOverview}
+                    >
+                        Skip setup
+                    </p>
                     <p className={styles.skipDesc}>
                         Give me the default settings
                     </p>
                 </div>
-            </React.Fragment>
+            </>
         )
     }
 }

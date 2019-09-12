@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { OVERVIEW_URL } from 'src/constants'
 import { StatefulUIElement } from 'src/overview/types'
 import Logic, { State, Event } from './logic'
 import OnboardingBox from '../../components/onboarding-box'
@@ -10,7 +11,9 @@ import SearchSettings from '../../components/search-settings'
 
 const styles = require('../../components/onboarding-box.css')
 
-export interface Props {}
+export interface Props {
+    navToOverview: () => void
+}
 
 export default class OnboardingScreen extends StatefulUIElement<
     Props,
@@ -18,6 +21,9 @@ export default class OnboardingScreen extends StatefulUIElement<
     Event
 > {
     static TOTAL_STEPS = 4
+    static defaultProps: Partial<Props> = {
+        navToOverview: () => (window.location.href = OVERVIEW_URL),
+    }
 
     constructor(props: Props) {
         super(props, new Logic())
@@ -211,7 +217,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         goToStep={this.handleStepClick}
                         titleText="Powerup your indexing with custom keyboard shortcuts"
                         renderButton={() => (
-                            <NextStepButton>
+                            <NextStepButton onClick={this.props.navToOverview}>
                                 All done! Go to dashboard
                             </NextStepButton>
                         )}
@@ -232,6 +238,10 @@ export default class OnboardingScreen extends StatefulUIElement<
     }
 
     render() {
-        return <OnboardingBox>{this.renderCurrentStep()}</OnboardingBox>
+        return (
+            <OnboardingBox {...this.props}>
+                {this.renderCurrentStep()}
+            </OnboardingBox>
+        )
     }
 }
