@@ -1,8 +1,12 @@
+@value colors: 'src/common-ui/colors.css';
+@value color2 from colors;
+
 .main {
     composes: CTA from '../../../common-ui/elements.css';
-    font-size: 1.2rem;
+    background: color2;
     color: white;
     display: inline-block;
+    font-size: 1.2rem;
 
     &:active {
         border-radius: 8px;
@@ -13,20 +17,4 @@
         background: #44bc8b;
         color: white;
     }
-}
-
-.green {
-    background: color2;
-}
-
-.mint {
-    background: color1;
-}
-
-.blue {
-    background: color3;
-}
-
-.purple {
-    background: color17;
 }

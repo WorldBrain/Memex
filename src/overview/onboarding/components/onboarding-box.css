@@ -5,7 +5,8 @@
     background: white;
     width: 60%;
     max-width: 50rem;
-    margin: 40px auto 10px;
+    min-width: 4rem;
+    margin: 2rem auto 1rem;
     min-height: 400px;
     padding: 2rem 4rem;
     display: flex;
