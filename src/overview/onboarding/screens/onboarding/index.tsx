@@ -39,6 +39,58 @@ export default class OnboardingScreen extends StatefulUIElement<
         super(props, new Logic())
     }
 
+    componentDidMount() {
+        this.hydrateStateFromStorage()
+    }
+
+    private async hydrateStateFromStorage() {
+        const storedVals = await this.props.storage.get([
+            ...Object.values(STORAGE_KEYS),
+            SIDEBAR_STORAGE_NAME,
+            TOOLTIP_STORAGE_NAME,
+            KEYBOARDSHORTCUTS_STORAGE_NAME,
+        ])
+
+        // Set default vaslues if nothing present in storage
+        const defs = this.logic.getInitialState()
+        const grabVal = (key: string, defVal: boolean) => ({
+            enabled: storedVals[key] != null ? storedVals[key] : defVal,
+        })
+
+        this.processEvent(
+            'setAnnotationsEnabled',
+            grabVal(STORAGE_KEYS.LINKS, defs.areAnnotationsEnabled),
+        )
+        this.processEvent(
+            'setBookmarksEnabled',
+            grabVal(STORAGE_KEYS.BOOKMARKS, defs.areBookmarksEnabled),
+        )
+        this.processEvent(
+            'setVisitsEnabled',
+            grabVal(STORAGE_KEYS.VISITS, defs.areVisitsEnabled),
+        )
+        this.processEvent(
+            'setScreenshotsEnabled',
+            grabVal(STORAGE_KEYS.SCREENSHOTS, defs.areScreenshotsEnabled),
+        )
+        this.processEvent(
+            'setStubsEnabled',
+            grabVal(STORAGE_KEYS.STUBS, defs.areStubsEnabled),
+        )
+        this.processEvent(
+            'setShortcutsEnabled',
+            grabVal(KEYBOARDSHORTCUTS_STORAGE_NAME, defs.areShortcutsEnabled),
+        )
+        this.processEvent(
+            'setSidebarEnabled',
+            grabVal(SIDEBAR_STORAGE_NAME, defs.isSidebarEnabled),
+        )
+        this.processEvent(
+            'setTooltipEnabled',
+            grabVal(TOOLTIP_STORAGE_NAME, defs.isTooltipEnabled),
+        )
+    }
+
     private areAllSettingsChecked() {
         return (
             this.state.areVisitsEnabled &&

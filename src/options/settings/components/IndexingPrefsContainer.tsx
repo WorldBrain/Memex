@@ -28,21 +28,19 @@ class IndexingPrefsContainer extends React.PureComponent<Props> {
     }
 
     private async hydrateStateFromStorage() {
-        const storedVals = await this.props.storage.get(Object.values(KEYS))
+        const keys = Object.values(KEYS)
+        const storedVals = await this.props.storage.get(keys)
 
-        // Set default values if nothing present
-        for (const key in storedVals) {
-            if (storedVals[key] == null) {
-                storedVals[key] = defs[key]
-            }
-        }
+        // Set default values if nothing present in storage
+        const grabVal = (key: string, defVal: any) =>
+            storedVals[key] != null ? storedVals[key] : defVal
 
-        this.props.initLinks(storedVals[KEYS.BOOKMARKS])
-        this.props.initStubs(storedVals[KEYS.STUBS])
-        this.props.initVisits(storedVals[KEYS.VISITS])
-        this.props.initBookmarks(storedVals[KEYS.BOOKMARKS])
-        this.props.initScreenshots(storedVals[KEYS.SCREENSHOTS])
-        this.props.initVisitDelay(storedVals[KEYS.VISIT_DELAY])
+        this.props.initLinks(grabVal(KEYS.BOOKMARKS, defs.bookmarks))
+        this.props.initStubs(grabVal(KEYS.STUBS, defs.stubs))
+        this.props.initVisits(grabVal(KEYS.VISITS, defs.visits))
+        this.props.initBookmarks(grabVal(KEYS.BOOKMARKS, defs.bookmarks))
+        this.props.initScreenshots(grabVal(KEYS.SCREENSHOTS, defs.screenshots))
+        this.props.initVisitDelay(grabVal(KEYS.VISIT_DELAY, defs.visitDelay))
     }
 
     render() {
@@ -73,7 +71,7 @@ const mapDispatchToProps = (
             const state = getState()
             dispatch(acts.toggleBookmarks())
             return browser.storage.local.set({
-                [KEYS.BOOKMARKS]: !state.bookmarks,
+                [KEYS.BOOKMARKS]: !selectors.bookmarks(state),
             })
         }),
     toggleLinks: () =>
@@ -81,7 +79,7 @@ const mapDispatchToProps = (
             const state = getState()
             dispatch(acts.toggleLinks())
             return browser.storage.local.set({
-                [KEYS.LINKS]: !state.memexLinks,
+                [KEYS.LINKS]: !selectors.memexLinks(state),
             })
         }),
     toggleStubs: () =>
@@ -89,7 +87,7 @@ const mapDispatchToProps = (
             const state = getState()
             dispatch(acts.toggleStubs())
             return browser.storage.local.set({
-                [KEYS.STUBS]: !state.stubs,
+                [KEYS.STUBS]: !selectors.stubs(state),
             })
         }),
     toggleScreenshots: () =>
@@ -97,7 +95,7 @@ const mapDispatchToProps = (
             const state = getState()
             dispatch(acts.toggleScreenshots())
             return browser.storage.local.set({
-                [KEYS.SCREENSHOTS]: !state.screenshots,
+                [KEYS.SCREENSHOTS]: !selectors.screenshots(state),
             })
         }),
     toggleVisits: () =>
@@ -105,7 +103,7 @@ const mapDispatchToProps = (
             const state = getState()
             dispatch(acts.toggleVisits())
             return browser.storage.local.set({
-                [KEYS.VISITS]: !state.visits,
+                [KEYS.VISITS]: !selectors.visits(state),
             })
         }),
     handleVisitDelayChange: ev => {
