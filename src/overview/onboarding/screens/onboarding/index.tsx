@@ -1,6 +1,6 @@
 import React from 'react'
+import { browser, Storage } from 'webextension-polyfill-ts'
 
-import { OVERVIEW_URL } from 'src/constants'
 import { StatefulUIElement } from 'src/overview/types'
 import Logic, { State, Event } from './logic'
 import OnboardingBox from '../../components/onboarding-box'
@@ -9,10 +9,19 @@ import NextStepButton from '../../components/next-step-button'
 import SettingsCheckbox from '../../components/settings-checkbox'
 import SearchSettings from '../../components/search-settings'
 
+import { OVERVIEW_URL } from 'src/constants'
+import { STORAGE_KEYS } from 'src/options/settings/constants'
+import { SIDEBAR_STORAGE_NAME } from 'src/sidebar-overlay/constants'
+import {
+    TOOLTIP_STORAGE_NAME,
+    KEYBOARDSHORTCUTS_STORAGE_NAME,
+} from 'src/content-tooltip/constants'
+
 const styles = require('../../components/onboarding-box.css')
 
 export interface Props {
     navToOverview: () => void
+    storage: Storage.LocalStorageArea
 }
 
 export default class OnboardingScreen extends StatefulUIElement<
@@ -23,6 +32,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     static TOTAL_STEPS = 4
     static defaultProps: Partial<Props> = {
         navToOverview: () => (window.location.href = OVERVIEW_URL),
+        storage: browser.storage.local,
     }
 
     constructor(props: Props) {
@@ -40,20 +50,22 @@ export default class OnboardingScreen extends StatefulUIElement<
     private renderPlaceholderImage = () => <img width="100%" height="170px" />
 
     private handleTooltipToggle = () => {
-        this.processEvent('setTooltipEnabled', {
-            enabled: !this.state.isTooltipEnabled,
-        })
+        const enabled = !this.state.isTooltipEnabled
+        this.processEvent('setTooltipEnabled', { enabled })
+        return this.props.storage.set({ [TOOLTIP_STORAGE_NAME]: enabled })
     }
 
     private handleSidebarToggle = () => {
-        this.processEvent('setSidebarEnabled', {
-            enabled: !this.state.isSidebarEnabled,
-        })
+        const enabled = !this.state.isSidebarEnabled
+        this.processEvent('setSidebarEnabled', { enabled })
+        return this.props.storage.set({ [SIDEBAR_STORAGE_NAME]: enabled })
     }
 
     private handleShortcutsToggle = () => {
-        this.processEvent('setShortcutsEnabled', {
-            enabled: !this.state.areShortcutsEnabled,
+        const enabled = !this.state.areShortcutsEnabled
+        this.processEvent('setShortcutsEnabled', { enabled })
+        return this.props.storage.set({
+            [KEYBOARDSHORTCUTS_STORAGE_NAME]: enabled,
         })
     }
 
@@ -66,9 +78,8 @@ export default class OnboardingScreen extends StatefulUIElement<
     }
 
     private handleShowSearchSettingsToggle = () => {
-        this.processEvent('setSearchSettingsShown', {
-            shown: !this.state.showSearchSettings,
-        })
+        const shown = !this.state.showSearchSettings
+        this.processEvent('setSearchSettingsShown', { shown })
     }
 
     private handleAllSettingsToggle = () => {
@@ -76,7 +87,12 @@ export default class OnboardingScreen extends StatefulUIElement<
         this.processEvent('setAnnotationsEnabled', { enabled })
         this.processEvent('setVisitsEnabled', { enabled })
         this.processEvent('setBookmarksEnabled', { enabled })
-        this.processEvent('setCollectionsEnabled', { enabled })
+
+        return this.props.storage.set({
+            [STORAGE_KEYS.LINKS]: enabled,
+            [STORAGE_KEYS.VISITS]: enabled,
+            [STORAGE_KEYS.BOOKMARKS]: enabled,
+        })
     }
 
     private renderSearchSettings() {
@@ -91,31 +107,41 @@ export default class OnboardingScreen extends StatefulUIElement<
                 showSearchSettings={this.state.showSearchSettings}
                 toggleShowSearchSettings={this.handleShowSearchSettingsToggle}
                 areAllSettingsChecked={this.areAllSettingsChecked()}
-                toggleAnnotations={() =>
-                    this.processEvent('setAnnotationsEnabled', {
-                        enabled: !this.state.areAnnotationsEnabled,
+                toggleAnnotations={() => {
+                    const enabled = !this.state.areAnnotationsEnabled
+                    this.processEvent('setAnnotationsEnabled', { enabled })
+                    return this.props.storage.set({
+                        [STORAGE_KEYS.LINKS]: enabled,
                     })
-                }
-                toggleStubs={() =>
-                    this.processEvent('setStubsEnabled', {
-                        enabled: !this.state.areStubsEnabled,
+                }}
+                toggleStubs={() => {
+                    const enabled = !this.state.areStubsEnabled
+                    this.processEvent('setStubsEnabled', { enabled })
+                    return this.props.storage.set({
+                        [STORAGE_KEYS.STUBS]: enabled,
                     })
-                }
-                toggleVisits={() =>
-                    this.processEvent('setVisitsEnabled', {
-                        enabled: !this.state.areVisitsEnabled,
+                }}
+                toggleVisits={() => {
+                    const enabled = !this.state.areVisitsEnabled
+                    this.processEvent('setVisitsEnabled', { enabled })
+                    return this.props.storage.set({
+                        [STORAGE_KEYS.VISITS]: enabled,
                     })
-                }
-                toggleBookmarks={() =>
-                    this.processEvent('setBookmarksEnabled', {
-                        enabled: !this.state.areBookmarksEnabled,
+                }}
+                toggleBookmarks={() => {
+                    const enabled = !this.state.areBookmarksEnabled
+                    this.processEvent('setBookmarksEnabled', { enabled })
+                    return this.props.storage.set({
+                        [STORAGE_KEYS.BOOKMARKS]: enabled,
                     })
-                }
-                toggleScreenshots={() =>
-                    this.processEvent('setScreenshotsEnabled', {
-                        enabled: !this.state.areScreenshotsEnabled,
+                }}
+                toggleScreenshots={() => {
+                    const enabled = !this.state.areScreenshotsEnabled
+                    this.processEvent('setScreenshotsEnabled', { enabled })
+                    return this.props.storage.set({
+                        [STORAGE_KEYS.SCREENSHOTS]: enabled,
                     })
-                }
+                }}
             />
         )
     }

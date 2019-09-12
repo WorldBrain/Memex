@@ -14,11 +14,11 @@ export interface State {
 }
 
 export const defaultState: State = {
-    visits: true,
+    stubs: true,
+    visits: false,
     bookmarks: true,
     memexLinks: true,
-    stubs: true,
-    screenshots: browserIsChrome(),
+    screenshots: false,
     visitDelay: VISIT_DELAY_RANGE.DEF,
 }
 
