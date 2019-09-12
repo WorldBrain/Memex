@@ -47,6 +47,10 @@ export async function setupBackgroundIntegrationTest(options?: {
             },
         } as any,
         tabManager: options && options.tabManager,
+        authBackground: {
+            getCurrentUser: () => ({ id: 1 }),
+        },
+        signalTransportFactory: null,
     })
     backgroundModules.customLists._createPage =
         backgroundModules.search.searchIndex.createTestPage

@@ -23,8 +23,12 @@ import {
     ImportStateManager,
 } from 'src/imports/background/state-manager'
 import { setupImportBackgroundModule } from 'src/imports/background'
+import AuthBackground from 'src/auth/background'
+import SyncBackground from 'src/sync/background'
+import { SignalTransportFactory } from 'src/sync/background/initial-sync'
 
 export interface BackgroundModules {
+    auth: AuthBackground
     notifications: NotificationBackground
     social: SocialBackground
     activityLogger: ActivityLoggerBackground
@@ -35,11 +39,14 @@ export interface BackgroundModules {
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
+    sync: SyncBackground
 }
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
+    authBackground: AuthBackground
     browserAPIs: Browser
+    signalTransportFactory: SignalTransportFactory
     tabManager?: TabManager
 }): BackgroundModules {
     const { storageManager } = options
@@ -60,6 +67,7 @@ export function createBackgroundModules(options: {
     })
 
     return {
+        auth: options.authBackground,
         notifications,
         social,
         activityLogger,
@@ -91,6 +99,11 @@ export function createBackgroundModules(options: {
                 key: 'lastBackup',
             }),
             notifications,
+        }),
+        sync: new SyncBackground({
+            auth: options.authBackground,
+            signalTransportFactory: options.signalTransportFactory,
+            storageManager,
         }),
     }
 }

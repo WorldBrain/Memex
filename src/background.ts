@@ -37,6 +37,8 @@ initSentry({ storageChangesManager: localStorageChangesManager })
 const backgroundModules = createBackgroundModules({
     storageManager,
     browserAPIs: browser,
+    authBackground: null,
+    signalTransportFactory: null,
 })
 
 // TODO: There's still some evil code around that imports this entry point
