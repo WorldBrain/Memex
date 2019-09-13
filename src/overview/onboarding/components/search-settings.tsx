@@ -46,7 +46,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
 
         return (
             <>
-                <h3 className={styles.settingsHeader}>Text search settings</h3>
+                <p className={styles.settingsHeader}>General settings</p>
                 <Checkbox
                     id="index-stubs"
                     isChecked={this.props.stubs}
@@ -61,7 +61,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                 >
                     Capture screenshots (triples disk space requirements)
                 </Checkbox>
-                <p className={styles.textSearchHeader}>
+                <p className={styles.settingsHeader}>
                     Full-text search websites and PDFs
                 </p>
                 <Checkbox

@@ -5,7 +5,7 @@
     composes: CTA from '../../../common-ui/elements.css';
     background: color2;
     color: white;
-    display: inline-block;
+    display: inline-flex;
     font-size: 1.2rem;
 
     &:active {

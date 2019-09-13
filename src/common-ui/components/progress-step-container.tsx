@@ -17,6 +17,7 @@ export default class ProgressWrapper extends PureComponent<Props> {
                 {[...Array(this.props.totalSteps).keys()].map((data, i) => (
                     <ProgressStep
                         isSeen={i <= this.props.currentStep}
+                        isCurrentStep={i === this.props.currentStep}
                         onClick={this.props.onStepClick(i + 1)}
                         key={i}
                     />

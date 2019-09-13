@@ -3,11 +3,12 @@
 
 .container {
     background: white;
+    color: color5;
     width: 60%;
     max-width: 50rem;
     min-width: 4rem;
     margin: 2rem auto 1rem;
-    min-height: 400px;
+    min-height: 547px;
     padding: 2rem 4rem;
     display: flex;
     border: solid 1px #f4f4f4;
@@ -15,6 +16,7 @@
     flex-direction: column;
     box-shadow: 0px 2px 30px rgba(164, 180, 182, 0.5);
     text-align: center;
+    justify-content: space-between;
 }
 
 .logo {
@@ -30,12 +32,14 @@
 .heading1 {
     color: color5;
     font-size: 1.8rem;
-    margin-top: 0;
+    margin: 0 auto 2rem;
 }
 
 .heading2 {
     color: color5;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
+    display: inline-flex;
+    margin: 1rem auto;
 }
 
 .text {
@@ -43,15 +47,20 @@
     font-size: 1rem;
     margin-bottom: 2rem;
     min-height: 70px;
+    display: inline-flex;
+    flex-direction: column;
 }
 
 .textLarge {
     font-size: 1.2rem;
+    margin: 0 auto 1rem;
+    display: inline-flex;
 }
 
 .placeholder {
     background: color6;
     margin: auto;
+    display: inline-flex;
 }
 
 .backgroundBlobWrapper {
@@ -132,6 +141,13 @@
 }
 
 @media only screen and (max-width: 820px) {
+    .container {
+        width: 80%;
+        padding: 2rem;
+    }
+}
+
+@media only screen and (max-width: 620px) {
     .container {
         margin-top: 2rem;
         width: 95%;

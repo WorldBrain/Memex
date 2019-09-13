@@ -217,6 +217,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                             Have control over how much of your history is
                             captured
                         </p>
+                        <br />
                         <p className={styles.textLarge}>
                             Have control over how Memex is displayed
                         </p>
@@ -226,7 +227,8 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Can’t remember where you found something but know the text you are after?"
+                        titleText="Full text searching"
+                        subtitleText="Can’t remember where you found something but know the text you are after?"
                         renderButton={() => (
                             <NextStepButton onClick={this.handleNextStepClick}>
                                 Next
@@ -247,7 +249,8 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Use the tooltip when browsing the web to allow for quick annotations and sharing"
+                        titleText="Tooltip"
+                        subtitleText="Use the tooltip when browsing the web to allow for quick annotations and sharing"
                         renderButton={() => (
                             <NextStepButton onClick={this.handleNextStepClick}>
                                 Next
@@ -270,7 +273,8 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Have quick access to key features by enabling the sidebar"
+                        titleText="Quick access"
+                        subtitleText="Have quick access to key features by enabling the sidebar"
                         renderButton={() => (
                             <NextStepButton onClick={this.handleNextStepClick}>
                                 Next
@@ -293,7 +297,8 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Powerup your indexing with custom keyboard shortcuts"
+                        titleText="Keyboard shortcuts"
+                        subtitleText="Powerup your indexing with custom keyboard shortcuts"
                         renderButton={() => (
                             <NextStepButton onClick={this.props.navToOverview}>
                                 All done! Go to dashboard
