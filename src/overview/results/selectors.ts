@@ -41,6 +41,10 @@ const editPageResults = ({ modalShown, deleting, tagIndex }) => (
 
 const resultsState = (state: RootState) => state.results
 
+export const showOnboardingMessage = createSelector(
+    resultsState,
+    state => state.showOnboardingMessage,
+)
 export const isLoading = createSelector(resultsState, state => state.isLoading)
 export const resultDocs = createSelector(resultsState, state => state.results)
 export const activeTagIndex = createSelector(

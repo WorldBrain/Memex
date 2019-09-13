@@ -5,6 +5,7 @@ import propTypes from 'prop-types'
 import SidebarContainer, {
     selectors as sidebarSelectors,
 } from 'src/sidebar-overlay/sidebar'
+import { OVERVIEW_URL } from 'src/constants'
 import Onboarding from '../onboarding'
 import { DeleteConfirmModal } from '../delete-confirm-modal'
 import {
@@ -13,7 +14,7 @@ import {
 } from '../sidebar-left'
 import { HelpBtn } from '../help-btn'
 import { Header, acts as searchBarActs } from '../search-bar'
-import { Results } from '../results'
+import { Results, acts as resultActs } from '../results'
 import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
@@ -25,8 +26,9 @@ import styles from 'src/styles.css'
 
 class Overview extends PureComponent {
     static propTypes = {
-        init: propTypes.func.isRequired,
         pageUrl: propTypes.string,
+        init: propTypes.func.isRequired,
+        setShowOnboardingMessage: propTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -35,10 +37,15 @@ class Overview extends PureComponent {
 
     _annotationsManager = new AnnotationsManager()
 
+    handleOnboardingComplete = () => {
+        window.location.href = OVERVIEW_URL
+        this.props.setShowOnboardingMessage()
+    }
+
     renderOnboarding() {
         return (
             <div>
-                <Onboarding />
+                <Onboarding navToOverview={this.handleOnboardingComplete} />
                 <HelpBtn />
             </div>
         )
@@ -78,13 +85,11 @@ class Overview extends PureComponent {
     }
 
     render() {
-        return (
-            <React.Fragment>
-                {isDuringInstall()
-                    ? this.renderOnboarding()
-                    : this.renderOverview()}
-            </React.Fragment>
-        )
+        if (isDuringInstall()) {
+            return this.renderOnboarding()
+        }
+
+        return this.renderOverview()
     }
 }
 
@@ -92,7 +97,13 @@ const mapStateToProps = state => ({
     pageUrl: sidebarSelectors.pageUrl(state),
 })
 
+const mapDispatchToProps = dispatch => ({
+    init: () => dispatch(searchBarActs.init()),
+    setShowOnboardingMessage: () =>
+        dispatch(resultActs.setShowOnboardingMessage(true)),
+})
+
 export default connect(
     mapStateToProps,
-    dispatch => ({ init: () => dispatch(searchBarActs.init()) }),
+    mapDispatchToProps,
 )(Overview)
