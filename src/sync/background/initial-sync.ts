@@ -35,6 +35,7 @@ type InitialSyncEvents = FastSyncEvents &
 
 export type SignalTransportFactory = () => SignalTransport
 export default class InitialSync {
+    public wrtc: any // Possibility for tests to inject wrtc library
     private initialSyncInfo?: InitialSyncInfo
 
     constructor(
@@ -113,7 +114,10 @@ export default class InitialSync {
         const signalChannel = await options.signalTransport.openChannel(
             pick(options, 'initialMessage', 'deviceId'),
         )
-        const peer = new Peer({ initiator: options.role === 'receiver' })
+        const peer = new Peer({
+            initiator: options.role === 'receiver',
+            wrtc: this.wrtc,
+        })
 
         let senderFastSync: FastSyncSender | undefined
         let receiverFastSync: FastSyncReceiver | undefined

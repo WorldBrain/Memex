@@ -3,6 +3,7 @@ import { BackgroundModules } from 'src/background-script/setup'
 import { StorageDiff, StorageCollectionDiff } from './storage-change-detector'
 import { LoggedStorageOperation } from './storage-operation-logger'
 import { registerBackgroundIntegrationTest } from './background-integration-tests'
+import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -32,6 +33,7 @@ export interface IntegrationTestStep<StepContext> {
 export interface BackgroundIntegrationTestSetup {
     storageManager: StorageManager
     backgroundModules: BackgroundModules
+    browserLocalStorage: MemoryBrowserStorage
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup

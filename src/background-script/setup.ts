@@ -17,6 +17,8 @@ import {
     registerModuleMapCollections,
     StorageModule,
 } from '@worldbrain/storex-pattern-modules'
+import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
+import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { setupBlacklistRemoteFunctions } from 'src/blacklist/background'
 import {
     setImportStateManager,
@@ -47,6 +49,8 @@ export function createBackgroundModules(options: {
     authBackground: AuthBackground
     browserAPIs: Browser
     signalTransportFactory: SignalTransportFactory
+    clientSyncLog: ClientSyncLogStorage
+    sharedSyncLog: SharedSyncLog
     tabManager?: TabManager
 }): BackgroundModules {
     const { storageManager } = options
@@ -104,6 +108,9 @@ export function createBackgroundModules(options: {
             auth: options.authBackground,
             signalTransportFactory: options.signalTransportFactory,
             storageManager,
+            sharedSyncLog: options.sharedSyncLog,
+            browserAPIs: options.browserAPIs,
+            clienSyncLog: options.clientSyncLog,
         }),
     }
 }

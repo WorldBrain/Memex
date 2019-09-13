@@ -1,25 +1,40 @@
+import { Browser } from 'webextension-polyfill-ts'
+import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import AuthBackground from 'src/auth/background'
 import { PublicSyncInterface } from './types'
 import InitialSync, { SignalTransportFactory } from './initial-sync'
 import ContinuousSync from './continuous-sync'
 import StorageManager from '@worldbrain/storex'
+import { SYNC_STORAGE_AREA_KEYS } from './constants'
+import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 
 export default class SyncBackground {
     initialSync: InitialSync
     continuousSync: ContinuousSync
     remoteFunctions: PublicSyncInterface
 
-    constructor(options: {
-        auth: AuthBackground
-        storageManager: StorageManager
-        signalTransportFactory: SignalTransportFactory
-    }) {
+    constructor(
+        private options: {
+            auth: AuthBackground
+            storageManager: StorageManager
+            signalTransportFactory: SignalTransportFactory
+            clienSyncLog: ClientSyncLogStorage
+            sharedSyncLog: SharedSyncLog
+            browserAPIs: Pick<Browser, 'storage'>
+        },
+    ) {
         const syncedCollections = ['customLists', 'pageListEntries', 'pages']
         this.initialSync = new InitialSync({
             ...options,
             syncedCollections,
         })
-        this.continuousSync = new ContinuousSync()
+        this.continuousSync = new ContinuousSync({
+            auth: options.auth,
+            storageManager: options.storageManager,
+            clientSyncLog: options.clienSyncLog,
+            sharedSyncLog: options.sharedSyncLog,
+            browserAPIs: options.browserAPIs,
+        })
 
         const bound = <Target, Key extends keyof Target>(
             object: Target,
@@ -40,5 +55,5 @@ export default class SyncBackground {
         }
     }
 
-    async initDevice() {}
+    async setup() {}
 }

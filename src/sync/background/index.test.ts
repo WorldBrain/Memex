@@ -4,6 +4,11 @@ import {
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
+import {
+    lazyMemorySignalTransportFactory,
+    createMemorySharedSyncLog,
+} from './index.tests'
+import { SYNC_STORAGE_AREA_KEYS } from './constants'
 
 describe('SyncBackground', () => {
     it.skip('should not do anything if not enabled', () => {})
@@ -11,9 +16,17 @@ describe('SyncBackground', () => {
     it.skip('should reschedule a sync in case of network failures', () => {})
 
     it('should do the whole onboarding flow correctly', async () => {
+        const signalTransportFactory = lazyMemorySignalTransportFactory()
+        const sharedSyncLog = await createMemorySharedSyncLog()
         const setups = [
-            await setupBackgroundIntegrationTest(),
-            await setupBackgroundIntegrationTest(),
+            await setupBackgroundIntegrationTest({
+                signalTransportFactory,
+                sharedSyncLog,
+            }),
+            await setupBackgroundIntegrationTest({
+                signalTransportFactory,
+                sharedSyncLog,
+            }),
         ]
         const syncModule = (setup: BackgroundIntegrationTestSetup) =>
             setup.backgroundModules.sync
@@ -62,15 +75,25 @@ describe('SyncBackground', () => {
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
-            pages: ['http://www.bla.com/'],
+            pages: ['http://bla.com/'],
             active: true,
         })
 
-        await syncModule(setups[0]).initDevice()
-        await syncModule(setups[1]).initDevice()
+        await syncModule(setups[0]).continuousSync.initDevice()
+        await syncModule(setups[1]).continuousSync.initDevice()
 
-        await syncModule(setups[0]).remoteFunctions.enableContinuousSync()
-        await syncModule(setups[1]).remoteFunctions.enableContinuousSync()
+        const getDeviceId = async (setup: BackgroundIntegrationTestSetup) =>
+            (await setup.browserLocalStorage.get(
+                SYNC_STORAGE_AREA_KEYS.deviceId,
+            ))[SYNC_STORAGE_AREA_KEYS.deviceId]
+
+        const firstDeviceId = await getDeviceId(setups[0])
+        expect(firstDeviceId).toBeTruthy()
+
+        const secondDeviceId = await getDeviceId(setups[1])
+        expect(secondDeviceId).toBeTruthy()
+
+        expect(firstDeviceId).not.toEqual(secondDeviceId)
 
         await customLists(setups[1]).updateListName({
             id: listId,
@@ -90,7 +113,7 @@ describe('SyncBackground', () => {
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
-            pages: ['http://www.bla.com/'],
+            pages: ['http://bla.com/'],
             active: true,
         })
     })

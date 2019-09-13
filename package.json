@@ -209,6 +209,7 @@
         "webpack-chrome-extension-reloader": "^0.8.3",
         "webpack-cli": "^3.1.0",
         "whatwg-url": "^7.0.0",
+        "wrtc": "^0.4.1",
         "zip-webpack-plugin": "^3.0.0"
     }
 }
