@@ -95,6 +95,9 @@ describe('SyncBackground', () => {
 
         expect(firstDeviceId).not.toEqual(secondDeviceId)
 
+        await syncModule(setups[0]).remoteFunctions.enableContinuousSync()
+        await syncModule(setups[1]).remoteFunctions.enableContinuousSync()
+
         await customLists(setups[1]).updateListName({
             id: listId,
             name: 'Updated List Title',

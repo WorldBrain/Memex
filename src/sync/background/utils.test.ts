@@ -1,8 +1,5 @@
-import {
-    StorageModule,
-    StorageModuleCollections,
-} from '@worldbrain/storex-pattern-modules'
-import { mapCollectionVersions } from './storage'
+import { StorageModuleCollections } from '@worldbrain/storex-pattern-modules'
+import { mapCollectionVersions } from './utils'
 
 const TEST_STORAGE_COLLECTIONS: StorageModuleCollections = {
     foo: {

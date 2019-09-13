@@ -34,21 +34,11 @@ export async function setupBackgroundIntegrationTest(options?: {
         global['URL'] = URL
     }
 
-    const needsSync = !!options.sharedSyncLog
+    const needsSync = !!(options && options.sharedSyncLog)
 
     const browserLocalStorage =
-        options.browserLocalStorage || new MemoryBrowserStorage()
-    const storageManager = initStorex({
-        customMiddleware: options && options.customMiddleware,
-    })
-
-    let clientSyncLog: ClientSyncLogStorage
-    if (needsSync) {
-        clientSyncLog = new ClientSyncLogStorage({ storageManager })
-        registerModuleMapCollections(storageManager.registry, {
-            clientSyncLog,
-        })
-    }
+        (options && options.browserLocalStorage) || new MemoryBrowserStorage()
+    const storageManager = initStorex()
 
     const backgroundModules = createBackgroundModules({
         storageManager,
@@ -66,7 +56,6 @@ export async function setupBackgroundIntegrationTest(options?: {
             getCurrentUser: () => ({ id: 1 }),
         },
         signalTransportFactory: options && options.signalTransportFactory,
-        clientSyncLog,
         sharedSyncLog: options && options.sharedSyncLog,
     })
     backgroundModules.customLists._createPage =
@@ -78,12 +67,10 @@ export async function setupBackgroundIntegrationTest(options?: {
     await storageManager.finishInitialization()
 
     if (needsSync) {
-        const syncLoggingMiddleware = new SyncLoggingMiddleware({
-            storageManager,
-            clientSyncLog,
-            includeCollections: ['customLists', 'pageListEntries'],
-        })
-        storageManager.setMiddleware([syncLoggingMiddleware])
+        storageManager.setMiddleware([
+            ...((options && options.customMiddleware) || []),
+            await backgroundModules.sync.createSyncLoggingMiddleware(),
+        ])
     }
 
     setStorex(storageManager)

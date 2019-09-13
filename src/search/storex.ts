@@ -1,8 +1,4 @@
-import Storex, {
-    CollectionDefinitionMap,
-    StorageBackendPlugin,
-} from '@worldbrain/storex'
-import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
+import Storex from '@worldbrain/storex'
 import {
     DexieStorageBackend,
     IndexedDbImplementation,
@@ -16,7 +12,6 @@ import { plugins as backendPlugins } from './storex-plugins'
 
 export default function initStorex(options: {
     dbName: string
-    customMiddleware?: StorageMiddleware[]
     idbImplementation?: IndexedDbImplementation
 }): Storex {
     const backend = new DexieStorageBackend({
@@ -31,9 +26,6 @@ export default function initStorex(options: {
     }
 
     const storex = new Storex({ backend })
-    if (options.customMiddleware) {
-        storex.setMiddleware(options.customMiddleware)
-    }
 
     // Override default storex fields with Memex-specific ones
     const customFields = [{ key: 'url', field: UrlField }]

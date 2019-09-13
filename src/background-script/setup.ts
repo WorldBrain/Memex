@@ -28,6 +28,7 @@ import { setupImportBackgroundModule } from 'src/imports/background'
 import AuthBackground from 'src/auth/background'
 import SyncBackground from 'src/sync/background'
 import { SignalTransportFactory } from 'src/sync/background/initial-sync'
+import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -49,7 +50,6 @@ export function createBackgroundModules(options: {
     authBackground: AuthBackground
     browserAPIs: Browser
     signalTransportFactory: SignalTransportFactory
-    clientSyncLog: ClientSyncLogStorage
     sharedSyncLog: SharedSyncLog
     tabManager?: TabManager
 }): BackgroundModules {
@@ -110,7 +110,6 @@ export function createBackgroundModules(options: {
             storageManager,
             sharedSyncLog: options.sharedSyncLog,
             browserAPIs: options.browserAPIs,
-            clienSyncLog: options.clientSyncLog,
         }),
     }
 }
@@ -155,6 +154,7 @@ export function getBackgroundStorageModules(
         search: backgroundModules.search.storage,
         social: backgroundModules.social.storage,
         tags: backgroundModules.tags.storage,
+        clientSyncLog: backgroundModules.sync.clientSyncLog,
     }
 }
 

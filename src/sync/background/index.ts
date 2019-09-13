@@ -1,39 +1,57 @@
 import { Browser } from 'webextension-polyfill-ts'
+import StorageManager from '@worldbrain/storex'
+import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
+import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
 import AuthBackground from 'src/auth/background'
 import { PublicSyncInterface } from './types'
 import InitialSync, { SignalTransportFactory } from './initial-sync'
 import ContinuousSync from './continuous-sync'
-import StorageManager from '@worldbrain/storex'
-import { SYNC_STORAGE_AREA_KEYS } from './constants'
-import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
+import { MemexClientSyncLogStorage } from './storage'
 
 export default class SyncBackground {
     initialSync: InitialSync
     continuousSync: ContinuousSync
     remoteFunctions: PublicSyncInterface
+    clientSyncLog: ClientSyncLogStorage
+    syncLoggingMiddleware?: SyncLoggingMiddleware
+    readonly syncedCollections: string[] = [
+        'customLists',
+        'pageListEntries',
+        'pages',
+    ]
 
     constructor(
         private options: {
             auth: AuthBackground
             storageManager: StorageManager
             signalTransportFactory: SignalTransportFactory
-            clienSyncLog: ClientSyncLogStorage
             sharedSyncLog: SharedSyncLog
             browserAPIs: Pick<Browser, 'storage'>
         },
     ) {
-        const syncedCollections = ['customLists', 'pageListEntries', 'pages']
+        this.clientSyncLog = new MemexClientSyncLogStorage({
+            storageManager: options.storageManager,
+        })
         this.initialSync = new InitialSync({
             ...options,
-            syncedCollections,
+            syncedCollections: this.syncedCollections,
         })
         this.continuousSync = new ContinuousSync({
             auth: options.auth,
             storageManager: options.storageManager,
-            clientSyncLog: options.clienSyncLog,
+            clientSyncLog: this.clientSyncLog,
             sharedSyncLog: options.sharedSyncLog,
             browserAPIs: options.browserAPIs,
+            toggleSyncLogging: (enabed: true) => {
+                if (this.syncLoggingMiddleware) {
+                    this.syncLoggingMiddleware.enabled = enabed
+                } else {
+                    throw new Error(
+                        `Tried to toggle sync logging before logging middleware was created`,
+                    )
+                }
+            },
         })
 
         const bound = <Target, Key extends keyof Target>(
@@ -56,4 +74,14 @@ export default class SyncBackground {
     }
 
     async setup() {}
+
+    async createSyncLoggingMiddleware() {
+        this.syncLoggingMiddleware = new SyncLoggingMiddleware({
+            storageManager: this.options.storageManager,
+            clientSyncLog: this.clientSyncLog,
+            includeCollections: this.syncedCollections,
+        })
+        this.syncLoggingMiddleware.enabled = false
+        return this.syncLoggingMiddleware
+    }
 }

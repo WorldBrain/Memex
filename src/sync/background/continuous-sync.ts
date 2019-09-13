@@ -6,6 +6,7 @@ import { doSync } from '@worldbrain/storex-sync'
 import AuthBackground from 'src/auth/background'
 import { SYNC_STORAGE_AREA_KEYS } from './constants'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
+import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
 
 export default class ContinuousSync {
     private deviceId: number | string
@@ -17,6 +18,7 @@ export default class ContinuousSync {
             clientSyncLog: ClientSyncLogStorage
             sharedSyncLog: SharedSyncLog
             browserAPIs: Pick<Browser, 'storage'>
+            toggleSyncLogging: (enabled: boolean) => void
         },
     ) {}
 
@@ -40,7 +42,14 @@ export default class ContinuousSync {
         this.deviceId = newDeviceId
     }
 
-    async enableContinuousSync(): Promise<void> {}
+    async enableContinuousSync(): Promise<void> {
+        const localStorage = this.options.browserAPIs.storage.local
+        await localStorage.set({
+            [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
+        })
+
+        this.options.toggleSyncLogging(true)
+    }
 
     async forceIncrementalSync(): Promise<void> {
         const { auth } = this.options
@@ -53,7 +62,7 @@ export default class ContinuousSync {
             sharedSyncLog: this.options.sharedSyncLog,
             storageManager: this.options.storageManager,
             reconciler: reconcileSyncLog,
-            now: '$now',
+            now: Date.now(),
             userId: user.id,
             deviceId: this.deviceId,
         })
