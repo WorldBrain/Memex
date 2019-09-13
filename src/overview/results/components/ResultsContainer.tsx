@@ -20,6 +20,7 @@ export interface StateProps {
     isLoading: boolean
     showInbox: boolean
     areAnnotationsExpanded: boolean
+    showOnboardingMessage: boolean
     shouldShowCount: boolean
     isInvalidSearch: boolean
     showInitSearchMsg: boolean
@@ -107,6 +108,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isInvalidSearch: selectors.isInvalidSearch(state),
     totalResultCount: selectors.totalResultCount(state),
     showInitSearchMsg: selectors.showInitSearchMsg(state),
+    showOnboardingMessage: selectors.showOnboardingMessage(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({

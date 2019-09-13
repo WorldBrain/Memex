@@ -9,7 +9,6 @@ import NextStepButton from '../../components/next-step-button'
 import SettingsCheckbox from '../../components/settings-checkbox'
 import SearchSettings from '../../components/search-settings'
 
-import { OVERVIEW_URL } from 'src/constants'
 import { STORAGE_KEYS } from 'src/options/settings/constants'
 import { SIDEBAR_STORAGE_NAME } from 'src/sidebar-overlay/constants'
 import {
@@ -20,8 +19,8 @@ import {
 const styles = require('../../components/onboarding-box.css')
 
 export interface Props {
-    navToOverview: () => void
     storage: Storage.LocalStorageArea
+    navToOverview: () => void
 }
 
 export default class OnboardingScreen extends StatefulUIElement<
@@ -31,7 +30,6 @@ export default class OnboardingScreen extends StatefulUIElement<
 > {
     static TOTAL_STEPS = 4
     static defaultProps: Partial<Props> = {
-        navToOverview: () => (window.location.href = OVERVIEW_URL),
         storage: browser.storage.local,
     }
 

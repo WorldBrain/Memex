@@ -26,6 +26,10 @@ export const delTag = createAction('results/localDelTag', (tag, index) => ({
     index,
 }))
 
+export const setShowOnboardingMessage = createAction<boolean>(
+    'results/setShowOnboardingMessage',
+)
+
 export const hideResultItem = createAction<string>('results/hideResultItem')
 export const changeHasBookmark = createAction<number>(
     'results/changeHasBookmark',
