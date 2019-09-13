@@ -7,6 +7,7 @@ import NotificationContainer, {
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
+import OnboardingMessage from './onboarding-message'
 import SearchTypeSwitch from './search-type-switch-container'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -47,6 +48,10 @@ class ResultsContainer extends PureComponent<Props> {
                 {children}
             </React.Fragment>
         )
+
+        if (this.props.showOnboardingMessage) {
+            return <OnboardingMessage />
+        }
 
         if (this.props.isBadTerm) {
             return renderSearchSwitch(
