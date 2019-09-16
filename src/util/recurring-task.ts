@@ -1,5 +1,5 @@
 export class RecurringTask {
-    taskRunning = false
+    // taskRunning = false
     aproximateNextRun: number | null = null
     private timeoutId: ReturnType<typeof setTimeout> | null = null
 
@@ -48,11 +48,11 @@ export class RecurringTask {
     }
 
     private async run() {
-        this.taskRunning = true
+        // this.taskRunning = true
         try {
             await this.task()
         } finally {
-            this.taskRunning = false
+            // this.taskRunning = false
         }
     }
 
