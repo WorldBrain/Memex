@@ -114,7 +114,9 @@ export function createBackgroundModules(options: {
     }
 }
 
-export function setupBackgroundModules(backgroundModules: BackgroundModules) {
+export async function setupBackgroundModules(
+    backgroundModules: BackgroundModules,
+) {
     setImportStateManager(
         new ImportStateManager({
             searchIndex: backgroundModules.search.searchIndex,
@@ -139,6 +141,7 @@ export function setupBackgroundModules(backgroundModules: BackgroundModules) {
     backgroundModules.backupModule.setupRemoteFunctions()
     backgroundModules.backupModule.startRecordingChangesIfNeeded()
     setupBlacklistRemoteFunctions()
+    await backgroundModules.sync.setup()
 }
 
 export function getBackgroundStorageModules(

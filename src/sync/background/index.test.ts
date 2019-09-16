@@ -8,12 +8,11 @@ import {
     lazyMemorySignalTransportFactory,
     createMemorySharedSyncLog,
 } from './index.tests'
-import { SYNC_STORAGE_AREA_KEYS } from './constants'
+import { SYNC_STORAGE_AREA_KEYS, INCREMENTAL_SYNC_FREQUENCY } from './constants'
+import SyncBackground from '.'
 
 describe('SyncBackground', () => {
     it.skip('should not do anything if not enabled', () => {})
-    it.skip('should sync every 15 minutes once enabled', () => {})
-    it.skip('should reschedule a sync in case of network failures', () => {})
 
     it('should do the whole onboarding flow correctly', async () => {
         const signalTransportFactory = lazyMemorySignalTransportFactory()
@@ -35,6 +34,8 @@ describe('SyncBackground', () => {
         const customLists = (setup: BackgroundIntegrationTestSetup) =>
             setup.backgroundModules.customLists.remoteFunctions
 
+        // Initial data
+
         const listId = await setups[0].backgroundModules.customLists.createCustomList(
             {
                 name: 'My list',
@@ -54,6 +55,8 @@ describe('SyncBackground', () => {
             },
             visits: [],
         })
+
+        // Initial sync
 
         const { initialMessage } = await syncModule(
             setups[0],
@@ -79,6 +82,8 @@ describe('SyncBackground', () => {
             active: true,
         })
 
+        // Set up device IDs
+
         await syncModule(setups[0]).continuousSync.initDevice()
         await syncModule(setups[1]).continuousSync.initDevice()
 
@@ -95,8 +100,21 @@ describe('SyncBackground', () => {
 
         expect(firstDeviceId).not.toEqual(secondDeviceId)
 
+        // Enable continuous sync
+
         await syncModule(setups[0]).remoteFunctions.enableContinuousSync()
+        expectIncrementalSyncScheduled(syncModule(setups[0]), {
+            when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
+            margin: 50,
+        })
+
         await syncModule(setups[1]).remoteFunctions.enableContinuousSync()
+        expectIncrementalSyncScheduled(syncModule(setups[1]), {
+            when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
+            margin: 50,
+        })
+
+        // Force incremental sync
 
         await customLists(setups[1]).updateListName({
             id: listId,
@@ -120,4 +138,81 @@ describe('SyncBackground', () => {
             active: true,
         })
     })
+
+    it('should enable Sync on start up if enabled', async () => {
+        const signalTransportFactory = lazyMemorySignalTransportFactory()
+        const sharedSyncLog = await createMemorySharedSyncLog()
+        const deviceIds = [
+            await sharedSyncLog.createDeviceId({ userId: 1 }),
+            await sharedSyncLog.createDeviceId({ userId: 1 }),
+        ]
+        const setups = [
+            await setupBackgroundIntegrationTest({
+                signalTransportFactory,
+                sharedSyncLog,
+            }),
+            await setupBackgroundIntegrationTest({
+                signalTransportFactory,
+                sharedSyncLog,
+            }),
+        ]
+
+        const syncModule = (setup: BackgroundIntegrationTestSetup) =>
+            setup.backgroundModules.sync
+        const customLists = (setup: BackgroundIntegrationTestSetup) =>
+            setup.backgroundModules.customLists.remoteFunctions
+
+        await setups[0].browserLocalStorage.set({
+            [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
+            [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[0],
+        })
+        await setups[1].browserLocalStorage.set({
+            [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
+            [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[0],
+        })
+
+        await syncModule(setups[0]).setup()
+        await syncModule(setups[1]).setup()
+        expectIncrementalSyncScheduled(syncModule(setups[0]), {
+            when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
+            margin: 50,
+        })
+        expectIncrementalSyncScheduled(syncModule(setups[1]), {
+            when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
+            margin: 50,
+        })
+
+        const listId = await setups[0].backgroundModules.customLists.createCustomList(
+            {
+                name: 'My list',
+            },
+        )
+        await setups[0].backgroundModules.sync.continuousSync.forceIncrementalSync()
+        // await setups[1].backgroundModules.sync.continuousSync.forceIncrementalSync()
+
+        // expect(
+        //     await customLists(setups[1]).fetchListById({
+        //         id: listId,
+        //     }),
+        // ).toEqual({
+        //     id: listId,
+        //     name: 'My list',
+        //     isDeletable: true,
+        //     isNestable: true,
+        //     createdAt: expect.any(Date),
+        //     pages: ['http://bla.com/'],
+        //     active: true,
+        // })
+    })
 })
+
+function expectIncrementalSyncScheduled(
+    sync: SyncBackground,
+    options: { when: number; margin: number },
+) {
+    const recurringTask = sync.continuousSync.recurringIncrementalSyncTask
+    expect(recurringTask).toBeTruthy()
+    expect(recurringTask.aproximateNextRun).toBeTruthy()
+    const difference = recurringTask.aproximateNextRun - options.when
+    expect(difference).toBeLessThan(options.margin)
+}

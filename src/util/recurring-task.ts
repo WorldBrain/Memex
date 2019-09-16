@@ -1,5 +1,5 @@
 export class RecurringTask {
-    // taskRunning = false
+    // taskRunning = false // TODO: Write tests before introducing this feature
     aproximateNextRun: number | null = null
     private timeoutId: ReturnType<typeof setTimeout> | null = null
 

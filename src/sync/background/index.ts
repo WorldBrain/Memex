@@ -8,6 +8,7 @@ import { PublicSyncInterface } from './types'
 import InitialSync, { SignalTransportFactory } from './initial-sync'
 import ContinuousSync from './continuous-sync'
 import { MemexClientSyncLogStorage } from './storage'
+import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 
 export default class SyncBackground {
     initialSync: InitialSync
@@ -38,6 +39,7 @@ export default class SyncBackground {
             syncedCollections: this.syncedCollections,
         })
         this.continuousSync = new ContinuousSync({
+            frequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
             auth: options.auth,
             storageManager: options.storageManager,
             clientSyncLog: this.clientSyncLog,
@@ -73,7 +75,13 @@ export default class SyncBackground {
         }
     }
 
-    async setup() {}
+    async setup() {
+        await this.continuousSync.setup()
+    }
+
+    async tearDown() {
+        await this.continuousSync.tearDown()
+    }
 
     async createSyncLoggingMiddleware() {
         this.syncLoggingMiddleware = new SyncLoggingMiddleware({
