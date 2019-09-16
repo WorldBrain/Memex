@@ -32,13 +32,38 @@ export default class SearchSettings extends React.PureComponent<Props> {
         visitDelayMax: VISIT_DELAY_RANGE.MAX,
     }
 
+    private renderIndexingMessage() {
+        if (
+            !this.props.visits &&
+            !this.props.bookmarks &&
+            !this.props.annotations
+        ) {
+            return this.props.stubs
+                ? 'Titles and URLs are always searchable'
+                : 'Searchability of visited websites is disabled'
+        }
+
+        let base = 'All pages are full-text searchable that you have '
+
+        if (this.props.visits) {
+            base += `visited for more than ${this.props.visitDelay} seconds, `
+        }
+
+        if (this.props.bookmarks) {
+            base += 'bookmarked, tagged, or sorted into collections, '
+        }
+
+        if (this.props.annotations) {
+            base += 'annotated or made highlights on, '
+        }
+
+        return base.slice(0, base.length - 2)
+    }
+
     private renderDisabledSettings() {
         return (
             <>
-                <p>
-                    All pages you visited more than {this.props.visitDelay}{' '}
-                    seconds are full-text searchable
-                </p>
+                <p>{this.renderIndexingMessage()}</p>
                 <a
                     className={styles.settingsButton}
                     onClick={this.props.toggleShowSearchSettings}
