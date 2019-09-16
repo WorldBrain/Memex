@@ -1,5 +1,4 @@
 import React from 'react'
-import cx from 'classnames'
 
 import { ProgressStepContainer } from 'src/common-ui/components'
 
