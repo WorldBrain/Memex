@@ -1,0 +1,8 @@
+@value colors: 'src/common-ui/colors.css';
+@value color5 from colors;
+
+.mainText {
+    font-size: 18px;
+    font-weight: 500;
+    color: color5;
+}

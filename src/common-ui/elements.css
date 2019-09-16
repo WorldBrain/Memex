@@ -104,6 +104,11 @@
         background: color2;
         color: color5;
     }
+
+    &:active,
+    &:focus {
+        outline: none;
+    }
 }
 
 .CTAwarning {
