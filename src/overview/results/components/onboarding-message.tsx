@@ -21,12 +21,12 @@ export default class OnboardingMessage extends React.PureComponent<
         return (
             <ResultsMessage>
                 <p className={styles.mainText}>
-                    You don't have any content indexed yet...
+                    Welcome to Memex! It looks like you don't have any content
+                    indexed yet...
                 </p>
                 {this.state.showTooltip && (
                     <OnboardingTooltip
-                        titleText="Import"
-                        descriptionText="Import history and content from other services."
+                        descriptionText="Import your existing bookmarks &amp; web history from Pocket, Diigo, Raindrop.io and many more."
                         CTAText="Import"
                         onCTAClick={() => (window.location.hash = '#/import')}
                         onDismiss={() =>

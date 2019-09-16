@@ -5,7 +5,6 @@ const styles = require('./onboarding-tooltip.css')
 export interface Props {
     imgSrc?: string
     CTAText?: string
-    titleText: string
     descriptionText: string
     onDismiss: () => void
     onCTAClick?: () => void
@@ -18,14 +17,12 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
         }
 
         return (
-            <div className={styles.ctaContainer}>
-                <button
-                    className={styles.ctaButton}
-                    onClick={this.props.onCTAClick}
-                >
-                    {this.props.CTAText}
-                </button>
-            </div>
+            <button
+                className={styles.ctaButton}
+                onClick={this.props.onCTAClick}
+            >
+                {this.props.CTAText}
+            </button>
         )
     }
 
@@ -42,7 +39,10 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
             <div className={styles.container}>
                 {this.renderImg()}
                 <div className={styles.textContainer}>
-                    <h1 className={styles.titleText}>{this.props.titleText}</h1>
+                    <p className={styles.containerTitle}>
+                        <span className={styles.tipIcon} />
+                        <span>Pro tip</span>
+                    </p>
                     <p className={styles.descriptionText}>
                         {this.props.descriptionText}
                     </p>
@@ -51,9 +51,7 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
                 <button
                     className={styles.dismissButton}
                     onClick={this.props.onDismiss}
-                >
-                    X
-                </button>
+                />
             </div>
         )
     }

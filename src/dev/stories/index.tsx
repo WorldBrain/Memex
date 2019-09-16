@@ -3,6 +3,7 @@ import React from 'react'
 import { storiesOf } from '@storybook/react'
 
 import ProgressStepContainer from 'src/common-ui/components/progress-step-container'
+import OnboardingTooltip from 'src/overview/onboarding/components/onboarding-tooltip'
 
 storiesOf('ProgressContainer', module)
     .add('No steps seen/completed', () => (
@@ -15,3 +16,12 @@ storiesOf('ProgressContainer', module)
             onStepClick={() => undefined}
         />
     ))
+
+storiesOf('Onboarding Tooltip', module).add('Import example', () => (
+    <OnboardingTooltip
+        descriptionText="Import your existing bookmarks &amp; web history from Pocket, Diigo, Raindrop.io and many more."
+        CTAText="Import"
+        onCTAClick={() => undefined}
+        onDismiss={() => undefined}
+    />
+))
