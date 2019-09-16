@@ -15,6 +15,7 @@ import { SIDEBAR_STORAGE_NAME } from 'src/sidebar-overlay/constants'
 import {
     TOOLTIP_STORAGE_NAME,
     KEYBOARDSHORTCUTS_STORAGE_NAME,
+    KEYBOARDSHORTCUTS_DEFAULT_STATE,
 } from 'src/content-tooltip/constants'
 
 const styles = require('../../components/onboarding-box.css')
@@ -78,17 +79,22 @@ export default class OnboardingScreen extends StatefulUIElement<
             grabVal(STORAGE_KEYS.STUBS, defs.areStubsEnabled),
         )
         this.processEvent(
-            'setShortcutsEnabled',
-            grabVal(KEYBOARDSHORTCUTS_STORAGE_NAME, defs.areShortcutsEnabled),
+            'setTooltipEnabled',
+            grabVal(TOOLTIP_STORAGE_NAME, defs.isTooltipEnabled),
         )
         this.processEvent(
             'setSidebarEnabled',
             grabVal(SIDEBAR_STORAGE_NAME, defs.isSidebarEnabled),
         )
-        this.processEvent(
-            'setTooltipEnabled',
-            grabVal(TOOLTIP_STORAGE_NAME, defs.isTooltipEnabled),
-        )
+
+        // Keyboard shortcut state is nested
+        let shortcutsEnabled = storedVals[KEYBOARDSHORTCUTS_STORAGE_NAME]
+        shortcutsEnabled =
+            shortcutsEnabled != null
+                ? shortcutsEnabled.shortcutsEnabled
+                : defs.areShortcutsEnabled
+
+        this.processEvent('setShortcutsEnabled', { enabled: shortcutsEnabled })
     }
 
     private areAllSettingsChecked() {
@@ -116,8 +122,12 @@ export default class OnboardingScreen extends StatefulUIElement<
     private handleShortcutsToggle = () => {
         const enabled = !this.state.areShortcutsEnabled
         this.processEvent('setShortcutsEnabled', { enabled })
+
         return this.props.storage.set({
-            [KEYBOARDSHORTCUTS_STORAGE_NAME]: enabled,
+            [KEYBOARDSHORTCUTS_STORAGE_NAME]: {
+                ...KEYBOARDSHORTCUTS_DEFAULT_STATE,
+                shortcutsEnabled: enabled,
+            },
         })
     }
 
