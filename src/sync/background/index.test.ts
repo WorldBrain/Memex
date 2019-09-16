@@ -121,24 +121,3 @@ describe('SyncBackground', () => {
         })
     })
 })
-
-// export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Sync functionality', [
-//     backgroundIntegrationTest('should do the whole onboarding flow correctly', () => {
-//         return {
-//             steps: [
-//                 {
-//                     description: 'enable sync',
-//                     execute: async ({ setup }) => {
-
-//                     },
-//                 },
-//                 {
-//                     description: 'do initial sync',
-//                     execute: async ({ setup }) => {
-
-//                     },
-//                 },
-//             ]
-//         }
-//     })
-// ])
