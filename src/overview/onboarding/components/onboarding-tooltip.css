@@ -1,15 +1,16 @@
 @value colors: 'src/common-ui/colors.css';
-@value color2 from colors;
+@value color2, color3, color5, color17 from colors;
 
 .container {
-    border: 1px solid #ededed;
-    border-radius: 3px;
-    position: relative;
-    display: flex;
-    flex-direction: row;
+    composes: boxShadow from 'src/common-ui/colors.css';
     align-items: center;
-    min-width: 500px;
-    height: 120px;
+    background-color: white;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 17px;
+    position: relative;
+    padding: 1rem;
 }
 
 .img {
@@ -17,45 +18,63 @@
 }
 
 .textContainer {
-    flex: 3;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding-left: 1em;
-}
-
-.ctaContainer {
     flex: 1;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .ctaButton {
+    display: inline-flex;
+    composes: CTA from 'src/common-ui/elements.css';
     background: color2;
     color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.7em 1em;
-    font-weight: bold;
+    font-size: 14px;
+
+    &:hover {
+        background: #44bc8b;
+        color: white;
+    }
 }
 
 .dismissButton {
+    composes: removeIcon from 'src/common-ui/icons.css';
+    border: none;
+    background-size: 12px;
+    background-color: transparent;
+    width: 22px;
+    height: 22px;
+    outline: none;
     position: absolute;
-    top: 1em;
-    right: 1em;
-    width: 2em;
-    height: 2em;
-    border-radius: 1em;
-    background: #b3b3b3;
-    color: white;
+    top: 1rem;
+    right: 1rem;
+
+    &:hover {
+        cursor: pointer;
+    }
 }
 
-.titleText {
-    font-size: 16px;
-    text-align: left;
-    margin: 0;
+.containerTitle {
+    color: color17;
+    display: flex;
+    flex-direction: normal;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.tipIcon {
+    composes: tipIcon from 'src/common-ui/icons.css';
+    margin: 0 5px 0 -21px; /* width of the icon to offset */
+    position: relative;
+    display: flex;
 }
 
 .descriptionText {
-    font-size: 12px;
-    text-align: left;
-    margin: 0;
+    font-size: 16px;
+    color: color3;
+    font-weight: normal;
+    width: 75%;
+    margin: 1rem auto;
+    text-align: center;
 }

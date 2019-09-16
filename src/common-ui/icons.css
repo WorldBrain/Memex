@@ -189,3 +189,10 @@
     composes: iconPosition;
     background-image: url('/img/exclusion.svg');
 }
+
+.tipIcon {
+    composes: iconPosition;
+    background-image: url('/img/icon_tooltip.svg');
+    height: 21px;
+    width: 16px;
+}
