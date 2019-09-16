@@ -35,7 +35,17 @@ async function setupTest() {
 }
 
 describe('SyncBackground', () => {
-    it.skip('should not do anything if not enabled', () => {})
+    it('should not do anything if not enabled', async () => {
+        const { setups, syncModule } = await setupTest()
+        expect(syncModule(setups[0]).continuousSync.enabled).toBe(false)
+        expect(syncModule(setups[0]).syncLoggingMiddleware.enabled).toBe(false)
+        await setups[0].backgroundModules.customLists.createCustomList({
+            name: 'My list',
+        })
+        expect(
+            await syncModule(setups[0]).clientSyncLog.getEntriesCreatedAfter(0),
+        ).toEqual([])
+    })
 
     it('should do the whole onboarding flow correctly', async () => {
         const {
