@@ -1,14 +1,13 @@
 @value colors: 'src/common-ui/colors.css';
 @value color1, color2, color5, color6 from colors;
 
-.container {
+.containerStyle {
     background: white;
     color: color5;
     width: 60%;
     max-width: 50rem;
     min-width: 4rem;
     margin: 2rem auto 1rem;
-    min-height: 547px;
     padding: 2rem 4rem;
     display: flex;
     border: solid 1px #f4f4f4;
@@ -17,6 +16,26 @@
     box-shadow: 0px 2px 30px rgba(164, 180, 182, 0.5);
     text-align: center;
     justify-content: space-between;
+}
+
+.initStepContainer {
+    animation: fadeIn 0.4s ease;
+    composes: containerStyle;
+}
+
+.container {
+    composes: containerStyle;
+    min-height: 567px;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .logo {

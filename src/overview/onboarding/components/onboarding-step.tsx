@@ -1,4 +1,5 @@
 import React from 'react'
+import cx from 'classnames'
 
 import { ProgressStepContainer } from 'src/common-ui/components'
 
@@ -26,7 +27,13 @@ export default class OnboardingStep extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.container}>
+            <div
+                className={
+                    this.props.isInitStep
+                        ? styles.initStepContainer
+                        : styles.container
+                }
+            >
                 <div>
                     <h1 className={this.headerClassName}>
                         {this.props.titleText}
