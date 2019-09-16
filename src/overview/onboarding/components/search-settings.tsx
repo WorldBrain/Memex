@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { Checkbox, CheckboxToggle } from 'src/common-ui/components'
+import { VISIT_DELAY_RANGE } from 'src/options/settings/constants'
 
 const styles = require('./search-settings.css')
 
@@ -12,6 +13,9 @@ export interface Props {
     screenshots: boolean
     showSearchSettings: boolean
     areAllSettingsChecked: boolean
+    visitDelay: number
+    visitDelayMin: number
+    visitDelayMax: number
     toggleAll: CheckboxToggle
     toggleStubs: CheckboxToggle
     toggleAnnotations: CheckboxToggle
@@ -19,15 +23,21 @@ export interface Props {
     toggleBookmarks: CheckboxToggle
     toggleScreenshots: CheckboxToggle
     toggleShowSearchSettings: () => void
+    setVisitDelayChange: (e: React.SyntheticEvent<HTMLInputElement>) => void
 }
 
 export default class SearchSettings extends React.PureComponent<Props> {
+    static defaultProps: Partial<Props> = {
+        visitDelayMin: VISIT_DELAY_RANGE.MIN,
+        visitDelayMax: VISIT_DELAY_RANGE.MAX,
+    }
+
     private renderDisabledSettings() {
         return (
             <>
                 <p>
-                    All pages you visited more than 5 seconds are full-text
-                    searchable
+                    All pages you visited more than {this.props.visitDelay}{' '}
+                    seconds are full-text searchable
                 </p>
                 <a
                     className={styles.settingsButton}
@@ -76,7 +86,15 @@ export default class SearchSettings extends React.PureComponent<Props> {
                     isChecked={this.props.visits}
                     handleChange={this.props.toggleVisits}
                 >
-                    Visited for at least X seconds
+                    Visited for at least{' '}
+                    <input
+                        type="number"
+                        value={this.props.visitDelay}
+                        onChange={this.props.setVisitDelayChange}
+                        min={this.props.visitDelayMin}
+                        max={this.props.visitDelayMax}
+                    />{' '}
+                    seconds
                 </Checkbox>
                 <Checkbox
                     id="index-bookmarks"

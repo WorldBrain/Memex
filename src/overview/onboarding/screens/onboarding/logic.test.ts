@@ -23,6 +23,23 @@ describe('onboarding screen UI logic tests', () => {
         }
     })
 
+    it('should be able to set visit delay', () => {
+        const { logic, state } = setupTest()
+
+        let nextState = state
+        for (const delay of [1, 2, 3, 4, 5, 6]) {
+            expect(nextState.visitDelay).not.toBe(delay)
+            nextState = logic.withMutation(
+                nextState,
+                logic.setVisitDelay({
+                    event: { delay },
+                    previousState: nextState,
+                }),
+            )
+            expect(nextState.visitDelay).toBe(delay)
+        }
+    })
+
     it('should be able to set tooltip enabled state', () => {
         const { logic, state } = setupTest()
 

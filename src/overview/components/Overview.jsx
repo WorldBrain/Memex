@@ -35,44 +35,54 @@ class Overview extends PureComponent {
 
     _annotationsManager = new AnnotationsManager()
 
+    renderOnboarding() {
+        return (
+            <div>
+                <Onboarding />
+                <HelpBtn />
+            </div>
+        )
+    }
+
+    renderOverview() {
+        return (
+            <div>
+                <Head />
+                <CollectionsButton />
+                <Header />
+                <SidebarLeft />
+                <Results />
+                <DeleteConfirmModal message="Delete page and related note" />
+                <DragElement />
+                <div className={styles.productHuntContainer}>
+                    <a
+                        href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
+                        target="_blank"
+                    >
+                        <img
+                            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=151367&theme=dark"
+                            alt="Memex 1.0 - Annotate, search and organize what you've read online. | Product Hunt Embed"
+                            className={styles.productHuntBatch}
+                        />
+                    </a>
+                </div>
+                <SidebarContainer
+                    env="overview"
+                    annotationsManager={this._annotationsManager}
+                    goToAnnotation={goToAnnotation(this.props.pageUrl)}
+                />
+                <Tooltip />
+                <HelpBtn />
+            </div>
+        )
+    }
+
     render() {
         return (
             <React.Fragment>
-                {isDuringInstall() ? (
-                    <div>
-                        <Onboarding />
-                        <HelpBtn />
-                    </div>
-                ) : (
-                    <div>
-                        <Head />
-                        <CollectionsButton />
-                        <Header />
-                        <SidebarLeft />
-                        <Results />
-                        <DeleteConfirmModal message="Delete page and related note" />
-                        <DragElement />
-                        <div className={styles.productHuntContainer}>
-                            <a
-                                href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
-                                target="_blank"
-                            >
-                                <img
-                                    src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=151367&theme=dark"
-                                    alt="Memex 1.0 - Annotate, search and organize what you've read online. | Product Hunt Embed"
-                                    className={styles.productHuntBatch}
-                                />
-                            </a>
-                        </div>
-                        <SidebarContainer
-                            env="overview"
-                            annotationsManager={this._annotationsManager}
-                            goToAnnotation={goToAnnotation(this.props.pageUrl)}
-                        />
-                        <Tooltip />
-                        <HelpBtn />
-                    </div>
-                )}
+                {isDuringInstall()
+                    ? this.renderOnboarding()
+                    : this.renderOverview()}
             </React.Fragment>
         )
     }

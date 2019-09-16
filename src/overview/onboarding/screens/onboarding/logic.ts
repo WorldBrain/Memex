@@ -1,6 +1,8 @@
 import { UILogic, UIEvent, IncomingUIEvent, UIMutation } from 'ui-logic-core'
+import { VISIT_DELAY_RANGE } from 'src/options/settings/constants'
 
 export interface State {
+    visitDelay: number
     currentStep: number
     isTooltipEnabled: boolean
     isSidebarEnabled: boolean
@@ -16,6 +18,7 @@ export interface State {
 
 export type Event = UIEvent<{
     setStep: { step: number }
+    setVisitDelay: { delay: number }
     setTooltipEnabled: { enabled: boolean }
     setSidebarEnabled: { enabled: boolean }
     setShortcutsEnabled: { enabled: boolean }
@@ -31,6 +34,7 @@ export type Event = UIEvent<{
 export default class Logic extends UILogic<State, Event> {
     getInitialState(): State {
         return {
+            visitDelay: VISIT_DELAY_RANGE.DEF,
             currentStep: 0,
             isTooltipEnabled: true,
             isSidebarEnabled: true,
@@ -49,6 +53,12 @@ export default class Logic extends UILogic<State, Event> {
         incoming: IncomingUIEvent<State, Event, 'setStep'>,
     ): UIMutation<State> {
         return { currentStep: { $set: incoming.event.step } }
+    }
+
+    setVisitDelay(
+        incoming: IncomingUIEvent<State, Event, 'setVisitDelay'>,
+    ): UIMutation<State> {
+        return { visitDelay: { $set: incoming.event.delay } }
     }
 
     setTooltipEnabled(

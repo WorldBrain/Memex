@@ -54,7 +54,7 @@ export default class OnboardingScreen extends StatefulUIElement<
 
         // Set default vaslues if nothing present in storage
         const defs = this.logic.getInitialState()
-        const grabVal = (key: string, defVal: boolean) => ({
+        const grabVal = (key: string, defVal: any) => ({
             enabled: storedVals[key] != null ? storedVals[key] : defVal,
         })
 
@@ -78,6 +78,9 @@ export default class OnboardingScreen extends StatefulUIElement<
             'setStubsEnabled',
             grabVal(STORAGE_KEYS.STUBS, defs.areStubsEnabled),
         )
+        this.processEvent('setVisitDelay', {
+            delay: grabVal(STORAGE_KEYS.VISIT_DELAY, defs.visitDelay).enabled,
+        })
         this.processEvent(
             'setTooltipEnabled',
             grabVal(TOOLTIP_STORAGE_NAME, defs.isTooltipEnabled),
@@ -157,15 +160,27 @@ export default class OnboardingScreen extends StatefulUIElement<
         })
     }
 
+    private handleVisitDelayChange = (
+        e: React.SyntheticEvent<HTMLInputElement>,
+    ) => {
+        const el = e.target as HTMLInputElement
+        const delay = +el.value
+
+        this.processEvent('setVisitDelay', { delay })
+        this.props.storage.set({ [STORAGE_KEYS.VISIT_DELAY]: delay })
+    }
+
     private renderSearchSettings() {
         return (
             <SearchSettings
+                visitDelay={this.state.visitDelay}
                 stubs={this.state.areStubsEnabled}
                 visits={this.state.areVisitsEnabled}
                 bookmarks={this.state.areBookmarksEnabled}
                 annotations={this.state.areAnnotationsEnabled}
                 screenshots={this.state.areScreenshotsEnabled}
                 toggleAll={this.handleAllSettingsToggle}
+                setVisitDelayChange={this.handleVisitDelayChange}
                 showSearchSettings={this.state.showSearchSettings}
                 toggleShowSearchSettings={this.handleShowSearchSettingsToggle}
                 areAllSettingsChecked={this.areAllSettingsChecked()}
