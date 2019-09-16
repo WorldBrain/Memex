@@ -9,18 +9,22 @@
 .progressStep {
     background: color8;
     border-radius: 10px;
+    cursor: pointer;
     display: inline-block;
     height: 10px;
-    margin-right: 4px;
+    margin: 0 4px;
     width: 10px;
     transition: all 200ms;
-}
-
-.progressStepSeen {
-    background: color2;
-    cursor: pointer;
 
     &:hover {
         transform: scale(1.3);
     }
+}
+
+.progressStepSeen {
+    background: color2;
+}
+
+.progressStepCurrent {
+    background: #6289dc;
 }
