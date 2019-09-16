@@ -11,28 +11,39 @@ import {
 import { SYNC_STORAGE_AREA_KEYS, INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
 
+async function setupTest() {
+    const signalTransportFactory = lazyMemorySignalTransportFactory()
+    const sharedSyncLog = await createMemorySharedSyncLog()
+    const setups = [
+        await setupBackgroundIntegrationTest({
+            signalTransportFactory,
+            sharedSyncLog,
+        }),
+        await setupBackgroundIntegrationTest({
+            signalTransportFactory,
+            sharedSyncLog,
+        }),
+    ]
+    const syncModule = (setup: BackgroundIntegrationTestSetup) =>
+        setup.backgroundModules.sync
+    const searchModule = (setup: BackgroundIntegrationTestSetup) =>
+        setup.backgroundModules.search
+    const customLists = (setup: BackgroundIntegrationTestSetup) =>
+        setup.backgroundModules.customLists.remoteFunctions
+
+    return { setups, syncModule, searchModule, customLists, sharedSyncLog }
+}
+
 describe('SyncBackground', () => {
     it.skip('should not do anything if not enabled', () => {})
 
     it('should do the whole onboarding flow correctly', async () => {
-        const signalTransportFactory = lazyMemorySignalTransportFactory()
-        const sharedSyncLog = await createMemorySharedSyncLog()
-        const setups = [
-            await setupBackgroundIntegrationTest({
-                signalTransportFactory,
-                sharedSyncLog,
-            }),
-            await setupBackgroundIntegrationTest({
-                signalTransportFactory,
-                sharedSyncLog,
-            }),
-        ]
-        const syncModule = (setup: BackgroundIntegrationTestSetup) =>
-            setup.backgroundModules.sync
-        const searchModule = (setup: BackgroundIntegrationTestSetup) =>
-            setup.backgroundModules.search
-        const customLists = (setup: BackgroundIntegrationTestSetup) =>
-            setup.backgroundModules.customLists.remoteFunctions
+        const {
+            setups,
+            customLists,
+            syncModule,
+            searchModule,
+        } = await setupTest()
 
         // Initial data
 
@@ -140,27 +151,16 @@ describe('SyncBackground', () => {
     })
 
     it('should enable Sync on start up if enabled', async () => {
-        const signalTransportFactory = lazyMemorySignalTransportFactory()
-        const sharedSyncLog = await createMemorySharedSyncLog()
+        const {
+            setups,
+            customLists,
+            syncModule,
+            sharedSyncLog,
+        } = await setupTest()
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId: 1 }),
             await sharedSyncLog.createDeviceId({ userId: 1 }),
         ]
-        const setups = [
-            await setupBackgroundIntegrationTest({
-                signalTransportFactory,
-                sharedSyncLog,
-            }),
-            await setupBackgroundIntegrationTest({
-                signalTransportFactory,
-                sharedSyncLog,
-            }),
-        ]
-
-        const syncModule = (setup: BackgroundIntegrationTestSetup) =>
-            setup.backgroundModules.sync
-        const customLists = (setup: BackgroundIntegrationTestSetup) =>
-            setup.backgroundModules.customLists.remoteFunctions
 
         await setups[0].browserLocalStorage.set({
             [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
@@ -168,7 +168,7 @@ describe('SyncBackground', () => {
         })
         await setups[1].browserLocalStorage.set({
             [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
-            [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[0],
+            [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[1],
         })
 
         await syncModule(setups[0]).setup()
@@ -188,21 +188,21 @@ describe('SyncBackground', () => {
             },
         )
         await setups[0].backgroundModules.sync.continuousSync.forceIncrementalSync()
-        // await setups[1].backgroundModules.sync.continuousSync.forceIncrementalSync()
+        await setups[1].backgroundModules.sync.continuousSync.forceIncrementalSync()
 
-        // expect(
-        //     await customLists(setups[1]).fetchListById({
-        //         id: listId,
-        //     }),
-        // ).toEqual({
-        //     id: listId,
-        //     name: 'My list',
-        //     isDeletable: true,
-        //     isNestable: true,
-        //     createdAt: expect.any(Date),
-        //     pages: ['http://bla.com/'],
-        //     active: true,
-        // })
+        expect(
+            await customLists(setups[1]).fetchListById({
+                id: listId,
+            }),
+        ).toEqual({
+            id: listId,
+            name: 'My list',
+            isDeletable: true,
+            isNestable: true,
+            createdAt: expect.any(Date),
+            pages: [],
+            active: false,
+        })
     })
 })
 
