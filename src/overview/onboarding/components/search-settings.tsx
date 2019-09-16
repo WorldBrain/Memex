@@ -36,11 +36,20 @@ export default class SearchSettings extends React.PureComponent<Props> {
         if (
             !this.props.visits &&
             !this.props.bookmarks &&
-            !this.props.annotations
+            !this.props.annotations &&
+            !this.props.stubs
         ) {
-            return this.props.stubs
-                ? 'Titles and URLs are always searchable'
-                : 'Searchability of visited websites is disabled'
+            return 'Searchability of visited websites is disabled.'
+        }
+        const titles = 'Titles and URLs are always searchable.'
+
+        if (
+            !this.props.visits &&
+            !this.props.bookmarks &&
+            !this.props.annotations &&
+            this.props.stubs
+        ) {
+            return titles
         }
 
         let base = 'All pages are full-text searchable that you have '
@@ -57,7 +66,14 @@ export default class SearchSettings extends React.PureComponent<Props> {
             base += 'annotated or made highlights on, '
         }
 
-        return base.slice(0, base.length - 2)
+        // Replace any trailing ', ' with '.'
+        base = base.slice(0, base.length - 2) + '.'
+
+        if (this.props.stubs) {
+            base += ' ' + titles
+        }
+
+        return base
     }
 
     private renderDisabledSettings() {
