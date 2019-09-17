@@ -25,7 +25,7 @@
 
 .container {
     composes: containerStyle;
-    min-height: 567px;
+    min-height: 585px;
 }
 
 @keyframes fadeIn {
