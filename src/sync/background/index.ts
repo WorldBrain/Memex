@@ -77,6 +77,7 @@ export default class SyncBackground {
 
     async setup() {
         await this.continuousSync.setup()
+        await this.continuousSync.forceIncrementalSync()
     }
 
     async tearDown() {

@@ -214,6 +214,52 @@ describe('SyncBackground', () => {
             active: false,
         })
     })
+
+    it('should sync on start up if enabled', async () => {
+        const {
+            setups,
+            customLists,
+            syncModule,
+            sharedSyncLog,
+        } = await setupTest()
+        const deviceIds = [
+            await sharedSyncLog.createDeviceId({ userId: 1 }),
+            await sharedSyncLog.createDeviceId({ userId: 1 }),
+        ]
+
+        await setups[0].browserLocalStorage.set({
+            [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
+            [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[0],
+        })
+        await setups[1].browserLocalStorage.set({
+            [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
+            [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[1],
+        })
+
+        await syncModule(setups[0]).setup()
+
+        const listId = await setups[0].backgroundModules.customLists.createCustomList(
+            {
+                name: 'My list',
+            },
+        )
+        await setups[0].backgroundModules.sync.continuousSync.forceIncrementalSync()
+        await syncModule(setups[1]).setup()
+
+        expect(
+            await customLists(setups[1]).fetchListById({
+                id: listId,
+            }),
+        ).toEqual({
+            id: listId,
+            name: 'My list',
+            isDeletable: true,
+            isNestable: true,
+            createdAt: expect.any(Date),
+            pages: [],
+            active: false,
+        })
+    })
 })
 
 function expectIncrementalSyncScheduled(
