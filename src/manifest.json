@@ -7,6 +7,7 @@
     "background": {
         "scripts": ["lib/browser-polyfill.js", "background.js"]
     },
+    "content_security_policy": "script-src 'self' https://www.gstatic.com/ https://*.firebaseio.com https://www.googleapis.com; object-src 'self'",
     "content_scripts": [
         {
             "matches": ["<all_urls>"],

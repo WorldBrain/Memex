@@ -22,3 +22,6 @@
 [submodule "external/@worldbrain/memex-storage"]
 	path = external/@worldbrain/memex-storage
 	url = https://github.com/WorldBrain/memex-storage.git
+[submodule "external/@worldbrain/storex-backend-firestore"]
+	path = external/@worldbrain/storex-backend-firestore
+	url = https://github.com/WorldBrain/storex-backend-firestore.git

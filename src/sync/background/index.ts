@@ -35,7 +35,8 @@ export default class SyncBackground {
             storageManager: options.storageManager,
         })
         this.initialSync = new InitialSync({
-            ...options,
+            storageManager: options.storageManager,
+            signalTransportFactory: options.signalTransportFactory,
             syncedCollections: this.syncedCollections,
         })
         this.continuousSync = new ContinuousSync({

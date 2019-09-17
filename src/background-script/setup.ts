@@ -1,5 +1,6 @@
 import { browser, Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
+import internalAnalytics from '../analytics/internal'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/direct-linking/background'
@@ -18,7 +19,6 @@ import {
     StorageModule,
 } from '@worldbrain/storex-pattern-modules'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
-import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { setupBlacklistRemoteFunctions } from 'src/blacklist/background'
 import {
     setImportStateManager,
@@ -28,7 +28,9 @@ import { setupImportBackgroundModule } from 'src/imports/background'
 import AuthBackground from 'src/auth/background'
 import SyncBackground from 'src/sync/background'
 import { SignalTransportFactory } from 'src/sync/background/initial-sync'
-import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
+import BackgroundScript from '.'
+import alarms from './alarms'
+import { setupNotificationClickListener } from 'src/util/notifications'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -43,6 +45,7 @@ export interface BackgroundModules {
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
     sync: SyncBackground
+    bgScript: BackgroundScript
 }
 
 export function createBackgroundModules(options: {
@@ -68,6 +71,11 @@ export function createBackgroundModules(options: {
         searchIndex: search.searchIndex,
         browserAPIs: options.browserAPIs,
         tabManager,
+    })
+    const bgScript = new BackgroundScript({
+        storageManager,
+        notifsBackground: notifications,
+        loggerBackground: activityLogger,
     })
 
     return {
@@ -111,6 +119,7 @@ export function createBackgroundModules(options: {
             sharedSyncLog: options.sharedSyncLog,
             browserAPIs: options.browserAPIs,
         }),
+        bgScript,
     }
 }
 
@@ -127,6 +136,7 @@ export async function setupBackgroundModules(
         tagsModule: backgroundModules.tags,
         customListsModule: backgroundModules.customLists,
     })
+
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
@@ -140,7 +150,15 @@ export async function setupBackgroundModules(
     backgroundModules.backupModule.setBackendFromStorage()
     backgroundModules.backupModule.setupRemoteFunctions()
     backgroundModules.backupModule.startRecordingChangesIfNeeded()
+    backgroundModules.bgScript.setupRemoteFunctions()
+    backgroundModules.bgScript.setupWebExtAPIHandlers()
+    backgroundModules.bgScript.setupAlarms(alarms)
+    setupNotificationClickListener()
+
     setupBlacklistRemoteFunctions()
+    internalAnalytics.registerOperations(backgroundModules.eventLog)
+    backgroundModules.backupModule.storage.setupChangeTracking()
+
     await backgroundModules.sync.setup()
 }
 

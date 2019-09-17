@@ -104,7 +104,9 @@ export default class ContinuousSync {
     }
 
     async forceIncrementalSync() {
-        await this.recurringIncrementalSyncTask.forceRun()
+        if (this.enabled) {
+            await this.recurringIncrementalSyncTask.forceRun()
+        }
     }
 
     async maybeDoIncrementalSync() {

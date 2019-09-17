@@ -37,6 +37,9 @@ async function setupTest() {
 describe('SyncBackground', () => {
     it('should not do anything if not enabled', async () => {
         const { setups, syncModule } = await setupTest()
+        await syncModule(setups[0]).setup()
+        await syncModule(setups[1]).setup()
+
         expect(syncModule(setups[0]).continuousSync.enabled).toBe(false)
         expect(syncModule(setups[0]).syncLoggingMiddleware.enabled).toBe(false)
         await setups[0].backgroundModules.customLists.createCustomList({
@@ -54,6 +57,9 @@ describe('SyncBackground', () => {
             syncModule,
             searchModule,
         } = await setupTest()
+
+        await syncModule(setups[0]).setup()
+        await syncModule(setups[1]).setup()
 
         // Initial data
 
