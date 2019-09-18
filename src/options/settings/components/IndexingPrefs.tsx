@@ -39,14 +39,14 @@ class IndexingPrefs extends React.PureComponent<Props> {
                     isChecked={this.props.stubs}
                     handleChange={this.props.toggleStubs}
                 >
-                    Make title and url always searchable (recommended)
+                    Make title and URL always searchable (recommended)
                 </Checkbox>
                 <Checkbox
                     id="index-visits"
                     isChecked={this.props.visits}
                     handleChange={this.props.toggleVisits}
                 >
-                    All visited for more than{' '}
+                    Visited for at least{' '}
                     <input
                         type="number"
                         value={this.props.visitDelay}
@@ -54,7 +54,7 @@ class IndexingPrefs extends React.PureComponent<Props> {
                         min={this.props.visitDelayMin}
                         max={this.props.visitDelayMax}
                     />{' '}
-                    seconds.
+                    seconds
                 </Checkbox>
                 <Checkbox
                     id="index-screenshots"
@@ -68,14 +68,14 @@ class IndexingPrefs extends React.PureComponent<Props> {
                     isChecked={this.props.bookmarks}
                     handleChange={this.props.toggleBookmarks}
                 >
-                    All bookmarked, tagged or sorted into collections. 
+                    Bookmarked, tagged, or sorted into collections
                 </Checkbox>
                 <Checkbox
                     id="index-links"
                     isChecked={this.props.memexLinks}
                     handleChange={this.props.toggleLinks}
                 >
-                    All with highlights, notes or Memex.Links
+                    Made notes or annotations on
                 </Checkbox>
             </div>
         )

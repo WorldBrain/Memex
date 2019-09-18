@@ -16,6 +16,8 @@ export interface State {
     isBadTerm: boolean
     /** Denotes whether or not the current search only had invalid filters. */
     isInvalidSearch: boolean
+    /** Denotes whether or not to show post-onboarding message. */
+    showOnboardingMessage: boolean
     /** Holds the index of the result where the tags popup should be displayed (-1 by default). */
     activeTagIndex: number
     /** Holds the index of the result which has the sidebar open (-1 by default) */
@@ -48,6 +50,7 @@ const defState: State = {
     totalCount: null,
     searchCount: 0,
     areAnnotationsExpanded: false,
+    showOnboardingMessage: false,
     isAnnotsSearch: false,
     annotsByDay: null,
     searchType: 'page',
@@ -90,6 +93,11 @@ const handleSearchResult = (overwrite: boolean) => (
 }
 
 const reducer = createReducer<State>({}, defState)
+
+reducer.on(acts.setShowOnboardingMessage, (state, showOnboardingMessage) => ({
+    ...state,
+    showOnboardingMessage,
+}))
 
 reducer.on(acts.addTag, (state, { tag, index }) => {
     const doc = state.results[index]

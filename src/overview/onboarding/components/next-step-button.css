@@ -1,0 +1,20 @@
+@value colors: 'src/common-ui/colors.css';
+@value color2 from colors;
+
+.main {
+    composes: CTA from '../../../common-ui/elements.css';
+    background: color2;
+    color: white;
+    display: inline-flex;
+    font-size: 1.2rem;
+
+    &:active {
+        border-radius: 8px;
+        transform: scale(0.95);
+    }
+
+    &:hover {
+        background: #44bc8b;
+        color: white;
+    }
+}

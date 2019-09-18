@@ -1,25 +1,27 @@
 import 'babel-polyfill'
 import React from 'react'
 import { storiesOf } from '@storybook/react'
-import { Button, Welcome } from '@storybook/react/demo'
 
-import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
-import ConfirmModal from 'src/common-ui/components/ConfirmModal'
+import ProgressStepContainer from 'src/common-ui/components/progress-step-container'
+import OnboardingTooltip from 'src/overview/onboarding/components/onboarding-tooltip'
 
-storiesOf('Button demo', module).add('with text', () => (
-    <Button>This is button</Button>
-))
+storiesOf('ProgressContainer', module)
+    .add('No steps seen/completed', () => (
+        <ProgressStepContainer totalSteps={4} onStepClick={() => undefined} />
+    ))
+    .add('All steps seen', () => (
+        <ProgressStepContainer
+            totalSteps={4}
+            currentStep={4}
+            onStepClick={() => undefined}
+        />
+    ))
 
-storiesOf('Welcome demo', module).add('no idea what this is', () => <Welcome />)
-
-storiesOf('Memex loader', module).add('our main loading animation', () => (
-    <LoadingIndicator />
-))
-
-storiesOf('Confirm modal', module).add('our main confirm modal', () => (
-    <ConfirmModal
-        isShown
-        message="hey there"
-        onClose={() => console.log('closed!')}
+storiesOf('Onboarding Tooltip', module).add('Import example', () => (
+    <OnboardingTooltip
+        descriptionText="Import your existing bookmarks &amp; web history from Pocket, Diigo, Raindrop.io and many more."
+        CTAText="Import"
+        onCTAClick={() => undefined}
+        onDismiss={() => undefined}
     />
 ))

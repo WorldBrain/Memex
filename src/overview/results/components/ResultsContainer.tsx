@@ -7,6 +7,7 @@ import NotificationContainer, {
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './ResultsMessage'
 import ResultList from './ResultListContainer'
+import OnboardingMessage from './onboarding-message'
 import SearchTypeSwitch from './search-type-switch-container'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -20,6 +21,7 @@ export interface StateProps {
     isLoading: boolean
     showInbox: boolean
     areAnnotationsExpanded: boolean
+    showOnboardingMessage: boolean
     shouldShowCount: boolean
     isInvalidSearch: boolean
     showInitSearchMsg: boolean
@@ -46,6 +48,10 @@ class ResultsContainer extends PureComponent<Props> {
                 {children}
             </React.Fragment>
         )
+
+        if (this.props.showOnboardingMessage) {
+            return <OnboardingMessage />
+        }
 
         if (this.props.isBadTerm) {
             return renderSearchSwitch(
@@ -107,6 +113,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isInvalidSearch: selectors.isInvalidSearch(state),
     totalResultCount: selectors.totalResultCount(state),
     showInitSearchMsg: selectors.showInitSearchMsg(state),
+    showOnboardingMessage: selectors.showOnboardingMessage(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({

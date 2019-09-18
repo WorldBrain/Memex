@@ -1,5 +1,21 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color3, color4, color5, color6, color11, color12, radius3 from colors;
+@value color1, color2, color3, color4, color5, color6, color7, color8, color11, color12, color16, radius3 from colors;
+
+/* Animations */
+
+.fadeIn {
+    animation: fadeIn 500ms ease;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
 
 /* FONTs */
 
@@ -25,19 +41,20 @@
 }
 
 .tagPillSuggestions {
-	composes: tagPill;
+    composes: tagPill;
 }
 
 .tagPillRemove {
-	composes: tagPill;
-	padding: 2px 4px 3px 9px;
+    composes: tagPill;
+    padding: 2px 4px 3px 9px;
 }
 
 /* Tooltips */
 
 .toolTips {
     border-radius: 3px;
-    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     background: white;
 }
 
@@ -72,6 +89,21 @@
     composes: nakedButton hoverColor warningColor from './colors.css';
 }
 
+.grayActionButton {
+    background-color: color7;
+    border-radius: 22px;
+    color: color16;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1.2rem;
+    padding: 0.3rem 0.8rem;
+    transition: background-color 200ms ease-in-out;
+
+    &:hover {
+        background-color: color8;
+    }
+}
+
 .CTA {
     background: color1;
     color: color4;
@@ -82,10 +114,16 @@
     cursor: pointer;
     text-decoration: none;
     border: none;
+    transition: all 200ms ease-in-out;
 
     &:hover {
         background: color2;
         color: color5;
+    }
+
+    &:active,
+    &:focus {
+        outline: none;
     }
 }
 
@@ -117,7 +155,7 @@
     padding: 10px 7px;
     margin: 5px 5px 5px 5px;
 
-     &::placeholder {
+    &::placeholder {
         color: #888;
     }
 
@@ -132,7 +170,8 @@
 
 .annotationCard {
     border-radius: 3px;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 2px 4px;
     transition: background 120ms ease-in 0s;
 
     &:hover {
