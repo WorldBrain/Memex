@@ -9,8 +9,8 @@ export interface Props {
 class OnboardingBox extends PureComponent<Props> {
     render() {
         return (
-            <>
-                <div>{this.props.children}</div>
+            <div className={styles.screen}>
+                <div className={styles.boxContainer}>{this.props.children}</div>
 
                 <div className={styles.backgroundBlobWrapper}>
                     <div className={styles.backgroundBlob} />
@@ -27,7 +27,7 @@ class OnboardingBox extends PureComponent<Props> {
                         Give me the default settings
                     </p>
                 </div>
-            </>
+            </div>
         )
     }
 }

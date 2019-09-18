@@ -26,14 +26,8 @@ export default class OnboardingStep extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div
-                className={
-                    this.props.isInitStep
-                        ? styles.initStepContainer
-                        : styles.container
-                }
-            >
-                <div>
+            <div className={styles.container}>
+                <div className={styles.stepContainer}>
                     <h1 className={this.headerClassName}>
                         {this.props.titleText}
                     </h1>
@@ -45,7 +39,7 @@ export default class OnboardingStep extends React.PureComponent<Props> {
                     {this.props.renderImage()}
                     <div className={styles.text}>{this.props.children}</div>
                 </div>
-                <div>
+                <div className={styles.navigation}>
                     {this.props.renderButton()}
                     {!this.props.isInitStep && (
                         <ProgressStepContainer

@@ -52,14 +52,14 @@ export default class SearchSettings extends React.PureComponent<Props> {
             return titles
         }
 
-        let base = 'All pages are full-text searchable that you have '
+        let base = 'You can full-text search all pages you '
 
         if (this.props.visits) {
             base += `visited for more than ${this.props.visitDelay} seconds, `
         }
 
         if (this.props.bookmarks) {
-            base += 'bookmarked, tagged, or sorted into collections, '
+            base += 'bookmarked, tagged or put into collections, '
         }
 
         if (this.props.annotations) {
@@ -96,7 +96,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
         }
 
         return (
-            <>
+            <div className={styles.container}>
                 <p className={styles.settingsHeader}>General settings</p>
                 <Checkbox
                     id="index-stubs"
@@ -157,7 +157,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                 >
                     Back
                 </a>
-            </>
+            </div>
         )
     }
 }

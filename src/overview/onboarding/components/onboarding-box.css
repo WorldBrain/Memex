@@ -1,31 +1,37 @@
 @value colors: 'src/common-ui/colors.css';
 @value color1, color2, color5, color6 from colors;
 
-.containerStyle {
+.screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+}
+
+.boxContainer {
     background: white;
     color: color5;
-    width: 60%;
-    max-width: 50rem;
-    min-width: 4rem;
+    width: 90%;
+    max-width: 800px;
+    min-width: 50vw;
     margin: 2rem auto 1rem;
-    padding: 2rem 4rem;
     display: flex;
+    padding: 2em 4em;
     border: solid 1px #f4f4f4;
     border-radius: 10px;
     flex-direction: column;
     box-shadow: 0px 2px 30px rgba(164, 180, 182, 0.5);
     text-align: center;
+    align-items: center;
     justify-content: space-between;
-}
-
-.initStepContainer {
-    animation: fadeIn 0.4s ease;
-    composes: containerStyle;
+    height: 80vh;
 }
 
 .container {
-    composes: containerStyle;
-    min-height: 585px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 @keyframes fadeIn {
@@ -36,6 +42,12 @@
     100% {
         opacity: 1;
     }
+}
+
+.navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .logo {
@@ -50,30 +62,30 @@
 
 .heading1 {
     color: color5;
-    font-size: 1.8rem;
-    margin: 0 auto 2rem;
+    font-size: calc(1.3rem + 0.3vh);
+    margin: 1rem auto 1rem;
 }
 
 .heading2 {
     color: color5;
-    font-size: 1.5rem;
+    font-size: calc(1.1rem + 0.3vw);
     display: inline-flex;
-    margin: 1rem auto;
+    margin: 1rem auto 1rem;
 }
 
 .text {
-    color: color5;
-    font-size: 1rem;
+    color: color6;
+    font-size: calc(0.6rem + 0.3vw);
     margin-bottom: 2rem;
-    min-height: 70px;
     display: inline-flex;
     flex-direction: column;
 }
 
 .textLarge {
-    font-size: 1.2rem;
+    font-size: calc(0.8rem + 0.5vw);
     margin: 0 auto 1rem;
     display: inline-flex;
+    color: color6;
 }
 
 .placeholder {
@@ -101,19 +113,19 @@
 
 .privacyImage {
     background-repeat: no-repeat;
+    background-position: center center;
     display: flex;
     background-image: url('/img/privacy.svg');
     fill: white;
     background-size: contain;
     width: 65%;
-    height: 100%;
-    margin-left: auto;
-    margin-top: 25px;
-    margin-right: auto;
+    margin: 25px auto;
+    height: 30vh;
 }
 
 .center {
     text-align: center;
+    margin-bottom: 10px;
 }
 
 .skipTitle {
@@ -159,22 +171,25 @@
     align-items: center;
 }
 
-@media only screen and (max-width: 820px) {
-    .container {
-        width: 80%;
-        padding: 2rem;
+@media only screen and (max-width: 620px) {
+    .backgroundBlob {
+        background: none;
     }
 }
 
-@media only screen and (max-width: 620px) {
+/* @media only screen and (max-height: 700px) {
     .container {
-        margin-top: 2rem;
+        margin-top: 2.5%;
         width: 95%;
         padding: 2rem;
-        min-height: none;
+        max-height: 600px;
+        min-height: 500px;
     }
 
-    .heading1,
+    .heading1 {
+        font-size: 1.3rem;
+    }
+
     .heading2 {
         font-size: 1.15rem;
         line-height: 1.5rem;
@@ -185,10 +200,50 @@
     }
 
     .textLarge {
-        font-size: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .privacyImage {
+        min-height: 200px;
     }
 
     .backgroundBlob {
         background: none;
     }
 }
+
+@media only screen and (max-height: 800px) {
+    .container {
+        margin-top: 2.5%;
+        width: 95%;
+        padding: 2rem;
+        max-height: 600px;
+        min-height: 500px;
+    }
+
+    .heading1 {
+        font-size: 1.3rem;
+    }
+
+    .heading2 {
+        font-size: 1.15rem;
+        line-height: 1.5rem;
+    }
+
+    .text {
+        font-size: 0.875rem;
+    }
+
+    .textLarge {
+        font-size: 0.9rem;
+    }
+
+    .privacyImage {
+        min-height: 200px;
+    }
+
+    .backgroundBlob {
+        background: none;
+    }
+}
+*/

@@ -5,11 +5,23 @@
 
 .settingsHeader {
     text-align: left;
-    font-size: 1.1rem;
+    font-size: calc(0.6em + 0.5vh);
     font-weight: bold;
 }
 
 .textSearchHeader {
     margin-top: 2em;
     text-align: left;
+}
+
+@media only screen and (max-height: 700px) {
+    .settingsHeader {
+        font-size: 0.9rem;
+    }
+
+    .container {
+        overflow: visible;
+        padding: 0 20px;
+        height: 45vh;
+    }
 }
