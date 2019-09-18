@@ -130,6 +130,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                     Visited for at least{' '}
                     <input
                         type="number"
+                        className={styles.number}
                         value={this.props.visitDelay}
                         onChange={this.props.setVisitDelayChange}
                         min={this.props.visitDelayMin}

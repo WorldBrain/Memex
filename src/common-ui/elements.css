@@ -1,6 +1,22 @@
 @value colors: 'src/common-ui/colors.css';
 @value color1, color2, color3, color4, color5, color6, color7, color8, color11, color12, color16, radius3 from colors;
 
+/* Animations */
+
+.fadeIn {
+    animation: fadeIn 500ms ease;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
 /* FONTs */
 
 .fontFamily {

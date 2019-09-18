@@ -3,6 +3,7 @@
 
 .container {
     composes: boxShadow from 'src/common-ui/colors.css';
+    composes: fadeIn from 'src/common-ui/elements.css';
     align-items: center;
     background-color: white;
     border-radius: 3px;

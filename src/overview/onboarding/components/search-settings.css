@@ -1,6 +1,7 @@
 .settingsButton {
     composes: grayActionButton from 'src/common-ui/elements.css';
     margin: auto;
+    text-decoration: none;
 }
 
 .settingsHeader {
@@ -14,14 +15,20 @@
     text-align: left;
 }
 
-@media only screen and (max-height: 700px) {
-	.settingsHeader {
-		font-size: 0.9rem;
-	}
+.number {
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid #d2d2d2;
+    text-align: center;
+}
 
-	.container {
-		overflow: visible;
-	    padding: 0 20px;
-	    height: 45vh;
-	}
+@media only screen and (max-height: 700px) {
+    .settingsHeader {
+        font-size: 0.9rem;
+    }
+
+    .container {
+        overflow: visible;
+        padding: 0 20px;
+    }
 }
