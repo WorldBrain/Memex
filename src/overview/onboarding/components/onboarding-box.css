@@ -69,7 +69,7 @@
 }
 
 .textLarge {
-    font-size: calc(0.8rem + 0.5vw);
+    font-size: calc(0.8rem + 0.3vw);
     margin: 0 auto 1rem;
     display: inline-flex;
     color: color6;

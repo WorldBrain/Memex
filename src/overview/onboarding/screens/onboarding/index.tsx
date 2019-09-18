@@ -230,7 +230,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <OnboardingStep
                         isInitStep
                         titleText="Setup your Memex in less than 1 minute"
-                        subtitleText="Find any website or PDF again without upfront organisation."
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         renderButton={() => (
                             <NextStepButton onClick={this.handleNextStepClick}>
@@ -272,7 +271,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <OnboardingStep
                         goToStep={this.handleStepClick}
                         titleText="Web Annotations"
-                        subtitleText="Add highlight and make notes on websites and (soon) PDFs too."
+                        subtitleText="Add highlight and make notes on websites and (soon) PDFs."
                         renderButton={() => (
                             <NextStepButton onClick={this.handleNextStepClick}>
                                 Next
@@ -287,7 +286,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                             isChecked={this.state.isTooltipEnabled}
                             handleChange={this.handleTooltipToggle}
                         >
-                            Show Highlighter (or use Keyboard Shortcuts instead)
+                            Show Highlighter when selecting text
                         </SettingsCheckbox>
                     </OnboardingStep>
                 )
@@ -295,8 +294,8 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
-                        titleText="Tag, favorite or sort content into collections"
-                        subtitleText="Move your mouse to the right side of the screen to open the sidebar"
+                        titleText="Fast & Flexible Content Organisation"
+                        subtitleText="Tag, favorite or sort content into collections"
                         renderButton={() => (
                             <NextStepButton onClick={this.handleNextStepClick}>
                                 Next
@@ -311,7 +310,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                             isChecked={this.state.isSidebarEnabled}
                             handleChange={this.handleSidebarToggle}
                         >
-                            Show sidebar (or use keyboard shortcuts)
+                            Show sidebar when moving cursor to the right side of your screen
                         </SettingsCheckbox>
                     </OnboardingStep>
                 )
@@ -320,7 +319,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <OnboardingStep
                         goToStep={this.handleStepClick}
                         titleText="Keyboard Shortcuts for Everything"
-                        subtitleText="Use Memex without the Highlighter or Sidebar"
+                        subtitleText="Organise and annotate content without the Highlighter or Sidebar"
                         renderButton={() => (
                             <NextStepButton onClick={this.props.navToOverview}>
                                 All done! Go to dashboard

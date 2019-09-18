@@ -1,6 +1,7 @@
 .settingsButton {
     composes: grayActionButton from 'src/common-ui/elements.css';
     margin: auto;
+    text-decoration: none;
 }
 
 .settingsHeader {
