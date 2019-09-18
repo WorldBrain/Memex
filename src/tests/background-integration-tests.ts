@@ -53,6 +53,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         } as any,
         tabManager: options && options.tabManager,
         authBackground: {
+            userId: 1,
             getCurrentUser: () => ({ id: 1 }),
         },
         signalTransportFactory: options && options.signalTransportFactory,

@@ -251,6 +251,7 @@ describe('SyncBackground', () => {
         )
         await setups[0].backgroundModules.sync.continuousSync.forceIncrementalSync()
         await syncModule(setups[1]).setup()
+        await syncModule(setups[1]).firstContinuousSyncPromise
 
         expect(
             await customLists(setups[1]).fetchListById({

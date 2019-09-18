@@ -16,6 +16,7 @@ export default class SyncBackground {
     remoteFunctions: PublicSyncInterface
     clientSyncLog: ClientSyncLogStorage
     syncLoggingMiddleware?: SyncLoggingMiddleware
+    firstContinuousSyncPromise?: Promise<void>
     readonly syncedCollections: string[] = [
         'customLists',
         'pageListEntries',
@@ -78,7 +79,7 @@ export default class SyncBackground {
 
     async setup() {
         await this.continuousSync.setup()
-        await this.continuousSync.forceIncrementalSync()
+        this.firstContinuousSyncPromise = this.continuousSync.forceIncrementalSync()
     }
 
     async tearDown() {

@@ -80,7 +80,7 @@ export default class ContinuousSync {
 
         const newDeviceId = await this.options.sharedSyncLog.createDeviceId({
             userId: this.options.auth.getCurrentUser().id,
-            sharedUntil: 0,
+            sharedUntil: 1,
         })
         await localStorage.set({
             [SYNC_STORAGE_AREA_KEYS.deviceId]: newDeviceId,
