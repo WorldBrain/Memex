@@ -26,7 +26,7 @@ export default class OnboardingStep extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.container}>
+            <>
                 <div className={styles.stepContainer}>
                     <h1 className={this.headerClassName}>
                         {this.props.titleText}
@@ -49,7 +49,7 @@ export default class OnboardingStep extends React.PureComponent<Props> {
                         />
                     )}
                 </div>
-            </div>
+            </>
         )
     }
 }

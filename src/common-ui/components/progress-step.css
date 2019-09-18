@@ -2,7 +2,6 @@
 @value color2, color8 from colors;
 
 .progressContainer {
-    width: 100px;
     text-align: center;
 }
 
@@ -12,7 +11,7 @@
     cursor: pointer;
     display: inline-block;
     height: 10px;
-    margin: 0 4px;
+    margin: 1rem 0.25rem 0;
     width: 10px;
     transition: all 200ms;
 

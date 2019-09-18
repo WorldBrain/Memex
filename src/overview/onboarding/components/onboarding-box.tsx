@@ -9,23 +9,28 @@ export interface Props {
 class OnboardingBox extends PureComponent<Props> {
     render() {
         return (
-            <div className={styles.screen}>
-                <div className={styles.boxContainer}>{this.props.children}</div>
-
+            <div>
+                <div className={styles.flexLayout}>
+                    <div className={styles.container}>
+                        <div className={styles.whiteBox}>
+                            {this.props.children}
+                        </div>
+                        <div className={styles.skipContainer}>
+                            <p
+                                className={styles.skipTitle}
+                                onClick={this.props.navToOverview}
+                            >
+                                Skip setup
+                            </p>
+                            <p className={styles.skipDesc}>
+                                Give me the default settings
+                            </p>
+                        </div>
+                    </div>
+                    <div className={styles.backgroundColor} />
+                </div>
                 <div className={styles.backgroundBlobWrapper}>
                     <div className={styles.backgroundBlob} />
-                </div>
-
-                <div className={styles.center}>
-                    <p
-                        className={styles.skipTitle}
-                        onClick={this.props.navToOverview}
-                    >
-                        Skip setup
-                    </p>
-                    <p className={styles.skipDesc}>
-                        Give me the default settings
-                    </p>
                 </div>
             </div>
         )

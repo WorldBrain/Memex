@@ -1,14 +1,25 @@
 @value colors: 'src/common-ui/colors.css';
 @value color1, color2, color5, color6 from colors;
 
-.screen {
+.flexLayout {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center; /* We need the white box to sit in the middle of the screen */
     height: 100vh;
 }
 
-.boxContainer {
+/* We cant target the body class easily to set a bg color since it shares the layout with the whole extension */
+.backgroundColor {
+    width: 100%;
+    height: 100vh;
+    background: #f6fcfa;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -2;
+}
+
+.whiteBox {
     background: white;
     color: color5;
     width: 90%;
@@ -24,14 +35,7 @@
     text-align: center;
     align-items: center;
     justify-content: space-between;
-    height: 80vh;
-}
-
-.container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    min-height: 515px;
 }
 
 @keyframes fadeIn {
@@ -42,12 +46,6 @@
     100% {
         opacity: 1;
     }
-}
-
-.navigation {
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .logo {
@@ -69,7 +67,6 @@
 .heading2 {
     color: color5;
     font-size: calc(1.1rem + 0.3vw);
-    display: inline-flex;
     margin: 1rem auto 1rem;
 }
 
@@ -96,11 +93,15 @@
 
 .backgroundBlobWrapper {
     position: absolute;
-    width: 70%;
-    max-width: 55rem;
-    left: 15%;
+    width: 140%;
+    max-width: 900px;
+    min-height: 515px;
     z-index: -1;
-    top: -17px;
+    top: calc(
+        50% - 81px
+    ); /* position in the center but offset rougly the heading text so it still shows above the box */
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .backgroundBlob {
@@ -108,7 +109,7 @@
     position: relative;
     width: 100%;
     background-size: contain;
-    height: 546px;
+    height: 590px;
 }
 
 .privacyImage {
@@ -123,9 +124,18 @@
     height: 30vh;
 }
 
-.center {
-    text-align: center;
-    margin-bottom: 10px;
+.navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.skipContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
 .skipTitle {
@@ -138,6 +148,7 @@
     position: relative;
     cursor: pointer;
 
+    /* A little underline animation */
     &::before {
         content: '';
         position: absolute;
@@ -160,7 +171,7 @@
 
 .skipDesc {
     font-size: 0.8rem;
-    margin-top: 0;
+    margin-top: 0.5rem;
 }
 
 .footer {
@@ -172,6 +183,10 @@
 }
 
 @media only screen and (max-width: 620px) {
+    .whiteBox {
+        min-width: 90vw;
+    }
+
     .backgroundBlob {
         background: none;
     }
