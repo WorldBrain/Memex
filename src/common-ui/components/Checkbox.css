@@ -66,11 +66,11 @@
 .label__text {
     display: flex;
     align-items: center;
-    font-size: 15px;
+    font-size: calc(0.6rem + 0.3vw);
     cursor: pointer;
 
     &:hover {
-        font-weight: 500;
+        color: black;
     }
 }
 

@@ -65,7 +65,6 @@ export default function configureStore({ ReduxDevTools = undefined } = {}) {
     const enhancers = [
         overviewPage.enhancer,
         imports.enhancer,
-        settings.enhancer,
         applyMiddleware(...middlewares),
     ]
 

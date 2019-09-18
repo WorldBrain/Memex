@@ -1,17 +1,41 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6, color3 from colors;
+@value color1, color2, color5, color6 from colors;
 
-.container {
-    /* composes: boxShadow from '../../../common-ui/colors.css'; */
-    composes: toolTips from 'src/common-ui/elements.css';
-    width: 95%;
-    max-width: 50rem;
-    margin: 90px auto 30px auto;
+.flexLayout {
     display: flex;
+    flex-direction: column;
+    justify-content: center; /* We need the white box to sit in the middle of the screen */
+    height: 100vh;
+}
+
+/* We cant target the body class easily to set a bg color since it shares the layout with the whole extension */
+.backgroundColor {
+    width: 100%;
+    height: 100vh;
+    background: #f6fcfa;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -2;
+}
+
+.whiteBox {
+    background: white;
+    color: color5;
+    width: 90%;
+    max-width: 800px;
+    min-width: 50vw;
+    margin: 2rem auto 1rem;
+    display: flex;
+    padding: 2em 4em;
     border: solid 1px #f4f4f4;
     border-radius: 10px;
-    height: 570px;
     flex-direction: column;
+    box-shadow: 0px 2px 30px rgba(164, 180, 182, 0.5);
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 525px;
 }
 
 .logo {
@@ -24,24 +48,172 @@
     margin: 40px auto -40px auto;
 }
 
+.heading1 {
+    color: color5;
+    font-size: calc(1.3rem + 0.3vh);
+    margin: 1rem auto 1rem;
+}
+
+.heading2 {
+    color: color5;
+    font-size: calc(1.1rem + 0.3vw);
+    margin: 1rem auto 0.5rem;
+}
+
 .text {
-    composes: subTextColor from '../../../common-ui/colors.css';
-    font-size: 0.9rem;
-    text-align: center;
-    letter-spacing: 0.7px;
+    color: color6;
+    font-size: calc(0.6rem + 0.3vw);
+    margin-bottom: 2rem;
+    display: inline-flex;
+    flex-direction: column;
+}
+
+.textLarge {
+    font-size: calc(0.8rem + 0.3vw);
+    margin: 0 auto 1.5rem;
+    display: inline-flex;
+    color: color6;
+}
+
+.placeholder {
+    background: color6;
+    margin: auto;
+    display: inline-flex;
+}
+
+.backgroundBlobWrapper {
+    position: absolute;
+    width: 140%;
+    max-width: 900px;
+    min-height: 515px;
+    z-index: -1;
+    top: calc(
+        50% - 81px
+    ); /* position in the center but offset rougly the heading text so it still shows above the box */
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.backgroundBlob {
+    background: url('/img/onboarding/backgroundBlob.svg') no-repeat;
+    position: relative;
+    width: 100%;
+    background-size: contain;
+    height: 590px;
 }
 
 .privacyImage {
     background-repeat: no-repeat;
+    background-position: center center;
     display: flex;
     background-image: url('/img/privacy.svg');
     fill: white;
     background-size: contain;
     width: 65%;
-    height: 100%;
-    margin-left: auto;
-    margin-top: 25px;
-    margin-right: auto;
+    margin: 25px auto;
+    height: 30vh;
+}
+
+.navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.skipContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.annotationImage {
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    background-image: url('/img/annotationImage.gif');
+    fill: white;
+    border: 1px solid #eee;
+    background-size: contain;
+    border-radius: 5px;
+    height: 0;
+    padding-top: 59.5%;
+}
+
+.searchImage {
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    background-image: url('/img/searchImage.gif');
+    fill: white;
+    border: 1px solid #eee;
+    background-size: contain;
+    border-radius: 5px;
+    height: 0;
+    padding-top: 44.5%;
+    margin: 0 13%;
+}
+
+.sidebarImage {
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    background-image: url('/img/sidebarImage.gif');
+    fill: white;
+    border: 1px solid #eee;
+    background-size: contain;
+    border-radius: 5px;
+    height: 0;
+    padding-top: 59.5%;
+}
+
+.keyboardImage {
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    background-image: url('/img/keyboardImage.gif');
+    fill: white;
+    background-size: contain;
+    border-radius: 5px;
+    height: 0;
+    padding-top: 44%;
+}
+
+.skipTitle {
+    font-size: 1.1rem;
+    text-decoration: underline;
+    margin-bottom: 0.2rem;
+    font-weight: 500;
+    z-index: 1;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+
+    /* A little underline animation */
+    &::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background: color2;
+        visibility: hidden;
+        transform: scaleX(0);
+        transition: 0.25s linear;
+    }
+
+    &:hover::before,
+    &:focus::before {
+        visibility: visible;
+        transform: scaleX(1);
+    }
+}
+
+.skipDesc {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
 }
 
 .footer {
@@ -52,137 +224,83 @@
     align-items: center;
 }
 
-.bold {
-    composes: h2Color from '../../../common-ui/colors.css';
-    font-size: 22px;
-    font-weight: 600;
-    margin-top: 20px;
-    margin-bottom: 10px;
+@media only screen and (max-width: 620px) {
+    .whiteBox {
+        min-width: 90vw;
+    }
+
+    .backgroundBlob {
+        background: none;
+    }
 }
 
-.subtextGreen {
-    composes: subTextColor from '../../../common-ui/colors.css';
-    font-size: 0.8125rem;
-    text-align: center;
-    margin-top: 5px;
-    margin-bottom: 13px;
-}
-
-.learnMore {
-    composes: CTA from '../../../common-ui/colors.css';
-    font-size: 0.8125rem;
-    padding: 7px 24px 8px 24px;
-    cursor: pointer;
-    margin-top: 6px;
-    margin-bottom: 72px;
-    margin-right: 4px;
-}
-
-.iconBox {
-    display: flex;
-    margin-bottom: 10px;
-}
-
-.icon {
-    background-position: center center;
-    width: 40px;
-    height: 40px;
-    background-size: 40px;
-    display: flex;
-    background-repeat: no-repeat;
-    margin: 10px;
-    background-color: transparent;
-    z-index: 5000;
-}
-
-.pocket {
-    background-image: url('/img/pocket.svg');
-}
-
-.diigo {
-    background-image: url('/img/diigo.png');
-}
-
-.chrome {
-    background-image: url('/img/chrome.svg');
-}
-
-.firefox {
-    background-image: url('/img/firefox.png');
-}
-
-.raindrop {
-    background-image: url('/img/raindrop.png');
-}
-
-.instapaper {
-    background-image: url('/img/instapaper.svg');
-}
-
-/* .settings {
-    background-repeat: no-repeat;
-    display: inline-block;
-    cursor: pointer;
-    background-image: url('/img/settings.svg');
-    fill: white;
-    background-size: 20px;
-    width: 20px;
-    height: 20px;
-    margin-left: -19px;
-    margin-top: 9px;
-} */
-
-@media only screen and (max-width: 820px) {
+/* @media only screen and (max-height: 700px) {
     .container {
-        composes: h2Color from '../../../common-ui/colors.css';
-        margin-top: 75px;
+        margin-top: 2.5%;
+        width: 95%;
+        padding: 2rem;
+        max-height: 600px;
+        min-height: 500px;
     }
 
-    .welcome {
-        font-size: 1.2rem;
+    .heading1 {
+        font-size: 1.3rem;
+    }
+
+    .heading2 {
+        font-size: 1.15rem;
         line-height: 1.5rem;
-    }
-
-    .logo {
-        width: 90px;
     }
 
     .text {
         font-size: 0.875rem;
     }
 
-    .leftParent {
-        padding: 40px 30px 30px 30px;
-        width: 50%;
+    .textLarge {
+        font-size: 0.9rem;
     }
 
     .privacyImage {
-        width: 85%;
-        height: 100%;
-        margin-left: 10px;
-        margin-top: 40px;
-        margin-right: auto;
+        min-height: 200px;
+    }
+
+    .backgroundBlob {
+        background: none;
     }
 }
 
-@keyframes float {
-    0% {
-        transform: translateY(0px);
+@media only screen and (max-height: 800px) {
+    .container {
+        margin-top: 2.5%;
+        width: 95%;
+        padding: 2rem;
+        max-height: 600px;
+        min-height: 500px;
     }
 
-    25% {
-        transform: translateY(10px);
+    .heading1 {
+        font-size: 1.3rem;
     }
 
-    50% {
-        transform: translateY(0px);
+    .heading2 {
+        font-size: 1.15rem;
+        line-height: 1.5rem;
     }
 
-    75% {
-        transform: translateY(-10px);
+    .text {
+        font-size: 0.875rem;
     }
 
-    100% {
-        transform: translateY(0px);
+    .textLarge {
+        font-size: 0.9rem;
+    }
+
+    .privacyImage {
+        min-height: 200px;
+    }
+
+    .backgroundBlob {
+        background: none;
     }
 }
+*/

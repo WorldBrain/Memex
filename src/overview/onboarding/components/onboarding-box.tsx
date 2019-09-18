@@ -1,43 +1,42 @@
 import React, { PureComponent } from 'react'
-import OnboardingChecklist from './checklist-container'
-import classNames from 'classnames'
 
 const styles = require('./onboarding-box.css')
 
-class OnboardingBox extends PureComponent {
+export interface Props {
+    navToOverview: () => void
+}
+
+class OnboardingBox extends PureComponent<Props> {
     render() {
         return (
-            <React.Fragment>
-                <div className={styles.container}>
-                    <OnboardingChecklist />
-                </div>
-                <div className={styles.footer}>
-                    <div className={styles.textContainer}>
-                        <p className={styles.bold}>
-                            Import your bookmarks and existing history
-                        </p>
+            <div>
+                <div className={styles.flexLayout}>
+                    <div className={styles.container}>
+                        <div className={styles.whiteBox}>
+                            {this.props.children}
+                        </div>
+                        <div className={styles.skipContainer}>
+                            <p
+                                className={styles.skipTitle}
+                                onClick={this.props.navToOverview}
+                            >
+                                Skip setup
+                            </p>
+                            <p className={styles.skipDesc}>
+                                Give me the default settings
+                            </p>
+                        </div>
                     </div>
-                    <div className={styles.iconBox}>
-                    <span className={classNames(styles.icon, styles.pocket)}/>
-                    <span className={classNames(styles.icon, styles.diigo)}/>
-                    <span className={classNames(styles.icon, styles.chrome)}/>
-                    <span className={classNames(styles.icon, styles.firefox)}/>
-                    <span className={classNames(styles.icon, styles.raindrop)}/>
-                    <span className={classNames(styles.icon, styles.instapaper)}/>
-                    </div>
-
-                    <a
-                        className={styles.learnMore}
-                        target="_blank"
-                        href="#/import"
-                    >
-                        Import Now
-                    </a>
-                    {/* <a className={styles.settings} href="#privacy" /> */}
+                    <div className={styles.backgroundColor} />
                 </div>
-            </React.Fragment>
+                <div className={styles.backgroundBlobWrapper}>
+                    <div className={styles.backgroundBlob} />
+                </div>
+            </div>
         )
     }
 }
 
 export default OnboardingBox
+
+// TODO styles.container could be turned into a component taking heading, image, content, onSubmit action

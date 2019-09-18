@@ -79,7 +79,7 @@ const shortcutStorageToState = (storage): KeyboardShortcuts => {
     const shortcuts: Partial<KeyboardShortcuts> = {}
     for (const key of keys) {
         if (key === 'shortcutsEnabled') {
-            shortcuts[key] = storage[key]
+            shortcuts[key] = storage[key] || false
             continue
         }
         const enabledKey = `${key}ShortcutEnabled`

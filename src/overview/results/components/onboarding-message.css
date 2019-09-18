@@ -1,0 +1,19 @@
+@value colors: 'src/common-ui/colors.css';
+@value color5, color6 from colors;
+
+.mainText {
+    composes: fadeIn from 'src/common-ui/elements.css';
+    font-weight: 500;
+}
+
+.title {
+    font-size: 18px;
+    color: color5;
+    margin-bottom: 0.5rem;
+}
+
+.subTitle {
+    font-size: 15px;
+    color: color6;
+    margin-bottom: 2.5rem;
+}

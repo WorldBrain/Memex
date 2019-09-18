@@ -1,3 +1,4 @@
+/* eslint prefer-const: 0 */
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import { NUM_IMPORT_ITEMS as ONBOARDING_LIM } from 'src/overview/onboarding/constants'
 import ItemCreator from './item-creator'
