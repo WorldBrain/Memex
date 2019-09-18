@@ -128,6 +128,46 @@
     flex-direction: column;
 }
 
+.annotationImage {
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    background-image: url('/img/annotationImage.gif');
+    fill: white;
+    border: 1px solid #eee;
+    background-size: contain;
+    border-radius: 5px;
+    height: 0;
+    padding-top: 59.5%;
+}
+
+.searchImage {
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    background-image: url('/img/searchImage.gif');
+    fill: white;
+    border: 1px solid #eee;
+    background-size: contain;
+    border-radius: 5px;
+    height: 0;
+    padding-top: 44.5%;
+    margin: 0 13%;
+}
+
+.sidebarImage {
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    background-image: url('/img/sidebarImage.gif');
+    fill: white;
+    border: 1px solid #eee;
+    background-size: contain;
+    border-radius: 5px;
+    height: 0;
+    padding-top: 59.5%;
+}
+
 .skipTitle {
     font-size: 1.1rem;
     text-decoration: underline;

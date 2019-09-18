@@ -108,6 +108,10 @@ export default class OnboardingScreen extends StatefulUIElement<
     }
 
     private renderPlaceholderImage = () => <img width="100%" height="170px" />
+    private searchImage = () => <div className={styles.searchImage}/>
+    private annotationImage = () => <div className={styles.annotationImage}/>
+    private keyboardImage = () => <div className={styles.keyboardImage}/>
+    private sidebarImage = () => <div className={styles.sidebarImage}/>
 
     private handleTooltipToggle = () => {
         const enabled = !this.state.isTooltipEnabled
@@ -257,7 +261,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         )}
                         renderImage={() => {
                             if (!this.state.showSearchSettings) {
-                                return this.renderPlaceholderImage()
+                                return this.searchImage()
                             }
                         }}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
@@ -277,7 +281,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 Next
                             </NextStepButton>
                         )}
-                        renderImage={this.renderPlaceholderImage}
+                        renderImage={this.annotationImage}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
                     >
@@ -301,7 +305,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 Next
                             </NextStepButton>
                         )}
-                        renderImage={this.renderPlaceholderImage}
+                        renderImage={this.sidebarImage}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
                     >
