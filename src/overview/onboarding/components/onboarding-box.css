@@ -57,7 +57,7 @@
 .heading2 {
     color: color5;
     font-size: calc(1.1rem + 0.3vw);
-    margin: 1rem auto 1rem;
+    margin: 1rem auto 0.5rem;
 }
 
 .text {
@@ -70,7 +70,7 @@
 
 .textLarge {
     font-size: calc(0.8rem + 0.3vw);
-    margin: 0 auto 1rem;
+    margin: 0 auto 1.5rem;
     display: inline-flex;
     color: color6;
 }
@@ -166,6 +166,18 @@
     border-radius: 5px;
     height: 0;
     padding-top: 59.5%;
+}
+
+.keyboardImage {
+    background-repeat: no-repeat;
+    background-position: center center;
+    display: flex;
+    background-image: url('/img/keyboardImage.gif');
+    fill: white;
+    background-size: contain;
+    border-radius: 5px;
+    height: 0;
+    padding-top: 44%;
 }
 
 .skipTitle {

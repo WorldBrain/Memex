@@ -20,10 +20,14 @@ export default class OnboardingMessage extends React.PureComponent<
     render() {
         return (
             <ResultsMessage>
-                <p className={styles.mainText}>
-                    Welcome to Memex! It looks like you don't have any content
-                    indexed yet...
-                </p>
+                  <div className={styles.mainText}>
+                    <p className= {styles.title}>
+                        It looks like you don't have any thing saved yet.
+                    </p>
+                    <p className={styles.subTitle}>
+                        Visit some websites to fill your Memex
+                    </p>
+                </div>
                 {this.state.showTooltip && (
                     <OnboardingTooltip
                         descriptionText="Import your existing bookmarks &amp; web history from Pocket, Diigo, Raindrop.io and many more."

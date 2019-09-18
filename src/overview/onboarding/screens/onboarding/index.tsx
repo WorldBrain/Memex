@@ -314,7 +314,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                             isChecked={this.state.isSidebarEnabled}
                             handleChange={this.handleSidebarToggle}
                         >
-                            Show sidebar when moving cursor to the right side of your screen
+                            Show Sidebar when moving cursor to the right of your screen
                         </SettingsCheckbox>
                     </OnboardingStep>
                 )
@@ -329,7 +329,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 All done! Go to dashboard
                             </NextStepButton>
                         )}
-                        renderImage={this.renderPlaceholderImage}
+                        renderImage={this.keyboardImage}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
                     >
