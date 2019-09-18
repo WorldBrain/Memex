@@ -18,9 +18,12 @@ import { reducer as customLists } from 'src/custom-lists'
 // Search filters in the sidebar
 import { reducer as searchFilters } from 'src/search-filters'
 import { reducer as sidebarLeft } from 'src/overview/sidebar-left'
+
 import * as notifications from '../notifications'
+import { authReducer } from '../authentication/redux'
 
 const rootReducer = combineReducers({
+    auth: authReducer,
     blacklist: blacklist.reducer,
     imports: imports.reducer,
     privacy: privacy.reducer,

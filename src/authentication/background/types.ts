@@ -12,7 +12,7 @@ export interface AuthInterface {
 
 // These are key-values that a client is verified to have by authenticating, e.g. Coming from a JWT token.
 export interface Claims {
-    subscription_pro_expiry?: number
+    subscriptions: { [key: string]: { refreshAt: number } }
     [key: string]: any
 }
 
@@ -55,4 +55,11 @@ export interface LinkGeneratorInterface {
 
 export interface CheckoutLinkOptions {
     userId: string
+}
+
+export interface AuthRemoteFunctionsInterface {
+    getUser(): Promise<AuthenticatedUser | null>
+    refresh(): Promise<AuthenticatedUser | null>
+    checkValidPlan(plan): any
+    hasSubscribedBefore(): any
 }
