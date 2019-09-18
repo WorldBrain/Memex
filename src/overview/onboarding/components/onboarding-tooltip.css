@@ -12,6 +12,8 @@
     margin-bottom: 17px;
     position: relative;
     padding: 1rem;
+    margin: 0 auto;
+    max-width: 95%;
 }
 
 .img {
