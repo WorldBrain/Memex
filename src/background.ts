@@ -56,16 +56,23 @@ export async function main() {
 
     await setupBackgroundModules(backgroundModules)
 
+    // const authService = new AuthService(new AuthFirebase())
+    const authService = new AuthService(new MockAuthImplementation())
+
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
+        auth: {
+            getUser: authService.getUser,
+            refresh: authService.refresh,
+            checkValidPlan: authService.checkValidPlan,
+            hasSubscribedBefore: authService.hasSubscribedBefore,
+        },
         notifications: { createNotification },
         bookmarks: {
             addPageBookmark:
-                backgroundModules.search.remoteFunctions.bookmarks
-                    .addPageBookmark,
+            backgroundModules.search.remoteFunctions.bookmarks.addPageBookmark,
             delPageBookmark:
-                backgroundModules.search.remoteFunctions.bookmarks
-                    .delPageBookmark,
+            backgroundModules.search.remoteFunctions.bookmarks.delPageBookmark,
         },
     })
 

@@ -6,7 +6,7 @@ import { AuthService } from 'src/authentication/background/auth-service'
 
 export class SubscriptionService {
     private subscription: SubscriptionInterface<any>
-    private auth: AuthService
+    private readonly auth: AuthService
 
     public constructor(
         subscriptionImplementation: SubscriptionInterface<any>,

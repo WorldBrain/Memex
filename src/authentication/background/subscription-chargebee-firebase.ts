@@ -6,12 +6,10 @@ import {
 } from 'src/authentication/background/types'
 import { EventEmitter } from 'events'
 import { AuthService } from 'src/authentication/background/auth-service'
-import * as firebase from 'firebase'
-
+import * as firebase from 'firebase/app'
+import 'firebase/functions'
 // todo: make sure firebase is initialised somewhere
-const functions = firebase.functions()
-// Required for side-effects
-require('firebase/functions')
+const functions = null
 
 // Todo: What does chargbee call it's steps?
 type ChargeeCheckoutStepEvents = 'step1' | 'step2'
@@ -27,15 +25,11 @@ export class SubscriptionChargebeeFirebase
     private eventEmitter: SubscriptionEventEmitter<ChargeeCheckoutStepEvents>
 
     constructor(
-        linkGenerator?: LinkGeneratorInterface,
-        chargebeeInstance?: ChargebeeInterface,
+        linkGenerator: LinkGeneratorInterface,
+        chargebeeInstance: ChargebeeInterface,
     ) {
-        this.links = linkGenerator || new FirebaseChargebeeLinks()
-        // todo: Add env variable for chargebee site id
-        // todo: how to access chargebee library, they don't publish their client package as an npm module, just a hosted JS script
-        this.cbInstance =
-            chargebeeInstance ||
-            document.Chargebee.init({ site: 'TODO:ENV:CONFIG:ChargebeeSite' })
+        this.cbInstance = chargebeeInstance
+        this.links = linkGenerator
     }
 
     async checkout(auth: AuthService, options: SubscriptionCheckoutOptions) {
@@ -75,12 +69,16 @@ export class SubscriptionChargebeeFirebase
     }
 }
 
-class FirebaseChargebeeLinks implements LinkGeneratorInterface {
+export class FirebaseChargebeeLinks implements LinkGeneratorInterface {
     async checkout(options): Promise<string> {
-        return firebase.functions().httpsCallable('getCheckoutLink')(options)
+        return (await firebase.functions().httpsCallable('getCheckoutLink')(
+            options,
+        )).data
     }
 
     async manage(options): Promise<string> {
-        return firebase.functions().httpsCallable('getManageLink')(options)
+        return (await firebase.functions().httpsCallable('getManageLink')(
+            options,
+        )).data
     }
 }

@@ -5,12 +5,19 @@ import Privacy from './privacy'
 import Statistics from './statistics'
 import Settings from './settings'
 import Overview from '../overview'
+import Authentication from '../authentication/components/Authentication'
 
 export default [
     {
         name: 'Usage Statistics',
         pathname: '/statistics',
         component: Statistics,
+        hideFromSidebar: true,
+    },
+    {
+        name: 'User Account',
+        pathname: '/auth',
+        component: Authentication,
         hideFromSidebar: true,
     },
     {
@@ -23,7 +30,7 @@ export default [
     {
         name: 'Settings',
         pathname: '/settings',
-        component: Settings, 
+        component: Settings,
         icon: 'settings',
     },
     {
@@ -64,7 +71,8 @@ export default [
     },
     {
         name: 'Tutorial',
-        pathname: 'https://www.notion.so/worldbrain/Tutorials-fa44dcbf41654ceb910c5952b6097f8d',
+        pathname:
+            'https://www.notion.so/worldbrain/Tutorials-fa44dcbf41654ceb910c5952b6097f8d',
         isExternal: true,
         icon: 'info',
     },

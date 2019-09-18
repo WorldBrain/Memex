@@ -1,4 +1,8 @@
-import { AuthInterface, Claims } from 'src/authentication/background/types'
+import {
+    AuthInterface,
+    AuthRemoteFunctionsInterface,
+    Claims,
+} from 'src/authentication/background/types'
 
 export type plans = 'free' | 'pro'
 
@@ -7,7 +11,7 @@ export class AuthSubscriptionInvalid extends AuthSubscriptionError {}
 export class AuthSubscriptionNotPresent extends AuthSubscriptionInvalid {}
 export class AuthSubscriptionExpired extends AuthSubscriptionInvalid {}
 
-export class AuthService {
+export class AuthService implements AuthRemoteFunctionsInterface {
     private auth: AuthInterface
 
     public constructor(authImplementation: AuthInterface) {
