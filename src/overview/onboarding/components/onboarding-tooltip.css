@@ -9,10 +9,9 @@
     border-radius: 3px;
     display: flex;
     flex-direction: column;
-    margin-bottom: 17px;
     position: relative;
     padding: 1rem;
-    margin: 0 auto;
+    margin: 0 auto 17px;
     max-width: 95%;
 }
 
