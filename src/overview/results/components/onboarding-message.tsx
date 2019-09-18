@@ -22,7 +22,7 @@ export default class OnboardingMessage extends React.PureComponent<
             <ResultsMessage>
                   <div className={styles.mainText}>
                     <p className= {styles.title}>
-                        It looks like you don't have any thing saved yet.
+                        It looks like you don't have anything saved yet.
                     </p>
                     <p className={styles.subTitle}>
                         Visit some websites to fill your Memex
