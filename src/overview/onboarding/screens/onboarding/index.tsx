@@ -8,7 +8,6 @@ import OnboardingStep from '../../components/onboarding-step'
 import NextStepButton from '../../components/next-step-button'
 import SettingsCheckbox from '../../components/settings-checkbox'
 import SearchSettings from '../../components/search-settings'
-
 import { STORAGE_KEYS } from 'src/options/settings/constants'
 import { SIDEBAR_STORAGE_NAME } from 'src/sidebar-overlay/constants'
 import {
@@ -16,8 +15,10 @@ import {
     KEYBOARDSHORTCUTS_STORAGE_NAME,
     KEYBOARDSHORTCUTS_DEFAULT_STATE,
 } from 'src/content-tooltip/constants'
+import { OPTIONS_URL } from 'src/constants'
 
 const styles = require('../../components/onboarding-box.css')
+const searchSettingsStyles = require('../../components/search-settings.css')
 
 export interface Props {
     storage: Storage.LocalStorageArea
@@ -336,6 +337,13 @@ export default class OnboardingScreen extends StatefulUIElement<
                         >
                             Enable keyboard shortcuts
                         </SettingsCheckbox>
+                        <a
+                            className={searchSettingsStyles.settingsButton}
+                            href={`${OPTIONS_URL}#/settings`}
+                            target="_blank"
+                        >
+                            Change shortcut settings
+                        </a>
                     </OnboardingStep>
                 )
         }
