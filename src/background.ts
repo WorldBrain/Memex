@@ -33,15 +33,7 @@ export async function main() {
     })
     initSentry({ storageChangesManager: localStorageChangesManager })
 
-    const serverStorageManager = createServerStorageManager({
-        apiKey: 'AIzaSyDZhd-4XonvNk5jpg2a5F2_XmKb3G2jI9U',
-        authDomain: 'worldbrain-1057.firebaseapp.com',
-        databaseURL: 'https://worldbrain-1057.firebaseio.com',
-        projectId: 'worldbrain-1057',
-        storageBucket: 'worldbrain-1057.appspot.com',
-        messagingSenderId: '455172385517',
-        appId: '1:455172385517:web:ad25d7f0325f2ddc0c3ae4',
-    })
+    const serverStorageManager = createServerStorageManager()
     const sharedSyncLog = createSharedSyncLog(serverStorageManager)
     registerModuleMapCollections(serverStorageManager.registry, {
         sharedSyncLog,
@@ -88,6 +80,81 @@ export async function main() {
     window['bgModules'] = backgroundModules
     window['analytics'] = analytics
     window['tabMan'] = backgroundModules.activityLogger.tabManager
+
+    const selfTests = {
+        clearDb: async () => {
+            await storageManager.collection('customLists').deleteObjects({})
+            await storageManager.collection('pageListEntries').deleteObjects({})
+            await storageManager.collection('pages').deleteObjects({})
+        },
+        initialSyncSend: async () => {
+            await selfTests.clearDb()
+
+            const listId = await backgroundModules.customLists.createCustomList(
+                {
+                    name: 'My list',
+                },
+            )
+            await backgroundModules.customLists.insertPageToList({
+                id: listId,
+                url: 'http://bla.com/',
+            })
+            await backgroundModules.search.searchIndex.addPage({
+                pageDoc: {
+                    url: 'http://www.bla.com/',
+                    content: {
+                        fullText: 'home page content',
+                        title: 'bla.com title',
+                    },
+                },
+                visits: [],
+            })
+            return backgroundModules.sync.remoteFunctions.requestInitialSync()
+        },
+        initialSyncReceive: async (options: { initialMessage: string }) => {
+            await selfTests.clearDb()
+            backgroundModules.sync.remoteFunctions.answerInitialSync(options)
+            await backgroundModules.sync.remoteFunctions.waitForInitialSync()
+            console['log'](
+                'After initial Sync, got these lists',
+                await storageManager.collection('customLists').findObjects({}),
+            )
+        },
+        incrementalSyncSend: async (userId: string) => {
+            await selfTests.clearDb()
+            backgroundModules.auth.userId = userId
+            await backgroundModules.sync.continuousSync.storeSetting(
+                'deviceId',
+                null,
+            )
+
+            // await serverStorageManager.collection('sharedSyncLogEntryBatch').deleteObjects({})
+            await backgroundModules.sync.continuousSync.initDevice()
+            await backgroundModules.sync.continuousSync.setupContinuousSync()
+            await backgroundModules.customLists.createCustomList({
+                name: 'My list',
+            })
+            await backgroundModules.sync.continuousSync.forceIncrementalSync()
+        },
+        incrementalSyncReceive: async (userId: string) => {
+            await selfTests.clearDb()
+            backgroundModules.auth.userId = userId
+            await backgroundModules.sync.continuousSync.storeSetting(
+                'deviceId',
+                null,
+            )
+            // await serverStorageManager.collection('sharedSyncLogEntryBatch').deleteObjects({})
+
+            await backgroundModules.sync.continuousSync.initDevice()
+            await backgroundModules.sync.continuousSync.setupContinuousSync()
+            await backgroundModules.sync.continuousSync.forceIncrementalSync()
+            console['log'](
+                'After incremental Sync, got these lists',
+                await storageManager.collection('customLists').findObjects({}),
+            )
+        },
+    }
+    window['selfTests'] = selfTests
 }
 
 main()

@@ -31,22 +31,12 @@ export default class ContinuousSync {
     ) {}
 
     async setup() {
-        const localStorage = this.options.browserAPIs.storage.local
-
-        const enabled = await getLocalStorage(
-            SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled,
-            null,
-            localStorage,
-        )
+        const enabled = await this.retrieveSetting('continuousSyncEnabled')
         if (!enabled) {
             return
         }
 
-        this.deviceId = await getLocalStorage(
-            SYNC_STORAGE_AREA_KEYS.deviceId,
-            null,
-            localStorage,
-        )
+        this.deviceId = await this.retrieveSetting('deviceId')
         this.setupContinuousSync()
     }
 
@@ -67,13 +57,7 @@ export default class ContinuousSync {
     }
 
     async initDevice() {
-        const localStorage = this.options.browserAPIs.storage.local
-
-        const existingDeviceId = await getLocalStorage(
-            SYNC_STORAGE_AREA_KEYS.deviceId,
-            null,
-            localStorage,
-        )
+        const existingDeviceId = await this.retrieveSetting('deviceId')
         if (existingDeviceId) {
             return
         }
@@ -82,18 +66,12 @@ export default class ContinuousSync {
             userId: this.options.auth.getCurrentUser().id,
             sharedUntil: 1,
         })
-        await localStorage.set({
-            [SYNC_STORAGE_AREA_KEYS.deviceId]: newDeviceId,
-        })
+        await this.storeSetting('deviceId', newDeviceId)
         this.deviceId = newDeviceId
     }
 
     async enableContinuousSync() {
-        const localStorage = this.options.browserAPIs.storage.local
-        await localStorage.set({
-            [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
-        })
-
+        await this.storeSetting('continuousSyncEnabled', true)
         await this.setupContinuousSync()
     }
 
@@ -129,6 +107,21 @@ export default class ContinuousSync {
             now: Date.now(),
             userId: user.id,
             deviceId: this.deviceId,
+        })
+    }
+
+    async retrieveSetting(key: keyof typeof SYNC_STORAGE_AREA_KEYS) {
+        const localStorage = this.options.browserAPIs.storage.local
+        return getLocalStorage(SYNC_STORAGE_AREA_KEYS[key], null, localStorage)
+    }
+
+    async storeSetting(
+        key: keyof typeof SYNC_STORAGE_AREA_KEYS,
+        value: boolean | number | string | null,
+    ) {
+        const localStorage = this.options.browserAPIs.storage.local
+        await localStorage.set({
+            [SYNC_STORAGE_AREA_KEYS[key]]: value,
         })
     }
 }

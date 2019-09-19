@@ -40,6 +40,11 @@ export async function setupBackgroundIntegrationTest(options?: {
         (options && options.browserLocalStorage) || new MemoryBrowserStorage()
     const storageManager = initStorex()
 
+    const authBackground = {
+        userId: 1,
+        setup: async () => {},
+        getCurrentUser: () => ({ id: authBackground.userId }),
+    }
     const backgroundModules = createBackgroundModules({
         storageManager,
         browserAPIs: {
@@ -52,10 +57,7 @@ export async function setupBackgroundIntegrationTest(options?: {
             },
         } as any,
         tabManager: options && options.tabManager,
-        authBackground: {
-            userId: 1,
-            getCurrentUser: () => ({ id: 1 }),
-        },
+        authBackground,
         signalTransportFactory: options && options.signalTransportFactory,
         sharedSyncLog: options && options.sharedSyncLog,
     })

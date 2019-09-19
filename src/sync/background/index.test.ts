@@ -1,3 +1,4 @@
+import uuid from 'uuid/v4'
 import {
     backgroundIntegrationTestSuite,
     backgroundIntegrationTest,
@@ -10,11 +11,39 @@ import {
 } from './index.tests'
 import { SYNC_STORAGE_AREA_KEYS, INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
+import { createServerStorageManager } from 'src/storage/server'
+import { createSharedSyncLog } from './shared-sync-log'
+import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { withEmulatedFirestoreBackend } from '@worldbrain/storex-backend-firestore/lib/index.tests'
+import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
 
-async function setupTest() {
+interface TestSetup {
+    setups: [BackgroundIntegrationTestSetup, BackgroundIntegrationTestSetup]
+    syncModule: (
+        setup: BackgroundIntegrationTestSetup,
+    ) => BackgroundIntegrationTestSetup['backgroundModules']['sync']
+    searchModule: (
+        setup: BackgroundIntegrationTestSetup,
+    ) => BackgroundIntegrationTestSetup['backgroundModules']['search']
+    customLists: (
+        setup: BackgroundIntegrationTestSetup,
+    ) => BackgroundIntegrationTestSetup['backgroundModules']['customLists']['remoteFunctions']
+    sharedSyncLog: SharedSyncLogStorage
+    userId: number | string
+}
+export type TestFactory = (
+    description: string,
+    test: (setup: TestSetup) => void,
+) => void
+
+async function setupTest(
+    sharedSyncLog: SharedSyncLogStorage,
+): Promise<TestSetup> {
     const signalTransportFactory = lazyMemorySignalTransportFactory()
-    const sharedSyncLog = await createMemorySharedSyncLog()
-    const setups = [
+    const setups: [
+        BackgroundIntegrationTestSetup,
+        BackgroundIntegrationTestSetup
+    ] = [
         await setupBackgroundIntegrationTest({
             signalTransportFactory,
             sharedSyncLog,
@@ -31,12 +60,25 @@ async function setupTest() {
     const customLists = (setup: BackgroundIntegrationTestSetup) =>
         setup.backgroundModules.customLists.remoteFunctions
 
-    return { setups, syncModule, searchModule, customLists, sharedSyncLog }
+    const userId: string = uuid()
+    setups[0].backgroundModules.auth.userId = userId
+    setups[1].backgroundModules.auth.userId = userId
+
+    return {
+        setups,
+        syncModule,
+        searchModule,
+        customLists,
+        sharedSyncLog,
+        userId,
+    }
 }
 
-describe('SyncBackground', () => {
-    it('should not do anything if not enabled', async () => {
-        const { setups, syncModule } = await setupTest()
+function syncModuleTests(options: { testFactory: TestFactory }) {
+    const it = options.testFactory
+
+    it('should not do anything if not enabled', async (setup: TestSetup) => {
+        const { setups, syncModule } = setup
         await syncModule(setups[0]).setup()
         await syncModule(setups[1]).setup()
 
@@ -50,13 +92,8 @@ describe('SyncBackground', () => {
         ).toEqual([])
     })
 
-    it('should do the whole onboarding flow correctly', async () => {
-        const {
-            setups,
-            customLists,
-            syncModule,
-            searchModule,
-        } = await setupTest()
+    it('should do the whole onboarding flow correctly', async (setup: TestSetup) => {
+        const { setups, customLists, syncModule, searchModule, userId } = setup
 
         await syncModule(setups[0]).setup()
         await syncModule(setups[1]).setup()
@@ -166,16 +203,12 @@ describe('SyncBackground', () => {
         })
     })
 
-    it('should enable Sync on start up if enabled', async () => {
-        const {
-            setups,
-            customLists,
-            syncModule,
-            sharedSyncLog,
-        } = await setupTest()
+    it('should enable Sync on start up if enabled', async (setup: TestSetup) => {
+        const { setups, customLists, syncModule, sharedSyncLog, userId } = setup
+
         const deviceIds = [
-            await sharedSyncLog.createDeviceId({ userId: 1 }),
-            await sharedSyncLog.createDeviceId({ userId: 1 }),
+            await sharedSyncLog.createDeviceId({ userId }),
+            await sharedSyncLog.createDeviceId({ userId }),
         ]
 
         await setups[0].browserLocalStorage.set({
@@ -221,16 +254,11 @@ describe('SyncBackground', () => {
         })
     })
 
-    it('should sync on start up if enabled', async () => {
-        const {
-            setups,
-            customLists,
-            syncModule,
-            sharedSyncLog,
-        } = await setupTest()
+    it('should sync on start up if enabled', async (setup: TestSetup) => {
+        const { setups, customLists, syncModule, sharedSyncLog, userId } = setup
         const deviceIds = [
-            await sharedSyncLog.createDeviceId({ userId: 1 }),
-            await sharedSyncLog.createDeviceId({ userId: 1 }),
+            await sharedSyncLog.createDeviceId({ userId }),
+            await sharedSyncLog.createDeviceId({ userId }),
         ]
 
         await setups[0].browserLocalStorage.set({
@@ -265,6 +293,58 @@ describe('SyncBackground', () => {
             createdAt: expect.any(Date),
             pages: [],
             active: false,
+        })
+    })
+}
+
+describe('SyncBackground', () => {
+    describe('Memory backend', () => {
+        syncModuleTests({
+            testFactory: (description, test) => {
+                it(description, async () => {
+                    await test(
+                        await setupTest(await createMemorySharedSyncLog()),
+                    )
+                })
+            },
+        })
+    })
+
+    describe('Firestore backend', () => {
+        syncModuleTests({
+            testFactory: (description, test) => {
+                it(description, async () => {
+                    // const serverStorageManager = await createServerStorageManager()
+                    // const sharedSyncLog = createSharedSyncLog(serverStorageManager)
+                    // registerModuleMapCollections(serverStorageManager.registry, {
+                    //     sharedSyncLog,
+                    // })
+                    // await serverStorageManager.finishInitialization()
+
+                    await withEmulatedFirestoreBackend(
+                        {
+                            sharedSyncLog: ({ storageManager }) =>
+                                new SharedSyncLogStorage({
+                                    storageManager,
+                                    autoPkType: 'string',
+                                    excludeTimestampChecks: false,
+                                }) as any,
+                        },
+                        {
+                            auth: { userId: 'alice' },
+                            printProjectId: false,
+                            loadRules: true,
+                        },
+                        async ({ storageManager, modules }) => {
+                            await test(
+                                await setupTest(
+                                    modules.sharedSyncLog as SharedSyncLogStorage,
+                                ),
+                            )
+                        },
+                    )
+                })
+            },
         })
     })
 })

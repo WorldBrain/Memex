@@ -160,6 +160,7 @@ export async function setupBackgroundModules(
     backgroundModules.backupModule.storage.setupChangeTracking()
 
     await backgroundModules.sync.setup()
+    await backgroundModules.sync.setup()
 }
 
 export function getBackgroundStorageModules(

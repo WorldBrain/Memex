@@ -110,6 +110,7 @@
         "when-all-settled": "^0.1.1"
     },
     "devDependencies": {
+        "@firebase/testing": "^0.13.1",
         "@sentry/webpack-plugin": "^1.5.2",
         "@storybook/react": "^5.1.11",
         "@types/jest": "^23.3.1",
@@ -155,6 +156,7 @@
         "eslint-plugin-standard": "^3.1.0",
         "expect": "^23.6.0",
         "fake-indexeddb": "^2.0.4",
+        "firebase-tools": "^7.3.2",
         "fork-ts-checker-webpack-plugin": "^0.4.2",
         "hard-source-webpack-plugin": "^0.12.0",
         "html-webpack-include-assets-plugin": "^1.0.4",
