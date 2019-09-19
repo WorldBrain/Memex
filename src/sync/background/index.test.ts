@@ -19,6 +19,9 @@ import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-lo
 
 interface TestSetup {
     setups: [BackgroundIntegrationTestSetup, BackgroundIntegrationTestSetup]
+    forEachSetup: (
+        f: (setup: BackgroundIntegrationTestSetup) => void,
+    ) => Promise<void>
     syncModule: (
         setup: BackgroundIntegrationTestSetup,
     ) => BackgroundIntegrationTestSetup['backgroundModules']['sync']
@@ -64,8 +67,15 @@ async function setupTest(
     setups[0].backgroundModules.auth.userId = userId
     setups[1].backgroundModules.auth.userId = userId
 
+    const forEachSetup = async (
+        f: (setup: BackgroundIntegrationTestSetup) => void,
+    ) => {
+        await Promise.all(setups.map(f))
+    }
+
     return {
         setups,
+        forEachSetup,
         syncModule,
         searchModule,
         customLists,
@@ -78,9 +88,8 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
     const it = options.testFactory
 
     it('should not do anything if not enabled', async (setup: TestSetup) => {
-        const { setups, syncModule } = setup
-        await syncModule(setups[0]).setup()
-        await syncModule(setups[1]).setup()
+        const { setups, syncModule, forEachSetup } = setup
+        await forEachSetup(s => syncModule(s).setup())
 
         expect(syncModule(setups[0]).continuousSync.enabled).toBe(false)
         expect(syncModule(setups[0]).syncLoggingMiddleware.enabled).toBe(false)
@@ -93,10 +102,14 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
     })
 
     it('should do the whole onboarding flow correctly', async (setup: TestSetup) => {
-        const { setups, customLists, syncModule, searchModule, userId } = setup
-
-        await syncModule(setups[0]).setup()
-        await syncModule(setups[1]).setup()
+        const {
+            setups,
+            customLists,
+            syncModule,
+            searchModule,
+            forEachSetup,
+        } = setup
+        await forEachSetup(s => syncModule(s).setup())
 
         // Initial data
 
@@ -129,8 +142,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
             initialMessage,
         })
 
-        await syncModule(setups[0]).initialSync.waitForInitialSync()
-        await syncModule(setups[1]).initialSync.waitForInitialSync()
+        await forEachSetup(s => syncModule(s).initialSync.waitForInitialSync())
 
         expect(
             await customLists(setups[1]).fetchListById({
@@ -148,8 +160,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
 
         // Set up device IDs
 
-        await syncModule(setups[0]).continuousSync.initDevice()
-        await syncModule(setups[1]).continuousSync.initDevice()
+        await forEachSetup(s => syncModule(s).continuousSync.initDevice())
 
         const getDeviceId = async (setup: BackgroundIntegrationTestSetup) =>
             (await setup.browserLocalStorage.get(
@@ -166,16 +177,12 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
 
         // Enable continuous sync
 
-        await syncModule(setups[0]).remoteFunctions.enableContinuousSync()
-        expectIncrementalSyncScheduled(syncModule(setups[0]), {
-            when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
-            margin: 50,
-        })
-
-        await syncModule(setups[1]).remoteFunctions.enableContinuousSync()
-        expectIncrementalSyncScheduled(syncModule(setups[1]), {
-            when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
-            margin: 50,
+        await forEachSetup(async s => {
+            await syncModule(s).remoteFunctions.enableContinuousSync()
+            expectIncrementalSyncScheduled(syncModule(s), {
+                when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
+                margin: 50,
+            })
         })
 
         // Force incremental sync
@@ -204,7 +211,14 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
     })
 
     it('should enable Sync on start up if enabled', async (setup: TestSetup) => {
-        const { setups, customLists, syncModule, sharedSyncLog, userId } = setup
+        const {
+            setups,
+            forEachSetup,
+            customLists,
+            syncModule,
+            sharedSyncLog,
+            userId,
+        } = setup
 
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId }),
@@ -220,8 +234,9 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
             [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[1],
         })
 
-        await syncModule(setups[0]).setup()
-        await syncModule(setups[1]).setup()
+        await forEachSetup(s => syncModule(s).setup())
+        await forEachSetup(s => syncModule(s).firstContinuousSyncPromise)
+
         expectIncrementalSyncScheduled(syncModule(setups[0]), {
             when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
             margin: 50,
@@ -271,6 +286,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
         })
 
         await syncModule(setups[0]).setup()
+        await syncModule(setups[0]).firstContinuousSyncPromise
 
         const listId = await setups[0].backgroundModules.customLists.createCustomList(
             {
