@@ -1,4 +1,5 @@
 export const directLink = {
+    //
     pageTitle: 'Some random page',
     pageUrl: 'somerandomurl.com',
     url: 'http://memex.link/3234235/',
@@ -17,6 +18,7 @@ export const coll1 = 'testA'
 export const coll2 = 'testB'
 
 export const highlight = {
+    //
     pageTitle: 'Annotation title',
     pageUrl,
     body: 'Whooo this is a highlight',
@@ -27,9 +29,10 @@ export const highlight = {
 }
 
 export const hybrid = {
+    //
     pageTitle: 'Annotation title',
     pageUrl: 'test.com/test',
-    body: 'Whooo this is a highlight',
+    body: 'Whooo this is a highlight bla',
     url: 'https://test.com/test#12124124124',
     comment: 'Great quote in that highlight',
     selector: {},
@@ -41,7 +44,7 @@ export const annotation = {
     pageUrl,
     body: 'Whooo this is an annotation',
     url: 'https://annotation.url/#12124124134',
-    comment: 'Hmm this is the annotation comment',
+    comment: 'Hmm this is the annotation comment bla',
     selector: {},
     createdWhen: new Date('2019-01-29T18:42Z'),
 }
