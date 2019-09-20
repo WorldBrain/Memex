@@ -1,4 +1,4 @@
-import * as expect from 'expect'
+import expect from 'expect'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
 import initStorageManager from 'src/search/memory-storex'

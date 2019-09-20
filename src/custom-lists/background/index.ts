@@ -14,11 +14,11 @@ import { SearchIndex } from 'src/search'
 
 export default class CustomListBackground {
     storage: CustomListStorage
+    _createPage: SearchIndex['createPageViaBmTagActs'] // public so tests can override as a hack
     public remoteFunctions: CustomListsInterface
     private tabMan: TabManager
     private windows: Windows.Static
     private getPage: (url: string) => Promise<Page>
-    private createPage: SearchIndex['createPageFromTab']
     private searchIndex: SearchIndex
 
     constructor({
@@ -33,7 +33,7 @@ export default class CustomListBackground {
         tabMan?: TabManager
         windows?: Windows.Static
         getPage?: (url: string) => Promise<Page>
-        createPage?: SearchIndex['createPageFromTab']
+        createPage?: SearchIndex['createPageViaBmTagActs']
         searchIndex: SearchIndex
     }) {
         // Makes the custom list Table in indexed DB.
@@ -41,8 +41,8 @@ export default class CustomListBackground {
         this.tabMan = tabMan
         this.searchIndex = searchIndex
         this.windows = windows
-        this.getPage = getPage
-        this.createPage = createPage
+        this.getPage = getPage || searchIndex.getPage
+        this._createPage = createPage || searchIndex.createPageViaBmTagActs
 
         this.remoteFunctions = {
             createCustomList: this.createCustomList.bind(this),
@@ -150,7 +150,7 @@ export default class CustomListBackground {
         let page = await this.getPage(url)
 
         if (!page) {
-            page = await this.createPage({ url })
+            page = await this._createPage({ url })
         }
 
         page.addVisit()
@@ -229,7 +229,7 @@ export default class CustomListBackground {
             let page = await this.searchIndex.getPage(tab.url)
 
             if (page == null || page.isStub) {
-                page = await this.createPage({
+                page = await this._createPage({
                     tabId: tab.tabId,
                     url: tab.url,
                     allowScreenshot: false,

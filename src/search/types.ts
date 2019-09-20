@@ -168,6 +168,7 @@ export interface SearchIndex {
     createPageFromTab: (params: PageCreationProps) => Promise<any>
     createPageFromUrl: (params: PageCreationProps) => Promise<any>
     createPageViaBmTagActs: (params: PageCreationProps) => Promise<any>
+    createTestPage: (params: PageCreationProps) => Promise<any>
 
     dangerousPleaseBeSureDeleteAndRecreateDatabase: () => Promise<void>
 }

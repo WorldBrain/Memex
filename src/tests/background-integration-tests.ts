@@ -42,12 +42,14 @@ export async function setupBackgroundIntegrationTest(options?: {
                 local: new MemoryLocalStorage(),
             },
             bookmarks: {
-                onCreated: { addListener: () => { } },
-                onRemoved: { addListener: () => { } },
+                onCreated: { addListener: () => {} },
+                onRemoved: { addListener: () => {} },
             },
         } as any,
         tabManager: options && options.tabManager,
     })
+    backgroundModules.customLists._createPage =
+        backgroundModules.search.searchIndex.createTestPage
     registerBackgroundModuleCollections(storageManager, backgroundModules)
     // const clientSyncLog = new ClientSyncLogStorage({ storageManager })
     // registerModuleMapCollections(storageManager.registry, {
@@ -144,7 +146,7 @@ export function registerBackgroundIntegrationTest(
                 } catch (e) {
                     console.error(
                         `Unexpected storage changes in step number ${stepIndex +
-                        1} (counting from 1)`,
+                            1} (counting from 1)`,
                     )
                     throw e
                 }

@@ -21,6 +21,7 @@ import {
     createPageFromTab,
     createPageFromUrl,
     createPageViaBmTagActs,
+    createTestPage,
 } from './on-demand-indexing'
 import { domainHasFavIcon } from './search/fav-icon'
 
@@ -53,6 +54,7 @@ export function combineSearchIndex(dependenices: {
         createPageFromTab: createPageFromTab(dependenices.getDb),
         createPageFromUrl: createPageFromUrl(dependenices.getDb),
         createPageViaBmTagActs: createPageViaBmTagActs(dependenices.getDb),
+        createTestPage: createTestPage(dependenices.getDb),
 
         dangerousPleaseBeSureDeleteAndRecreateDatabase: dangerousPleaseBeSureDeleteAndRecreateDatabase(
             dependenices.getDb,
