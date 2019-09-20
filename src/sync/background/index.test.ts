@@ -39,9 +39,10 @@ export type TestFactory = (
     test: (setup: TestSetup) => void,
 ) => void
 
-async function setupTest(
-    sharedSyncLog: SharedSyncLogStorage,
-): Promise<TestSetup> {
+async function setupTest(options: {
+    sharedSyncLog: SharedSyncLogStorage
+    userId?: string
+}): Promise<TestSetup> {
     const signalTransportFactory = lazyMemorySignalTransportFactory()
     const setups: [
         BackgroundIntegrationTestSetup,
@@ -49,11 +50,11 @@ async function setupTest(
     ] = [
         await setupBackgroundIntegrationTest({
             signalTransportFactory,
-            sharedSyncLog,
+            sharedSyncLog: options.sharedSyncLog,
         }),
         await setupBackgroundIntegrationTest({
             signalTransportFactory,
-            sharedSyncLog,
+            sharedSyncLog: options.sharedSyncLog,
         }),
     ]
     const syncModule = (setup: BackgroundIntegrationTestSetup) =>
@@ -63,7 +64,7 @@ async function setupTest(
     const customLists = (setup: BackgroundIntegrationTestSetup) =>
         setup.backgroundModules.customLists.remoteFunctions
 
-    const userId: string = uuid()
+    const userId: string = options.userId || uuid()
     setups[0].backgroundModules.auth.userId = userId
     setups[1].backgroundModules.auth.userId = userId
 
@@ -79,7 +80,7 @@ async function setupTest(
         syncModule,
         searchModule,
         customLists,
-        sharedSyncLog,
+        sharedSyncLog: options.sharedSyncLog,
         userId,
     }
 }
@@ -319,7 +320,9 @@ describe('SyncBackground', () => {
             testFactory: (description, test) => {
                 it(description, async () => {
                     await test(
-                        await setupTest(await createMemorySharedSyncLog()),
+                        await setupTest({
+                            sharedSyncLog: await createMemorySharedSyncLog(),
+                        }),
                     )
                 })
             },
@@ -330,13 +333,7 @@ describe('SyncBackground', () => {
         syncModuleTests({
             testFactory: (description, test) => {
                 it(description, async () => {
-                    // const serverStorageManager = await createServerStorageManager()
-                    // const sharedSyncLog = createSharedSyncLog(serverStorageManager)
-                    // registerModuleMapCollections(serverStorageManager.registry, {
-                    //     sharedSyncLog,
-                    // })
-                    // await serverStorageManager.finishInitialization()
-
+                    const userId = 'alice'
                     await withEmulatedFirestoreBackend(
                         {
                             sharedSyncLog: ({ storageManager }) =>
@@ -347,15 +344,17 @@ describe('SyncBackground', () => {
                                 }) as any,
                         },
                         {
-                            auth: { userId: 'alice' },
+                            auth: { userId },
                             printProjectId: false,
                             loadRules: true,
                         },
                         async ({ storageManager, modules }) => {
+                            const sharedSyncLog = modules.sharedSyncLog as SharedSyncLogStorage
                             await test(
-                                await setupTest(
-                                    modules.sharedSyncLog as SharedSyncLogStorage,
-                                ),
+                                await setupTest({
+                                    sharedSyncLog,
+                                    userId,
+                                }),
                             )
                         },
                     )

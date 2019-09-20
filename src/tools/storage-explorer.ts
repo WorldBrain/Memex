@@ -1,4 +1,3 @@
-import fromPairs from 'lodash/fromPairs'
 import mapValues from 'lodash/mapValues'
 import util from 'util'
 import { URL } from 'whatwg-url'
@@ -44,6 +43,9 @@ async function main() {
 
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
+        authBackground: null,
+        sharedSyncLog: null,
+        signalTransportFactory: null,
         storageManager,
         browserAPIs: {
             storage: {
