@@ -135,7 +135,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             expectedStorageChanges: {
                                 pageListEntries: (): StorageCollectionDiff => ({
                                     [listEntry &&
-                                        `[${listId},"${listEntry.pageUrl}"]`]: {
+                                    `[${listId},"${listEntry.pageUrl}"]`]: {
                                         type: 'create',
                                         object: {
                                             listId,
@@ -145,6 +145,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     },
                                 }),
+                                visits: (): StorageCollectionDiff =>
+                                    expect.any(Object),
                             },
                         },
                         {
