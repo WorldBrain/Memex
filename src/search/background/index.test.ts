@@ -8,17 +8,12 @@ import { BackgroundModules } from 'src/background-script/setup'
 const mockEvent = { addListener: () => undefined }
 
 const countAnnots = res => {
-    const results: any = res.docs[0]
-
-    // let count = 0
-    // for (const annotation of results.annotations) {
-    //     count += Object.keys(results[day]).length
-    // }
-
-    return results.annotations.length
+    return res.docs.reduce(
+        (count, result) => count + result.annotations.length,
+        0,
+    )
 }
 
-// TODO: Make this work somehow...
 describe('Annotations search', () => {
     async function insertTestData({
         storageManager,
