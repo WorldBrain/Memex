@@ -1,13 +1,19 @@
 import TypedEmitter from 'typed-emitter'
 import { AuthService } from 'src/authentication/background/auth-service'
+import {
+    ChargebeeInterface,
+    ChargeeCheckoutStepEvents,
+    ChargeeManageStepEvents,
+} from 'src/authentication/background/auth-firebase-chargebee'
 interface AuthenticatedUser {
     id: string
 }
 
-export interface AuthInterface {
+export interface AuthInterface<T> {
     getCurrentUser(): Promise<AuthenticatedUser | null>
     getUserClaims(): Promise<Claims>
     refresh(): Promise<AuthenticatedUser | null>
+    subscription: T
 }
 
 // These are key-values that a client is verified to have by authenticating, e.g. Coming from a JWT token.
@@ -16,15 +22,12 @@ export interface Claims {
     [key: string]: any
 }
 
-export interface SubscriptionInterface<T> {
-    checkout(
-        auth: AuthService,
-        options: SubscriptionCheckoutOptions,
-    ): Promise<SubscriptionEventEmitter<T>>
-    manage(): TypedEmitter<any>
-}
-
-export type SubscriptionEventEmitter<T> = TypedEmitter<SubscriptionEvents<T>>
+export type SubscriptionCheckoutEventEmitter<T> = TypedEmitter<
+    SubscriptionEvents<T>
+>
+export type SubscriptionManageEventEmitter<T> = TypedEmitter<
+    SubscriptionEvents<T>
+>
 
 export interface SubscriptionCheckoutOptions {
     subscriptionPlanId: string
@@ -62,4 +65,14 @@ export interface AuthRemoteFunctionsInterface {
     refresh(): Promise<AuthenticatedUser | null>
     checkValidPlan(plan): any
     hasSubscribedBefore(): any
+}
+
+export interface SubscriptionRemoteFunctionsInterface {
+    checkout(
+        options: SubscriptionCheckoutOptions,
+        cbInstance: ChargebeeInterface,
+    ): Promise<SubscriptionCheckoutEventEmitter<ChargeeCheckoutStepEvents>>
+    manage(
+        cbInstance: ChargebeeInterface,
+    ): Promise<SubscriptionManageEventEmitter<ChargeeManageStepEvents>>
 }

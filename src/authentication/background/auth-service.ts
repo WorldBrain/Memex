@@ -11,16 +11,20 @@ export class AuthSubscriptionInvalid extends AuthSubscriptionError {}
 export class AuthSubscriptionNotPresent extends AuthSubscriptionInvalid {}
 export class AuthSubscriptionExpired extends AuthSubscriptionInvalid {}
 
-export class AuthService implements AuthRemoteFunctionsInterface {
-    private auth: AuthInterface
+export class AuthService<T> implements AuthRemoteFunctionsInterface {
+    private readonly auth: AuthInterface<T>
 
-    public constructor(authImplementation: AuthInterface) {
+    public constructor(authImplementation: AuthInterface<T>) {
         this.auth = authImplementation
     }
 
     public getUser = () => this.auth.getCurrentUser()
     private getUserClaims = () => this.auth.getUserClaims()
     public refresh = () => this.auth.refresh()
+
+    public get subscription() {
+        return this.auth.subscription
+    }
 
     /**
      *  Checks that a client has a valid subscription (exists, is not expired)
@@ -46,11 +50,6 @@ export class AuthService implements AuthRemoteFunctionsInterface {
         return true
     }
 
-    public async hasSubscribedBefore(): Promise<boolean> {
-        const claims = await this.getUserClaims()
-        return claims[this.subscriptionExpiryKey('pro')] != null
-    }
-
     private subscriptionExpiryKey = (plan: plans): keyof Claims =>
         `subscription_${plan}_expiry`
 
@@ -63,5 +62,11 @@ export class AuthService implements AuthRemoteFunctionsInterface {
         } catch {
             return false
         }
+    }
+
+    public async hasSubscribedBefore(): Promise<boolean> {
+        const claims = await this.getUserClaims()
+        // todo: (ch) make typesafe
+        return claims['subscriptions']['pro'] != null
     }
 }
