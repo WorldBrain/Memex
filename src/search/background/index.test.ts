@@ -309,69 +309,88 @@ describe('Annotations search', () => {
         })
     })
 
-    // describe('url-based search', () => {
-    //     test('blank', async () => {
-    //         const { searchBg, annotsBg } = await setupTest()
-    //         const results = await annotsBg.getAllAnnotationsByUrl(
-    //             { tab: null },
-    //             { url: DATA.pageUrl },
-    //         )
+    describe('url-based searches', () => {
+        test('blank', async () => {
+            const { annotsBg } = await setupTest()
 
-    //         expect(results.length).toBe(3)
-    //     })
+            const results = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                { url: DATA.pageUrl },
+            )
+            expect(results.length).toBe(3)
+            expect(results.map(a => a.url)).toEqual(
+                expect.arrayContaining([
+                    DATA.highlight.url,
+                    DATA.annotation.url,
+                    DATA.comment.url,
+                ]),
+            )
+        })
 
-    //     test('bookmark filter', async () => {
-    //         const { searchBg, annotsBg } = await setupTest()
-    //         const results = await annotsBg.getAllAnnotationsByUrl(
-    //             { tab: null },
-    //             { url: DATA.pageUrl, bookmarksOnly: true },
-    //         )
+        test('bookmarks filter', async () => {
+            const { annotsBg } = await setupTest()
 
-    //         expect(results.length).toBe(1)
-    //     })
+            const results = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                { url: DATA.pageUrl, bookmarksOnly: true },
+            )
+            expect(results.length).toBe(1)
+            expect(results.map(a => a.url)).toEqual(
+                expect.arrayContaining([DATA.highlight.url]),
+            )
+        })
 
-    //     test('tag inc filter', async () => {
-    //         const { searchBg, annotsBg } = await setupTest()
-    //         const results = await annotsBg.getAllAnnotationsByUrl(
-    //             { tab: null },
-    //             {
-    //                 url: DATA.pageUrl,
-    //                 tagsInc: [DATA.tag1],
-    //             },
-    //         )
+        test('tags included filter', async () => {
+            const { annotsBg } = await setupTest()
 
-    //         expect(results.length).toBe(1)
-    //     })
+            const results = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                {
+                    url: DATA.pageUrl,
+                    tagsInc: [DATA.tag1],
+                },
+            )
+            expect(results.length).toBe(1)
+            expect(results.map(a => a.url)).toEqual(
+                expect.arrayContaining([DATA.annotation.url]),
+            )
+        })
 
-    //     test('tag exc filter', async () => {
-    //         const { searchBg, annotsBg } = await setupTest()
-    //         const results = await annotsBg.getAllAnnotationsByUrl(
-    //             { tab: null },
-    //             {
-    //                 url: DATA.pageUrl,
-    //                 tagsExc: [DATA.tag1, DATA.tag2, 'dummy'],
-    //             },
-    //         )
+        test('tags excluded filter', async () => {
+            const { annotsBg } = await setupTest()
 
-    //         expect(results.length).toBe(0)
-    //     })
+            const results = await annotsBg.getAllAnnotationsByUrl(
+                { tab: null },
+                {
+                    url: DATA.pageUrl,
+                    tagsExc: [DATA.tag1, DATA.tag2, 'dummy'],
+                },
+            )
+            expect(results.length).toBe(0)
+        })
 
-    //     test('collection filter', async () => {
-    //         const { searchBg, annotsBg } = await setupTest()
-    //         const resA = await annotsBg.getAllAnnotationsByUrl({ tab: null }, {
-    //             url: DATA.pageUrl,
-    //             lists: [DATA.coll2],
-    //         } as any)
+        test('collection filter', async () => {
+            const { annotsBg } = await setupTest()
 
-    //         const resB = await annotsBg.getAllAnnotationsByUrl({ tab: null }, {
-    //             url: DATA.pageUrl,
-    //             lists: [DATA.coll1],
-    //         } as any)
+            const resA = await annotsBg.getAllAnnotationsByUrl({ tab: null }, {
+                url: DATA.pageUrl,
+                collections: [DATA.coll2],
+            } as any)
+            expect(resA.length).toBe(1)
+            expect(resA.map(a => a.url)).toEqual(
+                expect.arrayContaining([DATA.highlight.url]),
+            )
 
-    //         expect(resA.length).toBe(1)
-    //         expect(resB.length).toBe(0)
-    //     })
-    // })
+            const resB = await annotsBg.getAllAnnotationsByUrl({ tab: null }, {
+                url: DATA.pageUrl,
+                collections: [DATA.coll1],
+            } as any)
+            expect(resB.length).toBe(1)
+            expect(resB.map(a => a.url)).toEqual(
+                expect.arrayContaining([DATA.hybrid.url]),
+            )
+        })
+    })
 
     // describe('blank search', () => {
     //     test('all content types', async () => {
