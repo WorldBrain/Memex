@@ -1,26 +1,9 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
-import Checkbox from 'src/common-ui/components/Checkbox'
-const scriptjs = require('scriptjs')
-import { createAction } from 'redux-act'
-import { settings } from 'src/options/settings/selectors'
-import { AuthService } from 'src/authentication/background/auth-service'
-import { SubscriptionService } from 'src/authentication/background/subscription-service'
-import {
-    FirebaseChargebeeLinks,
-    SubscriptionChargebeeFirebase,
-} from 'src/authentication/background/subscription-chargebee-firebase'
-import { AuthFirebase } from 'src/authentication/background/auth-firebase'
-import {
-    MockAuthImplementation,
-    MockLinkGenerator,
-} from 'src/authentication/background/mocks/auth-mocks'
 import { Helmet } from 'react-helmet'
 import { setCurrentUser } from 'src/authentication/redux'
-import { auth } from 'src/util/remote-functions-background'
+import { auth, subscription } from 'src/util/remote-functions-background'
 import Button from 'src/popup/components/Button'
-
-const initBookmarks = createAction('index-prefs/init-bookmarks')
 
 const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 
@@ -62,18 +45,16 @@ class Authentication extends React.PureComponent<Props, State> {
 
     openPortal = () => {
         this._initChargebee()
-        const authService = new AuthService(MockAuthImplementation.newUser())
-        const subService = new SubscriptionService(
-            new SubscriptionChargebeeFirebase(
-                new MockLinkGenerator(),
-                this.chargebeeInstance,
-            ),
-            authService,
-        )
-        subService.checkout({ subscriptionPlanId: 'test' })
+        subscription.manage(this.chargebeeInstance)
     }
 
-    openCheckout = () => {}
+    openCheckout = () => {
+        this._initChargebee()
+        subscription.checkout(
+            { subscriptionPlanId: 'test' },
+            this.chargebeeInstance,
+        )
+    }
 
     render() {
         return (
@@ -91,9 +72,9 @@ class Authentication extends React.PureComponent<Props, State> {
                 </h1>
                 <Button onClick={() => this.props.setUser()}>WIP</Button>
 
-                <Button onClick={() => this.props.openPortal()}>
-                    Subscribe
-                </Button>
+                <Button onClick={() => this.openCheckout()}>Subscribe</Button>
+
+                <Button onClick={() => this.openPortal()}>Manage</Button>
             </div>
         )
     }

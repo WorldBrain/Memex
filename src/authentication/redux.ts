@@ -1,4 +1,6 @@
 import { createAction, createReducer } from 'redux-act'
+import { PageList } from 'src/custom-lists/background/types'
+
 const defaultState = {
     currentUser: null, // auth service or user?
 }
@@ -13,3 +15,12 @@ export const authReducer = createReducer(
     },
     defaultState,
 )
+
+const _openUserSubscriptionPortal = createAction(
+    'auth/openUserSubscriptionPortal',
+) as any
+export const openUserSubscriptionPortal = (
+    collection: PageList,
+) => async dispatch => {
+    dispatch(_openUserSubscriptionPortal())
+}

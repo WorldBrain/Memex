@@ -23,9 +23,13 @@ import {
 } from './background-script/setup'
 import { createServerStorageManager } from './storage/server'
 import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
-import AuthBackground from './auth/background'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { AuthService } from 'src/authentication/background/auth-service'
+import {
+    AuthFirebaseChargebee,
+    ChargebeeSubscriptionInterface,
+} from 'src/authentication/background/auth-firebase-chargebee'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -57,7 +61,9 @@ export async function main() {
     await setupBackgroundModules(backgroundModules)
 
     // const authService = new AuthService(new AuthFirebase())
-    const authService = new AuthService(new MockAuthImplementation())
+    const authService = new AuthService<ChargebeeSubscriptionInterface>(
+        new AuthFirebaseChargebee(),
+    )
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
@@ -67,19 +73,26 @@ export async function main() {
             checkValidPlan: authService.checkValidPlan,
             hasSubscribedBefore: authService.hasSubscribedBefore,
         },
+        subscription: {
+            checkout: authService.subscription.checkout,
+            manage: authService.subscription.manage,
+        },
         notifications: { createNotification },
         bookmarks: {
             addPageBookmark:
-            backgroundModules.search.remoteFunctions.bookmarks.addPageBookmark,
-            delPageBookmark:
-            backgroundModules.search.remoteFunctions.bookmarks.delPageBookmark,
-        },
+                backgroundModules.search.remoteFunctions.bookmarks.addPageBookmark,
+                delPageBookmark:
+                backgroundModules.search.remoteFunctions.bookmarks.delPageBookmark,
+            },
     })
 
     // Attach interesting features onto global window scope for interested users
+    // TODO: Shouldn't we prefix these with memex_ to avoid collisions?
+    window['auth'] = authService
+    window['backup'] = backupModule
     window['getDb'] = getDb
     window['storageMan'] = storageManager
-    window['bgScript'] = backgroundModules.bgScript
+    window['bgScript'] = bgScript
     window['bgModules'] = backgroundModules
     window['analytics'] = analytics
     window['tabMan'] = backgroundModules.activityLogger.tabManager
