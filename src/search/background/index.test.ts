@@ -4,6 +4,7 @@ import * as DATA from './index.test.data'
 import { PageUrlsByDay } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { BackgroundModules } from 'src/background-script/setup'
+import { Annotation } from 'src/direct-linking/types'
 
 const mockEvent = { addListener: () => undefined }
 
@@ -19,6 +20,17 @@ const flattenAnnotUrls = res => {
         (urls, { annotations }) => [...urls, ...annotations.map(a => a.url)],
         [],
     )
+}
+
+const flattenAnnotUrlsFromDayMap = (res: PageUrlsByDay) => {
+    const urls: string[] = []
+
+    for (const annotsByPageUrl of Object.values(res)) {
+        const annots = Object.values(annotsByPageUrl) as Annotation[][]
+        urls.push(...[].concat(...annots).map(a => a.url))
+    }
+
+    return urls
 }
 
 describe('Annotations search', () => {
@@ -369,141 +381,126 @@ describe('Annotations search', () => {
             expect(results.length).toBe(0)
         })
 
-        test('collection filter', async () => {
-            const { annotsBg } = await setupTest()
+        // test('collection filter', async () => {
+        //     const { annotsBg } = await setupTest()
 
-            const resA = await annotsBg.getAllAnnotationsByUrl({ tab: null }, {
-                url: DATA.pageUrl,
-                collections: [DATA.coll2],
-            } as any)
-            expect(resA.length).toBe(1)
-            expect(resA.map(a => a.url)).toEqual(
+        //     const resA = await annotsBg.getAllAnnotationsByUrl({ tab: null }, {
+        //         url: DATA.pageUrl,
+        //         collections: [DATA.coll2],
+        //     } as any)
+        //     expect(resA.length).toBe(1)
+        //     expect(resA.map(a => a.url)).toEqual(
+        //         expect.arrayContaining([DATA.highlight.url]),
+        //     )
+
+        //     const resB = await annotsBg.getAllAnnotationsByUrl({ tab: null }, {
+        //         url: DATA.pageUrl,
+        //         collections: [DATA.coll1],
+        //     } as any)
+        //     expect(resB.length).toBe(1)
+        //     expect(resB.map(a => a.url)).toEqual(
+        //         expect.arrayContaining([DATA.hybrid.url]),
+        //     )
+        // })
+    })
+
+    describe('blank searches', () => {
+        test('all content types search', async () => {
+            const { searchBg } = await setupTest()
+
+            const { docs: results } = await searchBg.searchPages({
+                contentTypes: { highlights: true, notes: true, pages: true },
+            })
+            expect(results.length).toBe(3)
+
+            // Ensure order is by latest visit
+            expect(results.map(res => res.url)).toEqual([
+                DATA.hybrid.pageUrl,
+                DATA.highlight.pageUrl,
+                DATA.directLink.pageUrl,
+            ])
+        })
+
+        test('annots-only search', async () => {
+            const { searchBg } = await setupTest()
+
+            const {
+                annotsByDay: results,
+                resultsExhausted,
+            }: any = await searchBg.searchAnnotations({})
+
+            const resUrls = flattenAnnotUrlsFromDayMap(results)
+            expect(resultsExhausted).toBe(true)
+            expect(resUrls.length).toBe(5)
+            // Ensure order of pages is by latest annot
+            expect(resUrls).toEqual(
+                expect.arrayContaining([
+                    DATA.hybrid.url,
+                    DATA.comment.url,
+                    DATA.highlight.url,
+                    DATA.annotation.url,
+                    DATA.directLink.url,
+                ]),
+            )
+        })
+
+        test('time filters', async () => {
+            const { searchBg } = await setupTest()
+
+            // Should result in only the newest annot
+            const { annotsByDay: resA }: any = await searchBg.searchAnnotations(
+                {
+                    startDate: new Date('2019-01-30'),
+                },
+            )
+
+            const resAUrls = flattenAnnotUrlsFromDayMap(resA)
+            expect(resAUrls.length).toBe(1)
+            expect(resAUrls).toEqual(expect.arrayContaining([DATA.hybrid.url]))
+
+            // Should result in only the oldest annot
+            const { annotsByDay: resB }: any = await searchBg.searchAnnotations(
+                {
+                    endDate: new Date('2019-01-26'),
+                },
+            )
+
+            const resBUrls = flattenAnnotUrlsFromDayMap(resB)
+            expect(resBUrls.length).toBe(1)
+            expect(resBUrls).toEqual(
                 expect.arrayContaining([DATA.highlight.url]),
             )
 
-            const resB = await annotsBg.getAllAnnotationsByUrl({ tab: null }, {
-                url: DATA.pageUrl,
-                collections: [DATA.coll1],
-            } as any)
-            expect(resB.length).toBe(1)
-            expect(resB.map(a => a.url)).toEqual(
-                expect.arrayContaining([DATA.hybrid.url]),
+            // Should result in only the oldest annot
+            const { annotsByDay: resC }: any = await searchBg.searchAnnotations(
+                {
+                    startDate: new Date('2019-01-25'),
+                    endDate: new Date('2019-01-28T23:00Z'),
+                },
+            )
+
+            const resCUrls = flattenAnnotUrlsFromDayMap(resC)
+            expect(resCUrls.length).toBe(2)
+            expect(resCUrls).toEqual(
+                expect.arrayContaining([DATA.comment.url, DATA.highlight.url]),
             )
         })
+
+        test('tags filter', async () => {
+            const { searchBg } = await setupTest()
+
+            const {
+                annotsByDay: results,
+                resultsExhausted,
+            }: any = await searchBg.searchAnnotations({
+                tagsInc: [DATA.tag1],
+            })
+
+            const resUrls = flattenAnnotUrlsFromDayMap(results)
+            expect(resultsExhausted).toBe(true)
+            expect(resUrls.length).toBe(1)
+
+            expect(resUrls).toEqual([DATA.annotation.url])
+        })
     })
-
-    // describe('blank search', () => {
-    //     test('all content types', async () => {
-    //         const { searchBg, annotsBg } = await setupTest()
-    //         const { docs: results } = await searchBg.searchPages({
-    //             contentTypes: { highlights: true, notes: true, pages: true },
-    //         })
-
-    //         expect(results).toBeDefined()
-    //         expect(results.length).toBe(3)
-
-    //         Ensure order is by latest visit
-    //         expect(results.map(res => res.url)).toEqual([
-    //             DATA.hybrid.pageUrl,
-    //             DATA.highlight.pageUrl,
-    //             DATA.directLink.pageUrl,
-    //         ])
-
-    //         const resByUrl = new Map()
-    //         results.forEach(res => resByUrl.set(res.url, res))
-
-    //         expect(resByUrl.get(DATA.pageUrl).annotations.length).toBe(3)
-    //         expect(
-    //             resByUrl.get(DATA.directLink.pageUrl).annotations.length,
-    //         ).toBe(1)
-    //         expect(resByUrl.get(DATA.hybrid.pageUrl).annotations.length).toBe(1)
-    //     })
-
-    //     test('annots-only', async () => {
-    //         const { searchBg, annotsBg } = await setupTest()
-    //         const {
-    //             docs: results,
-    //             resultsExhausted,
-    //         } = await searchBg.searchAnnotations({})
-
-    //         expect(resultsExhausted).toBe(true)
-    //         expect(results).toBeDefined()
-    //         expect(results.length).toBe(3)
-
-    //         Ensure order of pages is by latest annot
-    //         expect(results.map(res => res.url)).toEqual([
-    //             DATA.hybrid.pageUrl,
-    //             DATA.annotation.pageUrl,
-    //             DATA.directLink.pageUrl,
-    //         ])
-
-    //         For each page, ensure order of annots is by latest
-    //         expect(results[0].annotations.map(annot => annot.url)).toEqual([
-    //             DATA.hybrid.url,
-    //         ])
-    //         expect(results[1].annotations.map(annot => annot.url)).toEqual([
-    //             DATA.annotation.url,
-    //             DATA.comment.url,
-    //             DATA.highlight.url,
-    //         ])
-    //         expect(results[2].annotations.map(annot => annot.url)).toEqual([
-    //             DATA.directLink.url,
-    //         ])
-    //     })
-
-    //     test('time filters', async () => {
-    //         const { searchBg, annotsBg } = await setupTest()
-    //         Should result in only the newest annot
-    //         const { docs: resA } = await searchBg.searchAnnotations({
-    //             startDate: new Date('2019-01-30'),
-    //         })
-
-    //         expect(resA).toBeDefined()
-    //         expect(resA.length).toBe(1)
-
-    //         expect(resA[0].annotations.length).toBe(1)
-    //         expect(resA[0].annotations[0].url).toBe(DATA.hybrid.url)
-
-    //         Should result in only the oldest annot
-    //         const { docs: resB } = await searchBg.searchAnnotations({
-    //             endDate: new Date('2019-01-26'),
-    //         })
-
-    //         expect(resB).toBeDefined()
-    //         expect(resB.length).toBe(1)
-
-    //         expect(resB[0].annotations.length).toBe(1)
-    //         expect(resB[0].annotations[0].url).toBe(DATA.highlight.url)
-
-    //         Should result in only the oldest annot
-    //         const { docs: resC } = await searchBg.searchAnnotations({
-    //             startDate: new Date('2019-01-25'),
-    //             endDate: new Date('2019-01-28T23:00Z'),
-    //         })
-
-    //         expect(resC).toBeDefined()
-    //         expect(resC.length).toBe(1)
-
-    //         expect(resC[0].annotations.length).toBe(2)
-    //         expect(resC[0].annotations[0].url).toBe(DATA.comment.url)
-    //         expect(resC[0].annotations[1].url).toBe(DATA.highlight.url)
-    //     })
-
-    //     test('tags filter', async () => {
-    //         const { searchBg, annotsBg } = await setupTest()
-    //         const {
-    //             docs: results,
-    //             resultsExhausted,
-    //         } = await searchBg.searchAnnotations({
-    //             tagsInc: [DATA.tag1],
-    //         })
-
-    //         expect(resultsExhausted).toBe(true)
-    //         expect(results).toBeDefined()
-    //         expect(results.length).toBe(1)
-
-    //         expect(results[0].annotations.length).toBe(1)
-    //         expect(results[0].annotations[0].url).toEqual(DATA.annotation.url)
-    //     })
-    // })
 })
