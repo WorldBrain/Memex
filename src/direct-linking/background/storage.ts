@@ -42,7 +42,7 @@ export default class AnnotationStorage extends StorageModule {
         super({ storageManager: options.storageManager })
 
         this.db = options.storageManager
-        this.searchIndex = this.searchIndex
+        this.searchIndex = options.searchIndex
         this._browserStorageArea = options.browserStorageArea
     }
 
