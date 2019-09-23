@@ -9,8 +9,15 @@ const mockEvent = { addListener: () => undefined }
 
 const countAnnots = res => {
     return res.docs.reduce(
-        (count, result) => count + result.annotations.length,
+        (count, { annotations }) => count + annotations.length,
         0,
+    )
+}
+
+const flattenAnnotUrls = res => {
+    return res.docs.reduce(
+        (urls, { annotations }) => [...urls, ...annotations.map(a => a.url)],
+        [],
     )
 }
 
@@ -96,30 +103,52 @@ describe('Annotations search', () => {
         }
     }
 
-    describe('terms search', () => {
-        test('test terms', async () => {
-            const { searchBg, annotsBg } = await setupTest()
-            const results = await searchBg.searchAnnotations({
+    describe('terms-based searches', () => {
+        test('plain terms search', async () => {
+            const { searchBg } = await setupTest()
+
+            const resA = await searchBg.searchAnnotations({
                 query: 'comment',
             })
+            expect(countAnnots(resA)).toBe(2)
+            expect(flattenAnnotUrls(resA)).toEqual(
+                expect.arrayContaining([DATA.comment.url, DATA.annotation.url]),
+            )
 
-            expect(results.docs.length).toBe(1)
-            expect(countAnnots(results)).toBe(2)
+            const resB = await searchBg.searchAnnotations({
+                query: 'bla',
+            })
+            expect(countAnnots(resB)).toBe(2)
+            expect(flattenAnnotUrls(resB)).toEqual(
+                expect.arrayContaining([DATA.hybrid.url, DATA.annotation.url]),
+            )
         })
 
-        test('bookmarks only', async () => {
-            const { searchBg, annotsBg } = await setupTest()
-            const results = await searchBg.searchAnnotations({
+        test('bookmarks filter', async () => {
+            const { searchBg } = await setupTest()
+
+            const resFiltered = await searchBg.searchAnnotations({
                 query: 'bla',
                 bookmarksOnly: true,
             })
+            expect(countAnnots(resFiltered)).toBe(1)
+            expect(flattenAnnotUrls(resFiltered)).toEqual(
+                expect.arrayContaining([DATA.hybrid.url]),
+            )
 
-            expect(results.docs.length).toBe(1)
-            expect(countAnnots(results)).toBe(1)
+            const resUnfiltered = await searchBg.searchAnnotations({
+                query: 'bla',
+                bookmarksOnly: false,
+            })
+            expect(countAnnots(resUnfiltered)).toBe(2)
+            expect(flattenAnnotUrls(resUnfiltered)).toEqual(
+                expect.arrayContaining([DATA.hybrid.url, DATA.annotation.url]),
+            )
         })
 
         // test('collections filter', async () => {
-        //     const { searchBg, annotsBg } = await setupTest()
+        //     const { searchBg } = await setupTest()
+
         //     const resA = await searchBg.searchAnnotations({
         //         query: 'quote',
         //         lists: [DATA.coll1, DATA.coll2],
@@ -135,45 +164,70 @@ describe('Annotations search', () => {
         //     expect(countAnnots(resB)).toBe(0)
         // })
 
-        // test('tags filter', async () => {
-        //     const { searchBg, annotsBg } = await setupTest()
-        //     const results = await searchBg.searchAnnotations({
-        //         query: 'highlight annotation comment',
-        //         tagsInc: [DATA.tag1],
-        //     })
+        test('tags filter', async () => {
+            const { searchBg } = await setupTest()
 
-        //     expect(countAnnots(results)).toBe(1)
-        // })
+            const resFiltered = await searchBg.searchAnnotations({
+                query: 'comment',
+                tagsInc: [DATA.tag1],
+            })
+            expect(countAnnots(resFiltered)).toBe(1)
+            expect(flattenAnnotUrls(resFiltered)).toEqual(
+                expect.arrayContaining([DATA.annotation.url]),
+            )
 
-        // test('domains filter', async () => {
-        //     const { searchBg, annotsBg } = await setupTest()
-        //     const resA = await searchBg.searchAnnotations({
-        //         query: 'highlight annotation comment',
-        //         domainsExclude: ['annotation.url'],
-        //     })
+            const resUnfiltered = await searchBg.searchAnnotations({
+                query: 'comment',
+            })
+            expect(countAnnots(resUnfiltered)).toBe(2)
+            expect(flattenAnnotUrls(resUnfiltered)).toEqual(
+                expect.arrayContaining([DATA.annotation.url, DATA.comment.url]),
+            )
+        })
 
-        //     expect(countAnnots(resA)).toBe(1)
+        test('domains filter', async () => {
+            const { searchBg } = await setupTest()
 
-        //     const resB = await searchBg.searchAnnotations({
-        //         query: 'highlight annotation comment',
-        //         domains: ['annotation.url'],
-        //     })
+            const resUnfiltered = await searchBg.searchAnnotations({
+                query: 'highlight',
+            })
+            expect(countAnnots(resUnfiltered)).toBe(2)
+            expect(flattenAnnotUrls(resUnfiltered)).toEqual(
+                expect.arrayContaining([DATA.hybrid.url, DATA.highlight.url]),
+            )
 
-        //     expect(countAnnots(resB)).toBe(3)
-        // })
+            const resExc = await searchBg.searchAnnotations({
+                query: 'highlight',
+                domainsExclude: ['annotation.url'],
+            })
+            expect(countAnnots(resExc)).toBe(1)
+            expect(flattenAnnotUrls(resExc)).toEqual(
+                expect.arrayContaining([DATA.hybrid.url]),
+            )
 
-        // test('limit', async () => {
-        //     const { searchBg, annotsBg } = await setupTest()
+            const resInc = await searchBg.searchAnnotations({
+                query: 'highlight',
+                domains: ['annotation.url'],
+            })
+            expect(countAnnots(resInc)).toBe(1)
+            expect(flattenAnnotUrls(resInc)).toEqual(
+                expect.arrayContaining([DATA.highlight.url]),
+            )
+        })
+
+        // test('result limit parameter', async () => {
+        //     const { searchBg } = await setupTest()
+
         //     const single = await searchBg.searchAnnotations({
-        //         query: 'highlight annotation comment',
+        //         query: 'term',
         //         limit: 1,
         //     })
         //     const double = await searchBg.searchAnnotations({
-        //         query: 'highlight annotation comment',
+        //         query: 'term',
         //         limit: 2,
         //     })
         //     const triple = await searchBg.searchAnnotations({
-        //         query: 'highlight annotation comment',
+        //         query: 'term',
         //         limit: 3,
         //     })
 
@@ -182,42 +236,77 @@ describe('Annotations search', () => {
         //     expect(countAnnots(triple)).toBe(3)
         // })
 
-        // test('url scope', async () => {
-        //     const { searchBg, annotsBg } = await setupTest()
-        //     const res = await searchBg.searchAnnotations({
+        // test('page URL filter', async () => {
+        //     const { searchBg } = await setupTest()
+
+        //     const resA = await searchBg.searchAnnotations({
         //         query: 'quote',
-        //         url: normalize(DATA.directLink.pageUrl),
+        //         url: DATA.directLink.pageUrl,
         //     })
+        //     expect(countAnnots(resA)).toBe(1)
+        //     expect(flattenAnnotUrls(resA)).toEqual(
+        //         expect.arrayContaining([DATA.directLink.url]),
+        //     )
 
-        //     expect(countAnnots(res)).toBe(1)
-
-        //     const resNone = await searchBg.searchAnnotations({
+        //     const resB = await searchBg.searchAnnotations({
         //         query: 'quote',
-        //         url: normalize(DATA.pageUrl),
+        //         url: DATA.hybrid.pageUrl,
         //     })
-
-        //     expect(countAnnots(resNone)).toBe(0)
+        //     expect(countAnnots(resB)).toBe(1)
+        //     expect(flattenAnnotUrls(resB)).toEqual(
+        //         expect.arrayContaining([DATA.directLink.url]),
+        //     )
         // })
 
-        // test('comment-text-only', async () => {
-        //     const { searchBg, annotsBg } = await setupTest()
-        //     const results = await searchBg.searchAnnotations({
-        //         query: 'comment',
-        //         contentTypes: { highlights: false, notes: true, pages: false },
-        //     } as any)
+        test('comment-terms only terms search', async () => {
+            const { searchBg } = await setupTest()
 
-        //     expect(countAnnots(results)).toBe(2)
-        // })
+            const resCommentsOnly = await searchBg.searchAnnotations({
+                query: 'term',
+                contentTypes: { highlights: false, notes: true, pages: false },
+            })
+            expect(countAnnots(resCommentsOnly)).toBe(1)
+            expect(flattenAnnotUrls(resCommentsOnly)).toEqual(
+                expect.arrayContaining([DATA.hybrid.url]),
+            )
 
-        // test('highlight-text-only', async () => {
-        //     const { searchBg, annotsBg } = await setupTest()
-        //     const results = await searchBg.searchAnnotations({
-        //         query: 'whooo',
-        //         contentTypes: { highlights: true, notes: false, pages: false },
-        //     } as any)
+            const resAllFields = await searchBg.searchAnnotations({
+                query: 'term',
+            })
+            expect(countAnnots(resAllFields)).toBe(3)
+            expect(flattenAnnotUrls(resAllFields)).toEqual(
+                expect.arrayContaining([
+                    DATA.hybrid.url,
+                    DATA.annotation.url,
+                    DATA.comment.url,
+                ]),
+            )
+        })
 
-        //     expect(countAnnots(results)).toBe(3)
-        // })
+        test('highlighted-text-terms only terms search', async () => {
+            const { searchBg } = await setupTest()
+
+            const resBodyOnly = await searchBg.searchAnnotations({
+                query: 'term',
+                contentTypes: { highlights: true, notes: false, pages: false },
+            })
+            expect(countAnnots(resBodyOnly)).toBe(2)
+            expect(flattenAnnotUrls(resBodyOnly)).toEqual(
+                expect.arrayContaining([DATA.annotation.url, DATA.comment.url]),
+            )
+
+            const resAllFields = await searchBg.searchAnnotations({
+                query: 'term',
+            })
+            expect(countAnnots(resAllFields)).toBe(3)
+            expect(flattenAnnotUrls(resAllFields)).toEqual(
+                expect.arrayContaining([
+                    DATA.hybrid.url,
+                    DATA.annotation.url,
+                    DATA.comment.url,
+                ]),
+            )
+        })
     })
 
     // describe('url-based search', () => {
