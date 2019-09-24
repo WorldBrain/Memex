@@ -4,8 +4,7 @@ import Storex from '@worldbrain/storex'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import normalizeUrl from 'src/util/encode-url-for-id'
 import { Windows } from 'webextension-polyfill-ts'
-import { getPage } from 'src/search/util'
-import { createPageFromTab, DBGet } from 'src/search'
+import { SearchIndex } from 'src/search'
 
 interface Tabs {
     tabId: number
@@ -14,23 +13,25 @@ interface Tabs {
 
 export default class TagsBackground {
     storage: TagStorage
-    private getDb: DBGet
     private tabMan: TabManager
     private windows: Windows.Static
+    private searchIndex: SearchIndex
 
     constructor({
         storageManager,
+        searchIndex,
         tabMan,
         windows,
     }: {
         storageManager: Storex
+        searchIndex: SearchIndex
         tabMan?: TabManager
         windows?: Windows.Static
     }) {
         this.storage = new TagStorage({ storageManager })
-        this.getDb = async () => storageManager
         this.tabMan = tabMan
         this.windows = windows
+        this.searchIndex = searchIndex
     }
 
     setupRemoteFunctions() {
@@ -51,10 +52,10 @@ export default class TagsBackground {
         const time = Date.now()
 
         tabs.forEach(async tab => {
-            let page = await getPage(this.getDb)(tab.url)
+            let page = await this.searchIndex.getPage(tab.url)
 
             if (page == null || page.isStub) {
-                page = await createPageFromTab(this.getDb)({
+                page = await this.searchIndex.createPageFromTab({
                     tabId: tab.tabId,
                     url: tab.url,
                     allowScreenshot: false,

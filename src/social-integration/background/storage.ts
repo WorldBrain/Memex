@@ -3,11 +3,22 @@ import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
+import {
+    socialPostCollectionDefinition,
+    socialUserCollectionDefinition,
+    socialBookmarkCollectionDefinition,
+    socialPostListEntryDefinition,
+    socialTagCollectionDefinition,
+    socialPostCollectionName,
+    socialBookmarkCollectionName,
+    socialPostListEntryCollectionName,
+    socialTagCollectionName,
+    socialUserCollectionName,
+} from '@worldbrain/memex-storage/lib/social-posts/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
 import { Tweet, User } from '../types'
 import { PageList } from 'src/custom-lists/background/types'
-import * as consts from '../constants'
 import { Annotation } from 'src/direct-linking/types'
 import { buildPostUrlId } from '../util'
 
@@ -21,11 +32,11 @@ export interface SocialStorageProps {
 }
 
 export default class SocialStorage extends StorageModule {
-    static TWEETS_COLL = consts.POSTS_COLL
-    static USERS_COLL = consts.USERS_COLL
-    static TAGS_COLL = consts.TAGS_COLL
-    static BMS_COLL = consts.BMS_COLL
-    static LIST_ENTRIES_COLL = consts.LIST_ENTRIES_COLL
+    static TWEETS_COLL = socialPostCollectionName
+    static USERS_COLL = socialUserCollectionName
+    static TAGS_COLL = socialTagCollectionName
+    static BMS_COLL = socialBookmarkCollectionName
+    static LIST_ENTRIES_COLL = socialPostListEntryCollectionName
 
     private storageManager: Storex
     private postsColl: string
@@ -54,89 +65,11 @@ export default class SocialStorage extends StorageModule {
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            [this.postsColl]: {
-                version: new Date('2019-04-22'),
-                fields: {
-                    text: { type: 'text' },
-                    serviceId: { type: 'string' },
-                    createdAt: { type: 'datetime' },
-                    createdWhen: { type: 'datetime' },
-                },
-                indices: [
-                    { field: 'text' },
-                    { field: 'serviceId' },
-                    { field: 'createdAt' },
-                ],
-                relationships: [
-                    {
-                        childOf: this.usersColl,
-                        alias: 'userId',
-                        fieldName: 'userId',
-                    },
-                ],
-            },
-            [this.usersColl]: {
-                version: new Date('2019-04-22'),
-                fields: {
-                    serviceId: { type: 'string' },
-                    name: { type: 'string' },
-                    username: { type: 'string' },
-                    isVerified: { type: 'boolean' },
-                    profilePic: { type: 'blob' },
-                    type: { type: 'string' },
-                },
-                indices: [
-                    { field: 'serviceId' },
-                    { field: 'name' },
-                    { field: 'username' },
-                ],
-            },
-            [this.bookmarksColl]: {
-                version: new Date('2019-05-15'),
-                fields: {
-                    createdAt: { type: 'datetime' },
-                },
-                indices: [{ field: 'createdAt' }],
-                relationships: [
-                    {
-                        singleChildOf: this.postsColl,
-                        alias: 'postId',
-                        fieldName: 'postId',
-                    },
-                ],
-            },
-            [this.tagsColl]: {
-                version: new Date('2019-05-17'),
-                fields: {
-                    name: { type: 'string' },
-                },
-                indices: [{ field: 'name' }],
-                relationships: [
-                    {
-                        childOf: this.postsColl,
-                        alias: 'postId',
-                        fieldName: 'postId',
-                    },
-                ],
-            },
-            [this.listEntriesColl]: {
-                version: new Date('2019-05-17'),
-                fields: {
-                    createdAt: { type: 'datetime' },
-                },
-                relationships: [
-                    {
-                        childOf: 'customLists',
-                        alias: 'listId',
-                        fieldName: 'listId',
-                    },
-                    {
-                        childOf: this.postsColl,
-                        alias: 'postId',
-                        fieldName: 'postId',
-                    },
-                ],
-            },
+            ...socialPostCollectionDefinition,
+            ...socialUserCollectionDefinition,
+            ...socialBookmarkCollectionDefinition,
+            ...socialTagCollectionDefinition,
+            ...socialPostListEntryDefinition,
         },
         operations: {
             createSocialPost: {

@@ -1,7 +1,7 @@
-import * as searchIndex from '../../search'
 import { blacklist } from '../../blacklist/background'
 import { isLoggable, getPauseState } from '..'
-import { LoggableTabChecker, VisitInteractionUpdater } from './types'
+import { LoggableTabChecker, VisitInteractionUpdater, TabState } from './types'
+import { SearchIndex } from 'src/search'
 
 /**
  * Combines all "loggable" conditions for logging on given tab data to determine
@@ -23,20 +23,20 @@ export const shouldLogTab: LoggableTabChecker = async function({ url }) {
 /**
  * Handles update of assoc. visit with derived tab state data, using the tab state.
  *
- * @param {Tab} tab The tab state to derive visit meta data from.
+ * @param {Tab} tabState The tab state to derive visit meta data from.
  */
-export const updateVisitInteractionData: VisitInteractionUpdater = ({
-    url,
-    visitTime,
-    activeTime,
-    scrollState,
-}) =>
-    searchIndex
-        .updateTimestampMeta(searchIndex.getDb)(url, +visitTime, {
-            duration: activeTime,
+export const updateVisitInteractionData: VisitInteractionUpdater = (
+    tabState: TabState,
+    searchIndex: SearchIndex,
+) => {
+    const { scrollState } = tabState
+    return searchIndex
+        .updateTimestampMeta(tabState.url, +tabState.visitTime, {
+            duration: tabState.activeTime,
             scrollPx: scrollState.pixel,
             scrollMaxPx: scrollState.maxPixel,
             scrollPerc: scrollState.percent,
             scrollMaxPerc: scrollState.maxPercent,
         })
         .catch(f => f)
+}

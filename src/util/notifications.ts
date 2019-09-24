@@ -9,13 +9,15 @@ export const DEF_TYPE = 'basic'
 
 const onClickListeners = new Map<string, (id: string) => void>()
 
-browser.notifications.onClicked.addListener(id => {
-    browser.notifications.clear(id)
+export function setupNotificationClickListener() {
+    browser.notifications.onClicked.addListener(id => {
+        browser.notifications.clear(id)
 
-    const listener = onClickListeners.get(id)
-    listener(id)
-    onClickListeners.delete(id) // Manually clean up ref
-})
+        const listener = onClickListeners.get(id)
+        listener(id)
+        onClickListeners.delete(id) // Manually clean up ref
+    })
+}
 
 /**
  * Firefox supports only a subset of notif options. If you pass unknowns, it throws Errors.

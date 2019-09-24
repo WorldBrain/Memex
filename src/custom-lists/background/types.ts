@@ -18,3 +18,19 @@ export interface Tab {
     tabId: number
     url: string
 }
+
+export interface CustomListsInterface {
+    createCustomList: any
+    insertPageToList: any
+    updateListName: any
+    removeList: any
+    removePageFromList: any
+    fetchAllLists: any
+    fetchListById: any
+    fetchListPagesByUrl: any
+    fetchListNameSuggestions: any
+    fetchListPagesById: any
+    fetchListIgnoreCase: any
+    addOpenTabsToList: any
+    removeOpenTabsFromList: any
+}

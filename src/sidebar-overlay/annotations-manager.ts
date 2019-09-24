@@ -4,7 +4,10 @@ import { Omit } from './types'
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import analytics from 'src/analytics'
-import { AnnotSearchParams } from 'src/search/background/types'
+import {
+    AnnotSearchParams,
+    BackgroundSearchParams,
+} from 'src/search/background/types'
 
 export default class AnnotationsManager {
     private readonly _processEventRPC = remoteFunction('processEvent')
@@ -187,7 +190,7 @@ export default class AnnotationsManager {
         }
     }
 
-    public searchAnnotations = async (searchParams: AnnotSearchParams) => {
+    public searchAnnotations = async (searchParams: BackgroundSearchParams) => {
         const annotations = await this.searchAnnotationsRPC(searchParams)
         return annotations
     }

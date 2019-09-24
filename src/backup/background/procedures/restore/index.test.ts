@@ -1,5 +1,7 @@
+import BlobPolyfill from 'node-blob'
+import atobPolyfill from 'atob'
 import * as sinon from 'sinon'
-import * as expect from 'expect'
+import expect from 'expect'
 import { BackupBackend, ObjectChange } from '../../backend'
 import { BackupRestoreProcedure } from '.'
 import encodeBlob from 'src/util/encode-blob'
@@ -65,6 +67,7 @@ describe('BackupRestoreProcedure', () => {
             stopRecordingChanges: () => (storage.recording = false),
         }
         const restoreProcedure = new BackupRestoreProcedure({
+            searchIndex: {} as any,
             backend: null,
             storageManager: null,
             storage: storage as any,
@@ -136,6 +139,7 @@ describe('BackupRestoreProcedure', () => {
             },
         } as BackupBackend
         const restoreProcedure = new BackupRestoreProcedure({
+            searchIndex: {} as any,
             backend,
             storageManager: null,
             storage: null,
@@ -161,6 +165,7 @@ describe('BackupRestoreProcedure', () => {
 
     it('should propagate errors correctly', async () => {
         const restoreProcedure = new BackupRestoreProcedure({
+            searchIndex: {} as any,
             backend: null,
             storageManager: null,
             logErrors: false,
@@ -233,6 +238,7 @@ describe('BackupRestoreProcedure', () => {
         const deleteObjects = sinon.fake()
 
         const restoreProcedure = new BackupRestoreProcedure({
+            searchIndex: {} as any,
             backend: null,
             storageManager: {
                 collection: () => ({
@@ -252,6 +258,10 @@ describe('BackupRestoreProcedure', () => {
             logErrors: false,
             storage: null,
         })
+        restoreProcedure._getBlobClass = () =>
+            typeof Blob !== 'undefined' ? Blob : BlobPolyfill
+        restoreProcedure._getAtobFunction = () =>
+            typeof atob !== 'undefined' ? atob : atobPolyfill
 
         const {
             screenshot,
@@ -295,10 +305,15 @@ describe('BackupRestoreProcedure', () => {
             }),
         }
         const restoreProcedure = new BackupRestoreProcedure({
+            searchIndex: {} as any,
             backend: null,
             storageManager: storageManager as any,
             storage: null,
         })
+        restoreProcedure._getBlobClass = () =>
+            typeof Blob !== 'undefined' ? Blob : BlobPolyfill
+        restoreProcedure._getAtobFunction = () =>
+            typeof atob !== 'undefined' ? atob : atobPolyfill
         restoreProcedure._getChangeWhere = () => ({ boo: 'bla' })
         const dataUrl = 'data:text/plain;charset=utf-8;base64,dGVzdA=='
         await restoreProcedure._writeImage({
@@ -327,10 +342,15 @@ describe('BackupRestoreProcedure', () => {
             }),
         }
         const restoreProcedure = new BackupRestoreProcedure({
+            searchIndex: {} as any,
             backend: null,
             storageManager: storageManager as any,
             storage: null,
         })
+        restoreProcedure._getBlobClass = () =>
+            typeof Blob !== 'undefined' ? Blob : BlobPolyfill
+        restoreProcedure._getAtobFunction = () =>
+            typeof atob !== 'undefined' ? atob : atobPolyfill
         restoreProcedure._getChangeWhere = () => ({ boo: 'bla' })
         await restoreProcedure._writeChange({
             timestamp: 1,
@@ -358,6 +378,7 @@ describe('BackupRestoreProcedure', () => {
             }),
         }
         const restoreProcedure = new BackupRestoreProcedure({
+            searchIndex: {} as any,
             backend: null,
             storageManager: storageManager as any,
             storage: null,

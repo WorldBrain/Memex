@@ -7,7 +7,6 @@ import moment from 'moment'
 import analytics from 'src/analytics'
 import internalAnalytics from 'src/analytics/internal'
 import shortUrl from 'src/util/short-url'
-import * as searchIndex from 'src/search'
 import extractTimeFiltersFromQuery, {
     queryFiltersDisplay,
 } from 'src/util/nlp-time-filter'
@@ -15,6 +14,10 @@ import { OVERVIEW_URL } from './constants'
 import browserIsChrome from './util/check-browser'
 import { EVENT_NAMES } from './analytics/internal/constants'
 import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
+import { combineSearchIndex } from './search/search-index'
+import { getDb } from './search'
+
+const searchIndex = combineSearchIndex({ getDb, tabManager: null })
 
 // Read which browser we are running in.
 let browserName
@@ -78,10 +81,10 @@ async function makeSuggestion(query, suggest) {
 
     const queryFilters = extractTimeFiltersFromQuery(query)
 
-    const searchResults = await (searchIndex.search(searchIndex.getDb) as any)({
+    const searchResults = await searchIndex.search({
         ...queryFilters,
         limit: 5,
-    })
+    } as any)
 
     analytics.trackEvent({
         category: 'Search',

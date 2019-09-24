@@ -1,4 +1,4 @@
-import * as expect from 'expect'
+import expect from 'expect'
 import { fakeRemoteFunction } from 'src/util/webextensionRPC'
 import * as logic from 'src/options/backup/container.logic'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'

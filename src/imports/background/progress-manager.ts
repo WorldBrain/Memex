@@ -2,8 +2,11 @@ import promiseLimit from 'promise-limit'
 import noop from 'lodash/fp/noop'
 
 import ItemProcessor from './item-processor'
+import { SearchIndex } from 'src/search'
+import TagsBackground from 'src/tags/background'
+import CustomListBackground from 'src/custom-lists/background'
 
-class ImportProgressManager {
+export default class ImportProgressManager {
     static CONCURR_LIMIT = 20
     static DEF_CONCURR = 1
     static DEF_OBSERVER = { next: noop, complete: noop }
@@ -11,7 +14,7 @@ class ImportProgressManager {
     /**
      * @type {ItemProcessor[]} Currently scheduled processor instances, affording control over execution.
      */
-    processors = []
+    processors: ItemProcessor[] = []
 
     /**
      * @type {number} Currently set level of concurrency.
@@ -29,16 +32,38 @@ class ImportProgressManager {
      */
     stopped = true
 
+    _stateManager
+    _Processor: typeof ItemProcessor
+    runConcurrent
+
+    _searchIndex: SearchIndex
+    _tagsModule: TagsBackground
+    _customListsModule: CustomListBackground
+
     constructor({
+        searchIndex,
+        tagsModule,
+        customListsModule,
         concurrency = ImportProgressManager.DEF_CONCURR,
         observer = ImportProgressManager.DEF_OBSERVER,
         stateManager,
         Processor = ItemProcessor,
+    }: {
+        searchIndex: SearchIndex
+        tagsModule: TagsBackground
+        customListsModule: CustomListBackground
+        concurrency?: any
+        observer?: any
+        stateManager?: any
+        Processor?: typeof ItemProcessor
     }) {
         this.concurrency = concurrency
         this._observer = observer
         this._stateManager = stateManager
         this._Processor = Processor
+        this._searchIndex = searchIndex
+        this._tagsModule = tagsModule
+        this._customListsModule = customListsModule
     }
 
     set concurrency(value) {
@@ -80,10 +105,14 @@ class ImportProgressManager {
      * @returns {(chunkEntry) => Promise<void>} Async function affording processing of single entry in chunk.
      */
     _processItem = chunkKey => async ([encodedUrl, importItem]) => {
-        const processor = new this._Processor()
+        const processor = new this._Processor({
+            searchIndex: this._searchIndex,
+            tagsModule: this._tagsModule,
+            customListsModule: this._customListsModule,
+        })
 
         // Used to build the message to send to observer
-        const msg = {
+        const msg: { type: any; url: any; status?: any; error?: any } = {
             type: importItem.type,
             url: importItem.url,
         }
@@ -180,5 +209,3 @@ class ImportProgressManager {
         this.processors = []
     }
 }
-
-export default ImportProgressManager

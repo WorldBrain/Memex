@@ -40,6 +40,7 @@
                 "@worldbrain/storex-backend-dexie",
                 "@worldbrain/storex-pattern-modules",
                 "@worldbrain/memex-stemmer",
+                "@worldbrain/memex-storage",
                 "src"
             ]
         ],

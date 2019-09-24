@@ -14,11 +14,13 @@ import { BackupRestoreProcedure } from './procedures/restore'
 import { ProcedureUiCommunication } from 'src/backup/background/procedures/ui-communication'
 import NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
+import { SearchIndex } from 'src/search'
 
 export * from './backend'
 
 export class BackupBackgroundModule {
     storageManager: Storex
+    searchIndex: SearchIndex
     storage: BackupStorage
     backendLocation: string
     backend: BackupBackend
@@ -41,12 +43,14 @@ export class BackupBackgroundModule {
 
     constructor({
         storageManager,
+        searchIndex,
         lastBackupStorage,
         createQueue = Queue,
         queueOpts = { autostart: true, concurrency: 1 },
         notifications,
     }: {
         storageManager: Storex
+        searchIndex: SearchIndex
         lastBackupStorage: LastBackupStorage
         createQueue?: typeof Queue
         queueOpts?: QueueOpts
@@ -258,6 +262,7 @@ export class BackupBackgroundModule {
 
         this.restoreProcedure = new BackupRestoreProcedure({
             storageManager: this.storageManager,
+            searchIndex: this.searchIndex,
             storage: this.storage,
             backend,
         })
@@ -331,8 +336,6 @@ export class BackupBackgroundModule {
             if (endDate !== undefined) {
                 localStorage.setItem('backup.subscription-end-date', endDate)
             }
-
-            console.log('hasSubscription', hasSubscription)
 
             return hasSubscription
         })()

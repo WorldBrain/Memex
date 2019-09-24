@@ -4,48 +4,41 @@ import moment from 'moment'
 import { TabManager } from './tab-manager'
 // @ts-ignore
 import analyzePage, { PageAnalyzer } from '../../page-analysis/background'
-import * as searchIndex from '../../search'
 
 import { FavIconChecker } from './types'
+import { SearchIndex } from 'src/search'
 
 interface Props {
     tabManager: TabManager
+    searchIndex: SearchIndex
     momentLib?: typeof moment
     favIconCheck?: FavIconChecker
     pageAnalyzer?: PageAnalyzer
-    pageFetch?: any
-    pageCreate?: any
-    visitCreate?: any
-    pageTermsAdd?: any
 }
 
 export default class PageVisitLogger {
     private _tabManager: TabManager
     private _checkFavIcon: FavIconChecker
     private _analyzePage: PageAnalyzer
-    private _addPageTerms
-    private _createPage
-    private _fetchPage
-    private _createVisit
+    private _addPageTerms: SearchIndex['addPageTerms']
+    private _createPage: SearchIndex['addPage']
+    private _fetchPage: SearchIndex['getPage']
+    private _createVisit: SearchIndex['addVisit']
     private _moment: typeof moment
 
     constructor({
         tabManager,
+        searchIndex,
         pageAnalyzer = analyzePage,
-        pageTermsAdd = searchIndex.addPageTerms(searchIndex.getDb),
-        pageCreate = searchIndex.addPage(searchIndex.getDb),
-        pageFetch = searchIndex.getPage(searchIndex.getDb),
-        visitCreate = searchIndex.addVisit(searchIndex.getDb),
-        favIconCheck = searchIndex.domainHasFavIcon(searchIndex.getDb),
         momentLib = moment,
     }: Props) {
         this._tabManager = tabManager
         this._analyzePage = pageAnalyzer
-        this._fetchPage = pageFetch
-        this._addPageTerms = pageTermsAdd
-        this._createPage = pageCreate
-        this._createVisit = visitCreate
-        this._checkFavIcon = favIconCheck
+        this._fetchPage = searchIndex.getPage
+        this._addPageTerms = searchIndex.addPageTerms
+        this._createPage = searchIndex.addPage
+        this._createVisit = searchIndex.addVisit
+        this._checkFavIcon = searchIndex.domainHasFavIcon
         this._moment = momentLib
     }
 

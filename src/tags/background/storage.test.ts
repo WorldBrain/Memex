@@ -13,7 +13,7 @@ describe('Tags', () => {
 
     beforeEach(async () => {
         const storageManager = initStorageManager()
-        bg = new TagsBackground({ storageManager })
+        bg = new TagsBackground({ storageManager, searchIndex: {} as any })
 
         await storageManager.finishInitialization()
         await insertTestData()

@@ -1,5 +1,5 @@
-import * as omitBy from 'lodash/omitBy'
-import * as endsWith from 'lodash/endsWith'
+import omitBy from 'lodash/omitBy'
+import endsWith from 'lodash/endsWith'
 import Storex from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
@@ -62,10 +62,15 @@ describe('Annotations storage', () => {
     beforeEach(async () => {
         storageManager = initStorageManager()
         const annotBg = new AnnotationBackground({
+            searchIndex: {} as any,
             storageManager,
             socialBg: {} as any,
+            browserAPIs: { storage: {} } as any,
         })
-        customListsBg = new CustomListBackground({ storageManager })
+        customListsBg = new CustomListBackground({
+            storageManager,
+            searchIndex: {} as any,
+        })
         annotationStorage = annotBg.annotationStorage
 
         registerModuleMapCollections(storageManager.registry, {

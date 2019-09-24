@@ -1,4 +1,4 @@
-import * as expect from 'expect'
+import expect from 'expect'
 import Logic from './logic'
 
 describe('onboarding screen UI logic tests', () => {

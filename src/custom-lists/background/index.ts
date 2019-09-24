@@ -7,15 +7,19 @@ import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { PageCreator, Page } from 'src/search'
-import { Tab } from './types'
+import { Page } from 'src/search'
+import { getPage } from 'src/search/util'
+import { Tab, CustomListsInterface } from './types'
+import { SearchIndex } from 'src/search'
 
 export default class CustomListBackground {
     storage: CustomListStorage
+    _createPage: SearchIndex['createPageViaBmTagActs'] // public so tests can override as a hack
+    public remoteFunctions: CustomListsInterface
     private tabMan: TabManager
     private windows: Windows.Static
     private getPage: (url: string) => Promise<Page>
-    private createPage: PageCreator
+    private searchIndex: SearchIndex
 
     constructor({
         storageManager,
@@ -23,23 +27,24 @@ export default class CustomListBackground {
         windows,
         createPage,
         getPage,
+        searchIndex,
     }: {
         storageManager: Storex
         tabMan?: TabManager
         windows?: Windows.Static
         getPage?: (url: string) => Promise<Page>
-        createPage?: PageCreator
+        createPage?: SearchIndex['createPageViaBmTagActs']
+        searchIndex: SearchIndex
     }) {
         // Makes the custom list Table in indexed DB.
         this.storage = new CustomListStorage({ storageManager })
         this.tabMan = tabMan
+        this.searchIndex = searchIndex
         this.windows = windows
-        this.getPage = getPage
-        this.createPage = createPage
-    }
+        this.getPage = getPage || searchIndex.getPage
+        this._createPage = createPage || searchIndex.createPageViaBmTagActs
 
-    setupRemoteFunctions() {
-        makeRemotelyCallable({
+        this.remoteFunctions = {
             createCustomList: this.createCustomList.bind(this),
             insertPageToList: this.insertPageToList.bind(this),
             updateListName: this.updateList.bind(this),
@@ -53,7 +58,11 @@ export default class CustomListBackground {
             fetchListIgnoreCase: this.fetchListIgnoreCase.bind(this),
             addOpenTabsToList: this.addOpenTabsToList.bind(this),
             removeOpenTabsFromList: this.removeOpenTabsFromList.bind(this),
-        })
+        }
+    }
+
+    setupRemoteFunctions() {
+        makeRemotelyCallable(this.remoteFunctions)
     }
 
     generateListId() {
@@ -141,7 +150,7 @@ export default class CustomListBackground {
         let page = await this.getPage(url)
 
         if (!page) {
-            page = await this.createPage({ url })
+            page = await this._createPage({ url })
         }
 
         page.addVisit()
@@ -217,10 +226,10 @@ export default class CustomListBackground {
         const time = Date.now()
 
         tabs.forEach(async tab => {
-            let page = await this.getPage(tab.url)
+            let page = await this.searchIndex.getPage(tab.url)
 
             if (page == null || page.isStub) {
-                page = await this.createPage({
+                page = await this._createPage({
                     tabId: tab.tabId,
                     url: tab.url,
                     allowScreenshot: false,
