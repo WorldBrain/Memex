@@ -19,3 +19,6 @@
 [submodule "external/simple-signalling"]
 	path = external/simple-signalling
 	url = https://github.com/WorldBrain/simple-signalling.git
+[submodule "external/@worldbrain/memex-storage"]
+	path = external/@worldbrain/memex-storage
+	url = git@github.com:WorldBrain/memex-storage.git

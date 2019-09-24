@@ -29,6 +29,12 @@
             "@worldbrain/storex-pattern-modules": [
                 "external/@worldbrain/storex-pattern-modules/ts"
             ],
+            "@worldbrain/memex-storage": [
+                "external/@worldbrain/memex-storage/ts"
+            ],
+            "@worldbrain/memex-storage/lib/*": [
+                "external/@worldbrain/memex-storage/ts/*"
+            ],
             "@worldbrain/memex-stemmer": [
                 "external/@worldbrain/memex-stemmer/ts"
             ],
