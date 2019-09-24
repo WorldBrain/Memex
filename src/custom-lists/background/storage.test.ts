@@ -1,3 +1,4 @@
+import StorageManager from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
 import BookmarksBackground from 'src/bookmarks/background'
@@ -11,6 +12,7 @@ import { SearchIndex } from 'src/search'
 describe('Custom List Integrations', () => {
     let customLists: CustomListBackground
     let searchIndex: SearchIndex
+    let storageManager: StorageManager
 
     const checkDefined = currPage => {
         expect(currPage).toBeDefined()
@@ -30,10 +32,13 @@ describe('Custom List Integrations', () => {
     }
 
     beforeEach(async () => {
-        const { backgroundModules } = await setupBackgroundIntegrationTest()
+        const {
+            backgroundModules,
+            ...setup
+        } = await setupBackgroundIntegrationTest()
         customLists = backgroundModules.customLists
         searchIndex = backgroundModules.search.searchIndex
-        const storageManager = initStorageManager()
+        storageManager = setup.storageManager
 
         // NOTE: Each test starts creating lists at ID `1`
         let fakeListCount = 0
