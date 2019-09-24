@@ -3,6 +3,8 @@ import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
+import { tagCollectionName } from '@worldbrain/memex-storage/lib/tags/constants'
+import { annotationBookmarkCollectionName } from '@worldbrain/memex-storage/lib/annotations/constants'
 
 import {
     SearchParams as OldSearchParams,
@@ -41,6 +43,8 @@ export type LegacySearch = (
 }>
 
 export default class SearchStorage extends StorageModule {
+    static TAGS_COLL = tagCollectionName
+    static BMS_COLL = annotationBookmarkCollectionName
     private legacySearch
 
     constructor({ storageManager, legacySearch }: SearchStorageProps) {
@@ -52,12 +56,12 @@ export default class SearchStorage extends StorageModule {
     getConfig = (): StorageModuleConfig => ({
         operations: {
             findAnnotBookmarksByUrl: {
-                collection: 'annotBookmarks',
+                collection: SearchStorage.BMS_COLL,
                 operation: 'findObjects',
                 args: { url: { $in: '$annotUrls:string[]' } },
             },
             findAnnotTagsByUrl: {
-                collection: 'tags',
+                collection: SearchStorage.TAGS_COLL,
                 operation: 'findObjects',
                 args: [{ url: { $in: '$annotUrls:string[]' } }, { limit: 4 }],
             },
