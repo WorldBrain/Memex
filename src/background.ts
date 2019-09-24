@@ -83,9 +83,13 @@ export async function main() {
 
     const selfTests = {
         clearDb: async () => {
-            await storageManager.collection('customLists').deleteObjects({})
-            await storageManager.collection('pageListEntries').deleteObjects({})
-            await storageManager.collection('pages').deleteObjects({})
+            for (const collectionName of Object.keys(
+                storageManager.registry.collections,
+            )) {
+                await storageManager
+                    .collection(collectionName)
+                    .deleteObjects({})
+            }
         },
         initialSyncSend: async () => {
             await selfTests.clearDb()
@@ -103,6 +107,7 @@ export async function main() {
                 pageDoc: {
                     url: 'http://www.bla.com/',
                     content: {
+                        canonicalUrl: 'http://www.bla.com/',
                         fullText: 'home page content',
                         title: 'bla.com title',
                     },
