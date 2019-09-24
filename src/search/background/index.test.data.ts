@@ -3,7 +3,7 @@ export const directLink = {
     pageTitle: 'Some random page',
     pageUrl: 'somerandomurl.com',
     url: 'http://memex.link/3234235/',
-    body: 'Some random quote in some random page',
+    body: 'Some random quote in some random page term',
     comment: '',
     selector: {},
     createdWhen: new Date('2019-01-29T02:14Z'),
@@ -46,7 +46,7 @@ export const hybrid = {
 export const annotation = {
     pageTitle: 'Annotation title',
     pageUrl,
-    body: 'Whooo this is an annotation term',
+    body: 'Whooo this is an annotation ',
     url: 'https://annotation.url/#12124124134',
     comment: 'Hmm this is the annotation comment bla',
     selector: {},
