@@ -2,7 +2,6 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { Page } from '.'
 import { initErrHandler } from './storage'
-import { collections } from './util'
 import { DBGet } from './types'
 import { DexieUtilsPlugin } from './plugins/dexie-utils'
 
