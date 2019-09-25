@@ -16,6 +16,7 @@ import { createSharedSyncLog } from './shared-sync-log'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { withEmulatedFirestoreBackend } from '@worldbrain/storex-backend-firestore/lib/index.tests'
 import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
+import { RUN_FIRESTORE_TESTS } from 'src/tests/constants'
 
 interface TestSetup {
     setups: [BackgroundIntegrationTestSetup, BackgroundIntegrationTestSetup]
@@ -332,6 +333,11 @@ describe('SyncBackground', () => {
     describe('Firestore backend', () => {
         syncModuleTests({
             testFactory: (description, test) => {
+                if (!RUN_FIRESTORE_TESTS) {
+                    it.skip(description, () => {})
+                    return
+                }
+
                 it(description, async () => {
                     const userId = 'alice'
                     await withEmulatedFirestoreBackend(

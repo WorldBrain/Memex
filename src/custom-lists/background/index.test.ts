@@ -47,15 +47,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             },
                         },
                         {
-                            execute: async ({ setup }) =>
-                                customLists(setup).insertPageToList({
+                            execute: async ({ setup }) => {
+                                listEntry = (await customLists(
+                                    setup,
+                                ).insertPageToList({
                                     id: listId,
                                     url: 'http://www.bla.com/',
-                                }).object,
+                                })).object
+                            },
                             expectedStorageChanges: {
                                 pageListEntries: (): StorageCollectionDiff => ({
                                     [listEntry &&
-                                        `[${listId},"${listEntry.pageUrl}"]`]: {
+                                    `[${listId},"${listEntry.pageUrl}"]`]: {
                                         type: 'create',
                                         object: {
                                             listId,
@@ -65,6 +68,26 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     },
                                 }),
+                                pages: (): StorageCollectionDiff => ({
+                                    'bla.com': {
+                                        type: 'create',
+                                        object: {
+                                            canonicalUrl: undefined,
+                                            domain: 'bla.com',
+                                            fullTitle: undefined,
+                                            fullUrl: 'http://www.bla.com/',
+                                            hostname: 'bla.com',
+                                            screenshot: undefined,
+                                            terms: [],
+                                            text: undefined,
+                                            titleTerms: [],
+                                            url: 'bla.com',
+                                            urlTerms: [],
+                                        },
+                                    },
+                                }),
+                                visits: (): StorageCollectionDiff =>
+                                    expect.any(Object),
                             },
                         },
                         {
