@@ -4,12 +4,12 @@ import {
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import {
-    bookmarkCollectionDefinition,
-    bookmarkCollectionName,
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/pages/constants'
 
 export default class BookmarksStorage extends StorageModule {
-    static BMS_COLL = bookmarkCollectionName
+    static BMS_COLL = COLLECTION_NAMES.bookmark
 
     private bookmarksColl: string
 
@@ -26,7 +26,8 @@ export default class BookmarksStorage extends StorageModule {
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            ...bookmarkCollectionDefinition,
+            [BookmarksStorage.BMS_COLL]:
+                COLLECTION_DEFINITIONS[BookmarksStorage.BMS_COLL],
         },
         operations: {
             createBookmark: {
