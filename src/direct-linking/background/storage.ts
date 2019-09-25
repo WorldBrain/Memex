@@ -5,16 +5,12 @@ import {
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import {
-    annotationCollectionDefinition,
-    annotationBookmarkCollectionDefinition,
-    annotationListEntryCollectionDefinition,
-    annotationCollectionName,
-    annotationBookmarkCollectionName,
-    annotationListEntryCollectionName,
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/annotations/constants'
-import { pageCollectionName } from '@worldbrain/memex-storage/lib/pages/constants'
-import { tagCollectionName } from '@worldbrain/memex-storage/lib/tags/constants'
-import { listCollectionName } from '@worldbrain/memex-storage/lib/lists/constants'
+import { COLLECTION_NAMES as PAGE_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/pages/constants'
+import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/tags/constants'
+import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
 import { Tag, SearchIndex } from 'src/search'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
@@ -24,12 +20,12 @@ import { Annotation, AnnotListEntry } from '../types'
 
 // TODO: Move to src/annotations in the future
 export default class AnnotationStorage extends StorageModule {
-    static PAGES_COLL = pageCollectionName
-    static ANNOTS_COLL = annotationCollectionName
-    static TAGS_COLL = tagCollectionName
-    static BMS_COLL = annotationBookmarkCollectionName
-    static LISTS_COLL = listCollectionName
-    static LIST_ENTRIES_COLL = annotationListEntryCollectionName
+    static PAGES_COLL = PAGE_COLLECTION_NAMES.page
+    static ANNOTS_COLL = COLLECTION_NAMES.annotation
+    static TAGS_COLL = TAG_COLLECTION_NAMES.tag
+    static BMS_COLL = COLLECTION_NAMES.bookmark
+    static LISTS_COLL = LIST_COLLECTION_NAMES.list
+    static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
     private _browserStorageArea: Storage.StorageArea
 
@@ -56,9 +52,7 @@ export default class AnnotationStorage extends StorageModule {
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            ...annotationCollectionDefinition,
-            ...annotationBookmarkCollectionDefinition,
-            ...annotationListEntryCollectionDefinition,
+            ...COLLECTION_DEFINITIONS,
             // NOTE: This is no longer used; keeping to maintain DB schema sanity
             directLinks: {
                 version: new Date('2018-08-03'),

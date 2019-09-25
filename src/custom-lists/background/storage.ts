@@ -3,23 +3,20 @@ import {
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import {
-    listCollectionDefinition,
-    listEntryCollectionDefinition,
-    listCollectionName,
-    listEntryCollectionName,
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/lists/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
 import { PageList, PageListEntry } from './types'
 
 export default class CustomListStorage extends StorageModule {
-    static CUSTOM_LISTS_COLL = listCollectionName
-    static LIST_ENTRIES_COLL = listEntryCollectionName
+    static CUSTOM_LISTS_COLL = COLLECTION_NAMES.list
+    static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            ...listCollectionDefinition,
-            ...listEntryCollectionDefinition,
+            ...COLLECTION_DEFINITIONS,
         },
         operations: {
             createList: {

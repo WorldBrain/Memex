@@ -3,8 +3,8 @@ import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
-import { tagCollectionName } from '@worldbrain/memex-storage/lib/tags/constants'
-import { annotationBookmarkCollectionName } from '@worldbrain/memex-storage/lib/annotations/constants'
+import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/tags/constants'
+import { COLLECTION_NAMES as ANNOT_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/annotations/constants'
 
 import {
     SearchParams as OldSearchParams,
@@ -43,8 +43,8 @@ export type LegacySearch = (
 }>
 
 export default class SearchStorage extends StorageModule {
-    static TAGS_COLL = tagCollectionName
-    static BMS_COLL = annotationBookmarkCollectionName
+    static TAGS_COLL = TAG_COLLECTION_NAMES.tag
+    static BMS_COLL = ANNOT_COLLECTION_NAMES.bookmark
     private legacySearch
 
     constructor({ storageManager, legacySearch }: SearchStorageProps) {
