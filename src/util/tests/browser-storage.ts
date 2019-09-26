@@ -23,9 +23,6 @@ export default class MemoryBrowserStorage implements LimitedBrowserStorage {
         }
     }
 
-    get(key: string): Promise<EntryValueMap>
-    get(keys: string[]): Promise<EntryValueMap>
-    get(keysAndDefaults: { [key: string]: EntryValue })
     async get(
         wanted: string | string[] | EntryValueMap,
     ): Promise<EntryValueMap> {

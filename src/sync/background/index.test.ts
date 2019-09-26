@@ -1,9 +1,5 @@
 import uuid from 'uuid/v4'
-import {
-    backgroundIntegrationTestSuite,
-    backgroundIntegrationTest,
-    BackgroundIntegrationTestSetup,
-} from 'src/tests/integration-tests'
+import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import {
     lazyMemorySignalTransportFactory,
@@ -11,9 +7,6 @@ import {
 } from './index.tests'
 import { SYNC_STORAGE_AREA_KEYS, INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
-import { createServerStorageManager } from 'src/storage/server'
-import { createSharedSyncLog } from './shared-sync-log'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { withEmulatedFirestoreBackend } from '@worldbrain/storex-backend-firestore/lib/index.tests'
 import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
 import { RUN_FIRESTORE_TESTS } from 'src/tests/constants'

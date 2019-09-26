@@ -22,6 +22,7 @@ import { SignalTransportFactory } from 'src/sync/background/initial-sync'
 import { StorageChangeDetector } from './storage-change-detector'
 import StorageOperationLogger from './storage-operation-logger'
 import { setStorex } from 'src/search/get-db'
+import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -47,13 +48,14 @@ export async function setupBackgroundIntegrationTest(options?: {
     }
     const backgroundModules = createBackgroundModules({
         storageManager,
+        localStorageChangesManager: null,
         browserAPIs: {
             storage: {
                 local: browserLocalStorage,
             },
             bookmarks: {
-                onCreated: { addListener: () => { } },
-                onRemoved: { addListener: () => { } },
+                onCreated: { addListener: () => {} },
+                onRemoved: { addListener: () => {} },
             },
         } as any,
         tabManager: options && options.tabManager,
@@ -88,63 +90,70 @@ export async function setupBackgroundIntegrationTest(options?: {
 export function registerBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
 ) {
-    it(test.description, async () => {
-        const storageOperationLogger = new StorageOperationLogger({
-            enabled: false,
+    describe(test.description, () => {
+        it('should work on a single device', async () => {
+            await runBackgroundIntegrationTest(test)
         })
-        const setup = await setupBackgroundIntegrationTest({
-            customMiddleware: [storageOperationLogger.asMiddleware()],
-        })
-        const testOptions = await test.instantiate()
+        registerSyncBackgroundIntegrationTests(test)
+    })
+}
 
-        const changeDetector = new StorageChangeDetector({
-            storageManager: setup.storageManager,
-            toTrack: Object.keys(setup.storageManager.registry.collections),
-        })
-        let changeDetectorUsed = false
+export async function runBackgroundIntegrationTest(
+    test: BackgroundIntegrationTest,
+) {
+    const storageOperationLogger = new StorageOperationLogger({
+        enabled: false,
+    })
+    const setup = await setupBackgroundIntegrationTest({
+        customMiddleware: [storageOperationLogger.asMiddleware()],
+    })
+    const testOptions = await test.instantiate()
 
-        let stepIndex = -1
-        for (const step of testOptions.steps) {
-            stepIndex += 1
+    const changeDetector = new StorageChangeDetector({
+        storageManager: setup.storageManager,
+        toTrack: Object.keys(setup.storageManager.registry.collections),
+    })
+    let changeDetectorUsed = false
 
-            if (step.preCheck) {
-                await step.preCheck({ setup })
-            }
-            if (step.expectedStorageChanges && !changeDetectorUsed) {
-                await changeDetector.capture()
-                changeDetectorUsed = true
-            }
-            if (step.expectedStorageOperations) {
-                storageOperationLogger.enabled = true
-            }
+    let stepIndex = -1
+    for (const step of testOptions.steps) {
+        stepIndex += 1
 
-            await step.execute({ setup })
-            storageOperationLogger.enabled = false
+        if (step.preCheck) {
+            await step.preCheck({ setup })
+        }
+        if (step.expectedStorageChanges && !changeDetectorUsed) {
+            await changeDetector.capture()
+            changeDetectorUsed = true
+        }
+        if (step.expectedStorageOperations) {
+            storageOperationLogger.enabled = true
+        }
 
-            if (step.postCheck) {
-                await step.postCheck({ setup })
-            }
-            if (step.expectedStorageOperations) {
-                const executedOperations = storageOperationLogger.popOperations()
-                expect(executedOperations).toEqual(
-                    step.expectedStorageOperations(),
+        await step.execute({ setup })
+        storageOperationLogger.enabled = false
+
+        if (step.postCheck) {
+            await step.postCheck({ setup })
+        }
+        if (step.expectedStorageOperations) {
+            const executedOperations = storageOperationLogger.popOperations()
+            expect(executedOperations).toEqual(step.expectedStorageOperations())
+        }
+        if (step.expectedStorageChanges) {
+            try {
+                expect(await changeDetector.compare()).toEqual(
+                    mapValues(step.expectedStorageChanges, getChanges =>
+                        getChanges(),
+                    ),
                 )
-            }
-            if (step.expectedStorageChanges) {
-                try {
-                    expect(await changeDetector.compare()).toEqual(
-                        mapValues(step.expectedStorageChanges, getChanges =>
-                            getChanges(),
-                        ),
-                    )
-                } catch (e) {
-                    console.error(
-                        `Unexpected storage changes in step number ${stepIndex +
+            } catch (e) {
+                console.error(
+                    `Unexpected storage changes in step number ${stepIndex +
                         1} (counting from 1)`,
-                    )
-                    throw e
-                }
+                )
+                throw e
             }
         }
-    })
+    }
 }

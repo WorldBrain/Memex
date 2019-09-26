@@ -47,6 +47,7 @@ async function main() {
         sharedSyncLog: null,
         signalTransportFactory: null,
         storageManager,
+        localStorageChangesManager: null,
         browserAPIs: {
             storage: {
                 local: new MemoryLocalStorage(),

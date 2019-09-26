@@ -379,8 +379,6 @@ export default class Page extends AbstractModel
                         this.screenshot = existing.screenshot
                     }
                 }
-
-                console.log('writing this to storage', this.data)
                 await this.db.collection('pages').createObject(this.data)
 
                 // Insert or update all associated visits + tags

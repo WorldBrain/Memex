@@ -25,7 +25,7 @@ import { createServerStorageManager } from './storage/server'
 import { createSharedSyncLog } from './sync/background/shared-sync-log'
 import AuthBackground from './auth/background'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules';
+import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -44,6 +44,7 @@ export async function main() {
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
         storageManager,
+        localStorageChangesManager,
         browserAPIs: browser,
         authBackground,
         signalTransportFactory: createFirebaseSignalTransport,
@@ -91,9 +92,7 @@ export async function main() {
                     .deleteObjects({})
             }
         },
-        initialSyncSend: async () => {
-            await selfTests.clearDb()
-
+        insertTestList: async () => {
             const listId = await backgroundModules.customLists.createCustomList(
                 {
                     name: 'My list',
@@ -101,24 +100,31 @@ export async function main() {
             )
             await backgroundModules.customLists.insertPageToList({
                 id: listId,
-                url: 'http://bla.com/',
+                url:
+                    'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
             })
             await backgroundModules.search.searchIndex.addPage({
                 pageDoc: {
-                    url: 'http://www.bla.com/',
+                    url:
+                        'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
                     content: {
-                        canonicalUrl: 'http://www.bla.com/',
                         fullText: 'home page content',
                         title: 'bla.com title',
                     },
                 },
                 visits: [],
             })
+        },
+        initialSyncSend: async () => {
+            await selfTests.clearDb()
+            await selfTests.insertTestList()
             return backgroundModules.sync.remoteFunctions.requestInitialSync()
         },
         initialSyncReceive: async (options: { initialMessage: string }) => {
             await selfTests.clearDb()
-            backgroundModules.sync.remoteFunctions.answerInitialSync(options)
+            await backgroundModules.sync.remoteFunctions.answerInitialSync(
+                options,
+            )
             await backgroundModules.sync.remoteFunctions.waitForInitialSync()
             console['log'](
                 'After initial Sync, got these lists',
@@ -136,9 +142,7 @@ export async function main() {
             // await serverStorageManager.collection('sharedSyncLogEntryBatch').deleteObjects({})
             await backgroundModules.sync.continuousSync.initDevice()
             await backgroundModules.sync.continuousSync.setupContinuousSync()
-            await backgroundModules.customLists.createCustomList({
-                name: 'My list',
-            })
+            await selfTests.insertTestList()
             await backgroundModules.sync.continuousSync.forceIncrementalSync()
         },
         incrementalSyncReceive: async (userId: string) => {

@@ -1,8 +1,6 @@
 import * as DATA from './index.test.data'
 import { FavIcon } from './models'
 import { SearchIndex } from './types'
-import { combineSearchIndex } from './search-index'
-import { getDb } from '.'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 jest.mock('./models/abstract-model')
@@ -16,7 +14,7 @@ describe('Search index integration', () => {
             storageManager,
             backgroundModules,
         } = await setupBackgroundIntegrationTest()
-        const { searchIndex: searchIndex } = backgroundModules.search
+        const { searchIndex } = backgroundModules.search
 
         await insertTestData(searchIndex)
         return {

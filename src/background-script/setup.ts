@@ -31,6 +31,7 @@ import { SignalTransportFactory } from 'src/sync/background/initial-sync'
 import BackgroundScript from '.'
 import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
+import { StorageChangesManager } from 'src/util/storage-changes'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -55,6 +56,7 @@ export function createBackgroundModules(options: {
     signalTransportFactory: SignalTransportFactory
     sharedSyncLog: SharedSyncLog
     tabManager?: TabManager
+    localStorageChangesManager: StorageChangesManager
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
@@ -74,6 +76,7 @@ export function createBackgroundModules(options: {
     })
     const bgScript = new BackgroundScript({
         storageManager,
+        storageChangesMan: options.localStorageChangesManager,
         notifsBackground: notifications,
         loggerBackground: activityLogger,
     })
