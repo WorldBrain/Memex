@@ -378,8 +378,12 @@ export default class Page extends AbstractModel
                     if (!this.screenshot && existing.screenshot) {
                         this.screenshot = existing.screenshot
                     }
+                    await this.db
+                        .collection('pages')
+                        .updateObjects({ url: this.url }, this.data)
+                } else {
+                    await this.db.collection('pages').createObject(this.data)
                 }
-                await this.db.collection('pages').createObject(this.data)
 
                 // Insert or update all associated visits + tags
                 const visitIds = await this.saveNewVisits()

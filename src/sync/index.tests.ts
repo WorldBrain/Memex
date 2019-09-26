@@ -4,6 +4,8 @@ import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
 import {
     BackgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
+    IntegrationTestStep,
+    BackgroundIntegrationTestContext,
 } from 'src/tests/integration-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { createMemorySharedSyncLog } from './background/index.tests'
@@ -92,6 +94,7 @@ async function runSyncBackgroundTest(
     const testOptions = await test.instantiate()
 
     let stepIndex = -1
+    let lastStep: IntegrationTestStep<BackgroundIntegrationTestContext> = null
     for (const currentDeviceIndex of pattern) {
         stepIndex += 1
         const currentDeviceId = deviceIds[currentDeviceIndex]
@@ -103,7 +106,7 @@ async function runSyncBackgroundTest(
             await sync(currentSetup, currentDeviceId)
         }
 
-        const step = testOptions.steps[stepIndex]
+        const step = (lastStep = testOptions.steps[stepIndex])
         if (step.preCheck) {
             await step.preCheck({
                 setup: currentSetup,
@@ -121,13 +124,22 @@ async function runSyncBackgroundTest(
         // console.log('post-sync, device', currentDeviceId)
         await sync(currentSetup, currentDeviceId)
 
-        // const lastSyncedDeviceIndex = pattern[pattern.length - 1]
         // const unsyncedDeviceIndex = (lastSyncedDeviceIndex + 1) % 2
 
         // await sync(
         //     setups[unsyncedDeviceIndex],
         //     deviceIds[unsyncedDeviceIndex],
         // )
+    }
+
+    const lastSyncedDeviceIndex = pattern[pattern.length - 1]
+    const unsyncedDeviceIndices = deviceIds
+        .map((deviceId, deviceIndex) => deviceIndex)
+        .filter(deviceIndex => deviceIndex !== lastSyncedDeviceIndex)
+
+    for (const unsyncedDeviceIndex of unsyncedDeviceIndices) {
+        await sync(setups[unsyncedDeviceIndex], deviceIds[unsyncedDeviceIndex])
+        lastStep!.postCheck({ setup: setups[unsyncedDeviceIndex] })
     }
 }
 
