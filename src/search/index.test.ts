@@ -2,6 +2,7 @@ import * as DATA from './index.test.data'
 import { FavIcon } from './models'
 import { SearchIndex } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
+import StorageOperationLogger from 'src/tests/storage-operation-logger'
 
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
@@ -643,7 +644,7 @@ describe('Search index integration', () => {
         })
 
         test('page re-add appends new terms on updates', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, searchIndex, storageManager } = await setupTest()
             const { docs: before } = await search({ query: 'fox' })
             expect(before.length).toBe(1)
 
@@ -656,6 +657,28 @@ describe('Search index integration', () => {
                         fullText: 'a group of pigs were shocked',
                     },
                 },
+            })
+
+            expect(await searchIndex.getPage(DATA.PAGE_3.url)).toMatchObject({
+                domain: 'test.com',
+                fullTitle: 'page',
+                fullUrl: DATA.PAGE_3.url,
+                hostname: 'test.com',
+                terms: [
+                    'group',
+                    'pigs',
+                    'shocked',
+                    'wild',
+                    'fox',
+                    'jumped',
+                    'hairy',
+                    'red',
+                    'hen',
+                ],
+                text: 'a group of pigs were shocked',
+                titleTerms: ['page'],
+                url: 'test.com/test',
+                urlTerms: ['test'],
             })
 
             // Should still match old text not in new page data

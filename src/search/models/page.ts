@@ -378,6 +378,7 @@ export default class Page extends AbstractModel
                     if (!this.screenshot && existing.screenshot) {
                         this.screenshot = existing.screenshot
                     }
+
                     await this.db
                         .collection('pages')
                         .updateObjects({ url: this.url }, this.data)

@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep'
 import {
     StorageMiddleware,
     StorageMiddlewareContext,
@@ -26,13 +27,14 @@ export default class StorageOperationLogger {
     asMiddleware(): StorageMiddleware {
         return {
             process: async (context: StorageMiddlewareContext) => {
+                const operation = cloneDeep(context.operation)
                 const result = await context.next.process({
                     operation: context.operation,
                 })
                 if (this.enabled) {
                     this.loggedOperations.push({
-                        operation: context.operation,
-                        result,
+                        operation,
+                        result: cloneDeep(result),
                     })
                 }
                 return result
