@@ -1,9 +1,9 @@
 import Storex from '@worldbrain/storex'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { DexieUtilsPlugin } from './plugins/dexie-utils'
 import { DBGet } from './types'
 import { Page } from './models'
-import normalizeUrl from '../util/encode-url-for-id'
 import { initErrHandler } from './storage'
 
 export const DEFAULT_TERM_SEPARATOR = /[|\u{A0}' .,|(\n)]+/u

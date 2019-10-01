@@ -1,7 +1,7 @@
 import Storex from '@worldbrain/storex'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import BookmarksStorage from './storage'
-import normalizeUrl from 'src/util/encode-url-for-id'
 
 export default class BookmarksBackground {
     storage: BookmarksStorage

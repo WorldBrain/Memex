@@ -1,5 +1,6 @@
 import Storex from '@worldbrain/storex'
 import { Tabs, Browser } from 'webextension-polyfill-ts'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import {
     makeRemotelyCallable,
@@ -10,7 +11,6 @@ import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 import AnnotationStorage from './storage'
-import normalize from '../../util/encode-url-for-id'
 import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
@@ -216,7 +216,7 @@ export default class DirectLinkingBackground {
         isSocialPost?: boolean,
     ) {
         url = url == null && tab != null ? tab.url : url
-        url = isSocialPost ? await this.lookupSocialId(url) : normalize(url)
+        url = isSocialPost ? await this.lookupSocialId(url) : normalizeUrl(url)
 
         const annotations = await this.annotationStorage.getAllAnnotationsByUrl(
             {
@@ -267,7 +267,7 @@ export default class DirectLinkingBackground {
         }
 
         const pageTitle = title == null ? tab.title : title
-        const uniqueUrl = normalize(`${pageUrl}/#${Date.now()}`, {
+        const uniqueUrl = normalizeUrl(`${pageUrl}/#${Date.now()}`, {
             stripHash: false,
             removeTrailingSlash: false,
         })
