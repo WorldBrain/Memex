@@ -1,6 +1,5 @@
-import normalizeUrl from 'normalize-url'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-import { normalizationOpts } from 'src/util/encode-url-for-id'
 import extractPageContent from 'src/page-analysis/content_script/extract-page-content'
 import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
 import extractPdfContent from 'src/page-analysis/content_script/extract-pdf-content'
@@ -40,7 +39,6 @@ export default function fetchPageData(
 
     try {
         normalizedUrl = normalizeUrl(url, {
-            ...normalizationOpts,
             removeQueryParameters: [/.*/i],
         })
     } catch (err) {

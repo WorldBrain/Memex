@@ -1,7 +1,7 @@
 import { Field } from '@worldbrain/storex/lib/fields/types'
 import { PrimitiveFieldType } from '@worldbrain/storex/lib/types'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-import normalize from 'src/util/encode-url-for-id'
 import { POST_URL_ID_MATCH_PATTERN } from 'src/social-integration/constants'
 
 export default class UrlField extends Field {
@@ -12,6 +12,6 @@ export default class UrlField extends Field {
             return input
         }
 
-        return normalize(input)
+        return normalizeUrl(input)
     }
 }

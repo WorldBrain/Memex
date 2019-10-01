@@ -14,7 +14,6 @@ type ForEachChunkCb = (
 ) => Promise<void>
 
 jest.mock('src/blacklist/background/interface')
-jest.mock('src/util/encode-url-for-id')
 jest.mock('src/activity-logger')
 jest.mock('./cache')
 jest.mock('./data-sources')

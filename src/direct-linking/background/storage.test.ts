@@ -2,9 +2,9 @@ import omitBy from 'lodash/omitBy'
 import endsWith from 'lodash/endsWith'
 import Storex from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import initStorageManager from '../../search/memory-storex'
-import normalize from '../../util/encode-url-for-id'
 import AnnotationBackground from './'
 import AnnotationStorage from './storage'
 import CustomListBackground from 'src/custom-lists/background'
@@ -28,8 +28,8 @@ describe('Annotations storage', () => {
             await storageManager.collection('pages').createObject({
                 url: annot.pageUrl,
                 fullUrl: annot.url,
-                hostname: normalize(annot.pageUrl),
-                domain: normalize(annot.pageUrl),
+                hostname: normalizeUrl(annot.pageUrl),
+                domain: normalizeUrl(annot.pageUrl),
                 title: annot.pageTitle,
                 text: '',
                 canonicalUrl: annot.url,

@@ -1,9 +1,10 @@
+import Storex from '@worldbrain/storex'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { Windows } from 'webextension-polyfill-ts'
+
 import TagStorage from './storage'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import Storex from '@worldbrain/storex'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import normalizeUrl from 'src/util/encode-url-for-id'
-import { Windows } from 'webextension-polyfill-ts'
 import { SearchIndex } from 'src/search'
 
 interface Tabs {
