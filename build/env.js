@@ -1,3 +1,14 @@
+const firebase = {
+    development: {
+        FIREBASE_MEMEX_API_KEY: 'AIzaSyCyxWY7qZSWlncB_JDYOSzeTOfRnYhNcS8',
+        FIREBASE_MEMEX_AUTH_DOMAIN: 'worldbrain-staging.firebaseapp.com',
+        FIREBASE_MEMEX_DATABSE_URL: 'https://worldbrain-staging.firebaseio.com',
+        FIREBASE_MEMEX_PROJECT_ID: 'worldbrain-staging',
+        FIREBASE_MEMEX_MESSAGING_SENDER_ID: '840601505816',
+        FIREBASE_MEMEX_APP_ID: '1:840601505816:web:69fbb7a789882e399fb36d',
+    },
+}
+
 export default ({ mode }) => {
     const env = {
         VERSION: process.env.npm_package_version,
@@ -14,6 +25,14 @@ export default ({ mode }) => {
         BACKUP_TEST_SIZE_ESTIMATION: '',
     }
 
+    // Auth (with Firebase)
+    for (const key in firebase.development) {
+        // noinspection JSUnfilteredForInLoop
+        env[key] =
+            mode === 'development' ? firebase[mode][key] : process.env[key]
+    }
+
+    // Analytics
     if (mode === 'development' && process.env.DEV_ANALYTICS !== 'true') {
         console.warn(
             `Turing off analytics for extension development, set DEV_ANALYTICS=true if you're hacking on analytics`,

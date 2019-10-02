@@ -21,6 +21,8 @@
 import mapValues from 'lodash/fp/mapValues'
 import { browser } from 'webextension-polyfill-ts'
 import { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
+import TypedEventEmitter from 'typed-emitter'
+import { EventEmitter } from 'events'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -233,10 +235,13 @@ export function makeRemotelyCallable<T>(
     // so remove this from the call if this was not desired.
     if (!insertExtraArg) {
         // Replace each func with...
+        // @ts-ignore
         const wrapFunctions = mapValues(func =>
             // ...a function that calls func, but hides the inserted argument.
+            // @ts-ignore
             (extraArg, ...args) => func(...args),
         )
+        // @ts-ignore
         functions = wrapFunctions(functions)
     }
 
@@ -271,4 +276,61 @@ export function fakeRemoteFunction(functions: {
             return Promise.resolve(functions[name](...args))
         }
     }
+}
+
+// todo(ch): type safe this
+const __REMOTE_EVENT__ = '__REMOTE_EVENT__'
+const __REMOTE_EVENT_TYPE__ = '__REMOTE_EVENT_TYPE__'
+const __REMOTE_EVENT_NAME__ = '__REMOTE_EVENT_NAME__'
+
+// Sending Side, (e.g. background script)
+export function remoteEventEmitter(eventType: string) {
+    const message = {
+        __REMOTE_EVENT__,
+        __REMOTE_EVENT_TYPE__: eventType,
+    }
+    return {
+        emit: async (eventName: string, data: any) =>
+            browser.runtime.sendMessage({
+                ...message,
+                __REMOTE_EVENT_NAME__: eventName,
+                data,
+            }),
+    }
+}
+
+// Receiving Side (e.g. content script, options page, etc)
+const remoteEventEmitters: { [key: string]: TypedEventEmitter<any> } = {}
+
+function registerRemoteEventForwarder() {
+    if (browser.runtime.onMessage.hasListener(remoteEventForwarder)) {
+        return
+    }
+    browser.runtime.onMessage.addListener(remoteEventForwarder)
+}
+const remoteEventForwarder = (message, _) => {
+    if (message == null || message[__REMOTE_EVENT__] !== __REMOTE_EVENT__) {
+        return
+    }
+
+    const emitterType = message[__REMOTE_EVENT_TYPE__]
+    const emitter = remoteEventEmitters[emitterType]
+
+    if (emitter == null) {
+        return
+    }
+
+    emitter.emit(message[__REMOTE_EVENT_NAME__], message.data)
+}
+
+export function getRemoteEventEmitter(eventType) {
+    const existingEmitter = remoteEventEmitters[eventType]
+    if (existingEmitter) {
+        return existingEmitter
+    }
+
+    const newEmitter = new EventEmitter() as TypedEventEmitter<any>
+    remoteEventEmitters[eventType] = newEmitter
+    registerRemoteEventForwarder()
+    return newEmitter
 }

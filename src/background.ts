@@ -26,10 +26,12 @@ import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { AuthService } from 'src/authentication/background/auth-service'
+import { firebase } from 'src/util/firebase-app-initialized'
+import { AuthFirebase } from 'src/authentication/background/auth-firebase'
 import {
-    AuthFirebaseChargebee,
-    ChargebeeSubscriptionInterface,
-} from 'src/authentication/background/auth-firebase-chargebee'
+    FirebaseFunctionsAuth,
+    FirebaseFunctionsSubscription,
+} from 'src/authentication/background/firebase-functions-subscription'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -60,10 +62,9 @@ export async function main() {
 
     await setupBackgroundModules(backgroundModules)
 
-    // const authService = new AuthService(new AuthFirebase())
-    const authService = new AuthService<ChargebeeSubscriptionInterface>(
-        new AuthFirebaseChargebee(),
-    )
+    const authService = new AuthService(new AuthFirebase())
+    const subscriptionServerFunctions = new FirebaseFunctionsSubscription()
+    const authServerFunctions = new FirebaseFunctionsAuth()
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
@@ -73,17 +74,18 @@ export async function main() {
             checkValidPlan: authService.checkValidPlan,
             hasSubscribedBefore: authService.hasSubscribedBefore,
         },
-        subscription: {
-            checkout: authService.subscription.checkout,
-            manage: authService.subscription.manage,
+        serverFunctions: {
+            getCheckoutLink: subscriptionServerFunctions.getCheckoutLink,
+            getManageLink: subscriptionServerFunctions.getManageLink,
+            refreshUserClaims: authServerFunctions.refreshUserClaims,
         },
         notifications: { createNotification },
         bookmarks: {
             addPageBookmark:
                 backgroundModules.search.remoteFunctions.bookmarks.addPageBookmark,
-                delPageBookmark:
+            delPageBookmark:
                 backgroundModules.search.remoteFunctions.bookmarks.delPageBookmark,
-            },
+        },
     })
 
     // Attach interesting features onto global window scope for interested users
