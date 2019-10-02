@@ -139,7 +139,7 @@ async function runSyncBackgroundTest(
 
     for (const unsyncedDeviceIndex of unsyncedDeviceIndices) {
         await sync(setups[unsyncedDeviceIndex], deviceIds[unsyncedDeviceIndex])
-        lastStep!.postCheck({ setup: setups[unsyncedDeviceIndex] })
+        await lastStep!.postCheck({ setup: setups[unsyncedDeviceIndex] })
     }
 }
 
