@@ -1,9 +1,12 @@
 import * as React from 'react'
-import { connect } from 'react-redux'
 import { Helmet } from 'react-helmet'
-import { setCurrentUser } from 'src/authentication/redux'
-import { auth, subscription } from 'src/util/remote-functions-background'
 import Button from 'src/popup/components/Button'
+import { UserSubscription } from 'src/authentication/components/user-subscription'
+import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
+import { firebase } from 'src/util/firebase-app-initialized'
+import 'firebase/auth'
+import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
+import { auth } from 'src/util/remote-functions-background'
 
 const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 
@@ -17,17 +20,32 @@ interface State {
 }
 
 class Authentication extends React.PureComponent<Props, State> {
-    chargebeeInstance: any
-
     state = { currentUser: null }
 
     componentDidMount = async () => {
-        // scriptjs.ready(chargeBeeScriptSource, () => {
-        //     this._initChargebee()
-        // })
-        const user = await auth.getUser()
-        this.setState({ currentUser: user })
+        this.setState({ currentUser: await auth.getUser() })
+
+        const authEvents = getRemoteEventEmitter('auth')
+        authEvents.addListener('onAuthStateChanged', _user => {
+            console.log('Updating user from event fired by background script')
+            this.setState({ currentUser: _user })
+        })
     }
+
+    render() {
+        return (
+            <div className={''}>
+                {this.state.currentUser == null && <SignInScreen />}
+                {this.state.currentUser != null && <UserInfo />}
+            </div>
+        )
+    }
+}
+export default Authentication
+
+class Subscription extends React.PureComponent {
+    chargebeeInstance: any
+    userSubscription: UserSubscription
 
     _initChargebee = (): void => {
         if (this.chargebeeInstance != null) {
@@ -41,19 +59,21 @@ class Authentication extends React.PureComponent<Props, State> {
         this.chargebeeInstance = window['Chargebee'].init({
             site: 'wbstaging-test',
         })
+        this.userSubscription = new UserSubscription(this.chargebeeInstance)
     }
 
-    openPortal = () => {
+    openPortal = async () => {
         this._initChargebee()
-        subscription.manage(this.chargebeeInstance)
+        return this.userSubscription.manageUserSubscription({
+            planId: 'cbdemo_grow',
+        })
     }
 
-    openCheckout = () => {
+    openCheckout = async () => {
         this._initChargebee()
-        subscription.checkout(
-            { subscriptionPlanId: 'test' },
-            this.chargebeeInstance,
-        )
+        return this.userSubscription.checkoutUserSubscription({
+            planId: 'cbdemo_grow',
+        })
     }
 
     render() {
@@ -62,49 +82,74 @@ class Authentication extends React.PureComponent<Props, State> {
                 <Helmet>
                     <script src={chargeBeeScriptSource} />
                 </Helmet>
-                <h1 className={''}>hi user</h1>
-                <h1 className={''}>CurrentUser: {this.props.currentUser}</h1>
-                <h1 className={''}>
-                    CurrentUser:{' '}
-                    {this.state.currentUser != null
-                        ? this.state.currentUser.id
-                        : ''}
-                </h1>
-                <Button onClick={() => this.props.setUser()}>WIP</Button>
+                <h1 className={''}>Subscription (Test)</h1>
+                <Button onClick={_ => this.openCheckout()}>
+                    Subscribe Monthly
+                </Button>
+                <Button onClick={_ => this.openCheckout()}>
+                    Subscribe Yearly
+                </Button>
 
-                <Button onClick={() => this.openCheckout()}>Subscribe</Button>
-
-                <Button onClick={() => this.openPortal()}>Manage</Button>
+                <br />
+                <Button onClick={_ => this.openPortal()}>
+                    Manage Existing Subscription
+                </Button>
             </div>
         )
     }
 }
 
-const mapStateToProps = (state): any => ({
-    currentUser: state.auth.currentUser,
-})
+class UserInfo extends React.PureComponent {
+    state = { currentUser: null }
 
-const mapDispatchToProps = (dispatch): any => ({
-    setUser: () => dispatch(setCurrentUser('hi')),
-})
+    componentDidMount = async () => {
+        const user = await auth.getUser()
+        this.setState({ currentUser: user })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(Authentication)
+        const authEvents = getRemoteEventEmitter('auth')
+        authEvents.addListener('onAuthStateChanged', _user => {
+            this.setState({ currentUser: _user })
+        })
+    }
 
-class UserContainer extends React.PureComponent {
-    // If user is logged in (get from redux store) show User Info
-    // If user is not logged in (get from redux store) show Login
+    handleLogout = () => {
+        firebase.auth().signOut()
+    }
+    handleRefresh = async () => {
+        await auth.refresh()
+        await auth.checkValidPlan('pro')
+        // todo: implement check has access to feature 'backup'
+    }
+
+    render() {
+        return (
+            <div className={''}>
+                <pre>{JSON.stringify(this.state.currentUser)}</pre>
+                <span>Subscribed to pro plan:</span>
+                <Subscription />
+                <span onClick={this.handleLogout}>Logout</span>
+                <span onClick={this.handleRefresh}>refresh</span>
+            </div>
+        )
+    }
 }
 
-class Login extends React.PureComponent {}
-
-class UserInfo extends React.PureComponent {}
-
-/*
-
-import { State } from '../../options/settings/reducer'
-export const bookmarks = createSelector(settings, state => state.bookmarks)
-import { createSelector } from 'reselect'
-*/
+class SignInScreen extends React.Component {
+    render = () => {
+        return (
+            <StyledFirebaseAuth
+                uiConfig={{
+                    signInFlow: 'popup',
+                    signInOptions: [
+                        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                    ],
+                    callbacks: {
+                        // Avoid redirects after sign-in.
+                        signInSuccessWithAuthResult: () => false,
+                    },
+                }}
+                firebaseAuth={firebase.auth()}
+            />
+        )
+    }
+}

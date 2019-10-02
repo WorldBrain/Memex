@@ -11,10 +11,10 @@ export class AuthSubscriptionInvalid extends AuthSubscriptionError {}
 export class AuthSubscriptionNotPresent extends AuthSubscriptionInvalid {}
 export class AuthSubscriptionExpired extends AuthSubscriptionInvalid {}
 
-export class AuthService<T> implements AuthRemoteFunctionsInterface {
-    private readonly auth: AuthInterface<T>
+export class AuthService implements AuthRemoteFunctionsInterface {
+    private readonly auth: AuthInterface
 
-    public constructor(authImplementation: AuthInterface<T>) {
+    public constructor(authImplementation: AuthInterface) {
         this.auth = authImplementation
     }
 
@@ -22,22 +22,19 @@ export class AuthService<T> implements AuthRemoteFunctionsInterface {
     private getUserClaims = () => this.auth.getUserClaims()
     public refresh = () => this.auth.refresh()
 
-    public get subscription() {
-        return this.auth.subscription
-    }
-
     /**
      *  Checks that a client has a valid subscription (exists, is not expired)
      *  to the provided plan.
      */
-    public async checkValidPlan(plan: plans): Promise<boolean> {
+    public checkValidPlan = async (plan: plans): Promise<boolean> => {
         if (plan === 'free') {
             return true
         }
 
         const claims = await this.getUserClaims()
-        const subscriptionExpiry: number =
-            claims[this.subscriptionExpiryKey(plan)]
+        console.log('Claims:', claims)
+
+        const subscriptionExpiry = this.subscriptionExpiryAccessor(claims)(plan)
 
         if (!subscriptionExpiry) {
             throw new AuthSubscriptionNotPresent()
@@ -50,8 +47,14 @@ export class AuthService<T> implements AuthRemoteFunctionsInterface {
         return true
     }
 
-    private subscriptionExpiryKey = (plan: plans): keyof Claims =>
-        `subscription_${plan}_expiry`
+    private subscriptionExpiryAccessor = claims => (
+        plan: plans,
+    ): keyof Claims =>
+        claims !== null &&
+        claims.subscriptions !== null &&
+        claims.subscriptions[plan] !== null
+            ? claims.subscriptions[plan].expiry
+            : null
 
     /**
      * As above but does not throw errors.

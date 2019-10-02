@@ -3,25 +3,29 @@ import { NotificationInterface } from 'src/util/notification-types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import {
     AuthRemoteFunctionsInterface,
-    SubscriptionRemoteFunctionsInterface,
+    AuthServerFunctionsInterface,
+    SubscriptionServerFunctionsInterface,
 } from 'src/authentication/background/types'
+type ServerFunctionsInterface = SubscriptionServerFunctionsInterface &
+    AuthServerFunctionsInterface
 
 export interface RemoteFunctionImplementations {
     notifications: NotificationInterface
     bookmarks: BookmarksInterface
     auth: AuthRemoteFunctionsInterface
-    subscription: SubscriptionRemoteFunctionsInterface
+    serverFunctions: ServerFunctionsInterface
 }
 
-const remoteFunctions: RemoteFunctionImplementations = {
+// See `src/background.ts` for the concrete remote function bindings
+// (in setupRemoteFunctionsImplementations and elsewhere)
+export const remoteFunctions: RemoteFunctionImplementations = {
     notifications: runInBackground<NotificationInterface>(),
     bookmarks: runInBackground<BookmarksInterface>(),
     auth: runInBackground<AuthRemoteFunctionsInterface>(),
-    subscription: runInBackground<SubscriptionRemoteFunctionsInterface>(),
+    serverFunctions: runInBackground<ServerFunctionsInterface>(),
 }
 
 export const notifications = remoteFunctions.notifications
 export const bookmarks = remoteFunctions.bookmarks
-// TODO: (CH): Document that this is the main entry point for client calling scripts that want authentication info/actions
 export const auth = remoteFunctions.auth
-export const subscription = remoteFunctions.subscription
+export const serverFunctions = remoteFunctions.serverFunctions
