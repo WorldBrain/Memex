@@ -9,7 +9,7 @@ import { EVENT_NAMES } from '../../../analytics/internal/constants'
 const styles = require('./CFModal.css')
 
 export interface Props {
-    onClose: MouseEventHandler
+    onClose: MouseEventHandler<HTMLSpanElement>
     tabs: Tabs.Static
     learnMoreUrl: string
     context: string

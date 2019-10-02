@@ -5,7 +5,7 @@ const styles = require('./FeatureInfo.css')
 export interface Props {
     heading: string
     subheading: string
-    handleClick: MouseEventHandler
+    handleClick: MouseEventHandler<any>
 }
 
 class FeatureInfo extends PureComponent<Props> {
