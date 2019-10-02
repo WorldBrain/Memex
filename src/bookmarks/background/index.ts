@@ -12,8 +12,8 @@ export default class BookmarksBackground {
         this.delBookmark = this.delBookmark.bind(this)
     }
 
-    async addBookmark({ url }: { url: string }) {
-        return this.storage.addBookmark({ url: normalizeUrl(url) })
+    async addBookmark({ url, time }: { url: string; time?: number }) {
+        return this.storage.addBookmark({ url: normalizeUrl(url), time })
     }
 
     async delBookmark({ url }: { url: string }) {

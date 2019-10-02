@@ -41,11 +41,14 @@ export default class BookmarksStorage extends StorageModule {
         },
     })
 
-    async addBookmark({ url }: { url: string }) {
-        return this.operation('createBookmark', {
-            url,
-            time: Date.now(),
-        })
+    async addBookmark({
+        url,
+        time = Date.now(),
+    }: {
+        url: string
+        time?: number
+    }) {
+        return this.operation('createBookmark', { url, time })
     }
 
     async delBookmark({ url }: { url: string }) {
