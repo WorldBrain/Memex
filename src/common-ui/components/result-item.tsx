@@ -33,11 +33,11 @@ export interface Props extends Partial<SocialPage> {
     annotsCount?: number
     tagHolder: ReactNode
     tagManager: ReactNode
-    onTagBtnClick: MouseEventHandler<any>
-    onTrashBtnClick: MouseEventHandler<any>
-    onCommentBtnClick: MouseEventHandler<any>
-    onToggleBookmarkClick: MouseEventHandler<any>
-    handleCrossRibbonClick: MouseEventHandler<any>
+    onTagBtnClick: MouseEventHandler
+    onTrashBtnClick: MouseEventHandler
+    onCommentBtnClick: MouseEventHandler
+    onToggleBookmarkClick: MouseEventHandler
+    handleCrossRibbonClick: MouseEventHandler
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
     setTagButtonRef: (el: HTMLButtonElement) => void
@@ -56,7 +56,7 @@ class ResultItem extends PureComponent<Props> {
         }
     }
 
-    dragStart: DragEventHandler<HTMLAnchorElement> = e => {
+    dragStart: DragEventHandler = e => {
         const { url, setUrlDragged, isSocial } = this.props
 
         setUrlDragged(url)

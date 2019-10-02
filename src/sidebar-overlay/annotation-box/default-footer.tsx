@@ -8,7 +8,7 @@ interface Props {
     isEdited: boolean
     timestamp: string
     hasBookmark: boolean
-    goToAnnotationHandler: (e: React.MouseEvent<any>) => void
+    goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
     handleBookmarkToggle: () => void

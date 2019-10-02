@@ -7,7 +7,7 @@ import { EVENT_NAMES } from '../../../analytics/internal/constants'
 const styles = require('./CFBox.css')
 
 export interface Props {
-    onClose: MouseEventHandler<HTMLDivElement>
+    onClose: MouseEventHandler
 }
 
 class CrowdfundingBox extends PureComponent<Props> {

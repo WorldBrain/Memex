@@ -7,7 +7,7 @@ const pageStyles = require('./result-item.css')
 export interface Props {
     crossIconSrc?: string
     title?: string
-    onClick: MouseEventHandler<HTMLDivElement>
+    onClick: MouseEventHandler
 }
 
 class SemiCircularRibbon extends PureComponent<Props> {
