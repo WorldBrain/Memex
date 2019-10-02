@@ -3,9 +3,7 @@ import classNames from 'classnames'
 
 const styles = require('./Button.css')
 
-// todo: Find out why unselectable produces type errors if left in
-export interface Props
-    extends Omit<HTMLProps<HTMLButtonElement>, 'unselectable'> {
+export interface Props extends HTMLProps<HTMLButtonElement> {
     children?: React.ReactNode
     btnClass?: string
     itemClass?: string

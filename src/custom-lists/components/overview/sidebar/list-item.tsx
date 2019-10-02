@@ -93,7 +93,7 @@ class PageList extends Component<Props, State> {
         }))
     }
 
-    private handleDrop: DragEventHandler<any> = e => {
+    private handleDrop: DragEventHandler = e => {
         e.preventDefault()
         this.handleDragLeave()
         // const url = e.dataTransfer.getData('URL')
