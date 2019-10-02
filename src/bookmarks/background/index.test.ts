@@ -10,7 +10,7 @@ import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
     backgroundIntegrationTest(
-        'should create a page, bookmark it, and retrieve it via a filtered search',
+        'should create a page, bookmark it, retrieve it via a filtered search, and unbookmark it',
         () => {
             const bookmarks = (setup: BackgroundIntegrationTestSetup) =>
                 setup.backgroundModules.bookmarks
@@ -108,6 +108,29 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                         url: DATA.PAGE_1.url,
                                     },
                                 ],
+                                totalCount: null,
+                                resultsExhausted: true,
+                            })
+                        },
+                    },
+                    {
+                        execute: async ({ setup }) => {
+                            await bookmarks(setup).delBookmark({
+                                url: DATA.PAGE_1.fullUrl,
+                            })
+                        },
+                        expectedStorageChanges: {
+                            bookmarks: (): StorageCollectionDiff => ({
+                                [DATA.PAGE_1.url]: { type: 'delete' },
+                            }),
+                        },
+                        postCheck: async ({ setup }) => {
+                            expect(
+                                await searchModule(setup).searchPages({
+                                    bookmarksOnly: true,
+                                }),
+                            ).toEqual({
+                                docs: [],
                                 totalCount: null,
                                 resultsExhausted: true,
                             })
