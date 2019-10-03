@@ -4,10 +4,14 @@ import {
     backgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
-import {
-    StorageDiff,
-    StorageCollectionDiff,
-} from 'src/tests/storage-change-detector'
+import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+
+const customLists = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.customLists
+const searchModule = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.search
+let listId!: any
+let listEntry!: any
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Custom lists',
@@ -15,12 +19,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         backgroundIntegrationTest(
             'should create a list, edit its title, add an entry to it and retrieve the list and its pages',
             () => {
-                const customLists = (setup: BackgroundIntegrationTestSetup) =>
-                    setup.backgroundModules.customLists.remoteFunctions
-                const searchModule = (setup: BackgroundIntegrationTestSetup) =>
-                    setup.backgroundModules.search
-                let listId!: any
-                let listEntry!: any
                 return {
                     steps: [
                         {
@@ -92,7 +90,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         },
                         {
                             execute: async ({ setup }) =>
-                                customLists(setup).updateListName({
+                                customLists(setup).updateList({
                                     id: listId,
                                     name: 'Updated List Title',
                                 }),
@@ -136,10 +134,27 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 ])
 
-                                // expect(await setup.backgroundModules.search.remoteFunctions.search.searchPages({
-                                //     contentTypes: { pages: true, notes: false, highlights: false },
-                                //     collections: [listId]
-                                // })).toEqual([])
+                                expect(
+                                    await searchModule(setup).searchPages({
+                                        lists: [listId],
+                                    }),
+                                ).toEqual({
+                                    docs: [
+                                        {
+                                            annotations: [],
+                                            annotsCount: undefined,
+                                            displayTime: expect.any(Number),
+                                            favIcon: undefined,
+                                            hasBookmark: false,
+                                            screenshot: undefined,
+                                            tags: [],
+                                            title: undefined,
+                                            url: 'bla.com',
+                                        },
+                                    ],
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                })
                             },
                         },
                     ],
@@ -149,12 +164,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         backgroundIntegrationTest(
             'should create a list, add an entry of an existing page to it and retrieve the list and its pages',
             () => {
-                const customLists = (setup: BackgroundIntegrationTestSetup) =>
-                    setup.backgroundModules.customLists.remoteFunctions
-                const searchModule = (setup: BackgroundIntegrationTestSetup) =>
-                    setup.backgroundModules.search
-                let listId!: any
-                let listEntry!: any
                 return {
                     steps: [
                         {
@@ -168,12 +177,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         },
                         {
                             execute: async ({ setup }) => {
-                                listEntry = (await customLists(
-                                    setup,
-                                ).insertPageToList({
+                                await customLists(setup).insertPageToList({
                                     id: listId,
                                     url: 'http://www.bla.com/',
-                                })).object
+                                })
                             },
                         },
                         {
@@ -219,10 +226,181 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 ])
 
-                                // expect(await setup.backgroundModules.search.remoteFunctions.search.searchPages({
-                                //     contentTypes: { pages: true, notes: false, highlights: false },
-                                //     collections: [listId]
-                                // })).toEqual([])
+                                expect(
+                                    await searchModule(setup).searchPages({
+                                        lists: [listId],
+                                    }),
+                                ).toEqual({
+                                    docs: [
+                                        {
+                                            annotations: [],
+                                            annotsCount: undefined,
+                                            displayTime: expect.any(Number),
+                                            favIcon: undefined,
+                                            hasBookmark: false,
+                                            screenshot: undefined,
+                                            tags: [],
+                                            title: 'bla.com title',
+                                            url: 'bla.com',
+                                        },
+                                    ],
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+
+        backgroundIntegrationTest(
+            'should create a list, add an entry to it, then remove the list and its entries',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                listId = await customLists(
+                                    setup,
+                                ).createCustomList({
+                                    name: 'My Custom List',
+                                })
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await customLists(setup).insertPageToList({
+                                    id: listId,
+                                    url: 'http://www.bla.com/',
+                                })
+                            },
+                        },
+                        {
+                            preCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListById({
+                                        id: listId,
+                                    }),
+                                ).toEqual({
+                                    id: listId,
+                                    name: 'My Custom List',
+                                    isDeletable: true,
+                                    isNestable: true,
+                                    createdAt: expect.any(Date),
+                                    pages: ['http://www.bla.com/'],
+                                    active: true,
+                                })
+
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([
+                                    {
+                                        listId,
+                                        pageUrl: 'bla.com',
+                                        fullUrl: 'http://www.bla.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                ])
+                            },
+                            execute: async ({ setup }) => {
+                                await customLists(setup).removeList({
+                                    id: listId,
+                                })
+                            },
+                            postCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListById({
+                                        id: listId,
+                                    }),
+                                ).toEqual(null)
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should create a list, add two entries to it, then remove one of the entries',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                listId = await customLists(
+                                    setup,
+                                ).createCustomList({
+                                    name: 'My Custom List',
+                                })
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await customLists(setup).insertPageToList({
+                                    id: listId,
+                                    url: 'http://www.bla.com/',
+                                })
+                                await customLists(setup).insertPageToList({
+                                    id: listId,
+                                    url: 'http://www.test.com/',
+                                })
+                            },
+                        },
+                        {
+                            preCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([
+                                    {
+                                        listId,
+                                        pageUrl: 'bla.com',
+                                        fullUrl: 'http://www.bla.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                    {
+                                        listId,
+                                        pageUrl: 'test.com',
+                                        fullUrl: 'http://www.test.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                ])
+                            },
+                            execute: async ({ setup }) => {
+                                await customLists(setup).removePageFromList({
+                                    id: listId,
+                                    url: 'test.com',
+                                })
+                            },
+                            postCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([
+                                    {
+                                        listId,
+                                        pageUrl: 'bla.com',
+                                        fullUrl: 'http://www.bla.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                ])
                             },
                         },
                     ],
