@@ -1,4 +1,9 @@
-import { doSync } from '@worldbrain/storex-sync'
+import {
+    doSync,
+    SyncEvents,
+    SYNC_EVENTS,
+    SyncEventMap,
+} from '@worldbrain/storex-sync'
 import { reconcileSyncLog } from '@worldbrain/storex-sync/lib/reconciliation'
 import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
 import {
@@ -9,6 +14,8 @@ import {
 } from 'src/tests/integration-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { createMemorySharedSyncLog } from './background/index.tests'
+import { StorageChangeDetector } from 'src/tests/storage-change-detector'
+import { EventEmitter } from 'events'
 
 export function registerSyncBackgroundIntegrationTests(
     test: BackgroundIntegrationTest,
@@ -58,8 +65,23 @@ async function runSyncBackgroundTest(
 
     const sharedSyncLog = await createMemorySharedSyncLog()
     const setups: BackgroundIntegrationTestSetup[] = []
+    const syncEventEmitters: SyncEvents[] = []
     for (let i = 0; i < options.deviceCount; ++i) {
         setups.push(await setupBackgroundIntegrationTest({ sharedSyncLog }))
+
+        const syncEventEmitter = new EventEmitter() as SyncEvents
+        for (const eventName of Object.keys(SYNC_EVENTS)) {
+            syncEventEmitter.on(eventName as keyof SyncEventMap, args => {
+                console.log(
+                    `SYNC EVENT ${eventName}:`,
+                    require('util').inspect(args, {
+                        colors: true,
+                        depth: null,
+                    }),
+                )
+            })
+        }
+        syncEventEmitters.push(syncEventEmitter)
     }
     for (const setup of setups) {
         setup.backgroundModules.sync.syncLoggingMiddleware.enabled = true
@@ -76,10 +98,17 @@ async function runSyncBackgroundTest(
         }),
     ]
 
+    // const changeDetectors = setups.map(setup => new StorageChangeDetector({
+    //     storageManager: setup.storageManager,
+    //     toTrack: Object.keys(setup.storageManager.registry.collections),
+    // }))
+    // let changeDetectorUsed = false
+
     const sync = async (
-        setup: BackgroundIntegrationTestSetup,
-        deviceId: number | string,
+        deviceIndex: number | string,
+        syncOptions: { debug: boolean },
     ) => {
+        const setup = setups[deviceIndex]
         await doSync({
             clientSyncLog: setup.backgroundModules.sync.clientSyncLog,
             sharedSyncLog,
@@ -87,7 +116,8 @@ async function runSyncBackgroundTest(
             reconciler: reconcileSyncLog,
             now: Date.now(),
             userId,
-            deviceId,
+            deviceId: deviceIds[deviceIndex],
+            syncEvents: syncEventEmitters[deviceIndex],
         })
     }
 
@@ -97,16 +127,24 @@ async function runSyncBackgroundTest(
     let lastStep: IntegrationTestStep<BackgroundIntegrationTestContext> = null
     for (const currentDeviceIndex of pattern) {
         stepIndex += 1
-        const currentDeviceId = deviceIds[currentDeviceIndex]
+        const step = (lastStep = testOptions.steps[stepIndex])
+
+        // const currentDeviceId = deviceIds[currentDeviceIndex]
         const currentSetup = setups[currentDeviceIndex]
 
         // console.log('stepIndex > 0', stepIndex)
         if (stepIndex > 0) {
             // console.log('pre-sync, device', currentDeviceId)
-            await sync(currentSetup, currentDeviceId)
+            await sync(currentDeviceIndex, { debug: step.debug })
         }
 
-        const step = (lastStep = testOptions.steps[stepIndex])
+        // if (step.expectedStorageChanges && !changeDetectorUsed) {
+        //     await Promise.all(changeDetectors.map(
+        //         changeDetector => changeDetector.capture()
+        //     ))
+        //     changeDetectorUsed = true
+        // }
+
         if (step.preCheck) {
             await step.preCheck({
                 setup: currentSetup,
@@ -121,15 +159,7 @@ async function runSyncBackgroundTest(
             })
         }
 
-        // console.log('post-sync, device', currentDeviceId)
-        await sync(currentSetup, currentDeviceId)
-
-        // const unsyncedDeviceIndex = (lastSyncedDeviceIndex + 1) % 2
-
-        // await sync(
-        //     setups[unsyncedDeviceIndex],
-        //     deviceIds[unsyncedDeviceIndex],
-        // )
+        await sync(currentDeviceIndex, { debug: step.debug })
     }
 
     const lastSyncedDeviceIndex = pattern[pattern.length - 1]
@@ -138,7 +168,7 @@ async function runSyncBackgroundTest(
         .filter(deviceIndex => deviceIndex !== lastSyncedDeviceIndex)
 
     for (const unsyncedDeviceIndex of unsyncedDeviceIndices) {
-        await sync(setups[unsyncedDeviceIndex], deviceIds[unsyncedDeviceIndex])
+        await sync(unsyncedDeviceIndex, { debug: lastStep!.debug })
         await lastStep!.postCheck({ setup: setups[unsyncedDeviceIndex] })
     }
 }

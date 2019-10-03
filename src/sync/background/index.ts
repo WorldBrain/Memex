@@ -18,6 +18,7 @@ export default class SyncBackground {
     syncLoggingMiddleware?: SyncLoggingMiddleware
     firstContinuousSyncPromise?: Promise<void>
     readonly syncedCollections: string[] = [
+        'bookmarks',
         'customLists',
         'pageListEntries',
         'pages',

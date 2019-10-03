@@ -19,6 +19,7 @@ export interface IntegrationTestInstance<StepContext> {
 }
 
 export interface IntegrationTestStep<StepContext> {
+    debug?: true
     description?: string
     preCheck?: (context: StepContext) => Promise<void>
     execute: (context: StepContext) => Promise<void>
