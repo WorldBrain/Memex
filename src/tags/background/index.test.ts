@@ -6,6 +6,7 @@ import {
     backgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
+import { createPageStep, searchModule } from 'src/tests/common-fixtures'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
@@ -14,52 +15,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
         () => {
             const tags = (setup: BackgroundIntegrationTestSetup) =>
                 setup.backgroundModules.tags
-            const searchModule = (setup: BackgroundIntegrationTestSetup) =>
-                setup.backgroundModules.search
 
             return {
                 steps: [
-                    {
-                        execute: async ({ setup }) => {
-                            await searchModule(setup).searchIndex.addPage({
-                                pageDoc: {
-                                    url: DATA.PAGE_1.fullUrl,
-                                    content: {},
-                                },
-                                visits: [DATA.VISIT_1],
-                                rejectNoContent: false,
-                            })
-                        },
-                        expectedStorageChanges: {
-                            pages: (): StorageCollectionDiff => ({
-                                [DATA.PAGE_1.url]: {
-                                    type: 'create',
-                                    object: {
-                                        url: DATA.PAGE_1.url,
-                                        fullUrl: DATA.PAGE_1.fullUrl,
-                                        domain: DATA.PAGE_1.domain,
-                                        hostname: DATA.PAGE_1.hostname,
-                                        canonicalUrl: undefined,
-                                        fullTitle: undefined,
-                                        screenshot: undefined,
-                                        text: undefined,
-                                        titleTerms: [],
-                                        urlTerms: [],
-                                        terms: [],
-                                    },
-                                },
-                            }),
-                            visits: (): StorageCollectionDiff => ({
-                                [`[${DATA.VISIT_1},"${DATA.PAGE_1.url}"]`]: {
-                                    type: 'create',
-                                    object: {
-                                        time: DATA.VISIT_1,
-                                        url: DATA.PAGE_1.url,
-                                    },
-                                },
-                            }),
-                        },
-                    },
+                    createPageStep,
                     {
                         execute: async ({ setup }) => {
                             await tags(setup).addTag({
