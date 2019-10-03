@@ -150,10 +150,10 @@ export default class DirectLinkingBackground {
                 override?: boolean
                 openSidebar?: boolean
             } = {
-                anchor: null,
-                override: false,
-                activeUrl: undefined,
-            },
+            anchor: null,
+            override: false,
+            activeUrl: undefined,
+        },
     ) {
         const [currentTab] = await this.options.browserAPIs.tabs.query({
             active: true,
@@ -249,6 +249,7 @@ export default class DirectLinkingBackground {
     async createAnnotation(
         { tab }: TabArg,
         { url, title, comment, body, selector, bookmarked, isSocialPost },
+        { skipPageIndexing }: { skipPageIndexing?: boolean },
     ) {
         let pageUrl = url == null ? tab.url : url
 
@@ -272,7 +273,9 @@ export default class DirectLinkingBackground {
         })
 
         // Attempt to (re-)index, if user preference set, but don't wait for it
-        this.annotationStorage.indexPageFromTab(tab)
+        if (!skipPageIndexing) {
+            this.annotationStorage.indexPageFromTab(tab)
+        }
 
         if (bookmarked) {
             await this.toggleAnnotBookmark({ tab }, { url: uniqueUrl })
