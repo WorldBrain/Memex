@@ -50,16 +50,16 @@ export class AuthService implements AuthRemoteFunctionsInterface {
     private subscriptionExpiryAccessor = claims => (
         plan: plans,
     ): keyof Claims =>
-        claims !== null &&
-        claims.subscriptions !== null &&
-        claims.subscriptions[plan] !== null
+        claims != null &&
+        claims.subscriptions != null &&
+        claims.subscriptions[plan] != null
             ? claims.subscriptions[plan].expiry
             : null
 
     /**
      * As above but does not throw errors.
      */
-    public async checkValidPlanQuiet(plan: plans): Promise<boolean> {
+    public async hasValidPlan(plan: plans): Promise<boolean> {
         try {
             return await this.checkValidPlan(plan)
         } catch {
