@@ -23,6 +23,7 @@ export default class SyncBackground {
         'pageListEntries',
         'pages',
         'visits',
+        'tags',
     ]
 
     constructor(
