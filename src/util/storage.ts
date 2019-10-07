@@ -2,7 +2,7 @@ import { Browser, browser } from 'webextension-polyfill-ts'
 
 export async function getLocalStorage(
     key,
-    defVal,
+    defVal?: any,
     localStorage: Pick<Browser['storage']['local'], 'get'> = null,
 ) {
     // KEY: (string)

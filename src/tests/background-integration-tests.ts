@@ -71,12 +71,20 @@ export async function setupBackgroundIntegrationTest(options?: {
 
     await storageManager.finishInitialization()
 
-    if (needsSync) {
-        storageManager.setMiddleware([
-            ...((options && options.customMiddleware) || []),
-            await backgroundModules.sync.createSyncLoggingMiddleware(),
-        ])
-    }
+    const storageOperationLogger = new StorageOperationLogger({
+        enabled: false,
+    })
+    const storageChangeDetector = new StorageChangeDetector({
+        storageManager,
+        toTrack: Object.keys(storageManager.registry.collections),
+    })
+
+    const middleware: StorageMiddleware[] = [
+        ...((options && options.customMiddleware) || []),
+        storageOperationLogger.asMiddleware(),
+        await backgroundModules.sync.createSyncLoggingMiddleware(),
+    ]
+    storageManager.setMiddleware(middleware)
 
     setStorex(storageManager)
 
@@ -84,6 +92,8 @@ export async function setupBackgroundIntegrationTest(options?: {
         storageManager,
         backgroundModules,
         browserLocalStorage,
+        storageOperationLogger,
+        storageChangeDetector,
     }
 }
 
@@ -101,18 +111,11 @@ export function registerBackgroundIntegrationTest(
 export async function runBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
 ) {
-    const storageOperationLogger = new StorageOperationLogger({
-        enabled: false,
-    })
     const setup = await setupBackgroundIntegrationTest({
-        customMiddleware: [storageOperationLogger.asMiddleware()],
+        customMiddleware: [],
     })
     const testOptions = await test.instantiate()
 
-    const changeDetector = new StorageChangeDetector({
-        storageManager: setup.storageManager,
-        toTrack: Object.keys(setup.storageManager.registry.collections),
-    })
     let changeDetectorUsed = false
 
     let stepIndex = -1
@@ -123,26 +126,26 @@ export async function runBackgroundIntegrationTest(
             await step.preCheck({ setup })
         }
         if (step.expectedStorageChanges && !changeDetectorUsed) {
-            await changeDetector.capture()
+            await setup.storageChangeDetector.capture()
             changeDetectorUsed = true
         }
         if (step.expectedStorageOperations) {
-            storageOperationLogger.enabled = true
+            setup.storageOperationLogger.enabled = true
         }
 
         await step.execute({ setup })
-        storageOperationLogger.enabled = false
+        setup.storageOperationLogger.enabled = false
 
         if (step.postCheck) {
             await step.postCheck({ setup })
         }
         if (step.expectedStorageOperations) {
-            const executedOperations = storageOperationLogger.popOperations()
+            const executedOperations = setup.storageOperationLogger.popOperations()
             expect(executedOperations).toEqual(step.expectedStorageOperations())
         }
         if (step.expectedStorageChanges) {
             try {
-                expect(await changeDetector.compare()).toEqual(
+                expect(await setup.storageChangeDetector.compare()).toEqual(
                     mapValues(step.expectedStorageChanges, getChanges =>
                         getChanges(),
                     ),

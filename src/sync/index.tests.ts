@@ -117,7 +117,9 @@ async function runSyncBackgroundTest(
             now: Date.now(),
             userId,
             deviceId: deviceIds[deviceIndex],
-            syncEvents: syncEventEmitters[deviceIndex],
+            syncEvents: syncOptions.debug
+                ? syncEventEmitters[deviceIndex]
+                : undefined,
         })
     }
 
@@ -127,15 +129,28 @@ async function runSyncBackgroundTest(
     let lastStep: IntegrationTestStep<BackgroundIntegrationTestContext> = null
     for (const currentDeviceIndex of pattern) {
         stepIndex += 1
-        const step = (lastStep = testOptions.steps[stepIndex])
+        const step = testOptions.steps[stepIndex]
 
-        // const currentDeviceId = deviceIds[currentDeviceIndex]
+        const currentDeviceId = deviceIds[currentDeviceIndex]
         const currentSetup = setups[currentDeviceIndex]
 
-        // console.log('stepIndex > 0', stepIndex)
         if (stepIndex > 0) {
-            // console.log('pre-sync, device', currentDeviceId)
+            if (step.debug) {
+                console.log(
+                    `SYNC before step ${stepIndex}, device`,
+                    currentDeviceId,
+                )
+            }
             await sync(currentDeviceIndex, { debug: step.debug })
+        }
+        if (lastStep && lastStep.postCheck) {
+            if (step.debug) {
+                console.log(
+                    `SYNC postCheck of previous step before step ${stepIndex}, device`,
+                    currentDeviceId,
+                )
+            }
+            await lastStep.postCheck({ setup: currentSetup })
         }
 
         // if (step.expectedStorageChanges && !changeDetectorUsed) {
@@ -146,20 +161,59 @@ async function runSyncBackgroundTest(
         // }
 
         if (step.preCheck) {
+            if (step.debug) {
+                console.log(
+                    `SYNC after step ${stepIndex}, device`,
+                    currentDeviceId,
+                )
+            }
             await step.preCheck({
                 setup: currentSetup,
             })
         }
+        if (step.expectedStorageOperations) {
+            currentSetup.storageOperationLogger.enabled = true
+        }
+        const timeBeforeStepExecution = Date.now()
         await step.execute({
             setup: currentSetup,
         })
+
+        currentSetup.storageOperationLogger.enabled = false
+        if (step.expectedStorageOperations) {
+            const executedOperations = currentSetup.storageOperationLogger.popOperations()
+            expect(
+                executedOperations.filter(
+                    entry => entry.operation[1] !== 'clientSyncLogEntry',
+                ),
+            ).toEqual(step.expectedStorageOperations())
+        }
+
+        if (step.expectedSyncLogEntries) {
+            const addedEntries = await currentSetup.backgroundModules.sync.clientSyncLog.getEntriesCreatedAfter(
+                timeBeforeStepExecution,
+            )
+            expect(addedEntries).toEqual(step.expectedSyncLogEntries())
+        }
+
         if (step.postCheck) {
+            if (step.debug) {
+                console.log(
+                    `SYNC postCheck after step ${stepIndex}, device`,
+                    currentDeviceId,
+                )
+            }
             await step.postCheck({
                 setup: currentSetup,
             })
         }
 
+        if (step.debug) {
+            console.log(`SYNC after step ${stepIndex}, device`, currentDeviceId)
+        }
         await sync(currentDeviceIndex, { debug: step.debug })
+
+        lastStep = step
     }
 
     const lastSyncedDeviceIndex = pattern[pattern.length - 1]
@@ -168,19 +222,44 @@ async function runSyncBackgroundTest(
         .filter(deviceIndex => deviceIndex !== lastSyncedDeviceIndex)
 
     for (const unsyncedDeviceIndex of unsyncedDeviceIndices) {
+        if (lastStep!.debug) {
+            console.log(
+                `SYNC before last postCheck, device`,
+                deviceIds[unsyncedDeviceIndex],
+            )
+        }
         await sync(unsyncedDeviceIndex, { debug: lastStep!.debug })
+        if (lastStep!.debug) {
+            console.log(
+                `SYNC completed before last postCheck, device`,
+                deviceIds[unsyncedDeviceIndex],
+            )
+        }
         await lastStep!.postCheck({ setup: setups[unsyncedDeviceIndex] })
+        if (lastStep!.debug) {
+            console.log(
+                `SYNC last postCheck done, device`,
+                deviceIds[unsyncedDeviceIndex],
+            )
+        }
     }
 }
 
 const getReadablePattern = (pattern: number[]) =>
     pattern
         .map(
-            idx =>
+            index =>
                 ({
                     0: 'A',
                     1: 'B',
                     2: 'C',
-                }[idx]),
+                }[index]),
         )
         .join('')
+
+const getReadableDeviceIndex = (index: number) =>
+    ({
+        0: 'A',
+        1: 'B',
+        2: 'C',
+    }[index])

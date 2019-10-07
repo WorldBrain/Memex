@@ -1,7 +1,13 @@
 import StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
-import { StorageDiff, StorageCollectionDiff } from './storage-change-detector'
-import { LoggedStorageOperation } from './storage-operation-logger'
+import {
+    StorageDiff,
+    StorageCollectionDiff,
+    StorageChangeDetector,
+} from './storage-change-detector'
+import StorageOperationLogger, {
+    LoggedStorageOperation,
+} from './storage-operation-logger'
 import { registerBackgroundIntegrationTest } from './background-integration-tests'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 
@@ -29,12 +35,15 @@ export interface IntegrationTestStep<StepContext> {
         [collection: string]: () => StorageCollectionDiff
     }
     expectedStorageOperations?: () => LoggedStorageOperation[]
+    expectedSyncLogEntries?: () => any[]
 }
 
 export interface BackgroundIntegrationTestSetup {
     storageManager: StorageManager
     backgroundModules: BackgroundModules
     browserLocalStorage: MemoryBrowserStorage
+    storageChangeDetector: StorageChangeDetector
+    storageOperationLogger: StorageOperationLogger
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup

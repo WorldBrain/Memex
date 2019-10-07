@@ -81,8 +81,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
         () => {
             return {
                 steps: [
-                    createPageStep,
                     {
+                        ...createPageStep,
+                        // debug: true,
+                    },
+                    {
+                        // debug: true,
                         execute: async ({ setup }) => {
                             await bookmarks(setup).addBookmark({
                                 url: DATA.PAGE_1.fullUrl,
@@ -100,8 +104,31 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                 },
                             }),
                         },
+                        expectedStorageOperations: () => [
+                            (expect as any).objectContaining({
+                                operation: [
+                                    'createObject',
+                                    'bookmarks',
+                                    {
+                                        url: DATA.PAGE_1.url,
+                                        time: DATA.BOOKMARK_1,
+                                    },
+                                ],
+                            }),
+                        ],
+                        expectedSyncLogEntries: () => [
+                            expect.objectContaining({
+                                collection: 'bookmarks',
+                                operation: 'create',
+                                pk: 'lorem.com',
+                                value: {
+                                    time: expect.any(Number),
+                                },
+                            }),
+                        ],
                     },
                     {
+                        // debug: true,
                         preCheck: async ({ setup }) => {
                             expect(
                                 await searchModule(setup).searchPages({
@@ -135,7 +162,25 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                                 [DATA.PAGE_1.url]: { type: 'delete' },
                             }),
                         },
+                        expectedSyncLogEntries: () => [
+                            expect.objectContaining({
+                                collection: 'bookmarks',
+                                operation: 'delete',
+                                pk: 'lorem.com',
+                            }),
+                        ],
                         postCheck: async ({ setup }) => {
+                            console.log(
+                                await setup.storageManager
+                                    .collection('bookmarks')
+                                    .findObjects({}),
+                            )
+                            console.log('!!!!')
+                            console.log('!!!!')
+                            console.log('!!!!')
+                            console.log('!!!!')
+                            console.log('!!!!')
+                            console.log('!!!!')
                             expect(
                                 await searchModule(setup).searchPages({
                                     bookmarksOnly: true,
