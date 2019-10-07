@@ -32,6 +32,18 @@ import BackgroundScript from '.'
 import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
+import { AuthService } from 'src/authentication/background/auth-service'
+import { AuthFirebase } from 'src/authentication/background/auth-firebase'
+import {
+    FirebaseFunctionsAuth,
+    FirebaseFunctionsSubscription,
+} from 'src/authentication/background/firebase-functions-subscription'
+import {
+    AuthBackground,
+    AuthInterface,
+    AuthServerFunctionsInterface,
+    SubscriptionServerFunctionsInterface,
+} from 'src/authentication/background/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -47,6 +59,7 @@ export interface BackgroundModules {
     backupModule: backup.BackupBackgroundModule
     sync: SyncBackground
     bgScript: BackgroundScript
+    auth: AuthBackground
 }
 
 export function createBackgroundModules(options: {
@@ -57,6 +70,9 @@ export function createBackgroundModules(options: {
     getSharedSyncLog: () => Promise<SharedSyncLog>
     tabManager?: TabManager
     localStorageChangesManager: StorageChangesManager
+    authImplementation?: AuthInterface
+    authServerSubscriptionFunctions?: SubscriptionServerFunctionsInterface
+    authServerAuthFunctions?: AuthServerFunctionsInterface
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
@@ -81,8 +97,21 @@ export function createBackgroundModules(options: {
         loggerBackground: activityLogger,
     })
 
+    const authService = new AuthService(
+        options.authImplementation || new AuthFirebase(),
+    )
+    const subscriptionServerFunctions =
+        options.authServerSubscriptionFunctions ||
+        new FirebaseFunctionsSubscription()
+    const authServerFunctions =
+        options.authServerAuthFunctions || new FirebaseFunctionsAuth()
+
     return {
-        auth: options.authBackground,
+        auth: {
+            authService,
+            subscriptionServerFunctions,
+            authServerFunctions,
+        },
         notifications,
         social,
         activityLogger,

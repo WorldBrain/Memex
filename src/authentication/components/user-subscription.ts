@@ -18,7 +18,6 @@ export class UserSubscription {
             const checkoutExternalUrl = await serverFunctions.getCheckoutLink(
                 options,
             )
-            console.log(checkoutExternalUrl)
             eventEmitter.emit('externalUrl', checkoutExternalUrl)
             return checkoutExternalUrl
         }
@@ -37,17 +36,13 @@ export class UserSubscription {
         // todo: (ch) what's the correct method here?
         const res = await this.cbInstance.setPortalSession(async () => {
             let s = await serverFunctions.getManageLink(options)
-            console.log('S', s)
             return s
         })
 
-        console.log('Res', res)
-
         const cbPortal = this.cbInstance.createChargebeePortal()
-        console.log(cbPortal)
         cbPortal.open({
             close() {
-                //close callbacks
+                // todo: close callbacks
             },
         })
 

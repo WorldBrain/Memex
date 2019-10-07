@@ -32,7 +32,6 @@ export class AuthService implements AuthRemoteFunctionsInterface {
         }
 
         const claims = await this.getUserClaims()
-        console.log('Claims:', claims)
 
         const subscriptionExpiry = this.subscriptionExpiryAccessor(claims)(plan)
 
