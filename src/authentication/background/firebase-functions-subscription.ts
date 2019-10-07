@@ -24,7 +24,6 @@ export class FirebaseFunctionsSubscription
         const result = await firebase
             .functions()
             .httpsCallable('getManageLink')(options)
-        console.log('data', result.data)
         return result.data['portal_session']
     }
 }
