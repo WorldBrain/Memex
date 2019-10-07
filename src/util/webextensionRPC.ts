@@ -23,6 +23,7 @@ import { browser } from 'webextension-polyfill-ts'
 import { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
 import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
+import { AuthEvents } from 'src/authentication/background/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -278,19 +279,23 @@ export function fakeRemoteFunction(functions: {
     }
 }
 
-// todo(ch): type safe this
+export interface RemoteEventEmitter<T> {
+    emit: (eventName: keyof T, data: any) => Promise<any>
+}
 const __REMOTE_EVENT__ = '__REMOTE_EVENT__'
 const __REMOTE_EVENT_TYPE__ = '__REMOTE_EVENT_TYPE__'
 const __REMOTE_EVENT_NAME__ = '__REMOTE_EVENT_NAME__'
 
 // Sending Side, (e.g. background script)
-export function remoteEventEmitter(eventType: string) {
+export function remoteEventEmitter<T>(
+    eventType: string,
+): RemoteEventEmitter<T> {
     const message = {
         __REMOTE_EVENT__,
         __REMOTE_EVENT_TYPE__: eventType,
     }
     return {
-        emit: async (eventName: string, data: any) =>
+        emit: async (eventName, data) =>
             browser.runtime.sendMessage({
                 ...message,
                 __REMOTE_EVENT_NAME__: eventName,
@@ -300,7 +305,19 @@ export function remoteEventEmitter(eventType: string) {
 }
 
 // Receiving Side (e.g. content script, options page, etc)
-const remoteEventEmitters: { [key: string]: TypedEventEmitter<any> } = {}
+const remoteEventEmitters: RemoteEventEmitters = {}
+type RemoteEventEmitters = {
+    [K in keyof RemoteEvents]?: TypedRemoteEventEmitter<K>
+}
+type TypedRemoteEventEmitter<T extends keyof RemoteEvents> = TypedEventEmitter<
+    RemoteEvents[T]
+>
+
+// Statically defined types
+// TODO: Move this somewhere more appropriate
+interface RemoteEvents {
+    auth: AuthEvents
+}
 
 function registerRemoteEventForwarder() {
     if (browser.runtime.onMessage.hasListener(remoteEventForwarder)) {
@@ -323,13 +340,15 @@ const remoteEventForwarder = (message, _) => {
     emitter.emit(message[__REMOTE_EVENT_NAME__], message.data)
 }
 
-export function getRemoteEventEmitter(eventType) {
+export function getRemoteEventEmitter<T extends keyof RemoteEvents>(
+    eventType: T,
+): TypedRemoteEventEmitter<T> {
     const existingEmitter = remoteEventEmitters[eventType]
     if (existingEmitter) {
         return existingEmitter
     }
 
-    const newEmitter = new EventEmitter() as TypedEventEmitter<any>
+    const newEmitter = new EventEmitter() as TypedRemoteEventEmitter<T>
     remoteEventEmitters[eventType] = newEmitter
     registerRemoteEventForwarder()
     return newEmitter
