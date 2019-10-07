@@ -1,7 +1,14 @@
-interface AuthenticatedUser {
+import { AuthService } from 'src/authentication/background/auth-service'
+import {
+    FirebaseFunctionsAuth,
+    FirebaseFunctionsSubscription,
+} from 'src/authentication/background/firebase-functions-subscription'
+
+export interface AuthenticatedUser {
     displayName: string | null
     email: string | null
     uid: string
+    subscription?: { [key: string]: boolean }
 }
 
 export interface AuthInterface {
@@ -14,7 +21,7 @@ export interface AuthInterface {
 
 // These are key-values that a client is verified to have by authenticating, e.g. Coming from a JWT token.
 export interface Claims {
-    subscriptions: { [key: string]: { refreshAt: number } }
+    subscriptions: { [key: string]: { expiry: number } }
 
     [key: string]: any
 }
@@ -39,7 +46,18 @@ export interface AuthRemoteFunctionsInterface {
 
     refresh(): Promise<AuthenticatedUser | null>
 
-    checkValidPlan(plan): any
+    hasValidPlan(plan): Promise<boolean>
+    // isAuthorizedForFeature(feature): boolean
 
     hasSubscribedBefore(): any
+}
+
+export interface AuthEvents {
+    onAuthStateChanged: (user: AuthenticatedUser) => void
+}
+
+export interface AuthBackground {
+    authService: AuthService
+    subscriptionServerFunctions: FirebaseFunctionsSubscription
+    authServerFunctions: FirebaseFunctionsAuth
 }
