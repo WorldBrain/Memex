@@ -15,17 +15,17 @@ export default [
         hideFromSidebar: true,
     },
     {
-        name: 'User Account',
-        pathname: '/auth',
-        component: Authentication,
-        hideFromSidebar: true,
-    },
-    {
         name: 'Go back to Search',
         pathname: '/overview',
         component: Overview,
         icon: 'search',
         useOwnLayout: true,
+    },
+    {
+        name: 'User Account',
+        pathname: '/auth',
+        component: Authentication,
+        hideFromSidebar: false, // TODO: Remove this from the sidebar?
     },
     {
         name: 'Settings',
