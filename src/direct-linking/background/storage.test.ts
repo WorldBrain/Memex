@@ -176,7 +176,6 @@ describe('Annotations storage', () => {
                 expect(directLink).toBeDefined()
                 expect(directLink).not.toBeNull()
 
-                // expect(afterDeletion).not.toBeDefined()
                 expect(afterDeletion).toBeNull()
             })
 
@@ -210,6 +209,49 @@ describe('Annotations storage', () => {
                 )
                 expect(tagsAfter2).toBeDefined()
                 expect(tagsAfter2.length).toBe(0)
+            })
+
+            test('delete tags bulk', async () => {
+                const url = DATA.annotation.url
+                const before = await annotationStorage.getTagsByAnnotationUrl(
+                    url,
+                )
+                expect(before).toBeDefined()
+                expect(before.length).toBe(2)
+
+                await annotationStorage.deleteTagsByUrl({ url })
+
+                const after = await annotationStorage.getTagsByAnnotationUrl(
+                    url,
+                )
+                expect(after).toBeDefined()
+                expect(after.length).toBe(0)
+            })
+
+            test('delete bookmark', async () => {
+                const url = DATA.directLink.url
+
+                expect(await annotationStorage.annotHasBookmark({ url })).toBe(
+                    true,
+                )
+                await annotationStorage.deleteBookmarkByUrl({ url })
+                expect(await annotationStorage.annotHasBookmark({ url })).toBe(
+                    false,
+                )
+            })
+
+            test('delete list entries', async () => {
+                const url = DATA.hybrid.url
+
+                const before = await annotationStorage.findListEntriesByUrl({
+                    url,
+                })
+                expect(before.length).toBe(1)
+                await annotationStorage.deleteListEntriesByUrl({ url })
+                const after = await annotationStorage.findListEntriesByUrl({
+                    url,
+                })
+                expect(after.length).toBe(0)
             })
         })
     })

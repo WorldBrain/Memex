@@ -13,6 +13,8 @@ import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 
 const directLinking = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.directLinking
+const customLists = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.customLists
 
 let annotUrl!: string
 
@@ -387,6 +389,88 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     totalCount: null,
                                 })
                             },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should create a page, create an annotation, tag it, bookmark it, then delete it - deleting all assoc. data',
+            () => {
+                let listId: number
+                return {
+                    steps: [
+                        createPageStep,
+                        createAnnotationStep,
+                        {
+                            execute: async ({ setup }) => {
+                                await directLinking(setup).toggleAnnotBookmark(
+                                    {} as any,
+                                    { url: annotUrl },
+                                )
+                                await directLinking(setup).addTagForAnnotation(
+                                    {},
+                                    { tag: DATA.TAG_1, url: annotUrl },
+                                )
+                                listId = await customLists(
+                                    setup,
+                                ).createCustomList({ name: 'test' })
+                                await directLinking(setup).insertAnnotToList(
+                                    {} as any,
+                                    { listId, url: annotUrl },
+                                )
+                            },
+                            expectedStorageChanges: {
+                                annotBookmarks: (): StorageCollectionDiff => ({
+                                    [annotUrl]: {
+                                        type: 'create',
+                                        object: {
+                                            url: annotUrl,
+                                            createdAt: expect.any(Date),
+                                        },
+                                    },
+                                }),
+                                tags: (): StorageCollectionDiff => ({
+                                    [`["${DATA.TAG_1}","${annotUrl}"]`]: {
+                                        type: 'create',
+                                        object: {
+                                            url: annotUrl,
+                                            name: DATA.TAG_1,
+                                        },
+                                    },
+                                }),
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await directLinking(setup).deleteAnnotation(
+                                    {},
+                                    annotUrl,
+                                )
+                            },
+                            expectedStorageChanges: {
+                                annotations: (): StorageCollectionDiff => ({
+                                    [annotUrl]: {
+                                        type: 'delete',
+                                    },
+                                }),
+                                annotBookmarks: (): StorageCollectionDiff => ({
+                                    [annotUrl]: {
+                                        type: 'delete',
+                                    },
+                                }),
+                                tags: (): StorageCollectionDiff => ({
+                                    [`["${DATA.TAG_1}","${annotUrl}"]`]: {
+                                        type: 'delete',
+                                    },
+                                }),
+                                annotListEntries: (): StorageCollectionDiff => ({
+                                    [`["${listId}","${annotUrl}"]`]: {
+                                        type: 'delete',
+                                    },
+                                }),
+                            },
+                            postCheck: async ({ setup }) => {},
                         },
                     ],
                 }

@@ -325,7 +325,10 @@ export default class DirectLinkingBackground {
             pk = await this.lookupSocialId(pk)
         }
 
-        return this.annotationStorage.deleteAnnotation(pk)
+        await this.annotationStorage.deleteTagsByUrl({ url: pk })
+        await this.annotationStorage.deleteBookmarkByUrl({ url: pk })
+        await this.annotationStorage.deleteListEntriesByUrl({ url: pk })
+        await this.annotationStorage.deleteAnnotation(pk)
     }
 
     async getTagsByAnnotationUrl(_, url) {

@@ -112,6 +112,11 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObject',
                 args: { url: '$url:pk' },
             },
+            findListEntriesByUrl: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: { url: '$url:pk' },
+            },
             createAnnotationForList: {
                 collection: AnnotationStorage.LIST_ENTRIES_COLL,
                 operation: 'createObject',
@@ -145,9 +150,19 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'deleteObjects',
                 args: { listId: '$listId:int', url: '$url:string' },
             },
+            deleteListEntriesByUrl: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'deleteObjects',
+                args: { url: '$url:string' },
+            },
             deleteBookmarkByUrl: {
                 collection: AnnotationStorage.BMS_COLL,
                 operation: 'deleteObject',
+                args: { url: '$url:pk' },
+            },
+            deleteTagsByUrl: {
+                collection: AnnotationStorage.TAGS_COLL,
+                operation: 'deleteObjects',
                 args: { url: '$url:pk' },
             },
             listAnnotsByPage: {
@@ -203,6 +218,10 @@ export default class AnnotationStorage extends StorageModule {
 
         await this.operation('deleteBookmarkByUrl', { url })
         return false
+    }
+
+    async deleteBookmarkByUrl({ url }: { url: string }) {
+        return this.operation('deleteBookmarkByUrl', { url })
     }
 
     async annotHasBookmark({ url }: { url: string }) {
@@ -321,5 +340,17 @@ export default class AnnotationStorage extends StorageModule {
         } else {
             return this.deleteTags({ name, url })
         }
+    }
+
+    deleteTagsByUrl({ url }: { url: string }) {
+        return this.operation('deleteTagsByUrl', { url })
+    }
+
+    deleteListEntriesByUrl({ url }: { url: string }) {
+        return this.operation('deleteListEntriesByUrl', { url })
+    }
+
+    findListEntriesByUrl({ url }: { url: string }) {
+        return this.operation('findListEntriesByUrl', { url })
     }
 }
