@@ -113,49 +113,60 @@ For the user to manage an existing subscription of theirs, the procedure happens
 Via, Firebase Auth, Firebase Functions and Chargebee integrations.
 
 ```
-+-------+                                         +-----------+                                +-----------------+ +---------------+
-| Memex |                                         | Firebase  |                                | ChargebeeServer | | ChargebeeAPI  |
-+-------+                                         +-----------+                                +-----------------+ +---------------+
-    |                                                   |                                               |                  |
-    | Load UI helper script                             |                                               |                  |
-    |-------------------------------------------------------------------------------------------------->|                  |
-    | --------------------------\                       |                                               |                  |
-    |-| Initialise Chargebee UI |                       |                                               |                  |
-    | |-------------------------|                       |                                               |                  |
-    |                                                   |                                               |                  |
-    | getCheckoutLink                                   |                                               |                  |
-    |-------------------------------------------------->|                                               |                  |
-    |                                                   | ------------------------------\               |                  |
-    |                                                   |-| Check user is authenticated |               |                  |
-    |                                                   | |-----------------------------|               |                  |
-    |                                                   | -------------------------------------\        |                  |
-    |                                                   |-| Get unique user URL from chargebee |        |                  |
-    |                                                   | |------------------------------------|        |                  |
-    |                                                   |                                               |                  |
-    |                                                   | chargebee.hosted_page.checkout_new            |                  |
-    |                                                   |----------------------------------------------------------------->|
-    |                                                   |                                               |                  |
-    |                                                   |                                               |  ${Checkout URL} |
-    |                                                   |<-----------------------------------------------------------------|
-    |                                                   |                                               |                  |
-    |                                   ${Checkout URL} |                                               |                  |
-    |<--------------------------------------------------|                                               |                  |
-    | --------------------------------------------\     |                                               |                  |
-    |-| Chargebee UI to load page ${Checkout URL} |     |                                               |                  |
-    | |-------------------------------------------|     |                                               |                  |
-    |                                                   |                                               |                  |
-    | Get ${Checkout URL}                               |                                               |                  |
-    |-------------------------------------------------------------------------------------------------->|                  |
-    |                                                   |          -----------------------------------\ |                  |
-    |                                                   |          | User continues with Subscription |-|                  |
-    |                                                   |          |----------------------------------| |                  |
-    |                                                   |                                               |
+     ┌─────┐          ┌────────┐          ┌───────────────┐          ┌────────────┐
+     │Memex│          │Firebase│          │ChargebeeServer│          │ChargebeeAPI│
+     └──┬──┘          └───┬────┘          └───────┬───────┘          └─────┬──────┘
+        │         Load UI helper script           │                        │
+        │────────────────────────────────────────>│                        │
+        │                 │                       │                        │
+        │ ╔═══════════════╧═════════╗             │                        │
+        │ ║Initialise Chargebee UI ░║             │                        │
+        │ ╚═══════════════╤═════════╝             │                        │
+        │getCheckoutLink  │                       │                        │
+        │────────────────>│                       │                        │
+        │                 │                       │                        │
+        │                 │  ╔════════════════════╧════════╗               │
+        │                 │  ║Check user is authenticated ░║               │
+        │                 │  ╚════════════════════╤════════╝               │
+        │                 │  ╔════════════════════╧═══════════════╗        │
+        │                 │  ║Get unique user URL from chargebee ░║        │
+        │                 │  ╚════════════════════╤═══════════════╝        │
+        │                 │       chargebee.hosted_page.checkout_new       │
+        │                 │ ───────────────────────────────────────────────>
+        │                 │                       │                        │
+        │                 │                 ${Checkout URL}                │
+        │                 │ <───────────────────────────────────────────────
+        │                 │                       │                        │
+        │${Checkout URL}  │                       │                        │
+        │<────────────────│                       │                        │
+        │                 │                       │                        │
+        │ ╔═══════════════╧═══════════════════════╧═══╗                    │
+        │ ║Chargebee UI to load page ${Checkout URL} ░║                    │
+        │ ╚═══════════════╤═══════════════════════╤═══╝                    │
+        │          Get ${Checkout URL}            │                        │
+        │────────────────────────────────────────>│                        │
+        │                 │                       │                        │
+        │    ╔════════════╧═════════════════════╗ │                        │
+        │    ║User continues with Subscription ░║ │                        │
+        │    ╚════════════╤═════════════════════╝ │                        │
+        │             Dialog closed               │                        │
+        │<────────────────────────────────────────│                        │
+        │                 │                       │                        │
+        │ ╔═══════════════╧════════╗              │                        │
+        │-║Refresh Authentication ░║              │                        │
+     ┌──┴─╚════════════════════════╝      ┌───────┴───────┐          ┌─────┴──────┐
+     │Memex│          │Firebase│          │ChargebeeServer│          │ChargebeeAPI│
+     └─────┘          └────────┘          └───────────────┘          └────────────┘
 ```
 
 (source)
 
 ```puml
-object Memex Firebase ChargebeeServer ChargebeeAPI
+@startuml
+participant Memex
+participant Firebase
+participant ChargebeeServer
+participant ChargebeeAPI
 Memex->ChargebeeServer: Load UI helper script
 note right of Memex: Initialise Chargebee UI
 Memex->Firebase: getCheckoutLink
@@ -169,63 +180,69 @@ Memex->ChargebeeServer: Get ${Checkout URL}
 note left of ChargebeeServer: User continues with Subscription
 ChargebeeServer->Memex: Dialog closed
 note right of Memex: Refresh Authentication
+@enduml
 ```
 
 ### Refresh Authentication
 
-```puml
-+-------+                                      +-----------+                                         +---------------+
-| Memex |                                      | Firebase  |                                         | ChargebeeAPI  |
-+-------+                                      +-----------+                                         +---------------+
-    |                                                |                                                       |
-    | refreshUser                                    |                                                       |
-    |----------------------------------------------->|                                                       |
-    |                                                | ------------------------------\                       |
-    |                                                |-| Check user is authenticated |                       |
-    |                                                | |-----------------------------|                       |
-    |                                                | ---------------------------------------\              |
-    |                                                |-| Get all valid subscriptions for user |              |
-    |                                                | |--------------------------------------|              |
-    |                                                |                                                       |
-    |                                                | chargebee.subscription.list(query)                    |
-    |                                                |------------------------------------------------------>|
-    |                                                |                                                       |
-    |                                                |                             ${Subscriptions} for user |
-    |                                                |<------------------------------------------------------|
-    |                                                | ----------------------------------------------\       |
-    |                                                |-| for all subscriptions, check they are valid |       |
-    |                                                | |---------------------------------------------|       |
-    |                                                | --------------------------\                           |
-    |                                                |-| get subscription expiry |                           |
-    |                                                | |-------------------------|                           |
-    |                                                | --------------------------------------------\         |
-    |                                                |-| "FirebaseAuth Admin                       |         |
-    |                                                | | -> setCustomClaims(userId,subscriptions)" |         |
-    |                                                | |-------------------------------------------|         |
-    |                                          done. |                                                       |
-    |<-----------------------------------------------|                                                       |
-    | -------------------------------------\         |                                                       |
-    |-| "ReAuthenticate with Firebase Auth |         |                                                       |
-    | | using existing credentials."       |         |                                                       |
-    | -----------------------------------------\     |                                                       |
-    |-| new subscription claims are picked up. |     |                                                       |
-    | |----------------------------------------|     |                                                       |
-    |                                                |                                                       |
+```
+     ┌─────┐          ┌─────────────┐                     ┌────────────┐          ┌────────────┐
+     │Memex│          │FirebaseFuncs│                     │ChargebeeAPI│          │FirebaseAuth│
+     └──┬──┘          └──────┬──────┘                     └─────┬──────┘          └─────┬──────┘
+        │    refreshUser     │                                  │                       │
+        │───────────────────>│                                  │                       │
+        │                    │                                  │                       │
+        │                    │ ╔═════════════════════════════╗  │                       │
+        │                    │-║Check user is authenticated ░║  │                       │
+        │                    │ ╚═════════════════════════════╝  │                       │
+        │                    │ ╔════════════════════════════════╧═════╗                 │
+        │                    │-║Get all valid subscriptions for user ░║                 │
+        │                    │ ╚════════════════════════════════╤═════╝                 │
+        │                    │chargebee.subscription.list(query)│                       │
+        │                    │──────────────────────────────────>                       │
+        │                    │                                  │                       │
+        │                    │    ${Subscriptions} for user     │                       │
+        │                    │<──────────────────────────────────                       │
+        │                    │                                  │                       │
+        │                    │ ╔════════════════════════════════╧═══════╗               │
+        │                    │-║for all subscriptions, check validity, ░║               │
+        │                    │ ║get subscription expiry                 ║               │
+        │                    │ ╚════════════════════════════════╤═══════╝               │
+        │                    │         FirebaseAuth Admin       │                       │
+        │                    │         -> setCustomClaims(userId,subscriptions)         │
+        │                    │──────────────────────────────────────────────────────────>
+        │                    │                                  │                       │
+        │       done.        │                                  │                       │
+        │<───────────────────│                                  │                       │
+        │                    │                                  │                       │
+        │  auth.refresh()                                                               │
+        │  ReAuthenticate using existing credentials.                                   │
+        │───────────────────────────────────────────────────────────────────────────────>
+        │                                                                               │
+        │                                             User with new subscription claims │
+        │<───────────────────────────────────────────────────────────────────────────────
+        │                    │                                  │                       │
+        │ ╔══════════════════╧════════════════════════════╗     │                       │
+        │-║Auth changed handler fires with updated user. ░║     │                       │
+        ┴ ╚═══════════════════════════════════════════════╝
 ```
 
-(source)
-
 ```puml
-object Memex Firebase ChargebeeAPI
-Memex->Firebase: refreshUser
-note right of Firebase: Check user is authenticated
-note right of Firebase: Get all valid subscriptions for user
-Firebase->ChargebeeAPI: chargebee.subscription.list(query)
-ChargebeeAPI->Firebase: ${Subscriptions} for user
-note right of Firebase: for all subscriptions, check they are valid
-note right of Firebase: get subscription expiry
-note right of Firebase: "FirebaseAuth Admin \n-> setCustomClaims(userId,subscriptions)"
-Firebase->Memex: done.
-note right of Memex: "ReAuthenticate with Firebase Auth\n using existing credentials."
-note right of Memex: new subscription claims are picked up.
+@startuml
+participant Memex
+participant FirebaseFuncs
+participant ChargebeeAPI
+participant FirebaseAuth
+Memex->FirebaseFuncs: refreshUser
+note right of FirebaseFuncs: Check user is authenticated
+note right of FirebaseFuncs: Get all valid subscriptions for user
+FirebaseFuncs->ChargebeeAPI: chargebee.subscription.list(query)
+ChargebeeAPI->FirebaseFuncs: ${Subscriptions} for user
+note right of FirebaseFuncs: for all subscriptions, check validity,\nget subscription expiry
+FirebaseFuncs->FirebaseAuth: FirebaseAuth Admin \n-> setCustomClaims(userId,subscriptions)
+FirebaseFuncs->Memex: done.
+Memex->FirebaseAuth: auth.refresh() \nReAuthenticate using existing credentials.
+FirebaseAuth->Memex: User with new subscription claims
+note right of Memex: Auth changed handler fires with updated user.
+@enduml
 ```
