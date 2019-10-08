@@ -51,6 +51,94 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Direct links',
     [
         backgroundIntegrationTest(
+            'should create a page, create a highlight, then retrieve it via a search',
+            () => {
+                return {
+                    steps: [
+                        createPageStep,
+                        {
+                            execute: async ({ setup }) => {
+                                annotUrl = await directLinking(
+                                    setup,
+                                ).createAnnotation(
+                                    { tab: {} as any },
+                                    DATA.HIGHLIGHT_1 as any,
+                                    { skipPageIndexing: true },
+                                )
+                            },
+                            expectedStorageChanges: {
+                                annotations: (): StorageCollectionDiff => ({
+                                    [annotUrl]: {
+                                        type: 'create',
+                                        object: {
+                                            url: annotUrl,
+                                            pageUrl: DATA.HIGHLIGHT_1.url,
+                                            pageTitle: DATA.HIGHLIGHT_1.title,
+                                            _pageTitle_terms: ['test'],
+                                            body: DATA.HIGHLIGHT_1.body,
+                                            _body_terms: ['test', 'body'],
+                                            comment: undefined,
+                                            selector: undefined,
+                                            createdWhen: expect.any(Date),
+                                            lastEdited: expect.any(Date),
+                                        },
+                                    },
+                                }),
+                            },
+                            postCheck: async ({ setup }) => {
+                                expect(
+                                    await searchModule(setup).searchAnnotations(
+                                        {
+                                            query: 'body',
+                                        },
+                                    ),
+                                ).toEqual({
+                                    docs: [
+                                        {
+                                            annotations: [
+                                                {
+                                                    url: annotUrl,
+                                                    _body_terms: [
+                                                        'test',
+                                                        'body',
+                                                    ],
+                                                    _pageTitle_terms: ['test'],
+                                                    body: 'test body',
+                                                    comment: undefined,
+                                                    createdWhen: expect.any(
+                                                        Date,
+                                                    ),
+                                                    hasBookmark: false,
+                                                    lastEdited: expect.any(
+                                                        Date,
+                                                    ),
+                                                    pageTitle: 'test',
+                                                    pageUrl: 'lorem.com',
+                                                    selector: undefined,
+                                                    tags: [],
+                                                },
+                                            ],
+                                            annotsCount: 1,
+                                            displayTime: DATA.VISIT_1,
+                                            favIcon: undefined,
+                                            hasBookmark: false,
+                                            pageId: 'lorem.com',
+                                            screenshot: undefined,
+                                            tags: [],
+                                            title: undefined,
+                                            url: 'lorem.com',
+                                        },
+                                    ],
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
             'should create a page, create an annotation, edit its note, then retrieve it via a search',
             () => {
                 return {

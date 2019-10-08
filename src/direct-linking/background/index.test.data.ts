@@ -13,4 +13,12 @@ export const ANNOT_1 = {
     url: PAGE_1.url,
     title: 'test',
     comment: 'test comment',
+    createdWhen: new Date(1570024800000),
+}
+
+export const HIGHLIGHT_1 = {
+    url: PAGE_1.url,
+    title: 'test',
+    body: 'test body',
+    createdWhen: new Date(1570024800000),
 }

@@ -248,7 +248,16 @@ export default class DirectLinkingBackground {
 
     async createAnnotation(
         { tab }: TabArg,
-        { url, title, comment, body, selector, bookmarked, isSocialPost },
+        {
+            url,
+            title,
+            comment,
+            body,
+            selector,
+            bookmarked,
+            isSocialPost,
+            createdWhen = new Date(),
+        },
         { skipPageIndexing }: { skipPageIndexing?: boolean },
     ) {
         let pageUrl = url == null ? tab.url : url
@@ -270,6 +279,7 @@ export default class DirectLinkingBackground {
             comment,
             body,
             selector,
+            createdWhen,
         })
 
         // Attempt to (re-)index, if user preference set, but don't wait for it
