@@ -18,6 +18,7 @@ export interface IntegrationTestSuite<StepContext> {
 
 export interface IntegrationTest<StepContext> {
     description: string
+    mark?: boolean
     instantiate: () => IntegrationTestInstance<StepContext>
 }
 export interface IntegrationTestInstance<StepContext> {
@@ -67,12 +68,30 @@ export function backgroundIntegrationTestSuite(
     return { description, tests }
 }
 
+export interface BackgroundIntegrationTestOptions {
+    mark?: boolean
+}
+export function backgroundIntegrationTest(
+    description: string,
+    options: BackgroundIntegrationTestOptions,
+    test: () => IntegrationTestInstance<BackgroundIntegrationTestContext>,
+): BackgroundIntegrationTest
 export function backgroundIntegrationTest(
     description: string,
     test: () => IntegrationTestInstance<BackgroundIntegrationTestContext>,
+): BackgroundIntegrationTest
+export function backgroundIntegrationTest(
+    description: string,
+    paramA:
+        | BackgroundIntegrationTestOptions
+        | (() => IntegrationTestInstance<BackgroundIntegrationTestContext>),
+    paramB?: () => IntegrationTestInstance<BackgroundIntegrationTestContext>,
 ): BackgroundIntegrationTest {
+    const test = typeof paramA === 'function' ? paramA : paramB
+    const options = typeof paramA === 'object' ? paramA : {}
     return {
         description,
         instantiate: test,
+        ...options,
     }
 }

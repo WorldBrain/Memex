@@ -101,9 +101,12 @@ export function registerBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
 ) {
     describe(test.description, () => {
-        it('should work on a single device', async () => {
-            await runBackgroundIntegrationTest(test)
-        })
+        it(
+            'should work on a single device' + (test.mark ? '!!!' : ''),
+            async () => {
+                await runBackgroundIntegrationTest(test)
+            },
+        )
         registerSyncBackgroundIntegrationTests(test)
     })
 }

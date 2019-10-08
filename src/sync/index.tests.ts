@@ -28,9 +28,10 @@ export function registerSyncBackgroundIntegrationTests(
                 testOptions.steps.length,
             )
             for (const pattern of syncPatterns) {
+                const mark = test.mark ? '!!!' : ''
                 it(`should work when synced in pattern ${getReadablePattern(
                     pattern,
-                )}`, async () => {
+                )}${mark}`, async () => {
                     await runSyncBackgroundTest(test, {
                         pattern,
                         deviceCount: 2,

@@ -163,6 +163,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should create a list, add an entry of an existing page to it and retrieve the list and its pages',
+            { mark: false },
             () => {
                 return {
                     steps: [
