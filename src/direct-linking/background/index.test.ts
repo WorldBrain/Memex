@@ -156,15 +156,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }),
                             },
                             postCheck: async ({ setup }) => {
-                                expect(
-                                    await searchModule(setup).searchAnnotations(
-                                        {
-                                            tagsInc: [DATA.TAG_1],
-                                        },
-                                    ),
-                                ).toEqual({
+                                const searchResults = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    tagsInc: [DATA.TAG_1],
+                                })
+
+                                const firstDay = Object.keys(
+                                    searchResults['annotsByDay'],
+                                )[0]
+                                expect(searchResults).toEqual({
                                     annotsByDay: {
-                                        1570024800000: {
+                                        [firstDay]: {
                                             ['lorem.com']: [
                                                 {
                                                     url: annotUrl,
@@ -240,16 +243,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }),
                             },
                             postCheck: async ({ setup }) => {
-                                expect(
-                                    await searchModule(setup).searchAnnotations(
-                                        {
-                                            bookmarksOnly: true,
-                                        },
-                                    ),
-                                ).toEqual({
+                                const searchResults = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    bookmarksOnly: true,
+                                })
+
+                                const firstDay = Object.keys(
+                                    searchResults['annotsByDay'],
+                                )[0]
+                                expect(searchResults).toEqual({
                                     annotsByDay: {
-                                        1570024800000: {
-                                            ['lorem.com']: [
+                                        [firstDay]: {
+                                            'lorem.com': [
                                                 {
                                                     url: annotUrl,
                                                     _comment_terms: [
