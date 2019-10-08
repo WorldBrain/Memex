@@ -170,17 +170,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Bookmarks', [
                             }),
                         ],
                         postCheck: async ({ setup }) => {
-                            console.log(
-                                await setup.storageManager
-                                    .collection('bookmarks')
-                                    .findObjects({}),
-                            )
-                            console.log('!!!!')
-                            console.log('!!!!')
-                            console.log('!!!!')
-                            console.log('!!!!')
-                            console.log('!!!!')
-                            console.log('!!!!')
                             expect(
                                 await searchModule(setup).searchPages({
                                     bookmarksOnly: true,

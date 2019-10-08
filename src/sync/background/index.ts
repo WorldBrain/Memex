@@ -3,6 +3,23 @@ import StorageManager from '@worldbrain/storex'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
+
+import {
+    annotationCollectionName,
+    annotationBookmarkCollectionName,
+    annotationListEntryCollectionName,
+} from '@worldbrain/memex-storage/lib/annotations/constants'
+import { tagCollectionName } from '@worldbrain/memex-storage/lib/tags/constants'
+import {
+    visitCollectionName,
+    pageCollectionName,
+    bookmarkCollectionName,
+} from '@worldbrain/memex-storage/lib/pages/constants'
+import {
+    listEntryCollectionName,
+    listCollectionName,
+} from '@worldbrain/memex-storage/lib/lists/constants'
+
 import AuthBackground from 'src/auth/background'
 import { PublicSyncInterface } from './types'
 import InitialSync, { SignalTransportFactory } from './initial-sync'
@@ -18,12 +35,15 @@ export default class SyncBackground {
     syncLoggingMiddleware?: SyncLoggingMiddleware
     firstContinuousSyncPromise?: Promise<void>
     readonly syncedCollections: string[] = [
-        'bookmarks',
-        'customLists',
-        'pageListEntries',
-        'pages',
-        'visits',
-        'tags',
+        bookmarkCollectionName,
+        listCollectionName,
+        listEntryCollectionName,
+        pageCollectionName,
+        visitCollectionName,
+        tagCollectionName,
+        annotationCollectionName,
+        annotationBookmarkCollectionName,
+        annotationListEntryCollectionName,
     ]
 
     constructor(

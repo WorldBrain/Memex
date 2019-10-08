@@ -8,7 +8,7 @@ import UrlField from './storage/url-field'
 import schemaPatcher from './storage/dexie-schema'
 import collections from './old-schema'
 import stemmerSelector from './stemmers'
-import { plugins as backendPlugins } from './storex-plugins'
+import { createStorexPlugins } from './storex-plugins'
 
 export default function initStorex(options: {
     dbName: string
@@ -21,7 +21,7 @@ export default function initStorex(options: {
         idbImplementation: options.idbImplementation,
     })
 
-    for (const plugin of backendPlugins) {
+    for (const plugin of createStorexPlugins()) {
         backend.use(plugin)
     }
 
