@@ -37,6 +37,7 @@
             [
                 "user-logic",
                 "@worldbrain/storex",
+                "@worldbrain/storex-sync",
                 "@worldbrain/storex-backend-dexie",
                 "@worldbrain/storex-pattern-modules",
                 "@worldbrain/memex-url-utils",
