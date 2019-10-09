@@ -1,6 +1,6 @@
 import Storex from '@worldbrain/storex'
 import { Tabs, Browser } from 'webextension-polyfill-ts'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl, URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import {
     makeRemotelyCallable,
@@ -30,6 +30,7 @@ export default class DirectLinkingBackground {
     private sendAnnotation: AnnotationSender
     private requests: AnnotationRequests
     private socialBg: SocialBG
+    private _normalizeUrl: URLNormalizer
 
     constructor(
         private options: {
@@ -37,6 +38,7 @@ export default class DirectLinkingBackground {
             storageManager: Storex
             socialBg: SocialBG
             searchIndex: SearchIndex
+            normalizeUrl?: URLNormalizer
         },
     ) {
         this.socialBg = options.socialBg
@@ -47,6 +49,8 @@ export default class DirectLinkingBackground {
             browserStorageArea: options.browserAPIs.storage.local,
             searchIndex: options.searchIndex,
         })
+
+        this._normalizeUrl = options.normalizeUrl || normalizeUrl
 
         this.sendAnnotation = ({ tabId, annotation }) => {
             options.browserAPIs.tabs.sendMessage(tabId, {
@@ -197,7 +201,7 @@ export default class DirectLinkingBackground {
         const result = await this.backend.createDirectLink(request)
         await this.annotationStorage.createAnnotation({
             pageTitle,
-            pageUrl: tab.url,
+            pageUrl: this._normalizeUrl(tab.url),
             body: request.anchor.quote,
             url: result.url,
             selector: request.anchor,
@@ -216,7 +220,9 @@ export default class DirectLinkingBackground {
         isSocialPost?: boolean,
     ) {
         url = url == null && tab != null ? tab.url : url
-        url = isSocialPost ? await this.lookupSocialId(url) : normalizeUrl(url)
+        url = isSocialPost
+            ? await this.lookupSocialId(url)
+            : this._normalizeUrl(url)
 
         const annotations = await this.annotationStorage.getAllAnnotationsByUrl(
             {
@@ -260,14 +266,14 @@ export default class DirectLinkingBackground {
         },
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        let pageUrl = url == null ? tab.url : url
+        let pageUrl = this._normalizeUrl(url == null ? tab.url : url)
 
         if (isSocialPost) {
             pageUrl = await this.lookupSocialId(pageUrl)
         }
 
         const pageTitle = title == null ? tab.title : title
-        const uniqueUrl = normalizeUrl(`${pageUrl}/#${Date.now()}`, {
+        const uniqueUrl = this._normalizeUrl(`${pageUrl}/#${Date.now()}`, {
             stripHash: false,
             removeTrailingSlash: false,
         })
