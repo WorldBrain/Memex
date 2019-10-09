@@ -1,4 +1,9 @@
-import { AuthInterface, Claims } from 'src/authentication/background/types'
+import {
+    AuthEvents,
+    AuthInterface,
+    Claims,
+} from 'src/authentication/background/types'
+import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 
 export class MockLinkGenerator {
     static checkoutLink = 'https://checkout.example-test.com'
@@ -48,4 +53,6 @@ export class MockAuthImplementation implements AuthInterface {
     refresh() {
         return null
     }
+
+    registerAuthEmitter(emitter: RemoteEventEmitter<AuthEvents>): void {}
 }

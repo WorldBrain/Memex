@@ -1,12 +1,8 @@
 import {
-    AuthEvents,
+    AuthenticatedUserWithClaims,
     AuthInterface,
     Claims,
 } from 'src/authentication/background/types'
-import {
-    RemoteEventEmitter,
-    remoteEventEmitter,
-} from 'src/util/webextensionRPC'
 import { firebase } from 'src/util/firebase-app-initialized'
 import 'firebase/functions'
 import 'firebase/auth'
@@ -14,25 +10,22 @@ import { FirebaseFunctionsAuth } from 'src/authentication/background/firebase-fu
 
 export class AuthFirebase implements AuthInterface {
     private firebaseAuthObserver: firebase.Unsubscribe
-    private authEmitter: RemoteEventEmitter<AuthEvents>
 
     private firebaseAuthFunctions = new FirebaseFunctionsAuth()
 
-    constructor() {
-        this.registerAuthEmitter()
-    }
-
-    registerAuthEmitter() {
-        this.authEmitter = remoteEventEmitter('auth')
-        this.firebaseAuthObserver = firebase
-            .auth()
-            .onAuthStateChanged(user =>
-                this.authEmitter.emit('onAuthStateChanged', user),
-            )
-    }
-
     async getCurrentUser(): Promise<firebase.User | null> {
         return firebase.auth().currentUser
+    }
+
+    registerAuthEmitter(authEmitter) {
+        this.firebaseAuthObserver = firebase
+            .auth()
+            .onAuthStateChanged(async user => {
+                if (user != null) {
+                    ;(user as AuthenticatedUserWithClaims).claims = await this.getUserClaims()
+                }
+                return authEmitter.emit('onAuthStateChanged', user)
+            })
     }
 
     async getUserClaims(): Promise<Claims> {
@@ -45,13 +38,8 @@ export class AuthFirebase implements AuthInterface {
         return idTokenResult.claims as Claims
     }
 
-    // todo(ch): Also provide mechanism for 'hasBackupEnabled' which looks at feature claims, not just subscription claims, incase features change.
     async refresh() {
-        // call firebase function,
-        // then reauthenticate
         await this.firebaseAuthFunctions.refreshUserClaims()
-        await firebase.auth().currentUser.reload() // todo (ch): I think this is the right method
-
-        return null
+        await firebase.auth().currentUser.reload()
     }
 }

@@ -68,6 +68,8 @@ export async function main() {
             getUser: backgroundModules.auth.authService.getUser,
             refresh: backgroundModules.auth.authService.refresh,
             hasValidPlan: backgroundModules.auth.authService.hasValidPlan,
+            isAuthorizedForFeature:
+                backgroundModules.auth.authService.isAuthorizedForFeature,
             hasSubscribedBefore:
                 backgroundModules.auth.authService.hasSubscribedBefore,
         },
