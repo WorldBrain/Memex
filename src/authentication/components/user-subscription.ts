@@ -22,6 +22,7 @@ export class UserSubscription {
             return checkoutExternalUrl
         }
 
+        // todo: (ch) type eventEmitter
         this.cbInstance.openCheckout({
             hostedPage: getExternalUrl,
             success: hostedPageId => eventEmitter.emit('success', hostedPageId),
@@ -32,6 +33,7 @@ export class UserSubscription {
     }
 
     async manageUserSubscription(options: SubscriptionCheckoutOptions) {
+        // todo: (ch) provide a way to close this box on parent component unmount
         // todo: (ch) find out what events this emits and return them
         // todo: (ch) what's the correct method here?
         const res = await this.cbInstance.setPortalSession(async () => {

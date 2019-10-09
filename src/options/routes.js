@@ -6,6 +6,7 @@ import Statistics from './statistics'
 import Settings from './settings'
 import Overview from '../overview'
 import Authentication from '../authentication/components/Authentication'
+import { Subscribe } from '../authentication/components/Subscription/Subscribe'
 
 export default [
     {
@@ -26,6 +27,12 @@ export default [
         pathname: '/auth',
         component: Authentication,
         hideFromSidebar: false, // TODO: Remove this from the sidebar?
+    },
+    {
+        name: 'Subscribe',
+        pathname: '/subscribe',
+        component: Subscribe,
+        hideFromSidebar: true,
     },
     {
         name: 'Settings',
