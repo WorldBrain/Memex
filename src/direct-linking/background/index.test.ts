@@ -395,9 +395,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should create a page, create an annotation, tag it, bookmark it, then delete it - deleting all assoc. data',
+            'should create a page, create an annotation, tag+star+add it to list, then delete it - deleting all assoc. data',
             () => {
                 let listId: number
+                const findAllObjects = (collection, setup) =>
+                    setup.storageManager.collection(collection).findObjects({})
+
                 return {
                     steps: [
                         createPageStep,
@@ -439,6 +442,28 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     },
                                 }),
+                                annotListEntries: (): StorageCollectionDiff => ({
+                                    [`[${listId},"${annotUrl}"]`]: {
+                                        type: 'create',
+                                        object: {
+                                            listId,
+                                            url: annotUrl,
+                                            createdAt: expect.any(Date),
+                                        },
+                                    },
+                                }),
+                                customLists: (): StorageCollectionDiff => ({
+                                    [listId]: {
+                                        type: 'create',
+                                        object: {
+                                            id: listId,
+                                            name: 'test',
+                                            isDeletable: true,
+                                            isNestable: true,
+                                            createdAt: expect.any(Date),
+                                        },
+                                    },
+                                }),
                             },
                         },
                         {
@@ -465,12 +490,31 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 }),
                                 annotListEntries: (): StorageCollectionDiff => ({
-                                    [`["${listId}","${annotUrl}"]`]: {
+                                    [`[${listId},"${annotUrl}"]`]: {
                                         type: 'delete',
                                     },
                                 }),
                             },
-                            postCheck: async ({ setup }) => {},
+                            postCheck: async ({ setup }) => {
+                                expect(
+                                    await findAllObjects('annotations', setup),
+                                ).toEqual([])
+                                expect(
+                                    await findAllObjects(
+                                        'annotBookmarks',
+                                        setup,
+                                    ),
+                                ).toEqual([])
+                                expect(
+                                    await findAllObjects(
+                                        'annotListEntries',
+                                        setup,
+                                    ),
+                                ).toEqual([])
+                                expect(
+                                    await findAllObjects('tags', setup),
+                                ).toEqual([])
+                            },
                         },
                     ],
                 }
