@@ -3,7 +3,7 @@ import { UserSubscription } from 'src/authentication/components/user-subscriptio
 import Button from 'src/popup/components/Button'
 const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 import { Helmet } from 'react-helmet'
-import { SubscriptionPriceBox } from 'src/authentication/components/SubscriptionPriceBox'
+import { SubscriptionPriceBox } from 'src/authentication/components/Subscription/SubscriptionPriceBox'
 import { AuthenticatedUser } from 'src/authentication/background/types'
 import { auth } from 'src/util/remote-functions-background'
 
@@ -14,8 +14,9 @@ export const subscriptionConfig = {
 
 interface Props {
     user: AuthenticatedUser | null
+    onClose?: () => void
 }
-export class Subscription extends React.PureComponent<Props> {
+export class SubscriptionOptions extends React.PureComponent<Props> {
     chargebeeInstance: any
     userSubscription: UserSubscription
     private subscribed: boolean
@@ -41,16 +42,23 @@ export class Subscription extends React.PureComponent<Props> {
 
     openPortal = async (planId = null) => {
         this._initChargebee()
-        return this.userSubscription.manageUserSubscription({
-            planId: planId || subscriptionConfig.defaultPlan,
-        })
+        const portalEvents = await this.userSubscription.manageUserSubscription(
+            {
+                planId: planId || subscriptionConfig.defaultPlan,
+            },
+        )
+
+        portalEvents.addListener('closed', () => this.props.onClose())
     }
 
     openCheckout = async (planId = null) => {
         this._initChargebee()
-        return this.userSubscription.checkoutUserSubscription({
-            planId: planId || subscriptionConfig.defaultPlan,
-        })
+        const subscriptionEvents = await this.userSubscription.checkoutUserSubscription(
+            {
+                planId: planId || subscriptionConfig.defaultPlan,
+            },
+        )
+        subscriptionEvents.addListener('closed', () => this.props.onClose())
     }
 
     render() {

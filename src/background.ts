@@ -91,7 +91,7 @@ export async function main() {
     })
 
     // Attach interesting features onto global window scope for interested users
-    // TODO: Shouldn't we prefix these with memex_ to avoid collisions?
+    // TODO: prefix these with memex_ to avoid collisions?
     window['authService'] = backgroundModules.auth.authService
     window['authServerFunctions'] = backgroundModules.auth.authServerFunctions
     window['backup'] = backupModule
