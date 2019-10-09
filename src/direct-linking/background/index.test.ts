@@ -221,8 +221,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should create a page, create an annotation, tag it, then retrieve it via a filtered search',
+            'should create a page, create an annotation, tag it, retrieve it via a filtered search, then untag it, no longer being able to retrieve it via the same search',
             () => {
+                const runFilteredTagSearch = setup =>
+                    searchModule(setup).searchAnnotations({
+                        tagsInc: [DATA.TAG_1],
+                    })
+
                 return {
                     steps: [
                         createPageStep,
@@ -246,11 +251,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }),
                             },
                             postCheck: async ({ setup }) => {
-                                const searchResults = await searchModule(
+                                const searchResults = await runFilteredTagSearch(
                                     setup,
-                                ).searchAnnotations({
-                                    tagsInc: [DATA.TAG_1],
-                                })
+                                )
 
                                 const firstDay = Object.keys(
                                     searchResults['annotsByDay'],
@@ -300,6 +303,34 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     isAnnotsSearch: true,
                                     resultsExhausted: true,
                                     totalCount: null,
+                                })
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await directLinking(setup).delTagForAnnotation(
+                                    {},
+                                    { tag: DATA.TAG_1, url: annotUrl },
+                                )
+                            },
+                            expectedStorageChanges: {
+                                tags: (): StorageCollectionDiff => ({
+                                    [`["${DATA.TAG_1}","${annotUrl}"]`]: {
+                                        type: 'delete',
+                                    },
+                                }),
+                            },
+                            postCheck: async ({ setup }) => {
+                                const searchResults = await runFilteredTagSearch(
+                                    setup,
+                                )
+
+                                expect(searchResults).toEqual({
+                                    resultsExhausted: true,
+                                    isAnnotsSearch: true,
+                                    totalCount: null,
+                                    annotsByDay: {},
+                                    docs: [],
                                 })
                             },
                         },
@@ -514,6 +545,200 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(
                                     await findAllObjects('tags', setup),
                                 ).toEqual([])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should create a page, create 2 annotations, then delete one of them, leaving the other',
+            () => {
+                let annotAUrl: string
+                let annotBUrl: string
+
+                return {
+                    steps: [
+                        createPageStep,
+                        {
+                            execute: async ({ setup }) => {
+                                annotAUrl = await directLinking(
+                                    setup,
+                                ).createAnnotation(
+                                    { tab: {} as any },
+                                    DATA.ANNOT_1 as any,
+                                    { skipPageIndexing: true },
+                                )
+                                annotBUrl = await directLinking(
+                                    setup,
+                                ).createAnnotation(
+                                    { tab: {} as any },
+                                    DATA.ANNOT_1 as any,
+                                    { skipPageIndexing: true },
+                                )
+                            },
+                            expectedStorageChanges: {
+                                annotations: (): StorageCollectionDiff => ({
+                                    [annotAUrl]: {
+                                        type: 'create',
+                                        object: {
+                                            url: annotAUrl,
+                                            pageUrl: DATA.ANNOT_1.url,
+                                            pageTitle: DATA.ANNOT_1.title,
+                                            comment: DATA.ANNOT_1.comment,
+                                            _comment_terms: ['test', 'comment'],
+                                            _pageTitle_terms: ['test'],
+                                            body: undefined,
+                                            selector: undefined,
+                                            createdWhen: expect.any(Date),
+                                            lastEdited: expect.any(Date),
+                                        },
+                                    },
+                                    [annotBUrl]: {
+                                        type: 'create',
+                                        object: {
+                                            url: annotBUrl,
+                                            pageUrl: DATA.ANNOT_1.url,
+                                            pageTitle: DATA.ANNOT_1.title,
+                                            comment: DATA.ANNOT_1.comment,
+                                            _comment_terms: ['test', 'comment'],
+                                            _pageTitle_terms: ['test'],
+                                            body: undefined,
+                                            selector: undefined,
+                                            createdWhen: expect.any(Date),
+                                            lastEdited: expect.any(Date),
+                                        },
+                                    },
+                                }),
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await directLinking(setup).deleteAnnotation(
+                                    {},
+                                    annotAUrl,
+                                )
+                            },
+                            expectedStorageChanges: {
+                                annotations: (): StorageCollectionDiff => ({
+                                    [annotAUrl]: {
+                                        type: 'delete',
+                                    },
+                                }),
+                            },
+                            postCheck: async ({ setup }) => {
+                                expect(
+                                    await setup.storageManager
+                                        .collection('annotations')
+                                        .findObjects({}),
+                                ).toEqual([
+                                    {
+                                        url: annotBUrl,
+                                        pageUrl: DATA.ANNOT_1.url,
+                                        pageTitle: DATA.ANNOT_1.title,
+                                        comment: DATA.ANNOT_1.comment,
+                                        _comment_terms: ['test', 'comment'],
+                                        _pageTitle_terms: ['test'],
+                                        body: undefined,
+                                        selector: undefined,
+                                        createdWhen: expect.any(Date),
+                                        lastEdited: expect.any(Date),
+                                    },
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            "should create a page, create an annotation, add page to a list, then retrieve page's annotation via a filtered search",
+            () => {
+                let listId: number
+
+                return {
+                    steps: [
+                        createPageStep,
+                        createAnnotationStep,
+                        {
+                            execute: async ({ setup }) => {
+                                listId = await customLists(
+                                    setup,
+                                ).createCustomList({ name: 'test' })
+                                await customLists(setup).insertPageToList({
+                                    id: listId,
+                                    url: DATA.ANNOT_1.url,
+                                })
+                            },
+                            expectedStorageChanges: {
+                                pageListEntries: (): StorageCollectionDiff => ({
+                                    [`[${listId},"${DATA.ANNOT_1.url}"]`]: {
+                                        type: 'create',
+                                        object: {
+                                            listId,
+                                            fullUrl: DATA.ANNOT_1.url,
+                                            pageUrl: DATA.ANNOT_1.url,
+                                            createdAt: expect.any(Date),
+                                        },
+                                    },
+                                }),
+                                customLists: (): StorageCollectionDiff => ({
+                                    [listId]: {
+                                        type: 'create',
+                                        object: {
+                                            id: listId,
+                                            name: 'test',
+                                            isDeletable: true,
+                                            isNestable: true,
+                                            createdAt: expect.any(Date),
+                                        },
+                                    },
+                                }),
+                            },
+                            postCheck: async ({ setup }) => {
+                                const searchResults = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    lists: [listId],
+                                })
+
+                                const firstDay = Object.keys(
+                                    searchResults['annotsByDay'],
+                                )[0]
+
+                                expect(searchResults).toEqual({
+                                    annotsByDay: {
+                                        [firstDay]: {
+                                            'lorem.com': [
+                                                {
+                                                    url: annotUrl,
+                                                    _comment_terms: [
+                                                        'test',
+                                                        'comment',
+                                                    ],
+                                                    _pageTitle_terms: ['test'],
+                                                    body: undefined,
+                                                    comment: 'test comment',
+                                                    createdWhen: expect.any(
+                                                        Date,
+                                                    ),
+                                                    lastEdited: expect.any(
+                                                        Date,
+                                                    ),
+                                                    hasBookmark: false,
+                                                    pageTitle: 'test',
+                                                    pageUrl: 'lorem.com',
+                                                    selector: undefined,
+                                                    tags: [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    docs: [expect.any(Object)],
+                                    isAnnotsSearch: true,
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                })
                             },
                         },
                     ],

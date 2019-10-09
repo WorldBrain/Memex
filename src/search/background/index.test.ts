@@ -408,9 +408,9 @@ describe('Annotations search', () => {
 
             // Ensure order is by latest visit
             expect(results.map(res => res.url)).toEqual([
+                DATA.hybrid.pageUrl,
                 DATA.highlight.pageUrl,
                 DATA.directLink.pageUrl,
-                DATA.hybrid.pageUrl,
             ])
         })
 

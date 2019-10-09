@@ -151,9 +151,9 @@ export default class CustomListBackground {
 
         if (!page) {
             page = await this._createPage({ url })
+            page.addVisit()
         }
 
-        page.addVisit()
         return page.save()
     }
 
