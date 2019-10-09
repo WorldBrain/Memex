@@ -70,7 +70,7 @@ export default class SyncBackground {
             clientSyncLog: this.clientSyncLog,
             sharedSyncLog: options.sharedSyncLog,
             browserAPIs: options.browserAPIs,
-            toggleSyncLogging: (enabed: true) => {
+            toggleSyncLogging: (enabed: boolean) => {
                 if (this.syncLoggingMiddleware) {
                     this.syncLoggingMiddleware.enabled = enabed
                 } else {
