@@ -14,7 +14,11 @@ describe('Dexie Utils storex plugin', () => {
         const storageManager = initStorageManager()
         const customLists = new CustomListStorage({ storageManager })
         const bookmarks = new BookmarksStorage({ storageManager })
-        const annotations = new AnnotationStorage({ storageManager })
+        const annotations = new AnnotationStorage({
+            storageManager,
+            browserStorageArea: {} as any,
+            searchIndex: {} as any,
+        })
 
         registerModuleMapCollections(storageManager.registry, {
             customLists,
