@@ -107,12 +107,10 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 
-    private renderPlaceholderImage = () => <img width="100%" height="170px" />
-    private searchImage = () => <div className={styles.searchImage}/>
-    private annotationImage = () => <div className={styles.annotationImage}/>
-    private keyboardImage = () => <div className={styles.keyboardImage}/>
-    private sidebarImage = () => <div className={styles.sidebarImage}/>
-
+    private searchImage = () => <div className={styles.searchGif} />
+    private annotationImage = () => <div className={styles.annotationGif} />
+    private keyboardImage = () => <div className={styles.keyboardGif} />
+    private sidebarImage = () => <div className={styles.sidebarGif} />
     private handleTooltipToggle = () => {
         const enabled = !this.state.isTooltipEnabled
         this.processEvent('setTooltipEnabled', { enabled })
@@ -241,11 +239,15 @@ export default class OnboardingScreen extends StatefulUIElement<
                             </NextStepButton>
                         )}
                     >
-                        <p className={styles.textLarge}>
+                        <p className={styles.textDark}>
                             Learn how everything works and make Memex tailormade
                             for you.
                         </p>
-                        <div className={styles.privacyImage} />
+                        <img
+                            src="img/privacy.svg"
+                            alt="A person floating above the earth on a laptop"
+                            className={styles.floatingImage}
+                        />
                     </OnboardingStep>
                 )
             case 1:
@@ -314,7 +316,8 @@ export default class OnboardingScreen extends StatefulUIElement<
                             isChecked={this.state.isSidebarEnabled}
                             handleChange={this.handleSidebarToggle}
                         >
-                            Show Sidebar when moving cursor to the right of your screen
+                            Show Sidebar when moving cursor to the right of your
+                            screen
                         </SettingsCheckbox>
                     </OnboardingStep>
                 )
