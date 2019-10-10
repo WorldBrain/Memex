@@ -12,6 +12,12 @@ import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 
 const searchModule = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.search
+const customLists = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.customLists
+const tags = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.tags
+const bookmarks = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.bookmarks
 
 const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
     execute: async ({ setup }) => {
@@ -332,6 +338,179 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                     'test',
                                 ]),
                             )
+                        },
+                    },
+                ],
+            }
+        },
+    ),
+    backgroundIntegrationTest(
+        'should create + visit two pages, tag, star, and add one to a list, then delete that one - deleting all associated data',
+        () => {
+            let listId: number
+
+            return {
+                steps: [
+                    createPagesStep,
+                    {
+                        execute: async ({ setup }) => {
+                            listId = await customLists(setup).createCustomList({
+                                name: 'test',
+                            })
+                            await customLists(setup).insertPageToList({
+                                url: DATA.PAGE_1.url,
+                                id: listId,
+                            })
+                            await bookmarks(setup).addBookmark({
+                                url: DATA.PAGE_1.url,
+                            })
+                            await tags(setup).addTag({
+                                url: DATA.PAGE_1.fullUrl,
+                                tag: DATA.TAG_1,
+                            })
+                        },
+                        expectedStorageChanges: {
+                            customLists: (): StorageCollectionDiff => ({
+                                [listId]: {
+                                    type: 'create',
+                                    object: {
+                                        id: listId,
+                                        name: 'test',
+                                        isDeletable: true,
+                                        isNestable: true,
+                                        createdAt: expect.any(Date),
+                                    },
+                                },
+                            }),
+                            pageListEntries: (): StorageCollectionDiff => ({
+                                [`[${listId},"${DATA.PAGE_1.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        listId,
+                                        fullUrl: DATA.PAGE_1.url,
+                                        pageUrl: DATA.PAGE_1.url,
+                                        createdAt: expect.any(Date),
+                                    },
+                                },
+                            }),
+                            tags: (): StorageCollectionDiff => ({
+                                [`["${DATA.TAG_1}","${DATA.PAGE_1.url}"]`]: {
+                                    type: 'create',
+                                    object: {
+                                        url: DATA.PAGE_1.url,
+                                        name: DATA.TAG_1,
+                                    },
+                                },
+                            }),
+                            bookmarks: (): StorageCollectionDiff => ({
+                                [DATA.PAGE_1.url]: {
+                                    type: 'create',
+                                    object: {
+                                        url: DATA.PAGE_1.url,
+                                        time: expect.any(Number),
+                                    },
+                                },
+                            }),
+                        },
+                    },
+                    {
+                        preCheck: async ({ setup }) => {
+                            expect(
+                                await setup.storageManager
+                                    .collection('pages')
+                                    .findObject({ url: DATA.PAGE_2.url }),
+                            ).not.toBeNull()
+                            expect(
+                                await setup.storageManager
+                                    .collection('pages')
+                                    .findObject({ url: DATA.PAGE_1.url }),
+                            ).not.toBeNull()
+                            expect(
+                                await setup.storageManager
+                                    .collection('bookmarks')
+                                    .findObject({ url: DATA.PAGE_1.url }),
+                            ).not.toBeNull()
+                            expect(
+                                await setup.storageManager
+                                    .collection('tags')
+                                    .findObject({
+                                        url: DATA.PAGE_1.url,
+                                        name: DATA.TAG_1,
+                                    }),
+                            ).not.toBeNull()
+                            expect(
+                                await setup.storageManager
+                                    .collection('pageListEntries')
+                                    .findObject({
+                                        pageUrl: DATA.PAGE_1.url,
+                                        listId,
+                                    }),
+                            ).not.toBeNull()
+                        },
+                        execute: async ({ setup }) => {
+                            await searchModule(setup).searchIndex.delPages([
+                                DATA.PAGE_1.url,
+                            ])
+                        },
+                        expectedStorageChanges: {
+                            pages: (): StorageCollectionDiff => ({
+                                [DATA.PAGE_1.url]: {
+                                    type: 'delete',
+                                },
+                            }),
+                            visits: (): StorageCollectionDiff => ({
+                                [`[${DATA.VISIT_1},"${DATA.PAGE_1.url}"]`]: {
+                                    type: 'delete',
+                                },
+                            }),
+                            pageListEntries: (): StorageCollectionDiff => ({
+                                [`[${listId},"${DATA.PAGE_1.url}"]`]: {
+                                    type: 'delete',
+                                },
+                            }),
+                            tags: (): StorageCollectionDiff => ({
+                                [`["${DATA.TAG_1}","${DATA.PAGE_1.url}"]`]: {
+                                    type: 'delete',
+                                },
+                            }),
+                            bookmarks: (): StorageCollectionDiff => ({
+                                [DATA.PAGE_1.url]: {
+                                    type: 'delete',
+                                },
+                            }),
+                        },
+                        postCheck: async ({ setup }) => {
+                            expect(
+                                await setup.storageManager
+                                    .collection('pages')
+                                    .findObject({ url: DATA.PAGE_2.url }),
+                            ).not.toBeNull()
+                            expect(
+                                await setup.storageManager
+                                    .collection('pages')
+                                    .findObject({ url: DATA.PAGE_1.url }),
+                            ).toBeNull()
+                            expect(
+                                await setup.storageManager
+                                    .collection('bookmarks')
+                                    .findObject({ url: DATA.PAGE_1.url }),
+                            ).toBeNull()
+                            expect(
+                                await setup.storageManager
+                                    .collection('tags')
+                                    .findObject({
+                                        url: DATA.PAGE_1.url,
+                                        name: DATA.TAG_1,
+                                    }),
+                            ).toBeNull()
+                            expect(
+                                await setup.storageManager
+                                    .collection('pageListEntries')
+                                    .findObject({
+                                        url: DATA.PAGE_1.url,
+                                        listId,
+                                    }),
+                            ).toBeNull()
                         },
                     },
                 ],
