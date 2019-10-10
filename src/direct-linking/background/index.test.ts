@@ -221,6 +221,99 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
+            'should create a page, create an annotation, edit its note, then retrieve it via a filtered search on edit time',
+            () => {
+                const runFilteredTimeSearch = setup =>
+                    searchModule(setup).searchAnnotations({
+                        startDate: DATA.ANNOT_1.createdWhen.getTime() + 1000,
+                    })
+
+                return {
+                    steps: [
+                        createPageStep,
+                        createAnnotationStep,
+                        {
+                            preCheck: async ({ setup }) => {
+                                const searchResults = await runFilteredTimeSearch(
+                                    setup,
+                                )
+
+                                expect(searchResults).toEqual({
+                                    annotsByDay: {},
+                                    docs: [],
+                                    isAnnotsSearch: true,
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                })
+                            },
+                            execute: async ({ setup }) => {
+                                await directLinking(setup).editAnnotation(
+                                    {},
+                                    annotUrl,
+                                    'updated comment',
+                                )
+                            },
+                            expectedStorageChanges: {
+                                annotations: (): StorageCollectionDiff => ({
+                                    [annotUrl]: {
+                                        type: 'modify',
+                                        updates: {
+                                            comment: 'updated comment',
+                                            _comment_terms: expect.any(Object),
+                                            lastEdited: expect.any(Date),
+                                        },
+                                    },
+                                }),
+                            },
+                            postCheck: async ({ setup }) => {
+                                const searchResults = await runFilteredTimeSearch(
+                                    setup,
+                                )
+
+                                const firstDay = Object.keys(
+                                    searchResults['annotsByDay'],
+                                )[0]
+
+                                expect(searchResults).toEqual({
+                                    annotsByDay: {
+                                        [firstDay]: {
+                                            ['lorem.com']: [
+                                                {
+                                                    url: annotUrl,
+                                                    _comment_terms: [
+                                                        'updated',
+                                                        'comment',
+                                                    ],
+                                                    _pageTitle_terms: ['test'],
+                                                    body: undefined,
+                                                    comment: 'updated comment',
+                                                    createdWhen: expect.any(
+                                                        Date,
+                                                    ),
+                                                    hasBookmark: false,
+                                                    lastEdited: expect.any(
+                                                        Date,
+                                                    ),
+                                                    pageTitle: 'test',
+                                                    pageUrl: 'lorem.com',
+                                                    selector: undefined,
+                                                    tags: [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    docs: [expect.any(Object)],
+                                    isAnnotsSearch: true,
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
             'should create a page, create an annotation, tag it, retrieve it via a filtered search, then untag it, no longer being able to retrieve it via the same search',
             () => {
                 const runFilteredTagSearch = setup =>
@@ -739,6 +832,444 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     resultsExhausted: true,
                                     totalCount: null,
                                 })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should create a page, create 2 annotations, tag them differently, then retrieve them with a mix of filtered tag searches',
+            () => {
+                let annotUrlA: string
+                let annotUrlB: string
+
+                return {
+                    steps: [
+                        createPageStep,
+                        {
+                            execute: async ({ setup }) => {
+                                annotUrlA = await directLinking(
+                                    setup,
+                                ).createAnnotation(
+                                    { tab: {} as any },
+                                    DATA.ANNOT_1 as any,
+                                    { skipPageIndexing: true },
+                                )
+                                annotUrlB = await directLinking(
+                                    setup,
+                                ).createAnnotation(
+                                    { tab: {} as any },
+                                    {
+                                        ...DATA.ANNOT_2,
+                                        url: DATA.PAGE_1.url,
+                                    } as any,
+                                    { skipPageIndexing: true },
+                                )
+                            },
+                            expectedStorageChanges: {
+                                annotations: (): StorageCollectionDiff => ({
+                                    [annotUrlA]: {
+                                        type: 'create',
+                                        object: {
+                                            url: annotUrlA,
+                                            pageUrl: DATA.PAGE_1.url,
+                                            pageTitle: DATA.ANNOT_1.title,
+                                            comment: DATA.ANNOT_1.comment,
+                                            _comment_terms: ['test', 'comment'],
+                                            _pageTitle_terms: ['test'],
+                                            body: undefined,
+                                            selector: undefined,
+                                            createdWhen: expect.any(Date),
+                                            lastEdited: expect.any(Date),
+                                        },
+                                    },
+                                    [annotUrlB]: {
+                                        type: 'create',
+                                        object: {
+                                            url: annotUrlB,
+                                            pageUrl: DATA.PAGE_1.url,
+                                            pageTitle: DATA.ANNOT_2.title,
+                                            comment: DATA.ANNOT_2.comment,
+                                            _comment_terms: ['test', 'text'],
+                                            _pageTitle_terms: ['annotation'],
+                                            body: undefined,
+                                            selector: undefined,
+                                            createdWhen: expect.any(Date),
+                                            lastEdited: expect.any(Date),
+                                        },
+                                    },
+                                }),
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await directLinking(setup).addTagForAnnotation(
+                                    {},
+                                    { tag: DATA.TAG_1, url: annotUrlA },
+                                )
+                                await directLinking(setup).addTagForAnnotation(
+                                    {},
+                                    { tag: DATA.TAG_2, url: annotUrlB },
+                                )
+                            },
+                            postCheck: async ({ setup }) => {
+                                const searchResultsA = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    tagsInc: [DATA.TAG_1],
+                                })
+                                const searchResultsB = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    tagsInc: [DATA.TAG_2],
+                                })
+                                const searchResultsC = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    tagsExc: [DATA.TAG_1],
+                                })
+                                const searchResultsD = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    tagsExc: [DATA.TAG_2],
+                                })
+
+                                const firstDay = Object.keys(
+                                    searchResultsA['annotsByDay'],
+                                )[0]
+
+                                const expectedResultAnnotA = {
+                                    annotsByDay: {
+                                        [firstDay]: {
+                                            ['lorem.com']: [
+                                                {
+                                                    url: annotUrlA,
+                                                    _comment_terms: [
+                                                        'test',
+                                                        'comment',
+                                                    ],
+                                                    _pageTitle_terms: ['test'],
+                                                    body: undefined,
+                                                    comment: 'test comment',
+                                                    createdWhen: expect.any(
+                                                        Date,
+                                                    ),
+                                                    hasBookmark: false,
+                                                    lastEdited: expect.any(
+                                                        Date,
+                                                    ),
+                                                    pageTitle: 'test',
+                                                    pageUrl: 'lorem.com',
+                                                    selector: undefined,
+                                                    tags: [DATA.TAG_1],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    docs: [expect.any(Object)],
+                                    isAnnotsSearch: true,
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                }
+
+                                const expectedResultAnnotB = {
+                                    annotsByDay: {
+                                        [firstDay]: {
+                                            ['lorem.com']: [
+                                                {
+                                                    url: annotUrlB,
+                                                    _comment_terms: [
+                                                        'test',
+                                                        'text',
+                                                    ],
+                                                    _pageTitle_terms: [
+                                                        'annotation',
+                                                    ],
+                                                    body: undefined,
+                                                    comment: 'some test text',
+                                                    createdWhen: expect.any(
+                                                        Date,
+                                                    ),
+                                                    hasBookmark: false,
+                                                    lastEdited: expect.any(
+                                                        Date,
+                                                    ),
+                                                    pageTitle: 'annotation',
+                                                    pageUrl: 'lorem.com',
+                                                    selector: undefined,
+                                                    tags: [DATA.TAG_2],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    docs: [expect.any(Object)],
+                                    isAnnotsSearch: true,
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                }
+
+                                expect(searchResultsA).toEqual(
+                                    expectedResultAnnotA,
+                                )
+                                expect(searchResultsB).toEqual(
+                                    expectedResultAnnotB,
+                                )
+                                expect(searchResultsC).toEqual(
+                                    expectedResultAnnotB,
+                                )
+                                expect(searchResultsD).toEqual(
+                                    expectedResultAnnotA,
+                                )
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should create 2 pages on different domains, create an annotation for each, then retrieve them via a mix of filtered domain searches',
+            () => {
+                let annotUrlA: string
+                let annotUrlB: string
+
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                await searchModule(setup).searchIndex.addPage({
+                                    pageDoc: {
+                                        url: DATA.PAGE_1.fullUrl,
+                                        content: {},
+                                    },
+                                    visits: [DATA.VISIT_1],
+                                    rejectNoContent: false,
+                                })
+                                await searchModule(setup).searchIndex.addPage({
+                                    pageDoc: {
+                                        url: DATA.PAGE_2.fullUrl,
+                                        content: {},
+                                    },
+                                    visits: [DATA.VISIT_1],
+                                    rejectNoContent: false,
+                                })
+                            },
+                            expectedStorageChanges: {
+                                pages: (): StorageCollectionDiff => ({
+                                    [DATA.PAGE_1.url]: {
+                                        type: 'create',
+                                        object: {
+                                            url: DATA.PAGE_1.url,
+                                            fullUrl: DATA.PAGE_1.fullUrl,
+                                            domain: DATA.PAGE_1.domain,
+                                            hostname: DATA.PAGE_1.hostname,
+                                            canonicalUrl: undefined,
+                                            fullTitle: undefined,
+                                            screenshot: undefined,
+                                            text: undefined,
+                                            titleTerms: [],
+                                            urlTerms: [],
+                                            terms: [],
+                                        },
+                                    },
+                                    [DATA.PAGE_2.url]: {
+                                        type: 'create',
+                                        object: {
+                                            url: DATA.PAGE_2.url,
+                                            fullUrl: DATA.PAGE_2.fullUrl,
+                                            domain: DATA.PAGE_2.domain,
+                                            hostname: DATA.PAGE_2.hostname,
+                                            canonicalUrl: undefined,
+                                            fullTitle: undefined,
+                                            screenshot: undefined,
+                                            text: undefined,
+                                            titleTerms: [],
+                                            urlTerms: [],
+                                            terms: [],
+                                        },
+                                    },
+                                }),
+                                visits: (): StorageCollectionDiff => ({
+                                    [`[${DATA.VISIT_1},"${
+                                        DATA.PAGE_1.url
+                                    }"]`]: {
+                                        type: 'create',
+                                        object: {
+                                            time: DATA.VISIT_1,
+                                            url: DATA.PAGE_1.url,
+                                        },
+                                    },
+                                    [`[${DATA.VISIT_1},"${
+                                        DATA.PAGE_2.url
+                                    }"]`]: {
+                                        type: 'create',
+                                        object: {
+                                            time: DATA.VISIT_1,
+                                            url: DATA.PAGE_2.url,
+                                        },
+                                    },
+                                }),
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                annotUrlA = await directLinking(
+                                    setup,
+                                ).createAnnotation(
+                                    { tab: {} as any },
+                                    DATA.ANNOT_1 as any,
+                                    { skipPageIndexing: true },
+                                )
+                                annotUrlB = await directLinking(
+                                    setup,
+                                ).createAnnotation(
+                                    { tab: {} as any },
+                                    DATA.ANNOT_2 as any,
+                                    { skipPageIndexing: true },
+                                )
+                            },
+                            expectedStorageChanges: {
+                                annotations: (): StorageCollectionDiff => ({
+                                    [annotUrlA]: {
+                                        type: 'create',
+                                        object: {
+                                            url: annotUrlA,
+                                            pageUrl: DATA.PAGE_1.url,
+                                            pageTitle: DATA.ANNOT_1.title,
+                                            comment: DATA.ANNOT_1.comment,
+                                            _comment_terms: ['test', 'comment'],
+                                            _pageTitle_terms: ['test'],
+                                            body: undefined,
+                                            selector: undefined,
+                                            createdWhen: expect.any(Date),
+                                            lastEdited: expect.any(Date),
+                                        },
+                                    },
+                                    [annotUrlB]: {
+                                        type: 'create',
+                                        object: {
+                                            url: annotUrlB,
+                                            pageUrl: DATA.PAGE_2.url,
+                                            pageTitle: DATA.ANNOT_2.title,
+                                            comment: DATA.ANNOT_2.comment,
+                                            _comment_terms: ['test', 'text'],
+                                            _pageTitle_terms: ['annotation'],
+                                            body: undefined,
+                                            selector: undefined,
+                                            createdWhen: expect.any(Date),
+                                            lastEdited: expect.any(Date),
+                                        },
+                                    },
+                                }),
+                            },
+                            postCheck: async ({ setup }) => {
+                                const searchResultsA = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    domains: [DATA.PAGE_1.url],
+                                })
+                                const searchResultsB = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    domains: [DATA.PAGE_2.url],
+                                })
+                                const searchResultsC = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    domainsExclude: [DATA.PAGE_1.url],
+                                })
+                                const searchResultsD = await searchModule(
+                                    setup,
+                                ).searchAnnotations({
+                                    domainsExclude: [DATA.PAGE_2.url],
+                                })
+
+                                const firstDay = Object.keys(
+                                    searchResultsA['annotsByDay'],
+                                )[0]
+
+                                const expectedResultAnnotA = {
+                                    annotsByDay: {
+                                        [firstDay]: {
+                                            ['lorem.com']: [
+                                                {
+                                                    url: annotUrlA,
+                                                    _comment_terms: [
+                                                        'test',
+                                                        'comment',
+                                                    ],
+                                                    _pageTitle_terms: ['test'],
+                                                    body: undefined,
+                                                    comment: 'test comment',
+                                                    createdWhen: expect.any(
+                                                        Date,
+                                                    ),
+                                                    hasBookmark: false,
+                                                    lastEdited: expect.any(
+                                                        Date,
+                                                    ),
+                                                    pageTitle: 'test',
+                                                    pageUrl: 'lorem.com',
+                                                    selector: undefined,
+                                                    tags: [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    docs: [expect.any(Object)],
+                                    isAnnotsSearch: true,
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                }
+
+                                const expectedResultAnnotB = {
+                                    annotsByDay: {
+                                        [firstDay]: {
+                                            ['test.com']: [
+                                                {
+                                                    url: annotUrlB,
+                                                    _comment_terms: [
+                                                        'test',
+                                                        'text',
+                                                    ],
+                                                    _pageTitle_terms: [
+                                                        'annotation',
+                                                    ],
+                                                    body: undefined,
+                                                    comment: 'some test text',
+                                                    createdWhen: expect.any(
+                                                        Date,
+                                                    ),
+                                                    hasBookmark: false,
+                                                    lastEdited: expect.any(
+                                                        Date,
+                                                    ),
+                                                    pageTitle: 'annotation',
+                                                    pageUrl: 'test.com',
+                                                    selector: undefined,
+                                                    tags: [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    docs: [expect.any(Object)],
+                                    isAnnotsSearch: true,
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                }
+
+                                expect(searchResultsA).toEqual(
+                                    expectedResultAnnotA,
+                                )
+                                expect(searchResultsB).toEqual(
+                                    expectedResultAnnotB,
+                                )
+                                expect(searchResultsC).toEqual(
+                                    expectedResultAnnotB,
+                                )
+                                expect(searchResultsD).toEqual(
+                                    expectedResultAnnotA,
+                                )
                             },
                         },
                     ],
