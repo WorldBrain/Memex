@@ -18,7 +18,7 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
         await searchModule(setup).searchIndex.addPage({
             pageDoc: {
                 url: DATA.PAGE_1.fullUrl,
-                content: {},
+                content: { fullText: 'just some dummy test text' },
             },
             visits: [DATA.VISIT_1],
             rejectNoContent: false,
@@ -44,10 +44,10 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
                     canonicalUrl: undefined,
                     fullTitle: undefined,
                     screenshot: undefined,
-                    text: undefined,
+                    text: 'just some dummy test text',
                     titleTerms: [],
                     urlTerms: [],
-                    terms: [],
+                    terms: ['dummy', 'test', 'text'],
                 },
             },
             [DATA.PAGE_2.url]: {
@@ -275,6 +275,63 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 resultsExhausted: true,
                                 totalCount: null,
                             })
+                        },
+                    },
+                ],
+            }
+        },
+    ),
+    backgroundIntegrationTest(
+        "should create + visit two pages, update the text of one of them, then confirm the indexed terms still contain the old text's terms",
+        () => {
+            return {
+                steps: [
+                    createPagesStep,
+                    {
+                        preCheck: async ({ setup }) => {
+                            const page = await setup.storageManager
+                                .collection('pages')
+                                .findOneObject<{ terms: string[] }>({
+                                    url: DATA.PAGE_1.url,
+                                })
+                            expect(page.terms).toEqual(
+                                expect.arrayContaining([
+                                    'text',
+                                    'dummy',
+                                    'test',
+                                ]),
+                            )
+                        },
+                        execute: async ({ setup }) => {
+                            await searchModule(setup).searchIndex.addPageTerms({
+                                pageDoc: {
+                                    url: DATA.PAGE_1.fullUrl,
+                                    content: { fullText: 'some new text' },
+                                },
+                            })
+                        },
+                        expectedStorageChanges: {
+                            pages: (): StorageCollectionDiff => ({
+                                [DATA.PAGE_1.url]: {
+                                    type: 'modify',
+                                    updates: { terms: [] },
+                                },
+                            }),
+                        },
+                        postCheck: async ({ setup }) => {
+                            const page = await setup.storageManager
+                                .collection('pages')
+                                .findOneObject<{ terms: string[] }>({
+                                    url: DATA.PAGE_1.url,
+                                })
+                            expect(page.terms).toEqual(
+                                expect.arrayContaining([
+                                    'new',
+                                    'text',
+                                    'dummy',
+                                    'test',
+                                ]),
+                            )
                         },
                     },
                 ],
