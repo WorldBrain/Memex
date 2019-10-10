@@ -1,7 +1,12 @@
+.container {
+    margin-top: 4.25rem;
+}
+
 .settingsButton {
     composes: grayActionButton from 'src/common-ui/elements.css';
-    margin: auto;
+    margin: 20px 0 0;
     text-decoration: none;
+    display: inline-flex;
 }
 
 .settingsHeader {
@@ -30,5 +35,6 @@
     .container {
         overflow: visible;
         padding: 0 20px;
+        margin-top: 0;
     }
 }
