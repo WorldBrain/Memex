@@ -32,14 +32,20 @@ export function registerSyncBackgroundIntegrationTests(
             )
             for (const pattern of syncPatterns) {
                 const mark = test.mark ? '!!!' : ''
-                it(`should work when synced in pattern ${getReadablePattern(
-                    pattern,
-                )}${mark}`, async () => {
-                    await runSyncBackgroundTest(test, {
+
+                const registerTest =
+                    process.env.TEST_SYNC_INTEGRATION === 'true' ? it : it.skip
+                registerTest(
+                    `should work when synced in pattern ${getReadablePattern(
                         pattern,
-                        deviceCount: 2,
-                    })
-                })
+                    )}${mark}`,
+                    async () => {
+                        await runSyncBackgroundTest(test, {
+                            pattern,
+                            deviceCount: 2,
+                        })
+                    },
+                )
             }
         })
         // describe('should work when synced in various patterns across 3 devices', () => {
