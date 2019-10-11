@@ -106,16 +106,6 @@
     display: inline-flex;
 }
 
-.backgroundBlobWrapper {
-    position: absolute;
-    z-index: -1;
-    top: calc(
-        50% - 50px
-    ); /* position in the center but offset rougly the heading text so it still shows above the box */
-    left: calc(50% + 40px);
-    transform: translate(-50%, -50%);
-}
-
 .navigation {
     display: flex;
     justify-content: center;
@@ -217,9 +207,11 @@
     0% {
         transform: translateY(0px);
     }
+
     50% {
         transform: translateY(-20px);
     }
+
     100% {
         transform: translateY(0px);
     }
