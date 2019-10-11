@@ -258,7 +258,7 @@ export default class DirectLinkingBackground {
             isSocialPost,
             createdWhen = new Date(),
         },
-        { skipPageIndexing }: { skipPageIndexing?: boolean },
+        { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
         let pageUrl = url == null ? tab.url : url
 

@@ -157,10 +157,10 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
 
         await forEachSetup(s => syncModule(s).continuousSync.initDevice())
 
-        const getDeviceId = async (setup: BackgroundIntegrationTestSetup) =>
-            (await setup.browserLocalStorage.get(
-                SYNC_STORAGE_AREA_KEYS.deviceId,
-            ))[SYNC_STORAGE_AREA_KEYS.deviceId]
+        const getDeviceId = async (s: BackgroundIntegrationTestSetup) =>
+            (await s.browserLocalStorage.get(SYNC_STORAGE_AREA_KEYS.deviceId))[
+                SYNC_STORAGE_AREA_KEYS.deviceId
+            ]
 
         const firstDeviceId = await getDeviceId(setups[0])
         expect(firstDeviceId).toBeTruthy()

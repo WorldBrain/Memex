@@ -17,6 +17,9 @@ import { createMemorySharedSyncLog } from './background/index.tests'
 import { StorageChangeDetector } from 'src/tests/storage-change-detector'
 import { EventEmitter } from 'events'
 
+// to shut up linting
+const debug = console['log'].bind(console)
+
 export function registerSyncBackgroundIntegrationTests(
     test: BackgroundIntegrationTest,
 ) {
@@ -73,7 +76,7 @@ async function runSyncBackgroundTest(
         const syncEventEmitter = new EventEmitter() as SyncEvents
         for (const eventName of Object.keys(SYNC_EVENTS)) {
             syncEventEmitter.on(eventName as keyof SyncEventMap, args => {
-                console.log(
+                debug(
                     `SYNC EVENT ${eventName}:`,
                     require('util').inspect(args, {
                         colors: true,
@@ -137,16 +140,13 @@ async function runSyncBackgroundTest(
 
         if (stepIndex > 0) {
             if (step.debug) {
-                console.log(
-                    `SYNC before step ${stepIndex}, device`,
-                    currentDeviceId,
-                )
+                debug(`SYNC before step ${stepIndex}, device`, currentDeviceId)
             }
             await sync(currentDeviceIndex, { debug: step.debug })
         }
         if (lastStep && lastStep.postCheck) {
             if (step.debug) {
-                console.log(
+                debug(
                     `SYNC postCheck of previous step before step ${stepIndex}, device`,
                     currentDeviceId,
                 )
@@ -163,10 +163,7 @@ async function runSyncBackgroundTest(
 
         if (step.preCheck) {
             if (step.debug) {
-                console.log(
-                    `SYNC after step ${stepIndex}, device`,
-                    currentDeviceId,
-                )
+                debug(`SYNC after step ${stepIndex}, device`, currentDeviceId)
             }
             await step.preCheck({
                 setup: currentSetup,
@@ -199,7 +196,7 @@ async function runSyncBackgroundTest(
 
         if (step.postCheck) {
             if (step.debug) {
-                console.log(
+                debug(
                     `SYNC postCheck after step ${stepIndex}, device`,
                     currentDeviceId,
                 )
@@ -210,7 +207,7 @@ async function runSyncBackgroundTest(
         }
 
         if (step.debug) {
-            console.log(`SYNC after step ${stepIndex}, device`, currentDeviceId)
+            debug(`SYNC after step ${stepIndex}, device`, currentDeviceId)
         }
         await sync(currentDeviceIndex, { debug: step.debug })
 
@@ -224,21 +221,21 @@ async function runSyncBackgroundTest(
 
     for (const unsyncedDeviceIndex of unsyncedDeviceIndices) {
         if (lastStep!.debug) {
-            console.log(
+            debug(
                 `SYNC before last postCheck, device`,
                 deviceIds[unsyncedDeviceIndex],
             )
         }
         await sync(unsyncedDeviceIndex, { debug: lastStep!.debug })
         if (lastStep!.debug) {
-            console.log(
+            debug(
                 `SYNC completed before last postCheck, device`,
                 deviceIds[unsyncedDeviceIndex],
             )
         }
         await lastStep!.postCheck({ setup: setups[unsyncedDeviceIndex] })
         if (lastStep!.debug) {
-            console.log(
+            debug(
                 `SYNC last postCheck done, device`,
                 deviceIds[unsyncedDeviceIndex],
             )

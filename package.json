@@ -39,6 +39,7 @@
         }
     },
     "dependencies": {
+        "@worldbrain/storex-sync": "^0.1.1",
         "babel-polyfill": "^6.26.0",
         "blob-util": "^1.2.1",
         "cheerio": "^1.0.0-rc.2",
@@ -125,6 +126,7 @@
         "@types/storybook__react": "^4.0.2",
         "@types/url-regex": "^4.1.0",
         "@types/whatwg-url": "^6.4.0",
+        "@worldbrain/storex-backend-firestore": "^0.1.1",
         "atob": "^2.1.2",
         "autoprefixer": "^7.1.1",
         "babel-core": "^6.26.3",

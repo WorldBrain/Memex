@@ -7,10 +7,8 @@ import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { Page } from 'src/search'
-import { getPage } from 'src/search/util'
+import { Page, SearchIndex } from 'src/search'
 import { Tab, CustomListsInterface } from './types'
-import { SearchIndex } from 'src/search'
 
 export default class CustomListBackground {
     storage: CustomListStorage
