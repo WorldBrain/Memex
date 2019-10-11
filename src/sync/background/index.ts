@@ -51,7 +51,7 @@ export default class SyncBackground {
             auth: AuthBackground
             storageManager: StorageManager
             signalTransportFactory: SignalTransportFactory
-            sharedSyncLog: SharedSyncLog
+            getSharedSyncLog: () => Promise<SharedSyncLog>
             browserAPIs: Pick<Browser, 'storage'>
         },
     ) {
@@ -68,7 +68,7 @@ export default class SyncBackground {
             auth: options.auth,
             storageManager: options.storageManager,
             clientSyncLog: this.clientSyncLog,
-            sharedSyncLog: options.sharedSyncLog,
+            getSharedSyncLog: options.getSharedSyncLog,
             browserAPIs: options.browserAPIs,
             toggleSyncLogging: (enabed: boolean) => {
                 if (this.syncLoggingMiddleware) {

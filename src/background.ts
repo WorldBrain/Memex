@@ -22,7 +22,7 @@ import {
     registerBackgroundModuleCollections,
 } from './background-script/setup'
 import { createServerStorageManager } from './storage/server'
-import { createSharedSyncLog } from './sync/background/shared-sync-log'
+import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import AuthBackground from './auth/background'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
@@ -33,12 +33,7 @@ export async function main() {
     })
     initSentry({ storageChangesManager: localStorageChangesManager })
 
-    const serverStorageManager = createServerStorageManager()
-    const sharedSyncLog = createSharedSyncLog(serverStorageManager)
-    registerModuleMapCollections(serverStorageManager.registry, {
-        sharedSyncLog,
-    })
-    await serverStorageManager.finishInitialization()
+    const getSharedSyncLog = createLazySharedSyncLog()
 
     const authBackground = new AuthBackground()
     const storageManager = initStorex()
@@ -48,7 +43,7 @@ export async function main() {
         browserAPIs: browser,
         authBackground,
         signalTransportFactory: createFirebaseSignalTransport,
-        sharedSyncLog,
+        getSharedSyncLog,
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
     await storageManager.finishInitialization()

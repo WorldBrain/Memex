@@ -14,7 +14,6 @@ import {
 } from 'src/tests/integration-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { createMemorySharedSyncLog } from './background/index.tests'
-import { StorageChangeDetector } from 'src/tests/storage-change-detector'
 import { EventEmitter } from 'events'
 
 // to shut up linting

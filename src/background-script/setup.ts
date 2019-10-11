@@ -54,7 +54,7 @@ export function createBackgroundModules(options: {
     authBackground: AuthBackground
     browserAPIs: Browser
     signalTransportFactory: SignalTransportFactory
-    sharedSyncLog: SharedSyncLog
+    getSharedSyncLog: () => Promise<SharedSyncLog>
     tabManager?: TabManager
     localStorageChangesManager: StorageChangesManager
 }): BackgroundModules {
@@ -119,7 +119,7 @@ export function createBackgroundModules(options: {
             auth: options.authBackground,
             signalTransportFactory: options.signalTransportFactory,
             storageManager,
-            sharedSyncLog: options.sharedSyncLog,
+            getSharedSyncLog: options.getSharedSyncLog,
             browserAPIs: options.browserAPIs,
         }),
         bgScript,

@@ -61,7 +61,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         tabManager: options && options.tabManager,
         authBackground,
         signalTransportFactory: options && options.signalTransportFactory,
-        sharedSyncLog: options && options.sharedSyncLog,
+        getSharedSyncLog: async () => options && options.sharedSyncLog,
     })
     backgroundModules.customLists._createPage =
         backgroundModules.search.searchIndex.createTestPage

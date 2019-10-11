@@ -19,7 +19,7 @@ export default class ContinuousSync {
             auth: AuthBackground
             storageManager: StorageManager
             clientSyncLog: ClientSyncLogStorage
-            sharedSyncLog: SharedSyncLog
+            getSharedSyncLog: () => Promise<SharedSyncLog>
             browserAPIs: {
                 storage: {
                     local: Pick<Browser['storage']['local'], 'get' | 'set'>
@@ -62,7 +62,8 @@ export default class ContinuousSync {
             return
         }
 
-        const newDeviceId = await this.options.sharedSyncLog.createDeviceId({
+        const sharedSyncLog = await this.options.getSharedSyncLog()
+        const newDeviceId = await sharedSyncLog.createDeviceId({
             userId: this.options.auth.getCurrentUser().id,
             sharedUntil: 1,
         })
@@ -101,7 +102,7 @@ export default class ContinuousSync {
         }
         await doSync({
             clientSyncLog: this.options.clientSyncLog,
-            sharedSyncLog: this.options.sharedSyncLog,
+            sharedSyncLog: await this.options.getSharedSyncLog(),
             storageManager: this.options.storageManager,
             reconciler: reconcileSyncLog,
             now: Date.now(),
