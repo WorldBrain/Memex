@@ -22,6 +22,7 @@
 .startingPage {
     width: 90%;
     max-width: 800px;
+    transition: height 0.5s;
     margin: 2rem auto 1rem;
     display: flex;
     padding: 2em 4em;
@@ -154,7 +155,10 @@
 }
 
 .floatingImage {
-    animation: float 6s ease-in-out infinite;
+    animation-name: float, scale-in-center;
+    animation-duration: 6s, 1s;
+    animation-timing-function: ease-in-out, ease;
+    animation-iteration-count: infinite, 1;
     width: 210px;
     margin: 1rem auto 2rem;
 }
@@ -217,8 +221,18 @@
     }
 }
 
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
 @media only screen and (max-height: 700px) {
     .flexLayout {
-        height: auto;
+        height: auto; /* reset the 100vh which causes scroll issues on smaller screens */
     }
 }
