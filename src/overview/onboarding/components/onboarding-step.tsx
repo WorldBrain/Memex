@@ -25,45 +25,42 @@ export default class OnboardingStep extends React.PureComponent<Props> {
     }
 
     render() {
+        if (this.props.isInitStep) {
+            return (
+                <div className={styles.startingPage}>
+                    <div className={styles.stepContainer}>
+                        <h1 className={this.headerClassName}>
+                            {this.props.titleText}
+                        </h1>
+                        <div>{this.props.children}</div>
+                    </div>
+                    <div className={styles.navigation}>
+                        {this.props.renderButton()}
+                    </div>
+                </div>
+            )
+        }
         return (
-            <>
-                {this.props.isInitStep ? (
-                    <div className={styles.startingPage}>
-                        <div className={styles.stepContainer}>
-                            <h1 className={this.headerClassName}>
-                                {this.props.titleText}
-                            </h1>
-                            <div>{this.props.children}</div>
-                        </div>
-                        <div className={styles.navigation}>
-                            {this.props.renderButton()}
-                        </div>
-                    </div>
-                ) : (
-                    <div className={styles.whiteBox}>
-                        <div className={styles.stepContainer}>
-                            <h1 className={this.headerClassName}>
-                                {this.props.titleText}
-                            </h1>
-                            <p className={styles.textLarge}>
-                                {this.props.subtitleText}
-                            </p>
-                            {this.props.renderImage()}
-                            <div className={styles.text}>
-                                {this.props.children}
-                            </div>
-                        </div>
-                        <div className={styles.navigation}>
-                            {this.props.renderButton()}
-                            <ProgressStepContainer
-                                onStepClick={this.props.goToStep}
-                                totalSteps={this.props.totalSteps}
-                                currentStep={this.props.currentStep}
-                            />
-                        </div>
-                    </div>
-                )}
-            </>
+            <div className={styles.whiteBox}>
+                <div className={styles.stepContainer}>
+                    <h1 className={this.headerClassName}>
+                        {this.props.titleText}
+                    </h1>
+                    <p className={styles.textLarge}>
+                        {this.props.subtitleText}
+                    </p>
+                    {this.props.renderImage()}
+                    <div className={styles.text}>{this.props.children}</div>
+                </div>
+                <div className={styles.navigation}>
+                    {this.props.renderButton()}
+                    <ProgressStepContainer
+                        onStepClick={this.props.goToStep}
+                        totalSteps={this.props.totalSteps}
+                        currentStep={this.props.currentStep}
+                    />
+                </div>
+            </div>
         )
     }
 }
