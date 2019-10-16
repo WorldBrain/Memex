@@ -4,23 +4,24 @@ import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import { firebase } from 'src/util/firebase-app-initialized'
 import { SubscriptionOptions } from 'src/authentication/components/Subscription/SubscriptionOptions'
 import Button from 'src/popup/components/Button'
-
-export class UserInfo extends React.PureComponent {
-    state = { currentUser: null, subscribed: false }
+import { AuthenticatedUserWithClaims } from 'src/authentication/background/types'
+interface State {
+    currentUser: AuthenticatedUserWithClaims
+}
+export class UserInfo extends React.Component<any, State> {
+    state = { currentUser: null }
 
     componentDidMount = async () => {
-        const user = await auth.getUser()
-        const subscribed = await auth.hasValidPlan('pro')
-        this.setState({ currentUser: user, subscribed })
+        this.setState({ currentUser: await auth.getUser() })
 
         const authEvents = getRemoteEventEmitter('auth')
-        authEvents.addListener('onAuthStateChanged', async _user => {
-            const _subscribed = await auth.hasValidPlan('pro')
-            this.setState({
-                currentUser: _user,
-                subscribed: _subscribed,
-            })
+        authEvents.addListener('onAuthStateChanged', async user => {
+            this.setState({ currentUser: user })
         })
+    }
+
+    componentWillUnmount(): void {
+        // todo: remove event listener, but let's abstract this whole listening lifecycle to context or redux
     }
 
     handleLogout = () => {
@@ -28,24 +29,47 @@ export class UserInfo extends React.PureComponent {
     }
     handleRefresh = async () => {
         await auth.refresh()
-        // todo: implement check has access to feature 'backup'
     }
 
     render() {
+        const user: AuthenticatedUserWithClaims = this.state.currentUser
+        console.log('Render with user:', user)
         return (
             <div className={''}>
-                <pre style={{ whiteSpace: 'pre-wrap' }}>
-                    {JSON.stringify(this.state.currentUser)}
-                </pre>
+                {user != null && (
+                    <div>
+                        <div>User: {user.displayName}</div>
+                        <div>Email: {user.email}</div>
+                        <div>Email Verified: {user.emailVerified}</div>
+                        <div>UID: {user.uid}</div>
 
-                {this.state.subscribed && <span>Subscribed to pro plan:</span>}
-                <SubscriptionOptions user={this.state.currentUser} />
-                <Button className={'button'} onClick={this.handleLogout}>
-                    Logout
-                </Button>
-                <Button className={'button'} onClick={this.handleRefresh}>
-                    refresh
-                </Button>
+                        {user.claims != null &&
+                        user.claims.subscriptions != null ? (
+                            <div>Manage your subscription</div>
+                        ) : (
+                            <div> Upgrade </div>
+                        )}
+                        {user.claims != null &&
+                            user.claims.features != null && (
+                                <pre style={{ whiteSpace: 'pre-wrap' }}>
+                                    {JSON.stringify(user.claims.features)}
+                                </pre>
+                            )}
+
+                        <Button
+                            className={'button'}
+                            onClick={this.handleLogout}
+                        >
+                            Logout
+                        </Button>
+                        <Button
+                            className={'button'}
+                            onClick={this.handleRefresh}
+                        >
+                            refresh
+                        </Button>
+                    </div>
+                )}
             </div>
         )
     }

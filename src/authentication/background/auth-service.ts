@@ -24,9 +24,9 @@ export class AuthService implements AuthRemoteFunctionsInterface {
         this.auth.registerAuthEmitter(emitter)
     }
 
-    public getUser = () => this.auth.getCurrentUser()
-    private getUserClaims = () => this.auth.getUserClaims()
-    public refresh = () => this.auth.refresh()
+    public getUser = async () => this.auth.getCurrentUser()
+    private getUserClaims = async () => this.auth.getUserClaims()
+    public refresh = async () => this.auth.refresh()
 
     /**
      *  Checks that a client has a valid subscription (exists, is not expired)

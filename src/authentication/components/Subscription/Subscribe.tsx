@@ -13,7 +13,6 @@ interface State {
     currentUser: AuthenticatedUserWithClaims
 }
 
-// todo: visit this from the page / pop up from modal
 export class Subscribe extends React.PureComponent<Props, State> {
     state = { currentUser: null }
 
@@ -37,11 +36,16 @@ export class Subscribe extends React.PureComponent<Props, State> {
                     </div>
                 )}
 
+                {
+                    //todo: if currently subscribed, show to which
+                }
+
                 {this.state.currentUser != null && (
                     <div>
                         <SubscriptionOptions
                             user={this.state.currentUser}
                             onClose={this.props.onClose}
+                            subscriptionChanged={this.props.onClose}
                         />
                     </div>
                 )}

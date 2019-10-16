@@ -31,7 +31,7 @@ describe('Backup settings container logic', () => {
             analytics,
             localStorage,
             remoteFunction: fakeRemoteFunction({
-                isBackupAuthenticated: () => false,
+                isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
             }),
@@ -46,7 +46,7 @@ describe('Backup settings container logic', () => {
             { type: 'onBackupRequested' },
             {
                 remoteFunctions: {
-                    isBackupAuthenticated: () => false,
+                    isBackupBackendAuthenticated: () => false,
                     hasInitialBackup: () => false,
                     getBackupInfo: () => null,
                     getBackendLocation: () => undefined,
@@ -152,7 +152,7 @@ describe('Backup settings container logic', () => {
             analytics,
             localStorage,
             remoteFunction: fakeRemoteFunction({
-                isBackupAuthenticated: () => true,
+                isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
             }),
@@ -191,7 +191,7 @@ describe('Backup settings container logic', () => {
             analytics,
             localStorage,
             remoteFunction: fakeRemoteFunction({
-                isBackupAuthenticated: () => false,
+                isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
             }),
@@ -202,7 +202,7 @@ describe('Backup settings container logic', () => {
             { type: 'onBackupRequested' },
             {
                 remoteFunctions: {
-                    isBackupAuthenticated: () => false,
+                    isBackupBackendAuthenticated: () => false,
                     hasInitialBackup: () => false,
                     getBackupInfo: () => null,
                     getBackendLocation: () => undefined,
@@ -285,7 +285,7 @@ describe('Backup settings container logic', () => {
             analytics,
             localStorage,
             remoteFunction: fakeRemoteFunction({
-                isBackupAuthenticated: () => false,
+                isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
             }),
@@ -329,7 +329,7 @@ describe('Backup settings container logic', () => {
             analytics,
             localStorage,
             remoteFunction: fakeRemoteFunction({
-                isBackupAuthenticated: () => true,
+                isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
             }),
@@ -353,7 +353,7 @@ describe('Backup settings container logic', () => {
             analytics,
             localStorage,
             remoteFunction: fakeRemoteFunction({
-                isBackupAuthenticated: () => false,
+                isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
             }),
@@ -397,7 +397,7 @@ describe('Backup settings container logic', () => {
             analytics,
             localStorage,
             remoteFunction: fakeRemoteFunction({
-                isBackupAuthenticated: () => false,
+                isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
             }),
@@ -421,7 +421,7 @@ describe('Backup settings container logic', () => {
             analytics,
             localStorage,
             remoteFunction: fakeRemoteFunction({
-                isBackupAuthenticated: () => true,
+                isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
             }),
@@ -463,7 +463,7 @@ describe('Backup settings container logic', () => {
             analytics,
             localStorage,
             remoteFunction: fakeRemoteFunction({
-                isBackupAuthenticated: () => false,
+                isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
             }),

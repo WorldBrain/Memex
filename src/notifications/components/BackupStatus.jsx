@@ -8,9 +8,7 @@ const styles = require('./BackupStatus.css')
 
 const BackupStatus = props => {
     return (
-        <div
-            className={styles.TopContainer}
-        >
+        <div className={styles.TopContainer}>
             <div
                 className={styles.container}
                 onMouseEnter={props.onMouseEnter}
@@ -20,9 +18,19 @@ const BackupStatus = props => {
                     <div className={styles.header}>Backup Status</div>
                     <div className={styles.IconBox}>
                         {props.backupState.state === 'success' ? (
-                            <span className={classNames(styles.successIcon, styles.icon)} />
+                            <span
+                                className={classNames(
+                                    styles.successIcon,
+                                    styles.icon,
+                                )}
+                            />
                         ) : (
-                            <span className={classNames(styles.failIcon, styles.icon)} />
+                            <span
+                                className={classNames(
+                                    styles.failIcon,
+                                    styles.icon,
+                                )}
+                            />
                         )}
                     </div>
                 </div>
@@ -98,66 +106,6 @@ const BackupStatus = props => {
                                         automaticBackup={props.automaticBackup}
                                         message={`Automatic backups every 15 minutes. Worry-free.`}
                                     >
-                                        <div className={styles.paymentOptions}>
-                                            <div>
-                                                <label>
-                                                    <input
-                                                        type="radio"
-                                                        checked={
-                                                            props.billingPeriod ===
-                                                            'yearly'
-                                                        }
-                                                        onChange={() =>
-                                                            props.onBillingPeriodChange(
-                                                                'yearly',
-                                                            )
-                                                        }
-                                                    />
-                                                    <span
-                                                        className={styles.price}
-                                                    >
-                                                        12 &euro;
-                                                    </span>
-                                                    <span
-                                                        className={
-                                                            styles.period
-                                                        }
-                                                    >
-                                                        {' '}
-                                                        yearly
-                                                    </span>
-                                                </label>
-                                            </div>
-                                            <div>
-                                                <label>
-                                                    <input
-                                                        type="radio"
-                                                        checked={
-                                                            props.billingPeriod ===
-                                                            'monthly'
-                                                        }
-                                                        onChange={() =>
-                                                            props.onBillingPeriodChange(
-                                                                'monthly',
-                                                            )
-                                                        }
-                                                    />
-                                                    <span
-                                                        className={styles.price}
-                                                    >
-                                                        1,5 &euro;
-                                                    </span>
-                                                    <span
-                                                        className={
-                                                            styles.period
-                                                        }
-                                                    >
-                                                        {' '}
-                                                        monthly
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </div>
                                         <div className={styles.ActionButton}>
                                             <ActionButton
                                                 handleClick={() =>
@@ -189,8 +137,6 @@ BackupStatus.propTypes = {
     backupState: PropTypes.object,
     automaticBackup: PropTypes.bool,
     onAutomaticBackupSelect: PropTypes.func,
-    billingPeriod: PropTypes.string,
-    onBillingPeriodChange: PropTypes.func,
     paymentUrl: PropTypes.string,
 }
 

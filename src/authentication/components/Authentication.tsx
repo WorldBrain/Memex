@@ -5,7 +5,7 @@ import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import { auth } from 'src/util/remote-functions-background'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import { UserInfo } from 'src/authentication/components/UserInfo'
-
+const styles = require('./styles.css')
 interface Props {
     currentUser: any
     setUser: any
@@ -30,7 +30,7 @@ class Authentication extends React.PureComponent<Props, State> {
 
     render() {
         return (
-            <div className={''}>
+            <div className={styles.authContainer}>
                 {this.state.currentUser == null && <SignInScreen />}
                 {this.state.currentUser != null && <UserInfo />}
             </div>

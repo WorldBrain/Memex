@@ -15,6 +15,7 @@ export const subscriptionConfig = {
 interface Props {
     user: AuthenticatedUser | null
     onClose?: () => void
+    subscriptionChanged: () => void
 }
 export class SubscriptionOptions extends React.PureComponent<Props> {
     chargebeeInstance: any
@@ -42,13 +43,25 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
 
     openPortal = async (planId = null) => {
         this._initChargebee()
-        const portalEvents = await this.userSubscription.manageUserSubscription(
+        const portalEvents = await this.userSubscription.checkoutUserSubscription(
             {
                 planId: planId || subscriptionConfig.defaultPlan,
             },
         )
 
         portalEvents.addListener('closed', () => this.props.onClose())
+        portalEvents.addListener('changed', () => {
+            this.props.subscriptionChanged()
+            this.props.onClose()
+        })
+    }
+
+    openCheckoutBackup = async () => {
+        return this.openCheckout('backup_monthly')
+    }
+
+    openCheckoutBackupSync = async () => {
+        return this.openCheckout('backupsync_monthly')
     }
 
     openCheckout = async (planId = null) => {
@@ -59,6 +72,10 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
             },
         )
         subscriptionEvents.addListener('closed', () => this.props.onClose())
+        subscriptionEvents.addListener('changed', () => {
+            this.props.subscriptionChanged()
+            this.props.onClose()
+        })
     }
 
     render() {
@@ -72,15 +89,34 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
                 {this.subscribed !== true ? (
                     <div style={styles.subscriptionOptionsContainer}>
                         <SubscriptionPriceBox
-                            onClick={_ => this.openCheckout()}
-                        >
-                            {'Pro Monthly'}
-                        </SubscriptionPriceBox>
+                            onClick={undefined}
+                            title={'Free'}
+                            infoItems={[
+                                'All offline features',
+                                'Manual Backups',
+                                'To your favorite cloud',
+                                'No account necessary',
+                            ]}
+                        />
                         <SubscriptionPriceBox
-                            onClick={_ => this.openCheckout()}
-                        >
-                            {'Pro Yearly'}
-                        </SubscriptionPriceBox>
+                            onClick={_ => this.openCheckoutBackup()}
+                            title={'Auto Backups'}
+                            infoItems={[
+                                "Everything in 'Free'",
+                                'Automatic Backups every 15 min',
+                                'To your favorite cloud',
+                                'No account necessary',
+                            ]}
+                        />
+                        <SubscriptionPriceBox
+                            onClick={_ => this.openCheckoutBackupSync()}
+                            title={'Auto Backup and Mobile Sync'}
+                            infoItems={[
+                                'Everything in Free & Auto Backups',
+                                'Sync with mobile phone',
+                                'IOS and Android App',
+                            ]}
+                        />
                     </div>
                 ) : (
                     <Button onClick={_ => this.openPortal()}>

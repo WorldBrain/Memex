@@ -35,7 +35,6 @@ export class BackupBackgroundModule {
     )
 
     uiTabId?: any
-    automaticBackupCheck?: Promise<boolean>
     automaticBackupTimeout?: any
     automaticBackupEnabled?: boolean
     scheduledAutomaticBackupTimestamp?: number
@@ -146,58 +145,43 @@ export class BackupBackgroundModule {
                     this.backendLocation = await this.backendSelect.restoreBackendLocation()
                     return this.backendLocation
                 },
-                isBackupAuthenticated: async () => {
-                    let backend = null
-                    /* Check if restoreProcedure's backend is present. 
+                isBackupBackendAuthenticated: async () => {
+                    /* Check if restoreProcedure's backend is present.
                         Restore's backend is only present during restore. */
-                    backend = this.restoreProcedure
-                        ? this.restoreProcedure.backend
-                        : this.backend
-
-                    return backend ? backend.isAuthenticated() : false
-                },
-                maybeCheckAutomaticBakupEnabled: async () => {
                     if (
-                        !!(await this.lastBackupStorage.getLastBackupTime()) &&
-                        localStorage.getItem('wp.user-id') &&
-                        localStorage.getItem('backup.has-subscription') &&
-                        localStorage.getItem('nextBackup') === null
+                        this.restoreProcedure &&
+                        this.restoreProcedure.backend != null
                     ) {
-                        await this.checkAutomaticBakupEnabled()
-                        await this.maybeScheduleAutomaticBackup()
-                    }
-                },
-                checkAutomaticBakupEnabled: async () => {
-                    // The only place this is called right now is post-purchase.
-                    // Move to more suitable place once this changes.
-                    const override =
-                        process.env.AUTOMATIC_BACKUP_PAYMENT_SUCCESS
-                    if (override && override.length) {
-                        console.log(
-                            'Automatic backup payment override',
-                            override,
-                        )
-                        this.automaticBackupCheck = Promise.resolve(
-                            override === 'true',
-                        )
-                        // Send a notification stating that the auto backup has expired
-                        this.notifications.dispatchNotification(
-                            'auto_backup_expired',
-                        )
-                        // Set the message of backupStatus stating the expiration of auto backup
-                        await setLocalStorage('backup-status', {
-                            state: 'fail',
-                            backupId: 'auto_backup_expired',
-                        })
+                        return this.restoreProcedure.backend.isAuthenticated()
+                    } else if (this.backend != null) {
+                        return this.backend.isAuthenticated()
                     } else {
-                        await this.checkAutomaticBakupEnabled()
+                        return false
                     }
+                },
+                maybeCheckAutomaticBackupEnabled: async () => {
+                    // TODO: (ch) What is this used for?
 
-                    return this.automaticBackupCheck
+                    // TODO: (ch) Auth-Memex-Backup
+                    const hasFeatureAutoBackup = true
+
+                    // TODO: (ch) document logic here
+                    const lastBackupTime = !!(await this.lastBackupStorage.getLastBackupTime())
+                    const nextBackup = localStorage.getItem('nextBackup')
+                    if (
+                        hasFeatureAutoBackup &&
+                        lastBackupTime &&
+                        nextBackup === null
+                    ) {
+                        await this.checkAutomaticBackupEnabled()
+                        await this.scheduleAutomaticBackupIfEnabled()
+                    }
                 },
-                isAutomaticBackupEnabled: async () => {
-                    return this.isAutomaticBackupEnabled()
+                checkAutomaticBackupEnabled: async () => {
+                    // TODO: (ch) What is this used for?
                 },
+                isAutomaticBackupEnabled: this.isAutomaticBackupEnabled,
+                isAutomaticBackupAllowed: this.isAutomaticBackupAllowed,
                 sendNotification: async (id: string) => {
                     const errorId = await this.backend.sendNotificationOnFailure(
                         id,
@@ -217,9 +201,6 @@ export class BackupBackgroundModule {
                 },
                 forgetAllChanges: async () => {
                     return this.forgetAllChanges()
-                },
-                storeWordpressUserId: (info, userId) => {
-                    localStorage.setItem('wp.user-id', userId)
                 },
                 setupRequestInterceptor: () => {
                     return this.setupRequestInterceptor()
@@ -279,7 +260,8 @@ export class BackupBackgroundModule {
             handleLoginRedirectedBack: backend
                 ? backend.handleLoginRedirectedBack.bind(backend)
                 : null,
-            checkAutomaticBakupEnabled: () => this.checkAutomaticBakupEnabled(),
+            checkAutomaticBackupEnabled: () =>
+                this.checkAutomaticBackupEnabled(),
             memexCloudOrigin: _getMemexCloudOrigin(),
         })
     }
@@ -293,12 +275,14 @@ export class BackupBackgroundModule {
         }
 
         this.storage.startRecordingChanges()
-        this.maybeScheduleAutomaticBackup()
+        this.scheduleAutomaticBackupIfEnabled()
     }
 
     isAutomaticBackupEnabled({ forceCheck = false } = {}) {
-        if (!forceCheck && this.automaticBackupCheck) {
-            return this.automaticBackupCheck
+        // const check = this.checkAutomaticBackupEnabled()
+        const check = false
+        if (!forceCheck && check) {
+            return check
         }
 
         const override = process.env.AUTOMATIC_BACKUP
@@ -311,46 +295,26 @@ export class BackupBackgroundModule {
             return false
         }
 
-        return this.checkAutomaticBakupEnabled()
+        return this.checkAutomaticBackupEnabled()
     }
 
-    checkAutomaticBakupEnabled() {
-        this.automaticBackupCheck = (async () => {
-            const wpUserId = localStorage.getItem('wp.user-id')
-            if (!wpUserId) {
-                return false
-            }
-
-            let hasSubscription
-            let endDate
-            try {
-                const subscriptionUrl = `${_getMemexCloudOrigin()}/subscriptions/automatic-backup?user=${wpUserId}`
-                const response = await (await fetch(subscriptionUrl)).json()
-                hasSubscription = response.active
-                endDate = response.endDate
-            } catch (e) {
-                return true
-            }
-
-            localStorage.setItem('backup.has-subscription', hasSubscription)
-            if (endDate !== undefined) {
-                localStorage.setItem('backup.subscription-end-date', endDate)
-            }
-
-            return hasSubscription
-        })()
-
-        return this.automaticBackupCheck
+    async isAutomaticBackupAllowed() {
+        // return auth.isAuthorizedForFeature(UserFeatures.BACKUP)
+        return true
     }
 
-    async maybeScheduleAutomaticBackup() {
+    async checkAutomaticBackupEnabled() {
+        // todo: check the feature setting?
+        return true
+    }
+
+    async scheduleAutomaticBackupIfEnabled() {
         if (await this.isAutomaticBackupEnabled()) {
             this.scheduleAutomaticBackup()
         }
     }
 
     scheduleAutomaticBackup() {
-        this.automaticBackupEnabled = true
         if (this.automaticBackupTimeout || this.backupProcedure.running) {
             return
         }
@@ -399,7 +363,7 @@ export class BackupBackgroundModule {
         this.backupProcedure.run()
 
         const always = () => {
-            this.maybeScheduleAutomaticBackup()
+            this.scheduleAutomaticBackupIfEnabled()
         }
         this.backupProcedure.events.on('success', async () => {
             this.lastBackupStorage.storeLastBackupFinishTime(new Date())
@@ -420,7 +384,7 @@ export class BackupBackgroundModule {
         this.restoreProcedure.events.once('success', async () => {
             // await this.lastBackupStorage.storeLastBackupTime(new Date())
             await this.startRecordingChangesIfNeeded()
-            await this.maybeScheduleAutomaticBackup()
+            await this.scheduleAutomaticBackupIfEnabled()
             this.resetRestoreProcedure()
         })
 
