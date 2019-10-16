@@ -286,7 +286,7 @@ export default class Page extends AbstractModel
     }
 
     async delete() {
-        return this.db.backend.executeBatch([
+        return this.db.operation('executeBatch', [
             {
                 collection: 'visits',
                 operation: 'deleteObjects',
