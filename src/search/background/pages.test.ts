@@ -156,6 +156,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 displayTime: DATA.VISIT_3,
                             }
 
+                            for (const results of [
+                                searchResultsA,
+                                searchResultsB,
+                                searchResultsC,
+                            ]) {
+                                for (const doc of results.docs) {
+                                    expect(doc.title).toBeFalsy()
+                                    delete doc.title
+                                }
+                            }
+
                             expect(searchResultsA).toEqual({
                                 docs: [
                                     expectedPage2ResultVisit3,

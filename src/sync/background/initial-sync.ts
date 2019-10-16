@@ -148,10 +148,10 @@ export default class InitialSync {
                 return executePromise
             }
             executePromise = (async () => {
-                fastSync.events.emit = ((eventName: string, event: any) => {
-                    console.log('sync event', eventName, event)
-                    return true
-                }) as any
+                // fastSync.events.emit = ((eventName: string, event: any) => {
+                //     console.log('sync event', eventName, event)
+                //     return true
+                // }) as any
 
                 fastSync.events.emit('connecting', {})
                 await signalChannel.connect()

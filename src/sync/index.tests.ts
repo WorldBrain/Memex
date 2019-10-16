@@ -145,7 +145,10 @@ async function runSyncBackgroundTest(
 
         if (stepIndex > 0) {
             if (step.debug) {
-                debug(`SYNC before step ${stepIndex}, device`, currentDeviceId)
+                debug(
+                    `SYNC before step ${stepIndex}, device`,
+                    getReadableDeviceIndex(currentDeviceIndex),
+                )
             }
             await sync(currentDeviceIndex, { debug: step.debug })
         }
@@ -153,7 +156,7 @@ async function runSyncBackgroundTest(
             if (step.debug) {
                 debug(
                     `SYNC postCheck of previous step before step ${stepIndex}, device`,
-                    currentDeviceId,
+                    getReadableDeviceIndex(currentDeviceIndex),
                 )
             }
             await lastStep.postCheck({ setup: currentSetup })
@@ -168,7 +171,10 @@ async function runSyncBackgroundTest(
 
         if (step.preCheck) {
             if (step.debug) {
-                debug(`SYNC after step ${stepIndex}, device`, currentDeviceId)
+                debug(
+                    `SYNC after step ${stepIndex}, device`,
+                    getReadableDeviceIndex(currentDeviceIndex),
+                )
             }
             await step.preCheck({
                 setup: currentSetup,
@@ -203,7 +209,7 @@ async function runSyncBackgroundTest(
             if (step.debug) {
                 debug(
                     `SYNC postCheck after step ${stepIndex}, device`,
-                    currentDeviceId,
+                    getReadableDeviceIndex(currentDeviceIndex),
                 )
             }
             await step.postCheck({
@@ -212,7 +218,10 @@ async function runSyncBackgroundTest(
         }
 
         if (step.debug) {
-            debug(`SYNC after step ${stepIndex}, device`, currentDeviceId)
+            debug(
+                `SYNC after step ${stepIndex}, device`,
+                getReadableDeviceIndex(currentDeviceIndex),
+            )
         }
         await sync(currentDeviceIndex, { debug: step.debug })
 
@@ -228,37 +237,28 @@ async function runSyncBackgroundTest(
         if (lastStep!.debug) {
             debug(
                 `SYNC before last postCheck, device`,
-                deviceIds[unsyncedDeviceIndex],
+                getReadableDeviceIndex(unsyncedDeviceIndex),
             )
         }
         await sync(unsyncedDeviceIndex, { debug: lastStep!.debug })
         if (lastStep!.debug) {
             debug(
                 `SYNC completed before last postCheck, device`,
-                deviceIds[unsyncedDeviceIndex],
+                getReadableDeviceIndex(unsyncedDeviceIndex),
             )
         }
         await lastStep!.postCheck({ setup: setups[unsyncedDeviceIndex] })
         if (lastStep!.debug) {
             debug(
                 `SYNC last postCheck done, device`,
-                deviceIds[unsyncedDeviceIndex],
+                getReadableDeviceIndex(unsyncedDeviceIndex),
             )
         }
     }
 }
 
 const getReadablePattern = (pattern: number[]) =>
-    pattern
-        .map(
-            index =>
-                ({
-                    0: 'A',
-                    1: 'B',
-                    2: 'C',
-                }[index]),
-        )
-        .join('')
+    pattern.map(getReadableDeviceIndex).join('')
 
 const getReadableDeviceIndex = (index: number) =>
     ({
