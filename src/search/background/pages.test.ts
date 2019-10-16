@@ -312,7 +312,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             await searchModule(setup).searchIndex.addPageTerms({
                                 pageDoc: {
                                     url: DATA.PAGE_1.fullUrl,
-                                    content: { fullText: 'some new text' },
+                                    content: {
+                                        fullText: 'some new updated text',
+                                    },
                                 },
                             })
                         },
@@ -320,7 +322,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             pages: (): StorageCollectionDiff => ({
                                 [DATA.PAGE_1.url]: {
                                     type: 'modify',
-                                    updates: { terms: [] },
+                                    updates: {
+                                        terms: {
+                                            '0': 'updated',
+                                            '1': 'text',
+                                            '2': 'dummy',
+                                        },
+                                        text: 'some new updated text',
+                                    },
                                 },
                             }),
                         },
@@ -332,7 +341,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 })
                             expect(page.terms).toEqual(
                                 expect.arrayContaining([
-                                    'new',
                                     'text',
                                     'dummy',
                                     'test',
