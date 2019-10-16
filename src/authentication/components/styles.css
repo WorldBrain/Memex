@@ -1,0 +1,11 @@
+.authContainer {
+    height: 100%;
+    align-items: center;
+    align-content: center;
+    display: flex;
+    width: 100%;
+}
+
+.flex {
+    flex: 1;
+}

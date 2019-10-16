@@ -36,6 +36,13 @@
     cursor: default;
 }
 
+.popupLarge {
+    composes: popup;
+    width: 70%;
+    height: 80%;
+    overflow-y: scroll;
+}
+
 .close {
     composes: nakedSquareButton from 'src/common-ui/elements.css';
     composes: removeIcon from 'src/common-ui/icons.css';

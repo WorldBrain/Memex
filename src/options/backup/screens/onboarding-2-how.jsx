@@ -5,9 +5,8 @@ import { PrimaryButton } from '../components/primary-button'
 import Styles from '../styles.css'
 
 export default class OnboardingHowContainer extends React.Component {
-    state = { mode: null, billingPeriod: null }
+    state = { mode: null }
     render() {
-        const isAutomatic = this.state.mode === 'automatic'
         return (
             <div>
                 <p className={Styles.header2}>
@@ -17,9 +16,7 @@ export default class OnboardingHowContainer extends React.Component {
                 <OnboardingBackupMode
                     className={Styles.selectionlist}
                     onModeChange={mode => this.setState({ mode })}
-                    onBillingPeriodChange={billingPeriod =>
-                        this.setState({ billingPeriod })
-                    }
+                    launchSubscriptionFlow={this.props.onSubscribeRequested}
                 />
                 {this.state.mode === 'manual' && (
                     <PrimaryButton
@@ -28,19 +25,17 @@ export default class OnboardingHowContainer extends React.Component {
                         Calculate size
                     </PrimaryButton>
                 )}
-                {isAutomatic && (
+                {this.state.mode === 'automatic' && (
                     <PrimaryButton
-                        disabled={!this.state.billingPeriod}
+                        disabled
                         onClick={() =>
-                            this.props.onChoice({
-                                type: 'automatic',
-                                billingPeriod: this.state.billingPeriod,
-                            })
+                            this.props.onChoice({ type: 'automatic' })
                         }
                     >
-                        Pay Now
+                        Continue
                     </PrimaryButton>
                 )}
+
                 <span
                     className={Styles.back}
                     onClick={this.props.onBackRequested}
@@ -55,4 +50,5 @@ export default class OnboardingHowContainer extends React.Component {
 OnboardingHowContainer.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onBackRequested: PropTypes.func.isRequired,
+    onSubscribeRequested: PropTypes.func.isRequired,
 }

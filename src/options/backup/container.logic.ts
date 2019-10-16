@@ -1,10 +1,8 @@
 import React from 'react'
 const mapValues = require('lodash/mapValues')
-import {
-    redirectToGDriveLogin,
-    redirectToAutomaticBackupPurchase,
-} from 'src/options/backup/utils'
+import { redirectToGDriveLogin } from 'src/options/backup/utils'
 import { Analytics } from 'src/analytics/types'
+import { OPTIONS_URL } from 'src/constants'
 
 export async function getInitialState({
     analytics,
@@ -15,7 +13,9 @@ export async function getInitialState({
     localStorage: any
     remoteFunction: any
 }) {
-    const isAuthenticated = await remoteFunction('isBackupAuthenticated')()
+    const isAuthenticated = await remoteFunction(
+        'isBackupBackendAuthenticated',
+    )()
     return {
         isAuthenticated,
         screen: await getStartScreen({
@@ -58,7 +58,7 @@ export async function getStartScreen({
     if (localStorage.getItem('backup.onboarding')) {
         if (localStorage.getItem('backup.onboarding.payment')) {
             localStorage.removeItem('backup.onboarding.payment')
-            if (await remoteFunction('checkAutomaticBakupEnabled')()) {
+            if (await remoteFunction('checkAutomaticBackupEnabled')()) {
                 return 'onboarding-size'
             } else {
                 return 'onboarding-how'
@@ -143,8 +143,9 @@ export async function processEvent({
             onRestoreRequested: () => {
                 return { screen: 'restore-where' }
             },
-            onPaymentRequested: () => {
+            onSubscribeRequested: () => {
                 const { choice } = event
+
                 localStorage.setItem('backup.onboarding.authenticating', true)
                 return {
                     redirect: { to: 'automatic-backup-purchase', choice },
@@ -307,8 +308,10 @@ export const getScreenHandlers = ({
 export function doRedirect(redirect) {
     const redirects = {
         'gdrive-login': () => redirectToGDriveLogin(),
-        'automatic-backup-purchase': () =>
-            redirectToAutomaticBackupPurchase(redirect.choice.billingPeriod),
+        'automatic-backup-purchase': () => {
+            // TODO: (ch) should probably pop up a dialog, and use a redirect function, but for now we'll just navigate
+            window.location.href = `${OPTIONS_URL}#/subscribe`
+        },
     }
     return redirects[redirect.to]()
 }

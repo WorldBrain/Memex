@@ -43,7 +43,12 @@ export class MockAuthImplementation implements AuthInterface {
     static newUser = () => new MockAuthImplementation()
 
     async getCurrentUser() {
-        return { uid: 'test', email: 'test@test.com', displayName: 'Test User' }
+        return {
+            uid: 'test',
+            email: 'test@test.com',
+            emailVerified: false,
+            displayName: 'Test User',
+        }
     }
 
     async getUserClaims() {

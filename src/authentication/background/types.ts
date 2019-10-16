@@ -3,6 +3,7 @@ import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 export interface AuthenticatedUser {
     displayName: string | null
     email: string | null
+    emailVerified: boolean
     uid: string
 }
 
@@ -17,6 +18,7 @@ export interface AuthInterface {
     registerAuthEmitter(emitter: RemoteEventEmitter<AuthEvents>): void
 }
 
+// TODO: (ch) this should be imported from the firebase functions package?
 export enum UserFeatures {
     BACKUP = 'backup',
     SYNC = 'sync',
@@ -57,5 +59,5 @@ export interface AuthRemoteFunctionsInterface {
 }
 
 export interface AuthEvents {
-    onAuthStateChanged: (user: AuthenticatedUser) => void
+    onAuthStateChanged: (user: AuthenticatedUserWithClaims) => void
 }

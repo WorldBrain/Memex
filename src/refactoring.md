@@ -250,16 +250,15 @@ makeRemotelyCallable(
     hasInitialBackup,
     setBackendLocation,
     getBackendLocation,
-    isBackupAuthenticated,
+    isBackupBackendAuthenticated,
     maybeCheckAutomaticBakupEnabled,
-    checkAutomaticBakupEnabled,
+    checkAutomaticBackupEnabled,
     isAutomaticBackupEnabled,
     sendNotification,
     estimateInitialBackupSize,
     setBackupBlobs,
     getBackupTimes,
     forgetAllChanges,
-    storeWordpressUserId,
     setupRequestInterceptor,
 )
 ```

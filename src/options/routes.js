@@ -6,7 +6,7 @@ import Statistics from './statistics'
 import Settings from './settings'
 import Overview from '../overview'
 import Authentication from '../authentication/components/Authentication'
-import { Subscribe } from '../authentication/components/Subscription/Subscribe'
+import { SubscribeModal } from '../authentication/components/Subscription/SubscribeModal'
 
 export default [
     {
@@ -22,16 +22,11 @@ export default [
         icon: 'search',
         useOwnLayout: true,
     },
-    {
-        name: 'User Account',
-        pathname: '/auth',
-        component: Authentication,
-        hideFromSidebar: false, // TODO: Remove this from the sidebar?
-    },
+
     {
         name: 'Subscribe',
         pathname: '/subscribe',
-        component: Subscribe,
+        component: SubscribeModal,
         hideFromSidebar: true,
     },
     {
@@ -82,5 +77,12 @@ export default [
             'https://www.notion.so/worldbrain/Tutorials-fa44dcbf41654ceb910c5952b6097f8d',
         isExternal: true,
         icon: 'info',
+    },
+    {
+        name: 'User Account',
+        pathname: '/auth',
+        icon: 'settings',
+        component: Authentication,
+        hideFromSidebar: false,
     },
 ]

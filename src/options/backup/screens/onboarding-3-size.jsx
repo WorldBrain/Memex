@@ -34,7 +34,9 @@ export default class OnboardingSizeContainer extends React.Component {
             console.error(e)
         }
         this.setState({
-            isAuthenticated: await remoteFunction('isBackupAuthenticated')(),
+            isAuthenticated: await remoteFunction(
+                'isBackupBackendAuthenticated',
+            )(),
             backendLocation: await remoteFunction('getBackendLocation')(),
         })
     }

@@ -11,7 +11,6 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 //     redirectToAutomaticBackupCancellation,
 // } from '../utils'
 // import { ToggleSwitch } from 'src/common-ui/components'
-import AutomaticPricing from '../components/automatic-pricing'
 import SmallButton from '../components/small-button'
 import LoadingBlocker from '../components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
@@ -44,7 +43,8 @@ export default class OverviewContainer extends React.Component<Props> {
     }
 
     async componentDidMount() {
-        await remoteFunction('maybeCheckAutomaticBakupEnabled')()
+        // todo: (ch): remove?
+        // await remoteFunction('maybeCheckAutomaticBakupEnabled')()
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()
@@ -81,15 +81,16 @@ export default class OverviewContainer extends React.Component<Props> {
             <div>
                 {this.state.showWarning && (
                     <div className={styles.showWarning}>
-                        <span className={styles.WarningIcon}/>
+                        <span className={styles.WarningIcon} />
                         <span className={styles.showWarningText}>
                             The first backup must be done manually. Follow{' '}
-                            <span 
-                                className={styles.underline} 
+                            <span
+                                className={styles.underline}
                                 onClick={this.props.onBackupRequested}
                             >
-                            the wizard
-                            </span>{' '}to get started.
+                                the wizard
+                            </span>{' '}
+                            to get started.
                         </span>
                     </div>
                 )}
@@ -174,28 +175,20 @@ export default class OverviewContainer extends React.Component<Props> {
                                     ? 'Automatic Backups Enabled'
                                     : 'Enable Automatic Backups'}
                             </span>
-                            <SmallButton
-                                extraClass={localStyles.right}
-                                onClick={() => {
-                                    if (!this.state.automaticBackupEnabled) {
-                                        this.setState({ showPricing: true })
-                                    } else {
-                                        window.open(
-                                            'https://worldbrain.io/community/view-subscription/',
-                                            '_blank',
-                                        )
-                                    }
-                                }}
-                                color={
-                                    this.state.automaticBackupEnabled
-                                        ? 'red'
-                                        : 'darkblue'
-                                }
-                            >
-                                {this.state.automaticBackupEnabled
-                                    ? 'Cancel'
-                                    : 'Upgrade'}
-                            </SmallButton>
+                            // TODO: (ch) this doesn't seem useful, maybe this
+                            combination isn't used, only use one module, //
+                            currently in the onboarding
+                            {!this.state.automaticBackupEnabled && (
+                                <SmallButton
+                                    extraClass={localStyles.right}
+                                    onClick={() => {
+                                        // todo: open upgrade flow with redirect back here
+                                    }}
+                                    color={'darkblue'}
+                                >
+                                    {'Upgrade'}
+                                </SmallButton>
+                            )}
                             <span
                                 className={classNames(
                                     styles.subname,
@@ -205,46 +198,6 @@ export default class OverviewContainer extends React.Component<Props> {
                                 Worry-free. Automatically backs up your data
                                 every 15 minutes.
                             </span>
-                            {this.state.showPricing ? (
-                                <div className={localStyles.pricing}>
-                                    <AutomaticPricing
-                                        mode="automatic"
-                                        billingPeriod={this.state.billingPeriod}
-                                        onBillingPeriodChange={billingPeriod =>
-                                            this.setState({ billingPeriod })
-                                        }
-                                    />
-                                    {this.state.showPricing &&
-                                    this.state.billingPeriod ? (
-                                        <div className={localStyles.payConfirm}>
-                                            <SmallButton
-                                                color="green"
-                                                onClick={() =>
-                                                    this.props.onPaymentRequested(
-                                                        this.state
-                                                            .billingPeriod,
-                                                    )
-                                                }
-                                            >
-                                                Pay now
-                                            </SmallButton>
-                                            <span
-                                                className={
-                                                    localStyles.cancelButton
-                                                }
-                                                onClick={() =>
-                                                    this.setState({
-                                                        showPricing: false,
-                                                    })
-                                                }
-                                            >
-                                                Cancel
-                                            </span>
-                                        </div>
-                                    ) : null}
-                                </div>
-                            ) : null}
-
                             <p className={styles.optionLine}>
                                 <span className={styles.name}>
                                     Backup Location
