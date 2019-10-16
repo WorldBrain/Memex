@@ -5,7 +5,7 @@ import {
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
-import { LoggedStorageOperation } from 'src/tests/storage-operation-logger';
+import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
 
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
@@ -131,7 +131,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             expectedStorageChanges: {
                                 pageListEntries: (): StorageCollectionDiff => ({
                                     [listEntry &&
-                                        `[${listId},"${listEntry.pageUrl}"]`]: {
+                                    `[${listId},"${listEntry.pageUrl}"]`]: {
                                         type: 'create',
                                         object: {
                                             listId,
@@ -141,26 +141,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     },
                                 }),
-                                pages: (): StorageCollectionDiff => ({
-                                    'bla.com': {
-                                        type: 'create',
-                                        object: {
-                                            canonicalUrl: undefined,
-                                            domain: 'bla.com',
-                                            fullTitle: undefined,
-                                            fullUrl: 'http://www.bla.com/',
-                                            hostname: 'bla.com',
-                                            screenshot: undefined,
-                                            terms: [],
-                                            text: undefined,
-                                            titleTerms: [],
-                                            url: 'bla.com',
-                                            urlTerms: [],
-                                        },
-                                    },
-                                }),
-                                visits: (): StorageCollectionDiff =>
-                                    expect.any(Object),
                             },
                         },
                         {
@@ -223,7 +203,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             hasBookmark: false,
                                             screenshot: undefined,
                                             tags: [],
-                                            title: undefined,
+                                            title: 'bla.com title',
                                             url: 'bla.com',
                                         },
                                     ],

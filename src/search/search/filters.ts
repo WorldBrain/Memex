@@ -140,7 +140,7 @@ const excDomainSearch = (getDb: DBGet) => ({
 const listSearch = (getDb: DBGet) => async ({
     lists,
 }: Partial<SearchParams>) => {
-    if (!lists || !lists.length || !lists[0].length) {
+    if (!lists || !lists.length) {
         return undefined
     }
 
