@@ -309,6 +309,85 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
             active: false,
         })
     })
+
+    it('should not include passive data in initial Sync if not desired', async (setup: TestSetup) => {
+        const {
+            setups,
+            customLists,
+            syncModule,
+            searchModule,
+            forEachSetup,
+        } = setup
+        await forEachSetup(s => syncModule(s).setup())
+
+        // Initial data
+
+        await searchModule(setups[0]).searchIndex.addPage({
+            pageDoc: {
+                url: 'http://www.bla2.com/',
+                content: {
+                    fullText: 'home page content',
+                    title: 'bla2.com title',
+                },
+            },
+            visits: [],
+        })
+        const listId = await customLists(setups[0]).createCustomList({
+            name: 'My list',
+        })
+        await customLists(setups[0]).insertPageToList({
+            id: listId,
+            url: 'http://bla.com/',
+        })
+        await searchModule(setups[0]).searchIndex.addPage({
+            pageDoc: {
+                url: 'http://www.bla.com/',
+                content: {
+                    fullText: 'home page content',
+                    title: 'bla.com title',
+                },
+            },
+            visits: [],
+        })
+
+        // Initial Sync
+
+        const { initialMessage } = await syncModule(
+            setups[0],
+        ).remoteFunctions.requestInitialSync({ excludePassiveData: true })
+        await syncModule(setups[1]).remoteFunctions.answerInitialSync({
+            initialMessage,
+        })
+
+        await forEachSetup(s => syncModule(s).initialSync.waitForInitialSync())
+
+        // Check
+        expect(
+            await setups[1].storageManager
+                .collection('customLists')
+                .findObjects({}),
+        ).toEqual([
+            expect.objectContaining({
+                name: 'My list',
+            }),
+        ])
+        expect(
+            await setups[1].storageManager
+                .collection('pageListEntries')
+                .findObjects({}),
+        ).toEqual([
+            expect.objectContaining({
+                pageUrl: 'bla.com',
+            }),
+        ])
+        expect(
+            await setups[1].storageManager.collection('pages').findObjects({}),
+        ).toEqual([
+            expect.objectContaining({
+                fullUrl: 'http://www.bla.com/',
+            }),
+        ])
+    })
 }
 
 describe('SyncBackground', () => {
