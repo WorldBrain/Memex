@@ -9,6 +9,7 @@ import {
     FastSyncSender,
     FastSyncReceiver,
     FastSyncEvents,
+    FastSyncPreSendProcessor,
 } from '@worldbrain/storex-sync/lib/fast-sync'
 import {
     WebRTCFastSyncSenderChannel,
@@ -16,6 +17,8 @@ import {
 } from '@worldbrain/storex-sync/lib/fast-sync/channels'
 import TypedEmitter from 'typed-emitter'
 import StorageManager from '@worldbrain/storex'
+import { createPassiveDataChecker } from 'src/storage/utils'
+import { getObjectPk } from '@worldbrain/storex/lib/utils'
 
 interface InitialSyncInfo {
     signalChannel: SignalChannel
@@ -46,7 +49,9 @@ export default class InitialSync {
         },
     ) {}
 
-    async requestInitialSync(): Promise<{ initialMessage: string }> {
+    async requestInitialSync(options?: {
+        excludePassiveData?: boolean
+    }): Promise<{ initialMessage: string }> {
         const role = 'sender'
         const {
             signalTransport,
@@ -57,6 +62,7 @@ export default class InitialSync {
             signalTransport,
             initialMessage,
             deviceId: 'first',
+            ...(options || {}),
         })
         this.initialSyncInfo.execute()
 
@@ -110,6 +116,7 @@ export default class InitialSync {
         signalTransport: SignalTransport
         initialMessage: string
         deviceId: 'first' | 'second'
+        excludePassiveData?: boolean
     }): Promise<InitialSyncInfo> {
         const signalChannel = await options.signalTransport.openChannel(
             pick(options, 'initialMessage', 'deviceId'),
@@ -131,6 +138,11 @@ export default class InitialSync {
                 storageManager: this.options.storageManager,
                 channel: senderChannel,
                 collections: this.options.syncedCollections,
+                preSendProcessor:
+                    options.excludePassiveData &&
+                    _createExcludePassivePreSendFilter({
+                        storageManager: this.options.storageManager,
+                    }),
             })
             fastSync = senderFastSync
         } else {
@@ -177,5 +189,23 @@ export default class InitialSync {
             senderFastSync,
             receiverFastSync,
         }
+    }
+}
+
+export function _createExcludePassivePreSendFilter(dependencies: {
+    storageManager: StorageManager
+}): FastSyncPreSendProcessor {
+    const isPassiveData = createPassiveDataChecker(dependencies)
+    return async params => {
+        return (await isPassiveData({
+            collection: params.collection,
+            pk: getObjectPk(
+                params.object,
+                params.collection,
+                dependencies.storageManager.registry,
+            ),
+        }))
+            ? { object: null }
+            : params
     }
 }

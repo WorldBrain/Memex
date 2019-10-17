@@ -186,6 +186,7 @@ async function runSyncBackgroundTest(
         const timeBeforeStepExecution = Date.now()
         await step.execute({
             setup: currentSetup,
+            isSyncTest: true,
         })
 
         currentSetup.storageOperationLogger.enabled = false
