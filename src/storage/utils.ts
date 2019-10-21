@@ -36,3 +36,24 @@ export function createPassiveDataChecker(dependencies: {
         return !(await check('pageListEntries', { pageUrl: params.pk }))
     }
 }
+
+export async function getStorageContents(
+    storageManager: StorageManager,
+    options?: { include?: Set<string>; exclude?: Set<string> },
+) {
+    const exclude = (options && options.exclude) || new Set()
+
+    const storedData: { [collection: string]: any[] } = {}
+
+    const collectionNames =
+        (options && options.include) ||
+        Object.keys(storageManager.registry.collections)
+    for (const collectionName of collectionNames) {
+        if (!exclude.has(collectionName)) {
+            storedData[collectionName] = await storageManager
+                .collection(collectionName)
+                .findObjects({})
+        }
+    }
+    return storedData
+}

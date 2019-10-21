@@ -12,6 +12,7 @@ import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-lo
 import { RUN_FIRESTORE_TESTS } from 'src/tests/constants'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { getStorageContents } from 'src/storage/utils'
 
 interface TestSetup {
     setups: [BackgroundIntegrationTestSetup, BackgroundIntegrationTestSetup]
@@ -44,15 +45,15 @@ async function setupTest(options: {
         BackgroundIntegrationTestSetup,
         BackgroundIntegrationTestSetup
     ] = [
-        await setupBackgroundIntegrationTest({
-            signalTransportFactory,
-            sharedSyncLog: options.sharedSyncLog,
-        }),
-        await setupBackgroundIntegrationTest({
-            signalTransportFactory,
-            sharedSyncLog: options.sharedSyncLog,
-        }),
-    ]
+            await setupBackgroundIntegrationTest({
+                signalTransportFactory,
+                sharedSyncLog: options.sharedSyncLog,
+            }),
+            await setupBackgroundIntegrationTest({
+                signalTransportFactory,
+                sharedSyncLog: options.sharedSyncLog,
+            }),
+        ]
     const syncModule = (setup: BackgroundIntegrationTestSetup) =>
         setup.backgroundModules.sync
     const searchModule = (setup: BackgroundIntegrationTestSetup) =>
@@ -162,7 +163,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
 
         const getDeviceId = async (s: BackgroundIntegrationTestSetup) =>
             (await s.browserLocalStorage.get(SYNC_STORAGE_AREA_KEYS.deviceId))[
-                SYNC_STORAGE_AREA_KEYS.deviceId
+            SYNC_STORAGE_AREA_KEYS.deviceId
             ]
 
         const firstDeviceId = await getDeviceId(setups[0])
@@ -310,83 +311,119 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
         })
     })
 
-    it('should not include passive data in initial Sync if not desired', async (setup: TestSetup) => {
-        const {
-            setups,
-            customLists,
-            syncModule,
-            searchModule,
-            forEachSetup,
-        } = setup
-        await forEachSetup(s => syncModule(s).setup())
-
-        // Initial data
-
-        await searchModule(setups[0]).searchIndex.addPage({
-            pageDoc: {
-                url: 'http://www.bla2.com/',
-                content: {
-                    fullText: 'home page content',
-                    title: 'bla2.com title',
+    describe('passive data filtering in initial Sync', () => {
+        async function runPassiveDataTest(params: {
+            setup: TestSetup
+            insertDefaultPages: boolean
+            insertData: (
+                params: {
+                    device: BackgroundIntegrationTestSetup
                 },
-            },
-            visits: [],
-        })
-        const listId = await customLists(setups[0]).createCustomList({
-            name: 'My list',
-        })
-        await customLists(setups[0]).insertPageToList({
-            id: listId,
-            url: 'http://bla.com/',
-        })
-        await searchModule(setups[0]).searchIndex.addPage({
-            pageDoc: {
-                url: 'http://www.bla.com/',
-                content: {
-                    fullText: 'home page content',
-                    title: 'bla.com title',
+            ) => Promise<void>
+            checkData: (
+                params: {
+                    device: BackgroundIntegrationTestSetup
+                    expectData: (
+                        collections: string[],
+                        expacted: object,
+                    ) => Promise<void>
                 },
-            },
-            visits: [],
+            ) => Promise<void>
+        }) {
+            const {
+                setups,
+                customLists,
+                syncModule,
+                searchModule,
+                forEachSetup,
+            } = params.setup
+
+            await forEachSetup(s => syncModule(s).setup())
+
+            if (params.insertDefaultPages) {
+                await searchModule(setups[0]).searchIndex.addPage({
+                    pageDoc: {
+                        url: 'http://www.bla.com/',
+                        content: {
+                            fullText: 'home page content',
+                            title: 'bla.com title',
+                        },
+                    },
+                    visits: [],
+                })
+                await searchModule(setups[0]).searchIndex.addPage({
+                    pageDoc: {
+                        url: 'http://www.bla2.com/',
+                        content: {
+                            fullText: 'home page content',
+                            title: 'bla2.com title',
+                        },
+                    },
+                    visits: [],
+                })
+            }
+
+            await params.insertData({ device: setups[0] })
+
+            const { initialMessage } = await syncModule(
+                setups[0],
+            ).remoteFunctions.requestInitialSync({ excludePassiveData: true })
+            await syncModule(setups[1]).remoteFunctions.answerInitialSync({
+                initialMessage,
+            })
+            await syncModule(setups[1]).initialSync.waitForInitialSync()
+
+            await params.checkData({
+                device: setups[1],
+                expectData: async (collections, expected) => {
+                    const contents = await getStorageContents(
+                        setups[1].storageManager,
+                        { include: new Set(collections) },
+                    )
+                    expect(contents).toEqual(expected)
+                },
+            })
+        }
+
+        it('should not include pages in filtered initial Sync unless included in a custom list', async (setup: TestSetup) => {
+            const { customLists } = setup
+
+            await runPassiveDataTest({
+                setup,
+                insertDefaultPages: true,
+                insertData: async ({ device }) => {
+                    const listId = await customLists(device).createCustomList({
+                        name: 'My list',
+                    })
+                    await customLists(device).insertPageToList({
+                        id: listId,
+                        url: 'http://bla.com/',
+                    })
+                },
+                checkData: async ({ expectData }) => {
+                    await expectData(
+                        ['pages', 'customLists', 'pageListEntries'],
+                        {
+                            pages: [
+                                expect.objectContaining({
+                                    fullUrl: 'http://www.bla.com/',
+                                }),
+                            ],
+                            customLists: [
+                                expect.objectContaining({
+                                    name: 'My list',
+                                }),
+                            ],
+                            pageListEntries: [
+                                expect.objectContaining({
+                                    pageUrl: 'bla.com',
+                                }),
+                            ],
+                        },
+                    )
+                },
+            })
         })
-
-        // Initial Sync
-
-        const { initialMessage } = await syncModule(
-            setups[0],
-        ).remoteFunctions.requestInitialSync({ excludePassiveData: true })
-        await syncModule(setups[1]).remoteFunctions.answerInitialSync({
-            initialMessage,
-        })
-
-        await forEachSetup(s => syncModule(s).initialSync.waitForInitialSync())
-
-        // Check
-        expect(
-            await setups[1].storageManager
-                .collection('customLists')
-                .findObjects({}),
-        ).toEqual([
-            expect.objectContaining({
-                name: 'My list',
-            }),
-        ])
-        expect(
-            await setups[1].storageManager
-                .collection('pageListEntries')
-                .findObjects({}),
-        ).toEqual([
-            expect.objectContaining({
-                pageUrl: 'bla.com',
-            }),
-        ])
-        expect(
-            await setups[1].storageManager.collection('pages').findObjects({}),
-        ).toEqual([
-            expect.objectContaining({
-                fullUrl: 'http://www.bla.com/',
-            }),
-        ])
     })
 }
 
@@ -409,7 +446,7 @@ describe('SyncBackground', () => {
         syncModuleTests({
             testFactory: (description, test) => {
                 if (!RUN_FIRESTORE_TESTS) {
-                    it.skip(description, () => {})
+                    it.skip(description, () => { })
                     return
                 }
 
