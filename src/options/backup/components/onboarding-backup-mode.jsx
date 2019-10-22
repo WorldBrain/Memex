@@ -6,10 +6,10 @@ import { SubscribeModal } from 'src/authentication/components/Subscription/Subsc
 
 export default class OnboardingBackupModeContainer extends React.Component {
     static propTypes = {
-        disableModeSelection: PropTypes.bool,
-        disableAutomaticBackup: PropTypes.bool,
         onModeChange: PropTypes.func,
         launchSubscriptionFlow: PropTypes.func,
+        mode: PropTypes.string,
+        isAuthorizedForAutomaticBackup: PropTypes.bool,
     }
 
     state = {
@@ -18,12 +18,10 @@ export default class OnboardingBackupModeContainer extends React.Component {
     }
 
     componentDidMount() {
-        if (this.props.disableModeSelection) {
-            this.setState({ mode: 'automatic' })
+        if (this.props.mode) {
+            this.setState({ mode: this.props.mode })
         }
     }
-
-    // todo: (ch): Hook up to user account watch to control auto backup feature indication
 
     openSubscriptionModal = () => this.setState({ subscribeModal: true })
     closeSubscriptionModal = () => this.setState({ subscribeModal: false })
@@ -33,14 +31,15 @@ export default class OnboardingBackupModeContainer extends React.Component {
             <div>
                 <OnboardingBackupMode
                     {...this.props}
-                    disableModeSelection={this.props.disableModeSelection}
                     mode={this.state.mode}
                     onModeChange={mode => {
                         this.setState({ mode })
                         this.props.onModeChange && this.props.onModeChange(mode)
                     }}
                     launchSubscriptionFlow={this.openSubscriptionModal}
-                    userHasFeatureBackup={false}
+                    isAuthorizedForAutomaticBackup={
+                        this.props.isAuthorizedForAutomaticBackup
+                    }
                 />
                 {this.state.subscribeModal && (
                     <SubscribeModal onClose={this.closeSubscriptionModal} />
@@ -56,7 +55,7 @@ export function OnboardingBackupMode({
     launchSubscriptionFlow,
     mode,
     onModeChange,
-    userHasFeatureBackup,
+    isAuthorizedForAutomaticBackup,
 }) {
     return (
         <div className={Styles.selectionDiv}>
@@ -95,7 +94,7 @@ export function OnboardingBackupMode({
                                 Automatic Backup
                             </span>
                             {!disableAutomaticBackup &&
-                                !userHasFeatureBackup && (
+                                !isAuthorizedForAutomaticBackup && (
                                     <span
                                         className={Styles.labelPremium}
                                         onClick={launchSubscriptionFlow}
@@ -119,7 +118,7 @@ export function OnboardingBackupMode({
 OnboardingBackupMode.propTypes = {
     disableModeSelection: PropTypes.bool,
     disableAutomaticBackup: PropTypes.bool,
-    userHasFeatureBackup: PropTypes.bool,
+    isAuthorizedForAutomaticBackup: PropTypes.bool,
     mode: PropTypes.string,
     onModeChange: PropTypes.func.isRequired,
     launchSubscriptionFlow: PropTypes.func,

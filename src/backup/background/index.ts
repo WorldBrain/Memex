@@ -15,6 +15,7 @@ import { ProcedureUiCommunication } from 'src/backup/background/procedures/ui-co
 import NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
 import { SearchIndex } from 'src/search'
+import { auth } from 'src/util/remote-functions-background'
 
 export * from './backend'
 
@@ -160,12 +161,13 @@ export class BackupBackgroundModule {
                     }
                 },
                 maybeCheckAutomaticBackupEnabled: async () => {
-                    // TODO: (ch) What is this used for?
+                    // TODO: What is this used for, can we rename or document it?
 
-                    // TODO: (ch) Auth-Memex-Backup
-                    const hasFeatureAutoBackup = true
+                    const hasFeatureAutoBackup = (await auth.getAuthorizedFeatures()).includes(
+                        'backup',
+                    )
 
-                    // TODO: (ch) document logic here
+                    // TODO: document logic here
                     const lastBackupTime = !!(await this.lastBackupStorage.getLastBackupTime())
                     const nextBackup = localStorage.getItem('nextBackup')
                     if (
@@ -178,7 +180,7 @@ export class BackupBackgroundModule {
                     }
                 },
                 checkAutomaticBackupEnabled: async () => {
-                    // TODO: (ch) What is this used for?
+                    // TODO: (ch) What is this used for? how is it different from isAutomaticBackupEnabled
                 },
                 isAutomaticBackupEnabled: this.isAutomaticBackupEnabled,
                 isAutomaticBackupAllowed: this.isAutomaticBackupAllowed,

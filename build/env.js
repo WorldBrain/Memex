@@ -12,14 +12,14 @@ export default ({ mode }) => {
         BACKUP_BATCH_SIZE: '500',
         BACKUP_START_SCREEN: '',
         BACKUP_TEST_SIZE_ESTIMATION: '',
-        AUTH_ENABLED: true,
+        AUTH_ENABLED: 'true',
     }
 
-    if (mode === 'development' && process.env.DEV_AUTH_ENANABLED !== 'true') {
+    if (mode === 'development' && process.env.DEV_AUTH_ENABLED !== 'true') {
         console.warn(
-            `Turning off firebase auth for extension development. See authentication/readme.md for more.`,
+            `Firebase auth will be turned off for extension development. See authentication/readme.md for more.`,
         )
-        env.AUTH_ENABLED = false
+        env.AUTH_ENABLED = 'false'
     }
 
     // Analytics

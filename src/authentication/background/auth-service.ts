@@ -31,14 +31,13 @@ export class AuthService implements AuthRemoteFunctionsInterface {
         this.auth = authImplementation
     }
 
-    // TODO: remove the boolean or
-    static get isEnabledByUser() {
-        return true || localStorage.getItem('AUTH_ENABLED') === 'true'
-    }
-
-    static setEnabledByUser() {
-        localStorage.setItem('AUTH_ENABLED', 'true')
-    }
+    // TODO: (ch) (opt-out-auth): to allow the user to enable/disabled auth we also need to re-initialise the background auth service
+    // static get isEnabledByUser() {
+    //     return localStorage.getItem('AUTH_ENABLED') === 'true'
+    // }
+    // static setEnabledByUser() {
+    //     localStorage.setItem('AUTH_ENABLED', 'true')
+    // }
 
     public registerAuthEmitter(emitter: RemoteEventEmitter<AuthEvents>) {
         this.auth.registerAuthEmitter(emitter)
@@ -80,15 +79,6 @@ export class AuthService implements AuthRemoteFunctionsInterface {
             ? claims.subscriptions.get(plan).expiry
             : null
 
-    private featureExpiryAccessor = claims => (
-        feature: UserFeatures,
-    ): number | null =>
-        claims != null &&
-        claims.features != null &&
-        claims.features.get(feature) != null
-            ? claims.features.get(feature).expiry
-            : null
-
     /**
      * As above but does not throw errors.
      */
@@ -100,14 +90,25 @@ export class AuthService implements AuthRemoteFunctionsInterface {
         }
     }
 
-    public async isAuthorizedForFeature(feature): Promise<boolean> {
-        const expiry = this.featureExpiryAccessor(await this.getUserClaims())(
-            feature,
-        )
-        return (
-            expiry != null &&
-            expiry + subscriptionGraceMs > new Date().getUTCMilliseconds()
-        )
+    public getAuthorizedFeatures = async (): Promise<UserFeatures[]> => {
+        const claims = await this.getUserClaims()
+        const features = [] as UserFeatures[]
+
+        if (claims == null || claims.features == null) {
+            return features
+        }
+
+        Object.keys(claims.features).forEach((feature: UserFeatures) => {
+            const expiry = claims.features[feature].expiry
+            if (
+                expiry != null &&
+                expiry + subscriptionGraceMs > new Date().getUTCMilliseconds()
+            ) {
+                features.push(feature)
+            }
+        })
+
+        return features
     }
 
     public async hasSubscribedBefore(): Promise<boolean> {

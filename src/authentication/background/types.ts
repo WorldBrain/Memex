@@ -1,5 +1,9 @@
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
-import { Claims } from 'firebase-backend/firebase/functions/src/types'
+import {
+    Claims,
+    UserPlans,
+    UserFeatures,
+} from 'firebase-backend/firebase/functions/src/types'
 export interface AuthenticatedUser {
     displayName: string | null
     email: string | null
@@ -8,7 +12,7 @@ export interface AuthenticatedUser {
 }
 
 export interface AuthenticatedUserWithClaims extends AuthenticatedUser {
-    claims?: Claims | null
+    claims: Claims | null
 }
 
 export interface AuthInterface {
@@ -33,11 +37,10 @@ export interface AuthServerFunctionsInterface {
 
 export interface AuthRemoteFunctionsInterface {
     getUser(): Promise<AuthenticatedUser | null>
-
     refresh(): Promise<void>
 
     hasValidPlan(plan): Promise<boolean>
-    isAuthorizedForFeature(plan): Promise<boolean>
+    getAuthorizedFeatures(): Promise<UserFeatures[]>
 
     hasSubscribedBefore(): any
 }

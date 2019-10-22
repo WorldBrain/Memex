@@ -61,10 +61,10 @@ export async function main() {
             getUser: backgroundModules.auth.authService.getUser,
             refresh: backgroundModules.auth.authService.refresh,
             hasValidPlan: backgroundModules.auth.authService.hasValidPlan,
-            isAuthorizedForFeature:
-                backgroundModules.auth.authService.isAuthorizedForFeature,
             hasSubscribedBefore:
                 backgroundModules.auth.authService.hasSubscribedBefore,
+            getAuthorizedFeatures:
+                backgroundModules.auth.authService.getAuthorizedFeatures,
         },
         serverFunctions: {
             getCheckoutLink:
@@ -145,7 +145,7 @@ export async function main() {
         },
         incrementalSyncSend: async (userId: string) => {
             await selfTests.clearDb()
-            // todo: (ch) (auth) (sync): Configure auth with a testing userId
+            // todo: (ch) (auth) (sync): Construct and set a Memory Auth implementation that allows setting the UserID
             await backgroundModules.sync.continuousSync.storeSetting(
                 'deviceId',
                 null,
@@ -159,7 +159,7 @@ export async function main() {
         },
         incrementalSyncReceive: async (userId: string) => {
             await selfTests.clearDb()
-            // todo: (ch) (auth) (sync): Configure auth with a testing userId
+            // todo: (ch) (auth) (sync): Construct and set a Memory Auth implementation that allows setting the UserID
             // backgroundModules.auth.userId = userId
             await backgroundModules.sync.continuousSync.storeSetting(
                 'deviceId',
