@@ -21,17 +21,9 @@ import {
     setupBackgroundModules,
     registerBackgroundModuleCollections,
 } from './background-script/setup'
-import { createServerStorageManager } from './storage/server'
 import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-import { AuthService } from 'src/authentication/background/auth-service'
-import { firebase } from 'src/util/firebase-app-initialized'
-import { AuthFirebase } from 'src/authentication/background/auth-firebase'
-import {
-    FirebaseFunctionsAuth,
-    FirebaseFunctionsSubscription,
-} from 'src/authentication/background/firebase-functions-subscription'
+import { AuthBackground } from 'src/authentication/background/auth-background'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -42,6 +34,7 @@ export async function main() {
     const getSharedSyncLog = createLazySharedSyncLog()
 
     const authBackground = new AuthBackground()
+
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
         storageManager,
@@ -75,29 +68,28 @@ export async function main() {
         },
         serverFunctions: {
             getCheckoutLink:
-                backgroundModules.auth.subscriptionServerFunctions.getCheckoutLink,
+                backgroundModules.auth.subscriptionServerFunctions
+                    .getCheckoutLink,
             getManageLink:
-                backgroundModules.auth.subscriptionServerFunctions.getManageLink,
+                backgroundModules.auth.subscriptionServerFunctions
+                    .getManageLink,
             refreshUserClaims:
                 backgroundModules.auth.authServerFunctions.refreshUserClaims,
         },
         notifications: { createNotification },
         bookmarks: {
             addPageBookmark:
-                backgroundModules.search.remoteFunctions.bookmarks.addPageBookmark,
+                backgroundModules.search.remoteFunctions.bookmarks
+                    .addPageBookmark,
             delPageBookmark:
-                backgroundModules.search.remoteFunctions.bookmarks.delPageBookmark,
+                backgroundModules.search.remoteFunctions.bookmarks
+                    .delPageBookmark,
         },
     })
 
     // Attach interesting features onto global window scope for interested users
-    // TODO: prefix these with memex_ to avoid collisions?
-    window['authService'] = backgroundModules.auth.authService
-    window['authServerFunctions'] = backgroundModules.auth.authServerFunctions
-    window['backup'] = backupModule
     window['getDb'] = getDb
     window['storageMan'] = storageManager
-    window['bgScript'] = bgScript
     window['bgModules'] = backgroundModules
     window['analytics'] = analytics
     window['tabMan'] = backgroundModules.activityLogger.tabManager
@@ -153,7 +145,7 @@ export async function main() {
         },
         incrementalSyncSend: async (userId: string) => {
             await selfTests.clearDb()
-            backgroundModules.auth.userId = userId
+            // todo: (ch) (auth) (sync): Configure auth with a testing userId
             await backgroundModules.sync.continuousSync.storeSetting(
                 'deviceId',
                 null,
@@ -167,7 +159,8 @@ export async function main() {
         },
         incrementalSyncReceive: async (userId: string) => {
             await selfTests.clearDb()
-            backgroundModules.auth.userId = userId
+            // todo: (ch) (auth) (sync): Configure auth with a testing userId
+            // backgroundModules.auth.userId = userId
             await backgroundModules.sync.continuousSync.storeSetting(
                 'deviceId',
                 null,

@@ -23,6 +23,9 @@ import { StorageChangeDetector } from './storage-change-detector'
 import StorageOperationLogger from './storage-operation-logger'
 import { setStorex } from 'src/search/get-db'
 import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
+import { AuthBackground } from 'src/authentication/background/auth-background'
+import { MockAuthImplementation } from 'src/authentication/background/mocks/auth-mocks'
+import { AuthService } from 'src/authentication/background/auth-service'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -41,11 +44,18 @@ export async function setupBackgroundIntegrationTest(options?: {
         (options && options.browserLocalStorage) || new MemoryBrowserStorage()
     const storageManager = initStorex()
 
-    const authBackground = {
-        userId: 1,
-        setup: async () => {},
-        getCurrentUser: () => ({ id: authBackground.userId }),
-    }
+    const mockAuthImplementation = new MockAuthImplementation()
+    const authBackground: AuthBackground = new AuthBackground(
+        new AuthService(mockAuthImplementation),
+        {
+            getCheckoutLink: async () => '',
+            getManageLink: async () => '',
+        },
+        {
+            refreshUserClaims: async () => true,
+        },
+    )
+
     const backgroundModules = createBackgroundModules({
         storageManager,
         localStorageChangesManager: null,
@@ -94,6 +104,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         browserLocalStorage,
         storageOperationLogger,
         storageChangeDetector,
+        mockAuthImplementation,
     }
 }
 

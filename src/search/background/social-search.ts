@@ -38,7 +38,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const ids = new Set()
+        const ids = new Set<number>()
 
         await this.backend.dexieInstance
             .table(LIST_ENTRIES_COLL)
@@ -75,7 +75,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const ids = new Set()
+        const ids = new Set<number>()
         await this.backend.dexieInstance
             .table(TAGS_COLL)
             .where('name')

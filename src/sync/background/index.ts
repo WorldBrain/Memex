@@ -9,12 +9,12 @@ import { COLLECTION_NAMES as TAGS_COLLECTION_NAMES } from '@worldbrain/memex-sto
 import { COLLECTION_NAMES as LISTS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 import { COLLECTION_NAMES as ANNOTATIONS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/annotations/constants'
 
-import AuthBackground from 'src/auth/background'
 import { PublicSyncInterface } from './types'
 import InitialSync, { SignalTransportFactory } from './initial-sync'
 import ContinuousSync from './continuous-sync'
 import { MemexClientSyncLogStorage } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
+import { AuthBackground } from 'src/authentication/background/auth-background'
 
 export default class SyncBackground {
     initialSync: InitialSync
