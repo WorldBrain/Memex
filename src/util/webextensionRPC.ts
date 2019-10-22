@@ -309,12 +309,11 @@ const remoteEventEmitters: RemoteEventEmitters = {}
 type RemoteEventEmitters = {
     [K in keyof RemoteEvents]?: TypedRemoteEventEmitter<K>
 }
-type TypedRemoteEventEmitter<T extends keyof RemoteEvents> = TypedEventEmitter<
-    RemoteEvents[T]
->
+export type TypedRemoteEventEmitter<
+    T extends keyof RemoteEvents
+> = TypedEventEmitter<RemoteEvents[T]>
 
 // Statically defined types
-// TODO: Move this somewhere more appropriate
 interface RemoteEvents {
     auth: AuthEvents
 }
