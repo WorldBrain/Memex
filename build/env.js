@@ -1,14 +1,3 @@
-const firebase = {
-    development: {
-        FIREBASE_MEMEX_API_KEY: 'AIzaSyCyxWY7qZSWlncB_JDYOSzeTOfRnYhNcS8',
-        FIREBASE_MEMEX_AUTH_DOMAIN: 'worldbrain-staging.firebaseapp.com',
-        FIREBASE_MEMEX_DATABSE_URL: 'https://worldbrain-staging.firebaseio.com',
-        FIREBASE_MEMEX_PROJECT_ID: 'worldbrain-staging',
-        FIREBASE_MEMEX_MESSAGING_SENDER_ID: '840601505816',
-        FIREBASE_MEMEX_APP_ID: '1:840601505816:web:69fbb7a789882e399fb36d',
-    },
-}
-
 export default ({ mode }) => {
     const env = {
         VERSION: process.env.npm_package_version,
@@ -23,13 +12,14 @@ export default ({ mode }) => {
         BACKUP_BATCH_SIZE: '500',
         BACKUP_START_SCREEN: '',
         BACKUP_TEST_SIZE_ESTIMATION: '',
+        AUTH_ENABLED: true,
     }
 
-    // Auth (with Firebase)
-    for (const key in firebase.development) {
-        // noinspection JSUnfilteredForInLoop
-        env[key] =
-            mode === 'development' ? firebase[mode][key] : process.env[key]
+    if (mode === 'development' && process.env.DEV_AUTH_ENANABLED !== 'true') {
+        console.warn(
+            `Turning off firebase auth for extension development. See authentication/readme.md for more.`,
+        )
+        env.AUTH_ENABLED = false
     }
 
     // Analytics

@@ -3,11 +3,11 @@ import StorageManager from '@worldbrain/storex'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { reconcileSyncLog } from '@worldbrain/storex-sync/lib/reconciliation'
 import { doSync } from '@worldbrain/storex-sync'
-import AuthBackground from 'src/auth/background'
 import { SYNC_STORAGE_AREA_KEYS } from './constants'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { RecurringTask } from 'src/util/recurring-task'
 import { getLocalStorage } from 'src/util/storage'
+import { AuthBackground } from 'src/authentication/background/auth-background'
 
 export default class ContinuousSync {
     public recurringIncrementalSyncTask?: RecurringTask
@@ -64,7 +64,7 @@ export default class ContinuousSync {
 
         const sharedSyncLog = await this.options.getSharedSyncLog()
         const newDeviceId = await sharedSyncLog.createDeviceId({
-            userId: this.options.auth.getCurrentUser().id,
+            userId: (await this.options.auth.authService.getUser()).uid,
             sharedUntil: 1,
         })
         await this.storeSetting('deviceId', newDeviceId)
@@ -95,8 +95,8 @@ export default class ContinuousSync {
     }
 
     private async doIncrementalSync() {
-        const { auth } = this.options
-        const user = auth.getCurrentUser()
+        const user = await this.options.auth.authService.getUser()
+
         if (!user) {
             throw new Error(`Cannot Sync without authenticated user`)
         }
@@ -106,7 +106,7 @@ export default class ContinuousSync {
             storageManager: this.options.storageManager,
             reconciler: reconcileSyncLog,
             now: Date.now(),
-            userId: user.id,
+            userId: user.uid,
             deviceId: this.deviceId,
         })
     }

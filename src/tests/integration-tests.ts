@@ -10,6 +10,7 @@ import StorageOperationLogger, {
 } from './storage-operation-logger'
 import { registerBackgroundIntegrationTest } from './background-integration-tests'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
+import { MockAuthImplementation } from 'src/authentication/background/mocks/auth-mocks'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -45,6 +46,7 @@ export interface BackgroundIntegrationTestSetup {
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector
     storageOperationLogger: StorageOperationLogger
+    mockAuthImplementation: MockAuthImplementation
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup

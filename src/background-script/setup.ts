@@ -24,15 +24,12 @@ import {
     ImportStateManager,
 } from 'src/imports/background/state-manager'
 import { setupImportBackgroundModule } from 'src/imports/background'
-import AuthBackground from 'src/auth/background'
 import SyncBackground from 'src/sync/background'
 import { SignalTransportFactory } from 'src/sync/background/initial-sync'
 import BackgroundScript from '.'
 import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
-import { AuthService } from 'src/authentication/background/auth-service'
-import { AuthFirebase } from 'src/authentication/background/auth-firebase'
 import {
     AuthInterface,
     AuthServerFunctionsInterface,
@@ -54,7 +51,6 @@ export interface BackgroundModules {
     backupModule: backup.BackupBackgroundModule
     sync: SyncBackground
     bgScript: BackgroundScript
-    auth: AuthBackground
 }
 
 export function createBackgroundModules(options: {
@@ -171,12 +167,9 @@ export async function setupBackgroundModules(
     backgroundModules.bgScript.setupWebExtAPIHandlers()
     backgroundModules.bgScript.setupAlarms(alarms)
     setupNotificationClickListener()
-
     setupBlacklistRemoteFunctions()
-    internalAnalytics.registerOperations(backgroundModules.eventLog)
     backgroundModules.backupModule.storage.setupChangeTracking()
 
-    await backgroundModules.sync.setup()
     await backgroundModules.sync.setup()
 }
 
