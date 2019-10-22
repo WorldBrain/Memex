@@ -1,5 +1,5 @@
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
-
+import { Claims } from 'firebase-backend/firebase/functions/src/types'
 export interface AuthenticatedUser {
     displayName: string | null
     email: string | null
@@ -18,29 +18,13 @@ export interface AuthInterface {
     registerAuthEmitter(emitter: RemoteEventEmitter<AuthEvents>): void
 }
 
-// TODO: (ch) this should be imported from the firebase functions package?
-export enum UserFeatures {
-    BACKUP = 'backup',
-    SYNC = 'sync',
-}
-export enum UserPlans {
-    PRO = 'pro',
-}
-
-// These are key-values that a client is verified to have by authenticating, e.g. Coming from a JWT token.
-export interface Claims {
-    subscriptions?: { [key: string]: { expiry: number } }
-    features?: { [key: string]: { expiry: number } }
-    [key: string]: any
-}
-
 export interface SubscriptionCheckoutOptions {
     planId: string
 }
 
 export interface SubscriptionServerFunctionsInterface {
     getCheckoutLink(options: SubscriptionCheckoutOptions): Promise<string>
-    getManageLink(options: SubscriptionCheckoutOptions): Promise<string>
+    getManageLink(options?: SubscriptionCheckoutOptions): Promise<string>
 }
 
 export interface AuthServerFunctionsInterface {

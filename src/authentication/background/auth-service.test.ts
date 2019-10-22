@@ -8,32 +8,32 @@ import { MockAuthImplementation } from 'src/authentication/background/mocks/auth
 
 const sinon = require('sinon')
 describe('Authentication Subscription Status Tests', () => {
-    it('should not be subscribed to pro plan if user is new', async () => {
+    it('should not be subscribed to backup-monthly plan if user is new', async () => {
         const authService = new AuthService(MockAuthImplementation.newUser())
 
-        expect(await authService.hasValidPlan('pro')).toBeFalsy()
-        expect(authService.checkValidPlan('pro')).rejects.toThrowError(
-            AuthSubscriptionNotPresent,
-        )
+        expect(await authService.hasValidPlan('backup-monthly')).toBeFalsy()
+        expect(
+            authService.checkValidPlan('backup-monthly'),
+        ).rejects.toThrowError(AuthSubscriptionNotPresent)
     })
 
-    it('should not be subscribed to pro plan if subscription expired', async () => {
+    it('should not be subscribed to backup-monthly plan if subscription expired', async () => {
         const authService = new AuthService(
             MockAuthImplementation.expiredProSubscription(),
         )
 
-        expect(await authService.hasValidPlan('pro')).toBeFalsy()
-        expect(authService.checkValidPlan('pro')).rejects.toThrowError(
-            AuthSubscriptionExpired,
-        )
+        expect(await authService.hasValidPlan('backup-monthly')).toBeFalsy()
+        expect(
+            authService.checkValidPlan('backup-monthly'),
+        ).rejects.toThrowError(AuthSubscriptionExpired)
     })
 
-    it('should be subscribed to pro plan if subscription is valid', async () => {
+    it('should be subscribed to backup-monthly plan if subscription is valid', async () => {
         const authService = new AuthService(
             MockAuthImplementation.validProSubscription(),
         )
 
-        expect(await authService.checkValidPlan('pro')).toBeTruthy()
-        expect(await authService.hasValidPlan('pro')).toBeTruthy()
+        expect(await authService.checkValidPlan('backup-monthly')).toBeTruthy()
+        expect(await authService.hasValidPlan('backup-monthly')).toBeTruthy()
     })
 })

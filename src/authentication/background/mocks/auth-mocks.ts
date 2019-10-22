@@ -1,8 +1,9 @@
+import { AuthEvents, AuthInterface } from 'src/authentication/background/types'
 import {
-    AuthEvents,
-    AuthInterface,
     Claims,
-} from 'src/authentication/background/types'
+    SubscriptionMap,
+    FeaturesMap,
+} from 'firebase-backend/firebase/functions/src/types'
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 
 export class MockLinkGenerator {
@@ -24,31 +25,54 @@ export class MockLinkGenerator {
 }
 
 export class MockAuthImplementation implements AuthInterface {
-    private readonly claims: Claims = { subscriptions: {} }
+    private readonly claims: Claims = {
+        subscriptions: new Map() as SubscriptionMap,
+        features: new Map() as FeaturesMap,
+        lastSubscribed: null,
+    }
 
     constructor(options: { expiry?: number } = {}) {
         const { expiry } = options
 
         if (expiry) {
-            this.claims.subscriptions = {
-                pro: { expiry },
-            }
+            this.claims.subscriptions.set('backup-monthly', { expiry })
+            this.claims.features.set('backup', { expiry })
         }
     }
 
     static validProSubscription = () =>
         new MockAuthImplementation({ expiry: Date.now() + 1000 })
     static expiredProSubscription = () =>
-        new MockAuthImplementation({ expiry: Date.now() - 1000 })
+        new MockAuthImplementation({
+            expiry: Date.now() - 1000 - 1000 * 60 * 60,
+        })
     static newUser = () => new MockAuthImplementation()
 
-    async getCurrentUser() {
-        return {
+    public currentUser
+
+    public setCurrentUser(user) {
+        this.currentUser = user
+    }
+    public setCurrentUserToLoggedInUser() {
+        this.currentUser = {
             uid: 'test',
             email: 'test@test.com',
             emailVerified: false,
             displayName: 'Test User',
         }
+    }
+
+    public setCurrentUserId(uid) {
+        this.currentUser = {
+            uid,
+            email: 'test@test.com',
+            emailVerified: false,
+            displayName: 'Test User',
+        }
+    }
+
+    async getCurrentUser() {
+        return this.currentUser
     }
 
     async getUserClaims() {

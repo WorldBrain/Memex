@@ -1,15 +1,19 @@
 import * as React from 'react'
 import { UserSubscription } from 'src/authentication/components/user-subscription'
 import Button from 'src/popup/components/Button'
-const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 import { Helmet } from 'react-helmet'
 import { SubscriptionPriceBox } from 'src/authentication/components/Subscription/SubscriptionPriceBox'
 import { AuthenticatedUser } from 'src/authentication/background/types'
 import { auth } from 'src/util/remote-functions-background'
+import { UserPlans } from 'firebase-backend/firebase/functions/src/types'
+const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 
+//
 export const subscriptionConfig = {
-    site: 'wbstaging-test',
-    defaultPlan: 'pro1',
+    site:
+        process.env.NODE_ENV !== 'production'
+            ? 'worldbrain-test'
+            : 'worldbrain',
 }
 
 interface Props {
@@ -41,13 +45,9 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
         this.userSubscription = new UserSubscription(this.chargebeeInstance)
     }
 
-    openPortal = async (planId = null) => {
+    openPortal = async () => {
         this._initChargebee()
-        const portalEvents = await this.userSubscription.checkoutUserSubscription(
-            {
-                planId: planId || subscriptionConfig.defaultPlan,
-            },
-        )
+        const portalEvents = await this.userSubscription.manageUserSubscription()
 
         portalEvents.addListener('closed', () => this.props.onClose())
         portalEvents.addListener('changed', () => {
@@ -57,19 +57,17 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
     }
 
     openCheckoutBackup = async () => {
-        return this.openCheckout('backup_monthly')
+        return this.openCheckout('backup-monthly')
     }
 
     openCheckoutBackupSync = async () => {
-        return this.openCheckout('backupsync_monthly')
+        return this.openCheckout('sync-monthly')
     }
 
-    openCheckout = async (planId = null) => {
+    openCheckout = async (planId: UserPlans) => {
         this._initChargebee()
         const subscriptionEvents = await this.userSubscription.checkoutUserSubscription(
-            {
-                planId: planId || subscriptionConfig.defaultPlan,
-            },
+            { planId },
         )
         subscriptionEvents.addListener('closed', () => this.props.onClose())
         subscriptionEvents.addListener('changed', () => {

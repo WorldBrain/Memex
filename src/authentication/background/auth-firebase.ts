@@ -3,13 +3,13 @@ import {
     AuthenticatedUserWithClaims,
     AuthEvents,
     AuthInterface,
-    Claims,
 } from 'src/authentication/background/types'
 import { firebase } from 'src/util/firebase-app-initialized'
 import 'firebase/functions'
 import 'firebase/auth'
 import { FirebaseFunctionsAuth } from 'src/authentication/background/firebase-functions-subscription'
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
+import { Claims } from 'firebase-backend/firebase/functions/src/types'
 
 export class AuthFirebase implements AuthInterface {
     private firebaseAuthObserver: firebase.Unsubscribe
