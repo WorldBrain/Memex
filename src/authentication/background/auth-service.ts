@@ -2,22 +2,42 @@ import {
     AuthEvents,
     AuthInterface,
     AuthRemoteFunctionsInterface,
-    Claims,
 } from 'src/authentication/background/types'
-import { RemoteEventEmitter } from 'src/util/webextensionRPC'
+import {
+    Claims,
+    UserPlans,
+    UserFeatures,
+} from 'firebase-backend/firebase/functions/src/types'
 
-export type plans = string
+import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 
 export class AuthSubscriptionError extends Error {}
 export class AuthSubscriptionInvalid extends AuthSubscriptionError {}
 export class AuthSubscriptionNotPresent extends AuthSubscriptionInvalid {}
 export class AuthSubscriptionExpired extends AuthSubscriptionInvalid {}
 
+//
+/**
+ * Number of milliseconds leeway after a subscription has expired
+ * Should be at least as long as the auth implementation's refresh token
+ * so for firebase, 1h.
+ */
+const subscriptionGraceMs = 1000 * 60 * 60
+
 export class AuthService implements AuthRemoteFunctionsInterface {
     private readonly auth: AuthInterface
 
     public constructor(authImplementation: AuthInterface) {
         this.auth = authImplementation
+    }
+
+    // TODO: remove the boolean or
+    static get isEnabledByUser() {
+        return true || localStorage.getItem('AUTH_ENABLED') === 'true'
+    }
+
+    static setEnabledByUser() {
+        localStorage.setItem('AUTH_ENABLED', 'true')
     }
 
     public registerAuthEmitter(emitter: RemoteEventEmitter<AuthEvents>) {
@@ -32,7 +52,7 @@ export class AuthService implements AuthRemoteFunctionsInterface {
      *  Checks that a client has a valid subscription (exists, is not expired)
      *  to the provided plan.
      */
-    public checkValidPlan = async (plan: plans): Promise<boolean> => {
+    public checkValidPlan = async (plan: UserPlans): Promise<boolean> => {
         const claims = await this.getUserClaims()
 
         const subscriptionExpiry = this.subscriptionExpiryAccessor(claims)(plan)
@@ -41,33 +61,38 @@ export class AuthService implements AuthRemoteFunctionsInterface {
             throw new AuthSubscriptionNotPresent()
         }
 
-        if (Date.now() >= subscriptionExpiry) {
+        if (
+            new Date().getUTCMilliseconds() >=
+            subscriptionExpiry + subscriptionGraceMs
+        ) {
             throw new AuthSubscriptionExpired()
         }
 
         return true
     }
 
-    private subscriptionExpiryAccessor = claims => (
-        plan: plans,
-    ): keyof Claims =>
+    private subscriptionExpiryAccessor = (claims: Claims) => (
+        plan: UserPlans,
+    ): number | null =>
         claims != null &&
         claims.subscriptions != null &&
-        claims.subscriptions[plan] != null
-            ? claims.subscriptions[plan].expiry
+        claims.subscriptions.get(plan) != null
+            ? claims.subscriptions.get(plan).expiry
             : null
 
-    private featureExpiryAccessor = claims => (feature: string): keyof Claims =>
+    private featureExpiryAccessor = claims => (
+        feature: UserFeatures,
+    ): number | null =>
         claims != null &&
         claims.features != null &&
-        claims.features[feature] != null
-            ? claims.features[feature].expiry
+        claims.features.get(feature) != null
+            ? claims.features.get(feature).expiry
             : null
 
     /**
      * As above but does not throw errors.
      */
-    public async hasValidPlan(plan: plans): Promise<boolean> {
+    public async hasValidPlan(plan: UserPlans): Promise<boolean> {
         try {
             return await this.checkValidPlan(plan)
         } catch {
@@ -79,8 +104,10 @@ export class AuthService implements AuthRemoteFunctionsInterface {
         const expiry = this.featureExpiryAccessor(await this.getUserClaims())(
             feature,
         )
-        // todo: (ch) test timezones
-        return expiry != null && expiry > Date.now()
+        return (
+            expiry != null &&
+            expiry + subscriptionGraceMs > new Date().getUTCMilliseconds()
+        )
     }
 
     public async hasSubscribedBefore(): Promise<boolean> {
