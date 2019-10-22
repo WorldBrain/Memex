@@ -1,33 +1,19 @@
 import * as React from 'react'
-const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 import { AuthenticatedUserWithClaims } from 'src/authentication/background/types'
-import { auth } from 'src/util/remote-functions-background'
-import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import { SubscriptionOptions } from 'src/authentication/components/Subscription/SubscriptionOptions'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 
 interface Props {
     onClose: () => void
-}
-interface State {
     currentUser: AuthenticatedUserWithClaims
 }
 
-export class Subscribe extends React.PureComponent<Props, State> {
-    state = { currentUser: null }
-
-    componentDidMount = async () => {
-        this.setState({ currentUser: await auth.getUser() })
-        const authEvents = getRemoteEventEmitter('auth')
-        authEvents.addListener('onAuthStateChanged', _user => {
-            this.setState({ currentUser: _user })
-        })
-    }
-
+export class Subscribe extends React.PureComponent<Props> {
     render() {
         return (
             <div className={''}>
-                {this.state.currentUser == null && (
+                {this.props.currentUser == null && (
                     <div>
                         {
                             ' Please Login or Create an account in order to subscribe'
@@ -37,13 +23,13 @@ export class Subscribe extends React.PureComponent<Props, State> {
                 )}
 
                 {
-                    //todo: if currently subscribed, show to which
+                    // todo: if currently subscribed, show to which
                 }
 
-                {this.state.currentUser != null && (
+                {this.props.currentUser != null && (
                     <div>
                         <SubscriptionOptions
-                            user={this.state.currentUser}
+                            user={this.props.currentUser}
                             onClose={this.props.onClose}
                             subscriptionChanged={this.props.onClose}
                         />
@@ -53,6 +39,8 @@ export class Subscribe extends React.PureComponent<Props, State> {
         )
     }
 }
+
+export default withCurrentUser(Subscribe)
 
 const styles = {
     subscriptionOptionsContainer: {

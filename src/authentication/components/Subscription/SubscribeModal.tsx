@@ -1,5 +1,5 @@
 import React from 'react'
-import { Subscribe } from 'src/authentication/components/Subscription/Subscribe'
+import Subscribe from 'src/authentication/components/Subscription/Subscribe'
 import Modal from 'src/common-ui/components/Modal'
 
 interface Props {

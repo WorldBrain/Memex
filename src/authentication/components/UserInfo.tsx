@@ -1,29 +1,15 @@
 import * as React from 'react'
 import { auth } from 'src/util/remote-functions-background'
-import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import { firebase } from 'src/util/firebase-app-initialized'
 import { SubscriptionOptions } from 'src/authentication/components/Subscription/SubscriptionOptions'
 import Button from 'src/popup/components/Button'
 import { AuthenticatedUserWithClaims } from 'src/authentication/background/types'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 interface State {
     currentUser: AuthenticatedUserWithClaims
 }
+
 export class UserInfo extends React.Component<any, State> {
-    state = { currentUser: null }
-
-    componentDidMount = async () => {
-        this.setState({ currentUser: await auth.getUser() })
-
-        const authEvents = getRemoteEventEmitter('auth')
-        authEvents.addListener('onAuthStateChanged', async user => {
-            this.setState({ currentUser: user })
-        })
-    }
-
-    componentWillUnmount(): void {
-        // todo: remove event listener, but let's abstract this whole listening lifecycle to context or redux
-    }
-
     handleLogout = () => {
         firebase.auth().signOut()
     }
@@ -32,8 +18,7 @@ export class UserInfo extends React.Component<any, State> {
     }
 
     render() {
-        const user: AuthenticatedUserWithClaims = this.state.currentUser
-        console.log('Render with user:', user)
+        const user: AuthenticatedUserWithClaims = this.props.currentUser
         return (
             <div className={''}>
                 {user != null && (
@@ -74,3 +59,4 @@ export class UserInfo extends React.Component<any, State> {
         )
     }
 }
+export default withCurrentUser(UserInfo)

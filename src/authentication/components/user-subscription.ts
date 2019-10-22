@@ -28,10 +28,10 @@ export class UserSubscription {
         return eventEmitter
     }
 
-    async manageUserSubscription(options: SubscriptionCheckoutOptions) {
+    async manageUserSubscription() {
         // todo: (ch) provide a way to close this box on parent component unmount
         await this.cbInstance.setPortalSession(async () => {
-            await serverFunctions.getManageLink(options)
+            await serverFunctions.getManageLink()
         })
 
         const emitter = new EventEmitter() as SubscriptionManageEventEmitter
@@ -60,7 +60,6 @@ export interface ChargebeeInterface {
 export type SubscriptionCheckoutEventEmitter = TypedEmitter<SubscriptionEvents>
 export type SubscriptionManageEventEmitter = TypedEmitter<SubscriptionEvents>
 
-// todo(ch): Review these Susbcription types, move elsewhere perhaps
 export interface SubscriptionCheckoutOptions {
     planId: string
 }
