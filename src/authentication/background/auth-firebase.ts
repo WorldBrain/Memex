@@ -34,7 +34,7 @@ export class AuthFirebase implements AuthInterface {
         return this.withClaims(this.getUserFromFirebaseUser(user))
     }
 
-    registerAuthEmitter(authEmitter) {
+    registerAuthEmitter = authEmitter => {
         this.authEmitter = authEmitter
         this.firebaseAuthObserver = firebase
             .auth()

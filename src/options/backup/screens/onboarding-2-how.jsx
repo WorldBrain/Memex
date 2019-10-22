@@ -3,9 +3,11 @@ import PropTypes from 'prop-types'
 import OnboardingBackupMode from '../components/onboarding-backup-mode'
 import { PrimaryButton } from '../components/primary-button'
 import Styles from '../styles.css'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 
-export default class OnboardingHowContainer extends React.Component {
+class OnboardingHow extends React.Component {
     state = { mode: null }
+
     render() {
         return (
             <div>
@@ -17,6 +19,9 @@ export default class OnboardingHowContainer extends React.Component {
                     className={Styles.selectionlist}
                     onModeChange={mode => this.setState({ mode })}
                     launchSubscriptionFlow={this.props.onSubscribeRequested}
+                    isAuthorizedForAutomaticBackup={this.props.authorizedFeatures.includes(
+                        'backup',
+                    )}
                 />
                 {this.state.mode === 'manual' && (
                     <PrimaryButton
@@ -27,9 +32,14 @@ export default class OnboardingHowContainer extends React.Component {
                 )}
                 {this.state.mode === 'automatic' && (
                     <PrimaryButton
-                        disabled
-                        onClick={() =>
-                            this.props.onChoice({ type: 'automatic' })
+                        disabled={
+                            !this.props.authorizedFeatures.includes('backup')
+                        }
+                        onClick={
+                            this.props.authorizedFeatures.includes('backup')
+                                ? () =>
+                                      this.props.onChoice({ type: 'automatic' })
+                                : () => false
                         }
                     >
                         Continue
@@ -47,8 +57,12 @@ export default class OnboardingHowContainer extends React.Component {
     }
 }
 
-OnboardingHowContainer.propTypes = {
+export default withCurrentUser(OnboardingHow)
+
+OnboardingHow.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onBackRequested: PropTypes.func.isRequired,
     onSubscribeRequested: PropTypes.func.isRequired,
+    currentUser: PropTypes.any,
+    authorizedFeatures: PropTypes.array,
 }

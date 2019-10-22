@@ -20,18 +20,21 @@ export class AuthBackground {
         if (authService != null) {
             this.authService = authService
         } else {
-            let authImplementation
-
             // If we're in development and have set auth off, use the mock (todo: in memory implementation)
-            if (!process.env.AUTH_ENABLED) {
-                authImplementation = new MockAuthImplementation()
-            } else if (AuthService.isEnabledByUser) {
-                authImplementation = new AuthFirebase()
+            // tslint:disable-next-line:prefer-conditional-expression
+            if (process.env.AUTH_ENABLED !== 'true') {
+                this.authService = new AuthService(
+                    MockAuthImplementation.validProSubscription(),
+                )
             } else {
-                // todo: use a null implementation
-                authImplementation = new MockAuthImplementation()
+                this.authService = new AuthService(new AuthFirebase())
+                // if (AuthService.isEnabledByUser) {
+                //     authImplementation = new AuthFirebase()
+                // } else {
+                //     // TODO: (ch) (opt-out-auth): use a null implementation until user enabled auth and then reconfigure the backend once they do
+                //     authImplementation = new AuthDisabled()
+                // }
             }
-            this.authService = new AuthService(authImplementation)
         }
 
         this.subscriptionServerFunctions =

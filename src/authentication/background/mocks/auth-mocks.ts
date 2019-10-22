@@ -36,12 +36,16 @@ export class MockAuthImplementation implements AuthInterface {
 
         if (expiry) {
             this.claims.subscriptions.set('backup-monthly', { expiry })
+            this.claims.subscriptions.set('sync-monthly', { expiry })
             this.claims.features.set('backup', { expiry })
+            this.claims.features.set('sync', { expiry })
         }
     }
 
     static validProSubscription = () =>
-        new MockAuthImplementation({ expiry: Date.now() + 1000 })
+        new MockAuthImplementation({
+            expiry: Date.now() + 10000 + 1000 * 60 * 60,
+        })
     static expiredProSubscription = () =>
         new MockAuthImplementation({
             expiry: Date.now() - 1000 - 1000 * 60 * 60,
