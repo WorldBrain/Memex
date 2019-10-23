@@ -398,6 +398,36 @@ describe('Storage initialization', () => {
                     },
                     version: 17,
                 },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
+                        bookmarks: 'url, time',
+                        clientSyncLogEntry: '++id, [collection+pk], createdOn',
+                        directLinks:
+                            'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
+                        customLists:
+                            'id, &name, isDeletable, isNestable, createdAt',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        notifications: 'id',
+                        annotations:
+                            'url, pageUrl, *_pageTitle_terms, *_body_terms, createdWhen, lastEdited, *_comment_terms',
+                        backupChanges: 'timestamp, collection',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotBookmarks: 'url, createdAt',
+                        socialPosts:
+                            '++id, *_text_terms, serviceId, createdAt, userId',
+                        socialUsers: '++id, serviceId, name, username',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialTags: '++id, name, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                    },
+                    version: 18,
+                },
             ]),
         )
     })
