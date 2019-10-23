@@ -406,8 +406,7 @@ describe('Storage initialization', () => {
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
                         bookmarks: 'url, time',
-                        clientSyncLogEntry:
-                            '[deviceId+createdOn], [collection+pk], createdOn',
+                        clientSyncLogEntry: '++id, [collection+pk], createdOn',
                         directLinks:
                             'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
                         customLists:
@@ -426,7 +425,6 @@ describe('Storage initialization', () => {
                         socialBookmarks: '++id, createdAt, postId',
                         socialTags: '++id, name, postId',
                         socialPostListEntries: '++id, listId, postId',
-                        syncDeviceInfo: 'deviceId',
                     },
                     version: 18,
                 },
