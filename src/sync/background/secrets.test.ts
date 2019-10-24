@@ -69,8 +69,6 @@ describe('SyncSecretStore', () => {
         const encrypted = await secretStore.encryptSyncMessage(original)
         expect(encrypted.message).not.toEqual(original)
         const decrypted = await secretStore.decryptSyncMessage(encrypted)
-        console.log(original.length)
-        console.log(decrypted.length)
         expect(decrypted).toEqual(original)
     })
 
