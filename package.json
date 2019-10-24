@@ -105,6 +105,7 @@
         "strict-uri-encode": "^2.0.0",
         "string.prototype.matchall": "^3.0.1",
         "through2": "^2.0.3",
+        "tweetnacl": "^1.0.1",
         "typed-emitter": "^0.1.0",
         "ui-logic-core": "^0.1.2",
         "ui-logic-react": "^0.1.3",
