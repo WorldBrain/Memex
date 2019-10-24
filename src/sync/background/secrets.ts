@@ -1,13 +1,11 @@
+import * as openpgp from 'openpgp'
 import nacl from 'tweetnacl'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import { SYNC_STORAGE_AREA_KEYS } from './constants'
-import encodeBlob from 'src/util/encode-blob'
-import decodeBlob from 'src/util/decode-blob'
-import { blobToBuffer, bufferToBlob } from 'src/util/blob-utils'
 import { stringToUint8Array, uint8ArrayToBase64, str2ab, ab2str } from './utils'
 
 export class SyncSecretStore {
-    private key: Uint8Array | null = null
+    private key: string | null = null
     private loaded = false
 
     constructor(
@@ -19,7 +17,7 @@ export class SyncSecretStore {
     ) {}
 
     async generateSyncEncryptionKey(): Promise<void> {
-        this.key = nacl.randomBytes(nacl.secretbox.keyLength)
+        this.key = ab2str(nacl.randomBytes(nacl.secretbox.keyLength))
         await this._storeKey()
     }
 
@@ -27,44 +25,44 @@ export class SyncSecretStore {
         if (!this.loaded) {
             await this._loadKey()
         }
-        return this.key && uint8ArrayToBase64(this.key)
+        return this.key
     }
 
     async setSyncEncryptionKey(key: string): Promise<void> {
-        this.key = await stringToUint8Array(key)
+        this.key = key
         await this._storeKey()
     }
 
     async encryptSyncMessage(
         message: string,
-    ): Promise<{ message: string; nonce: string }> {
-        const nonce = nacl.randomBytes(nacl.secretbox.nonceLength)
-        const messageArray = new Uint8Array(str2ab(message))
-        const encrypted = nacl.secretbox(messageArray, nonce, this.key)
+    ): Promise<{ message: string; nonce?: string }> {
+        // const nonce = nacl.randomBytes(nacl.secretbox.nonceLength)
+        // const messageArray = new Uint8Array(str2ab(message))
+        // const encrypted = nacl.secretbox(messageArray, nonce, this.key)
         return {
-            message: await uint8ArrayToBase64(encrypted),
-            nonce: await uint8ArrayToBase64(nonce),
+            message: (await openpgp.encrypt({
+                message: openpgp.message.fromText(message),
+                passwords: [this.key],
+                armor: true,
+            })).data,
+            nonce: '',
         }
     }
 
     async decryptSyncMessage(encrypted: {
         message: string
-        nonce: string
+        nonce?: string
     }): Promise<string> {
-        const decrypted = nacl.secretbox.open(
-            await stringToUint8Array(encrypted.message),
-            await stringToUint8Array(encrypted.nonce),
-            this.key,
-        )
-
-        return ab2str(decrypted)
+        return (await openpgp.decrypt({
+            message: await openpgp.message.readArmored(encrypted.message),
+            passwords: [this.key],
+            format: 'utf8',
+        })).data as string
     }
 
     async _storeKey() {
         await this.options.browserAPIs.storage.local.set({
-            [SYNC_STORAGE_AREA_KEYS.encryptionKey]: await uint8ArrayToBase64(
-                this.key,
-            ),
+            [SYNC_STORAGE_AREA_KEYS.encryptionKey]: this.key,
         })
     }
 
@@ -75,7 +73,7 @@ export class SyncSecretStore {
         ])
         const retrievedKey: string | null = retrieved[storageKey]
         if (retrievedKey) {
-            this.key = await stringToUint8Array(retrievedKey)
+            this.key = retrievedKey
             this.loaded = true
         }
     }

@@ -72,12 +72,22 @@ describe('SyncSecretStore', () => {
         expect(decrypted).toEqual(original)
     })
 
+    it('should encrypt and decrypt a sync message with unicode characters', async () => {
+        const { secretStore } = await setupTest()
+        await secretStore.generateSyncEncryptionKey()
+        const original = 'test 𝌆 foo'
+        const encrypted = await secretStore.encryptSyncMessage(original)
+        expect(encrypted.message).not.toEqual(original)
+        const decrypted = await secretStore.decryptSyncMessage(encrypted)
+        expect(decrypted).toEqual(original)
+    })
+
     it('should encrypt sync message with different nonces every time', async () => {
         const { secretStore } = await setupTest()
         await secretStore.generateSyncEncryptionKey()
         const original = 'top secret'
         const firstEncrypted = await secretStore.encryptSyncMessage(original)
         const secondEncrypted = await secretStore.encryptSyncMessage(original)
-        expect(firstEncrypted).not.toEqual(secondEncrypted)
+        expect(firstEncrypted.message).not.toEqual(secondEncrypted.message)
     })
 })
