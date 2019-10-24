@@ -15,12 +15,14 @@ import ContinuousSync from './continuous-sync'
 import { MemexClientSyncLogStorage } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { AuthBackground } from 'src/authentication/background'
+import { SyncSecretStore } from './secrets'
 
 export default class SyncBackground {
     initialSync: InitialSync
     continuousSync: ContinuousSync
     remoteFunctions: PublicSyncInterface
     clientSyncLog: ClientSyncLogStorage
+    secretStore: SyncSecretStore
     syncLoggingMiddleware?: SyncLoggingMiddleware
     firstContinuousSyncPromise?: Promise<void>
     getSharedSyncLog: () => Promise<SharedSyncLog>
@@ -72,6 +74,7 @@ export default class SyncBackground {
                 }
             },
         })
+        this.secretStore = new SyncSecretStore(options)
 
         const bound = <Target, Key extends keyof Target>(
             object: Target,
