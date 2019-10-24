@@ -40,7 +40,6 @@ export class SyncSecretStore {
     ): Promise<{ message: string; nonce: string }> {
         const nonce = nacl.randomBytes(nacl.secretbox.nonceLength)
         const messageArray = new Uint8Array(str2ab(message))
-        console.log('in', messageArray)
         const encrypted = nacl.secretbox(messageArray, nonce, this.key)
         return {
             message: await uint8ArrayToBase64(encrypted),
@@ -58,7 +57,6 @@ export class SyncSecretStore {
             this.key,
         )
 
-        console.log('out', decrypted)
         return ab2str(decrypted)
     }
 
