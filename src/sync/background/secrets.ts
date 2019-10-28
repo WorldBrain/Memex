@@ -2,7 +2,7 @@ import * as openpgp from 'openpgp'
 import nacl from 'tweetnacl'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import { SYNC_STORAGE_AREA_KEYS } from './constants'
-import { stringToUint8Array, uint8ArrayToBase64, str2ab, ab2str } from './utils'
+import { ab2str } from './utils'
 
 export class SyncSecretStore {
     private key: string | null = null
@@ -36,9 +36,10 @@ export class SyncSecretStore {
     async encryptSyncMessage(
         message: string,
     ): Promise<{ message: string; nonce?: string }> {
-        // const nonce = nacl.randomBytes(nacl.secretbox.nonceLength)
-        // const messageArray = new Uint8Array(str2ab(message))
-        // const encrypted = nacl.secretbox(messageArray, nonce, this.key)
+        if (!this.key) {
+            throw new Error('Tried to encrypt sync message without a key')
+        }
+
         return {
             message: (await openpgp.encrypt({
                 message: openpgp.message.fromText(message),
@@ -53,6 +54,10 @@ export class SyncSecretStore {
         message: string
         nonce?: string
     }): Promise<string> {
+        if (!this.key) {
+            throw new Error('Tried to decrypt sync message without a key')
+        }
+
         return (await openpgp.decrypt({
             message: await openpgp.message.readArmored(encrypted.message),
             passwords: [this.key],

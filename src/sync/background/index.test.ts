@@ -184,7 +184,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
             })
         })
 
-        // Force incremental sync
+        // Force incremental sync from second device back to first
 
         await customLists(setups[1]).updateListName({
             id: listId,
@@ -201,6 +201,30 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
         ).toEqual({
             id: listId,
             name: 'Updated List Title',
+            isDeletable: true,
+            isNestable: true,
+            createdAt: expect.any(Date),
+            pages: ['http://bla.com/'],
+            active: true,
+        })
+
+        // Force incremental sync from first device to second
+
+        await customLists(setups[0]).updateListName({
+            id: listId,
+            name: 'Another Updated List Title',
+        })
+
+        await syncModule(setups[0]).remoteFunctions.forceIncrementalSync()
+        await syncModule(setups[1]).remoteFunctions.forceIncrementalSync()
+
+        expect(
+            await customLists(setups[1]).fetchListById({
+                id: listId,
+            }),
+        ).toEqual({
+            id: listId,
+            name: 'Another Updated List Title',
             isDeletable: true,
             isNestable: true,
             createdAt: expect.any(Date),
@@ -235,6 +259,9 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
 
         await forEachSetup(s => syncModule(s).setup())
         await forEachSetup(s => syncModule(s).firstContinuousSyncPromise)
+        await forEachSetup(
+            s => (syncModule(s).continuousSync.useEncryption = false),
+        )
 
         expectIncrementalSyncScheduled(syncModule(setups[0]), {
             when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
@@ -285,6 +312,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
         })
 
         await syncModule(setups[0]).setup()
+        syncModule(setups[0]).continuousSync.useEncryption = false
         await syncModule(setups[0]).firstContinuousSyncPromise
 
         const listId = await setups[0].backgroundModules.customLists.createCustomList(
@@ -294,6 +322,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
         )
         await setups[0].backgroundModules.sync.continuousSync.forceIncrementalSync()
         await syncModule(setups[1]).setup()
+        syncModule(setups[1]).continuousSync.useEncryption = false
         await syncModule(setups[1]).firstContinuousSyncPromise
 
         expect(

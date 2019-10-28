@@ -49,6 +49,7 @@ export default class SyncBackground {
         },
     ) {
         this.getSharedSyncLog = options.getSharedSyncLog
+        this.secretStore = new SyncSecretStore(options)
         this.clientSyncLog = new MemexClientSyncLogStorage({
             storageManager: options.storageManager,
         })
@@ -56,6 +57,7 @@ export default class SyncBackground {
             storageManager: options.storageManager,
             signalTransportFactory: options.signalTransportFactory,
             syncedCollections: this.syncedCollections,
+            secrectStore: this.secretStore,
         })
         this.continuousSync = new ContinuousSync({
             frequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
@@ -64,6 +66,7 @@ export default class SyncBackground {
             clientSyncLog: this.clientSyncLog,
             getSharedSyncLog: options.getSharedSyncLog,
             browserAPIs: options.browserAPIs,
+            secretStore: this.secretStore,
             toggleSyncLogging: (enabed: boolean) => {
                 if (this.syncLoggingMiddleware) {
                     this.syncLoggingMiddleware.enabled = enabed
@@ -74,7 +77,6 @@ export default class SyncBackground {
                 }
             },
         })
-        this.secretStore = new SyncSecretStore(options)
 
         const bound = <Target, Key extends keyof Target>(
             object: Target,

@@ -2,24 +2,33 @@ import { Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { reconcileSyncLog } from '@worldbrain/storex-sync/lib/reconciliation'
-import { doSync, SyncPreSendProcessor } from '@worldbrain/storex-sync'
+import {
+    doSync,
+    SyncPreSendProcessor,
+    SyncSerializer,
+} from '@worldbrain/storex-sync'
 import { SYNC_STORAGE_AREA_KEYS } from './constants'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { RecurringTask } from 'src/util/recurring-task'
 import { getLocalStorage } from 'src/util/storage'
 import { AuthBackground } from 'src/authentication/background'
 import { isTermsField } from 'src/storage/utils'
+import { SyncSecretStore } from './secrets'
+import { EncryptedSyncSerializer } from './sync-serializer'
 
 export default class ContinuousSync {
     public recurringIncrementalSyncTask?: RecurringTask
     public deviceId: number | string
     public enabled = false
+    public useEncryption = true
+    private syncSerializer: SyncSerializer
 
     constructor(
         private options: {
             auth: AuthBackground
             storageManager: StorageManager
             clientSyncLog: ClientSyncLogStorage
+            secretStore: SyncSecretStore
             getSharedSyncLog: () => Promise<SharedSyncLog>
             browserAPIs: {
                 storage: {
@@ -29,7 +38,11 @@ export default class ContinuousSync {
             frequencyInMs: number
             toggleSyncLogging: (enabled: boolean) => void
         },
-    ) { }
+    ) {
+        this.syncSerializer = new EncryptedSyncSerializer({
+            secretStore: options.secretStore,
+        })
+    }
 
     async setup() {
         const enabled = await this.retrieveSetting('continuousSyncEnabled')
@@ -109,6 +122,7 @@ export default class ContinuousSync {
             now: Date.now(),
             userId: user.id,
             deviceId: this.deviceId,
+            serializer: this.useEncryption ? this.syncSerializer : undefined,
             preSend: _preSendProcessor,
         })
     }
