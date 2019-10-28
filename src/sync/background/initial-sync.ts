@@ -19,6 +19,11 @@ import TypedEmitter from 'typed-emitter'
 import StorageManager from '@worldbrain/storex'
 import { createPassiveDataChecker } from 'src/storage/utils'
 import { getObjectPk } from '@worldbrain/storex/lib/utils'
+import { SyncSecretStore } from './secrets'
+import {
+    FastSyncSenderChannel,
+    FastSyncReceiverChannel,
+} from '@worldbrain/storex-sync/lib/fast-sync/types'
 
 interface InitialSyncInfo {
     signalChannel: SignalChannel
@@ -46,6 +51,7 @@ export default class InitialSync {
             storageManager: StorageManager
             signalTransportFactory: SignalTransportFactory
             syncedCollections: string[]
+            secrectStore: SyncSecretStore
         },
     ) {}
 
@@ -126,6 +132,8 @@ export default class InitialSync {
             wrtc: this.wrtc,
         })
 
+        let senderFastSyncChannel: FastSyncSenderChannel | undefined
+        let receiverFastSyncChannel: FastSyncReceiverChannel | undefined
         let senderFastSync: FastSyncSender | undefined
         let receiverFastSync: FastSyncReceiver | undefined
         let fastSync: {
@@ -133,10 +141,10 @@ export default class InitialSync {
             events: TypedEmitter<FastSyncEvents & InitialSyncEvents>
         }
         if (options.role === 'sender') {
-            const senderChannel = new WebRTCFastSyncSenderChannel({ peer })
+            senderFastSyncChannel = new WebRTCFastSyncSenderChannel({ peer })
             senderFastSync = new FastSyncSender({
                 storageManager: this.options.storageManager,
-                channel: senderChannel,
+                channel: senderFastSyncChannel,
                 collections: this.options.syncedCollections,
                 preSendProcessor:
                     options.excludePassiveData &&
@@ -146,10 +154,12 @@ export default class InitialSync {
             })
             fastSync = senderFastSync
         } else {
-            const receiverChannel = new WebRTCFastSyncReceiverChannel({ peer })
+            receiverFastSyncChannel = new WebRTCFastSyncReceiverChannel({
+                peer,
+            })
             receiverFastSync = new FastSyncReceiver({
                 storageManager: this.options.storageManager,
-                channel: receiverChannel,
+                channel: receiverFastSyncChannel,
             })
             fastSync = receiverFastSync
         }
@@ -176,6 +186,29 @@ export default class InitialSync {
                 fastSync.events.emit('releasingSignalChannel', {})
                 await signalChannel.release()
                 fastSync.events.emit('connected', {})
+
+                const { secrectStore } = this.options
+                if (options.role === 'sender') {
+                    let key = await secrectStore.getSyncEncryptionKey()
+                    if (!key) {
+                        await secrectStore.generateSyncEncryptionKey()
+                        key = await secrectStore.getSyncEncryptionKey()
+                    }
+                    await senderFastSyncChannel.sendUserPackage({
+                        type: 'encryption-key',
+                        key,
+                    })
+                } else {
+                    const userPackage = await receiverFastSyncChannel.receiveUserPackage()
+                    if (userPackage.type !== 'encryption-key') {
+                        throw new Error(
+                            'Expected to receive encryption key in inital sync, but got ' +
+                                userPackage.type,
+                        )
+                    }
+                    await secrectStore.setSyncEncryptionKey(userPackage.key)
+                }
+
                 await fastSync.execute()
                 fastSync.events.emit('finished', {})
             })()

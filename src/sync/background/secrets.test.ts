@@ -90,4 +90,18 @@ describe('SyncSecretStore', () => {
         const secondEncrypted = await secretStore.encryptSyncMessage(original)
         expect(firstEncrypted.message).not.toEqual(secondEncrypted.message)
     })
+
+    it('should throw an error if trying to encrypt a message without a key', async () => {
+        const { secretStore } = await setupTest()
+        await expect(secretStore.encryptSyncMessage('bla')).rejects.toThrow(
+            'Tried to encrypt sync message without a key',
+        )
+    })
+
+    it('should throw an error if trying to encrypt a message without a key', async () => {
+        const { secretStore } = await setupTest()
+        await expect(
+            secretStore.decryptSyncMessage({ message: 'bla' }),
+        ).rejects.toThrow('Tried to decrypt sync message without a key')
+    })
 })
