@@ -25,13 +25,21 @@ import {
     FastSyncReceiverChannel,
 } from '@worldbrain/storex-sync/lib/fast-sync/types'
 
-interface InitialSyncInfo {
+type InitialSyncInfo = {
     signalChannel: SignalChannel
-    execute: () => Promise<void>
     events: TypedEmitter<InitialSyncEvents>
-    senderFastSync?: FastSyncSender
-    receiverFastSync?: FastSyncReceiver
-}
+    finishPromise: Promise<void>
+} & (
+    | {
+          role: 'sender'
+          senderFastSyncChannel: FastSyncSenderChannel
+          senderFastSync: FastSyncSender
+      }
+    | {
+          role: 'receiver'
+          receiverFastSyncChannel: FastSyncReceiverChannel
+          receiverFastSync: FastSyncReceiver
+      })
 
 type InitialSyncEvents = FastSyncEvents &
     SimplePeerSignallingEvents & {
@@ -70,7 +78,6 @@ export default class InitialSync {
             deviceId: 'first',
             ...(options || {}),
         })
-        this.initialSyncInfo.execute()
 
         return { initialMessage }
     }
@@ -86,12 +93,11 @@ export default class InitialSync {
             initialMessage: options.initialMessage,
             deviceId: 'second',
         })
-        this.initialSyncInfo.execute()
     }
 
     async waitForInitialSync(): Promise<void> {
         if (this.initialSyncInfo) {
-            await this.initialSyncInfo.execute()
+            await this.initialSyncInfo.finishPromise
         }
     }
 
@@ -140,6 +146,7 @@ export default class InitialSync {
             execute: () => Promise<void>
             events: TypedEmitter<FastSyncEvents & InitialSyncEvents>
         }
+
         if (options.role === 'sender') {
             senderFastSyncChannel = new WebRTCFastSyncSenderChannel({ peer })
             senderFastSync = new FastSyncSender({
@@ -164,63 +171,76 @@ export default class InitialSync {
             fastSync = receiverFastSync
         }
 
-        let executePromise: Promise<void>
-        const execute = () => {
-            if (executePromise) {
-                return executePromise
+        const buildInfo = (): InitialSyncInfo => {
+            const common = {
+                signalChannel,
+                finishPromise,
+                events: fastSync.events,
             }
-            executePromise = (async () => {
-                // fastSync.events.emit = ((eventName: string, event: any) => {
-                //     console.log('sync event', eventName, event)
-                //     return true
-                // }) as any
-
-                fastSync.events.emit('connecting', {})
-                await signalChannel.connect()
-                await signalSimplePeer({
-                    signalChannel,
-                    simplePeer: peer,
-                    reporter: (eventName, event) =>
-                        (fastSync.events as any).emit(eventName, event),
-                })
-                fastSync.events.emit('releasingSignalChannel', {})
-                await signalChannel.release()
-                fastSync.events.emit('connected', {})
-
-                const { secrectStore } = this.options
-                if (options.role === 'sender') {
-                    let key = await secrectStore.getSyncEncryptionKey()
-                    if (!key) {
-                        await secrectStore.generateSyncEncryptionKey()
-                        key = await secrectStore.getSyncEncryptionKey()
-                    }
-                    await senderFastSyncChannel.sendUserPackage({
-                        type: 'encryption-key',
-                        key,
-                    })
-                } else {
-                    const userPackage = await receiverFastSyncChannel.receiveUserPackage()
-                    if (userPackage.type !== 'encryption-key') {
-                        throw new Error(
-                            'Expected to receive encryption key in inital sync, but got ' +
-                                userPackage.type,
-                        )
-                    }
-                    await secrectStore.setSyncEncryptionKey(userPackage.key)
+            if (options.role === 'sender') {
+                return {
+                    role: 'sender',
+                    ...common,
+                    senderFastSync,
+                    senderFastSyncChannel,
                 }
-
-                await fastSync.execute()
-                fastSync.events.emit('finished', {})
-            })()
-            return executePromise
+            } else {
+                return {
+                    role: 'receiver',
+                    ...common,
+                    receiverFastSync,
+                    receiverFastSyncChannel,
+                }
+            }
         }
 
-        return {
-            signalChannel,
-            execute,
-            events: fastSync.events,
-            senderFastSync,
-            receiverFastSync,
+        const finishPromise: Promise<void> = (async () => {
+            // fastSync.events.emit = ((eventName: string, event: any) => {
+            //     console.log('sync event', eventName, event)
+            //     return true
+            // }) as any
+
+            fastSync.events.emit('connecting', {})
+            await signalChannel.connect()
+            await signalSimplePeer({
+                signalChannel,
+                simplePeer: peer,
+                reporter: (eventName, event) =>
+                    (fastSync.events as any).emit(eventName, event),
+            })
+            fastSync.events.emit('releasingSignalChannel', {})
+            await signalChannel.release()
+            fastSync.events.emit('connected', {})
+
+            await this.preSync(buildInfo())
+            await fastSync.execute()
+            fastSync.events.emit('finished', {})
+        })()
+
+        return buildInfo()
+    }
+
+    protected async preSync(options: InitialSyncInfo) {
+        const { secrectStore } = this.options
+        if (options.role === 'sender') {
+            let key = await secrectStore.getSyncEncryptionKey()
+            if (!key) {
+                await secrectStore.generateSyncEncryptionKey()
+                key = await secrectStore.getSyncEncryptionKey()
+            }
+            await options.senderFastSyncChannel.sendUserPackage({
+                type: 'encryption-key',
+                key,
+            })
+        } else {
+            const userPackage = await options.receiverFastSyncChannel.receiveUserPackage()
+            if (userPackage.type !== 'encryption-key') {
+                throw new Error(
+                    'Expected to receive encryption key in inital sync, but got ' +
+                        userPackage.type,
+                )
+            }
+            await secrectStore.setSyncEncryptionKey(userPackage.key)
         }
     }
 }
