@@ -4,26 +4,35 @@ import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-lo
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
 
+import {
+    MemexInitialSync,
+    MemexContinuousSync,
+    SignalTransportFactory,
+    SyncSecretStore,
+} from '@worldbrain/memex-common/lib/sync'
+import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/constants'
 import { COLLECTION_NAMES as PAGES_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/pages/constants'
 import { COLLECTION_NAMES as TAGS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/tags/constants'
 import { COLLECTION_NAMES as LISTS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 import { COLLECTION_NAMES as ANNOTATIONS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/annotations/constants'
 
 import { PublicSyncInterface } from './types'
-import InitialSync, { SignalTransportFactory } from './initial-sync'
-import ContinuousSync from './continuous-sync'
 import { MemexClientSyncLogStorage } from './storage'
 import { AuthBackground } from 'src/authentication/background'
-import { INCREMENTAL_SYNC_FREQUENCY, SYNC_STORAGE_AREA_KEYS } from './constants'
-import { SyncSecretStore } from './secrets'
-import { ContinuousSyncSetting } from '@worldbrain/storex-sync/lib/integration/continuous-sync'
+import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { getLocalStorage } from 'src/util/storage'
+import {
+    SyncSetting,
+    SyncSettingsStore,
+} from '@worldbrain/storex-sync/lib/integration/settings'
+import { MemexSyncSetting } from '@worldbrain/memex-common/lib/sync/types'
 
 export default class SyncBackground {
-    initialSync: InitialSync
-    continuousSync: ContinuousSync
+    initialSync: MemexInitialSync
+    continuousSync: MemexContinuousSync
     remoteFunctions: PublicSyncInterface
     clientSyncLog: ClientSyncLogStorage
+    settingStore: MemexSyncSettingStore
     secretStore: SyncSecretStore
     syncLoggingMiddleware?: SyncLoggingMiddleware
     firstContinuousSyncPromise?: Promise<void>
@@ -51,17 +60,20 @@ export default class SyncBackground {
         },
     ) {
         this.getSharedSyncLog = options.getSharedSyncLog
-        this.secretStore = new SyncSecretStore(options)
+        this.settingStore = new MemexSyncSettingStore(options)
+        this.secretStore = new SyncSecretStore({
+            settingStore: this.settingStore,
+        })
         this.clientSyncLog = new MemexClientSyncLogStorage({
             storageManager: options.storageManager,
         })
-        this.initialSync = new InitialSync({
+        this.initialSync = new MemexInitialSync({
             storageManager: options.storageManager,
             signalTransportFactory: options.signalTransportFactory,
             syncedCollections: this.syncedCollections,
             secrectStore: this.secretStore,
         })
-        this.continuousSync = new ContinuousSync({
+        this.continuousSync = new MemexContinuousSync({
             frequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
             auth: {
                 getUserId: async () => {
@@ -73,25 +85,7 @@ export default class SyncBackground {
             clientSyncLog: this.clientSyncLog,
             getSharedSyncLog: options.getSharedSyncLog,
             secretStore: this.secretStore,
-            settingStore: {
-                retrieveSetting: async (key: ContinuousSyncSetting) => {
-                    const localStorage = options.browserAPIs.storage.local
-                    return getLocalStorage(
-                        SYNC_STORAGE_AREA_KEYS[key],
-                        null,
-                        localStorage,
-                    )
-                },
-                storeSetting: async (
-                    key: ContinuousSyncSetting,
-                    value: boolean | number | string | null,
-                ) => {
-                    const localStorage = options.browserAPIs.storage.local
-                    await localStorage.set({
-                        [SYNC_STORAGE_AREA_KEYS[key]]: value,
-                    })
-                },
-            },
+            settingStore: this.settingStore,
             toggleSyncLogging: (enabed: boolean) => {
                 if (this.syncLoggingMiddleware) {
                     this.syncLoggingMiddleware.enabled = enabed
@@ -139,5 +133,23 @@ export default class SyncBackground {
         })
         this.syncLoggingMiddleware.enabled = false
         return this.syncLoggingMiddleware
+    }
+}
+
+class MemexSyncSettingStore implements SyncSettingsStore {
+    constructor(private options: { browserAPIs: Pick<Browser, 'storage'> }) { }
+
+    async retrieveSetting(key: MemexSyncSetting) {
+        const localStorage = this.options.browserAPIs.storage.local
+        return getLocalStorage(SYNC_STORAGE_AREA_KEYS[key], null, localStorage)
+    }
+    async storeSetting(
+        key: MemexSyncSetting,
+        value: boolean | number | string | null,
+    ) {
+        const localStorage = this.options.browserAPIs.storage.local
+        await localStorage.set({
+            [SYNC_STORAGE_AREA_KEYS[key]]: value,
+        })
     }
 }
