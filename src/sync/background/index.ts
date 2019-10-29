@@ -13,9 +13,11 @@ import { PublicSyncInterface } from './types'
 import InitialSync, { SignalTransportFactory } from './initial-sync'
 import ContinuousSync from './continuous-sync'
 import { MemexClientSyncLogStorage } from './storage'
-import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { AuthBackground } from 'src/authentication/background'
+import { INCREMENTAL_SYNC_FREQUENCY, SYNC_STORAGE_AREA_KEYS } from './constants'
 import { SyncSecretStore } from './secrets'
+import { ContinuousSyncSetting } from '@worldbrain/storex-sync/lib/integration/continuous-sync'
+import { getLocalStorage } from 'src/util/storage'
 
 export default class SyncBackground {
     initialSync: InitialSync
@@ -61,12 +63,35 @@ export default class SyncBackground {
         })
         this.continuousSync = new ContinuousSync({
             frequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
-            auth: options.auth,
+            auth: {
+                getUserId: async () => {
+                    const user = options.auth.getCurrentUser()
+                    return user && user.id
+                },
+            },
             storageManager: options.storageManager,
             clientSyncLog: this.clientSyncLog,
             getSharedSyncLog: options.getSharedSyncLog,
-            browserAPIs: options.browserAPIs,
             secretStore: this.secretStore,
+            settingStore: {
+                retrieveSetting: async (key: ContinuousSyncSetting) => {
+                    const localStorage = options.browserAPIs.storage.local
+                    return getLocalStorage(
+                        SYNC_STORAGE_AREA_KEYS[key],
+                        null,
+                        localStorage,
+                    )
+                },
+                storeSetting: async (
+                    key: ContinuousSyncSetting,
+                    value: boolean | number | string | null,
+                ) => {
+                    const localStorage = options.browserAPIs.storage.local
+                    await localStorage.set({
+                        [SYNC_STORAGE_AREA_KEYS[key]]: value,
+                    })
+                },
+            },
             toggleSyncLogging: (enabed: boolean) => {
                 if (this.syncLoggingMiddleware) {
                     this.syncLoggingMiddleware.enabled = enabed

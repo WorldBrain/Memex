@@ -394,9 +394,10 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
 
             await params.insertData({ device: setups[0] })
 
+            syncModule(setups[0]).initialSync.filterPassiveData = true
             const { initialMessage } = await syncModule(
                 setups[0],
-            ).remoteFunctions.requestInitialSync({ excludePassiveData: true })
+            ).remoteFunctions.requestInitialSync()
             await syncModule(setups[1]).remoteFunctions.answerInitialSync({
                 initialMessage,
             })
