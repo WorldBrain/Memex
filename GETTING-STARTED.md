@@ -4,7 +4,7 @@
 
 **This assumes a basic knowledge of `git`, `npm` and usage of the `command line`.**
 
-** Please ensure you are running on an environment using [the latest LTS version of Node](https://nodejs.org/en/).**
+**Please ensure you are running on an environment using [a v10.x release of Node](https://nodejs.org/en/).** As of writing, this is currently Node [v10.17.0](https://nodejs.org/download/release/v10.17.0/). Newer versions could result in a failing `yarn install` as they haven't been assessed just yet.
 
 ### First steps:
 
