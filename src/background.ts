@@ -1,6 +1,7 @@
 import 'babel-polyfill'
 import 'core-js/es7/symbol'
 import { browser } from 'webextension-polyfill-ts'
+import { createSelfTests } from '@worldbrain/memex-common/lib/self-tests'
 
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
@@ -84,89 +85,45 @@ export async function main() {
     window['analytics'] = analytics
     window['tabMan'] = backgroundModules.activityLogger.tabManager
 
-    const selfTests = {
-        clearDb: async () => {
-            for (const collectionName of Object.keys(
-                storageManager.registry.collections,
-            )) {
-                await storageManager
-                    .collection(collectionName)
-                    .deleteObjects({})
-            }
+    window['selfTests'] = await createSelfTests({
+        storage: {
+            manager: storageManager,
         },
-        insertTestList: async () => {
-            const listId = await backgroundModules.customLists.createCustomList(
-                {
-                    name: 'My list',
-                },
-            )
-            await backgroundModules.customLists.insertPageToList({
-                id: listId,
-                url:
-                    'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
-            })
-            await backgroundModules.search.searchIndex.addPage({
-                pageDoc: {
+        services: {
+            sync: backgroundModules.sync,
+        },
+        auth: {
+            setUser: async ({ id }) => {
+                backgroundModules.auth.userId = id
+            },
+        },
+        intergrationTestData: {
+            insert: async () => {
+                console.log('Inserting integration test data')
+                const listId = await backgroundModules.customLists.createCustomList(
+                    {
+                        name: 'My list',
+                    },
+                )
+                await backgroundModules.customLists.insertPageToList({
+                    id: listId,
                     url:
                         'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
-                    content: {
-                        fullText: 'home page content',
-                        title: 'bla.com title',
+                })
+                await backgroundModules.search.searchIndex.addPage({
+                    pageDoc: {
+                        url:
+                            'http://highscalability.com/blog/2019/7/19/stuff-the-internet-says-on-scalability-for-july-19th-2019.html',
+                        content: {
+                            fullText: 'home page content',
+                            title: 'bla.com title',
+                        },
                     },
-                },
-                visits: [],
-            })
+                    visits: [],
+                })
+            },
         },
-        initialSyncSend: async () => {
-            await selfTests.clearDb()
-            await selfTests.insertTestList()
-            return backgroundModules.sync.remoteFunctions.requestInitialSync()
-        },
-        initialSyncReceive: async (options: { initialMessage: string }) => {
-            await selfTests.clearDb()
-            await backgroundModules.sync.remoteFunctions.answerInitialSync(
-                options,
-            )
-            await backgroundModules.sync.remoteFunctions.waitForInitialSync()
-            console['log'](
-                'After initial Sync, got these lists',
-                await storageManager.collection('customLists').findObjects({}),
-            )
-        },
-        incrementalSyncSend: async (userId: string) => {
-            await selfTests.clearDb()
-            // todo: (ch) (auth) (sync): Construct and set a Memory Auth implementation that allows setting the UserID
-            await backgroundModules.sync.continuousSync.storeSetting(
-                'deviceId',
-                null,
-            )
-
-            // await serverStorageManager.collection('sharedSyncLogEntryBatch').deleteObjects({})
-            await backgroundModules.sync.continuousSync.initDevice()
-            await backgroundModules.sync.continuousSync.setupContinuousSync()
-            await selfTests.insertTestList()
-            await backgroundModules.sync.continuousSync.forceIncrementalSync()
-        },
-        incrementalSyncReceive: async (userId: string) => {
-            await selfTests.clearDb()
-            // todo: (ch) (auth) (sync): Construct and set a Memory Auth implementation that allows setting the UserID
-            // backgroundModules.auth.userId = userId
-            await backgroundModules.sync.continuousSync.storeSetting(
-                'deviceId',
-                null,
-            )
-            // await serverStorageManager.collection('sharedSyncLogEntryBatch').deleteObjects({})
-
-            await backgroundModules.sync.continuousSync.initDevice()
-            await backgroundModules.sync.continuousSync.setupContinuousSync()
-            await backgroundModules.sync.continuousSync.forceIncrementalSync()
-            console['log'](
-                'After incremental Sync, got these lists',
-                await storageManager.collection('customLists').findObjects({}),
-            )
-        },
-    }
-    window['selfTests'] = selfTests
+    })
 }
 
 main()

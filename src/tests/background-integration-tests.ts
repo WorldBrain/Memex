@@ -3,11 +3,9 @@ import { URL } from 'whatwg-url'
 import expect from 'expect'
 const wrtc = require('wrtc')
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
-import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
-import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import {
     createBackgroundModules,
     registerBackgroundModuleCollections,
@@ -19,7 +17,6 @@ import {
     BackgroundIntegrationTest,
 } from './integration-tests'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
-import { SignalTransportFactory } from 'src/sync/background/initial-sync'
 import { StorageChangeDetector } from './storage-change-detector'
 import StorageOperationLogger from './storage-operation-logger'
 import { setStorex } from 'src/search/get-db'

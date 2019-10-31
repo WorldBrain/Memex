@@ -10,6 +10,8 @@ import {
     SignalTransportFactory,
     SyncSecretStore,
 } from '@worldbrain/memex-common/lib/sync'
+import { MemexSyncSettingsStore } from '@worldbrain/memex-common/lib/sync/settings'
+import { MemexSyncSetting } from '@worldbrain/memex-common/lib/sync/types'
 import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/constants'
 import { COLLECTION_NAMES as PAGES_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/pages/constants'
 import { COLLECTION_NAMES as TAGS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/tags/constants'
@@ -21,18 +23,13 @@ import { MemexClientSyncLogStorage } from './storage'
 import { AuthBackground } from 'src/authentication/background'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { getLocalStorage } from 'src/util/storage'
-import {
-    SyncSetting,
-    SyncSettingsStore,
-} from '@worldbrain/storex-sync/lib/integration/settings'
-import { MemexSyncSetting } from '@worldbrain/memex-common/lib/sync/types'
 
 export default class SyncBackground {
     initialSync: MemexInitialSync
     continuousSync: MemexContinuousSync
     remoteFunctions: PublicSyncInterface
     clientSyncLog: ClientSyncLogStorage
-    settingStore: MemexSyncSettingStore
+    settingStore: MemexSyncSettingStoreImplentation
     secretStore: SyncSecretStore
     syncLoggingMiddleware?: SyncLoggingMiddleware
     firstContinuousSyncPromise?: Promise<void>
@@ -60,7 +57,7 @@ export default class SyncBackground {
         },
     ) {
         this.getSharedSyncLog = options.getSharedSyncLog
-        this.settingStore = new MemexSyncSettingStore(options)
+        this.settingStore = new MemexSyncSettingStoreImplentation(options)
         this.secretStore = new SyncSecretStore({
             settingStore: this.settingStore,
         })
@@ -86,9 +83,12 @@ export default class SyncBackground {
             getSharedSyncLog: options.getSharedSyncLog,
             secretStore: this.secretStore,
             settingStore: this.settingStore,
-            toggleSyncLogging: (enabed: boolean) => {
+            toggleSyncLogging: (enabed, deviceId?) => {
                 if (this.syncLoggingMiddleware) {
                     this.syncLoggingMiddleware.enabled = enabed
+                    if (enabed) {
+                        this.syncLoggingMiddleware.deviceId = deviceId
+                    }
                 } else {
                     throw new Error(
                         `Tried to toggle sync logging before logging middleware was created`,
@@ -136,7 +136,7 @@ export default class SyncBackground {
     }
 }
 
-class MemexSyncSettingStore implements SyncSettingsStore {
+class MemexSyncSettingStoreImplentation implements MemexSyncSettingsStore {
     constructor(private options: { browserAPIs: Pick<Browser, 'storage'> }) { }
 
     async retrieveSetting(key: MemexSyncSetting) {
