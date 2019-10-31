@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-    - 'lts/*'
+    - '10'
 install:
     - git submodule update --init --recursive
     - yarn install --frozen-lockfile
