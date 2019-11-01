@@ -25,3 +25,8 @@ export interface Item {
 }
 
 export type ServiceParser = (doc: Document) => Item[]
+
+export interface ExistingSets {
+    histKeys: Set<string>
+    bmKeys: Set<string>
+}

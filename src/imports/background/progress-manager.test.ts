@@ -32,6 +32,10 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
                 histKeys: new Set(),
                 bmKeys: new Set(),
             }),
+            existingKeyCounts: async () => ({
+                histCount: 1000,
+                bmCount: 1000,
+            }),
         })
         stateManager = new ImportStateManager({
             itemCreator,

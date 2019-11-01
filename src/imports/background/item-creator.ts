@@ -4,6 +4,7 @@ import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import DataSources from './data-sources'
 import { chunk } from 'src/util/chunk'
+import { ExistingSets } from './types'
 
 // Binds an import type to a function that transforms a history/bookmark doc to an import item.
 const deriveImportItem = type => item => ({
@@ -50,23 +51,26 @@ export default class ImportItemCreator {
         bmLimit: Infinity,
         servicesLimit: Infinity,
     }
-    static IMPORT_LIMIT = 1000
+    static EXISTING_ITEM_BATCH_SIZE = 1000
 
     _dataSources: DataSources
-    _existingKeys: () => Promise<{
-        histKeys: Set<string>
-        bmKeys: Set<string>
+    private _existingKeys: (
+        args: { limit: number; offset: number },
+    ) => Promise<ExistingSets>
+    private _existingKeyCounts: () => Promise<{
+        histCount: number
+        bmCount: number
     }>
 
+    private _completedServicesCount: number
+    private _histCount: number
+    private _bmCount: number
+    private _servicesData: any[]
     _histLimit
     _bmLimit
     _servicesLimit
-    _bmKeys
-    _histKeys
-    _completedServicesKeys
     existingDataReady
     _isBlacklisted
-    _servicesData
 
     /**
      * @param {ItemCreatorParams} args
@@ -75,17 +79,19 @@ export default class ImportItemCreator {
         limits = ImportItemCreator.DEF_LIMITS,
         dataSources = new DataSources({}),
         existingKeySource,
+        existingKeyCounts,
     }: {
         limits?: any
         dataSources?: DataSources
-        existingKeySource: () => Promise<{
-            histKeys: Set<string>
-            bmKeys: Set<string>
-        }>
+        existingKeySource: (
+            args: { limit: number; offset: number },
+        ) => Promise<ExistingSets>
+        existingKeyCounts: () => Promise<{ histCount: number; bmCount: number }>
     }) {
         this.limits = limits
         this._dataSources = dataSources
         this._existingKeys = existingKeySource
+        this._existingKeyCounts = existingKeyCounts
 
         this.initData()
     }
@@ -101,15 +107,15 @@ export default class ImportItemCreator {
     }
 
     get completedBmCount() {
-        return this._bmCounts
+        return this._bmCount
     }
 
     get completedHistCount() {
-        return this._histCounts - this.completedBmCount
+        return this._histCount - this.completedBmCount
     }
 
     get completedServicesCount() {
-        return this._completedServicesKeys.size
+        return this._completedServicesCount
     }
 
     static _limitMap = (items, limit) => new Map([...items].slice(0, limit))
@@ -125,12 +131,10 @@ export default class ImportItemCreator {
                 this._isBlacklisted = await checkWithBlacklist()
 
                 // Grab existing data keys from DB
-                const keySets = await this._existingKeys()
+                const keySets = await this._existingKeyCounts()
 
-                this._histCounts = keySets.histCounts._value
-                this._bmCounts = keySets.bmCounts._value
-                this._histKeys = keySets.histKeys
-                this._bmKeys = keySets.bmKeys
+                this._histCount = keySets.histCount
+                this._bmCount = keySets.bmCount
                 resolve()
             } catch (err) {
                 reject(err)
@@ -142,47 +146,68 @@ export default class ImportItemCreator {
             ? await this._dataSources.parseFile(blobUrl, allowTypes)
             : []
 
-        this._completedServicesKeys = new Set(
-            this._servicesData
-                .filter(item => this._histKeys.has(normalizeUrl(item.url)))
-                .map(item => item.url),
-        )
+        await this.calculateCompletedServicesCount()
+    }
+
+    private async calculateCompletedServicesCount() {
+        this._completedServicesCount = 0
+
+        for (
+            let offset = 0;
+            offset < this._histCount;
+            offset += ImportItemCreator.EXISTING_ITEM_BATCH_SIZE
+        ) {
+            const existingSet = (await this._existingKeys({
+                limit: ImportItemCreator.EXISTING_ITEM_BATCH_SIZE,
+                offset,
+            })).histKeys
+
+            this._completedServicesCount += this._servicesData.filter(item =>
+                existingSet.has(normalizeUrl(item.url)),
+            ).length
+        }
     }
 
     /**
-     *
      * Performs all needed filtering on a collection of history or bookmarks
-     *
-     * @param {(item: any) => any} [transform=noop] Opt. transformation fn turning current item into import item structure.
-     * @param {(count: number) => bool} [count] check against the maximum number of entries from the database
-     * @param {(url: string) => bool} [existsSet] Opt. checker function to check against existing data.
-     * @return {(items: BrowserItem[]) => Map<string, any>} Function that filters array of browser items into a Map of encoded URL strings to import items. (return type)
      */
-    _filterItemsByUrl = (transform, count, existsSet) => items => {
-        const importItems = new Map()
-        const addedItems = new Set(items)
-        let offset = existsSet.size
+    _filterItemsByUrl = (args: {
+        transform: (item: any) => any
+        totalCount: number
+        existingSetSelector: (sets: ExistingSets) => Set<string>
+    }) => async (items: any[]): Promise<Map<string, any>> => {
+        const importItems = new Map<string, any>()
 
-        // constantly update existing urls to remove duplicates the set
-        while (offset < count) {
-            for (const url of existsSet) {
-                addedItems.delete(url)
-            }
-            existsSet = () =>
-                searchIndex.grabMoreExistingKeys(
+        for (
+            let offset = 0;
+            offset < args.totalCount;
+            offset += ImportItemCreator.EXISTING_ITEM_BATCH_SIZE
+        ) {
+            const existsSet = args.existingSetSelector(
+                await this._existingKeys({
+                    limit: ImportItemCreator.EXISTING_ITEM_BATCH_SIZE,
                     offset,
-                    ImportItemCreator.IMPORT_LIMIT,
-                )
-            offset += ImportItemCreator.IMPORT_LIMIT
-        }
+                }),
+            )
 
-        for (const url of addedItems.values()) {
-            if (!isLoggable(url) || this._isBlacklisted(url)) {
-                addedItems.delete(url)
-            } else {
-                importItems.set(normalizeUrl(url), transform(url))
+            for (const item of items) {
+                const { url } = item
+                if (!isLoggable({ url }) || this._isBlacklisted({ url })) {
+                    continue
+                }
+
+                try {
+                    const normalized = normalizeUrl(url)
+
+                    if (!existsSet.has(normalized)) {
+                        importItems.set(normalized, args.transform(item))
+                    }
+                } catch (err) {
+                    continue
+                }
             }
         }
+
         return importItems
     }
 
@@ -200,7 +225,7 @@ export default class ImportItemCreator {
 
         for await (const itemBatch of itemIterator) {
             const prevCount = itemCount
-            const data = itemFilter(itemBatch)
+            const data = await itemFilter(itemBatch)
             itemCount += data.size
 
             if (itemCount >= limit) {
@@ -225,11 +250,11 @@ export default class ImportItemCreator {
      */
     async *createImportItems() {
         if (this._bmLimit > 0) {
-            const itemsFilter = this._filterItemsByUrl(
-                deriveImportItem(TYPE.BOOKMARK),
-                this._bmCounts,
-                this._bmKeys,
-            )
+            const itemsFilter = this._filterItemsByUrl({
+                transform: deriveImportItem(TYPE.BOOKMARK),
+                totalCount: this._bmCount,
+                existingSetSelector: sets => sets.bmKeys,
+            })
 
             yield* this._iterateItems(
                 this._dataSources.bookmarks(),
@@ -240,11 +265,11 @@ export default class ImportItemCreator {
         }
 
         if (this._histLimit > 0) {
-            const itemsFilter = this._filterItemsByUrl(
-                deriveImportItem(TYPE.HISTORY),
-                this._histCounts,
-                this._histKeys,
-            )
+            const itemsFilter = this._filterItemsByUrl({
+                transform: deriveImportItem(TYPE.HISTORY),
+                totalCount: this._histCount,
+                existingSetSelector: sets => sets.histKeys,
+            })
 
             yield* this._iterateItems(
                 this._dataSources.history(),
@@ -255,10 +280,16 @@ export default class ImportItemCreator {
         }
 
         if (this._servicesData && this._servicesLimit > 0) {
-            const itemsFilter = this._filterItemsByUrl(
-                deriveServicesImportItem(TYPE.OTHERS),
-                new Set(),
-            )
+            const itemsFilter = items => {
+                const importItems = new Map()
+                for (const item of items) {
+                    importItems.set(
+                        item,
+                        deriveServicesImportItem(TYPE.OTHERS)(item),
+                    )
+                }
+                return importItems
+            }
 
             yield* this._iterateItems(
                 chunk(this._servicesData, 10),

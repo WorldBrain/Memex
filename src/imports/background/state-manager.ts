@@ -67,7 +67,8 @@ export class ImportStateManager {
         this._itemCreator =
             itemCreator ||
             new ItemCreator({
-                existingKeySource: () => searchIndex.grabExistingKeys(),
+                existingKeySource: args => searchIndex.grabExistingKeys(args),
+                existingKeyCounts: () => searchIndex.grabExistingKeyCounts(),
             })
 
         this._initFromCache()
