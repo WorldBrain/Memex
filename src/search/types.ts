@@ -161,9 +161,15 @@ export interface SearchIndex {
     ) => Promise<void>
     fetchPageTags: (url: string) => Promise<any>
 
-    grabExistingKeys: () => Promise<{
+    grabExistingKeys: (
+        args: { limit: number; offset: number },
+    ) => Promise<{
         histKeys: Set<string>
         bmKeys: Set<string>
+    }>
+    grabExistingKeyCounts: () => Promise<{
+        histCount: number
+        bmCount: number
     }>
 
     createPageFromTab: (params: PageCreationProps) => Promise<any>

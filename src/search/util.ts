@@ -33,7 +33,7 @@ export const grabExistingKeyCounts = (getDb: DBGet) => async (): Promise<{
     const db = await getDb()
 
     const histCount = await db.operation(DexieUtilsPlugin.GET_COUNT_OP, {
-        collection: 'pages ',
+        collection: 'pages',
     })
     const bmCount = await db.operation(DexieUtilsPlugin.GET_COUNT_OP, {
         collection: 'bookmarks',
@@ -76,30 +76,6 @@ export const grabExistingKeys = (getDb: DBGet) => async ({
     }
 
     return { histKeys, bmKeys }
-}
-
-export const grabMoreExistingKeys = (getDb: () => Promise<Dexie>) => async (
-    offset,
-    importLimit,
-) => {
-    const db = await getDb()
-
-    return db.transaction('r', db.pages, db.bookmarks, async () => ({
-        histKeys: new Set(
-            await db.pages
-                .toCollection()
-                .offset(offset)
-                .limit(importLimit)
-                .primaryKeys(),
-        ),
-        bmKeys: new Set(
-            await db.bookmarks
-                .toCollection()
-                .offset(offset)
-                .limit(importLimit)
-                .primaryKeys(),
-        ),
-    }))
 }
 
 /**

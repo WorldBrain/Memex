@@ -15,7 +15,7 @@ import {
 import { addBookmark, delBookmark, pageHasBookmark } from './bookmarks'
 import { addTag, delTag, fetchPageTags } from './tags'
 import { TabManager } from 'src/activity-logger/background'
-import { getPage, grabExistingKeys } from './util'
+import { getPage, grabExistingKeys, grabExistingKeyCounts } from './util'
 import { search, getMatchingPageCount, fullSearch } from './search'
 import {
     createPageFromTab,
@@ -50,6 +50,7 @@ export function combineSearchIndex(dependenices: {
         delTag: delTag(dependenices.getDb),
         fetchPageTags: fetchPageTags(dependenices.getDb),
         grabExistingKeys: grabExistingKeys(dependenices.getDb),
+        grabExistingKeyCounts: grabExistingKeyCounts(dependenices.getDb),
 
         createPageFromTab: createPageFromTab(dependenices.getDb),
         createPageFromUrl: createPageFromUrl(dependenices.getDb),

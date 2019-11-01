@@ -144,6 +144,7 @@ export interface SearchBackend {
     pageHasBookmark: any
     getPage: any
     grabExistingKeys: any
+    grabExistingKeyCounts: any
     search: any
     getMatchingPageCount: any
     domainHasFavIcon: any
