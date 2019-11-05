@@ -12,14 +12,19 @@ export default ({ mode }) => {
         BACKUP_BATCH_SIZE: '500',
         BACKUP_START_SCREEN: '',
         BACKUP_TEST_SIZE_ESTIMATION: '',
-        AUTH_ENABLED: 'true',
+        DEV_AUTH_STATE: '',
     }
 
-    if (mode === 'development' && process.env.DEV_AUTH_ENABLED !== 'true') {
-        console.warn(
-            `Firebase auth will be turned off for extension development. See authentication/readme.md for more.`,
-        )
-        env.AUTH_ENABLED = 'false'
+    if (mode === 'development') {
+        if (process.env.DEV_AUTH_STATE !== '') {
+            console.warn(
+                `AUTH: Firebase auth will use staging credentials. See authentication/readme.md for more auth options.`,
+            )
+            env.DEV_AUTH_STATE = 'staging'
+        }
+    } else {
+        env.DEV_AUTH_STATE = process.env.DEV_AUTH_STATE
+        console.info(`AUTH: Firebase auth state set to: ${env.DEV_AUTH_STATE}`)
     }
 
     // Analytics

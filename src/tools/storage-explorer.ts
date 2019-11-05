@@ -43,7 +43,6 @@ async function main() {
 
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
-        authBackground: null,
         getSharedSyncLog: null,
         signalTransportFactory: null,
         storageManager,

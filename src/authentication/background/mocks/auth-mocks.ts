@@ -25,7 +25,7 @@ export class MockLinkGenerator {
 }
 
 export class MockAuthImplementation implements AuthInterface {
-    private readonly claims: Claims = {
+    private claims: Claims = {
         subscriptions: new Map() as SubscriptionMap,
         features: new Map() as FeaturesMap,
         lastSubscribed: null,
@@ -33,8 +33,7 @@ export class MockAuthImplementation implements AuthInterface {
 
     constructor(options: { expiry?: number } = {}) {
         const { expiry } = options
-
-        if (expiry) {
+        if (expiry != null) {
             this.claims.subscriptions.set('backup-monthly', { expiry })
             this.claims.subscriptions.set('sync-monthly', { expiry })
             this.claims.features.set('backup', { expiry })
@@ -42,14 +41,15 @@ export class MockAuthImplementation implements AuthInterface {
         }
     }
 
-    static validProSubscription = () =>
+    static validSubscriptions = () =>
         new MockAuthImplementation({
             expiry: Date.now() + 10000 + 1000 * 60 * 60,
         })
-    static expiredProSubscription = () =>
+    static expiredSubscriptions = () =>
         new MockAuthImplementation({
             expiry: Date.now() - 1000 - 1000 * 60 * 60,
         })
+
     static newUser = () => new MockAuthImplementation()
 
     public currentUser
@@ -63,6 +63,7 @@ export class MockAuthImplementation implements AuthInterface {
             email: 'test@test.com',
             emailVerified: false,
             displayName: 'Test User',
+            claims: this.claims,
         }
     }
 
@@ -72,6 +73,7 @@ export class MockAuthImplementation implements AuthInterface {
             email: 'test@test.com',
             emailVerified: false,
             displayName: 'Test User',
+            claims: this.claims,
         }
     }
 

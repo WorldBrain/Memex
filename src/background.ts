@@ -33,14 +33,11 @@ export async function main() {
 
     const getSharedSyncLog = createLazySharedSyncLog()
 
-    const authBackground = new AuthBackground()
-
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
         storageManager,
         localStorageChangesManager,
         browserAPIs: browser,
-        authBackground,
         signalTransportFactory: createFirebaseSignalTransport,
         getSharedSyncLog,
     })

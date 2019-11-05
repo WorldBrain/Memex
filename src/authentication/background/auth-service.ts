@@ -98,8 +98,7 @@ export class AuthService implements AuthRemoteFunctionsInterface {
             return features
         }
 
-        Object.keys(claims.features).forEach((feature: UserFeatures) => {
-            const expiry = claims.features[feature].expiry
+        claims.features.forEach(({ expiry }, feature: UserFeatures) => {
             if (
                 expiry != null &&
                 expiry + subscriptionGraceMs > new Date().getUTCMilliseconds()

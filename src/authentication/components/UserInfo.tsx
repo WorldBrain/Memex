@@ -19,6 +19,7 @@ export class UserInfo extends React.Component<any, State> {
 
     render() {
         const user: AuthenticatedUserWithClaims = this.props.currentUser
+        const features = this.props.authorizedFeatures
         return (
             <div className={''}>
                 {user != null && (
@@ -34,12 +35,11 @@ export class UserInfo extends React.Component<any, State> {
                         ) : (
                             <div> Upgrade </div>
                         )}
-                        {user.claims != null &&
-                            user.claims.features != null && (
-                                <pre style={{ whiteSpace: 'pre-wrap' }}>
-                                    {JSON.stringify(user.claims.features)}
-                                </pre>
-                            )}
+                        {features != null && (
+                            <pre style={{ whiteSpace: 'pre-wrap' }}>
+                                {JSON.stringify(features)}
+                            </pre>
+                        )}
 
                         <Button
                             className={'button'}
