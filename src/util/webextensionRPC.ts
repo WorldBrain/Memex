@@ -124,7 +124,9 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
         // Check if it was *our* listener that responded.
         if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
             throw new RpcError(
-                `RPC got a response from an interfering listener.`,
+                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${
+                    response[RPC_RESPONSE]
+                }. Response:${response}`,
             )
         }
 

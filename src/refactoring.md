@@ -252,7 +252,7 @@ makeRemotelyCallable(
     getBackendLocation,
     isBackupBackendAuthenticated,
     maybeCheckAutomaticBakupEnabled,
-    checkAutomaticBackupEnabled,
+    isAutomaticBackupEnabled,
     isAutomaticBackupEnabled,
     sendNotification,
     estimateInitialBackupSize,

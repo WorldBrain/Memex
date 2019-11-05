@@ -23,7 +23,6 @@ import {
 } from './background-script/setup'
 import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
-import { AuthBackground } from 'src/authentication/background/auth-background'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({

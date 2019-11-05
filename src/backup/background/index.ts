@@ -160,30 +160,12 @@ export class BackupBackgroundModule {
                         return false
                     }
                 },
-                maybeCheckAutomaticBackupEnabled: async () => {
-                    // TODO: What is this used for, can we rename or document it?
-
-                    const hasFeatureAutoBackup = (await auth.getAuthorizedFeatures()).includes(
-                        'backup',
-                    )
-
-                    // TODO: document logic here
-                    const lastBackupTime = !!(await this.lastBackupStorage.getLastBackupTime())
-                    const nextBackup = localStorage.getItem('nextBackup')
-                    if (
-                        hasFeatureAutoBackup &&
-                        lastBackupTime &&
-                        nextBackup === null
-                    ) {
-                        await this.checkAutomaticBackupEnabled()
-                        await this.scheduleAutomaticBackupIfEnabled()
-                    }
-                },
-                checkAutomaticBackupEnabled: async () => {
-                    // TODO: (ch) What is this used for? how is it different from isAutomaticBackupEnabled
-                },
                 isAutomaticBackupEnabled: this.isAutomaticBackupEnabled,
                 isAutomaticBackupAllowed: this.isAutomaticBackupAllowed,
+                scheduleAutomaticBackupIfEnabled: this
+                    .scheduleAutomaticBackupIfEnabled,
+                enableAutomaticBackup: this.enableAutomaticBackup,
+                disableAutomaticBackup: this.disableAutomaticBackup,
                 sendNotification: async (id: string) => {
                     const errorId = await this.backend.sendNotificationOnFailure(
                         id,
@@ -262,8 +244,7 @@ export class BackupBackgroundModule {
             handleLoginRedirectedBack: backend
                 ? backend.handleLoginRedirectedBack.bind(backend)
                 : null,
-            checkAutomaticBackupEnabled: () =>
-                this.checkAutomaticBackupEnabled(),
+            isAutomaticBackupEnabled: () => this.isAutomaticBackupEnabled(),
             memexCloudOrigin: _getMemexCloudOrigin(),
         })
     }
@@ -280,34 +261,22 @@ export class BackupBackgroundModule {
         this.scheduleAutomaticBackupIfEnabled()
     }
 
-    isAutomaticBackupEnabled({ forceCheck = false } = {}) {
-        // const check = this.checkAutomaticBackupEnabled()
-        const check = false
-        if (!forceCheck && check) {
-            return check
-        }
-
-        const override = process.env.AUTOMATIC_BACKUP
-        if (override) {
-            console.log('Automatic backup override:', override)
-            return override === 'true'
-        }
-
-        if (!localStorage.getItem('wp.user-id')) {
-            return false
-        }
-
-        return this.checkAutomaticBackupEnabled()
-    }
-
     async isAutomaticBackupAllowed() {
-        // return auth.isAuthorizedForFeature(UserFeatures.BACKUP)
-        return true
+        return (await auth.getAuthorizedFeatures()).includes('backup')
     }
 
-    async checkAutomaticBackupEnabled() {
-        // todo: check the feature setting?
-        return true
+    isAutomaticBackupEnabled() {
+        return (
+            localStorage.getItem('backup.automatic-backups-enabled') === 'true'
+        )
+    }
+
+    enableAutomaticBackup() {
+        localStorage.setItem('backup.automatic-backups-enabled', 'true')
+    }
+
+    disableAutomaticBackup() {
+        localStorage.setItem('backup.automatic-backups-enabled', 'false')
     }
 
     async scheduleAutomaticBackupIfEnabled() {

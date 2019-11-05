@@ -58,7 +58,7 @@ export async function getStartScreen({
     if (localStorage.getItem('backup.onboarding')) {
         if (localStorage.getItem('backup.onboarding.payment')) {
             localStorage.removeItem('backup.onboarding.payment')
-            if (await remoteFunction('checkAutomaticBackupEnabled')()) {
+            if (await remoteFunction('enableAutomaticBackup')()) {
                 return 'onboarding-size'
             } else {
                 return 'onboarding-how'
@@ -187,8 +187,10 @@ export async function processEvent({
                     value: choice,
                 })
 
-                // todo: refactor localStorage key
                 localStorage.setItem('backup.onboarding.payment', true)
+                if (choice === 'automatic') {
+                    remoteFunction('enableAutomaticBackup')
+                }
                 return { screen: 'onboarding-size' }
             },
             onBackRequested: () => {
@@ -211,6 +213,7 @@ export async function processEvent({
                     category: 'Backup',
                     action: 'onboarding-backup-requested',
                 })
+
                 return { screen: 'running-backup' }
             },
         },

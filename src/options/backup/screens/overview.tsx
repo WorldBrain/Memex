@@ -15,6 +15,9 @@ import SmallButton from '../components/small-button'
 import LoadingBlocker from '../components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
 import { browser } from 'webextension-polyfill-ts'
+import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { UserFeatures } from 'firebase-backend/firebase/functions/src/types'
 
 const styles = require('../styles.css')
 const localStyles = require('./overview.css')
@@ -24,9 +27,10 @@ interface Props {
     onRestoreRequested: (...args: any[]) => any
     onBlobPreferenceChange: (...args: any[]) => any
     onPaymentRequested: (...args: any[]) => any
+    authorizedFeatures: UserFeatures[]
 }
 
-export default class OverviewContainer extends React.Component<Props> {
+export class OverviewContainer extends React.Component<Props> {
     state = {
         automaticBackupEnabled: null,
         backupTimes: null,
@@ -40,11 +44,10 @@ export default class OverviewContainer extends React.Component<Props> {
         /* Pricing */
         showPricing: false,
         billingPeriod: null,
+        subscribeModal: false,
     }
 
     async componentDidMount() {
-        // todo: (ch): remove?
-        // await remoteFunction('maybeCheckAutomaticBakupEnabled')()
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()
@@ -72,10 +75,17 @@ export default class OverviewContainer extends React.Component<Props> {
         })
     }
 
+    openSubscriptionModal = () => this.setState({ subscribeModal: true })
+    closeSubscriptionModal = () => this.setState({ subscribeModal: false })
+
     render() {
         if (!this.state.backupTimes) {
             return <LoadingBlocker />
         }
+
+        const automaticBackupAllowed = this.props.authorizedFeatures.includes(
+            'backup',
+        )
 
         return (
             <div>
@@ -175,15 +185,11 @@ export default class OverviewContainer extends React.Component<Props> {
                                     ? 'Automatic Backups Enabled'
                                     : 'Enable Automatic Backups'}
                             </span>
-                            // TODO: (ch) this doesn't seem useful, maybe this
-                            combination isn't used, only use one module, //
-                            currently in the onboarding
-                            {!this.state.automaticBackupEnabled && (
+
+                            {!automaticBackupAllowed && (
                                 <SmallButton
                                     extraClass={localStyles.right}
-                                    onClick={() => {
-                                        // todo: open upgrade flow with redirect back here
-                                    }}
+                                    onClick={this.openSubscriptionModal}
                                     color={'darkblue'}
                                 >
                                     {'Upgrade'}
@@ -219,6 +225,7 @@ export default class OverviewContainer extends React.Component<Props> {
                         </div>
                     </div>
                 ) : null}
+
                 {!this.state.hasInitialBackup &&
                     this.state.automaticBackupEnabled && (
                         <div>
@@ -311,7 +318,12 @@ export default class OverviewContainer extends React.Component<Props> {
                         </span>
                     </div>
                 </div>
+                {this.state.subscribeModal && (
+                    <SubscribeModal onClose={this.closeSubscriptionModal} />
+                )}
             </div>
         )
     }
 }
+
+export default withCurrentUser(OverviewContainer)
