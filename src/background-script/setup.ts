@@ -36,6 +36,11 @@ import {
     DevAuthState,
 } from 'src/authentication/background/setup'
 import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
+import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
+import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
+import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import pipeline from 'src/search/pipeline'
+import { Page } from 'src/search'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -52,6 +57,7 @@ export interface BackgroundModules {
     sync: SyncBackground
     bgScript: BackgroundScript
     features: FeatureOptIns
+    pageFetchBacklog: PageFetchBacklogBackground
 }
 
 export function createBackgroundModules(options: {
@@ -90,6 +96,20 @@ export function createBackgroundModules(options: {
     const auth =
         options.auth ||
         new AuthBackground(createAuthDependencies(options.authOptions))
+    const fetchPageDataProcessor = new FetchPageDataProcessor({
+        fetchPageData,
+        pagePipeline: pipeline,
+    })
+
+    const pageFetchBacklog = new PageFetchBacklogBackground({
+        storageManager,
+        fetchPageData: fetchPageDataProcessor,
+        storePageContent: async content => {
+            const page = new Page(storageManager, content)
+            await page.loadRels()
+            await page.save()
+        },
+    })
 
     return {
         auth,
@@ -132,9 +152,11 @@ export function createBackgroundModules(options: {
             getSharedSyncLog: options.getSharedSyncLog,
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
+            pageFetchBacklog,
         }),
         features: new FeatureOptIns(),
         bgScript,
+        pageFetchBacklog,
     }
 }
 
@@ -169,6 +191,7 @@ export async function setupBackgroundModules(
     backgroundModules.bgScript.setupRemoteFunctions()
     backgroundModules.bgScript.setupWebExtAPIHandlers()
     backgroundModules.bgScript.setupAlarms(alarms)
+    backgroundModules.pageFetchBacklog.setupBacklogProcessing()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()

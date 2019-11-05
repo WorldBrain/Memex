@@ -6,6 +6,7 @@ import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middl
 
 import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 import SyncService, {
+    MemexInitialSync,
     SignalTransportFactory,
 } from '@worldbrain/memex-common/lib/sync'
 import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
@@ -17,9 +18,11 @@ import {
 } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { filterBlobsFromSyncLog } from './sync-logging'
-import { MemexExtSyncSettingStore } from './setting-store'
+import { MemexExtContinuousSync } from './memex-ext-continuous-sync'
 
 export default class SyncBackground extends SyncService {
+    initialSync: MemexInitialSync
+    continuousSync: MemexExtContinuousSync
     remoteFunctions: PublicSyncInterface
     firstContinuousSyncPromise?: Promise<void>
     getSharedSyncLog: () => Promise<SharedSyncLog>
