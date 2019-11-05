@@ -94,14 +94,18 @@ export function OnboardingBackupMode({
                                 Automatic Backup
                             </span>
                             {!disableAutomaticBackup &&
-                                !isAuthorizedForAutomaticBackup && (
-                                    <span
-                                        className={Styles.labelPremium}
-                                        onClick={launchSubscriptionFlow}
-                                    >
-                                        Upgrade
-                                    </span>
-                                )}
+                            isAuthorizedForAutomaticBackup ? (
+                                <span className={classNames(Styles.labelFree)}>
+                                    Subscribed
+                                </span>
+                            ) : (
+                                <span
+                                    className={Styles.labelPremium}
+                                    onClick={launchSubscriptionFlow}
+                                >
+                                    Upgrade
+                                </span>
+                            )}
 
                             <br />
                             <span className={Styles.subname}>

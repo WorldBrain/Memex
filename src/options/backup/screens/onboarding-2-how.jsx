@@ -9,6 +9,9 @@ class OnboardingHow extends React.Component {
     state = { mode: null }
 
     render() {
+        const isAuthorizedForAutomaticBackup = this.props.authorizedFeatures.includes(
+            'backup',
+        )
         return (
             <div>
                 <p className={Styles.header2}>
@@ -19,9 +22,9 @@ class OnboardingHow extends React.Component {
                     className={Styles.selectionlist}
                     onModeChange={mode => this.setState({ mode })}
                     launchSubscriptionFlow={this.props.onSubscribeRequested}
-                    isAuthorizedForAutomaticBackup={this.props.authorizedFeatures.includes(
-                        'backup',
-                    )}
+                    isAuthorizedForAutomaticBackup={
+                        isAuthorizedForAutomaticBackup
+                    }
                 />
                 {this.state.mode === 'manual' && (
                     <PrimaryButton
@@ -32,11 +35,9 @@ class OnboardingHow extends React.Component {
                 )}
                 {this.state.mode === 'automatic' && (
                     <PrimaryButton
-                        disabled={
-                            !this.props.authorizedFeatures.includes('backup')
-                        }
+                        disabled={!isAuthorizedForAutomaticBackup}
                         onClick={
-                            this.props.authorizedFeatures.includes('backup')
+                            isAuthorizedForAutomaticBackup
                                 ? () =>
                                       this.props.onChoice({ type: 'automatic' })
                                 : () => false
@@ -63,6 +64,5 @@ OnboardingHow.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onBackRequested: PropTypes.func.isRequired,
     onSubscribeRequested: PropTypes.func.isRequired,
-    currentUser: PropTypes.any,
     authorizedFeatures: PropTypes.array,
 }

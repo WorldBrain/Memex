@@ -187,14 +187,9 @@ export async function processEvent({
                     value: choice,
                 })
 
-                if (choice.type === 'automatic') {
-                    localStorage.setItem('backup.onboarding.payment', true)
-                    return {
-                        redirect: { to: 'automatic-backup-purchase', choice },
-                    }
-                } else {
-                    return { screen: 'onboarding-size' }
-                }
+                // todo: refactor localStorage key
+                localStorage.setItem('backup.onboarding.payment', true)
+                return { screen: 'onboarding-size' }
             },
             onBackRequested: () => {
                 localStorage.setItem('backup.onboarding.where', true)
