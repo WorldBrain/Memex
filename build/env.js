@@ -16,15 +16,20 @@ export default ({ mode }) => {
     }
 
     if (mode === 'development') {
-        if (process.env.DEV_AUTH_STATE !== '') {
+        if (
+            process.env.DEV_AUTH_STATE === '' ||
+            process.env.DEV_AUTH_STATE == null
+        ) {
             console.warn(
                 `AUTH: Firebase auth will use staging credentials. See authentication/readme.md for more auth options.`,
             )
             env.DEV_AUTH_STATE = 'staging'
+        } else {
+            env.DEV_AUTH_STATE = process.env.DEV_AUTH_STATE
+            console.info(
+                `AUTH: Firebase auth state set to: ${env.DEV_AUTH_STATE}`,
+            )
         }
-    } else {
-        env.DEV_AUTH_STATE = process.env.DEV_AUTH_STATE
-        console.info(`AUTH: Firebase auth state set to: ${env.DEV_AUTH_STATE}`)
     }
 
     // Analytics

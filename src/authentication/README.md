@@ -23,6 +23,12 @@ const user = await backgroundModules.auth.authService.getUser()
 
 ### From Content Script
 
+## Via helper HOC
+
+Use the Component wrapper `withCurrentUser(Component)` to pass Component the props `currentUser` and `authorizedFeatures`, these will be updated as and when the current user changes.
+
+## Once - Manually
+
 To obtain the currently logged in user object from a page's content script, use the `auth` key of the usual remote function interfaces.
 I.e.
 
@@ -40,7 +46,7 @@ auth.refresh()
 
 (as registered at extension startup in `setupRemoteFunctionsImplementations` of `background.ts`)
 
-#### Observing Auth Changes
+## Observing Changes - Manually
 
 In order to be able to react to observable changes in auth events, import the remote event emitter and register to recieve auth events as below:
 
@@ -105,6 +111,16 @@ For the user to manage an existing subscription of theirs, the procedure happens
 ## Disabling Auth
 
 ## Testing Auth
+
+By default when running the extension in development mode, the firebase staging environment will be used.
+
+To test with a user having full subscription features, export the environment variable as follows:
+DEV_AUTH_STATE="user_subscribed"
+
+To test with a user who is not subscribed use:
+DEV_AUTH_STATE="user_signed_in"
+or
+DEV_AUTH_STATE="user_signed_out"
 
 ## Appendix
 
