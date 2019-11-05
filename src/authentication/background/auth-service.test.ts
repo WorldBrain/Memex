@@ -19,7 +19,7 @@ describe('Authentication Subscription Status Tests', () => {
 
     it('should not be subscribed to backup-monthly plan if subscription expired', async () => {
         const authService = new AuthService(
-            MockAuthImplementation.expiredProSubscription(),
+            MockAuthImplementation.expiredSubscriptions(),
         )
 
         expect(await authService.hasValidPlan('backup-monthly')).toBeFalsy()
@@ -30,7 +30,7 @@ describe('Authentication Subscription Status Tests', () => {
 
     it('should be subscribed to backup-monthly plan if subscription is valid', async () => {
         const authService = new AuthService(
-            MockAuthImplementation.validProSubscription(),
+            MockAuthImplementation.validSubscriptions(),
         )
 
         expect(await authService.checkValidPlan('backup-monthly')).toBeTruthy()

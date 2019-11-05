@@ -69,13 +69,13 @@ export async function setupBackgroundIntegrationTest(options?: {
             },
         } as any,
         tabManager: options && options.tabManager,
-        authBackground,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,
     })
     backgroundModules.customLists._createPage =
         backgroundModules.search.searchIndex.createTestPage
     backgroundModules.sync.initialSync.wrtc = wrtc
+    backgroundModules.auth = authBackground
 
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 

@@ -55,7 +55,6 @@ export interface BackgroundModules {
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
-    authBackground: AuthBackground
     browserAPIs: Browser
     signalTransportFactory: SignalTransportFactory
     getSharedSyncLog: () => Promise<SharedSyncLog>
@@ -125,7 +124,7 @@ export function createBackgroundModules(options: {
             notifications,
         }),
         sync: new SyncBackground({
-            auth: options.authBackground,
+            auth,
             signalTransportFactory: options.signalTransportFactory,
             storageManager,
             getSharedSyncLog: options.getSharedSyncLog,
