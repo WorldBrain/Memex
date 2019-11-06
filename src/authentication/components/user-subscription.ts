@@ -31,7 +31,7 @@ export class UserSubscription {
     async manageUserSubscription() {
         // todo: (ch) provide a way to close this box on parent component unmount
         await this.cbInstance.setPortalSession(async () => {
-            await serverFunctions.getManageLink()
+            return serverFunctions.getManageLink()
         })
 
         const emitter = new EventEmitter() as SubscriptionManageEventEmitter
