@@ -25,9 +25,7 @@ export class FirebaseFunctionsSubscription
             .functions()
             .httpsCallable('getCheckoutLink')(options)
 
-        if (result.data != null) {
-            return result.data['hosted_page']
-        }
+        return result.data['hosted_page']
     }
 
     async getManageLink(options): Promise<string> {
@@ -35,9 +33,7 @@ export class FirebaseFunctionsSubscription
             .functions()
             .httpsCallable('getManageLink')(options)
 
-        if (result.data != null) {
-            return result.data['portal_session']
-        }
+        return result.data['portal_session']
     }
 }
 
