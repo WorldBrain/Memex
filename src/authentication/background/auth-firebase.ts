@@ -48,19 +48,20 @@ export class AuthFirebase implements AuthInterface {
 
     private async withClaims(
         user: AuthenticatedUser,
+        forceRefresh = false,
     ): Promise<AuthenticatedUserWithClaims | null> {
         if (user == null) {
             return null
         }
-        return { ...user, claims: await this.getUserClaims() }
+        return { ...user, claims: await this.getUserClaims(forceRefresh) }
     }
 
-    async getUserClaims(): Promise<Claims | null> {
+    async getUserClaims(forceRefresh: boolean = false): Promise<Claims | null> {
         const currentUser = firebase.auth().currentUser
         if (currentUser == null) {
             return null
         }
-        const idTokenResult = await currentUser.getIdTokenResult()
+        const idTokenResult = await currentUser.getIdTokenResult(forceRefresh)
 
         const claims: Claims = idTokenResult.claims as Claims
 
@@ -70,5 +71,10 @@ export class AuthFirebase implements AuthInterface {
     async refresh() {
         await this.firebaseAuthFunctions.refreshUserClaims()
         await firebase.auth().currentUser.reload()
+        const emitUser = await this.withClaims(
+            this.getUserFromFirebaseUser(await this.getCurrentUser()),
+            true,
+        )
+        this.authEmitter.emit('onAuthStateChanged', emitUser)
     }
 }
