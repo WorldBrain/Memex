@@ -14,8 +14,9 @@ import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/constants'
 import { getStorageContents } from '@worldbrain/memex-common/lib/storage/utils'
+import { insertIntegrationTestData } from 'src/tests/shared-fixtures/integration'
 
-interface TestSetup {
+interface ExtensionTestSetup {
     setups: [BackgroundIntegrationTestSetup, BackgroundIntegrationTestSetup]
     forEachSetup: (
         f: (setup: BackgroundIntegrationTestSetup) => void,
@@ -32,15 +33,15 @@ interface TestSetup {
     sharedSyncLog: SharedSyncLogStorage
     userId: number | string
 }
-export type TestFactory = (
+type ExtensionTestFactory = (
     description: string,
-    test: (setup: TestSetup) => void,
+    test: (setup: ExtensionTestSetup) => void,
 ) => void
 
-async function setupTest(options: {
+async function setupExtensionTest(options: {
     sharedSyncLog: SharedSyncLogStorage
     userId?: string
-}): Promise<TestSetup> {
+}): Promise<ExtensionTestSetup> {
     const signalTransportFactory = lazyMemorySignalTransportFactory()
     const setups: [
         BackgroundIntegrationTestSetup,
@@ -84,10 +85,21 @@ async function setupTest(options: {
     }
 }
 
-function syncModuleTests(options: { testFactory: TestFactory }) {
+async function doInitialSync(setup: ExtensionTestSetup) {
+    const { setups, syncModule, forEachSetup } = setup
+    const { initialMessage } = await syncModule(
+        setups[0],
+    ).remoteFunctions.requestInitialSync()
+    await syncModule(setups[1]).remoteFunctions.answerInitialSync({
+        initialMessage,
+    })
+    await forEachSetup(s => syncModule(s).initialSync.waitForInitialSync())
+}
+
+function syncModuleTests(options: { testFactory: ExtensionTestFactory }) {
     const it = options.testFactory
 
-    it('should not do anything if not enabled', async (setup: TestSetup) => {
+    it('should not do anything if not enabled', async (setup: ExtensionTestSetup) => {
         const { setups, syncModule, forEachSetup } = setup
         await forEachSetup(s => syncModule(s).setup())
 
@@ -101,7 +113,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
         ).toEqual([])
     })
 
-    it('should do the whole onboarding flow correctly', async (setup: TestSetup) => {
+    it('should do the whole onboarding flow correctly', async (setup: ExtensionTestSetup) => {
         const {
             setups,
             customLists,
@@ -135,15 +147,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
 
         // Initial sync
 
-        const { initialMessage } = await syncModule(
-            setups[0],
-        ).remoteFunctions.requestInitialSync()
-        await syncModule(setups[1]).remoteFunctions.answerInitialSync({
-            initialMessage,
-        })
-
-        await forEachSetup(s => syncModule(s).initialSync.waitForInitialSync())
-
+        await doInitialSync(setup)
         expect(
             await customLists(setups[1]).fetchListById({
                 id: listId,
@@ -234,7 +238,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
         })
     })
 
-    it('should enable Sync on start up if enabled', async (setup: TestSetup) => {
+    it('should enable Sync on start up if enabled', async (setup: ExtensionTestSetup) => {
         const {
             setups,
             forEachSetup,
@@ -296,7 +300,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
         })
     })
 
-    it('should sync on start up if enabled', async (setup: TestSetup) => {
+    it('should sync on start up if enabled', async (setup: ExtensionTestSetup) => {
         const { setups, customLists, syncModule, sharedSyncLog, userId } = setup
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId }),
@@ -341,9 +345,30 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
         })
     })
 
+    it('should merge data if do an initial sync to a device which already has some data', async (setup: ExtensionTestSetup) => {
+        const { syncModule, forEachSetup, setups } = setup
+        await forEachSetup(s => syncModule(s).setup())
+
+        await insertIntegrationTestData(setups[0])
+        const storageContents = await getStorageContents(
+            setups[0].storageManager,
+        )
+        storageContents['pages'][0].screenshot = null
+
+        await doInitialSync(setup)
+        expect(await getStorageContents(setups[1].storageManager)).toEqual(
+            storageContents,
+        )
+
+        await doInitialSync(setup)
+        expect(await getStorageContents(setups[1].storageManager)).toEqual(
+            storageContents,
+        )
+    })
+
     describe('passive data filtering in initial Sync', () => {
         async function runPassiveDataTest(params: {
-            setup: TestSetup
+            setup: ExtensionTestSetup
             insertDefaultPages: boolean
             insertData: (
                 params: {
@@ -396,13 +421,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
             await params.insertData({ device: setups[0] })
 
             syncModule(setups[0]).initialSync.filterPassiveData = true
-            const { initialMessage } = await syncModule(
-                setups[0],
-            ).remoteFunctions.requestInitialSync()
-            await syncModule(setups[1]).remoteFunctions.answerInitialSync({
-                initialMessage,
-            })
-            await syncModule(setups[1]).initialSync.waitForInitialSync()
+            await doInitialSync(params.setup)
 
             await params.checkData({
                 device: setups[1],
@@ -416,7 +435,7 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
             })
         }
 
-        it('should not include pages in filtered initial Sync unless included in a custom list', async (setup: TestSetup) => {
+        it('should not include pages in filtered initial Sync unless included in a custom list', async (setup: ExtensionTestSetup) => {
             const { customLists } = setup
 
             await runPassiveDataTest({
@@ -459,56 +478,58 @@ function syncModuleTests(options: { testFactory: TestFactory }) {
 }
 
 describe('SyncBackground', () => {
-    describe('Memory backend', () => {
-        syncModuleTests({
-            testFactory: (description, test) => {
-                it(description, async () => {
-                    await test(
-                        await setupTest({
-                            sharedSyncLog: await createMemorySharedSyncLog(),
-                        }),
-                    )
-                })
-            },
+    describe('Extension to extension', () => {
+        describe('Memory backend', () => {
+            syncModuleTests({
+                testFactory: (description, test) => {
+                    it(description, async () => {
+                        await test(
+                            await setupExtensionTest({
+                                sharedSyncLog: await createMemorySharedSyncLog(),
+                            }),
+                        )
+                    })
+                },
+            })
         })
-    })
 
-    describe('Firestore backend', () => {
-        syncModuleTests({
-            testFactory: (description, test) => {
-                if (!RUN_FIRESTORE_TESTS) {
-                    it.skip(description, () => { })
-                    return
-                }
+        describe('Firestore backend', () => {
+            syncModuleTests({
+                testFactory: (description, test) => {
+                    if (!RUN_FIRESTORE_TESTS) {
+                        it.skip(description, () => { })
+                        return
+                    }
 
-                it(description, async () => {
-                    const userId = 'alice'
-                    await withEmulatedFirestoreBackend(
-                        {
-                            sharedSyncLog: ({ storageManager }) =>
-                                new SharedSyncLogStorage({
-                                    storageManager,
-                                    autoPkType: 'string',
-                                    excludeTimestampChecks: false,
-                                }) as any,
-                        },
-                        {
-                            auth: { userId },
-                            printProjectId: false,
-                            loadRules: true,
-                        },
-                        async ({ storageManager, modules }) => {
-                            const sharedSyncLog = modules.sharedSyncLog as SharedSyncLogStorage
-                            await test(
-                                await setupTest({
-                                    sharedSyncLog,
-                                    userId,
-                                }),
-                            )
-                        },
-                    )
-                })
-            },
+                    it(description, async () => {
+                        const userId = 'alice'
+                        await withEmulatedFirestoreBackend(
+                            {
+                                sharedSyncLog: ({ storageManager }) =>
+                                    new SharedSyncLogStorage({
+                                        storageManager,
+                                        autoPkType: 'string',
+                                        excludeTimestampChecks: false,
+                                    }) as any,
+                            },
+                            {
+                                auth: { userId },
+                                printProjectId: false,
+                                loadRules: true,
+                            },
+                            async ({ storageManager, modules }) => {
+                                const sharedSyncLog = modules.sharedSyncLog as SharedSyncLogStorage
+                                await test(
+                                    await setupExtensionTest({
+                                        sharedSyncLog,
+                                        userId,
+                                    }),
+                                )
+                            },
+                        )
+                    })
+                },
+            })
         })
     })
 })
