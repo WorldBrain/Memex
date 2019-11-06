@@ -109,11 +109,12 @@ export class AuthService implements AuthRemoteFunctionsInterface {
         return features
     }
 
-    public async hasSubscribedBefore(): Promise<boolean> {
+    public hasSubscribedBefore = async (): Promise<boolean> => {
         const claims = await this.getUserClaims()
         return (
-            claims.subscriptions != null &&
-            Object.keys(claims.subscriptions).length > 0
+            claims.lastSubscribed != null ||
+            (claims.subscriptions != null &&
+                Object.keys(claims.subscriptions).length > 0)
         )
     }
 }

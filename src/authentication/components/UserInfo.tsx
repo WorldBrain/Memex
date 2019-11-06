@@ -5,11 +5,14 @@ import { SubscriptionOptions } from 'src/authentication/components/Subscription/
 import Button from 'src/popup/components/Button'
 import { AuthenticatedUserWithClaims } from 'src/authentication/background/types'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
 interface State {
-    currentUser: AuthenticatedUserWithClaims
+    showSubscriptionModal: boolean
 }
 
 export class UserInfo extends React.Component<any, State> {
+    state = { showSubscriptionModal: false }
+
     handleLogout = () => {
         firebase.auth().signOut()
     }
@@ -17,11 +20,19 @@ export class UserInfo extends React.Component<any, State> {
         await auth.refresh()
     }
 
+    hideSubscriptionModal = () => {
+        this.setState({ showSubscriptionModal: false })
+    }
+    showSubscriptionModal = () => this.setState({ showSubscriptionModal: true })
+
     render() {
         const user: AuthenticatedUserWithClaims = this.props.currentUser
         const features = this.props.authorizedFeatures
         return (
             <div className={''}>
+                {this.state.showSubscriptionModal === true && (
+                    <SubscribeModal onClose={this.hideSubscriptionModal} />
+                )}
                 {user != null && (
                     <div>
                         <div>User: {user.displayName}</div>
@@ -29,12 +40,10 @@ export class UserInfo extends React.Component<any, State> {
                         <div>Email Verified: {user.emailVerified}</div>
                         <div>UID: {user.uid}</div>
 
-                        {user.claims != null &&
-                        user.claims.subscriptions != null ? (
-                            <div>Manage your subscription</div>
-                        ) : (
-                            <div> Upgrade </div>
-                        )}
+                        <Button onClick={this.showSubscriptionModal}>
+                            Subscriptions
+                        </Button>
+
                         {features != null && (
                             <pre style={{ whiteSpace: 'pre-wrap' }}>
                                 {JSON.stringify(features)}

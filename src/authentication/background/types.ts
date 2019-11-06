@@ -59,7 +59,7 @@ export interface AuthRemoteFunctionsInterface {
     hasValidPlan(plan): Promise<boolean>
     getAuthorizedFeatures(): Promise<UserFeatures[]>
 
-    hasSubscribedBefore(): any
+    hasSubscribedBefore(): Promise<boolean>
 }
 
 export interface AuthEvents {

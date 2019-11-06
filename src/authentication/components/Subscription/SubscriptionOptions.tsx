@@ -29,13 +29,14 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
     private subscribed: boolean
 
     async componentDidMount() {
-        this.subscribed = await auth.hasValidPlan('pro')
+        this.subscribed = await auth.hasSubscribedBefore()
     }
 
     _initChargebee = (): void => {
         if (this.chargebeeInstance != null) {
             return
         }
+        // todo: Handle offline cases better
         if (window['Chargebee'] == null) {
             return console.error(
                 'Could not load payment provider as external script is not currently loaded.',
@@ -51,7 +52,10 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
         this._initChargebee()
         const portalEvents = await this.userSubscription.manageUserSubscription()
 
-        portalEvents.addListener('closed', () => this.props.onClose())
+        portalEvents.addListener('closed', async () => {
+            await auth.refresh()
+            this.props.onClose()
+        })
         portalEvents.addListener('changed', () => {
             this.props.subscriptionChanged()
             this.props.onClose()
@@ -71,8 +75,12 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
         const subscriptionEvents = await this.userSubscription.checkoutUserSubscription(
             { planId },
         )
-        subscriptionEvents.addListener('closed', () => this.props.onClose())
-        subscriptionEvents.addListener('changed', () => {
+        subscriptionEvents.addListener('closed', async () => {
+            await auth.refresh()
+            this.props.onClose()
+        })
+        subscriptionEvents.addListener('changed', async () => {
+            await auth.refresh()
             this.props.subscriptionChanged()
             this.props.onClose()
         })
@@ -86,43 +94,44 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
                 </Helmet>
                 <h1 className={''}>Subscribe</h1>
 
-                {this.subscribed !== true ? (
-                    <div style={styles.subscriptionOptionsContainer}>
-                        <SubscriptionPriceBox
-                            onClick={undefined}
-                            title={'Free'}
-                            infoItems={[
-                                'All offline features',
-                                'Manual Backups',
-                                'To your favorite cloud',
-                                'No account necessary',
-                            ]}
-                        />
-                        <SubscriptionPriceBox
-                            onClick={_ => this.openCheckoutBackup()}
-                            title={'Auto Backups'}
-                            infoItems={[
-                                "Everything in 'Free'",
-                                'Automatic Backups every 15 min',
-                                'To your favorite cloud',
-                                'No account necessary',
-                            ]}
-                        />
-                        <SubscriptionPriceBox
-                            onClick={_ => this.openCheckoutBackupSync()}
-                            title={'Auto Backup and Mobile Sync'}
-                            infoItems={[
-                                'Everything in Free & Auto Backups',
-                                'Sync with mobile phone',
-                                'IOS and Android App',
-                            ]}
-                        />
-                    </div>
-                ) : (
-                    <Button onClick={_ => this.openPortal()}>
-                        Manage Existing Subscription
-                    </Button>
-                )}
+                <div style={styles.subscriptionOptionsContainer}>
+                    <SubscriptionPriceBox
+                        key={'SubscriptionBoxFree'}
+                        onClick={undefined}
+                        title={'Free'}
+                        infoItems={[
+                            'All offline features',
+                            'Manual Backups',
+                            'To your favorite cloud',
+                            'No account necessary',
+                        ]}
+                    />
+                    <SubscriptionPriceBox
+                        key={'SubscriptionBoxBackups'}
+                        onClick={_ => this.openCheckoutBackup()}
+                        title={'Auto Backups'}
+                        infoItems={[
+                            "Everything in 'Free'",
+                            'Automatic Backups every 15 min',
+                            'To your favorite cloud',
+                            'No account necessary',
+                        ]}
+                    />
+                    <SubscriptionPriceBox
+                        key={'SubscriptionBoxSync'}
+                        onClick={_ => this.openCheckoutBackupSync()}
+                        title={'Auto Backup and Mobile Sync'}
+                        infoItems={[
+                            'Everything in Free & Auto Backups',
+                            'Sync with mobile phone',
+                            'IOS and Android App',
+                        ]}
+                    />
+                </div>
+
+                <Button onClick={_ => this.openPortal()}>
+                    Manage Existing Subscription
+                </Button>
             </div>
         )
     }
