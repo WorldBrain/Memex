@@ -53,6 +53,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         },
         {
             refreshUserClaims: async () => true,
+            getCustomLoginToken: async () => '',
         },
     )
 
