@@ -12,11 +12,8 @@ import {
 } from '@worldbrain/memex-common/lib/sync'
 import { MemexSyncSettingsStore } from '@worldbrain/memex-common/lib/sync/settings'
 import { MemexSyncSetting } from '@worldbrain/memex-common/lib/sync/types'
+import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
 import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/constants'
-import { COLLECTION_NAMES as PAGES_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/pages/constants'
-import { COLLECTION_NAMES as TAGS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/tags/constants'
-import { COLLECTION_NAMES as LISTS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
-import { COLLECTION_NAMES as ANNOTATIONS_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/annotations/constants'
 
 import { PublicSyncInterface } from './types'
 import { MemexClientSyncLogStorage } from './storage'
@@ -35,17 +32,7 @@ export default class SyncBackground {
     firstContinuousSyncPromise?: Promise<void>
     getSharedSyncLog: () => Promise<SharedSyncLog>
 
-    readonly syncedCollections: string[] = [
-        PAGES_COLLECTION_NAMES.bookmark,
-        PAGES_COLLECTION_NAMES.page,
-        PAGES_COLLECTION_NAMES.visit,
-        TAGS_COLLECTION_NAMES.tag,
-        LISTS_COLLECTION_NAMES.list,
-        LISTS_COLLECTION_NAMES.listEntry,
-        ANNOTATIONS_COLLECTION_NAMES.annotation,
-        ANNOTATIONS_COLLECTION_NAMES.listEntry,
-        ANNOTATIONS_COLLECTION_NAMES.bookmark,
-    ]
+    readonly syncedCollections: string[] = SYNCED_COLLECTIONS
 
     constructor(
         private options: {

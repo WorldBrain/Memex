@@ -8,27 +8,34 @@ import {
 } from 'src/background-script/setup'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
 
-interface CommandLineArguments {}
-
+type CommandLineArguments =
+    | { command: 'list-collections' }
+    | { command: 'list-operations' }
+const COMMAND_MAP: { [Key in CommandLineArguments['command']]: true } = {
+    'list-collections': true,
+    'list-operations': true,
+}
 function printUsage() {
-    console.error(`USAGE: storage-explorer list-operations`)
+    console.error(`USAGE:`)
+    console.error(`  storage-explorer list-collections`)
+    console.error(`  storage-explorer list-operations`)
 }
 
 function parseCommandLineArgs():
     | { success: false; args: null }
     | { success: true; args: CommandLineArguments } {
-    const command = process.argv[2]
+    const command = process.argv[2] as CommandLineArguments['command']
     if (!command) {
         printUsage()
         return { success: false, args: null }
     }
-    if (command !== 'list-operations') {
+    if (!COMMAND_MAP[command]) {
         console.error(`Unknown command '${command}'`)
         printUsage()
         return { success: false, args: null }
     }
 
-    return { success: true, args: {} }
+    return { success: true, args: { command } }
 }
 
 async function main() {
@@ -58,17 +65,31 @@ async function main() {
         } as any,
     })
     const storageModules = getBackgroundStorageModules(backgroundModules)
-    const report = mapValues(storageModules, storageModule =>
-        mapValues(storageModule.operations, operation => {
-            operation = { ...operation }
-            if (operation.operation === 'createObject') {
-                delete operation.args
-            }
-            return operation
-        }),
-    )
+
     const display = console['log'].bind(console) // Circumvent linter
-    display(util.inspect(report, false, null, true))
+    if (args.command === 'list-operations') {
+        const report = mapValues(storageModules, storageModule =>
+            mapValues(storageModule.operations, operation => {
+                operation = { ...operation }
+                if (operation.operation === 'createObject') {
+                    delete operation.args
+                }
+                return operation
+            }),
+        )
+        display(util.inspect(report, false, null, true))
+    } else if (args.command === 'list-collections') {
+        for (const [storageModuleName, storageModule] of Object.entries(
+            storageModules,
+        )) {
+            display(`MODULE ${storageModuleName}:`)
+            for (const collectionName of Object.keys(
+                storageModule.getConfig().collections || {},
+            )) {
+                display(`  COLLECTION: ${collectionName}`)
+            }
+        }
+    }
 }
 
 if (require.main === module) {
