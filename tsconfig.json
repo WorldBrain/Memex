@@ -32,6 +32,12 @@
             "@worldbrain/storex-backend-firestore/lib/*": [
                 "external/@worldbrain/storex-backend-firestore/ts/*"
             ],
+            "@worldbrain/storex-backend-typeorm": [
+                "external/@worldbrain/storex-backend-typeorm/ts"
+            ],
+            "@worldbrain/storex-backend-typeorm/lib/*": [
+                "external/@worldbrain/storex-backend-typeorm/ts/*"
+            ],
             "@worldbrain/storex-pattern-modules": [
                 "external/@worldbrain/storex-pattern-modules/ts"
             ],
