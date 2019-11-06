@@ -17,7 +17,7 @@ import RestoreConfirmation from '../components/restore-confirmation'
 import { browser } from 'webextension-polyfill-ts'
 import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
-import { UserFeatures } from 'firebase-backend/firebase/functions/src/types'
+import { UserFeatures } from 'src/authentication/background/types'
 
 const styles = require('../styles.css')
 const localStyles = require('./overview.css')

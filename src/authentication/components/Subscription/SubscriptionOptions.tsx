@@ -3,9 +3,11 @@ import { UserSubscription } from 'src/authentication/components/user-subscriptio
 import Button from 'src/popup/components/Button'
 import { Helmet } from 'react-helmet'
 import { SubscriptionPriceBox } from 'src/authentication/components/Subscription/SubscriptionPriceBox'
-import { AuthenticatedUser } from 'src/authentication/background/types'
+import {
+    AuthenticatedUser,
+    UserPlans,
+} from 'src/authentication/background/types'
 import { auth } from 'src/util/remote-functions-background'
-import { UserPlans } from 'firebase-backend/firebase/functions/src/types'
 const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 
 //

@@ -4,8 +4,8 @@ import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import {
     AuthenticatedUser,
     AuthenticatedUserWithClaims,
+    UserFeatures,
 } from 'src/authentication/background/types'
-import { UserFeatures } from 'firebase-backend/firebase/functions/src/types'
 
 interface State {
     currentUser: AuthenticatedUserWithClaims | AuthenticatedUser | null

@@ -3,18 +3,13 @@ import {
     AuthenticatedUserWithClaims,
     AuthEvents,
     AuthInterface,
+    Claims,
 } from 'src/authentication/background/types'
 import { firebase } from 'src/util/firebase-app-initialized'
 import 'firebase/functions'
 import 'firebase/auth'
 import { FirebaseFunctionsAuth } from 'src/authentication/background/firebase-functions-subscription'
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
-import {
-    Claims,
-    SubscriptionMap,
-    FeaturesMap,
-} from 'firebase-backend/firebase/functions/src/types'
-import { UserSubscription } from 'src/authentication/components/user-subscription'
 
 export class AuthFirebase implements AuthInterface {
     private firebaseAuthObserver: firebase.Unsubscribe
@@ -69,18 +64,6 @@ export class AuthFirebase implements AuthInterface {
 
         const claims: Claims = idTokenResult.claims as Claims
 
-        // Type juggling from object to Map
-        for (const key of Object.keys(claims)) {
-            if (key === 'subscriptions') {
-                claims[key] = new Map(
-                    Object.entries(claims[key]),
-                ) as SubscriptionMap
-            } else if (key === 'features') {
-                claims[key] = new Map(
-                    Object.entries(claims[key]),
-                ) as FeaturesMap
-            }
-        }
         return claims
     }
 

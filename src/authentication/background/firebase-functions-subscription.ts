@@ -40,8 +40,14 @@ export class FirebaseFunctionsSubscription
         }
     }
 }
+
 export class FirebaseFunctionsAuth implements AuthServerFunctionsInterface {
     async refreshUserClaims(): Promise<any> {
-        return firebase.functions().httpsCallable('refreshUserClaims')()
+        firebase.functions().httpsCallable('refreshUserClaims')()
+    }
+    async getCustomLoginToken(): Promise<string> {
+        return (await firebase
+            .functions()
+            .httpsCallable('getCustomLoginToken')()).data
     }
 }

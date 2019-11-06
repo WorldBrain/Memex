@@ -2,12 +2,10 @@ import {
     AuthEvents,
     AuthInterface,
     AuthRemoteFunctionsInterface,
-} from 'src/authentication/background/types'
-import {
     Claims,
-    UserPlans,
     UserFeatures,
-} from 'firebase-backend/firebase/functions/src/types'
+    UserPlans,
+} from 'src/authentication/background/types'
 
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 
@@ -75,8 +73,8 @@ export class AuthService implements AuthRemoteFunctionsInterface {
     ): number | null =>
         claims != null &&
         claims.subscriptions != null &&
-        claims.subscriptions.get(plan) != null
-            ? claims.subscriptions.get(plan).expiry
+        claims.subscriptions[plan] != null
+            ? claims.subscriptions[plan].expiry
             : null
 
     /**
@@ -98,7 +96,8 @@ export class AuthService implements AuthRemoteFunctionsInterface {
             return features
         }
 
-        claims.features.forEach(({ expiry }, feature: UserFeatures) => {
+        Object.keys(claims.features).forEach((feature: UserFeatures) => {
+            const expiry = claims.features[feature].expiry
             if (
                 expiry != null &&
                 expiry + subscriptionGraceMs > new Date().getUTCMilliseconds()

@@ -1,9 +1,8 @@
-import { AuthEvents, AuthInterface } from 'src/authentication/background/types'
 import {
+    AuthEvents,
+    AuthInterface,
     Claims,
-    SubscriptionMap,
-    FeaturesMap,
-} from 'firebase-backend/firebase/functions/src/types'
+} from 'src/authentication/background/types'
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 
 export class MockLinkGenerator {
@@ -26,18 +25,18 @@ export class MockLinkGenerator {
 
 export class MockAuthImplementation implements AuthInterface {
     private claims: Claims = {
-        subscriptions: new Map() as SubscriptionMap,
-        features: new Map() as FeaturesMap,
+        subscriptions: {},
+        features: {},
         lastSubscribed: null,
     }
 
     constructor(options: { expiry?: number } = {}) {
         const { expiry } = options
         if (expiry != null) {
-            this.claims.subscriptions.set('backup-monthly', { expiry })
-            this.claims.subscriptions.set('sync-monthly', { expiry })
-            this.claims.features.set('backup', { expiry })
-            this.claims.features.set('sync', { expiry })
+            this.claims.subscriptions['backup-monthly'] = { expiry }
+            this.claims.subscriptions['sync-monthly'] = { expiry }
+            this.claims.features['backup'] = { expiry }
+            this.claims.features['sync'] = { expiry }
         }
     }
 
