@@ -64,6 +64,7 @@ export async function setupMobileIntegrationTest(options?: {
         browserAPIs: {
             storage: { local: browserLocalStorage } as any,
         },
+        appVersion: '1.2.3',
     })
     sync.initialSync.wrtc = wrtc
     registerModuleMapCollections(storageManager.registry, {
