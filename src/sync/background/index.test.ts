@@ -11,12 +11,14 @@ import SyncBackground from '.'
 import { withEmulatedFirestoreBackend } from '@worldbrain/storex-backend-firestore/lib/index.tests'
 import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
 import { RUN_FIRESTORE_TESTS } from 'src/tests/constants'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/constants'
+import {
+    SYNC_STORAGE_AREA_KEYS,
+    SYNCED_COLLECTIONS,
+} from '@worldbrain/memex-common/lib/sync/constants'
 import {
     getStorageContents,
     isTermsField,
+    StorageContents,
 } from '@worldbrain/memex-common/lib/storage/utils'
 import { insertIntegrationTestData } from 'src/tests/shared-fixtures/integration'
 import {
@@ -571,38 +573,23 @@ function mobileSyncTests(suiteOptions: {
         return { devices }
     }
 
-    const it = makeTestFactory({
-        ...suiteOptions,
-        setupTest,
-    })
-
-    it('should sync from extension to mobile', async (setup: TestSetup) => {
-        const { devices } = setup
-        const removeUnsyncedCollectionFromStorageContents = async (
-            storageContents: typeof extensionStorageContents,
-        ) => {
-            for (const [collectionName, objects] of Object.entries(
-                storageContents,
-            )) {
-                if (
-                    devices.mobile.services.sync.syncedCollections.indexOf(
-                        collectionName,
-                    ) === -1
-                ) {
-                    delete storageContents[collectionName]
-                }
+    const removeUnsyncedCollectionFromStorageContents = async (
+        storageContents: StorageContents,
+    ) => {
+        for (const [collectionName, objects] of Object.entries(
+            storageContents,
+        )) {
+            if (SYNCED_COLLECTIONS.indexOf(collectionName) === -1) {
+                delete storageContents[collectionName]
             }
         }
+    }
 
-        await insertIntegrationTestData(devices.extension)
-        const extensionStorageContents = await getStorageContents(
-            devices.extension.storageManager,
-        )
-        await removeUnsyncedCollectionFromStorageContents(
-            extensionStorageContents,
-        )
+    function removeTermFieldsFromStorageContents(
+        storageContents: StorageContents,
+    ) {
         for (const [collectionName, objects] of Object.entries(
-            extensionStorageContents,
+            storageContents,
         )) {
             for (const object of objects) {
                 for (const [fieldName, fieldValue] of Object.entries(object)) {
@@ -617,6 +604,24 @@ function mobileSyncTests(suiteOptions: {
                 }
             }
         }
+    }
+
+    const it = makeTestFactory({
+        ...suiteOptions,
+        setupTest,
+    })
+
+    it('should do an initial sync from extension to mobile', async (setup: TestSetup) => {
+        const { devices } = setup
+
+        await insertIntegrationTestData(devices.extension)
+        const extensionStorageContents = await getStorageContents(
+            devices.extension.storageManager,
+        )
+        await removeUnsyncedCollectionFromStorageContents(
+            extensionStorageContents,
+        )
+        await removeTermFieldsFromStorageContents(extensionStorageContents)
 
         await doInitialSync({
             source: devices.extension.backgroundModules.sync,
@@ -627,6 +632,47 @@ function mobileSyncTests(suiteOptions: {
         )
         await removeUnsyncedCollectionFromStorageContents(mobileStorageContents)
         expect(mobileStorageContents).toEqual(extensionStorageContents)
+    })
+
+    it('should merge during initial sync from extension to mobile', async (setup: TestSetup) => {
+        const { devices } = setup
+
+        await insertIntegrationTestData(devices.extension)
+        const extensionStorageContents = await getStorageContents(
+            devices.extension.storageManager,
+        )
+        await removeUnsyncedCollectionFromStorageContents(
+            extensionStorageContents,
+        )
+        await removeTermFieldsFromStorageContents(extensionStorageContents)
+
+        await doInitialSync({
+            source: devices.extension.backgroundModules.sync,
+            target: devices.mobile.services.sync,
+        })
+        const mobileStorageContentsBeforeMerge = await getStorageContents(
+            devices.mobile.storage.manager,
+        )
+        await removeUnsyncedCollectionFromStorageContents(
+            mobileStorageContentsBeforeMerge,
+        )
+        expect(mobileStorageContentsBeforeMerge).toEqual(
+            extensionStorageContents,
+        )
+
+        await doInitialSync({
+            source: devices.extension.backgroundModules.sync,
+            target: devices.mobile.services.sync,
+        })
+        const mobileStorageContentsAfterMerge = await getStorageContents(
+            devices.mobile.storage.manager,
+        )
+        await removeUnsyncedCollectionFromStorageContents(
+            mobileStorageContentsAfterMerge,
+        )
+        expect(mobileStorageContentsAfterMerge).toEqual(
+            extensionStorageContents,
+        )
     })
 }
 
