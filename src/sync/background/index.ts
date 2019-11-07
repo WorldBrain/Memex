@@ -41,6 +41,7 @@ export default class SyncBackground {
             signalTransportFactory: SignalTransportFactory
             getSharedSyncLog: () => Promise<SharedSyncLog>
             browserAPIs: Pick<Browser, 'storage'>
+            appVersion: string
         },
     ) {
         this.getSharedSyncLog = options.getSharedSyncLog
@@ -70,6 +71,8 @@ export default class SyncBackground {
             getSharedSyncLog: options.getSharedSyncLog,
             secretStore: this.secretStore,
             settingStore: this.settingStore,
+            productType: 'ext',
+            productVersion: this.options.appVersion,
             toggleSyncLogging: (enabed, deviceId?) => {
                 if (this.syncLoggingMiddleware) {
                     this.syncLoggingMiddleware.enabled = enabed

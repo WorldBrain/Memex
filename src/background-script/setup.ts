@@ -129,6 +129,7 @@ export function createBackgroundModules(options: {
             storageManager,
             getSharedSyncLog: options.getSharedSyncLog,
             browserAPIs: options.browserAPIs,
+            appVersion: process.env.VERSION,
         }),
         bgScript,
     }
