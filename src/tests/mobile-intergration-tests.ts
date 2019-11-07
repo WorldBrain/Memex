@@ -1,14 +1,41 @@
-import { TypeORMStorageBackend } from '@worldbrain/storex-backend-typeorm'
+const wrtc = require('wrtc')
 import StorageManager from '@worldbrain/storex'
+import { TypeORMStorageBackend } from '@worldbrain/storex-backend-typeorm'
 import { extractUrlParts, normalizeUrl } from '@worldbrain/memex-url-utils'
 import { MetaPickerStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/storage'
 import { OverviewStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/overview/storage'
 import { PageEditorStorage } from '@worldbrain/memex-storage/lib/mobile-app/features/page-editor/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import SyncBackground from 'src/sync/background'
+import MemoryBrowserStorage from 'src/util/tests/browser-storage'
+import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
+import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
+
+export interface MobileIntegrationTestSetup {
+    storage: {
+        manager: StorageManager
+        modules: {
+            metaPicker: MetaPickerStorage
+            overview: OverviewStorage
+            pageEditor: PageEditorStorage
+        }
+    }
+    services: {
+        sync: SyncBackground
+    }
+    destroy: () => Promise<void>
+}
 
 let storageBackendsCreated = 0
 
-export async function setupMobileIntegrationTest() {
+export async function setupMobileIntegrationTest(options?: {
+    signalTransportFactory?: SignalTransportFactory
+    sharedSyncLog?: SharedSyncLog
+    browserLocalStorage?: MemoryBrowserStorage
+}): Promise<MobileIntegrationTestSetup> {
+    const browserLocalStorage =
+        (options && options.browserLocalStorage) || new MemoryBrowserStorage()
+
     const backend = new TypeORMStorageBackend({
         connectionOptions: {
             type: 'sqlite',
@@ -29,13 +56,30 @@ export async function setupMobileIntegrationTest() {
         }),
         pageEditor: new PageEditorStorage({ storageManager, normalizeUrl }),
     }
-    registerModuleMapCollections(storageManager.registry, storageModules)
+    const sync = new SyncBackground({
+        auth: { getCurrentUser: () => null },
+        storageManager,
+        signalTransportFactory: options && options.signalTransportFactory,
+        getSharedSyncLog: async () => options && options.sharedSyncLog,
+        browserAPIs: {
+            storage: { local: browserLocalStorage } as any,
+        },
+    })
+    sync.initialSync.wrtc = wrtc
+    registerModuleMapCollections(storageManager.registry, {
+        ...storageModules,
+        clientSyncLog: sync.clientSyncLog,
+    })
     await storageManager.finishInitialization()
+    await storageManager.backend.migrate()
 
     return {
         storage: {
             manager: storageManager,
             modules: storageModules,
+        },
+        services: {
+            sync,
         },
         destroy: async () => {
             if (backend.connection) {
