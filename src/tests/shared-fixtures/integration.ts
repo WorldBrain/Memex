@@ -1,6 +1,5 @@
 import StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
-import { getStorageContents } from '@worldbrain/memex-common/lib/storage/utils'
 
 export async function insertIntegrationTestData(params: {
     backgroundModules: BackgroundModules
@@ -53,5 +52,12 @@ export async function insertIntegrationTestData(params: {
             tab: null as any,
         },
         { url: annotUrl },
+    )
+    await backgroundModules.directLinking.insertAnnotToList(
+        { tab: null },
+        {
+            listId,
+            url: annotUrl,
+        },
     )
 }

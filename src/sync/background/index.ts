@@ -36,7 +36,7 @@ export default class SyncBackground {
 
     constructor(
         private options: {
-            auth: AuthBackground
+            auth: { getCurrentUser: () => { id: string | number } | null }
             storageManager: StorageManager
             signalTransportFactory: SignalTransportFactory
             getSharedSyncLog: () => Promise<SharedSyncLog>
