@@ -55,7 +55,9 @@ export default class BackupProcedure {
         this.storage = storage
         this.lastBackupStorage = lastBackupStorage
         this.backend = backend
-        this.currentSchemaVersion = getCurrentSchemaVersion(storageManager)
+        this.currentSchemaVersion = getCurrentSchemaVersion(
+            storageManager,
+        ).getTime()
         this.reset()
     }
 
