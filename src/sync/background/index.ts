@@ -36,7 +36,9 @@ export default class SyncBackground {
 
     constructor(
         private options: {
-            auth: { getCurrentUser: () => { id: string | number } | null }
+            auth: {
+                getCurrentUser: () => Promise<{ id: string | number } | null>
+            }
             storageManager: StorageManager
             signalTransportFactory: SignalTransportFactory
             getSharedSyncLog: () => Promise<SharedSyncLog>
@@ -62,7 +64,7 @@ export default class SyncBackground {
             frequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
             auth: {
                 getUserId: async () => {
-                    const user = options.auth.getCurrentUser()
+                    const user = await options.auth.getCurrentUser()
                     return user && user.id
                 },
             },
@@ -128,7 +130,7 @@ export default class SyncBackground {
 }
 
 class MemexSyncSettingStoreImplentation implements MemexSyncSettingsStore {
-    constructor(private options: { browserAPIs: Pick<Browser, 'storage'> }) { }
+    constructor(private options: { browserAPIs: Pick<Browser, 'storage'> }) {}
 
     async retrieveSetting(key: MemexSyncSetting) {
         const localStorage = this.options.browserAPIs.storage.local
