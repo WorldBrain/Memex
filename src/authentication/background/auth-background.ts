@@ -14,30 +14,27 @@ export class AuthBackground {
     subscriptionServerFunctions: FirebaseFunctionsSubscription
     authServerFunctions: FirebaseFunctionsAuth
 
-    constructor(
-        authService: AuthService = null,
-        subscriptionServerFunctions: FirebaseFunctionsSubscription = null,
-        authServerFunctions: FirebaseFunctionsAuth = null,
-    ) {
-        if (authService != null) {
-            this.authService = authService
+    constructor(options: {
+        authService?: AuthService
+        subscriptionServerFunctions?: FirebaseFunctionsSubscription
+        authServerFunctions?: FirebaseFunctionsAuth
+        devAuthState?: string
+    }) {
+        const devAuthState = (options && options.devAuthState) || ''
+        if (options.authService != null) {
+            this.authService = options.authService
         } else {
-            if (
-                process.env.DEV_AUTH_STATE === '' ||
-                process.env.DEV_AUTH_STATE === 'staging'
-            ) {
+            if (devAuthState === '' || devAuthState === 'staging') {
                 this.authService = new AuthService(new AuthFirebase())
             } else {
                 // todo: (ch): Clean up the creation of these testing states, might not want to be done here.
                 let mockAuthImplementation
-                if (process.env.DEV_AUTH_STATE === 'user_signed_out') {
+                if (devAuthState === 'user_signed_out') {
                     mockAuthImplementation = MockAuthImplementation.newUser()
-                } else if (process.env.DEV_AUTH_STATE === 'user_signed_in') {
+                } else if (devAuthState === 'user_signed_in') {
                     mockAuthImplementation = new MockAuthImplementation()
                     mockAuthImplementation.setCurrentUserToLoggedInUser()
-                } else if (
-                    process.env.DEV_AUTH_STATE.startsWith('user_subscribed')
-                ) {
+                } else if (devAuthState.startsWith('user_subscribed')) {
                     // todo: (ch): allow testing of different plans
                     mockAuthImplementation = MockAuthImplementation.validSubscriptions()
                     mockAuthImplementation.setCurrentUserToLoggedInUser()
@@ -47,9 +44,10 @@ export class AuthBackground {
         }
 
         this.subscriptionServerFunctions =
-            subscriptionServerFunctions || new FirebaseFunctionsSubscription()
+            options.subscriptionServerFunctions ||
+            new FirebaseFunctionsSubscription()
         this.authServerFunctions =
-            authServerFunctions || new FirebaseFunctionsAuth()
+            options.authServerFunctions || new FirebaseFunctionsAuth()
     }
 
     registerRemoteEmitter() {

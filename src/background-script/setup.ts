@@ -60,9 +60,8 @@ export function createBackgroundModules(options: {
     getSharedSyncLog: () => Promise<SharedSyncLog>
     tabManager?: TabManager
     localStorageChangesManager: StorageChangesManager
-    authImplementation?: AuthInterface
-    authServerSubscriptionFunctions?: SubscriptionServerFunctionsInterface
-    authServerAuthFunctions?: AuthServerFunctionsInterface
+    auth?: AuthBackground
+    authOptions?: { devAuthState: string }
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
@@ -87,7 +86,12 @@ export function createBackgroundModules(options: {
         loggerBackground: activityLogger,
     })
 
-    const auth = new AuthBackground()
+    const auth =
+        options.auth ||
+        new AuthBackground({
+            devAuthState:
+                options.authOptions && options.authOptions.devAuthState,
+        })
 
     return {
         auth,

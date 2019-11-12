@@ -60,8 +60,8 @@ async function setupTest(options: {
         setup.backgroundModules.customLists.remoteFunctions
 
     const userId: string = options.userId || uuid()
-    setups[0].mockAuthImplementation.setCurrentUserId('<TestUser:1>')
-    setups[1].mockAuthImplementation.setCurrentUserId('<TestUser:2>')
+    setups[0].mockAuthImplementation.setCurrentUserId(userId)
+    setups[1].mockAuthImplementation.setCurrentUserId(userId)
 
     const forEachSetup = async (
         f: (setup: BackgroundIntegrationTestSetup) => void,
