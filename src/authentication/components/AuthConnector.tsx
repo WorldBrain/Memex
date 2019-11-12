@@ -7,14 +7,21 @@ import {
     UserFeatures,
 } from 'src/authentication/background/types'
 
-interface State {
+/**
+ * Remove from T the keys that are in common with K
+ */
+type Optionalize<T extends K, K> = Omit<T, keyof K>
+
+export interface UserProps {
     currentUser: AuthenticatedUserWithClaims | AuthenticatedUser | null
     authorizedFeatures: UserFeatures[]
 }
 
 // tslint:disable-next-line:variable-name
-export function withCurrentUser(WrappedComponent) {
-    return class extends React.Component<any, State> {
+export function withCurrentUser<P extends UserProps = UserProps>(
+    WrappedComponent: React.ComponentType<P>,
+) {
+    return class extends React.Component<Optionalize<P, UserProps>, UserProps> {
         unsubscribe: () => void
         constructor(props) {
             super(props)
@@ -53,7 +60,7 @@ export function withCurrentUser(WrappedComponent) {
                 <WrappedComponent
                     currentUser={this.state.currentUser}
                     authorizedFeatures={this.state.authorizedFeatures}
-                    {...this.props}
+                    {...(this.props as P)}
                 />
             )
         }

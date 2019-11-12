@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { UserSubscription } from 'src/authentication/components/user-subscription'
+import { UserSubscription } from 'src/authentication/ui/user-subscription'
 import Button from 'src/popup/components/Button'
 import { Helmet } from 'react-helmet'
 import { SubscriptionPriceBox } from 'src/authentication/components/Subscription/SubscriptionPriceBox'
@@ -23,13 +23,17 @@ interface Props {
     onClose?: () => void
     subscriptionChanged: () => void
 }
-export class SubscriptionOptions extends React.PureComponent<Props> {
+interface State {
+    subscribed: boolean
+}
+export class SubscriptionOptions extends React.Component<Props, State> {
     chargebeeInstance: any
     userSubscription: UserSubscription
-    private subscribed: boolean
+
+    public state = { subscribed: false }
 
     async componentDidMount() {
-        this.subscribed = await auth.hasSubscribedBefore()
+        this.setState({ subscribed: await auth.hasSubscribedBefore() })
     }
 
     _initChargebee = (): void => {

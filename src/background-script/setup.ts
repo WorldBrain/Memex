@@ -35,7 +35,7 @@ import {
     AuthServerFunctionsInterface,
     SubscriptionServerFunctionsInterface,
 } from 'src/authentication/background/types'
-import { AuthBackground } from 'src/authentication/background/auth-background'
+import { AuthBackground } from 'src/authentication/background'
 
 export interface BackgroundModules {
     auth: AuthBackground

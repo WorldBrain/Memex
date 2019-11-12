@@ -7,7 +7,7 @@ import { SYNC_STORAGE_AREA_KEYS } from './constants'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { RecurringTask } from 'src/util/recurring-task'
 import { getLocalStorage } from 'src/util/storage'
-import { AuthBackground } from 'src/authentication/background/auth-background'
+import { AuthBackground } from 'src/authentication/background'
 
 export default class ContinuousSync {
     public recurringIncrementalSyncTask?: RecurringTask

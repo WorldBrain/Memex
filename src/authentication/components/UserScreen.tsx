@@ -2,17 +2,13 @@ import * as React from 'react'
 import 'firebase/auth'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import UserInfo from 'src/authentication/components/UserInfo'
-import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import {
+    UserProps,
+    withCurrentUser,
+} from 'src/authentication/components/AuthConnector'
 const styles = require('./styles.css')
-interface Props {
-    currentUser: any
-    setUser: any
-}
 
-interface State {
-    currentUser: any
-}
-class Authentication extends React.PureComponent<Props, State> {
+class UserScreen extends React.PureComponent<UserProps> {
     render() {
         return (
             <div className={styles.authContainer}>
@@ -22,4 +18,4 @@ class Authentication extends React.PureComponent<Props, State> {
         )
     }
 }
-export default withCurrentUser(Authentication)
+export default withCurrentUser(UserScreen)

@@ -23,7 +23,7 @@ import { StorageChangeDetector } from './storage-change-detector'
 import StorageOperationLogger from './storage-operation-logger'
 import { setStorex } from 'src/search/get-db'
 import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
-import { AuthBackground } from 'src/authentication/background/auth-background'
+import { AuthBackground } from 'src/authentication/background'
 import { MockAuthImplementation } from 'src/authentication/background/mocks/auth-mocks'
 import { AuthService } from 'src/authentication/background/auth-service'
 

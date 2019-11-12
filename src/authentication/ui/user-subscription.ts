@@ -2,10 +2,24 @@ import { EventEmitter } from 'events'
 import TypedEmitter from 'typed-emitter'
 import { serverFunctions } from 'src/util/remote-functions-background'
 
+interface ChargebeeInstanceInterface {
+    setPortalSession(getUrl: () => Promise<string>): void
+    createChargebeePortal(): void
+    openCheckout({
+        hostedPage,
+        success,
+        close,
+    }: {
+        hostedPage: () => Promise<string>
+        success: (id: string) => void
+        close: () => void
+    })
+}
+
 export class UserSubscription {
     private cbInstance: any
 
-    constructor(chargebeeInstance) {
+    constructor(chargebeeInstance: ChargebeeInstanceInterface) {
         this.cbInstance = chargebeeInstance
     }
 
