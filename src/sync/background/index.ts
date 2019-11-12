@@ -14,7 +14,7 @@ import InitialSync, { SignalTransportFactory } from './initial-sync'
 import ContinuousSync from './continuous-sync'
 import { MemexClientSyncLogStorage } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
-import { AuthBackground } from 'src/authentication/background/auth-background'
+import { AuthBackground } from 'src/authentication/background'
 
 export default class SyncBackground {
     initialSync: InitialSync

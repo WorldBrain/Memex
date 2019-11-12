@@ -5,7 +5,7 @@ import Privacy from './privacy'
 import Statistics from './statistics'
 import Settings from './settings'
 import Overview from '../overview'
-import Authentication from '../authentication/components/Authentication'
+import UserScreen from '../authentication/components/UserScreen'
 import { SubscribeModal } from '../authentication/components/Subscription/SubscribeModal'
 
 export default [
@@ -82,7 +82,7 @@ export default [
         name: 'User Account',
         pathname: '/auth',
         icon: 'settings',
-        component: Authentication,
+        component: UserScreen,
         hideFromSidebar: false,
     },
 ]

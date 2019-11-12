@@ -52,7 +52,9 @@ export class AuthService implements AuthRemoteFunctionsInterface {
     public checkValidPlan = async (plan: UserPlans): Promise<boolean> => {
         const claims = await this.getUserClaims()
 
-        const subscriptionExpiry = this.subscriptionExpiryAccessor(claims)(plan)
+        const subscriptionExpiry = this.getSubscriptionExpirationTimestamp(
+            claims,
+        )(plan)
 
         if (!subscriptionExpiry) {
             throw new AuthSubscriptionNotPresent()
@@ -68,7 +70,7 @@ export class AuthService implements AuthRemoteFunctionsInterface {
         return true
     }
 
-    private subscriptionExpiryAccessor = (claims: Claims) => (
+    private getSubscriptionExpirationTimestamp = (claims: Claims) => (
         plan: UserPlans,
     ): number | null =>
         claims != null &&

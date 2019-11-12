@@ -1,16 +1,17 @@
 import * as React from 'react'
 import { auth } from 'src/util/remote-functions-background'
 import { firebase } from 'src/util/firebase-app-initialized'
-import { SubscriptionOptions } from 'src/authentication/components/Subscription/SubscriptionOptions'
 import Button from 'src/popup/components/Button'
-import { AuthenticatedUserWithClaims } from 'src/authentication/background/types'
-import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import {
+    UserProps,
+    withCurrentUser,
+} from 'src/authentication/components/AuthConnector'
 import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
 interface State {
     showSubscriptionModal: boolean
 }
 
-export class UserInfo extends React.Component<any, State> {
+export class UserInfo extends React.Component<UserProps, State> {
     state = { showSubscriptionModal: false }
 
     handleLogout = () => {
@@ -26,7 +27,7 @@ export class UserInfo extends React.Component<any, State> {
     showSubscriptionModal = () => this.setState({ showSubscriptionModal: true })
 
     render() {
-        const user: AuthenticatedUserWithClaims = this.props.currentUser
+        const user = this.props.currentUser
         const features = this.props.authorizedFeatures
         return (
             <div className={''}>
