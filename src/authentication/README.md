@@ -58,6 +58,12 @@ authEvents.addListener('onAuthStateChanged', user => {
 })
 ```
 
+## Generating Custom Login Tokens
+
+```typescript
+serverFunctions.getCustomLoginToken() : Promise<String>
+```
+
 #### Logging In
 
 Providing an interface to login is most easily handled by delegating to the UI library and login logic already provided by Firebase.
