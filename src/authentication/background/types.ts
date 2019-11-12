@@ -15,10 +15,14 @@ export interface FeatureMap {
 export type UserFeatures = 'backup' | 'sync'
 export type UserPlans =
     | 'free'
-    | 'backup-monthly'
-    | 'backup-yearly'
-    | 'sync-monthly'
-    | 'sync-yearly'
+    | 'pro-1-device'
+    | 'pro-2-devices'
+    | 'pro-3-devices'
+    | 'pro-4-devices'
+    | 'pro-1-device-yrl'
+    | 'pro-2-devices-yrl'
+    | 'pro-3-devices-yrl'
+    | 'pro-4-devices-yrl'
 
 export interface AuthenticatedUser {
     displayName: string | null

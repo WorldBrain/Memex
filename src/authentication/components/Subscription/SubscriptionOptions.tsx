@@ -63,11 +63,11 @@ export class SubscriptionOptions extends React.PureComponent<Props> {
     }
 
     openCheckoutBackup = async () => {
-        return this.openCheckout('backup-monthly')
+        return this.openCheckout('pro-1-device-yrl')
     }
 
     openCheckoutBackupSync = async () => {
-        return this.openCheckout('sync-monthly')
+        return this.openCheckout('pro-1-device')
     }
 
     openCheckout = async (planId: UserPlans) => {
