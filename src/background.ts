@@ -39,6 +39,9 @@ export async function main() {
         browserAPIs: browser,
         signalTransportFactory: createFirebaseSignalTransport,
         getSharedSyncLog,
+        authOptions: {
+            devAuthState: process.env.DEV_AUTH_STATE,
+        },
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
     await storageManager.finishInitialization()

@@ -45,17 +45,17 @@ export async function setupBackgroundIntegrationTest(options?: {
     const storageManager = initStorex()
 
     const mockAuthImplementation = new MockAuthImplementation()
-    const authBackground: AuthBackground = new AuthBackground(
-        new AuthService(mockAuthImplementation),
-        {
+    const auth: AuthBackground = new AuthBackground({
+        authService: new AuthService(mockAuthImplementation),
+        subscriptionServerFunctions: {
             getCheckoutLink: async () => '',
             getManageLink: async () => '',
         },
-        {
+        authServerFunctions: {
             refreshUserClaims: async () => true,
             getCustomLoginToken: async () => '',
         },
-    )
+    })
 
     const backgroundModules = createBackgroundModules({
         storageManager,
@@ -72,11 +72,11 @@ export async function setupBackgroundIntegrationTest(options?: {
         tabManager: options && options.tabManager,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,
+        auth,
     })
     backgroundModules.customLists._createPage =
         backgroundModules.search.searchIndex.createTestPage
     backgroundModules.sync.initialSync.wrtc = wrtc
-    backgroundModules.auth = authBackground
 
     registerBackgroundModuleCollections(storageManager, backgroundModules)
 
