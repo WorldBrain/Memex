@@ -17,9 +17,9 @@ import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/consta
 
 import { PublicSyncInterface } from './types'
 import { MemexClientSyncLogStorage } from './storage'
-import { AuthBackground } from 'src/authentication/background'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { getLocalStorage } from 'src/util/storage'
+import { filterBlobsFromSyncLog } from './sync-logging'
 
 export default class SyncBackground {
     initialSync: MemexInitialSync
@@ -122,6 +122,7 @@ export default class SyncBackground {
             includeCollections: this.syncedCollections,
         })
         this.syncLoggingMiddleware.enabled = false
+        this.syncLoggingMiddleware.operationPreprocessor = filterBlobsFromSyncLog
         return this.syncLoggingMiddleware
     }
 }
