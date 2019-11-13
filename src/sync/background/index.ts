@@ -38,6 +38,8 @@ export default class SyncBackground {
         private options: {
             auth: {
                 getCurrentUser: () => Promise<{ id: string | number } | null>
+                generateLoginToken?(): Promise<{ token: string }>
+                loginWithToken?(token: string): Promise<void>
             }
             storageManager: StorageManager
             signalTransportFactory: SignalTransportFactory
@@ -59,6 +61,9 @@ export default class SyncBackground {
             signalTransportFactory: options.signalTransportFactory,
             syncedCollections: this.syncedCollections,
             secrectStore: this.secretStore,
+            generateLoginToken: async () =>
+                (await this.options.auth.generateLoginToken()).token,
+            loginWithToken: this.options.auth.loginWithToken,
         })
         this.continuousSync = new MemexContinuousSync({
             frequencyInMs: INCREMENTAL_SYNC_FREQUENCY,

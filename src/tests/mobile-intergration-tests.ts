@@ -57,7 +57,10 @@ export async function setupMobileIntegrationTest(options?: {
         pageEditor: new PageEditorStorage({ storageManager, normalizeUrl }),
     }
     const sync = new SyncBackground({
-        auth: { getCurrentUser: () => null },
+        auth: {
+            getCurrentUser: () => null,
+            loginWithToken: async () => null,
+        },
         storageManager,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,

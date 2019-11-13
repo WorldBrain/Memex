@@ -129,6 +129,10 @@ export function createBackgroundModules(options: {
                     const user = await auth.authService.getUser()
                     return user ? { id: user.uid } : null
                 },
+                generateLoginToken: () =>
+                    auth.authService['auth'].generateLoginToken(),
+                loginWithToken: (token: string) =>
+                    auth.authService['auth'].loginWithToken(token),
             },
             signalTransportFactory: options.signalTransportFactory,
             storageManager,
