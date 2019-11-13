@@ -187,7 +187,6 @@ export async function processEvent({
                     value: choice,
                 })
 
-                localStorage.setItem('backup.onboarding.payment', true)
                 if (choice === 'automatic') {
                     remoteFunction('enableAutomaticBackup')
                 }
