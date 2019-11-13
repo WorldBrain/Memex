@@ -2,12 +2,14 @@ import * as React from 'react'
 import { AuthenticatedUserWithClaims } from 'src/authentication/background/types'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import { SubscriptionOptions } from 'src/authentication/components/Subscription/SubscriptionOptions'
-import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import {
+    UserProps,
+    withCurrentUser,
+} from 'src/authentication/components/AuthConnector'
 
-interface Props {
+type Props = {
     onClose: () => void
-    currentUser: AuthenticatedUserWithClaims
-}
+} & UserProps
 
 export class Subscribe extends React.PureComponent<Props> {
     render() {
