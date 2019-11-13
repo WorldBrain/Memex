@@ -4,6 +4,7 @@ import {
     Claims,
 } from 'src/authentication/background/types'
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
+import { subscriptionGraceMs } from 'src/authentication/background/auth-service'
 
 export class MockLinkGenerator {
     static checkoutLink = 'https://checkout.example-test.com'
@@ -30,23 +31,26 @@ export class MockAuthImplementation implements AuthInterface {
         lastSubscribed: null,
     }
 
-    constructor(options: { expiry?: number } = {}) {
-        const { expiry } = options
-        if (expiry != null) {
-            this.claims.subscriptions['backup-monthly'] = { expiry }
-            this.claims.subscriptions['sync-monthly'] = { expiry }
+    constructor(options: { expiry?: number; subscriptionKey?: string } = {}) {
+        const { expiry, subscriptionKey } = options
+        if (expiry != null && subscriptionKey != null) {
+            this.claims.subscriptions[subscriptionKey] = { expiry }
+            this.claims.subscriptions[subscriptionKey] = { expiry }
             this.claims.features['backup'] = { expiry }
             this.claims.features['sync'] = { expiry }
         }
     }
 
-    static validSubscriptions = () =>
+    static validSubscriptions = (subscriptionKey?: string) =>
         new MockAuthImplementation({
-            expiry: Date.now() + 10000 + 1000 * 60 * 60,
+            expiry: new Date().getUTCMilliseconds() + 1000,
+            subscriptionKey,
         })
-    static expiredSubscriptions = () =>
+    static expiredSubscriptions = (subscriptionKey?: string) =>
         new MockAuthImplementation({
-            expiry: Date.now() - 1000 - 1000 * 60 * 60,
+            expiry:
+                new Date().getUTCMilliseconds() - 1000 - subscriptionGraceMs,
+            subscriptionKey,
         })
 
     static newUser = () => new MockAuthImplementation()

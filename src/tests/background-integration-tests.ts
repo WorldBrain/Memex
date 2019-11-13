@@ -53,7 +53,6 @@ export async function setupBackgroundIntegrationTest(options?: {
         },
         authServerFunctions: {
             refreshUserClaims: async () => true,
-            getCustomLoginToken: async () => '',
         },
     })
 

@@ -6,34 +6,37 @@ import {
 } from 'src/authentication/background/auth-service'
 import { MockAuthImplementation } from 'src/authentication/background/mocks/auth-mocks'
 
-const sinon = require('sinon')
+const testSubscriptionKey = 'pro-1-device'
+
 describe('Authentication Subscription Status Tests', () => {
-    it('should not be subscribed to backup-monthly plan if user is new', async () => {
+    it('should not be subscribed to pro-1-device plan if user is new', async () => {
         const authService = new AuthService(MockAuthImplementation.newUser())
 
-        expect(await authService.hasValidPlan('backup-monthly')).toBeFalsy()
+        expect(await authService.hasValidPlan(testSubscriptionKey)).toBeFalsy()
         expect(
-            authService.checkValidPlan('backup-monthly'),
+            authService.checkValidPlan(testSubscriptionKey),
         ).rejects.toThrowError(AuthSubscriptionNotPresent)
     })
 
-    it('should not be subscribed to backup-monthly plan if subscription expired', async () => {
+    it('should not be subscribed to pro-1-device plan if subscription expired', async () => {
         const authService = new AuthService(
-            MockAuthImplementation.expiredSubscriptions(),
+            MockAuthImplementation.expiredSubscriptions(testSubscriptionKey),
         )
 
-        expect(await authService.hasValidPlan('backup-monthly')).toBeFalsy()
+        expect(await authService.hasValidPlan(testSubscriptionKey)).toBeFalsy()
         expect(
-            authService.checkValidPlan('backup-monthly'),
+            authService.checkValidPlan(testSubscriptionKey),
         ).rejects.toThrowError(AuthSubscriptionExpired)
     })
 
-    it('should be subscribed to backup-monthly plan if subscription is valid', async () => {
+    it('should be subscribed to pro-1-device plan if subscription is valid', async () => {
         const authService = new AuthService(
-            MockAuthImplementation.validSubscriptions(),
+            MockAuthImplementation.validSubscriptions(testSubscriptionKey),
         )
 
-        expect(await authService.checkValidPlan('backup-monthly')).toBeTruthy()
-        expect(await authService.hasValidPlan('backup-monthly')).toBeTruthy()
+        expect(
+            await authService.checkValidPlan(testSubscriptionKey),
+        ).toBeTruthy()
+        expect(await authService.hasValidPlan(testSubscriptionKey)).toBeTruthy()
     })
 })

@@ -20,7 +20,7 @@ export class AuthSubscriptionExpired extends AuthSubscriptionInvalid {}
  * Should be at least as long as the auth implementation's refresh token
  * so for firebase, 1h.
  */
-const subscriptionGraceMs = 1000 * 60 * 60
+export const subscriptionGraceMs = 1000 * 60 * 60
 
 export class AuthService implements AuthRemoteFunctionsInterface {
     private readonly auth: AuthInterface
