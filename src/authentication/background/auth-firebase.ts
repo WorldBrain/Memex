@@ -77,4 +77,14 @@ export class AuthFirebase implements AuthInterface {
         )
         this.authEmitter.emit('onAuthStateChanged', emitUser)
     }
+
+    async generateLoginToken() {
+        return (await firebase
+            .functions()
+            .httpsCallable('getCustomLoginToken')()).data
+    }
+
+    async loginWithToken(token: string) {
+        await firebase.auth().signInWithCustomToken(token)
+    }
 }

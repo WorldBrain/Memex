@@ -40,6 +40,8 @@ export interface AuthInterface {
     getUserClaims(): Promise<Claims>
     refresh(): Promise<void>
     registerAuthEmitter(emitter: RemoteEventEmitter<AuthEvents>): void
+    generateLoginToken(): Promise<{ token: string }>
+    loginWithToken(token: string): Promise<void>
 }
 
 export interface SubscriptionCheckoutOptions {
@@ -53,7 +55,6 @@ export interface SubscriptionServerFunctionsInterface {
 
 export interface AuthServerFunctionsInterface {
     refreshUserClaims(): Promise<any>
-    getCustomLoginToken(): Promise<string>
 }
 
 export interface AuthRemoteFunctionsInterface {
