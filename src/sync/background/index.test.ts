@@ -43,7 +43,7 @@ function makeTestFactory<TestSetup>(options: {
     setupTest: (dependencies: TestDependencies) => Promise<TestSetup>
 }) {
     return (description: string, test: (setup: TestSetup) => Promise<void>) => {
-        ; (options.skip ? registerTest.skip : registerTest)(
+        ;(options.skip ? registerTest.skip : registerTest)(
             description,
             async () => {
                 await options.withDependencies(async dependencies => {
@@ -99,15 +99,15 @@ function extensionSyncTests(suiteOptions: {
             BackgroundIntegrationTestSetup,
             BackgroundIntegrationTestSetup
         ] = [
-                await setupBackgroundIntegrationTest({
-                    signalTransportFactory,
-                    sharedSyncLog: options.sharedSyncLog,
-                }),
-                await setupBackgroundIntegrationTest({
-                    signalTransportFactory,
-                    sharedSyncLog: options.sharedSyncLog,
-                }),
-            ]
+            await setupBackgroundIntegrationTest({
+                signalTransportFactory,
+                sharedSyncLog: options.sharedSyncLog,
+            }),
+            await setupBackgroundIntegrationTest({
+                signalTransportFactory,
+                sharedSyncLog: options.sharedSyncLog,
+            }),
+        ]
         const syncModule = (setup: BackgroundIntegrationTestSetup) =>
             setup.backgroundModules.sync
         const searchModule = (setup: BackgroundIntegrationTestSetup) =>
@@ -116,10 +116,6 @@ function extensionSyncTests(suiteOptions: {
             setup.backgroundModules.customLists.remoteFunctions
 
         const userId: string = options.userId || uuid()
-        devices[0].mockAuthImplementation.setCurrentUserId(userId)
-        devices[1].mockAuthImplementation.setCurrentUserId(userId)
-        // devices[0].backgroundModules.auth.userId = userId
-        // devices[1].backgroundModules.auth.userId = userId
 
         const forEachDevice = async (
             f: (setup: BackgroundIntegrationTestSetup) => void,
@@ -166,7 +162,11 @@ function extensionSyncTests(suiteOptions: {
             syncModule,
             searchModule,
             forEachDevice: forEachSetup,
+            userId,
         } = setup
+
+        devices[0].mockAuthImplementation.setCurrentUserId(userId)
+
         await forEachSetup(s => syncModule(s).setup())
 
         // Initial data
@@ -217,7 +217,7 @@ function extensionSyncTests(suiteOptions: {
 
         const getDeviceId = async (s: BackgroundIntegrationTestSetup) =>
             (await s.browserLocalStorage.get(SYNC_STORAGE_AREA_KEYS.deviceId))[
-            SYNC_STORAGE_AREA_KEYS.deviceId
+                SYNC_STORAGE_AREA_KEYS.deviceId
             ]
 
         const firstDeviceId = await getDeviceId(devices[0])
@@ -287,7 +287,7 @@ function extensionSyncTests(suiteOptions: {
         })
     })
 
-    it('should enable Sync on start up if enabled', async (setup: TestSetup) => {
+    it('should enable sync on start up if enabled', async (setup: TestSetup) => {
         const {
             devices,
             forEachDevice: forEachSetup,
@@ -296,6 +296,9 @@ function extensionSyncTests(suiteOptions: {
             sharedSyncLog,
             userId,
         } = setup
+
+        devices[0].mockAuthImplementation.setCurrentUserId(userId)
+        devices[1].mockAuthImplementation.setCurrentUserId(userId)
 
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId }),
@@ -357,6 +360,10 @@ function extensionSyncTests(suiteOptions: {
             sharedSyncLog,
             userId,
         } = setup
+
+        devices[0].mockAuthImplementation.setCurrentUserId(userId)
+        devices[1].mockAuthImplementation.setCurrentUserId(userId)
+
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId }),
             await sharedSyncLog.createDeviceId({ userId }),
