@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import { EnvironmentPlugin } from 'webpack'
+import { EnvironmentPlugin, DefinePlugin } from 'webpack'
 import ForkTsPlugin from 'fork-ts-checker-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import HtmlPlugin from 'html-webpack-plugin'
@@ -11,6 +11,8 @@ import CssExtractPlugin from 'mini-css-extract-plugin'
 import SentryPlugin from '@sentry/webpack-plugin'
 import ZipPlugin from 'zip-webpack-plugin'
 import PostCompilePlugin from 'post-compile-webpack-plugin'
+const Dotenv = require('dotenv-webpack')
+
 // Disabling this for now as it adds 2-4 seconds to inc. build time - look into finding out why
 // import WebExtReloadPlugin from 'webpack-chrome-extension-reloader'
 
@@ -39,8 +41,10 @@ export default function({
     extPackageName = 'extension.zip',
     sourcePackageName = 'source-code.zip',
 }) {
+    const envs = initEnv({ mode })
     const plugins = [
-        new EnvironmentPlugin(initEnv({ mode })),
+        new EnvironmentPlugin(envs),
+        new Dotenv(),
         new CopyPlugin(staticFiles.copyPatterns),
         new HtmlPlugin({
             title: 'Popup',
