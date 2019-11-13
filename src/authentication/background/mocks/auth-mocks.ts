@@ -89,4 +89,21 @@ export class MockAuthImplementation implements AuthInterface {
     }
 
     registerAuthEmitter(emitter: RemoteEventEmitter<AuthEvents>): void {}
+
+    async generateLoginToken() {
+        return {
+            token: JSON.stringify({
+                authMockToken: true,
+                user: this.currentUser,
+            }),
+        }
+    }
+
+    async loginWithToken(token: string) {
+        const parsed = JSON.parse(token)
+        if (!parsed.authMockToken) {
+            throw new Error(`Tried to log in with invalid token: ` + token)
+        }
+        this.currentUser = parsed.user
+    }
 }
