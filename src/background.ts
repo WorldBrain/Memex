@@ -74,8 +74,6 @@ export async function main() {
                     .getManageLink,
             refreshUserClaims:
                 backgroundModules.auth.authServerFunctions.refreshUserClaims,
-            getCustomLoginToken:
-                backgroundModules.auth.authServerFunctions.getCustomLoginToken,
         },
         notifications: { createNotification },
         bookmarks: {

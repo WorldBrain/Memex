@@ -1,22 +1,16 @@
 import moment from 'moment'
 import React from 'react'
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
-// import analytics from 'src/analytics'
-// import AutomaticBackupButton from '../components/overview-automatic-backup-button'
-// import OnboardingBackupMode from '../components/onboarding-backup-mode'
-// import {
-//     redirectToAutomaticBackupPurchase,
-//     redirectToAutomaticBackupCancellation,
-// } from '../utils'
-// import { ToggleSwitch } from 'src/common-ui/components'
 import SmallButton from '../components/small-button'
 import LoadingBlocker from '../components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
 import { browser } from 'webextension-polyfill-ts'
 import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
-import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import {
+    UserProps,
+    withCurrentUser,
+} from 'src/authentication/components/AuthConnector'
 import { UserFeatures } from 'src/authentication/background/types'
 
 const styles = require('../styles.css')
@@ -30,7 +24,7 @@ interface Props {
     authorizedFeatures: UserFeatures[]
 }
 
-export class OverviewContainer extends React.Component<Props> {
+export class OverviewContainer extends React.Component<Props & UserProps> {
     state = {
         automaticBackupEnabled: null,
         backupTimes: null,
