@@ -10,7 +10,8 @@ import StorageOperationLogger, {
 } from './storage-operation-logger'
 import { registerBackgroundIntegrationTest } from './background-integration-tests'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
-import { MockAuthImplementation } from 'src/authentication/background/mocks/auth-mocks'
+import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 
 export interface IntegrationTestSuite<StepContext> {
     description: string
@@ -46,7 +47,8 @@ export interface BackgroundIntegrationTestSetup {
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector
     storageOperationLogger: StorageOperationLogger
-    mockAuthImplementation: MockAuthImplementation
+    authService: MemoryAuthService
+    subscriptionService: MemorySubscriptionsService
 }
 export interface BackgroundIntegrationTestContext {
     setup: BackgroundIntegrationTestSetup

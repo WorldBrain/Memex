@@ -10,7 +10,8 @@ import SyncBackground from '.'
 import { withEmulatedFirestoreBackend } from '@worldbrain/storex-backend-firestore/lib/index.tests'
 import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
 import { RUN_FIRESTORE_TESTS } from 'src/tests/constants'
-import { MockAuthImplementation } from 'src/authentication/background/mocks/auth-mocks'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 interface TestSetup {
     setups: [BackgroundIntegrationTestSetup, BackgroundIntegrationTestSetup]
@@ -60,8 +61,9 @@ async function setupTest(options: {
         setup.backgroundModules.customLists.remoteFunctions
 
     const userId: string = options.userId || uuid()
-    setups[0].mockAuthImplementation.setCurrentUserId(userId)
-    setups[1].mockAuthImplementation.setCurrentUserId(userId)
+    const user: AuthenticatedUser = { ...TEST_USER, id: userId }
+    setups[0].authService.setUser(user)
+    setups[1].authService.setUser(user)
 
     const forEachSetup = async (
         f: (setup: BackgroundIntegrationTestSetup) => void,

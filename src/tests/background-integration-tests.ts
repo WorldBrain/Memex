@@ -7,6 +7,7 @@ import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middl
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import {
     createBackgroundModules,
     registerBackgroundModuleCollections,
@@ -24,8 +25,7 @@ import StorageOperationLogger from './storage-operation-logger'
 import { setStorex } from 'src/search/get-db'
 import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
 import { AuthBackground } from 'src/authentication/background'
-import { MockAuthImplementation } from 'src/authentication/background/mocks/auth-mocks'
-import { AuthService } from 'src/authentication/background/auth-service'
+import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -44,16 +44,11 @@ export async function setupBackgroundIntegrationTest(options?: {
         (options && options.browserLocalStorage) || new MemoryBrowserStorage()
     const storageManager = initStorex()
 
-    const mockAuthImplementation = new MockAuthImplementation()
+    const authService = new MemoryAuthService()
+    const subscriptionService = new MemorySubscriptionsService()
     const auth: AuthBackground = new AuthBackground({
-        authService: new AuthService(mockAuthImplementation),
-        subscriptionServerFunctions: {
-            getCheckoutLink: async () => '',
-            getManageLink: async () => '',
-        },
-        authServerFunctions: {
-            refreshUserClaims: async () => true,
-        },
+        authService,
+        subscriptionService,
     })
 
     const backgroundModules = createBackgroundModules({
@@ -64,8 +59,8 @@ export async function setupBackgroundIntegrationTest(options?: {
                 local: browserLocalStorage,
             },
             bookmarks: {
-                onCreated: { addListener: () => {} },
-                onRemoved: { addListener: () => {} },
+                onCreated: { addListener: () => { } },
+                onRemoved: { addListener: () => { } },
             },
         } as any,
         tabManager: options && options.tabManager,
@@ -104,7 +99,8 @@ export async function setupBackgroundIntegrationTest(options?: {
         browserLocalStorage,
         storageOperationLogger,
         storageChangeDetector,
-        mockAuthImplementation,
+        authService,
+        subscriptionService,
     }
 }
 
@@ -167,7 +163,7 @@ export async function runBackgroundIntegrationTest(
             } catch (e) {
                 console.error(
                     `Unexpected storage changes in step number ${stepIndex +
-                        1} (counting from 1)`,
+                    1} (counting from 1)`,
                 )
                 throw e
             }
