@@ -1,56 +1,65 @@
-import { AuthService } from 'src/authentication/background/auth-service'
+import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import { AuthRemoteFunctionsInterface } from './old/types'
 import {
-    FirebaseFunctionsAuth,
-    FirebaseFunctionsSubscription,
-} from 'src/authentication/background/firebase-functions-subscription'
+    UserPlan,
+    SubscriptionsService,
+} from '@worldbrain/memex-common/lib/subscriptions/types'
+import {
+    hasSubscribedBefore,
+    hasValidPlan,
+    getAuthorizedFeatures,
+} from './utils'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
-import { AuthFirebase } from 'src/authentication/background/auth-firebase'
-import { MockAuthImplementation } from 'src/authentication/background/mocks/auth-mocks'
+import { AuthRemoteEvents } from './types'
 
-// TODO: (ch) (opt-out-auth): Allow user to opt-in. Either use an opt-out / null implementation or provide a global condition,
-// allowing the implementation / service to be reconfigured when the user opt-in changes.
 export class AuthBackground {
     authService: AuthService
-    subscriptionServerFunctions: FirebaseFunctionsSubscription
-    authServerFunctions: FirebaseFunctionsAuth
+    subscriptionService: SubscriptionsService
+    remoteFunctions: AuthRemoteFunctionsInterface
 
     constructor(options: {
-        authService?: AuthService
-        subscriptionServerFunctions?: FirebaseFunctionsSubscription
-        authServerFunctions?: FirebaseFunctionsAuth
-        devAuthState?: string
+        authService: AuthService
+        subscriptionService: SubscriptionsService
     }) {
-        const devAuthState = (options && options.devAuthState) || ''
-        if (options.authService != null) {
-            this.authService = options.authService
-        } else {
-            if (devAuthState === '' || devAuthState === 'staging') {
-                this.authService = new AuthService(new AuthFirebase())
-            } else {
-                // todo: (ch): Clean up the creation of these testing states, might not want to be done here.
-                let mockAuthImplementation
-                if (devAuthState === 'user_signed_out') {
-                    mockAuthImplementation = MockAuthImplementation.newUser()
-                } else if (devAuthState === 'user_signed_in') {
-                    mockAuthImplementation = new MockAuthImplementation()
-                    mockAuthImplementation.setCurrentUserToLoggedInUser()
-                } else if (devAuthState.startsWith('user_subscribed')) {
-                    // todo: (ch): allow testing of different plans
-                    mockAuthImplementation = MockAuthImplementation.validSubscriptions()
-                    mockAuthImplementation.setCurrentUserToLoggedInUser()
-                }
-                this.authService = new AuthService(mockAuthImplementation)
-            }
-        }
+        this.authService = options.authService
+        this.subscriptionService = options.subscriptionService
+        this.remoteFunctions = {
+            getUser: async () => {
+                const user = await this.authService.getCurrentUser()
+                return user ? { ...user, uid: user.id, id: undefined } : null
+            },
+            refresh: () => this.authService.refreshUserInfo(),
 
-        this.subscriptionServerFunctions =
-            options.subscriptionServerFunctions ||
-            new FirebaseFunctionsSubscription()
-        this.authServerFunctions =
-            options.authServerFunctions || new FirebaseFunctionsAuth()
+            hasValidPlan: async (plan: UserPlan) => {
+                return hasValidPlan(
+                    await this.subscriptionService.getCurrentUserClaims(),
+                    plan,
+                )
+            },
+            getAuthorizedFeatures: async () => {
+                return getAuthorizedFeatures(
+                    await this.subscriptionService.getCurrentUserClaims(),
+                )
+            },
+
+            hasSubscribedBefore: async () => {
+                return hasSubscribedBefore(
+                    await this.subscriptionService.getCurrentUserClaims(),
+                )
+            },
+        }
     }
 
     registerRemoteEmitter() {
-        this.authService.registerAuthEmitter(remoteEventEmitter('auth'))
+        const remoteEmitter = remoteEventEmitter<AuthRemoteEvents>('auth')
+        this.authService.events.on('changed', async ({ user }) => {
+            const userWithClaims = user
+                ? {
+                      ...user,
+                      claims: await this.subscriptionService.getCurrentUserClaims(),
+                  }
+                : null
+            remoteEmitter.emit('onAuthStateChanged', userWithClaims)
+        })
     }
 }

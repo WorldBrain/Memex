@@ -36,6 +36,10 @@ import {
     SubscriptionServerFunctionsInterface,
 } from 'src/authentication/background/types'
 import { AuthBackground } from 'src/authentication/background'
+import {
+    createAuthDependencies,
+    DevAuthState,
+} from 'src/authentication/background/setup'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -61,7 +65,7 @@ export function createBackgroundModules(options: {
     tabManager?: TabManager
     localStorageChangesManager: StorageChangesManager
     auth?: AuthBackground
-    authOptions?: { devAuthState: string }
+    authOptions?: { devAuthState: DevAuthState }
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
@@ -88,10 +92,7 @@ export function createBackgroundModules(options: {
 
     const auth =
         options.auth ||
-        new AuthBackground({
-            devAuthState:
-                options.authOptions && options.authOptions.devAuthState,
-        })
+        new AuthBackground(createAuthDependencies(options.authOptions))
 
     return {
         auth,
