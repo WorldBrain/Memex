@@ -28,3 +28,6 @@
 [submodule "external/@worldbrain/memex-url-utils"]
 	path = external/@worldbrain/memex-url-utils
 	url = https://github.com/WorldBrain/memex-url-utils.git
+[submodule "external/@worldbrain/memex-common"]
+	path = external/@worldbrain/memex-common
+	url = https://github.com/WorldBrain/memex-common.git
