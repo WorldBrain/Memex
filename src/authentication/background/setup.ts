@@ -13,6 +13,7 @@ export type DevAuthState =
     | 'user_signed_out'
     | 'user_signed_in'
     | 'user_subscribed'
+    | 'user_subscription_expired'
 
 export function createAuthDependencies(options?: {
     devAuthState?: DevAuthState
@@ -46,14 +47,26 @@ export function createAuthDependencies(options?: {
         }
     }
 
-    if (devAuthState.startsWith('user_subscribed')) {
+    if (devAuthState === 'user_subscribed') {
         // todo: (ch): allow testing of different plans
         const authService = new MemoryAuthService()
         authService.setUser(TEST_USER)
         return {
             authService,
             subscriptionService: new MemorySubscriptionsService({
-                expiry: Date.now() + 10000 + 1000 * 60 * 60,
+                expiry: Date.now() + 1000 * 60 * 60 * 24,
+            }),
+        }
+    }
+
+    if (devAuthState === 'user_subscription_expired') {
+        // todo: (ch): allow testing of different plans
+        const authService = new MemoryAuthService()
+        authService.setUser(TEST_USER)
+        return {
+            authService,
+            subscriptionService: new MemorySubscriptionsService({
+                expiry: Date.now() - 1000 * 60 * 60,
             }),
         }
     }

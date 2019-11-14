@@ -16,11 +16,7 @@ export function hasSubscribedBefore(claims: Claims): boolean {
 }
 
 export function hasValidPlan(claims: Claims, plan: UserPlan): boolean {
-    try {
-        return checkValidPlan(claims, plan)
-    } catch {
-        return false
-    }
+    return checkValidPlan(claims, plan).valid
 }
 
 export function getAuthorizedFeatures(claims: Claims): UserFeature[] {
@@ -43,30 +39,33 @@ export function getAuthorizedFeatures(claims: Claims): UserFeature[] {
     return features
 }
 
-export function checkValidPlan(claims: Claims, plan: UserPlan): boolean {
+export function checkValidPlan(
+    claims: Claims,
+    plan: UserPlan,
+): { valid: true } | { valid: false; reason: 'not-present' | 'expired' } {
     const subscriptionExpiry = getSubscriptionExpirationTimestamp(claims, plan)
 
     if (!subscriptionExpiry) {
-        throw new AuthSubscriptionNotPresent()
+        return { valid: false, reason: 'not-present' }
     }
 
     if (
         new Date().getUTCMilliseconds() >=
         subscriptionExpiry + SUBSCRIPTION_GRACE_MS
     ) {
-        throw new AuthSubscriptionExpired()
+        return { valid: false, reason: 'expired' }
     }
 
-    return true
+    return { valid: true }
 }
 
 export function getSubscriptionExpirationTimestamp(
     claims: Claims,
     plan: UserPlan,
 ): number | null {
-    return claims != null &&
+    const isPresent =
+        claims != null &&
         claims.subscriptions != null &&
         claims.subscriptions[plan] != null
-        ? claims.subscriptions[plan].expiry
-        : null
+    return isPresent ? claims.subscriptions[plan].expiry : null
 }
