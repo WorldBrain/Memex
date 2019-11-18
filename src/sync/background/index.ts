@@ -4,7 +4,7 @@ import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-lo
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
 
-import {
+import SyncService, {
     MemexInitialSync,
     MemexContinuousSync,
     SignalTransportFactory,
@@ -20,8 +20,9 @@ import { MemexClientSyncLogStorage } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { getLocalStorage } from 'src/util/storage'
 import { filterBlobsFromSyncLog } from './sync-logging'
+import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 
-export default class SyncBackground {
+export default class SyncBackground extends SyncService {
     initialSync: MemexInitialSync
     continuousSync: MemexContinuousSync
     remoteFunctions: PublicSyncInterface
@@ -34,64 +35,22 @@ export default class SyncBackground {
 
     readonly syncedCollections: string[] = SYNCED_COLLECTIONS
 
-    constructor(
-        private options: {
-            auth: {
-                getCurrentUser: () => Promise<{ id: string | number } | null>
-                generateLoginToken?(): Promise<{ token: string }>
-                loginWithToken?(token: string): Promise<void>
-            }
-            storageManager: StorageManager
-            signalTransportFactory: SignalTransportFactory
-            getSharedSyncLog: () => Promise<SharedSyncLog>
-            browserAPIs: Pick<Browser, 'storage'>
-            appVersion: string
-        },
-    ) {
-        this.getSharedSyncLog = options.getSharedSyncLog
-        this.settingStore = new MemexSyncSettingStoreImplentation(options)
-        this.secretStore = new SyncSecretStore({
-            settingStore: this.settingStore,
-        })
-        this.clientSyncLog = new MemexClientSyncLogStorage({
-            storageManager: options.storageManager,
-        })
-        this.initialSync = new MemexInitialSync({
-            storageManager: options.storageManager,
-            signalTransportFactory: options.signalTransportFactory,
-            syncedCollections: this.syncedCollections,
-            secrectStore: this.secretStore,
-            generateLoginToken: async () =>
-                (await this.options.auth.generateLoginToken()).token,
-            loginWithToken: this.options.auth.loginWithToken,
-        })
-        this.continuousSync = new MemexContinuousSync({
-            frequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
-            auth: {
-                getUserId: async () => {
-                    const user = await options.auth.getCurrentUser()
-                    return user && user.id
-                },
-            },
-            storageManager: options.storageManager,
-            clientSyncLog: this.clientSyncLog,
-            getSharedSyncLog: options.getSharedSyncLog,
-            secretStore: this.secretStore,
-            settingStore: this.settingStore,
+    constructor(options: {
+        auth: AuthService
+        storageManager: StorageManager
+        signalTransportFactory: SignalTransportFactory
+        getSharedSyncLog: () => Promise<SharedSyncLog>
+        browserAPIs: Pick<Browser, 'storage'>
+        appVersion: string
+    }) {
+        super({
+            ...options,
+            clientSyncLog: new MemexClientSyncLogStorage({
+                storageManager: options.storageManager,
+            }),
+            settingStore: new MemexSyncSettingStoreImplentation(options),
             productType: 'ext',
-            productVersion: this.options.appVersion,
-            toggleSyncLogging: (enabed, deviceId?) => {
-                if (this.syncLoggingMiddleware) {
-                    this.syncLoggingMiddleware.enabled = enabed
-                    if (enabed) {
-                        this.syncLoggingMiddleware.deviceId = deviceId
-                    }
-                } else {
-                    throw new Error(
-                        `Tried to toggle sync logging before logging middleware was created`,
-                    )
-                }
-            },
+            productVersion: options.appVersion,
         })
 
         const bound = <Target, Key extends keyof Target>(
@@ -120,17 +79,6 @@ export default class SyncBackground {
 
     async tearDown() {
         await this.continuousSync.tearDown()
-    }
-
-    async createSyncLoggingMiddleware() {
-        this.syncLoggingMiddleware = new SyncLoggingMiddleware({
-            storageManager: this.options.storageManager,
-            clientSyncLog: this.clientSyncLog,
-            includeCollections: this.syncedCollections,
-        })
-        this.syncLoggingMiddleware.enabled = false
-        this.syncLoggingMiddleware.operationPreprocessor = filterBlobsFromSyncLog
-        return this.syncLoggingMiddleware
     }
 }
 
