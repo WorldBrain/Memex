@@ -144,7 +144,6 @@ function extensionSyncTests(suiteOptions: {
         await forEachSetup(s => syncModule(s).setup())
 
         expect(syncModule(devices[0]).continuousSync.enabled).toBe(false)
-        expect(syncModule(devices[0]).syncLoggingMiddleware.enabled).toBe(false)
         await devices[0].backgroundModules.customLists.createCustomList({
             name: 'My list',
         })

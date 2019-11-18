@@ -124,16 +124,7 @@ export function createBackgroundModules(options: {
             notifications,
         }),
         sync: new SyncBackground({
-            auth: {
-                getCurrentUser: async () => {
-                    const user = await auth.authService.getUser()
-                    return user ? { id: user.uid } : null
-                },
-                generateLoginToken: () =>
-                    auth.authService['auth'].generateLoginToken(),
-                loginWithToken: (token: string) =>
-                    auth.authService['auth'].loginWithToken(token),
-            },
+            auth: auth.authService,
             signalTransportFactory: options.signalTransportFactory,
             storageManager,
             getSharedSyncLog: options.getSharedSyncLog,
