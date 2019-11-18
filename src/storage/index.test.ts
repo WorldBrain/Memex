@@ -406,7 +406,8 @@ describe('Storage initialization', () => {
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
                         bookmarks: 'url, time',
-                        clientSyncLogEntry: '++id, [collection+pk], createdOn',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], createdOn',
                         directLinks:
                             'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
                         customLists:
