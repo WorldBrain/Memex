@@ -3,7 +3,6 @@ import {
     Claims,
     UserFeature,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
-import { AuthSubscriptionNotPresent, AuthSubscriptionExpired } from './errors'
 
 export const SUBSCRIPTION_GRACE_MS = 1000 * 60 * 60
 

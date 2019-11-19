@@ -23,7 +23,7 @@ import { browser } from 'webextension-polyfill-ts'
 import { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
 import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
-import { AuthEvents } from 'src/authentication/background/types'
+import { AuthRemoteEvents } from 'src/authentication/background/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -124,9 +124,7 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
         // Check if it was *our* listener that responded.
         if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
             throw new RpcError(
-                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${
-                    response[RPC_RESPONSE]
-                }. Response:${response}`,
+                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${response[RPC_RESPONSE]}. Response:${response}`,
             )
         }
 
@@ -317,7 +315,7 @@ export type TypedRemoteEventEmitter<
 
 // Statically defined types
 interface RemoteEvents {
-    auth: AuthEvents
+    auth: AuthRemoteEvents
 }
 
 function registerRemoteEventForwarder() {

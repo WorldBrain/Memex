@@ -11,7 +11,7 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
-import { UserFeatures } from 'src/authentication/background/types'
+import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 const styles = require('../styles.css')
 const localStyles = require('./overview.css')
@@ -21,7 +21,7 @@ interface Props {
     onRestoreRequested: (...args: any[]) => any
     onBlobPreferenceChange: (...args: any[]) => any
     onPaymentRequested: (...args: any[]) => any
-    authorizedFeatures: UserFeatures[]
+    authorizedFeatures: UserFeature[]
 }
 
 export class OverviewContainer extends React.Component<Props & UserProps> {

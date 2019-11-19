@@ -6,8 +6,8 @@ import {
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 export interface AuthRemoteFunctionsInterface {
-    getUser(): Promise<AuthenticatedUser | null>
-    refresh(): Promise<void>
+    getCurrentUser(): Promise<AuthenticatedUser | null>
+    refreshUserInfo(): Promise<void>
 
     hasValidPlan(plan: UserPlan): Promise<boolean>
     getAuthorizedFeatures(): Promise<UserFeature[]>

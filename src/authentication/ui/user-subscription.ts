@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import TypedEmitter from 'typed-emitter'
-import { serverFunctions } from 'src/util/remote-functions-background'
+import { subscription } from 'src/util/remote-functions-background'
+import { SubscriptionCheckoutOptions } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 interface ChargebeeInstanceInterface {
     setPortalSession(getUrl: () => Promise<string>): void
@@ -27,7 +28,7 @@ export class UserSubscription {
         const eventEmitter = new EventEmitter() as SubscriptionCheckoutEventEmitter
 
         const getExternalUrl = async () => {
-            const checkoutExternalUrl = await serverFunctions.getCheckoutLink(
+            const checkoutExternalUrl = await subscription.getCheckoutLink(
                 options,
             )
             eventEmitter.emit('externalUrl', checkoutExternalUrl)
@@ -45,7 +46,7 @@ export class UserSubscription {
     async manageUserSubscription() {
         // todo: (ch) provide a way to close this box on parent component unmount
         await this.cbInstance.setPortalSession(async () => {
-            return serverFunctions.getManageLink()
+            return subscription.getManageLink()
         })
 
         const emitter = new EventEmitter() as SubscriptionManageEventEmitter
@@ -73,10 +74,6 @@ export interface ChargebeeInterface {
 
 export type SubscriptionCheckoutEventEmitter = TypedEmitter<SubscriptionEvents>
 export type SubscriptionManageEventEmitter = TypedEmitter<SubscriptionEvents>
-
-export interface SubscriptionCheckoutOptions {
-    planId: string
-}
 
 export interface SubscriptionEvents {
     error: (error: Error) => any

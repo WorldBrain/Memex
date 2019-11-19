@@ -1,19 +1,14 @@
 import { runInBackground } from 'src/util/webextensionRPC'
 import { NotificationInterface } from 'src/util/notification-types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
-import {
-    AuthRemoteFunctionsInterface,
-    AuthServerFunctionsInterface,
-    SubscriptionServerFunctionsInterface,
-} from 'src/authentication/background/types'
-type ServerFunctionsInterface = SubscriptionServerFunctionsInterface &
-    AuthServerFunctionsInterface
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 export interface RemoteFunctionImplementations {
     notifications: NotificationInterface
     bookmarks: BookmarksInterface
     auth: AuthRemoteFunctionsInterface
-    serverFunctions: ServerFunctionsInterface
+    subscription: SubscriptionsService
 }
 
 // See `src/background.ts` for the concrete remote function bindings
@@ -22,10 +17,10 @@ export const remoteFunctions: RemoteFunctionImplementations = {
     notifications: runInBackground<NotificationInterface>(),
     bookmarks: runInBackground<BookmarksInterface>(),
     auth: runInBackground<AuthRemoteFunctionsInterface>(),
-    serverFunctions: runInBackground<ServerFunctionsInterface>(),
+    subscription: runInBackground<SubscriptionsService>(),
 }
 
 export const notifications = remoteFunctions.notifications
 export const bookmarks = remoteFunctions.bookmarks
 export const auth = remoteFunctions.auth
-export const serverFunctions = remoteFunctions.serverFunctions
+export const subscription = remoteFunctions.subscription

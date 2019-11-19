@@ -5,7 +5,7 @@ import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authenticati
 import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { WorldbrainSubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/worldbrain'
-import { getFirebase } from 'src/storage/server'
+import { firebase } from 'src/util/firebase-app-initialized'
 
 export type DevAuthState =
     | ''
@@ -24,10 +24,8 @@ export function createAuthDependencies(options?: {
     const devAuthState = (options && options.devAuthState) || ''
     if (devAuthState === '' || devAuthState === 'staging') {
         return {
-            authService: new WorldbrainAuthService(getFirebase()),
-            subscriptionService: new WorldbrainSubscriptionsService(
-                getFirebase(),
-            ),
+            authService: new WorldbrainAuthService(firebase),
+            subscriptionService: new WorldbrainSubscriptionsService(firebase),
         }
     }
 
