@@ -26,6 +26,7 @@ import {
     setupMobileIntegrationTest,
 } from 'src/tests/mobile-intergration-tests'
 import { MemexInitialSync } from '@worldbrain/memex-common/lib/sync'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 const registerTest = it
 
@@ -164,7 +165,7 @@ function extensionSyncTests(suiteOptions: {
             userId,
         } = setup
 
-        devices[0].mockAuthImplementation.setCurrentUserId(userId)
+        devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
 
         await forEachSetup(s => syncModule(s).setup())
 
@@ -296,8 +297,8 @@ function extensionSyncTests(suiteOptions: {
             userId,
         } = setup
 
-        devices[0].mockAuthImplementation.setCurrentUserId(userId)
-        devices[1].mockAuthImplementation.setCurrentUserId(userId)
+        devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
+        devices[1].authService.setUser({ ...TEST_USER, id: userId as string })
 
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId }),
@@ -360,8 +361,8 @@ function extensionSyncTests(suiteOptions: {
             userId,
         } = setup
 
-        devices[0].mockAuthImplementation.setCurrentUserId(userId)
-        devices[1].mockAuthImplementation.setCurrentUserId(userId)
+        devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
+        devices[1].authService.setUser({ ...TEST_USER, id: userId as string })
 
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId }),
@@ -573,7 +574,10 @@ function mobileSyncTests(suiteOptions: {
             }),
         }
         const userId: string = dependencies.userId || uuid()
-        devices.extension.mockAuthImplementation.setCurrentUserId(userId)
+        devices.extension.authService.setUser({
+            ...TEST_USER,
+            id: userId as string,
+        })
         // devices.app.backgroundModules.auth.userId = userId
 
         return { devices }
