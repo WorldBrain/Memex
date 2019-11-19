@@ -23,6 +23,7 @@ import {
 } from './background-script/setup'
 import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
+import { DevAuthState } from 'src/authentication/background/setup'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -40,7 +41,7 @@ export async function main() {
         signalTransportFactory: createFirebaseSignalTransport,
         getSharedSyncLog,
         authOptions: {
-            devAuthState: process.env.DEV_AUTH_STATE,
+            devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
         },
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
@@ -56,24 +57,14 @@ export async function main() {
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({
-        auth: {
-            getUser: backgroundModules.auth.authService.getUser,
-            refresh: backgroundModules.auth.authService.refresh,
-            hasValidPlan: backgroundModules.auth.authService.hasValidPlan,
-            hasSubscribedBefore:
-                backgroundModules.auth.authService.hasSubscribedBefore,
-            getAuthorizedFeatures:
-                backgroundModules.auth.authService.getAuthorizedFeatures,
-        },
-        serverFunctions: {
+        auth: backgroundModules.auth.remoteFunctions,
+        subscription: {
             getCheckoutLink:
-                backgroundModules.auth.subscriptionServerFunctions
-                    .getCheckoutLink,
+                backgroundModules.auth.subscriptionService.getCheckoutLink,
             getManageLink:
-                backgroundModules.auth.subscriptionServerFunctions
-                    .getManageLink,
-            refreshUserClaims:
-                backgroundModules.auth.authServerFunctions.refreshUserClaims,
+                backgroundModules.auth.subscriptionService.getManageLink,
+            getCurrentUserClaims:
+                backgroundModules.auth.subscriptionService.getCurrentUserClaims,
         },
         notifications: { createNotification },
         bookmarks: {

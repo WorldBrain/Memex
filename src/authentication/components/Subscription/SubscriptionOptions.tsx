@@ -3,10 +3,8 @@ import { UserSubscription } from 'src/authentication/ui/user-subscription'
 import Button from 'src/popup/components/Button'
 import { Helmet } from 'react-helmet'
 import { SubscriptionPriceBox } from 'src/authentication/components/Subscription/SubscriptionPriceBox'
-import {
-    AuthenticatedUser,
-    UserPlans,
-} from 'src/authentication/background/types'
+import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { auth } from 'src/util/remote-functions-background'
 const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 
@@ -57,7 +55,7 @@ export class SubscriptionOptions extends React.Component<Props, State> {
         const portalEvents = await this.userSubscription.manageUserSubscription()
 
         portalEvents.addListener('closed', async () => {
-            await auth.refresh()
+            await auth.refreshUserInfo()
             this.props.onClose()
         })
         portalEvents.addListener('changed', () => {
@@ -74,17 +72,17 @@ export class SubscriptionOptions extends React.Component<Props, State> {
         return this.openCheckout('pro-1-device')
     }
 
-    openCheckout = async (planId: UserPlans) => {
+    openCheckout = async (plan: UserPlan) => {
         this._initChargebee()
         const subscriptionEvents = await this.userSubscription.checkoutUserSubscription(
-            { planId },
+            { plan },
         )
         subscriptionEvents.addListener('closed', async () => {
-            await auth.refresh()
+            await auth.refreshUserInfo()
             this.props.onClose()
         })
         subscriptionEvents.addListener('changed', async () => {
-            await auth.refresh()
+            await auth.refreshUserInfo()
             this.props.subscriptionChanged()
             this.props.onClose()
         })

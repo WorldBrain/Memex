@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { AuthenticatedUserWithClaims } from 'src/authentication/background/types'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import { SubscriptionOptions } from 'src/authentication/components/Subscription/SubscriptionOptions'
 import {

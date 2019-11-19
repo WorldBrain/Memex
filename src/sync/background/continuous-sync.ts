@@ -64,7 +64,7 @@ export default class ContinuousSync {
 
         const sharedSyncLog = await this.options.getSharedSyncLog()
         const newDeviceId = await sharedSyncLog.createDeviceId({
-            userId: (await this.options.auth.authService.getUser()).uid,
+            userId: (await this.options.auth.authService.getCurrentUser()).id,
             sharedUntil: 1,
         })
         await this.storeSetting('deviceId', newDeviceId)
@@ -95,7 +95,7 @@ export default class ContinuousSync {
     }
 
     private async doIncrementalSync() {
-        const user = await this.options.auth.authService.getUser()
+        const user = await this.options.auth.authService.getCurrentUser()
 
         if (!user) {
             throw new Error(`Cannot Sync without authenticated user`)
@@ -106,7 +106,7 @@ export default class ContinuousSync {
             storageManager: this.options.storageManager,
             reconciler: reconcileSyncLog,
             now: Date.now(),
-            userId: user.uid,
+            userId: user.id,
             deviceId: this.deviceId,
         })
     }

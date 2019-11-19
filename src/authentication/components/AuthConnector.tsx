@@ -1,11 +1,8 @@
 import * as React from 'react'
 import { auth } from 'src/util/remote-functions-background'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
-import {
-    AuthenticatedUser,
-    AuthenticatedUserWithClaims,
-    UserFeatures,
-} from 'src/authentication/background/types'
+import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 /**
  * Remove from T the keys that are in common with K
@@ -13,12 +10,12 @@ import {
 type Optionalize<T extends K, K> = Omit<T, keyof K>
 
 export interface UserProps {
-    currentUser: AuthenticatedUserWithClaims | AuthenticatedUser | null
-    authorizedFeatures: UserFeatures[]
+    currentUser: AuthenticatedUser | null
+    authorizedFeatures: UserFeature[]
 }
 
-// tslint:disable-next-line:variable-name
 export function withCurrentUser<P extends UserProps = UserProps>(
+    // tslint:disable-next-line:variable-name
     WrappedComponent: React.ComponentType<P>,
 ) {
     return class extends React.Component<Optionalize<P, UserProps>, UserProps> {
@@ -30,7 +27,7 @@ export function withCurrentUser<P extends UserProps = UserProps>(
 
         componentDidMount = async () => {
             this.setState({
-                currentUser: await auth.getUser(),
+                currentUser: await auth.getCurrentUser(),
                 authorizedFeatures: await auth.getAuthorizedFeatures(),
             })
             const authEvents = getRemoteEventEmitter('auth')

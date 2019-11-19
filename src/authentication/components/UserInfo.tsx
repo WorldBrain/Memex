@@ -18,7 +18,7 @@ export class UserInfo extends React.Component<UserProps, State> {
         firebase.auth().signOut()
     }
     handleRefresh = async () => {
-        await auth.refresh()
+        await auth.refreshUserInfo()
     }
 
     hideSubscriptionModal = () => {
@@ -39,7 +39,7 @@ export class UserInfo extends React.Component<UserProps, State> {
                         <div>User: {user.displayName}</div>
                         <div>Email: {user.email}</div>
                         <div>Email Verified: {user.emailVerified}</div>
-                        <div>UID: {user.uid}</div>
+                        <div>UID: {user.id}</div>
 
                         <Button onClick={this.showSubscriptionModal}>
                             Subscriptions

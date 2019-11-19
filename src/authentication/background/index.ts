@@ -1,5 +1,4 @@
 import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
-import { AuthRemoteFunctionsInterface } from './old/types'
 import {
     UserPlan,
     SubscriptionsService,
@@ -10,7 +9,7 @@ import {
     getAuthorizedFeatures,
 } from './utils'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
-import { AuthRemoteEvents } from './types'
+import { AuthRemoteEvents, AuthRemoteFunctionsInterface } from './types'
 
 export class AuthBackground {
     authService: AuthService
@@ -24,11 +23,11 @@ export class AuthBackground {
         this.authService = options.authService
         this.subscriptionService = options.subscriptionService
         this.remoteFunctions = {
-            getUser: async () => {
+            getCurrentUser: async () => {
                 const user = await this.authService.getCurrentUser()
                 return user ? { ...user, uid: user.id, id: undefined } : null
             },
-            refresh: () => this.authService.refreshUserInfo(),
+            refreshUserInfo: () => this.authService.refreshUserInfo(),
 
             hasValidPlan: async (plan: UserPlan) => {
                 return hasValidPlan(

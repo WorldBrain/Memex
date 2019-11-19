@@ -30,11 +30,6 @@ import BackgroundScript from '.'
 import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
-import {
-    AuthInterface,
-    AuthServerFunctionsInterface,
-    SubscriptionServerFunctionsInterface,
-} from 'src/authentication/background/types'
 import { AuthBackground } from 'src/authentication/background'
 import {
     createAuthDependencies,
