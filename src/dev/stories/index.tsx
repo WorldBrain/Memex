@@ -6,6 +6,8 @@ import { withKnobs, text, boolean, number } from '@storybook/addon-knobs'
 import QRCanvas from 'src/common-ui/components/qr-canvas'
 import ProgressStepContainer from 'src/common-ui/components/progress-step-container'
 import OnboardingTooltip from 'src/overview/onboarding/components/onboarding-tooltip'
+import SyncDevicesPane from 'src/sync/components/SyncDevicesPane'
+import { SyncDevice } from 'src/sync/components/types'
 
 storiesOf('ProgressContainer', module)
     .add('No steps seen/completed', () => (
@@ -41,3 +43,29 @@ Fusce ut placerat orci nulla. Pharetra vel turpis nunc eget lorem dolor. Tristiq
 storiesOf('QR Code creation', module)
     .add('HTML canvas short example', () => <QRCanvas toEncode="test" />)
     .add('HTML canvas long example', () => <QRCanvas toEncode={longText} />)
+
+const devices = [
+    {
+        id: '123',
+        name: "Tom's Iphone",
+        added: new Date(),
+        initialSync: false,
+        lastSync: null,
+    },
+    {
+        id: '1235',
+        name: 'Android Device',
+        added: new Date(),
+        initialSync: false,
+        lastSync: null,
+    },
+] as SyncDevice[]
+
+storiesOf('Device Sync', module).add('Sync DevicePane', () => (
+    <SyncDevicesPane
+        devices={devices}
+        isDeviceSyncAllowed={true}
+        isDeviceSyncEnabled={true}
+        handleRemoveDevice={() => false}
+    />
+))
