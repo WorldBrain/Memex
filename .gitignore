@@ -15,3 +15,4 @@ stats.json
 local-backup
 .idea
 *-debug.log
+private/

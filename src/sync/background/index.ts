@@ -23,13 +23,7 @@ import { filterBlobsFromSyncLog } from './sync-logging'
 import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 
 export default class SyncBackground extends SyncService {
-    initialSync: MemexInitialSync
-    continuousSync: MemexContinuousSync
     remoteFunctions: PublicSyncInterface
-    clientSyncLog: ClientSyncLogStorage
-    settingStore: MemexSyncSettingStoreImplentation
-    secretStore: SyncSecretStore
-    syncLoggingMiddleware?: SyncLoggingMiddleware
     firstContinuousSyncPromise?: Promise<void>
     getSharedSyncLog: () => Promise<SharedSyncLog>
 
@@ -45,6 +39,7 @@ export default class SyncBackground extends SyncService {
     }) {
         super({
             ...options,
+            syncFrequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
             clientSyncLog: new MemexClientSyncLogStorage({
                 storageManager: options.storageManager,
             }),
