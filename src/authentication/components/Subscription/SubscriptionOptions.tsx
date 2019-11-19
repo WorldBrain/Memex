@@ -72,10 +72,10 @@ export class SubscriptionOptions extends React.Component<Props, State> {
         return this.openCheckout('pro-1-device')
     }
 
-    openCheckout = async (plan: UserPlan) => {
+    openCheckout = async (planId: UserPlan) => {
         this._initChargebee()
         const subscriptionEvents = await this.userSubscription.checkoutUserSubscription(
-            { plan },
+            { planId },
         )
         subscriptionEvents.addListener('closed', async () => {
             await auth.refreshUserInfo()
