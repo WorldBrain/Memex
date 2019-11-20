@@ -1,0 +1,50 @@
+.test {
+    color: blue;
+}
+
+@value colors: 'src/common-ui/colors.css';
+@value color16 from colors;
+
+.syncDevicesContainer {
+    border: 1px color16 solid;
+    composes: radius4 from 'src/common-ui/colors.css';
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.syncLeftCol {
+    flex: 9;
+}
+
+.syncRightCol {
+    flex: 1;
+    padding: 10px;
+    margin: auto;
+}
+
+.syncHeaderText {
+    composes: sectionTitle from 'src/options/base.css';
+    display: block;
+}
+
+.syncSubText {
+    composes: sectionTitle from 'src/options/base.css';
+    display: block;
+}
+
+.subText {
+    composes: subText from 'src/options/base.css';
+    display: block;
+}
+
+.button {
+    composes: CTA from 'src/common-ui/colors.css';
+}
+
+.removeText {
+    padding-left: 40px;
+}

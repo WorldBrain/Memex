@@ -13,7 +13,7 @@ export function SyncDevicesList(props: Props) {
             {props.devices.map(device => (
                 <SyncDeviceItem
                     device={device}
-                    handleRemoveDevice={this.handleRemoveDevice}
+                    handleRemoveDevice={props.handleRemoveDevice}
                 />
             ))}
         </div>
