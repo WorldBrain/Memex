@@ -10,6 +10,9 @@ import SyncBackground from 'src/sync/background'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
+import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
+import { AuthBackground } from 'src/authentication/background'
 
 export interface MobileIntegrationTestSetup {
     storage: {
@@ -56,11 +59,16 @@ export async function setupMobileIntegrationTest(options?: {
         }),
         pageEditor: new PageEditorStorage({ storageManager, normalizeUrl }),
     }
+
+    const authService = new MemoryAuthService()
+    // const subscriptionService = new MemorySubscriptionsService()
+    // const auth: AuthBackground = new AuthBackground({
+    //     authService,
+    //     subscriptionService,
+    // })
+
     const sync = new SyncBackground({
-        auth: {
-            getCurrentUser: () => null,
-            loginWithToken: async () => null,
-        },
+        auth: authService,
         storageManager,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,
@@ -73,6 +81,7 @@ export async function setupMobileIntegrationTest(options?: {
     registerModuleMapCollections(storageManager.registry, {
         ...storageModules,
         clientSyncLog: sync.clientSyncLog,
+        syncInfo: sync.syncInfoStorage,
     })
     await storageManager.finishInitialization()
     await storageManager.backend.migrate()

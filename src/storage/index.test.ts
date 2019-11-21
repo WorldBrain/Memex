@@ -426,6 +426,7 @@ describe('Storage initialization', () => {
                         socialBookmarks: '++id, createdAt, postId',
                         socialTags: '++id, name, postId',
                         socialPostListEntries: '++id, listId, postId',
+                        syncDeviceInfo: 'deviceId',
                     },
                     version: 18,
                 },
