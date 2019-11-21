@@ -408,8 +408,15 @@ function extensionSyncTests(suiteOptions: {
     })
 
     it('should merge data if do an initial sync to a device which already has some data', async (setup: TestSetup) => {
-        const { syncModule, forEachDevice: forEachSetup, devices } = setup
+        const {
+            syncModule,
+            forEachDevice: forEachSetup,
+            devices,
+            userId,
+        } = setup
         await forEachSetup(s => syncModule(s).setup())
+
+        devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
 
         await insertIntegrationTestData(devices[0])
         const storageContents = await getStorageContents(
@@ -421,17 +428,19 @@ function extensionSyncTests(suiteOptions: {
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getStorageContents(devices[1].storageManager)).toEqual(
-            storageContents,
-        )
+        expect(await getStorageContents(devices[1].storageManager)).toEqual({
+            ...storageContents,
+            syncDeviceInfo: expect.any(Array),
+        })
 
         await doInitialSync({
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getStorageContents(devices[1].storageManager)).toEqual(
-            storageContents,
-        )
+        expect(await getStorageContents(devices[1].storageManager)).toEqual({
+            ...storageContents,
+            syncDeviceInfo: expect.any(Array),
+        })
     })
 
     describe('passive data filtering in initial Sync', () => {
@@ -459,9 +468,14 @@ function extensionSyncTests(suiteOptions: {
                 syncModule,
                 searchModule,
                 forEachDevice: forEachSetup,
+                userId,
             } = params.setup
 
             await forEachSetup(s => syncModule(s).setup())
+            devices[0].authService.setUser({
+                ...TEST_USER,
+                id: userId as string,
+            })
 
             if (params.insertDefaultPages) {
                 await searchModule(devices[0]).searchIndex.addPage({
@@ -641,7 +655,10 @@ function mobileSyncTests(suiteOptions: {
             devices.mobile.storage.manager,
         )
         await removeUnsyncedCollectionFromStorageContents(mobileStorageContents)
-        expect(mobileStorageContents).toEqual(extensionStorageContents)
+        expect(mobileStorageContents).toEqual({
+            ...extensionStorageContents,
+            syncDeviceInfo: expect.any(Array),
+        })
     })
 
     it('should merge during initial sync from extension to mobile', async (setup: TestSetup) => {
@@ -666,9 +683,10 @@ function mobileSyncTests(suiteOptions: {
         await removeUnsyncedCollectionFromStorageContents(
             mobileStorageContentsBeforeMerge,
         )
-        expect(mobileStorageContentsBeforeMerge).toEqual(
-            extensionStorageContents,
-        )
+        expect(mobileStorageContentsBeforeMerge).toEqual({
+            ...extensionStorageContents,
+            syncDeviceInfo: expect.any(Array),
+        })
 
         await doInitialSync({
             source: devices.extension.backgroundModules.sync,
@@ -681,7 +699,7 @@ function mobileSyncTests(suiteOptions: {
             mobileStorageContentsAfterMerge,
         )
         expect(mobileStorageContentsAfterMerge).toEqual(
-            extensionStorageContents,
+            mobileStorageContentsBeforeMerge,
         )
     })
 }

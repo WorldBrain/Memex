@@ -16,7 +16,10 @@ import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
 import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/constants'
 
 import { PublicSyncInterface } from './types'
-import { MemexClientSyncLogStorage } from './storage'
+import {
+    MemexExtClientSyncLogStorage,
+    MemexExtSyncInfoStorage,
+} from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { getLocalStorage } from 'src/util/storage'
 import { filterBlobsFromSyncLog } from './sync-logging'
@@ -40,7 +43,11 @@ export default class SyncBackground extends SyncService {
         super({
             ...options,
             syncFrequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
-            clientSyncLog: new MemexClientSyncLogStorage({
+            clientSyncLog: new MemexExtClientSyncLogStorage({
+                storageManager: options.storageManager,
+            }),
+            devicePlatform: 'browser',
+            syncInfoStorage: new MemexExtSyncInfoStorage({
                 storageManager: options.storageManager,
             }),
             settingStore: new MemexSyncSettingStoreImplentation(options),

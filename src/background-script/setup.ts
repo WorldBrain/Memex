@@ -187,6 +187,7 @@ export function getBackgroundStorageModules(
         social: backgroundModules.social.storage,
         tags: backgroundModules.tags.storage,
         clientSyncLog: backgroundModules.sync.clientSyncLog,
+        syncInfo: backgroundModules.sync.syncInfoStorage,
     }
 }
 
