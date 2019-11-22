@@ -4,16 +4,11 @@ import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-lo
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
 
+import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 import SyncService, {
-    MemexInitialSync,
-    MemexContinuousSync,
     SignalTransportFactory,
-    SyncSecretStore,
 } from '@worldbrain/memex-common/lib/sync'
-import { MemexSyncSettingsStore } from '@worldbrain/memex-common/lib/sync/settings'
-import { MemexSyncSetting } from '@worldbrain/memex-common/lib/sync/types'
 import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
-import { SYNC_STORAGE_AREA_KEYS } from '@worldbrain/memex-common/lib/sync/constants'
 
 import { PublicSyncInterface } from './types'
 import {
@@ -21,9 +16,8 @@ import {
     MemexExtSyncInfoStorage,
 } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
-import { getLocalStorage } from 'src/util/storage'
 import { filterBlobsFromSyncLog } from './sync-logging'
-import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import { MemexExtSyncSettingStore } from './setting-store'
 
 export default class SyncBackground extends SyncService {
     remoteFunctions: PublicSyncInterface
@@ -50,7 +44,7 @@ export default class SyncBackground extends SyncService {
             syncInfoStorage: new MemexExtSyncInfoStorage({
                 storageManager: options.storageManager,
             }),
-            settingStore: new MemexSyncSettingStoreImplentation(options),
+            settingStore: new MemexExtSyncSettingStore(options),
             productType: 'ext',
             productVersion: options.appVersion,
         })
@@ -81,23 +75,5 @@ export default class SyncBackground extends SyncService {
 
     async tearDown() {
         await this.continuousSync.tearDown()
-    }
-}
-
-class MemexSyncSettingStoreImplentation implements MemexSyncSettingsStore {
-    constructor(private options: { browserAPIs: Pick<Browser, 'storage'> }) {}
-
-    async retrieveSetting(key: MemexSyncSetting) {
-        const localStorage = this.options.browserAPIs.storage.local
-        return getLocalStorage(SYNC_STORAGE_AREA_KEYS[key], null, localStorage)
-    }
-    async storeSetting(
-        key: MemexSyncSetting,
-        value: boolean | number | string | null,
-    ) {
-        const localStorage = this.options.browserAPIs.storage.local
-        await localStorage.set({
-            [SYNC_STORAGE_AREA_KEYS[key]]: value,
-        })
     }
 }

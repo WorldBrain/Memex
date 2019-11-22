@@ -8,11 +8,16 @@ import { PageEditorStorage } from '@worldbrain/memex-storage/lib/mobile-app/feat
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 import SyncBackground from 'src/sync/background'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
-import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
+import SyncService, {
+    SignalTransportFactory,
+} from '@worldbrain/memex-common/lib/sync'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { AuthBackground } from 'src/authentication/background'
+import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
+import { SyncInfoStorage } from '@worldbrain/memex-common/lib/sync/storage'
+import { MemexExtSyncSettingStore } from 'src/sync/background/setting-store'
 
 export interface MobileIntegrationTestSetup {
     storage: {
@@ -24,7 +29,7 @@ export interface MobileIntegrationTestSetup {
         }
     }
     services: {
-        sync: SyncBackground
+        sync: SyncService
     }
     destroy: () => Promise<void>
 }
@@ -58,6 +63,8 @@ export async function setupMobileIntegrationTest(options?: {
             normalizeUrl,
         }),
         pageEditor: new PageEditorStorage({ storageManager, normalizeUrl }),
+        clientSyncLog: new ClientSyncLogStorage({ storageManager }),
+        syncInfoStorage: new SyncInfoStorage({ storageManager }),
     }
 
     const authService = new MemoryAuthService()
@@ -67,15 +74,23 @@ export async function setupMobileIntegrationTest(options?: {
     //     subscriptionService,
     // })
 
-    const sync = new SyncBackground({
+    const sync = new SyncService({
         auth: authService,
         storageManager,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,
-        browserAPIs: {
-            storage: { local: browserLocalStorage } as any,
-        },
-        appVersion: '1.2.3',
+        productType: 'app',
+        productVersion: '1.2.3',
+        devicePlatform: 'integration-tests',
+        clientSyncLog: storageModules.clientSyncLog,
+        syncInfoStorage: storageModules.syncInfoStorage,
+        settingStore: new MemexExtSyncSettingStore({
+            browserAPIs: {
+                storage: {
+                    local: new MemoryBrowserStorage(),
+                } as any,
+            },
+        }),
     })
     sync.initialSync.wrtc = wrtc
     registerModuleMapCollections(storageManager.registry, {

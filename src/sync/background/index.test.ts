@@ -94,6 +94,21 @@ function extensionSyncTests(suiteOptions: {
         userId: number | string
     }
 
+    const expectedDeviceInfo = [
+        {
+            createdWhen: expect.any(Number),
+            deviceId: '1',
+            productType: 'ext',
+            devicePlatform: 'browser',
+        },
+        {
+            createdWhen: expect.any(Number),
+            deviceId: '2',
+            productType: 'ext',
+            devicePlatform: 'browser',
+        },
+    ]
+
     async function setupTest(options: TestDependencies): Promise<TestSetup> {
         const signalTransportFactory = lazyMemorySignalTransportFactory()
         const devices: [
@@ -430,7 +445,7 @@ function extensionSyncTests(suiteOptions: {
         })
         expect(await getStorageContents(devices[1].storageManager)).toEqual({
             ...storageContents,
-            syncDeviceInfo: expect.any(Array),
+            syncDeviceInfo: expectedDeviceInfo,
         })
 
         await doInitialSync({
@@ -439,7 +454,7 @@ function extensionSyncTests(suiteOptions: {
         })
         expect(await getStorageContents(devices[1].storageManager)).toEqual({
             ...storageContents,
-            syncDeviceInfo: expect.any(Array),
+            syncDeviceInfo: expectedDeviceInfo,
         })
     })
 
@@ -573,6 +588,21 @@ function mobileSyncTests(suiteOptions: {
         }
     }
 
+    const expectedDeviceInfo = [
+        {
+            createdWhen: expect.any(Number),
+            deviceId: '1',
+            productType: 'app',
+            devicePlatform: 'integration-tests',
+        },
+        {
+            createdWhen: expect.any(Number),
+            deviceId: '2',
+            productType: 'ext',
+            devicePlatform: 'browser',
+        },
+    ]
+
     async function setupTest(
         dependencies: TestDependencies,
     ): Promise<TestSetup> {
@@ -657,7 +687,7 @@ function mobileSyncTests(suiteOptions: {
         await removeUnsyncedCollectionFromStorageContents(mobileStorageContents)
         expect(mobileStorageContents).toEqual({
             ...extensionStorageContents,
-            syncDeviceInfo: expect.any(Array),
+            syncDeviceInfo: expectedDeviceInfo,
         })
     })
 
@@ -685,7 +715,7 @@ function mobileSyncTests(suiteOptions: {
         )
         expect(mobileStorageContentsBeforeMerge).toEqual({
             ...extensionStorageContents,
-            syncDeviceInfo: expect.any(Array),
+            syncDeviceInfo: expectedDeviceInfo,
         })
 
         await doInitialSync({
