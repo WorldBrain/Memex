@@ -68,6 +68,12 @@ export default class SyncBackground extends SyncService {
         }
     }
 
+    async createSyncLoggingMiddleware() {
+        const middleware = await super.createSyncLoggingMiddleware()
+        middleware.operationPreprocessor = filterBlobsFromSyncLog
+        return middleware
+    }
+
     async setup() {
         await this.continuousSync.setup()
         this.firstContinuousSyncPromise = this.continuousSync.forceIncrementalSync()
