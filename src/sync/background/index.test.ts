@@ -394,6 +394,7 @@ function extensionSyncTests(suiteOptions: {
         })
 
         await syncModule(devices[0]).setup()
+        syncModule(devices[0]).initialSync.useEncryption = false
         syncModule(devices[0]).continuousSync.useEncryption = false
         await syncModule(devices[0]).firstContinuousSyncPromise
 
