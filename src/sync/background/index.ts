@@ -18,11 +18,14 @@ import {
 } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { filterBlobsFromSyncLog } from './sync-logging'
-import { MemexExtContinuousSync } from './memex-ext-continuous-sync'
+import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
+import { PostReceiveProcessor } from './post-receive-processor'
+import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
+import pipeline from 'src/search/pipeline'
 
 export default class SyncBackground extends SyncService {
     initialSync: MemexInitialSync
-    continuousSync: MemexExtContinuousSync
     remoteFunctions: PublicSyncInterface
     firstContinuousSyncPromise?: Promise<void>
     getSharedSyncLog: () => Promise<SharedSyncLog>
@@ -51,41 +54,13 @@ export default class SyncBackground extends SyncService {
             settingStore: new MemexExtSyncSettingStore(options),
             productType: 'ext',
             productVersion: options.appVersion,
-            disableEncryption: true,
-        })
-
-        this.continuousSync = new MemexExtContinuousSync({
-            frequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
-            auth: {
-                getUserId: async () => {
-                    const user = await options.auth.getCurrentUser()
-                    return user && user.id
-                },
-            },
-            storageManager: options.storageManager,
-            clientSyncLog: this.clientSyncLog,
-            getSharedSyncLog: options.getSharedSyncLog,
-            secretStore: this.secretStore,
-            settingStore: this.settingStore,
-            productType: 'ext',
-            productVersion: options.appVersion,
-            pageFetchBacklog: options.pageFetchBacklog,
-            toggleSyncLogging: (
-                enabled: boolean,
-                deviceId?: string | number,
-            ) => {
-                if (this.syncLoggingMiddleware) {
-                    if (enabled) {
-                        this.syncLoggingMiddleware.enable(deviceId!)
-                    } else {
-                        this.syncLoggingMiddleware.disable()
-                    }
-                } else {
-                    throw new Error(
-                        `Tried to toggle sync logging before logging middleware was created`,
-                    )
-                }
-            },
+            postReceiveProcessor: new PostReceiveProcessor({
+                pageFetchBacklog: options.pageFetchBacklog,
+                fetchPageData: new FetchPageDataProcessor({
+                    fetchPageData,
+                    pagePipeline: pipeline,
+                }),
+            }),
         })
 
         const bound = <Target, Key extends keyof Target>(
