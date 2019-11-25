@@ -39,6 +39,9 @@
         }
     },
     "dependencies": {
+        "@worldbrain/memex-common": "WorldBrain/memex-common",
+        "@worldbrain/memex-storage": "WorldBrain/memex-storage",
+        "@worldbrain/memex-url-utils": "WorldBrain/memex-url-utils",
         "@worldbrain/storex-sync": "^0.1.1",
         "babel-polyfill": "^6.26.0",
         "blob-util": "^1.2.1",
@@ -132,6 +135,7 @@
         "@types/url-regex": "^4.1.0",
         "@types/whatwg-url": "^6.4.0",
         "@worldbrain/storex-backend-firestore": "^0.1.1",
+        "@worldbrain/storex-backend-typeorm": "WorldBrain/storex-backend-typeorm",
         "atob": "^2.1.2",
         "autoprefixer": "^7.1.1",
         "babel-core": "^6.26.3",

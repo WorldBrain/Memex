@@ -92,20 +92,17 @@ async function runSyncBackgroundTest(
         }
         syncEventEmitters.push(syncEventEmitter)
     }
-    for (const setup of setups) {
-        setup.backgroundModules.sync.syncLoggingMiddleware.enabled = true
-    }
 
-    const deviceIds = [
-        await sharedSyncLog.createDeviceId({
+    const deviceIds: Array<number | string> = []
+
+    for (const setup of setups) {
+        const deviceId = await sharedSyncLog.createDeviceId({
             userId,
             sharedUntil: 0,
-        }),
-        await sharedSyncLog.createDeviceId({
-            userId,
-            sharedUntil: 0,
-        }),
-    ]
+        })
+        deviceIds.push(deviceId)
+        setup.backgroundModules.sync.syncLoggingMiddleware.enable(deviceId)
+    }
 
     // const changeDetectors = setups.map(setup => new StorageChangeDetector({
     //     storageManager: setup.storageManager,

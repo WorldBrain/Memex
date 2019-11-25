@@ -124,7 +124,9 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
         // Check if it was *our* listener that responded.
         if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
             throw new RpcError(
-                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${response[RPC_RESPONSE]}. Response:${response}`,
+                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${
+                    response[RPC_RESPONSE]
+                }. Response:${response}`,
             )
         }
 
@@ -339,15 +341,15 @@ const remoteEventForwarder = (message, _) => {
     emitter.emit(message[__REMOTE_EVENT_NAME__], message.data)
 }
 
-export function getRemoteEventEmitter<T extends keyof RemoteEvents>(
-    eventType: T,
-): TypedRemoteEventEmitter<T> {
+export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
+    eventType: EventType,
+): TypedRemoteEventEmitter<EventType> {
     const existingEmitter = remoteEventEmitters[eventType]
     if (existingEmitter) {
         return existingEmitter
     }
 
-    const newEmitter = new EventEmitter() as TypedRemoteEventEmitter<T>
+    const newEmitter = new EventEmitter() as any
     remoteEventEmitters[eventType] = newEmitter
     registerRemoteEventForwarder()
     return newEmitter

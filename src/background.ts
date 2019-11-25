@@ -25,6 +25,8 @@ import {
 import { createLazySharedSyncLog } from './sync/background/shared-sync-log'
 import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { DevAuthState } from 'src/authentication/background/setup'
+import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -94,12 +96,16 @@ export async function main() {
         },
         auth: {
             setUser: async ({ id }) => {
-                backgroundModules.auth.userId = id
+                ;(backgroundModules.auth
+                    .authService as MemoryAuthService).setUser({
+                    ...TEST_USER,
+                    id: id as string,
+                })
             },
         },
         intergrationTestData: {
             insert: async () => {
-                console.log('Inserting integration test data')
+                console['log']('Inserting integration test data')
                 const listId = await backgroundModules.customLists.createCustomList(
                     {
                         name: 'My list',
