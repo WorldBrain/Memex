@@ -2689,6 +2689,21 @@
     text-table "^0.2.0"
     webpack-log "^1.1.2"
 
+"@worldbrain/memex-common@git+https://github.com/WorldBrain/memex-common.git":
+  version "0.0.1"
+  resolved "git+https://github.com/WorldBrain/memex-common.git#d18739439809c831e1399832332c1c6c29c65a98"
+
+"@worldbrain/memex-storage@git+https://github.com/WorldBrain/memex-storage.git":
+  version "0.0.1"
+  resolved "git+https://github.com/WorldBrain/memex-storage.git#3a0197a4f5b6c643319b83f8e98804118c49a9af"
+
+"@worldbrain/memex-url-utils@git+https://github.com/WorldBrain/memex-url-utils.git":
+  version "0.0.1"
+  resolved "git+https://github.com/WorldBrain/memex-url-utils.git#804670331cbe6e198a142035e5c922e83d5ecc42"
+  dependencies:
+    normalize-url "^4.5.0"
+    url "^0.11.0"
+
 "@worldbrain/storex-backend-firestore@^0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@worldbrain/storex-backend-firestore/-/storex-backend-firestore-0.1.1.tgz#3f8f6af803e485747e469814cff2f92d5bebf1fa"
@@ -2698,6 +2713,19 @@
     firebase "^5.8.2"
     lodash "^4.17.10"
     source-map-support "^0.4.18"
+
+"@worldbrain/storex-backend-typeorm@git+https://github.com/WorldBrain/storex-backend-typeorm.git":
+  version "0.1.0"
+  resolved "git+https://github.com/WorldBrain/storex-backend-typeorm.git#6ea9bbfde09885ed4e37d7985fb3d1390edc896b"
+  dependencies:
+    event-emitter "^0.3.5"
+    events "^3.0.0"
+    json-stable-stringify "^1.0.1"
+    lodash "^4.17.11"
+    pluralize "^7.0.0"
+    randombytes "^2.0.6"
+    source-map-support "^0.4.18"
+    typeorm "^0.2.17"
 
 "@worldbrain/storex-graphql-schema@^0.1.0":
   version "0.1.1"
@@ -12547,6 +12575,11 @@ normalize-url@^4.3.0:
   resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-4.3.0.tgz#9c49e10fc1876aeb76dba88bf1b2b5d9fa57b2ee"
   integrity sha512-0NLtR71o4k6GLP+mr6Ty34c5GA6CMoEsncKJxvQd8NzPxaHRJNnb5gZE8R1XF4CPIS7QPHLJ74IFszwtNVAHVQ==
 
+normalize-url@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-4.5.0.tgz#453354087e6ca96957bd8f5baf753f5982142129"
+  integrity sha512-2s47yzUxdexf1OhyRi4Em83iQk0aPvwTddtFz4hnSSw9dCEsLEGf6SwIO8ss/19S9iBb5sJaOuTvTGDeZI00BQ==
+
 npm-bundled@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/npm-bundled/-/npm-bundled-1.0.3.tgz#7e71703d973af3370a9591bafe3a63aca0be2308"
@@ -17617,7 +17650,7 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
-typeorm@^0.2.20:
+typeorm@^0.2.17, typeorm@^0.2.20:
   version "0.2.20"
   resolved "https://registry.yarnpkg.com/typeorm/-/typeorm-0.2.20.tgz#efb60f2e55a7d08fc365f281ec2a71c87a9ebba5"
   integrity sha512-VxB+9qH8D+PM19MIx18Zs3Fqv/ZINnnQvUGmBEiLYDrB9etdSdamgSTCIhWdFNndeJ6ldH4jbD0Z6HWsepMPlA==
