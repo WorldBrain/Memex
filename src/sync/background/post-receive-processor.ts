@@ -23,11 +23,21 @@ export class PostReceiveProcessor {
         }
     }
 
-    processor: SyncPostReceiveProcessor = async ({ entry, ...params }) => {
+    private shouldPostProcess({
+        data,
+    }: SharedSyncLogEntry<'deserialized-data'>): boolean {
         if (
-            entry.data.collection === PAGES_COLLECTION_NAMES.page &&
-            entry.data.operation === 'create'
+            data.collection !== PAGES_COLLECTION_NAMES.page ||
+            data.operation !== 'create'
         ) {
+            return false
+        }
+
+        return data.value.fullTitle == null || !data.value.fullTitle.length
+    }
+
+    processor: SyncPostReceiveProcessor = async ({ entry, ...params }) => {
+        if (this.shouldPostProcess(entry)) {
             try {
                 const value = await this.props.fetchPageData.process(
                     entry.data.pk,

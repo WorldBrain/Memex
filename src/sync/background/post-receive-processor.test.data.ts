@@ -41,3 +41,24 @@ export const pageCreateA: SharedSyncLogEntry<'deserialized-data'> = {
     sharedOn: 1573020804486,
     userId: 'one',
 }
+
+export const pageCreateB: SharedSyncLogEntry<'deserialized-data'> = {
+    data: {
+        collection: 'pages',
+        operation: 'create',
+        pk: 'test.com',
+        value: {
+            url: 'test.com',
+            domain: 'test.com',
+            hostname: 'test.com',
+            fullUrl: 'https://test.com',
+            fullTitle: 'Test page',
+            text: 'This is a test page. Enjoy reading',
+        },
+        field: '',
+    },
+    createdOn: 1573020802355,
+    deviceId: 'one',
+    sharedOn: 1573020802355,
+    userId: 'one',
+}

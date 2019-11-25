@@ -1,34 +1,32 @@
 import expect from 'expect'
 
-import { FetchPageDataError } from 'src/page-analysis/background/fetch-page-data-error'
+import {
+    FetchPageDataError,
+    FetchPageDataErrorType,
+} from 'src/page-analysis/background/fetch-page-data-error'
 import { PostReceiveProcessor } from './post-receive-processor'
 import * as DATA from './post-receive-processor.test.data'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
-import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 
-function setupTest() {
-    const mockStdPageFetcher = ({ url }) => ({
-        run: async () => ({
+const createMockStdPageFetcher = ({
+    errorType,
+}: {
+    errorType?: FetchPageDataErrorType
+}) => ({ url }) => ({
+    cancel: () => undefined,
+    run: async () => {
+        if (errorType) {
+            throw new FetchPageDataError('', errorType)
+        }
+
+        return {
             content: { title: 'test title', fullText: 'some test text' },
             url,
-        }),
-        cancel: () => undefined,
-    })
+        }
+    },
+})
 
-    const mockPermFailurePageFetcher = ({ url }) => ({
-        run: async () => {
-            throw new FetchPageDataError('', 'permanent')
-        },
-        cancel: () => undefined,
-    })
-
-    const mockTempFailurePageFetcher = ({ url }) => ({
-        run: async () => {
-            throw new FetchPageDataError('', 'temporary')
-        },
-        cancel: () => undefined,
-    })
-
+function setupTest({ pageFetcher = createMockStdPageFetcher({}) }) {
     const mockPagePipeline = async ({ pageDoc }) => ({
         url: pageDoc.url,
         fullUrl: pageDoc.url,
@@ -50,25 +48,11 @@ function setupTest() {
     }
 
     return {
-        stdProcessor: new PostReceiveProcessor({
+        processor: new PostReceiveProcessor({
             pageFetchBacklog: mockBacklog as any,
             fetchPageData: new FetchPageDataProcessor({
-                fetchPageData: mockStdPageFetcher,
                 pagePipeline: mockPagePipeline,
-            }),
-        }).processor,
-        tempFailingProcessor: new PostReceiveProcessor({
-            pageFetchBacklog: mockBacklog as any,
-            fetchPageData: new FetchPageDataProcessor({
-                fetchPageData: mockTempFailurePageFetcher,
-                pagePipeline: mockPagePipeline,
-            }),
-        }).processor,
-        permFailingProcessor: new PostReceiveProcessor({
-            pageFetchBacklog: mockBacklog as any,
-            fetchPageData: new FetchPageDataProcessor({
-                fetchPageData: mockPermFailurePageFetcher,
-                pagePipeline: mockPagePipeline,
+                fetchPageData: pageFetcher,
             }),
         }).processor,
         mockBacklog,
@@ -77,7 +61,7 @@ function setupTest() {
 
 describe('sync post-receive processor', () => {
     it('should not process non-page-create sync entries', async () => {
-        const { stdProcessor: processor } = setupTest()
+        const { processor } = setupTest({})
 
         expect(await processor({ entry: DATA.bookmarkCreateA })).toEqual({
             entry: DATA.bookmarkCreateA,
@@ -90,8 +74,16 @@ describe('sync post-receive processor', () => {
         })
     })
 
+    it('should not process incoming page-create sync entries with data attached', async () => {
+        const { processor } = setupTest({})
+
+        expect(await processor({ entry: DATA.pageCreateB })).toEqual({
+            entry: DATA.pageCreateB,
+        })
+    })
+
     it('should process a page-create sync entry, filling in missing data', async () => {
-        const { stdProcessor: processor } = setupTest()
+        const { processor } = setupTest({})
 
         expect(await processor({ entry: DATA.pageCreateA })).toEqual({
             entry: {
@@ -116,7 +108,9 @@ describe('sync post-receive processor', () => {
     })
 
     it('should process a stub entry with URL as title on permanent failures', async () => {
-        const { permFailingProcessor: processor } = setupTest()
+        const { processor } = setupTest({
+            pageFetcher: createMockStdPageFetcher({ errorType: 'permanent' }),
+        })
 
         expect(await processor({ entry: DATA.pageCreateA })).toEqual({
             entry: {
@@ -141,7 +135,9 @@ describe('sync post-receive processor', () => {
     })
 
     it('should process a null entry on temporary failures', async () => {
-        const { tempFailingProcessor: processor } = setupTest()
+        const { processor } = setupTest({
+            pageFetcher: createMockStdPageFetcher({ errorType: 'temporary' }),
+        })
 
         expect(await processor({ entry: DATA.pageCreateA })).toEqual({
             entry: null,
@@ -149,7 +145,9 @@ describe('sync post-receive processor', () => {
     })
 
     it('should enqueue entry on page backlog in the case of a failure', async () => {
-        const { tempFailingProcessor: processor, mockBacklog } = setupTest()
+        const { processor, mockBacklog } = setupTest({
+            pageFetcher: createMockStdPageFetcher({ errorType: 'temporary' }),
+        })
 
         expect(mockBacklog.tmp).not.toBe(DATA.pageCreateA.data.pk)
         expect(mockBacklog.tmp).toBeNull()
