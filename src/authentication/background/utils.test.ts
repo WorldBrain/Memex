@@ -13,10 +13,11 @@ describe('Authentication Subscription Status Tests', () => {
         })
 
         const claims = await subscriptionService.getCurrentUserClaims()
+        expect(checkValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toEqual({
+            valid: false,
+            reason: 'not-present',
+        })
         expect(hasValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toBeFalsy()
-        expect(() =>
-            checkValidPlan(claims, TEST_SUBSCRIPTION_KEY),
-        ).toThrowError(AuthSubscriptionNotPresent)
     })
 
     it('should not be subscribed to pro-1-device plan if subscription expired', async () => {
@@ -25,10 +26,11 @@ describe('Authentication Subscription Status Tests', () => {
         })
 
         const claims = await subscriptionService.getCurrentUserClaims()
+        expect(checkValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toEqual({
+            valid: false,
+            reason: 'expired',
+        })
         expect(hasValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toBeFalsy()
-        expect(() =>
-            checkValidPlan(claims, TEST_SUBSCRIPTION_KEY),
-        ).toThrowError(AuthSubscriptionNotPresent)
     })
 
     it('should be subscribed to pro-1-device plan if subscription is valid', async () => {

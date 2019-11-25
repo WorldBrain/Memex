@@ -48,10 +48,7 @@ export function checkValidPlan(
         return { valid: false, reason: 'not-present' }
     }
 
-    if (
-        new Date().getUTCMilliseconds() >=
-        subscriptionExpiry + SUBSCRIPTION_GRACE_MS
-    ) {
+    if (Date.now() >= subscriptionExpiry + SUBSCRIPTION_GRACE_MS) {
         return { valid: false, reason: 'expired' }
     }
 
