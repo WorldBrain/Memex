@@ -47,6 +47,7 @@ export default class SyncBackground extends SyncService {
             settingStore: new MemexExtSyncSettingStore(options),
             productType: 'ext',
             productVersion: options.appVersion,
+            disableEncryption: true,
         })
 
         const bound = <Target, Key extends keyof Target>(
