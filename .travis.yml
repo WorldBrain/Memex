@@ -5,7 +5,7 @@ install:
     - git submodule update --init --recursive
     - yarn install --frozen-lockfile --network-concurrency 1
 script:
-    - npm run test
+    - npm run test -- --detectOpenHandles
     - npm run lint
     - npm run build:ci
 cache:
