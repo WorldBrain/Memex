@@ -54,6 +54,7 @@ export default class SyncBackground extends SyncService {
             object: Target,
             key: Key,
         ): Target[Key] => (object[key] as any).bind(object)
+
         this.remoteFunctions = {
             requestInitialSync: bound(this.initialSync, 'requestInitialSync'),
             answerInitialSync: bound(this.initialSync, 'answerInitialSync'),
@@ -66,6 +67,7 @@ export default class SyncBackground extends SyncService {
                 this.continuousSync,
                 'forceIncrementalSync',
             ),
+            listDevices: bound(this.syncInfoStorage, 'listDevices'),
         }
     }
 

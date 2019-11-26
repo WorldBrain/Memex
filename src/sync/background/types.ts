@@ -8,4 +8,6 @@ export interface PublicSyncInterface {
 
     enableContinuousSync(): Promise<void>
     forceIncrementalSync(): Promise<void>
+
+    listDevices(): Promise<any>
 }

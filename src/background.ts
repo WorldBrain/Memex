@@ -27,6 +27,7 @@ import { createFirebaseSignalTransport } from './sync/background/signalling'
 import { DevAuthState } from 'src/authentication/background/setup'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -78,6 +79,8 @@ export async function main() {
                 backgroundModules.search.remoteFunctions.bookmarks
                     .delPageBookmark,
         },
+        sync: backgroundModules.sync.remoteFunctions,
+        features: new FeatureOptIns(),
     })
 
     // Attach interesting features onto global window scope for interested users
