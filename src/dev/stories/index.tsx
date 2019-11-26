@@ -1,6 +1,7 @@
 import 'babel-polyfill'
 import React from 'react'
 import { storiesOf } from '@storybook/react'
+import { withKnobs, text, boolean, number } from '@storybook/addon-knobs'
 
 import QRCanvas from 'src/common-ui/components/qr-canvas'
 import ProgressStepContainer from 'src/common-ui/components/progress-step-container'

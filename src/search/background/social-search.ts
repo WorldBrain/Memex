@@ -38,7 +38,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const ids = new Set()
+        const ids = new Set<number>()
 
         await this.backend.dexieInstance
             .table(LIST_ENTRIES_COLL)
@@ -75,14 +75,14 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const ids = new Set()
+        const ids = new Set<number>()
         await this.backend.dexieInstance
             .table(TAGS_COLL)
             .where('name')
             .anyOf(tags)
             .each(({ postId }) => ids.add(postId))
 
-        return ids
+        return ids as any
     }
 
     private async userSearch(users: User[]): Promise<Set<number>> {
