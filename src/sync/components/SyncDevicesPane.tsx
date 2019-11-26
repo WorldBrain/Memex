@@ -5,6 +5,13 @@ import { SyncDevicesList } from 'src/sync/components/SyncDevicesList'
 import { SyncDevice } from 'src/sync/components/types'
 import Modal from 'src/common-ui/components/Modal'
 import InitialSyncStepper from 'src/sync/components/initial-sync/InitialSyncStepper'
+import {
+    UserProps,
+    withCurrentUser,
+} from 'src/authentication/components/AuthConnector'
+import { features, sync } from 'src/util/remote-functions-background'
+import { getBackgroundStorageModules } from 'src/background-script/setup'
+import { enums } from 'openpgp'
 const styles = require('./styles.css')
 
 interface Props {
@@ -12,6 +19,8 @@ interface Props {
     isDeviceSyncEnabled: boolean
     isDeviceSyncAllowed: boolean
     handleRemoveDevice: any
+    getInitialSyncMessage: () => Promise<string>
+    waitForInitialSync: () => Promise<void>
 }
 
 interface State {
@@ -19,7 +28,7 @@ interface State {
     isAddingNewDevice: boolean
 }
 
-export default class SyncDevicesPane extends Component<Props, State> {
+export class SyncDevicesPane extends Component<Props, State> {
     state = { isTogglingSync: false, isAddingNewDevice: false }
 
     enableSync = () => {
@@ -52,16 +61,6 @@ export default class SyncDevicesPane extends Component<Props, State> {
                 ? this.disableSync()
                 : this.enableSync()
         }
-    }
-
-    render() {
-        return (
-            <div className={styles.syncDevicesContainer}>
-                {this.renderHeader()}
-                {this.props.isDeviceSyncEnabled && this.renderDeviceList()}
-                {this.state.isAddingNewDevice && this.renderAddNewDevice()}
-            </div>
-        )
     }
 
     renderHeader() {
@@ -117,8 +116,71 @@ export default class SyncDevicesPane extends Component<Props, State> {
     renderAddNewDevice() {
         return (
             <Modal onClose={this.handleCloseNewDevice}>
-                <InitialSyncStepper onFinish={this.handleCloseNewDevice} />
+                <InitialSyncStepper
+                    onFinish={this.handleCloseNewDevice}
+                    getInitialSyncMessage={this.props.getInitialSyncMessage}
+                    waitForInitialSync={this.props.waitForInitialSync}
+                />
             </Modal>
         )
     }
+
+    render() {
+        return (
+            <div className={styles.syncDevicesContainer}>
+                {this.renderHeader()}
+                {this.props.isDeviceSyncEnabled && this.renderDeviceList()}
+                {this.state.isAddingNewDevice && this.renderAddNewDevice()}
+            </div>
+        )
+    }
 }
+
+class SyncDevicesPaneContainer extends Component<
+    UserProps,
+    { devices: any; feature: boolean }
+> {
+    state = { devices: [], feature: false }
+
+    async componentDidMount() {
+        this.refreshDevices()
+        this.setState({ feature: await features.getFeature('Sync') })
+    }
+
+    handleRemoveDevice = () => {}
+
+    getInitialSyncMessage = async () => {
+        return (await sync.requestInitialSync()).initialMessage
+    }
+
+    waitForInitialSync = async () => {
+        await sync.waitForInitialSync()
+        this.refreshDevices()
+    }
+
+    refreshDevices = async () => {
+        const devices = await sync.listDevices()
+        this.setState({ devices })
+    }
+
+    render() {
+        if (this.state.feature === false) {
+            return null
+        }
+
+        return (
+            <SyncDevicesPane
+                devices={this.state.devices}
+                isDeviceSyncEnabled
+                isDeviceSyncAllowed={this.props.authorizedFeatures.includes(
+                    'sync',
+                )}
+                handleRemoveDevice={this.handleRemoveDevice}
+                getInitialSyncMessage={this.getInitialSyncMessage}
+                waitForInitialSync={this.waitForInitialSync}
+            />
+        )
+    }
+}
+
+export default withCurrentUser(SyncDevicesPaneContainer)

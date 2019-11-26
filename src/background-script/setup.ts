@@ -35,6 +35,7 @@ import {
     createAuthDependencies,
     DevAuthState,
 } from 'src/authentication/background/setup'
+import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -50,6 +51,7 @@ export interface BackgroundModules {
     backupModule: backup.BackupBackgroundModule
     sync: SyncBackground
     bgScript: BackgroundScript
+    features: FeatureOptIns
 }
 
 export function createBackgroundModules(options: {
@@ -131,6 +133,7 @@ export function createBackgroundModules(options: {
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
         }),
+        features: new FeatureOptIns(),
         bgScript,
     }
 }

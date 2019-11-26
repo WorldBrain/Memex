@@ -1,22 +1,39 @@
 import React, { Component } from 'react'
-import ScanQRCode from 'src/sync/components/initial-sync/ScanQRCode'
 import SyncProgress from 'src/sync/components/initial-sync/SyncProgress'
 import ProgressWrapper from 'src/common-ui/components/progress-step-container'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import QRCanvas from 'src/common-ui/components/qr-canvas'
 
 interface Props {
     onFinish: any
+    getInitialSyncMessage: () => Promise<string>
+    waitForInitialSync: () => Promise<void>
 }
 
 interface State {
     currentStep: number
+    initialSyncMessage: string
 }
 
 export default class InitialSyncStepper extends Component<Props, State> {
-    state = { currentStep: 0 }
+    state = { currentStep: 0, initialSyncMessage: null }
 
-    steps = [() => <ScanQRCode />, () => <SyncProgress />]
+    componentDidMount = async () => {
+        const initialSyncMessage = await this.props.getInitialSyncMessage()
+        this.setState({ initialSyncMessage: initialSyncMessage })
+        await this.props.waitForInitialSync
+        this.setState({ currentStep: 1 })
+    }
+
+    steps = [
+        () => <QRCanvas toEncode={this.state.initialSyncMessage} />,
+        () => <SyncProgress />,
+    ]
 
     render() {
+        if (this.state.initialSyncMessage === null) {
+            return <LoadingIndicator />
+        }
         return (
             <div>
                 <ProgressWrapper

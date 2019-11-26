@@ -6,7 +6,7 @@ import { withKnobs, text, boolean, number } from '@storybook/addon-knobs'
 import QRCanvas from 'src/common-ui/components/qr-canvas'
 import ProgressStepContainer from 'src/common-ui/components/progress-step-container'
 import OnboardingTooltip from 'src/overview/onboarding/components/onboarding-tooltip'
-import SyncDevicesPane from 'src/sync/components/SyncDevicesPane'
+import { SyncDevicesPane } from 'src/sync/components/SyncDevicesPane'
 import { SyncDevice } from 'src/sync/components/types'
 
 storiesOf('ProgressContainer', module)
@@ -67,5 +67,7 @@ storiesOf('Device Sync', module).add('Sync DevicePane', () => (
         isDeviceSyncAllowed={true}
         isDeviceSyncEnabled={true}
         handleRemoveDevice={() => false}
+        getInitialSyncMessage={async () => 'test'}
+        waitForInitialSync={async () => {}}
     />
 ))

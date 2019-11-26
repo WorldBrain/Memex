@@ -7,6 +7,7 @@ import Settings from './settings'
 import Overview from '../overview'
 import UserScreen from '../authentication/components/UserScreen'
 import { SubscribeModal } from '../authentication/components/Subscription/SubscribeModal'
+import { FeaturesOptInScreen } from '../feature-opt-in/ui/components/FeaturesOptInScreen'
 
 export default [
     {
@@ -84,5 +85,12 @@ export default [
         icon: 'settings',
         component: UserScreen,
         hideFromSidebar: false,
+    },
+    {
+        name: 'Opt In Features',
+        pathname: '/features',
+        icon: 'settings',
+        component: FeaturesOptInScreen,
+        hideFromSidebar: true,
     },
 ]
