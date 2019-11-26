@@ -331,9 +331,9 @@ function extensionSyncTests(suiteOptions: {
 
         await forEachSetup(s => syncModule(s).setup())
         await forEachSetup(s => syncModule(s).firstContinuousSyncPromise)
-        await forEachSetup(
-            s => (syncModule(s).continuousSync.useEncryption = false),
-        )
+        // await forEachSetup(
+        //     s => (syncModule(s).continuousSync.useEncryption = false),
+        // )
 
         expectIncrementalSyncScheduled(syncModule(devices[0]), {
             when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
@@ -394,8 +394,8 @@ function extensionSyncTests(suiteOptions: {
         })
 
         await syncModule(devices[0]).setup()
-        syncModule(devices[0]).initialSync.useEncryption = false
-        syncModule(devices[0]).continuousSync.useEncryption = false
+        // syncModule(devices[0]).initialSync.useEncryption = false
+        // syncModule(devices[0]).continuousSync.useEncryption = false
         await syncModule(devices[0]).firstContinuousSyncPromise
 
         const listId = await devices[0].backgroundModules.customLists.createCustomList(
@@ -405,7 +405,7 @@ function extensionSyncTests(suiteOptions: {
         )
         await devices[0].backgroundModules.sync.continuousSync.forceIncrementalSync()
         await syncModule(devices[1]).setup()
-        syncModule(devices[1]).continuousSync.useEncryption = false
+        // syncModule(devices[1]).continuousSync.useEncryption = false
         await syncModule(devices[1]).firstContinuousSyncPromise
 
         expect(

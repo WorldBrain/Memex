@@ -349,7 +349,7 @@ export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
         return existingEmitter
     }
 
-    const newEmitter = new EventEmitter() as TypedRemoteEventEmitter<EventType>
+    const newEmitter = new EventEmitter() as any
     remoteEventEmitters[eventType] = newEmitter
     registerRemoteEventForwarder()
     return newEmitter
