@@ -20,8 +20,8 @@ export default class InitialSyncStepper extends Component<Props, State> {
 
     componentDidMount = async () => {
         const initialSyncMessage = await this.props.getInitialSyncMessage()
-        this.setState({ initialSyncMessage: initialSyncMessage })
-        await this.props.waitForInitialSync
+        this.setState({ initialSyncMessage })
+        await this.props.waitForInitialSync()
         this.setState({ currentStep: 1 })
     }
 
