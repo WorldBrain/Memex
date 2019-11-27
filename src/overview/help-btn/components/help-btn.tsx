@@ -38,8 +38,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
         return (
             <div className={styles.footerBar}>
                 {this.renderMenu()}
-                <span className={styles.logo}/>
-                <button onClick={this.handleClick} className={styles.btn}/>
+                <button onClick={this.handleClick} className={styles.btn} />
             </div>
         )
     }

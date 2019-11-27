@@ -10,8 +10,6 @@ import {
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 import { features, sync } from 'src/util/remote-functions-background'
-import { getBackgroundStorageModules } from 'src/background-script/setup'
-import { enums } from 'openpgp'
 const styles = require('./styles.css')
 
 interface Props {

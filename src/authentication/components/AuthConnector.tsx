@@ -3,11 +3,7 @@ import { auth } from 'src/util/remote-functions-background'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-
-/**
- * Remove from T the keys that are in common with K
- */
-type Optionalize<T extends K, K> = Omit<T, keyof K>
+import { Optionalize } from 'src/util/types'
 
 export interface UserProps {
     currentUser: AuthenticatedUser | null
