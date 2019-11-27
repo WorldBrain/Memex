@@ -8,6 +8,8 @@
 @value color6: #a2a2a2; /* LightGrey (for subtitles) */
 @value color7: #e8e8e8; /* LightGrey (for onhover) */
 @value color8: rgba(55, 53, 47, 0.2); /* Darkergrey (for non-white onhover) */
+
+/* TODO: This is not LightGrey, it's the same lightMintGreen as color1 ??? */
 @value color9: #8fffd7; /* LightGrey (for borders) */
 @value color10: #83c9f4; /* lightBlue */
 @value color11: #f7f7f7; /* lightgrey for edit fields */

@@ -10,8 +10,8 @@ import { isExcludedFromBackup } from '../utils'
 import { setLocalStorage } from 'src/util/storage'
 import { getLocalStorage } from '../../../util/storage'
 import { DexieUtilsPlugin, BackupPlugin } from 'src/search/plugins'
+import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 
-const last = require('lodash/last')
 const pickBy = require('lodash/pickBy')
 
 export interface BackupProgressInfo {
@@ -55,7 +55,9 @@ export default class BackupProcedure {
         this.storage = storage
         this.lastBackupStorage = lastBackupStorage
         this.backend = backend
-        this.currentSchemaVersion = getCurrentSchemaVersion(storageManager)
+        this.currentSchemaVersion = getCurrentSchemaVersion(
+            storageManager,
+        ).getTime()
         this.reset()
     }
 
@@ -318,12 +320,4 @@ export default class BackupProcedure {
 export function _shouldStoreBlobs() {
     const pref = localStorage.getItem('backup.save-blobs')
     return pref !== 'false'
-}
-
-export function getCurrentSchemaVersion(storageManager: Storex) {
-    const schemaVersions = Object.keys(
-        storageManager.registry.collectionsByVersion,
-    ).map(version => parseInt(version, 10))
-    schemaVersions.sort()
-    return last(schemaVersions)
 }

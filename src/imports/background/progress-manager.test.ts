@@ -10,7 +10,6 @@ import * as urlLists from './url-list.test.data'
 import initData, { TestData, diff } from './state-manager.test.data'
 
 jest.mock('src/blacklist/background/interface')
-jest.mock('src/util/encode-url-for-id')
 jest.mock('src/activity-logger')
 // jest.mock('./item-processor')
 jest.mock('./cache')

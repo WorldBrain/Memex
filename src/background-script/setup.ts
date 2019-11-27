@@ -1,6 +1,6 @@
 import { browser, Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
-import internalAnalytics from '../analytics/internal'
+import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/direct-linking/background'
@@ -25,13 +25,17 @@ import {
     ImportStateManager,
 } from 'src/imports/background/state-manager'
 import { setupImportBackgroundModule } from 'src/imports/background'
-import AuthBackground from 'src/auth/background'
 import SyncBackground from 'src/sync/background'
-import { SignalTransportFactory } from 'src/sync/background/initial-sync'
 import BackgroundScript from '.'
 import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
+import { AuthBackground } from 'src/authentication/background'
+import {
+    createAuthDependencies,
+    DevAuthState,
+} from 'src/authentication/background/setup'
+import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -47,16 +51,18 @@ export interface BackgroundModules {
     backupModule: backup.BackupBackgroundModule
     sync: SyncBackground
     bgScript: BackgroundScript
+    features: FeatureOptIns
 }
 
 export function createBackgroundModules(options: {
     storageManager: StorageManager
-    authBackground: AuthBackground
     browserAPIs: Browser
     signalTransportFactory: SignalTransportFactory
     getSharedSyncLog: () => Promise<SharedSyncLog>
     tabManager?: TabManager
     localStorageChangesManager: StorageChangesManager
+    auth?: AuthBackground
+    authOptions?: { devAuthState: DevAuthState }
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
@@ -81,8 +87,12 @@ export function createBackgroundModules(options: {
         loggerBackground: activityLogger,
     })
 
+    const auth =
+        options.auth ||
+        new AuthBackground(createAuthDependencies(options.authOptions))
+
     return {
-        auth: options.authBackground,
+        auth,
         notifications,
         social,
         activityLogger,
@@ -116,12 +126,14 @@ export function createBackgroundModules(options: {
             notifications,
         }),
         sync: new SyncBackground({
-            auth: options.authBackground,
+            auth: auth.authService,
             signalTransportFactory: options.signalTransportFactory,
             storageManager,
             getSharedSyncLog: options.getSharedSyncLog,
             browserAPIs: options.browserAPIs,
+            appVersion: process.env.VERSION,
         }),
+        features: new FeatureOptIns(),
         bgScript,
     }
 }
@@ -140,6 +152,7 @@ export async function setupBackgroundModules(
         customListsModule: backgroundModules.customLists,
     })
 
+    backgroundModules.auth.registerRemoteEmitter()
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
@@ -157,12 +170,9 @@ export async function setupBackgroundModules(
     backgroundModules.bgScript.setupWebExtAPIHandlers()
     backgroundModules.bgScript.setupAlarms(alarms)
     setupNotificationClickListener()
-
     setupBlacklistRemoteFunctions()
-    internalAnalytics.registerOperations(backgroundModules.eventLog)
     backgroundModules.backupModule.storage.setupChangeTracking()
 
-    await backgroundModules.sync.setup()
     await backgroundModules.sync.setup()
 }
 
@@ -180,6 +190,7 @@ export function getBackgroundStorageModules(
         social: backgroundModules.social.storage,
         tags: backgroundModules.tags.storage,
         clientSyncLog: backgroundModules.sync.clientSyncLog,
+        syncInfo: backgroundModules.sync.syncInfoStorage,
     }
 }
 

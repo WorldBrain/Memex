@@ -21,7 +21,6 @@ export interface Props {
     settingsRoute?: string
     overviewUrl?: string
     pricingUrl?: string
-    automaticBackupEnalbled?: boolean
     checkedIcon: string
     crossIcon: string
     query: string
@@ -46,7 +45,6 @@ class Header extends PureComponent<Props> {
         checkedIcon: 'img/checked_green.svg',
         crossIcon: 'img/cross.svg',
         settingsRoute: '/settings',
-        automaticBackupEnabled: localStorage.getItem('backup.has-subscription'),
         overviewUrl: OVERVIEW_URL,
     }
 

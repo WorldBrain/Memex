@@ -3,8 +3,8 @@ import {
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import {
-    notificationCollectionDefinition,
-    notificationCollectionName,
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/notifications/constants'
 
 import createNotif from '../../util/notifications'
@@ -12,11 +12,11 @@ import { browser } from 'webextension-polyfill-ts'
 import { Notification } from '../types'
 
 export default class NotificationStorage extends StorageModule {
-    static NOTIFS_COLL = notificationCollectionName
+    static NOTIFS_COLL = COLLECTION_NAMES.notification
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            ...notificationCollectionDefinition,
+            ...COLLECTION_DEFINITIONS,
         },
         operations: {
             createNotification: {

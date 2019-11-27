@@ -4,16 +4,8 @@ import {
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import {
-    socialPostCollectionDefinition,
-    socialUserCollectionDefinition,
-    socialBookmarkCollectionDefinition,
-    socialPostListEntryDefinition,
-    socialTagCollectionDefinition,
-    socialPostCollectionName,
-    socialBookmarkCollectionName,
-    socialPostListEntryCollectionName,
-    socialTagCollectionName,
-    socialUserCollectionName,
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/social-posts/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
@@ -32,11 +24,11 @@ export interface SocialStorageProps {
 }
 
 export default class SocialStorage extends StorageModule {
-    static TWEETS_COLL = socialPostCollectionName
-    static USERS_COLL = socialUserCollectionName
-    static TAGS_COLL = socialTagCollectionName
-    static BMS_COLL = socialBookmarkCollectionName
-    static LIST_ENTRIES_COLL = socialPostListEntryCollectionName
+    static TWEETS_COLL = COLLECTION_NAMES.post
+    static USERS_COLL = COLLECTION_NAMES.user
+    static TAGS_COLL = COLLECTION_NAMES.tag
+    static BMS_COLL = COLLECTION_NAMES.bookmark
+    static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
     private storageManager: Storex
     private postsColl: string
@@ -65,11 +57,7 @@ export default class SocialStorage extends StorageModule {
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            ...socialPostCollectionDefinition,
-            ...socialUserCollectionDefinition,
-            ...socialBookmarkCollectionDefinition,
-            ...socialTagCollectionDefinition,
-            ...socialPostListEntryDefinition,
+            ...COLLECTION_DEFINITIONS,
         },
         operations: {
             createSocialPost: {

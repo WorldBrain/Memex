@@ -1,4 +1,5 @@
 import { createAction } from 'redux-act'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { Thunk } from '../types'
 import { RES_PAGE_SIZE } from './constants'
@@ -15,7 +16,6 @@ import {
 } from 'src/overview/onboarding/utils'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { AnnotSearchParams } from 'src/search/background/types'
-import normalizeUrl from 'src/util/encode-url-for-id'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
 

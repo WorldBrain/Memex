@@ -1,6 +1,12 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
+export interface RegexpQueryArgs {
+    collection: string
+    fieldName: string
+    pattern: string | RegExp
+}
+
 export interface GetPksProps {
     collection: string
     fieldName?: string
@@ -41,15 +47,7 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
     /**
      * NOTE: This is SUPER innefficient.
      */
-    private queryByRegexp({
-        collection,
-        fieldName,
-        pattern,
-    }: {
-        collection: string
-        fieldName: string
-        pattern: string | RegExp
-    }) {
+    private queryByRegexp({ collection, fieldName, pattern }: RegexpQueryArgs) {
         const re =
             typeof pattern === 'string' ? new RegExp(pattern, 'i') : pattern
 
@@ -91,8 +89,44 @@ export class DexieUtilsPlugin extends StorageBackendPlugin<
         return coll.primaryKeys()
     }
 
-    deleteByRegexp = args => this.queryByRegexp(args).delete()
-    countByRegexp = args => this.queryByRegexp(args).count()
+    async deleteByRegexp(args: RegexpQueryArgs) {
+        const pageUrls = await this.queryByRegexp(args).primaryKeys()
+
+        await this.backend.executeBatch([
+            {
+                collection: 'pages',
+                operation: 'deleteObjects',
+                where: { url: { $in: pageUrls } },
+            },
+            {
+                collection: 'visits',
+                operation: 'deleteObjects',
+                where: { url: { $in: pageUrls } },
+            },
+            {
+                collection: 'bookmarks',
+                operation: 'deleteObjects',
+                where: { url: { $in: pageUrls } },
+            },
+            {
+                collection: 'tags',
+                operation: 'deleteObjects',
+                where: { url: { $in: pageUrls } },
+            },
+            {
+                collection: 'pageListEntries',
+                operation: 'deleteObjects',
+                where: { pageUrl: { $in: pageUrls } },
+            },
+            {
+                collection: 'annotations',
+                operation: 'deleteObjects',
+                where: { pageUrl: { $in: pageUrls } },
+            },
+        ])
+    }
+
+    countByRegexp = (args: RegexpQueryArgs) => this.queryByRegexp(args).count()
 
     /**
      * NOTE: Super dangerous; deletes all data

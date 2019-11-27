@@ -5,7 +5,7 @@ import analytics from 'src/analytics'
 import { default as Overview } from './screens/overview'
 import { default as RunningBackup } from './screens/running-backup'
 import { default as OnboardingWhere } from './screens/onboarding-1-where'
-import { default as OnboardingHow } from './screens/onboarding-2-how'
+import OnboardingHow from './screens/onboarding-2-how'
 import { default as OnboardingSize } from './screens/onboarding-3-size'
 import { BackupHeader } from './components/backup-header'
 import LoadingBlocker from './components/loading-blocker'
@@ -14,7 +14,7 @@ import RestoreWhere from 'src/options/backup/screens/restore-where'
 import RestoreRunning from 'src/options/backup/screens/restore-running'
 
 const styles = require('./styles.css')
-window['remoteFunction'] = remoteFunction
+
 export const SCREENS = {
     overview: {
         component: Overview,
@@ -22,7 +22,7 @@ export const SCREENS = {
             onBackupRequested: { argument: 'changeBackupRequested' },
             onRestoreRequested: true,
             onBlobPreferenceChange: { argument: 'saveBlobs' },
-            onPaymentRequested: { argument: 'choice' },
+            onSubscribeRequested: { argument: 'choice' },
         },
     },
     'running-backup': {
@@ -41,6 +41,7 @@ export const SCREENS = {
         events: {
             onChoice: { argument: 'choice' },
             onBackRequested: true,
+            onSubscribeRequested: true,
         },
     },
     'onboarding-size': {

@@ -1,5 +1,6 @@
 import StorageManager from '@worldbrain/storex'
-import normalize from 'src/util/encode-url-for-id'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import * as DATA from './index.test.data'
 import { PageUrlsByDay } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
@@ -57,8 +58,8 @@ describe('Annotations search', () => {
             // Pages also need to be seeded to match domains filters against
             await storageManager.collection('pages').createObject({
                 url: annot.pageUrl,
-                hostname: normalize(annot.pageUrl),
-                domain: normalize(annot.pageUrl),
+                hostname: normalizeUrl(annot.pageUrl),
+                domain: normalizeUrl(annot.pageUrl),
                 title: annot.pageTitle,
                 text: annot.body,
                 canonicalUrl: annot.url,

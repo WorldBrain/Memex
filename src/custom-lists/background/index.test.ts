@@ -5,6 +5,7 @@ import {
     BackgroundIntegrationTestSetup,
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
 
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
@@ -43,6 +44,80 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 }),
                             },
+                            expectedStorageOperations: (): LoggedStorageOperation[] => [
+                                {
+                                    operation: [
+                                        'createObject',
+                                        'customLists',
+                                        {
+                                            createdAt: expect.any(Date),
+                                            id: listId,
+                                            isDeletable: true,
+                                            isNestable: true,
+                                            name: 'My Custom List',
+                                        },
+                                    ],
+                                    result: {
+                                        object: expect.objectContaining({
+                                            id: listId,
+                                        }),
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await searchModule(setup).searchIndex.addPage({
+                                    pageDoc: {
+                                        url: 'http://www.bla.com/',
+                                        content: {
+                                            fullText: 'home page content',
+                                            title: 'bla.com title',
+                                        },
+                                    },
+                                    visits: [],
+                                })
+                                await searchModule(setup).searchIndex.addPage({
+                                    pageDoc: {
+                                        url: 'http://www.bla.com/foo',
+                                        content: {
+                                            fullText: 'foo page content',
+                                            title: 'bla.com foo title',
+                                        },
+                                    },
+                                    visits: [],
+                                })
+                            },
+                            expectedStorageChanges: {
+                                pages: (): StorageCollectionDiff => ({
+                                    'bla.com': {
+                                        type: 'create',
+                                        object: expect.objectContaining({
+                                            domain: 'bla.com',
+                                            fullTitle: 'bla.com title',
+                                            fullUrl: 'http://www.bla.com/',
+                                            hostname: 'bla.com',
+                                            screenshot: undefined,
+                                            text: 'home page content',
+                                            url: 'bla.com',
+                                        }),
+                                    },
+                                    'bla.com/foo': {
+                                        type: 'create',
+                                        object: expect.objectContaining({
+                                            domain: 'bla.com',
+                                            fullTitle: 'bla.com foo title',
+                                            fullUrl: 'http://www.bla.com/foo',
+                                            hostname: 'bla.com',
+                                            screenshot: undefined,
+                                            text: 'foo page content',
+                                            url: 'bla.com/foo',
+                                        }),
+                                    },
+                                }),
+                                visits: (): StorageCollectionDiff =>
+                                    expect.any(Object),
+                            },
                         },
                         {
                             execute: async ({ setup }) => {
@@ -66,26 +141,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                     },
                                 }),
-                                pages: (): StorageCollectionDiff => ({
-                                    'bla.com': {
-                                        type: 'create',
-                                        object: {
-                                            canonicalUrl: undefined,
-                                            domain: 'bla.com',
-                                            fullTitle: undefined,
-                                            fullUrl: 'http://www.bla.com/',
-                                            hostname: 'bla.com',
-                                            screenshot: undefined,
-                                            terms: [],
-                                            text: undefined,
-                                            titleTerms: [],
-                                            url: 'bla.com',
-                                            urlTerms: [],
-                                        },
-                                    },
-                                }),
-                                visits: (): StorageCollectionDiff =>
-                                    expect.any(Object),
                             },
                         },
                         {
@@ -148,7 +203,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             hasBookmark: false,
                                             screenshot: undefined,
                                             tags: [],
-                                            title: undefined,
+                                            title: 'bla.com title',
                                             url: 'bla.com',
                                         },
                                     ],

@@ -4,8 +4,8 @@ import {
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import {
-    backupChangeCollectionDefinition,
-    backupChangeCollectionName,
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/backup-changes/constants'
 
 import { ObjectChangeBatch } from './backend/types'
@@ -13,7 +13,7 @@ import { isExcludedFromBackup } from './utils'
 import setupChangeTracking from 'src/backup/background/change-hooks'
 
 export default class BackupStorage extends StorageModule {
-    static BACKUP_COLL = backupChangeCollectionName
+    static BACKUP_COLL = COLLECTION_NAMES.backupChange
 
     recordingChanges: boolean = false
     private storageManager: Storex
@@ -25,7 +25,7 @@ export default class BackupStorage extends StorageModule {
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            ...backupChangeCollectionDefinition,
+            ...COLLECTION_DEFINITIONS,
         },
         operations: {
             findBackupChanges: {

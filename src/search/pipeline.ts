@@ -1,4 +1,5 @@
-import normalizeUrl from '../util/encode-url-for-id'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import transformPageText from '../util/transform-page-text'
 import { DEFAULT_TERM_SEPARATOR, extractContent } from './util'
 import { PipelineReq, PipelineRes } from './types'

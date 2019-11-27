@@ -3,16 +3,16 @@ import {
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import {
-    tagCollectionDefinition,
-    tagCollectionName,
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/tags/constants'
 
 export default class TagStorage extends StorageModule {
-    static TAGS_COLL = tagCollectionName
+    static TAGS_COLL = COLLECTION_NAMES.tag
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            ...tagCollectionDefinition,
+            ...COLLECTION_DEFINITIONS,
         },
         operations: {
             findAllTagsOfPage: {

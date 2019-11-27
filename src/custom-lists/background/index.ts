@@ -1,8 +1,8 @@
 import Storex from '@worldbrain/storex'
 import { Windows } from 'webextension-polyfill-ts'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import normalizeUrl from 'src/util/encode-url-for-id'
 import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'

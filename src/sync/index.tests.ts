@@ -92,20 +92,17 @@ async function runSyncBackgroundTest(
         }
         syncEventEmitters.push(syncEventEmitter)
     }
-    for (const setup of setups) {
-        setup.backgroundModules.sync.syncLoggingMiddleware.enabled = true
-    }
 
-    const deviceIds = [
-        await sharedSyncLog.createDeviceId({
+    const deviceIds: Array<number | string> = []
+
+    for (const setup of setups) {
+        const deviceId = await sharedSyncLog.createDeviceId({
             userId,
             sharedUntil: 0,
-        }),
-        await sharedSyncLog.createDeviceId({
-            userId,
-            sharedUntil: 0,
-        }),
-    ]
+        })
+        deviceIds.push(deviceId)
+        setup.backgroundModules.sync.syncLoggingMiddleware.enable(deviceId)
+    }
 
     // const changeDetectors = setups.map(setup => new StorageChangeDetector({
     //     storageManager: setup.storageManager,
@@ -145,7 +142,10 @@ async function runSyncBackgroundTest(
 
         if (stepIndex > 0) {
             if (step.debug) {
-                debug(`SYNC before step ${stepIndex}, device`, currentDeviceId)
+                debug(
+                    `SYNC before step ${stepIndex}, device`,
+                    getReadableDeviceIndex(currentDeviceIndex),
+                )
             }
             await sync(currentDeviceIndex, { debug: step.debug })
         }
@@ -153,7 +153,7 @@ async function runSyncBackgroundTest(
             if (step.debug) {
                 debug(
                     `SYNC postCheck of previous step before step ${stepIndex}, device`,
-                    currentDeviceId,
+                    getReadableDeviceIndex(currentDeviceIndex),
                 )
             }
             await lastStep.postCheck({ setup: currentSetup })
@@ -168,7 +168,10 @@ async function runSyncBackgroundTest(
 
         if (step.preCheck) {
             if (step.debug) {
-                debug(`SYNC after step ${stepIndex}, device`, currentDeviceId)
+                debug(
+                    `SYNC after step ${stepIndex}, device`,
+                    getReadableDeviceIndex(currentDeviceIndex),
+                )
             }
             await step.preCheck({
                 setup: currentSetup,
@@ -180,6 +183,7 @@ async function runSyncBackgroundTest(
         const timeBeforeStepExecution = Date.now()
         await step.execute({
             setup: currentSetup,
+            isSyncTest: true,
         })
 
         currentSetup.storageOperationLogger.enabled = false
@@ -203,7 +207,7 @@ async function runSyncBackgroundTest(
             if (step.debug) {
                 debug(
                     `SYNC postCheck after step ${stepIndex}, device`,
-                    currentDeviceId,
+                    getReadableDeviceIndex(currentDeviceIndex),
                 )
             }
             await step.postCheck({
@@ -212,7 +216,10 @@ async function runSyncBackgroundTest(
         }
 
         if (step.debug) {
-            debug(`SYNC after step ${stepIndex}, device`, currentDeviceId)
+            debug(
+                `SYNC after step ${stepIndex}, device`,
+                getReadableDeviceIndex(currentDeviceIndex),
+            )
         }
         await sync(currentDeviceIndex, { debug: step.debug })
 
@@ -228,37 +235,28 @@ async function runSyncBackgroundTest(
         if (lastStep!.debug) {
             debug(
                 `SYNC before last postCheck, device`,
-                deviceIds[unsyncedDeviceIndex],
+                getReadableDeviceIndex(unsyncedDeviceIndex),
             )
         }
         await sync(unsyncedDeviceIndex, { debug: lastStep!.debug })
         if (lastStep!.debug) {
             debug(
                 `SYNC completed before last postCheck, device`,
-                deviceIds[unsyncedDeviceIndex],
+                getReadableDeviceIndex(unsyncedDeviceIndex),
             )
         }
         await lastStep!.postCheck({ setup: setups[unsyncedDeviceIndex] })
         if (lastStep!.debug) {
             debug(
                 `SYNC last postCheck done, device`,
-                deviceIds[unsyncedDeviceIndex],
+                getReadableDeviceIndex(unsyncedDeviceIndex),
             )
         }
     }
 }
 
 const getReadablePattern = (pattern: number[]) =>
-    pattern
-        .map(
-            index =>
-                ({
-                    0: 'A',
-                    1: 'B',
-                    2: 'C',
-                }[index]),
-        )
-        .join('')
+    pattern.map(getReadableDeviceIndex).join('')
 
 const getReadableDeviceIndex = (index: number) =>
     ({

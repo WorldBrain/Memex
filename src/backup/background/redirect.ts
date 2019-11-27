@@ -3,7 +3,7 @@ import { browser } from 'webextension-polyfill-ts'
 export function setupRequestInterceptors({
     webRequest,
     handleLoginRedirectedBack,
-    checkAutomaticBakupEnabled,
+    isAutomaticBackupEnabled,
     memexCloudOrigin,
 }) {
     if (handleLoginRedirectedBack) {
@@ -13,11 +13,6 @@ export function setupRequestInterceptors({
             ['blocking'],
         )
     }
-    webRequest.onBeforeRequest.addListener(
-        makeWooCommercePurchaseHandler({ checkAutomaticBakupEnabled }),
-        { urls: ['https://worldbrain.io/order-received/thank-you/redirect/'] },
-        ['blocking'],
-    )
 }
 
 export function makeGoogleCallbackHandler({ handleLoginRedirectedBack }) {
@@ -28,14 +23,6 @@ export function makeGoogleCallbackHandler({ handleLoginRedirectedBack }) {
         }
 
         handleLoginRedirectedBack(url)
-        const targetUrl = `${browser.extension.getURL('/options.html')}#/backup`
-        return { redirectUrl: targetUrl }
-    }
-}
-
-export function makeWooCommercePurchaseHandler({ checkAutomaticBakupEnabled }) {
-    return () => {
-        checkAutomaticBakupEnabled()
         const targetUrl = `${browser.extension.getURL('/options.html')}#/backup`
         return { redirectUrl: targetUrl }
     }

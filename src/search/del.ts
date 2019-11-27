@@ -1,8 +1,8 @@
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import { Page } from '.'
 import { initErrHandler } from './storage'
-import { collections } from './util'
 import { DBGet } from './types'
-import normalizeUrl from '../util/encode-url-for-id'
 import { DexieUtilsPlugin } from './plugins/dexie-utils'
 
 const deletePages = async (getDb: DBGet, query: object) => {
@@ -15,7 +15,7 @@ const deletePages = async (getDb: DBGet, query: object) => {
 }
 
 export const delPages = (getDb: DBGet) => (urls: string[]) => {
-    const normalizedUrls: string[] = urls.map(normalizeUrl as any)
+    const normalizedUrls: string[] = urls.map(url => normalizeUrl(url))
 
     return deletePages(getDb, { url: { $in: normalizedUrls } })
 }

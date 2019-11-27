@@ -3,11 +3,15 @@ import PropTypes from 'prop-types'
 import OnboardingBackupMode from '../components/onboarding-backup-mode'
 import { PrimaryButton } from '../components/primary-button'
 import Styles from '../styles.css'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 
-export default class OnboardingHowContainer extends React.Component {
-    state = { mode: null, billingPeriod: null }
+class OnboardingHow extends React.Component {
+    state = { mode: null }
+
     render() {
-        const isAutomatic = this.state.mode === 'automatic'
+        const isAuthorizedForAutomaticBackup = this.props.authorizedFeatures.includes(
+            'backup',
+        )
         return (
             <div>
                 <p className={Styles.header2}>
@@ -17,8 +21,9 @@ export default class OnboardingHowContainer extends React.Component {
                 <OnboardingBackupMode
                     className={Styles.selectionlist}
                     onModeChange={mode => this.setState({ mode })}
-                    onBillingPeriodChange={billingPeriod =>
-                        this.setState({ billingPeriod })
+                    launchSubscriptionFlow={this.props.onSubscribeRequested}
+                    isAuthorizedForAutomaticBackup={
+                        isAuthorizedForAutomaticBackup
                     }
                 />
                 {this.state.mode === 'manual' && (
@@ -28,19 +33,20 @@ export default class OnboardingHowContainer extends React.Component {
                         Calculate size
                     </PrimaryButton>
                 )}
-                {isAutomatic && (
+                {this.state.mode === 'automatic' && (
                     <PrimaryButton
-                        disabled={!this.state.billingPeriod}
-                        onClick={() =>
-                            this.props.onChoice({
-                                type: 'automatic',
-                                billingPeriod: this.state.billingPeriod,
-                            })
+                        disabled={!isAuthorizedForAutomaticBackup}
+                        onClick={
+                            isAuthorizedForAutomaticBackup
+                                ? () =>
+                                      this.props.onChoice({ type: 'automatic' })
+                                : () => false
                         }
                     >
-                        Pay Now
+                        Continue
                     </PrimaryButton>
                 )}
+
                 <span
                     className={Styles.back}
                     onClick={this.props.onBackRequested}
@@ -52,7 +58,11 @@ export default class OnboardingHowContainer extends React.Component {
     }
 }
 
-OnboardingHowContainer.propTypes = {
+export default withCurrentUser(OnboardingHow)
+
+OnboardingHow.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onBackRequested: PropTypes.func.isRequired,
+    onSubscribeRequested: PropTypes.func.isRequired,
+    authorizedFeatures: PropTypes.array,
 }

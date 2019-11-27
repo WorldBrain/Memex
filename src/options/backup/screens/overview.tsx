@@ -1,21 +1,17 @@
 import moment from 'moment'
 import React from 'react'
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
-// import analytics from 'src/analytics'
-// import AutomaticBackupButton from '../components/overview-automatic-backup-button'
-// import OnboardingBackupMode from '../components/onboarding-backup-mode'
-// import {
-//     redirectToAutomaticBackupPurchase,
-//     redirectToAutomaticBackupCancellation,
-// } from '../utils'
-// import { ToggleSwitch } from 'src/common-ui/components'
-import AutomaticPricing from '../components/automatic-pricing'
 import SmallButton from '../components/small-button'
 import LoadingBlocker from '../components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
 import { browser } from 'webextension-polyfill-ts'
+import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
+import {
+    UserProps,
+    withCurrentUser,
+} from 'src/authentication/components/AuthConnector'
+import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 const styles = require('../styles.css')
 const localStyles = require('./overview.css')
@@ -25,9 +21,10 @@ interface Props {
     onRestoreRequested: (...args: any[]) => any
     onBlobPreferenceChange: (...args: any[]) => any
     onPaymentRequested: (...args: any[]) => any
+    authorizedFeatures: UserFeature[]
 }
 
-export default class OverviewContainer extends React.Component<Props> {
+export class OverviewContainer extends React.Component<Props & UserProps> {
     state = {
         automaticBackupEnabled: null,
         backupTimes: null,
@@ -41,10 +38,10 @@ export default class OverviewContainer extends React.Component<Props> {
         /* Pricing */
         showPricing: false,
         billingPeriod: null,
+        subscribeModal: false,
     }
 
     async componentDidMount() {
-        await remoteFunction('maybeCheckAutomaticBakupEnabled')()
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()
@@ -72,24 +69,32 @@ export default class OverviewContainer extends React.Component<Props> {
         })
     }
 
+    openSubscriptionModal = () => this.setState({ subscribeModal: true })
+    closeSubscriptionModal = () => this.setState({ subscribeModal: false })
+
     render() {
         if (!this.state.backupTimes) {
             return <LoadingBlocker />
         }
 
+        const automaticBackupAllowed = this.props.authorizedFeatures.includes(
+            'backup',
+        )
+
         return (
             <div>
                 {this.state.showWarning && (
                     <div className={styles.showWarning}>
-                        <span className={styles.WarningIcon}/>
+                        <span className={styles.WarningIcon} />
                         <span className={styles.showWarningText}>
                             The first backup must be done manually. Follow{' '}
-                            <span 
-                                className={styles.underline} 
+                            <span
+                                className={styles.underline}
                                 onClick={this.props.onBackupRequested}
                             >
-                            the wizard
-                            </span>{' '}to get started.
+                                the wizard
+                            </span>{' '}
+                            to get started.
                         </span>
                     </div>
                 )}
@@ -174,28 +179,16 @@ export default class OverviewContainer extends React.Component<Props> {
                                     ? 'Automatic Backups Enabled'
                                     : 'Enable Automatic Backups'}
                             </span>
-                            <SmallButton
-                                extraClass={localStyles.right}
-                                onClick={() => {
-                                    if (!this.state.automaticBackupEnabled) {
-                                        this.setState({ showPricing: true })
-                                    } else {
-                                        window.open(
-                                            'https://worldbrain.io/community/view-subscription/',
-                                            '_blank',
-                                        )
-                                    }
-                                }}
-                                color={
-                                    this.state.automaticBackupEnabled
-                                        ? 'red'
-                                        : 'darkblue'
-                                }
-                            >
-                                {this.state.automaticBackupEnabled
-                                    ? 'Cancel'
-                                    : 'Upgrade'}
-                            </SmallButton>
+
+                            {!automaticBackupAllowed && (
+                                <SmallButton
+                                    extraClass={localStyles.right}
+                                    onClick={this.openSubscriptionModal}
+                                    color={'darkblue'}
+                                >
+                                    {'Upgrade'}
+                                </SmallButton>
+                            )}
                             <span
                                 className={classNames(
                                     styles.subname,
@@ -205,46 +198,6 @@ export default class OverviewContainer extends React.Component<Props> {
                                 Worry-free. Automatically backs up your data
                                 every 15 minutes.
                             </span>
-                            {this.state.showPricing ? (
-                                <div className={localStyles.pricing}>
-                                    <AutomaticPricing
-                                        mode="automatic"
-                                        billingPeriod={this.state.billingPeriod}
-                                        onBillingPeriodChange={billingPeriod =>
-                                            this.setState({ billingPeriod })
-                                        }
-                                    />
-                                    {this.state.showPricing &&
-                                    this.state.billingPeriod ? (
-                                        <div className={localStyles.payConfirm}>
-                                            <SmallButton
-                                                color="green"
-                                                onClick={() =>
-                                                    this.props.onPaymentRequested(
-                                                        this.state
-                                                            .billingPeriod,
-                                                    )
-                                                }
-                                            >
-                                                Pay now
-                                            </SmallButton>
-                                            <span
-                                                className={
-                                                    localStyles.cancelButton
-                                                }
-                                                onClick={() =>
-                                                    this.setState({
-                                                        showPricing: false,
-                                                    })
-                                                }
-                                            >
-                                                Cancel
-                                            </span>
-                                        </div>
-                                    ) : null}
-                                </div>
-                            ) : null}
-
                             <p className={styles.optionLine}>
                                 <span className={styles.name}>
                                     Backup Location
@@ -266,6 +219,7 @@ export default class OverviewContainer extends React.Component<Props> {
                         </div>
                     </div>
                 ) : null}
+
                 {!this.state.hasInitialBackup &&
                     this.state.automaticBackupEnabled && (
                         <div>
@@ -358,7 +312,12 @@ export default class OverviewContainer extends React.Component<Props> {
                         </span>
                     </div>
                 </div>
+                {this.state.subscribeModal && (
+                    <SubscribeModal onClose={this.closeSubscriptionModal} />
+                )}
             </div>
         )
     }
 }
+
+export default withCurrentUser(OverviewContainer)

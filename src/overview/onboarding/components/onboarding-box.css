@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color5, color6 from colors;
+@value color1, color2, color4, color5, color6 from colors;
 
 .flexLayout {
     display: flex;
@@ -19,12 +19,26 @@
     z-index: -2;
 }
 
+.startingPage {
+    width: 90%;
+    max-width: 800px;
+    transition: height 0.5s;
+    margin: 2rem auto 1rem;
+    display: flex;
+    padding: 2em 4em;
+    border-radius: 10px;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .whiteBox {
+    animation: scale-in-center 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     background: white;
     color: color5;
     width: 90%;
     max-width: 800px;
-    min-width: 50vw;
     margin: 2rem auto 1rem;
     display: flex;
     padding: 2em 4em;
@@ -35,7 +49,21 @@
     text-align: center;
     align-items: center;
     justify-content: space-between;
-    min-height: 525px;
+    min-height: 633px;
+    transition: height 0.25s ease;
+    opacity: 1;
+}
+
+@keyframes scale-in-center {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .logo {
@@ -64,54 +92,19 @@
     color: color6;
     font-size: calc(0.6rem + 0.3vw);
     margin-bottom: 2rem;
-    display: inline-flex;
     flex-direction: column;
 }
 
 .textLarge {
     font-size: calc(0.8rem + 0.3vw);
     margin: 0 auto 1.5rem;
-    display: inline-flex;
-    color: color6;
+    color: color4;
 }
 
 .placeholder {
     background: color6;
     margin: auto;
     display: inline-flex;
-}
-
-.backgroundBlobWrapper {
-    position: absolute;
-    width: 140%;
-    max-width: 900px;
-    min-height: 515px;
-    z-index: -1;
-    top: calc(
-        50% - 81px
-    ); /* position in the center but offset rougly the heading text so it still shows above the box */
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.backgroundBlob {
-    background: url('/img/onboarding/backgroundBlob.svg') no-repeat;
-    position: relative;
-    width: 100%;
-    background-size: contain;
-    height: 590px;
-}
-
-.privacyImage {
-    background-repeat: no-repeat;
-    background-position: center center;
-    display: flex;
-    background-image: url('/img/privacy.svg');
-    fill: white;
-    background-size: contain;
-    width: 65%;
-    margin: 25px auto;
-    height: 30vh;
 }
 
 .navigation {
@@ -128,56 +121,46 @@
     flex-direction: column;
 }
 
-.annotationImage {
+.onboardingGif {
     background-repeat: no-repeat;
     background-position: center center;
+    background-size: contain;
+    border: 1px solid #eee;
+    border-radius: 5px;
     display: flex;
+    height: 258px;
+    margin: 0 auto 2rem;
+    width: 400px;
+}
+
+.annotationGif {
+    composes: onboardingGif;
     background-image: url('/img/annotationImage.gif');
-    fill: white;
-    border: 1px solid #eee;
-    background-size: contain;
-    border-radius: 5px;
-    height: 0;
-    padding-top: 59.5%;
 }
 
-.searchImage {
-    background-repeat: no-repeat;
-    background-position: center center;
-    display: flex;
+.searchGif {
+    composes: onboardingGif;
     background-image: url('/img/searchImage.gif');
-    fill: white;
-    border: 1px solid #eee;
-    background-size: contain;
-    border-radius: 5px;
-    height: 0;
-    padding-top: 44.5%;
-    margin: 0 13%;
 }
 
-.sidebarImage {
-    background-repeat: no-repeat;
-    background-position: center center;
-    display: flex;
+.sidebarGif {
+    composes: onboardingGif;
     background-image: url('/img/sidebarImage.gif');
-    fill: white;
-    border: 1px solid #eee;
-    background-size: contain;
-    border-radius: 5px;
-    height: 0;
-    padding-top: 59.5%;
 }
 
-.keyboardImage {
-    background-repeat: no-repeat;
-    background-position: center center;
-    display: flex;
+.keyboardGif {
+    composes: onboardingGif;
     background-image: url('/img/keyboardImage.gif');
-    fill: white;
-    background-size: contain;
-    border-radius: 5px;
-    height: 0;
-    padding-top: 44%;
+    background-size: cover;
+}
+
+.floatingImage {
+    animation-name: float, scale-in-center;
+    animation-duration: 6s, 1s;
+    animation-timing-function: ease-in-out, ease;
+    animation-iteration-count: infinite, 1;
+    width: 210px;
+    margin: 1rem auto 2rem;
 }
 
 .skipTitle {
@@ -224,83 +207,32 @@
     align-items: center;
 }
 
-@media only screen and (max-width: 620px) {
-    .whiteBox {
-        min-width: 90vw;
+@keyframes float {
+    0% {
+        transform: translateY(0px);
     }
 
-    .backgroundBlob {
-        background: none;
+    50% {
+        transform: translateY(-20px);
+    }
+
+    100% {
+        transform: translateY(0px);
     }
 }
 
-/* @media only screen and (max-height: 700px) {
-    .container {
-        margin-top: 2.5%;
-        width: 95%;
-        padding: 2rem;
-        max-height: 600px;
-        min-height: 500px;
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
     }
 
-    .heading1 {
-        font-size: 1.3rem;
-    }
-
-    .heading2 {
-        font-size: 1.15rem;
-        line-height: 1.5rem;
-    }
-
-    .text {
-        font-size: 0.875rem;
-    }
-
-    .textLarge {
-        font-size: 0.9rem;
-    }
-
-    .privacyImage {
-        min-height: 200px;
-    }
-
-    .backgroundBlob {
-        background: none;
+    100% {
+        opacity: 1;
     }
 }
 
-@media only screen and (max-height: 800px) {
-    .container {
-        margin-top: 2.5%;
-        width: 95%;
-        padding: 2rem;
-        max-height: 600px;
-        min-height: 500px;
-    }
-
-    .heading1 {
-        font-size: 1.3rem;
-    }
-
-    .heading2 {
-        font-size: 1.15rem;
-        line-height: 1.5rem;
-    }
-
-    .text {
-        font-size: 0.875rem;
-    }
-
-    .textLarge {
-        font-size: 0.9rem;
-    }
-
-    .privacyImage {
-        min-height: 200px;
-    }
-
-    .backgroundBlob {
-        background: none;
+@media only screen and (max-height: 700px) {
+    .flexLayout {
+        height: auto; /* reset the 100vh which causes scroll issues on smaller screens */
     }
 }
-*/

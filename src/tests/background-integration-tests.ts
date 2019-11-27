@@ -3,10 +3,9 @@ import { URL } from 'whatwg-url'
 import expect from 'expect'
 const wrtc = require('wrtc')
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
-import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
-import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import {
     createBackgroundModules,
     registerBackgroundModuleCollections,
@@ -18,11 +17,12 @@ import {
     BackgroundIntegrationTest,
 } from './integration-tests'
 import MemoryBrowserStorage from 'src/util/tests/browser-storage'
-import { SignalTransportFactory } from 'src/sync/background/initial-sync'
 import { StorageChangeDetector } from './storage-change-detector'
 import StorageOperationLogger from './storage-operation-logger'
 import { setStorex } from 'src/search/get-db'
 import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
+import { AuthBackground } from 'src/authentication/background'
+import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -41,11 +41,13 @@ export async function setupBackgroundIntegrationTest(options?: {
         (options && options.browserLocalStorage) || new MemoryBrowserStorage()
     const storageManager = initStorex()
 
-    const authBackground = {
-        userId: 1,
-        setup: async () => {},
-        getCurrentUser: () => ({ id: authBackground.userId }),
-    }
+    const authService = new MemoryAuthService()
+    const subscriptionService = new MemorySubscriptionsService()
+    const auth: AuthBackground = new AuthBackground({
+        authService,
+        subscriptionService,
+    })
+
     const backgroundModules = createBackgroundModules({
         storageManager,
         localStorageChangesManager: null,
@@ -54,14 +56,14 @@ export async function setupBackgroundIntegrationTest(options?: {
                 local: browserLocalStorage,
             },
             bookmarks: {
-                onCreated: { addListener: () => {} },
-                onRemoved: { addListener: () => {} },
+                onCreated: { addListener: () => { } },
+                onRemoved: { addListener: () => { } },
             },
         } as any,
         tabManager: options && options.tabManager,
-        authBackground,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,
+        auth,
     })
     backgroundModules.customLists._createPage =
         backgroundModules.search.searchIndex.createTestPage
@@ -94,6 +96,8 @@ export async function setupBackgroundIntegrationTest(options?: {
         browserLocalStorage,
         storageOperationLogger,
         storageChangeDetector,
+        authService,
+        subscriptionService,
     }
 }
 
@@ -156,7 +160,7 @@ export async function runBackgroundIntegrationTest(
             } catch (e) {
                 console.error(
                     `Unexpected storage changes in step number ${stepIndex +
-                        1} (counting from 1)`,
+                    1} (counting from 1)`,
                 )
                 throw e
             }

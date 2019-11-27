@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import { Page } from '../types'
-import normalizeUrl from 'src/util/encode-url-for-id'
 
 const styles = require('./page-info.css')
 

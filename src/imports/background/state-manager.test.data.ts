@@ -1,8 +1,12 @@
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import { BrowserItem } from './types'
 
 interface AllowTypes {
     [key: string]: boolean | string
 }
+
+const normalize = url => normalizeUrl(url)
 
 export interface TestData {
     allowTypes: AllowTypes
@@ -18,6 +22,9 @@ export default function(
     bmUrls: string[],
     allowTypes?: AllowTypes,
 ): TestData {
+    histUrls = [...new Set(histUrls.map(normalize))]
+    bmUrls = [...new Set(bmUrls.map(normalize))]
+
     let idIt = 0
     const createBrowserItem = type => url =>
         ({ id: idIt++, url, type } as BrowserItem)

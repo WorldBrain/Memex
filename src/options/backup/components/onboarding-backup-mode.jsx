@@ -2,56 +2,60 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './backup-mode.css'
 import classNames from 'classnames'
-
-import AutomaticPricing from './automatic-pricing'
+import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
 
 export default class OnboardingBackupModeContainer extends React.Component {
     static propTypes = {
-        disableModeSelection: PropTypes.bool,
-        billingPeriod: PropTypes.string,
         onModeChange: PropTypes.func,
-        onBillingPeriodChange: PropTypes.func.isRequired,
+        launchSubscriptionFlow: PropTypes.func,
+        mode: PropTypes.string,
+        isAuthorizedForAutomaticBackup: PropTypes.bool,
     }
 
     state = {
         mode: null,
-        billingPeriod: null,
+        subscribeModal: false,
     }
 
     componentDidMount() {
-        if (this.props.disableModeSelection) {
-            this.setState({ mode: 'automatic' })
+        if (this.props.mode) {
+            this.setState({ mode: this.props.mode })
         }
     }
 
+    openSubscriptionModal = () => this.setState({ subscribeModal: true })
+    closeSubscriptionModal = () => this.setState({ subscribeModal: false })
+
     render() {
         return (
-            <OnboardingBackupMode
-                {...this.props}
-                disableModeSelection={this.props.disableModeSelection}
-                mode={this.state.mode}
-                billingPeriod={this.state.billingPeriod}
-                showPrice={this.state.mode === 'automatic'}
-                onModeChange={mode => {
-                    this.setState({ mode })
-                    this.props.onModeChange && this.props.onModeChange(mode)
-                }}
-                onBillingPeriodChange={billingPeriod => {
-                    this.setState({ billingPeriod })
-                    this.props.onBillingPeriodChange(billingPeriod)
-                }}
-            />
+            <div>
+                <OnboardingBackupMode
+                    {...this.props}
+                    mode={this.state.mode}
+                    onModeChange={mode => {
+                        this.setState({ mode })
+                        this.props.onModeChange && this.props.onModeChange(mode)
+                    }}
+                    launchSubscriptionFlow={this.openSubscriptionModal}
+                    isAuthorizedForAutomaticBackup={
+                        this.props.isAuthorizedForAutomaticBackup
+                    }
+                />
+                {this.state.subscribeModal && (
+                    <SubscribeModal onClose={this.closeSubscriptionModal} />
+                )}
+            </div>
         )
     }
 }
 
 export function OnboardingBackupMode({
     disableModeSelection,
+    disableAutomaticBackup,
+    launchSubscriptionFlow,
     mode,
-    billingPeriod,
     onModeChange,
-    onBillingPeriodChange,
-    showPrice,
+    isAuthorizedForAutomaticBackup,
 }) {
     return (
         <div className={Styles.selectionDiv}>
@@ -65,11 +69,7 @@ export function OnboardingBackupMode({
                         />{' '}
                         <span className={Styles.option}>
                             <span className={Styles.name}>Manual Backup</span>
-                            <span
-                                className={classNames(
-                                    Styles.labelFree,
-                                )}
-                            >
+                            <span className={classNames(Styles.labelFree)}>
                                 Free
                             </span>
                             <br />
@@ -93,24 +93,26 @@ export function OnboardingBackupMode({
                             <span className={Styles.name}>
                                 Automatic Backup
                             </span>
-                            <span
-                                className={Styles.labelPremium}
-                            >
-                                Upgrade
-                            </span>
+                            {!disableAutomaticBackup &&
+                            isAuthorizedForAutomaticBackup ? (
+                                <span className={classNames(Styles.labelFree)}>
+                                    Subscribed
+                                </span>
+                            ) : (
+                                <span
+                                    className={Styles.labelPremium}
+                                    onClick={launchSubscriptionFlow}
+                                >
+                                    Upgrade
+                                </span>
+                            )}
+
                             <br />
                             <span className={Styles.subname}>
                                 Worry-free backups every 15 minutes.
                             </span>
                         </span>
                     </label>
-                )}
-                {showPrice && (
-                    <AutomaticPricing
-                        billingPeriod={billingPeriod}
-                        mode={mode}
-                        onBillingPeriodChange={onBillingPeriodChange}
-                    />
                 )}
             </div>
         </div>
@@ -119,9 +121,9 @@ export function OnboardingBackupMode({
 
 OnboardingBackupMode.propTypes = {
     disableModeSelection: PropTypes.bool,
+    disableAutomaticBackup: PropTypes.bool,
+    isAuthorizedForAutomaticBackup: PropTypes.bool,
     mode: PropTypes.string,
-    billingPeriod: PropTypes.string,
     onModeChange: PropTypes.func.isRequired,
-    onBillingPeriodChange: PropTypes.func.isRequired,
-    showPrice: PropTypes.bool,
+    launchSubscriptionFlow: PropTypes.func,
 }

@@ -4,87 +4,57 @@ import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-lo
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
 
-import {
-    annotationCollectionName,
-    annotationBookmarkCollectionName,
-    annotationListEntryCollectionName,
-} from '@worldbrain/memex-storage/lib/annotations/constants'
-import { tagCollectionName } from '@worldbrain/memex-storage/lib/tags/constants'
-import {
-    visitCollectionName,
-    pageCollectionName,
-    bookmarkCollectionName,
-} from '@worldbrain/memex-storage/lib/pages/constants'
-import {
-    listEntryCollectionName,
-    listCollectionName,
-} from '@worldbrain/memex-storage/lib/lists/constants'
+import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import SyncService, {
+    SignalTransportFactory,
+} from '@worldbrain/memex-common/lib/sync'
+import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
 
-import AuthBackground from 'src/auth/background'
 import { PublicSyncInterface } from './types'
-import InitialSync, { SignalTransportFactory } from './initial-sync'
-import ContinuousSync from './continuous-sync'
-import { MemexClientSyncLogStorage } from './storage'
+import {
+    MemexExtClientSyncLogStorage,
+    MemexExtSyncInfoStorage,
+} from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
+import { filterBlobsFromSyncLog } from './sync-logging'
+import { MemexExtSyncSettingStore } from './setting-store'
 
-export default class SyncBackground {
-    initialSync: InitialSync
-    continuousSync: ContinuousSync
+export default class SyncBackground extends SyncService {
     remoteFunctions: PublicSyncInterface
-    clientSyncLog: ClientSyncLogStorage
-    syncLoggingMiddleware?: SyncLoggingMiddleware
     firstContinuousSyncPromise?: Promise<void>
-    readonly syncedCollections: string[] = [
-        bookmarkCollectionName,
-        listCollectionName,
-        listEntryCollectionName,
-        pageCollectionName,
-        visitCollectionName,
-        tagCollectionName,
-        annotationCollectionName,
-        annotationBookmarkCollectionName,
-        annotationListEntryCollectionName,
-    ]
+    getSharedSyncLog: () => Promise<SharedSyncLog>
 
-    constructor(
-        private options: {
-            auth: AuthBackground
-            storageManager: StorageManager
-            signalTransportFactory: SignalTransportFactory
-            getSharedSyncLog: () => Promise<SharedSyncLog>
-            browserAPIs: Pick<Browser, 'storage'>
-        },
-    ) {
-        this.clientSyncLog = new MemexClientSyncLogStorage({
-            storageManager: options.storageManager,
-        })
-        this.initialSync = new InitialSync({
-            storageManager: options.storageManager,
-            signalTransportFactory: options.signalTransportFactory,
-            syncedCollections: this.syncedCollections,
-        })
-        this.continuousSync = new ContinuousSync({
-            frequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
-            auth: options.auth,
-            storageManager: options.storageManager,
-            clientSyncLog: this.clientSyncLog,
-            getSharedSyncLog: options.getSharedSyncLog,
-            browserAPIs: options.browserAPIs,
-            toggleSyncLogging: (enabed: boolean) => {
-                if (this.syncLoggingMiddleware) {
-                    this.syncLoggingMiddleware.enabled = enabed
-                } else {
-                    throw new Error(
-                        `Tried to toggle sync logging before logging middleware was created`,
-                    )
-                }
-            },
+    readonly syncedCollections: string[] = SYNCED_COLLECTIONS
+
+    constructor(options: {
+        auth: AuthService
+        storageManager: StorageManager
+        signalTransportFactory: SignalTransportFactory
+        getSharedSyncLog: () => Promise<SharedSyncLog>
+        browserAPIs: Pick<Browser, 'storage'>
+        appVersion: string
+    }) {
+        super({
+            ...options,
+            syncFrequencyInMs: INCREMENTAL_SYNC_FREQUENCY,
+            clientSyncLog: new MemexExtClientSyncLogStorage({
+                storageManager: options.storageManager,
+            }),
+            devicePlatform: 'browser',
+            syncInfoStorage: new MemexExtSyncInfoStorage({
+                storageManager: options.storageManager,
+            }),
+            settingStore: new MemexExtSyncSettingStore(options),
+            productType: 'ext',
+            productVersion: options.appVersion,
+            disableEncryption: true,
         })
 
         const bound = <Target, Key extends keyof Target>(
             object: Target,
             key: Key,
         ): Target[Key] => (object[key] as any).bind(object)
+
         this.remoteFunctions = {
             requestInitialSync: bound(this.initialSync, 'requestInitialSync'),
             answerInitialSync: bound(this.initialSync, 'answerInitialSync'),
@@ -97,7 +67,14 @@ export default class SyncBackground {
                 this.continuousSync,
                 'forceIncrementalSync',
             ),
+            listDevices: bound(this.syncInfoStorage, 'listDevices'),
         }
+    }
+
+    async createSyncLoggingMiddleware() {
+        const middleware = await super.createSyncLoggingMiddleware()
+        middleware.operationPreprocessor = filterBlobsFromSyncLog
+        return middleware
     }
 
     async setup() {
@@ -107,15 +84,5 @@ export default class SyncBackground {
 
     async tearDown() {
         await this.continuousSync.tearDown()
-    }
-
-    async createSyncLoggingMiddleware() {
-        this.syncLoggingMiddleware = new SyncLoggingMiddleware({
-            storageManager: this.options.storageManager,
-            clientSyncLog: this.clientSyncLog,
-            includeCollections: this.syncedCollections,
-        })
-        this.syncLoggingMiddleware.enabled = false
-        return this.syncLoggingMiddleware
     }
 }
