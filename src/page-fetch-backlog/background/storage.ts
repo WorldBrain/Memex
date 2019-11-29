@@ -16,6 +16,7 @@ export class PageFetchBacklogStorage extends StorageModule {
                     url: { type: 'string' },
                     createdAt: { type: 'datetime' },
                     timesRetried: { type: 'int' },
+                    lastRetry: { type: 'datetime' },
                 },
                 indices: [{ field: 'createdAt' }],
                 watch: false,
@@ -43,9 +44,15 @@ export class PageFetchBacklogStorage extends StorageModule {
     async createEntry({
         url,
         timesRetried = 0,
+        lastRetry = new Date(),
         createdAt = new Date(),
     }: BacklogEntryCreateArgs): Promise<void> {
-        await this.operation('createEntry', { url, timesRetried, createdAt })
+        await this.operation('createEntry', {
+            url,
+            timesRetried,
+            lastRetry,
+            createdAt,
+        })
     }
 
     async removeOldestEntry(): Promise<BacklogEntry | null> {
@@ -57,6 +64,10 @@ export class PageFetchBacklogStorage extends StorageModule {
 
         await this.operation('deleteEntry', { id: result.id })
 
-        return { url: result.url, timesRetried: result.timesRetried }
+        return {
+            url: result.url,
+            timesRetried: result.timesRetried,
+            lastRetry: result.lastRetry,
+        }
     }
 }

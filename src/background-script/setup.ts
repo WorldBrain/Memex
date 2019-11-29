@@ -37,6 +37,7 @@ import {
 } from 'src/authentication/background/setup'
 import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
+import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from 'src/search/pipeline'
@@ -47,6 +48,7 @@ export interface BackgroundModules {
     notifications: NotificationBackground
     social: SocialBackground
     activityLogger: ActivityLoggerBackground
+    connectivityChecker: ConnectivityCheckerBackground
     directLinking: DirectLinkingBackground
     search: SearchBackground
     eventLog: EventLogBackground
@@ -101,8 +103,13 @@ export function createBackgroundModules(options: {
         pagePipeline: pipeline,
     })
 
+    const connectivityChecker = new ConnectivityCheckerBackground({
+        xhr: new XMLHttpRequest(),
+    })
+
     const pageFetchBacklog = new PageFetchBacklogBackground({
         storageManager,
+        connectivityChecker,
         fetchPageData: fetchPageDataProcessor,
         storePageContent: async content => {
             const page = new Page(storageManager, content)
@@ -116,6 +123,7 @@ export function createBackgroundModules(options: {
         notifications,
         social,
         activityLogger,
+        connectivityChecker,
         directLinking: new DirectLinkingBackground({
             browserAPIs: options.browserAPIs,
             storageManager,

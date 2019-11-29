@@ -78,6 +78,7 @@ export class PageFetchBacklogBackground {
                 await this.enqueueEntry({
                     ...backlogEntry,
                     timesRetried: backlogEntry.timesRetried + 1,
+                    lastRetry: new Date(),
                 })
             }
         }

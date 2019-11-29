@@ -49,6 +49,12 @@ async function setupTest({
         text: pageDoc.content.fullText,
     })
 
+    const mockConnectivityChecker = {
+        checkUntilConnected: () => Promise.resolve(),
+        checkConnection: () => Promise.resolve(),
+        isConnected: true,
+    }
+
     const storageManager = initStorageManager()
     const backlog = new PageFetchBacklogBackground({
         storageManager,
@@ -59,6 +65,7 @@ async function setupTest({
         processingInterval,
         retryLimit,
         storePageContent: mockPageStorer,
+        connectivityChecker: mockConnectivityChecker as any,
     })
 
     registerModuleMapCollections(storageManager.registry, {
@@ -87,18 +94,21 @@ describe('failed page fetch backlog', () => {
             {
                 id: expect.anything(),
                 createdAt: expect.any(Date),
+                lastRetry: expect.any(Date),
                 url: DATA.bookmarkCreateA.data.pk,
                 timesRetried: 0,
             },
             {
                 id: expect.anything(),
                 createdAt: expect.any(Date),
+                lastRetry: expect.any(Date),
                 url: DATA.pageCreateA.data.pk,
                 timesRetried: 0,
             },
             {
                 id: expect.anything(),
                 createdAt: expect.any(Date),
+                lastRetry: expect.any(Date),
                 url: DATA.pageModifyA.data.pk,
                 timesRetried: 0,
             },
@@ -119,14 +129,17 @@ describe('failed page fetch backlog', () => {
 
         expect(await backlog.dequeueEntry()).toEqual({
             url: DATA.bookmarkCreateA.data.pk,
+            lastRetry: expect.any(Date),
             timesRetried: 0,
         })
         expect(await backlog.dequeueEntry()).toEqual({
             url: DATA.pageCreateA.data.pk,
+            lastRetry: expect.any(Date),
             timesRetried: 0,
         })
         expect(await backlog.dequeueEntry()).toEqual({
             url: DATA.pageModifyA.data.pk,
+            lastRetry: expect.any(Date),
             timesRetried: 0,
         })
         expect(await backlog.dequeueEntry()).toEqual(null)
@@ -140,24 +153,29 @@ describe('failed page fetch backlog', () => {
 
         expect(await backlog.dequeueEntry()).toEqual({
             url: DATA.bookmarkCreateA.data.pk,
+            lastRetry: expect.any(Date),
             timesRetried: 0,
         })
         expect(await backlog.dequeueEntry()).toEqual({
             url: DATA.pageCreateA.data.pk,
+            lastRetry: expect.any(Date),
             timesRetried: 0,
         })
         await backlog.enqueueEntry({ url: DATA.pageCreateA.data.pk })
         await backlog.enqueueEntry({ url: DATA.bookmarkCreateA.data.pk })
         expect(await backlog.dequeueEntry()).toEqual({
             url: DATA.pageModifyA.data.pk,
+            lastRetry: expect.any(Date),
             timesRetried: 0,
         })
         expect(await backlog.dequeueEntry()).toEqual({
             url: DATA.pageCreateA.data.pk,
+            lastRetry: expect.any(Date),
             timesRetried: 0,
         })
         expect(await backlog.dequeueEntry()).toEqual({
             url: DATA.bookmarkCreateA.data.pk,
+            lastRetry: expect.any(Date),
             timesRetried: 0,
         })
         expect(await backlog.dequeueEntry()).toEqual(null)
@@ -173,6 +191,7 @@ describe('failed page fetch backlog', () => {
             const entry = await backlog.dequeueEntry()
             expect(entry).toEqual({
                 url: data[i % data.length].data.pk,
+                lastRetry: expect.any(Date),
                 timesRetried: 0,
             })
             await backlog.enqueueEntry(entry)
@@ -190,6 +209,7 @@ describe('failed page fetch backlog', () => {
         const expectedEntry = {
             id: expect.anything(),
             createdAt: expect.any(Date),
+            lastRetry: expect.any(Date),
             url: DATA.pageCreateA.data.pk,
         }
 
@@ -235,6 +255,7 @@ describe('failed page fetch backlog', () => {
                 id: expect.anything(),
                 createdAt: expect.any(Date),
                 url: DATA.pageCreateA.data.pk,
+                lastRetry: expect.any(Date),
             }
 
             for (let retries = 0; retries <= retryLimit; retries++) {
