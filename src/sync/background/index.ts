@@ -23,6 +23,7 @@ import { PostReceiveProcessor } from './post-receive-processor'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import pipeline from 'src/search/pipeline'
+import { MemexExtSyncSettingStore } from './setting-store'
 
 export default class SyncBackground extends SyncService {
     initialSync: MemexInitialSync
@@ -47,6 +48,7 @@ export default class SyncBackground extends SyncService {
             clientSyncLog: new MemexExtClientSyncLogStorage({
                 storageManager: options.storageManager,
             }),
+            disableEncryption: true,
             devicePlatform: 'browser',
             syncInfoStorage: new MemexExtSyncInfoStorage({
                 storageManager: options.storageManager,
@@ -60,7 +62,7 @@ export default class SyncBackground extends SyncService {
                     fetchPageData,
                     pagePipeline: pipeline,
                 }),
-            }),
+            }).processor,
         })
 
         const bound = <Target, Key extends keyof Target>(
