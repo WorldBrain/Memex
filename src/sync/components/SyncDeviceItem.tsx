@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
 import { SyncDevice } from 'src/sync/components/types'
 
 interface Props {

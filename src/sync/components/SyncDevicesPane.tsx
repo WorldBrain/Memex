@@ -1,4 +1,5 @@
 import React, { PureComponent, Fragment, Component } from 'react'
+import ReactDOM from 'react-dom'
 import cx from 'classnames'
 import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import { SyncDevicesList } from 'src/sync/components/SyncDevicesList'

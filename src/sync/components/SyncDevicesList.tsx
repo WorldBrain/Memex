@@ -1,4 +1,5 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
 import { SyncDevice } from 'src/sync/components/types'
 import SyncDeviceItem from 'src/sync/components/SyncDeviceItem'
 
