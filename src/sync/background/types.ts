@@ -4,6 +4,7 @@ export interface PublicSyncInterface {
         excludePassiveData?: boolean
     }): Promise<{ initialMessage: string }>
     answerInitialSync(options: { initialMessage: string }): Promise<void>
+    waitForInitialSyncConnected(): Promise<void>
     waitForInitialSync(): Promise<void>
 
     enableContinuousSync(): Promise<void>

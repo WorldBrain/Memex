@@ -9,3 +9,12 @@
 .flex {
     flex: 1;
 }
+
+.profileButton {
+    display: inline-flex;
+    height: 30px;
+    position: fixed;
+    left: 0.2em;
+    bottom: 1em;
+    cursor: pointer;
+}

@@ -84,7 +84,7 @@ export default [
         pathname: '/auth',
         icon: 'settings',
         component: UserScreen,
-        hideFromSidebar: false,
+        hideFromSidebar: true,
     },
     {
         name: 'Opt In Features',

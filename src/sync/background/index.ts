@@ -59,6 +59,10 @@ export default class SyncBackground extends SyncService {
             requestInitialSync: bound(this.initialSync, 'requestInitialSync'),
             answerInitialSync: bound(this.initialSync, 'answerInitialSync'),
             waitForInitialSync: bound(this.initialSync, 'waitForInitialSync'),
+            waitForInitialSyncConnected: bound(
+                this.initialSync,
+                'waitForInitialSyncConnected',
+            ),
             enableContinuousSync: bound(
                 this.continuousSync,
                 'enableContinuousSync',

@@ -1,10 +1,13 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-
 import Nav from './Nav'
 import NavLink from './NavLink'
 
-class Navigation extends Component {
+interface Props {
+    currentLocation: any
+    routes: any[]
+}
+
+class Navigation extends Component<Props> {
     isActive(route) {
         return this.props.currentLocation.pathname === route.pathname
     }
@@ -20,11 +23,6 @@ class Navigation extends Component {
     render() {
         return <Nav>{this.renderNavLinks()}</Nav>
     }
-}
-
-Navigation.propTypes = {
-    currentLocation: PropTypes.object.isRequired,
-    routes: PropTypes.array.isRequired,
 }
 
 export default Navigation

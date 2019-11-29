@@ -9,7 +9,9 @@ const firebaseConfig = {
     appId: process.env.FIREBASE_MEMEX_APP_ID,
 }
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig)
+export const getFirebase = () => {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig)
+    }
+    return firebase
 }
-export { firebase }

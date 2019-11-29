@@ -226,9 +226,7 @@ function extensionSyncTests(suiteOptions: {
             active: true,
         })
 
-        // Set up device IDs
-
-        await forEachSetup(s => syncModule(s).continuousSync.initDevice())
+        // Check device IDs
 
         const getDeviceId = async (s: BackgroundIntegrationTestSetup) =>
             (await s.browserLocalStorage.get(SYNC_STORAGE_AREA_KEYS.deviceId))[
@@ -243,10 +241,9 @@ function extensionSyncTests(suiteOptions: {
 
         expect(firstDeviceId).not.toEqual(secondDeviceId)
 
-        // Enable continuous sync
+        // Check continuous sync
 
         await forEachSetup(async s => {
-            await syncModule(s).remoteFunctions.enableContinuousSync()
             expectIncrementalSyncScheduled(syncModule(s), {
                 when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
                 margin: 50,
@@ -438,13 +435,24 @@ function extensionSyncTests(suiteOptions: {
         const storageContents = await getStorageContents(
             devices[0].storageManager,
         )
-        storageContents['pages'][0].screenshot = null
+        delete storageContents['clientSyncLogEntry']
+
+        const getTargetStorageContents = async () => {
+            const contents = await getStorageContents(
+                devices[1].storageManager,
+                { exclude: new Set(['clientSyncLogEntry']) },
+            )
+            for (const page of contents['pages'] || []) {
+                delete page['screenshot']
+            }
+            return contents
+        }
 
         await doInitialSync({
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getStorageContents(devices[1].storageManager)).toEqual({
+        expect(await getTargetStorageContents()).toEqual({
             ...storageContents,
             syncDeviceInfo: expectedDeviceInfo,
         })
@@ -453,7 +461,7 @@ function extensionSyncTests(suiteOptions: {
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
         })
-        expect(await getStorageContents(devices[1].storageManager)).toEqual({
+        expect(await getTargetStorageContents()).toEqual({
             ...storageContents,
             syncDeviceInfo: expectedDeviceInfo,
         })
@@ -740,8 +748,12 @@ describe('SyncBackground', () => {
         withDependencies: WithTestDependencies
         skip?: boolean
     }) {
-        extensionSyncTests(options)
-        mobileSyncTests(options)
+        describe('Ext+Ext sync tests', () => {
+            extensionSyncTests(options)
+        })
+        describe('Ext+App sync tests', () => {
+            mobileSyncTests(options)
+        })
     }
 
     describe('Memory backend', () => {

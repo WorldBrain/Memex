@@ -100,6 +100,9 @@ export async function setupMobileIntegrationTest(options?: {
         syncInfo: sync.syncInfoStorage,
     })
     await storageManager.finishInitialization()
+
+    storageManager.setMiddleware([await sync.createSyncLoggingMiddleware()])
+
     await storageManager.backend.migrate()
 
     return {

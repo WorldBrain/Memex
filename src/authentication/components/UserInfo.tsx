@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { auth } from 'src/util/remote-functions-background'
-import { firebase } from 'src/util/firebase-app-initialized'
+import { getFirebase } from 'src/util/firebase-app-initialized'
 import Button from 'src/popup/components/Button'
 import {
     UserProps,
@@ -15,7 +15,9 @@ export class UserInfo extends React.Component<UserProps, State> {
     state = { showSubscriptionModal: false }
 
     handleLogout = () => {
-        firebase.auth().signOut()
+        getFirebase()
+            .auth()
+            .signOut()
     }
     handleRefresh = async () => {
         await auth.refreshUserInfo()
