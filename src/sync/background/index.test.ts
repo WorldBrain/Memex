@@ -27,6 +27,7 @@ import {
 } from 'src/tests/mobile-intergration-tests'
 import { MemexInitialSync } from '@worldbrain/memex-common/lib/sync'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { Resolvable, resolvablePromise } from 'src/util/promises'
 
 const registerTest = it
 
@@ -740,6 +741,84 @@ function mobileSyncTests(suiteOptions: {
         expect(mobileStorageContentsAfterMerge).toEqual(
             mobileStorageContentsBeforeMerge,
         )
+    })
+
+    it('should log and transfer changes made during initial sync from ext to app', async (setup: TestSetup) => {
+        const { devices } = setup
+
+        await insertIntegrationTestData(devices.extension)
+        const extensionStorageContents = await getStorageContents(
+            devices.extension.storageManager,
+        )
+        await removeUnsyncedCollectionFromStorageContents(
+            extensionStorageContents,
+        )
+        await removeTermFieldsFromStorageContents(extensionStorageContents)
+
+        const extensionInitialSync =
+            devices.extension.backgroundModules.sync.initialSync
+        const origGetPreProcessor = extensionInitialSync.getPreSendProcessor.bind(
+            extensionInitialSync,
+        )
+
+        let lastObjectCollection: string
+        extensionInitialSync.getPreSendProcessor = () => {
+            const origPreProcessor = origGetPreProcessor()
+            return async params => {
+                // When done with the bookmarks collection, create another bookmark
+                if (
+                    lastObjectCollection === 'bookmarks' &&
+                    params.collection !== lastObjectCollection
+                ) {
+                    await devices.extension.backgroundModules.bookmarks.addBookmark(
+                        {
+                            url: 'http://toolate.com/',
+                            time: new Date('2019-10-10').getTime(),
+                        },
+                    )
+                }
+                return origPreProcessor(params)
+            }
+        }
+
+        await doInitialSync({
+            source: devices.extension.backgroundModules.sync,
+            target: devices.mobile.services.sync,
+        })
+
+        const mobileStorageContentsBeforeIncrementalSync = await getStorageContents(
+            devices.mobile.storage.manager,
+        )
+        await removeUnsyncedCollectionFromStorageContents(
+            mobileStorageContentsBeforeIncrementalSync,
+        )
+        expect(mobileStorageContentsBeforeIncrementalSync).toEqual({
+            ...extensionStorageContents,
+            syncDeviceInfo: expectedDeviceInfo,
+        })
+
+        await devices.extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
+        await devices.mobile.services.sync.continuousSync.forceIncrementalSync()
+
+        const mobileStorageContentsAfterIncrementalSync = await getStorageContents(
+            devices.mobile.storage.manager,
+        )
+        await removeUnsyncedCollectionFromStorageContents(
+            mobileStorageContentsAfterIncrementalSync,
+        )
+        expect(mobileStorageContentsAfterIncrementalSync).toEqual({
+            ...{
+                ...extensionStorageContents,
+                bookmarks: [
+                    ...extensionStorageContents.bookmarks,
+                    {
+                        url: 'toolate.com',
+                        time: new Date('2019-10-10').getTime(),
+                    },
+                ],
+            },
+            syncDeviceInfo: expectedDeviceInfo,
+        })
     })
 }
 
