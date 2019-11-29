@@ -5,13 +5,16 @@ import {
     FetchPageDataProcessor,
     PageContent,
 } from 'src/page-analysis/background/fetch-page-data-processor'
+import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageDataError } from 'src/page-analysis/background/fetch-page-data-error'
 import { PageFetchBacklogStorage } from './storage'
 import { BacklogEntry, BacklogEntryCreateArgs } from './types'
 
 export class PageFetchBacklogBackground {
-    static DEF_PROCESSING_INTERVAL = 600000
+    static DEF_PROCESSING_INTERVAL = 300000
     static DEF_RETRY_LIMIT = 5
+    static DEF_ENTRY_CHUNK = 5
+    static DEF_RETRY_INTERVALS = [5, 15, 60, 180, 1440]
 
     private storage: PageFetchBacklogStorage
     private recurringTask: RecurringTask
@@ -21,16 +24,26 @@ export class PageFetchBacklogBackground {
             storageManager: Storex
             fetchPageData: FetchPageDataProcessor
             storePageContent: (content: PageContent) => Promise<void>
+            connectivityChecker: ConnectivityCheckerBackground
+            retryIntervals?: number[]
             processingInterval?: number
+            entryChunkSize?: number
             retryLimit?: number
         },
     ) {
+        this.props.retryIntervals =
+            props.retryIntervals ||
+            PageFetchBacklogBackground.DEF_RETRY_INTERVALS
+
         this.props.processingInterval =
             props.processingInterval ||
             PageFetchBacklogBackground.DEF_PROCESSING_INTERVAL
 
         this.props.retryLimit =
             props.retryLimit || PageFetchBacklogBackground.DEF_RETRY_LIMIT
+
+        this.props.entryChunkSize =
+            props.entryChunkSize || PageFetchBacklogBackground.DEF_ENTRY_CHUNK
 
         this.storage = new PageFetchBacklogStorage({
             storageManager: props.storageManager,
@@ -42,10 +55,30 @@ export class PageFetchBacklogBackground {
             return
         }
 
-        this.recurringTask = new RecurringTask(this.processEntry, {
+        this.recurringTask = new RecurringTask(this.processEntries, {
             intervalInMs: this.props.processingInterval,
             onError: this.handleProcessingError,
         })
+    }
+
+    async forceRun() {
+        return this.processEntries()
+    }
+
+    private shouldRetry({ timesRetried, lastRetry }: BacklogEntry): boolean {
+        if (timesRetried >= this.props.retryLimit) {
+            return false
+        }
+
+        const nextRetry = new Date(
+            lastRetry.getTime() +
+                this.props.retryIntervals[timesRetried] * 60000,
+        )
+        if (nextRetry.getTime() > Date.now()) {
+            return false
+        }
+
+        return true
     }
 
     private async storeProcessedPageContent(content: PageContent) {
@@ -56,28 +89,45 @@ export class PageFetchBacklogBackground {
         // TODO: Think about this... we're already handling errors inside the recurring task
     }
 
-    private processEntry = async () => {
-        const backlogEntry = await this.dequeueEntry()
+    private async checkConnection() {
+        await this.props.connectivityChecker.checkConnection()
 
-        if (
-            backlogEntry === null ||
-            backlogEntry.timesRetried >= this.props.retryLimit
-        ) {
+        if (!this.props.connectivityChecker.isConnected) {
+            this.recurringTask.stop()
+            await this.props.connectivityChecker.waitUntilConnected()
+            this.recurringTask['schedule']()
+        }
+    }
+
+    private processEntries = async () => {
+        const backlogEntries = await this.dequeueEntries()
+
+        if (backlogEntries == null) {
             return
         }
 
+        await Promise.all(
+            backlogEntries
+                .filter(entry => this.shouldRetry(entry))
+                .map(entry => this.processEntry(entry)),
+        )
+    }
+
+    private async processEntry(entry: BacklogEntry) {
         try {
             const processedData = await this.props.fetchPageData.process(
-                backlogEntry.url,
+                entry.url,
             )
 
             await this.storeProcessedPageContent(processedData)
         } catch (err) {
+            await this.checkConnection()
+
             // If the processing error is another temporary failure, put it back on the backlog
             if (err instanceof FetchPageDataError && err.isTempFailure) {
                 await this.enqueueEntry({
-                    ...backlogEntry,
-                    timesRetried: backlogEntry.timesRetried + 1,
+                    ...entry,
+                    timesRetried: entry.timesRetried + 1,
                     lastRetry: new Date(),
                 })
             }
@@ -90,5 +140,11 @@ export class PageFetchBacklogBackground {
 
     async dequeueEntry(): Promise<BacklogEntry | null> {
         return this.storage.removeOldestEntry()
+    }
+
+    async dequeueEntries(
+        limit = this.props.entryChunkSize,
+    ): Promise<BacklogEntry[] | null> {
+        return this.storage.removeOldestEntries(limit)
     }
 }

@@ -10,7 +10,8 @@ export class ConnectivityCheckerBackground extends EventEmitter {
     static DISCONNECTED_EVENT = 'disconnected'
 
     private recurringTask: RecurringTask
-    private checkingConnection: Promise<void>
+    private checkingConnectionOnce: Promise<void>
+    private checkingConnectionWait: Promise<void>
     isConnected: boolean = true
 
     constructor(
@@ -43,11 +44,11 @@ export class ConnectivityCheckerBackground extends EventEmitter {
 
     async waitUntilConnected(intervalInMs = this.props.checkingInterval) {
         // Use the Promise created by previous calls if existing
-        if (this.checkingConnection) {
-            return this.checkingConnection
+        if (this.checkingConnectionWait) {
+            return this.checkingConnectionWait
         }
 
-        this.checkingConnection = new Promise(resolve => {
+        this.checkingConnectionWait = new Promise(resolve => {
             if (this.recurringTask) {
                 this.recurringTask.stop()
             }
@@ -57,7 +58,7 @@ export class ConnectivityCheckerBackground extends EventEmitter {
                     await this.checkConnection()
 
                     if (this.isConnected) {
-                        this.checkingConnection = undefined
+                        this.checkingConnectionWait = undefined
                         this.recurringTask.stop()
                         resolve()
                     }
@@ -69,17 +70,26 @@ export class ConnectivityCheckerBackground extends EventEmitter {
             )
         })
 
-        return this.checkingConnection
+        return this.checkingConnectionWait
     }
 
     checkConnection = async () => {
-        this.isConnected = await this.runCheck()
+        if (this.checkingConnectionOnce) {
+            return this.checkingConnectionOnce
+        }
 
-        this.emit(
-            this.isConnected
-                ? ConnectivityCheckerBackground.CONNECTED_EVENT
-                : ConnectivityCheckerBackground.DISCONNECTED_EVENT,
-        )
+        this.checkingConnectionOnce = (async () => {
+            this.isConnected = await this.runCheck()
+
+            this.emit(
+                this.isConnected
+                    ? ConnectivityCheckerBackground.CONNECTED_EVENT
+                    : ConnectivityCheckerBackground.DISCONNECTED_EVENT,
+            )
+        })()
+
+        await this.checkingConnectionOnce
+        this.checkingConnectionOnce = undefined
     }
 
     private runCheck(): Promise<boolean> {

@@ -33,10 +33,20 @@ export class PageFetchBacklogStorage extends StorageModule {
                 operation: 'findObject',
                 args: {},
             },
+            findOldestEntries: {
+                collection: PageFetchBacklogStorage.BACKLOG_COLL,
+                operation: 'findObjects',
+                args: [{}, { limit: '$limit:int' }],
+            },
             deleteEntry: {
                 collection: PageFetchBacklogStorage.BACKLOG_COLL,
                 operation: 'deleteObject',
                 args: { id: '$id:pk' },
+            },
+            deleteEntries: {
+                collection: PageFetchBacklogStorage.BACKLOG_COLL,
+                operation: 'deleteObjects',
+                args: { id: { $in: '$ids:pk' } },
             },
         },
     })
@@ -69,5 +79,23 @@ export class PageFetchBacklogStorage extends StorageModule {
             timesRetried: result.timesRetried,
             lastRetry: result.lastRetry,
         }
+    }
+
+    async removeOldestEntries(limit: number): Promise<BacklogEntry[] | null> {
+        const result = await this.operation('findOldestEntries', { limit })
+
+        if (result == null || !result.length) {
+            return null
+        }
+
+        await this.operation('deleteEntries', {
+            ids: result.map(entry => entry.id),
+        })
+
+        return result.map(entry => ({
+            url: entry.url,
+            timesRetried: entry.timesRetried,
+            lastRetry: entry.lastRetry,
+        }))
     }
 }

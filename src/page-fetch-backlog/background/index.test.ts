@@ -66,6 +66,7 @@ async function setupTest({
         retryLimit,
         storePageContent: mockPageStorer,
         connectivityChecker: mockConnectivityChecker as any,
+        retryIntervals: [0, 0, 0, 0, 0],
     })
 
     registerModuleMapCollections(storageManager.registry, {
@@ -203,8 +204,12 @@ describe('failed page fetch backlog', () => {
             pageFetcher: mockTempFailurePageFetcher,
         })
 
-        await backlog.enqueueEntry({ url: DATA.pageCreateA.data.pk })
+        await backlog.enqueueEntry({
+            url: DATA.pageCreateA.data.pk,
+            lastRetry: new Date('2010-01-01'),
+        })
         backlog.setupBacklogProcessing()
+        // backlog['recurringTask'].stop()
 
         const expectedEntry = {
             id: expect.anything(),
@@ -212,6 +217,7 @@ describe('failed page fetch backlog', () => {
             lastRetry: expect.any(Date),
             url: DATA.pageCreateA.data.pk,
         }
+        // await backlog['recurringTask'].forceRun()
 
         expect(
             await storageManager
@@ -223,6 +229,7 @@ describe('failed page fetch backlog', () => {
                 timesRetried: 0,
             },
         ])
+        // await backlog['recurringTask'].forceRun()
 
         // Wait at least the processing interval, after which the recurring task should trigger, then fail
         //  and reschedule the entry on the backlog (with retry count increased)
@@ -247,7 +254,9 @@ describe('failed page fetch backlog', () => {
                 pageFetcher: mockTempFailurePageFetcher,
             })
 
-            await backlog.enqueueEntry({ url: DATA.pageCreateA.data.pk })
+            await backlog.enqueueEntry({
+                url: DATA.pageCreateA.data.pk,
+            })
             backlog.setupBacklogProcessing()
             backlog['recurringTask'].stop()
 
@@ -291,7 +300,9 @@ describe('failed page fetch backlog', () => {
 
         expect(mockPageStorer.content).toBeNull()
 
-        await backlog.enqueueEntry({ url: DATA.pageCreateA.data.pk })
+        await backlog.enqueueEntry({
+            url: DATA.pageCreateA.data.pk,
+        })
         backlog.setupBacklogProcessing()
         await backlog['recurringTask'].forceRun()
         expect(mockPageStorer.content).not.toBeNull()
