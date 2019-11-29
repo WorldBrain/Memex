@@ -61,4 +61,14 @@ describe('ConnectivityCheckerBackground tests', () => {
             ConnectivityCheckerBackground.DISCONNECTED_EVENT,
         )
     })
+
+    it('should be able to continually check until connected', async () => {
+        const xhr = new MockXHR({ shouldSucceed: false })
+        const { background } = setupTest({ xhr })
+
+        const check = background.waitUntilConnected(200)
+        xhr.shouldSucceed = true
+        await check
+        expect(check).resolves.toBeUndefined()
+    })
 })

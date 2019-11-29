@@ -10,13 +10,13 @@ export class ConnectivityCheckerBackground extends EventEmitter {
     static DISCONNECTED_EVENT = 'disconnected'
 
     private recurringTask: RecurringTask
-
+    private checkingConnection: Promise<void>
     isConnected: boolean = true
 
     constructor(
         private props: {
             xhr: XMLHttpRequest
-            target: string
+            target?: string
             checkingTimeout?: number
             checkingInterval?: number
         },
@@ -30,17 +30,9 @@ export class ConnectivityCheckerBackground extends EventEmitter {
         this.props.xhr.timeout =
             props.checkingTimeout ||
             ConnectivityCheckerBackground.DEF_CHECK_TIMEOUT
-    }
 
-    setupChecking() {
-        if (this.recurringTask != null) {
-            return
-        }
-
-        this.recurringTask = new RecurringTask(this.checkConnection, {
-            intervalInMs: this.props.checkingInterval,
-            onError: this.handleProcessingError,
-        })
+        this.props.target =
+            props.target || ConnectivityCheckerBackground.DEF_TARGET
     }
 
     async forceCheck() {
@@ -49,7 +41,38 @@ export class ConnectivityCheckerBackground extends EventEmitter {
 
     private handleProcessingError = (err: Error) => {}
 
-    private checkConnection = async () => {
+    async waitUntilConnected(intervalInMs = this.props.checkingInterval) {
+        // Use the Promise created by previous calls if existing
+        if (this.checkingConnection) {
+            return this.checkingConnection
+        }
+
+        this.checkingConnection = new Promise(resolve => {
+            if (this.recurringTask) {
+                this.recurringTask.stop()
+            }
+
+            this.recurringTask = new RecurringTask(
+                async () => {
+                    await this.checkConnection()
+
+                    if (this.isConnected) {
+                        this.checkingConnection = undefined
+                        this.recurringTask.stop()
+                        resolve()
+                    }
+                },
+                {
+                    intervalInMs,
+                    onError: this.handleProcessingError,
+                },
+            )
+        })
+
+        return this.checkingConnection
+    }
+
+    checkConnection = async () => {
         this.isConnected = await this.runCheck()
 
         this.emit(
