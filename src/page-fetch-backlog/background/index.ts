@@ -2,9 +2,9 @@ import Storex from '@worldbrain/storex'
 import { RecurringTask } from '@worldbrain/storex-sync/lib/utils/recurring-task'
 
 import {
-    FetchPageDataProcessor,
+    FetchPageProcessor,
     PageContent,
-} from 'src/page-analysis/background/fetch-page-data-processor'
+} from 'src/page-analysis/background/types'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageDataError } from 'src/page-analysis/background/fetch-page-data-error'
 import { PageFetchBacklogStorage } from './storage'
@@ -22,7 +22,7 @@ export class PageFetchBacklogBackground {
     constructor(
         private props: {
             storageManager: Storex
-            fetchPageData: FetchPageDataProcessor
+            fetchPageData: FetchPageProcessor
             storePageContent: (content: PageContent) => Promise<void>
             connectivityChecker: ConnectivityCheckerBackground
             retryIntervals?: number[]

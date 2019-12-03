@@ -38,9 +38,7 @@ import {
 import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
-import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
-import fetchPageData from 'src/page-analysis/background/fetch-page-data'
-import pipeline from 'src/search/pipeline'
+import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { Page } from 'src/search'
 
 export interface BackgroundModules {
@@ -67,8 +65,9 @@ export function createBackgroundModules(options: {
     browserAPIs: Browser
     signalTransportFactory: SignalTransportFactory
     getSharedSyncLog: () => Promise<SharedSyncLog>
-    tabManager?: TabManager
     localStorageChangesManager: StorageChangesManager
+    fetchPageDataProcessor: FetchPageProcessor
+    tabManager?: TabManager
     auth?: AuthBackground
     authOptions?: { devAuthState: DevAuthState }
 }): BackgroundModules {
@@ -98,10 +97,6 @@ export function createBackgroundModules(options: {
     const auth =
         options.auth ||
         new AuthBackground(createAuthDependencies(options.authOptions))
-    const fetchPageDataProcessor = new FetchPageDataProcessor({
-        fetchPageData,
-        pagePipeline: pipeline,
-    })
 
     const connectivityChecker = new ConnectivityCheckerBackground({
         xhr: new XMLHttpRequest(),
@@ -110,7 +105,7 @@ export function createBackgroundModules(options: {
     const pageFetchBacklog = new PageFetchBacklogBackground({
         storageManager,
         connectivityChecker,
-        fetchPageData: fetchPageDataProcessor,
+        fetchPageData: options.fetchPageDataProcessor,
         storePageContent: async content => {
             const page = new Page(storageManager, content)
             await page.loadRels()

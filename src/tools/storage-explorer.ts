@@ -7,6 +7,7 @@ import {
     getBackgroundStorageModules,
 } from 'src/background-script/setup'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
+import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 
 type CommandLineArguments =
     | { command: 'list-collections' }
@@ -63,6 +64,7 @@ async function main() {
                 onRemoved: { addListener: () => {} },
             },
         } as any,
+        fetchPageDataProcessor: new MockFetchPageDataProcessor(),
     })
     const storageModules = getBackgroundStorageModules(backgroundModules)
 

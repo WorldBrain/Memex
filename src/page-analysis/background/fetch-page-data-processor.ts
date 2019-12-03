@@ -1,12 +1,9 @@
 import { PagePipeline } from 'src/search/pipeline'
 import { FetchPageData } from './fetch-page-data'
 import { FetchPageDataError } from './fetch-page-data-error'
-import { PageDataResult } from './types'
-import { PipelineRes } from 'src/search'
+import { PageDataResult, PageContent, FetchPageProcessor } from './types'
 
-export type PageContent = PipelineRes
-
-export class FetchPageDataProcessor {
+export class FetchPageDataProcessor implements FetchPageProcessor {
     constructor(
         private props: {
             fetchPageData: FetchPageData

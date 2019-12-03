@@ -1,13 +1,19 @@
+import { PipelineRes } from 'src/search'
+
+export type PageContent = PipelineRes
+
 export interface PageDataResult {
-    content: PageContent
     favIconURI?: string
+    content: {
+        canonicalUrl?: string
+        description?: string
+        keywords?: string[]
+        fullText?: string
+        title?: string
+        lang?: string
+    }
 }
 
-export interface PageContent {
-    canonicalUrl?: string
-    description?: string
-    keywords?: string[]
-    fullText?: string
-    title?: string
-    lang?: string
+export interface FetchPageProcessor {
+    process(url: string): Promise<PageContent>
 }

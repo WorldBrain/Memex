@@ -23,6 +23,7 @@ import { setStorex } from 'src/search/get-db'
 import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
 import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
+import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -64,6 +65,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         tabManager: options && options.tabManager,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,
+        fetchPageDataProcessor: new MockFetchPageDataProcessor(),
         auth,
     })
     backgroundModules.customLists._createPage =
