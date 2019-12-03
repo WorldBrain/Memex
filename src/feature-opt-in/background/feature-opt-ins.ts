@@ -1,5 +1,9 @@
 export type UserFeatureOptIn = 'Auth' | 'Sync'
 const allFeatures: UserFeatureOptIn[] = ['Auth', 'Sync']
+const featureDefaults = {
+    Auth: true,
+    Sync: false,
+}
 export type UserFeatureOptInMap = {
     [key in UserFeatureOptIn]: boolean
 }
@@ -22,7 +26,7 @@ export class FeatureOptIns implements FeaturesInterface {
 
     public getFeature = (feature: UserFeatureOptIn): boolean => {
         const val = localStorage.getItem(`${this.keyPrefix}${feature}`)
-        return val !== null ? JSON.parse(val) : false
+        return val !== null ? JSON.parse(val) : featureDefaults[feature]
     }
 
     public toggleFeature = (feature: UserFeatureOptIn) => {

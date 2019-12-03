@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { colorButtonHighlightBackground } from 'src/common-ui/components/design-library/colors'
 // tslint:disable-next-line:variable-name
 export const MenuItem = styled.div`
     height: 40px;
@@ -10,7 +11,8 @@ export const MenuItem = styled.div`
     font-size: 14px;
     text-decoration: none;
     cursor: pointer;
+
     :hover {
-        background: rgba(196, 196, 196, 0.3);
+        background: ${colorButtonHighlightBackground};
     }
 `

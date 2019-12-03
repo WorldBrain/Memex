@@ -16,3 +16,4 @@ local-backup
 .idea
 *-debug.log
 private/
+.env

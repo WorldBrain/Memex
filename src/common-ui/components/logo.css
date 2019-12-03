@@ -1,4 +1,4 @@
 .logo {
-    composes: logo from '../../common-ui/icons.css';
+    composes: logoSquared from '../../common-ui/icons.css';
     width: 130px;
 }

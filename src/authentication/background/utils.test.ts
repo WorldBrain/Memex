@@ -2,12 +2,11 @@ import expect from 'expect'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { createAuthDependencies } from './setup'
 import { hasValidPlan, checkValidPlan } from './utils'
-import { AuthSubscriptionNotPresent } from './errors'
 
-const TEST_SUBSCRIPTION_KEY: UserPlan = 'pro-1-device'
+const TEST_SUBSCRIPTION_KEY: UserPlan = 'pro-yearly'
 
 describe('Authentication Subscription Status Tests', () => {
-    it('should not be subscribed to pro-1-device plan if user is new', async () => {
+    it('should not be subscribed to pro-yearly plan if user is new', async () => {
         const { subscriptionService } = createAuthDependencies({
             devAuthState: 'user_signed_out',
         })
@@ -20,7 +19,7 @@ describe('Authentication Subscription Status Tests', () => {
         expect(hasValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toBeFalsy()
     })
 
-    it('should not be subscribed to pro-1-device plan if subscription expired', async () => {
+    it('should not be subscribed to pro-yearly plan if subscription expired', async () => {
         const { subscriptionService } = createAuthDependencies({
             devAuthState: 'user_subscription_expired',
         })
@@ -33,7 +32,7 @@ describe('Authentication Subscription Status Tests', () => {
         expect(hasValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toBeFalsy()
     })
 
-    it('should be subscribed to pro-1-device plan if subscription is valid', async () => {
+    it('should be subscribed to pro-yearly plan if subscription is valid', async () => {
         const { subscriptionService } = createAuthDependencies({
             devAuthState: 'user_subscribed',
         })

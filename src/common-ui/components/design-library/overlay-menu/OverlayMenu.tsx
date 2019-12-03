@@ -4,7 +4,12 @@ import styled from 'styled-components'
 
 interface Props {
     menuHeader: any
-    menuItems: any[]
+    menuItems: MenuItemType[]
+}
+
+export interface MenuItemType {
+    label: string
+    handler: () => void
 }
 
 interface State {
@@ -28,6 +33,13 @@ export class OverlayMenu extends React.Component<Props, State> {
         })
     }
 
+    closeAnd = handler => () => {
+        this.setState({
+            hover: false,
+        })
+        handler()
+    }
+
     render() {
         return (
             <StyledOverlayMenu
@@ -41,7 +53,9 @@ export class OverlayMenu extends React.Component<Props, State> {
                         {this.state.hover && (
                             <div>
                                 {this.props.menuItems.map(item => (
-                                    <MenuItem onClick={item.handler}>
+                                    <MenuItem
+                                        onClick={this.closeAnd(item.handler)}
+                                    >
                                         {' '}
                                         {item.label}
                                     </MenuItem>

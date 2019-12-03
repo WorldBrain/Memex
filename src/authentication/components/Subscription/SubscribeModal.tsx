@@ -13,7 +13,7 @@ export class SubscribeModal extends React.PureComponent<Props, State> {
             <Modal
                 onClose={this.props.onClose}
                 onClick={this.props.onClose}
-                large={true}
+                large
             >
                 <div style={styles.container}>
                     <Subscribe onClose={this.props.onClose} />

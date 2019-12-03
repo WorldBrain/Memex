@@ -5,12 +5,25 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
+import { auth } from 'src/util/remote-functions-background'
 
 type Props = {
     onClose: () => void
 } & UserProps
 
 export class Subscribe extends React.PureComponent<Props> {
+    handleSubscriptionChanged = () => {
+        this.handleRefresh()
+    }
+
+    handleClose = () => {
+        this.props.onClose()
+    }
+
+    handleRefresh = async () => {
+        await auth.refreshUserInfo()
+    }
+
     render() {
         return (
             <div className={''}>
@@ -31,8 +44,8 @@ export class Subscribe extends React.PureComponent<Props> {
                     <div>
                         <SubscriptionOptions
                             user={this.props.currentUser}
-                            onClose={this.props.onClose}
-                            subscriptionChanged={this.props.onClose}
+                            onClose={this.handleClose}
+                            subscriptionChanged={this.handleSubscriptionChanged}
                         />
                     </div>
                 )}
@@ -42,9 +55,3 @@ export class Subscribe extends React.PureComponent<Props> {
 }
 
 export default withCurrentUser(Subscribe)
-
-const styles = {
-    subscriptionOptionsContainer: {
-        display: 'flex',
-    },
-}

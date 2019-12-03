@@ -65,11 +65,11 @@ export class SubscriptionOptions extends React.Component<Props, State> {
     }
 
     openCheckoutBackup = async () => {
-        return this.openCheckout('pro-1-device-yrl')
+        return this.openCheckout('pro-yearly')
     }
 
     openCheckoutBackupSync = async () => {
-        return this.openCheckout('pro-1-device')
+        return this.openCheckout('pro-monthly')
     }
 
     openCheckout = async (planId: UserPlan) => {
@@ -82,6 +82,11 @@ export class SubscriptionOptions extends React.Component<Props, State> {
             this.props.onClose()
         })
         subscriptionEvents.addListener('changed', async () => {
+            await auth.refreshUserInfo()
+            this.props.subscriptionChanged()
+            this.props.onClose()
+        })
+        subscriptionEvents.addListener('success', async () => {
             await auth.refreshUserInfo()
             this.props.subscriptionChanged()
             this.props.onClose()

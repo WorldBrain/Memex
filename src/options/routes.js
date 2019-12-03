@@ -8,7 +8,7 @@ import Overview from '../overview'
 import UserScreen from '../authentication/components/UserScreen'
 import { SubscribeModal } from '../authentication/components/Subscription/SubscribeModal'
 import { FeaturesOptInScreen } from '../feature-opt-in/ui/components/FeaturesOptInScreen'
-
+import React from 'react'
 export default [
     {
         name: 'Usage Statistics',
@@ -81,9 +81,18 @@ export default [
     },
     {
         name: 'User Account',
-        pathname: '/auth',
+        pathname: '/account',
         icon: 'settings',
         component: UserScreen,
+        hideFromSidebar: true,
+    },
+    {
+        name: 'User Account Subscriptions',
+        pathname: '/account-subscriptions',
+        icon: 'settings',
+        component: props => (
+            <UserScreen initiallyShowSubscriptionModal {...props} />
+        ),
         hideFromSidebar: true,
     },
     {

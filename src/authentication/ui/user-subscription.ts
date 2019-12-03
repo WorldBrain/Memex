@@ -80,6 +80,7 @@ export interface SubscriptionEvents {
     externalUrl: (url: string) => any
     closed: () => any
     changed: (id: string) => any
+    success: (id: string) => any
 }
 
 export const subscriptionEventKeys: Array<keyof SubscriptionEvents> = [
@@ -87,4 +88,5 @@ export const subscriptionEventKeys: Array<keyof SubscriptionEvents> = [
     'externalUrl',
     'closed',
     'changed',
+    'success',
 ]
