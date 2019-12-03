@@ -16,7 +16,8 @@ class ProfileButton extends React.PureComponent<UserProps> {
         return (
             <div className={styles.profileButton} onClick={this.handleClick}>
                 <MemexLogo />
-                <span>{this.props.currentUser.displayName}</span>
+                {/* <span>{this.props.currentUser.displayName}</span> */}
+                <span className={styles.buttonText}> My Account </span>
             </div>
         )
     }

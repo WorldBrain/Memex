@@ -1,13 +1,13 @@
 import * as React from 'react'
-import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth'
 import { getFirebase } from 'src/util/firebase-app-initialized'
+import { FirebaseAuth } from 'react-firebaseui'
 const styles = require('src/authentication/components/styles.css')
 
 export class SignInScreen extends React.Component {
     render = () => {
         return (
-            <StyledFirebaseAuth
-                className={styles.flex}
+            <FirebaseAuth
+                className={styles.firebaseAuth}
                 uiConfig={{
                     signInFlow: 'popup',
                     signInOptions: [

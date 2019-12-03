@@ -23,10 +23,8 @@ export class AuthBackground {
         this.authService = options.authService
         this.subscriptionService = options.subscriptionService
         this.remoteFunctions = {
-            getCurrentUser: async () => {
-                const user = await this.authService.getCurrentUser()
-                return user ? { ...user, uid: user.id, id: undefined } : null
-            },
+            getCurrentUser: () => this.authService.getCurrentUser(),
+            signOut: () => this.authService.signOut(),
             refreshUserInfo: () => this.authService.refreshUserInfo(),
 
             hasValidPlan: async (plan: UserPlan) => {

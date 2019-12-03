@@ -5,8 +5,8 @@ import Navigation from './components/navigation'
 import routes from './routes'
 import Head from './containers/Head'
 import styles from './base.css'
-import LoginButton from '../overview/login-btn/LoginButton'
 import { HelpBtn } from '../overview/help-btn'
+import AccountMenu from '../authentication/components/AccountMenu'
 
 class Layout extends Component {
     isActive = route => this.props.location.pathname === route.pathname
@@ -20,7 +20,7 @@ class Layout extends Component {
                     routes={routes}
                 />
                 <div className={styles.route}>{this.props.children}</div>
-                <LoginButton />
+                <AccountMenu />
                 <HelpBtn />
             </div>
         )

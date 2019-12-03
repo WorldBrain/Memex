@@ -107,6 +107,7 @@
         "simple-signalling": "^0.2.1",
         "strict-uri-encode": "^2.0.0",
         "string.prototype.matchall": "^3.0.1",
+        "styled-components": "^4.4.1",
         "through2": "^2.0.3",
         "tweetnacl": "^1.0.1",
         "typed-emitter": "^0.1.0",

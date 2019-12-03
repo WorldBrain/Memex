@@ -6,8 +6,12 @@
     width: 100%;
 }
 
-.flex {
+.firebaseAuth {
     flex: 1;
+}
+
+.firebaseAuth .firebaseui-id-submit {
+    color: #2ab98a;
 }
 
 .profileButton {
@@ -17,4 +21,17 @@
     left: 0.2em;
     bottom: 1em;
     cursor: pointer;
+}
+
+.buttonText {
+    font-size: 14px;
+    line-height: 16px;
+    align-items: center;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 600;
+    align-self: center;
+    cursor: pointer;
+    padding: 1em;
+    padding-left: 0;
 }

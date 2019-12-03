@@ -7,6 +7,7 @@ import {
 
 export interface AuthRemoteFunctionsInterface {
     getCurrentUser(): Promise<AuthenticatedUser | null>
+    signOut(): void
     refreshUserInfo(): Promise<void>
 
     hasValidPlan(plan: UserPlan): Promise<boolean>
