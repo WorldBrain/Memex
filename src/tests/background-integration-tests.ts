@@ -24,6 +24,7 @@ import { registerSyncBackgroundIntegrationTests } from 'src/sync/index.tests'
 import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import { FetchPageProcessor } from 'src/page-analysis/background/types'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -32,6 +33,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     sharedSyncLog?: SharedSyncLog
     browserLocalStorage?: MemoryBrowserStorage
     debugStorageOperations?: boolean
+    fetchPageProcessor?: FetchPageProcessor
 }): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
         global['URL'] = URL
@@ -65,7 +67,9 @@ export async function setupBackgroundIntegrationTest(options?: {
         tabManager: options && options.tabManager,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,
-        fetchPageDataProcessor: new MockFetchPageDataProcessor(),
+        fetchPageDataProcessor:
+            options &&
+            (options.fetchPageProcessor || new MockFetchPageDataProcessor()),
         auth,
     })
     backgroundModules.customLists._createPage =
