@@ -611,12 +611,19 @@ function mobileSyncTests(suiteOptions: {
     withDependencies: WithTestDependencies
     skip?: boolean
 }) {
-    interface TestSetup {
+    interface TestSetupConfig {
+        enablePostProcessing?: boolean
+    }
+
+    type TestSetup = (
+        conf?: TestSetupConfig,
+    ) => Promise<{
+        fetchPageProcessor?: MockFetchPageDataProcessor
         devices: {
             extension: BackgroundIntegrationTestSetup
             mobile: MobileIntegrationTestSetup
         }
-    }
+    }>
 
     const expectedDeviceInfo = [
         {
@@ -636,41 +643,33 @@ function mobileSyncTests(suiteOptions: {
     async function setupTest(
         dependencies: TestDependencies,
     ): Promise<TestSetup> {
-        const signalTransportFactory = lazyMemorySignalTransportFactory()
-        const devices: TestSetup['devices'] = {
-            extension: await setupBackgroundIntegrationTest({
-                signalTransportFactory,
-                sharedSyncLog: dependencies.sharedSyncLog,
-            }),
-            mobile: await setupMobileIntegrationTest({
-                signalTransportFactory,
-                sharedSyncLog: dependencies.sharedSyncLog,
-            }),
+        return async (conf: TestSetupConfig = {}) => {
+            const signalTransportFactory = lazyMemorySignalTransportFactory()
+            const fetchPageProcessor = conf.enablePostProcessing
+                ? new MockFetchPageDataProcessor()
+                : undefined
+
+            const devices = {
+                extension: await setupBackgroundIntegrationTest({
+                    signalTransportFactory,
+                    sharedSyncLog: dependencies.sharedSyncLog,
+                    fetchPageProcessor,
+                }),
+                mobile: await setupMobileIntegrationTest({
+                    signalTransportFactory,
+                    sharedSyncLog: dependencies.sharedSyncLog,
+                }),
+            }
+
+            const userId: string = dependencies.userId || uuid()
+
+            devices.extension.authService.setUser({
+                ...TEST_USER,
+                id: userId as string,
+            })
+
+            return { devices, fetchPageProcessor }
         }
-        const userId: string = dependencies.userId || uuid()
-        devices.extension.authService.setUser({
-            ...TEST_USER,
-            id: userId as string,
-        })
-        // devices.app.backgroundModules.auth.userId = userId
-
-        return { devices }
-    }
-
-    async function setupPostProcessedTest(
-        dependencies: TestDependencies,
-    ): Promise<TestSetup & { fetchPageProcessor: MockFetchPageDataProcessor }> {
-        const { devices } = await setupTest(dependencies)
-
-        const signalTransportFactory = lazyMemorySignalTransportFactory()
-        const fetchPageProcessor = new MockFetchPageDataProcessor()
-        devices.extension = await setupBackgroundIntegrationTest({
-            signalTransportFactory,
-            sharedSyncLog: dependencies.sharedSyncLog,
-            fetchPageProcessor,
-        })
-
-        return { devices, fetchPageProcessor }
     }
 
     const removeUnsyncedCollectionFromStorageContents = async (
@@ -728,65 +727,59 @@ function mobileSyncTests(suiteOptions: {
         setupTest,
     })
 
-    const postProcessedIt = makeTestFactory({
-        ...suiteOptions,
-        setupTest: setupPostProcessedTest,
+    it('should fetch missing data during sync from mobile to extension', async setup => {
+        const { devices, fetchPageProcessor } = await setup({
+            enablePostProcessing: true,
+        })
+
+        const mockPage = {
+            url: 'test.com',
+            domain: 'test.com',
+            hostname: 'test.com',
+            fullUrl: 'http://test.com',
+            fullTitle: 'Test',
+            text: 'Test',
+            tags: [],
+            terms: ['test'],
+            titleTerms: ['test'],
+            urlTerms: [],
+        }
+
+        fetchPageProcessor.mockPage = mockPage
+
+        await devices.mobile.storage.modules.overview.createPage({
+            url: mockPage.fullUrl,
+        } as any)
+
+        await doInitialSync({
+            source: devices.mobile.services.sync,
+            target: devices.extension.backgroundModules.sync,
+        })
+
+        // Give post processing time to complete
+        await delay(1000)
+
+        const mobileStorageContents = await getStorageContents(
+            devices.mobile.storage.manager,
+        )
+        expect(mobileStorageContents.pages.length).toBe(1)
+        expect(mobileStorageContents.pages[0]).not.toEqual(mockPage)
+        expect(mobileStorageContents.pages[0]).toEqual({
+            url: mockPage.url,
+            fullUrl: mockPage.fullUrl,
+            domain: mockPage.domain,
+            hostname: mockPage.hostname,
+        })
+
+        const extensionStorageContents = await getStorageContents(
+            devices.extension.storageManager,
+        )
+        expect(extensionStorageContents.pages.length).toBe(1)
+        expect(extensionStorageContents.pages[0]).toEqual(mockPage)
     })
 
-    postProcessedIt(
-        'should fetch missing data during sync from mobile to extension',
-        async setup => {
-            const { devices, fetchPageProcessor } = setup
-
-            const mockPage = {
-                url: 'test.com',
-                domain: 'test.com',
-                hostname: 'test.com',
-                fullUrl: 'http://test.com',
-                fullTitle: 'Test',
-                text: 'Test',
-                tags: [],
-                terms: ['test'],
-                titleTerms: ['test'],
-                urlTerms: [],
-            }
-
-            fetchPageProcessor.mockPage = mockPage
-
-            await devices.mobile.storage.modules.overview.createPage({
-                url: mockPage.fullUrl,
-            } as any)
-
-            await doInitialSync({
-                source: devices.mobile.services.sync,
-                target: devices.extension.backgroundModules.sync,
-            })
-
-            // Give post processing time to complete
-            await delay(1000)
-
-            const mobileStorageContents = await getStorageContents(
-                devices.mobile.storage.manager,
-            )
-            expect(mobileStorageContents.pages.length).toBe(1)
-            expect(mobileStorageContents.pages[0]).not.toEqual(mockPage)
-            expect(mobileStorageContents.pages[0]).toEqual({
-                url: mockPage.url,
-                fullUrl: mockPage.fullUrl,
-                domain: mockPage.domain,
-                hostname: mockPage.hostname,
-            })
-
-            const extensionStorageContents = await getStorageContents(
-                devices.extension.storageManager,
-            )
-            expect(extensionStorageContents.pages.length).toBe(1)
-            expect(extensionStorageContents.pages[0]).toEqual(mockPage)
-        },
-    )
-
     it('should do an initial sync from extension to mobile', async (setup: TestSetup) => {
-        const { devices } = setup
+        const { devices } = await setup()
 
         await insertIntegrationTestData(devices.extension)
         const extensionStorageContents = await getExtensionStorageContents(
@@ -807,7 +800,7 @@ function mobileSyncTests(suiteOptions: {
     })
 
     it('should merge during initial sync from extension to mobile', async (setup: TestSetup) => {
-        const { devices } = setup
+        const { devices } = await setup()
 
         await insertIntegrationTestData(devices.extension)
         const extensionStorageContents = await getExtensionStorageContents(
