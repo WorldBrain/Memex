@@ -1,16 +1,8 @@
-import fromPairs from 'lodash/fromPairs'
 import uuid from 'uuid/v4'
-import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
-import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import {
-    lazyMemorySignalTransportFactory,
-    createMemorySharedSyncLog,
-} from './index.tests'
-import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
-import SyncBackground from '.'
+
+import StorageManager from '@worldbrain/storex'
 import { withEmulatedFirestoreBackend } from '@worldbrain/storex-backend-firestore/lib/index.tests'
 import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-log/storex'
-import { RUN_FIRESTORE_TESTS } from 'src/tests/constants'
 import {
     SYNC_STORAGE_AREA_KEYS,
     SYNCED_COLLECTIONS,
@@ -20,14 +12,24 @@ import {
     isTermsField,
     StorageContents,
 } from '@worldbrain/memex-common/lib/storage/utils'
+import { MemexInitialSync } from '@worldbrain/memex-common/lib/sync'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+
+import { RUN_FIRESTORE_TESTS } from 'src/tests/constants'
+import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { insertIntegrationTestData } from 'src/tests/shared-fixtures/integration'
 import {
     MobileIntegrationTestSetup,
     setupMobileIntegrationTest,
 } from 'src/tests/mobile-intergration-tests'
-import { MemexInitialSync } from '@worldbrain/memex-common/lib/sync'
-import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { Resolvable, resolvablePromise } from 'src/util/promises'
+
+import {
+    lazyMemorySignalTransportFactory,
+    createMemorySharedSyncLog,
+} from './index.tests'
+import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
+import SyncBackground from '.'
 
 const registerTest = it
 
@@ -93,7 +95,7 @@ function extensionSyncTests(suiteOptions: {
     interface TestSetup {
         devices: [
             BackgroundIntegrationTestSetup,
-            BackgroundIntegrationTestSetup
+            BackgroundIntegrationTestSetup,
         ]
         forEachDevice: (
             f: (setup: BackgroundIntegrationTestSetup) => void,
@@ -130,7 +132,7 @@ function extensionSyncTests(suiteOptions: {
         const signalTransportFactory = lazyMemorySignalTransportFactory()
         const devices: [
             BackgroundIntegrationTestSetup,
-            BackgroundIntegrationTestSetup
+            BackgroundIntegrationTestSetup,
         ] = [
             await setupBackgroundIntegrationTest({
                 signalTransportFactory,
@@ -488,20 +490,16 @@ function extensionSyncTests(suiteOptions: {
         async function runPassiveDataTest(params: {
             setup: TestSetup
             insertDefaultPages: boolean
-            insertData: (
-                params: {
-                    device: BackgroundIntegrationTestSetup
-                },
-            ) => Promise<void>
-            checkData: (
-                params: {
-                    device: BackgroundIntegrationTestSetup
-                    expectData: (
-                        collections: string[],
-                        expacted: object,
-                    ) => Promise<void>
-                },
-            ) => Promise<void>
+            insertData: (params: {
+                device: BackgroundIntegrationTestSetup
+            }) => Promise<void>
+            checkData: (params: {
+                device: BackgroundIntegrationTestSetup
+                expectData: (
+                    collections: string[],
+                    expacted: object,
+                ) => Promise<void>
+            }) => Promise<void>
         }) {
             const {
                 devices,
@@ -686,6 +684,23 @@ function mobileSyncTests(suiteOptions: {
         }
     }
 
+    async function getExtensionStorageContents(storageManager: StorageManager) {
+        const extensionStorageContents = await getStorageContents(
+            storageManager,
+        )
+        await removeUnsyncedCollectionFromStorageContents(
+            extensionStorageContents,
+        )
+        await removeTermFieldsFromStorageContents(extensionStorageContents)
+        return extensionStorageContents
+    }
+
+    async function getMobileStorageContents(storageManager: StorageManager) {
+        const mobileStorageContents = await getStorageContents(storageManager)
+        await removeUnsyncedCollectionFromStorageContents(mobileStorageContents)
+        return mobileStorageContents
+    }
+
     const it = makeTestFactory({
         ...suiteOptions,
         setupTest,
@@ -695,73 +710,111 @@ function mobileSyncTests(suiteOptions: {
         const { devices } = setup
 
         await insertIntegrationTestData(devices.extension)
-        const extensionStorageContents = await getStorageContents(
+        const extensionStorageContents = await getExtensionStorageContents(
             devices.extension.storageManager,
         )
-        await removeUnsyncedCollectionFromStorageContents(
-            extensionStorageContents,
-        )
-        await removeTermFieldsFromStorageContents(extensionStorageContents)
 
         await doInitialSync({
             source: devices.extension.backgroundModules.sync,
             target: devices.mobile.services.sync,
         })
-        const mobileStorageContents = await getStorageContents(
+        const mobileStorageContents = await getMobileStorageContents(
             devices.mobile.storage.manager,
         )
-        await removeUnsyncedCollectionFromStorageContents(mobileStorageContents)
         expect(mobileStorageContents).toEqual({
             ...extensionStorageContents,
             syncDeviceInfo: expectedDeviceInfo,
         })
     })
 
-    it(
-        'should merge during initial sync from extension to mobile',
-        { skip: true },
-        async (setup: TestSetup) => {
-            const { devices } = setup
+    it('should merge during initial sync from extension to mobile', async (setup: TestSetup) => {
+        const { devices } = setup
 
-            await insertIntegrationTestData(devices.extension)
-            const extensionStorageContents = await getStorageContents(
+        await insertIntegrationTestData(devices.extension)
+        const extensionStorageContents = await getExtensionStorageContents(
+            devices.extension.storageManager,
+        )
+
+        await doInitialSync({
+            source: devices.extension.backgroundModules.sync,
+            target: devices.mobile.services.sync,
+        })
+        const mobileStorageContentsBeforeMerge = await getMobileStorageContents(
+            devices.mobile.storage.manager,
+        )
+        expect(mobileStorageContentsBeforeMerge).toEqual({
+            ...extensionStorageContents,
+            syncDeviceInfo: expectedDeviceInfo,
+        })
+
+        await doInitialSync({
+            source: devices.extension.backgroundModules.sync,
+            target: devices.mobile.services.sync,
+        })
+        const mobileStorageContentsAfterMerge = await getMobileStorageContents(
+            devices.mobile.storage.manager,
+        )
+        expect(mobileStorageContentsAfterMerge).toEqual(
+            mobileStorageContentsBeforeMerge,
+        )
+    })
+
+    it('should be able to do a two way initial sync from extension to mobile', async (setup: TestSetup) => {
+        const { devices } = setup
+
+        await insertIntegrationTestData(devices.extension, {
+            collections: {
+                pages: true,
+                bookmarks: true,
+            },
+        })
+        await devices.mobile.storage.modules.overview.createPage({
+            url: 'test.com',
+            fullUrl: 'https://www.test.com',
+            fullTitle: 'This is a test page',
+            text:
+                'Hey there this is some test text with lots of test terms included.',
+        })
+        await devices.mobile.storage.modules.pageEditor.createNote({
+            pageUrl: 'test.com',
+            pageTitle: 'This is a test page',
+            body: 'this is some highlighted text from the page',
+        })
+
+        const beforeSync = {
+            extension: await getExtensionStorageContents(
                 devices.extension.storageManager,
-            )
-            await removeUnsyncedCollectionFromStorageContents(
-                extensionStorageContents,
-            )
-            await removeTermFieldsFromStorageContents(extensionStorageContents)
-
-            await doInitialSync({
-                source: devices.extension.backgroundModules.sync,
-                target: devices.mobile.services.sync,
-            })
-            const mobileStorageContentsBeforeMerge = await getStorageContents(
+            ),
+            mobile: await getMobileStorageContents(
                 devices.mobile.storage.manager,
-            )
-            await removeUnsyncedCollectionFromStorageContents(
-                mobileStorageContentsBeforeMerge,
-            )
-            expect(mobileStorageContentsBeforeMerge).toEqual({
-                ...extensionStorageContents,
-                syncDeviceInfo: expectedDeviceInfo,
-            })
+            ),
+        }
+        const merged = {}
+        for (const collectionName of Object.keys(beforeSync.extension)) {
+            merged[collectionName] = [
+                ...beforeSync.extension[collectionName],
+                ...beforeSync.mobile[collectionName],
+            ]
+        }
 
-            await doInitialSync({
-                source: devices.extension.backgroundModules.sync,
-                target: devices.mobile.services.sync,
-            })
-            const mobileStorageContentsAfterMerge = await getStorageContents(
+        await doInitialSync({
+            source: devices.extension.backgroundModules.sync,
+            target: devices.mobile.services.sync,
+        })
+
+        const afterSync = {
+            extension: await getExtensionStorageContents(
+                devices.extension.storageManager,
+            ),
+            mobile: await getMobileStorageContents(
                 devices.mobile.storage.manager,
-            )
-            await removeUnsyncedCollectionFromStorageContents(
-                mobileStorageContentsAfterMerge,
-            )
-            expect(mobileStorageContentsAfterMerge).toEqual(
-                mobileStorageContentsBeforeMerge,
-            )
-        },
-    )
+            ),
+        }
+        expect(afterSync.extension).toEqual({
+            ...merged,
+            syncDeviceInfo: expectedDeviceInfo,
+        })
+    })
 
     it(
         'should log and transfer changes made during initial sync from ext to app',
@@ -770,13 +823,9 @@ function mobileSyncTests(suiteOptions: {
             const { devices } = setup
 
             await insertIntegrationTestData(devices.extension)
-            const extensionStorageContents = await getStorageContents(
+            const extensionStorageContents = await getExtensionStorageContents(
                 devices.extension.storageManager,
             )
-            await removeUnsyncedCollectionFromStorageContents(
-                extensionStorageContents,
-            )
-            await removeTermFieldsFromStorageContents(extensionStorageContents)
 
             const extensionInitialSync =
                 devices.extension.backgroundModules.sync.initialSync
@@ -809,11 +858,8 @@ function mobileSyncTests(suiteOptions: {
                 target: devices.mobile.services.sync,
             })
 
-            const mobileStorageContentsBeforeIncrementalSync = await getStorageContents(
+            const mobileStorageContentsBeforeIncrementalSync = await getMobileStorageContents(
                 devices.mobile.storage.manager,
-            )
-            await removeUnsyncedCollectionFromStorageContents(
-                mobileStorageContentsBeforeIncrementalSync,
             )
             expect(mobileStorageContentsBeforeIncrementalSync).toEqual({
                 ...extensionStorageContents,
@@ -823,11 +869,8 @@ function mobileSyncTests(suiteOptions: {
             await devices.extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
             await devices.mobile.services.sync.continuousSync.forceIncrementalSync()
 
-            const mobileStorageContentsAfterIncrementalSync = await getStorageContents(
+            const mobileStorageContentsAfterIncrementalSync = await getMobileStorageContents(
                 devices.mobile.storage.manager,
-            )
-            await removeUnsyncedCollectionFromStorageContents(
-                mobileStorageContentsAfterIncrementalSync,
             )
             expect(mobileStorageContentsAfterIncrementalSync).toEqual({
                 ...{
