@@ -58,7 +58,7 @@ export async function getStartScreen({
     if (localStorage.getItem('backup.onboarding')) {
         if (localStorage.getItem('backup.onboarding.payment')) {
             localStorage.removeItem('backup.onboarding.payment')
-            if (await remoteFunction('enableAutomaticBackup')()) {
+            if (await remoteFunction('isAutomaticBackupEnabled')()) {
                 return 'onboarding-size'
             } else {
                 return 'onboarding-how'
@@ -184,11 +184,16 @@ export async function processEvent({
                 await analytics.trackEvent({
                     category: 'Backup',
                     action: 'onboarding-how-chosen',
-                    value: choice,
+                    value: choice.type,
                 })
 
-                if (choice === 'automatic') {
-                    remoteFunction('enableAutomaticBackup')
+                if (choice.type === 'automatic') {
+                    // TODO: (ch): Hack, setting the key here, don't know why the following remoteFunction does not work
+                    localStorage.setItem(
+                        'backup.automatic-backups-enabled',
+                        'true',
+                    )
+                    await remoteFunction('enableAutomaticBackup')
                 }
                 return { screen: 'onboarding-size' }
             },
