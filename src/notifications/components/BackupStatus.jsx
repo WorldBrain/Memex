@@ -35,93 +35,111 @@ const BackupStatus = props => {
                     </div>
                 </div>
                 <div className={[styles.backupOverlay]}>
-                    {props.hover &&
-                        props.backupTimes && (
-                            <div>
-                                {props.backupState.state === 'success' && (
-                                    <BackupSuccess
-                                        message={props.backupState.message}
-                                        header={props.backupState.header}
-                                        lastBackup={
-                                            props.backupTimes.lastBackup
-                                        }
-                                        nextBackup={
-                                            props.backupTimes.nextBackup
-                                        }
-                                        automaticBackup={props.automaticBackup}
-                                        onAutomaticBackupSelect={
-                                            props.onAutomaticBackupSelect
-                                        }
-                                    >
-                                        <div className={styles.ActionButton}>
-                                            <ActionButton
-                                                handleClick={() =>
-                                                    (window.location.href =
-                                                        '/options.html#/backup')
-                                                }
-                                                className={styles.ActionButton}
-                                            >
-                                                {' '}
-                                                Backup Now{' '}
-                                            </ActionButton>
-                                        </div>
-                                    </BackupSuccess>
-                                )}
-                                {props.backupState.state === 'fail' && (
-                                    <BackupFailed
-                                        errorMessage={props.backupState.message}
-                                        header={props.backupState.header}
-                                        lastBackup={
-                                            props.backupTimes.lastBackup
-                                        }
-                                        nextBackup={
-                                            props.backupTimes.nextBackup
-                                        }
-                                        crossIcon={props.crossIcon}
-                                        automaticBackup={props.automaticBackup}
-                                        onAutomaticBackupSelect={
-                                            props.onAutomaticBackupSelect
-                                        }
-                                    >
-                                        <div className={styles.ActionButton}>
-                                            <ActionButton
-                                                handleClick={() =>
-                                                    (window.location.href =
-                                                        '/options.html#/backup')
-                                                }
-                                                className={styles.ActionButton}
-                                            >
-                                                {' '}
-                                                Backup Now{' '}
-                                            </ActionButton>
-                                        </div>
-                                    </BackupFailed>
-                                )}
-                                {props.backupState.state === 'autoBackup' && (
-                                    <AutomaticBackup
-                                        header={props.backupState.header}
-                                        onAutomaticBackupSelect={
-                                            props.onAutomaticBackupSelect
-                                        }
-                                        automaticBackup={props.automaticBackup}
-                                        message={`Automatic backups every 15 minutes. Worry-free.`}
-                                    >
-                                        <div className={styles.ActionButton}>
-                                            <ActionButton
-                                                handleClick={() =>
-                                                    (window.location.href =
-                                                        props.paymentUrl)
-                                                }
-                                                className={styles.ActionButton}
-                                            >
-                                                {' '}
-                                                Upgrade now{' '}
-                                            </ActionButton>
-                                        </div>
-                                    </AutomaticBackup>
-                                )}
-                            </div>
-                        )}
+                    {props.hover && props.backupTimes && (
+                        <div>
+                            {props.backupState.state === 'success' && (
+                                <BackupSuccess
+                                    message={props.backupState.message}
+                                    header={props.backupState.header}
+                                    lastBackup={props.backupTimes.lastBackup}
+                                    nextBackup={props.backupTimes.nextBackup}
+                                    automaticBackup={
+                                        props.automaticBackupAllowed &&
+                                        props.automaticBackupEnabled
+                                    }
+                                    automaticBackupEnabled={
+                                        props.automaticBackupEnabled
+                                    }
+                                    automaticBackupAllowed={
+                                        props.automaticBackupAllowed
+                                    }
+                                    onAutomaticBackupSelect={
+                                        props.onAutomaticBackupSelect
+                                    }
+                                >
+                                    <div className={styles.ActionButton}>
+                                        <ActionButton
+                                            handleClick={() =>
+                                                (window.location.href =
+                                                    '/options.html#/backup')
+                                            }
+                                            className={styles.ActionButton}
+                                        >
+                                            {' '}
+                                            Backup Now{' '}
+                                        </ActionButton>
+                                    </div>
+                                </BackupSuccess>
+                            )}
+                            {props.backupState.state === 'fail' && (
+                                <BackupFailed
+                                    errorMessage={props.backupState.message}
+                                    header={props.backupState.header}
+                                    lastBackup={props.backupTimes.lastBackup}
+                                    nextBackup={props.backupTimes.nextBackup}
+                                    crossIcon={props.crossIcon}
+                                    automaticBackup={
+                                        props.automaticBackupEnabled &&
+                                        props.automaticBackupAllowed
+                                    }
+                                    automaticBackupEnabled={
+                                        props.automaticBackupEnabled
+                                    }
+                                    automaticBackupAllowed={
+                                        props.automaticBackupAllowed
+                                    }
+                                    onAutomaticBackupSelect={
+                                        props.onAutomaticBackupSelect
+                                    }
+                                >
+                                    <div className={styles.ActionButton}>
+                                        <ActionButton
+                                            handleClick={() =>
+                                                (window.location.href =
+                                                    '/options.html#/backup')
+                                            }
+                                            className={styles.ActionButton}
+                                        >
+                                            {' '}
+                                            Backup Now{' '}
+                                        </ActionButton>
+                                    </div>
+                                </BackupFailed>
+                            )}
+                            {props.backupState.state === 'autoBackup' && (
+                                <AutomaticBackup
+                                    header={props.backupState.header}
+                                    onAutomaticBackupSelect={
+                                        props.onAutomaticBackupSelect
+                                    }
+                                    automaticBackup={
+                                        props.automaticBackupEnabled &&
+                                        props.automaticBackupAllowed
+                                    }
+                                    automaticBackupEnabled={
+                                        props.automaticBackupEnabled
+                                    }
+                                    automaticBackupAllowed={
+                                        props.automaticBackupAllowed
+                                    }
+                                    message={`Automatic backups every 15 minutes. Worry-free.`}
+                                >
+                                    <div className={styles.ActionButton}>
+                                        <ActionButton
+                                            handleClick={() =>
+                                                (window.location.href =
+                                                    props.paymentUrl)
+                                            }
+                                            className={styles.ActionButton}
+                                        >
+                                            {' '}
+                                            Upgrade now{' '}
+                                        </ActionButton>
+                                    </div>
+                                </AutomaticBackup>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -135,7 +153,8 @@ BackupStatus.propTypes = {
     onMouseEnter: PropTypes.func,
     onMouseLeave: PropTypes.func,
     backupState: PropTypes.object,
-    automaticBackup: PropTypes.bool,
+    automaticBackupAllowed: PropTypes.bool,
+    automaticBackupEnabled: PropTypes.bool,
     onAutomaticBackupSelect: PropTypes.func,
     paymentUrl: PropTypes.string,
 }

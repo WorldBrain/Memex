@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import BackupOverlay from 'src/common-ui/components/BackupOverlay'
+import { AutomaticBackup } from 'src/notifications/components/BackupOverlay/index'
 
 const BackupFailed = props => {
     return (
@@ -10,8 +11,9 @@ const BackupFailed = props => {
             lastBackup={props.lastBackup ? props.lastBackup : 'Never'}
             nextBackup={props.nextBackup ? props.nextBackup : null}
             crossIcon={props.crossIcon}
-            automaticBackup
-            isAutomaticBackupEnabled={props.automaticBackup}
+            automaticBackup={props.automaticBackup}
+            automaticBackupEnabled={props.automaticBackupEnabled}
+            automaticBackupAllowed={props.automaticBackupAllowed}
             onAutomaticBackupSelect={props.onAutomaticBackupSelect}
         >
             {props.children}
@@ -26,6 +28,8 @@ BackupFailed.propTypes = {
     nextBackup: PropTypes.number,
     crossIcon: PropTypes.string.isRequired,
     automaticBackup: PropTypes.bool.isRequired,
+    automaticBackupAllowed: PropTypes.bool,
+    automaticBackupEnabled: PropTypes.bool,
     onAutomaticBackupSelect: PropTypes.func.isRequired,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),

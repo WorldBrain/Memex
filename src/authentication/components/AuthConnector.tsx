@@ -1,13 +1,17 @@
 import * as React from 'react'
-import { auth } from 'src/util/remote-functions-background'
+import { auth, subscription } from 'src/util/remote-functions-background'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
-import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
+import {
+    UserFeature,
+    UserPlan,
+} from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { Optionalize } from 'src/util/types'
 
 export interface UserProps {
     currentUser: AuthenticatedUser | null
     authorizedFeatures: UserFeature[]
+    authorizedPlans: UserPlan[]
 }
 
 export function withCurrentUser<P extends UserProps = UserProps>(
@@ -18,7 +22,11 @@ export function withCurrentUser<P extends UserProps = UserProps>(
         unsubscribe: () => void
         constructor(props) {
             super(props)
-            this.state = { currentUser: null, authorizedFeatures: [] }
+            this.state = {
+                currentUser: null,
+                authorizedFeatures: [] as UserFeature[],
+                authorizedPlans: [] as UserPlan[],
+            }
         }
 
         componentDidMount = async () => {
@@ -26,6 +34,16 @@ export function withCurrentUser<P extends UserProps = UserProps>(
                 currentUser: await auth.getCurrentUser(),
                 authorizedFeatures: await auth.getAuthorizedFeatures(),
             })
+
+            const claims = await subscription.getCurrentUserClaims()
+            if (claims && claims.subscriptions) {
+                this.setState({
+                    authorizedPlans: Object.keys(
+                        claims.subscriptions,
+                    ) as UserPlan[],
+                })
+            }
+
             const authEvents = getRemoteEventEmitter('auth')
             authEvents.addListener(
                 'onAuthStateChanged',
@@ -53,6 +71,7 @@ export function withCurrentUser<P extends UserProps = UserProps>(
                 <WrappedComponent
                     currentUser={this.state.currentUser}
                     authorizedFeatures={this.state.authorizedFeatures}
+                    authorizedPlans={this.state.authorizedPlans}
                     {...(this.props as P)}
                 />
             )

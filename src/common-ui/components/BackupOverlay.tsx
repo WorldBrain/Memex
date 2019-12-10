@@ -18,6 +18,7 @@ interface Props {
     errorMessage: string
     buttonText: string
     isAutomaticBackupEnabled: boolean
+    isAutomaticBackupAllowed: boolean
     onAutomaticBackupSelect: any
 }
 
@@ -32,12 +33,13 @@ export default class BackupOverlay extends PureComponent<Props> {
         crossIcon: PropTypes.string,
         message: PropTypes.string,
         automaticBackup: PropTypes.bool,
+        automaticBackupAllowed: PropTypes.bool,
+        automaticBackupEnabled: PropTypes.bool,
         lastBackup: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
         nextBackup: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
         buttonUrl: PropTypes.string,
         errorMessage: PropTypes.string,
         buttonText: PropTypes.string,
-        isAutomaticBackupEnabled: PropTypes.bool,
         onAutomaticBackupSelect: PropTypes.func,
     }
 
@@ -73,6 +75,7 @@ export default class BackupOverlay extends PureComponent<Props> {
             crossIcon,
             buttonText,
             isAutomaticBackupEnabled,
+            isAutomaticBackupAllowed,
             onAutomaticBackupSelect,
         } = this.props
         return ReactDOM.createPortal(
@@ -110,7 +113,7 @@ export default class BackupOverlay extends PureComponent<Props> {
 
                     {lastBackup && <div className={styles.bottomBorder} />}
 
-                    {nextBackup && (
+                    {nextBackup && automaticBackup && (
                         <div className={styles.backup}>
                             <span>Next Backup:</span>
                             <span>
@@ -127,12 +130,6 @@ export default class BackupOverlay extends PureComponent<Props> {
                             {!isAutomaticBackupEnabled && (
                                 <ToggleSwitch
                                     defaultValue={isAutomaticBackupEnabled}
-                                    onChange={onAutomaticBackupSelect}
-                                />
-                            )}
-                            {isAutomaticBackupEnabled && (
-                                <ToggleSwitch
-                                    isChecked={isAutomaticBackupEnabled}
                                     onChange={onAutomaticBackupSelect}
                                 />
                             )}

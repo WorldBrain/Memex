@@ -10,7 +10,9 @@ const AutomaticBackup = props => {
             buttonText={props.buttonText}
             buttonUrl={props.buttonUrl}
             onAutomaticBackupSelect={props.onAutomaticBackupSelect}
-            isAutomaticBackupEnabled={props.automaticBackup}
+            automaticBackup={props.automaticBackup}
+            automaticBackupEnabled={props.automaticBackupEnabled}
+            automaticBackupAllowed={props.automaticBackupAllowed}
         >
             {props.children}
         </BackupOverlay>
@@ -23,6 +25,8 @@ AutomaticBackup.propTypes = {
     message: PropTypes.string,
     onAutomaticBackupSelect: PropTypes.func,
     automaticBackup: PropTypes.bool,
+    automaticBackupAllowed: PropTypes.bool,
+    automaticBackupEnabled: PropTypes.bool,
     header: PropTypes.string,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),

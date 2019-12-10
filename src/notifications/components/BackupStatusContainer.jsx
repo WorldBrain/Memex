@@ -4,6 +4,7 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { getLocalStorage } from 'src/util/storage'
 import BackupStatus from './BackupStatus'
 import { BACKUP_STATUS_MESSAGES as messages } from '../constants'
+import { SUBSCRIPTIONS_URL } from 'src/constants'
 
 class BackupStatusContainer extends Component {
     static propTypes = {
@@ -20,6 +21,7 @@ class BackupStatusContainer extends Component {
 
     state = {
         automaticBackupEnabled: null,
+        automaticBackupAllowed: false,
         backupTimes: null,
         hasInitialBackup: false,
         backupLocation: null,
@@ -30,7 +32,6 @@ class BackupStatusContainer extends Component {
             id: 'no_backup',
         },
         billingPeriod: 'monthly',
-        paymentUrl: '',
     }
 
     async componentDidMount() {
@@ -38,21 +39,28 @@ class BackupStatusContainer extends Component {
         const automaticBackupEnabled = await remoteFunction(
             'isAutomaticBackupEnabled',
         )()
+        const automaticBackupAllowed = await remoteFunction(
+            'isAutomaticBackupAllowed',
+        )()
         const getBackupState = await this.backupState(
             hasInitialBackup,
             automaticBackupEnabled,
         )
         this.setState({
             automaticBackupEnabled,
+            automaticBackupAllowed,
             backupTimes: await remoteFunction('getBackupTimes')(),
             backupLocation: await remoteFunction('getBackendLocation')(),
             hasInitialBackup,
             backupState: getBackupState,
-            paymentUrl: `http://worldbrain.io/?add-to-cart=7542&variation_id=7544`,
         })
     }
 
-    backupState = async (hasInitialBackup, automaticBackupEnabled) => {
+    backupState = async (
+        hasInitialBackup,
+        automaticBackupEnabled,
+        automaticBackupAllowed,
+    ) => {
         let backupState
         const backupStatus = await getLocalStorage('backup-status', {
             state: 'no_backup',
@@ -60,7 +68,7 @@ class BackupStatusContainer extends Component {
         })
 
         if (backupStatus.state === 'success') {
-            if (automaticBackupEnabled) {
+            if (automaticBackupEnabled && automaticBackupAllowed) {
                 backupState = {
                     state: 'success',
                     header: 'All good!',
@@ -70,12 +78,16 @@ class BackupStatusContainer extends Component {
                 backupState = {
                     state: 'fail',
                     header: 'Backup mode: manual',
-                    message: messages.automatic_backup_disabled_first_backup_done,
+                    message:
+                        messages.automatic_backup_disabled_first_backup_done,
                 }
             }
         } else if (backupStatus.state === 'fail') {
             let message
-            if (backupStatus.backupId === 'backup_error' && automaticBackupEnabled) {
+            if (
+                backupStatus.backupId === 'backup_error' &&
+                automaticBackupEnabled
+            ) {
                 message = messages.unsuccessful_backup_auto_enabled
             } else if (backupStatus.backupId === 'backup_error') {
                 message = messages.unsuccessful_backup_internet
@@ -92,7 +104,7 @@ class BackupStatusContainer extends Component {
                 message,
             }
         } else if (backupStatus.state === 'no_backup') {
-            if (automaticBackupEnabled) {
+            if (automaticBackupEnabled && automaticBackupAllowed) {
                 backupState = {
                     state: 'fail',
                     header: 'Do your first backup',
@@ -111,7 +123,7 @@ class BackupStatusContainer extends Component {
 
     onAutomaticBackupSelect = async val => {
         this.setState(prevState => {
-            if (val && !prevState.automaticBackupEnabled) {
+            if (val && !prevState.automaticBackupAllowed) {
                 return {
                     backupState: {
                         state: 'autoBackup',
@@ -134,16 +146,7 @@ class BackupStatusContainer extends Component {
 
     onMouseLeaveHandler = () => {
         this.setState({
-            hover: false,  
-        })
-    }
-
-    onBillingPeriodChange = billingPeriod => {
-        const productId = 7542
-        const variationId = billingPeriod === 'yearly' ? 7545 : 7544
-        this.setState({
-            billingPeriod,
-            paymentUrl: `http://worldbrain.io/?add-to-cart=${productId}&variation_id=${variationId}`,
+            hover: false,
         })
     }
 
@@ -154,10 +157,9 @@ class BackupStatusContainer extends Component {
             backupTimes,
             backupLocation,
             automaticBackupEnabled,
+            automaticBackupAllowed,
             hover,
             backupState,
-            billingPeriod,
-            paymentUrl,
         } = this.state
         return (
             <BackupStatus
@@ -169,13 +171,12 @@ class BackupStatusContainer extends Component {
                 hover={hover}
                 backupTimes={backupTimes}
                 backupLocation={backupLocation}
-                automaticBackup={automaticBackupEnabled}
+                automaticBackupEnabled={automaticBackupEnabled}
+                automaticBackupAllowed={automaticBackupAllowed}
                 backupUrl={backupUrl}
                 backupState={backupState}
                 onAutomaticBackupSelect={this.onAutomaticBackupSelect}
-                onBillingPeriodChange={this.onBillingPeriodChange}
-                billingPeriod={billingPeriod}
-                paymentUrl={paymentUrl}
+                paymentUrl={SUBSCRIPTIONS_URL}
             />
         )
     }

@@ -44,6 +44,7 @@ export class Subscribe extends React.PureComponent<Props> {
                     <div>
                         <SubscriptionOptions
                             user={this.props.currentUser}
+                            plans={this.props.authorizedPlans}
                             onClose={this.handleClose}
                             subscriptionChanged={this.handleSubscriptionChanged}
                         />

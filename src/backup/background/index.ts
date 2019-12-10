@@ -262,7 +262,8 @@ export class BackupBackgroundModule {
     }
 
     async isAutomaticBackupAllowed() {
-        return (await auth.getAuthorizedFeatures()).includes('backup')
+        const features = await auth.getAuthorizedFeatures()
+        return features && features.includes('backup')
     }
 
     isAutomaticBackupEnabled() {
@@ -280,13 +281,29 @@ export class BackupBackgroundModule {
     }
 
     async scheduleAutomaticBackupIfEnabled() {
-        if (await this.isAutomaticBackupEnabled()) {
-            this.scheduleAutomaticBackup()
+        console['log']('scheduleAutomaticBackupIfEnabled')
+        if (!this.isAutomaticBackupEnabled()) {
+            console['log']('scheduleAutomaticBackupIfEnabled - not enabled')
+            return
         }
+
+        if (!this.isAutomaticBackupAllowed()) {
+            console['log']('scheduleAutomaticBackupIfEnabled - not allowed')
+            return
+        }
+
+        return this.scheduleAutomaticBackup()
     }
 
     scheduleAutomaticBackup() {
-        if (this.automaticBackupTimeout || this.backupProcedure.running) {
+        console['log']('scheduleAutomaticBackup')
+        if (this.automaticBackupTimeout) {
+            console['log']('scheduleAutomaticBackup - already scheduled')
+            return
+        }
+
+        if (this.backupProcedure && this.backupProcedure.running) {
+            console['log']('scheduleAutomaticBackup - already running')
             return
         }
 
@@ -328,6 +345,7 @@ export class BackupBackgroundModule {
     }
 
     doBackup() {
+        console['log']('doBackup')
         this.clearAutomaticBackupTimeout()
 
         this.storage.startRecordingChanges()
