@@ -4,6 +4,7 @@ import { FirebaseAuth } from 'react-firebaseui'
 import styled from 'styled-components'
 import { colorPrimary } from 'src/common-ui/components/design-library/colors'
 import { fontSizeBigger } from 'src/common-ui/components/design-library/typography'
+import { auth } from 'src/util/remote-functions-background'
 const styles = require('src/authentication/components/styles.css')
 
 export class SignInScreen extends React.Component {
@@ -17,8 +18,11 @@ export class SignInScreen extends React.Component {
                         getFirebase().auth.EmailAuthProvider.PROVIDER_ID,
                     ],
                     callbacks: {
-                        // Avoid redirects after sign-in.
-                        signInSuccessWithAuthResult: () => false,
+                        signInSuccessWithAuthResult: async () => {
+                            await auth.refreshUserInfo()
+                            // Avoid redirects after sign-in.
+                            return false
+                        },
                     },
                 }}
                 firebaseAuth={getFirebase().auth()}

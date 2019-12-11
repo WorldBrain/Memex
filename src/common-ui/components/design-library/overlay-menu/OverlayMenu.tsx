@@ -55,6 +55,7 @@ export class OverlayMenu extends React.Component<Props, State> {
                                 {this.props.menuItems.map(item => (
                                     <MenuItem
                                         onClick={this.closeAnd(item.handler)}
+                                        key={`overlayMenu-${item.label}`}
                                     >
                                         {' '}
                                         {item.label}

@@ -134,7 +134,6 @@ export class SubscriptionOptions extends React.Component<Props, State> {
     }
 
     render() {
-
         return (
             <div className={''}>
                 <Helmet>
@@ -160,7 +159,7 @@ export class SubscriptionOptions extends React.Component<Props, State> {
                         ]}
                     />
                     <SubscriptionPriceBox
-                        key={'SubscriptionBoxBackups'}
+                        key={'SubscriptionBoxBackupsMonthly'}
                         onClick={_ => this.openCheckoutBackupMonthly()}
                         title={'Pro Monthly'}
                         price={'€1.00'}
@@ -174,7 +173,7 @@ export class SubscriptionOptions extends React.Component<Props, State> {
                         manageSubscription={this.openPortal}
                     />
                     <SubscriptionPriceBox
-                        key={'SubscriptionBoxBackups'}
+                        key={'SubscriptionBoxBackupsYearly'}
                         onClick={_ => this.openCheckoutBackupYearly()}
                         price={'€12.00'}
                         title={'Pro Yearly'}

@@ -55,7 +55,11 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
                             {' '}
                             Email Address{' '}
                         </TypographyInputTitle>
-                        <InputTextField type={'text'} value={user.email} />
+                        <InputTextField
+                            type={'text'}
+                            value={user.email}
+                            readonly
+                        />
                         <TypographyInputTitle>
                             {' '}
                             Display Name{' '}
@@ -63,6 +67,7 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
                         <InputTextField
                             type={'text'}
                             value={user.displayName}
+                            readonly
                         />
                         <input
                             type={'hidden'}
