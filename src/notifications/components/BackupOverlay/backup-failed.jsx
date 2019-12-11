@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import BackupOverlay from 'src/common-ui/components/BackupOverlay'
-import { AutomaticBackup } from 'src/notifications/components/BackupOverlay/index'
 
 const BackupFailed = props => {
     return (

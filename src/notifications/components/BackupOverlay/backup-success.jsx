@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import BackupOverlay from 'src/common-ui/components/BackupOverlay'
-import { AutomaticBackup } from 'src/notifications/components/BackupOverlay/index'
 
 const BackupSuccess = props => {
     return (
@@ -23,7 +22,6 @@ BackupSuccess.propTypes = {
     lastBackup: PropTypes.number.isRequired,
     nextBackup: PropTypes.number,
     automaticBackup: PropTypes.bool.isRequired,
-    onAutomaticBackupSelect: PropTypes.func.isRequired,
     automaticBackupAllowed: PropTypes.bool,
     automaticBackupEnabled: PropTypes.bool,
     message: PropTypes.string.isRequired,

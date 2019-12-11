@@ -1,4 +1,4 @@
-import React, { ComponentType, ElementType } from 'react'
+import React from 'react'
 import { MenuItem } from 'src/common-ui/components/design-library/overlay-menu/MenuItem'
 import styled from 'styled-components'
 

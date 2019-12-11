@@ -1,6 +1,5 @@
 import React from 'react'
 import PricingTable, {
-    DeviceSelection,
     ListItem,
     PricingButton,
     PricingHead,
@@ -12,11 +11,11 @@ import Checkmark from 'src/common-ui/components/design-library/Checkmark'
 
 interface Props {
     onClick: (...params: any) => any
-    manageSubscription: (...params: any) => any
+    manageSubscription?: (...params: any) => any
     title: string
     price: string
     infoItems: any[]
-    subscribed: boolean
+    subscribed?: boolean
 }
 
 export class SubscriptionPriceBox extends React.PureComponent<Props> {

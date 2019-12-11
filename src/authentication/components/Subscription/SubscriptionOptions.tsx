@@ -6,7 +6,7 @@ import { SubscriptionPriceBox } from 'src/authentication/components/Subscription
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { auth } from 'src/util/remote-functions-background'
-import PricingTable, {
+import {
     PricingButtonWrapper,
     PricingPlanTitle,
 } from 'src/authentication/components/Subscription/pricing.style'
@@ -103,37 +103,38 @@ export class SubscriptionOptions extends React.Component<Props, State> {
 
     // TODO
     renderMonthlyYearlyChoice() {
-        let activeStatus = true
-
-        return (
-            <div>
-                <PricingButtonWrapper>
-                    <Button
-                        title="Monthly Plan"
-                        className={activeStatus ? 'active-item' : ''}
-                        onClick={() => {
-                            // setState({
-                            //     data: MONTHLY_PRICING_TABLE,
-                            //     active: true,
-                            // })
-                        }}
-                    />
-                    <Button
-                        title="Annual Plan"
-                        className={activeStatus === false ? 'active-item' : ''}
-                        onClick={() => {
-                            // setState({
-                            //     data: Data.saasJson.YEARLY_PRICING_TABLE,
-                            //     active: false,
-                            // })
-                        }}
-                    />
-                </PricingButtonWrapper>
-            </div>
-        )
+        // let activeStatus = true
+        //
+        // return (
+        //     <div>
+        //         <PricingButtonWrapper>
+        //             <Button
+        //                 title="Monthly Plan"
+        //                 className={activeStatus ? 'active-item' : ''}
+        //                 onClick={() => {
+        //                     // setState({
+        //                     //     data: MONTHLY_PRICING_TABLE,
+        //                     //     active: true,
+        //                     // })
+        //                 }}
+        //             />
+        //             <Button
+        //                 title="Annual Plan"
+        //                 className={activeStatus === false ? 'active-item' : ''}
+        //                 onClick={() => {
+        //                     // setState({
+        //                     //     data: Data.saasJson.YEARLY_PRICING_TABLE,
+        //                     //     active: false,
+        //                     // })
+        //                 }}
+        //             />
+        //         </PricingButtonWrapper>
+        //     </div>
+        // )
     }
 
     render() {
+
         return (
             <div className={''}>
                 <Helmet>
