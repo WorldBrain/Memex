@@ -667,6 +667,10 @@ function mobileSyncTests(suiteOptions: {
                 ...TEST_USER,
                 id: userId as string,
             })
+            devices.mobile.services.sync['options'].auth['setUser']({
+                ...TEST_USER,
+                id: userId as string,
+            })
 
             return { devices, fetchPageProcessor }
         }
