@@ -18,6 +18,7 @@ export class PageFetchBacklogBackground {
 
     private storage: PageFetchBacklogStorage
     private recurringTask: RecurringTask
+    private checkingConnection: Promise<void>
 
     constructor(
         private props: {
@@ -86,17 +87,27 @@ export class PageFetchBacklogBackground {
     }
 
     private handleProcessingError = async (err: Error) => {
-        // TODO: Think about this... we're already handling errors inside the recurring task
+        console.error('Page fetch backlog processing encountered an error:')
+        console.error(err)
     }
 
     private async checkConnection() {
-        await this.props.connectivityChecker.checkConnection()
-
-        if (!this.props.connectivityChecker.isConnected) {
-            this.recurringTask.stop()
-            await this.props.connectivityChecker.waitUntilConnected()
-            this.recurringTask['schedule']()
+        if (this.checkingConnection) {
+            return this.checkingConnection
         }
+
+        this.checkingConnection = (async () => {
+            await this.props.connectivityChecker.checkConnection()
+
+            if (!this.props.connectivityChecker.isConnected) {
+                this.recurringTask.stop()
+                await this.props.connectivityChecker.waitUntilConnected()
+                this.recurringTask['schedule']()
+            }
+        })()
+
+        await this.checkingConnection
+        this.checkingConnection = undefined
     }
 
     private processEntries = async () => {

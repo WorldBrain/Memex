@@ -10,7 +10,6 @@ export class ConnectivityCheckerBackground extends EventEmitter {
     static DISCONNECTED_EVENT = 'disconnected'
 
     private recurringTask: RecurringTask
-    private checkingConnectionOnce: Promise<void>
     private checkingConnectionWait: Promise<void>
     isConnected: boolean = true
 
@@ -34,10 +33,6 @@ export class ConnectivityCheckerBackground extends EventEmitter {
 
         this.props.target =
             props.target || ConnectivityCheckerBackground.DEF_TARGET
-    }
-
-    async forceCheck() {
-        await this.checkConnection()
     }
 
     private handleProcessingError = (err: Error) => {}
@@ -73,23 +68,14 @@ export class ConnectivityCheckerBackground extends EventEmitter {
         return this.checkingConnectionWait
     }
 
-    checkConnection = async () => {
-        if (this.checkingConnectionOnce) {
-            return this.checkingConnectionOnce
-        }
+    async checkConnection() {
+        this.isConnected = await this.runCheck()
 
-        this.checkingConnectionOnce = (async () => {
-            this.isConnected = await this.runCheck()
-
-            this.emit(
-                this.isConnected
-                    ? ConnectivityCheckerBackground.CONNECTED_EVENT
-                    : ConnectivityCheckerBackground.DISCONNECTED_EVENT,
-            )
-        })()
-
-        await this.checkingConnectionOnce
-        this.checkingConnectionOnce = undefined
+        this.emit(
+            this.isConnected
+                ? ConnectivityCheckerBackground.CONNECTED_EVENT
+                : ConnectivityCheckerBackground.DISCONNECTED_EVENT,
+        )
     }
 
     private runCheck(): Promise<boolean> {

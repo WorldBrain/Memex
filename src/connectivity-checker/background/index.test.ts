@@ -44,7 +44,7 @@ describe('ConnectivityCheckerBackground tests', () => {
 
         expect(background['lastEventEmitted']).toBeUndefined()
 
-        await background.forceCheck()
+        await background.checkConnection()
 
         expect(background.isConnected).toBe(true)
         expect(background['lastEventEmitted']).toEqual(
@@ -54,7 +54,7 @@ describe('ConnectivityCheckerBackground tests', () => {
         // Try again but with a failing XHR
         xhr.shouldSucceed = false
 
-        await background.forceCheck()
+        await background.checkConnection()
 
         expect(background.isConnected).toBe(false)
         expect(background['lastEventEmitted']).toEqual(
