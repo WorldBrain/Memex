@@ -18,8 +18,8 @@ export class SignInScreen extends React.Component {
                         getFirebase().auth.EmailAuthProvider.PROVIDER_ID,
                     ],
                     callbacks: {
-                        signInSuccessWithAuthResult: async () => {
-                            await auth.refreshUserInfo()
+                        signInSuccessWithAuthResult: () => {
+                            auth.refreshUserInfo()
                             // Avoid redirects after sign-in.
                             return false
                         },
