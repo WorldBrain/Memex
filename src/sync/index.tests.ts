@@ -11,97 +11,289 @@ import {
     BackgroundIntegrationTestSetup,
     IntegrationTestStep,
     BackgroundIntegrationTestContext,
+    BackgroundIntegrationTestInstance,
 } from 'src/tests/integration-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { createMemorySharedSyncLog } from './background/index.tests'
 import { EventEmitter } from 'events'
+import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 // to shut up linting
 const debug = console['log'].bind(console)
 
+type SyncTestSequence = SyncTestStep[]
+interface SyncTestStep {
+    action: 'execute' | 'sync' | 'preCheck' | 'postCheck'
+    integrationStepIndex: number
+    deviceIndex: number
+}
+
 export function registerSyncBackgroundIntegrationTests(
     test: BackgroundIntegrationTest,
 ) {
-    describe('sync tests', () => {
+    describe('Sync tests', () => {
         describe('should work when synced in various patterns across 2 devices', () => {
-            const testOptions = test.instantiate()
-            const syncPatterns = generateSyncPatterns(
-                [0, 1],
-                testOptions.steps.length,
-            )
-            for (const pattern of syncPatterns) {
-                const mark = test.mark ? '!!!' : ''
-
-                const registerTest =
-                    process.env.TEST_SYNC_INTEGRATION === 'true' ? it : it.skip
-                registerTest(
-                    `should work when synced in pattern ${getReadablePattern(
-                        pattern,
-                    )}${mark}`,
-                    async () => {
-                        await runSyncBackgroundTest(test, {
-                            pattern,
-                            deviceCount: 2,
-                        })
-                    },
-                )
-            }
+            registerSyncBackAndForthTests(test)
         })
-        // describe('should work when synced in various patterns across 3 devices', () => {
-        //     const testOptions = test.instantiate()
-        //     const syncPatterns = generateSyncPatterns(
-        //         [0, 1, 2],
-        //         testOptions.steps.length,
-        //     )
-        //     for (const pattern of syncPatterns) {
-        //         it(`should work when synced in pattern ${getReadablePattern(pattern)}`, async () => {
-        //             await runSyncBackgroundTest(test, { pattern, deviceCount: 3 })
-        //         })
-        //     }
-        // })
+        describe('should work when doing the same action on two devices, then syncing', async () => {
+            registerConflictGenerationTests(test)
+        })
     })
 }
 
-async function runSyncBackgroundTest(
-    test: BackgroundIntegrationTest,
-    options: {
-        pattern: number[]
-        deviceCount: number
-    },
-) {
-    const { pattern } = options
+function maybeMark(s: string, mark: false | null | undefined | string): string {
+    return mark ? s + mark : s
+}
+
+function registerSyncBackAndForthTests(test: BackgroundIntegrationTest) {
+    const testOptions = test.instantiate()
+    const syncPatterns = generateSyncPatterns([0, 1], testOptions.steps.length)
+    for (const pattern of syncPatterns) {
+        const description = `should work when synced in pattern ${getReadablePattern(
+            pattern,
+        )}`
+        it(maybeMark(description, test.mark && '!!!'), async () => {
+            const sequence = generateBackAndForthSyncTestSequence(pattern)
+            await runSyncBackgroundTest({
+                test,
+                sequence,
+                deviceCount: 2,
+            })
+        })
+    }
+}
+
+function generateBackAndForthSyncTestSequence(
+    pattern: number[],
+): SyncTestSequence {
+    const sequence: SyncTestSequence = []
+    let integrationStepIndex = -1
+    for (const currentDeviceIndex of pattern) {
+        integrationStepIndex += 1
+
+        if (integrationStepIndex > 0) {
+            sequence.push({
+                action: 'sync',
+                integrationStepIndex,
+                deviceIndex: currentDeviceIndex,
+            })
+            sequence.push({
+                action: 'postCheck',
+                integrationStepIndex: integrationStepIndex - 1,
+                deviceIndex: pattern[currentDeviceIndex],
+            })
+        }
+        sequence.push({
+            action: 'preCheck',
+            integrationStepIndex,
+            deviceIndex: currentDeviceIndex,
+        })
+        sequence.push({
+            action: 'execute',
+            integrationStepIndex,
+            deviceIndex: currentDeviceIndex,
+        })
+        sequence.push({
+            action: 'postCheck',
+            integrationStepIndex,
+            deviceIndex: currentDeviceIndex,
+        })
+        sequence.push({
+            action: 'sync',
+            integrationStepIndex,
+            deviceIndex: currentDeviceIndex,
+        })
+    }
+
+    const lastSyncedDeviceIndex = pattern[pattern.length - 1]
+    const unsyncedDeviceIndex = lastSyncedDeviceIndex === 1 ? 0 : 1
+
+    sequence.push({
+        action: 'sync',
+        integrationStepIndex: pattern.length - 1,
+        deviceIndex: unsyncedDeviceIndex,
+    })
+    sequence.push({
+        action: 'postCheck',
+        integrationStepIndex: pattern.length - 1,
+        deviceIndex: unsyncedDeviceIndex,
+    })
+
+    return sequence
+}
+
+function registerConflictGenerationTests(test: BackgroundIntegrationTest) {
+    const description =
+        'should work when device A syncs an action, device B does the same action, then syncs'
+    it(maybeMark(description, test.mark && '!!!'), async () => {
+        const testInstance = test.instantiate()
+        const sequence = generateConfictingActionsTestSequence({ testInstance })
+        await runSyncBackgroundTest({
+            sequence,
+            test,
+            deviceCount: 2,
+        })
+    })
+}
+
+function generateConfictingActionsTestSequence(options: {
+    testInstance: BackgroundIntegrationTestInstance
+}): SyncTestSequence {
+    const sequence: SyncTestSequence = []
+
+    let integrationStepIndex = -1
+    for (const step of options.testInstance.steps) {
+        integrationStepIndex += 1
+
+        sequence.push({
+            action: 'preCheck',
+            integrationStepIndex,
+            deviceIndex: 0,
+        })
+        sequence.push({
+            action: 'execute',
+            integrationStepIndex,
+            deviceIndex: 0,
+        })
+        // sequence.push({
+        //     action: 'postCheck',
+        //     integrationStepIndex,
+        //     deviceIndex: 0,
+        // })
+        sequence.push({
+            action: 'sync',
+            integrationStepIndex,
+            deviceIndex: 0,
+        })
+        sequence.push({
+            action: 'execute',
+            integrationStepIndex,
+            deviceIndex: 1,
+        })
+        sequence.push({
+            action: 'sync',
+            integrationStepIndex,
+            deviceIndex: 1,
+        })
+        // sequence.push({
+        //     action: 'postCheck',
+        //     integrationStepIndex,
+        //     deviceIndex: 1,
+        // })
+        sequence.push({
+            action: 'sync',
+            integrationStepIndex,
+            deviceIndex: 0,
+        })
+        // sequence.push({
+        //     action: 'postCheck',
+        //     integrationStepIndex,
+        //     deviceIndex: 0,
+        // })
+    }
+    return sequence
+}
+
+async function runSyncBackgroundTest(options: {
+    sequence: SyncTestSequence
+    test: BackgroundIntegrationTest
+    deviceCount: number
+
+    // setups: BackgroundIntegrationTestSetup[]
+    // deviceIds: Array<number | string>
+    // sync: (
+    //     deviceIndex: number | string,
+    //     syncOptions: { debug: boolean },
+    // ) => Promise<void>
+}) {
+    const { setups, sync } = await setupSyncBackgroundTest({
+        deviceCount: options.deviceCount,
+    })
+
+    const testInstance = await options.test.instantiate()
+    for (const sequenceStep of options.sequence) {
+        const integrationTestStep =
+            testInstance.steps[sequenceStep.integrationStepIndex]
+        const setup = setups[sequenceStep.deviceIndex]
+        // const deviceId = deviceIds[step.deviceIndex]
+        const readableDeviceIndex = getReadableDeviceIndex(
+            sequenceStep.deviceIndex,
+        )
+
+        if (integrationTestStep.debug) {
+            debug(
+                `SYNC TEST, action ${sequenceStep.action}, device ${readableDeviceIndex}`,
+            )
+        }
+
+        if (sequenceStep.action === 'preCheck') {
+            await integrationTestStep.preCheck?.({
+                setup,
+            })
+        } else if (sequenceStep.action === 'postCheck') {
+            await integrationTestStep.postCheck?.({
+                setup,
+            })
+        } else if (sequenceStep.action === 'execute') {
+            if (integrationTestStep.expectedStorageOperations) {
+                setup.storageOperationLogger.enabled = true
+            }
+            const timeBeforeStepExecution = Date.now()
+            await integrationTestStep.execute({ setup })
+
+            setup.storageOperationLogger.enabled = false
+            if (integrationTestStep.expectedStorageOperations) {
+                const executedOperations = setup.storageOperationLogger.popOperations()
+                expect(
+                    executedOperations.filter(
+                        entry => entry.operation[1] !== 'clientSyncLogEntry',
+                    ),
+                ).toEqual(integrationTestStep.expectedStorageOperations())
+            }
+
+            if (integrationTestStep.expectedSyncLogEntries) {
+                const addedEntries = await setup.backgroundModules.sync.clientSyncLog.getEntriesCreatedAfter(
+                    timeBeforeStepExecution,
+                )
+                expect(addedEntries).toEqual(
+                    integrationTestStep.expectedSyncLogEntries(),
+                )
+            }
+        } else if (sequenceStep.action === 'sync') {
+            await sync(sequenceStep.deviceIndex, {
+                debug: integrationTestStep.debug,
+            })
+        }
+    }
+}
+
+async function setupSyncBackgroundTest(options: {
+    deviceCount: number
+    debugStorageOperations?: boolean
+}) {
     const userId = 'user'
 
     const sharedSyncLog = await createMemorySharedSyncLog()
     const setups: BackgroundIntegrationTestSetup[] = []
-    const syncEventEmitters: SyncEvents[] = []
     for (let i = 0; i < options.deviceCount; ++i) {
         setups.push(await setupBackgroundIntegrationTest({ sharedSyncLog }))
-
-        const syncEventEmitter = new EventEmitter() as SyncEvents
-        for (const eventName of Object.keys(SYNC_EVENTS)) {
-            syncEventEmitter.on(eventName as keyof SyncEventMap, args => {
-                debug(
-                    `SYNC EVENT ${eventName}:`,
-                    require('util').inspect(args, {
-                        colors: true,
-                        depth: null,
-                    }),
-                )
-            })
-        }
-        syncEventEmitters.push(syncEventEmitter)
     }
 
-    const deviceIds: Array<number | string> = []
+    // const deviceIds: Array<number | string> = []
 
     for (const setup of setups) {
-        const deviceId = await sharedSyncLog.createDeviceId({
-            userId,
-            sharedUntil: 0,
-        })
-        deviceIds.push(deviceId)
-        setup.backgroundModules.sync.syncLoggingMiddleware.enable(deviceId)
+        // const deviceId = await sharedSyncLog.createDeviceId({
+        //     userId,
+        //     sharedUntil: 0,
+        // })
+        // deviceIds.push(deviceId)
+
+        const memoryAuth = setup.backgroundModules.auth
+            .authService as MemoryAuthService
+        memoryAuth.setUser({ ...TEST_USER, id: userId })
+        await setup.backgroundModules.sync.continuousSync.initDevice()
+        await setup.backgroundModules.sync.continuousSync.enableContinuousSync()
     }
 
     // const changeDetectors = setups.map(setup => new StorageChangeDetector({
@@ -111,148 +303,17 @@ async function runSyncBackgroundTest(
     // let changeDetectorUsed = false
 
     const sync = async (
-        deviceIndex: number | string,
+        deviceIndex: number,
         syncOptions: { debug: boolean },
     ) => {
         const setup = setups[deviceIndex]
-        await doSync({
-            clientSyncLog: setup.backgroundModules.sync.clientSyncLog,
-            sharedSyncLog,
-            storageManager: setup.storageManager,
-            reconciler: reconcileSyncLog,
-            now: Date.now(),
-            userId,
-            deviceId: deviceIds[deviceIndex],
-            syncEvents: syncOptions.debug
-                ? syncEventEmitters[deviceIndex]
-                : undefined,
+        await setup.backgroundModules.sync.continuousSync.doIncrementalSync({
+            debug: syncOptions.debug,
+            // debug: true
         })
     }
 
-    const testOptions = await test.instantiate()
-
-    let stepIndex = -1
-    let lastStep: IntegrationTestStep<BackgroundIntegrationTestContext> = null
-    for (const currentDeviceIndex of pattern) {
-        stepIndex += 1
-        const step = testOptions.steps[stepIndex]
-
-        const currentDeviceId = deviceIds[currentDeviceIndex]
-        const currentSetup = setups[currentDeviceIndex]
-
-        if (stepIndex > 0) {
-            if (step.debug) {
-                debug(
-                    `SYNC before step ${stepIndex}, device`,
-                    getReadableDeviceIndex(currentDeviceIndex),
-                )
-            }
-            await sync(currentDeviceIndex, { debug: step.debug })
-        }
-        if (lastStep && lastStep.postCheck) {
-            if (step.debug) {
-                debug(
-                    `SYNC postCheck of previous step before step ${stepIndex}, device`,
-                    getReadableDeviceIndex(currentDeviceIndex),
-                )
-            }
-            await lastStep.postCheck({ setup: currentSetup })
-        }
-
-        // if (step.expectedStorageChanges && !changeDetectorUsed) {
-        //     await Promise.all(changeDetectors.map(
-        //         changeDetector => changeDetector.capture()
-        //     ))
-        //     changeDetectorUsed = true
-        // }
-
-        if (step.preCheck) {
-            if (step.debug) {
-                debug(
-                    `SYNC after step ${stepIndex}, device`,
-                    getReadableDeviceIndex(currentDeviceIndex),
-                )
-            }
-            await step.preCheck({
-                setup: currentSetup,
-            })
-        }
-        if (step.expectedStorageOperations) {
-            currentSetup.storageOperationLogger.enabled = true
-        }
-        const timeBeforeStepExecution = Date.now()
-        await step.execute({
-            setup: currentSetup,
-            isSyncTest: true,
-        })
-
-        currentSetup.storageOperationLogger.enabled = false
-        if (step.expectedStorageOperations) {
-            const executedOperations = currentSetup.storageOperationLogger.popOperations()
-            expect(
-                executedOperations.filter(
-                    entry => entry.operation[1] !== 'clientSyncLogEntry',
-                ),
-            ).toEqual(step.expectedStorageOperations())
-        }
-
-        if (step.expectedSyncLogEntries) {
-            const addedEntries = await currentSetup.backgroundModules.sync.clientSyncLog.getEntriesCreatedAfter(
-                timeBeforeStepExecution,
-            )
-            expect(addedEntries).toEqual(step.expectedSyncLogEntries())
-        }
-
-        if (step.postCheck) {
-            if (step.debug) {
-                debug(
-                    `SYNC postCheck after step ${stepIndex}, device`,
-                    getReadableDeviceIndex(currentDeviceIndex),
-                )
-            }
-            await step.postCheck({
-                setup: currentSetup,
-            })
-        }
-
-        if (step.debug) {
-            debug(
-                `SYNC after step ${stepIndex}, device`,
-                getReadableDeviceIndex(currentDeviceIndex),
-            )
-        }
-        await sync(currentDeviceIndex, { debug: step.debug })
-
-        lastStep = step
-    }
-
-    const lastSyncedDeviceIndex = pattern[pattern.length - 1]
-    const unsyncedDeviceIndices = deviceIds
-        .map((deviceId, deviceIndex) => deviceIndex)
-        .filter(deviceIndex => deviceIndex !== lastSyncedDeviceIndex)
-
-    for (const unsyncedDeviceIndex of unsyncedDeviceIndices) {
-        if (lastStep!.debug) {
-            debug(
-                `SYNC before last postCheck, device`,
-                getReadableDeviceIndex(unsyncedDeviceIndex),
-            )
-        }
-        await sync(unsyncedDeviceIndex, { debug: lastStep!.debug })
-        if (lastStep!.debug) {
-            debug(
-                `SYNC completed before last postCheck, device`,
-                getReadableDeviceIndex(unsyncedDeviceIndex),
-            )
-        }
-        await lastStep!.postCheck({ setup: setups[unsyncedDeviceIndex] })
-        if (lastStep!.debug) {
-            debug(
-                `SYNC last postCheck done, device`,
-                getReadableDeviceIndex(unsyncedDeviceIndex),
-            )
-        }
-    }
+    return { userId, setups, sync }
 }
 
 const getReadablePattern = (pattern: number[]) =>
