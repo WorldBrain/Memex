@@ -57,6 +57,9 @@ export interface BackgroundIntegrationTestContext {
 export type BackgroundIntegrationTest = IntegrationTest<
     BackgroundIntegrationTestContext
 >
+export type BackgroundIntegrationTestInstance = IntegrationTestInstance<
+    BackgroundIntegrationTestContext
+>
 export type BackgroundIntegrationTestSuite = IntegrationTestSuite<
     BackgroundIntegrationTestContext
 >
