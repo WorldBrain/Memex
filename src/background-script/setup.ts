@@ -155,6 +155,7 @@ export function createBackgroundModules(options: {
             getSharedSyncLog: options.getSharedSyncLog,
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
+            fetchPageDataProcessor: options.fetchPageDataProcessor,
             pageFetchBacklog,
         }),
         features: new FeatureOptIns(),

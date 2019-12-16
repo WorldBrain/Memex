@@ -1,14 +1,14 @@
 import { SyncPostReceiveProcessor } from '@worldbrain/storex-sync'
 import { COLLECTION_NAMES as PAGES_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/pages/constants'
 
-import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
+import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { SharedSyncLogEntry } from '@worldbrain/storex-sync/lib/shared-sync-log/types'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 
 export class PostReceiveProcessor {
     constructor(
         private props: {
-            fetchPageData: FetchPageDataProcessor
+            fetchPageData: FetchPageProcessor
             pageFetchBacklog?: PageFetchBacklogBackground
         },
     ) {}

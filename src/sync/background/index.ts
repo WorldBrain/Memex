@@ -20,9 +20,7 @@ import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { filterBlobsFromSyncLog } from './sync-logging'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { PostReceiveProcessor } from './post-receive-processor'
-import fetchPageData from 'src/page-analysis/background/fetch-page-data'
-import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
-import pipeline from 'src/search/pipeline'
+import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { MemexExtSyncSettingStore } from './setting-store'
 
 export default class SyncBackground extends SyncService {
@@ -41,6 +39,7 @@ export default class SyncBackground extends SyncService {
         browserAPIs: Pick<Browser, 'storage'>
         appVersion: string
         pageFetchBacklog?: PageFetchBacklogBackground
+        fetchPageDataProcessor?: FetchPageProcessor
     }) {
         super({
             ...options,
@@ -58,10 +57,7 @@ export default class SyncBackground extends SyncService {
             productVersion: options.appVersion,
             postReceiveProcessor: new PostReceiveProcessor({
                 pageFetchBacklog: options.pageFetchBacklog,
-                fetchPageData: new FetchPageDataProcessor({
-                    fetchPageData,
-                    pagePipeline: pipeline,
-                }),
+                fetchPageData: options.fetchPageDataProcessor,
             }).processor,
         })
 

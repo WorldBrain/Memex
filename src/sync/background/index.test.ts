@@ -463,7 +463,6 @@ function extensionSyncTests(suiteOptions: {
     it('should fetch missing data on post-sync if enabled', async (setup: TestSetup) => {
         const {
             devices,
-            customLists,
             syncModule,
             sharedSyncLog,
             userId,
@@ -503,8 +502,6 @@ function extensionSyncTests(suiteOptions: {
         })
 
         await syncModule(devices[0]).setup()
-        // syncModule(devices[0]).initialSync.useEncryption = false
-        // syncModule(devices[0]).continuousSync.useEncryption = false
         await syncModule(devices[0]).firstContinuousSyncPromise
 
         await devices[0].backgroundModules.search.searchIndex.addPage({
@@ -519,20 +516,7 @@ function extensionSyncTests(suiteOptions: {
             { debug: true },
         )
         await syncModule(devices[1]).setup()
-        // syncModule(devices[1]).continuousSync.useEncryption = false
         await syncModule(devices[1]).firstContinuousSyncPromise
-
-        // TODO: Work out how to get events from the receiver
-        // const { syncEvents } = await syncModule(
-        //     devices[1],
-        // ).continuousSync.getSyncOptions()
-
-        // syncEvents.on('receivedSharedEntries', ({ entries }) => {
-        //     const receivedEntry = entries[0]
-        //     const pageData = JSON.parse(receivedEntry.data, jsonDateParser)
-        //     expect(pageData).toEqual(mockPage)
-        // })
-        // await delay(1000)
 
         const initiatorStorageContents = await getStorageContents(
             devices[0].storageManager,
