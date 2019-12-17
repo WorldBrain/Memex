@@ -328,9 +328,6 @@ function extensionSyncTests(suiteOptions: {
             userId,
         } = setup
 
-        devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
-        devices[1].authService.setUser({ ...TEST_USER, id: userId as string })
-
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId }),
             await sharedSyncLog.createDeviceId({ userId }),
@@ -346,6 +343,10 @@ function extensionSyncTests(suiteOptions: {
         })
 
         await forEachSetup(s => syncModule(s).setup())
+
+        devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
+        devices[1].authService.setUser({ ...TEST_USER, id: userId as string })
+
         await forEachSetup(s => syncModule(s).firstContinuousSyncPromise)
         // await forEachSetup(
         //     s => (syncModule(s).continuousSync.useEncryption = false),
@@ -393,7 +394,6 @@ function extensionSyncTests(suiteOptions: {
         } = setup
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
-        devices[1].authService.setUser({ ...TEST_USER, id: userId as string })
 
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId }),
@@ -421,6 +421,7 @@ function extensionSyncTests(suiteOptions: {
         )
         await devices[0].backgroundModules.sync.continuousSync.forceIncrementalSync()
         await syncModule(devices[1]).setup()
+        devices[1].authService.setUser({ ...TEST_USER, id: userId as string })
         // syncModule(devices[1]).continuousSync.useEncryption = false
         await syncModule(devices[1]).firstContinuousSyncPromise
 
