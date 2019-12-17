@@ -109,7 +109,6 @@ export default class SyncBackground extends SyncService {
                 authChangePromise,
                 new Promise(resolve => setTimeout(resolve, 2000)),
             ])
-            await authChangePromise
             await maybeSync()
         })()
     }
