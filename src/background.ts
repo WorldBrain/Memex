@@ -97,15 +97,15 @@ export async function main() {
         services: {
             sync: backgroundModules.sync,
         },
-        auth: {
-            setUser: async ({ id }) => {
-                ;(backgroundModules.auth
-                    .authService as MemoryAuthService).setUser({
-                    ...TEST_USER,
-                    id: id as string,
-                })
-            },
-        },
+        // auth: {
+        //     setUser: async ({ id }) => {
+        //         ;(backgroundModules.auth
+        //             .authService as MemoryAuthService).setUser({
+        //             ...TEST_USER,
+        //             id: id as string,
+        //         })
+        //     },
+        // },
         intergrationTestData: {
             insert: async () => {
                 console['log']('Inserting integration test data')

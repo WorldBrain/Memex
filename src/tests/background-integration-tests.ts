@@ -30,6 +30,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     signalTransportFactory?: SignalTransportFactory
     sharedSyncLog?: SharedSyncLog
     browserLocalStorage?: MemoryBrowserStorage
+    debugStorageOperations?: boolean
 }): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
         global['URL'] = URL
@@ -56,8 +57,8 @@ export async function setupBackgroundIntegrationTest(options?: {
                 local: browserLocalStorage,
             },
             bookmarks: {
-                onCreated: { addListener: () => { } },
-                onRemoved: { addListener: () => { } },
+                onCreated: { addListener: () => {} },
+                onRemoved: { addListener: () => {} },
             },
         } as any,
         tabManager: options && options.tabManager,
@@ -80,9 +81,24 @@ export async function setupBackgroundIntegrationTest(options?: {
         storageManager,
         toTrack: Object.keys(storageManager.registry.collections),
     })
+    const storageOperationDebugger: StorageMiddleware = {
+        async process(args) {
+            const result = await args.next.process({
+                operation: args.operation,
+            })
+            console.log('STORAGE OPERATION - ', {
+                operation: args.operation,
+                result,
+            })
+            return result
+        },
+    }
 
     const middleware: StorageMiddleware[] = [
         ...((options && options.customMiddleware) || []),
+        ...(options && options.debugStorageOperations
+            ? [storageOperationDebugger]
+            : []),
         storageOperationLogger.asMiddleware(),
         await backgroundModules.sync.createSyncLoggingMiddleware(),
     ]
@@ -160,7 +176,7 @@ export async function runBackgroundIntegrationTest(
             } catch (e) {
                 console.error(
                     `Unexpected storage changes in step number ${stepIndex +
-                    1} (counting from 1)`,
+                        1} (counting from 1)`,
                 )
                 throw e
             }
