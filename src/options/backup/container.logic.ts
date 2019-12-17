@@ -184,7 +184,7 @@ export async function processEvent({
                 await analytics.trackEvent({
                     category: 'Backup',
                     action: 'onboarding-how-chosen',
-                    value: choice.type,
+                    value: { type: choice.type },
                 })
 
                 if (choice.type === 'automatic') {
