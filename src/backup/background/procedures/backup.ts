@@ -7,8 +7,7 @@ import BackupStorage, { LastBackupStorage } from '../storage'
 import { BackupBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
-import { setLocalStorage } from 'src/util/storage'
-import { getLocalStorage } from '../../../util/storage'
+import { getLocalStorageTyped, setLocalStorageTyped } from 'src/util/storage'
 import { DexieUtilsPlugin, BackupPlugin } from 'src/search/plugins'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 
@@ -150,7 +149,7 @@ export default class BackupProcedure {
                         this.events.emit('success')
                     }
                     // Set backup status for notification in search bar
-                    await setLocalStorage('backup-status', {
+                    await setLocalStorageTyped('backup-status', {
                         state: 'success',
                         backupId: 'success',
                     })
@@ -169,12 +168,12 @@ export default class BackupProcedure {
                     console.error(e.stack)
 
                     // Set backup status for notification in search bar
-                    const getState = await getLocalStorage('backup-status')
+                    const getState = await getLocalStorageTyped('backup-status')
                     if (
                         getState.state === 'success' ||
                         getState.state === 'no_backup'
                     ) {
-                        await setLocalStorage('backup-status', {
+                        await setLocalStorageTyped('backup-status', {
                             state: 'fail',
                             backupId: 'backup_error',
                         })

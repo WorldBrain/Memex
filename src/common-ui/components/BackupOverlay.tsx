@@ -1,22 +1,21 @@
 import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
-import PropTypes from 'prop-types'
 import moment from 'moment'
 import ToggleSwitch from './ToggleSwitch'
 
 import ConfirmModalBtn from './ConfirmModalBtn'
+import { BackupTimes } from 'src/backup/components/BackupOverlay/BackupStatusContainer'
 const styles = require('./BackupOverlay.css')
 
 interface Props {
-    header: string
+    header?: string
     crossIcon: string
-    message: string
-    automaticBackup: boolean
-    lastBackup: number | string
-    nextBackup: number | string
-    buttonUrl: string
-    errorMessage: string
-    buttonText: string
+    message?: string
+    lastBackup?: BackupTimes['lastBackup']
+    nextBackup?: BackupTimes['nextBackup']
+    buttonUrl?: string
+    errorMessage?: string
+    buttonText?: string
     isAutomaticBackupEnabled: boolean
     isAutomaticBackupAllowed: boolean
     onAutomaticBackupSelect: any
@@ -24,24 +23,6 @@ interface Props {
 
 export default class BackupOverlay extends PureComponent<Props> {
     static DEF_ROOT_EL = 'div'
-
-    static propTypes = {
-        rootEl: PropTypes.string,
-        hasInitBackup: PropTypes.bool,
-        backupTimes: PropTypes.object,
-        header: PropTypes.string,
-        crossIcon: PropTypes.string,
-        message: PropTypes.string,
-        automaticBackup: PropTypes.bool,
-        automaticBackupAllowed: PropTypes.bool,
-        automaticBackupEnabled: PropTypes.bool,
-        lastBackup: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-        nextBackup: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-        buttonUrl: PropTypes.string,
-        errorMessage: PropTypes.string,
-        buttonText: PropTypes.string,
-        onAutomaticBackupSelect: PropTypes.func,
-    }
 
     static defaultProps = {
         rootEl: BackupOverlay.DEF_ROOT_EL,
@@ -67,7 +48,6 @@ export default class BackupOverlay extends PureComponent<Props> {
         const {
             header,
             message,
-            automaticBackup,
             lastBackup,
             nextBackup,
             buttonUrl,
@@ -113,28 +93,33 @@ export default class BackupOverlay extends PureComponent<Props> {
 
                     {lastBackup && <div className={styles.bottomBorder} />}
 
-                    {nextBackup && automaticBackup && (
-                        <div className={styles.backup}>
-                            <span>Next Backup:</span>
-                            <span>
-                                <b>{moment(nextBackup).fromNow()}</b>
-                            </span>
-                        </div>
-                    )}
+                    {nextBackup &&
+                        isAutomaticBackupAllowed &&
+                        isAutomaticBackupEnabled && (
+                            <div className={styles.backup}>
+                                <span>Next Backup:</span>
+                                <span>
+                                    <b>{moment(nextBackup).fromNow()}</b>
+                                </span>
+                            </div>
+                        )}
 
                     {nextBackup && <div className={styles.bottomBorder} />}
 
-                    {automaticBackup && (
-                        <div className={styles.backup}>
-                            <span>Automatic Backup:</span>
-                            {!isAutomaticBackupEnabled && (
-                                <ToggleSwitch
-                                    defaultValue={isAutomaticBackupEnabled}
-                                    onChange={onAutomaticBackupSelect}
-                                />
-                            )}
-                        </div>
-                    )}
+                    <div
+                        className={styles.backup}
+                        onClick={onAutomaticBackupSelect}
+                    >
+                        <span>Automatic Backup:</span>
+                        <ToggleSwitch
+                            defaultValue={isAutomaticBackupEnabled}
+                            onChange={
+                                isAutomaticBackupAllowed
+                                    ? onAutomaticBackupSelect
+                                    : undefined
+                            }
+                        />
+                    </div>
 
                     {this.props.children}
 

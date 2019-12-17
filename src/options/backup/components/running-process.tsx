@@ -1,6 +1,6 @@
 import React from 'react'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { setLocalStorage } from 'src/util/storage'
+import { setLocalStorageTyped } from 'src/util/storage'
 const localStyles = require('./running-process.css')
 import { ProgressBar } from 'src/common-ui/components'
 import MovingDotsLabel from '../components/moving-dots-label'
@@ -91,7 +91,7 @@ export default class RunningProcess extends React.Component<Props> {
                 info: event.info || this.state.info,
             })
         } else if (event.type === 'success') {
-            await setLocalStorage('backup-status', {
+            await setLocalStorageTyped('backup-status', {
                 state: 'success',
                 backupId: 'success',
             })
@@ -100,7 +100,7 @@ export default class RunningProcess extends React.Component<Props> {
             const errorId = await remoteFunction(
                 this.props.functionNames.sendNotif,
             )('error')
-            await setLocalStorage('backup-status', {
+            await setLocalStorageTyped('backup-status', {
                 state: 'fail',
                 backupId:
                     errorId === 'backup_error' ? errorId : 'drive_size_empty',
@@ -144,7 +144,7 @@ export default class RunningProcess extends React.Component<Props> {
     renderRunning(info) {
         const progressPercentage =
             info.processedChanges && info.totalChanges
-                ? info.processedChanges / info.totalChanges * 100
+                ? (info.processedChanges / info.totalChanges) * 100
                 : 0
 
         return (
@@ -193,14 +193,11 @@ export default class RunningProcess extends React.Component<Props> {
                                 up next
                             </span>
                         )}
-                        {status === 'running' &&
-                            info.state !== 'preparing' && (
-                                <span
-                                    className={localStyles.statusMessageActive}
-                                >
-                                    running
-                                </span>
-                            )}
+                        {status === 'running' && info.state !== 'preparing' && (
+                            <span className={localStyles.statusMessageActive}>
+                                running
+                            </span>
+                        )}
                         {status === 'success' && (
                             <img src="/img/checkmarkGreen.svg" />
                         )}
@@ -213,23 +210,22 @@ export default class RunningProcess extends React.Component<Props> {
     renderActions(info) {
         return (
             <div className={localStyles.actions}>
-                {info.state !== 'paused' &&
-                    info.state !== 'pausing' && (
-                        <div
-                            className={localStyles.actionCancel}
-                            onClick={() => {
-                                !this.state.canceling && this.handleCancel()
-                            }}
-                        >
-                            {!this.state.canceling && 'Cancel'}
-                            {this.state.canceling && (
-                                <MovingDotsLabel
-                                    text="Finishing current batch"
-                                    intervalMs={500}
-                                />
-                            )}
-                        </div>
-                    )}
+                {info.state !== 'paused' && info.state !== 'pausing' && (
+                    <div
+                        className={localStyles.actionCancel}
+                        onClick={() => {
+                            !this.state.canceling && this.handleCancel()
+                        }}
+                    >
+                        {!this.state.canceling && 'Cancel'}
+                        {this.state.canceling && (
+                            <MovingDotsLabel
+                                text="Finishing current batch"
+                                intervalMs={500}
+                            />
+                        )}
+                    </div>
+                )}
             </div>
         )
     }

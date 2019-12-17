@@ -245,8 +245,7 @@ class Container extends React.Component<any, any> {
                     }
                     fromSearch
                 >
-                    {' '}
-                    {buttons[0].label}{' '}
+                    {` ${buttons[0].label} `}
                 </ActionButton>
             )
         } else if (action.type === actionTypes.TOGGLE_SETTING) {
@@ -268,8 +267,7 @@ class Container extends React.Component<any, any> {
                         definition: action,
                     })}
                 >
-                    {' '}
-                    {buttons[0].label}{' '}
+                    {` ${buttons[0].label} `}
                 </ActionButton>
             )
         }

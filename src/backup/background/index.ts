@@ -281,14 +281,14 @@ export class BackupBackgroundModule {
     }
 
     async scheduleAutomaticBackupIfEnabled() {
-        console['log']('scheduleAutomaticBackupIfEnabled')
+        console.log('scheduleAutomaticBackupIfEnabled')
         if (!this.isAutomaticBackupEnabled()) {
-            console['log']('scheduleAutomaticBackupIfEnabled - not enabled')
+            console.log('scheduleAutomaticBackupIfEnabled - not enabled')
             return
         }
 
         if (!this.isAutomaticBackupAllowed()) {
-            console['log']('scheduleAutomaticBackupIfEnabled - not allowed')
+            console.log('scheduleAutomaticBackupIfEnabled - not allowed')
             return
         }
 
@@ -296,14 +296,14 @@ export class BackupBackgroundModule {
     }
 
     scheduleAutomaticBackup() {
-        console['log']('scheduleAutomaticBackup')
+        console.log('scheduleAutomaticBackup')
         if (this.automaticBackupTimeout) {
-            console['log']('scheduleAutomaticBackup - already scheduled')
+            console.log('scheduleAutomaticBackup - already scheduled')
             return
         }
 
         if (this.backupProcedure && this.backupProcedure.running) {
-            console['log']('scheduleAutomaticBackup - already running')
+            console.log('scheduleAutomaticBackup - already running')
             return
         }
 
@@ -345,7 +345,7 @@ export class BackupBackgroundModule {
     }
 
     doBackup() {
-        console['log']('doBackup')
+        console.log('doBackup')
         this.clearAutomaticBackupTimeout()
 
         this.storage.startRecordingChanges()

@@ -8,6 +8,12 @@ import ProgressStepContainer from 'src/common-ui/components/progress-step-contai
 import OnboardingTooltip from 'src/overview/onboarding/components/onboarding-tooltip'
 import { SyncDevicesPane } from 'src/sync/components/SyncDevicesPane'
 import { SyncDevice } from 'src/sync/components/types'
+import BackupStatusContainer, {
+    BackupUIState,
+    calcBackupUIState,
+} from 'src/backup/components/BackupOverlay/BackupStatusContainer'
+import BackupStatus from 'src/backup/components/BackupOverlay/BackupStatus'
+import { LocalStorageTypes } from 'src/util/storage'
 
 storiesOf('ProgressContainer', module)
     .add('No steps seen/completed', () => (
@@ -71,3 +77,260 @@ storiesOf('Device Sync', module).add('Sync DevicePane', () => (
         waitForInitialSync={async () => {}}
     />
 ))
+
+const propDefaultsBackupStatus = {
+    isAutomaticBackupAllowed: true,
+    isAutomaticBackupEnabled: true,
+    backupTimes: {
+        lastBackup: Date.now() - 1000,
+        nextBackup: Date.now() + 1000,
+    },
+    hover: true,
+    onAutomaticBackupSelect: () => false,
+    onMouseEnter: () => false,
+    onMouseLeave: () => false,
+    paymentUrl: '',
+}
+
+const backupStatus = {
+    state: 'no_backup',
+    backupId: 'no_backup',
+} as LocalStorageTypes['backup-status']
+
+storiesOf('Backup Modules - Overlay', module)
+    .add('Status - no backupTimes (no automatic backups)', () => (
+        <BackupStatus
+            {...propDefaultsBackupStatus}
+            backupTimes={{}}
+            isAutomaticBackupAllowed={false}
+            isAutomaticBackupEnabled={false}
+            backupUIState={calcBackupUIState({
+                showAutomaticBackupSubscription: false,
+                backupStatus,
+                isAutomaticBackupAllowed: false,
+                isAutomaticBackupEnabled: false,
+            })}
+            hover={true}
+        />
+    ))
+    .add('Status - lastBackup: Never (no automatic backups)', () => (
+        <BackupStatus
+            {...propDefaultsBackupStatus}
+            backupTimes={{ lastBackup: 'Never' }}
+            isAutomaticBackupAllowed={false}
+            isAutomaticBackupEnabled={false}
+            backupUIState={calcBackupUIState({
+                showAutomaticBackupSubscription: false,
+                backupStatus,
+                isAutomaticBackupAllowed: false,
+                isAutomaticBackupEnabled: false,
+            })}
+            hover={true}
+        />
+    ))
+    .add('Status - lastBackup: Running (no automatic backups)', () => (
+        <BackupStatus
+            {...propDefaultsBackupStatus}
+            backupTimes={{ lastBackup: 'running' }}
+            isAutomaticBackupAllowed={false}
+            isAutomaticBackupEnabled={false}
+            backupUIState={calcBackupUIState({
+                showAutomaticBackupSubscription: false,
+                backupStatus,
+                isAutomaticBackupAllowed: false,
+                isAutomaticBackupEnabled: false,
+            })}
+            hover={true}
+        />
+    ))
+    .add('Status - lastBackup: past (no automatic backups)', () => (
+        <BackupStatus
+            {...propDefaultsBackupStatus}
+            backupTimes={{ lastBackup: Date.now() - 10000 }}
+            isAutomaticBackupAllowed={false}
+            isAutomaticBackupEnabled={false}
+            backupUIState={calcBackupUIState({
+                showAutomaticBackupSubscription: false,
+                backupStatus,
+                isAutomaticBackupAllowed: false,
+                isAutomaticBackupEnabled: false,
+            })}
+            hover={true}
+        />
+    ))
+    .add(
+        'Status - lastBackup: past, nextBackup:soon (allowed automatic backups)',
+        () => (
+            <BackupStatus
+                {...propDefaultsBackupStatus}
+                backupTimes={{ lastBackup: Date.now() - 10000 }}
+                isAutomaticBackupAllowed={true}
+                isAutomaticBackupEnabled={false}
+                backupUIState={calcBackupUIState({
+                    showAutomaticBackupSubscription: false,
+                    backupStatus,
+                    isAutomaticBackupAllowed: true,
+                    isAutomaticBackupEnabled: false,
+                })}
+                hover={true}
+            />
+        ),
+    )
+    .add(
+        'Status - lastBackup: past, nextBackup:soon (allowed&enabled automatic backups)',
+        () => (
+            <BackupStatus
+                {...propDefaultsBackupStatus}
+                backupTimes={{
+                    lastBackup: Date.now() - 10000,
+                    nextBackup: Date.now() + 10000,
+                }}
+                isAutomaticBackupAllowed={true}
+                isAutomaticBackupEnabled={true}
+                backupUIState={calcBackupUIState({
+                    showAutomaticBackupSubscription: false,
+                    backupStatus,
+                    isAutomaticBackupAllowed: true,
+                    isAutomaticBackupEnabled: true,
+                })}
+                hover={true}
+            />
+        ),
+    )
+    .add('Status - status: success (allowed&enabled automatic backups)', () => (
+        <BackupStatus
+            {...propDefaultsBackupStatus}
+            backupTimes={{
+                lastBackup: Date.now() - 10000,
+                nextBackup: Date.now() + 10000,
+            }}
+            isAutomaticBackupAllowed={true}
+            isAutomaticBackupEnabled={true}
+            backupUIState={calcBackupUIState({
+                showAutomaticBackupSubscription: false,
+                backupStatus: {
+                    backupId: 'success',
+                    state: 'success',
+                },
+                isAutomaticBackupAllowed: true,
+                isAutomaticBackupEnabled: true,
+            })}
+            hover={true}
+        />
+    ))
+    .add(
+        'Status - status: auto_backup_expired (allowed&enabled automatic backups)',
+        () => (
+            <BackupStatus
+                {...propDefaultsBackupStatus}
+                backupTimes={{
+                    lastBackup: Date.now() - 10000,
+                    nextBackup: Date.now() + 10000,
+                }}
+                isAutomaticBackupAllowed={true}
+                isAutomaticBackupEnabled={true}
+                backupUIState={calcBackupUIState({
+                    showAutomaticBackupSubscription: false,
+                    backupStatus: {
+                        backupId: 'auto_backup_expired',
+                        state: 'fail',
+                    },
+                    isAutomaticBackupAllowed: true,
+                    isAutomaticBackupEnabled: true,
+                })}
+                hover={true}
+            />
+        ),
+    )
+    .add(
+        'Status - status: backup_error (allowed&enabled automatic backups)',
+        () => (
+            <BackupStatus
+                {...propDefaultsBackupStatus}
+                backupTimes={{
+                    lastBackup: Date.now() - 10000,
+                    nextBackup: Date.now() + 10000,
+                }}
+                isAutomaticBackupAllowed={true}
+                isAutomaticBackupEnabled={true}
+                backupUIState={calcBackupUIState({
+                    showAutomaticBackupSubscription: false,
+                    backupStatus: {
+                        backupId: 'backup_error',
+                        state: 'fail',
+                    },
+                    isAutomaticBackupAllowed: true,
+                    isAutomaticBackupEnabled: true,
+                })}
+                hover={true}
+            />
+        ),
+    )
+    .add(
+        'Status - status: fail drive_size_empty (allowed&enabled automatic backups)',
+        () => (
+            <BackupStatus
+                {...propDefaultsBackupStatus}
+                backupTimes={{
+                    lastBackup: Date.now() - 10000,
+                    nextBackup: Date.now() + 10000,
+                }}
+                isAutomaticBackupAllowed={true}
+                isAutomaticBackupEnabled={true}
+                backupUIState={calcBackupUIState({
+                    showAutomaticBackupSubscription: false,
+                    backupStatus: {
+                        backupId: 'drive_size_empty',
+                        state: 'fail',
+                    },
+                    isAutomaticBackupAllowed: true,
+                    isAutomaticBackupEnabled: true,
+                })}
+                hover={true}
+            />
+        ),
+    )
+    .add('Status - status: showAutomaticBackupSubscription', () => (
+        <BackupStatus
+            {...propDefaultsBackupStatus}
+            backupTimes={{
+                lastBackup: Date.now() - 100000,
+            }}
+            isAutomaticBackupAllowed={false}
+            isAutomaticBackupEnabled={false}
+            backupUIState={calcBackupUIState({
+                showAutomaticBackupSubscription: true,
+                backupStatus: {
+                    backupId: 'success',
+                    state: 'success',
+                },
+                isAutomaticBackupAllowed: false,
+                isAutomaticBackupEnabled: false,
+            })}
+            hover={true}
+        />
+    ))
+    .add(
+        'Status - status: fail&success?? (allowed&enabled automatic backups)',
+        () => (
+            <BackupStatus
+                {...propDefaultsBackupStatus}
+                backupTimes={{
+                    lastBackup: Date.now() - 10000,
+                    nextBackup: Date.now() + 10000,
+                }}
+                isAutomaticBackupAllowed={true}
+                isAutomaticBackupEnabled={true}
+                backupUIState={calcBackupUIState({
+                    showAutomaticBackupSubscription: false,
+                    backupStatus: {
+                        backupId: 'success',
+                        state: 'fail',
+                    },
+                    isAutomaticBackupAllowed: true,
+                    isAutomaticBackupEnabled: true,
+                })}
+                hover={true}
+            />
+        ),
+    )

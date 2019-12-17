@@ -1,5 +1,28 @@
 import { Browser, browser } from 'webextension-polyfill-ts'
 
+export interface LocalStorageTypes {
+    'backup-status': {
+        state: 'no_backup' | 'success' | 'fail'
+        backupId:
+            | 'no_backup'
+            | 'success'
+            | 'backup_error'
+            | 'drive_size_empty'
+            | 'auto_backup_expired'
+    }
+}
+
+export async function getLocalStorageTyped<
+    T extends keyof LocalStorageTypes,
+    U extends LocalStorageTypes[T]
+>(
+    key: T,
+    defVal?: U,
+    localStorage: Pick<Browser['storage']['local'], 'get'> = null,
+): Promise<LocalStorageTypes[T]> {
+    return getLocalStorage(key, defVal, localStorage)
+}
+
 export async function getLocalStorage(
     key,
     defVal?: any,
@@ -18,6 +41,17 @@ export async function getLocalStorage(
         return setLocalStorage(key, defVal)
     }
     return value
+}
+
+export async function setLocalStorageTyped<
+    T extends keyof LocalStorageTypes,
+    U extends LocalStorageTypes[T]
+>(
+    key: T,
+    value: U,
+    localStorage: Pick<Browser['storage']['local'], 'set'> = null,
+): Promise<U> {
+    return setLocalStorage(key, value, localStorage)
 }
 
 export async function setLocalStorage(

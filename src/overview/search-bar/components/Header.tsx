@@ -8,7 +8,7 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import cx from 'classnames'
 
 import InboxButton from 'src/notifications/components/InboxButton'
-import BackupStatus from 'src/notifications/components/BackupStatusContainer'
+import BackupStatus from 'src/backup/components/BackupOverlay/BackupStatusContainer'
 import { OVERVIEW_URL } from 'src/constants'
 import BackToSearch from 'src/overview/sidebar-left/components/BackToSearch'
 import SearchFilters from 'src/search-filters'
@@ -108,7 +108,7 @@ class Header extends PureComponent<Props> {
                         </button>
                     </div>
                     <div className={styles.links}>
-                        <BackupStatus className={styles.backupStatus} />
+                        <BackupStatus />
                         <InboxButton
                             toggleInbox={this.props.toggleInbox}
                             showInbox={this.props.showInbox}
