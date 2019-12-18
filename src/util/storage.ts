@@ -1,5 +1,5 @@
 import { Browser, browser } from 'webextension-polyfill-ts'
-import { BackupStatusType } from 'src/backup/types'
+import { BackupStatusType } from 'src/backup-restore/types'
 
 export interface LocalStorageTypes {
     'backup-status': BackupStatusType

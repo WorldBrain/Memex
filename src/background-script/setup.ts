@@ -12,8 +12,8 @@ import EventLogBackground from 'src/analytics/internal/background'
 import CustomListBackground from 'src/custom-lists/background'
 import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
-import * as backup from '../backup/background'
-import * as backupStorage from '../backup/background/storage'
+import * as backup from '../backup-restore/background'
+import * as backupStorage from '../backup-restore/background/storage'
 import {
     registerModuleMapCollections,
     StorageModule,
