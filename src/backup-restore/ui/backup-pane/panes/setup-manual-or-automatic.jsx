@@ -64,5 +64,5 @@ SetupManualOrAutomatic.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onBackRequested: PropTypes.func.isRequired,
     onSubscribeRequested: PropTypes.func.isRequired,
-    authorizedFeatures: PropTypes.array,
+    authorizedFeatures: PropTypes.array.isRequired,
 }

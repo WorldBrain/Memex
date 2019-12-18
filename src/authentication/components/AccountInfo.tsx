@@ -1,6 +1,4 @@
 import * as React from 'react'
-import { auth } from 'src/util/remote-functions-background'
-import Button from 'src/popup/components/Button'
 import {
     UserProps,
     withCurrentUser,
@@ -23,10 +21,6 @@ interface State {
 
 export class AccountInfo extends React.Component<Props & UserProps, State> {
     state = { showSubscriptionModal: false }
-
-    handleRefresh = async () => {
-        await auth.refreshUserInfo()
-    }
 
     hideSubscriptionModal = () => {
         this.setState({ showSubscriptionModal: false })
@@ -83,6 +77,11 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
                             type={'hidden'}
                             name={'Features'}
                             value={JSON.stringify(features)}
+                        />
+                        <input
+                            type={'hidden'}
+                            name={'Plans'}
+                            value={JSON.stringify(this.props.authorizedPlans)}
                         />
                     </div>
                 )}

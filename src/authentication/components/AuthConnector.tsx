@@ -57,7 +57,10 @@ export function withCurrentUser<P extends UserProps = UserProps>(
         }
 
         listenOnAuthStateChanged = async user => {
-            this.setState({ currentUser: user })
+            this.setState({
+                currentUser: user,
+                authorizedFeatures: await auth.getAuthorizedFeatures(),
+            })
         }
 
         componentWillUnmount = () => {

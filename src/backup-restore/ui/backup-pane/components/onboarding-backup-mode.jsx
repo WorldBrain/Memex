@@ -50,8 +50,6 @@ export default class OnboardingBackupModeContainer extends React.Component {
 }
 
 export function OnboardingBackupMode({
-    disableModeSelection,
-    disableAutomaticBackup,
     launchSubscriptionFlow,
     mode,
     onModeChange,
@@ -59,69 +57,59 @@ export function OnboardingBackupMode({
 }) {
     return (
         <div className={Styles.selectionDiv}>
-            {!disableModeSelection && (
-                <div>
-                    <label>
-                        <input
-                            type="radio"
-                            checked={mode === 'manual'}
-                            onChange={() => onModeChange('manual')}
-                        />{' '}
-                        <span className={Styles.option}>
-                            <span className={Styles.name}>Manual Backup</span>
-                            <span className={classNames(Styles.labelFree)}>
-                                Free
-                            </span>
-                            <br />
-                            <span className={Styles.subname}>
-                                You need to regularly remember to back up
-                                yourself.
-                            </span>
-                        </span>
-                    </label>
-                </div>
-            )}
             <div>
-                {!disableModeSelection && (
-                    <label>
-                        <input
-                            type="radio"
-                            checked={mode === 'automatic'}
-                            onChange={() => onModeChange('automatic')}
-                        />{' '}
-                        <span className={Styles.option}>
-                            <span className={Styles.name}>
-                                Automatic Backup
-                            </span>
-                            {!disableAutomaticBackup &&
-                            isAuthorizedForAutomaticBackup ? (
-                                <span className={classNames(Styles.labelFree)}>
-                                    Subscribed
-                                </span>
-                            ) : (
-                                <span
-                                    className={Styles.labelPremium}
-                                    onClick={launchSubscriptionFlow}
-                                >
-                                    Upgrade
-                                </span>
-                            )}
-
-                            <br />
-                            <span className={Styles.subname}>
-                                Worry-free backups every 15 minutes.
-                            </span>
+                <label>
+                    <input
+                        type="radio"
+                        checked={mode === 'manual'}
+                        onChange={() => onModeChange('manual')}
+                    />{' '}
+                    <span className={Styles.option}>
+                        <span className={Styles.name}>Manual Backup</span>
+                        <span className={classNames(Styles.labelFree)}>
+                            Free
                         </span>
-                    </label>
-                )}
+                        <br />
+                        <span className={Styles.subname}>
+                            You need to regularly remember to back up yourself.
+                        </span>
+                    </span>
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input
+                        type="radio"
+                        checked={mode === 'automatic'}
+                        onChange={() => onModeChange('automatic')}
+                    />{' '}
+                    <span className={Styles.option}>
+                        <span className={Styles.name}>Automatic Backup</span>
+                        {isAuthorizedForAutomaticBackup ? (
+                            <span className={classNames(Styles.labelFree)}>
+                                Subscribed
+                            </span>
+                        ) : (
+                            <span
+                                className={Styles.labelPremium}
+                                onClick={launchSubscriptionFlow}
+                            >
+                                Upgrade
+                            </span>
+                        )}
+
+                        <br />
+                        <span className={Styles.subname}>
+                            Worry-free backups every 15 minutes.
+                        </span>
+                    </span>
+                </label>
             </div>
         </div>
     )
 }
 
 OnboardingBackupMode.propTypes = {
-    disableModeSelection: PropTypes.bool,
-    disableAutomaticBackup: PropTypes.bool,
     isAuthorizedForAutomaticBackup: PropTypes.bool,
     mode: PropTypes.string,
     onModeChange: PropTypes.func.isRequired,

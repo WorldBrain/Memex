@@ -27,7 +27,6 @@ interface Props {
 export class OverviewContainer extends React.Component<Props & UserProps> {
     state = {
         automaticBackupEnabled: null,
-        automaticBackupAllowed: null,
         backupTimes: null,
         hasInitialBackup: false,
         showAutomaticUpgradeDetails: false,
@@ -55,9 +54,6 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
         }
         this.setState({
             automaticBackupEnabled,
-            automaticBackupAllowed: this.props.authorizedFeatures.includes(
-                'backup',
-            ),
             backupTimes,
             hasInitialBackup,
             backupLocation,
@@ -77,6 +73,10 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
     closeSubscriptionModal = () => this.setState({ subscribeModal: false })
 
     render() {
+        const automaticBackupsAllowed = this.props.authorizedFeatures.includes(
+            'backup',
+        )
+
         if (!this.state.backupTimes) {
             return <LoadingBlocker />
         }
@@ -155,8 +155,7 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                                     <span className={localStyles.time}>
                                         {this.state.backupTimes.nextBackup !==
                                         'running'
-                                            ? this.state
-                                                  .automaticBackupAllowed &&
+                                            ? automaticBackupsAllowed &&
                                               moment(
                                                   this.state.backupTimes
                                                       .nextBackup,
@@ -178,12 +177,12 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                         <div className={styles.option}>
                             <span className={styles.name}>
                                 {this.state.automaticBackupEnabled &&
-                                this.state.automaticBackupAllowed
-                                    ? 'Automatic Backups Enabled'
+                                automaticBackupsAllowed
+                                    ? 'Automatic Backups: Enabled'
                                     : 'Enable Automatic Backups'}
                             </span>
 
-                            {!this.state.automaticBackupAllowed && (
+                            {!automaticBackupsAllowed && (
                                 <SmallButton
                                     extraClass={localStyles.right}
                                     onClick={this.openSubscriptionModal}
@@ -225,7 +224,7 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
 
                 {!this.state.hasInitialBackup &&
                     this.state.automaticBackupEnabled &&
-                    this.state.automaticBackupAllowed && (
+                    automaticBackupsAllowed && (
                         <div>
                             <p className={styles.header2}>
                                 <strong>SETTINGS</strong>
