@@ -262,7 +262,7 @@ export class BackupBackgroundModule {
     }
 
     async isAutomaticBackupAllowed() {
-        return (await auth.getAuthorizedFeatures()).includes('backup')
+        return auth.isAuthorizedForFeature('backup')
     }
 
     isAutomaticBackupEnabled() {

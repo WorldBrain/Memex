@@ -2,6 +2,7 @@ import {
     UserPlan,
     Claims,
     UserFeature,
+    FeatureMap,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 export const SUBSCRIPTION_GRACE_MS = 1000 * 60 * 60
@@ -26,16 +27,34 @@ export function getAuthorizedFeatures(claims: Claims): UserFeature[] {
     }
 
     Object.keys(claims.features).forEach((feature: UserFeature) => {
-        const expiry = claims.features[feature].expiry
-        if (
-            expiry != null &&
-            expiry + SUBSCRIPTION_GRACE_MS > new Date().getUTCMilliseconds()
-        ) {
+        if (isFeatureInDate(claims.features[feature])) {
             features.push(feature)
         }
     })
 
     return features
+}
+
+export function isAuthorizedForFeature(
+    claims: Claims,
+    feature: UserFeature,
+): boolean {
+    if (claims != null && claims.features != null) {
+        const featureObject = claims.features[feature]
+        return isFeatureInDate(featureObject)
+    }
+    return false
+}
+
+function isFeatureInDate(
+    featureObject?: FeatureMap[keyof FeatureMap],
+): boolean {
+    return (
+        featureObject != null &&
+        featureObject.expiry != null &&
+        featureObject.expiry + SUBSCRIPTION_GRACE_MS >
+            new Date().getUTCMilliseconds()
+    )
 }
 
 export function checkValidPlan(
