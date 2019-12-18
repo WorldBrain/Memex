@@ -5,16 +5,7 @@ import { getLocalStorageTyped, LocalStorageTypes } from 'src/util/storage'
 import BackupStatus from './BackupStatus'
 import { BACKUP_STATUS_MESSAGES as messages } from '../../../notifications/constants'
 import { SUBSCRIPTIONS_URL } from 'src/constants'
-
-export type LastBackup = 'Never' | 'running' | number | null
-export type NextBackup = number | null
-
-export interface BackupTimes {
-    lastBackup?: LastBackup
-    nextBackup?: NextBackup
-}
-
-export type BackupLocation = 'google-drive' | 'local'
+import { BackupLocation, BackupStatusType, BackupTimes } from 'src/backup/types'
 
 interface Props {
     checkedIcon: string
@@ -29,13 +20,7 @@ interface State {
     backupLocation: BackupLocation
     hover: boolean
     showAutomaticBackupSubscription: boolean
-    backupStatus: LocalStorageTypes['backup-status']
-}
-
-export interface BackupUIState {
-    state: 'success' | 'fail' | 'autoBackup' | 'no_backup'
-    header?: string
-    message?: string
+    backupStatus: BackupStatusType
 }
 
 class BackupStatusContainer extends Component<Props, State> {
@@ -141,6 +126,11 @@ interface BackupUIStateDependencies
         | 'backupStatus'
     > {}
 
+export interface BackupUIState {
+    state: 'success' | 'fail' | 'autoBackup' | 'no_backup'
+    header?: string
+    message?: string
+}
 export const calcBackupUIState = (
     options: BackupUIStateDependencies,
 ): BackupUIState => {

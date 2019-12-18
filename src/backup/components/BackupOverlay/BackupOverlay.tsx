@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import moment from 'moment'
-import ToggleSwitch from './ToggleSwitch'
+import ToggleSwitch from '../../../common-ui/components/ToggleSwitch'
 
-import ConfirmModalBtn from './ConfirmModalBtn'
-import { BackupTimes } from 'src/backup/components/BackupOverlay/BackupStatusContainer'
+import ConfirmModalBtn from '../../../common-ui/components/ConfirmModalBtn'
+import { BackupTimes } from 'src/backup/types'
 const styles = require('./BackupOverlay.css')
 
 interface Props {

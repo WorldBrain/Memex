@@ -1,11 +1,9 @@
 import React from 'react'
 import ActionButton from '../../../notifications/components/ActionButton'
 import classNames from 'classnames'
-import {
-    BackupTimes,
-    BackupUIState,
-} from 'src/backup/components/BackupOverlay/BackupStatusContainer'
-import BackupOverlay from 'src/common-ui/components/BackupOverlay'
+import { BackupUIState } from 'src/backup/components/BackupOverlay/BackupStatusContainer'
+import BackupOverlay from 'src/backup/components/BackupOverlay/BackupOverlay'
+import { BackupTimes } from 'src/backup/types'
 
 const styles = require('./BackupStatus.css')
 

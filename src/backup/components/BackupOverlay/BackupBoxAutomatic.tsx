@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import BackupOverlay from 'src/common-ui/components/BackupOverlay'
+import BackupOverlay from 'src/backup/components/BackupOverlay/BackupOverlay'
 
 const BackupBoxAutomatic = (props: Props) => {
     return (

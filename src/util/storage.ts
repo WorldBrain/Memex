@@ -1,15 +1,8 @@
 import { Browser, browser } from 'webextension-polyfill-ts'
+import { BackupStatusType } from 'src/backup/types'
 
 export interface LocalStorageTypes {
-    'backup-status': {
-        state: 'no_backup' | 'success' | 'fail'
-        backupId:
-            | 'no_backup'
-            | 'success'
-            | 'backup_error'
-            | 'drive_size_empty'
-            | 'auto_backup_expired'
-    }
+    'backup-status': BackupStatusType
 }
 
 export async function getLocalStorageTyped<

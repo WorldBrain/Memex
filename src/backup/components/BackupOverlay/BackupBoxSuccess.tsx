@@ -1,5 +1,5 @@
 import React from 'react'
-import BackupOverlay from 'src/common-ui/components/BackupOverlay'
+import BackupOverlay from 'src/backup/components/BackupOverlay/BackupOverlay'
 
 const BackupBoxSuccess = (props: Props) => {
     return (
