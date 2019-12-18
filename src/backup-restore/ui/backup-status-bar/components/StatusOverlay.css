@@ -1,4 +1,4 @@
-@value colors: '../../../common-ui/colors.css';
+@value colors: '../../../../common-ui/colors.css';
 @value color11, color6, color12, radius3 from colors;
 
 .overlay {
@@ -16,7 +16,7 @@
     z-index: 999999;
     background: white;
     background-color: white;
-    composes: toolTips from '../../../common-ui/elements.css';
+    composes: toolTips from '../../../../common-ui/elements.css';
 
     /* &:disabled,
     &[disabled] {

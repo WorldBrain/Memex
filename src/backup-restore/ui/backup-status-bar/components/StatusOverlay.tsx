@@ -1,11 +1,11 @@
 import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import moment from 'moment'
-import ToggleSwitch from '../../../common-ui/components/ToggleSwitch'
+import ToggleSwitch from '../../../../common-ui/components/ToggleSwitch'
 
-import ConfirmModalBtn from '../../../common-ui/components/ConfirmModalBtn'
+import ConfirmModalBtn from '../../../../common-ui/components/ConfirmModalBtn'
 import { BackupTimes } from 'src/backup-restore/types'
-const styles = require('./BackupOverlay.css')
+const styles = require('./StatusOverlay.css')
 
 interface Props {
     header?: string
@@ -21,11 +21,11 @@ interface Props {
     onAutomaticBackupSelect: any
 }
 
-export default class BackupOverlay extends PureComponent<Props> {
+export default class StatusOverlay extends PureComponent<Props> {
     static DEF_ROOT_EL = 'div'
 
     static defaultProps = {
-        rootEl: BackupOverlay.DEF_ROOT_EL,
+        rootEl: StatusOverlay.DEF_ROOT_EL,
     }
     overlayRoot: any
 

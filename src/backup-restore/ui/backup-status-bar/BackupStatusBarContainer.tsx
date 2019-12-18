@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { getLocalStorageTyped, LocalStorageTypes } from 'src/util/storage'
-import BackupStatus from './BackupStatus'
+import StatusBar from './components/StatusBar'
 import { BACKUP_STATUS_MESSAGES as messages } from '../../../notifications/constants'
 import { SUBSCRIPTIONS_URL } from 'src/constants'
 import {
@@ -27,7 +27,7 @@ interface State {
     backupStatus: BackupStatusType
 }
 
-class BackupStatusContainer extends Component<Props, State> {
+class BackupStatusBar extends Component<Props, State> {
     static propTypes = {
         checkedIcon: PropTypes.string,
         crossIcon: PropTypes.string,
@@ -106,7 +106,7 @@ class BackupStatusContainer extends Component<Props, State> {
         const backupUIState = calcBackupUIState(this.state)
 
         return (
-            <BackupStatus
+            <StatusBar
                 onMouseEnter={this.onMouseEnterHandler}
                 onMouseLeave={this.onMouseLeaveHandler}
                 hover={hover}
@@ -212,4 +212,4 @@ export const calcBackupUIState = (
     }
 }
 
-export default BackupStatusContainer
+export default BackupStatusBar

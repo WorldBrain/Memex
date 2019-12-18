@@ -8,11 +8,11 @@ import ProgressStepContainer from 'src/common-ui/components/progress-step-contai
 import OnboardingTooltip from 'src/overview/onboarding/components/onboarding-tooltip'
 import { SyncDevicesPane } from 'src/sync/components/SyncDevicesPane'
 import { SyncDevice } from 'src/sync/components/types'
-import BackupStatusContainer, {
+import BackupStatusBar, {
     BackupUIState,
     calcBackupUIState,
-} from 'src/backup-restore/ui/backup-overlay/BackupStatusContainer'
-import BackupStatus from 'src/backup-restore/ui/backup-overlay/BackupStatus'
+} from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
+import StatusBar from 'src/backup-restore/ui/backup-status-bar/components/StatusBar'
 import { LocalStorageTypes } from 'src/util/storage'
 
 storiesOf('ProgressContainer', module)
@@ -99,7 +99,7 @@ const backupStatus = {
 
 storiesOf('Backup Modules - Overlay', module)
     .add('Status - no backupTimes (no automatic backups)', () => (
-        <BackupStatus
+        <StatusBar
             {...propDefaultsBackupStatus}
             backupTimes={{}}
             isAutomaticBackupAllowed={false}
@@ -114,7 +114,7 @@ storiesOf('Backup Modules - Overlay', module)
         />
     ))
     .add('Status - lastBackup: Never (no automatic backups)', () => (
-        <BackupStatus
+        <StatusBar
             {...propDefaultsBackupStatus}
             backupTimes={{ lastBackup: 'Never' }}
             isAutomaticBackupAllowed={false}
@@ -129,7 +129,7 @@ storiesOf('Backup Modules - Overlay', module)
         />
     ))
     .add('Status - lastBackup: Running (no automatic backups)', () => (
-        <BackupStatus
+        <StatusBar
             {...propDefaultsBackupStatus}
             backupTimes={{ lastBackup: 'running' }}
             isAutomaticBackupAllowed={false}
@@ -144,7 +144,7 @@ storiesOf('Backup Modules - Overlay', module)
         />
     ))
     .add('Status - lastBackup: past (no automatic backups)', () => (
-        <BackupStatus
+        <StatusBar
             {...propDefaultsBackupStatus}
             backupTimes={{ lastBackup: Date.now() - 10000 }}
             isAutomaticBackupAllowed={false}
@@ -161,7 +161,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add(
         'Status - lastBackup: past, nextBackup:soon (allowed automatic backups)',
         () => (
-            <BackupStatus
+            <StatusBar
                 {...propDefaultsBackupStatus}
                 backupTimes={{ lastBackup: Date.now() - 10000 }}
                 isAutomaticBackupAllowed={true}
@@ -179,7 +179,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add(
         'Status - lastBackup: past, nextBackup:soon (allowed&enabled automatic backups)',
         () => (
-            <BackupStatus
+            <StatusBar
                 {...propDefaultsBackupStatus}
                 backupTimes={{
                     lastBackup: Date.now() - 10000,
@@ -198,7 +198,7 @@ storiesOf('Backup Modules - Overlay', module)
         ),
     )
     .add('Status - status: success (allowed&enabled automatic backups)', () => (
-        <BackupStatus
+        <StatusBar
             {...propDefaultsBackupStatus}
             backupTimes={{
                 lastBackup: Date.now() - 10000,
@@ -221,7 +221,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add(
         'Status - status: auto_backup_expired (allowed&enabled automatic backups)',
         () => (
-            <BackupStatus
+            <StatusBar
                 {...propDefaultsBackupStatus}
                 backupTimes={{
                     lastBackup: Date.now() - 10000,
@@ -245,7 +245,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add(
         'Status - status: backup_error (allowed&enabled automatic backups)',
         () => (
-            <BackupStatus
+            <StatusBar
                 {...propDefaultsBackupStatus}
                 backupTimes={{
                     lastBackup: Date.now() - 10000,
@@ -269,7 +269,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add(
         'Status - status: fail drive_size_empty (allowed&enabled automatic backups)',
         () => (
-            <BackupStatus
+            <StatusBar
                 {...propDefaultsBackupStatus}
                 backupTimes={{
                     lastBackup: Date.now() - 10000,
@@ -291,7 +291,7 @@ storiesOf('Backup Modules - Overlay', module)
         ),
     )
     .add('Status - status: showAutomaticBackupSubscription', () => (
-        <BackupStatus
+        <StatusBar
             {...propDefaultsBackupStatus}
             backupTimes={{
                 lastBackup: Date.now() - 100000,
@@ -313,7 +313,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add(
         'Status - status: fail&success?? (allowed&enabled automatic backups)',
         () => (
-            <BackupStatus
+            <StatusBar
                 {...propDefaultsBackupStatus}
                 backupTimes={{
                     lastBackup: Date.now() - 10000,

@@ -1,11 +1,11 @@
 import React from 'react'
-import ActionButton from '../../../notifications/components/ActionButton'
+import ActionButton from '../../../../notifications/components/ActionButton'
 import classNames from 'classnames'
-import { BackupUIState } from 'src/backup-restore/ui/backup-overlay/BackupStatusContainer'
-import BackupOverlay from 'src/backup-restore/ui/backup-overlay/BackupOverlay'
+import { BackupUIState } from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
+import StatusOverlay from 'src/backup-restore/ui/backup-status-bar/components/StatusOverlay'
 import { BackupTimes } from 'src/backup-restore/types'
 
-const styles = require('./BackupStatus.css')
+const styles = require('./StatusBar.css')
 
 interface Props {
     backupTimes: BackupTimes
@@ -19,7 +19,7 @@ interface Props {
     paymentUrl: string
 }
 
-const BackupStatus = (props: Props) => {
+const StatusBar = (props: Props) => {
     const backupProps = {
         isAutomaticBackupAllowed: props.isAutomaticBackupAllowed,
         isAutomaticBackupEnabled: props.isAutomaticBackupEnabled,
@@ -61,7 +61,7 @@ const BackupStatus = (props: Props) => {
                     {props.hover && props.backupTimes && (
                         <div>
                             {props.backupUIState.state === 'success' && (
-                                <BackupOverlay
+                                <StatusOverlay
                                     {...backupProps}
                                     crossIcon={'img/cross.svg'}
                                 >
@@ -75,10 +75,10 @@ const BackupStatus = (props: Props) => {
                                             {` Backup Now `}
                                         </ActionButton>
                                     </div>
-                                </BackupOverlay>
+                                </StatusOverlay>
                             )}
                             {props.backupUIState.state === 'fail' && (
-                                <BackupOverlay
+                                <StatusOverlay
                                     {...backupProps}
                                     crossIcon={'img/cross.svg'}
                                 >
@@ -92,10 +92,10 @@ const BackupStatus = (props: Props) => {
                                             {` Backup Now `}
                                         </ActionButton>
                                     </div>
-                                </BackupOverlay>
+                                </StatusOverlay>
                             )}
                             {props.backupUIState.state === 'autoBackup' && (
-                                <BackupOverlay
+                                <StatusOverlay
                                     {...backupProps}
                                     crossIcon={'img/cross.svg'}
                                     message={`Automatic backups every 15 minutes. Worry-free.`}
@@ -110,7 +110,7 @@ const BackupStatus = (props: Props) => {
                                             {` Upgrade Now `}
                                         </ActionButton>
                                     </div>
-                                </BackupOverlay>
+                                </StatusOverlay>
                             )}
                         </div>
                     )}
@@ -120,4 +120,4 @@ const BackupStatus = (props: Props) => {
     )
 }
 
-export default BackupStatus
+export default StatusBar

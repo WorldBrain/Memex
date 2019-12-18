@@ -1,32 +1,32 @@
 import React from 'react'
-import BackupOverlay from 'src/backup-restore/ui/backup-overlay/BackupOverlay'
+import StatusOverlay from 'src/backup-restore/ui/backup-status-bar/components/StatusOverlay'
 
-const BackupBoxSuccess = (props: Props) => {
+const InnerBoxFailed = (props: Props) => {
     return (
-        <BackupOverlay
+        <StatusOverlay
             header={props.header}
-            message={props.message}
+            errorMessage={props.errorMessage}
             lastBackup={props.lastBackup ? props.lastBackup : 'Never'}
-            nextBackup={props.nextBackup}
+            nextBackup={props.nextBackup ? props.nextBackup : null}
             isAutomaticBackupEnabled={props.isAutomaticBackupEnabled}
             isAutomaticBackupAllowed={props.isAutomaticBackupAllowed}
             onAutomaticBackupSelect={props.onAutomaticBackupSelect}
-            crossIcon={'/img/cross_blue.svg'}
+            crossIcon={'/img/cross_grey.svg'}
         >
             {props.children}
-        </BackupOverlay>
+        </StatusOverlay>
     )
 }
 
 interface Props {
-    header?: string
-    message?: string
+    errorMessage: string
+    header: string
     lastBackup: number
-    nextBackup?: number
+    nextBackup: number
     isAutomaticBackupEnabled: boolean
     isAutomaticBackupAllowed: boolean
     onAutomaticBackupSelect: (val: boolean) => void
     children: any
 }
 
-export default BackupBoxSuccess
+export default InnerBoxFailed
