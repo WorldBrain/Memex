@@ -59,7 +59,7 @@ export default class StatusOverlay extends PureComponent<Props> {
             onAutomaticBackupSelect,
         } = this.props
         return ReactDOM.createPortal(
-            <>
+            <div>
                 <div className={styles.overlay}>
                     {header && (
                         <div className={styles.overlayHeader}>{header}</div>
@@ -115,8 +115,11 @@ export default class StatusOverlay extends PureComponent<Props> {
                             defaultValue={isAutomaticBackupEnabled}
                             onChange={
                                 isAutomaticBackupAllowed
-                                    ? onAutomaticBackupSelect
-                                    : undefined
+                                    ? () => onAutomaticBackupSelect
+                                    : () => false
+                            }
+                            isChecked={
+                                isAutomaticBackupAllowed ? undefined : false
                             }
                         />
                     </div>
@@ -131,7 +134,7 @@ export default class StatusOverlay extends PureComponent<Props> {
                         </div>
                     )}
                 </div>
-            </>,
+            </div>,
             this.overlayRoot,
         )
     }
