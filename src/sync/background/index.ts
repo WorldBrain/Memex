@@ -18,6 +18,7 @@ import {
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { filterBlobsFromSyncLog } from './sync-logging'
 import { MemexExtSyncSettingStore } from './setting-store'
+import { resolvablePromise } from 'src/util/promises'
 
 export default class SyncBackground extends SyncService {
     remoteFunctions: PublicSyncInterface
@@ -25,6 +26,7 @@ export default class SyncBackground extends SyncService {
     getSharedSyncLog: () => Promise<SharedSyncLog>
 
     readonly syncedCollections: string[] = SYNCED_COLLECTIONS
+    readonly auth: AuthService
 
     constructor(options: {
         auth: AuthService
@@ -49,6 +51,8 @@ export default class SyncBackground extends SyncService {
             productVersion: options.appVersion,
             disableEncryption: true,
         })
+
+        this.auth = options.auth
 
         const bound = <Target, Key extends keyof Target>(
             object: Target,
@@ -83,7 +87,30 @@ export default class SyncBackground extends SyncService {
 
     async setup() {
         await this.continuousSync.setup()
-        this.firstContinuousSyncPromise = this.continuousSync.forceIncrementalSync()
+
+        const authChangePromise = resolvablePromise()
+        this.auth.events.once('changed', () => {
+            authChangePromise.resolve()
+        })
+
+        this.firstContinuousSyncPromise = (async () => {
+            const maybeSync = async () => {
+                const isAuthenticated = !!(await this.auth.getCurrentUser())
+                if (isAuthenticated) {
+                    await this.continuousSync.forceIncrementalSync()
+                }
+                return isAuthenticated
+            }
+            if (await maybeSync()) {
+                return
+            }
+
+            await Promise.race([
+                authChangePromise,
+                new Promise(resolve => setTimeout(resolve, 2000)),
+            ])
+            await maybeSync()
+        })()
     }
 
     async tearDown() {
