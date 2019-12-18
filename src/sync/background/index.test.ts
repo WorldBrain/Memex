@@ -30,6 +30,8 @@ import {
 } from './index.tests'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
+import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
+import delay from 'src/util/delay'
 
 const registerTest = it
 
@@ -43,8 +45,9 @@ type WithTestDependencies = (
 
 function makeTestFactory<TestSetup>(options: {
     withDependencies: WithTestDependencies
-    setupTest: (dependencies: TestDependencies) => Promise<TestSetup>
+    // setupTest: (dependencies: TestDependencies) => Promise<TestSetup>
     skip?: boolean
+    setupTest: (dependencies: TestDependencies) => TestSetup
 }) {
     interface Options {
         skip?: boolean
@@ -92,7 +95,13 @@ function extensionSyncTests(suiteOptions: {
     withDependencies: WithTestDependencies
     skip?: boolean
 }) {
-    interface TestSetup {
+    interface TestSetupConfig {
+        enablePostProcessing?: boolean
+    }
+
+    type TestSetup = (
+        conf?: TestSetupConfig,
+    ) => Promise<{
         devices: [
             BackgroundIntegrationTestSetup,
             BackgroundIntegrationTestSetup,
@@ -111,7 +120,8 @@ function extensionSyncTests(suiteOptions: {
         ) => BackgroundIntegrationTestSetup['backgroundModules']['customLists']['remoteFunctions']
         sharedSyncLog: SharedSyncLogStorage
         userId: number | string
-    }
+        fetchPageProcessor?: MockFetchPageDataProcessor
+    }>
 
     const expectedDeviceInfo = [
         {
@@ -128,44 +138,55 @@ function extensionSyncTests(suiteOptions: {
         },
     ]
 
-    async function setupTest(options: TestDependencies): Promise<TestSetup> {
-        const signalTransportFactory = lazyMemorySignalTransportFactory()
-        const devices: [
-            BackgroundIntegrationTestSetup,
-            BackgroundIntegrationTestSetup,
-        ] = [
-            await setupBackgroundIntegrationTest({
-                signalTransportFactory,
+    function setupTest(options: TestDependencies): TestSetup {
+        return async (conf = {}) => {
+            const signalTransportFactory = lazyMemorySignalTransportFactory()
+            const fetchPageProcessor = conf.enablePostProcessing
+                ? new MockFetchPageDataProcessor()
+                : undefined
+
+            const devices: [
+                BackgroundIntegrationTestSetup,
+                BackgroundIntegrationTestSetup,
+            ] = [
+                await setupBackgroundIntegrationTest({
+                    signalTransportFactory,
+                    sharedSyncLog: options.sharedSyncLog,
+                    includePostSyncProcessor: conf.enablePostProcessing,
+                    fetchPageProcessor,
+                }),
+                await setupBackgroundIntegrationTest({
+                    signalTransportFactory,
+                    sharedSyncLog: options.sharedSyncLog,
+                    includePostSyncProcessor: conf.enablePostProcessing,
+                    fetchPageProcessor,
+                }),
+            ]
+            const syncModule = (setup: BackgroundIntegrationTestSetup) =>
+                setup.backgroundModules.sync
+            const searchModule = (setup: BackgroundIntegrationTestSetup) =>
+                setup.backgroundModules.search
+            const customLists = (setup: BackgroundIntegrationTestSetup) =>
+                setup.backgroundModules.customLists.remoteFunctions
+
+            const userId: string = options.userId || uuid()
+
+            const forEachDevice = async (
+                f: (setup: BackgroundIntegrationTestSetup) => void,
+            ) => {
+                await Promise.all(devices.map(f))
+            }
+
+            return {
+                devices,
+                forEachDevice,
+                syncModule,
+                searchModule,
+                customLists,
                 sharedSyncLog: options.sharedSyncLog,
-            }),
-            await setupBackgroundIntegrationTest({
-                signalTransportFactory,
-                sharedSyncLog: options.sharedSyncLog,
-            }),
-        ]
-        const syncModule = (setup: BackgroundIntegrationTestSetup) =>
-            setup.backgroundModules.sync
-        const searchModule = (setup: BackgroundIntegrationTestSetup) =>
-            setup.backgroundModules.search
-        const customLists = (setup: BackgroundIntegrationTestSetup) =>
-            setup.backgroundModules.customLists.remoteFunctions
-
-        const userId: string = options.userId || uuid()
-
-        const forEachDevice = async (
-            f: (setup: BackgroundIntegrationTestSetup) => void,
-        ) => {
-            await Promise.all(devices.map(f))
-        }
-
-        return {
-            devices,
-            forEachDevice,
-            syncModule,
-            searchModule,
-            customLists,
-            sharedSyncLog: options.sharedSyncLog,
-            userId,
+                userId,
+                fetchPageProcessor,
+            }
         }
     }
 
@@ -175,7 +196,11 @@ function extensionSyncTests(suiteOptions: {
     })
 
     it('should not do anything if not enabled', async (setup: TestSetup) => {
-        const { devices, syncModule, forEachDevice: forEachSetup } = setup
+        const {
+            devices,
+            syncModule,
+            forEachDevice: forEachSetup,
+        } = await setup()
         await forEachSetup(s => syncModule(s).setup())
 
         expect(syncModule(devices[0]).continuousSync.enabled).toBe(false)
@@ -197,7 +222,7 @@ function extensionSyncTests(suiteOptions: {
             searchModule,
             forEachDevice: forEachSetup,
             userId,
-        } = setup
+        } = await setup()
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
 
@@ -326,7 +351,7 @@ function extensionSyncTests(suiteOptions: {
             syncModule,
             sharedSyncLog,
             userId,
-        } = setup
+        } = await setup()
 
         const deviceIds = [
             await sharedSyncLog.createDeviceId({ userId }),
@@ -391,7 +416,7 @@ function extensionSyncTests(suiteOptions: {
             syncModule,
             sharedSyncLog,
             userId,
-        } = setup
+        } = await setup()
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
 
@@ -440,13 +465,95 @@ function extensionSyncTests(suiteOptions: {
         })
     })
 
+    it('should fetch missing data on post-sync if enabled', async (setup: TestSetup) => {
+        const {
+            devices,
+            syncModule,
+            sharedSyncLog,
+            userId,
+            fetchPageProcessor,
+        } = await setup({ enablePostProcessing: true })
+
+        const mockPage = {
+            url: 'test.com',
+            domain: 'test.com',
+            hostname: 'test.com',
+            fullUrl: 'http://test.com',
+            fullTitle: 'Test',
+            text: 'Test',
+            tags: [],
+            terms: ['test'],
+            titleTerms: ['test'],
+            urlTerms: [],
+        }
+
+        fetchPageProcessor.mockPage = mockPage
+
+        devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
+        devices[1].authService.setUser({ ...TEST_USER, id: userId as string })
+
+        const deviceIds = [
+            await sharedSyncLog.createDeviceId({ userId }),
+            await sharedSyncLog.createDeviceId({ userId }),
+        ]
+
+        await devices[0].browserLocalStorage.set({
+            [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
+            [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[0],
+        })
+        await devices[1].browserLocalStorage.set({
+            [SYNC_STORAGE_AREA_KEYS.continuousSyncEnabled]: true,
+            [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[1],
+        })
+
+        await syncModule(devices[0]).setup()
+        await syncModule(devices[0]).firstContinuousSyncPromise
+
+        await devices[0].backgroundModules.search.searchIndex.addPage({
+            rejectNoContent: false,
+            pageDoc: {
+                url: mockPage.fullUrl,
+                content: {},
+            },
+        })
+
+        await devices[0].backgroundModules.sync.continuousSync.forceIncrementalSync(
+            { debug: true },
+        )
+        await syncModule(devices[1]).setup()
+        await syncModule(devices[1]).firstContinuousSyncPromise
+
+        const initiatorStorageContents = await getStorageContents(
+            devices[0].storageManager,
+        )
+        expect(initiatorStorageContents.pages.length).toBe(1)
+        expect(initiatorStorageContents.pages[0]).not.toEqual(mockPage)
+        expect(initiatorStorageContents.pages[0]).toEqual({
+            url: mockPage.url,
+            fullUrl: mockPage.fullUrl,
+            domain: mockPage.domain,
+            hostname: mockPage.hostname,
+            fullTitle: undefined,
+            text: undefined,
+            terms: [],
+            titleTerms: [],
+            urlTerms: [],
+        })
+
+        const receiverStorageContents = await getStorageContents(
+            devices[1].storageManager,
+        )
+        expect(receiverStorageContents.pages.length).toBe(1)
+        expect(receiverStorageContents.pages[0]).toEqual(mockPage)
+    })
+
     it('should merge data if do an initial sync to a device which already has some data', async (setup: TestSetup) => {
         const {
             syncModule,
             forEachDevice: forEachSetup,
             devices,
             userId,
-        } = setup
+        } = await setup()
         await forEachSetup(s => syncModule(s).setup())
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
@@ -509,7 +616,7 @@ function extensionSyncTests(suiteOptions: {
                 searchModule,
                 forEachDevice: forEachSetup,
                 userId,
-            } = params.setup
+            } = await params.setup()
 
             await forEachSetup(s => syncModule(s).setup())
             devices[0].authService.setUser({
@@ -561,7 +668,7 @@ function extensionSyncTests(suiteOptions: {
         }
 
         it('should not include pages in filtered initial Sync unless included in a custom list', async (setup: TestSetup) => {
-            const { customLists } = setup
+            const { customLists } = await setup()
 
             await runPassiveDataTest({
                 setup,
@@ -606,12 +713,19 @@ function mobileSyncTests(suiteOptions: {
     withDependencies: WithTestDependencies
     skip?: boolean
 }) {
-    interface TestSetup {
+    interface TestSetupConfig {
+        enablePostProcessing?: boolean
+    }
+
+    type TestSetup = (
+        conf?: TestSetupConfig,
+    ) => Promise<{
+        fetchPageProcessor?: MockFetchPageDataProcessor
         devices: {
             extension: BackgroundIntegrationTestSetup
             mobile: MobileIntegrationTestSetup
         }
-    }
+    }>
 
     const expectedDeviceInfo = [
         {
@@ -628,28 +742,38 @@ function mobileSyncTests(suiteOptions: {
         },
     ]
 
-    async function setupTest(
-        dependencies: TestDependencies,
-    ): Promise<TestSetup> {
-        const signalTransportFactory = lazyMemorySignalTransportFactory()
-        const devices: TestSetup['devices'] = {
-            extension: await setupBackgroundIntegrationTest({
-                signalTransportFactory,
-                sharedSyncLog: dependencies.sharedSyncLog,
-            }),
-            mobile: await setupMobileIntegrationTest({
-                signalTransportFactory,
-                sharedSyncLog: dependencies.sharedSyncLog,
-            }),
-        }
-        const userId: string = dependencies.userId || uuid()
-        devices.extension.authService.setUser({
-            ...TEST_USER,
-            id: userId as string,
-        })
-        // devices.app.backgroundModules.auth.userId = userId
+    function setupTest(dependencies: TestDependencies): TestSetup {
+        return async (conf: TestSetupConfig = {}) => {
+            const signalTransportFactory = lazyMemorySignalTransportFactory()
+            const fetchPageProcessor = conf.enablePostProcessing
+                ? new MockFetchPageDataProcessor()
+                : undefined
 
-        return { devices }
+            const devices = {
+                extension: await setupBackgroundIntegrationTest({
+                    signalTransportFactory,
+                    sharedSyncLog: dependencies.sharedSyncLog,
+                    fetchPageProcessor,
+                }),
+                mobile: await setupMobileIntegrationTest({
+                    signalTransportFactory,
+                    sharedSyncLog: dependencies.sharedSyncLog,
+                }),
+            }
+
+            const userId: string = dependencies.userId || uuid()
+
+            devices.extension.authService.setUser({
+                ...TEST_USER,
+                id: userId as string,
+            })
+            devices.mobile.services.sync['options'].auth['setUser']({
+                ...TEST_USER,
+                id: userId as string,
+            })
+
+            return { devices, fetchPageProcessor }
+        }
     }
 
     const removeUnsyncedCollectionFromStorageContents = async (
@@ -708,7 +832,7 @@ function mobileSyncTests(suiteOptions: {
     })
 
     it('should do an initial sync from extension to mobile', async (setup: TestSetup) => {
-        const { devices } = setup
+        const { devices } = await setup()
 
         await insertIntegrationTestData(devices.extension)
         const extensionStorageContents = await getExtensionStorageContents(
@@ -729,7 +853,7 @@ function mobileSyncTests(suiteOptions: {
     })
 
     it('should merge during initial sync from extension to mobile', async (setup: TestSetup) => {
-        const { devices } = setup
+        const { devices } = await setup()
 
         await insertIntegrationTestData(devices.extension)
         const extensionStorageContents = await getExtensionStorageContents(
@@ -761,7 +885,7 @@ function mobileSyncTests(suiteOptions: {
     })
 
     it('should be able to do a two way initial sync from extension to mobile', async (setup: TestSetup) => {
-        const { devices } = setup
+        const { devices } = await setup()
 
         await insertIntegrationTestData(devices.extension, {
             collections: {
@@ -818,7 +942,7 @@ function mobileSyncTests(suiteOptions: {
     })
 
     it('should log and transfer changes made during initial sync from ext to app', async (setup: TestSetup) => {
-        const { devices } = setup
+        const { devices } = await setup()
 
         await insertIntegrationTestData(devices.extension)
         const extensionStorageContents = await getExtensionStorageContents(

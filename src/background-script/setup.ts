@@ -26,6 +26,7 @@ import {
 } from 'src/imports/background/state-manager'
 import { setupImportBackgroundModule } from 'src/imports/background'
 import SyncBackground from 'src/sync/background'
+import { PostReceiveProcessor } from 'src/sync/background/post-receive-processor'
 import BackgroundScript from '.'
 import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
@@ -36,12 +37,17 @@ import {
     DevAuthState,
 } from 'src/authentication/background/setup'
 import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
+import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
+import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
+import { FetchPageProcessor } from 'src/page-analysis/background/types'
+import { Page } from 'src/search'
 
 export interface BackgroundModules {
     auth: AuthBackground
     notifications: NotificationBackground
     social: SocialBackground
     activityLogger: ActivityLoggerBackground
+    connectivityChecker: ConnectivityCheckerBackground
     directLinking: DirectLinkingBackground
     search: SearchBackground
     eventLog: EventLogBackground
@@ -52,6 +58,7 @@ export interface BackgroundModules {
     sync: SyncBackground
     bgScript: BackgroundScript
     features: FeatureOptIns
+    pageFetchBacklog: PageFetchBacklogBackground
 }
 
 export function createBackgroundModules(options: {
@@ -59,10 +66,12 @@ export function createBackgroundModules(options: {
     browserAPIs: Browser
     signalTransportFactory: SignalTransportFactory
     getSharedSyncLog: () => Promise<SharedSyncLog>
-    tabManager?: TabManager
     localStorageChangesManager: StorageChangesManager
+    fetchPageDataProcessor: FetchPageProcessor
+    tabManager?: TabManager
     auth?: AuthBackground
     authOptions?: { devAuthState: DevAuthState }
+    includePostSyncProcessor?: boolean
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
@@ -91,11 +100,34 @@ export function createBackgroundModules(options: {
         options.auth ||
         new AuthBackground(createAuthDependencies(options.authOptions))
 
+    const connectivityChecker = new ConnectivityCheckerBackground({
+        xhr: new XMLHttpRequest(),
+    })
+
+    const pageFetchBacklog = new PageFetchBacklogBackground({
+        storageManager,
+        connectivityChecker,
+        fetchPageData: options.fetchPageDataProcessor,
+        storePageContent: async content => {
+            const page = new Page(storageManager, content)
+            await page.loadRels()
+            await page.save()
+        },
+    })
+
+    const postReceiveProcessor = options.includePostSyncProcessor
+        ? new PostReceiveProcessor({
+              pageFetchBacklog,
+              fetchPageData: options.fetchPageDataProcessor,
+          }).processor
+        : undefined
+
     return {
         auth,
         notifications,
         social,
         activityLogger,
+        connectivityChecker,
         directLinking: new DirectLinkingBackground({
             browserAPIs: options.browserAPIs,
             storageManager,
@@ -132,9 +164,11 @@ export function createBackgroundModules(options: {
             getSharedSyncLog: options.getSharedSyncLog,
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
+            postReceiveProcessor,
         }),
         features: new FeatureOptIns(),
         bgScript,
+        pageFetchBacklog,
     }
 }
 
@@ -169,6 +203,7 @@ export async function setupBackgroundModules(
     backgroundModules.bgScript.setupRemoteFunctions()
     backgroundModules.bgScript.setupWebExtAPIHandlers()
     backgroundModules.bgScript.setupAlarms(alarms)
+    backgroundModules.pageFetchBacklog.setupBacklogProcessing()
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()

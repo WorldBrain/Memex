@@ -1,11 +1,13 @@
 import { Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
+import { SyncPostReceiveProcessor } from '@worldbrain/storex-sync'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
 
 import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 import SyncService, {
+    MemexInitialSync,
     SignalTransportFactory,
 } from '@worldbrain/memex-common/lib/sync'
 import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
@@ -21,6 +23,7 @@ import { MemexExtSyncSettingStore } from './setting-store'
 import { resolvablePromise } from 'src/util/promises'
 
 export default class SyncBackground extends SyncService {
+    initialSync: MemexInitialSync
     remoteFunctions: PublicSyncInterface
     firstContinuousSyncPromise?: Promise<void>
     getSharedSyncLog: () => Promise<SharedSyncLog>
@@ -35,6 +38,7 @@ export default class SyncBackground extends SyncService {
         getSharedSyncLog: () => Promise<SharedSyncLog>
         browserAPIs: Pick<Browser, 'storage'>
         appVersion: string
+        postReceiveProcessor?: SyncPostReceiveProcessor
     }) {
         super({
             ...options,
@@ -42,6 +46,7 @@ export default class SyncBackground extends SyncService {
             clientSyncLog: new MemexExtClientSyncLogStorage({
                 storageManager: options.storageManager,
             }),
+            disableEncryption: true,
             devicePlatform: 'browser',
             syncInfoStorage: new MemexExtSyncInfoStorage({
                 storageManager: options.storageManager,
@@ -49,7 +54,7 @@ export default class SyncBackground extends SyncService {
             settingStore: new MemexExtSyncSettingStore(options),
             productType: 'ext',
             productVersion: options.appVersion,
-            disableEncryption: true,
+            postReceiveProcessor: options.postReceiveProcessor,
         })
 
         this.auth = options.auth
