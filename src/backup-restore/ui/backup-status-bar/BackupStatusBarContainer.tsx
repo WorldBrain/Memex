@@ -41,7 +41,10 @@ class BackupStatusBar extends Component<Props, State> {
     }
 
     state = {
-        backupTimes: null,
+        backupTimes: {
+            nextBackup: null,
+            lastBackup: null,
+        } as BackupTimes,
         backupLocation: null,
         backupStatus: {
             state: 'no_backup',

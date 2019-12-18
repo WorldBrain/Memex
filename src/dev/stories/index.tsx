@@ -8,10 +8,7 @@ import ProgressStepContainer from 'src/common-ui/components/progress-step-contai
 import OnboardingTooltip from 'src/overview/onboarding/components/onboarding-tooltip'
 import { SyncDevicesPane } from 'src/sync/components/SyncDevicesPane'
 import { SyncDevice } from 'src/sync/components/types'
-import BackupStatusBar, {
-    BackupUIState,
-    calcBackupUIState,
-} from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
+import { calcBackupUIState } from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
 import StatusBar from 'src/backup-restore/ui/backup-status-bar/components/StatusBar'
 import { LocalStorageTypes } from 'src/util/storage'
 
@@ -101,7 +98,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add('Status - no backupTimes (no automatic backups)', () => (
         <StatusBar
             {...propDefaultsBackupStatus}
-            backupTimes={{}}
+            backupTimes={{ lastBackup: null, nextBackup: null }}
             isAutomaticBackupAllowed={false}
             isAutomaticBackupEnabled={false}
             backupUIState={calcBackupUIState({
@@ -116,7 +113,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add('Status - lastBackup: Never (no automatic backups)', () => (
         <StatusBar
             {...propDefaultsBackupStatus}
-            backupTimes={{ lastBackup: 'Never' }}
+            backupTimes={{ lastBackup: 'Never', nextBackup: null }}
             isAutomaticBackupAllowed={false}
             isAutomaticBackupEnabled={false}
             backupUIState={calcBackupUIState({
@@ -131,7 +128,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add('Status - lastBackup: Running (no automatic backups)', () => (
         <StatusBar
             {...propDefaultsBackupStatus}
-            backupTimes={{ lastBackup: 'running' }}
+            backupTimes={{ lastBackup: 'running', nextBackup: null }}
             isAutomaticBackupAllowed={false}
             isAutomaticBackupEnabled={false}
             backupUIState={calcBackupUIState({
@@ -146,7 +143,7 @@ storiesOf('Backup Modules - Overlay', module)
     .add('Status - lastBackup: past (no automatic backups)', () => (
         <StatusBar
             {...propDefaultsBackupStatus}
-            backupTimes={{ lastBackup: Date.now() - 10000 }}
+            backupTimes={{ lastBackup: Date.now() - 10000, nextBackup: null }}
             isAutomaticBackupAllowed={false}
             isAutomaticBackupEnabled={false}
             backupUIState={calcBackupUIState({
@@ -163,7 +160,10 @@ storiesOf('Backup Modules - Overlay', module)
         () => (
             <StatusBar
                 {...propDefaultsBackupStatus}
-                backupTimes={{ lastBackup: Date.now() - 10000 }}
+                backupTimes={{
+                    lastBackup: Date.now() - 10000,
+                    nextBackup: null,
+                }}
                 isAutomaticBackupAllowed={true}
                 isAutomaticBackupEnabled={false}
                 backupUIState={calcBackupUIState({
@@ -295,6 +295,7 @@ storiesOf('Backup Modules - Overlay', module)
             {...propDefaultsBackupStatus}
             backupTimes={{
                 lastBackup: Date.now() - 100000,
+                nextBackup: null,
             }}
             isAutomaticBackupAllowed={false}
             isAutomaticBackupEnabled={false}
