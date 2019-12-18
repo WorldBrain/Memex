@@ -68,7 +68,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         tabManager: options && options.tabManager,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,
-        includePostSyncProcessor: options.includePostSyncProcessor,
+        includePostSyncProcessor: options && options.includePostSyncProcessor,
         fetchPageDataProcessor:
             options &&
             (options.fetchPageProcessor || new MockFetchPageDataProcessor()),
