@@ -1,5 +1,5 @@
 import React from 'react'
-import BackupOverlay from 'src/backup/components/BackupOverlay/BackupOverlay'
+import BackupOverlay from 'src/backup/components/backup-overlay/BackupOverlay'
 
 const BackupBoxFailed = (props: Props) => {
     return (

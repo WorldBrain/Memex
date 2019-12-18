@@ -11,8 +11,8 @@ import { SyncDevice } from 'src/sync/components/types'
 import BackupStatusContainer, {
     BackupUIState,
     calcBackupUIState,
-} from 'src/backup/components/BackupOverlay/BackupStatusContainer'
-import BackupStatus from 'src/backup/components/BackupOverlay/BackupStatus'
+} from 'src/backup/components/backup-overlay/BackupStatusContainer'
+import BackupStatus from 'src/backup/components/backup-overlay/BackupStatus'
 import { LocalStorageTypes } from 'src/util/storage'
 
 storiesOf('ProgressContainer', module)

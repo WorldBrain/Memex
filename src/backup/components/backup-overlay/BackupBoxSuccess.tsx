@@ -1,18 +1,17 @@
 import React from 'react'
-import PropTypes from 'prop-types'
-import BackupOverlay from 'src/backup/components/BackupOverlay/BackupOverlay'
+import BackupOverlay from 'src/backup/components/backup-overlay/BackupOverlay'
 
-const BackupBoxAutomatic = (props: Props) => {
+const BackupBoxSuccess = (props: Props) => {
     return (
         <BackupOverlay
             header={props.header}
             message={props.message}
-            buttonText={props.buttonText}
-            buttonUrl={props.buttonUrl}
+            lastBackup={props.lastBackup ? props.lastBackup : 'Never'}
+            nextBackup={props.nextBackup}
             isAutomaticBackupEnabled={props.isAutomaticBackupEnabled}
             isAutomaticBackupAllowed={props.isAutomaticBackupAllowed}
             onAutomaticBackupSelect={props.onAutomaticBackupSelect}
-            crossIcon={'/img/cross_grey.svg'}
+            crossIcon={'/img/cross_blue.svg'}
         >
             {props.children}
         </BackupOverlay>
@@ -22,12 +21,12 @@ const BackupBoxAutomatic = (props: Props) => {
 interface Props {
     header?: string
     message?: string
-    buttonUrl?: string
-    buttonText?: string
+    lastBackup: number
+    nextBackup?: number
     isAutomaticBackupEnabled: boolean
     isAutomaticBackupAllowed: boolean
     onAutomaticBackupSelect: (val: boolean) => void
     children: any
 }
 
-export default BackupBoxAutomatic
+export default BackupBoxSuccess
