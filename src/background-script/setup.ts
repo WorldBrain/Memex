@@ -26,6 +26,7 @@ import {
 } from 'src/imports/background/state-manager'
 import { setupImportBackgroundModule } from 'src/imports/background'
 import SyncBackground from 'src/sync/background'
+import { PostReceiveProcessor } from 'src/sync/background/post-receive-processor'
 import BackgroundScript from '.'
 import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
@@ -70,6 +71,7 @@ export function createBackgroundModules(options: {
     tabManager?: TabManager
     auth?: AuthBackground
     authOptions?: { devAuthState: DevAuthState }
+    includePostSyncProcessor?: boolean
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
@@ -113,6 +115,13 @@ export function createBackgroundModules(options: {
         },
     })
 
+    const postReceiveProcessor = options.includePostSyncProcessor
+        ? new PostReceiveProcessor({
+              pageFetchBacklog,
+              fetchPageData: options.fetchPageDataProcessor,
+          }).processor
+        : undefined
+
     return {
         auth,
         notifications,
@@ -155,8 +164,7 @@ export function createBackgroundModules(options: {
             getSharedSyncLog: options.getSharedSyncLog,
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
-            fetchPageDataProcessor: options.fetchPageDataProcessor,
-            pageFetchBacklog,
+            postReceiveProcessor,
         }),
         features: new FeatureOptIns(),
         bgScript,

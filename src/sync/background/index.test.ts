@@ -152,10 +152,14 @@ function extensionSyncTests(suiteOptions: {
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
                     sharedSyncLog: options.sharedSyncLog,
+                    includePostSyncProcessor: conf.enablePostProcessing,
+                    fetchPageProcessor,
                 }),
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
                     sharedSyncLog: options.sharedSyncLog,
+                    includePostSyncProcessor: conf.enablePostProcessing,
+                    fetchPageProcessor,
                 }),
             ]
             const syncModule = (setup: BackgroundIntegrationTestSetup) =>
@@ -593,20 +597,16 @@ function extensionSyncTests(suiteOptions: {
         async function runPassiveDataTest(params: {
             setup: TestSetup
             insertDefaultPages: boolean
-            insertData: (
-                params: {
-                    device: BackgroundIntegrationTestSetup
-                },
-            ) => Promise<void>
-            checkData: (
-                params: {
-                    device: BackgroundIntegrationTestSetup
-                    expectData: (
-                        collections: string[],
-                        expacted: object,
-                    ) => Promise<void>
-                },
-            ) => Promise<void>
+            insertData: (params: {
+                device: BackgroundIntegrationTestSetup
+            }) => Promise<void>
+            checkData: (params: {
+                device: BackgroundIntegrationTestSetup
+                expectData: (
+                    collections: string[],
+                    expacted: object,
+                ) => Promise<void>
+            }) => Promise<void>
         }) {
             const {
                 devices,

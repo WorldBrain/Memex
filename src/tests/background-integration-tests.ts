@@ -34,6 +34,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     browserLocalStorage?: MemoryBrowserStorage
     debugStorageOperations?: boolean
     fetchPageProcessor?: FetchPageProcessor
+    includePostSyncProcessor?: boolean
 }): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
         global['URL'] = URL
@@ -67,6 +68,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         tabManager: options && options.tabManager,
         signalTransportFactory: options && options.signalTransportFactory,
         getSharedSyncLog: async () => options && options.sharedSyncLog,
+        includePostSyncProcessor: options.includePostSyncProcessor,
         fetchPageDataProcessor:
             options &&
             (options.fetchPageProcessor || new MockFetchPageDataProcessor()),

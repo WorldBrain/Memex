@@ -1,5 +1,6 @@
 import { Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
+import { SyncPostReceiveProcessor } from '@worldbrain/storex-sync'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
 import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
@@ -18,9 +19,6 @@ import {
 } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { filterBlobsFromSyncLog } from './sync-logging'
-import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
-import { PostReceiveProcessor } from './post-receive-processor'
-import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { MemexExtSyncSettingStore } from './setting-store'
 
 export default class SyncBackground extends SyncService {
@@ -38,8 +36,7 @@ export default class SyncBackground extends SyncService {
         getSharedSyncLog: () => Promise<SharedSyncLog>
         browserAPIs: Pick<Browser, 'storage'>
         appVersion: string
-        pageFetchBacklog?: PageFetchBacklogBackground
-        fetchPageDataProcessor?: FetchPageProcessor
+        postReceiveProcessor?: SyncPostReceiveProcessor
     }) {
         super({
             ...options,
@@ -55,10 +52,7 @@ export default class SyncBackground extends SyncService {
             settingStore: new MemexExtSyncSettingStore(options),
             productType: 'ext',
             productVersion: options.appVersion,
-            postReceiveProcessor: new PostReceiveProcessor({
-                pageFetchBacklog: options.pageFetchBacklog,
-                fetchPageData: options.fetchPageDataProcessor,
-            }).processor,
+            postReceiveProcessor: options.postReceiveProcessor,
         })
 
         const bound = <Target, Key extends keyof Target>(
