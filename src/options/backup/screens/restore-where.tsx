@@ -3,7 +3,7 @@ import React from 'react'
 // import classNames from 'classnames'
 import * as logic from './restore-where.logic'
 import { ProviderList } from 'src/options/backup/components/provider-list'
-import { PrimaryButton } from 'src/options/backup/components/primary-button'
+import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import { DownloadOverlay } from '../components/overlays'
 import { fetchBackupPath, checkServerStatus, changeBackupPath } from '../utils'
 const STYLES = require('../styles.css')

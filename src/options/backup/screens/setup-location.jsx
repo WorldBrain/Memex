@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { ProviderList } from '../components/provider-list'
-import { PrimaryButton } from '../components/primary-button'
+import { PrimaryButton } from '../../../common-ui/components/primary-button'
 import {
     DownloadOverlay,
     CopyOverlay,
@@ -11,7 +11,7 @@ import Styles from '../styles.css'
 import { checkServerStatus, fetchBackupPath, changeBackupPath } from '../utils'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
-export default class OnboardingWhere extends React.Component {
+export default class SetupLocation extends React.Component {
     state = {
         provider: null,
         path: null,
@@ -171,7 +171,7 @@ export default class OnboardingWhere extends React.Component {
     }
 }
 
-OnboardingWhere.propTypes = {
+SetupLocation.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onChangeLocalLocation: PropTypes.func.isRequired,
 }

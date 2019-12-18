@@ -23,17 +23,17 @@
 }
 
 .red {
-    composes: CTAwarning from 'src/common-ui/elements.css';
+    composes: CTAwarning from '../elements.css';
 }
 
 .text {
-    composes: CTA from '../../../common-ui/colors.css';
+    composes: CTA from '../colors.css';
 }
 
 .green {
-    composes: CTA from '../../../common-ui/colors.css';
+    composes: CTA from '../colors.css';
 }
 
 .white {
-    composes: CTA from '../../../common-ui/colors.css';
+    composes: CTA from '../colors.css';
 }

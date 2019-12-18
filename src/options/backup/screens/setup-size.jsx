@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import localStyles from './onboarding-3-size.css'
-import { PrimaryButton } from '../components/primary-button'
-import LoadingBlocker from '../components/loading-blocker'
+import localStyles from './setup-size.css'
+import { PrimaryButton } from '../../../common-ui/components/primary-button'
+import LoadingBlocker from '../../../common-ui/components/loading-blocker'
 import Styles from '../styles.css'
 
 export default class OnboardingSizeContainer extends React.Component {

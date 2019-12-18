@@ -3,9 +3,9 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { setLocalStorageTyped } from 'src/util/storage'
 const localStyles = require('./running-process.css')
 import { ProgressBar } from 'src/common-ui/components'
-import MovingDotsLabel from '../components/moving-dots-label'
-import { PrimaryButton } from '../components/primary-button'
-import LoadingBlocker from '../components/loading-blocker'
+import MovingDotsLabel from '../../../common-ui/components/moving-dots-label'
+import { PrimaryButton } from '../../../common-ui/components/primary-button'
+import LoadingBlocker from '../../../common-ui/components/loading-blocker'
 import { FailedOverlay } from '../components/overlays'
 const STYLES = require('../styles.css')
 

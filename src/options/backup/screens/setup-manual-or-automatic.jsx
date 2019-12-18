@@ -1,11 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import OnboardingBackupMode from '../components/onboarding-backup-mode'
-import { PrimaryButton } from '../components/primary-button'
+import { PrimaryButton } from '../../../common-ui/components/primary-button'
 import Styles from '../styles.css'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 
-class OnboardingHow extends React.Component {
+class SetupManualOrAutomatic extends React.Component {
     state = { mode: null }
 
     render() {
@@ -58,9 +58,9 @@ class OnboardingHow extends React.Component {
     }
 }
 
-export default withCurrentUser(OnboardingHow)
+export default withCurrentUser(SetupManualOrAutomatic)
 
-OnboardingHow.propTypes = {
+SetupManualOrAutomatic.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onBackRequested: PropTypes.func.isRequired,
     onSubscribeRequested: PropTypes.func.isRequired,

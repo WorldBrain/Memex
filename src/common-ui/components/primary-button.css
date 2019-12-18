@@ -1,5 +1,5 @@
 .primaryBtn {
-    composes: CTA from '../../../common-ui/colors.css';
+    composes: CTA from 'src/common-ui/colors.css';
     display: inline-block;
     cursor: pointer;
     padding: 10px 20px;
@@ -8,7 +8,7 @@
 }
 
 .disabled {
-    composes: CTA from '../../../common-ui/colors.css';
+    composes: CTA from 'src/common-ui/colors.css';
     opacity: 0.4;
     cursor: not-allowed;
 }

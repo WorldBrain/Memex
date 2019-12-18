@@ -10,7 +10,7 @@ import {
     PricingButtonWrapper,
     PricingPlanTitle,
 } from 'src/authentication/components/Subscription/pricing.style'
-import { PrimaryButton } from 'src/options/backup/components/primary-button'
+import { PrimaryButton } from 'src/common-ui/components/primary-button'
 
 const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 
