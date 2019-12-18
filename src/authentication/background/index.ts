@@ -2,11 +2,13 @@ import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 import {
     UserPlan,
     SubscriptionsService,
+    UserFeature,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 import {
     hasSubscribedBefore,
     hasValidPlan,
     getAuthorizedFeatures,
+    isAuthorizedForFeature,
 } from './utils'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
 import { AuthRemoteEvents, AuthRemoteFunctionsInterface } from './types'
@@ -40,7 +42,12 @@ export class AuthBackground {
                     await this.subscriptionService.getCurrentUserClaims(),
                 )
             },
-
+            isAuthorizedForFeature: async (feature: UserFeature) => {
+                return isAuthorizedForFeature(
+                    await this.subscriptionService.getCurrentUserClaims(),
+                    feature,
+                )
+            },
             hasSubscribedBefore: async () => {
                 return hasSubscribedBefore(
                     await this.subscriptionService.getCurrentUserClaims(),
