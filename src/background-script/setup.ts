@@ -124,6 +124,8 @@ export function createBackgroundModules(options: {
                 key: 'lastBackup',
             }),
             notifications,
+            checkAuthorizedForAutoBackup: async () =>
+                auth.remoteFunctions.isAuthorizedForFeature('backup'),
         }),
         sync: new SyncBackground({
             auth: auth.authService,

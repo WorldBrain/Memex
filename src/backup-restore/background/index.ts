@@ -15,7 +15,6 @@ import { ProcedureUiCommunication } from 'src/backup-restore/background/procedur
 import NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
 import { SearchIndex } from 'src/search'
-import { auth } from 'src/util/remote-functions-background'
 
 export * from './backend'
 
@@ -40,6 +39,7 @@ export class BackupBackgroundModule {
     automaticBackupEnabled?: boolean
     scheduledAutomaticBackupTimestamp?: number
     notifications: NotificationBackground
+    checkAuthorizedForAutoBackup: () => Promise<boolean>
 
     constructor({
         storageManager,
@@ -48,6 +48,7 @@ export class BackupBackgroundModule {
         createQueue = Queue,
         queueOpts = { autostart: true, concurrency: 1 },
         notifications,
+        checkAuthorizedForAutoBackup,
     }: {
         storageManager: Storex
         searchIndex: SearchIndex
@@ -55,12 +56,14 @@ export class BackupBackgroundModule {
         createQueue?: typeof Queue
         queueOpts?: QueueOpts
         notifications: NotificationBackground
+        checkAuthorizedForAutoBackup: () => Promise<boolean>
     }) {
         this.storageManager = storageManager
         this.storage = new BackupStorage({ storageManager })
         this.lastBackupStorage = lastBackupStorage
         this.changeTrackingQueue = createQueue(queueOpts)
         this.notifications = notifications
+        this.checkAuthorizedForAutoBackup = checkAuthorizedForAutoBackup
     }
 
     setupRemoteFunctions() {
@@ -261,8 +264,8 @@ export class BackupBackgroundModule {
         this.scheduleAutomaticBackupIfEnabled()
     }
 
-    async isAutomaticBackupAllowed() {
-        return auth.isAuthorizedForFeature('backup')
+    isAutomaticBackupAllowed = async () => {
+        return this.checkAuthorizedForAutoBackup()
     }
 
     isAutomaticBackupEnabled() {
