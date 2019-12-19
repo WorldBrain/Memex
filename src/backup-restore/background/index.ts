@@ -286,7 +286,10 @@ export class BackupBackgroundModule {
     }
 
     scheduleAutomaticBackup() {
-        if (this.automaticBackupTimeout || this.backupProcedure.running) {
+        if (
+            this.automaticBackupTimeout ||
+            (this.backupProcedure && this.backupProcedure.running)
+        ) {
             return
         }
 

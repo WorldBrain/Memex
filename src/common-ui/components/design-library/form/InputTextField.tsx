@@ -1,7 +1,10 @@
 import styled from 'styled-components'
-import { TypographyInputBody } from 'src/common-ui/components/design-library/typography'
 
-export const InputTextField = styled(TypographyInputBody)`
+export const InputTextField = styled.input`
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: left;
     border: none;
     outline: none;
     width: 100%;

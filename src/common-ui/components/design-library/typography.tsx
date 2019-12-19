@@ -17,14 +17,7 @@ export const TypographyHeadingPage = styled.span`
     margin-bottom: 2em;
 `
 
-export const TypographyInputBody = styled.input`
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    text-align: left;
-`
-
-export const TypographyInputTitle = styled.span`
+export const TypographyInputTitle = styled.h2`
     font-family: 'Inter', sans-serif;
     font-size: ${fontSizeTitle}px;
     font-weight: bold;

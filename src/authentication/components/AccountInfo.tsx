@@ -51,7 +51,7 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
                         </TypographyInputTitle>
                         <InputTextField
                             type={'text'}
-                            value={user.email}
+                            defaultValue={user.email}
                             readonly
                         />
                         <TypographyInputTitle>
@@ -60,28 +60,34 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
                         </TypographyInputTitle>
                         <InputTextField
                             type={'text'}
-                            value={user.displayName}
+                            defaultValue={user.displayName}
                             readonly
                         />
                         <input
                             type={'hidden'}
                             name={'Email Verified'}
-                            value={JSON.stringify(user.emailVerified)}
+                            defaultValue={JSON.stringify(user.emailVerified)}
+                            readOnly
                         />
                         <input
                             type={'hidden'}
                             name={'User ID'}
-                            value={user.id}
+                            defaultValue={user.id}
+                            readOnly
                         />
                         <input
                             type={'hidden'}
                             name={'Features'}
-                            value={JSON.stringify(features)}
+                            defaultValue={JSON.stringify(features)}
+                            readOnly
                         />
                         <input
                             type={'hidden'}
                             name={'Plans'}
-                            value={JSON.stringify(this.props.authorizedPlans)}
+                            defaultValue={JSON.stringify(
+                                this.props.authorizedPlans,
+                            )}
+                            readOnly
                         />
                     </div>
                 )}
