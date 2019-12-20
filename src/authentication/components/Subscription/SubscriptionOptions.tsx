@@ -1,17 +1,17 @@
 import * as React from 'react'
 import { UserSubscription } from 'src/authentication/ui/user-subscription'
-import Button from 'src/popup/components/Button'
 import { Helmet } from 'react-helmet'
 import { SubscriptionPriceBox } from 'src/authentication/components/Subscription/SubscriptionPriceBox'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { auth } from 'src/util/remote-functions-background'
-import {
-    PricingButtonWrapper,
-    PricingPlanTitle,
-} from 'src/authentication/components/Subscription/pricing.style'
+import { PricingPlanTitle } from 'src/authentication/components/Subscription/pricing.style'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
-
+import styled from 'styled-components'
+import {
+    TypographyHeadingSmall,
+    TypographyLink,
+} from 'src/common-ui/components/design-library/typography'
 const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 
 export const subscriptionConfig = {
@@ -29,17 +29,21 @@ interface Props {
 }
 
 interface State {
-    subscribed: boolean
+    subscribed: boolean | null
+    showSubscriptionOptions: boolean
 }
 
 export class SubscriptionOptions extends React.Component<Props, State> {
     chargebeeInstance: any
     userSubscription: UserSubscription
 
-    public state = { subscribed: false }
+    public state = { subscribed: null, showSubscriptionOptions: false }
 
     async componentDidMount() {
-        this.setState({ subscribed: await auth.hasSubscribedBefore() })
+        this.setState({
+            subscribed: await auth.hasSubscribedBefore(),
+            showSubscriptionOptions: false,
+        })
     }
 
     _initChargebee = (): void => {
@@ -101,7 +105,7 @@ export class SubscriptionOptions extends React.Component<Props, State> {
         })
     }
 
-    // TODO
+    // TODO: monthly / yearly picker as in website?
     renderMonthlyYearlyChoice() {
         // let activeStatus = true
         //
@@ -133,70 +137,127 @@ export class SubscriptionOptions extends React.Component<Props, State> {
         // )
     }
 
+    onClickShowSubscriptionOptions = () => {
+        this.setState({ showSubscriptionOptions: true })
+    }
+
     render() {
         return (
             <div className={''}>
                 <Helmet>
                     <script src={chargeBeeScriptSource} />
                 </Helmet>
-                <PricingPlanTitle className={''}>
-                    Subscription Options
-                </PricingPlanTitle>
 
                 {/*{this.renderMonthlyYearlyChoice()}*/}
+                {this.state.subscribed === true && (
+                    <AlreadySubscribedBox>
+                        <span> You're subscribed </span>
+                        <PrimaryButton onClick={this.openPortal}>
+                            Manage Existing Subscription
+                        </PrimaryButton>
 
-                <div style={styles.subscriptionOptionsContainer}>
-                    <SubscriptionPriceBox
-                        key={'SubscriptionBoxFree'}
-                        onClick={undefined}
-                        title={'Free'}
-                        price={undefined}
-                        infoItems={[
-                            'All offline features',
-                            'Manual Backups',
-                            'To your favorite cloud',
-                            'No account necessary',
-                        ]}
-                    />
-                    <SubscriptionPriceBox
-                        key={'SubscriptionBoxBackupsMonthly'}
-                        onClick={_ => this.openCheckoutBackupMonthly()}
-                        title={'Pro Monthly'}
-                        price={'€1.00'}
-                        infoItems={[
-                            "Everything in 'Free'",
-                            'Automatic Backups every 15 min',
-                            'To your favorite cloud',
-                            'Sync between your devices',
-                        ]}
-                        subscribed={this.props.plans.includes('pro-monthly')}
-                        manageSubscription={this.openPortal}
-                    />
-                    <SubscriptionPriceBox
-                        key={'SubscriptionBoxBackupsYearly'}
-                        onClick={_ => this.openCheckoutBackupYearly()}
-                        price={'€12.00'}
-                        title={'Pro Yearly'}
-                        infoItems={[
-                            "Everything in 'Free'",
-                            'Automatic Backups every 15 min',
-                            'To your favorite cloud',
-                            'Sync between your devices',
-                        ]}
-                        subscribed={this.props.plans.includes('pro-yearly')}
-                        manageSubscription={this.openPortal}
-                    />
-                </div>
+                        {!this.state.showSubscriptionOptions && (
+                            <SubscriptionOptionsButton>
+                                <span> or </span>
+                                <Spacer />
+                                <TypographyLink
+                                    onClick={
+                                        this.onClickShowSubscriptionOptions
+                                    }
+                                >
+                                    Show subscription options
+                                </TypographyLink>
+                            </SubscriptionOptionsButton>
+                        )}
+                    </AlreadySubscribedBox>
+                )}
 
-                {this.props.plans.length !== 0 && (
-                    <PrimaryButton onClick={this.openPortal}>
-                        Manage Subscription
-                    </PrimaryButton>
+                {(this.state.subscribed === false ||
+                    this.state.showSubscriptionOptions) && (
+                    <div>
+                        <PricingPlanTitle className={''}>
+                            Subscription Options
+                        </PricingPlanTitle>
+
+                        <div style={styles.subscriptionOptionsContainer}>
+                            <SubscriptionPriceBox
+                                key={'SubscriptionBoxFree'}
+                                onClick={undefined}
+                                title={'Free'}
+                                price={undefined}
+                                infoItems={[
+                                    'All offline features',
+                                    'Manual Backups',
+                                    'To your favorite cloud',
+                                    'No account necessary',
+                                ]}
+                            />
+                            <SubscriptionPriceBox
+                                key={'SubscriptionBoxBackupsMonthly'}
+                                onClick={_ => this.openCheckoutBackupMonthly()}
+                                title={'Pro Monthly'}
+                                price={'€1.00'}
+                                infoItems={[
+                                    "Everything in 'Free'",
+                                    'Automatic Backups every 15 min',
+                                    'To your favorite cloud',
+                                    'Sync between your devices',
+                                ]}
+                                subscribed={this.props.plans.includes(
+                                    'pro-monthly',
+                                )}
+                                manageSubscription={this.openPortal}
+                            />
+                            <SubscriptionPriceBox
+                                key={'SubscriptionBoxBackupsYearly'}
+                                onClick={_ => this.openCheckoutBackupYearly()}
+                                price={'€12.00'}
+                                title={'Pro Yearly'}
+                                infoItems={[
+                                    "Everything in 'Free'",
+                                    'Automatic Backups every 15 min',
+                                    'To your favorite cloud',
+                                    'Sync between your devices',
+                                ]}
+                                subscribed={this.props.plans.includes(
+                                    'pro-yearly',
+                                )}
+                                manageSubscription={this.openPortal}
+                            />
+                        </div>
+                    </div>
                 )}
             </div>
         )
     }
 }
+
+const AlreadySubscribedBox = styled.div`
+    max-width: 300px;
+    border-width: 3px;
+    border-radius: 5px;
+    border-style: solid;
+    border-color: rgb(92, 217, 166);
+    margin: auto auto;
+    margin-bottom: 20px;
+    padding: 20px;
+    text-align: center;
+`
+
+const SubscriptionOptionsButton = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+    align-content: space-around;
+    padding: 20px;
+    margin: 20px;
+    width: 200px;
+`
+
+const Spacer = styled.div`
+    margin: 15px;
+`
 
 const styles = {
     subscriptionOptionsContainer: {

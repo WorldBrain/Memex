@@ -94,7 +94,7 @@ export function OnboardingBackupMode({
                                 className={Styles.labelPremium}
                                 onClick={launchSubscriptionFlow}
                             >
-                                Upgrade
+                                Manage Subscription
                             </span>
                         )}
 

@@ -188,7 +188,7 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                                     onClick={this.openSubscriptionModal}
                                     color={'darkblue'}
                                 >
-                                    {'Upgrade'}
+                                    {'Subscriptions'}
                                 </SmallButton>
                             )}
                             <span
@@ -222,8 +222,8 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                     </div>
                 ) : null}
 
-                {!this.state.hasInitialBackup &&
-                    this.state.automaticBackupEnabled &&
+                {(!this.state.hasInitialBackup ||
+                    !this.state.automaticBackupEnabled) &&
                     automaticBackupsAllowed && (
                         <div>
                             <p className={styles.header2}>
@@ -231,19 +231,14 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                             </p>
                             <div className={styles.option}>
                                 <span className={styles.name}>
-                                    Automatic Backups Enabled
+                                    Automatic Backups Disabled
                                 </span>
                                 <SmallButton
                                     extraClass={localStyles.right}
-                                    onClick={() => {
-                                        window.open(
-                                            'https://worldbrain.io/community/view-subscription/',
-                                            '_blank',
-                                        )
-                                    }}
                                     color={'red'}
+                                    onClick={undefined}
                                 >
-                                    Cancel
+                                    Disabled
                                 </SmallButton>
                                 <span
                                     className={classNames(

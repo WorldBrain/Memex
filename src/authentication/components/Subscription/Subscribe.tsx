@@ -29,16 +29,14 @@ export class Subscribe extends React.PureComponent<Props> {
             <div className={''}>
                 {this.props.currentUser == null && (
                     <div>
-                        {
-                            ' Please Login or Create an account in order to subscribe'
-                        }
+                        <span>
+                            {
+                                ' Please Login or Create an account in order to subscribe'
+                            }
+                        </span>
                         <SignInScreen />
                     </div>
                 )}
-
-                {
-                    // todo: if currently subscribed, show to which
-                }
 
                 {this.props.currentUser != null && (
                     <div>

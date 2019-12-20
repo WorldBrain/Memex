@@ -7,7 +7,7 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
-import { LOGIN_URL, SUBSCRIPTIONS_URL } from 'src/constants'
+import { LOGIN_URL } from 'src/constants'
 import { ButtonSideMenu } from 'src/common-ui/components/design-library/buttons'
 import { MemexLogo } from 'src/common-ui/components/MemexLogo'
 
@@ -15,9 +15,6 @@ const handleLoginClick = () => {
     window.location.href = LOGIN_URL
 }
 
-const handleSubscriptionsClick = () => {
-    window.location.href = SUBSCRIPTIONS_URL
-}
 const handleLogOutClick = () => {
     return auth.signOut()
 }
@@ -48,11 +45,7 @@ const AccountMenu = (props: UserProps) => {
                     </ButtonSideMenu>
                 }
                 menuItems={[
-                    { label: 'Account Data', handler: handleLoginClick },
-                    {
-                        label: 'Subscriptions',
-                        handler: handleSubscriptionsClick,
-                    },
+                    { label: 'Account Info', handler: handleLoginClick },
                     { label: 'Log Out', handler: handleLogOutClick },
                 ]}
             />

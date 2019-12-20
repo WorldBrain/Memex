@@ -106,7 +106,6 @@ const styles = {
         fontFamily: 'Arial',
         fontSize: '13px',
         lineHeight: '15px',
-        minHeight: '300px',
         display: 'flex',
         flexDirection: 'column' as 'column',
     },

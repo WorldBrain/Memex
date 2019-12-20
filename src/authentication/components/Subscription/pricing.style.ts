@@ -6,20 +6,17 @@ import {
 
 const PricingTable = styled.div`
     border-radius: 5px;
-    padding: 60px 45px;
-    margin-bottom: 30px;
+    padding: 10px 13px;
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    min-height: 600px;
-    width: 35%;
-    max-width: 400px;
     margin-right: 20px;
 
     border-width: 3px;
     border-style: solid;
     border-color: rgb(92, 217, 166);
+    color: rgb(84, 73, 96);
 
     &.free-plan {
         border: 3px solid ${colorPrimary};
@@ -44,7 +41,7 @@ const PricingTable = styled.div`
     }
 
     @media (max-width: 767px) {
-        padding: 35px 25px;
+        padding: 10px 13px;
         width: 100%;
         min-height: 0;
     }
@@ -138,8 +135,9 @@ const ListItem = styled.div`
     &:last-child {
         margin-bottom: 0;
     }
-    .price_list_icon {
+    svg {
         color: #18d379;
+        fill: #18d379;
         margin-right: 10px;
     }
 `

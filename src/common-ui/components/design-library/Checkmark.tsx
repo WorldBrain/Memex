@@ -9,6 +9,7 @@ const Checkmark = props => (
         viewBox="0 0 16 16"
         color={colorPrimary}
         fill={colorPrimary}
+        style={{ color: colorPrimary }}
     >
         <path d="M13.5 2l-7.5 7.5-3.5-3.5-2.5 2.5 6 6 10-10z" />
     </svg>
@@ -17,6 +18,10 @@ const Checkmark = props => (
 export default styled(Checkmark)`
     display: inline-block;
     vertical-align: middle;
-    color: rgb(24, 211, 121);
-    margin-right: 10px;
+    color: ${colorPrimary};
+
+    svg {
+        color: ${colorPrimary};
+        margin-right: 10px;
+    }
 `

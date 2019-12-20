@@ -87,7 +87,7 @@ const StyledMenuHeader = styled.div`
 
 const DivOverlayParent = styled.div`
     position: relative;
-    top: -100px;
+    top: -60px;
 `
 
 const DivOverlayChild = styled.div`

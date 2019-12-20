@@ -10,6 +10,7 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 import { InputTextField } from 'src/common-ui/components/design-library/form/InputTextField'
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
+import { PrimaryButton } from 'src/common-ui/components/primary-button'
 
 interface Props {
     initiallyShowSubscriptionModal?: boolean
@@ -24,9 +25,11 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
 
     hideSubscriptionModal = () => {
         this.setState({ showSubscriptionModal: false })
+        // If the url has subscription, remove it
     }
 
     showSubscriptionModal = () => this.setState({ showSubscriptionModal: true })
+    // if the url does not have subscription, add it
 
     componentDidMount(): void {
         if (this.props.initiallyShowSubscriptionModal) {
@@ -39,7 +42,7 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
         const features = this.props.authorizedFeatures
         return (
             <FullPage>
-                <TypographyHeadingPage>My Account Data</TypographyHeadingPage>
+                <TypographyHeadingPage>My Account</TypographyHeadingPage>
                 {this.state.showSubscriptionModal === true && (
                     <SubscribeModal onClose={this.hideSubscriptionModal} />
                 )}
@@ -63,6 +66,11 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
                             defaultValue={user.displayName}
                             readonly
                         />
+
+                        <PrimaryButton onClick={this.showSubscriptionModal}>
+                            Manage Subscriptions
+                        </PrimaryButton>
+
                         <input
                             type={'hidden'}
                             name={'Email Verified'}
