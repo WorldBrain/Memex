@@ -28,6 +28,9 @@ import { DevAuthState } from 'src/authentication/background/setup'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
+import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
+import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import pipeline from 'src/search/pipeline'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -36,6 +39,10 @@ export async function main() {
     initSentry({ storageChangesManager: localStorageChangesManager })
 
     const getSharedSyncLog = createLazySharedSyncLog()
+    const fetchPageDataProcessor = new FetchPageDataProcessor({
+        fetchPageData,
+        pagePipeline: pipeline,
+    })
 
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
@@ -43,6 +50,7 @@ export async function main() {
         localStorageChangesManager,
         browserAPIs: browser,
         signalTransportFactory: createFirebaseSignalTransport,
+        fetchPageDataProcessor,
         getSharedSyncLog,
         authOptions: {
             devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,

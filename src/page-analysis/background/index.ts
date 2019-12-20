@@ -6,25 +6,26 @@ import makeScreenshot from './make-screenshot'
 import { runInTab } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
 
-/**
- * @typedef {Object} PageAnalysisResult
- * @property {any} content Object containing `fullText`, and other meta data extracted from the DOM.
- * @property {string} [favIcon] Data URL representing the favicon.
- * @property {string} [screenshot] Data URL representing the screenshot.
- */
+export type PageAnalyzer = (args: {
+    tabId: number
+    allowContent?: boolean
+    allowScreenshot?: boolean
+    allowFavIcon?: boolean
+}) => Promise<{
+    favIconURI: string
+    screenshotURI: string
+    content: any
+}>
 
 /**
  * Performs page content analysis on a given Tab's ID.
- *
- * @param {number} args.tabId ID of browser tab to use as data source.
- * @returns {Promise<PageAnalysisResult>}
  */
-export default async function analysePage({
+const analysePage: PageAnalyzer = async ({
     tabId,
     allowContent = true,
     allowScreenshot = true,
     allowFavIcon = true,
-}) {
+}) => {
     // Wait until its DOM has loaded, in case we got invoked before that.
     await whenPageDOMLoaded({ tabId })
 
@@ -48,3 +49,5 @@ export default async function analysePage({
     )
     return { favIconURI, screenshotURI, content: content || {} }
 }
+
+export default analysePage

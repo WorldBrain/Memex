@@ -43,6 +43,7 @@
                 "@worldbrain/memex-url-utils",
                 "@worldbrain/memex-stemmer",
                 "@worldbrain/memex-storage",
+                "@worldbrain/memex-common",
                 "src"
             ]
         ],
