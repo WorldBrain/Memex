@@ -69,19 +69,16 @@ export async function getStartScreen({
         ) {
             localStorage.removeItem('backup.onboarding.authenticating')
             return 'onboarding-size'
-        } else if (
-            isAuthenticated &&
-            !localStorage.getItem('backup.onboarding.where')
-        ) {
-            localStorage.removeItem('backup.onboarding.payment')
-            localStorage.removeItem('backup.onboarding.authenticating')
-            localStorage.removeItem('backup.onboarding')
-            return 'running-backup'
         } else {
             localStorage.removeItem('backup.onboarding.where')
             localStorage.removeItem('backup.onboarding')
         }
+
+        // If we're onboarding, but we don't know anything else, let's go to the first screen'
+        return 'onboarding-how'
     }
+
+    // N.B. No need to return a backup-running here, since the button on the overview will show 'go to backup' in that case.
 
     return 'overview'
 }
