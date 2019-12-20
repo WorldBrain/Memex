@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { colorPrimary } from 'src/common-ui/components/design-library/colors'
 
 export const fontSizeNormal = 14
 export const fontSizeTitle = 16
@@ -8,6 +9,15 @@ export const TypographyHeadingSmall = styled.span`
     font-size: ${fontSizeNormal}px;
     text-decoration: none;
     margin-right: 5px;
+`
+
+export const TypographyLink = styled.span`
+    font-size: ${fontSizeNormal}px;
+    text-decoration: none;
+    margin: 5px;
+    color: ${colorPrimary};
+    cursor: pointer;
+    padding: 5px;
 `
 
 export const TypographyHeadingPage = styled.span`
