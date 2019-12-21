@@ -42,30 +42,30 @@ export class OverlayMenu extends React.Component<Props, State> {
 
     render() {
         return (
-            <StyledOverlayMenu
-                onMouseEnter={this.onMouseEnterHandler}
-                onMouseLeave={this.onMouseLeaveHandler}
-            >
-                <StyledMenuHeader>{this.props.menuHeader}</StyledMenuHeader>
+                <StyledOverlayMenu
+                    onMouseEnter={this.onMouseEnterHandler}
+                    onMouseLeave={this.onMouseLeaveHandler}
+                >
+                    <StyledMenuHeader>{this.props.menuHeader}</StyledMenuHeader>
 
-                <DivOverlayParent>
-                    <DivOverlayChild>
-                        {this.state.hover && (
-                            <div>
-                                {this.props.menuItems.map(item => (
-                                    <MenuItem
-                                        onClick={this.closeAnd(item.handler)}
-                                        key={`overlayMenu-${item.label}`}
-                                    >
-                                        {' '}
-                                        {item.label}
-                                    </MenuItem>
-                                ))}
-                            </div>
-                        )}
-                    </DivOverlayChild>
-                </DivOverlayParent>
-            </StyledOverlayMenu>
+                    <DivOverlayParent>
+                        <DivOverlayChild>
+                            {this.state.hover && (
+                                <div>
+                                    {this.props.menuItems.map(item => (
+                                        <MenuItem
+                                            onClick={this.closeAnd(item.handler)}
+                                            key={`overlayMenu-${item.label}`}
+                                        >
+                                            {' '}
+                                            {item.label}
+                                        </MenuItem>
+                                    ))}
+                                </div>
+                            )}
+                        </DivOverlayChild>
+                    </DivOverlayParent>
+                </StyledOverlayMenu>
         )
     }
 }
@@ -74,20 +74,22 @@ const StyledOverlayMenu = styled.div`
     display: inline-flex;
     align-items: center;
     z-index: 2147483647;
+    width: 100%;
+    border-radius: 5px;
 `
 
 const StyledMenuHeader = styled.div`
-    padding: 3px 8px 3px 12px;
     display: flex;
     align-items: center;
-    height: 25px;
-    padding: 3px 8px 3px 8px;
     border-radius: 5px;
+    width: 100%;
+    justify-content: center;
 `
 
 const DivOverlayParent = styled.div`
     position: relative;
     top: -60px;
+    border-radius: 5px;
 `
 
 const DivOverlayChild = styled.div`

@@ -37,12 +37,12 @@ export class SubscriptionOptions extends React.Component<Props, State> {
     chargebeeInstance: any
     userSubscription: UserSubscription
 
-    public state = { subscribed: null, showSubscriptionOptions: false }
+    public state = { subscribed: null, showSubscriptionOptions: true }
 
     async componentDidMount() {
         this.setState({
             subscribed: await auth.hasSubscribedBefore(),
-            showSubscriptionOptions: false,
+            showSubscriptionOptions: true,
         })
     }
 
@@ -149,59 +149,21 @@ export class SubscriptionOptions extends React.Component<Props, State> {
                 </Helmet>
 
                 {/*{this.renderMonthlyYearlyChoice()}*/}
-                {this.state.subscribed === true && (
-                    <AlreadySubscribedBox>
-                        <span> You're subscribed </span>
-                        <PrimaryButton onClick={this.openPortal}>
-                            Manage Existing Subscription
-                        </PrimaryButton>
-
-                        {!this.state.showSubscriptionOptions && (
-                            <SubscriptionOptionsButton>
-                                <span> or </span>
-                                <Spacer />
-                                <TypographyLink
-                                    onClick={
-                                        this.onClickShowSubscriptionOptions
-                                    }
-                                >
-                                    Show subscription options
-                                </TypographyLink>
-                            </SubscriptionOptionsButton>
-                        )}
-                    </AlreadySubscribedBox>
-                )}
-
-                {(this.state.subscribed === false ||
-                    this.state.showSubscriptionOptions) && (
                     <div>
                         <PricingPlanTitle className={''}>
-                            Subscription Options
+                            Subscribe to Memex Pro
                         </PricingPlanTitle>
 
                         <div style={styles.subscriptionOptionsContainer}>
                             <SubscriptionPriceBox
-                                key={'SubscriptionBoxFree'}
-                                onClick={undefined}
-                                title={'Free'}
-                                price={undefined}
-                                infoItems={[
-                                    'All offline features',
-                                    'Manual Backups',
-                                    'To your favorite cloud',
-                                    'No account necessary',
-                                ]}
-                            />
-                            <SubscriptionPriceBox
                                 key={'SubscriptionBoxBackupsMonthly'}
                                 onClick={_ => this.openCheckoutBackupMonthly()}
-                                title={'Pro Monthly'}
-                                price={'€1.00'}
+                                title={'Per Month'}
+                                price={'€3'}
                                 infoItems={[
-                                    "Everything in 'Free'",
                                     'Automatic Backups every 15 min',
-                                    'To your favorite cloud',
-                                    'Sync between your devices',
+                                    'End2End encrypted sync between your devices',
+                                    '3 devices included',
                                 ]}
                                 subscribed={this.props.plans.includes(
                                     'pro-monthly',
@@ -211,13 +173,12 @@ export class SubscriptionOptions extends React.Component<Props, State> {
                             <SubscriptionPriceBox
                                 key={'SubscriptionBoxBackupsYearly'}
                                 onClick={_ => this.openCheckoutBackupYearly()}
-                                price={'€12.00'}
-                                title={'Pro Yearly'}
+                                price={'€30'}
+                                title={'Per Year'}
                                 infoItems={[
-                                    "Everything in 'Free'",
                                     'Automatic Backups every 15 min',
-                                    'To your favorite cloud',
-                                    'Sync between your devices',
+                                    'End2End encrypted sync between your devices',
+                                    '3 devices included',
                                 ]}
                                 subscribed={this.props.plans.includes(
                                     'pro-yearly',
@@ -225,22 +186,30 @@ export class SubscriptionOptions extends React.Component<Props, State> {
                                 manageSubscription={this.openPortal}
                             />
                         </div>
+                        {this.state.subscribed === true && (
+                            <AlreadySubscribedBox>
+                                <SubscribedSpan> 🎉 You've already subscribed to a plan </SubscribedSpan>
+                                <PrimaryButton onClick={this.openPortal}>
+                                    Manage Existing Subscription
+                                </PrimaryButton>
+                            </AlreadySubscribedBox>
+                        )}
                     </div>
-                )}
             </div>
         )
     }
 }
 
 const AlreadySubscribedBox = styled.div`
-    max-width: 300px;
-    border-width: 3px;
-    border-radius: 5px;
-    border-style: solid;
-    border-color: rgb(92, 217, 166);
-    margin: auto auto;
-    margin-bottom: 20px;
-    padding: 20px;
+    max-width: 350px;   
+    margin: 20px auto;
+    text-align: center;
+`
+
+const SubscribedSpan = styled.span`
+    max-width: 300px;   
+    font-size: 17px;
+    font-weight: bold;
     text-align: center;
 `
 

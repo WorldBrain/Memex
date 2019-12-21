@@ -38,7 +38,6 @@ export class SubscriptionPriceBox extends React.PureComponent<Props> {
                 <PricingList>
                     {this.props.infoItems.map((item, index) => (
                         <ListItem key={`pricing-table-list-${index}`}>
-                            <Checkmark />
                             <span>{item}</span>
                         </ListItem>
                     ))}

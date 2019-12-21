@@ -57,15 +57,6 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
                             defaultValue={user.email}
                             readonly
                         />
-                        <TypographyInputTitle>
-                            {' '}
-                            Display Name{' '}
-                        </TypographyInputTitle>
-                        <InputTextField
-                            type={'text'}
-                            defaultValue={user.displayName}
-                            readonly
-                        />
 
                         <PrimaryButton onClick={this.showSubscriptionModal}>
                             Manage Subscriptions

@@ -59,7 +59,7 @@ const StyledFirebaseAuth = styled(FirebaseAuth)`
         font-size: ${fontSizeBigger}px;
         font-weight: 600;
         color: #000000;
-        margin-bottom: 2em;
+        margin-bottom: 0.5em;
     }
 
     .firebaseui-link {

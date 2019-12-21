@@ -64,15 +64,16 @@ const DeviceSelection = styled.div`
 
 const PricingPlanTitle = styled.h1`
     box-sizing: border-box;
-    margin-bottom: 10px;
-    margin-top: 0px;
-    font-size: 14px;
-    color: rgb(86, 113, 207);
+    margin-bottom: 30px;
+    margin-top: 30px;
+    font-size: 35px;
+    color: black;
     display: block;
     font-weight: 700;
     text-align: center;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.1em;
 `
+
 const PricingHead = styled.div`
     display: flex;
 `
@@ -110,7 +111,7 @@ const PricingButton = styled.div`
     padding-bottom: 8px;
     //background-color: rgb(86, 113, 207);
     box-sizing: border-box;
-    margin-top: 20px;
+    margin: 20px;
     padding-left: 10px;
     padding-right: 10px;
     width: 222px;
@@ -127,10 +128,14 @@ const PricingButton = styled.div`
 const PricingList = styled.div`
     display: flex;
     flex-direction: column;
+    width: 80%;
+    line-height: 1.3em;
+    text-align: center;
 `
 
 const ListItem = styled.div`
     margin-bottom: 19px;
+    justify-content: center;
     display: inline-flex;
     &:last-child {
         margin-bottom: 0;

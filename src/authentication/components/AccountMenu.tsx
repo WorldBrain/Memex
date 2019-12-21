@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import OverlayMenu from 'src/common-ui/components/design-library/overlay-menu/OverlayMenu'
-import { TypographyHeadingSmall } from 'src/common-ui/components/design-library/typography'
+import { TypographyHeadingSmall, TypographyHeadingBig } from 'src/common-ui/components/design-library/typography'
 import { auth } from 'src/util/remote-functions-background'
 import {
     UserProps,
@@ -25,9 +25,9 @@ const AccountMenu = (props: UserProps) => {
             <BottomLeft>
                 <ButtonSideMenu onClick={handleLoginClick}>
                     <MemexLogo />
-                    <TypographyHeadingSmall>
+                    <TypographyHeadingBig>
                         Login to Memex
-                    </TypographyHeadingSmall>
+                    </TypographyHeadingBig>
                 </ButtonSideMenu>
             </BottomLeft>
         )
@@ -39,9 +39,9 @@ const AccountMenu = (props: UserProps) => {
                 menuHeader={
                     <ButtonSideMenu>
                         <MemexLogo />
-                        <TypographyHeadingSmall>
+                        <TypographyHeadingBig>
                             My Account
-                        </TypographyHeadingSmall>
+                        </TypographyHeadingBig>
                     </ButtonSideMenu>
                 }
                 menuItems={[
@@ -55,8 +55,9 @@ const AccountMenu = (props: UserProps) => {
 
 const BottomLeft = styled.div`
     position: fixed;
-    left: 0.2em;
-    bottom: 1em;
+    bottom: 1.5em;
+    max-width: 280px;
+    min-width: 260px;
 `
 
 export default withCurrentUser(AccountMenu)

@@ -1,7 +1,6 @@
 .authContainer {
     height: 100%;
-    align-items: center;
-    align-content: center;
+    align-items: flex-start;
     display: flex;
     width: 100%;
 }
