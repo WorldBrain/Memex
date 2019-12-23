@@ -56,7 +56,10 @@ export async function setupMobileIntegrationTest(options?: {
 
     const storageManager = new StorageManager({ backend })
     const storageModules = {
-        metaPicker: new MetaPickerStorage({ storageManager }),
+        metaPicker: new MetaPickerStorage({
+            storageManager,
+            normalizeUrl,
+        }),
         overview: new OverviewStorage({
             storageManager,
             extractUrlParts,

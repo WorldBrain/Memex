@@ -941,6 +941,135 @@ function mobileSyncTests(suiteOptions: {
         })
     })
 
+    it('should correctly incremental sync from app to ext', async (setup: TestSetup) => {
+        const { devices } = await setup()
+
+        await devices.mobile.services.sync.continuousSync.initDevice()
+        await devices.extension.backgroundModules.sync.continuousSync.initDevice()
+
+        await devices.mobile.services.sync.continuousSync.enableContinuousSync()
+        await devices.extension.backgroundModules.sync.continuousSync.enableContinuousSync()
+
+        const testPage = {
+            url: 'test.com/foo',
+            fullUrl: 'https://www.test.com/foo',
+            fullTitle: 'This is a test page',
+            text:
+                'Hey there this is some test text with lots of test terms included.',
+        }
+        const mobileStorage = devices.mobile.storage
+        await mobileStorage.modules.overview.createPage(testPage)
+        for (const tag of ['spam', 'eggs']) {
+            await mobileStorage.modules.metaPicker.createTag({
+                name: tag,
+                url: testPage.fullUrl,
+            })
+        }
+        await mobileStorage.modules.overview.starPage(testPage)
+
+        const listIds: Array<any> = []
+        for (const list of ['widgets', 'thingies']) {
+            const {
+                object,
+            } = await mobileStorage.modules.metaPicker.createList({
+                name: list,
+            })
+            listIds.push(object.id)
+        }
+        await mobileStorage.modules.metaPicker.createPageListEntry({
+            pageUrl: testPage.fullUrl,
+            listId: listIds[0],
+        })
+
+        await mobileStorage.modules.metaPicker.createPageListEntry({
+            pageUrl: testPage.fullUrl,
+            listId: listIds[0],
+        })
+
+        await mobileStorage.modules.pageEditor.createNote({
+            pageTitle: testPage.fullTitle,
+            pageUrl: testPage.fullUrl,
+            body: 'Test note',
+            selector: 'sel.ect',
+        })
+
+        await devices.mobile.services.sync.continuousSync.forceIncrementalSync()
+        await devices.extension.backgroundModules.sync.continuousSync.forceIncrementalSync()
+
+        // expect(await getStorageContents(devices.extension.storageManager)).toEqual({})
+
+        expect(
+            await devices.extension.backgroundModules.search.searchPages({
+                query: 'test',
+            }),
+        ).toEqual({
+            docs: [
+                {
+                    annotations: [],
+                    annotsCount: 1,
+                    displayTime: expect.any(Number),
+                    favIcon: undefined,
+                    hasBookmark: false,
+                    screenshot: undefined,
+                    tags: ['eggs', 'spam'],
+                    title: 'This is a test page',
+                    url: 'test.com/foo',
+                },
+            ],
+            resultsExhausted: true,
+            totalCount: null,
+        })
+        expect(
+            await devices.extension.backgroundModules.directLinking.getAllAnnotationsByUrl(
+                { tab: null },
+                { url: testPage.fullUrl },
+            ),
+        ).toEqual([
+            expect.objectContaining({
+                url: expect.stringContaining('test.com/foo'),
+                body: 'Test note',
+                createdWhen: expect.any(Number),
+                hasBookmark: false,
+                lastEdited: expect.any(Number),
+                pageTitle: 'This is a test page',
+                pageUrl: 'test.com/foo',
+                selector: 'sel.ect',
+            }),
+        ])
+
+        expect(
+            await devices.extension.backgroundModules.customLists.fetchAllLists(
+                {},
+            ),
+        ).toEqual([
+            {
+                active: false,
+                createdAt: expect.any(Date),
+                id: expect.any(Number),
+                name: 'widgets',
+                pages: [],
+            },
+            {
+                active: false,
+                createdAt: expect.any(Date),
+                id: expect.any(Number),
+                name: 'thingies',
+                pages: [],
+            },
+        ])
+        expect(
+            await devices.extension.backgroundModules.customLists.fetchListById(
+                { id: listIds[0] },
+            ),
+        ).toEqual({
+            active: true,
+            createdAt: expect.any(Date),
+            id: expect.any(Number),
+            name: 'widgets',
+            pages: ['https://www.test.com/foo'],
+        })
+    })
+
     it('should log and transfer changes made during initial sync from ext to app', async (setup: TestSetup) => {
         const { devices } = await setup()
 
