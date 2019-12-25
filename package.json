@@ -110,6 +110,8 @@
         "styled-components": "^4.4.1",
         "through2": "^2.0.3",
         "tweetnacl": "^1.0.1",
+        "tweetnacl-async": "^2.0.0",
+        "tweetnacl-util": "^0.15.0",
         "typed-emitter": "^0.1.0",
         "ui-logic-core": "^0.1.2",
         "ui-logic-react": "^0.1.3",

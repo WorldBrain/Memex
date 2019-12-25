@@ -17865,6 +17865,16 @@ tunnel-agent@~0.4.1:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/tunnel-agent/-/tunnel-agent-0.4.3.tgz#6373db76909fe570e08d73583365ed828a74eeeb"
 
+tweetnacl-async@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/tweetnacl-async/-/tweetnacl-async-2.0.0.tgz#0f7eed1107f862f88d4d95cc05398eb9a6413d1d"
+  integrity sha512-uQcKy2mXpwO6S+wgASnfrYQMJi9bj45RDBwhcekeMBPZux6WxSAjGkM/GwS5dcJ88hxyeZJodzxYh85OIczFpg==
+
+tweetnacl-util@^0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/tweetnacl-util/-/tweetnacl-util-0.15.0.tgz#4576c1cee5e2d63d207fee52f1ba02819480bc75"
+  integrity sha1-RXbBzuXi1j0gf+5S8boCgZSAvHU=
+
 tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"

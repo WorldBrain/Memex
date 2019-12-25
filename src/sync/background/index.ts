@@ -1,9 +1,7 @@
 import { Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import { SyncPostReceiveProcessor } from '@worldbrain/storex-sync'
-import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'
-import { SyncLoggingMiddleware } from '@worldbrain/storex-sync/lib/logging-middleware'
 
 import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 import SyncService, {
@@ -11,6 +9,7 @@ import SyncService, {
     SignalTransportFactory,
 } from '@worldbrain/memex-common/lib/sync'
 import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
+import { TweetNaclSyncEncryption } from '@worldbrain/memex-common/lib/sync/secrets/tweetnacl'
 
 import { PublicSyncInterface } from './types'
 import {
@@ -46,7 +45,8 @@ export default class SyncBackground extends SyncService {
             clientSyncLog: new MemexExtClientSyncLogStorage({
                 storageManager: options.storageManager,
             }),
-            disableEncryption: true,
+            disableEncryption: false,
+            syncEncryption: new TweetNaclSyncEncryption({}),
             devicePlatform: 'browser',
             syncInfoStorage: new MemexExtSyncInfoStorage({
                 storageManager: options.storageManager,
