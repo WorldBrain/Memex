@@ -72,6 +72,7 @@ export function createBackgroundModules(options: {
     auth?: AuthBackground
     authOptions?: { devAuthState: DevAuthState }
     includePostSyncProcessor?: boolean
+    disableSyncEnryption?: boolean
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
@@ -167,6 +168,7 @@ export function createBackgroundModules(options: {
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
             postReceiveProcessor,
+            disableEncryption: options.disableSyncEnryption,
         }),
         features: new FeatureOptIns(),
         bgScript,

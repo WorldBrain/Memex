@@ -37,6 +37,7 @@ export default class SyncBackground extends SyncService {
         getSharedSyncLog: () => Promise<SharedSyncLog>
         browserAPIs: Pick<Browser, 'storage'>
         appVersion: string
+        disableEncryption?: boolean
         postReceiveProcessor?: SyncPostReceiveProcessor
     }) {
         super({
@@ -45,7 +46,7 @@ export default class SyncBackground extends SyncService {
             clientSyncLog: new MemexExtClientSyncLogStorage({
                 storageManager: options.storageManager,
             }),
-            disableEncryption: false,
+            disableEncryption: options.disableEncryption,
             syncEncryption: new TweetNaclSyncEncryption({}),
             devicePlatform: 'browser',
             syncInfoStorage: new MemexExtSyncInfoStorage({

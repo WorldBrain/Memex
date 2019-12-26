@@ -73,6 +73,7 @@ export async function setupBackgroundIntegrationTest(options?: {
             options &&
             (options.fetchPageProcessor || new MockFetchPageDataProcessor()),
         auth,
+        disableSyncEnryption: true,
     })
     backgroundModules.customLists._createPage =
         backgroundModules.search.searchIndex.createTestPage
