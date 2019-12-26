@@ -159,11 +159,11 @@ export class SubscriptionOptions extends React.Component<Props, State> {
                                 key={'SubscriptionBoxBackupsMonthly'}
                                 onClick={_ => this.openCheckoutBackupMonthly()}
                                 title={'Per Month'}
-                                price={'€3'}
+                                price={'€2'}
                                 infoItems={[
-                                    'Automatic Backups every 15 min',
-                                    'End2End encrypted sync between your devices',
-                                    '3 devices included',
+                                    'Automatic Backups every 15 min, locally or your favorite cloud provider',
+                                    '[SOON] End2End encrypted sync between your devices. 2 devices included',
+                                    '+1€ per additional device',
                                 ]}
                                 subscribed={this.props.plans.includes(
                                     'pro-monthly',
@@ -173,12 +173,12 @@ export class SubscriptionOptions extends React.Component<Props, State> {
                             <SubscriptionPriceBox
                                 key={'SubscriptionBoxBackupsYearly'}
                                 onClick={_ => this.openCheckoutBackupYearly()}
-                                price={'€30'}
+                                price={'€20'}
                                 title={'Per Year'}
                                 infoItems={[
-                                    'Automatic Backups every 15 min',
-                                    'End2End encrypted sync between your devices',
-                                    '3 devices included',
+                                    'Automatic Backups every 15 min, locally or your favorite cloud provider',
+                                    '[SOON] End2End encrypted sync between your devices. 2 devices included',
+                                    '+10€ per additional device',
                                 ]}
                                 subscribed={this.props.plans.includes(
                                     'pro-yearly',

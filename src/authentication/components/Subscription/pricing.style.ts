@@ -108,10 +108,10 @@ const PricingButton = styled.div`
     font-size: 16px;
     font-weight: 500;
     padding-top: 8px;
+    margin-bottom: 20px;
     padding-bottom: 8px;
     //background-color: rgb(86, 113, 207);
     box-sizing: border-box;
-    margin: 20px;
     padding-left: 10px;
     padding-right: 10px;
     width: 222px;
