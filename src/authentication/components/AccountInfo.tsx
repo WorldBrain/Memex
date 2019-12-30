@@ -3,7 +3,7 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
-import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
+import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 import {
     TypographyHeadingPage,
     TypographyInputTitle,

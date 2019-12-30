@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { SignInScreen } from 'src/authentication/components/SignIn'
-import { SubscriptionOptions } from 'src/authentication/components/Subscription/SubscriptionOptions'
+import { SubscriptionOptionsChargebee } from 'src/authentication/components/Subscription/SubscriptionOptionsChargebee'
 import {
     UserProps,
     withCurrentUser,
@@ -40,7 +40,7 @@ export class Subscribe extends React.PureComponent<Props> {
 
                 {this.props.currentUser != null && (
                     <div>
-                        <SubscriptionOptions
+                        <SubscriptionOptionsChargebee
                             user={this.props.currentUser}
                             plans={this.props.authorizedPlans}
                             onClose={this.handleClose}

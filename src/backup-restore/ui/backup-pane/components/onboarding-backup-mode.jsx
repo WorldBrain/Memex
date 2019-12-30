@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './onboarding-backup-mode.css'
 import classNames from 'classnames'
-import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
+import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 
 export default class OnboardingBackupModeContainer extends React.Component {
     static propTypes = {

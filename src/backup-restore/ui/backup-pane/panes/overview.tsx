@@ -6,7 +6,7 @@ import SmallButton from '../../../../common-ui/components/small-button'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
 import { browser } from 'webextension-polyfill-ts'
-import { SubscribeModal } from 'src/authentication/components/Subscription/SubscribeModal'
+import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 import {
     UserProps,
     withCurrentUser,

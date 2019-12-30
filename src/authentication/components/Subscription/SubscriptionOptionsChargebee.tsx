@@ -1,17 +1,13 @@
 import * as React from 'react'
 import { UserSubscription } from 'src/authentication/ui/user-subscription'
 import { Helmet } from 'react-helmet'
-import { SubscriptionPriceBox } from 'src/authentication/components/Subscription/SubscriptionPriceBox'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { auth } from 'src/util/remote-functions-background'
 import { PricingPlanTitle } from 'src/authentication/components/Subscription/pricing.style'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import styled from 'styled-components'
-import {
-    TypographyHeadingSmall,
-    TypographyLink,
-} from 'src/common-ui/components/design-library/typography'
+import { SubscriptionInnerOptions } from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
 const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
 
 export const subscriptionConfig = {
@@ -33,7 +29,10 @@ interface State {
     showSubscriptionOptions: boolean
 }
 
-export class SubscriptionOptions extends React.Component<Props, State> {
+export class SubscriptionOptionsChargebee extends React.Component<
+    Props,
+    State
+> {
     chargebeeInstance: any
     userSubscription: UserSubscription
 
@@ -148,66 +147,44 @@ export class SubscriptionOptions extends React.Component<Props, State> {
                     <script src={chargeBeeScriptSource} />
                 </Helmet>
 
-                {/*{this.renderMonthlyYearlyChoice()}*/}
-                    <div>
-                        <PricingPlanTitle className={''}>
-                            Subscribe to Memex Pro
-                        </PricingPlanTitle>
+                <div>
+                    <PricingPlanTitle className={''}>
+                        Subscribe to Memex Pro
+                    </PricingPlanTitle>
 
-                        <div style={styles.subscriptionOptionsContainer}>
-                            <SubscriptionPriceBox
-                                key={'SubscriptionBoxBackupsMonthly'}
-                                onClick={_ => this.openCheckoutBackupMonthly()}
-                                title={'Per Month'}
-                                price={'€2'}
-                                infoItems={[
-                                    'Automatic Backups every 15 min, locally or your favorite cloud provider',
-                                    '[SOON] End2End encrypted sync between your devices. 2 devices included',
-                                    '+1€ per additional device',
-                                ]}
-                                subscribed={this.props.plans.includes(
-                                    'pro-monthly',
-                                )}
-                                manageSubscription={this.openPortal}
-                            />
-                            <SubscriptionPriceBox
-                                key={'SubscriptionBoxBackupsYearly'}
-                                onClick={_ => this.openCheckoutBackupYearly()}
-                                price={'€20'}
-                                title={'Per Year'}
-                                infoItems={[
-                                    'Automatic Backups every 15 min, locally or your favorite cloud provider',
-                                    '[SOON] End2End encrypted sync between your devices. 2 devices included',
-                                    '+10€ per additional device',
-                                ]}
-                                subscribed={this.props.plans.includes(
-                                    'pro-yearly',
-                                )}
-                                manageSubscription={this.openPortal}
-                            />
-                        </div>
-                        {this.state.subscribed === true && (
-                            <AlreadySubscribedBox>
-                                <SubscribedSpan> 🎉 You've already subscribed to a plan </SubscribedSpan>
-                                <PrimaryButton onClick={this.openPortal}>
-                                    Manage Existing Subscription
-                                </PrimaryButton>
-                            </AlreadySubscribedBox>
-                        )}
-                    </div>
+                    <SubscriptionInnerOptions
+                        openCheckoutBackupMonthly={
+                            this.openCheckoutBackupMonthly
+                        }
+                        openCheckoutBackupYearly={this.openCheckoutBackupYearly}
+                        openPortal={this.openPortal}
+                        plans={this.props.plans}
+                    />
+                    {this.state.subscribed === true && (
+                        <AlreadySubscribedBox>
+                            <SubscribedSpan>
+                                {' '}
+                                🎉 You've already subscribed to a plan{' '}
+                            </SubscribedSpan>
+                            <PrimaryButton onClick={this.openPortal}>
+                                Manage Existing Subscription
+                            </PrimaryButton>
+                        </AlreadySubscribedBox>
+                    )}
+                </div>
             </div>
         )
     }
 }
 
 const AlreadySubscribedBox = styled.div`
-    max-width: 350px;   
+    max-width: 350px;
     margin: 20px auto;
     text-align: center;
 `
 
 const SubscribedSpan = styled.span`
-    max-width: 300px;   
+    max-width: 300px;
     font-size: 17px;
     font-weight: bold;
     text-align: center;
@@ -227,9 +204,3 @@ const SubscriptionOptionsButton = styled.div`
 const Spacer = styled.div`
     margin: 15px;
 `
-
-const styles = {
-    subscriptionOptionsContainer: {
-        display: 'flex',
-    },
-}

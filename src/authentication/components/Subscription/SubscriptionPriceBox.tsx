@@ -10,7 +10,7 @@ import PricingTable, {
 import Checkmark from 'src/common-ui/components/design-library/Checkmark'
 
 interface Props {
-    onClick: (...params: any) => any
+    onClick?: (...params: any) => any
     manageSubscription?: (...params: any) => any
     title: string
     price: string
