@@ -33,6 +33,7 @@ export class SignInScreen extends React.Component {
 
 const StyledFirebaseAuth = styled(FirebaseAuth)`
     margin-top: 20px;
+    width: 450px;
 
     .firebaseui-id-submit {
         background-color: ${colorPrimary};

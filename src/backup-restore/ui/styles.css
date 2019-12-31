@@ -19,11 +19,12 @@
 
 .subtitle {
     composes: subTitleColor from '../../common-ui/colors.css';
-    font-size: 0.8rem;
+    font-size: 19px;
 }
 
 .subtitle2 {
     composes: subText from '../../options/base.css';
+    font-size: 19px;
     margin-bottom: 30px;
 }
 
@@ -120,10 +121,10 @@
     vertical-align: middle;
     display: inline-block;
     width: 100%;
+    margin-top: 10px;
 }
 
 .optionLine {
-    margin: 10px 0 0 0;
     display: flex;
     justify-content: space-between;
 }

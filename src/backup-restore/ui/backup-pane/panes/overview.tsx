@@ -12,6 +12,8 @@ import {
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
+import SyncDevicesPane from 'src/sync/components/SyncDevicesPane'
+import { fetchBackupPath, checkServerStatus } from '../../utils'
 
 const styles = require('../../styles.css')
 const localStyles = require('./overview.css')
@@ -22,6 +24,7 @@ interface Props {
     onBlobPreferenceChange: (...args: any[]) => any
     onPaymentRequested: (...args: any[]) => any
     authorizedFeatures: UserFeature[]
+    backupPath: string
 }
 
 export class OverviewContainer extends React.Component<Props & UserProps> {
@@ -39,9 +42,11 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
         showPricing: false,
         billingPeriod: null,
         subscribeModal: false,
+        backupPath: null,
     }
 
     async componentDidMount() {
+        const status = await checkServerStatus()
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()
@@ -49,8 +54,12 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
             'isAutomaticBackupEnabled',
         )()
         let showWarning = false
+        let backupPath = null
         if (!hasInitialBackup && automaticBackupEnabled) {
             showWarning = true
+        }
+        if (status) {
+            backupPath = await fetchBackupPath()
         }
         this.setState({
             automaticBackupEnabled,
@@ -58,6 +67,7 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
             hasInitialBackup,
             backupLocation,
             showWarning,
+            backupPath,
         })
     }
 
@@ -108,7 +118,7 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                 )}
 
                 <p className={styles.header2}>
-                    <strong>STATUS</strong>
+                    <strong>BACKUP STATUS</strong>
                 </p>
                 {!this.state.hasInitialBackup ? (
                     <div className={localStyles.statusLine}>
@@ -188,7 +198,7 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                                     onClick={this.openSubscriptionModal}
                                     color={'darkblue'}
                                 >
-                                    {'Subscriptions'}
+                                    {'⭐️ Upgrade'}
                                 </SmallButton>
                             )}
                             <span
@@ -200,24 +210,30 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                                 Worry-free. Automatically backs up your data
                                 every 15 minutes.
                             </span>
-                            <p className={styles.optionLine}>
-                                <span className={styles.name}>
-                                    Backup Location
-                                </span>
+                        </div>
+                        <div className={styles.option}>
+                            <span className={styles.name}>Backup Location</span>
+                            <SmallButton
+                                extraClass={localStyles.right}
+                                color={'green'}
+                                onClick={() =>
+                                    this.props.onBackupRequested(true)
+                                }
+                            >
+                                Change
+                            </SmallButton>
+                            {this.state.backupLocation === 'local' ? (
                                 <span
-                                    onClick={() =>
-                                        this.props.onBackupRequested(true)
-                                    }
-                                    className={localStyles.location}
+                                    className={classNames(
+                                        styles.subname,
+                                        localStyles.limitWidth,
+                                    )}
                                 >
-                                    {this.state.backupLocation === 'local'
-                                        ? 'Your Computer'
-                                        : 'Google Drive'}
-                                    <span className={localStyles.change}>
-                                        change
-                                    </span>
+                                    {this.state.backupPath}
                                 </span>
-                            </p>
+                            ) : (
+                                'Google Drive'
+                            )}
                         </div>
                     </div>
                 ) : null}
@@ -253,9 +269,6 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                         </div>
                     )}
                 <div>
-                    <p className={styles.header2}>
-                        <strong>RESTORE </strong>
-                    </p>
                     <div className={styles.option}>
                         <span className={styles.name}>
                             Restore &amp; Replace
@@ -277,42 +290,16 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                                 localStyles.limitWidth,
                             )}
                         >
-                            Restoring will <b>replace</b> all current data with
-                            a backup.
-                        </span>
-                    </div>
-                    <div className={styles.option}>
-                        <span className={styles.name}>Restore &amp; Merge</span>
-                        <SmallButton
-                            onClick={() =>
-                                browser.tabs.create({
-                                    url:
-                                        'https://worldbrain.io/crowdfunding-memex',
-                                    active: true,
-                                })
-                            }
-                            extraClass={localStyles.right}
-                            color="white"
-                        >
-                            Contribute
-                        </SmallButton>
-                        <br />
-                        <span
-                            className={classNames(
-                                styles.subname,
-                                localStyles.limitWidth,
-                            )}
-                        >
-                            Merge the data you've backed up into the data
-                            currently present in your extension. We currently
-                            don't have the resources to build this. Help us to
-                            get there!
+                            <b>Replace</b> all current data with a backup.
                         </span>
                     </div>
                 </div>
-                {this.state.subscribeModal && (
-                    <SubscribeModal onClose={this.closeSubscriptionModal} />
-                )}
+                <div>
+                    <SyncDevicesPane />
+                    {this.state.subscribeModal && (
+                        <SubscribeModal onClose={this.closeSubscriptionModal} />
+                    )}
+                </div>
             </div>
         )
     }

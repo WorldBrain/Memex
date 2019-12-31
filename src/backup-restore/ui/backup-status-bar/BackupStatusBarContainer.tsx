@@ -118,7 +118,7 @@ class BackupStatusBar extends Component<Props, State> {
                 isAutomaticBackupAllowed={isAutomaticBackupAllowed}
                 backupUIState={backupUIState}
                 onAutomaticBackupSelect={this.onAutomaticBackupSelect}
-                paymentUrl={SUBSCRIPTIONS_URL}
+                paymentUrl={'/options.html#/backup'}
             />
         )
     }

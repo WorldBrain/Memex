@@ -19,6 +19,7 @@ interface Props {
     isAutomaticBackupEnabled: boolean
     isAutomaticBackupAllowed: boolean
     onAutomaticBackupSelect: any
+    UIstate?: string
 }
 
 export default class StatusOverlay extends PureComponent<Props> {
@@ -77,52 +78,70 @@ export default class StatusOverlay extends PureComponent<Props> {
                             </span>
                         </div>
                     )}
-                    {lastBackup && (
-                        <div className={styles.backup}>
-                            <span>Last Backup:</span>
-                            <span>
-                                {lastBackup === 'Never' && <b>Never</b>}
-                                {lastBackup === 'running' && <b>Running</b>}
-                                {lastBackup !== 'Never' &&
-                                    lastBackup !== 'running' && (
-                                        <b>{moment(lastBackup).fromNow()}</b>
-                                    )}
-                            </span>
+
+                    {this.props.UIstate === 'autoBackup' ? null : (
+                        <div className={styles.timer}>
+                            {lastBackup && (
+                                <div className={styles.backup}>
+                                    <span>Last Backup:</span>
+                                    <span>
+                                        {lastBackup === 'Never' && <b>Never</b>}
+                                        {lastBackup === 'running' && (
+                                            <b>Running</b>
+                                        )}
+                                        {lastBackup !== 'Never' &&
+                                            lastBackup !== 'running' && (
+                                                <b>
+                                                    {moment(
+                                                        lastBackup,
+                                                    ).fromNow()}
+                                                </b>
+                                            )}
+                                    </span>
+                                </div>
+                            )}
+
+                            {lastBackup && (
+                                <div className={styles.bottomBorder} />
+                            )}
+
+                            {nextBackup &&
+                                isAutomaticBackupAllowed &&
+                                isAutomaticBackupEnabled && (
+                                    <div className={styles.backup}>
+                                        <span>Next Backup:</span>
+                                        <span>
+                                            <b>
+                                                {moment(nextBackup).fromNow()}
+                                            </b>
+                                        </span>
+                                    </div>
+                                )}
+
+                            {nextBackup && (
+                                <div className={styles.bottomBorder} />
+                            )}
+                            <div
+                                className={styles.backup}
+                                onClick={onAutomaticBackupSelect}
+                            >
+                                <span>Automatic Backup:</span>
+                                <ToggleSwitch
+                                    defaultValue={isAutomaticBackupEnabled}
+                                    onChange={
+                                        isAutomaticBackupAllowed
+                                            ? () => onAutomaticBackupSelect
+                                            : () => false
+                                    }
+                                    isChecked={
+                                        isAutomaticBackupAllowed
+                                            ? undefined
+                                            : false
+                                    }
+                                />
+                            </div>
                         </div>
                     )}
-
-                    {lastBackup && <div className={styles.bottomBorder} />}
-
-                    {nextBackup &&
-                        isAutomaticBackupAllowed &&
-                        isAutomaticBackupEnabled && (
-                            <div className={styles.backup}>
-                                <span>Next Backup:</span>
-                                <span>
-                                    <b>{moment(nextBackup).fromNow()}</b>
-                                </span>
-                            </div>
-                        )}
-
-                    {nextBackup && <div className={styles.bottomBorder} />}
-
-                    <div
-                        className={styles.backup}
-                        onClick={onAutomaticBackupSelect}
-                    >
-                        <span>Automatic Backup:</span>
-                        <ToggleSwitch
-                            defaultValue={isAutomaticBackupEnabled}
-                            onChange={
-                                isAutomaticBackupAllowed
-                                    ? () => onAutomaticBackupSelect
-                                    : () => false
-                            }
-                            isChecked={
-                                isAutomaticBackupAllowed ? undefined : false
-                            }
-                        />
-                    </div>
 
                     {this.props.children}
 

@@ -11,6 +11,8 @@ import {
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 import { features, sync } from 'src/util/remote-functions-background'
+import SmallButton from '../../common-ui/components/small-button'
+const globalStyles = require('../../backup-restore/ui/styles.css')
 const styles = require('./styles.css')
 
 interface Props {
@@ -89,21 +91,20 @@ export class SyncDevicesPane extends Component<Props, State> {
     renderDeviceList() {
         return (
             <div>
-                <hr />
                 <div className={styles.container}>
                     <div className={styles.syncLeftCol}>
-                        <span className={styles.syncSubText}>
-                            Connected Devices
+                        <span className={styles.syncTitle}>
+                            CONNECTED DEVICES
                         </span>
                     </div>
-                    <div
-                        className={styles.syncRightCol}
+                    <SmallButton
+                        color="green"
                         onClick={this.handleOpenNewDevice}
                     >
-                        <div className={styles.button}>Add New</div>
-                    </div>
+                        + Add New
+                    </SmallButton>
                 </div>
-
+                <hr />
                 <SyncDevicesList
                     devices={this.props.devices}
                     handleRemoveDevice={this.props.handleRemoveDevice}
@@ -127,7 +128,6 @@ export class SyncDevicesPane extends Component<Props, State> {
     render() {
         return (
             <div className={styles.syncDevicesContainer}>
-                {this.renderHeader()}
                 {this.props.isDeviceSyncEnabled && this.renderDeviceList()}
                 {this.state.isAddingNewDevice && this.renderAddNewDevice()}
             </div>
@@ -168,16 +168,21 @@ class SyncDevicesPaneContainer extends Component<
         }
 
         return (
-            <SyncDevicesPane
-                devices={this.state.devices}
-                isDeviceSyncEnabled
-                isDeviceSyncAllowed={this.props.authorizedFeatures.includes(
-                    'sync',
-                )}
-                handleRemoveDevice={this.handleRemoveDevice}
-                getInitialSyncMessage={this.getInitialSyncMessage}
-                waitForInitialSync={this.waitForInitialSync}
-            />
+            <div className={styles.section}>
+                <p className={globalStyles.backupTitle}>
+                    Syncing between Devices
+                </p>
+                <SyncDevicesPane
+                    devices={this.state.devices}
+                    isDeviceSyncEnabled
+                    isDeviceSyncAllowed={this.props.authorizedFeatures.includes(
+                        'sync',
+                    )}
+                    handleRemoveDevice={this.handleRemoveDevice}
+                    getInitialSyncMessage={this.getInitialSyncMessage}
+                    waitForInitialSync={this.waitForInitialSync}
+                />
+            </div>
         )
     }
 }

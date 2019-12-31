@@ -11,7 +11,7 @@
     top: 50px;
     right: 50px;
     padding: 25px;
-    width: 300px;
+    width: 360px;
     min-height: 166px;
     z-index: 999999;
     background: white;
@@ -27,15 +27,19 @@
 .overlayHeader {
     font-size: 18px;
     font-weight: 600;
-    align-self: flex-start;
+    align-self: center;
     margin-bottom: 15px;
 }
 
 .description {
     display: flex;
-    align-items: center;
+    text-align: center;
     justify-content: space-between;
     margin-bottom: 15px;
+}
+
+.timer {
+    width: 100%;
 }
 
 .errorMessage {

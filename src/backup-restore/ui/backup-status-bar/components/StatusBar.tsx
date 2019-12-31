@@ -26,6 +26,7 @@ const StatusBar = (props: Props) => {
         onAutomaticBackupSelect: props.onAutomaticBackupSelect,
         message: props.backupUIState.message,
         header: props.backupUIState.header,
+        UIstate: props.backupUIState.state,
         lastBackup: props.backupTimes.lastBackup as BackupTimes['lastBackup'],
         nextBackup: props.backupTimes.nextBackup as BackupTimes['nextBackup'],
     }
@@ -98,7 +99,7 @@ const StatusBar = (props: Props) => {
                                 <StatusOverlay
                                     {...backupProps}
                                     crossIcon={'img/cross.svg'}
-                                    message={`Automatic backups every 15 minutes. Worry-free.`}
+                                    message={`Automatically backup your data every 15 minutes.`}
                                 >
                                     <div className={styles.ActionButton}>
                                         <ActionButton

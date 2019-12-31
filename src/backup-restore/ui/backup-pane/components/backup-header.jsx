@@ -4,9 +4,7 @@ import Styles from '../../styles.css'
 export function BackupHeader() {
     return (
         <div>
-            <p className={Styles.backupTitle}>
-                Backup your data to your computer or favorite cloud.
-            </p>
+            <p className={Styles.backupTitle}>Data Backup</p>
         </div>
     )
 }

@@ -7,6 +7,7 @@ import {
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 const styles = require('./styles.css')
+
 interface Props {
     initiallyShowSubscriptionModal?: boolean
 }
@@ -14,9 +15,20 @@ interface Props {
 class UserScreen extends React.PureComponent<Props & UserProps> {
     render() {
         return (
-            <div className={styles.authContainer}>
-                {this.props.currentUser == null && <SignInScreen />}
-                {this.props.currentUser != null && (
+            <div className={styles.section}>
+                {this.props.currentUser == null ? (
+                    <p>
+                        <p className={styles.instructionsTitle}>
+                            {' Login or Create an Account'}
+                        </p>
+                        <p className={styles.instructions}>
+                            {
+                                ' To create an account just type in a new email address'
+                            }
+                        </p>
+                        <SignInScreen />
+                    </p>
+                ) : (
                     <AccountInfo
                         initiallyShowSubscriptionModal={
                             this.props.initiallyShowSubscriptionModal

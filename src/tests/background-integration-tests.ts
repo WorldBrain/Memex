@@ -95,10 +95,10 @@ export async function setupBackgroundIntegrationTest(options?: {
             const result = await args.next.process({
                 operation: args.operation,
             })
-            console.log('STORAGE OPERATION - ', {
-                operation: args.operation,
-                result,
-            })
+            // console.log('STORAGE OPERATION - ', {
+            //     operation: args.operation,
+            //     result,
+            // })
             return result
         },
     }

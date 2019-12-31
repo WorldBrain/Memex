@@ -12,7 +12,6 @@ import LoadingBlocker from '../../../common-ui/components/loading-blocker'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
 import RestoreWhere from 'src/backup-restore/ui/backup-pane/panes/restore-where'
 import RestoreRunning from 'src/backup-restore/ui/backup-pane/panes/restore-running'
-import SyncDevicesPane from 'src/sync/components/SyncDevicesPane'
 
 const styles = require('../styles.css')
 
@@ -123,7 +122,6 @@ export default class BackupSettingsContainer extends React.Component {
                 <BackupHeader />
                 <div className={styles.screenContainer}>
                     {this.renderScreen()}
-                    <SyncDevicesPane />
                 </div>
             </div>
         )

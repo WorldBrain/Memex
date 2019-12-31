@@ -6,6 +6,7 @@ import {
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 import { auth } from 'src/util/remote-functions-background'
+const styles = require('../styles.css')
 
 type Props = {
     onClose: () => void
@@ -26,14 +27,17 @@ export class Subscribe extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div className={''}>
+            <div>
                 {this.props.currentUser == null && (
-                    <div>
-                        <span>
+                    <div className={styles.section}>
+                        <p className={styles.instructionsTitle}>
+                            {' Login or Create an account to subscribe'}
+                        </p>
+                        <p className={styles.instructions}>
                             {
-                                ' Please Login or Create an account in order to subscribe'
+                                ' To create an account just type in a new email address'
                             }
-                        </span>
+                        </p>
                         <SignInScreen />
                     </div>
                 )}

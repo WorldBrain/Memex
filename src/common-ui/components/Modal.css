@@ -17,7 +17,8 @@
     z-index: 2147483646;
     background: rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    padding-top: 2%;
+    justify-content: center;
+    align-items: center;
 
     &:disabled,
     &[disabled] {
@@ -39,8 +40,11 @@
 .popupLarge {
     composes: popup;
     overflow-y: scroll;
-    width: 90%;
-    height: 96%;
+    width: fit-content;
+    height: fit-content;
+    padding: 70px 100px 100px 100px;
+    max-height: 95vh;
+    max-width: 95vw;
 }
 
 .close {
