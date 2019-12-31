@@ -118,28 +118,27 @@ export default class StatusOverlay extends PureComponent<Props> {
                                     </div>
                                 )}
 
-                            {nextBackup && (
-                                <div className={styles.bottomBorder} />
+                            {isAutomaticBackupEnabled ? null : (
+                                <div
+                                    className={styles.backup}
+                                    onClick={onAutomaticBackupSelect}
+                                >
+                                    <span>Automatic Backup:</span>
+                                    <ToggleSwitch
+                                        defaultValue={isAutomaticBackupEnabled}
+                                        onChange={
+                                            isAutomaticBackupAllowed
+                                                ? () => onAutomaticBackupSelect
+                                                : () => false
+                                        }
+                                        isChecked={
+                                            isAutomaticBackupAllowed
+                                                ? undefined
+                                                : false
+                                        }
+                                    />
+                                </div>
                             )}
-                            <div
-                                className={styles.backup}
-                                onClick={onAutomaticBackupSelect}
-                            >
-                                <span>Automatic Backup:</span>
-                                <ToggleSwitch
-                                    defaultValue={isAutomaticBackupEnabled}
-                                    onChange={
-                                        isAutomaticBackupAllowed
-                                            ? () => onAutomaticBackupSelect
-                                            : () => false
-                                    }
-                                    isChecked={
-                                        isAutomaticBackupAllowed
-                                            ? undefined
-                                            : false
-                                    }
-                                />
-                            </div>
                         </div>
                     )}
 
