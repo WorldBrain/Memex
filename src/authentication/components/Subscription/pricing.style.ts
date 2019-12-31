@@ -131,6 +131,7 @@ const PricingList = styled.div`
     width: 80%;
     line-height: 1.3em;
     text-align: center;
+    margin-bottom: 40px;
 `
 
 const ListItem = styled.div`

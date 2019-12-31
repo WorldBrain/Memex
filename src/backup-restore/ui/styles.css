@@ -23,6 +23,7 @@
 
 .subtitle2 {
     composes: subText from '../../options/base.css';
+    font-size: 19px;
     margin-bottom: 30px;
 }
 
