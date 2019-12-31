@@ -232,7 +232,14 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                                     {this.state.backupPath}
                                 </span>
                             ) : (
-                                'Google Drive'
+                                <span
+                                    className={classNames(
+                                        styles.subname,
+                                        localStyles.limitWidth,
+                                    )}
+                                >
+                                    Google Drive
+                                </span>
                             )}
                         </div>
                     </div>

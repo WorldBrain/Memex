@@ -57,34 +57,45 @@ export function OnboardingBackupMode({
 }) {
     return (
         <div className={Styles.selectionDiv}>
-            <div>
-                <label>
-                    <input
-                        type="radio"
-                        checked={mode === 'manual'}
-                        onChange={() => onModeChange('manual')}
-                    />{' '}
-                    <span className={Styles.option}>
-                        <span className={Styles.name}>Manual Backup</span>
+            <div className={Styles.selectionContainer}>
+                <label className={Styles.option}>
+                    <div className={Styles.selection}>
+                        <input
+                            type="radio"
+                            checked={mode === 'manual'}
+                            onChange={() => onModeChange('manual')}
+                        />{' '}
+                        <div className={Styles.textBlock}>
+                            <p className={Styles.name}>Manual Backup</p>
+                            <p className={Styles.subname}>
+                                You need to regularly remember to back up
+                                yourself.
+                            </p>
+                        </div>
+                    </div>
+                    <div>
                         <span className={classNames(Styles.labelFree)}>
                             Free
                         </span>
-                        <br />
-                        <span className={Styles.subname}>
-                            You need to regularly remember to back up yourself.
-                        </span>
-                    </span>
+                    </div>
                 </label>
             </div>
-            <div>
-                <label>
-                    <input
-                        type="radio"
-                        checked={mode === 'automatic'}
-                        onChange={() => onModeChange('automatic')}
-                    />{' '}
-                    <span className={Styles.option}>
-                        <span className={Styles.name}>Automatic Backup</span>
+            <div className={Styles.selectionContainer}>
+                <label className={Styles.option}>
+                    <div className={Styles.selection}>
+                        <input
+                            type="radio"
+                            checked={mode === 'automatic'}
+                            onChange={() => onModeChange('automatic')}
+                        />{' '}
+                        <div className={Styles.textBlock}>
+                            <p className={Styles.name}>Automatic Backup</p>
+                            <p className={Styles.subname}>
+                                Worry-free backups every 15 minutes.
+                            </p>
+                        </div>
+                    </div>
+                    <div>
                         {isAuthorizedForAutomaticBackup ? (
                             <span className={classNames(Styles.labelFree)}>
                                 Subscribed
@@ -94,15 +105,10 @@ export function OnboardingBackupMode({
                                 className={Styles.labelPremium}
                                 onClick={launchSubscriptionFlow}
                             >
-                                Manage Subscription
+                                ⭐️ Click to Upgrade
                             </span>
                         )}
-
-                        <br />
-                        <span className={Styles.subname}>
-                            Worry-free backups every 15 minutes.
-                        </span>
-                    </span>
+                    </div>
                 </label>
             </div>
         </div>

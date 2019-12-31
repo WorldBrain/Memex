@@ -14,15 +14,10 @@
 }
 
 .statusLine {
+    composes: subText from '../../../../options/base.css';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
-
-    & p {
-        margin-bottom: 0;
-        margin-top: -5px;
-    }
 }
 
 .nextBackupLine {

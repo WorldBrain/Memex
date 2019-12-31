@@ -31,7 +31,7 @@
     width: 340px;
     height: 150px;
     position: relative;
-    transition: all 1s ease-in-out;
+    transition: all 0.2s ease-in-out;
     cursor: default;
 }
 

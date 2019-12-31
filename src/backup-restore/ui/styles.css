@@ -19,12 +19,10 @@
 
 .subtitle {
     composes: subTitleColor from '../../common-ui/colors.css';
-    font-size: 19px;
 }
 
 .subtitle2 {
     composes: subText from '../../options/base.css';
-    font-size: 19px;
     margin-bottom: 30px;
 }
 
@@ -34,11 +32,12 @@
 
 .back {
     composes: warningColor hoverColor from '../../common-ui/colors.css';
-    margin-left: 15px;
     font-weight: 500;
     cursor: pointer;
     margin-top: 20px;
+    padding: 3px 5px;
     font-size: 15px;
+    border-radius: 3px;
 }
 
 /* Warning section */

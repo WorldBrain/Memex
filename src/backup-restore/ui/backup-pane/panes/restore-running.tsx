@@ -25,7 +25,7 @@ export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
 }
 
 function renderHeader() {
-    return <p className={styles.header2}>RESTORE IN PROGRESS</p>
+    return <p className={styles.header2}>RESTORING: DON'T CLOSE THIS TAB</p>
 }
 
 function renderFailMessage() {

@@ -28,11 +28,13 @@ export default class RestoreConfirmation extends React.Component<Props, {}> {
                         className={styles.closeIcon}
                         onClick={this.props.onClose}
                     />
-                    <img
-                        className={styles.dangerIcon}
-                        src={'./img/danger.svg'}
-                    />
-                    <span className={styles.danger}>Danger Zone</span>
+                    <div>
+                        <img
+                            className={styles.dangerIcon}
+                            src={'./img/danger.svg'}
+                        />
+                        <span className={styles.danger}>Danger Zone</span>
+                    </div>
                     <p className={styles.normal}>
                         This will delete your existing data and replace it with
                         your backup. You cannot go back.

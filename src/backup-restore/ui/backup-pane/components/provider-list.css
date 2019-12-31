@@ -33,17 +33,23 @@
     font-size: 15px;
 }
 
+.label p {
+    margin: 0px;
+}
+
+.option {
+    display: flex;
+}
+
 .title {
     composes: h2Color from '../../../../common-ui/colors.css';
-    font-size: 15px;
+    font-size: 17px;
     vertical-align: middle;
     font-weight: 500;
 }
 
 .description {
     composes: subText from '../../../../options/base.css';
-    margin: 4px 0px 0px 41px;
-    line-height: 19px;
 }
 
 .destination {
@@ -56,7 +62,7 @@
     font-size: 15px;
     color: #0b0b69;
     margin-top: 10px;
-    margin-left: 30px;
+    margin-left: -3px;
     display: flex;
     align-items: flex-start;
 
@@ -96,10 +102,9 @@
 
 .form input {
     margin-right: 20px;
+    height: 21px;
     vertical-align: middle;
-    margin-left: 10px;
     margin-top: 0px;
-    padding: 5px 10px;
     border-radius: 3px;
     text-align: center;
 }

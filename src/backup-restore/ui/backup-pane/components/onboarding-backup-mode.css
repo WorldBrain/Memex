@@ -16,17 +16,33 @@ input {
 }
 
 .subname {
-    composes: subTitleColor from '../../../../common-ui/colors.css';
-    font-size: 13px;
+    composes: subText from '../../../../options/base.css';
+}
+
+.selectionContainer {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.selection {
+    display: flex;
 }
 
 .option {
     vertical-align: top;
-    display: inline-block;
-    margin-bottom: 14px;
+    display: flex;
     width: 90%;
     cursor: pointer;
-    margin-left: -5px;
+    justify-content: space-between;
+
+    & p {
+        margin: 0px;
+    }
+}
+
+.textBlock {
+    display: flex;
+    flex-direction: column;
 }
 
 .labelFree {
@@ -43,7 +59,7 @@ input {
     padding-right: 20px;
     font-weight: 500;
     padding-top: 5px;
-    padding-bottom: 5px;
+    padding-bottom: 7px;
     font-size: 14px;
     vertical-align: middle;
     float: right;
