@@ -219,6 +219,7 @@ export function getBackgroundStorageModules(
     backgroundModules: BackgroundModules,
 ): { [moduleName: string]: StorageModule } {
     return {
+        pageFetchBacklog: backgroundModules.pageFetchBacklog.storage,
         annotations: backgroundModules.directLinking.annotationStorage,
         notifications: backgroundModules.notifications.storage,
         customList: backgroundModules.customLists.storage,

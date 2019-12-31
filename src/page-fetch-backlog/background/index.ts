@@ -16,7 +16,7 @@ export class PageFetchBacklogBackground {
     static DEF_ENTRY_CHUNK = 5
     static DEF_RETRY_INTERVALS = [5, 15, 60, 180, 1440]
 
-    private storage: PageFetchBacklogStorage
+    storage: PageFetchBacklogStorage
     private recurringTask: RecurringTask
     private checkingConnection: Promise<void>
 
