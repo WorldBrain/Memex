@@ -7,8 +7,6 @@
 .overlay {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
     position: fixed;
     top: 0;
     bottom: 0;
