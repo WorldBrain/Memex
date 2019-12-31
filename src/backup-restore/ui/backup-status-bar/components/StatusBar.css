@@ -10,6 +10,10 @@
     align-items: center;
     height: 100%;
     z-index: 2147483647;
+
+    @media (max-width: 700px) {
+        display: none;
+    }
 }
 
 .header {
@@ -20,6 +24,10 @@
     text-align: right;
     align-self: inherit;
     width: max-content;
+
+    @media (max-width: 1150px) {
+        display: none;
+    }
 }
 
 .headerBox {

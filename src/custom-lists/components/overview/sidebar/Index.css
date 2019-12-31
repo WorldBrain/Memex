@@ -14,10 +14,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 5px 10px 5px 15px;
-
-    &:hover {
-        background-color: color14;
-    }
+    margin-top: -31px;
+    margin-right: 30px;
 }
 
 .myCollection {
@@ -37,8 +35,8 @@
     background-position: center;
     background-repeat: no-repeat;
     background-size: 12px;
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
 
     &:hover {
         background-color: color8;
