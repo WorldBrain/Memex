@@ -11,7 +11,6 @@
     color: color4;
     cursor: pointer;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 5px 10px 5px 15px;
     margin-top: -31px;
@@ -24,8 +23,18 @@
 }
 
 .myCollectionSidebar {
-    font-size: 18px;
+    font-size: 13px;
     font-weight: 500;
+    margin-right: 0px;
+}
+
+.collectionSidebar {
+    margin-right: 0px;
+    justify-content: space-between;
+}
+
+.collectionSidebarTitle {
+    font-size: 15px;
 }
 
 .addNew {

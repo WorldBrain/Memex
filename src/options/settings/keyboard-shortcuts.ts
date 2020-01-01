@@ -18,19 +18,19 @@ export const shortcuts: ShortcutElData[] = [
         id: 'show-highlights-shortcut',
         name: 'toggleHighlights',
         children: 'Toggle visibility of highlights (with no text selected)',
-        tooltip: 'Toggle highlights',
+        tooltip: 'Toggle Highlights',
     },
     {
         id: 'sidebar-shortcut',
         name: 'toggleSidebar',
         children: 'Open Sidebar',
-        toggleOn: 'Open Sidebar',
-        toggleOff: 'Close Sidebar',
+        toggleOn: 'Toggle Sidebar',
+        toggleOff: 'Open Sidebar',
     },
     {
         id: 'annotation-shortcut',
         name: 'createAnnotation',
-        children: 'Create annotation',
+        children: 'Create Annotation',
     },
     {
         id: 'add-to-coll-shortcut',

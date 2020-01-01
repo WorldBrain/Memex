@@ -21,6 +21,9 @@ const List = ({
         })}
         onClick={handleRenderCreateList}
     >
+        {isForInpage ? (
+            <div className={styles.collectionSidebarTitle}>Collections</div>
+        ) : null}
         <div
             className={cx(styles.addNew, {
                 [styles.addNewHover]: isSidebarLocked,

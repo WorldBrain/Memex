@@ -6,9 +6,13 @@
 
 .ribbon {
     position: fixed;
-    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
     right: 0;
-    width: 20px;
+    width: 15px;
+    top: 0;
     height: 100%;
     z-index: 2147483645;
 
@@ -17,53 +21,72 @@
     border-bottom-left-radius: 5px;
     border: 1px solid #7777775c;
     border-right: none; */
-    transform: translate(0, 0);
+    transform: translate(0, -20px);
     transition: all 0.1s ease-in-out;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
     text-align: start;
-    display: flex;
-    flex-direction: row;
     align-items: center;
 }
 
 .ribbonExpanded {
-    composes: sideBarColorOpen from '../../../common-ui/colors.css';
-    display: grid;
-    width: 35px;
-    z-index: 2147483647;
-    grid-template-rows: 20% 50% 20%;
-    grid-row-gap: 5%;
-    transition: all 0.2s ease-in-out;
+    display: flex;
+    width: 30px;
+    transition: all 0.1s ease-in-out;
+}
+
+.ribbonSidebarOpen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: none;
+    background: white;
+    height: 100%;
+    width: 30px;
+    top: 0;
+}
+
+.innerRibbonExpanded {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    box-shadow: -1px 1px 7px 2px #13131321;
+    background: white;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.innerRibbonSidebarOpen {
+    box-shadow: none;
+}
+
+hr {
+    width: 10px;
+    border: solid 0.5px #d8d8d8;
+    border-radius: 5px;
 }
 
 /* SECTIONS */
 
 .generalActions {
-    grid-row-gap: 20px;
-    display: grid;
-    justify-items: flex-start;
-    align-self: flex-start;
-    margin-top: 20px;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    margin-top: 2px;
 }
 
 .pageActions {
-    grid-row-gap: 20px;
-    display: grid;
-    justify-items: flex-start;
-    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
 }
 
 .settingsActions {
-    grid-row-gap: 20px;
-    display: grid;
+    display: flex;
     flex-direction: column;
-    align-self: flex-end;
-    margin-bottom: 20px;
-    justify-content: center;
+    margin-bottom: 3px;
 }
 
 /* ICONS */
@@ -284,77 +307,12 @@
     background-size: 14px;
 }
 
-@media (max-height: 450px) {
-    .button {
-        width: 20px;
-        height: 20px;
-        background-size: 12px;
-    }
-
-    .logo {
-        background-size: 16px;
-
-        &:hover {
-            background-size: 12px;
-        }
+@media (max-height: 600px) {
+    .ribbon {
+        top: 5%;
     }
 
     .ribbonExpanded {
-        grid-row-gap: 5%;
-    }
-
-    .generalActions {
-        grid-row-gap: 7px;
-        margin-top: 10px;
-    }
-
-    .pageActions {
-        grid-row-gap: 7px;
-    }
-
-    .settingsActions {
-        grid-row-gap: 7px;
-        margin-bottom: 10px;
-    }
-
-    .cancel {
-        background-image: url('/img/removeIcon.svg');
-        background-size: 10px;
-    }
-}
-
-@media (min-height: 451px) and (max-height: 600px) {
-    .button {
-        width: 20px;
-        height: 20px;
-        background-size: 12px;
-    }
-
-    .ribbonExpanded {
-        grid-row-gap: 5%;
-    }
-
-    .logo {
-        background-size: 16px;
-
-        &:hover {
-            background-size: 12px;
-        }
-    }
-
-    .generalActions {
-        grid-row-gap: 10px;
-    }
-
-    .pageActions {
-        grid-row-gap: 10px;
-    }
-
-    .settingsActions {
-        grid-row-gap: 10px;
-    }
-
-    .cancel {
-        background-size: 10px;
+        top: 5%;
     }
 }
