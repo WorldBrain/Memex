@@ -63,12 +63,8 @@
     background-position: center;
     background-repeat: no-repeat;
     background-size: 12px;
-    width: 26px;
     height: 26px;
-
-    &:hover {
-        background-color: color8;
-    }
+    width: 26px;
 }
 
 .button {
