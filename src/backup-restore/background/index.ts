@@ -60,6 +60,7 @@ export class BackupBackgroundModule {
     }) {
         this.storageManager = storageManager
         this.storage = new BackupStorage({ storageManager })
+        this.searchIndex = searchIndex
         this.lastBackupStorage = lastBackupStorage
         this.changeTrackingQueue = createQueue(queueOpts)
         this.notifications = notifications
