@@ -141,6 +141,7 @@ class ListContainer extends Component {
         return (
             <React.Fragment>
                 <MyCollection
+                    isSidebarLocked={this.props.isSidebarLocked}
                     handleRenderCreateList={this.props.toggleCreateListForm}
                 />
 
@@ -159,7 +160,16 @@ class ListContainer extends Component {
                                 .isSidebarLocked,
                         })}
                     >
-                        {this.renderAllLists()}
+                        {this.props.lists.length === 0 ? (
+                            <div className={extStyles.noLists}>
+                                <strong>You don't have any collections </strong>
+                                <br />
+                                Create one with the + icon and drag and drop
+                                items into it.
+                            </div>
+                        ) : (
+                            <div>{this.renderAllLists()}</div>
+                        )}
                     </div>
                 </div>
                 <DeleteConfirmModal
@@ -217,7 +227,4 @@ const mapDispatchToProps = (dispatch, getState) => ({
     },
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(ListContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(ListContainer)

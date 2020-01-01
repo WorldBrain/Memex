@@ -100,6 +100,7 @@
     justify-content: flex-start;
     cursor: pointer;
     outline: none;
+    margin-left: -6px;
     composes: nakedButton from 'src/common-ui/elements.css';
 }
 
