@@ -91,11 +91,11 @@ describe('sync post-receive processor', () => {
                 data: {
                     ...DATA.pageCreateA.data,
                     value: {
-                        url: DATA.pageCreateA.data.pk,
-                        fullUrl: DATA.pageCreateA.data.pk,
+                        url: DATA.pageCreateA.data.value.fullUrl,
+                        fullUrl: DATA.pageCreateA.data.value.fullUrl,
                         fullTitle: 'test title',
-                        domain: DATA.pageCreateA.data.pk,
-                        hostname: DATA.pageCreateA.data.pk,
+                        domain: DATA.pageCreateA.data.value.fullUrl,
+                        hostname: DATA.pageCreateA.data.value.fullUrl,
                         tags: [],
                         terms: [],
                         urlTerms: [],
@@ -118,11 +118,11 @@ describe('sync post-receive processor', () => {
                 data: {
                     ...DATA.pageCreateA.data,
                     value: {
-                        url: DATA.pageCreateA.data.pk,
-                        fullUrl: DATA.pageCreateA.data.pk,
-                        fullTitle: DATA.pageCreateA.data.pk,
-                        domain: DATA.pageCreateA.data.pk,
-                        hostname: DATA.pageCreateA.data.pk,
+                        url: DATA.pageCreateA.data.value.fullUrl,
+                        fullUrl: DATA.pageCreateA.data.value.fullUrl,
+                        fullTitle: DATA.pageCreateA.data.value.fullUrl,
+                        domain: DATA.pageCreateA.data.value.fullUrl,
+                        hostname: DATA.pageCreateA.data.value.fullUrl,
                         tags: [],
                         terms: [],
                         urlTerms: [],

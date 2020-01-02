@@ -34,10 +34,9 @@ export class PostReceiveProcessor {
         }
 
         return (
-            (data.value.fullUrl != null &&
-                data.value.fullUrl.length &&
-                data.value.fullTitle == null) ||
-            !data.value.fullTitle.length
+            data.value.fullUrl != null &&
+            data.value.fullUrl.length &&
+            (data.value.fullTitle == null || !data.value.fullTitle.length)
         )
     }
 
