@@ -8,14 +8,12 @@ import Styles from '../../styles.css'
 
 export default class OnboardingSizeContainer extends React.Component {
     static propTypes = {
-        onBlobPreferenceChange: PropTypes.func.isRequired,
         onLoginRequested: PropTypes.func.isRequired,
         onBackupRequested: PropTypes.func.isRequired,
     }
 
     state = {
         estimation: null,
-        blobPreference: true,
         backendLocation: null,
         isAuthenticated: null,
     }
@@ -89,39 +87,6 @@ export default class OnboardingSizeContainer extends React.Component {
                                     <span className={localStyles.subname}>
                                         Searchable History, Annotations,
                                         Comments, Highlights, Collections, Tags.
-                                    </span>
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className={localStyles.estimationSize}>
-                                {Math.ceil(_bytesToMega(sizes.blobs))}
-                                MB
-                            </td>
-                            <td>
-                                <span className={localStyles.option}>
-                                    <input
-                                        type="checkbox"
-                                        checked={this.state.blobPreference}
-                                        onChange={event => {
-                                            this.setState({
-                                                blobPreference:
-                                                    event.target.checked,
-                                            })
-                                            this.props.onBlobPreferenceChange(
-                                                event.target.checked,
-                                            )
-                                        }}
-                                        className={localStyles.checkbox}
-                                    />
-                                    <span className={localStyles.name}>
-                                        Include Screenshots?
-                                    </span>
-                                    <br />
-                                    <span className={localStyles.subname}>
-                                        If you want to enable this option later,
-                                        it will only backup screenshots made
-                                        after that point in time.
                                     </span>
                                 </span>
                             </td>

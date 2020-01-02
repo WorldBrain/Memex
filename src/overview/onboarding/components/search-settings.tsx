@@ -105,13 +105,6 @@ export default class SearchSettings extends React.PureComponent<Props> {
                 >
                     Make title and URL always searchable (recommended)
                 </Checkbox>
-                <Checkbox
-                    id="index-screenshots"
-                    isChecked={this.props.screenshots}
-                    handleChange={this.props.toggleScreenshots}
-                >
-                    Capture screenshots (triples disk space requirements)
-                </Checkbox>
                 <p className={styles.settingsHeader}>
                     Full-text search websites and PDFs
                 </p>

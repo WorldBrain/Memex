@@ -57,13 +57,6 @@ class IndexingPrefs extends React.PureComponent<Props> {
                     seconds
                 </Checkbox>
                 <Checkbox
-                    id="index-screenshots"
-                    isChecked={this.props.screenshots}
-                    handleChange={this.props.toggleScreenshots}
-                >
-                    Capture screenshots (triples disk space requirements)
-                </Checkbox>
-                <Checkbox
                     id="index-bookmarks"
                     isChecked={this.props.bookmarks}
                     handleChange={this.props.toggleBookmarks}
