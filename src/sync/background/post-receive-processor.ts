@@ -33,14 +33,19 @@ export class PostReceiveProcessor {
             return false
         }
 
-        return data.value.fullTitle == null || !data.value.fullTitle.length
+        return (
+            (data.value.fullUrl != null &&
+                data.value.fullUrl.length &&
+                data.value.fullTitle == null) ||
+            !data.value.fullTitle.length
+        )
     }
 
     processor: SyncPostReceiveProcessor = async ({ entry, ...params }) => {
         if (this.shouldPostProcess(entry)) {
             try {
                 const value = await this.props.fetchPageData.process(
-                    entry.data.pk,
+                    entry.data.value.fullUrl,
                 )
 
                 return {
