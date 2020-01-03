@@ -40,7 +40,7 @@ export default class Logic extends UILogic<State, Event> {
             isSidebarEnabled: true,
             areShortcutsEnabled: true,
             areStubsEnabled: true,
-            areVisitsEnabled: false,
+            areVisitsEnabled: true,
             areBookmarksEnabled: true,
             areAnnotationsEnabled: true,
             areScreenshotsEnabled: false,
