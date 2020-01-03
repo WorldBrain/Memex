@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Component } from 'react'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
@@ -21,6 +21,7 @@ export const SCREENS = {
         events: {
             onBackupRequested: { argument: 'changeBackupRequested' },
             onRestoreRequested: true,
+            onBackupSetupRequested: true,
             onBlobPreferenceChange: { argument: 'saveBlobs' },
             onSubscribeRequested: { argument: 'choice' },
         },
@@ -69,7 +70,7 @@ export const SCREENS = {
     },
 }
 
-export default class BackupSettingsContainer extends React.Component {
+export default class BackupSettingsContainer extends Component {
     state = { screen: null, isAuthenticated: null }
 
     async componentDidMount() {

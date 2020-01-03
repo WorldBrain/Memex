@@ -1,5 +1,5 @@
 import moment from 'moment'
-import React from 'react'
+import React, { Component } from 'react'
 import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import SmallButton from '../../../../common-ui/components/small-button'
@@ -21,13 +21,14 @@ const localStyles = require('./overview.css')
 interface Props {
     onBackupRequested: (...args: any[]) => any
     onRestoreRequested: (...args: any[]) => any
+    onBackupSetupRequested: (...args: any[]) => any
     onBlobPreferenceChange: (...args: any[]) => any
     onPaymentRequested: (...args: any[]) => any
     authorizedFeatures: UserFeature[]
     backupPath: string
 }
 
-export class OverviewContainer extends React.Component<Props & UserProps> {
+export class OverviewContainer extends Component<Props & UserProps> {
     state = {
         automaticBackupEnabled: null,
         backupTimes: null,
@@ -179,70 +180,22 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                 )}
 
                 {/* Settings Section */}
-                    <div>
-                        <p className={styles.header2}>
-                            <strong>SETTINGS</strong>
-                        </p>
-                        <div className={styles.option}>
-                            {!automaticBackupsAllowed && !this.state.automaticBackupEnabled && (
-                                <div>
-                                    <span className={styles.name}>
-                                        Enable Automatic Backups
-                                    </span>
-                                    <SmallButton
-                                        extraClass={localStyles.right}
-                                        onClick={this.openSubscriptionModal}
-                                        color={'darkblue'}
-                                    >
-                                        {'⭐️ Upgrade'}
-                                    </SmallButton>
-                                    <span
-                                        className={classNames(
-                                            styles.subname,
-                                            localStyles.limitWidth,
-                                        )}
-                                    >
-                                        Worry-free. Automatically backs up your data
-                                        every 15 minutes.
-                                    </span>
-                                </div>
-
-                            )}
-
-                            {automaticBackupsAllowed && !this.state.automaticBackupEnabled && (
-                                <div>
+                <div>
+                    <p className={styles.header2}>
+                        <strong>SETTINGS</strong>
+                    </p>
+                    <div className={styles.option}>
+                        {!automaticBackupsAllowed && (
+                            <div>
                                 <span className={styles.name}>
-                                    Automatic Backups still disabled
-                                </span>
-                                <SmallButton
-                                    extraClass={localStyles.right}
-                                    onClick={this.props.onBackupRequested}
-                                    color={'red'}
-                                >
-                                    {'Enable'}
-                                </SmallButton>
-                                 <span
-                                    className={classNames(
-                                        styles.subname,
-                                        localStyles.limitWidth,
-                                    )}
-                                >
-                                    You successfully upgraded but didn't enable automatic backups
-                                </span>
-                                </div>
-                            )}
-
-                            {this.state.automaticBackupEnabled && (
-                                <div>
-                                <span className={styles.name}>
-                                    Automatic Backups: Enabled
+                                    Enable Automatic Backups
                                 </span>
                                 <SmallButton
                                     extraClass={localStyles.right}
                                     onClick={this.openSubscriptionModal}
-                                    color={'green'}
+                                    color={'darkblue'}
                                 >
-                                    {'✓ Enabled'}
+                                    {'⭐️ Upgrade'}
                                 </SmallButton>
                                 <span
                                     className={classNames(
@@ -250,21 +203,73 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                                         localStyles.limitWidth,
                                     )}
                                 >
-                                    All set. Your data is backed up every 15 minutes.
+                                    Worry-free. Automatically backs up your data
+                                    every 15 minutes.
                                 </span>
+                            </div>
+                        )}
+
+                        {automaticBackupsAllowed &&
+                            !this.state.automaticBackupEnabled && (
+                                <div>
+                                    <span className={styles.name}>
+                                        Automatic Backups still disabled
+                                    </span>
+                                    <SmallButton
+                                        extraClass={localStyles.right}
+                                        onClick={
+                                            this.props.onBackupSetupRequested
+                                        }
+                                        color={'red'}
+                                    >
+                                        {'Enable'}
+                                    </SmallButton>
+                                    <span
+                                        className={classNames(
+                                            styles.subname,
+                                            localStyles.limitWidth,
+                                        )}
+                                    >
+                                        {
+                                            "You successfully upgraded but haven't enable automatic backups"
+                                        }
+                                    </span>
                                 </div>
                             )}
-                        </div>
+
+                        {automaticBackupsAllowed &&
+                            this.state.automaticBackupEnabled && (
+                                <div>
+                                    <span className={styles.name}>
+                                        Automatic Backups: Enabled
+                                    </span>
+                                    <SmallButton
+                                        extraClass={localStyles.right}
+                                        onClick={this.openSubscriptionModal}
+                                        color={'green'}
+                                    >
+                                        {'✓ Enabled'}
+                                    </SmallButton>
+                                    <span
+                                        className={classNames(
+                                            styles.subname,
+                                            localStyles.limitWidth,
+                                        )}
+                                    >
+                                        All set. Your data is backed up every 15
+                                        minutes.
+                                    </span>
+                                </div>
+                            )}
                     </div>
+                </div>
                 {this.state.hasInitialBackup ? (
                     <div className={styles.option}>
                         <span className={styles.name}>Backup Location</span>
                         <SmallButton
                             extraClass={localStyles.right}
                             color={'green'}
-                            onClick={() =>
-                                this.props.onBackupRequested(true)
-                            }
+                            onClick={() => this.props.onBackupRequested(true)}
                         >
                             Change
                         </SmallButton>
@@ -290,9 +295,7 @@ export class OverviewContainer extends React.Component<Props & UserProps> {
                     </div>
                 ) : null}
                 <div className={styles.option}>
-                    <span className={styles.name}>
-                        Restore &amp; Replace
-                    </span>
+                    <span className={styles.name}>Restore &amp; Replace</span>
                     <SmallButton
                         onClick={() =>
                             this.setState({ showRestoreConfirmation: true })

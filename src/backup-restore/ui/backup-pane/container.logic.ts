@@ -100,8 +100,21 @@ export async function processEvent({
         return {}
     }
 
+    const triggerOnboarding = () => {
+        localStorage.setItem('backup.onboarding', true)
+        localStorage.setItem('backup.onboarding.where', true)
+        analytics.trackEvent({
+            category: 'Backup',
+            action: 'onboarding-triggered',
+        })
+        return { screen: 'onboarding-where' }
+    }
+
     const handlers = {
         overview: {
+            onBackupSetupRequested: async () => {
+                return triggerOnboarding()
+            },
             onBackupRequested: async () => {
                 const changeBackupRequested = event.changeBackupRequested
                 const [
@@ -117,13 +130,7 @@ export async function processEvent({
                     user is trying to change the backend location */
                 const needsOnBoarding = !hasInitialBackup && !backupInfo
                 if (needsOnBoarding || changeBackupRequested === true) {
-                    localStorage.setItem('backup.onboarding', true)
-                    localStorage.setItem('backup.onboarding.where', true)
-                    analytics.trackEvent({
-                        category: 'Backup',
-                        action: 'onboarding-triggered',
-                    })
-                    return { screen: 'onboarding-where' }
+                    return triggerOnboarding()
                 }
 
                 /* Navigate to Google Drive login if previous it is not authentication
