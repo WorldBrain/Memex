@@ -9,7 +9,7 @@ import {
 } from '@worldbrain/memex-common/lib/sync/constants'
 import {
     getStorageContents,
-    isTermsField,
+    removeTermFieldsFromObject,
     StorageContents,
 } from '@worldbrain/memex-common/lib/storage/utils'
 import { MemexInitialSync } from '@worldbrain/memex-common/lib/sync'
@@ -31,7 +31,6 @@ import {
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import SyncBackground from '.'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
-import delay from 'src/util/delay'
 
 const registerTest = it
 
@@ -795,16 +794,7 @@ function mobileSyncTests(suiteOptions: {
             storageContents,
         )) {
             for (const object of objects) {
-                for (const [fieldName, fieldValue] of Object.entries(object)) {
-                    if (
-                        isTermsField({
-                            collection: collectionName,
-                            field: fieldName,
-                        })
-                    ) {
-                        delete object[fieldName]
-                    }
-                }
+                removeTermFieldsFromObject(object, { collectionName })
             }
         }
     }
