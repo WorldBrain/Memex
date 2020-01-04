@@ -53,40 +53,50 @@ export default class OnboardingScreen extends StatefulUIElement<
 
         // Set default vaslues if nothing present in storage
         const defs = this.logic.getInitialState()
-        const grabVal = (key: string, defVal: any) => ({
-            enabled: storedVals[key] != null ? storedVals[key] : defVal,
-        })
+        const grabVal = async (key: string, defVal: any) => {
+            let enabled: boolean
+
+            if (storedVals[key] == null) {
+                enabled = defVal
+                await this.props.storage.set({ [key]: enabled })
+            } else {
+                enabled = storedVals[key]
+            }
+
+            return { enabled }
+        }
 
         this.processEvent(
             'setAnnotationsEnabled',
-            grabVal(STORAGE_KEYS.LINKS, defs.areAnnotationsEnabled),
+            await grabVal(STORAGE_KEYS.LINKS, defs.areAnnotationsEnabled),
         )
         this.processEvent(
             'setBookmarksEnabled',
-            grabVal(STORAGE_KEYS.BOOKMARKS, defs.areBookmarksEnabled),
+            await grabVal(STORAGE_KEYS.BOOKMARKS, defs.areBookmarksEnabled),
         )
         this.processEvent(
             'setVisitsEnabled',
-            grabVal(STORAGE_KEYS.VISITS, defs.areVisitsEnabled),
+            await grabVal(STORAGE_KEYS.VISITS, defs.areVisitsEnabled),
         )
         this.processEvent(
             'setScreenshotsEnabled',
-            grabVal(STORAGE_KEYS.SCREENSHOTS, defs.areScreenshotsEnabled),
+            await grabVal(STORAGE_KEYS.SCREENSHOTS, defs.areScreenshotsEnabled),
         )
         this.processEvent(
             'setStubsEnabled',
-            grabVal(STORAGE_KEYS.STUBS, defs.areStubsEnabled),
+            await grabVal(STORAGE_KEYS.STUBS, defs.areStubsEnabled),
         )
         this.processEvent('setVisitDelay', {
-            delay: grabVal(STORAGE_KEYS.VISIT_DELAY, defs.visitDelay).enabled,
+            delay: (await grabVal(STORAGE_KEYS.VISIT_DELAY, defs.visitDelay))
+                .enabled as any,
         })
         this.processEvent(
             'setTooltipEnabled',
-            grabVal(TOOLTIP_STORAGE_NAME, defs.isTooltipEnabled),
+            await grabVal(TOOLTIP_STORAGE_NAME, defs.isTooltipEnabled),
         )
         this.processEvent(
             'setSidebarEnabled',
-            grabVal(SIDEBAR_STORAGE_NAME, defs.isSidebarEnabled),
+            await grabVal(SIDEBAR_STORAGE_NAME, defs.isSidebarEnabled),
         )
 
         // Keyboard shortcut state is nested
