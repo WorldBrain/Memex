@@ -82,6 +82,7 @@ export default class SyncBackground extends SyncService {
                 'forceIncrementalSync',
             ),
             listDevices: bound(this.syncInfoStorage, 'listDevices'),
+            removeDevice: bound(this.syncInfoStorage, 'removeDevice'),
         }
     }
 

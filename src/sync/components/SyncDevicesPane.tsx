@@ -137,7 +137,7 @@ export class SyncDevicesPane extends Component<Props, State> {
 
 class SyncDevicesPaneContainer extends Component<
     UserProps,
-    { devices: any; feature: boolean }
+    { devices: SyncDevice[]; feature: boolean }
 > {
     state = { devices: [], feature: false }
 
@@ -146,7 +146,10 @@ class SyncDevicesPaneContainer extends Component<
         this.setState({ feature: await features.getFeature('Sync') })
     }
 
-    handleRemoveDevice = () => {}
+    handleRemoveDevice = async (deviceId: string) => {
+        await sync.removeDevice(deviceId)
+        await this.refreshDevices()
+    }
 
     getInitialSyncMessage = async () => {
         return (await sync.requestInitialSync()).initialMessage
@@ -158,7 +161,7 @@ class SyncDevicesPaneContainer extends Component<
     }
 
     refreshDevices = async () => {
-        const devices = await sync.listDevices()
+        const devices = (await sync.listDevices()) as SyncDevice[]
         this.setState({ devices })
     }
 

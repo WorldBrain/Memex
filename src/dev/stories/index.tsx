@@ -49,18 +49,14 @@ storiesOf('QR Code creation', module)
 
 const devices = [
     {
-        id: '123',
-        name: "Tom's Iphone",
-        added: new Date(),
-        initialSync: false,
-        lastSync: null,
+        deviceId: '123',
+        productType: "Tom's Iphone",
+        createdWhen: new Date(),
     },
     {
-        id: '1235',
-        name: 'Android Device',
-        added: new Date(),
-        initialSync: false,
-        lastSync: null,
+        deviceId: '1235',
+        productType: 'Android Device',
+        createdWhen: new Date(),
     },
 ] as SyncDevice[]
 

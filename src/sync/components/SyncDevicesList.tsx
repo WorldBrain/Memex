@@ -21,6 +21,7 @@ export function SyncDevicesList(props: Props) {
                 <span>
                     {props.devices.map(device => (
                         <SyncDeviceItem
+                            key={`sync-device-${device.deviceId}`}
                             device={device}
                             handleRemoveDevice={props.handleRemoveDevice}
                         />

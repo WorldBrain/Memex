@@ -11,4 +11,5 @@ export interface PublicSyncInterface {
     forceIncrementalSync(): Promise<void>
 
     listDevices(): Promise<any>
+    removeDevice(deviceId: string): Promise<any>
 }
