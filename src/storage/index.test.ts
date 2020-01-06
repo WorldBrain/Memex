@@ -406,11 +406,13 @@ describe('Storage initialization', () => {
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
                         bookmarks: 'url, time',
-                        clientSyncLogEntry: '++id, [collection+pk], createdOn',
+                        clientSyncLogEntry:
+                            '[deviceId+createdOn], [collection+pk], createdOn',
+                        pageFetchBacklog: '++id, createdAt',
                         directLinks:
                             'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
                         customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
+                            'id, name, isDeletable, isNestable, createdAt',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         eventLog: '[time+type], time, type',
                         notifications: 'id',
@@ -425,6 +427,7 @@ describe('Storage initialization', () => {
                         socialBookmarks: '++id, createdAt, postId',
                         socialTags: '++id, name, postId',
                         socialPostListEntries: '++id, listId, postId',
+                        syncDeviceInfo: 'deviceId',
                     },
                     version: 18,
                 },
