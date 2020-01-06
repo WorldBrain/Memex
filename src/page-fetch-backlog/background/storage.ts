@@ -3,6 +3,7 @@ import {
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 
+import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { BacklogEntry, BacklogEntryCreateArgs } from './types'
 
 export class PageFetchBacklogStorage extends StorageModule {
@@ -11,7 +12,7 @@ export class PageFetchBacklogStorage extends StorageModule {
     getConfig = (): StorageModuleConfig => ({
         collections: {
             [PageFetchBacklogStorage.BACKLOG_COLL]: {
-                version: new Date('2019-11-07'),
+                version: STORAGE_VERSIONS[19].version,
                 fields: {
                     url: { type: 'string' },
                     createdAt: { type: 'datetime' },
