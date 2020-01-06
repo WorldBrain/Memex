@@ -35,6 +35,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     debugStorageOperations?: boolean
     fetchPageProcessor?: FetchPageProcessor
     includePostSyncProcessor?: boolean
+    enableSyncEncyption?: boolean
 }): Promise<BackgroundIntegrationTestSetup> {
     if (typeof window === 'undefined') {
         global['URL'] = URL
@@ -65,15 +66,15 @@ export async function setupBackgroundIntegrationTest(options?: {
                 onRemoved: { addListener: () => {} },
             },
         } as any,
-        tabManager: options && options.tabManager,
-        signalTransportFactory: options && options.signalTransportFactory,
-        getSharedSyncLog: async () => options && options.sharedSyncLog,
-        includePostSyncProcessor: options && options.includePostSyncProcessor,
+        tabManager: options?.tabManager,
+        signalTransportFactory: options?.signalTransportFactory,
+        getSharedSyncLog: async () => options?.sharedSyncLog,
+        includePostSyncProcessor: options?.includePostSyncProcessor,
         fetchPageDataProcessor:
             options &&
             (options.fetchPageProcessor || new MockFetchPageDataProcessor()),
         auth,
-        disableSyncEnryption: true,
+        disableSyncEnryption: !options?.enableSyncEncyption,
     })
     backgroundModules.customLists._createPage =
         backgroundModules.search.searchIndex.createTestPage

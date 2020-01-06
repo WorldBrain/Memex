@@ -96,6 +96,7 @@ function extensionSyncTests(suiteOptions: {
 }) {
     interface TestSetupConfig {
         enablePostProcessing?: boolean
+        enableSyncEncyption?: boolean
     }
 
     type TestSetup = (
@@ -153,12 +154,14 @@ function extensionSyncTests(suiteOptions: {
                     sharedSyncLog: options.sharedSyncLog,
                     includePostSyncProcessor: conf.enablePostProcessing,
                     fetchPageProcessor,
+                    enableSyncEncyption: conf.enableSyncEncyption,
                 }),
                 await setupBackgroundIntegrationTest({
                     signalTransportFactory,
                     sharedSyncLog: options.sharedSyncLog,
                     includePostSyncProcessor: conf.enablePostProcessing,
                     fetchPageProcessor,
+                    enableSyncEncyption: conf.enableSyncEncyption,
                 }),
             ]
             const syncModule = (setup: BackgroundIntegrationTestSetup) =>
@@ -340,6 +343,39 @@ function extensionSyncTests(suiteOptions: {
             pages: ['http://bla.com/'],
             active: true,
         })
+    })
+
+    it('should skip sync entries that cannot be successfully be decrypted', async (setup: TestSetup) => {
+        const {
+            devices,
+            customLists,
+            syncModule,
+            forEachDevice: forEachSetup,
+            userId,
+        } = await setup({ enableSyncEncyption: true })
+
+        devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
+
+        await forEachSetup(s => syncModule(s).setup())
+        await doInitialSync({
+            source: devices[0].backgroundModules.sync,
+            target: devices[1].backgroundModules.sync,
+        })
+
+        const listId = await devices[0].backgroundModules.customLists.createCustomList(
+            {
+                name: 'My list',
+            },
+        )
+
+        await syncModule(devices[0]).remoteFunctions.forceIncrementalSync()
+        await syncModule(devices[1]).secretStore!.generateSyncEncryptionKey()
+        await syncModule(devices[1]).remoteFunctions.forceIncrementalSync()
+        expect(
+            await customLists(devices[1]).fetchListById({
+                id: listId,
+            }),
+        ).toEqual(null)
     })
 
     it('should enable sync on start up if enabled', async (setup: TestSetup) => {
