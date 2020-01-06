@@ -5,6 +5,7 @@ import ToggleSwitch from '../../../../common-ui/components/ToggleSwitch'
 
 import ConfirmModalBtn from '../../../../common-ui/components/ConfirmModalBtn'
 import { BackupTimes } from 'src/backup-restore/types'
+import SyncNowOverlayPaneContainer from 'src/sync/components/SyncNowOverlayPane'
 const styles = require('./StatusOverlay.css')
 
 interface Props {
@@ -151,6 +152,8 @@ export default class StatusOverlay extends PureComponent<Props> {
                             </ConfirmModalBtn>
                         </div>
                     )}
+
+                    <SyncNowOverlayPaneContainer />
                 </div>
             </div>,
             this.overlayRoot,
