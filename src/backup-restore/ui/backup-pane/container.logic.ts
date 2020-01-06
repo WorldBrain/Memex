@@ -69,6 +69,13 @@ export async function getStartScreen({
         ) {
             localStorage.removeItem('backup.onboarding.authenticating')
             return 'onboarding-size'
+        } else if (
+            isAuthenticated &&
+            localStorage.getItem('backup.onboarding.authenticating')
+        ) {
+            localStorage.removeItem('backup.onboarding.authenticating')
+            localStorage.removeItem('backup.onboarding')
+            return 'running-backup'
         } else {
             localStorage.removeItem('backup.onboarding.where')
             localStorage.removeItem('backup.onboarding')

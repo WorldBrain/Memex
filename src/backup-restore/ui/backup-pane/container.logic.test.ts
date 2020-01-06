@@ -162,7 +162,6 @@ describe('Backup settings container logic', () => {
             screen: 'running-backup',
         })
         expect(localStorage.popChanges()).toEqual([
-            { type: 'remove', key: 'backup.onboarding.payment' },
             { type: 'remove', key: 'backup.onboarding.authenticating' },
             { type: 'remove', key: 'backup.onboarding' },
         ])
