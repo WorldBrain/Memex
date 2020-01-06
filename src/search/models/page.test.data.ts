@@ -7,7 +7,7 @@ export const testPageA: PageConstructorOptions = {
     domain: 'test.com',
     hostname: 'test.com',
     text: 'Here are some test terms',
-    terms: ['here', 'test', 'terms'],
+    terms: ['test', 'terms'],
     fullTitle: 'This is a test',
     titleTerms: ['test'],
 }

@@ -58,7 +58,7 @@
         "dom-anchor-text-quote": "^4.0.2",
         "dom-highlight-range": "^1.0.1",
         "fathom-web": "^2.1.0",
-        "firebase": "^7.2.0",
+        "firebase": "^7.6.1-canary.af162f9",
         "firebaseui": "^4.2.0",
         "history": "^3.2.1",
         "immutability-helper": "^3.0.1",
