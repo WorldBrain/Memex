@@ -69,6 +69,7 @@ export class SyncNowOverlayPaneContainer extends Component<
         const syncing = await sync.forceIncrementalSync()
         // console.log("UI: Sync completed with",syncing)
         this.setState({ isSyncing: false })
+        window.location.reload()
     }
 
     render() {
