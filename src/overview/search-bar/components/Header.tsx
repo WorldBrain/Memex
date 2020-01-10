@@ -8,7 +8,7 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import cx from 'classnames'
 
 import InboxButton from 'src/notifications/components/InboxButton'
-import BackupStatus from 'src/notifications/components/BackupStatusContainer'
+import BackupStatus from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
 import { OVERVIEW_URL } from 'src/constants'
 import BackToSearch from 'src/overview/sidebar-left/components/BackToSearch'
 import SearchFilters from 'src/search-filters'
@@ -21,7 +21,6 @@ export interface Props {
     settingsRoute?: string
     overviewUrl?: string
     pricingUrl?: string
-    automaticBackupEnalbled?: boolean
     checkedIcon: string
     crossIcon: string
     query: string
@@ -46,7 +45,6 @@ class Header extends PureComponent<Props> {
         checkedIcon: 'img/checked_green.svg',
         crossIcon: 'img/cross.svg',
         settingsRoute: '/settings',
-        automaticBackupEnabled: localStorage.getItem('backup.has-subscription'),
         overviewUrl: OVERVIEW_URL,
     }
 
@@ -110,7 +108,7 @@ class Header extends PureComponent<Props> {
                         </button>
                     </div>
                     <div className={styles.links}>
-                        <BackupStatus className={styles.backupStatus} />
+                        <BackupStatus />
                         <InboxButton
                             toggleInbox={this.props.toggleInbox}
                             showInbox={this.props.showInbox}

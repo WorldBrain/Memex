@@ -15,7 +15,7 @@ export interface State {
 
 export const defaultState: State = {
     stubs: true,
-    visits: false,
+    visits: true,
     bookmarks: true,
     memexLinks: true,
     screenshots: false,

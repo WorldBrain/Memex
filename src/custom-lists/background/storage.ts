@@ -1,148 +1,118 @@
 import {
-    withHistory,
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
+import {
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
+} from '@worldbrain/memex-storage/lib/lists/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
 import { PageList, PageListEntry } from './types'
-import history from './storage.history'
 
 export default class CustomListStorage extends StorageModule {
-    static CUSTOM_LISTS_COLL = 'customLists'
-    static LIST_ENTRIES_COLL = 'pageListEntries'
+    static CUSTOM_LISTS_COLL = COLLECTION_NAMES.list
+    static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
-    getConfig = (): StorageModuleConfig =>
-        withHistory({
-            history,
-            collections: {
-                [CustomListStorage.CUSTOM_LISTS_COLL]: {
-                    version: new Date('2019-08-29'),
-                    fields: {
-                        id: { type: 'string' },
-                        name: { type: 'string' },
-                        isDeletable: { type: 'boolean' },
-                        isNestable: { type: 'boolean' },
-                        createdAt: { type: 'datetime' },
-                    },
-                    indices: [
-                        { field: 'id', pk: true },
-                        { field: 'name', unique: true },
-                        { field: 'isDeletable' },
-                        { field: 'isNestable' },
-                        { field: 'createdAt' },
-                    ],
-                },
-                [CustomListStorage.LIST_ENTRIES_COLL]: {
-                    version: new Date(2018, 6, 12),
-                    fields: {
-                        listId: { type: 'string' },
-                        pageUrl: { type: 'string' },
-                        fullUrl: { type: 'string' },
-                        createdAt: { type: 'datetime' },
-                    },
-                    indices: [
-                        { field: ['listId', 'pageUrl'], pk: true },
-                        { field: 'listId' },
-                        { field: 'pageUrl' },
-                    ],
+    getConfig = (): StorageModuleConfig => ({
+        collections: {
+            ...COLLECTION_DEFINITIONS,
+        },
+        operations: {
+            createList: {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                operation: 'createObject',
+            },
+            createListEntry: {
+                collection: CustomListStorage.LIST_ENTRIES_COLL,
+                operation: 'createObject',
+            },
+            findListsIncluding: {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                operation: 'findObjects',
+                args: {
+                    id: { $in: '$includedIds:array' },
                 },
             },
-            operations: {
-                createList: {
-                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                    operation: 'createObject',
-                },
-                createListEntry: {
-                    collection: CustomListStorage.LIST_ENTRIES_COLL,
-                    operation: 'createObject',
-                },
-                findListsIncluding: {
-                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                    operation: 'findObjects',
-                    args: {
-                        id: { $in: '$includedIds:array' },
+            findListsExcluding: {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                operation: 'findObjects',
+                args: [
+                    {
+                        id: { $nin: '$excludedIds:array' },
                     },
-                },
-                findListsExcluding: {
-                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                    operation: 'findObjects',
-                    args: [
-                        {
-                            id: { $nin: '$excludedIds:array' },
-                        },
-                        {
-                            limit: '$limit:int',
-                            skip: '$skip:int',
-                        },
-                    ],
-                },
-                findListById: {
-                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                    operation: 'findObject',
-                    args: { id: '$id:pk' },
-                },
-                findListEntriesByListId: {
-                    collection: CustomListStorage.LIST_ENTRIES_COLL,
-                    operation: 'findObjects',
-                    args: { listId: '$listId:int' },
-                },
-                findListEntriesByUrl: {
-                    collection: CustomListStorage.LIST_ENTRIES_COLL,
-                    operation: 'findObjects',
-                    args: { pageUrl: '$url:string' },
-                },
-                findListEntriesByLists: {
-                    collection: CustomListStorage.LIST_ENTRIES_COLL,
-                    operation: 'findObjects',
-                    args: {
-                        listId: { $in: '$listIds:array' },
-                        pageUrl: '$url:string',
+                    {
+                        limit: '$limit:int',
+                        skip: '$skip:int',
                     },
-                },
-                findListByName: {
-                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                    operation: 'findObject',
-                    args: [{ name: '$name:string' }, { ignoreCase: ['name'] }],
-                },
-                updateListName: {
-                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                    operation: 'updateObject',
-                    args: [
-                        {
-                            id: '$id:pk',
-                        },
-                        {
-                            name: '$name:string',
-                            // updatedAt: '$updatedAt:any',
-                        },
-                    ],
-                },
-                deleteList: {
-                    collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                    operation: 'deleteObject',
-                    args: { id: '$id:pk' },
-                },
-                deleteListEntriesByListId: {
-                    collection: CustomListStorage.LIST_ENTRIES_COLL,
-                    operation: 'deleteObjects',
-                    args: { listId: '$listId:pk' },
-                },
-                deleteListEntriesById: {
-                    collection: CustomListStorage.LIST_ENTRIES_COLL,
-                    operation: 'deleteObjects',
-                    args: { listId: '$listId:pk', pageUrl: '$pageUrl:string' },
-                },
-                [SuggestPlugin.SUGGEST_OBJS_OP_ID]: {
-                    operation: SuggestPlugin.SUGGEST_OBJS_OP_ID,
-                    args: {
-                        collection: '$collection:string',
-                        query: '$query:string',
-                        options: '$options:any',
-                    },
+                ],
+            },
+            findListById: {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                operation: 'findObject',
+                args: { id: '$id:pk' },
+            },
+            findListEntriesByListId: {
+                collection: CustomListStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: { listId: '$listId:int' },
+            },
+            findListEntriesByUrl: {
+                collection: CustomListStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: { pageUrl: '$url:string' },
+            },
+            findListEntriesByLists: {
+                collection: CustomListStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: {
+                    listId: { $in: '$listIds:array' },
+                    pageUrl: '$url:string',
                 },
             },
-        })
+            findListByName: {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                operation: 'findObject',
+                args: [{ name: '$name:string' }, { ignoreCase: ['name'] }],
+            },
+            updateListName: {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                operation: 'updateObject',
+                args: [
+                    {
+                        id: '$id:pk',
+                    },
+                    {
+                        name: '$name:string',
+                        // updatedAt: '$updatedAt:any',
+                    },
+                ],
+            },
+            deleteList: {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                operation: 'deleteObject',
+                args: { id: '$id:pk' },
+            },
+            deleteListEntriesByListId: {
+                collection: CustomListStorage.LIST_ENTRIES_COLL,
+                operation: 'deleteObjects',
+                args: { listId: '$listId:pk' },
+            },
+            deleteListEntriesById: {
+                collection: CustomListStorage.LIST_ENTRIES_COLL,
+                operation: 'deleteObjects',
+                args: { listId: '$listId:pk', pageUrl: '$pageUrl:string' },
+            },
+            [SuggestPlugin.SUGGEST_OBJS_OP_ID]: {
+                operation: SuggestPlugin.SUGGEST_OBJS_OP_ID,
+                args: {
+                    collection: '$collection:string',
+                    query: '$query:string',
+                    options: '$options:any',
+                },
+            },
+        },
+    })
 
     private prepareList(
         list: PageList,

@@ -38,7 +38,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const ids = new Set()
+        const ids = new Set<number>()
 
         await this.backend.dexieInstance
             .table(LIST_ENTRIES_COLL)
@@ -59,7 +59,8 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             .table('tags')
             .where('name')
             .anyOf(tags)
-            .eachPrimaryKey(([, url]) => {
+            .eachPrimaryKey(pk => {
+                const [, url] = pk as [void, string]
                 const { postId } = derivePostUrlIdProps({ url })
 
                 if (postId) {
@@ -75,14 +76,14 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             return undefined
         }
 
-        const ids = new Set()
+        const ids = new Set<number>()
         await this.backend.dexieInstance
             .table(TAGS_COLL)
             .where('name')
             .anyOf(tags)
             .each(({ postId }) => ids.add(postId))
 
-        return ids
+        return ids as any
     }
 
     private async userSearch(users: User[]): Promise<Set<number>> {
@@ -92,11 +93,11 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
 
         const userIds = users.map(user => user.id)
 
-        const postIds = await this.backend.dexieInstance
+        const postIds = (await this.backend.dexieInstance
             .table(POSTS_COLL)
             .where('userId')
             .anyOf(userIds)
-            .primaryKeys()
+            .primaryKeys()) as number[]
 
         return new Set([...postIds])
     }
@@ -174,7 +175,7 @@ export class SocialSearchPlugin extends StorageBackendPlugin<
             )
         }
 
-        return coll.primaryKeys()
+        return coll.primaryKeys() as Promise<number[]>
     }
 
     private async lookupTerms({ termsInc, ...params }: SocialSearchParams) {

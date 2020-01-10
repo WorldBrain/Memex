@@ -7,7 +7,7 @@ import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import initContentTooltip from 'src/content-tooltip/content_script'
 import 'src/direct-linking/content_script'
 import initRibbonAndSidebar from './sidebar-overlay/content_script'
-import 'src/backup/content_script'
+import 'src/backup-restore/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import initSocialIntegration from 'src/social-integration/content_script'
 

@@ -1,184 +1,170 @@
-import { browser, Tabs, Storage } from 'webextension-polyfill-ts'
+import { Tabs, Storage } from 'webextension-polyfill-ts'
 import Storex from '@worldbrain/storex'
 import {
-    withHistory,
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
+import {
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
+} from '@worldbrain/memex-storage/lib/annotations/constants'
+import { COLLECTION_NAMES as PAGE_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/pages/constants'
+import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/tags/constants'
+import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-storage/lib/lists/constants'
 
-import history from './storage.history'
-
-import { createPageFromTab, Tag, DBGet } from 'src/search'
+import { Tag, SearchIndex } from 'src/search'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Annotation, AnnotListEntry } from '../types'
 
-export interface AnnotationStorageProps {
-    storageManager: Storex
-    browserStorageArea?: Storage.StorageArea
-    annotationsColl?: string
-    pagesColl?: string
-    tagsColl?: string
-    bookmarksColl?: string
-    listsColl?: string
-    listEntriesColl?: string
-}
-
 // TODO: Move to src/annotations in the future
 export default class AnnotationStorage extends StorageModule {
-    static PAGES_COLL = 'pages'
-    static ANNOTS_COLL = 'annotations'
-    static TAGS_COLL = 'tags'
-    static BMS_COLL = 'annotBookmarks'
-    static LISTS_COLL = 'customLists'
-    static LIST_ENTRIES_COLL = 'annotListEntries'
+    static PAGES_COLL = PAGE_COLLECTION_NAMES.page
+    static ANNOTS_COLL = COLLECTION_NAMES.annotation
+    static TAGS_COLL = TAG_COLLECTION_NAMES.tag
+    static BMS_COLL = COLLECTION_NAMES.bookmark
+    static LISTS_COLL = LIST_COLLECTION_NAMES.list
+    static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
     private _browserStorageArea: Storage.StorageArea
-    private _getDb: DBGet
 
     private db: Storex
+    private searchIndex: SearchIndex
 
-    constructor({
-        storageManager,
-        browserStorageArea = browser.storage.local,
-    }: AnnotationStorageProps) {
-        super({ storageManager })
+    constructor(options: {
+        storageManager: Storex
+        browserStorageArea: Storage.StorageArea
+        annotationsColl?: string
+        pagesColl?: string
+        tagsColl?: string
+        bookmarksColl?: string
+        listsColl?: string
+        listEntriesColl?: string
+        searchIndex: SearchIndex
+    }) {
+        super({ storageManager: options.storageManager })
 
-        this.db = storageManager
-        this._browserStorageArea = browserStorageArea
-
-        this._getDb = async () => storageManager
+        this.db = options.storageManager
+        this.searchIndex = options.searchIndex
+        this._browserStorageArea = options.browserStorageArea
     }
 
-    getConfig = (): StorageModuleConfig =>
-        withHistory({
-            history,
-            collections: {
-                [AnnotationStorage.ANNOTS_COLL]: {
-                    version: new Date('2019-02-19'),
-                    fields: {
-                        pageTitle: { type: 'text' },
-                        pageUrl: { type: 'url' },
-                        body: { type: 'text' },
-                        comment: { type: 'text' },
-                        selector: { type: 'json' },
-                        createdWhen: { type: 'datetime' },
-                        lastEdited: { type: 'datetime' },
-                        url: { type: 'string' },
-                    },
-                    indices: [
-                        { field: 'url', pk: true },
-                        { field: 'pageUrl' },
-                        { field: 'pageTitle' },
-                        { field: 'body' },
-                        { field: 'createdWhen' },
-                        { field: 'lastEdited' },
-                        { field: 'comment' },
-                    ],
+    getConfig = (): StorageModuleConfig => ({
+        collections: {
+            ...COLLECTION_DEFINITIONS,
+            // NOTE: This is no longer used; keeping to maintain DB schema sanity
+            directLinks: {
+                version: new Date('2018-08-03'),
+                fields: {
+                    pageTitle: { type: 'text' },
+                    pageUrl: { type: 'url' },
+                    body: { type: 'text' },
+                    comment: { type: 'text' },
+                    selector: { type: 'json' },
+                    createdWhen: { type: 'datetime' },
+                    lastEdited: { type: 'datetime' },
+                    url: { type: 'string' },
                 },
-                [AnnotationStorage.LIST_ENTRIES_COLL]: {
-                    version: new Date(2019, 0, 4),
-                    fields: {
-                        listId: { type: 'int' },
-                        url: { type: 'string' },
-                        createdAt: { type: 'datetime' },
-                    },
-                    indices: [
-                        { field: ['listId', 'url'], pk: true },
-                        { field: 'listId' },
-                        { field: 'url' },
-                    ],
-                },
-                [AnnotationStorage.BMS_COLL]: {
-                    version: new Date(2019, 0, 5),
-                    fields: {
-                        url: { type: 'string' },
-                        createdAt: { type: 'datetime' },
-                    },
-                    indices: [
-                        { field: 'url', pk: true },
-                        { field: 'createdAt' },
-                    ],
-                },
-                // NOTE: This is no longer used; keeping to maintain DB schema sanity
-                directLinks: {
-                    version: new Date(2018, 7, 3),
-                    fields: {
-                        pageTitle: { type: 'text' },
-                        pageUrl: { type: 'url' },
-                        body: { type: 'text' },
-                        comment: { type: 'text' },
-                        selector: { type: 'json' },
-                        createdWhen: { type: 'datetime' },
-                        lastEdited: { type: 'datetime' },
-                        url: { type: 'string' },
-                    },
-                    indices: [
-                        { field: 'url', pk: true },
-                        { field: 'pageTitle' },
-                        { field: 'pageUrl' },
-                        { field: 'body' },
-                        { field: 'createdWhen' },
-                        { field: 'comment' },
-                    ],
-                },
-            },
-            operations: {
-                findBookmarkByUrl: {
-                    collection: AnnotationStorage.BMS_COLL,
-                    operation: 'findObject',
-                    args: { url: '$url:pk' },
-                },
-                findAnnotationByUrl: {
-                    collection: AnnotationStorage.ANNOTS_COLL,
-                    operation: 'findObject',
-                    args: { url: '$url:pk' },
-                },
-                createAnnotationForList: {
-                    collection: AnnotationStorage.LIST_ENTRIES_COLL,
-                    operation: 'createObject',
-                },
-                createBookmark: {
-                    collection: AnnotationStorage.BMS_COLL,
-                    operation: 'createObject',
-                },
-                createAnnotation: {
-                    collection: AnnotationStorage.ANNOTS_COLL,
-                    operation: 'createObject',
-                },
-                editAnnotation: {
-                    collection: AnnotationStorage.ANNOTS_COLL,
-                    operation: 'updateObject',
-                    args: [
-                        { url: '$url:pk' },
-                        {
-                            comment: '$comment:string',
-                            lastEdited: '$lastEdited:any',
+                indices: [
+                    { field: 'url', pk: true },
+                    { field: 'pageTitle' },
+                    { field: 'pageUrl' },
+                    { field: 'body' },
+                    { field: 'createdWhen' },
+                    { field: 'comment' },
+                ],
+                history: [
+                    {
+                        version: new Date('2018-06-31'),
+                        fields: {
+                            pageTitle: { type: 'text' },
+                            pageUrl: { type: 'url' },
+                            body: { type: 'text' },
+                            selector: { type: 'json' },
+                            createdWhen: { type: 'datetime' },
+                            url: { type: 'string' },
                         },
-                    ],
-                },
-                deleteAnnotation: {
-                    collection: AnnotationStorage.ANNOTS_COLL,
-                    operation: 'deleteObject',
-                    args: { url: '$url:pk' },
-                },
-                deleteAnnotationFromList: {
-                    collection: AnnotationStorage.LIST_ENTRIES_COLL,
-                    operation: 'deleteObjects',
-                    args: { listId: '$listId:int', url: '$url:string' },
-                },
-                deleteBookmarkByUrl: {
-                    collection: AnnotationStorage.BMS_COLL,
-                    operation: 'deleteObject',
-                    args: { url: '$url:pk' },
-                },
-                listAnnotsByPage: {
-                    operation: AnnotationsListPlugin.LIST_BY_PAGE_OP_ID,
-                    args: ['$params:any'],
-                },
+                        indices: [
+                            { field: 'url', pk: true },
+                            { field: 'pageTitle' },
+                            { field: 'body' },
+                            { field: 'createdWhen' },
+                        ],
+                    },
+                ],
             },
-        })
+        },
+        operations: {
+            findBookmarkByUrl: {
+                collection: AnnotationStorage.BMS_COLL,
+                operation: 'findObject',
+                args: { url: '$url:pk' },
+            },
+            findAnnotationByUrl: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'findObject',
+                args: { url: '$url:pk' },
+            },
+            findListEntriesByUrl: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'findObjects',
+                args: { url: '$url:pk' },
+            },
+            createAnnotationForList: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'createObject',
+            },
+            createBookmark: {
+                collection: AnnotationStorage.BMS_COLL,
+                operation: 'createObject',
+            },
+            createAnnotation: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'createObject',
+            },
+            editAnnotation: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'updateObject',
+                args: [
+                    { url: '$url:pk' },
+                    {
+                        comment: '$comment:string',
+                        lastEdited: '$lastEdited:any',
+                    },
+                ],
+            },
+            deleteAnnotation: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'deleteObject',
+                args: { url: '$url:pk' },
+            },
+            deleteAnnotationFromList: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'deleteObjects',
+                args: { listId: '$listId:int', url: '$url:string' },
+            },
+            deleteListEntriesByUrl: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'deleteObjects',
+                args: { url: '$url:string' },
+            },
+            deleteBookmarkByUrl: {
+                collection: AnnotationStorage.BMS_COLL,
+                operation: 'deleteObject',
+                args: { url: '$url:pk' },
+            },
+            deleteTagsByUrl: {
+                collection: AnnotationStorage.TAGS_COLL,
+                operation: 'deleteObjects',
+                args: { url: '$url:pk' },
+            },
+            listAnnotsByPage: {
+                operation: AnnotationsListPlugin.LIST_BY_PAGE_OP_ID,
+                args: ['$params:any'],
+            },
+        },
+    })
 
     private async getListById({ listId }: { listId: number }) {
         const list = await this.db
@@ -228,6 +214,10 @@ export default class AnnotationStorage extends StorageModule {
         return false
     }
 
+    async deleteBookmarkByUrl({ url }: { url: string }) {
+        return this.operation('deleteBookmarkByUrl', { url })
+    }
+
     async annotHasBookmark({ url }: { url: string }) {
         const bookmark = await this.operation('findBookmarkByUrl', { url })
         return bookmark != null
@@ -246,7 +236,7 @@ export default class AnnotationStorage extends StorageModule {
     async indexPageFromTab({ id, url }: Tabs.Tab) {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
-        const page = await createPageFromTab(this._getDb)({
+        const page = await this.searchIndex.createPageFromTab({
             tabId: id,
             url,
             stubOnly: !indexingPrefs.shouldIndexLinks,
@@ -344,5 +334,17 @@ export default class AnnotationStorage extends StorageModule {
         } else {
             return this.deleteTags({ name, url })
         }
+    }
+
+    deleteTagsByUrl({ url }: { url: string }) {
+        return this.operation('deleteTagsByUrl', { url })
+    }
+
+    deleteListEntriesByUrl({ url }: { url: string }) {
+        return this.operation('deleteListEntriesByUrl', { url })
+    }
+
+    findListEntriesByUrl({ url }: { url: string }) {
+        return this.operation('findListEntriesByUrl', { url })
     }
 }

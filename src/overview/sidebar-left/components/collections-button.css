@@ -19,14 +19,8 @@
     font-size: 15px;
     margin-left: 10px;
     white-space: nowrap;
-    text-align: center;
+    text-align: left;
     max-width: 164px;
-    overflow-x: scroll;
-
-    &::-webkit-scrollbar {
-        height: 0px;  /* Remove scrollbar space */
-        background: transparent;  /* Optional: just make scrollbar invisible */
-    }
 }
 
 .longTitle {
@@ -63,13 +57,15 @@
 
 .buttonContainer {
     position: fixed;
-    display: flex !important; /* stylelint-disable-line declaration-no-important */
-    justify-content: flex-start;
+    display: flex;
     flex-direction: column;
-    align-items: center;
     height: 55px;
     z-index: 1200;
     width: 250px;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 20px;
+    font-size: 15px;
 }
 
 .longContainer {
@@ -104,10 +100,8 @@
     justify-content: flex-start;
     cursor: pointer;
     outline: none;
+    margin-left: -6px;
     composes: nakedButton from 'src/common-ui/elements.css';
-    top: 9px;
-    position: absolute;
-    left: 6px;
 }
 
 @keyframes appear {

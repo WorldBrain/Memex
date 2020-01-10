@@ -1,0 +1,39 @@
+.button {
+    display: inline-block;
+    outline: none;
+    border: none;
+    width: 120px;
+    vertical-align: middle;
+    margin-left: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 9px 6px;
+    font-size: 13px;
+}
+
+.darkblue {
+    background-color: #1a2f58;
+    opacity: 0.7;
+    color: white;
+
+    &:hover {
+        background-color: #1a2f58;
+        opacity: 1;
+    }
+}
+
+.red {
+    composes: CTAwarning from '../elements.css';
+}
+
+.text {
+    composes: CTA from '../colors.css';
+}
+
+.green {
+    composes: CTA from '../colors.css';
+}
+
+.white {
+    composes: CTA from '../colors.css';
+}

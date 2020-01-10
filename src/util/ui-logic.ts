@@ -1,4 +1,4 @@
-import * as fromPairs from 'lodash/fromPairs'
+import fromPairs from 'lodash/fromPairs'
 
 export type EventProcessor<Dependencies> = (
     args: EventProcessorArgs<Dependencies>,

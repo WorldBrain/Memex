@@ -3,9 +3,13 @@ import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
+import {
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
+} from '@worldbrain/memex-storage/lib/pages/constants'
 
 export default class BookmarksStorage extends StorageModule {
-    static BMS_COLL = 'bookmarks'
+    static BMS_COLL = COLLECTION_NAMES.bookmark
 
     private bookmarksColl: string
 
@@ -22,14 +26,8 @@ export default class BookmarksStorage extends StorageModule {
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            [this.bookmarksColl]: {
-                version: new Date(2018, 1, 1),
-                fields: {
-                    url: { type: 'string' },
-                    time: { type: 'timestamp' },
-                },
-                indices: [{ field: 'url', pk: true }, { field: 'time' }],
-            },
+            [BookmarksStorage.BMS_COLL]:
+                COLLECTION_DEFINITIONS[BookmarksStorage.BMS_COLL],
         },
         operations: {
             createBookmark: {
@@ -44,11 +42,14 @@ export default class BookmarksStorage extends StorageModule {
         },
     })
 
-    async addBookmark({ url }: { url: string }) {
-        return this.operation('createBookmark', {
-            url,
-            time: Date.now(),
-        })
+    async addBookmark({
+        url,
+        time = Date.now(),
+    }: {
+        url: string
+        time?: number
+    }) {
+        return this.operation('createBookmark', { url, time })
     }
 
     async delBookmark({ url }: { url: string }) {

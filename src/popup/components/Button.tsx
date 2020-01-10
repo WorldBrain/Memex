@@ -14,6 +14,7 @@ class Button extends React.PureComponent<Props> {
     render() {
         const { itemClass, btnClass, children, ...btnProps } = this.props
         return (
+            // @ts-ignore
             <button
                 className={classNames(
                     styles.item,

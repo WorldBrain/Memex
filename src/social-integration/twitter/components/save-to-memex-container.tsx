@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import { MapDispatchToProps } from 'src/util/types'
 import RootState, { Tweet } from 'src/social-integration/types'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -17,7 +19,6 @@ import * as acts from 'src/social-integration/actions'
 import ActionBar from './action-bar'
 import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import { selectors as commentBox } from 'src/sidebar-overlay/comment-box'
-import normalizeUrl from 'src/util/encode-url-for-id'
 
 import cx from 'classnames'
 
@@ -173,10 +174,10 @@ class SaveToMemexContainer extends Component<Props, State> {
                 >
                     <div
                         className={cx(
-                                'IconContainer js-tooltip',
-                                styles.hoverArea,
-                                )}
-                                data-original-title="Save To Memex"
+                            'IconContainer js-tooltip',
+                            styles.hoverArea,
+                        )}
+                        data-original-title="Save To Memex"
                     >
                         <span
                             className={cx(

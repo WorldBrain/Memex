@@ -14,3 +14,6 @@ stats.json
 .DS_Store
 local-backup
 .idea
+*-debug.log
+private/
+.env

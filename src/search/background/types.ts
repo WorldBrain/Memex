@@ -1,5 +1,7 @@
 import { Annotation } from 'src/direct-linking/types'
 import { User } from 'src/social-integration/types'
+import SearchStorage from './storage'
+import { SearchIndex } from '../types'
 
 export interface AnnotPage {
     url: string
@@ -73,6 +75,32 @@ export interface UrlFilters {
 }
 
 /**
+ * Types for the search functions of the background class
+ */
+export interface BackgroundSearchParams {
+    query?: string
+    domains?: any[]
+    domainsExclude?: any[]
+    tagsInc?: any[]
+    tagsExc?: any[]
+    lists?: any[]
+    contentTypes?: ContentTypes
+    skip?: number
+    limit?: number
+    showOnlyBookmarks?: boolean
+    bookmarksOnly?: boolean
+
+    startDate?: number | Date
+    endDate?: number | Date
+    base64Img?: boolean
+    usersInc?: any
+    usersExc?: any
+    hashtagsInc?: any
+    hashtagsExc?: any
+    url?: string
+}
+
+/**
  * Maps day (start of day timestamp) to list of pages that have annots created/edited
  * on that day.
  */
@@ -121,4 +149,23 @@ export interface SearchBackend {
     domainHasFavIcon: any
     createPageFromTab: any
     createPageFromUrl: any
+}
+
+export interface SearchInterface {
+    search: SearchIndex['search']
+    searchAnnotations: (params: AnnotSearchParams) => any
+    searchPages: (params: PageSearchParams) => any
+    searchSocial: (params: SocialSearchParams) => any
+
+    suggest: SearchStorage['suggest']
+    extendedSuggest: SearchStorage['suggestExtended']
+
+    delPages: SearchIndex['delPages']
+    delPagesByDomain: SearchIndex['delPagesByDomain']
+    delPagesByPattern: SearchIndex['delPagesByPattern']
+    getMatchingPageCount: SearchIndex['getMatchingPageCount']
+
+    addPageTag: SearchIndex['addTag']
+    delPageTag: SearchIndex['delTag']
+    fetchPageTags: SearchIndex['fetchPageTags']
 }

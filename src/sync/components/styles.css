@@ -1,0 +1,68 @@
+.test {
+    color: blue;
+}
+
+@value colors: 'src/common-ui/colors.css';
+@value color16, h2color from colors;
+
+.syncDevicesContainer {
+    composes: radius4 from 'src/common-ui/colors.css';
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.syncLeftCol {
+    flex: 9;
+    display: flex;
+    align-items: center;
+}
+
+.syncRightCol {
+    flex: 1;
+    padding: 10px;
+    margin: auto;
+}
+
+.syncHeaderText {
+    composes: sectionTitle from 'src/options/base.css';
+    display: block;
+}
+
+.syncTitle {
+    composes: subTitle from '../../options/base.css';
+    margin: 0;
+}
+
+.syncSubText {
+    composes: h2Color from '../../common-ui/colors.css';
+    vertical-align: middle;
+    font-weight: 600;
+    font-size: 15px;
+    margin-right: 8px;
+}
+
+.subText {
+    composes: subText from 'src/options/base.css';
+    display: block;
+}
+
+.button {
+    composes: CTA from 'src/common-ui/colors.css';
+}
+
+.removeText {
+    padding-left: 40px;
+}
+
+.noDevices {
+    font-size: 15px;
+    color: color16;
+}
+
+.section {
+    margin-top: 50px;
+}

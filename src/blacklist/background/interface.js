@@ -1,5 +1,5 @@
 import { STORAGE_KEY } from 'src/options/blacklist/constants'
-import importStateManager from 'src/imports/background/state-manager'
+import getImportStateManager from 'src/imports/background/state-manager'
 
 /**
  * Main checking logic between a given blacklist expression and current URL.
@@ -60,7 +60,7 @@ export async function fetchBlacklist() {
 
 async function storeBlacklist(blacklist = []) {
     const serialized = JSON.stringify(blacklist)
-    await importStateManager.dirtyEstsCache()
+    await getImportStateManager().dirtyEstsCache()
 
     return browser.storage.local.set({ [STORAGE_KEY]: serialized })
 }

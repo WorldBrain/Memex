@@ -3,7 +3,6 @@
 
 .navbar {
     display: flex;
-    flex: 1;
     align-items: center;
     justify-content: space-between;
     height: 55px;
@@ -21,18 +20,14 @@
     background-color: white;
 
     @media (max-width: 1150px) {
-        justify-content: flex-end;
-        padding-right: 20px;
+        justify-content: space-between;
         display: flex;
     }
 }
 
 .collectionsPlaceholder {
-    width: 20vw;
-
-        @media (max-width: 1150px) {
-        display: none;
-    }
+    min-width: 110px;
+    flex: 1;
 }
 
 .searchField {
@@ -62,16 +57,18 @@
 .container {
     display: flex;
     justify-content: space-between;
-    width: 55%;
+    width: 100%;
     max-width: 800px;
     background-color: #fff;
     transition: all 200ms ease-out;
     border-right: none;
     align-items: center;
+    margin-left: 15px;
 
-     @media (max-width: 1150px) {
-        width: 65%;
+    @media (max-width: 1150px) {
+        margin-left: 20px;
         margin-right: 20px;
+        width: 65%;
     }
 }
 
@@ -93,11 +90,7 @@
     font-weight: normal;
     align-items: center;
     padding-right: 20px;
-    width: 20vw;
-
-    @media (max-width: 1150px) {
-        display: none;
-    }
+    flex: 1;
 
     & > a {
         height: 25px;

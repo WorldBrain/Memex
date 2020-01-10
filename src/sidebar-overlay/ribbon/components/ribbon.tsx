@@ -71,10 +71,12 @@ class Ribbon extends Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
-        this.shortcutsData = new Map(props.shortcutsData.map(s => [
-            s.name,
-            s,
-        ]) as [string, ShortcutElData][])
+        this.shortcutsData = new Map(
+            props.shortcutsData.map(s => [s.name, s]) as [
+                string,
+                ShortcutElData,
+            ][],
+        )
         this.openOverviewTabRPC = remoteFunction('openOverviewTab')
         this.openOptionsTabRPC = remoteFunction('openOptionsTab')
     }
@@ -161,306 +163,330 @@ class Ribbon extends Component<Props, State> {
             <div
                 ref={ref => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
-                    [styles.ribbonExpanded]:
-                        this.props.isExpanded || this.props.isSidebarOpen,
+                    [styles.ribbonExpanded]: this.props.isExpanded,
+                    [styles.ribbonSidebarOpen]: this.props.isSidebarOpen,
                 })}
             >
-                {(this.props.isExpanded || this.props.isSidebarOpen) && (
-                    <React.Fragment>
-                        <div className={styles.generalActions}>
-                            <ButtonTooltip
-                                tooltipText="Open Dashboard"
-                                position="left"
-                            >
-                                <button
-                                    onClick={() => this.openOverviewTabRPC()}
-                                    className={cx(styles.button, styles.logo)}
-                                />
-                            </ButtonTooltip>
-
-                            <ButtonTooltip
-                                tooltipText={this.getTooltipText(
-                                    'toggleSidebar',
-                                )}
-                                position="left"
-                            >
-                                <button
-                                    className={cx(styles.button, {
-                                        [styles.arrow]: !this.props
-                                            .isSidebarOpen,
-                                        [styles.arrowReverse]: this.props
-                                            .isSidebarOpen,
-                                    })}
-                                    onClick={() =>
-                                        !this.props.isSidebarOpen
-                                            ? this.props.openSidebar({})
-                                            : this.props.closeSidebar()
-                                    }
-                                />
-                            </ButtonTooltip>
-
-                            <div>
+                <div
+                    className={cx(styles.innerRibbon, {
+                        [styles.innerRibbonExpanded]: this.props.isExpanded,
+                        [styles.innerRibbonSidebarOpen]: this.props
+                            .isSidebarOpen,
+                    })}
+                >
+                    {(this.props.isExpanded || this.props.isSidebarOpen) && (
+                        <React.Fragment>
+                            <div className={styles.generalActions}>
                                 <ButtonTooltip
-                                    tooltipText={'Search Memex via Dashboard'}
+                                    tooltipText={'Close Toolbar Once.'}
                                     position="left"
                                 >
                                     <button
                                         className={cx(
                                             styles.button,
-                                            styles.search,
-                                        )}
-                                        onClick={() => {
-                                            this.props.setShowSearchBox(
-                                                !this.props.showSearchBox,
-                                            )
-                                            this.inputQueryEl.focus()
-                                        }}
-                                    />
-                                    {this.props.showSearchBox && (
-                                        <Tooltip
-                                            position="left"
-                                            itemClass={styles.tooltipLeft}
-                                            toolTipType="searchBar"
-                                        >
-                                            <form>
-                                                <span
-                                                    className={styles.search}
-                                                />
-                                                <TextInputControlled
-                                                    autoFocus={false}
-                                                    setRef={this.setInputRef}
-                                                    className={
-                                                        styles.searchInput
-                                                    }
-                                                    name="query"
-                                                    placeholder="Search your Memex"
-                                                    autoComplete="off"
-                                                    onChange={
-                                                        this.props
-                                                            .setSearchValue
-                                                    }
-                                                    specialHandlers={[
-                                                        {
-                                                            test: e =>
-                                                                e.key ===
-                                                                'Enter',
-                                                            handle: e =>
-                                                                this.handleSearchEnterPress(
-                                                                    e,
-                                                                ),
-                                                        },
-                                                    ]}
-                                                    defaultValue={
-                                                        this.props.searchValue
-                                                    }
-                                                    type={'input'}
-                                                />
-                                            </form>
-                                        </Tooltip>
-                                    )}
-                                </ButtonTooltip>
-                            </div>
-                        </div>
-                        <div className={styles.pageActions}>
-                            <ButtonTooltip
-                                tooltipText={this.getTooltipText(
-                                    'createBookmark',
-                                )}
-                                position="left"
-                            >
-                                <button
-                                    className={cx(styles.button, {
-                                        [styles.bookmark]: this.props
-                                            .isBookmarked,
-                                        [styles.notBookmark]: !this.props
-                                            .isBookmarked,
-                                    })}
-                                    onClick={() =>
-                                        this.props.handleBookmarkToggle()
-                                    }
-                                />
-                            </ButtonTooltip>
-                            <div>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addComment',
-                                    )}
-                                    position="left"
-                                >
-                                    <button
-                                        className={cx(
-                                            styles.button,
-                                            styles.comments,
-                                        )}
-                                        onClick={this.handleCommentIconBtnClick}
-                                    />
-                                    {this.props.showCommentBox && (
-                                        <Tooltip position="left">
-                                            <CommentBoxContainer env="inpage" />
-                                        </Tooltip>
-                                    )}
-                                    {this.props.isCommentSaved && (
-                                        <Tooltip
-                                            position="left"
-                                            itemClass={styles.commentSaved}
-                                        >
-                                            <div className={styles.saveBox}>
-                                                <span
-                                                    className={styles.saveIcon}
-                                                />
-                                                <span
-                                                    className={styles.saveText}
-                                                >
-                                                    Saved!
-                                                </span>
-                                            </div>
-                                        </Tooltip>
-                                    )}
-                                </ButtonTooltip>
-                            </div>
-
-                            <div>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText('addTag')}
-                                    position="left"
-                                >
-                                    <button
-                                        className={cx(
-                                            styles.button,
-                                            styles.tag,
+                                            styles.cancel,
                                         )}
                                         onClick={() =>
-                                            this.props.setShowTagsPicker(
-                                                !this.props.showTagsPicker,
-                                            )
+                                            this.props.handleRemoveRibbon()
                                         }
                                     />
-                                    {this.props.showTagsPicker && (
-                                        <Tooltip position="left">
-                                            {this.props.tagManager}
-                                        </Tooltip>
-                                    )}
                                 </ButtonTooltip>
-                            </div>
-
-                            <div>
+                                <ButtonTooltip
+                                    tooltipText="Open Memex Dashboard"
+                                    position="left"
+                                >
+                                    <button
+                                        onClick={() => this.openOverviewTabRPC()}
+                                        className={cx(styles.button, styles.logo)}
+                                    />
+                                </ButtonTooltip>
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(
-                                        'addToCollection',
+                                        'toggleSidebar',
                                     )}
+                                    position="left"
+                                >
+                                    <button
+                                        className={cx(styles.button, {
+                                            [styles.arrow]: !this.props
+                                                .isSidebarOpen,
+                                            [styles.arrowReverse]: this.props
+                                                .isSidebarOpen,
+                                        })}
+                                        onClick={() =>
+                                            !this.props.isSidebarOpen
+                                                ? this.props.openSidebar({})
+                                                : this.props.closeSidebar()
+                                        }
+                                    />
+                                </ButtonTooltip>
+
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={
+                                            'Search Memex via Dashboard'
+                                        }
+                                        position="left"
+                                    >
+                                        <button
+                                            className={cx(
+                                                styles.button,
+                                                styles.search,
+                                            )}
+                                            onClick={() => {
+                                                this.props.setShowSearchBox(
+                                                    !this.props.showSearchBox,
+                                                )
+                                                this.inputQueryEl.focus()
+                                            }}
+                                        />
+                                        {this.props.showSearchBox && (
+                                            <Tooltip
+                                                position="left"
+                                                itemClass={styles.tooltipLeft}
+                                                toolTipType="searchBar"
+                                            >
+                                                <form>
+                                                    <span
+                                                        className={
+                                                            styles.search
+                                                        }
+                                                    />
+                                                    <TextInputControlled
+                                                        autoFocus={false}
+                                                        setRef={
+                                                            this.setInputRef
+                                                        }
+                                                        className={
+                                                            styles.searchInput
+                                                        }
+                                                        name="query"
+                                                        placeholder="Search your Memex"
+                                                        autoComplete="off"
+                                                        onChange={
+                                                            this.props
+                                                                .setSearchValue
+                                                        }
+                                                        specialHandlers={[
+                                                            {
+                                                                test: e =>
+                                                                    e.key ===
+                                                                    'Enter',
+                                                                handle: e =>
+                                                                    this.handleSearchEnterPress(
+                                                                        e,
+                                                                    ),
+                                                            },
+                                                        ]}
+                                                        defaultValue={
+                                                            this.props
+                                                                .searchValue
+                                                        }
+                                                        type={'input'}
+                                                    />
+                                                </form>
+                                            </Tooltip>
+                                        )}
+                                    </ButtonTooltip>
+                                </div>
+                            </div>
+                            <div className={styles.horizontalLine}/>
+                            <div className={styles.pageActions}>
+                                <ButtonTooltip
+                                    tooltipText={this.getTooltipText(
+                                        'createBookmark',
+                                    )}
+                                    position="left"
+                                >
+                                    <button
+                                        className={cx(styles.button, {
+                                            [styles.bookmark]: this.props
+                                                .isBookmarked,
+                                            [styles.notBookmark]: !this.props
+                                                .isBookmarked,
+                                        })}
+                                        onClick={() =>
+                                            this.props.handleBookmarkToggle()
+                                        }
+                                    />
+                                </ButtonTooltip>
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addComment',
+                                        )}
+                                        position="left"
+                                    >
+                                        <button
+                                            className={cx(
+                                                styles.button,
+                                                styles.comments,
+                                            )}
+                                            onClick={
+                                                this.handleCommentIconBtnClick
+                                            }
+                                        />
+                                        {this.props.showCommentBox && (
+                                            <Tooltip position="left">
+                                                <CommentBoxContainer env="inpage" />
+                                            </Tooltip>
+                                        )}
+                                        {this.props.isCommentSaved && (
+                                            <Tooltip
+                                                position="left"
+                                                itemClass={styles.commentSaved}
+                                            >
+                                                <div className={styles.saveBox}>
+                                                    <span
+                                                        className={
+                                                            styles.saveIcon
+                                                        }
+                                                    />
+                                                    <span
+                                                        className={
+                                                            styles.saveText
+                                                        }
+                                                    >
+                                                        Saved!
+                                                    </span>
+                                                </div>
+                                            </Tooltip>
+                                        )}
+                                    </ButtonTooltip>
+                                </div>
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addTag',
+                                        )}
+                                        position="left"
+                                    >
+                                        <button
+                                            className={cx(
+                                                styles.button,
+                                                styles.tag,
+                                            )}
+                                            onClick={() =>
+                                                this.props.setShowTagsPicker(
+                                                    !this.props.showTagsPicker,
+                                                )
+                                            }
+                                        />
+                                        {this.props.showTagsPicker && (
+                                            <Tooltip position="left">
+                                                {this.props.tagManager}
+                                            </Tooltip>
+                                        )}
+                                    </ButtonTooltip>
+                                </div>
+
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addToCollection',
+                                        )}
+                                        position="left"
+                                    >
+                                        <button
+                                            className={cx(
+                                                styles.button,
+                                                styles.collection,
+                                            )}
+                                            onClick={() =>
+                                                this.props.setShowCollectionsPicker(
+                                                    !this.props
+                                                        .showCollectionsPicker,
+                                                )
+                                            }
+                                        />
+                                        {this.props.showCollectionsPicker && (
+                                            <Tooltip
+                                                position="left"
+                                                itemClass={styles.collectionDiv}
+                                            >
+                                                {this.props.collectionsManager}
+                                            </Tooltip>
+                                        )}
+                                    </ButtonTooltip>
+                                </div>
+                            </div>
+                            <div className={styles.horizontalLine}/>
+                            <div className={styles.settingsActions}>
+                                <ButtonTooltip
+                                    tooltipText="Disable this Toolbar (You can still use keyboard shortcuts)"
                                     position="left"
                                 >
                                     <button
                                         className={cx(
                                             styles.button,
-                                            styles.collection,
+                                            styles.ribbonIcon,
+                                            {
+                                                [styles.ribbonOn]: this.props
+                                                    .isRibbonEnabled,
+                                                [styles.ribbonOff]: !this.props
+                                                    .isRibbonEnabled,
+                                            },
                                         )}
                                         onClick={() =>
-                                            this.props.setShowCollectionsPicker(
-                                                !this.props
-                                                    .showCollectionsPicker,
-                                            )
+                                            this.props.handleRibbonToggle()
                                         }
                                     />
-                                    {this.props.showCollectionsPicker && (
-                                        <Tooltip
-                                            position="left"
-                                            itemClass={styles.collectionDiv}
-                                        >
-                                            {this.props.collectionsManager}
-                                        </Tooltip>
-                                    )}
+                                </ButtonTooltip>
+
+                                <ButtonTooltip
+                                    tooltipText="Toggle highlights"
+                                    position="left"
+                                >
+                                    <button
+                                        onClick={this.toggleHighlights}
+                                        className={cx(
+                                            styles.button,
+                                            styles.ribbonIcon,
+                                            {
+                                                [styles.highlightsOn]: this
+                                                    .props.isTooltipEnabled,
+                                                [styles.highlightsOff]: !this
+                                                    .props.isTooltipEnabled,
+                                            },
+                                        )}
+                                    />
+                                </ButtonTooltip>
+
+                                <ButtonTooltip
+                                    tooltipText="Pause indexing"
+                                    position="left"
+                                >
+                                    <button
+                                        className={cx(styles.button, {
+                                            [styles.playIcon]: this.props
+                                                .isPaused,
+                                            [styles.pauseIcon]: !this.props
+                                                .isPaused,
+                                        })}
+                                        onClick={() =>
+                                            this.props.handlePauseToggle()
+                                        }
+                                    />
+                                </ButtonTooltip>
+
+                                <ButtonTooltip
+                                    tooltipText="Settings"
+                                    position="left"
+                                >
+                                    <button
+                                        className={cx(
+                                            styles.button,
+                                            styles.settings,
+                                        )}
+                                        onClick={() =>
+                                            this.openOptionsTabRPC('settings')
+                                        }
+                                    />
                                 </ButtonTooltip>
                             </div>
-                        </div>
-                        <div className={styles.settingsActions}>
-                            <ButtonTooltip
-                                tooltipText={
-                                    'Remove Toolbar once. Disable permanently with button below.'
-                                }
-                                position="left"
-                            >
-                                <button
-                                    className={cx(styles.button, styles.cancel)}
-                                    onClick={() =>
-                                        this.props.handleRemoveRibbon()
-                                    }
-                                />
-                            </ButtonTooltip>
-
-                            <ButtonTooltip
-                                tooltipText="Disable this Toolbar (You can still use keyboard shortcuts)"
-                                position="left"
-                            >
-                                <button
-                                    className={cx(
-                                        styles.button,
-                                        styles.ribbonIcon,
-                                        {
-                                            [styles.ribbonOn]: this.props
-                                                .isRibbonEnabled,
-                                            [styles.ribbonOff]: !this.props
-                                                .isRibbonEnabled,
-                                        },
-                                    )}
-                                    onClick={() =>
-                                        this.props.handleRibbonToggle()
-                                    }
-                                />
-                            </ButtonTooltip>
-
-                            <ButtonTooltip
-                                tooltipText="Toggle highlights"
-                                position="left"
-                            >
-                                <button
-                                    onClick={this.toggleHighlights}
-                                    className={cx(
-                                        styles.button,
-                                        styles.ribbonIcon,
-                                        {
-                                            [styles.highlightsOn]: this.props
-                                                .isTooltipEnabled,
-                                            [styles.highlightsOff]: !this.props
-                                                .isTooltipEnabled,
-                                        },
-                                    )}
-                                />
-                            </ButtonTooltip>
-
-                            <ButtonTooltip
-                                tooltipText="Pause indexing"
-                                position="left"
-                            >
-                                <button
-                                    className={cx(styles.button, {
-                                        [styles.playIcon]: this.props.isPaused,
-                                        [styles.pauseIcon]: !this.props
-                                            .isPaused,
-                                    })}
-                                    onClick={() =>
-                                        this.props.handlePauseToggle()
-                                    }
-                                />
-                            </ButtonTooltip>
-
-                            <ButtonTooltip
-                                tooltipText="Settings"
-                                position="left"
-                            >
-                                <button
-                                    className={cx(
-                                        styles.button,
-                                        styles.settings,
-                                    )}
-                                    onClick={() =>
-                                        this.openOptionsTabRPC('settings')
-                                    }
-                                />
-                            </ButtonTooltip>
-                        </div>
-                    </React.Fragment>
-                )}
+                        </React.Fragment>
+                    )}
+                </div>
             </div>
         )
     }

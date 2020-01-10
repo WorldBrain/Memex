@@ -60,7 +60,7 @@ All personal data is stored and processed on your own computer and will **never 
 
 ## Project Status
 Memex is [available for Chrome and Firefox](https://worldbrain.io) and under active development by [our wonderful team](https://worldbrain.io/team).
-Memex is currently in beta status and serves almost 10.000 users. We still have some non-critical bugs, but all in all Memex runs smoothly. (Found another bug? [Please do tell](#report-bugs))
+Memex is currently in beta status and serves almost 10,000 users. We still have some non-critical bugs, but all in all Memex runs smoothly. (Found another bug? [Please do tell](#report-bugs))
 
 
 ### Changelog and Roadmap:

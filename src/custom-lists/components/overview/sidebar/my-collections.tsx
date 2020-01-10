@@ -3,34 +3,41 @@ import React from 'react'
 import cx from 'classnames'
 const styles = require('./Index.css')
 
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-
 interface Props {
     handleRenderCreateList: () => void
     isForInpage?: boolean
+    isSidebarLocked?: boolean
 }
 
 /* tslint:disable-next-line variable-name */
-const List = ({ handleRenderCreateList, isForInpage = false }: Props) => (
+const List = ({
+    handleRenderCreateList,
+    isForInpage = false,
+    isSidebarLocked,
+}: Props) => (
     <div
         className={cx(styles.collection, {
             [styles.collectionSidebar]: isForInpage,
         })}
         onClick={handleRenderCreateList}
     >
-        <span
-            className={cx(styles.myCollection, {
-                [styles.myCollectionSidebar]: isForInpage,
+        {isForInpage ? (
+            <div className={styles.collectionSidebarTitle}>Collections</div>
+        ) : null}
+        <div
+            className={cx(styles.addNew, {
+                [styles.addNewHover]: isSidebarLocked,
             })}
         >
-            Collections{' '}
-        </span>
-        <ButtonTooltip
-            position="right"
-            tooltipText="Add new collection. Add items via Drag & Drop"
-        >
             <span className={styles.plus} />
-        </ButtonTooltip>
+            <span
+                className={cx(styles.myCollection, {
+                    [styles.myCollectionSidebar]: isForInpage,
+                })}
+            >
+                Add New{' '}
+            </span>
+        </div>
     </div>
 )
 

@@ -4,7 +4,7 @@
 .filtersSidebar {
     position: fixed;
     top: 0px;
-    right: 385px;
+    right: 380px;
     z-index: 2147483646;
     width: 230px;
     display: flex;
@@ -67,8 +67,7 @@
 }
 
 .filterTitle {
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 15px;
     display: flex;
     align-items: center;
     color: color4;

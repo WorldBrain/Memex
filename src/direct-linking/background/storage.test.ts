@@ -1,10 +1,10 @@
-import * as omitBy from 'lodash/omitBy'
-import * as endsWith from 'lodash/endsWith'
+import omitBy from 'lodash/omitBy'
+import endsWith from 'lodash/endsWith'
 import Storex from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import initStorageManager from '../../search/memory-storex'
-import normalize from '../../util/encode-url-for-id'
 import AnnotationBackground from './'
 import AnnotationStorage from './storage'
 import CustomListBackground from 'src/custom-lists/background'
@@ -28,8 +28,8 @@ describe('Annotations storage', () => {
             await storageManager.collection('pages').createObject({
                 url: annot.pageUrl,
                 fullUrl: annot.url,
-                hostname: normalize(annot.pageUrl),
-                domain: normalize(annot.pageUrl),
+                hostname: normalizeUrl(annot.pageUrl),
+                domain: normalizeUrl(annot.pageUrl),
                 title: annot.pageTitle,
                 text: '',
                 canonicalUrl: annot.url,
@@ -62,10 +62,15 @@ describe('Annotations storage', () => {
     beforeEach(async () => {
         storageManager = initStorageManager()
         const annotBg = new AnnotationBackground({
+            searchIndex: {} as any,
             storageManager,
             socialBg: {} as any,
+            browserAPIs: { storage: {} } as any,
         })
-        customListsBg = new CustomListBackground({ storageManager })
+        customListsBg = new CustomListBackground({
+            storageManager,
+            searchIndex: {} as any,
+        })
         annotationStorage = annotBg.annotationStorage
 
         registerModuleMapCollections(storageManager.registry, {
@@ -171,7 +176,6 @@ describe('Annotations storage', () => {
                 expect(directLink).toBeDefined()
                 expect(directLink).not.toBeNull()
 
-                // expect(afterDeletion).not.toBeDefined()
                 expect(afterDeletion).toBeNull()
             })
 
@@ -205,6 +209,49 @@ describe('Annotations storage', () => {
                 )
                 expect(tagsAfter2).toBeDefined()
                 expect(tagsAfter2.length).toBe(0)
+            })
+
+            test('delete tags bulk', async () => {
+                const url = DATA.annotation.url
+                const before = await annotationStorage.getTagsByAnnotationUrl(
+                    url,
+                )
+                expect(before).toBeDefined()
+                expect(before.length).toBe(2)
+
+                await annotationStorage.deleteTagsByUrl({ url })
+
+                const after = await annotationStorage.getTagsByAnnotationUrl(
+                    url,
+                )
+                expect(after).toBeDefined()
+                expect(after.length).toBe(0)
+            })
+
+            test('delete bookmark', async () => {
+                const url = DATA.directLink.url
+
+                expect(await annotationStorage.annotHasBookmark({ url })).toBe(
+                    true,
+                )
+                await annotationStorage.deleteBookmarkByUrl({ url })
+                expect(await annotationStorage.annotHasBookmark({ url })).toBe(
+                    false,
+                )
+            })
+
+            test('delete list entries', async () => {
+                const url = DATA.hybrid.url
+
+                const before = await annotationStorage.findListEntriesByUrl({
+                    url,
+                })
+                expect(before.length).toBe(1)
+                await annotationStorage.deleteListEntriesByUrl({ url })
+                const after = await annotationStorage.findListEntriesByUrl({
+                    url,
+                })
+                expect(after.length).toBe(0)
             })
         })
     })

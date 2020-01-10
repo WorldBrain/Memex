@@ -321,6 +321,7 @@
     opacity: 0.8;
     background-size: 18px;
     background-position-y: 3px;
+    background-color: transparent;
 
     &:hover {
         opacity: 1;

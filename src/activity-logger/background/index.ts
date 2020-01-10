@@ -1,5 +1,4 @@
-import { browser, Runtime, WebNavigation, Tabs } from 'webextension-polyfill-ts'
-import Storex from '@worldbrain/storex'
+import { Runtime, WebNavigation, Tabs, Browser } from 'webextension-polyfill-ts'
 
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { mapChunks } from 'src/util/chunk'
@@ -10,11 +9,13 @@ import { TabChangeListener } from './types'
 import TabChangeListeners from './tab-change-listeners'
 import PageVisitLogger from './log-page-visit'
 import { CONCURR_TAB_LOAD } from '../constants'
+import { SearchIndex } from 'src/search'
 
 export default class ActivityLoggerBackground {
     static SCROLL_UPDATE_FN = 'updateScrollState'
 
     tabManager: TabManager
+    private searchIndex: SearchIndex
     private tabsAPI: Tabs.Static
     private runtimeAPI: Runtime.Static
     private webNavAPI: WebNavigation.Static
@@ -28,28 +29,29 @@ export default class ActivityLoggerBackground {
      */
     private tabQueryP = new Promise(resolve => resolve())
 
-    constructor({
-        storageManager,
-        tabsAPI = browser.tabs,
-        runtimeAPI = browser.runtime,
-        webNavAPI = browser.webNavigation,
-    }: {
-        storageManager: Storex
-        tabsAPI?: Tabs.Static
-        runtimeAPI?: Runtime.Static
-        webNavAPI?: WebNavigation.Static
+    constructor(options: {
+        tabManager: TabManager
+        searchIndex: SearchIndex
+        browserAPIs: Pick<
+            Browser,
+            'tabs' | 'runtime' | 'webNavigation' | 'storage'
+        >
     }) {
-        this.tabManager = new TabManager()
-        this.tabsAPI = tabsAPI
-        this.runtimeAPI = runtimeAPI
-        this.webNavAPI = webNavAPI
+        this.tabManager = options.tabManager
+        this.tabsAPI = options.browserAPIs.tabs
+        this.runtimeAPI = options.browserAPIs.runtime
+        this.webNavAPI = options.browserAPIs.webNavigation
+        this.searchIndex = options.searchIndex
 
         this.pageVisitLogger = new PageVisitLogger({
+            searchIndex: options.searchIndex,
             tabManager: this.tabManager,
         })
         this.tabChangeListener = new TabChangeListeners({
             tabManager: this.tabManager,
+            searchIndex: options.searchIndex,
             pageVisitLogger: this.pageVisitLogger,
+            browserAPIs: options.browserAPIs,
         })
     }
 
@@ -147,7 +149,7 @@ export default class ActivityLoggerBackground {
             const tab = this.tabManager.removeTab(tabId)
 
             if (tab != null) {
-                updateVisitInteractionData(tab)
+                updateVisitInteractionData(tab, this.searchIndex)
             }
         })
         this.tabsAPI.onUpdated.addListener(this.tabUpdatedListener)

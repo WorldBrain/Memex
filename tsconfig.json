@@ -12,6 +12,7 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
         "skipDefaultLibCheck": true,
         "skipLibCheck": true,
         "strictNullChecks": false,
@@ -25,14 +26,56 @@
             "@worldbrain/storex-backend-dexie/lib/*": [
                 "external/@worldbrain/storex-backend-dexie/ts/*"
             ],
+            "@worldbrain/storex-backend-firestore": [
+                "external/@worldbrain/storex-backend-firestore/ts"
+            ],
+            "@worldbrain/storex-backend-firestore/lib/*": [
+                "external/@worldbrain/storex-backend-firestore/ts/*"
+            ],
+            "@worldbrain/storex-backend-typeorm": [
+                "external/@worldbrain/storex-backend-typeorm/ts"
+            ],
+            "@worldbrain/storex-backend-typeorm/lib/*": [
+                "external/@worldbrain/storex-backend-typeorm/ts/*"
+            ],
             "@worldbrain/storex-pattern-modules": [
                 "external/@worldbrain/storex-pattern-modules/ts"
+            ],
+            "@worldbrain/storex-pattern-modules/lib/*": [
+                "external/@worldbrain/storex-pattern-modules/ts/*"
+            ],
+            "@worldbrain/memex-common": [
+                "external/@worldbrain/memex-common/ts"
+            ],
+            "@worldbrain/memex-common/lib/*": [
+                "external/@worldbrain/memex-common/ts/*"
+            ],
+            "@worldbrain/memex-storage": [
+                "external/@worldbrain/memex-storage/ts"
+            ],
+            "@worldbrain/memex-storage/lib/*": [
+                "external/@worldbrain/memex-storage/ts/*"
+            ],
+            "@worldbrain/memex-common": [
+                "external/@worldbrain/memex-common/ts"
+            ],
+            "@worldbrain/memex-common/lib/*": [
+                "external/@worldbrain/memex-common/ts/*"
             ],
             "@worldbrain/memex-stemmer": [
                 "external/@worldbrain/memex-stemmer/ts"
             ],
+            "@worldbrain/storex-sync": ["external/@worldbrain/storex-sync/ts"],
+            "@worldbrain/storex-sync/lib/*": [
+                "external/@worldbrain/storex-sync/ts/*"
+            ],
+            "@worldbrain/memex-url-utils": [
+                "external/@worldbrain/memex-url-utils/ts"
+            ],
             "user-logic": ["external/user-logic/ts"],
             "user-logic/lib/*": ["external/user-logic/ts/*"],
+            "simple-signalling": ["external/simple-signalling/ts"],
+            "simple-signalling/lib/*": ["external/simple-signalling/ts/*"],
             "src/*": ["src/*"]
         },
         "lib": ["es2017", "dom", "dom.iterable", "esnext.asynciterable"]

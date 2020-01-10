@@ -37,7 +37,7 @@ async function extractContent(pdfData) {
 }
 
 // Given a PDF as blob or URL, return a promise of its text and metadata.
-export default async function extractPdfContent({ url, blob }) {
+export default async function extractPdfContent({ url, blob = undefined }) {
     // Fetch document if only a URL is given.
     if (blob === undefined) {
         const response = await fetch(url)

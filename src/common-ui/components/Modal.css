@@ -7,8 +7,6 @@
 .overlay {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -17,7 +15,8 @@
     z-index: 2147483646;
     background: rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    padding-top: 200px;
+    justify-content: center;
+    align-items: center;
 
     &:disabled,
     &[disabled] {
@@ -32,8 +31,18 @@
     width: 340px;
     height: 150px;
     position: relative;
-    transition: all 1s ease-in-out;
+    transition: all 0.2s ease-in-out;
     cursor: default;
+}
+
+.popupLarge {
+    composes: popup;
+    overflow-y: scroll;
+    width: fit-content;
+    height: fit-content;
+    padding: 70px 100px 100px 100px;
+    max-height: 95vh;
+    max-width: 95vw;
 }
 
 .close {

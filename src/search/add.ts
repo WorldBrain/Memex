@@ -1,5 +1,6 @@
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import { VisitInteraction, PageAddRequest } from '.'
-import normalizeUrl from '../util/encode-url-for-id'
 import pipeline, { transformUrl } from './pipeline'
 import { Page, FavIcon } from './models'
 import { getPage } from './util'

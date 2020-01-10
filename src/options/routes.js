@@ -1,11 +1,14 @@
 import ImportContainer from './imports'
 import SettingsContainer from './containers/settings'
-import BackupSettingsContainer from './backup'
+import BackupSettingsContainer from '../backup-restore/ui/backup-pane'
 import Privacy from './privacy'
 import Statistics from './statistics'
 import Settings from './settings'
 import Overview from '../overview'
-
+import UserScreen from '../authentication/components/UserScreen'
+import SubscribeModal from '../authentication/components/Subscription/SubscribeModal'
+import { FeaturesOptInScreen } from '../feature-opt-in/ui/components/FeaturesOptInScreen'
+import React from 'react'
 export default [
     {
         name: 'Usage Statistics',
@@ -20,10 +23,17 @@ export default [
         icon: 'search',
         useOwnLayout: true,
     },
+
+    {
+        name: 'Subscribe',
+        pathname: '/subscribe',
+        component: SubscribeModal,
+        hideFromSidebar: true,
+    },
     {
         name: 'Settings',
         pathname: '/settings',
-        component: Settings, 
+        component: Settings,
         icon: 'settings',
     },
     {
@@ -64,8 +74,32 @@ export default [
     },
     {
         name: 'Tutorial',
-        pathname: 'https://www.notion.so/worldbrain/Tutorials-fa44dcbf41654ceb910c5952b6097f8d',
+        pathname:
+            'https://www.notion.so/worldbrain/Tutorials-fa44dcbf41654ceb910c5952b6097f8d',
         isExternal: true,
         icon: 'info',
+    },
+    {
+        name: 'User Account',
+        pathname: '/account',
+        icon: 'settings',
+        component: UserScreen,
+        hideFromSidebar: true,
+    },
+    {
+        name: 'User Account Subscriptions',
+        pathname: '/account-subscriptions',
+        icon: 'settings',
+        component: props => (
+            <UserScreen initiallyShowSubscriptionModal {...props} />
+        ),
+        hideFromSidebar: true,
+    },
+    {
+        name: 'Opt In Features',
+        pathname: '/features',
+        icon: 'settings',
+        component: FeaturesOptInScreen,
+        hideFromSidebar: true,
     },
 ]

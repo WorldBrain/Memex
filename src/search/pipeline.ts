@@ -1,7 +1,10 @@
-import normalizeUrl from '../util/encode-url-for-id'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+
 import transformPageText from '../util/transform-page-text'
 import { DEFAULT_TERM_SEPARATOR, extractContent } from './util'
 import { PipelineReq, PipelineRes } from './types'
+
+export type PagePipeline = (req: PipelineReq) => Promise<PipelineRes>
 
 export class PipelineError extends Error {}
 
@@ -94,10 +97,10 @@ export function extractTerms(text: string): Set<string> {
  *
  * @returns Resolves to an object containing all data needed for Page model.
  */
-export default function pipeline({
+const pipeline: PagePipeline = ({
     pageDoc: { content = {}, url, ...data },
     rejectNoContent = true,
-}: PipelineReq): Promise<PipelineRes> {
+}) => {
     // First apply transformations to the URL
     const { pathname, hostname, domain } = transformUrl(url)
 
@@ -131,3 +134,5 @@ export default function pipeline({
         ...data,
     })
 }
+
+export default pipeline

@@ -1,7 +1,7 @@
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
-import { Page } from 'src/search'
+import { Page } from 'src/search/models'
 import { reshapePageForDisplay } from './utils'
 import { AnnotPage } from './types'
 import { User, SocialPage } from 'src/social-integration/types'
@@ -122,7 +122,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .anyOf(pageUrls)
             .primaryKeys()
 
-        tags.forEach(([name, url]) => {
+        tags.forEach(pk => {
+            const [name, url] = pk as [string, string]
             let key: number | string
 
             if (isSocialSearch) {

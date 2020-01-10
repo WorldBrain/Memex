@@ -12,9 +12,7 @@ class OnboardingBox extends PureComponent<Props> {
             <div>
                 <div className={styles.flexLayout}>
                     <div className={styles.container}>
-                        <div className={styles.whiteBox}>
-                            {this.props.children}
-                        </div>
+                        {this.props.children}
                         <div className={styles.skipContainer}>
                             <p
                                 className={styles.skipTitle}
@@ -29,14 +27,9 @@ class OnboardingBox extends PureComponent<Props> {
                     </div>
                     <div className={styles.backgroundColor} />
                 </div>
-                <div className={styles.backgroundBlobWrapper}>
-                    <div className={styles.backgroundBlob} />
-                </div>
             </div>
         )
     }
 }
 
 export default OnboardingBox
-
-// TODO styles.container could be turned into a component taking heading, image, content, onSubmit action

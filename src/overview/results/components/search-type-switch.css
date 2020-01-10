@@ -5,7 +5,8 @@
     display: flex;
     align-self: center;
     justify-content: space-between;
-    width: 800px;
+    max-width: 800px;
+    width: 100%;
     align-items: center;
     padding-top: 60px;
     padding-bottom: 5px;
@@ -64,6 +65,7 @@
 .betaBox {
     display: inline-flex;
     margin-left: 6px;
+    margin-right: -2px;
 }
 
 .filterBarActive {

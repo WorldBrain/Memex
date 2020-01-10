@@ -11,38 +11,60 @@
     color: color4;
     cursor: pointer;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 5px 10px 5px 15px;
-
-    &:hover {
-        background-color: color14;
-    }
+    margin-top: -31px;
+    margin-right: 30px;
 }
 
 .myCollection {
-    font-size: 1.45em;
+    font-size: 13px;
     font-weight: 500;
 }
 
 .myCollectionSidebar {
-    font-size: 18px;
+    font-size: 13px;
     font-weight: 500;
+    margin-right: 0px;
+}
+
+.collectionSidebar {
+    margin-right: 0px;
+    justify-content: space-between;
+}
+
+.collectionSidebarTitle {
+    font-size: 15px;
+}
+
+.addNew {
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    composes: color8 from 'src/common-ui/colors.css';
+    display: flex;
+    align-items: center;
+    padding: 2px 8px 2px 4px;
+    margin-left: -10px;
+    height: 26px;
+}
+
+.addNewHover {
+    composes: hoversidebaropen from 'src/common-ui/colors.css';
+}
+
+.noLists {
+    font-size: 14px;
+    text-align: center;
+    padding: 10px;
+    margin-top: 20px;
 }
 
 .plus {
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
-    composes: onHoverDark from 'src/common-ui/colors.css';
     composes: addIcon from 'src/common-ui/icons.css';
     background-position: center;
     background-repeat: no-repeat;
     background-size: 12px;
-    width: 20px;
-    height: 20px;
-
-    &:hover {
-        background-color: color8;
-    }
+    height: 26px;
+    width: 26px;
 }
 
 .button {

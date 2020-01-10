@@ -1,40 +1,467 @@
-import * as expect from 'expect'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import expect from 'expect'
+import {
+    backgroundIntegrationTestSuite,
+    backgroundIntegrationTest,
+    BackgroundIntegrationTestSetup,
+} from 'src/tests/integration-tests'
+import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
+import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
 
-import CustomListBackground from '.'
-import initStorageManager from 'src/search/memory-storex'
+const customLists = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.customLists
+const searchModule = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.search
+let listId!: any
+let listEntry!: any
 
-async function setupTest() {
-    const storageManager = initStorageManager()
-    const background = new CustomListBackground({ storageManager })
+export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
+    'Custom lists',
+    [
+        backgroundIntegrationTest(
+            'should create a list, edit its title, add an entry to it and retrieve the list and its pages',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                listId = await customLists(
+                                    setup,
+                                ).createCustomList({
+                                    name: 'My Custom List',
+                                })
+                            },
+                            expectedStorageChanges: {
+                                customLists: (): StorageCollectionDiff => ({
+                                    [listId]: {
+                                        type: 'create',
+                                        object: {
+                                            id: listId,
+                                            createdAt: expect.any(Date),
+                                            name: 'My Custom List',
+                                            isDeletable: true,
+                                            isNestable: true,
+                                        },
+                                    },
+                                }),
+                            },
+                            expectedStorageOperations: (): LoggedStorageOperation[] => [
+                                {
+                                    operation: [
+                                        'createObject',
+                                        'customLists',
+                                        {
+                                            createdAt: expect.any(Date),
+                                            id: listId,
+                                            isDeletable: true,
+                                            isNestable: true,
+                                            name: 'My Custom List',
+                                        },
+                                    ],
+                                    result: {
+                                        object: expect.objectContaining({
+                                            id: listId,
+                                        }),
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await searchModule(setup).searchIndex.addPage({
+                                    pageDoc: {
+                                        url: 'http://www.bla.com/',
+                                        content: {
+                                            fullText: 'home page content',
+                                            title: 'bla.com title',
+                                        },
+                                    },
+                                    visits: [],
+                                })
+                                await searchModule(setup).searchIndex.addPage({
+                                    pageDoc: {
+                                        url: 'http://www.bla.com/foo',
+                                        content: {
+                                            fullText: 'foo page content',
+                                            title: 'bla.com foo title',
+                                        },
+                                    },
+                                    visits: [],
+                                })
+                            },
+                            expectedStorageChanges: {
+                                pages: (): StorageCollectionDiff => ({
+                                    'bla.com': {
+                                        type: 'create',
+                                        object: expect.objectContaining({
+                                            domain: 'bla.com',
+                                            fullTitle: 'bla.com title',
+                                            fullUrl: 'http://www.bla.com/',
+                                            hostname: 'bla.com',
+                                            screenshot: undefined,
+                                            text: 'home page content',
+                                            url: 'bla.com',
+                                        }),
+                                    },
+                                    'bla.com/foo': {
+                                        type: 'create',
+                                        object: expect.objectContaining({
+                                            domain: 'bla.com',
+                                            fullTitle: 'bla.com foo title',
+                                            fullUrl: 'http://www.bla.com/foo',
+                                            hostname: 'bla.com',
+                                            screenshot: undefined,
+                                            text: 'foo page content',
+                                            url: 'bla.com/foo',
+                                        }),
+                                    },
+                                }),
+                                visits: (): StorageCollectionDiff =>
+                                    expect.any(Object),
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                listEntry = (await customLists(
+                                    setup,
+                                ).insertPageToList({
+                                    id: listId,
+                                    url: 'http://www.bla.com/',
+                                })).object
+                            },
+                            expectedStorageChanges: {
+                                pageListEntries: (): StorageCollectionDiff => ({
+                                    [listEntry &&
+                                    `[${listId},"${listEntry.pageUrl}"]`]: {
+                                        type: 'create',
+                                        object: {
+                                            listId,
+                                            createdAt: expect.any(Date),
+                                            fullUrl: 'http://www.bla.com/',
+                                            pageUrl: 'bla.com',
+                                        },
+                                    },
+                                }),
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) =>
+                                customLists(setup).updateList({
+                                    id: listId,
+                                    name: 'Updated List Title',
+                                }),
+                            expectedStorageChanges: {
+                                customLists: (): StorageCollectionDiff => ({
+                                    [listId]: {
+                                        type: 'modify',
+                                        updates: {
+                                            name: 'Updated List Title',
+                                        },
+                                    },
+                                }),
+                            },
+                            postCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListById({
+                                        id: listId,
+                                    }),
+                                ).toEqual({
+                                    id: expect.any(Number),
+                                    name: 'Updated List Title',
+                                    isDeletable: true,
+                                    isNestable: true,
+                                    createdAt: expect.any(Date),
+                                    pages: ['http://www.bla.com/'],
+                                    active: true,
+                                })
 
-    registerModuleMapCollections(storageManager.registry, {
-        customLists: background.storage,
-    })
-    await storageManager.finishInitialization()
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([
+                                    {
+                                        listId,
+                                        pageUrl: 'bla.com',
+                                        fullUrl: 'http://www.bla.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                ])
 
-    return { background }
-}
+                                expect(
+                                    await searchModule(setup).searchPages({
+                                        lists: [listId],
+                                    }),
+                                ).toEqual({
+                                    docs: [
+                                        {
+                                            annotations: [],
+                                            annotsCount: undefined,
+                                            displayTime: expect.any(Number),
+                                            favIcon: undefined,
+                                            hasBookmark: false,
+                                            screenshot: undefined,
+                                            tags: [],
+                                            title: 'bla.com title',
+                                            url: 'bla.com',
+                                        },
+                                    ],
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should create a list, add an entry of an existing page to it and retrieve the list and its pages',
+            { mark: false },
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                listId = await customLists(
+                                    setup,
+                                ).createCustomList({
+                                    name: 'My Custom List',
+                                })
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await customLists(setup).insertPageToList({
+                                    id: listId,
+                                    url: 'http://www.bla.com/',
+                                })
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await searchModule(setup).searchIndex.addPage({
+                                    pageDoc: {
+                                        url: 'http://www.bla.com/',
+                                        content: {
+                                            fullText: 'home page content',
+                                            title: 'bla.com title',
+                                        },
+                                    },
+                                    visits: [],
+                                })
+                            },
+                            postCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListById({
+                                        id: listId,
+                                    }),
+                                ).toEqual({
+                                    id: expect.any(Number),
+                                    name: 'My Custom List',
+                                    isDeletable: true,
+                                    isNestable: true,
+                                    createdAt: expect.any(Date),
+                                    pages: ['http://www.bla.com/'],
+                                    active: true,
+                                })
 
-describe('custom list background tests', () => {
-    it('should be able to bulk insert lists without affecting existing lists', async () => {
-        const { background } = await setupTest()
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([
+                                    {
+                                        listId,
+                                        pageUrl: 'bla.com',
+                                        fullUrl: 'http://www.bla.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                ])
 
-        const listNames = ['listA', 'listB', 'listC', 'listD', 'listE']
+                                expect(
+                                    await searchModule(setup).searchPages({
+                                        lists: [listId],
+                                    }),
+                                ).toEqual({
+                                    docs: [
+                                        {
+                                            annotations: [],
+                                            annotsCount: undefined,
+                                            displayTime: expect.any(Number),
+                                            favIcon: undefined,
+                                            hasBookmark: false,
+                                            screenshot: undefined,
+                                            tags: [],
+                                            title: 'bla.com title',
+                                            url: 'bla.com',
+                                        },
+                                    ],
+                                    resultsExhausted: true,
+                                    totalCount: null,
+                                })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
 
-        // Ensure some lists exists first
-        const listAId = await background.createCustomList({
-            name: listNames[0],
-        })
-        const listBId = await background.createCustomList({
-            name: listNames[1],
-        })
+        backgroundIntegrationTest(
+            'should create a list, add an entry to it, then remove the list and its entries',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                listId = await customLists(
+                                    setup,
+                                ).createCustomList({
+                                    name: 'My Custom List',
+                                })
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await customLists(setup).insertPageToList({
+                                    id: listId,
+                                    url: 'http://www.bla.com/',
+                                })
+                            },
+                        },
+                        {
+                            preCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListById({
+                                        id: listId,
+                                    }),
+                                ).toEqual({
+                                    id: listId,
+                                    name: 'My Custom List',
+                                    isDeletable: true,
+                                    isNestable: true,
+                                    createdAt: expect.any(Date),
+                                    pages: ['http://www.bla.com/'],
+                                    active: true,
+                                })
 
-        // Try bulk inserting, including those lists that already exist
-        const listIds = await background.createCustomLists({ names: listNames })
-
-        expect(listIds.length).toBe(listNames.length)
-        // Those previously created list IDs should be present in the bulk output
-        expect(listIds).toEqual(expect.arrayContaining([listAId, listBId]))
-    })
-})
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([
+                                    {
+                                        listId,
+                                        pageUrl: 'bla.com',
+                                        fullUrl: 'http://www.bla.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                ])
+                            },
+                            execute: async ({ setup }) => {
+                                await customLists(setup).removeList({
+                                    id: listId,
+                                })
+                            },
+                            postCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListById({
+                                        id: listId,
+                                    }),
+                                ).toEqual(null)
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should create a list, add two entries to it, then remove one of the entries',
+            () => {
+                return {
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                listId = await customLists(
+                                    setup,
+                                ).createCustomList({
+                                    name: 'My Custom List',
+                                })
+                            },
+                        },
+                        {
+                            execute: async ({ setup }) => {
+                                await customLists(setup).insertPageToList({
+                                    id: listId,
+                                    url: 'http://www.bla.com/',
+                                })
+                                await customLists(setup).insertPageToList({
+                                    id: listId,
+                                    url: 'http://www.test.com/',
+                                })
+                            },
+                        },
+                        {
+                            preCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([
+                                    {
+                                        listId,
+                                        pageUrl: 'bla.com',
+                                        fullUrl: 'http://www.bla.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                    {
+                                        listId,
+                                        pageUrl: 'test.com',
+                                        fullUrl: 'http://www.test.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                ])
+                            },
+                            execute: async ({ setup }) => {
+                                await customLists(setup).removePageFromList({
+                                    id: listId,
+                                    url: 'test.com',
+                                })
+                            },
+                            postCheck: async ({ setup }) => {
+                                expect(
+                                    await customLists(setup).fetchListPagesById(
+                                        {
+                                            id: listId,
+                                        },
+                                    ),
+                                ).toEqual([
+                                    {
+                                        listId,
+                                        pageUrl: 'bla.com',
+                                        fullUrl: 'http://www.bla.com/',
+                                        createdAt: expect.any(Date),
+                                    },
+                                ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+    ],
+)

@@ -52,7 +52,8 @@ export class SearchLookbacksPlugin extends StorageBackendPlugin<
             // Stop iterating once we have enough
             .until(() => latestVisits.size >= skip + limit)
             // For each visit PK, reduce down into Map of URL keys to latest visit time
-            .eachPrimaryKey(([time, url]) => {
+            .eachPrimaryKey(key => {
+                const [time, url] = key as [number, string]
                 // Only ever record the latest visit for each URL (first due to IndexedDB reverse keys ordering)
                 if (!latestVisits.has(url) && filteredUrls.isAllowed(url)) {
                     latestVisits.set(url, time)
@@ -128,7 +129,8 @@ export class SearchLookbacksPlugin extends StorageBackendPlugin<
                             .equals(currentUrl)
                             .reverse()
                             .until(() => done)
-                            .eachPrimaryKey(([visitTime]) => {
+                            .eachPrimaryKey(key => {
+                                const [visitTime] = key as [number]
                                 if (
                                     visitTime >= startDate &&
                                     visitTime <= endDate

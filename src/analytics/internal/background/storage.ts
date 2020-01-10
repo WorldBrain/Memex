@@ -2,10 +2,15 @@ import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
+import {
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
+} from '@worldbrain/memex-storage/lib/event-log/constants'
+
 import { NOTIF_TYPE_EVENT_IDS, EVENT_TYPES } from '../constants'
 
 export default class EventLogStorage extends StorageModule {
-    static EVENT_LOG_COLL = 'eventLog'
+    static EVENT_LOG_COLL = COLLECTION_NAMES.eventLog
 
     constructor(storageManager) {
         super({ storageManager })
@@ -13,21 +18,7 @@ export default class EventLogStorage extends StorageModule {
 
     getConfig = (): StorageModuleConfig => ({
         collections: {
-            [EventLogStorage.EVENT_LOG_COLL]: {
-                version: new Date(2018, 6, 14),
-                fields: {
-                    time: { type: 'datetime' },
-                    type: { type: 'string' },
-                    details: { type: 'json' },
-                },
-                indices: [
-                    { field: ['time', 'type'], pk: true },
-                    { field: 'time' },
-                    { field: 'type' },
-                ],
-                watch: false,
-                backup: false,
-            },
+            ...COLLECTION_DEFINITIONS,
         },
         operations: {
             createEvent: {

@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-import normalize from 'src/util/encode-url-for-id'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export interface Migrations {
     [storageKey: string]: (db: Dexie) => Promise<void>
@@ -15,7 +15,7 @@ export const migrations: Migrations = {
             .toCollection()
             .filter(annot => annot.pageUrl === undefined)
             .modify(annot => {
-                annot.pageUrl = normalize(annot.url)
+                annot.pageUrl = normalizeUrl(annot.url)
             })
     },
     /**

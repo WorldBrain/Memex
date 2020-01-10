@@ -1,5 +1,6 @@
 import Storex from '@worldbrain/storex'
-import { browser, Tabs } from 'webextension-polyfill-ts'
+import { Tabs, Browser } from 'webextension-polyfill-ts'
+import { normalizeUrl, URLNormalizer } from '@worldbrain/memex-url-utils'
 
 import {
     makeRemotelyCallable,
@@ -10,7 +11,6 @@ import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
 import { AnnotationRequests } from './request'
 import AnnotationStorage from './storage'
-import normalize from '../../util/encode-url-for-id'
 import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
@@ -18,6 +18,7 @@ import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
 import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
+import { SearchIndex } from 'src/search'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -29,23 +30,33 @@ export default class DirectLinkingBackground {
     private sendAnnotation: AnnotationSender
     private requests: AnnotationRequests
     private socialBg: SocialBG
+    private _normalizeUrl: URLNormalizer
 
-    constructor({
-        storageManager,
-        socialBg,
-    }: {
-        storageManager: Storex
-        socialBg: SocialBG
-    }) {
-        this.socialBg = socialBg
+    constructor(
+        private options: {
+            browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
+            storageManager: Storex
+            socialBg: SocialBG
+            searchIndex: SearchIndex
+            normalizeUrl?: URLNormalizer
+        },
+    ) {
+        this.socialBg = options.socialBg
         this.backend = new DirectLinkingBackend()
 
         this.annotationStorage = new AnnotationStorage({
-            storageManager,
+            storageManager: options.storageManager,
+            browserStorageArea: options.browserAPIs.storage.local,
+            searchIndex: options.searchIndex,
         })
 
+        this._normalizeUrl = options.normalizeUrl || normalizeUrl
+
         this.sendAnnotation = ({ tabId, annotation }) => {
-            browser.tabs.sendMessage(tabId, { type: 'direct-link', annotation })
+            options.browserAPIs.tabs.sendMessage(tabId, {
+                type: 'direct-link',
+                annotation,
+            })
         }
 
         this.requests = new AnnotationRequests(
@@ -84,12 +95,12 @@ export default class DirectLinkingBackground {
     setupRequestInterceptor() {
         setupRequestInterceptor({
             requests: this.requests,
-            webRequest: browser.webRequest,
+            webRequest: this.options.browserAPIs.webRequest,
         })
     }
 
     async _triggerSidebar(functionName, ...args) {
-        const [currentTab] = await browser.tabs.query({
+        const [currentTab] = await this.options.browserAPIs.tabs.query({
             active: true,
             currentWindow: true,
         })
@@ -107,7 +118,10 @@ export default class DirectLinkingBackground {
             annotation: Annotation
         },
     ) {
-        const activeTab = await browser.tabs.create({ active: true, url })
+        const activeTab = await this.options.browserAPIs.tabs.create({
+            active: true,
+            url,
+        })
 
         const listener = async (tabId, changeInfo) => {
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
@@ -117,10 +131,10 @@ export default class DirectLinkingBackground {
                     tabId,
                 ).insertRibbon()
                 await remoteFunction('goToAnnotation', { tabId })(annotation)
-                browser.tabs.onUpdated.removeListener(listener)
+                this.options.browserAPIs.tabs.onUpdated.removeListener(listener)
             }
         }
-        browser.tabs.onUpdated.addListener(listener)
+        this.options.browserAPIs.tabs.onUpdated.addListener(listener)
     }
 
     async toggleSidebarOverlay(
@@ -145,7 +159,7 @@ export default class DirectLinkingBackground {
             activeUrl: undefined,
         },
     ) {
-        const [currentTab] = await browser.tabs.query({
+        const [currentTab] = await this.options.browserAPIs.tabs.query({
             active: true,
             currentWindow: true,
         })
@@ -187,7 +201,7 @@ export default class DirectLinkingBackground {
         const result = await this.backend.createDirectLink(request)
         await this.annotationStorage.createAnnotation({
             pageTitle,
-            pageUrl: tab.url,
+            pageUrl: this._normalizeUrl(tab.url),
             body: request.anchor.quote,
             url: result.url,
             selector: request.anchor,
@@ -206,7 +220,9 @@ export default class DirectLinkingBackground {
         isSocialPost?: boolean,
     ) {
         url = url == null && tab != null ? tab.url : url
-        url = isSocialPost ? await this.lookupSocialId(url) : normalize(url)
+        url = isSocialPost
+            ? await this.lookupSocialId(url)
+            : this._normalizeUrl(url)
 
         const annotations = await this.annotationStorage.getAllAnnotationsByUrl(
             {
@@ -238,16 +254,26 @@ export default class DirectLinkingBackground {
 
     async createAnnotation(
         { tab }: TabArg,
-        { url, title, comment, body, selector, bookmarked, isSocialPost },
+        {
+            url,
+            title,
+            comment,
+            body,
+            selector,
+            bookmarked,
+            isSocialPost,
+            createdWhen = new Date(),
+        },
+        { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        let pageUrl = url == null ? tab.url : url
+        let pageUrl = this._normalizeUrl(url == null ? tab.url : url)
 
         if (isSocialPost) {
             pageUrl = await this.lookupSocialId(pageUrl)
         }
 
         const pageTitle = title == null ? tab.title : title
-        const uniqueUrl = normalize(`${pageUrl}/#${Date.now()}`, {
+        const uniqueUrl = this._normalizeUrl(`${pageUrl}/#${Date.now()}`, {
             stripHash: false,
             removeTrailingSlash: false,
         })
@@ -259,10 +285,13 @@ export default class DirectLinkingBackground {
             comment,
             body,
             selector,
+            createdWhen,
         })
 
         // Attempt to (re-)index, if user preference set, but don't wait for it
-        this.annotationStorage.indexPageFromTab(tab)
+        if (!skipPageIndexing) {
+            this.annotationStorage.indexPageFromTab(tab)
+        }
 
         if (bookmarked) {
             await this.toggleAnnotBookmark({ tab }, { url: uniqueUrl })
@@ -302,7 +331,10 @@ export default class DirectLinkingBackground {
             pk = await this.lookupSocialId(pk)
         }
 
-        return this.annotationStorage.deleteAnnotation(pk)
+        await this.annotationStorage.deleteTagsByUrl({ url: pk })
+        await this.annotationStorage.deleteBookmarkByUrl({ url: pk })
+        await this.annotationStorage.deleteListEntriesByUrl({ url: pk })
+        await this.annotationStorage.deleteAnnotation(pk)
     }
 
     async getTagsByAnnotationUrl(_, url) {
