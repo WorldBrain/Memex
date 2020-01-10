@@ -125,13 +125,7 @@
 }
 
 .logo {
-    composes: logoSquared from 'src/common-ui/icons.css';
-    background-size: 20px;
-
-    &:hover {
-        background-image: url('/img/open.svg');
-        background-size: 16px;
-    }
+    background-image: url('/img/open.svg');
 }
 
 .dashboard {

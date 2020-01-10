@@ -192,6 +192,15 @@ class Ribbon extends Component<Props, State> {
                                     />
                                 </ButtonTooltip>
                                 <ButtonTooltip
+                                    tooltipText="Open Memex Dashboard"
+                                    position="left"
+                                >
+                                    <button
+                                        onClick={() => this.openOverviewTabRPC()}
+                                        className={cx(styles.button, styles.logo)}
+                                    />
+                                </ButtonTooltip>
+                                <ButtonTooltip
                                     tooltipText={this.getTooltipText(
                                         'toggleSidebar',
                                     )}
