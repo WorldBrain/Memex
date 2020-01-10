@@ -4,6 +4,13 @@
     font-family: 'Inter', sans-serif;
 }
 
+.horizontalLine {
+    width: 10px;
+    border: solid 0.5px #d8d8d8;
+    border-radius: 5px;
+    margin: 10px 0px;
+}
+
 .ribbon {
     position: fixed;
     display: flex;
@@ -61,12 +68,6 @@
 
 .innerRibbonSidebarOpen {
     box-shadow: none;
-}
-
-hr {
-    width: 10px;
-    border: solid 0.5px #d8d8d8;
-    border-radius: 5px;
 }
 
 /* SECTIONS */
