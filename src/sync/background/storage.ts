@@ -12,7 +12,7 @@ export class MemexExtClientSyncLogStorage extends ClientSyncLogStorage {
             mappings: [
                 {
                     moduleVersion: new Date('2019-02-05'),
-                    applicationVersion: STORAGE_VERSIONS[19].version,
+                    applicationVersion: STORAGE_VERSIONS[18].version,
                 },
             ],
         })
@@ -28,7 +28,7 @@ export class MemexExtSyncInfoStorage extends SyncInfoStorage {
             mappings: [
                 {
                     moduleVersion: new Date('2019-11-20'),
-                    applicationVersion: STORAGE_VERSIONS[19].version,
+                    applicationVersion: STORAGE_VERSIONS[18].version,
                 },
             ],
         })
