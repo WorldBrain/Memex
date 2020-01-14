@@ -8,9 +8,9 @@ import browserIsChrome from 'src/util/check-browser'
  * to users at the release of our Direct Links feature. This should ensure Dexie knows about
  * both the incorrect indexes and how to drop those to migrate to the correct indexes.
  */
-export default function patchDirectLinksSchema(
+export const initPatchSchema = (isChrome: boolean) => (
     schemaVersions: DexieSchema[],
-): any[] {
+): any[] => {
     const directLinksFirstAppears = schemaVersions.findIndex(
         ({ schema }) => schema.directLinks != null,
     )
@@ -44,7 +44,7 @@ export default function patchDirectLinksSchema(
         })),
     ]
 
-    if (browserIsChrome()) {
+    if (isChrome) {
         return [
             ...schemasBeforeSync,
             ...schemaVersions.slice(syncFirstAppears).map(schema => ({
@@ -72,3 +72,7 @@ export default function patchDirectLinksSchema(
         })),
     ]
 }
+
+const patchSchema = initPatchSchema(browserIsChrome())
+
+export default patchSchema
