@@ -47,7 +47,7 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     } catch (err) {
         handleDBQuotaErrors(
             error =>
-                notifications.createNotification({
+                notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: deleting page',
                     message: error.message,
