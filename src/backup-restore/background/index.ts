@@ -334,6 +334,27 @@ export class BackupBackgroundModule {
         return times
     }
 
+    async maybeShowBackupProblemNotif() {
+        const lastBackup = await this.lastBackupStorage.getLastBackupFinishTime()
+        const backupProblemThreshold = 1000 * 60 * 60 * 24
+        const timeSinceLastBackup = Date.now() - lastBackup.getTime()
+        if (timeSinceLastBackup < backupProblemThreshold) {
+            return
+        }
+
+        const lastNotifShown = 0
+        const problemNotifInterval = 1000 * 60 * 60 * 24 * 7
+        if (Date.now() - lastNotifShown < problemNotifInterval) {
+            return
+        }
+
+        await this.showBackupProblemNotif()
+    }
+
+    async showBackupProblemNotif() {
+        // TODO
+    }
+
     async doBackup() {
         this.clearAutomaticBackupTimeout()
 
