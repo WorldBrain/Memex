@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import { colorPrimary } from 'src/common-ui/components/design-library/colors'
 
+export const fontSizeSmall = 13
 export const fontSizeNormal = 14
 export const fontSizeBig = 17
 export const fontSizeTitle = 16
@@ -44,4 +45,21 @@ export const TypographyInputTitle = styled.h2`
     box-sizing: border-box;
     margin-bottom: 5px;
     margin-top: 10px;
+`
+
+export const TypographyButtonLabel = styled.span`
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 600;
+    font-size: ${fontSizeSmall}px;
+    line-height: 16px;
+    text-align: center;
+    color: #fafafb;
+`
+export const TypographyActionText = styled.span`
+    line-height: 16px;
+    text-align: center;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 600;
 `
