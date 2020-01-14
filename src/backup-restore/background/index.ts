@@ -334,27 +334,28 @@ export class BackupBackgroundModule {
         return times
     }
 
-    doBackup() {
+    async doBackup() {
         this.clearAutomaticBackupTimeout()
 
         this.storage.startRecordingChanges()
-        this.backupProcedure.run()
+        if (!(await this.backend.isReachable())) {
+            this.scheduleAutomaticBackupIfEnabled()
+            return
+        }
 
         const always = () => {
             this.scheduleAutomaticBackupIfEnabled()
         }
-        this.backupProcedure.events.on('success', async () => {
+        this.backupProcedure.events.once('success', async () => {
             // sets a flag that the progress of the backup has been successful so that the UI can set a proper state
             localStorage.setItem('progress-successful', 'true')
 
             this.lastBackupStorage.storeLastBackupFinishTime(new Date())
             always()
         })
-        this.backupProcedure.events.on('fail', () => {
+        this.backupProcedure.events.once('fail', () => {
             always()
         })
-
-        return this.backupProcedure.events
     }
 
     async prepareRestore() {
