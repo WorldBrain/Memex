@@ -1,6 +1,6 @@
 export const STORAGE_VERSIONS = {
     0: { version: new Date('2018-02-01') },
-    1: { version: new Date('2018-06-31') },
+    1: { version: new Date('2018-07-01') },
     2: { version: new Date('2018-07-12') },
     3: { version: new Date('2018-07-14') },
     4: { version: new Date('2018-08-03') },
