@@ -192,6 +192,15 @@ class Ribbon extends Component<Props, State> {
                                     />
                                 </ButtonTooltip>
                                 <ButtonTooltip
+                                    tooltipText="Open Memex Dashboard"
+                                    position="left"
+                                >
+                                    <button
+                                        onClick={() => this.openOverviewTabRPC()}
+                                        className={cx(styles.button, styles.logo)}
+                                    />
+                                </ButtonTooltip>
+                                <ButtonTooltip
                                     tooltipText={this.getTooltipText(
                                         'toggleSidebar',
                                     )}
@@ -281,7 +290,7 @@ class Ribbon extends Component<Props, State> {
                                     </ButtonTooltip>
                                 </div>
                             </div>
-                            <hr />
+                            <div className={styles.horizontalLine}/>
                             <div className={styles.pageActions}>
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(
@@ -401,7 +410,7 @@ class Ribbon extends Component<Props, State> {
                                     </ButtonTooltip>
                                 </div>
                             </div>
-                            <hr />
+                            <div className={styles.horizontalLine}/>
                             <div className={styles.settingsActions}>
                                 <ButtonTooltip
                                     tooltipText="Disable this Toolbar (You can still use keyboard shortcuts)"

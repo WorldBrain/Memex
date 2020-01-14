@@ -101,7 +101,7 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
         dispatch(changeHasBookmark(index))
         handleDBQuotaErrors(
             error =>
-                notifications.createNotification({
+                notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
                     message: error.message,
@@ -198,8 +198,8 @@ function storeSearch(searchResult, overwrite, state) {
         searchResult.totalCount === 0
             ? EVENT_NAMES.UNSUCCESSFUL_SEARCH
             : overwrite
-                ? EVENT_NAMES.SUCCESSFUL_SEARCH
-                : EVENT_NAMES.PAGINATE_SEARCH
+            ? EVENT_NAMES.SUCCESSFUL_SEARCH
+            : EVENT_NAMES.PAGINATE_SEARCH
 
     processEventRPC({ type })
 

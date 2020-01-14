@@ -133,14 +133,14 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             .anyOf(ids)
             .primaryKeys()
 
-        const pageUrls = new Set(pageEntries.map(([, url]) => url))
+        const pageUrls = new Set(pageEntries.map(pk => pk[1]))
 
         return this.backend.dexieInstance
             .table(AnnotsStorage.ANNOTS_COLL)
             .where('url')
             .anyOf(urls)
             .and(annot => pageUrls.has(annot.pageUrl))
-            .primaryKeys()
+            .primaryKeys() as Promise<string[]>
 
         // IMPLEMENTATION FOR ANNOTS COLLECTIONS
         // const [listIds, entries] = await Promise.all([
@@ -320,7 +320,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             )
         }
 
-        return coll.primaryKeys()
+        return coll.primaryKeys() as Promise<string[]>
     }
 
     private async lookupTerms({
@@ -444,7 +444,10 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             )
 
             const filteredPks = new Set(
-                await this.filterResults(annots.map(a => a.url), params),
+                await this.filterResults(
+                    annots.map(a => a.url),
+                    params,
+                ),
             )
             annots = annots.filter(annot => filteredPks.has(annot.url))
 

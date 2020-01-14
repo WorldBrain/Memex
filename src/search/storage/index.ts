@@ -1,4 +1,4 @@
-import Dexie from 'dexie'
+import Dexie, { DexieError } from 'dexie'
 
 /**
  * Error hanlder captures `OpenFailedError`s relating to `createObjectStore` IDB issues,
@@ -6,11 +6,11 @@ import Dexie from 'dexie'
  * with this error rendering the DB unusable, but spamming our sentry error tracker.
  */
 export const initErrHandler = <T>(defReturnVal: T = null) => (
-    err: Dexie.DexieError,
+    err: DexieError,
 ) => {
     if (
         err.message === 'Data fetch failed' ||
-        (err.name === Dexie.errnames.OpenFailed &&
+        (err.name === Dexie.errnames.OpenFailedError &&
             err.message.includes('createObjectStore'))
     ) {
         return defReturnVal

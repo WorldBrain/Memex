@@ -109,7 +109,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
             handleDBQuotaErrors(
                 err =>
-                    notifications.createNotification({
+                    notifications.create({
                         requireInteraction: false,
                         title: 'Memex error: list adding',
                         message: err.message,

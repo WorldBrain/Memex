@@ -289,7 +289,7 @@ export const toggleBookmark: (url: string) => Thunk = url => async (
         dispatch(toggleBookmarkState(index))
         handleDBQuotaErrors(
             error =>
-                notifications.createNotification({
+                notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
                     message: error.message,

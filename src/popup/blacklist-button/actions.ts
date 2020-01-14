@@ -7,7 +7,6 @@ import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { NotificationInterface } from 'src/util/notification-types'
 import { notifications } from 'src/util/remote-functions-background'
 
 function deriveDomain(url: string) {
@@ -92,7 +91,7 @@ export const deleteBlacklistData: () => Thunk = () => async (
     } catch (err) {
         handleDBQuotaErrors(
             error =>
-                notifications.createNotification({
+                notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: deleting page',
                     message: error.message,

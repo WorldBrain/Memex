@@ -4,6 +4,13 @@
     font-family: 'Inter', sans-serif;
 }
 
+.horizontalLine {
+    width: 10px;
+    border: solid 0.5px #d8d8d8;
+    border-radius: 5px;
+    margin: 10px 0px;
+}
+
 .ribbon {
     position: fixed;
     display: flex;
@@ -63,12 +70,6 @@
     box-shadow: none;
 }
 
-hr {
-    width: 10px;
-    border: solid 0.5px #d8d8d8;
-    border-radius: 5px;
-}
-
 /* SECTIONS */
 
 .generalActions {
@@ -124,13 +125,7 @@ hr {
 }
 
 .logo {
-    composes: logoSquared from 'src/common-ui/icons.css';
-    background-size: 20px;
-
-    &:hover {
-        background-image: url('/img/open.svg');
-        background-size: 16px;
-    }
+    background-image: url('/img/open.svg');
 }
 
 .dashboard {

@@ -122,7 +122,8 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .anyOf(pageUrls)
             .primaryKeys()
 
-        tags.forEach(([name, url]) => {
+        tags.forEach(pk => {
+            const [name, url] = pk as [string, string]
             let key: number | string
 
             if (isSocialSearch) {

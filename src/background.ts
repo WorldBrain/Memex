@@ -79,7 +79,7 @@ export async function main() {
             getCurrentUserClaims:
                 backgroundModules.auth.subscriptionService.getCurrentUserClaims,
         },
-        notifications: { createNotification },
+        notifications: { create: createNotification } as any,
         bookmarks: {
             addPageBookmark:
                 backgroundModules.search.remoteFunctions.bookmarks
