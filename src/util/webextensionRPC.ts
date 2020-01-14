@@ -24,6 +24,9 @@ import { RemoteFunctionImplementations } from 'src/util/remote-functions-backgro
 import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 import { AuthRemoteEvents } from 'src/authentication/background/types'
+import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { Claims } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -124,9 +127,7 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
         // Check if it was *our* listener that responded.
         if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
             throw new RpcError(
-                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${
-                    response[RPC_RESPONSE]
-                }. Response:${response}`,
+                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${response[RPC_RESPONSE]}. Response:${response}`,
             )
         }
 
@@ -318,6 +319,7 @@ export type TypedRemoteEventEmitter<
 // Statically defined types
 interface RemoteEvents {
     auth: AuthRemoteEvents
+    sync: InitialSyncEvents
 }
 
 function registerRemoteEventForwarder() {
@@ -343,7 +345,8 @@ const remoteEventForwarder = (message, _) => {
 
 export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
     eventType: EventType,
-): TypedRemoteEventEmitter<EventType> {
+) {
+    // todo: what is the correct function return type here? TypedRemoteEventEmitter<EventType> ? TypedRemoteEventEmitter<RemoteEVents[EventType]> ?
     const existingEmitter = remoteEventEmitters[eventType]
     if (existingEmitter) {
         return existingEmitter

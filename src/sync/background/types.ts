@@ -1,3 +1,6 @@
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { Claims } from '@worldbrain/memex-common/lib/subscriptions/types'
+
 export interface PublicSyncInterface {
     requestInitialSync(options?: {
         preserveChannel?: boolean

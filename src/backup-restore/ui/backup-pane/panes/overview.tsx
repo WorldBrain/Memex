@@ -12,7 +12,7 @@ import {
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
-import SyncDevicesPane from 'src/sync/components/SyncDevicesPane'
+import SyncDevicesPane from 'src/sync/components/device-list/SyncDevicesPane'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
 
 const styles = require('../../styles.css')

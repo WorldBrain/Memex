@@ -1,19 +1,17 @@
-import React, { PureComponent, Fragment, Component } from 'react'
-import ReactDOM from 'react-dom'
-import cx from 'classnames'
+import React, { Component } from 'react'
 import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
-import { SyncDevicesList } from 'src/sync/components/SyncDevicesList'
+import { SyncDevicesList } from 'src/sync/components/device-list/SyncDevicesList'
 import { SyncDevice } from 'src/sync/components/types'
 import Modal from 'src/common-ui/components/Modal'
-import InitialSyncStepper from 'src/sync/components/initial-sync/InitialSyncStepper'
 import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 import { features, sync } from 'src/util/remote-functions-background'
-import SmallButton from '../../common-ui/components/small-button'
-const globalStyles = require('../../backup-restore/ui/styles.css')
-const styles = require('./styles.css')
+import SmallButton from '../../../common-ui/components/small-button'
+import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
+const globalStyles = require('../../../backup-restore/ui/styles.css')
+const styles = require('../styles.css')
 
 interface Props {
     devices: SyncDevice[]
@@ -22,6 +20,7 @@ interface Props {
     handleRemoveDevice: any
     getInitialSyncMessage: () => Promise<string>
     waitForInitialSync: () => Promise<void>
+    waitForInitialSyncConnected: () => Promise<void>
 }
 
 interface State {
@@ -116,9 +115,12 @@ export class SyncDevicesPane extends Component<Props, State> {
     renderAddNewDevice() {
         return (
             <Modal onClose={this.handleCloseNewDevice}>
-                <InitialSyncStepper
-                    onFinish={this.handleCloseNewDevice}
+                <InitialSyncSetup
+                    onClose={this.handleCloseNewDevice}
                     getInitialSyncMessage={this.props.getInitialSyncMessage}
+                    waitForInitialSyncConnected={
+                        this.props.waitForInitialSyncConnected
+                    }
                     waitForInitialSync={this.props.waitForInitialSync}
                 />
             </Modal>
@@ -159,6 +161,9 @@ class SyncDevicesPaneContainer extends Component<
         await sync.waitForInitialSync()
         this.refreshDevices()
     }
+    waitForInitialSyncConnected = async () => {
+        await sync.waitForInitialSyncConnected()
+    }
 
     refreshDevices = async () => {
         const devices = (await sync.listDevices()) as SyncDevice[]
@@ -184,6 +189,9 @@ class SyncDevicesPaneContainer extends Component<
                     handleRemoveDevice={this.handleRemoveDevice}
                     getInitialSyncMessage={this.getInitialSyncMessage}
                     waitForInitialSync={this.waitForInitialSync}
+                    waitForInitialSyncConnected={
+                        this.waitForInitialSyncConnected
+                    }
                 />
             </div>
         )

@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { SyncDevice } from 'src/sync/components/types'
-import SyncDeviceItem from 'src/sync/components/SyncDeviceItem'
-const styles = require('./styles.css')
+import SyncDeviceItem from 'src/sync/components/device-list/SyncDeviceItem'
+const styles = require('../styles.css')
 
 interface Props {
     devices: SyncDevice[]
