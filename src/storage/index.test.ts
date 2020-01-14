@@ -2,6 +2,8 @@ import expect from 'expect'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { getDexieHistory } from '@worldbrain/storex-backend-dexie/lib/schema'
 import { DexieSchema } from '@worldbrain/storex-backend-dexie/lib/types'
+import patchDirectLinksSchema from 'src/search/storage/dexie-schema'
+import { STORAGE_VERSIONS } from './constants'
 
 function normalizeDexieHistory(dexieHistory: DexieSchema[]) {
     const fieldSeparator = ', '
@@ -25,7 +27,10 @@ function normalizeDexieHistory(dexieHistory: DexieSchema[]) {
 describe('Storage initialization', () => {
     it('should generate the correct Dexie schema', async () => {
         const setup = await setupBackgroundIntegrationTest()
-        const dexieHistory = getDexieHistory(setup.storageManager.registry)
+        const dexieHistory = patchDirectLinksSchema(
+            getDexieHistory(setup.storageManager.registry),
+        )
+
         expect(normalizeDexieHistory(dexieHistory)).toEqual(
             normalizeDexieHistory([
                 {
@@ -33,403 +38,434 @@ describe('Storage initialization', () => {
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
+                        bookmarks: 'url, time',
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
-                        bookmarks: 'url, time',
                     },
-                    version: 1,
-                },
-                {
-                    schema: {
-                        pages:
-                            'url, hostname, domain, *urlTerms, *titleTerms, *terms',
-                        visits: '[time+url], url',
-                        favIcons: 'hostname',
-                        tags: '[name+url], url, name',
-                        bookmarks: 'url, time',
-                        directLinks:
-                            'url, *_pageTitle_terms, *_body_terms, createdWhen',
-                    },
-                    version: 2,
+                    dexieSchemaVersion: 1,
+                    storexSchemaVersion: STORAGE_VERSIONS[0].version,
                 },
                 {
                     schema: {
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
+                        bookmarks: 'url, time',
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
+                        directLinks: 'url, *body, *pageTitle, createdWhen',
+                    },
+                    dexieSchemaVersion: 2,
+                    storexSchemaVersion: STORAGE_VERSIONS[0].version,
+                },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
                         bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
                         directLinks:
-                            'url, createdWhen, *_body_terms, *_pageTitle_terms',
+                            'url, *_body_terms, *_pageTitle_terms, createdWhen',
+                    },
+                    dexieSchemaVersion: 3,
+                    storexSchemaVersion: STORAGE_VERSIONS[1].version,
+                },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
+                        bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
+                        directLinks:
+                            'url, *_body_terms, *_pageTitle_terms, createdWhen',
                         customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
+                            'id, &name, createdAt, isDeletable, isNestable',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                     },
-                    version: 3,
-                },
-                {
-                    schema: {
-                        pages:
-                            'url, hostname, domain, *urlTerms, *titleTerms, *terms',
-                        visits: '[time+url], url',
-                        favIcons: 'hostname',
-                        tags: '[name+url], url, name',
-                        bookmarks: 'url, time',
-                        directLinks:
-                            'url, *_pageTitle_terms, *_body_terms, createdWhen',
-                        customLists:
-                            'id, createdAt, isNestable, isDeletable, &name',
-                        pageListEntries: '[listId+pageUrl], pageUrl, listId',
-                        eventLog: '[time+type], type, time',
-                    },
-                    version: 4,
+                    dexieSchemaVersion: 4,
+                    storexSchemaVersion: STORAGE_VERSIONS[2].version,
                 },
                 {
                     schema: {
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
+                        bookmarks: 'url, time',
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
-                        bookmarks: 'url, time',
                         directLinks:
-                            'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
+                            'url, *_body_terms, *_pageTitle_terms, createdWhen',
                         customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
+                            'id, &name, createdAt, isDeletable, isNestable',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         eventLog: '[time+type], time, type',
                     },
-                    version: 5,
-                },
-                {
-                    schema: {
-                        pages:
-                            'url, hostname, domain, *urlTerms, *titleTerms, *terms',
-                        visits: '[time+url], url',
-                        favIcons: 'hostname',
-                        tags: '[name+url], url, name',
-                        bookmarks: 'url, time',
-                        directLinks:
-                            'url, *_comment_terms, createdWhen, *_body_terms, pageUrl, *_pageTitle_terms',
-                        customLists:
-                            'id, createdAt, isNestable, isDeletable, &name',
-                        pageListEntries: '[listId+pageUrl], pageUrl, listId',
-                        eventLog: '[time+type], type, time',
-                        notifications: 'id',
-                    },
-                    version: 6,
+                    dexieSchemaVersion: 5,
+                    storexSchemaVersion: STORAGE_VERSIONS[3].version,
                 },
                 {
                     schema: {
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
+                        bookmarks: 'url, time',
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
-                        bookmarks: 'url, time',
                         directLinks:
-                            'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
                         customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
+                            'id, &name, createdAt, isDeletable, isNestable',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
+                    },
+                    dexieSchemaVersion: 6,
+                    storexSchemaVersion: STORAGE_VERSIONS[4].version,
+                },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
+                        bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        customLists:
+                            'id, &name, createdAt, isDeletable, isNestable',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        notifications: 'id',
+                    },
+                    dexieSchemaVersion: 7,
+                    storexSchemaVersion: STORAGE_VERSIONS[5].version,
+                },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
+                        bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        customLists:
+                            'id, &name, createdAt, isDeletable, isNestable',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         eventLog: '[time+type], time, type',
                         notifications: 'id',
                         annotations:
-                            'url, *_comment_terms, createdWhen, *_body_terms, *_pageTitle_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen',
                     },
-                    version: 7,
+                    dexieSchemaVersion: 8,
+                    storexSchemaVersion: STORAGE_VERSIONS[6].version,
                 },
                 {
                     schema: {
                         pages:
-                            'url, hostname, domain, *urlTerms, *titleTerms, *terms',
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
-                        favIcons: 'hostname',
-                        tags: '[name+url], url, name',
                         bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
                         directLinks:
-                            'url, *_comment_terms, createdWhen, *_body_terms, pageUrl, *_pageTitle_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
                         customLists:
-                            'id, createdAt, isNestable, isDeletable, &name',
-                        pageListEntries: '[listId+pageUrl], pageUrl, listId',
-                        eventLog: '[time+type], type, time',
+                            'id, &name, createdAt, isDeletable, isNestable',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
                         notifications: 'id',
                         annotations:
-                            'url, *_pageTitle_terms, *_body_terms, createdWhen, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen',
                         backupChanges: 'timestamp, collection',
                     },
-                    version: 8,
+                    dexieSchemaVersion: 9,
+                    storexSchemaVersion: STORAGE_VERSIONS[7].version,
                 },
                 {
                     schema: {
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
+                        bookmarks: 'url, time',
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
-                        bookmarks: 'url, time',
                         directLinks:
-                            'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
                         customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
+                            'id, &name, createdAt, isDeletable, isNestable',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         eventLog: '[time+type], time, type',
                         notifications: 'id',
                         annotations:
-                            'url, *_comment_terms, createdWhen, *_body_terms, *_pageTitle_terms',
-                        backupChanges: 'timestamp, collection',
-                        annotListEntries: '[listId+url], listId, url',
-                    },
-                    version: 9,
-                },
-                {
-                    schema: {
-                        pages:
-                            'url, hostname, domain, *urlTerms, *titleTerms, *terms',
-                        visits: '[time+url], url',
-                        favIcons: 'hostname',
-                        tags: '[name+url], url, name',
-                        bookmarks: 'url, time',
-                        directLinks:
-                            'url, *_comment_terms, createdWhen, *_body_terms, pageUrl, *_pageTitle_terms',
-                        customLists:
-                            'id, createdAt, isNestable, isDeletable, &name',
-                        pageListEntries: '[listId+pageUrl], pageUrl, listId',
-                        eventLog: '[time+type], type, time',
-                        notifications: 'id',
-                        annotations:
-                            'url, *_pageTitle_terms, *_body_terms, createdWhen, *_comment_terms',
-                        backupChanges: 'timestamp, collection',
-                        annotListEntries: '[listId+url], url, listId',
-                        annotBookmarks: 'url, createdAt',
-                    },
-                    version: 10,
-                },
-                {
-                    schema: {
-                        pages:
-                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
-                        visits: '[time+url], url',
-                        favIcons: 'hostname',
-                        tags: '[name+url], name, url',
-                        bookmarks: 'url, time',
-                        directLinks:
-                            'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
-                        customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
-                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
-                        eventLog: '[time+type], time, type',
-                        notifications: 'id',
-                        annotations:
-                            'url, pageUrl, *_pageTitle_terms, *_body_terms, createdWhen, lastEdited, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen',
                         backupChanges: 'timestamp, collection',
                         annotListEntries: '[listId+url], listId, url',
-                        annotBookmarks: 'url, createdAt',
                     },
-                    version: 11,
-                },
-                {
-                    schema: {
-                        pages:
-                            'url, hostname, domain, *urlTerms, *titleTerms, *terms',
-                        visits: '[time+url], url',
-                        favIcons: 'hostname',
-                        tags: '[name+url], url, name',
-                        bookmarks: 'url, time',
-                        directLinks:
-                            'url, *_comment_terms, createdWhen, *_body_terms, pageUrl, *_pageTitle_terms',
-                        customLists:
-                            'id, createdAt, isNestable, isDeletable, &name',
-                        pageListEntries: '[listId+pageUrl], pageUrl, listId',
-                        eventLog: '[time+type], type, time',
-                        notifications: 'id',
-                        annotations:
-                            'url, *_comment_terms, lastEdited, createdWhen, *_body_terms, *_pageTitle_terms, pageUrl',
-                        backupChanges: 'timestamp, collection',
-                        annotListEntries: '[listId+url], url, listId',
-                        annotBookmarks: 'url, createdAt',
-                        socialPosts:
-                            '++id, userId, createdAt, serviceId, *_text_terms',
-                        socialUsers: '++id, username, name, serviceId',
-                    },
-                    version: 12,
+                    dexieSchemaVersion: 10,
+                    storexSchemaVersion: STORAGE_VERSIONS[8].version,
                 },
                 {
                     schema: {
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
+                        bookmarks: 'url, time',
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
-                        bookmarks: 'url, time',
                         directLinks:
-                            'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
                         customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
+                            'id, &name, createdAt, isDeletable, isNestable',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         eventLog: '[time+type], time, type',
                         notifications: 'id',
                         annotations:
-                            'url, pageUrl, *_pageTitle_terms, *_body_terms, createdWhen, lastEdited, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen',
+                        backupChanges: 'timestamp, collection',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotBookmarks: 'url, createdAt',
+                    },
+                    dexieSchemaVersion: 11,
+                    storexSchemaVersion: STORAGE_VERSIONS[9].version,
+                },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
+                        bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        customLists:
+                            'id, &name, createdAt, isDeletable, isNestable',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        notifications: 'id',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotBookmarks: 'url, createdAt',
+                    },
+                    dexieSchemaVersion: 12,
+                    storexSchemaVersion: STORAGE_VERSIONS[11].version,
+                },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
+                        bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        customLists:
+                            'id, &name, createdAt, isDeletable, isNestable',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        notifications: 'id',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
                         backupChanges: 'timestamp, collection',
                         annotListEntries: '[listId+url], listId, url',
                         annotBookmarks: 'url, createdAt',
                         socialPosts:
-                            '++id, *_text_terms, serviceId, createdAt, userId',
-                        socialUsers: '++id, serviceId, name, username',
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialUsers: '++id, name, serviceId, username',
+                    },
+                    dexieSchemaVersion: 13,
+                    storexSchemaVersion: STORAGE_VERSIONS[12].version,
+                },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
+                        bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        customLists:
+                            'id, &name, createdAt, isDeletable, isNestable',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        notifications: 'id',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotBookmarks: 'url, createdAt',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialUsers: '++id, name, serviceId, username',
                         socialBookmarks: '++id, createdAt, postId',
                     },
-                    version: 13,
-                },
-                {
-                    schema: {
-                        pages:
-                            'url, hostname, domain, *urlTerms, *titleTerms, *terms',
-                        visits: '[time+url], url',
-                        favIcons: 'hostname',
-                        tags: '[name+url], url, name',
-                        bookmarks: 'url, time',
-                        directLinks:
-                            'url, *_comment_terms, createdWhen, *_body_terms, pageUrl, *_pageTitle_terms',
-                        customLists:
-                            'id, createdAt, isNestable, isDeletable, &name',
-                        pageListEntries: '[listId+pageUrl], pageUrl, listId',
-                        eventLog: '[time+type], type, time',
-                        notifications: 'id',
-                        annotations:
-                            'url, *_comment_terms, lastEdited, createdWhen, *_body_terms, *_pageTitle_terms, pageUrl',
-                        backupChanges: 'timestamp, collection',
-                        annotListEntries: '[listId+url], url, listId',
-                        annotBookmarks: 'url, createdAt',
-                        socialPosts:
-                            '++id, userId, createdAt, serviceId, *_text_terms',
-                        socialUsers: '++id, username, name, serviceId',
-                        socialBookmarks: '++id, postId, createdAt',
-                        socialTags: '++id, postId, name',
-                        socialPostListEntries: '++id, postId, listId',
-                    },
-                    version: 14,
+                    dexieSchemaVersion: 14,
+                    storexSchemaVersion: STORAGE_VERSIONS[13].version,
                 },
                 {
                     schema: {
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
+                        bookmarks: 'url, time',
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
-                        bookmarks: 'url, time',
                         directLinks:
-                            'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
                         customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
+                            'id, &name, createdAt, isDeletable, isNestable',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         eventLog: '[time+type], time, type',
                         notifications: 'id',
                         annotations:
-                            'url, pageUrl, *_pageTitle_terms, *_body_terms, createdWhen, lastEdited, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
                         backupChanges: 'timestamp, collection',
                         annotListEntries: '[listId+url], listId, url',
                         annotBookmarks: 'url, createdAt',
                         socialPosts:
-                            '++id, *_text_terms, serviceId, createdAt, userId',
-                        socialUsers: '++id, serviceId, name, username',
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialUsers: '++id, name, serviceId, username',
                         socialBookmarks: '++id, createdAt, postId',
                         socialTags: '++id, name, postId',
                         socialPostListEntries: '++id, listId, postId',
                     },
-                    version: 15,
-                },
-                {
-                    schema: {
-                        pages:
-                            'url, hostname, domain, *urlTerms, *titleTerms, *terms',
-                        visits: '[time+url], url',
-                        favIcons: 'hostname',
-                        tags: '[name+url], url, name',
-                        bookmarks: 'url, time',
-                        directLinks:
-                            'url, *_comment_terms, createdWhen, *_body_terms, pageUrl, *_pageTitle_terms',
-                        customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
-                        pageListEntries: '[listId+pageUrl], pageUrl, listId',
-                        eventLog: '[time+type], type, time',
-                        notifications: 'id',
-                        annotations:
-                            'url, *_comment_terms, lastEdited, createdWhen, *_body_terms, *_pageTitle_terms, pageUrl',
-                        backupChanges: 'timestamp, collection',
-                        annotListEntries: '[listId+url], url, listId',
-                        annotBookmarks: 'url, createdAt',
-                        socialPosts:
-                            '++id, userId, createdAt, serviceId, *_text_terms',
-                        socialUsers: '++id, username, name, serviceId',
-                        socialBookmarks: '++id, postId, createdAt',
-                        socialTags: '++id, postId, name',
-                        socialPostListEntries: '++id, postId, listId',
-                    },
-                    version: 16,
+                    dexieSchemaVersion: 15,
+                    storexSchemaVersion: STORAGE_VERSIONS[14].version,
                 },
                 {
                     schema: {
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
+                        bookmarks: 'url, time',
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
-                        bookmarks: 'url, time',
                         directLinks:
-                            'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
                         customLists:
-                            'id, &name, isDeletable, isNestable, createdAt',
+                            'id, &name, createdAt, isDeletable, isNestable',
                         pageListEntries: '[listId+pageUrl], listId, pageUrl',
                         eventLog: '[time+type], time, type',
                         notifications: 'id',
                         annotations:
-                            'url, pageUrl, *_pageTitle_terms, *_body_terms, createdWhen, lastEdited, *_comment_terms',
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
                         backupChanges: 'timestamp, collection',
                         annotListEntries: '[listId+url], listId, url',
                         annotBookmarks: 'url, createdAt',
                         socialPosts:
-                            '++id, *_text_terms, serviceId, createdAt, userId',
-                        socialUsers: '++id, serviceId, name, username',
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialUsers: '++id, name, serviceId, username',
                         socialBookmarks: '++id, createdAt, postId',
                         socialTags: '++id, name, postId',
                         socialPostListEntries: '++id, listId, postId',
                     },
-                    version: 17,
+                    dexieSchemaVersion: 16,
+                    storexSchemaVersion: STORAGE_VERSIONS[15].version,
                 },
                 {
                     schema: {
                         pages:
                             'url, *terms, *titleTerms, *urlTerms, domain, hostname',
                         visits: '[time+url], url',
+                        bookmarks: 'url, time',
                         favIcons: 'hostname',
                         tags: '[name+url], name, url',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        customLists:
+                            'id, &name, createdAt, isDeletable, isNestable',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        notifications: 'id',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotBookmarks: 'url, createdAt',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialUsers: '++id, name, serviceId, username',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialTags: '++id, name, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                    },
+                    dexieSchemaVersion: 17,
+                    storexSchemaVersion: STORAGE_VERSIONS[16].version,
+                },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
                         bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        customLists:
+                            'id, &name, createdAt, isDeletable, isNestable',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        notifications: 'id',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotBookmarks: 'url, createdAt',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialUsers: '++id, name, serviceId, username',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialTags: '++id, name, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                    },
+                    dexieSchemaVersion: 18,
+                    storexSchemaVersion: STORAGE_VERSIONS[17].version,
+                },
+                {
+                    schema: {
+                        pages:
+                            'url, *terms, *titleTerms, *urlTerms, domain, hostname',
+                        visits: '[time+url], url',
+                        bookmarks: 'url, time',
+                        favIcons: 'hostname',
+                        tags: '[name+url], name, url',
+                        directLinks:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, pageUrl',
+                        customLists:
+                            'id, createdAt, isDeletable, isNestable, name',
+                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
+                        eventLog: '[time+type], time, type',
+                        notifications: 'id',
+                        annotations:
+                            'url, *_body_terms, *_comment_terms, *_pageTitle_terms, createdWhen, lastEdited, pageUrl',
+                        backupChanges: 'timestamp, collection',
+                        annotListEntries: '[listId+url], listId, url',
+                        annotBookmarks: 'url, createdAt',
+                        socialPosts:
+                            '++id, *_text_terms, createdAt, serviceId, userId',
+                        socialUsers: '++id, name, serviceId, username',
+                        socialBookmarks: '++id, createdAt, postId',
+                        socialTags: '++id, name, postId',
+                        socialPostListEntries: '++id, listId, postId',
+                        pageFetchBacklog: '++id, createdAt',
                         clientSyncLogEntry:
                             '[deviceId+createdOn], [collection+pk], createdOn',
-                        pageFetchBacklog: '++id, createdAt',
-                        directLinks:
-                            'url, *_pageTitle_terms, pageUrl, *_body_terms, createdWhen, *_comment_terms',
-                        customLists:
-                            'id, name, isDeletable, isNestable, createdAt',
-                        pageListEntries: '[listId+pageUrl], listId, pageUrl',
-                        eventLog: '[time+type], time, type',
-                        notifications: 'id',
-                        annotations:
-                            'url, pageUrl, *_pageTitle_terms, *_body_terms, createdWhen, lastEdited, *_comment_terms',
-                        backupChanges: 'timestamp, collection',
-                        annotListEntries: '[listId+url], listId, url',
-                        annotBookmarks: 'url, createdAt',
-                        socialPosts:
-                            '++id, *_text_terms, serviceId, createdAt, userId',
-                        socialUsers: '++id, serviceId, name, username',
-                        socialBookmarks: '++id, createdAt, postId',
-                        socialTags: '++id, name, postId',
-                        socialPostListEntries: '++id, listId, postId',
                         syncDeviceInfo: 'deviceId',
                     },
-                    version: 18,
+                    dexieSchemaVersion: 19,
+                    storexSchemaVersion: STORAGE_VERSIONS[18].version,
                 },
             ]),
         )

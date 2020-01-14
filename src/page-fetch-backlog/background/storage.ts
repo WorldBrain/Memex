@@ -12,7 +12,7 @@ export class PageFetchBacklogStorage extends StorageModule {
     getConfig = (): StorageModuleConfig => ({
         collections: {
             [PageFetchBacklogStorage.BACKLOG_COLL]: {
-                version: STORAGE_VERSIONS[19].version,
+                version: STORAGE_VERSIONS[18].version,
                 fields: {
                     url: { type: 'string' },
                     createdAt: { type: 'datetime' },

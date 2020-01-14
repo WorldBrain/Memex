@@ -126,7 +126,7 @@ class IndexDropdownContainer extends Component<Props, State> {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
             handleDBQuotaErrors(
                 err =>
-                    notifications.createNotification({
+                    notifications.create({
                         requireInteraction: false,
                         title: 'Memex error: tag adding',
                         message: err.message,

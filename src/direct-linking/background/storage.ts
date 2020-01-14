@@ -17,6 +17,7 @@ import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constan
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Annotation, AnnotListEntry } from '../types'
+import { STORAGE_VERSIONS } from 'src/storage/constants'
 
 // TODO: Move to src/annotations in the future
 export default class AnnotationStorage extends StorageModule {
@@ -55,7 +56,7 @@ export default class AnnotationStorage extends StorageModule {
             ...COLLECTION_DEFINITIONS,
             // NOTE: This is no longer used; keeping to maintain DB schema sanity
             directLinks: {
-                version: new Date('2018-08-03'),
+                version: STORAGE_VERSIONS[4].version,
                 fields: {
                     pageTitle: { type: 'text' },
                     pageUrl: { type: 'url' },
@@ -76,7 +77,7 @@ export default class AnnotationStorage extends StorageModule {
                 ],
                 history: [
                     {
-                        version: new Date('2018-06-31'),
+                        version: STORAGE_VERSIONS[1].version,
                         fields: {
                             pageTitle: { type: 'text' },
                             pageUrl: { type: 'url' },

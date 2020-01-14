@@ -25,7 +25,7 @@ export const toggleBookmark: () => Thunk = () => async (dispatch, getState) => {
         dispatch(setIsBookmarked(hasBookmark))
         handleDBQuotaErrors(
             error =>
-                notifications.createNotification({
+                notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
                     message: error.message,

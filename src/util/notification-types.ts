@@ -1,4 +1,4 @@
-import { Notifications } from 'webextension-polyfill-ts/src/generated/notifications'
+import { Notifications } from 'webextension-polyfill-ts'
 
 // Chrome allows some extra notif opts that the standard web ext API doesn't support
 export interface NotifOpts extends Notifications.CreateNotificationOptions {
@@ -6,11 +6,14 @@ export interface NotifOpts extends Notifications.CreateNotificationOptions {
     requireInteraction?: boolean
 }
 
-export type CreateNotificationInterface = (
+export type CreateNotification = (
     notifOptions: Partial<NotifOpts>,
-    onClick?: (f: any) => any,
+    onClick?: NotificationClickListener,
 ) => Promise<void>
 
-export interface NotificationInterface {
-    createNotification: CreateNotificationInterface
+export type NotificationClickListener = (id: string) => void
+
+export interface NotificationCreator {
+    create: CreateNotification
+    setupListeners: () => void
 }

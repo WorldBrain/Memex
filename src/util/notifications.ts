@@ -1,56 +1,74 @@
-import { browser } from 'webextension-polyfill-ts'
-import browserIsChrome from './check-browser'
+import { Notifications, browser } from 'webextension-polyfill-ts'
+
 import {
-    CreateNotificationInterface,
+    CreateNotification,
     NotifOpts,
+    NotificationCreator,
+    NotificationClickListener,
 } from 'src/util/notification-types'
+import browserIsChrome from './check-browser'
+
 export const DEF_ICON_URL = '/img/worldbrain-logo-narrow.png'
 export const DEF_TYPE = 'basic'
 
-const onClickListeners = new Map<string, (id: string) => void>()
-
-export function setupNotificationClickListener() {
-    browser.notifications.onClicked.addListener(id => {
-        browser.notifications.clear(id)
-
-        const listener = onClickListeners.get(id)
-        listener(id)
-        onClickListeners.delete(id) // Manually clean up ref
-    })
+export interface Props {
+    notificationsAPI: Notifications.Static
+    browserIsChrome: () => boolean
 }
 
-/**
- * Firefox supports only a subset of notif options. If you pass unknowns, it throws Errors.
- * So filter them down if browser is FF, else nah.
- */
-function _filterOpts({
-    type,
-    iconUrl,
-    requireInteraction,
-    title,
-    message,
-    ...rest
-}: NotifOpts): NotifOpts {
-    const opts = { type, iconUrl, requireInteraction, title, message }
-    return !browserIsChrome() ? opts : { ...opts, ...rest }
+export class Creator implements NotificationCreator {
+    private onClickListeners = new Map<string, NotificationClickListener>()
+
+    static DEF_OPTS: Partial<NotifOpts> = {
+        type: DEF_TYPE,
+        iconUrl: DEF_ICON_URL,
+        requireInteraction: true,
+    }
+
+    constructor(private props: Props) {}
+
+    /**
+     * Firefox supports only a subset of notif options. If you pass unknowns, it throws Errors.
+     * So filter them down if browser is FF, else nah.
+     */
+    private filterOpts({
+        type,
+        iconUrl,
+        title,
+        message,
+        ...rest
+    }: NotifOpts): NotifOpts {
+        const opts = { type, iconUrl, title, message }
+        return !this.props.browserIsChrome() ? opts : { ...opts, ...rest }
+    }
+
+    create: CreateNotification = async (notifOptions, onClick = f => f) => {
+        const id = await this.props.notificationsAPI.create(
+            this.filterOpts({
+                ...Creator.DEF_OPTS,
+                ...(notifOptions as NotifOpts),
+            }),
+        )
+
+        this.onClickListeners.set(id, onClick)
+
+        return
+    }
+
+    setupListeners = () =>
+        this.props.notificationsAPI.onClicked.addListener(id => {
+            this.props.notificationsAPI.clear(id)
+
+            this.onClickListeners.get(id)(id)
+            this.onClickListeners.delete(id)
+        })
 }
 
-const createNotification: CreateNotificationInterface = async (
-    notifOptions: Partial<NotifOpts>,
-    onClick = f => f,
-): Promise<void> => {
-    const id = await browser.notifications.create(
-        _filterOpts({
-            type: DEF_TYPE,
-            iconUrl: DEF_ICON_URL,
-            requireInteraction: true,
-            ...(notifOptions as NotifOpts),
-        }),
-    )
+const instance = new Creator({
+    notificationsAPI: browser.notifications,
+    browserIsChrome,
+})
 
-    onClickListeners.set(id, onClick)
+export const setupNotificationClickListener = instance.setupListeners
 
-    return
-}
-
-export default createNotification
+export default instance.create
