@@ -29,6 +29,10 @@ export class MemexLocalBackend extends BackupBackend {
         return this.isConnected()
     }
 
+    async isReachable() {
+        return this.isConnected()
+    }
+
     async storeObject({
         backupObject,
         events,

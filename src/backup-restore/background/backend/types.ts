@@ -36,6 +36,11 @@ export abstract class BackupBackend {
     abstract isConnected(): Promise<boolean>
     abstract isAuthenticated(): Promise<boolean>
 
+    // Is the backend ready to store and retrieve stuff?
+    async isReachable(): Promise<boolean> {
+        return true
+    }
+
     async handleLoginRedirectedBack(locationHref: string) {
         return
     }
