@@ -76,7 +76,7 @@ export default class AnnotationStorage extends StorageModule {
                 ],
                 history: [
                     {
-                        version: new Date('2018-06-31'),
+                        version: new Date('2018-07-01'),
                         fields: {
                             pageTitle: { type: 'text' },
                             pageUrl: { type: 'url' },
