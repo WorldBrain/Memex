@@ -1,5 +1,8 @@
 import styled from 'styled-components'
-import { colorPrimary } from 'src/common-ui/components/design-library/colors'
+import {
+    colorPrimary,
+    colorText,
+} from 'src/common-ui/components/design-library/colors'
 
 export const fontSizeSmall = 13
 export const fontSizeNormal = 14
@@ -62,4 +65,19 @@ export const TypographyActionText = styled.span`
     font-family: Inter;
     font-style: normal;
     font-weight: 600;
+`
+
+export const TypographyBody = styled.span`
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 19px;
+    color: ${colorText};
+`
+export const TypographyBodyBlock = styled(TypographyBody)`
+    display: block;
+`
+
+export const CenterText = styled.div`
+    text-align: center;
 `

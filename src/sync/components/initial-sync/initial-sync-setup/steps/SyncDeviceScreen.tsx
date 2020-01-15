@@ -4,6 +4,10 @@ import { Link } from 'src/common-ui/components/design-library/actions/Link'
 import ProgressBar from 'src/common-ui/components/ProgressBar'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import {
+    CenterText,
+    TypographyBodyBlock,
+} from 'src/common-ui/components/design-library/typography'
 
 export const SyncDeviceScreen = ({
     error,
@@ -11,17 +15,19 @@ export const SyncDeviceScreen = ({
     progressPct,
 }: {
     error?: string
-    stage: number
+    stage: string
     progressPct?: number
 }) => {
     return (
         <ModalBox header={'Setup sync with mobile devices'} actions={[]}>
             <div>
-                <div>
-                    <div>
+                <CenterText>
+                    <TypographyBodyBlock>
                         {'Initial sync is in progress... this may take a while'}
-                    </div>
-                    <div>{'Make sure both devices stay connected'}</div>
+                    </TypographyBodyBlock>
+                    <TypographyBodyBlock>
+                        {'Make sure both devices stay connected'}
+                    </TypographyBodyBlock>
 
                     <div>
                         {!error ? (
@@ -34,7 +40,10 @@ export const SyncDeviceScreen = ({
                                     <LoadingIndicator />
                                 ) : (
                                     <div>
-                                        <ProgressBar progress={progressPct} />
+                                        <div>{`Stage ${stage}`}</div>
+                                        <ProgressBar
+                                            progress={progressPct * 100}
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -50,16 +59,10 @@ export const SyncDeviceScreen = ({
                     </div>
                     <div>
                         <span>{'Problem with syncing?'}</span>
-                        <ExternalLink
-                            label={'Send a bug report'}
-                            onClick={() => false}
-                        />
-                        <ExternalLink
-                            label={'Help & FAQ'}
-                            onClick={() => false}
-                        />
+                        <ExternalLink label={'Send a bug report'} href={''} />
+                        <ExternalLink label={'Help & FAQ'} href={''} />
                     </div>
-                </div>
+                </CenterText>
             </div>
         </ModalBox>
     )

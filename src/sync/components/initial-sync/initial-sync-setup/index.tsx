@@ -19,7 +19,7 @@ export default class InitialSyncSetup extends StatefulUIElement<
         super(props, new InitialSyncSetupLogic(props))
     }
 
-    renderInner = () => {
+    render = () => {
         switch (this.state.status) {
             case 'introduction':
                 return (
@@ -39,7 +39,7 @@ export default class InitialSyncSetup extends StatefulUIElement<
                     <SyncDeviceScreen
                         error={this.state.error}
                         progressPct={this.state.progressPct}
-                        stage={1}
+                        stage={this.state.stage}
                     />
                 )
             case 'done':
@@ -47,9 +47,5 @@ export default class InitialSyncSetup extends StatefulUIElement<
             default:
                 throw Error(`Unknown Sync Setup state ${this.state.status}`)
         }
-    }
-
-    render() {
-        return this.renderInner()
     }
 }

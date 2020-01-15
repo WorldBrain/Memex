@@ -24,7 +24,7 @@ storiesOf('Design Library', module)
             <SecondaryAction label={'SecondaryAction'} onClick={() => false} />
             <Link label={'Link'} onClick={() => false} />
             <LesserLink label={'LesserLink'} onClick={() => false} />
-            <ExternalLink label={'ExternalLink'} onClick={() => false} />
+            <ExternalLink label={'ExternalLink'} href={''} />
         </FlexContainer>
     ))
     .add('Other', () => (

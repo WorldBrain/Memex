@@ -18,13 +18,16 @@ const HeaderText = styled.h2`
 const Header = styled.div`
     margin: 5px;
 `
-const CloseButton = styled.div``
-
 const StyledLine = styled.hr``
-const Actions = styled.div``
+const Actions = styled.div`
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+`
 const Body = styled.div`
     display: flex;
     align-content: center;
+    padding: 20px;
 `
 export const ModalBox = ({
     header,
@@ -38,7 +41,6 @@ export const ModalBox = ({
     <StyledModalBox>
         <Header>
             <HeaderText>{header}</HeaderText>
-            <CloseButton />
         </Header>
         <StyledLine />
         <Body>{children}</Body>
@@ -47,8 +49,10 @@ export const ModalBox = ({
 )
 
 export const ModalColLeft = styled.div`
+    padding: 20px;
     flex-grow: 2;
 `
 export const ModalColRight = styled.div`
     flex-grow: 1;
+    padding: 20px;
 `

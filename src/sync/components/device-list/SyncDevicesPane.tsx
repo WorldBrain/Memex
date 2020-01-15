@@ -10,6 +10,7 @@ import {
 import { features, sync } from 'src/util/remote-functions-background'
 import SmallButton from '../../../common-ui/components/small-button'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
+import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 const globalStyles = require('../../../backup-restore/ui/styles.css')
 const styles = require('../styles.css')
 
@@ -114,7 +115,7 @@ export class SyncDevicesPane extends Component<Props, State> {
 
     renderAddNewDevice() {
         return (
-            <Modal onClose={this.handleCloseNewDevice}>
+            <Modal large onClose={this.handleCloseNewDevice}>
                 <InitialSyncSetup
                     onClose={this.handleCloseNewDevice}
                     getInitialSyncMessage={this.props.getInitialSyncMessage}
@@ -122,6 +123,7 @@ export class SyncDevicesPane extends Component<Props, State> {
                         this.props.waitForInitialSyncConnected
                     }
                     waitForInitialSync={this.props.waitForInitialSync}
+                    getSyncEventEmitter={() => getRemoteEventEmitter('sync')}
                 />
             </Modal>
         )

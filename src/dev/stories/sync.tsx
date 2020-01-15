@@ -6,6 +6,16 @@ import { PairDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-
 import { SyncDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/SyncDeviceScreen'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
 import _ from 'lodash'
+import TypedEventEmitter from 'typed-emitter'
+import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
+import {
+    FastSyncInfo,
+    FastSyncRole,
+} from '@worldbrain/storex-sync/lib/fast-sync/types'
+import { Success } from 'src/sync/components/initial-sync/initial-sync-setup/steps/Success'
+import { Introduction } from 'src/sync/components/initial-sync/initial-sync-setup/steps/Introduction'
+import { EventEmitter } from 'events'
+import Modal from 'src/common-ui/components/Modal'
 
 const devices = [
     {
@@ -33,7 +43,7 @@ storiesOf('Sync', module)
         />
     ))
     .add('Initial Sync - Modal', () => (
-        <div>
+        <Modal large>
             <InitialSyncSetup
                 getInitialSyncMessage={() =>
                     new Promise(r => setTimeout(r, 1000, 'hello '.repeat(100)))
@@ -42,15 +52,40 @@ storiesOf('Sync', module)
                     new Promise(r => setTimeout(r, 3000, 1))
                 }
                 waitForInitialSync={() =>
-                    new Promise(r => setTimeout(r, 4000, 1))
+                    new Promise(r =>
+                        setTimeout(r, 500 * progressStoryData.length, 1),
+                    )
                 }
+                getSyncEventEmitter={() => {
+                    const eventEmitter = new EventEmitter() as TypedEventEmitter<
+                        InitialSyncEvents
+                    >
+
+                    const testEventSender = async () => {
+                        await new Promise(r => setTimeout(r, 3000 + 100, 1))
+                        for (const e of progressStoryData) {
+                            await new Promise(r =>
+                                setTimeout(
+                                    r,
+                                    500,
+                                    eventEmitter.emit(
+                                        e.eventName as keyof InitialSyncEvents,
+                                        e,
+                                    ),
+                                ),
+                            )
+                        }
+                    }
+                    testEventSender()
+
+                    return eventEmitter
+                }}
             />
-        </div>
+        </Modal>
     ))
     .add('Initial Sync - Intro', () => (
         <div>
-            <SyncDeviceScreen stage={1} />
-            <SyncDeviceScreen stage={1} progressPct={50} />
+            <Introduction handleBack={() => false} handleStart={() => false} />
         </div>
     ))
     .add('Initial Sync - Pair Device', () => (
@@ -61,14 +96,128 @@ storiesOf('Sync', module)
     ))
     .add('Initial Sync - Sync Device', () => (
         <div>
-            <SyncDeviceScreen stage={1} />
-            <SyncDeviceScreen stage={1} progressPct={50} />
+            <SyncDeviceScreen stage={'1/2'} />
+            <SyncDeviceScreen stage={'1/2'} progressPct={0.5} />
         </div>
     ))
 
     .add('Initial Sync - Success', () => (
         <div>
-            <SyncDeviceScreen stage={1} />
-            <SyncDeviceScreen stage={1} progressPct={50} />
+            <Success onClose={() => false} />
         </div>
     ))
+
+const expectedSyncInfoWhileReceiving: FastSyncInfo = {
+    collectionCount: 1,
+    objectCount: 5,
+}
+const expectedSyncInfoWhileSending: FastSyncInfo = {
+    collectionCount: 1,
+    objectCount: 3,
+}
+const createProgressStoryData = (
+    initialRole: FastSyncRole,
+    subsequentRole: FastSyncRole,
+) => [
+    // {
+    //     eventName: 'prepared',
+    //     role: initialRole,
+    //     syncInfo: {
+    //         ...expectedSyncInfoWhileReceiving,
+    //     },
+    // },
+    {
+        eventName: 'progress',
+        role: initialRole,
+        progress: {
+            ...expectedSyncInfoWhileReceiving,
+            totalObjectsProcessed: 0,
+        },
+    },
+    {
+        eventName: 'progress',
+        role: initialRole,
+        progress: {
+            ...expectedSyncInfoWhileReceiving,
+            totalObjectsProcessed: 1,
+        },
+    },
+    {
+        eventName: 'progress',
+        role: initialRole,
+        progress: {
+            ...expectedSyncInfoWhileReceiving,
+            totalObjectsProcessed: 2,
+        },
+    },
+    {
+        eventName: 'progress',
+        role: initialRole,
+        progress: {
+            ...expectedSyncInfoWhileReceiving,
+            totalObjectsProcessed: 3,
+        },
+    },
+    {
+        eventName: 'progress',
+        role: initialRole,
+        progress: {
+            ...expectedSyncInfoWhileReceiving,
+            totalObjectsProcessed: 4,
+        },
+    },
+    {
+        eventName: 'progress',
+        role: initialRole,
+        progress: {
+            ...expectedSyncInfoWhileReceiving,
+            totalObjectsProcessed: 5,
+        },
+    },
+    {
+        eventName: 'roleSwitch',
+        before: initialRole,
+        after: subsequentRole,
+    },
+    // {
+    //     eventName: 'prepared',
+    //     role: subsequentRole,
+    //     syncInfo: {
+    //         ...expectedSyncInfoWhileSending,
+    //     },
+    // },
+    {
+        eventName: 'progress',
+        role: subsequentRole,
+        progress: {
+            ...expectedSyncInfoWhileSending,
+            totalObjectsProcessed: 0,
+        },
+    },
+    {
+        eventName: 'progress',
+        role: subsequentRole,
+        progress: {
+            ...expectedSyncInfoWhileSending,
+            totalObjectsProcessed: 1,
+        },
+    },
+    {
+        eventName: 'progress',
+        role: subsequentRole,
+        progress: {
+            ...expectedSyncInfoWhileSending,
+            totalObjectsProcessed: 2,
+        },
+    },
+    {
+        eventName: 'progress',
+        role: subsequentRole,
+        progress: {
+            ...expectedSyncInfoWhileSending,
+            totalObjectsProcessed: 3,
+        },
+    },
+]
+
+const progressStoryData = createProgressStoryData('receiver', 'sender')

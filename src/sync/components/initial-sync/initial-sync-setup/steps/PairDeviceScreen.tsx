@@ -18,7 +18,11 @@ import {
     colorPrimary,
 } from 'src/common-ui/components/design-library/colors'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
-import { TypographyHeadingSmall } from 'src/common-ui/components/design-library/typography'
+import {
+    CenterText,
+    TypographyBody,
+    TypographyHeadingSmall,
+} from 'src/common-ui/components/design-library/typography'
 
 const titleText = 'Setup sync with mobile devices'
 const helpText = 'Scan this QR code with your mobile app to pair the devices'
@@ -35,10 +39,12 @@ const QRPlaceHolderError = styled(QRPlaceHolder)`
 
 const LeftColumnHelpText = () => (
     <ModalColLeft>
-        <div>
+        <CenterText>
             <TypographyHeadingSmall>Step 2</TypographyHeadingSmall>
-        </div>
-        <div>{helpText}</div>
+        </CenterText>
+        <CenterText>
+            <TypographyBody>{helpText}</TypographyBody>
+        </CenterText>
     </ModalColLeft>
 )
 

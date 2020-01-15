@@ -6,30 +6,31 @@ import {
     TypographyActionText,
 } from 'src/common-ui/components/design-library/typography'
 
-const StyledExternalLink = styled.div`
+const StyledExternalLink = styled.a`
     cursor: pointer;
     display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
 `
 const StyledExternalLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeNormal}px;
     text-decoration-line: underline;
     font-weight: normal;
     color: ${colorText};
-
     &::after {
         content: '↗';
-        margin: 0 5px;
+        padding-left: 5px;
         text-decoration-line: none;
     }
 `
 export const ExternalLink = ({
     label,
-    onClick,
+    href,
 }: {
     label: string
-    onClick: () => void
+    href: string
 }) => (
-    <StyledExternalLink onClick={onClick}>
+    <StyledExternalLink href={href}>
         <StyledExternalLinkText>{label}</StyledExternalLinkText>
     </StyledExternalLink>
 )
