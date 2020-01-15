@@ -19,7 +19,6 @@ describe('Backup feature', () => {
             visits: { backup: true, watch: true },
             bookmarks: { backup: true, watch: true },
             favIcons: { backup: true, watch: true },
-            pageFetchBacklog: { backup: false, watch: false },
             annotations: { backup: true, watch: true },
             annotBookmarks: { backup: true, watch: true },
             annotListEntries: { backup: true, watch: true },
@@ -32,8 +31,9 @@ describe('Backup feature', () => {
             socialTags: { backup: true, watch: true },
             socialBookmarks: { backup: true, watch: true },
             socialPostListEntries: { backup: true, watch: true },
-
             tags: { backup: true, watch: true },
+
+            pageFetchBacklog: { backup: false, watch: false },
             backupChanges: { backup: false, watch: false },
             eventLog: { backup: false, watch: false },
             clientSyncLogEntry: { backup: false, watch: false },
