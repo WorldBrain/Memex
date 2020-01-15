@@ -1,11 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import { StatefulUIElement } from 'src/util/ui-logic'
-import PairScreenLogic, {
-    PairScreenDependencies,
-    PairScreenEvent,
-    PairScreenState,
-} from 'src/sync/components/initial-sync/old/pair-device/logic'
 import QRCanvas from 'src/common-ui/components/qr-canvas'
 import {
     ModalBox,
