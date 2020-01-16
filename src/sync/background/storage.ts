@@ -16,6 +16,8 @@ export class MemexExtClientSyncLogStorage extends ClientSyncLogStorage {
                 },
             ],
         })
+        config.collections!.clientSyncLogEntry.backup = false
+        config.collections!.clientSyncLogEntry.watch = false
         return config
     }
 }
@@ -32,6 +34,8 @@ export class MemexExtSyncInfoStorage extends SyncInfoStorage {
                 },
             ],
         })
+        config.collections!.syncDeviceInfo.backup = false
+        config.collections!.syncDeviceInfo.watch = false
         return config
     }
 }
