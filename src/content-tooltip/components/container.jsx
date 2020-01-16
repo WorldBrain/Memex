@@ -21,7 +21,7 @@ import {
     removeHighlights,
 } from '../../sidebar-overlay/content_script/highlight-interactions'
 import {
-    getTooltipState,
+    getHighlightsState,
     getKeyboardShortcutsState,
     convertKeyboardEventToKeyString,
 } from '../utils'
@@ -50,7 +50,7 @@ class TooltipContainer extends React.Component {
         this.fetchAndHighlightAnnotations()
 
         // Highlights state is coupled to whether or not the tooltip is enabled
-        const highlightsOn = await getTooltipState()
+        const highlightsOn = await getHighlightsState()
         this.setState(() => ({ highlightsOn }))
 
         const {
