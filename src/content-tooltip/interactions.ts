@@ -14,13 +14,7 @@ import {
 import { injectCSS } from '../search-injection/dom'
 import { conditionallyShowHighlightNotification } from './onboarding-interactions'
 import { TooltipInteractionInterface } from 'src/content-tooltip/types'
-import {
-    highlightAnnotations,
-    removeHighlights,
-} from 'src/sidebar-overlay/content_script/highlight-interactions'
-import { toggleSidebarOverlay } from 'src/direct-linking/content_script/interactions'
 
-const getAnnotsByUrlRPC = remoteFunction('getAllAnnotationsByUrl')
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
 
@@ -151,18 +145,10 @@ export const setupRPC = ({ toolbarNotifications }) => {
         insertTooltip: async ({ override } = {}) => {
             manualOverride = !!override
             await insertTooltip({ toolbarNotifications })
-            const annotations = await getAnnotsByUrlRPC({
-                url: window.location.href,
-            })
-            await highlightAnnotations(
-                annotations.filter(annot => annot.selector),
-                toggleSidebarOverlay,
-            )
         },
         removeTooltip: async ({ override } = {}) => {
             manualOverride = !!override
             await removeTooltip()
-            removeHighlights()
         },
         insertOrRemoveTooltip: async () => {
             await insertOrRemoveTooltip({ toolbarNotifications })

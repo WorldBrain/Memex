@@ -47,8 +47,6 @@ class TooltipContainer extends React.Component {
     async componentDidMount() {
         this.props.onInit(this.showTooltip)
 
-        this.fetchAndHighlightAnnotations()
-
         // Highlights state is coupled to whether or not the tooltip is enabled
         const highlightsOn = await getHighlightsState()
         this.setState(() => ({ highlightsOn }))
