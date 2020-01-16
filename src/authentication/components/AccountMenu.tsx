@@ -12,7 +12,7 @@ import { ButtonSideMenu } from 'src/common-ui/components/design-library/buttons'
 import { MemexLogo } from 'src/common-ui/components/MemexLogo'
 
 const handleLoginClick = () => {
-    window.location.href = LOGIN_URL
+    window.location.href = 'https://getmemex.com/subscriptions'
 }
 
 const handleLogOutClick = () => {
