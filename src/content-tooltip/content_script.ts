@@ -73,66 +73,63 @@ const handleKeyboardShortcuts = ({
     toggleHighlights,
     toggleSidebar,
 }: KeyboardShortcuts) => async e => {
-    const isTooltipEnabled = await getTooltipState()
-    if (!isTooltipEnabled) {
-        if (!userSelectedText()) {
-            switch (convertKeyboardEventToKeyString(e)) {
-                case toggleSidebar.shortcut:
-                    toggleSidebar.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openSidebar: true,
-                        })
-                    break
-                case toggleHighlights.shortcut:
-                    toggleHighlights.enabled && toggleHighlightsAct()
-                    break
-                case addTag.shortcut:
-                    addTag.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openToTags: true,
-                        })
-                    break
-                case addToCollection.shortcut:
-                    addToCollection.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openToCollections: true,
-                        })
-                    break
-                case addComment.shortcut:
-                    addComment.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openToComment: true,
-                        })
-                    break
-                case createBookmark.shortcut:
-                    createBookmark.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openToBookmark: true,
-                        })
-                    break
-                default:
-            }
-        } else {
-            switch (convertKeyboardEventToKeyString(e)) {
-                case link.shortcut:
-                    link.enabled && (await createLink())
-                    break
-                case highlight.shortcut:
-                    if (highlight.enabled) {
-                        await createHighlight()
-                        toggleHighlightsAct()
-                    }
-                    break
-                case createAnnotation.shortcut:
-                    createAnnotation.enabled && (await createNewAnnotation(e))
-                    break
-                default:
-            }
+    if (!userSelectedText()) {
+        switch (convertKeyboardEventToKeyString(e)) {
+            case toggleSidebar.shortcut:
+                toggleSidebar.enabled &&
+                    toggleSidebarOverlay({
+                        override: true,
+                        openSidebar: true,
+                    })
+                break
+            case toggleHighlights.shortcut:
+                toggleHighlights.enabled && toggleHighlightsAct()
+                break
+            case addTag.shortcut:
+                addTag.enabled &&
+                    toggleSidebarOverlay({
+                        override: true,
+                        openToTags: true,
+                    })
+                break
+            case addToCollection.shortcut:
+                addToCollection.enabled &&
+                    toggleSidebarOverlay({
+                        override: true,
+                        openToCollections: true,
+                    })
+                break
+            case addComment.shortcut:
+                addComment.enabled &&
+                    toggleSidebarOverlay({
+                        override: true,
+                        openToComment: true,
+                    })
+                break
+            case createBookmark.shortcut:
+                createBookmark.enabled &&
+                    toggleSidebarOverlay({
+                        override: true,
+                        openToBookmark: true,
+                    })
+                break
+            default:
+        }
+    } else {
+        switch (convertKeyboardEventToKeyString(e)) {
+            case link.shortcut:
+                link.enabled && (await createLink())
+                break
+            case highlight.shortcut:
+                if (highlight.enabled) {
+                    await createHighlight()
+                    toggleHighlightsAct()
+                }
+                break
+            case createAnnotation.shortcut:
+                createAnnotation.enabled && (await createNewAnnotation(e))
+                break
+            default:
         }
     }
 }
