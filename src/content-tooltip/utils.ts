@@ -44,6 +44,9 @@ export const getHighlightsState: () => Promise<boolean> = async () =>
         constants.HIGHLIGHTS_DEFAULT_OPTION,
     )
 
+export const setHighlightsState = async highlightsValue =>
+    setLocalStorage(constants.HIGHLIGHTS_STORAGE_NAME, highlightsValue)
+
 export const setTooltipState = async tooltipValue =>
     setLocalStorage(constants.TOOLTIP_STORAGE_NAME, tooltipValue)
 

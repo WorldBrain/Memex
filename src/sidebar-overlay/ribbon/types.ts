@@ -7,6 +7,7 @@ export default interface State {
     isPageFullScreen: boolean
     isExpanded: boolean
     isRibbonEnabled: boolean
+    areHighlightsEnabled: boolean
     isTooltipEnabled: boolean
     showCommentBox: boolean
     showSearchBox: boolean
