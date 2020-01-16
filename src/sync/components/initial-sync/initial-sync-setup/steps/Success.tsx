@@ -3,6 +3,7 @@ import {
     ModalBox,
     ModalColLeft,
     ModalColRight,
+    ModalColRightBig,
 } from 'src/common-ui/components/design-library/ModalBox'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import {
@@ -14,15 +15,13 @@ import { ExternalLink } from 'src/common-ui/components/design-library/actions/Ex
 export const Success = ({ onClose }: { onClose: () => void }) => {
     return (
         <ModalBox
-            header={''}
+            header={'SUCCESS! - Your devices are now synced!'}
             actions={[<PrimaryAction label={'Finish'} onClick={onClose} />]}
         >
             <ModalColLeft>
-                <TypographyHeadingPage>Succeess!</TypographyHeadingPage>
-                <TypographyBodyBlock>Device is now synced!</TypographyBodyBlock>
                 <TypographyBodyBlock>
-                    Pages, tags and notes shared via your phone will now sync
-                    with your desktop memex.
+                    Pages, tags and notes saved via your phone will now sync
+                    with your Desktop memex.
                 </TypographyBodyBlock>
                 <TypographyBodyBlock>
                     View our <ExternalLink label={'Roadmap'} href={''} /> to
@@ -30,9 +29,9 @@ export const Success = ({ onClose }: { onClose: () => void }) => {
                     features.
                 </TypographyBodyBlock>
             </ModalColLeft>
-            <ModalColRight>
-                <div>{'Picture Here'}</div>
-            </ModalColRight>
+            <ModalColRightBig>
+                <img src={'/img/share_dialogue.png'}/>
+            </ModalColRightBig>
         </ModalBox>
     )
 }

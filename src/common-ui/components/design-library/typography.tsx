@@ -37,8 +37,13 @@ export const TypographyLink = styled.span`
 export const TypographyHeadingPage = styled.span`
     font-size: ${fontSizeBigger}px;
     font-weight: 600;
-    color: #000000;
-    margin-bottom: 0.5em;
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: left;
+    color: #544960;
 `
 
 export const TypographyInputTitle = styled.h2`
@@ -69,15 +74,60 @@ export const TypographyActionText = styled.span`
 
 export const TypographyBody = styled.span`
     font-style: normal;
-    font-weight: normal;
+    font-weight: 300;
     font-size: 16px;
     line-height: 19px;
+    margin-top: 20px;
+    text-align: left; 
     color: ${colorText};
-`
-export const TypographyBodyBlock = styled(TypographyBody)`
-    display: block;
 `
 
 export const CenterText = styled.div`
     text-align: center;
+`
+
+export const TypographyBodyBlock = styled(TypographyBody)`
+    display: block;
+    font-style: normal;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 19px;
+    color: #544960;
+`
+
+export const TypographyBodyBold = styled.div`
+    display: block;
+    font-weight: bold;
+    margin: 10px 0;
+    font-size: 16px;
+    color: #544960;
+    text-align: center;
+`
+
+export const TypographyBodyCenter = styled.div`
+    display: block;
+    font-size: 16px;
+    text-align: center;
+    color: #544960;
+`
+export const HelpBlock = styled.div`
+    display: block;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 0px;
+    color: #544960;
+`
+
+export const StageBlock = styled.div`
+    display: block;
+    font-weight: bold;
+    font-size: 16px;
+    color: #544960;
+    text-align: center;
+    margin-bottom: 30px;
+    margin-top: 5px;
+`
+
+export const ProgressBox = styled.div`
+    width: 100%;
 `

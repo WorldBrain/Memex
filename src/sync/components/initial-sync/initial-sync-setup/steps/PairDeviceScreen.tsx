@@ -13,32 +13,33 @@ import {
 } from 'src/common-ui/components/design-library/colors'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import {
-    CenterText,
     TypographyBody,
     TypographyHeadingSmall,
+    TypographyHeadingPage,
+    TypographyBodyBlock,
 } from 'src/common-ui/components/design-library/typography'
 
-const titleText = 'Setup sync with mobile devices'
+const titleText = 'Pair your computer with a mobile device'
 const helpText = 'Scan this QR code with your mobile app to pair the devices'
 const QRPlaceHolder = styled.div`
-    min-width: 300px;
-    min-height: 300px;
-    border: 1px solid ${colorPrimary};
+    min-width: 150px;
+    min-height: 150px;
+    border: 1px solid #e0e0e0;
     box-sizing: border-box;
     border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `
+
 const QRPlaceHolderError = styled(QRPlaceHolder)`
     border: 1px solid ${colorError};
 `
 
 const LeftColumnHelpText = () => (
     <ModalColLeft>
-        <CenterText>
-            <TypographyHeadingSmall>Step 2</TypographyHeadingSmall>
-        </CenterText>
-        <CenterText>
-            <TypographyBody>{helpText}</TypographyBody>
-        </CenterText>
+            <TypographyHeadingPage>STEP 2</TypographyHeadingPage>
+            <TypographyBodyBlock>{helpText}</TypographyBodyBlock>
     </ModalColLeft>
 )
 

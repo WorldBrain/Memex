@@ -7,6 +7,11 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import {
     CenterText,
     TypographyBodyBlock,
+    TypographyBodyBold,
+    TypographyBodyCenter,
+    HelpBlock,
+    StageBlock,
+    ProgressBox,
 } from 'src/common-ui/components/design-library/typography'
 
 export const SyncDeviceScreen = ({
@@ -20,30 +25,30 @@ export const SyncDeviceScreen = ({
 }) => {
     return (
         <ModalBox header={'Setup sync with mobile devices'} actions={[]}>
-            <div>
+            <ProgressBox>
                 <CenterText>
-                    <TypographyBodyBlock>
+                    <TypographyBodyBold>
                         {'Initial sync is in progress... this may take a while'}
-                    </TypographyBodyBlock>
-                    <TypographyBodyBlock>
+                    </TypographyBodyBold>
+                    <TypographyBodyCenter>
                         {'Make sure both devices stay connected'}
-                    </TypographyBodyBlock>
+                    </TypographyBodyCenter>
 
                     <div>
                         {!error ? (
                             <div>
                                 <Link
-                                    label={'Cancel syncing'}
+                                    label={'CANCEL'}
                                     onClick={() => false}
                                 />
                                 {progressPct === undefined ? (
                                     <LoadingIndicator />
                                 ) : (
                                     <div>
-                                        <div>{`Stage ${stage}`}</div>
                                         <ProgressBar
                                             progress={progressPct * 100}
                                         />
+                                        <StageBlock>{`Stage ${stage}`}</StageBlock>
                                     </div>
                                 )}
                             </div>
@@ -57,13 +62,13 @@ export const SyncDeviceScreen = ({
                             </div>
                         )}
                     </div>
-                    <div>
+                    <HelpBlock>
                         <span>{'Problem with syncing?'}</span>
                         <ExternalLink label={'Send a bug report'} href={''} />
                         <ExternalLink label={'Help & FAQ'} href={''} />
-                    </div>
+                    </HelpBlock>
                 </CenterText>
-            </div>
+            </ProgressBox>
         </ModalBox>
     )
 }

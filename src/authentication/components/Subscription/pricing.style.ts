@@ -11,7 +11,6 @@ const PricingTable = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-right: 20px;
 
     border-width: 3px;
     border-style: solid;

@@ -7,7 +7,7 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 
 const StyledPrimaryAction = styled.div`
-    padding: 15px;
+    padding: 15px 30px;
     background: ${colorPrimary};
     border-radius: 5px;
     cursor: pointer;
