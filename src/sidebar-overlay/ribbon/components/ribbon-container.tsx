@@ -82,7 +82,6 @@ type Props = StateProps & DispatchProps & OwnProps
 
 class RibbonContainer extends Component<Props> {
     componentDidMount() {
-        this.props.onInit()
         this.props.setAnnotationsManager(this.props.annotationsManager)
     }
 

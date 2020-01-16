@@ -20,6 +20,7 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 const styles = require('./ribbon.css')
 
 export interface Props {
+    onInit: () => void
     isExpanded: boolean
     isRibbonEnabled: boolean
     areHighlightsEnabled: boolean
@@ -84,6 +85,12 @@ class Ribbon extends Component<Props, State> {
     }
 
     async componentDidMount() {
+        await this.props.onInit()
+
+        if (this.props.areHighlightsEnabled) {
+            this.fetchAndHighlightAnnotations()
+        }
+
         this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
         this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
