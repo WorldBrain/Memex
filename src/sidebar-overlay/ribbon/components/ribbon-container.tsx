@@ -28,6 +28,7 @@ import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar/'
 interface StateProps {
     isExpanded: boolean
     isTooltipEnabled: boolean
+    areHighlightsEnabled: boolean
     isPaused: boolean
     isBookmarked: boolean
     tabId: number
@@ -47,6 +48,7 @@ interface DispatchProps {
     setAnnotationsManager: (annotationsManager: AnnotationsManager) => void
     handleRibbonToggle: () => void
     handleTooltipToggle: () => void
+    handleHighlightsToggle: () => void
     handlePauseToggle: () => void
     handleBookmarkToggle: () => void
     onTagAdd: (tag: string) => void
@@ -140,6 +142,7 @@ const mapStateToProps: MapStateToProps<
 > = state => ({
     isExpanded: selectors.isExpanded(state),
     isTooltipEnabled: selectors.isTooltipEnabled(state),
+    areHighlightsEnabled: selectors.areHighlightsEnabled(state),
     showCollectionsPicker: selectors.showCollectionsPicker(state),
     showCommentBox: selectors.showCommentBox(state),
     showSearchBox: selectors.showSearchBox(state),
@@ -164,6 +167,7 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     handleRibbonToggle: () => dispatch(actions.toggleRibbon()),
     handleTooltipToggle: () => dispatch(actions.toggleTooltip()),
+    handleHighlightsToggle: () => dispatch(actions.toggleHighlights()),
     handlePauseToggle: () => dispatch(pauseActs.togglePaused()),
     handleBookmarkToggle: () => dispatch(bookmarkActs.toggleBookmark()),
     onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
@@ -183,7 +187,4 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(actions.setShowCollsPicker(value)),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(RibbonContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(RibbonContainer)
