@@ -15,7 +15,7 @@
             "run_at": "document_end"
         }
     ],
-    "content_security_policy": "script-src 'self'; object-src 'self' https://js.chargebee.com https://www.gstatic.com https://*.firebaseio.com https://www.googleapis.com;",
+    "content_security_policy": "script-src 'self' https://js.chargebee.com/v2/chargebee.js https://js.chargebee.com https://www.gstatic.com https://*.firebaseio.com https://www.googleapis.com; object-src 'self' https://js.chargebee.com/v2/chargebee.js https://js.chargebee.com https://www.gstatic.com https://*.firebaseio.com https://www.googleapis.com;",
     "browser_action": {
         "default_title": "WorldBrain's Memex",
         "default_popup": "./popup.html"
