@@ -5,7 +5,7 @@ import Queue, { Options as QueueOpts } from 'queue'
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { setLocalStorage } from 'src/util/storage'
 import { setupRequestInterceptors } from './redirect'
-import BackupStorage, { LastBackupStorage } from './storage'
+import BackupStorage, { BackupInfoStorage } from './storage'
 import { BackupBackend } from './backend'
 import { BackendSelect } from './backend-select'
 import estimateBackupSize from './estimate-backup-size'
@@ -24,7 +24,7 @@ export class BackupBackgroundModule {
     storage: BackupStorage
     backendLocation: string
     backend: BackupBackend
-    lastBackupStorage: LastBackupStorage
+    backupInfoStorage: BackupInfoStorage
     changeTrackingQueue: Queue
     backendSelect = new BackendSelect()
     backupProcedure: BackupProcedure
@@ -41,30 +41,30 @@ export class BackupBackgroundModule {
     notifications: NotificationBackground
     checkAuthorizedForAutoBackup: () => Promise<boolean>
 
-    constructor({
-        storageManager,
-        searchIndex,
-        lastBackupStorage,
-        createQueue = Queue,
-        queueOpts = { autostart: true, concurrency: 1 },
-        notifications,
-        checkAuthorizedForAutoBackup,
-    }: {
+    constructor(options: {
         storageManager: Storex
         searchIndex: SearchIndex
-        lastBackupStorage: LastBackupStorage
+        backupInfoStorage: BackupInfoStorage
         createQueue?: typeof Queue
         queueOpts?: QueueOpts
         notifications: NotificationBackground
         checkAuthorizedForAutoBackup: () => Promise<boolean>
     }) {
-        this.storageManager = storageManager
-        this.storage = new BackupStorage({ storageManager })
-        this.searchIndex = searchIndex
-        this.lastBackupStorage = lastBackupStorage
-        this.changeTrackingQueue = createQueue(queueOpts)
-        this.notifications = notifications
-        this.checkAuthorizedForAutoBackup = checkAuthorizedForAutoBackup
+        options.createQueue = options.createQueue || Queue
+        options.queueOpts = options.queueOpts || {
+            autostart: true,
+            concurrency: 1,
+        }
+
+        this.storageManager = options.storageManager
+        this.storage = new BackupStorage({
+            storageManager: options.storageManager,
+        })
+        this.searchIndex = options.searchIndex
+        this.backupInfoStorage = options.backupInfoStorage
+        this.changeTrackingQueue = options.createQueue(options.queueOpts)
+        this.notifications = options.notifications
+        this.checkAuthorizedForAutoBackup = options.checkAuthorizedForAutoBackup
     }
 
     setupRemoteFunctions() {
@@ -125,7 +125,9 @@ export class BackupBackgroundModule {
                     await this.restoreProcedure.interruptable.cancel()
                 },
                 hasInitialBackup: async () => {
-                    return !!(await this.lastBackupStorage.getLastBackupTime())
+                    return !!(await this.backupInfoStorage.retrieveDate(
+                        'lastBackup',
+                    ))
                 },
                 setBackendLocation: async (info, location?: string) => {
                     if (
@@ -215,7 +217,7 @@ export class BackupBackgroundModule {
         this.backupProcedure = new BackupProcedure({
             storageManager: this.storageManager,
             storage: this.storage,
-            lastBackupStorage: this.lastBackupStorage,
+            lastBackupStorage: this.backupInfoStorage,
             backend: this.backend,
         })
     }
@@ -255,7 +257,7 @@ export class BackupBackgroundModule {
 
     async startRecordingChangesIfNeeded() {
         if (
-            !(await this.lastBackupStorage.getLastBackupTime()) ||
+            !(await this.backupInfoStorage.retrieveDate('lastBackup')) ||
             this.storage.recordingChanges
         ) {
             return
@@ -313,11 +315,13 @@ export class BackupBackgroundModule {
 
     async forgetAllChanges() {
         await this.storage.forgetAllChanges()
-        await this.lastBackupStorage.removeBackupTimes()
+        await this.backupInfoStorage.clear()
     }
 
     async getBackupTimes() {
-        const lastBackup = await this.lastBackupStorage.getLastBackupFinishTime()
+        const lastBackup = await this.backupInfoStorage.retrieveDate(
+            'lastBackupFinish',
+        )
         let nextBackup = null
         if (this.backupProcedure.running) {
             nextBackup = 'running'
@@ -335,24 +339,42 @@ export class BackupBackgroundModule {
     }
 
     async maybeShowBackupProblemNotif() {
-        const lastBackup = await this.lastBackupStorage.getLastBackupFinishTime()
+        const lastBackup = await this.backupInfoStorage.retrieveDate(
+            'lastBackupFinish',
+        )
         const backupProblemThreshold = 1000 * 60 * 60 * 24
         const timeSinceLastBackup = Date.now() - lastBackup.getTime()
         if (timeSinceLastBackup < backupProblemThreshold) {
             return
         }
 
-        const lastNotifShown = 0
+        const lastNotifShown = await this.backupInfoStorage.retrieveDate(
+            'lastProblemNotifShown',
+        )
         const problemNotifInterval = 1000 * 60 * 60 * 24 * 7
-        if (Date.now() - lastNotifShown < problemNotifInterval) {
+        if (
+            !!lastNotifShown &&
+            Date.now() - lastNotifShown.getTime() < problemNotifInterval
+        ) {
             return
         }
 
-        await this.showBackupProblemNotif()
+        const alreadyStoredRecently =
+            !!lastNotifShown && lastNotifShown > lastBackup
+        await this.showBackupProblemNotif({
+            storeNotif: !alreadyStoredRecently,
+        })
     }
 
-    async showBackupProblemNotif() {
-        // TODO
+    async showBackupProblemNotif(options: { storeNotif: boolean }) {
+        await this.backupInfoStorage.storeDate(
+            'lastProblemNotifShown',
+            new Date(),
+        )
+        await this.notifications.dispatchNotification(
+            'incremental_backup_down',
+            { dontStore: !options.storeNotif },
+        )
     }
 
     async doBackup() {
@@ -371,7 +393,7 @@ export class BackupBackgroundModule {
             // sets a flag that the progress of the backup has been successful so that the UI can set a proper state
             localStorage.setItem('progress-successful', 'true')
 
-            this.lastBackupStorage.storeLastBackupFinishTime(new Date())
+            this.backupInfoStorage.storeDate('lastBackupFinish', new Date())
             always()
         })
         this.backupProcedure.events.once('fail', () => {

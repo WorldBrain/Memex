@@ -4,24 +4,48 @@ import * as notifications from '../notifications'
 import createNotif from 'src/util/notifications'
 import internalAnalytics from 'src/analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { NotifDefinition } from '../types'
+import { browser } from 'webextension-polyfill-ts'
+import StorageManager from '@worldbrain/storex'
+
+interface OptionalNotificationDependencies {
+    eventNotifs: notifications.EventNotifsDict
+    updateNotifs: NotifDefinition[]
+    releaseTime: number
+    createNotif: typeof createNotif
+}
+
+interface RequiredNotficationDependencies {
+    storageManager: StorageManager
+}
+
 export default class NotificationBackground {
     static LAST_NOTIF_TIME = 'last-notif-proc-timestamp'
 
-    constructor({
-        storageManager,
-        eventNotifs = notifications.EVENT_NOTIFS,
-        updateNotifs = notifications.UPDATE_NOTIFS,
-        releaseTime = notifications.releaseTime,
-    }) {
-        this.storage = new NotificationStorage({ storageManager })
-        this.eventNotifs = eventNotifs
-        this.updateNotifs = updateNotifs
-        this.releaseTime = releaseTime
+    private dependencies: RequiredNotficationDependencies &
+        OptionalNotificationDependencies
+    private storage: NotificationStorage
+
+    constructor(
+        options: RequiredNotficationDependencies &
+            Partial<OptionalNotificationDependencies>,
+    ) {
+        this.dependencies = {
+            eventNotifs: notifications.EVENT_NOTIFS,
+            updateNotifs: notifications.UPDATE_NOTIFS,
+            releaseTime: notifications.releaseTime,
+            createNotif,
+            ...options,
+        }
+
+        this.storage = new NotificationStorage({
+            storageManager: options.storageManager,
+        })
     }
 
     setupRemoteFunctions() {
         makeRemotelyCallable({
-            storeNotification: (...params) => {
+            storeNotification: (...params: [any]) => {
                 return this.storeNotification(...params)
             },
             fetchUnreadCount: () => {
@@ -30,7 +54,7 @@ export default class NotificationBackground {
             fetchUnreadNotifications: () => {
                 return this.fetchUnreadNotifications()
             },
-            fetchReadNotifications: (...params) => {
+            fetchReadNotifications: (...params: [any]) => {
                 return this.fetchReadNotifications(...params)
             },
             readNotification: id => {
@@ -72,19 +96,51 @@ export default class NotificationBackground {
         return this.storage.fetchNotifById(id)
     }
 
-    async dispatchNotification(notifId) {
-        await this.storage.dispatchNotification(
-            this.eventNotifs[notifId],
-            this.releaseTime,
-        )
+    async dispatchNotification(
+        notifId: string,
+        options?: { dontStore?: boolean },
+    ) {
+        const notification = this.dependencies.eventNotifs[notifId]
+
+        if (notification.overview) {
+            const newNotification = {
+                ...notification.overview,
+                id: notification.id,
+                deliveredTime: Date.now(),
+                sentTime: this.dependencies.releaseTime,
+            }
+            // Store the notification so that it displays in the inbox
+            if (!options?.dontStore) {
+                await this.storeNotification(newNotification)
+            }
+        }
+        if (notification.system) {
+            // Check if the system has to be notified or not
+            const url = notification.system.buttons[0].action.url
+            // console.log(notification.system.title, 'hello')
+            await createNotif(
+                {
+                    title: notification.system.title,
+                    message: notification.system.message,
+                    requireInteraction: false,
+                },
+                () => {
+                    return browser.tabs.create({
+                        url,
+                    })
+                },
+            )
+        }
     }
 
     async deliverStaticNotifications() {
-        const lastReleaseTime = (await browser.storage.local.get(
-            NotificationBackground.LAST_NOTIF_TIME,
-        ))[NotificationBackground.LAST_NOTIF_TIME]
+        const lastReleaseTime = (
+            await browser.storage.local.get(
+                NotificationBackground.LAST_NOTIF_TIME,
+            )
+        )[NotificationBackground.LAST_NOTIF_TIME]
 
-        for (let notification of this.updateNotifs) {
+        for (let notification of this.dependencies.updateNotifs) {
             if (notification.system) {
                 if (
                     !lastReleaseTime ||
@@ -119,7 +175,7 @@ export default class NotificationBackground {
                     ...notification.overview,
                     id: notification.id,
                     deliveredTime: Date.now(),
-                    sentTime: this.releaseTime,
+                    sentTime: this.dependencies.releaseTime,
                 }
 
                 if (

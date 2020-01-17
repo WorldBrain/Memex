@@ -3,7 +3,7 @@ import Storex from '@worldbrain/storex'
 import * as AllRaven from 'raven-js'
 import { EventEmitter } from 'events'
 
-import BackupStorage, { LastBackupStorage } from '../storage'
+import BackupStorage, { BackupInfoStorage } from '../storage'
 import { BackupBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
@@ -27,7 +27,7 @@ export default class BackupProcedure {
     storageManager: Storex
     storage: BackupStorage
     backend: BackupBackend
-    lastBackupStorage: LastBackupStorage
+    lastBackupStorage: BackupInfoStorage
     currentSchemaVersion: number
 
     running: boolean
@@ -47,7 +47,7 @@ export default class BackupProcedure {
     }: {
         storageManager: Storex
         storage: BackupStorage
-        lastBackupStorage: LastBackupStorage
+        lastBackupStorage: BackupInfoStorage
         backend: BackupBackend
     }) {
         this.storageManager = storageManager
@@ -114,7 +114,9 @@ export default class BackupProcedure {
         })
 
         const procedure = async () => {
-            const lastBackupTime = await this.lastBackupStorage.getLastBackupTime()
+            const lastBackupTime = await this.lastBackupStorage.retrieveDate(
+                'lastBackup',
+            )
 
             await this.backend.startBackup({ events: this.events })
             if (!lastBackupTime) {
@@ -137,7 +139,7 @@ export default class BackupProcedure {
             const backupTime = new Date()
             await this._doIncrementalBackup(backupTime, this.events)
             if (process.env.STORE_BACKUP_TIME !== 'false') {
-                await this.lastBackupStorage.storeLastBackupTime(backupTime)
+                await this.lastBackupStorage.storeDate('lastBackup', backupTime)
             }
         }
 
