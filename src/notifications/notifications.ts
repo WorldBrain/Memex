@@ -269,7 +269,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
         id: 'incremental_backup_down',
         system: {
             title: 'Auto Backup Down',
-            message: `Your auto backup hasn't ran in more than 24 hours.`,
+            message: `Your Auto Backup hasn't ran in more than 24 hours.`,
             // buttons: [
             //     {
             //         action: {
@@ -283,8 +283,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
         },
         overview: {
             title: 'Auto Backup Down',
-            message: `Your Auto Backup subscription has expired. If you want to
-                renew your subscription click on the button below.`,
+            message: `Your Auto Backup hasn't ran in more than 24 hours. Is the Memex Backup Helper running?`,
             // buttons: [
             //     {
             //         action: {
