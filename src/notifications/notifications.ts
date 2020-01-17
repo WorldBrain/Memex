@@ -4,7 +4,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-const releaseTime: number = 1559735977587
+export const releaseTime: number = 1559735977587
 
 /* Example Notification:
 {
@@ -57,7 +57,7 @@ const releaseTime: number = 1559735977587
     },
 */
 
-const UPDATE_NOTIFS: NotifDefinition[] = [
+export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
         id: 'Survey1_for_existing_users',
         search: {
@@ -107,11 +107,11 @@ const UPDATE_NOTIFS: NotifDefinition[] = [
     },
 ]
 
-interface EventNotifsDict {
+export interface EventNotifsDict {
     [name: string]: NotifDefinition
 }
 
-const EVENT_NOTIFS: EventNotifsDict = {
+export const EVENT_NOTIFS: EventNotifsDict = {
     db_error: {
         id: 'db_error',
         overview: {
@@ -298,5 +298,3 @@ const EVENT_NOTIFS: EventNotifsDict = {
         },
     },
 }
-
-export { releaseTime, EVENT_NOTIFS, UPDATE_NOTIFS }
