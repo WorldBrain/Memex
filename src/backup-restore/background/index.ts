@@ -74,7 +74,7 @@ export class BackupBackgroundModule {
                     const MEMEX_CLOUD_ORIGIN = _getMemexCloudOrigin()
                     return `${MEMEX_CLOUD_ORIGIN}/auth/google?scope=${DEFAULT_AUTH_SCOPE}`
                 },
-                startBackup: ({ tab }, params) => {
+                startBackup: async ({ tab }, params) => {
                     this.backupUiCommunication.registerUiTab(tab)
                     if (this.backupProcedure.running) {
                         return
@@ -88,7 +88,7 @@ export class BackupBackgroundModule {
                         )
                     }
 
-                    this.doBackup()
+                    await this.doBackup()
                     this.backupUiCommunication.connect(
                         this.backupProcedure.events,
                     )
