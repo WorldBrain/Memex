@@ -338,7 +338,9 @@ export class BackupBackgroundModule {
         return times
     }
 
-    async maybeShowBackupProblemNotif() {
+    async maybeShowBackupProblemNotif(
+        notifId: 'incremental_backup_down' | 'backup_error',
+    ) {
         const lastBackup = await this.backupInfoStorage.retrieveDate(
             'lastBackupFinish',
         )
@@ -382,7 +384,7 @@ export class BackupBackgroundModule {
 
         this.storage.startRecordingChanges()
         if (!(await this.backend.isReachable())) {
-            await this.maybeShowBackupProblemNotif()
+            await this.maybeShowBackupProblemNotif('incremental_backup_down')
             this.scheduleAutomaticBackupIfEnabled()
             return
         }
@@ -399,7 +401,7 @@ export class BackupBackgroundModule {
             always()
         })
         this.backupProcedure.events.once('fail', async () => {
-            await this.maybeShowBackupProblemNotif()
+            await this.maybeShowBackupProblemNotif('backup_error')
             always()
         })
     }
