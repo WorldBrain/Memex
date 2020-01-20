@@ -382,10 +382,12 @@ export class BackupBackgroundModule {
 
         this.storage.startRecordingChanges()
         if (!(await this.backend.isReachable())) {
+            await this.maybeShowBackupProblemNotif()
             this.scheduleAutomaticBackupIfEnabled()
             return
         }
 
+        this.backupProcedure.run()
         const always = () => {
             this.scheduleAutomaticBackupIfEnabled()
         }
@@ -396,7 +398,8 @@ export class BackupBackgroundModule {
             this.backupInfoStorage.storeDate('lastBackupFinish', new Date())
             always()
         })
-        this.backupProcedure.events.once('fail', () => {
+        this.backupProcedure.events.once('fail', async () => {
+            await this.maybeShowBackupProblemNotif()
             always()
         })
     }
