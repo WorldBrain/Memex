@@ -41,6 +41,7 @@ import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { Page } from 'src/search'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -49,6 +50,7 @@ export interface BackgroundModules {
     activityLogger: ActivityLoggerBackground
     connectivityChecker: ConnectivityCheckerBackground
     directLinking: DirectLinkingBackground
+    pages: PageIndexingBackground
     search: SearchBackground
     eventLog: EventLogBackground
     customLists: CustomListBackground
@@ -171,6 +173,7 @@ export function createBackgroundModules(options: {
             disableEncryption: options.disableSyncEnryption,
         }),
         features: new FeatureOptIns(),
+        pages: new PageIndexingBackground({ storageManager }),
         bgScript,
         pageFetchBacklog,
     }
@@ -232,6 +235,7 @@ export function getBackgroundStorageModules(
         tags: backgroundModules.tags.storage,
         clientSyncLog: backgroundModules.sync.clientSyncLog,
         syncInfo: backgroundModules.sync.syncInfoStorage,
+        pages: backgroundModules.pages.storage,
     }
 }
 
