@@ -12,9 +12,12 @@ export interface InitialSyncSetupState {
     progressPct?: number
     stage?: string
 }
+
 export type InitialSyncSetupEvent = UIEvent<{
     start: {}
+    backToIntroduction: {}
 }>
+
 export interface InitialSyncSetupDependencies {
     onClose?: () => void
     waitForInitialSyncConnected: () => Promise<any>
@@ -115,6 +118,12 @@ export default class InitialSyncSetupLogic extends UILogic<
         } catch (e) {
             this.error(e)
         }
+    }
+
+    backToIntroduction = () => {
+        this.emitMutation({
+            status: { $set: 'introduction' },
+        })
     }
 
     error(e) {

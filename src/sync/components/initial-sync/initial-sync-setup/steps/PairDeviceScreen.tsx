@@ -21,10 +21,14 @@ const LeftColumnHelpText = () => (
     </ModalColLeft>
 )
 
-export const LoadingQRCode = ({}) => (
+export const LoadingQRCode = ({
+    onPressBack,
+}: {
+    onPressBack?: () => void
+}) => (
     <ModalBox
         header={titleText}
-        actions={[<SecondaryAction label={'back'} onClick={() => null} />]}
+        actions={[<SecondaryAction label={'back'} onClick={onPressBack} />]}
     >
         <LeftColumnHelpText />
 
@@ -36,10 +40,16 @@ export const LoadingQRCode = ({}) => (
     </ModalBox>
 )
 
-export const ScanQRCode = ({ QRCodeData }: { QRCodeData: string }) => (
+export const ScanQRCode = ({
+    QRCodeData,
+    onPressBack,
+}: {
+    QRCodeData: string
+    onPressBack?: () => void
+}) => (
     <ModalBox
         header={titleText}
-        actions={[<SecondaryAction label={'back'} onClick={() => null} />]}
+        actions={[<SecondaryAction label={'back'} onClick={onPressBack} />]}
     >
         <LeftColumnHelpText />
 
@@ -66,13 +76,15 @@ export const ErrorPane = ({}) => (
 
 export const PairDeviceScreen = ({
     initialSyncMessage,
+    onPressBack,
 }: {
     initialSyncMessage?: string
+    onPressBack?: () => void
 }) => {
     return initialSyncMessage ? (
-        <ScanQRCode QRCodeData={initialSyncMessage} />
+        <ScanQRCode QRCodeData={initialSyncMessage} onPressBack={onPressBack} />
     ) : (
-        <LoadingQRCode />
+        <LoadingQRCode onPressBack={onPressBack} />
     )
 }
 

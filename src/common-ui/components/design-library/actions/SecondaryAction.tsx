@@ -25,7 +25,7 @@ export const SecondaryAction = ({
     label: string
     onClick: () => void
 }) => (
-    <StyledSecondaryAction onClick={onClick}>
+    <StyledSecondaryAction onClick={onClick} key={`button-${label}`}>
         <StyledSecondaryActionLinkText>{label}</StyledSecondaryActionLinkText>
     </StyledSecondaryAction>
 )

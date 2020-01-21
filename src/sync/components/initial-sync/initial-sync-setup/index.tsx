@@ -32,6 +32,9 @@ export default class InitialSyncSetup extends StatefulUIElement<
                 return (
                     <PairDeviceScreen
                         initialSyncMessage={this.state.initialSyncMessage}
+                        onPressBack={() =>
+                            this.processEvent('backToIntroduction', {})
+                        }
                     />
                 )
             case 'sync':

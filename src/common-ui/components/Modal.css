@@ -36,8 +36,7 @@
 
 .popupLarge {
     composes: popup;
-    overflow-y: hidden;
-    overflow-x: hidden;
+    overflow-y: scroll;
     width: 750px;
     height: 430px;
     max-height: 95vh;
