@@ -15,7 +15,9 @@ export default class QRCanvas extends React.PureComponent<Props> {
 
     async componentDidMount() {
         try {
-            await QRCode.toCanvas(this.canvasEl!, this.props.toEncode)
+            await QRCode.toCanvas(this.canvasEl!, this.props.toEncode, {
+                scale: 8,
+            })
         } catch (err) {
             this.props.errorHandler(err)
         }
@@ -26,6 +28,17 @@ export default class QRCanvas extends React.PureComponent<Props> {
     render() {
         const { toEncode, errorHandler, ...canvasProps } = this.props
 
-        return <canvas style={{borderRadius: '10px', height:'100%', width: '100%', color: '#5cd9a6'}} ref={this.setRef} {...canvasProps} />
+        return (
+            <canvas
+                style={{
+                    borderRadius: '10px',
+                    height: '100%',
+                    width: '100%',
+                    color: '#5cd9a6',
+                }}
+                ref={this.setRef}
+                {...canvasProps}
+            />
+        )
     }
 }

@@ -308,7 +308,7 @@ export function remoteEventEmitter<T>(
 }
 
 // Receiving Side (e.g. content script, options page, etc)
-const remoteEventEmitters: RemoteEventEmitters = {}
+const remoteEventEmitters: RemoteEventEmitters = {} as RemoteEventEmitters
 type RemoteEventEmitters = {
     [K in keyof RemoteEvents]?: TypedRemoteEventEmitter<K>
 }
@@ -316,7 +316,7 @@ export type TypedRemoteEventEmitter<
     T extends keyof RemoteEvents
 > = TypedEventEmitter<RemoteEvents[T]>
 
-// Statically defined types
+// Statically defined types for now, move this to a registry
 interface RemoteEvents {
     auth: AuthRemoteEvents
     sync: InitialSyncEvents
@@ -345,8 +345,7 @@ const remoteEventForwarder = (message, _) => {
 
 export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
     eventType: EventType,
-) {
-    // todo: what is the correct function return type here? TypedRemoteEventEmitter<EventType> ? TypedRemoteEventEmitter<RemoteEVents[EventType]> ?
+): RemoteEventEmitters[EventType] {
     const existingEmitter = remoteEventEmitters[eventType]
     if (existingEmitter) {
         return existingEmitter

@@ -46,7 +46,7 @@ storiesOf('Sync', module)
         <Modal large>
             <InitialSyncSetup
                 getInitialSyncMessage={() =>
-                    new Promise(r => setTimeout(r, 1000, 'hello '.repeat(100)))
+                    new Promise(r => setTimeout(r, 1000, 'hello '.repeat(5)))
                 }
                 waitForInitialSyncConnected={() =>
                     new Promise(r => setTimeout(r, 3000, 1))
@@ -101,6 +101,15 @@ storiesOf('Sync', module)
         </div>
     ))
 
+    .add('Initial Sync - Error', () => (
+        <div>
+            <SyncDeviceScreen
+                stage={'1/2'}
+                progressPct={0.5}
+                error={'An error with the flux capacitor occurred.'}
+            />
+        </div>
+    ))
     .add('Initial Sync - Success', () => (
         <div>
             <Success onClose={() => false} />

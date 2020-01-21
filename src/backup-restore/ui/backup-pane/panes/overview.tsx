@@ -317,7 +317,6 @@ export class OverviewContainer extends Component<Props & UserProps> {
                     </span>
                 </div>
                 <div>
-                    <SyncDevicesPane />
                     {this.state.subscribeModal && (
                         <SubscribeModal onClose={this.closeSubscriptionModal} />
                     )}

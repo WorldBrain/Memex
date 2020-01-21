@@ -42,7 +42,7 @@ export default class InitialSyncSetupLogic extends UILogic<
     }
 
     updateProgress = (event: Parameters<FastSyncEvents['progress']>[0]) => {
-        console.log('UI Logic received event [progress]:', event)
+        // console.log('UI Logic received event [progress]:', event)
 
         this.emitMutation({
             progressPct: {
@@ -54,7 +54,7 @@ export default class InitialSyncSetupLogic extends UILogic<
     }
 
     updateRole = (event: Parameters<FastSyncEvents['roleSwitch']>[0]) => {
-        console.log('UI Logic received event [roleSwitch]:', event)
+        // console.log('UI Logic received event [roleSwitch]:', event)
 
         // Currently assuming that this always happens once for two way sync, 1) A->B, 2) B+A->A
         this.emitMutation({
@@ -63,15 +63,25 @@ export default class InitialSyncSetupLogic extends UILogic<
         })
     }
 
+    updateError = (event: Parameters<FastSyncEvents['error']>[0]) => {
+        // console.log('UI Logic received event [roleSwitch]:', event)
+
+        this.emitMutation({
+            error: { $set: event.error },
+        })
+    }
+
     registerListeners = () => {
         this.eventEmitter.on('progress', this.updateProgress)
         this.eventEmitter.on('roleSwitch', this.updateRole)
+        this.eventEmitter.on('error', this.updateError)
     }
 
     cleanup() {
         if (this.eventEmitter != null) {
             this.eventEmitter.removeAllListeners('progress')
             this.eventEmitter.removeAllListeners('roleSwitch')
+            this.eventEmitter.removeAllListeners('error')
         }
     }
 

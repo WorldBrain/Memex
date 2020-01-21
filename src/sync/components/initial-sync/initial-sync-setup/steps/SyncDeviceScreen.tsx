@@ -6,7 +6,6 @@ import { ExternalLink } from 'src/common-ui/components/design-library/actions/Ex
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import {
     CenterText,
-    TypographyBodyBlock,
     TypographyBodyBold,
     TypographyBodyCenter,
     HelpBlock,
@@ -37,10 +36,7 @@ export const SyncDeviceScreen = ({
                     <div>
                         {!error ? (
                             <div>
-                                <Link
-                                    label={'CANCEL'}
-                                    onClick={() => false}
-                                />
+                                <Link label={'CANCEL'} onClick={() => false} />
                                 {progressPct === undefined ? (
                                     <LoadingIndicator />
                                 ) : (

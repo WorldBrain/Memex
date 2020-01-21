@@ -7,39 +7,17 @@ import {
     ModalColRight,
 } from 'src/common-ui/components/design-library/ModalBox'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import {
-    colorError,
-    colorPrimary,
-} from 'src/common-ui/components/design-library/colors'
+import { colorError } from 'src/common-ui/components/design-library/colors'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import {
-    TypographyBody,
-    TypographyHeadingSmall,
     TypographyHeadingPage,
     TypographyBodyBlock,
 } from 'src/common-ui/components/design-library/typography'
 
-const titleText = 'Pair your computer with a mobile device'
-const helpText = 'Scan this QR code with your mobile app to pair the devices'
-const QRPlaceHolder = styled.div`
-    min-width: 150px;
-    min-height: 150px;
-    border: 1px solid #e0e0e0;
-    box-sizing: border-box;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`
-
-const QRPlaceHolderError = styled(QRPlaceHolder)`
-    border: 1px solid ${colorError};
-`
-
 const LeftColumnHelpText = () => (
     <ModalColLeft>
-            <TypographyHeadingPage>STEP 2</TypographyHeadingPage>
-            <TypographyBodyBlock>{helpText}</TypographyBodyBlock>
+        <TypographyHeadingPage>STEP 2</TypographyHeadingPage>
+        <TypographyBodyBlock>{helpText}</TypographyBodyBlock>
     </ModalColLeft>
 )
 
@@ -73,19 +51,6 @@ export const ScanQRCode = ({ QRCodeData }: { QRCodeData: string }) => (
     </ModalBox>
 )
 
-export const SuccessfullyPaired = ({}) => (
-    <ModalBox
-        header={titleText}
-        actions={[<SecondaryAction label={'back'} onClick={() => null} />]}
-    >
-        <LeftColumnHelpText />
-
-        <ModalColRight>
-            <QRPlaceHolder>Successfully Paired</QRPlaceHolder>
-        </ModalColRight>
-    </ModalBox>
-)
-
 export const ErrorPane = ({}) => (
     <ModalBox
         header={titleText}
@@ -110,3 +75,20 @@ export const PairDeviceScreen = ({
         <LoadingQRCode />
     )
 }
+
+const titleText = 'Pair your computer with a mobile device'
+const helpText = 'Scan this QR code with your mobile app to pair the devices'
+const QRPlaceHolder = styled.div`
+    min-width: 150px;
+    min-height: 150px;
+    border: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
+const QRPlaceHolderError = styled(QRPlaceHolder)`
+    border: 1px solid ${colorError};
+`
