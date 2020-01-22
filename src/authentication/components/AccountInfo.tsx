@@ -4,11 +4,7 @@ import {
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
-import {
-    TypographyHeadingPage,
-    TypographyInputTitle,
-} from 'src/common-ui/components/design-library/typography'
-import { InputTextField } from 'src/common-ui/components/design-library/form/InputTextField'
+import { TypographyHeadingPage } from 'src/common-ui/components/design-library/typography'
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import Link from 'src/common-ui/components/link'
@@ -41,7 +37,7 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
     render() {
         const user = this.props.currentUser
         const features = this.props.authorizedFeatures
-        const url = 'https://getmemex.com/subscriptions'
+        const url = 'https://getmemex.com/subscriptions'
         return (
             <FullPage>
                 <TypographyHeadingPage>My Account</TypographyHeadingPage>
@@ -51,11 +47,7 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
                 {user != null && (
                     <div>
                         <PrimaryButton>
-                            <Link
-                                url={url}
-                                text={'Manage Subscriptions'}
-                            >
-                            </Link> 
+                            <Link url={url} text={'Manage Subscriptions'} />
                         </PrimaryButton>
 
                         <input

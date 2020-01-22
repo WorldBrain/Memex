@@ -36,8 +36,16 @@ storiesOf('Design Library', module)
         <div>
             <ModalBox
                 actions={[
-                    <SecondaryAction label={'Cancel'} onClick={undefined} />,
-                    <PrimaryAction label={'Action'} onClick={undefined} />,
+                    <SecondaryAction
+                        key={`button-1`}
+                        label={'Cancel'}
+                        onClick={undefined}
+                    />,
+                    <PrimaryAction
+                        key={`button-2`}
+                        label={'Action'}
+                        onClick={undefined}
+                    />,
                 ]}
                 header={'Modal Header'}
             >
@@ -45,8 +53,16 @@ storiesOf('Design Library', module)
             </ModalBox>
             <ModalBox
                 actions={[
-                    <SecondaryAction label={'Cancel'} onClick={undefined} />,
-                    <PrimaryAction label={'Action'} onClick={undefined} />,
+                    <SecondaryAction
+                        key={`button-1`}
+                        label={'Cancel'}
+                        onClick={undefined}
+                    />,
+                    <PrimaryAction
+                        key={`button-2`}
+                        label={'Action'}
+                        onClick={undefined}
+                    />,
                 ]}
                 header={'Modal Header'}
             >

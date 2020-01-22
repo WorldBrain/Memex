@@ -16,7 +16,14 @@ export const Success = ({ onClose }: { onClose: () => void }) => {
     return (
         <ModalBox
             header={'SUCCESS! - Your devices are now synced!'}
-            actions={[<PrimaryAction label={'Finish'} onClick={onClose} />]}
+            actions={[
+                <PrimaryAction
+                    label={'Finish'}
+                    onClick={onClose}
+                    key={`success-button`}
+                />,
+            ]}
+            key={`dialog-success`}
         >
             <ModalColLeft>
                 <TypographyBodyBlock>
@@ -30,7 +37,7 @@ export const Success = ({ onClose }: { onClose: () => void }) => {
                 </TypographyBodyBlock>
             </ModalColLeft>
             <ModalColRightBig>
-                <img src={'/img/share_dialogue.png'}/>
+                <img src={'/img/share_dialogue.png'} />
             </ModalColRightBig>
         </ModalBox>
     )

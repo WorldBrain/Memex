@@ -13,6 +13,7 @@ import {
     TypographyHeadingPage,
     TypographyBodyBlock,
 } from 'src/common-ui/components/design-library/typography'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 const LeftColumnHelpText = () => (
     <ModalColLeft>
@@ -28,7 +29,13 @@ export const LoadingQRCode = ({
 }) => (
     <ModalBox
         header={titleText}
-        actions={[<SecondaryAction label={'back'} onClick={onPressBack} />]}
+        actions={[
+            <SecondaryAction
+                label={'back'}
+                onClick={onPressBack}
+                key={`LoadingQRCode-back`}
+            />,
+        ]}
     >
         <LeftColumnHelpText />
 
@@ -49,7 +56,14 @@ export const ScanQRCode = ({
 }) => (
     <ModalBox
         header={titleText}
-        actions={[<SecondaryAction label={'back'} onClick={onPressBack} />]}
+        actions={[
+            <SecondaryAction
+                key={`ScanQRCode-back`}
+                label={'back'}
+                onClick={onPressBack}
+            />,
+        ]}
+        key={`dialog-pair-qr`}
     >
         <LeftColumnHelpText />
 
@@ -64,7 +78,14 @@ export const ScanQRCode = ({
 export const ErrorPane = ({}) => (
     <ModalBox
         header={titleText}
-        actions={[<SecondaryAction label={'back'} onClick={() => null} />]}
+        actions={[
+            <SecondaryAction
+                key={`ErrorPane-back`}
+                label={'back'}
+                onClick={() => null}
+            />,
+        ]}
+        key={`dialog-pair-error`}
     >
         <LeftColumnHelpText />
 

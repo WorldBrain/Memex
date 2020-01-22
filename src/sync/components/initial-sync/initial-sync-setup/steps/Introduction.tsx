@@ -25,8 +25,13 @@ export const Introduction = ({
         <ModalBox
             header={titleText}
             actions={[
-                <PrimaryAction label={'Ok, Got it'} onClick={handleStart} />,
+                <PrimaryAction
+                    key={`step1-ok`}
+                    label={'Ok, Got it'}
+                    onClick={handleStart}
+                />,
             ]}
+            key={`dialog-introduction`}
         >
             <ModalColLeft>
                 <TypographyHeadingPage>STEP 1</TypographyHeadingPage>
@@ -41,7 +46,7 @@ export const Introduction = ({
                 </TypographyBodyBlock>
             </ModalColLeft>
             <ModalColRight>
-                <img src={'/img/wifiDevices.png'}/>
+                <img src={'/img/wifiDevices.png'} />
             </ModalColRight>
         </ModalBox>
     )

@@ -23,7 +23,11 @@ export const SyncDeviceScreen = ({
     progressPct?: number
 }) => {
     return (
-        <ModalBox header={'Setup sync with mobile devices'} actions={[]}>
+        <ModalBox
+            header={'Setup sync with mobile devices'}
+            actions={[]}
+            key={`dialog-sync`}
+        >
             <ProgressBox>
                 <CenterText>
                     <TypographyBodyBold>
