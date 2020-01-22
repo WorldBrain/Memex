@@ -66,3 +66,13 @@
 .section {
     margin-top: 50px;
 }
+
+.tutorial {
+    composes: helpIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 25px;
+    height: 25px;
+    background-size: 20px;
+    display: flex;
+    align-self: center;
+}

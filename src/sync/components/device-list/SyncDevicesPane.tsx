@@ -11,6 +11,9 @@ import { features, sync } from 'src/util/remote-functions-background'
 import SmallButton from '../../../common-ui/components/small-button'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
+import ActionButton from 'src/notifications/components/ActionButton'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 const globalStyles = require('../../../backup-restore/ui/styles.css')
 const styles = require('../styles.css')
 
@@ -97,12 +100,19 @@ export class SyncDevicesPane extends Component<Props, State> {
                             CONNECTED DEVICES
                         </span>
                     </div>
-                    <SmallButton
-                        color="green"
+                    <PrimaryAction
                         onClick={this.handleOpenNewDevice}
-                    >
-                        + Add New
-                    </SmallButton>
+                        disabled={!this.props.isDeviceSyncAllowed}
+                        label={` + Add New`}
+                    />
+                    {!this.props.isDeviceSyncAllowed ? (
+                        <ButtonTooltip
+                            tooltipText="To sync multiple devices, please upgrade your subscription"
+                            position="right"
+                        >
+                            <span className={styles.tutorial} />
+                        </ButtonTooltip>
+                    ) : null}
                 </div>
                 <hr />
                 <SyncDevicesList

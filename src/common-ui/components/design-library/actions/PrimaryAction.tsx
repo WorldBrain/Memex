@@ -1,6 +1,9 @@
 import React from 'react'
 import styled from 'styled-components'
-import { colorPrimary } from 'src/common-ui/components/design-library/colors'
+import {
+    colorDisabled,
+    colorPrimary,
+} from 'src/common-ui/components/design-library/colors'
 import {
     fontSizeSmall,
     TypographyActionText,
@@ -8,7 +11,7 @@ import {
 
 const StyledPrimaryAction = styled.div`
     padding: 15px 30px;
-    background: ${colorPrimary};
+    background: ${props => (props.disabled ? colorDisabled : colorPrimary)};
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;
@@ -20,11 +23,16 @@ const StyledPrimaryActionLinkText = styled(TypographyActionText)`
 export const PrimaryAction = ({
     label,
     onClick,
+    disabled,
 }: {
     label: string
     onClick: () => void
+    disabled?: boolean
 }) => (
-    <StyledPrimaryAction onClick={onClick}>
+    <StyledPrimaryAction
+        onClick={disabled === true ? undefined : onClick}
+        disabled={disabled}
+    >
         <StyledPrimaryActionLinkText>{label}</StyledPrimaryActionLinkText>
     </StyledPrimaryAction>
 )

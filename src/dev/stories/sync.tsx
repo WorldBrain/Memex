@@ -31,10 +31,21 @@ const devices = [
 ] as SyncDevice[]
 
 storiesOf('Sync', module)
-    .add('DevicePane', () => (
+    .add('DevicePane - Subscribed', () => (
         <SyncDevicesPane
             devices={devices}
             isDeviceSyncAllowed={true}
+            isDeviceSyncEnabled={true}
+            handleRemoveDevice={() => false}
+            getInitialSyncMessage={async () => 'test'}
+            waitForInitialSync={async () => {}}
+            waitForInitialSyncConnected={async () => {}}
+        />
+    ))
+    .add('DevicePane - Not Subscribed', () => (
+        <SyncDevicesPane
+            devices={devices}
+            isDeviceSyncAllowed={false}
             isDeviceSyncEnabled={true}
             handleRemoveDevice={() => false}
             getInitialSyncMessage={async () => 'test'}
