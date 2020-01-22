@@ -107,14 +107,13 @@ export function createBackgroundModules(options: {
         xhr: new XMLHttpRequest(),
     })
 
+    const pages = new PageIndexingBackground({ storageManager })
     const pageFetchBacklog = new PageFetchBacklogBackground({
         storageManager,
         connectivityChecker,
         fetchPageData: options.fetchPageDataProcessor,
         storePageContent: async content => {
-            const page = new Page(storageManager, content)
-            await page.loadRels()
-            await page.save()
+            await pages.storage.updatePageContent(content)
         },
     })
 
@@ -144,6 +143,7 @@ export function createBackgroundModules(options: {
             tabMan: activityLogger.tabManager,
             windows: browser.windows,
             searchIndex: search.searchIndex,
+            pageStorage: pages.storage,
         }),
         tags: new TagsBackground({
             storageManager,
@@ -173,7 +173,7 @@ export function createBackgroundModules(options: {
             disableEncryption: options.disableSyncEnryption,
         }),
         features: new FeatureOptIns(),
-        pages: new PageIndexingBackground({ storageManager }),
+        pages: pages,
         bgScript,
         pageFetchBacklog,
     }

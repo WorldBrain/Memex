@@ -5,82 +5,91 @@ import fetchPageData from '../page-analysis/background/fetch-page-data'
 import pipeline from './pipeline'
 import { Page } from './models'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../options/settings/constants'
-import { DBGet } from './types'
+import { DBGet, PageCreationProps } from './types'
 
-interface Props {
-    url: string
-    tabId?: number
-    stubOnly?: boolean
-    allowScreenshot?: boolean
-}
-
-export const createPageFromTab = (getDb: DBGet) => async ({
-    url,
-    tabId,
-    stubOnly = false,
-    ...pageAnalysisArgs
-}: Props) => {
-    if (tabId == null) {
-        throw new Error(`No tabID provided to extract content: ${url}`)
+export const createPageFromTab = (getDb: DBGet) => async (
+    props: PageCreationProps,
+) => {
+    if (!props.tabId) {
+        throw new Error(`No tabID provided to extract content: ${props.url}`)
     }
 
     const analysisRes = await analysePage({
-        tabId,
+        tabId: props.tabId,
         allowFavIcon: false,
-        ...pageAnalysisArgs,
+        ...props,
     })
 
-    if (stubOnly && analysisRes.content) {
+    if (props.stubOnly && analysisRes.content) {
         delete analysisRes.content.fullText
     }
 
     const pageData = await pipeline({
-        pageDoc: { ...analysisRes, url },
-        rejectNoContent: !stubOnly,
+        pageDoc: { ...analysisRes, url: props.url },
+        rejectNoContent: !props.stubOnly,
     })
     const db = await getDb()
 
     const page = new Page(db, pageData)
     await page.loadRels()
+    if (props.visitTime) {
+        page.addVisit(props.visitTime)
+    }
+    if (props.save) {
+        await page.save()
+    }
     return page
 }
 
-export const createPageFromUrl = (getDb: DBGet) => async ({
-    url,
-    stubOnly = false,
-}: Props) => {
+export const createPageFromUrl = (getDb: DBGet) => async (
+    props: PageCreationProps,
+) => {
     const fetchRes = await fetchPageData({
-        url,
+        url: props.url,
         opts: {
             includePageContent: true,
             includeFavIcon: false,
         },
     }).run()
 
-    if (stubOnly && fetchRes.content) {
+    if (props.stubOnly && fetchRes.content) {
         delete fetchRes.content.fullText
     }
 
     const pageData = await pipeline({
-        pageDoc: { ...fetchRes, url },
-        rejectNoContent: !stubOnly,
+        pageDoc: { ...fetchRes, url: props.url },
+        rejectNoContent: !props.stubOnly,
     })
 
     const db = await getDb()
     const page = new Page(db, pageData)
     await page.loadRels()
+    if (props.visitTime) {
+        page.addVisit(props.visitTime)
+    }
+    if (props.save) {
+        await page.save()
+    }
     return page
 }
 
-export const createTestPage = (getDb: DBGet) => async ({ url }: Props) => {
+export const createTestPage = (getDb: DBGet) => async (
+    props: PageCreationProps,
+) => {
     const pageData = await pipeline({
-        pageDoc: { url, content: {} },
+        pageDoc: { url: props.url, content: {} },
         rejectNoContent: false,
     })
 
     const db = await getDb()
     const page = new Page(db, pageData)
     await page.loadRels()
+    if (props.visitTime) {
+        page.addVisit(props.visitTime)
+    }
+    if (props.save) {
+        await page.save()
+    }
     return page
 }
 
@@ -91,7 +100,7 @@ export const createTestPage = (getDb: DBGet) => async ({ url }: Props) => {
  */
 export const createPageViaBmTagActs: (
     getDb: DBGet,
-) => PageCreator = getDb => async (props: Props) => {
+) => PageCreator = getDb => async (props: PageCreationProps) => {
     const {
         [IDXING_PREF_KEYS.BOOKMARKS]: fullyIndex,
     } = await browser.storage.local.get(IDXING_PREF_KEYS.BOOKMARKS)
@@ -103,4 +112,4 @@ export const createPageViaBmTagActs: (
     return createPageFromUrl(getDb)({ stubOnly: !fullyIndex, ...props })
 }
 
-export type PageCreator = (props: Props) => Promise<Page>
+export type PageCreator = (props: PageCreationProps) => Promise<Page>

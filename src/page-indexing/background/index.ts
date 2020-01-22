@@ -4,11 +4,7 @@ import PageStorage from './storage'
 export class PageIndexingBackground {
     storage: PageStorage
 
-    constructor(
-        private options: {
-            storageManager: StorageManager
-        },
-    ) {
+    constructor(options: { storageManager: StorageManager }) {
         this.storage = new PageStorage({
             storageManager: options.storageManager,
         })
