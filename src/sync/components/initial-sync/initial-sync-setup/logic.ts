@@ -48,6 +48,7 @@ export default class InitialSyncSetupLogic extends UILogic<
         // console.log('UI Logic received event [progress]:', event)
 
         this.emitMutation({
+            status: { $set: 'sync' },
             progressPct: {
                 $set:
                     event.progress.totalObjectsProcessed /
@@ -70,6 +71,7 @@ export default class InitialSyncSetupLogic extends UILogic<
         // console.log('UI Logic received event [roleSwitch]:', event)
 
         this.emitMutation({
+            status: { $set: 'sync' },
             error: { $set: event.error },
         })
     }
@@ -78,6 +80,7 @@ export default class InitialSyncSetupLogic extends UILogic<
         this.eventEmitter.on('progress', this.updateProgress)
         this.eventEmitter.on('roleSwitch', this.updateRole)
         this.eventEmitter.on('error', this.updateError)
+        this.eventEmitter.on('finished', this.done)
     }
 
     cleanup() {
@@ -85,6 +88,7 @@ export default class InitialSyncSetupLogic extends UILogic<
             this.eventEmitter.removeAllListeners('progress')
             this.eventEmitter.removeAllListeners('roleSwitch')
             this.eventEmitter.removeAllListeners('error')
+            this.eventEmitter.removeAllListeners('finished')
         }
     }
 
@@ -123,6 +127,12 @@ export default class InitialSyncSetupLogic extends UILogic<
     backToIntroduction = () => {
         this.emitMutation({
             status: { $set: 'introduction' },
+        })
+    }
+
+    done = () => {
+        this.emitMutation({
+            status: { $set: 'done' },
         })
     }
 

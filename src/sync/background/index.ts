@@ -130,14 +130,17 @@ export default class SyncBackground extends SyncService {
     registerRemoteEmitter() {
         const remoteEmitter = remoteEventEmitter<InitialSyncEvents>('sync')
 
-        this.initialSync.events.on('progress', args =>
-            remoteEmitter.emit('progress', args),
-        )
-        this.initialSync.events.on('connecting', args =>
-            remoteEmitter.emit('connecting', args),
-        )
-        this.initialSync.events.on('preSyncSuccess', args =>
-            remoteEmitter.emit('preSyncSuccess', args),
-        )
+        this.initialSync.events.on('progress', args => {
+            return remoteEmitter.emit('progress', args)
+        })
+        this.initialSync.events.on('roleSwitch', args => {
+            return remoteEmitter.emit('roleSwitch', args)
+        })
+        this.initialSync.events.on('error', args => {
+            return remoteEmitter.emit('error', args)
+        })
+        this.initialSync.events.on('finished', args => {
+            return remoteEmitter.emit('finished', args)
+        })
     }
 }
