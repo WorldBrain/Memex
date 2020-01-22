@@ -22,7 +22,7 @@ import { isDuringInstall } from '../onboarding/utils'
 import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
 import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 
-import styles from 'src/styles.css'
+// import styles from 'src/styles.css'
 
 class Overview extends PureComponent {
     static propTypes = {
@@ -61,7 +61,7 @@ class Overview extends PureComponent {
                 <Results />
                 <DeleteConfirmModal message="Delete page and related note" />
                 <DragElement />
-                <div className={styles.productHuntContainer}>
+                {/*                <div className={styles.productHuntContainer}>
                     <a
                         href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
                         target="_blank"
@@ -72,7 +72,7 @@ class Overview extends PureComponent {
                             className={styles.productHuntBatch}
                         />
                     </a>
-                </div>
+                </div> */}
                 <SidebarContainer
                     env="overview"
                     annotationsManager={this._annotationsManager}
@@ -103,7 +103,4 @@ const mapDispatchToProps = dispatch => ({
         dispatch(resultActs.setShowOnboardingMessage(true)),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(Overview)
+export default connect(mapStateToProps, mapDispatchToProps)(Overview)

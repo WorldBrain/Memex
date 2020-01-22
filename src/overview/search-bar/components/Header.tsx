@@ -32,6 +32,7 @@ export interface Props {
     showClearFiltersBtn: boolean
     onQueryKeyDown: KeyboardEventHandler<HTMLInputElement>
     onQueryChange: ReactEventHandler<HTMLInputElement>
+    search: (term: string) => void
     toggleInbox: () => void
     toggleFilterBar: () => void
     clearFilters: React.MouseEventHandler<HTMLSpanElement>
@@ -54,6 +55,7 @@ class Header extends PureComponent<Props> {
 
     componentDidMount() {
         this.inputQueryEl.focus()
+        this.props.search('')
     }
 
     render() {

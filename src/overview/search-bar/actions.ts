@@ -19,6 +19,7 @@ const pageSearchRPC = remoteFunction('searchPages')
 const annotSearchRPC = remoteFunction('searchAnnotations')
 const socialSearchRPC = remoteFunction('searchSocial')
 
+export const doQuery = createAction<string>('header/doQuery')
 export const setQuery = createAction<string>('header/setQuery')
 export const setStartDate = createAction<number>('header/setStartDate')
 export const setEndDate = createAction<number>('header/setEndDate')
@@ -48,6 +49,7 @@ export const setQueryTagsDomains: (
             if (constants.HASH_TAG_PATTERN.test(term)) {
                 removeFromInputVal(term)
                 dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
+                dispatch(filterActs.setShowFilterBar(true))
                 analytics.trackEvent({
                     category: 'Tag',
                     action: 'Filter by Tag',
@@ -65,6 +67,7 @@ export const setQueryTagsDomains: (
 
                 term = term.replace(constants.TERM_CLEAN_PATTERN, '')
                 dispatch(act(term))
+                dispatch(filterActs.setShowFilterBar(true))
 
                 analytics.trackEvent({
                     category: 'Domain',
@@ -151,8 +154,8 @@ export const search: (args?: any) => Thunk = (
         const searchRPC = results.isSocialPost(state)
             ? socialSearchRPC
             : results.isAnnotsSearch(state)
-                ? annotSearchRPC
-                : pageSearchRPC
+            ? annotSearchRPC
+            : pageSearchRPC
 
         // Tell background script to search
         const searchResult = await searchRPC(searchParams)

@@ -50,6 +50,7 @@ interface Props {
     handleBookmarkToggle: (url: string) => void
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
+    search: (searchValue: string) => void
     clearAllFilters: () => void
     resetPage: React.MouseEventHandler<HTMLButtonElement>
 }
@@ -77,7 +78,7 @@ class Sidebar extends React.Component<Props, State> {
 
     private handleSearchEnter = (
         e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ) => this.props.onQueryKeyDown(this.state.searchValue)
+    ) => this.props.search(this.state.searchValue)
 
     private handleClearBtn = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
@@ -228,7 +229,7 @@ class Sidebar extends React.Component<Props, State> {
                             {!this.isCurrentPageSearch ? (
                                 this.renderResults()
                             ) : this.props.isLoading &&
-                            !this.props.appendLoader ? (
+                              !this.props.appendLoader ? (
                                 <Loader />
                             ) : annotations.length === 0 ? (
                                 <EmptyMessage />

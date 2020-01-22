@@ -9,6 +9,7 @@ import { actions as onboardingActs } from '../../onboarding'
 import Header, { Props } from './Header'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
+import { doQuery, setQuery } from '../actions'
 
 const processEventRPC = remoteFunction('processEvent')
 
@@ -25,15 +26,21 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
     toggleInbox: () => dispatch(notifActs.toggleInbox()),
     onQueryChange: e => {
         const el = e.target as HTMLInputElement
-        dispatch(acts.setQueryTagsDomains(el.value, false))
+        // dispatch(acts.setQueryTagsDomains(el.value, false))
+        dispatch(setQuery(el.value))
     },
     onQueryKeyDown: e => {
         if (e.key === 'Enter') {
             const el = e.target as HTMLInputElement
             dispatch(acts.setQueryTagsDomains(el.value, true))
+            dispatch(doQuery(el.value))
         }
         // Close search-bar tooltip in overview
         dispatch(tooltipActs.setTooltip('time-filters'))
+    },
+    search: term => {
+        dispatch(acts.setQueryTagsDomains(term, true))
+        dispatch(doQuery(term))
     },
     toggleFilterBar: () => {
         // Remove and reset onboarding tooltip
@@ -54,7 +61,4 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(Header)
+export default connect(mapState, mapDispatch)(Header)

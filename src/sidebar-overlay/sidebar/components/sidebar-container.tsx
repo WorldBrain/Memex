@@ -47,6 +47,7 @@ interface DispatchProps {
     handleBookmarkToggle: (url: string) => void
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
+    search: (searchValue: string) => void
     handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
     clearAllFilters: () => void
     resetPage: React.MouseEventHandler<HTMLButtonElement>
@@ -193,6 +194,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
         dispatch(searchBarActs.setQueryTagsDomains(searchValue, false)),
     onQueryKeyDown: searchValue =>
         dispatch(searchBarActs.setQueryTagsDomains(searchValue, true)),
+    search: searchValue => dispatch(searchBarActs.doQuery(searchValue)),
     handlePageTypeClick: e => {
         e.preventDefault()
         dispatch(actions.togglePageType())
@@ -214,7 +216,4 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     },
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(SidebarContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(SidebarContainer)

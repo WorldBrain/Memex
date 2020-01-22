@@ -6,6 +6,7 @@ import { acts as searchBarActs } from 'src/overview/search-bar'
 import { acts as resultActs } from 'src/overview/results'
 import { actions as filterActs } from 'src/search-filters'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
+import { doQuery } from 'src/overview/search-bar/actions'
 
 const searchUpdateActions = [
     searchBarActs.setQuery.getType(),
@@ -37,16 +38,15 @@ const searchUpdateActions = [
 ]
 
 // When the query changed, refresh the search results
-export const refreshSearchResultsUponQueryChange = action$ =>
-    action$
-        .filter(action => searchUpdateActions.includes(action.type))
-        .debounceTime(500) // wait until typing stops for 500ms
+export const refreshSearchResultsUponQueryChange = action$ => {
+    return action$
+        .filter(action => action.type === doQuery.getType()) // searchUpdateActions.includes(action.type)
         .map(() =>
             searchBarActs.search({ overwrite: true, fromOverview: false }),
-        ) // Schedule new fresh (overwriting) search
+        )
+} // Schedule new fresh (overwriting) search
 
 export const refreshSidebarSearchResultsUponQueryChange = action$ =>
     action$
-        .filter(action => searchUpdateActions.includes(action.type))
-        .debounceTime(500) // wait until typing stops for 500ms
+        .filter(action => action.type === doQuery.getType())
         .map(() => sidebarActs.searchAnnotations())
