@@ -13,7 +13,7 @@ import {
     dangerousPleaseBeSureDeleteAndRecreateDatabase,
 } from './del'
 import { addBookmark, delBookmark, pageHasBookmark } from './bookmarks'
-import { addTag, delTag, fetchPageTags } from './tags'
+// import { addTag, delTag, fetchPageTags } from './tags'
 import { TabManager } from 'src/activity-logger/background'
 import { getPage, grabExistingKeys } from './util'
 import { search, getMatchingPageCount, fullSearch } from './search'
@@ -24,8 +24,13 @@ import {
     createTestPage,
 } from './on-demand-indexing'
 import { domainHasFavIcon } from './search/fav-icon'
+import PageStorage from 'src/page-indexing/background/storage'
+import BookmarksStorage from 'src/bookmarks/background/storage'
 
 export function combineSearchIndex(dependenices: {
+    pageStorage: PageStorage
+    bookmarksStorage: BookmarksStorage
+    // tagStorage: TagStorage,
     getDb: DBGet
     tabManager: TabManager
 }): SearchIndex {
@@ -34,27 +39,40 @@ export function combineSearchIndex(dependenices: {
         getMatchingPageCount: getMatchingPageCount(dependenices.getDb),
         fullSearch: fullSearch(dependenices.getDb),
         getPage: getPage(dependenices.getDb),
-        addPage: addPage(dependenices.getDb),
-        addPageTerms: addPageTerms(dependenices.getDb),
+        addPage: addPage(
+            dependenices.pageStorage,
+            dependenices.bookmarksStorage,
+        ),
+        addPageTerms: addPageTerms(dependenices.pageStorage),
         delPages: delPages(dependenices.getDb),
         delPagesByDomain: delPagesByDomain(dependenices.getDb),
         delPagesByPattern: delPagesByPattern(dependenices.getDb),
-        addBookmark: addBookmark(dependenices.getDb, dependenices.tabManager),
-        delBookmark: delBookmark(dependenices.getDb, dependenices.tabManager),
-        pageHasBookmark: pageHasBookmark(dependenices.getDb),
-        updateTimestampMeta: updateTimestampMeta(dependenices.getDb),
-        addVisit: addVisit(dependenices.getDb),
-        addFavIcon: addFavIcon(dependenices.getDb),
+        addBookmark: addBookmark(
+            dependenices.pageStorage,
+            dependenices.bookmarksStorage,
+            dependenices.tabManager,
+        ),
+        delBookmark: delBookmark(
+            dependenices.pageStorage,
+            dependenices.bookmarksStorage,
+            dependenices.tabManager,
+        ),
+        pageHasBookmark: pageHasBookmark(dependenices.bookmarksStorage),
+        updateTimestampMeta: updateTimestampMeta(dependenices.pageStorage),
+        addVisit: addVisit(dependenices.pageStorage),
+        addFavIcon: addFavIcon(dependenices.pageStorage),
         domainHasFavIcon: domainHasFavIcon(dependenices.getDb),
-        addTag: addTag(dependenices.getDb),
-        delTag: delTag(dependenices.getDb),
-        fetchPageTags: fetchPageTags(dependenices.getDb),
+        // addTag: addTag(dependenices.pageStorage, dependenices.tagStorage),
+        // delTag: delTag(dependenices.pageStorage, dependenices.tagStorage),
+        // fetchPageTags: fetchPageTags(dependenices.tagStorage),
         grabExistingKeys: grabExistingKeys(dependenices.getDb),
 
-        createPageFromTab: createPageFromTab(dependenices.getDb),
-        createPageFromUrl: createPageFromUrl(dependenices.getDb),
-        createPageViaBmTagActs: createPageViaBmTagActs(dependenices.getDb),
-        createTestPage: createTestPage(dependenices.getDb),
+        createPageFromTab: createPageFromTab(dependenices.pageStorage),
+        createPageFromUrl: createPageFromUrl(dependenices.pageStorage),
+        createPageViaBmTagActs: createPageViaBmTagActs(
+            dependenices.pageStorage,
+        ),
+        createTestPage: createTestPage(dependenices.pageStorage),
 
         dangerousPleaseBeSureDeleteAndRecreateDatabase: dangerousPleaseBeSureDeleteAndRecreateDatabase(
             dependenices.getDb,

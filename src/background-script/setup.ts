@@ -40,8 +40,8 @@ import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
-import { Page } from 'src/search'
 import { PageIndexingBackground } from 'src/page-indexing/background'
+import { combineSearchIndex } from 'src/search/search-index'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -79,19 +79,36 @@ export function createBackgroundModules(options: {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
 
+    const pages = new PageIndexingBackground({ storageManager })
+    const bookmarks = new BookmarksBackground({ storageManager })
+    const searchIndex = combineSearchIndex({
+        getDb: async () => storageManager,
+        pageStorage: pages.storage,
+        bookmarksStorage: bookmarks.storage,
+        tabManager,
+    })
+    const activityLogger = new ActivityLoggerBackground({
+        searchIndex,
+        browserAPIs: options.browserAPIs,
+        tabManager,
+    })
+    const tags = new TagsBackground({
+        storageManager,
+        searchIndex,
+        tabMan: activityLogger.tabManager,
+        windows: browser.windows,
+    })
     const search = new SearchBackground({
         storageManager,
+        tags,
+        pages,
+        idx: searchIndex,
         tabMan: tabManager,
         browserAPIs: options.browserAPIs,
     })
 
     const notifications = new NotificationBackground({ storageManager })
     const social = new SocialBackground({ storageManager })
-    const activityLogger = new ActivityLoggerBackground({
-        searchIndex: search.searchIndex,
-        browserAPIs: options.browserAPIs,
-        tabManager,
-    })
     const bgScript = new BackgroundScript({
         storageManager,
         storageChangesMan: options.localStorageChangesManager,
@@ -107,13 +124,12 @@ export function createBackgroundModules(options: {
         xhr: new XMLHttpRequest(),
     })
 
-    const pages = new PageIndexingBackground({ storageManager })
     const pageFetchBacklog = new PageFetchBacklogBackground({
         storageManager,
         connectivityChecker,
         fetchPageData: options.fetchPageDataProcessor,
         storePageContent: async content => {
-            await pages.storage.updatePageContent(content)
+            await pages.storage.createOrUpdatePage(content)
         },
     })
 
@@ -145,13 +161,8 @@ export function createBackgroundModules(options: {
             searchIndex: search.searchIndex,
             pageStorage: pages.storage,
         }),
-        tags: new TagsBackground({
-            storageManager,
-            searchIndex: search.searchIndex,
-            tabMan: activityLogger.tabManager,
-            windows: browser.windows,
-        }),
-        bookmarks: new BookmarksBackground({ storageManager }),
+        tags,
+        bookmarks: bookmarks,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -173,7 +184,7 @@ export function createBackgroundModules(options: {
             disableEncryption: options.disableSyncEnryption,
         }),
         features: new FeatureOptIns(),
-        pages: pages,
+        pages,
         bgScript,
         pageFetchBacklog,
     }

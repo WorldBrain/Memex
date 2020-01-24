@@ -2,12 +2,12 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { Page } from '.'
 import { initErrHandler } from './storage'
-import { DBGet } from './types'
+import { DBGet, PipelineRes } from './types'
 import { DexieUtilsPlugin } from './plugins/dexie-utils'
 
 const deletePages = async (getDb: DBGet, query: object) => {
     const db = await getDb()
-    const pages = await db.collection('pages').findObjects<Page>(query)
+    const pages = await db.collection('pages').findObjects<PipelineRes>(query)
 
     return Promise.all(pages.map(page => new Page(db, page).delete())).catch(
         initErrHandler(),

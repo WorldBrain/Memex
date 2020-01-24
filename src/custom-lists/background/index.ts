@@ -7,7 +7,7 @@ import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { Page, SearchIndex } from 'src/search'
+import { SearchIndex } from 'src/search'
 import { Tab, CustomListsInterface } from './types'
 import PageStorage from 'src/page-indexing/background/storage'
 import { pageIsStub } from 'src/page-indexing/utils'
@@ -16,7 +16,6 @@ export default class CustomListBackground {
     storage: CustomListStorage
     _createPage: SearchIndex['createPageViaBmTagActs'] // public so tests can override as a hack
     public remoteFunctions: CustomListsInterface
-    private getPage: (url: string) => Promise<Page>
 
     constructor(
         private options: {
@@ -25,7 +24,6 @@ export default class CustomListBackground {
             pageStorage: PageStorage
             tabMan?: TabManager
             windows?: Windows.Static
-            getPage?: (url: string) => Promise<Page>
             createPage?: SearchIndex['createPageViaBmTagActs']
         },
     ) {
@@ -33,7 +31,6 @@ export default class CustomListBackground {
         this.storage = new CustomListStorage({
             storageManager: options.storageManager,
         })
-        this.getPage = options.getPage || options.searchIndex.getPage
         this._createPage =
             options.createPage || options.searchIndex.createPageViaBmTagActs
 
@@ -140,8 +137,8 @@ export default class CustomListBackground {
     }
 
     private async createPageIfNeeded({ url }: { url: string }) {
-        const page = await this.getPage(url)
-        if (!page) {
+        const exists = await this.options.pageStorage.pageExists(url)
+        if (!exists) {
             await this._createPage({ url, visitTime: Date.now(), save: true })
         }
     }
@@ -215,7 +212,7 @@ export default class CustomListBackground {
         const time = Date.now()
 
         tabs.forEach(async tab => {
-            const page = await this.options.getPage(tab.url)
+            const page = await this.options.pageStorage.getPage(tab.url)
 
             if (!page || pageIsStub(page)) {
                 await this._createPage({
@@ -226,14 +223,11 @@ export default class CustomListBackground {
                     save: true,
                 })
             } else {
-                const visits = await this.options.pageStorage.pageHasVisits(
-                    tab.url,
-                )
-
                 // Add new visit if none, else page won't appear in results
-                if (!visits) {
-                    await this.options.pageStorage.addPageVisit(tab.url, time)
-                }
+                await this.options.pageStorage.addPageVisitIfHasNone(
+                    tab.url,
+                    time,
+                )
             }
         })
 

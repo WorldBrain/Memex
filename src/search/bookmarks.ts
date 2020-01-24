@@ -4,8 +4,15 @@ import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { createPageViaBmTagActs } from './on-demand-indexing'
 import { getPage } from './util'
 import { DBGet } from './types'
+import { pageIsStub } from 'src/page-indexing/utils'
+import PageStorage from 'src/page-indexing/background/storage'
+import BookmarksStorage from 'src/bookmarks/background/storage'
 
-export const addBookmark = (getDb: DBGet, tabManager: TabManager) => async ({
+export const addBookmark = (
+    pageStorage: PageStorage,
+    bookmarksStorage: BookmarksStorage,
+    tabManager: TabManager,
+) => async ({
     url,
     timestamp = Date.now(),
     tabId,
@@ -14,37 +21,28 @@ export const addBookmark = (getDb: DBGet, tabManager: TabManager) => async ({
     timestamp?: number
     tabId?: number
 }) => {
-    let page = await getPage(getDb)(url)
+    const page = await pageStorage.getPage(url)
 
-    if (page == null || page.isStub) {
-        page = await createPageViaBmTagActs(getDb)({ url, tabId })
+    if (page == null || pageIsStub(page)) {
+        await createPageViaBmTagActs(pageStorage)({ url, tabId })
     }
 
-    page.setBookmark(timestamp)
-    await page.save()
+    await bookmarksStorage.createBookmarkIfNeeded(page.url, timestamp)
     tabManager.setBookmarkState(url, true)
 }
 
-export const delBookmark = (getDb: DBGet, tabManager: TabManager) => async ({
-    url,
-}: Partial<Bookmarks.BookmarkTreeNode>) => {
-    const page = await getPage(getDb)(url)
-
-    if (page != null) {
-        page.delBookmark()
-
-        // Delete if Page left orphaned, else just save current state
-        if (page.shouldDelete) {
-            await page.delete()
-        } else {
-            await page.save()
-        }
-        tabManager.setBookmarkState(url, false)
-    }
+export const delBookmark = (
+    pageStorage: PageStorage,
+    bookmarksStorage: BookmarksStorage,
+    tabManager: TabManager,
+) => async ({ url }: Partial<Bookmarks.BookmarkTreeNode>) => {
+    await bookmarksStorage.delBookmark({ url })
+    await pageStorage.deletePageIfOrphaned(url)
+    tabManager.setBookmarkState(url, false)
 }
 
-export const pageHasBookmark = (getDb: DBGet) => async (url: string) => {
-    const page = await getPage(getDb)(url)
-
-    return page != null ? page.hasBookmark : false
+export const pageHasBookmark = (bookmarksStorage: BookmarksStorage) => async (
+    url: string,
+) => {
+    return bookmarksStorage.pageHasBookmark(url)
 }

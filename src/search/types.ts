@@ -149,27 +149,27 @@ export interface SearchIndex {
     addFavIcon: (url: string, favIconURI: string) => Promise<any>
     domainHasFavIcon: (url: string) => Promise<boolean>
 
-    addTag: (params: {
-        url: string
-        tag: string
-        tabId?: number
-    }) => Promise<void>
-    delTag: (params: {
-        url: string
-        tag: string
-        tabId?: number
-    }) => Promise<void>
-    fetchPageTags: (url: string) => Promise<any>
+    // addTag: (params: {
+    //     url: string
+    //     tag: string
+    //     tabId?: number
+    // }) => Promise<void>
+    // delTag: (params: {
+    //     url: string
+    //     tag: string
+    //     tabId?: number
+    // }) => Promise<void>
+    // fetchPageTags: (url: string) => Promise<any>
 
     grabExistingKeys: () => Promise<{
         histKeys: Set<string>
         bmKeys: Set<string>
     }>
 
-    createPageFromTab: (params: PageCreationProps) => Promise<any>
-    createPageFromUrl: (params: PageCreationProps) => Promise<any>
-    createPageViaBmTagActs: (params: PageCreationProps) => Promise<any>
-    createTestPage: (params: PageCreationProps) => Promise<any>
+    createPageFromTab: (params: PageCreationProps) => Promise<PipelineRes>
+    createPageFromUrl: (params: PageCreationProps) => Promise<PipelineRes>
+    createPageViaBmTagActs: (params: PageCreationProps) => Promise<PipelineRes>
+    createTestPage: (params: PageCreationProps) => Promise<PipelineRes>
 
     dangerousPleaseBeSureDeleteAndRecreateDatabase: () => Promise<void>
 }
