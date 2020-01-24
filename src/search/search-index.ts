@@ -15,7 +15,7 @@ import {
 import { addBookmark, delBookmark, pageHasBookmark } from './bookmarks'
 // import { addTag, delTag, fetchPageTags } from './tags'
 import { TabManager } from 'src/activity-logger/background'
-import { getPage, grabExistingKeys } from './util'
+import { getPage } from './util'
 import { search, getMatchingPageCount, fullSearch } from './search'
 import {
     createPageFromTab,
@@ -30,7 +30,6 @@ import BookmarksStorage from 'src/bookmarks/background/storage'
 export function combineSearchIndex(dependenices: {
     pageStorage: PageStorage
     bookmarksStorage: BookmarksStorage
-    // tagStorage: TagStorage,
     getDb: DBGet
     tabManager: TabManager
 }): SearchIndex {
@@ -62,10 +61,6 @@ export function combineSearchIndex(dependenices: {
         addVisit: addVisit(dependenices.pageStorage),
         addFavIcon: addFavIcon(dependenices.pageStorage),
         domainHasFavIcon: domainHasFavIcon(dependenices.getDb),
-        // addTag: addTag(dependenices.pageStorage, dependenices.tagStorage),
-        // delTag: delTag(dependenices.pageStorage, dependenices.tagStorage),
-        // fetchPageTags: fetchPageTags(dependenices.tagStorage),
-        grabExistingKeys: grabExistingKeys(dependenices.getDb),
 
         createPageFromTab: createPageFromTab(dependenices.pageStorage),
         createPageFromUrl: createPageFromUrl(dependenices.pageStorage),

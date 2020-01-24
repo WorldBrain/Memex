@@ -27,34 +27,6 @@ export const getPage = (getDb: DBGet) => async (url: string) => {
 }
 
 /**
- * Hardcoded replacement for now.
- *
- * TODO: Maybe overhaul `import-item-creation` module to not need this (only caller)
- */
-export const grabExistingKeys = (getDb: DBGet) => async () => {
-    const db = await getDb()
-    let histKeys: Set<string>
-    let bmKeys: Set<string>
-
-    try {
-        histKeys = new Set(
-            await db.operation(DexieUtilsPlugin.GET_PKS_OP, {
-                collection: 'pages',
-            }),
-        )
-        bmKeys = new Set(
-            await db.operation(DexieUtilsPlugin.GET_PKS_OP, {
-                collection: 'bookmarks',
-            }),
-        )
-    } catch (err) {
-        initErrHandler({ histKeys: new Set(), bmKeys: new Set() })(err)
-    }
-
-    return { histKeys, bmKeys }
-}
-
-/**
  * Handles splitting up searchable content into indexable terms. Terms are all
  * lowercased.
  *

@@ -162,7 +162,7 @@ export function createBackgroundModules(options: {
             pageStorage: pages.storage,
         }),
         tags,
-        bookmarks: bookmarks,
+        bookmarks,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
@@ -192,10 +192,11 @@ export function createBackgroundModules(options: {
 
 export async function setupBackgroundModules(
     backgroundModules: BackgroundModules,
+    storageManager: StorageManager,
 ) {
     setImportStateManager(
         new ImportStateManager({
-            searchIndex: backgroundModules.search.searchIndex,
+            storageManager,
         }),
     )
     setupImportBackgroundModule({
