@@ -14,7 +14,10 @@
 }
 
 .backupTitle {
-    composes: sectionTitle from '../../options/base.css';
+    font-size: 24px;
+    color: color4;
+    font-weight: 600;
+    margin-top: 10px;
 }
 
 .subtitle {

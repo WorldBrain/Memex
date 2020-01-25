@@ -131,3 +131,17 @@ export const StageBlock = styled.div`
 export const ProgressBox = styled.div`
     width: 100%;
 `
+
+export const Warning = styled.p`
+    color: red;
+    font-weight: 700;
+    font-size: 18;
+`
+
+export const WhiteSpacer20 = styled.div`
+    margin-top: 20px;
+`
+
+export const WhiteSpacer30 = styled.div`
+    margin-top: 30px;
+`

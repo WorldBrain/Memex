@@ -8,3 +8,4 @@ export const colorMidPurple = `#5671CF`
 export const colorDarkText = `#3A2F45`
 export const colorText = `#544960`
 export const colorError = `#F45F5F`
+export const colorWhite = `#fff`

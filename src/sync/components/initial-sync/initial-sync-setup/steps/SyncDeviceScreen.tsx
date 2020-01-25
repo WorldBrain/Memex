@@ -11,7 +11,12 @@ import {
     HelpBlock,
     StageBlock,
     ProgressBox,
+    Warning,
+    WhiteSpacer20,
+    WhiteSpacer30,
 } from 'src/common-ui/components/design-library/typography'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { CancelAction } from 'src/common-ui/components/design-library/actions/CancelAction'
 
 export const SyncDeviceScreen = ({
     error,
@@ -40,7 +45,8 @@ export const SyncDeviceScreen = ({
                     <div>
                         {!error ? (
                             <div>
-                                <Link label={'CANCEL'} onClick={() => false} />
+                                <WhiteSpacer20/>  
+                                <CancelAction label={'Cancel'} onClick={() => false} />
                                 {progressPct === undefined ? (
                                     <LoadingIndicator />
                                 ) : (
@@ -54,11 +60,9 @@ export const SyncDeviceScreen = ({
                             </div>
                         ) : (
                             <div>
-                                <Link
-                                    label={'retry syncing'}
-                                    onClick={() => false}
-                                />
-                                Something went wrong
+                                <Warning>⚠️ Something went wrong</Warning>
+                                <PrimaryAction label={'Retry Syncing'} onClick={() => false} />
+                                <WhiteSpacer30/>                                
                             </div>
                         )}
                     </div>

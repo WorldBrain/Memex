@@ -3,24 +3,25 @@ import styled from 'styled-components'
 import {
     colorDisabled,
     colorPrimary,
+    colorError,
 } from 'src/common-ui/components/design-library/colors'
 import {
     fontSizeSmall,
     TypographyActionText,
 } from 'src/common-ui/components/design-library/typography'
 
-const StyledPrimaryAction = styled.div`
-    padding: 10px 20px;
-    background: ${props => (props.disabled ? colorDisabled : colorPrimary)};
+const StyledCancelAction = styled.div`
+    padding: 5px 10px;
+    background: ${props => (props.disabled ? colorDisabled : colorError)};
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;
 `
-const StyledPrimaryActionLinkText = styled(TypographyActionText)`
+const StyledCancelActionLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeSmall}px;
-    color: #545454;
+    color: #ffffff;
 `
-export const PrimaryAction = ({
+export const CancelAction = ({
     label,
     onClick,
     disabled,
@@ -29,10 +30,10 @@ export const PrimaryAction = ({
     onClick: () => void
     disabled?: boolean
 }) => (
-    <StyledPrimaryAction
+    <StyledCancelAction
         onClick={disabled === true ? undefined : onClick}
         disabled={disabled}
     >
-        <StyledPrimaryActionLinkText>{label}</StyledPrimaryActionLinkText>
-    </StyledPrimaryAction>
+        <StyledCancelActionLinkText>{label}</StyledCancelActionLinkText>
+    </StyledCancelAction>
 )

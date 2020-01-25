@@ -16,6 +16,7 @@ import SyncDevicesPane from 'src/sync/components/device-list/SyncDevicesPane'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
 
 const styles = require('../../styles.css')
+const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./overview.css')
 
 interface Props {
@@ -117,73 +118,74 @@ export class OverviewContainer extends Component<Props & UserProps> {
                         }
                     />
                 )}
-
-                <p className={styles.header2}>
-                    <strong>BACKUP STATUS</strong>
-                </p>
-                {!this.state.hasInitialBackup ? (
-                    <div className={localStyles.statusLine}>
-                        <p>You haven't set up any backups yet.</p>
-                        <SmallButton
-                            onClick={this.props.onBackupRequested}
-                            color="darkblue"
-                            extraClass={localStyles.right}
-                        >
-                            Start Wizard
-                        </SmallButton>
+                <div className={settingsStyle.section}>
+                    <div className={settingsStyle.sectionTitle}>
+                        Backup Status
                     </div>
-                ) : (
-                    <div>
-                        {/* The status line with last backup time */}
+                    {!this.state.hasInitialBackup ? (
                         <div className={localStyles.statusLine}>
-                            <div>
-                                <span className={localStyles.boldText}>
-                                    Last backup:
-                                </span>
-                                <span className={localStyles.time}>
-                                    {this.state.backupTimes.lastBackup
-                                        ? moment(
-                                              this.state.backupTimes.lastBackup,
-                                          ).fromNow()
-                                        : "You haven't made any backup yet"}
-                                </span>
-                            </div>
+                            <p>You haven't set up any backups yet.</p>
                             <SmallButton
-                                color="green"
                                 onClick={this.props.onBackupRequested}
+                                color="darkblue"
+                                extraClass={localStyles.right}
                             >
-                                {this.state.backupTimes.nextBackup !== 'running'
-                                    ? 'Backup Now'
-                                    : 'Go to Backup'}
+                                Start Wizard
                             </SmallButton>
                         </div>
-                        {this.state.backupTimes.nextBackup && (
+                    ) : (
+                        <div>
+                            {/* The status line with last backup time */}
                             <div className={localStyles.statusLine}>
-                                <span className={localStyles.nextBackupLine}>
-                                    <span className={styles.name}>
-                                        Next backup:
+                                <div>
+                                    <span className={localStyles.boldText}>
+                                        Last backup:
                                     </span>
                                     <span className={localStyles.time}>
-                                        {this.state.backupTimes.nextBackup !==
-                                        'running'
-                                            ? automaticBackupsAllowed &&
-                                              moment(
-                                                  this.state.backupTimes
-                                                      .nextBackup,
+                                        {this.state.backupTimes.lastBackup
+                                            ? moment(
+                                                  this.state.backupTimes.lastBackup,
                                               ).fromNow()
-                                            : 'in progress'}
+                                            : "You haven't made any backup yet"}
                                     </span>
-                                </span>
+                                </div>
+                                <SmallButton
+                                    color="green"
+                                    onClick={this.props.onBackupRequested}
+                                >
+                                    {this.state.backupTimes.nextBackup !== 'running'
+                                        ? 'Backup Now'
+                                        : 'Go to Backup'}
+                                </SmallButton>
                             </div>
-                        )}
-                    </div>
-                )}
+                            {this.state.backupTimes.nextBackup && (
+                                <div className={localStyles.statusLine}>
+                                    <span className={localStyles.nextBackupLine}>
+                                        <span className={styles.name}>
+                                            Next backup:
+                                        </span>
+                                        <span className={localStyles.time}>
+                                            {this.state.backupTimes.nextBackup !==
+                                            'running'
+                                                ? automaticBackupsAllowed &&
+                                                  moment(
+                                                      this.state.backupTimes
+                                                          .nextBackup,
+                                                  ).fromNow()
+                                                : 'in progress'}
+                                        </span>
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
 
                 {/* Settings Section */}
-                <div>
-                    <p className={styles.header2}>
-                        <strong>SETTINGS</strong>
-                    </p>
+                <div className={settingsStyle.section}>
+                    <div className={settingsStyle.sectionTitle}>
+                        Settings
+                    </div>
                     <div className={styles.option}>
                         {!automaticBackupsAllowed && (
                             <div>
@@ -199,7 +201,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                 </SmallButton>
                                 <span
                                     className={classNames(
-                                        styles.subname,
+                                        settingsStyle.subname,
                                         localStyles.limitWidth,
                                     )}
                                 >
@@ -226,7 +228,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                     </SmallButton>
                                     <span
                                         className={classNames(
-                                            styles.subname,
+                                            settingsStyle.subname,
                                             localStyles.limitWidth,
                                         )}
                                     >
@@ -252,7 +254,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                     </SmallButton>
                                     <span
                                         className={classNames(
-                                            styles.subname,
+                                            settingsStyle.subname,
                                             localStyles.limitWidth,
                                         )}
                                     >
@@ -262,40 +264,43 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                 </div>
                             )}
                     </div>
+                    {this.state.hasInitialBackup ? (
+                        <div className={styles.option}>
+                            <span className={styles.name}>Backup Location</span>
+                            <SmallButton
+                                extraClass={localStyles.right}
+                                color={'green'}
+                                onClick={() => this.props.onBackupRequested(true)}
+                            >
+                                Change
+                            </SmallButton>
+                            {this.state.backupLocation === 'local' ? (
+                                <span
+                                    className={classNames(
+                                        settingsStyle.subname,
+                                        localStyles.limitWidth,
+                                    )}
+                                >
+                                    {this.state.backupPath}
+                                </span>
+                            ) : (
+                                <span
+                                    className={classNames(
+                                        settingsStyle.subname,
+                                        localStyles.limitWidth,
+                                    )}
+                                >
+                                    Google Drive
+                                </span>
+                            )}
+                        </div>
+                    ) : null}
                 </div>
-                {this.state.hasInitialBackup ? (
-                    <div className={styles.option}>
-                        <span className={styles.name}>Backup Location</span>
-                        <SmallButton
-                            extraClass={localStyles.right}
-                            color={'green'}
-                            onClick={() => this.props.onBackupRequested(true)}
-                        >
-                            Change
-                        </SmallButton>
-                        {this.state.backupLocation === 'local' ? (
-                            <span
-                                className={classNames(
-                                    styles.subname,
-                                    localStyles.limitWidth,
-                                )}
-                            >
-                                {this.state.backupPath}
-                            </span>
-                        ) : (
-                            <span
-                                className={classNames(
-                                    styles.subname,
-                                    localStyles.limitWidth,
-                                )}
-                            >
-                                Google Drive
-                            </span>
-                        )}
+                <div className={settingsStyle.section}>
+                    <div className={settingsStyle.sectionTitle}>
+                        Restore & Replace
                     </div>
-                ) : null}
                 <div className={styles.option}>
-                    <span className={styles.name}>Restore &amp; Replace</span>
                     <SmallButton
                         onClick={() =>
                             this.setState({ showRestoreConfirmation: true })
@@ -305,11 +310,9 @@ export class OverviewContainer extends Component<Props & UserProps> {
                     >
                         Restore
                     </SmallButton>
-
-                    <br />
                     <span
                         className={classNames(
-                            styles.subname,
+                            settingsStyle.subname,
                             localStyles.limitWidth,
                         )}
                     >
@@ -320,6 +323,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
                     {this.state.subscribeModal && (
                         <SubscribeModal onClose={this.closeSubscriptionModal} />
                     )}
+                </div>
                 </div>
             </div>
         )

@@ -29,9 +29,11 @@ class IndexingPrefs extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.block}>
-                <h1 className={styles.header}>Indexing Preferences</h1>
-                <h3 className={styles.subHeader}>
+            <div className={styles.section}>
+                    <div className={styles.sectionTitle}>
+                        Indexing Preferences
+                    </div>
+                <h3 className={styles.infoText}>
                     Which websites do you want to make full-text searchable?
                 </h3>
                 <Checkbox

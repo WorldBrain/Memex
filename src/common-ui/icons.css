@@ -81,6 +81,12 @@
     background-image: url('/img/settings.svg');
 }
 
+.syncIcon {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/sync.svg');
+}
+
 .upgradeIcon {
     background-position: center;
     background-repeat: no-repeat;

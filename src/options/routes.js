@@ -53,7 +53,7 @@ export default [
         name: 'Sync',
         pathname: '/sync',
         component: SyncSettingsScreen,
-        icon: 'backup',
+        icon: 'sync',
     },
     {
         name: 'Blocklist',

@@ -13,8 +13,8 @@ import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setu
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import ActionButton from 'src/notifications/components/ActionButton'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-const globalStyles = require('../../../backup-restore/ui/styles.css')
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+const settingsStyle = require('src/options/settings/components/settings.css')
 const styles = require('../styles.css')
 
 interface Props {
@@ -97,24 +97,23 @@ export class SyncDevicesPane extends Component<Props, State> {
                 <div className={styles.container}>
                     <div className={styles.syncLeftCol}>
                         <span className={styles.syncTitle}>
-                            CONNECTED DEVICES
+                            Paired devices
                         </span>
                     </div>
-                    <PrimaryAction
+                    <SecondaryAction
                         onClick={this.handleOpenNewDevice}
-                        disabled={!this.props.isDeviceSyncAllowed}
-                        label={` + Add New`}
+                        disabled={(this.props.isDeviceSyncAllowed && this.props.devices.length > 0)}
+                        label={` Pair New Device`}
                     />
                     {!this.props.isDeviceSyncAllowed ? (
                         <ButtonTooltip
-                            tooltipText="To sync multiple devices, please upgrade your subscription"
+                            tooltipText="To sync with your mobile phone, please upgrade your subscription"
                             position="right"
                         >
                             <span className={styles.tutorial} />
                         </ButtonTooltip>
                     ) : null}
                 </div>
-                <hr />
                 <SyncDevicesList
                     devices={this.props.devices}
                     handleRemoveDevice={this.props.handleRemoveDevice}
@@ -188,10 +187,13 @@ class SyncDevicesPaneContainer extends Component<
         }
 
         return (
-            <div className={styles.section}>
-                <p className={globalStyles.backupTitle}>
-                    Syncing between Devices
-                </p>
+            <div className={settingsStyle.section}>
+                <div className={settingsStyle.sectionTitle}>
+                    Sync your mobile phone
+                </div>
+                <div className={settingsStyle.infoText}>
+                    Save and view content on the go. Use an end2end encrypted connection to keep your devices in sync. 
+                </div>
                 <SyncDevicesPane
                     devices={this.state.devices}
                     isDeviceSyncEnabled

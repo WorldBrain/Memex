@@ -8,6 +8,7 @@ const StyledModalBox = styled.div`
     justify-content: space-between;
     height: 100%;
     width: 100%;
+    overflow-y: hidden;
 `
 const HeaderText = styled.h2`
     font-family: Inter;
@@ -75,8 +76,8 @@ export const ModalColRight = styled.div`
 
 export const ModalColRightBig = styled(ModalColRight)`
     & img {
-        width: 100%;
-        margin-right: -100px;
+        width: 90%;
+        margin-right: -130px;
         margin-top: -10px;
         margin-bottom: -60px;
     }

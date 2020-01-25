@@ -32,8 +32,8 @@ export default class QRCanvas extends React.PureComponent<Props> {
             <canvas
                 style={{
                     borderRadius: '10px',
-                    height: '100%',
-                    width: '100%',
+                    height: '150px',
+                    width: '150px',
                     color: '#5cd9a6',
                 }}
                 ref={this.setRef}

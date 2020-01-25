@@ -11,13 +11,15 @@
 
 .container {
     display: flex;
+    align-items: center;
     width: 100%;
     flex-wrap: wrap;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 10px;
 }
 
 .syncLeftCol {
     flex: 9;
-    display: flex;
     align-items: center;
 }
 
@@ -33,15 +35,21 @@
 }
 
 .syncTitle {
-    composes: subTitle from '../../options/base.css';
-    margin: 0;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #3a2f45;
 }
 
 .syncSubText {
     composes: h2Color from '../../common-ui/colors.css';
     vertical-align: middle;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
     margin-right: 8px;
 }
 
@@ -61,10 +69,6 @@
 .noDevices {
     font-size: 15px;
     color: color16;
-}
-
-.section {
-    margin-top: 50px;
 }
 
 .tutorial {
