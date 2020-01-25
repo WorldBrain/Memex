@@ -15,8 +15,8 @@
 .route {
     padding-right: 30px;
     margin: 25px 0 100px 35px;
-    max-width: 700px;
-    width: 100vw;
+    width: 400vw;
+    max-width: 800px;
 }
 
 .routeTitle {

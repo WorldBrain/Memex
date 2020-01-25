@@ -217,7 +217,7 @@ export default class RunningProcess extends React.Component<Props> {
                             !this.state.canceling && this.handleCancel()
                         }}
                     >
-                        {!this.state.canceling && 'Cancel'}
+                        {!this.state.canceling ? ('Cancel'): ('Confirm Cancel')}
                         {this.state.canceling && (
                             <MovingDotsLabel
                                 text="Finishing current batch"

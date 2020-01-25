@@ -26,6 +26,7 @@
 .label {
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .label__check {
@@ -64,10 +65,11 @@
 }
 
 .label__text {
+    font-size: calc(0.9rem);
+    cursor: pointer;
     display: flex;
     align-items: center;
-    font-size: calc(0.6rem + 0.3vw);
-    cursor: pointer;
+    width: inherit;
 
     &:hover {
         color: black;
@@ -81,6 +83,13 @@
     width: 25px;
     height: 25px;
     outline: none;
+}
+
+.childrenBox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
 @keyframes icon {

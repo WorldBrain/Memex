@@ -3,6 +3,7 @@ import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import { SyncDevicesList } from 'src/sync/components/device-list/SyncDevicesList'
 import { SyncDevice } from 'src/sync/components/types'
 import Modal from 'src/common-ui/components/Modal'
+import { UPGRADE_URL, LOGIN_URL } from 'src/constants'
 import {
     UserProps,
     withCurrentUser,
@@ -25,6 +26,7 @@ interface Props {
     getInitialSyncMessage: () => Promise<string>
     waitForInitialSync: () => Promise<void>
     waitForInitialSyncConnected: () => Promise<void>
+    refreshDevices: () => Promise<void>
 }
 
 interface State {
@@ -48,9 +50,20 @@ export class SyncDevicesPane extends Component<Props, State> {
     }
 
     handleCloseNewDevice = () => {
+        this.props.refreshDevices
+        this.render()
+
         this.setState({
             isAddingNewDevice: false,
         })
+    }
+
+    handleUpgradeNeeded = () => {
+        window.open(UPGRADE_URL, '_blank')
+    }
+
+    handleLoginNeeded = () => {
+        window.location.href = LOGIN_URL
     }
 
     handleOpenNewDevice = () => {
@@ -92,27 +105,64 @@ export class SyncDevicesPane extends Component<Props, State> {
     }
 
     renderDeviceList() {
+
+        let pairButton
+
+        if (!this.props.isDeviceSyncAllowed && this.props.devices.length === 0) {
+            pairButton = 
+                        <ButtonTooltip
+                            tooltipText="To sync with your mobile phone, please upgrade your subscription"
+                            position="bottom"
+                        >
+                            <SecondaryAction
+                                onClick={this.handleUpgradeNeeded}
+                                label={` Pair New Device`}
+                            />
+                        </ButtonTooltip>
+        } 
+
+        if (this.props.devices.length > 0 && this.props.isDeviceSyncAllowed) {
+            pairButton = null
+        }
+
+        if (this.props.devices.length > 0 && !this.props.isDeviceSyncAllowed) {
+            pairButton = 
+                        <ButtonTooltip
+                            tooltipText="You need to be logged in to sync your devices"
+                            position="bottom"
+                        >
+                            <SecondaryAction
+                                onClick={this.handleLoginNeeded}
+                                label={`Login to Sync`}
+                            />
+                        </ButtonTooltip>
+        }
+
+         if (this.props.devices.length === 0 && this.props.isDeviceSyncAllowed) {
+            pairButton = 
+                        <SecondaryAction
+                            onClick={this.handleOpenNewDevice}
+                            label={`Pair New Device`}
+                        />
+        }
+
+
         return (
             <div>
                 <div className={styles.container}>
                     <div className={styles.syncLeftCol}>
-                        <span className={styles.syncTitle}>
-                            Paired devices
-                        </span>
-                    </div>
-                    <SecondaryAction
-                        onClick={this.handleOpenNewDevice}
-                        disabled={(this.props.isDeviceSyncAllowed && this.props.devices.length > 0)}
-                        label={` Pair New Device`}
-                    />
-                    {!this.props.isDeviceSyncAllowed ? (
                         <ButtonTooltip
-                            tooltipText="To sync with your mobile phone, please upgrade your subscription"
-                            position="right"
+                            tooltipText="Until now only one device can be synced"
+                            position="bottom"
                         >
-                            <span className={styles.tutorial} />
+                            {this.props.devices.length > 0 ? (
+                            <p className={styles.syncTitle}>2/2 Paired Devices</p>)
+                            :
+                            (<p className={styles.syncTitle}>No Paired Devices</p>)
+                            }
                         </ButtonTooltip>
-                    ) : null}
+                    </div>
+                    {pairButton}
                 </div>
                 <SyncDevicesList
                     devices={this.props.devices}
@@ -124,7 +174,8 @@ export class SyncDevicesPane extends Component<Props, State> {
 
     renderAddNewDevice() {
         return (
-            <Modal large onClose={this.handleCloseNewDevice}>
+            <Modal  large onClose={this.handleCloseNewDevice}
+                >
                 <InitialSyncSetup
                     onClose={this.handleCloseNewDevice}
                     getInitialSyncMessage={this.props.getInitialSyncMessage}
@@ -155,7 +206,7 @@ class SyncDevicesPaneContainer extends Component<
     state = { devices: [], feature: false }
 
     async componentDidMount() {
-        this.refreshDevices()
+        await this.refreshDevices()
         this.setState({ feature: await features.getFeature('Sync') })
     }
 
@@ -206,6 +257,7 @@ class SyncDevicesPaneContainer extends Component<
                     waitForInitialSyncConnected={
                         this.waitForInitialSyncConnected
                     }
+                    refreshDevices={this.refreshDevices}
                 />
             </div>
         )

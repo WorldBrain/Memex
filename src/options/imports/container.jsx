@@ -116,7 +116,7 @@ class ImportContainer extends Component {
             isHidden={!this.props.shouldRenderProgress}
             customClass={'cancel'}
         >
-            Cancel
+            {this.state.waitingOnCancelConfirm ? ('Confirm Cancel'):('Cancel')}
         </ActionButton>
     )
 

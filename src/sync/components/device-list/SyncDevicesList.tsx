@@ -13,10 +13,7 @@ export function SyncDevicesList(props: Props) {
     return (
         <div>
             {props.devices.length === 0 ? (
-                <p className={styles.noDevices}>
-                    {' '}
-                    You have not added any device
-                </p>
+                null
             ) : (
                 <span>
                     {props.devices.map(device => (

@@ -120,7 +120,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                     isChecked={this.props.visits}
                     handleChange={this.props.toggleVisits}
                 >
-                    Visited for at least{' '}
+                    Visited for how many seconds?{' '}
                     <input
                         type="number"
                         className={styles.number}
@@ -128,8 +128,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
                         onChange={this.props.setVisitDelayChange}
                         min={this.props.visitDelayMin}
                         max={this.props.visitDelayMax}
-                    />{' '}
-                    seconds
+                    />
                 </Checkbox>
                 <Checkbox
                     id="index-bookmarks"

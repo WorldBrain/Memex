@@ -191,14 +191,14 @@
 
 .searchField {
     background-color: color11;
-    color: color4;
+    color: color3;
     border-radius: 3px;
     font-size: 14px;
     font-weight: 400;
     text-align: left;
 
     &::placeholder {
-        color: color6;
+        color: color4;
         font-style: normal;
     }
 

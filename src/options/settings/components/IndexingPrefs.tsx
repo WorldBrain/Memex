@@ -34,43 +34,46 @@ class IndexingPrefs extends React.PureComponent<Props> {
                         Indexing Preferences
                     </div>
                 <h3 className={styles.infoText}>
-                    Which websites do you want to make full-text searchable?
+                    Define which pages you would like to search. 
                 </h3>
                 <Checkbox
                     id="index-stubs"
                     isChecked={this.props.stubs}
                     handleChange={this.props.toggleStubs}
                 >
-                    Make title and URL always searchable (recommended)
+                    Make title and URL of every visit searchable
                 </Checkbox>
+
+                <div className={styles.subSubTitle}>
+                    Make websites full-text searchable that I...?
+                </div>
                 <Checkbox
                     id="index-visits"
                     isChecked={this.props.visits}
                     handleChange={this.props.toggleVisits}
                 >
-                    Visited for at least{' '}
+                    visited for this many seconds{' '}
                     <input
                         type="number"
                         value={this.props.visitDelay}
                         onChange={this.props.handleVisitDelayChange}
                         min={this.props.visitDelayMin}
                         max={this.props.visitDelayMax}
-                    />{' '}
-                    seconds
+                    />
                 </Checkbox>
                 <Checkbox
                     id="index-bookmarks"
                     isChecked={this.props.bookmarks}
                     handleChange={this.props.toggleBookmarks}
                 >
-                    Bookmarked, tagged, or sorted into collections
+                    bookmarked, tagged, or sorted into collections
                 </Checkbox>
                 <Checkbox
                     id="index-links"
                     isChecked={this.props.memexLinks}
                     handleChange={this.props.toggleLinks}
                 >
-                    Made notes or annotations on
+                    annotated or added notes to
                 </Checkbox>
             </div>
         )

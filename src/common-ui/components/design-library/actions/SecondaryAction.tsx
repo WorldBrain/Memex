@@ -40,8 +40,11 @@ export const SecondaryAction = ({
     disabled?: boolean
     onClick: () => void
 }) => (
-    <StyledSecondaryAction onClick={disabled === true ? undefined : onClick}
-        disabled={disabled} key={`button-${label}`}>
+    <StyledSecondaryAction 
+        onClick={disabled === true ? undefined : onClick}
+        disabled={disabled} 
+        key={`button-${label}`}
+        >
         <StyledSecondaryActionLinkText>{label}</StyledSecondaryActionLinkText>
     </StyledSecondaryAction>
 )

@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color12 from colors;
+
 .settingsSection {
     display: flex;
 }
@@ -14,10 +17,12 @@
 }
 
 .statusLine {
-    composes: subText from '../../../../options/base.css';
+    color: color12;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: 16px;
+    vertical-align: middle;
 }
 
 .nextBackupLine {

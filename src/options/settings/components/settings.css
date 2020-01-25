@@ -32,7 +32,25 @@
     font-size: 16px;
     color: #544960;
     font-weight: 300;
-    margin: 15px 0 30px 0;
+    margin: 10px 0 10px 0;
+}
+
+.infoTextSmall {
+    composes: infoText;
+    font-size: 14px;
+}
+
+.whiteSpacer30 {
+    margin-top: 45px;
+}
+
+.subSubTitle {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 14px;
+    color: #3a2f45;
+    margin-top: 20px;
 }
 
 .block input {
