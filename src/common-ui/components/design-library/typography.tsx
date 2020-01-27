@@ -78,7 +78,7 @@ export const TypographyBody = styled.span`
     font-size: 16px;
     line-height: 19px;
     margin-top: 20px;
-    text-align: left; 
+    text-align: left;
     color: ${colorText};
 `
 
@@ -135,7 +135,7 @@ export const ProgressBox = styled.div`
 export const Warning = styled.p`
     color: red;
     font-weight: 700;
-    font-size: 18;
+    font-size: 18px;
 `
 
 export const WhiteSpacer20 = styled.div`
