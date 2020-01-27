@@ -134,23 +134,33 @@
 }
 
 .annotateIcon {
-        composes: nakedSquareButton from '../../common-ui/elements.css';
-        background-image: url('/img/comment_add.svg');
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: 20px;
-        height: 24px;
-        width: 24px;
+    composes: nakedSquareButton from '../../common-ui/elements.css';
+    background-image: url('/img/comment_add.svg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 20px;
+    height: 24px;
+    width: 24px;
+}
+
+.highlightIcon {
+    composes: nakedSquareButton from '../../common-ui/elements.css';
+    background-image: url('/img/highlightOn.svg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 20px;
+    height: 24px;
+    width: 24px;
 }
 
 .shareIcon {
-        composes: nakedSquareButton from '../../common-ui/elements.css';
-        background-image: url('/img/share.svg');
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: 20px;
-        height: 24px;
-        width: 24px;
+    composes: nakedSquareButton from '../../common-ui/elements.css';
+    background-image: url('/img/share.svg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 20px;
+    height: 24px;
+    width: 24px;
 }
 
 .progressIndicator {
