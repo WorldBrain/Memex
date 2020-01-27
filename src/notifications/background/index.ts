@@ -22,9 +22,10 @@ interface RequiredNotficationDependencies {
 export default class NotificationBackground {
     static LAST_NOTIF_TIME = 'last-notif-proc-timestamp'
 
+    storage: NotificationStorage
+
     private dependencies: RequiredNotficationDependencies &
         OptionalNotificationDependencies
-    private storage: NotificationStorage
 
     constructor(
         options: RequiredNotficationDependencies &
