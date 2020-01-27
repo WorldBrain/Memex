@@ -58,6 +58,7 @@ storiesOf('Sync', module)
     .add('Initial Sync - Modal', () => (
         <Modal large>
             <InitialSyncSetup
+                open={true}
                 getInitialSyncMessage={() =>
                     new Promise(r => setTimeout(r, 1000, 'hello '.repeat(5)))
                 }

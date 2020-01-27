@@ -13,7 +13,6 @@ import {
     TypographyHeadingPage,
     TypographyBodyBlock,
 } from 'src/common-ui/components/design-library/typography'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 const LeftColumnHelpText = () => (
     <ModalColLeft>

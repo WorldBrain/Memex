@@ -24,13 +24,13 @@ export interface InitialSyncSetupDependencies {
     waitForInitialSync: () => Promise<any>
     getInitialSyncMessage: () => Promise<string>
     getSyncEventEmitter: () => TypedEventEmitter<InitialSyncEvents>
+    open: boolean
 }
 
 export default class InitialSyncSetupLogic extends UILogic<
     InitialSyncSetupState,
     InitialSyncSetupEvent
 > {
-    prepared: number = 0
     eventEmitter: TypedEventEmitter<InitialSyncEvents> = null
 
     constructor(private dependencies: InitialSyncSetupDependencies) {

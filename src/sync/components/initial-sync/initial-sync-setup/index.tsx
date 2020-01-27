@@ -9,6 +9,7 @@ import { Success } from 'src/sync/components/initial-sync/initial-sync-setup/ste
 import { Introduction } from 'src/sync/components/initial-sync/initial-sync-setup/steps/Introduction'
 import { PairDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/PairDeviceScreen'
 import { SyncDeviceScreen } from 'src/sync/components/initial-sync/initial-sync-setup/steps/SyncDeviceScreen'
+import Modal from 'src/common-ui/components/Modal'
 
 export default class InitialSyncSetup extends StatefulUIElement<
     InitialSyncSetupDependencies,
@@ -19,13 +20,13 @@ export default class InitialSyncSetup extends StatefulUIElement<
         super(props, new InitialSyncSetupLogic(props))
     }
 
-    render = () => {
+    renderInner = () => {
         switch (this.state.status) {
             case 'introduction':
                 return (
                     <Introduction
                         handleStart={() => this.processEvent('start', {})}
-                        handleBack={this.props.onClose}
+                        handleBack={this.close}
                     />
                 )
             case 'pair':
@@ -46,9 +47,19 @@ export default class InitialSyncSetup extends StatefulUIElement<
                     />
                 )
             case 'done':
-                return <Success onClose={this.props.onClose} />
+                return <Success onClose={this.close} />
             default:
                 throw Error(`Unknown Sync Setup state ${this.state.status}`)
         }
+    }
+
+    close = () => (this.state.status === 'sync' ? false : this.props.onClose())
+
+    render() {
+        return this.props.open || this.state.status === 'sync' ? (
+            <Modal large onClose={this.close}>
+                {this.renderInner()}
+            </Modal>
+        ) : null
     }
 }

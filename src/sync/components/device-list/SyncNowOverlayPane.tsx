@@ -5,6 +5,7 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
+import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 interface Props {
     onClickSync: () => void
     isSyncing: boolean
@@ -59,8 +60,17 @@ export class SyncNowOverlayPaneContainer extends Component<
 
     async componentDidMount() {
         const syncFeatureEnabled = await features.getFeature('Sync')
-        const syncFeatureAllowed = true
-        // const syncFeatureAllowed = this.props.authorizedFeatures.includes('sync') // TODO: Uncomment this to show Sync button based on subscription
+        const syncFeatureAllowed = this.props.authorizedFeatures.includes(
+            'sync',
+        )
+        this.setState({ showSync: syncFeatureAllowed && syncFeatureEnabled })
+    }
+
+    async componentDidUpdate() {
+        const syncFeatureEnabled = await features.getFeature('Sync')
+        const syncFeatureAllowed = this.props.authorizedFeatures.includes(
+            'sync',
+        )
         this.setState({ showSync: syncFeatureAllowed && syncFeatureEnabled })
     }
 
@@ -78,10 +88,13 @@ export class SyncNowOverlayPaneContainer extends Component<
         }
 
         return (
-            <SyncNowOverlayPane
-                onClickSync={this.handleOnClickSync}
-                isSyncing={this.state.isSyncing}
-            />
+            <div>
+                <WhiteSpacer20 />
+                <SyncNowOverlayPane
+                    onClickSync={this.handleOnClickSync}
+                    isSyncing={this.state.isSyncing}
+                />
+            </div>
         )
     }
 }
