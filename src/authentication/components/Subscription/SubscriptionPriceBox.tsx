@@ -7,7 +7,6 @@ import PricingTable, {
     PricingList,
     PricingPrice,
 } from 'src/authentication/components/Subscription/pricing.style'
-import Checkmark from 'src/common-ui/components/design-library/Checkmark'
 
 interface Props {
     onClick?: (...params: any) => any
