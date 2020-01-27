@@ -198,7 +198,7 @@ class TooltipContainer extends React.Component {
     createAnnotation = async e => {
         e.preventDefault()
         e.stopPropagation()
-        await this.props.createAnnotation()
+        await this.props.createAnnotation(document.getSelection())
 
         // Remove onboarding select option notification if it's present
         await conditionallyRemoveSelectOption(
@@ -214,6 +214,16 @@ class TooltipContainer extends React.Component {
             })
         }, 400)
     }
+    createHighlight = async e => {
+        this.setState({
+            tooltipState: 'running',
+        })
+        await this.props.createHighlight(document.getSelection())
+        this.setState({
+            showTooltip: false,
+            tooltipState: 'pristine',
+        })
+    }
 
     openSettings = event => {
         event.preventDefault()
@@ -226,6 +236,7 @@ class TooltipContainer extends React.Component {
                 return (
                     <InitialComponent
                         createLink={this.createLink}
+                        createHighlight={this.createHighlight}
                         createAnnotation={this.createAnnotation}
                     />
                 )

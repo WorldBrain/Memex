@@ -2,6 +2,8 @@ import { remoteFunction } from '../../util/webextensionRPC'
 import { copyToClipboard } from './utils'
 import * as annotations from './annotations'
 import { highlightAnnotations } from '../../sidebar-overlay/content_script/highlight-interactions'
+import { highlightAnnotation } from 'src/direct-linking/content_script/rendering'
+import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 
 export interface Anchor {
     quote: string
@@ -28,11 +30,10 @@ export const createAndCopyDirectLink = async () => {
     return result
 }
 
-export const createAnnotation = async () => {
-    const selection = document.getSelection()
+export const createAnnotation = async (selection?: any) => {
     const range = selection.getRangeAt(0)
 
-    const anchor = await extractAnchor(selection)
+    const anchor = await extractAnchor(selection || document.getSelection())
     await toggleSidebarOverlay({ anchor, override: true })
     selectTextFromRange(range)
 }
@@ -46,24 +47,23 @@ const fetchAndHighlightAnnotations = async () => {
     )
     highlightAnnotations(highlightables, toggleSidebarOverlay)
 }
-export async function createHighlight() {
-    const selection = document.getSelection()
-    const range = selection.getRangeAt(0)
+export async function createHighlight(selection?: any) {
     const url = window.location.href
     const title = document.title
 
-    const anchor = await extractAnchor(selection)
+    const anchor = await extractAnchor(selection || document.getSelection())
     const body = anchor ? anchor.quote : ''
-    await remoteFunction('createAnnotation')({
+
+    const annotation = {
         url,
         title,
         comment: '',
         tags: [],
         body,
         selector: anchor,
-    })
-    selectTextFromRange(range)
-    fetchAndHighlightAnnotations()
+    } as Partial<Annotation>
+    highlightAnnotation({ annotation }, false)
+    await remoteFunction('createAnnotation')(annotation)
 }
 
 export const extractAnchor = async (selection: Selection): Promise<Anchor> => {
