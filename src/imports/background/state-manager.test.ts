@@ -35,7 +35,7 @@ const runSuite = (DATA: TestData) => async () => {
                 bmKeys: new Set(),
             }),
         })
-        state = new State({ itemCreator, searchIndex: {} as any })
+        state = new State({ itemCreator, storageManager: {} as any })
     })
 
     // Clear and force re-calc for each test
@@ -60,7 +60,7 @@ const runSuite = (DATA: TestData) => async () => {
         })
         const localState = new State({
             itemCreator,
-            searchIndex: {} as any,
+            storageManager: {} as any,
         }) as any
         await localState.fetchEsts()
 

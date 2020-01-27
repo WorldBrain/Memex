@@ -151,6 +151,7 @@ export function createBackgroundModules(options: {
             storageManager,
             socialBg: social,
             searchIndex: search.searchIndex,
+            pageStorage: pages.storage,
         }),
         search,
         eventLog: new EventLogBackground({ storageManager }),

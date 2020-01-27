@@ -83,7 +83,7 @@ export default class SyncBackground extends SyncService {
             forceIncrementalSync: bound(
                 this.continuousSync,
                 'forceIncrementalSync',
-            ),
+            ) as () => Promise<void>,
             listDevices: bound(this.syncInfoStorage, 'listDevices'),
             removeDevice: bound(this.syncInfoStorage, 'removeDevice'),
         }

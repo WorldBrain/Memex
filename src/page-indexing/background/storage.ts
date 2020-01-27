@@ -7,7 +7,8 @@ import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbra
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
-import { isTermsField } from '@worldbrain/memex-common/lib/storage/utils'
+import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
+import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 export default class PageStorage extends StorageModule {
     constructor(private options: StorageModuleConstructorArgs) {
@@ -105,29 +106,21 @@ export default class PageStorage extends StorageModule {
             return
         }
 
-        const mergeStringArrays = (left: string[], right: string[]) => {
-            return [...new Set([...left, ...right])]
-        }
-        const mergeTermFields = (fieldName: string, left: any, right: any) => {
-            const oldTerms = left[fieldName] || []
-            const addedTerms = right[fieldName] || []
-            return mergeStringArrays(oldTerms, addedTerms)
-        }
-
         const updates = {}
         for (const fieldName of Object.keys(pageData)) {
-            if (isTermsField({ collection: 'pages', field: fieldName })) {
-                const sourceField = fieldName.slice(0, -'Terms'.length)
-                if (existingPage[sourceField] === pageData[sourceField]) {
+            const termsField = getTermsField('pages', fieldName)
+            if (termsField) {
+                if (existingPage[fieldName] === pageData[fieldName]) {
                     continue
                 }
 
                 const mergedTerms = mergeTermFields(
-                    fieldName,
+                    termsField,
                     pageData,
                     existingPage,
                 )
-                updates[fieldName] = mergedTerms
+                updates[fieldName] = pageData[fieldName]
+                updates[termsField] = mergedTerms
             } else if (
                 typeof existingPage[fieldName] === 'string' ||
                 typeof pageData[fieldName] === 'string'
