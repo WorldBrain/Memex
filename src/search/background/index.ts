@@ -93,19 +93,10 @@ export default class SearchBackground {
             },
             search: {
                 search: this.searchIndex.search,
-                addPageTag: params => {
-                    return this._modifyTag(true, params)
-                },
-                delPageTag: params => {
-                    return this._modifyTag(true, params)
-                },
                 suggest: this.storage.suggest,
                 extendedSuggest: this.storage.suggestExtended,
                 delPages: this.searchIndex.delPages,
 
-                fetchPageTags: async (url: string) => {
-                    return this.options.tags.storage.fetchPageTags({ url })
-                },
                 delPagesByDomain: this.searchIndex.delPagesByDomain,
                 delPagesByPattern: this.searchIndex.delPagesByPattern,
                 getMatchingPageCount: this.searchIndex.getMatchingPageCount,
@@ -242,37 +233,5 @@ export default class SearchBackground {
         }
 
         return this.searchIndex.addBookmark({ url: node.url, tabId })
-    }
-
-    async _modifyTag(
-        shouldAdd: boolean,
-        params: {
-            url: string
-            tag: string
-            tabId?: number
-        },
-    ) {
-        const pageStorage = this.options.pages.storage
-        let page = await pageStorage.getPage(params.url)
-
-        if (page == null || pageIsStub(page)) {
-            page = await createPageViaBmTagActs(pageStorage)({
-                url: params.url,
-                tabId: params.tabId,
-            })
-        }
-
-        // Add new visit if none, else page won't appear in results
-        await pageStorage.addPageVisitIfHasNone(page.url, Date.now())
-
-        if (shouldAdd) {
-            await this.options.tags.storage
-                .addTag({ url: params.url, name: params.tag })
-                .catch(initErrHandler())
-        } else {
-            await this.options.tags.storage
-                .delTag({ url: params.url, name: params.tag })
-                .catch(initErrHandler())
-        }
     }
 }

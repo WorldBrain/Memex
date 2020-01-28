@@ -23,6 +23,7 @@ describe('Search index integration', () => {
         return {
             storageManager,
             searchIndex,
+            pages: backgroundModules.pages,
             tags: backgroundModules.tags,
             search: (params = {}) =>
                 searchIndex.search({
@@ -447,7 +448,8 @@ describe('Search index integration', () => {
         afterEach(() => (jasmine.DEFAULT_TIMEOUT_INTERVAL = origTimeout))
 
         test('add fav-icon', async () => {
-            const { searchIndex, storageManager } = await setupTest()
+            const { searchIndex, storageManager, pages } = await setupTest()
+            pages.storage.disableBlobProcessing = true
             const hostname1 = 'lorem.com'
             const hostname2 = 'sub.lorem.com'
 

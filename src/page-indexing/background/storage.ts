@@ -9,8 +9,11 @@ import { PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
 import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import decodeBlob from 'src/util/decode-blob'
 
 export default class PageStorage extends StorageModule {
+    disableBlobProcessing = false
+
     constructor(private options: StorageModuleConstructorArgs) {
         super(options)
     }
@@ -219,7 +222,7 @@ export default class PageStorage extends StorageModule {
         if (!exists) {
             await this.operation('createFavIcon', {
                 hostname,
-                favIcon,
+                favIcon: await this._maybeDecodeBlob(favIcon),
             })
         }
 
@@ -231,7 +234,7 @@ export default class PageStorage extends StorageModule {
         if (!created) {
             await this.operation('updateFavIcon', {
                 hostname,
-                favIcon,
+                favIcon: await this._maybeDecodeBlob(favIcon),
             })
         }
     }
@@ -253,5 +256,17 @@ export default class PageStorage extends StorageModule {
         await this.operation('deletePage', {
             url: normalizedUrl,
         })
+    }
+
+    async _maybeDecodeBlob(
+        blobOrString: Blob | string,
+    ): Promise<Blob | string> {
+        if (this.disableBlobProcessing) {
+            return blobOrString
+        }
+
+        return typeof blobOrString === 'string'
+            ? decodeBlob(blobOrString)
+            : blobOrString
     }
 }

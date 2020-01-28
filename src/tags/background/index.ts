@@ -8,14 +8,13 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { SearchIndex } from 'src/search'
 import { pageIsStub } from 'src/page-indexing/utils'
 import PageStorage from 'src/page-indexing/background/storage'
-
-interface Tab {
-    tabId: number
-    url: string
-}
+import { TagTab, RemoteTagsInterface } from './types'
+import { bindMethod } from 'src/util/functions'
+import { initErrHandler } from 'src/search/storage'
 
 export default class TagsBackground {
     storage: TagStorage
+    remoteFunctions: RemoteTagsInterface
 
     _createPageFromTab: SearchIndex['createPageFromTab']
 
@@ -35,6 +34,22 @@ export default class TagsBackground {
         this.storage = new TagStorage({
             storageManager: options.storageManager,
         })
+        this.remoteFunctions = {
+            addTag: bindMethod(this, 'addTag'),
+            delTag: bindMethod(this, 'delTag'),
+            addPageTag: params => {
+                return this._modifyTag(true, params)
+            },
+            delPageTag: params => {
+                return this._modifyTag(true, params)
+            },
+            fetchPageTags: async (url: string) => {
+                return this.storage.fetchPageTags({ url })
+            },
+
+            addTagsToOpenTabs: bindMethod(this, 'addTagsToOpenTabs'),
+            delTagsFromOpenTabs: bindMethod(this, 'delTagsFromOpenTabs'),
+        }
         this.tabMan = options.tabMan
         this.windows = options.windows
         this.searchIndex = options.searchIndex
@@ -42,12 +57,7 @@ export default class TagsBackground {
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable({
-            addTag: this.addTag.bind(this),
-            delTag: this.delTag.bind(this),
-            addTagsToOpenTabs: this.addTagsToOpenTabs.bind(this),
-            delTagsFromOpenTabs: this.delTagsFromOpenTabs.bind(this),
-        })
+        makeRemotelyCallable(this.remoteFunctions)
     }
 
     async addTagsToOpenTabs({
@@ -56,7 +66,7 @@ export default class TagsBackground {
         time,
     }: {
         tag: string
-        tabs?: Tab[]
+        tabs?: TagTab[]
         time?: number
     }) {
         if (!tabs) {
@@ -92,7 +102,13 @@ export default class TagsBackground {
         })
     }
 
-    async delTagsFromOpenTabs({ name, tabs }: { name: string; tabs?: Tab[] }) {
+    async delTagsFromOpenTabs({
+        name,
+        tabs,
+    }: {
+        name: string
+        tabs?: TagTab[]
+    }) {
         if (!tabs) {
             const currentWindow = await this.windows.getCurrent()
             tabs = this.tabMan.getTabUrls(currentWindow.id)
@@ -114,5 +130,37 @@ export default class TagsBackground {
 
     async delTag({ tag, url }: { tag: string; url: string }) {
         return this.storage.delTag({ name: tag, url: normalizeUrl(url) })
+    }
+
+    async _modifyTag(
+        shouldAdd: boolean,
+        params: {
+            url: string
+            tag: string
+            tabId?: number
+        },
+    ) {
+        const pageStorage = this.options.pageStorage
+        let page = await pageStorage.getPage(params.url)
+
+        if (page == null || pageIsStub(page)) {
+            page = await this.searchIndex.createPageViaBmTagActs({
+                url: params.url,
+                tabId: params.tabId,
+            })
+        }
+
+        // Add new visit if none, else page won't appear in results
+        await pageStorage.addPageVisitIfHasNone(page.url, Date.now())
+
+        if (shouldAdd) {
+            await this.storage
+                .addTag({ url: params.url, name: params.tag })
+                .catch(initErrHandler())
+        } else {
+            await this.storage
+                .delTag({ url: params.url, name: params.tag })
+                .catch(initErrHandler())
+        }
     }
 }

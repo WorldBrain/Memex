@@ -560,7 +560,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         let suggestions = this.state.filters
 
         try {
-            console.log('fetch sug', this.props.source)
             if (this.props.source === 'user') {
                 suggestions = await this.fetchUserSuggestionsRPC({
                     name: searchVal,
