@@ -6,6 +6,7 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/tags/constants'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export default class TagStorage extends StorageModule {
     static TAGS_COLL = COLLECTION_NAMES.tag
@@ -35,15 +36,19 @@ export default class TagStorage extends StorageModule {
     async fetchPageTags({ url }: { url: string }): Promise<string[]> {
         const tags: Array<{
             name: string
-        }> = await this.operation('findAllTagsOfPage', { url })
+        }> = await this.operation('findAllTagsOfPage', {
+            url: normalizeUrl(url, {}),
+        })
         return tags.map(({ name }) => name)
     }
 
     async addTag({ name, url }: { name: string; url: string }) {
+        url = normalizeUrl(url, {})
         return this.operation('createTag', { name, url })
     }
 
     async delTag({ name, url }: { name: string; url: string }) {
+        url = normalizeUrl(url, {})
         return this.operation('deleteTag', { name, url })
     }
 
