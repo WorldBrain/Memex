@@ -2,9 +2,6 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { copyToClipboard } from './utils'
 import { extractAnchor, selectTextFromRange } from 'src/highlighting/ui'
 
-// FIXME (ch - annotations): replace with typed version
-export const toggleSidebarOverlay = remoteFunction('toggleSidebarOverlay')
-
 export const createAndCopyDirectLink = async () => {
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
