@@ -24,15 +24,14 @@ import {
     removeHighlights,
 } from 'src/highlighting/ui/highlight-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
-import {
-    toggleSidebarOverlay,
-    createAndCopyDirectLink,
-} from 'src/direct-linking/content_script/interactions'
+import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import { KeyboardShortcuts } from './types'
+import { createHighlight } from 'src/highlighting/ui'
 import {
-    createAnnotation as createAnnotationAct,
-    renderHighlightAndCreateAnnotation,
-} from 'src/highlighting/ui'
+    fetchAnnotationsAndHighlight,
+    openSidebarToAnnotateSelection as createAnnotationAct,
+} from 'src/annotations'
+import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 
 export default async function init({
     toolbarNotifications,
@@ -124,7 +123,7 @@ const handleKeyboardShortcuts = ({
                 break
             case highlight.shortcut:
                 if (highlight.enabled) {
-                    await renderHighlightAndCreateAnnotation()
+                    await createHighlight()
                     toggleHighlightsAct()
                 }
                 break
@@ -137,15 +136,8 @@ const handleKeyboardShortcuts = ({
 }
 
 const toggleHighlightsAct = () => {
-    highlightsOn ? removeHighlights() : fetchAndHighlightAnnotations()
+    highlightsOn ? removeHighlights() : fetchAnnotationsAndHighlight()
     highlightsOn = !highlightsOn
-}
-const fetchAndHighlightAnnotations = async () => {
-    const annotations = await remoteFunction('getAllAnnotationsByUrl')(
-        window.location.href,
-    )
-    const highlightables = annotations.filter(annotation => annotation.selector)
-    renderHighlights(highlightables, toggleSidebarOverlay)
 }
 
 const createNewAnnotation = async e => {

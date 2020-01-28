@@ -4,28 +4,25 @@ import OnClickOutside from 'react-onclickoutside'
 
 import Tooltip from './tooltip'
 import {
-    InitialComponent,
-    CreatingLinkComponent,
     CopiedComponent,
-    ErrorComponent,
+    CreatingLinkComponent,
     DoneComponent,
+    ErrorComponent,
+    InitialComponent,
 } from './tooltip-states'
 
 import { conditionallyRemoveSelectOption } from '../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 import { userSelectedText } from '../interactions'
 import * as Mousetrap from 'mousetrap'
-import { remoteFunction } from 'src/util/webextensionRPC'
+import { removeHighlights } from '../../highlighting/ui/highlight-interactions'
 import {
-    renderHighlights,
-    removeHighlights,
-} from '../../highlighting/ui/highlight-interactions'
-import {
+    convertKeyboardEventToKeyString,
     getHighlightsState,
     getKeyboardShortcutsState,
-    convertKeyboardEventToKeyString,
 } from '../utils'
-import { toggleSidebarOverlay } from 'src/direct-linking/content_script/interactions'
+import { fetchAnnotationsAndHighlight } from '../../annotations'
+import { toggleSidebarOverlay } from '../../sidebar-overlay/utils'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -136,20 +133,10 @@ class TooltipContainer extends React.Component {
         }
     }
 
-    fetchAndHighlightAnnotations = async () => {
-        const annotations = await remoteFunction('getAllAnnotationsByUrl')({
-            url: window.location.href,
-        })
-        const highlightables = annotations.filter(
-            annotation => annotation.selector,
-        )
-        renderHighlights(highlightables, toggleSidebarOverlay)
-    }
-
     toggleHighlightsAct = () => {
         this.state.highlightsOn
             ? removeHighlights()
-            : this.fetchAndHighlightAnnotations()
+            : fetchAnnotationsAndHighlight()
         this.setState({ highlightsOn: !this.state.highlightsOn })
     }
 

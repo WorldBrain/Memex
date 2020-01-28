@@ -10,13 +10,11 @@ import {
     shortcuts,
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
-import {
-    renderHighlights,
-    removeHighlights,
-} from '../../../highlighting/ui/highlight-interactions'
+import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
 import * as utils from 'src/content-tooltip/utils'
 import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { fetchAnnotationsAndHighlight } from 'src/annotations'
 const styles = require('./ribbon.css')
 
 export interface Props {
@@ -88,7 +86,7 @@ class Ribbon extends Component<Props, State> {
         await this.props.onInit()
 
         if (this.props.areHighlightsEnabled) {
-            this.fetchAndHighlightAnnotations()
+            fetchAnnotationsAndHighlight()
         }
 
         this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
@@ -128,18 +126,10 @@ class Ribbon extends Component<Props, State> {
         if (this.props.areHighlightsEnabled) {
             removeHighlights()
         } else {
-            this.fetchAndHighlightAnnotations()
+            fetchAnnotationsAndHighlight()
         }
 
         await this.props.handleHighlightsToggle()
-    }
-
-    private fetchAndHighlightAnnotations = async () => {
-        const annotations = await remoteFunction('getAllAnnotationsByUrl')({
-            url: window.location.href,
-        })
-        const highlights = annotations.filter(annotation => annotation.selector)
-        renderHighlights(highlights, this.props.openSidebar)
     }
 
     private getTooltipText(name: string): string {

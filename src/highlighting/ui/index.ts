@@ -1,31 +1,11 @@
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import {
-    renderHighlight,
-    renderHighlights,
-} from 'src/highlighting/ui/highlight-interactions'
-import { toggleSidebarOverlay } from 'src/direct-linking/content_script/interactions'
+import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import * as annotations from 'src/highlighting/ui/anchoring/index'
 import { Anchor, Highlight } from 'src/highlighting/types'
+import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 
-export const createAnnotation = async (selection?: any) => {
-    const range = selection.getRangeAt(0)
-
-    const anchor = await extractAnchor(selection || document.getSelection())
-    await toggleSidebarOverlay({ anchor, override: true })
-    selectTextFromRange(range)
-}
-const fetchAndHighlightAnnotations = async () => {
-    const annotationList = await remoteFunction('getAllAnnotationsByUrl')({
-        url: window.location.href,
-    })
-    const highlightables = annotationList.filter(
-        annotation => annotation.selector,
-    )
-    renderHighlights(highlightables, toggleSidebarOverlay)
-}
-
-export async function renderHighlightAndCreateAnnotation(selection?: any) {
+export async function createHighlight(selection?: any) {
     const url = window.location.href
     const title = document.title
 
@@ -61,6 +41,8 @@ export const extractAnchor = async (selection: Selection): Promise<Anchor> => {
         descriptor,
     }
 }
+
+// FIXME (ch - annotations): Shouldn't need this once we have temporary highlights
 export const selectTextFromRange = (range: Range) => {
     const selection = document.getSelection()
     selection.removeAllRanges()
