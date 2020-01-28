@@ -1,7 +1,10 @@
 import { bodyLoader } from 'src/util/loader'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import * as rendering from './rendering'
-import * as interactions from 'src/sidebar-overlay/content_script/highlight-interactions'
+import {
+    makeHighlightDark,
+    renderHighlight,
+    scrollToHighlight,
+} from 'src/highlighting/ui/highlight-interactions'
 
 export async function init() {
     await bodyLoader()
@@ -18,12 +21,10 @@ browser.runtime.onMessage.addListener(request => {
     }
 
     ;(async () => {
-        const highlightSuccessful = await rendering.highlightAnnotation({
-            annotation: request.annotation,
-        })
+        const highlightSuccessful = await renderHighlight(request)
         if (highlightSuccessful) {
-            interactions.makeHighlightDark(request.annotation)
-            interactions.scrollToHighlight(request.annotation)
+            makeHighlightDark(request.annotation)
+            scrollToHighlight(request.annotation)
         } else {
             setupAnchorFallbackOverlay()
         }

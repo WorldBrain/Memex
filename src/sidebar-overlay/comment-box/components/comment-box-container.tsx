@@ -8,8 +8,8 @@ import * as selectors from '../selectors'
 import State from '../types'
 import { AnnotationHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
-import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { MapDispatchToProps } from '../../types'
+import { Anchor } from 'src/highlighting/types'
 
 const styles = require('./comment-box-container.css')
 
@@ -128,7 +128,4 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     toggleBookmark: () => dispatch(actions.toggleBookmark()),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(CommentBoxContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(CommentBoxContainer)

@@ -15,7 +15,10 @@
 // Parameters:
 // - rangeObject: a Range whose start and end containers are text nodes.
 // - highlightClass: the CSS class the text pieces in the range should get, defaults to 'highlighted-range'.
-const highlightRange = (rangeObject: Range, highlightClass: string) => {
+export const highlightDOMRange = (
+    rangeObject: Range,
+    highlightClass: string,
+) => {
     // Ignore range if empty.
     if (rangeObject.collapsed) {
         return
@@ -226,5 +229,3 @@ const removeHighlight = (highlight: HTMLElement) => {
     // Remove the now empty node
     highlight.remove()
 }
-
-export default highlightRange

@@ -11,9 +11,9 @@ import {
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
 import {
-    highlightAnnotations,
+    renderHighlights,
     removeHighlights,
-} from '../../content_script/highlight-interactions'
+} from '../../../highlighting/ui/highlight-interactions'
 import * as utils from 'src/content-tooltip/utils'
 import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
@@ -139,7 +139,7 @@ class Ribbon extends Component<Props, State> {
             url: window.location.href,
         })
         const highlights = annotations.filter(annotation => annotation.selector)
-        highlightAnnotations(highlights, this.props.openSidebar)
+        renderHighlights(highlights, this.props.openSidebar)
     }
 
     private getTooltipText(name: string): string {

@@ -19,10 +19,10 @@ import {
     selectors as commentBoxselectors,
 } from 'src/sidebar-overlay/comment-box'
 import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
-import { Anchor } from 'src/direct-linking/content_script/interactions'
-import { retryUntilErrorResolves } from '../utils'
 import * as bookmarkActs from 'src/popup/bookmark-button/actions'
 import * as popup from 'src/popup/selectors'
+import { retryUntilErrorResolves } from 'src/util/retry-until'
+import { Anchor } from 'src/highlighting/types'
 
 interface StateProps {
     url: string

@@ -9,10 +9,6 @@ import {
     getHighlightsState,
     setHighlightsState,
 } from 'src/content-tooltip/utils'
-import {
-    highlightAnnotations,
-    removeHighlights,
-} from '../content_script/highlight-interactions'
 
 export const setIsPageFullScreen = createAction<boolean>('setIsPageFullScreen')
 
