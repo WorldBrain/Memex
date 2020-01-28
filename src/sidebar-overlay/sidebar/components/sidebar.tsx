@@ -40,6 +40,7 @@ interface Props {
         annotation: Annotation,
     ) => (e: React.MouseEvent<HTMLElement>) => void
     handleAddCommentBtnClick: () => void
+    removeTempHighlights: () => void
     handleAnnotationBoxMouseEnter: (
         annotation: Annotation,
     ) => (e: Event) => void
@@ -130,6 +131,7 @@ class Sidebar extends React.Component<Props, State> {
                     annot,
                 )}
                 handleBookmarkToggle={this.props.handleBookmarkToggle}
+                removeTempHighlights={this.props.removeTempHighlights}
             />
         ))
 
@@ -228,7 +230,7 @@ class Sidebar extends React.Component<Props, State> {
                             {!this.isCurrentPageSearch ? (
                                 this.renderResults()
                             ) : this.props.isLoading &&
-                            !this.props.appendLoader ? (
+                              !this.props.appendLoader ? (
                                 <Loader />
                             ) : annotations.length === 0 ? (
                                 <EmptyMessage />

@@ -35,6 +35,7 @@ interface OwnProps {
     handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
     handleBookmarkToggle: (url: string) => void
+    removeTempHighlights: () => void
 }
 
 interface DispatchProps {
@@ -179,6 +180,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     private _handleCancelOperation = () => {
         this.setState({ mode: 'default' })
+        this.props.removeTempHighlights()
     }
 
     private handleBookmarkToggle = () => {
@@ -275,7 +277,4 @@ const mapDispatchToProps: MapDispatchToProps<
     handleTagClick: tag => dispatch(filterActs.toggleTagFilter(tag)),
 })
 
-export default connect(
-    null,
-    mapDispatchToProps,
-)(AnnotationBoxContainer)
+export default connect(null, mapDispatchToProps)(AnnotationBoxContainer)

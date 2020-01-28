@@ -23,6 +23,7 @@ interface Props extends Partial<KeyboardActions> {
     removeHighlights: () => void
     makeHighlightMedium: (annotation: Annotation) => void
     removeMediumHighlights: () => void
+    removeTempHighlights: () => void
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     setRibbonSidebarRef: any
     forceExpand?: boolean

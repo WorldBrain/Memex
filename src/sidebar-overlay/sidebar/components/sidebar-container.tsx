@@ -16,6 +16,7 @@ import {
     selectors as searchBar,
 } from 'src/overview/search-bar'
 import { actions as filterActs } from 'src/search-filters'
+import { removeTempHighlights } from 'src/highlighting/ui/highlight-interactions'
 
 interface StateProps {
     isOpen: boolean
@@ -63,6 +64,7 @@ interface OwnProps {
     handleAnnotationBoxMouseEnter?: (annotation: Annotation) => void
     /** Optional callback function that gets called when the mouse leaves the annotation box area. */
     handleAnnotationBoxMouseLeave?: () => void
+    removeTempHighlights?: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -132,6 +134,7 @@ class SidebarContainer extends React.Component<Props> {
                 handleAnnotationBoxMouseLeave={
                     this._handleAnnotationBoxMouseLeave
                 }
+                removeTempHighlights={removeTempHighlights}
             />
         )
     }
@@ -214,7 +217,4 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     },
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(SidebarContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(SidebarContainer)

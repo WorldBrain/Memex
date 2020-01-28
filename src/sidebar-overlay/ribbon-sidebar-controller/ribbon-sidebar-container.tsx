@@ -70,6 +70,7 @@ interface OwnProps extends Partial<KeyboardActions> {
     removeHighlights: () => void
     makeHighlightMedium: (annotation: Annotation) => void
     removeMediumHighlights: () => void
+    removeTempHighlights: () => void
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
 }
 
@@ -114,7 +115,16 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
 
     componentDidUpdate(prevProps: Props) {
         const { annotations, isSidebarOpen } = this.props
-        if (prevProps.annotations !== annotations && isSidebarOpen) {
+        // TODO (ch - annotations) Added here is the length check, so that on the first load of annotations
+        // (from the default of annotations = [], to the hydrated query result), it doesn't trigger this
+        // componentDidUpdate and remove annotations (unnecessary) and remove tmp annotations (bug)
+        // but really we should get rid of this remove all + re-annotate all, and either calculate the difference
+        // or trigger the appropriate add or delete respectively.
+        if (
+            prevProps.annotations.length > 0 &&
+            prevProps.annotations !== annotations &&
+            isSidebarOpen
+        ) {
             this.props.removeHighlights()
             this._highlightAnnotations()
         }
@@ -335,6 +345,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     private _closeSidebarCallback = () => {
         this.props.setActiveAnnotationUrl(null)
         this.props.setHoverAnnotationUrl(null)
+        this.props.removeTempHighlights()
     }
 
     private _goToAnnotation = async (annotation: Annotation) => {
@@ -419,6 +430,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             isRibbonEnabled,
             makeHighlightMedium,
             removeMediumHighlights,
+            removeTempHighlights,
             sortAnnotationsByPosition,
             closeSidebar,
             isCommentSaved,
@@ -454,6 +466,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
                         handleAnnotationBoxMouseEnter={makeHighlightMedium}
                         handleAnnotationBoxMouseLeave={removeMediumHighlights}
                         sortAnnotationsByPosition={sortAnnotationsByPosition}
+                        removeTempHighlights={removeTempHighlights}
                     />
                 )}
             </div>

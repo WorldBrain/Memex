@@ -53,7 +53,7 @@ export async function descriptorToRange({ descriptor }) {
 }
 
 export function markRange({ range, cssClass }) {
-    highlightDOMRange(range, cssClass)
+    return highlightDOMRange(range, cssClass)
 }
 
 function hasAncestor(node, test) {
