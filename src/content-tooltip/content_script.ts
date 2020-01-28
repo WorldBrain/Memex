@@ -18,19 +18,16 @@ import {
     convertKeyboardEventToKeyString,
     runOnScriptShutdown,
 } from './utils'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import {
-    highlightAnnotations,
-    removeHighlights,
-} from 'src/sidebar-overlay/content_script/highlight-interactions'
+import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
-import {
-    toggleSidebarOverlay,
-    createAnnotation as createAnnotationAct,
-    createAndCopyDirectLink,
-    createHighlight,
-} from 'src/direct-linking/content_script/interactions'
+import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import { KeyboardShortcuts } from './types'
+import { createHighlight } from 'src/highlighting/ui'
+import {
+    fetchAnnotationsAndHighlight,
+    openSidebarToAnnotateSelection as createAnnotationAct,
+} from 'src/annotations'
+import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 
 export default async function init({
     toolbarNotifications,
@@ -135,15 +132,8 @@ const handleKeyboardShortcuts = ({
 }
 
 const toggleHighlightsAct = () => {
-    highlightsOn ? removeHighlights() : fetchAndHighlightAnnotations()
+    highlightsOn ? removeHighlights() : fetchAnnotationsAndHighlight()
     highlightsOn = !highlightsOn
-}
-const fetchAndHighlightAnnotations = async () => {
-    const annotations = await remoteFunction('getAllAnnotationsByUrl')(
-        window.location.href,
-    )
-    const highlightables = annotations.filter(annotation => annotation.selector)
-    highlightAnnotations(highlightables, toggleSidebarOverlay)
 }
 
 const createNewAnnotation = async e => {

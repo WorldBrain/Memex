@@ -1,5 +1,4 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { Omit } from './types'
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
@@ -8,6 +7,7 @@ import {
     AnnotSearchParams,
     BackgroundSearchParams,
 } from 'src/search/background/types'
+import { Anchor } from 'src/highlighting/types'
 
 export default class AnnotationsManager {
     private readonly _processEventRPC = remoteFunction('processEvent')

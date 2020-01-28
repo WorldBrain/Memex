@@ -1,16 +1,7 @@
 import * as domTextQuote from 'dom-anchor-text-quote'
 import * as domTextPosition from 'dom-anchor-text-position'
 import * as hypAnchoring from './anchoring/html'
-import highlightRange from './dom-highlight-range'
-
-export function isSelectionWithinCorpus({ selection, corpus }) {
-    if (selection === null || selection.isCollapsed) {
-        return false
-    }
-
-    const range = selection.getRangeAt(0)
-    return isWithinNode(range, corpus)
-}
+import { highlightDOMRange } from '../highlight-dom-range'
 
 export async function selectionToDescriptor({ selection }) {
     if (selection === null || selection.isCollapsed) {
@@ -62,17 +53,7 @@ export async function descriptorToRange({ descriptor }) {
 }
 
 export function markRange({ range, cssClass }) {
-    highlightRange(range, cssClass)
-}
-
-function isWithinNode(range, node) {
-    const nodeRange = document.createRange()
-    nodeRange.selectNode(node)
-
-    return (
-        range.compareBoundaryPoints(Range.START_TO_START, nodeRange) >= 0 &&
-        range.compareBoundaryPoints(Range.END_TO_END, nodeRange) <= 0
-    )
+    return highlightDOMRange(range, cssClass)
 }
 
 function hasAncestor(node, test) {
