@@ -94,6 +94,7 @@ export function createBackgroundModules(options: {
     })
     const tags = new TagsBackground({
         storageManager,
+        pageStorage: pages.storage,
         searchIndex,
         tabMan: activityLogger.tabManager,
         windows: browser.windows,

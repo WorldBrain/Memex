@@ -155,4 +155,68 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
             }
         },
     ),
+
+    backgroundIntegrationTest('should add tags to open tabs', () => {
+        return {
+            steps: [
+                {
+                    execute: async ({ setup }) => {
+                        tags(setup)._createPageFromTab =
+                            setup.backgroundModules.search.searchIndex.createTestPage
+                        await tags(setup).addTagsToOpenTabs({
+                            tag: 'ninja',
+                            tabs: [
+                                { tabId: 1, url: 'http://www.bar.com/eggs' },
+                                { tabId: 2, url: 'http://www.foo.com/spam' },
+                            ],
+                            time: 555,
+                        })
+                    },
+                    postCheck: async ({ setup }) => {
+                        const stored = {
+                            pages: await setup.storageManager
+                                .collection('pages')
+                                .findObjects({}, { order: [['url', 'asc']] }),
+                            tags: await setup.storageManager
+                                .collection('tags')
+                                .findObjects({}, { order: [['url', 'asc']] }),
+                            visits: await setup.storageManager
+                                .collection('visits')
+                                .findObjects({}, { order: [['url', 'asc']] }),
+                        }
+                        expect(stored).toEqual({
+                            pages: [
+                                expect.objectContaining({
+                                    url: 'bar.com/eggs',
+                                }),
+                                expect.objectContaining({
+                                    url: 'foo.com/spam',
+                                }),
+                            ],
+                            tags: [
+                                expect.objectContaining({
+                                    name: 'ninja',
+                                    url: 'bar.com/eggs',
+                                }),
+                                expect.objectContaining({
+                                    name: 'ninja',
+                                    url: 'foo.com/spam',
+                                }),
+                            ],
+                            visits: [
+                                expect.objectContaining({
+                                    url: 'bar.com/eggs',
+                                    time: 555,
+                                }),
+                                expect.objectContaining({
+                                    url: 'foo.com/spam',
+                                    time: 555,
+                                }),
+                            ],
+                        })
+                    },
+                },
+            ],
+        }
+    }),
 ])
