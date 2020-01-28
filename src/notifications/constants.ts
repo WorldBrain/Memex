@@ -1,11 +1,11 @@
 export const NOTIFICATIONS_PAGE_SIZE: number = 20
 export const BACKUP_STATUS_MESSAGES: any = {
     successful_backup: 'Your last backup was successful. Backup again ',
-    unsuccessful_backup_internet: 'Your last backup was unsuccessful.',
+    unsuccessful_backup_internet: 'No internet connection on your last backup.',
     unsuccessful_backup_auto_enabled:
-        'Your last backup was unsuccessful. Retrying soon.',
+        'Your last backup failed. Retrying soon.',
     unsuccessful_backup_drive_size:
-        'Your last backup was unsuccessfull as there was no space in your google drive. Please clear some space and try again.',
+        'Your last backup was unsuccessful as there was no space in your google drive. Please clear some space and try again.',
     subscription_expiration:
         'Your Memex subscription has expired. Renew your subscription else Backups will have to be done manually.',
     upgraded_but_no_first_backup:

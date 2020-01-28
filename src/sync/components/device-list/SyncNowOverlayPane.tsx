@@ -10,6 +10,7 @@ interface Props {
     onClickSync: () => void
     isSyncing: boolean
 }
+const settingsStyle = require('src/options/settings/components/settings.css')
 
 export class SyncNowOverlayPane extends Component<Props> {
     renderSyncNowButton() {
@@ -89,11 +90,29 @@ export class SyncNowOverlayPaneContainer extends Component<
 
         return (
             <div>
-                <WhiteSpacer20 />
-                <SyncNowOverlayPane
-                    onClickSync={this.handleOnClickSync}
-                    isSyncing={this.state.isSyncing}
-                />
+                <div className={settingsStyle.sectionTitle}>
+                    Sync Status
+                </div>
+                <div className={settingsStyle.buttonArea}>
+                    {this.state.isSyncing ? (
+                        <div className={settingsStyle.infoText}>
+                            Sync in Progress
+                        </div>
+                    ):(
+                        <div className={settingsStyle.infoText}>
+                            Not synced yet
+                        </div>
+                    )}
+                    {this.state.syncError && (
+                        <div className={settingsStyle.infoText}>
+                            Error while syncing
+                        </div>
+                    )}
+                    <SyncNowOverlayPane
+                        onClickSync={this.handleOnClickSync}
+                        isSyncing={this.state.isSyncing}
+                    />
+                </div>
             </div>
         )
     }

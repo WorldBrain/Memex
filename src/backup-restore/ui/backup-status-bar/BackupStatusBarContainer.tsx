@@ -111,7 +111,7 @@ class BackupStatusBar extends Component<Props, State> {
         return (
             <StatusBar
                 onMouseEnter={this.onMouseEnterHandler}
-                onMouseLeave={this.onMouseLeaveHandler}
+                onMouseLeave={null}
                 hover={hover}
                 backupTimes={backupTimes}
                 isAutomaticBackupEnabled={isAutomaticBackupEnabled}

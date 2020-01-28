@@ -15,6 +15,7 @@ const StyledPrimaryAction = styled.div`
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;
+    white-space: nowrap;
 `
 const StyledPrimaryActionLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeSmall}px;

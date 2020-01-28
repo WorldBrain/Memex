@@ -7,6 +7,9 @@ import ConfirmModalBtn from '../../../../common-ui/components/ConfirmModalBtn'
 import { BackupTimes } from 'src/backup-restore/types'
 import SyncNowOverlayPaneContainer from 'src/sync/components/device-list/SyncNowOverlayPane'
 const styles = require('./StatusOverlay.css')
+const settingsStyle = require('src/options/settings/components/settings.css')
+import { WhiteSpacer20, WhiteSpacer10} from 'src/common-ui/components/design-library/typography'
+
 
 interface Props {
     header?: string
@@ -63,97 +66,107 @@ export default class StatusOverlay extends PureComponent<Props> {
         return ReactDOM.createPortal(
             <div>
                 <div className={styles.overlay}>
-                    {header && (
-                        <div className={styles.overlayHeader}>{header}</div>
-                    )}
-
-                    {message && (
-                        <div className={styles.description}>
-                            <span className={styles.descInfo}>{message}</span>
+                    <div className={styles.syncSection}>
+                        <SyncNowOverlayPaneContainer />
+                    </div>
+                    <WhiteSpacer20/>
+                    <div className={styles.backupSection}>
+                        <div className={settingsStyle.sectionTitle}>
+                                Backup Status: {header && (
+                                    <span>{header}</span>
+                                )}
                         </div>
-                    )}
-                    {errorMessage && (
-                        <div className={styles.errorMessage}>
-                            <span className={styles.errorDescInfo}>
-                                {errorMessage}
-                            </span>
-                        </div>
-                    )}
-
-                    {this.props.UIstate === 'autoBackup' ? null : (
-                        <div className={styles.timer}>
-                            {lastBackup && (
-                                <div className={styles.backup}>
-                                    <span>Last Backup:</span>
-                                    <span>
-                                        {lastBackup === 'Never' && <b>Never</b>}
-                                        {lastBackup === 'running' && (
-                                            <b>Running</b>
-                                        )}
-                                        {lastBackup !== 'Never' &&
-                                            lastBackup !== 'running' && (
-                                                <b>
-                                                    {moment(
-                                                        lastBackup,
-                                                    ).fromNow()}
-                                                </b>
-                                            )}
-                                    </span>
+                        <WhiteSpacer10/>
+                        <div className={settingsStyle.buttonArea}>
+                            <div className={styles.infoBox}>
+                                <div>
+                                    {message && (
+                                        <div className={styles.description}>
+                                            <span className={settingsStyle.infoText}>{message}</span>
+                                        </div>
+                                    )}
+                                    {(errorMessage) && (
+                                        <div className={styles.showWarning}>
+                                            <span className={styles.showWarningText}>
+                                                {errorMessage}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-
-                            {lastBackup && (
-                                <div className={styles.bottomBorder} />
-                            )}
-
-                            {nextBackup &&
-                                isAutomaticBackupAllowed &&
-                                isAutomaticBackupEnabled && (
+                                {buttonText && (
+                                    <div className={styles.button}>
+                                        <ConfirmModalBtn href={buttonUrl}>
+                                            {buttonText}
+                                        </ConfirmModalBtn>
+                                    </div>
+                                )}
+                                {this.props.children}
+                            </div>
+                        </div>
+                        <WhiteSpacer10/>
+                        {this.props.UIstate === 'autoBackup' ? null : (
+                            <div className={styles.timer}>
+                                {lastBackup && (
                                     <div className={styles.backup}>
-                                        <span>Next Backup:</span>
+                                        <span>Last Backup:</span>
                                         <span>
-                                            <b>
-                                                {moment(nextBackup).fromNow()}
-                                            </b>
+                                            {lastBackup === 'Never' && <b>Never</b>}
+                                            {lastBackup === 'running' && (
+                                                <b>Running</b>
+                                            )}
+                                            {lastBackup !== 'Never' &&
+                                                lastBackup !== 'running' && (
+                                                    <b>
+                                                        {moment(
+                                                            lastBackup,
+                                                        ).fromNow()}
+                                                    </b>
+                                                )}
                                         </span>
                                     </div>
                                 )}
 
-                            {isAutomaticBackupEnabled ? null : (
-                                <div
-                                    className={styles.backup}
-                                    onClick={onAutomaticBackupSelect}
-                                >
-                                    <span>Automatic Backup:</span>
-                                    <ToggleSwitch
-                                        defaultValue={isAutomaticBackupEnabled}
-                                        onChange={
-                                            isAutomaticBackupAllowed
-                                                ? () => onAutomaticBackupSelect
-                                                : () => false
-                                        }
-                                        isChecked={
-                                            isAutomaticBackupAllowed
-                                                ? undefined
-                                                : false
-                                        }
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                {lastBackup && (
+                                    <div className={styles.bottomBorder} />
+                                )}
 
-                    {this.props.children}
+                                {nextBackup &&
+                                    isAutomaticBackupAllowed &&
+                                    isAutomaticBackupEnabled && (
+                                        <div className={styles.backup}>
+                                            <span>Next Backup:</span>
+                                            <span>
+                                                <b>
+                                                    {moment(nextBackup).fromNow()}
+                                                </b>
+                                            </span>
+                                        </div>
+                                    )}
 
-                    {buttonText && (
-                        <div className={styles.button}>
-                            <ConfirmModalBtn href={buttonUrl}>
-                                {buttonText}
-                            </ConfirmModalBtn>
-                        </div>
-                    )}
-
-                    <SyncNowOverlayPaneContainer />
+                                {isAutomaticBackupEnabled ? null : (
+                                    <div
+                                        className={styles.backup}
+                                        onClick={onAutomaticBackupSelect}
+                                    >
+                                        <span>Automatic Backup:</span>
+                                        <ToggleSwitch
+                                            defaultValue={isAutomaticBackupEnabled}
+                                            onChange={
+                                                isAutomaticBackupAllowed
+                                                    ? () => onAutomaticBackupSelect
+                                                    : () => false
+                                            }
+                                            isChecked={
+                                                isAutomaticBackupAllowed
+                                                    ? undefined
+                                                    : false
+                                            }
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>,
             this.overlayRoot,

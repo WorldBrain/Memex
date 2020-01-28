@@ -11,7 +11,7 @@
     top: 50px;
     right: 50px;
     padding: 25px;
-    width: 360px;
+    width: 420px;
     min-height: 166px;
     z-index: 999999;
     background: white;
@@ -31,15 +31,27 @@
     margin-bottom: 15px;
 }
 
+.syncSection {
+    width: 100%;
+}
+
 .description {
     display: flex;
-    text-align: center;
+    text-align: left;
     justify-content: space-between;
-    margin-bottom: 15px;
+
+    & > span {
+        margin: 0 10px 0 0;
+    }
 }
 
 .timer {
     width: 100%;
+}
+
+.infoBox {
+    display: flex;
+    align-items: flex-start;
 }
 
 .errorMessage {
@@ -48,6 +60,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 15px;
+    text-align: left;
     background-color: color12;
     border-radius: radius3;
 }
@@ -56,6 +69,26 @@
     font-weight: 500;
     color: white;
     line-height: 20px;
+}
+
+.showWarning {
+    display: flex;
+    top: 0;
+    right: 0;
+    width: 100%;
+    padding: 15px 40px;
+    background-color: color12;
+    align-items: center;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+
+.showWarningText {
+    font-size: 15px;
+    text-align: center;
+    font-weight: 500;
+    color: white;
 }
 
 .backup {
@@ -94,6 +127,7 @@
 .descInfo {
     font-size: 16px;
     color: color6;
+    text-align: left;
 }
 
 .button {
