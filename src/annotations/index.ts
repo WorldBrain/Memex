@@ -1,6 +1,6 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
-import { extractAnchor } from 'src/highlighting/ui'
+import { createHighlight } from 'src/highlighting/ui'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 
 export const fetchAnnotationsAndHighlight = async () => {
@@ -13,6 +13,6 @@ export const fetchAnnotationsAndHighlight = async () => {
     renderHighlights(highlightables, toggleSidebarOverlay)
 }
 export const openSidebarToAnnotateSelection = async (selection?: any) => {
-    const anchor = await extractAnchor(selection || document.getSelection())
-    await toggleSidebarOverlay({ anchor, override: true })
+    const highlight = await createHighlight(selection, true)
+    await toggleSidebarOverlay({ anchor: highlight.selector, override: true })
 }

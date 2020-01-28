@@ -10,6 +10,7 @@ import { AnnotationHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
 import { MapDispatchToProps } from '../../types'
 import { Anchor } from 'src/highlighting/types'
+import { removeTempHighlights } from 'src/highlighting/ui/highlight-interactions'
 
 const styles = require('./comment-box-container.css')
 
@@ -124,7 +125,10 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
                 props.isSocialPost,
             ),
         ),
-    cancelComment: () => dispatch(actions.cancelComment()),
+    cancelComment: () => {
+        dispatch(actions.cancelComment())
+        removeTempHighlights() // TODO: make this a prop or a dispatch, remove the global
+    },
     toggleBookmark: () => dispatch(actions.toggleBookmark()),
 })
 

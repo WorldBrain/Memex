@@ -18,11 +18,7 @@ import {
     convertKeyboardEventToKeyString,
     runOnScriptShutdown,
 } from './utils'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import {
-    renderHighlights,
-    removeHighlights,
-} from 'src/highlighting/ui/highlight-interactions'
+import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import { KeyboardShortcuts } from './types'

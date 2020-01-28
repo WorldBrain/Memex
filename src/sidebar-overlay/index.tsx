@@ -11,6 +11,7 @@ import {
     makeHighlightMedium,
     removeMediumHighlights,
     sortAnnotationsByPosition,
+    removeTempHighlights,
 } from '../highlighting/ui/highlight-interactions'
 
 export const setupRibbonAndSidebarUI = (
@@ -41,6 +42,7 @@ export const setupRibbonAndSidebarUI = (
             removeHighlights={removeHighlights}
             makeHighlightMedium={makeHighlightMedium}
             removeMediumHighlights={removeMediumHighlights}
+            removeTempHighlights={removeTempHighlights}
             sortAnnotationsByPosition={sortAnnotationsByPosition}
             forceExpand={forceExpandRibbon}
             {...props}

@@ -5,14 +5,19 @@ import * as annotations from 'src/highlighting/ui/anchoring/index'
 import { Anchor, Highlight } from 'src/highlighting/types'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 
-export async function createHighlight(selection?: any) {
+export async function createHighlightAndSave(selection?: any) {
+    // FIXME (ch - annotations): Fix this to a typed version
+    await remoteFunction('createAnnotation')(await createHighlight(selection))
+}
+
+export async function createHighlight(selection?: any, temporary = false) {
     const url = window.location.href
     const title = document.title
 
     const anchor = await extractAnchor(selection || document.getSelection())
     const body = anchor ? anchor.quote : ''
 
-    const annotation = {
+    const highlight = {
         url,
         title,
         comment: '',
@@ -22,14 +27,14 @@ export async function createHighlight(selection?: any) {
     } as Partial<Annotation>
 
     renderHighlight(
-        annotation as Highlight,
+        highlight as Highlight,
         undefined,
         undefined,
         toggleSidebarOverlay,
+        temporary,
     )
 
-    // FIXME (ch - annotations): Fix this to a typed version
-    await remoteFunction('createAnnotation')(annotation)
+    return highlight
 }
 
 export const extractAnchor = async (selection: Selection): Promise<Anchor> => {

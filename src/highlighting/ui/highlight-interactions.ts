@@ -33,8 +33,10 @@ export const renderHighlight = async (
     focusOnAnnotation,
     hoverAnnotationContainer,
     openSidebar,
+    temporary = false,
 ) => {
-    const baseClass = styles['memex-highlight']
+    const baseClass =
+        styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
     try {
         await Raven.context(async () => {
             const descriptor = highlight.anchors
@@ -171,6 +173,12 @@ export const removeMediumHighlights = () => {
     )
     prevHighlights.forEach(highlight => highlight.classList.remove(mediumClass))
 }
+
+export const removeTempHighlights = () => {
+    const baseClass = styles['memex-highlight-tmp']
+    const prevHighlights = document.querySelectorAll(`.${baseClass}`)
+    prevHighlights.forEach(highlight => _removeHighlight(highlight))
+}
 /**
  * Makes the given annotation as a medium highlight.
  * @param {string} url PK of the annotation to make medium
@@ -202,6 +210,8 @@ export const makeHighlightDark = ({ url }: Highlight) => {
  * If `onlyRemoveDarkHighlights` is true, only dark highlights will be removed.
  */
 export const removeHighlights = (onlyRemoveDarkHighlights = false) => {
+    removeTempHighlights()
+
     const baseClass = '.' + styles['memex-highlight']
     const darkClass = onlyRemoveDarkHighlights ? '.' + styles['dark'] : ''
     const highlightClass = `${baseClass}${darkClass}`

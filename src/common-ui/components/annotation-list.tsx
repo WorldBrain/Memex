@@ -8,6 +8,7 @@ import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 
 import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
+import { removeTempHighlights } from 'src/highlighting/ui/highlight-interactions'
 
 const styles = require('./annotation-list.css')
 
@@ -164,6 +165,7 @@ class AnnotationList extends Component<Props, State> {
                 handleDeleteAnnotation={this.handleDeleteAnnotation}
                 handleEditAnnotation={this.handleEditAnnotation}
                 handleBookmarkToggle={this.handleBookmarkToggle}
+                removeTempHighlights={removeTempHighlights}
                 {...annot}
             />
         ))
@@ -212,7 +214,4 @@ const mapDispatchToProps: MapDispatchToProps<
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
 })
 
-export default connect(
-    null,
-    mapDispatchToProps,
-)(AnnotationList)
+export default connect(null, mapDispatchToProps)(AnnotationList)
