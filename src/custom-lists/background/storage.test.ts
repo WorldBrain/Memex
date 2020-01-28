@@ -1,11 +1,8 @@
 import StorageManager from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
-import BookmarksBackground from 'src/bookmarks/background'
-import initStorageManager from '../../search/memory-storex'
 import CustomListBackground from './'
 import * as DATA from './storage.test.data'
-import { createTestPage } from 'src/search/on-demand-indexing'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { SearchIndex } from 'src/search'
 

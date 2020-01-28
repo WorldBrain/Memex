@@ -6,6 +6,7 @@ import TagStorage from './storage'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import { SearchIndex } from 'src/search'
+import { pageIsStub } from 'src/page-indexing/utils'
 
 interface Tabs {
     tabId: number
@@ -55,7 +56,7 @@ export default class TagsBackground {
         tabs.forEach(async tab => {
             let page = await this.searchIndex.getPage(tab.url)
 
-            if (page == null || page.isStub) {
+            if (!page == null || pageIsStub(page)) {
                 page = await this.searchIndex.createPageFromTab({
                     tabId: tab.tabId,
                     url: tab.url,

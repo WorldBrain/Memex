@@ -15,7 +15,6 @@ import {
 import { addBookmark, delBookmark, pageHasBookmark } from './bookmarks'
 // import { addTag, delTag, fetchPageTags } from './tags'
 import { TabManager } from 'src/activity-logger/background'
-import { getPage } from './util'
 import { search, getMatchingPageCount, fullSearch } from './search'
 import {
     createPageFromTab,
@@ -26,6 +25,7 @@ import {
 import { domainHasFavIcon } from './search/fav-icon'
 import PageStorage from 'src/page-indexing/background/storage'
 import BookmarksStorage from 'src/bookmarks/background/storage'
+import { getPage } from './models/page'
 
 export function combineSearchIndex(dependenices: {
     pageStorage: PageStorage

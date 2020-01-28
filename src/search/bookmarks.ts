@@ -2,8 +2,6 @@ import { Bookmarks } from 'webextension-polyfill-ts'
 
 import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { createPageViaBmTagActs } from './on-demand-indexing'
-import { getPage } from './util'
-import { DBGet } from './types'
 import { pageIsStub } from 'src/page-indexing/utils'
 import PageStorage from 'src/page-indexing/background/storage'
 import BookmarksStorage from 'src/bookmarks/background/storage'
