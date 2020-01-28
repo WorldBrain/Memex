@@ -4,7 +4,6 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Thunk } from '../types'
 import { RES_PAGE_SIZE } from './constants'
 import { Annotation, Page } from './types'
-import { Anchor } from 'src/direct-linking/content_script/interactions'
 import * as selectors from './selectors'
 import AnnotationsManager from '../annotations-manager'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -18,6 +17,7 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
+import { Anchor } from 'src/highlighting/types'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')

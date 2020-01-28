@@ -17,9 +17,9 @@ import { userSelectedText } from '../interactions'
 import * as Mousetrap from 'mousetrap'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import {
-    highlightAnnotations,
+    renderHighlights,
     removeHighlights,
-} from '../../sidebar-overlay/content_script/highlight-interactions'
+} from '../../highlighting/ui/highlight-interactions'
 import {
     getHighlightsState,
     getKeyboardShortcutsState,
@@ -143,7 +143,7 @@ class TooltipContainer extends React.Component {
         const highlightables = annotations.filter(
             annotation => annotation.selector,
         )
-        highlightAnnotations(highlightables, toggleSidebarOverlay)
+        renderHighlights(highlightables, toggleSidebarOverlay)
     }
 
     toggleHighlightsAct = () => {

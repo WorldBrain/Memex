@@ -5,13 +5,13 @@ import RibbonSidebarController from './ribbon-sidebar-controller'
 import AnnotationsManager from './annotations-manager'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import {
-    highlightAnnotations,
+    renderHighlights,
     highlightAndScroll,
     removeHighlights,
     makeHighlightMedium,
     removeMediumHighlights,
     sortAnnotationsByPosition,
-} from './content_script/highlight-interactions'
+} from '../highlighting/ui/highlight-interactions'
 
 export const setupRibbonAndSidebarUI = (
     target: HTMLElement,
@@ -36,7 +36,7 @@ export const setupRibbonAndSidebarUI = (
             annotationsManager={annotationsManager}
             handleRemoveRibbon={handleRemoveRibbon}
             insertOrRemoveTooltip={insertOrRemoveTooltip}
-            highlightAll={highlightAnnotations}
+            highlightAll={renderHighlights}
             highlightAndScroll={highlightAndScroll}
             removeHighlights={removeHighlights}
             makeHighlightMedium={makeHighlightMedium}

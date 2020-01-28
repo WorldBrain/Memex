@@ -20,17 +20,19 @@ import {
 } from './utils'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import {
-    highlightAnnotations,
+    renderHighlights,
     removeHighlights,
-} from 'src/sidebar-overlay/content_script/highlight-interactions'
+} from 'src/highlighting/ui/highlight-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 import {
     toggleSidebarOverlay,
-    createAnnotation as createAnnotationAct,
     createAndCopyDirectLink,
-    createHighlight,
 } from 'src/direct-linking/content_script/interactions'
 import { KeyboardShortcuts } from './types'
+import {
+    createAnnotation as createAnnotationAct,
+    renderHighlightAndCreateAnnotation,
+} from 'src/highlighting/ui'
 
 export default async function init({
     toolbarNotifications,
@@ -122,7 +124,7 @@ const handleKeyboardShortcuts = ({
                 break
             case highlight.shortcut:
                 if (highlight.enabled) {
-                    await createHighlight()
+                    await renderHighlightAndCreateAnnotation()
                     toggleHighlightsAct()
                 }
                 break
@@ -143,7 +145,7 @@ const fetchAndHighlightAnnotations = async () => {
         window.location.href,
     )
     const highlightables = annotations.filter(annotation => annotation.selector)
-    highlightAnnotations(highlightables, toggleSidebarOverlay)
+    renderHighlights(highlightables, toggleSidebarOverlay)
 }
 
 const createNewAnnotation = async e => {

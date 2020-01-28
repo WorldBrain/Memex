@@ -5,7 +5,7 @@
 
 import { State as CommentBoxState } from '../comment-box'
 import AnnotationsManager from '../annotations-manager'
-import { Anchor } from 'src/direct-linking/content_script/interactions'
+import { Anchor } from 'src/highlighting/types'
 
 export interface Page {
     url: string | null
