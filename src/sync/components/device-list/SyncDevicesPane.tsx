@@ -158,7 +158,7 @@ export class SyncDevicesPane extends Component<Props, State> {
                         >
                             {this.props.devices.length > 0 ? (
                                 <p className={styles.syncTitle}>
-                                    2/2 Paired Devices
+                                    1 of 1 Paired Devices
                                 </p>
                             ) : (
                                 <p className={styles.syncTitle}>

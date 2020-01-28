@@ -53,6 +53,9 @@
     padding: 15px 40px;
     background-color: color12;
     align-items: center;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    justify-content: center;
 }
 
 .showWarningText {

@@ -138,6 +138,10 @@ export const Warning = styled.p`
     font-size: 18px;
 `
 
+export const WhiteSpacer10 = styled.div`
+    margin-top: 10px;
+`
+
 export const WhiteSpacer20 = styled.div`
     margin-top: 20px;
 `

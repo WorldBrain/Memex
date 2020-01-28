@@ -15,7 +15,8 @@ const StyledCancelAction = styled.div`
     background: ${props => (props.disabled ? colorDisabled : colorError)};
     border-radius: 5px;
     cursor: pointer;
-    display: inline-block;
+    display: flex;
+    align-items: center;
 `
 const StyledCancelActionLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeSmall}px;

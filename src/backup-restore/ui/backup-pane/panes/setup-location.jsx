@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { ProviderList } from '../components/provider-list'
-import { PrimaryButton } from '../../../../common-ui/components/primary-button'
 import {
     DownloadOverlay,
     CopyOverlay,
@@ -13,7 +12,13 @@ import {
     fetchBackupPath,
     changeBackupPath,
 } from '../../utils'
+import {
+    WhiteSpacer30,
+} from 'src/common-ui/components/design-library/typography'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+
+const settingsStyle = require('src/options/settings/components/settings.css')
 
 export default class SetupLocation extends React.Component {
     state = {
@@ -82,11 +87,11 @@ export default class SetupLocation extends React.Component {
 
     render() {
         return (
-            <div>
-                <p className={Styles.header2}>
+            <div className={settingsStyle.section}>
+                <div className={settingsStyle.sectionTitle}>
                     <strong>STEP 1/5: </strong>
                     Where do you want to store your data?
-                </p>
+                </div>
                 <ProviderList
                     className={Styles.selectionlist}
                     backupPath={this.state.backupPath}
@@ -160,16 +165,19 @@ export default class SetupLocation extends React.Component {
                         }
                     }}
                 />
-                <PrimaryButton
-                    disabled={
-                        !this.state.provider ||
-                        (this.state.provider === 'local' &&
-                            !this.state.backupPath)
-                    }
-                    onClick={() => this.props.onChoice(this.state.provider)}
-                >
-                    Continue
-                </PrimaryButton>
+                <WhiteSpacer30/>
+                <div className={settingsStyle.buttonArea}>
+                    <div/>
+                    <PrimaryAction
+                        disabled={
+                            !this.state.provider ||
+                            (this.state.provider === 'local' &&
+                                !this.state.backupPath)
+                        }
+                        onClick={() => this.props.onChoice(this.state.provider)}
+                        label={'Continue'}
+                    />
+                </div>
             </div>
         )
     }

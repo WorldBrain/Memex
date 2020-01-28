@@ -4,6 +4,7 @@ import Styles from './onboarding-backup-mode.css'
 import classNames from 'classnames'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 
+
 export default class OnboardingBackupModeContainer extends React.Component {
     static propTypes = {
         onModeChange: PropTypes.func,
@@ -66,7 +67,7 @@ export function OnboardingBackupMode({
                             onChange={() => onModeChange('manual')}
                         />{' '}
                         <div className={Styles.textBlock}>
-                            <p className={Styles.name}>Manual Backup</p>
+                            <div className={Styles.selectionTitle}>Manual Backup</div>
                             <p className={Styles.subname}>
                                 You need to regularly remember to back up
                                 yourself.
@@ -89,7 +90,7 @@ export function OnboardingBackupMode({
                             onChange={() => onModeChange('automatic')}
                         />{' '}
                         <div className={Styles.textBlock}>
-                            <p className={Styles.name}>Automatic Backup</p>
+                            <div className={Styles.selectionTitle}>Automatic Backup</div>
                             <p className={Styles.subname}>
                                 Worry-free backups every 15 minutes.
                             </p>

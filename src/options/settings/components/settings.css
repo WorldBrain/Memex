@@ -16,9 +16,9 @@
 .sectionTitle {
     font-style: normal;
     font-weight: bold;
-    font-size: 18px;
     line-height: 22px;
     color: #3a2f45;
+    font-size: 18px;
 }
 
 .subname {
@@ -71,6 +71,12 @@
 
 .subHeader {
     composes: subText from 'src/options/base.css';
+}
+
+.buttonArea {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .dropdown {
