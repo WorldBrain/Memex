@@ -96,9 +96,9 @@ export default class TagsBackground {
             }),
         )
 
-        return this.storage.addTagsToOpenTabs({
+        return this.storage.addTagToPages({
             name: tag,
-            urls: tabs.map(tab => normalizeUrl(tab.url)),
+            urls: tabs.map(tab => tab.url),
         })
     }
 
@@ -114,22 +114,22 @@ export default class TagsBackground {
             tabs = this.tabMan.getTabUrls(currentWindow.id)
         }
 
-        return this.storage.delTagsFromOpenTabs({
+        return this.storage.delTagsFromPages({
             name,
-            urls: tabs.map(tab => normalizeUrl(tab.url)),
+            urls: tabs.map(tab => tab.url),
         })
     }
 
     async fetchPageTags({ url }: { url: string }) {
-        return this.storage.fetchPageTags({ url: normalizeUrl(url) })
+        return this.storage.fetchPageTags({ url })
     }
 
     async addTag({ tag, url }: { tag: string; url: string }) {
-        return this.storage.addTag({ name: tag, url: normalizeUrl(url) })
+        return this.storage.addTag({ name: tag, url })
     }
 
     async delTag({ tag, url }: { tag: string; url: string }) {
-        return this.storage.delTag({ name: tag, url: normalizeUrl(url) })
+        return this.storage.delTag({ name: tag, url })
     }
 
     async _modifyTag(
