@@ -21,7 +21,6 @@ import { PrimaryAction } from 'src/common-ui/components/design-library/actions/P
 import { CancelAction } from 'src/common-ui/components/design-library/actions/CancelAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
-
 const styles = require('../../styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./overview.css')

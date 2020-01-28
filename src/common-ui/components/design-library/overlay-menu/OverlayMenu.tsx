@@ -76,24 +76,27 @@ const StyledOverlayMenu = styled.div`
     z-index: 2147483647;
     width: 100%;
     border-radius: 5px;
+    display: flex;
+    align-items: flex-end;
 `
 
 const StyledMenuHeader = styled.div`
     display: flex;
     align-items: center;
     border-radius: 5px;
-    width: 100%;
     justify-content: center;
+    max-width: 280px;
+    min-width: 260px;
 `
 
 const DivOverlayParent = styled.div`
     position: relative;
-    top: -60px;
+    left: -10px;
     border-radius: 5px;
 `
 
 const DivOverlayChild = styled.div`
-    position: absolute;
+    position: relative;
     background: #ffffff;
     box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25);
     border-radius: 5px;

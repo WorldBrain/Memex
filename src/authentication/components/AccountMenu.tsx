@@ -19,6 +19,10 @@ const handleAccountClick = () => {
     window.location.href = 'https://getmemex.com/subscriptions'
 }
 
+const handleUpgradeClick = () => {
+    window.location.href = 'https://getmemex.com/#pricingSection'
+}
+
 const handleLogOutClick = () => {
     return auth.signOut()
 }
@@ -49,6 +53,7 @@ const AccountMenu = (props: UserProps) => {
                     </ButtonSideMenu>
                 }
                 menuItems={[
+                    { label: '⭐️ Upgrade', handler: handleUpgradeClick },
                     { label: 'Account Info', handler: handleAccountClick },
                     { label: 'Log Out', handler: handleLogOutClick },
                 ]}
@@ -60,7 +65,8 @@ const AccountMenu = (props: UserProps) => {
 const BottomLeft = styled.div`
     position: fixed;
     bottom: 1.5em;
-    max-width: 280px;
+    display: flex;
+    width: 400px;
     min-width: 260px;
 `
 
