@@ -19,7 +19,7 @@ const StyledPrimaryAction = styled.div`
 `
 const StyledPrimaryActionLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeSmall}px;
-    color: #545454;
+    color: #2f2f2f;
 `
 export const PrimaryAction = ({
     label,

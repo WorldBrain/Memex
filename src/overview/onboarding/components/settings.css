@@ -5,6 +5,11 @@
     font-family: 'Inter', sans-serif;
 }
 
+.container {
+    display: flex;
+    justify-content: center;
+}
+
 .block input {
     margin-right: 10px;
     vertical-align: middle;
