@@ -111,7 +111,7 @@ class BackupStatusBar extends Component<Props, State> {
         return (
             <StatusBar
                 onMouseEnter={this.onMouseEnterHandler}
-                onMouseLeave={null}
+                onMouseLeave={this.onMouseLeaveHandler}
                 hover={hover}
                 backupTimes={backupTimes}
                 isAutomaticBackupEnabled={isAutomaticBackupEnabled}
@@ -158,13 +158,13 @@ export const calcBackupUIState = (
         ) {
             return {
                 state: 'success',
-                header: 'All good!',
-                message: null,
+                header: 'Backup Status',
+                message: 'All Good!',
             }
         } else {
             return {
                 state: 'fail',
-                header: 'Backup mode: manual',
+                header: 'Backup Status: manual',
                 message: messages.automatic_backup_disabled_first_backup_done,
             }
         }

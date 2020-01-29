@@ -1,11 +1,11 @@
-@import url('/fonts/poppins.css');
+@import url('/fonts/Inter.css');
 
 :root {
     --memex-green: #4abf9d;
 }
 
 .MEMEX_CONTAINER * {
-    font-family: 'poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .MEMEX_CONTAINER {

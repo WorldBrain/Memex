@@ -1,7 +1,9 @@
 import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
+import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import ToggleSwitch from '../../../../common-ui/components/ToggleSwitch'
+import { remoteFunction } from 'src/util/webextensionRPC'
 
 import ConfirmModalBtn from '../../../../common-ui/components/ConfirmModalBtn'
 import { BackupTimes } from 'src/backup-restore/types'
@@ -20,13 +22,18 @@ interface Props {
     buttonUrl?: string
     errorMessage?: string
     buttonText?: string
-    isAutomaticBackupEnabled: boolean
     isAutomaticBackupAllowed: boolean
     onAutomaticBackupSelect: any
     UIstate?: string
 }
 
 export default class StatusOverlay extends PureComponent<Props> {
+
+    state = {
+        hasInitialBackup: false,
+        automaticBackupEnabled: null,
+    }
+
     static DEF_ROOT_EL = 'div'
 
     static defaultProps = {
@@ -39,14 +46,39 @@ export default class StatusOverlay extends PureComponent<Props> {
         this.overlayRoot = document.createElement(props.rootEl)
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         document.body.appendChild(this.overlayRoot)
+        const hasInitialBackup = await remoteFunction('hasInitialBackup')()
+        const automaticBackupEnabled = await remoteFunction(
+            'isAutomaticBackupEnabled',
+        )()
+        
+        this.setState({
+            automaticBackupEnabled,
+            hasInitialBackup,
+        })
     }
 
     componentWillUnmount() {
         if (document.body.contains(this.overlayRoot)) {
             document.body.removeChild(this.overlayRoot)
         }
+    }
+
+    onBackupSetupRequested () {
+        window.open(`${browser.extension.getURL('/options.html')}#/backup`)
+    }
+
+    enableAutomaticBackup() {
+        if (this.state.hasInitialBackup === true) {
+            localStorage.setItem('backup.automatic-backups-enabled', 'true')
+            this.setState({automaticBackupEnabled : true})
+        }
+    }
+
+    disableAutomaticBackup() {
+        localStorage.setItem('backup.automatic-backups-enabled', 'false')
+        this.setState({automaticBackupEnabled : false})
     }
 
     render() {
@@ -59,8 +91,6 @@ export default class StatusOverlay extends PureComponent<Props> {
             errorMessage,
             crossIcon,
             buttonText,
-            isAutomaticBackupEnabled,
-            isAutomaticBackupAllowed,
             onAutomaticBackupSelect,
         } = this.props
         return ReactDOM.createPortal(
@@ -71,37 +101,37 @@ export default class StatusOverlay extends PureComponent<Props> {
                     </div>
                     <WhiteSpacer20/>
                     <div className={styles.backupSection}>
-                        <div className={settingsStyle.sectionTitle}>
-                                Backup Status: {header && (
-                                    <span>{header}</span>
-                                )}
+                        <div className={settingsStyle.buttonArea}>
+                            <div className={settingsStyle.sectionTitle}>
+                                    {header && (
+                                        <span>{header}</span>
+                                    )}
+                            </div>
+                            {this.props.children}
                         </div>
                         <WhiteSpacer10/>
-                        <div className={settingsStyle.buttonArea}>
-                            <div className={styles.infoBox}>
-                                <div>
-                                    {message && (
-                                        <div className={styles.description}>
-                                            <span className={settingsStyle.infoText}>{message}</span>
-                                        </div>
-                                    )}
-                                    {(errorMessage) && (
-                                        <div className={styles.showWarning}>
-                                            <span className={styles.showWarningText}>
-                                                {errorMessage}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                                {buttonText && (
-                                    <div className={styles.button}>
-                                        <ConfirmModalBtn href={buttonUrl}>
-                                            {buttonText}
-                                        </ConfirmModalBtn>
+                        <div className={styles.infoBox}>
+                            <div>
+                                {message && (
+                                    <div className={styles.description}>
+                                        <span className={settingsStyle.infoText}>{message}</span>
                                     </div>
                                 )}
-                                {this.props.children}
+                                {(errorMessage) && (
+                                    <div className={styles.showWarning}>
+                                        <span className={styles.showWarningText}>
+                                            {errorMessage}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
+                            {buttonText && (
+                                <div className={styles.button}>
+                                    <ConfirmModalBtn href={buttonUrl}>
+                                        {buttonText}
+                                    </ConfirmModalBtn>
+                                </div>
+                            )}
                         </div>
                         <WhiteSpacer10/>
                         {this.props.UIstate === 'autoBackup' ? null : (
@@ -131,8 +161,7 @@ export default class StatusOverlay extends PureComponent<Props> {
                                 )}
 
                                 {nextBackup &&
-                                    isAutomaticBackupAllowed &&
-                                    isAutomaticBackupEnabled && (
+                                    this.state.automaticBackupEnabled && (
                                         <div className={styles.backup}>
                                             <span>Next Backup:</span>
                                             <span>
@@ -143,27 +172,24 @@ export default class StatusOverlay extends PureComponent<Props> {
                                         </div>
                                     )}
 
-                                {isAutomaticBackupEnabled ? null : (
-                                    <div
-                                        className={styles.backup}
-                                        onClick={onAutomaticBackupSelect}
-                                    >
-                                        <span>Automatic Backup:</span>
-                                        <ToggleSwitch
-                                            defaultValue={isAutomaticBackupEnabled}
-                                            onChange={
-                                                isAutomaticBackupAllowed
-                                                    ? () => onAutomaticBackupSelect
-                                                    : () => false
-                                            }
-                                            isChecked={
-                                                isAutomaticBackupAllowed
-                                                    ? undefined
-                                                    : false
-                                            }
-                                        />
-                                    </div>
-                                )}
+                                <div
+                                    className={styles.backup}
+                                >
+                                    <span>Automatic Backup:</span>
+                                    <ToggleSwitch
+                                        defaultValue={this.state.automaticBackupEnabled}
+                                        onChange={
+                                            this.state.automaticBackupEnabled
+                                                ? () => this.disableAutomaticBackup()
+                                                : () => this.enableAutomaticBackup()
+                                        }
+                                        isChecked={
+                                            this.state.automaticBackupEnabled
+                                                ? true
+                                                : false
+                                        }
+                                    />
+                                </div>
                             </div>
                         )}
                     </div>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { features, sync } from 'src/util/remote-functions-background'
-import { PrimaryButton } from 'src/common-ui/components/primary-button'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import {
     UserProps,
     withCurrentUser,
@@ -16,15 +16,18 @@ export class SyncNowOverlayPane extends Component<Props> {
     renderSyncNowButton() {
         if (this.props.isSyncing) {
             return (
-                <PrimaryButton disabled={true} onClick={() => false}>
-                    Syncing....
-                </PrimaryButton>
+                <PrimaryAction 
+                    disabled={true} 
+                    onClick={() => false}
+                    label={'Syncing....'}
+                />
             )
         } else {
             return (
-                <PrimaryButton onClick={this.props.onClickSync}>
-                    Sync Now
-                </PrimaryButton>
+                <PrimaryAction 
+                    onClick={this.props.onClickSync}
+                    label={'Sync Now'}
+                />
             )
         }
     }
@@ -90,29 +93,29 @@ export class SyncNowOverlayPaneContainer extends Component<
 
         return (
             <div>
+                <div className={settingsStyle.buttonArea}>
                 <div className={settingsStyle.sectionTitle}>
                     Sync Status
                 </div>
-                <div className={settingsStyle.buttonArea}>
-                    {this.state.isSyncing ? (
-                        <div className={settingsStyle.infoText}>
-                            Sync in Progress
-                        </div>
-                    ):(
-                        <div className={settingsStyle.infoText}>
-                            Not synced yet
-                        </div>
-                    )}
-                    {this.state.syncError && (
-                        <div className={settingsStyle.infoText}>
-                            Error while syncing
-                        </div>
-                    )}
-                    <SyncNowOverlayPane
+                <SyncNowOverlayPane
                         onClickSync={this.handleOnClickSync}
                         isSyncing={this.state.isSyncing}
-                    />
+                />
                 </div>
+                {this.state.isSyncing ? (
+                    <div className={settingsStyle.infoText}>
+                        Sync in Progress
+                    </div>
+                ):(
+                    <div className={settingsStyle.infoText}>
+                        Not synced yet
+                    </div>
+                )}
+                {this.state.syncError && (
+                    <div className={settingsStyle.infoText}>
+                        Error while syncing
+                    </div>
+                )}
             </div>
         )
     }

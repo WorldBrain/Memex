@@ -18,4 +18,6 @@ export const BACKUP_STATUS_MESSAGES: any = {
         'Automatically backs up your data every 15 minutes.',
     automatic_backup_disabled_first_backup_done:
         'All data is only stored on your computer. Remember to regularly back it up.',
+    backupApp_not_running:
+        'The Backup Helper app is not running.',
 }
