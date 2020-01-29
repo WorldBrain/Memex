@@ -10,8 +10,10 @@ import {
 import { injectCSS } from '../search-injection/dom'
 import { conditionallyShowHighlightNotification } from './onboarding-interactions'
 import { TooltipInteractionInterface } from 'src/content-tooltip/types'
-import { createHighlightAndSave } from 'src/highlighting/ui'
-import { openSidebarToAnnotateSelection } from 'src/annotations'
+import {
+    createAnnotationHighlight,
+    createAnnotationDraftInSidebar,
+} from 'src/annotations'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
@@ -73,8 +75,8 @@ export const insertTooltip = async ({ toolbarNotifications }) => {
 
     showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
-        createAnnotation: openSidebarToAnnotateSelection,
-        createHighlight: createHighlightAndSave,
+        createAnnotation: createAnnotationDraftInSidebar,
+        createHighlight: createAnnotationHighlight,
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
             manualOverride = true
