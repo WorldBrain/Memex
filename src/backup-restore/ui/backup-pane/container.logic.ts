@@ -56,39 +56,20 @@ export async function getStartScreen({
     }
 
     if (localStorage.getItem('backup.onboarding')) {
-        if (localStorage.getItem('backup.onboarding.payment')) {
-            localStorage.removeItem('backup.onboarding.payment')
-            if (await remoteFunction('isAutomaticBackupEnabled')()) {
-                return 'onboarding-size'
-            } else {
-                return 'onboarding-how'
-            }
-        } else if (
-            !isAuthenticated &&
-            localStorage.getItem('backup.onboarding.authenticating')
-        ) {
-            localStorage.removeItem('backup.onboarding.authenticating')
-            return 'onboarding-size'
-        } else if (
-            isAuthenticated &&
-            localStorage.getItem('backup.onboarding.authenticating')
-        ) {
-            localStorage.removeItem('backup.onboarding.authenticating')
-            localStorage.removeItem('backup.onboarding')
+        if (isAuthenticated && localStorage.getItem('backup.onboarding.authenticating')) {
             return 'running-backup'
-        } else {
-            localStorage.removeItem('backup.onboarding.where')
+        } else {
             localStorage.removeItem('backup.onboarding')
+            return 'overview'
+            }
+        } else {
+            return 'overview'
         }
 
         // If we're onboarding, but we don't know anything else, let's go to the first screen'
-        return 'onboarding-how'
     }
 
     // N.B. No need to return a backup-running here, since the button on the overview will show 'go to backup' in that case.
-
-    return 'overview'
-}
 
 export async function processEvent({
     state,
@@ -109,7 +90,6 @@ export async function processEvent({
 
     const triggerOnboarding = () => {
         localStorage.setItem('backup.onboarding', true)
-        localStorage.setItem('backup.onboarding.where', true)
         analytics.trackEvent({
             category: 'Backup',
             action: 'onboarding-triggered',
@@ -173,7 +153,6 @@ export async function processEvent({
                     category: 'Backup',
                     action: 'onboarding-where-chosen',
                 })
-                localStorage.removeItem('backup.onboarding.where')
 
                 const isAutomaticBackupEnabled = await remoteFunction(
                     'isAutomaticBackupEnabled',
@@ -185,6 +164,14 @@ export async function processEvent({
                 }
             },
             onChangeLocalLocation: () => {
+                if (
+                    this.backendLocation === 'google-drive' &&
+                    !state.isAuthenticated
+                ) {
+                    return { redirect: { to: 'gdrive-login' } }
+                } else {
+                    return { screen: 'running-backup' }
+                }                
                 return { screen: 'running-backup' }
             },
         },
@@ -209,7 +196,6 @@ export async function processEvent({
                 return { screen: 'onboarding-size' }
             },
             onBackRequested: () => {
-                localStorage.setItem('backup.onboarding.where', true)
                 return { screen: 'onboarding-where' }
             },
         },
@@ -236,6 +222,7 @@ export async function processEvent({
             onFinish: () => {
                 localStorage.removeItem('backup.onboarding')
                 return { screen: 'overview' }
+                localStorage.removeItem('backup.onboarding.authenticating')
             },
         },
         'restore-where': {

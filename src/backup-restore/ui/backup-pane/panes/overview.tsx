@@ -89,6 +89,20 @@ export class OverviewContainer extends Component<Props & UserProps> {
 
     openSubscriptionModal = () => this.setState({ subscribeModal: true })
     closeSubscriptionModal = () => this.setState({ subscribeModal: false })
+     
+    enableAutomaticBackup() {
+        if (this.state.hasInitialBackup === true) {
+            localStorage.setItem('backup.automatic-backups-enabled', 'true')
+            this.setState({automaticBackupEnabled : true})
+        } else {
+            this.props.onBackupSetupRequested()
+        }
+    }
+
+    disableAutomaticBackup() {
+        localStorage.setItem('backup.automatic-backups-enabled', 'false')
+        this.setState({automaticBackupEnabled : false})
+    }
 
     render() {
         const automaticBackupsAllowed = this.props.authorizedFeatures.includes(
@@ -231,9 +245,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                         </span>
                                     </div>
                                     <PrimaryAction
-                                        onClick={
-                                            this.props.onBackupSetupRequested
-                                        }
+                                        onClick={() => this.enableAutomaticBackup()}
                                         label={'Enable'}
                                     />
                                 </div>
@@ -257,7 +269,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                         </span>
                                     </div>
                                     <SecondaryAction
-                                        onClick={this.openSubscriptionModal}
+                                        onClick={() => this.disableAutomaticBackup()}
                                         label={'✓ Enabled'}
                                     />
                                 </div>

@@ -1,16 +1,22 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import OnboardingBackupMode from '../components/onboarding-backup-mode'
-import { PrimaryButton } from '../../../../common-ui/components/primary-button'
 import Styles from '../../styles.css'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 
 class SetupManualOrAutomatic extends React.Component {
-    state = { mode: null }
+    state = {
+        mode: null,
+        subscribeModal: false,
+    }
+
+    openSubscriptionModal = () => this.setState({ subscribeModal: true })
+    closeSubscriptionModal = () => this.setState({ subscribeModal: false })
 
     render() {
         const isAuthorizedForAutomaticBackup = this.props.authorizedFeatures.includes(
@@ -40,23 +46,35 @@ class SetupManualOrAutomatic extends React.Component {
                             {this.state.mode === 'manual' && (
                                 <PrimaryAction
                                     onClick={() => this.props.onChoice({ type: 'manual' })}
-                                    label={'Contine'}
+                                    label={'Continue'}
                                 />
                             )}
-                            {this.state.mode === 'automatic' && (
-                                <PrimaryButton
-                                    disabled={!isAuthorizedForAutomaticBackup}
+                            {(this.state.mode === 'automatic' && isAuthorizedForAutomaticBackup) && (
+                                <PrimaryAction
+                                    disabled={false}
                                     onClick={
                                         isAuthorizedForAutomaticBackup
                                             ? () =>
                                                   this.props.onChoice({ type: 'automatic' })
                                             : () => false
                                     }
-                                    label={'Continue'}
+                                    label={'Next'}
+                                />
+                            )}
+                            {(isAuthorizedForAutomaticBackup === false && this.state.mode === 'automatic') && (
+                                <PrimaryAction
+                                    disabled={false}
+                                    onClick={() => 
+                                        this.openSubscriptionModal()
+                                    }
+                                    label={'Upgrade to Memex Pro'}
                                 />
                             )}
                         </div>
                     </div>
+                    {this.state.subscribeModal && (
+                        <SubscribeModal onClose={this.closeSubscriptionModal} />
+                    )}
                 </div>
             </div>
         )
