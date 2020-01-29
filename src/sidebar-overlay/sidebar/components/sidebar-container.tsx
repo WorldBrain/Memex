@@ -17,6 +17,12 @@ import {
 } from 'src/overview/search-bar'
 import { actions as filterActs } from 'src/search-filters'
 import { removeTempHighlights } from 'src/highlighting/ui/highlight-interactions'
+import {
+    deleteAnnotation,
+    editAnnotation,
+    fetchAnnotations,
+    fetchMoreAnnotations,
+} from 'src/annotations/actions'
 
 interface StateProps {
     isOpen: boolean
@@ -187,10 +193,10 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
         dispatch(commentBoxActions.setShowCommentBox(true)),
     setHoverAnnotationUrl: url => dispatch(actions.setHoverAnnotationUrl(url)),
     handleEditAnnotation: (url, comment, tags) =>
-        dispatch(actions.editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
+        dispatch(editAnnotation(url, comment, tags)),
+    handleDeleteAnnotation: url => dispatch(deleteAnnotation(url)),
     handleScrollPagination: (isSocialSearch?: boolean) =>
-        dispatch(actions.fetchMoreAnnotations(isSocialSearch)),
+        dispatch(fetchMoreAnnotations(isSocialSearch)),
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
     onQueryChange: searchValue =>
         dispatch(searchBarActs.setQueryTagsDomains(searchValue, false)),
@@ -213,7 +219,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
                 title: null,
             }),
         )
-        dispatch(actions.fetchAnnotations())
+        dispatch(fetchAnnotations())
     },
 })
 

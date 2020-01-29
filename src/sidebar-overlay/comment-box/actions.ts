@@ -1,9 +1,9 @@
 import { createAction } from 'redux-act'
 
 import { Thunk } from '../types'
-import { createAnnotation } from '../sidebar/actions'
 import * as selectors from './selectors'
 import { Anchor } from 'src/highlighting/types'
+import { createAnnotation } from 'src/annotations/actions'
 
 export const setShowCommentBox = createAction<boolean>('setShowCommentBox')
 
