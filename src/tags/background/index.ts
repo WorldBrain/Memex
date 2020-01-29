@@ -129,7 +129,6 @@ export default class TagsBackground {
     }
 
     async delTag({ tag, url }: { tag: string; url: string }) {
-        console.log('delTag', tag, url)
         return this.storage.delTag({ name: tag, url })
     }
 

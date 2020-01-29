@@ -49,7 +49,6 @@ export default class TagStorage extends StorageModule {
 
     async delTag({ name, url }: { name: string; url: string }) {
         url = normalizeUrl(url, {})
-        console.log(url)
         return this.operation('deleteTag', { name, url })
     }
 

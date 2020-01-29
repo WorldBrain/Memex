@@ -32,7 +32,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                             })
                         },
                         execute: async ({ setup }) => {
-                            await tags(setup).addTag({
+                            await tags(setup).remoteFunctions.addTag({
                                 tag: DATA.TAG_1,
                                 url: DATA.PAGE_1.fullUrl,
                             })
@@ -85,7 +85,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                     createPageStep,
                     {
                         execute: async ({ setup }) => {
-                            await tags(setup).addTag({
+                            await tags(setup).remoteFunctions.addTag({
                                 tag: DATA.TAG_1,
                                 url: DATA.PAGE_1.fullUrl,
                             })
@@ -127,7 +127,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                             })
                         },
                         execute: async ({ setup }) => {
-                            await tags(setup).delTag({
+                            await tags(setup).remoteFunctions.delTag({
                                 tag: DATA.TAG_1,
                                 url: DATA.PAGE_1.fullUrl,
                             })
@@ -163,7 +163,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                     execute: async ({ setup }) => {
                         tags(setup)._createPageFromTab =
                             setup.backgroundModules.search.searchIndex.createTestPage
-                        await tags(setup).addTagsToOpenTabs({
+                        await tags(setup).remoteFunctions.addTagsToOpenTabs({
                             tag: 'ninja',
                             tabs: [
                                 { tabId: 1, url: 'http://www.bar.com/eggs' },
