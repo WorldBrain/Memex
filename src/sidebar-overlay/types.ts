@@ -18,6 +18,8 @@ import { RootState as searchFiltersState } from 'src/search-filters/types'
 import { State as ResultsState } from 'src/overview/results/reducer'
 import { State as deleteConfModalState } from 'src/overview/delete-confirm-modal/reducer'
 import { State as CustomListsState } from 'src/custom-lists/types'
+import * as React from 'react'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
 
 export default interface RootState {
     ribbon: RibbonState
@@ -53,4 +55,8 @@ export type MapDispatchToProps<DispatchProps, OwnProps> = (
 
 export interface OpenSidebarArgs {
     activeUrl?: string
+}
+
+export interface SidebarContextInterface {
+    highlighter: HighlightInteractionInterface
 }

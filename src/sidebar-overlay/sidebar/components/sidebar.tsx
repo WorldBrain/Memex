@@ -41,7 +41,6 @@ interface Props {
         annotation: Annotation,
     ) => (e: React.MouseEvent<HTMLElement>) => void
     handleAddCommentBtnClick: () => void
-    removeTempHighlights: () => void
     handleAnnotationBoxMouseEnter: (
         annotation: Annotation,
     ) => (e: Event) => void
@@ -132,7 +131,6 @@ class Sidebar extends React.Component<Props, State> {
                     annot,
                 )}
                 handleBookmarkToggle={this.props.handleBookmarkToggle}
-                removeTempHighlights={this.props.removeTempHighlights}
             />
         ))
 

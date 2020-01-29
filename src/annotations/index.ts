@@ -1,7 +1,7 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 import { createHighlight } from 'src/highlighting/ui'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
+import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
 
 // TODO (ch - annotations): If this function is doing to work of getting all the annotations for a tab,
 // TODO (ch - annotations): it can at least also provide it for the annotations in the side bar.
