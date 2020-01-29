@@ -1,13 +1,13 @@
 import { Bookmarks } from 'webextension-polyfill-ts'
 
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { createPageViaBmTagActs } from './on-demand-indexing'
 import { pageIsStub } from 'src/page-indexing/utils'
 import PageStorage from 'src/page-indexing/background/storage'
 import BookmarksStorage from 'src/bookmarks/background/storage'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export const addBookmark = (
-    pageStorage: PageStorage,
+    pages: PageIndexingBackground,
     bookmarksStorage: BookmarksStorage,
     tabManager: TabManager,
 ) => async ({
@@ -19,10 +19,10 @@ export const addBookmark = (
     timestamp?: number
     tabId?: number
 }) => {
-    const page = await pageStorage.getPage(url)
+    const page = await pages.storage.getPage(url)
 
     if (page == null || pageIsStub(page)) {
-        await createPageViaBmTagActs(pageStorage)({ url, tabId })
+        await pages.createPageViaBmTagActs({ url, tabId })
     }
 
     await bookmarksStorage.createBookmarkIfNeeded(page.url, timestamp)

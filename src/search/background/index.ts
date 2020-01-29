@@ -12,9 +12,6 @@ import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { SearchIndex } from '../types'
 import TagsBackground from 'src/tags/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
-import { pageIsStub } from 'src/page-indexing/utils'
-import { createPageViaBmTagActs } from '../on-demand-indexing'
-import { initErrHandler } from '../storage'
 
 export default class SearchBackground {
     storage: SearchStorage

@@ -20,19 +20,23 @@ import initStorex from './search/memex-storex'
 import PageStorage from './page-indexing/background/storage'
 import BookmarksStorage from './bookmarks/background/storage'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
+import { PageIndexingBackground } from './page-indexing/background'
 
 export async function main() {
     const storageManager = initStorex()
-    const pageStorage = new PageStorage({ storageManager })
     const bookmarksStorage = new BookmarksStorage({ storageManager })
+    const pages = new PageIndexingBackground({
+        storageManager,
+        bookmarksStorage,
+    })
     registerModuleMapCollections(storageManager.registry, {
-        pages: pageStorage,
+        pages: pages.storage,
         bookmarks: bookmarksStorage,
     })
     await storageManager.finishInitialization()
     const searchIndex = combineSearchIndex({
         getDb,
-        pageStorage,
+        pages,
         bookmarksStorage,
         tabManager: null,
     })

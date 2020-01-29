@@ -79,11 +79,14 @@ export function createBackgroundModules(options: {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
 
-    const pages = new PageIndexingBackground({ storageManager })
     const bookmarks = new BookmarksBackground({ storageManager })
+    const pages = new PageIndexingBackground({
+        storageManager,
+        bookmarksStorage: bookmarks.storage,
+    })
     const searchIndex = combineSearchIndex({
         getDb: async () => storageManager,
-        pageStorage: pages.storage,
+        pages,
         bookmarksStorage: bookmarks.storage,
         tabManager,
     })

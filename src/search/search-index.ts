@@ -1,76 +1,56 @@
 import { DBGet, SearchIndex } from './types'
-import {
-    addPage,
-    addPageTerms,
-    updateTimestampMeta,
-    addVisit,
-    addFavIcon,
-} from './add'
-import {
-    delPages,
-    delPagesByDomain,
-    delPagesByPattern,
-    dangerousPleaseBeSureDeleteAndRecreateDatabase,
-} from './del'
 import { addBookmark, delBookmark, pageHasBookmark } from './bookmarks'
 // import { addTag, delTag, fetchPageTags } from './tags'
 import { TabManager } from 'src/activity-logger/background'
 import { search, getMatchingPageCount, fullSearch } from './search'
-import {
-    createPageFromTab,
-    createPageFromUrl,
-    createPageViaBmTagActs,
-    createTestPage,
-} from './on-demand-indexing'
-import { domainHasFavIcon } from './search/fav-icon'
-import PageStorage from 'src/page-indexing/background/storage'
 import BookmarksStorage from 'src/bookmarks/background/storage'
 import { getPage } from './models/page'
+import { PageIndexingBackground } from 'src/page-indexing/background'
+import { bindMethod } from 'src/util/functions'
 
 export function combineSearchIndex(dependenices: {
-    pageStorage: PageStorage
+    pages: PageIndexingBackground
     bookmarksStorage: BookmarksStorage
     getDb: DBGet
     tabManager: TabManager
 }): SearchIndex {
+    const pageStorage = dependenices.pages.storage
+
     return {
         search: search(dependenices.getDb),
         getMatchingPageCount: getMatchingPageCount(dependenices.getDb),
         fullSearch: fullSearch(dependenices.getDb),
         getPage: getPage(dependenices.getDb),
-        addPage: addPage(
-            dependenices.pageStorage,
-            dependenices.bookmarksStorage,
-        ),
-        addPageTerms: addPageTerms(dependenices.pageStorage),
-        delPages: delPages(dependenices.getDb),
-        delPagesByDomain: delPagesByDomain(dependenices.getDb),
-        delPagesByPattern: delPagesByPattern(dependenices.getDb),
+        addPage: bindMethod(dependenices.pages, 'addPage'),
+        addPageTerms: bindMethod(dependenices.pages, 'addPageTerms'),
+        delPages: bindMethod(dependenices.pages, 'delPages'),
+        delPagesByDomain: bindMethod(dependenices.pages, 'delPagesByDomain'),
+        delPagesByPattern: bindMethod(dependenices.pages, 'delPagesByPattern'),
         addBookmark: addBookmark(
-            dependenices.pageStorage,
+            dependenices.pages,
             dependenices.bookmarksStorage,
             dependenices.tabManager,
         ),
         delBookmark: delBookmark(
-            dependenices.pageStorage,
+            pageStorage,
             dependenices.bookmarksStorage,
             dependenices.tabManager,
         ),
         pageHasBookmark: pageHasBookmark(dependenices.bookmarksStorage),
-        updateTimestampMeta: updateTimestampMeta(dependenices.pageStorage),
-        addVisit: addVisit(dependenices.pageStorage),
-        addFavIcon: addFavIcon(dependenices.pageStorage),
-        domainHasFavIcon: domainHasFavIcon(dependenices.getDb),
-
-        createPageFromTab: createPageFromTab(dependenices.pageStorage),
-        createPageFromUrl: createPageFromUrl(dependenices.pageStorage),
-        createPageViaBmTagActs: createPageViaBmTagActs(
-            dependenices.pageStorage,
+        updateTimestampMeta: bindMethod(
+            dependenices.pages,
+            'updateTimestampMeta',
         ),
-        createTestPage: createTestPage(dependenices.pageStorage),
+        addVisit: bindMethod(dependenices.pages, 'addVisit'),
+        addFavIcon: bindMethod(dependenices.pages, 'addFavIcon'),
+        domainHasFavIcon: bindMethod(dependenices.pages, 'domainHasFavIcon'),
 
-        dangerousPleaseBeSureDeleteAndRecreateDatabase: dangerousPleaseBeSureDeleteAndRecreateDatabase(
-            dependenices.getDb,
+        createPageFromTab: bindMethod(dependenices.pages, 'createPageFromTab'),
+        createPageFromUrl: bindMethod(dependenices.pages, 'createPageFromUrl'),
+        createPageViaBmTagActs: bindMethod(
+            dependenices.pages,
+            'createPageViaBmTagActs',
         ),
+        createTestPage: bindMethod(dependenices.pages, 'createTestPage'),
     }
 }

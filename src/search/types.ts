@@ -1,6 +1,5 @@
 import Storex, { FindManyOptions } from '@worldbrain/storex'
 import { Bookmarks } from 'webextension-polyfill-ts'
-import { createPageFromTab } from './on-demand-indexing'
 
 export type DBGet = () => Promise<Storex>
 
@@ -153,8 +152,6 @@ export interface SearchIndex {
     createPageFromUrl: (params: PageCreationProps) => Promise<PipelineRes>
     createPageViaBmTagActs: (params: PageCreationProps) => Promise<PipelineRes>
     createTestPage: (params: PageCreationProps) => Promise<PipelineRes>
-
-    dangerousPleaseBeSureDeleteAndRecreateDatabase: () => Promise<void>
 }
 
 export interface PageCreationProps {

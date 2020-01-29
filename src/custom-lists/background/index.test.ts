@@ -219,7 +219,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should create a list, add an entry of an existing page to it and retrieve the list and its pages',
-            { mark: true },
             () => {
                 return {
                     steps: [
@@ -253,13 +252,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     visits: [],
                                 })
                             },
-                            // debug: true,
                             postCheck: async ({ setup }) => {
-                                // console.log(await setup.storageManager.collection('pages').findObjects({}))
-                                // console.log('!!!!')
-                                // console.log('!!!!')
-                                // console.log('!!!!')
-
                                 expect(
                                     await customLists(setup).fetchListById({
                                         id: listId,
