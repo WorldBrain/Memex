@@ -41,7 +41,7 @@ export default class TagsBackground {
                 return this._modifyTag(true, params)
             },
             delPageTag: params => {
-                return this._modifyTag(true, params)
+                return this._modifyTag(false, params)
             },
             fetchPageTags: async (url: string) => {
                 return this.storage.fetchPageTags({ url })
@@ -129,6 +129,7 @@ export default class TagsBackground {
     }
 
     async delTag({ tag, url }: { tag: string; url: string }) {
+        console.log('delTag', tag, url)
         return this.storage.delTag({ name: tag, url })
     }
 
@@ -141,17 +142,20 @@ export default class TagsBackground {
         },
     ) {
         const pageStorage = this.options.pageStorage
-        let page = await pageStorage.getPage(params.url)
 
-        if (page == null || pageIsStub(page)) {
-            page = await this.searchIndex.createPageViaBmTagActs({
-                url: params.url,
-                tabId: params.tabId,
-            })
+        if (shouldAdd) {
+            let page = await pageStorage.getPage(params.url)
+
+            if (page == null || pageIsStub(page)) {
+                page = await this.searchIndex.createPageViaBmTagActs({
+                    url: params.url,
+                    tabId: params.tabId,
+                })
+            }
+
+            // Add new visit if none, else page won't appear in results
+            await pageStorage.addPageVisitIfHasNone(page.url, Date.now())
         }
-
-        // Add new visit if none, else page won't appear in results
-        await pageStorage.addPageVisitIfHasNone(page.url, Date.now())
 
         if (shouldAdd) {
             await this.storage
