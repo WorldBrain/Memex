@@ -2,6 +2,7 @@ import React from 'react'
 
 import { Checkbox, CheckboxToggle } from 'src/common-ui/components'
 import { VISIT_DELAY_RANGE } from 'src/options/settings/constants'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 const styles = require('./search-settings.css')
 
@@ -80,12 +81,10 @@ export default class SearchSettings extends React.PureComponent<Props> {
         return (
             <>
                 <p>{this.renderIndexingMessage()}</p>
-                <a
-                    className={styles.settingsButton}
+                <SecondaryAction
                     onClick={this.props.toggleShowSearchSettings}
-                >
-                    Change settings
-                </a>
+                    label={'Change settings'}
+                />
             </>
         )
     }

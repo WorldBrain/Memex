@@ -119,11 +119,11 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 
-    private searchImage = () => <div className={styles.searchGif} />
-    private annotationImage = () => <div className={styles.annotationGif} />
-    private keyboardImage = () => <div className={styles.keyboardGif} />
-    private sidebarImage = () => <div className={styles.sidebarGif} />
-    private mobileImg = () => <div className={styles.mobileImg} />
+    private searchImage = () => <img src={'/img/searchImage.gif'} className={styles.searchGif} />
+    private annotationImage = () => <img src={'/img/annotationImage.gif'} className={styles.annotationGif} />
+    private keyboardImage = () => <img src={'/img/keyboardImage.gif'} className={styles.keyboardGif} />
+    private sidebarImage = () => <img src={'/img/sidebarImage.gif'} className={styles.sidebarGif} />
+    private mobileImg = () => <img src={'/img/mobileOnboarding.png'} className={styles.mobileImg} />
     private handleTooltipToggle = () => {
         const enabled = !this.state.isTooltipEnabled
         this.processEvent('setTooltipEnabled', { enabled })
@@ -253,10 +253,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                             />
                         )}
                     >
-                        <p className={styles.textDark}>
-                            Learn how everything works and make Memex tailormade
-                            for you.
-                        </p>
                         <img
                             src="img/privacy.svg"
                             alt="A person floating above the earth on a laptop"
@@ -376,20 +372,10 @@ export default class OnboardingScreen extends StatefulUIElement<
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
                     >
-                        <SettingsCheckbox
-                            id="onboarding-keyboard-shortcuts-toggle"
-                            isChecked={this.state.areShortcutsEnabled}
-                            handleChange={this.handleShortcutsToggle}
-                        >
-                            Enable keyboard shortcuts
-                        </SettingsCheckbox>
-                        <a
-                            className={searchSettingsStyles.settingsButton}
-                            href={`${OPTIONS_URL}#/settings`}
-                            target="_blank"
-                        >
-                            Change shortcut settings
-                        </a>
+                        <SecondaryAction
+                            onClick={()=> window.open(`${OPTIONS_URL}#/settings`)}
+                            label={'Change Shortcuts'}
+                        />
                     </OnboardingStep>
                 )
         }

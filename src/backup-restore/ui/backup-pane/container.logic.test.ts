@@ -56,7 +56,6 @@ describe('Backup settings container logic', () => {
         )
         expect(localStorage.popChanges()).toEqual([
             { type: 'set', key: 'backup.onboarding', value: true },
-            { type: 'set', key: 'backup.onboarding.where', value: true },
         ])
         expect(analytics.popNew()).toEqual([
             {
@@ -89,9 +88,6 @@ describe('Backup settings container logic', () => {
                     action: 'onboarding-where-chosen',
                 },
             },
-        ])
-        expect(localStorage.popChanges()).toEqual([
-            { type: 'remove', key: 'backup.onboarding.where' },
         ])
 
         // User chooses manual backup
