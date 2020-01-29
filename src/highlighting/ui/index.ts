@@ -46,10 +46,3 @@ export const extractAnchor = async (selection: Selection): Promise<Anchor> => {
         descriptor,
     }
 }
-
-// FIXME (ch - annotations): Shouldn't need this once we have temporary highlights
-export const selectTextFromRange = (range: Range) => {
-    const selection = document.getSelection()
-    selection.removeAllRanges()
-    selection.addRange(range)
-}
