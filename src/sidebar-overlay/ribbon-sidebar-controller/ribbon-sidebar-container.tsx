@@ -18,7 +18,7 @@ import {
     actions as commentBoxActions,
     selectors as commentBoxselectors,
 } from 'src/sidebar-overlay/comment-box'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 import * as bookmarkActs from 'src/popup/bookmark-button/actions'
 import * as popup from 'src/popup/selectors'
 import { retryUntilErrorResolves } from 'src/util/retry-until'

@@ -2,7 +2,7 @@ import { bodyLoader, interactiveLoader } from 'src/util/loader'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as interactions from './ribbon-interactions'
 import { getSidebarState } from '../utils'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 import { runOnScriptShutdown } from 'src/content-tooltip/utils'
 
 const onKeydown = (

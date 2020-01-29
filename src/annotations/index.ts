@@ -13,8 +13,19 @@ export const fetchAnnotationsAndHighlight = async () => {
         annotation => annotation.selector,
     )
     renderHighlights(highlightables, toggleSidebarOverlay)
+    return highlightables
 }
-export const openSidebarToAnnotateSelection = async (selection?: any) => {
+
+export const createAnnotationDraftInSidebar = async (selection?: any) => {
     const highlight = await createHighlight(selection, true)
     await toggleSidebarOverlay({ anchor: highlight.selector, override: true })
+    return highlight
+}
+
+// FIXME (ch - annotations): Type for selection
+export const createAnnotationHighlight = async (selection?: any) => {
+    const highlight = await createHighlight(selection)
+    // FIXME (ch - annotations): Fix this to a typed remote function version
+    await remoteFunction('createAnnotation')(highlight)
+    return highlight
 }

@@ -4,7 +4,7 @@
  */
 
 import { State as CommentBoxState } from '../comment-box'
-import AnnotationsManager from '../annotations-manager'
+import AnnotationsManager from '../../annotations/annotations-manager'
 import { Anchor } from 'src/highlighting/types'
 
 export interface Page {

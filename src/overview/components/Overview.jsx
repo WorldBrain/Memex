@@ -19,7 +19,7 @@ import Head from '../../options/containers/Head'
 import DragElement from './DragElement'
 import { Tooltip } from '../tooltips'
 import { isDuringInstall } from '../onboarding/utils'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 
 import styles from 'src/styles.css'
@@ -103,7 +103,4 @@ const mapDispatchToProps = dispatch => ({
         dispatch(resultActs.setShowOnboardingMessage(true)),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(Overview)
+export default connect(mapStateToProps, mapDispatchToProps)(Overview)

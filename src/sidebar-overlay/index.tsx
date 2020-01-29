@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
 import RibbonSidebarController from './ribbon-sidebar-controller'
-import AnnotationsManager from './annotations-manager'
+import AnnotationsManager from '../annotations/annotations-manager'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import {
     renderHighlights,

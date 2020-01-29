@@ -22,7 +22,7 @@ import {
 } from 'src/popup/bookmark-button'
 import * as popup from 'src/popup/selectors'
 import { PageList } from 'src/custom-lists/background/types'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar/'
 
 interface StateProps {

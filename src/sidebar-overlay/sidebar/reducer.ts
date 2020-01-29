@@ -7,7 +7,7 @@ import {
     defaultState as defCommentBoxState,
     reducer as commentBoxReducer,
 } from '../comment-box'
-import AnnotationsManager from '../annotations-manager'
+import AnnotationsManager from '../../annotations/annotations-manager'
 import {
     appendAnnotations,
     setAnnotations as setAnnotations1,
