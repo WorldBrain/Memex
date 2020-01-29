@@ -7,7 +7,7 @@ export interface RemoteTagsInterface {
     fetchPageTags(url: string): Promise<string[]>
 
     addTagsToOpenTabs(args: {
-        tag: string
+        name: string
         tabs?: TagTab[]
         time?: number
     }): Promise<void>

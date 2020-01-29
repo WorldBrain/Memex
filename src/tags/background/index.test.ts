@@ -164,7 +164,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Tags', [
                         tags(setup)._createPageFromTab =
                             setup.backgroundModules.search.searchIndex.createTestPage
                         await tags(setup).remoteFunctions.addTagsToOpenTabs({
-                            tag: 'ninja',
+                            name: 'ninja',
                             tabs: [
                                 { tabId: 1, url: 'http://www.bar.com/eggs' },
                                 { tabId: 2, url: 'http://www.foo.com/spam' },

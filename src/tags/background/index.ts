@@ -60,24 +60,20 @@ export default class TagsBackground {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
-    async addTagsToOpenTabs({
-        tag,
-        tabs,
-        time,
-    }: {
-        tag: string
+    async addTagsToOpenTabs(params: {
+        name: string
         tabs?: TagTab[]
         time?: number
     }) {
-        if (!tabs) {
+        if (!params.tabs) {
             const currentWindow = await this.windows.getCurrent()
-            tabs = this.tabMan.getTabUrls(currentWindow.id)
+            params.tabs = this.tabMan.getTabUrls(currentWindow.id)
         }
 
-        time = time || Date.now()
+        params.time = params.time || Date.now()
 
         await Promise.all(
-            tabs.map(async tab => {
+            params.tabs.map(async tab => {
                 let page = await this.searchIndex.getPage(tab.url)
 
                 if (!page || pageIsStub(page)) {
@@ -91,14 +87,14 @@ export default class TagsBackground {
                 // Add new visit if none, else page won't appear in results
                 await this.options.pageStorage.addPageVisitIfHasNone(
                     page.url,
-                    time,
+                    params.time,
                 )
             }),
         )
 
-        return this.storage.addTagToPages({
-            name: tag,
-            urls: tabs.map(tab => tab.url),
+        await this.storage.addTagToPages({
+            name: params.name,
+            urls: params.tabs.map(tab => tab.url),
         })
     }
 
