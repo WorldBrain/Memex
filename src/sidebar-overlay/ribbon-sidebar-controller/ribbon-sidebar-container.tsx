@@ -13,7 +13,7 @@ import SidebarContainer, {
     actions as sidebarActions,
     selectors as sidebarSelectors,
 } from 'src/sidebar-overlay/sidebar'
-import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
+import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import {
     actions as commentBoxActions,
     selectors as commentBoxselectors,
@@ -23,6 +23,7 @@ import * as bookmarkActs from 'src/popup/bookmark-button/actions'
 import * as popup from 'src/popup/selectors'
 import { retryUntilErrorResolves } from 'src/util/retry-until'
 import { Anchor } from 'src/highlighting/types'
+import { Annotation } from 'src/annotations/types'
 
 interface StateProps {
     url: string

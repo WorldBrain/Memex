@@ -2,16 +2,17 @@ import { createReducer } from 'redux-act'
 import { combineReducers } from 'redux'
 
 import * as actions from './actions'
-import State, { Annotation, Page } from './types'
+import State, { Page } from './types'
 import {
     defaultState as defCommentBoxState,
     reducer as commentBoxReducer,
 } from '../comment-box'
 import AnnotationsManager from '../../annotations/annotations-manager'
 import {
-    appendAnnotations,
-    setAnnotations as setAnnotations1,
+    appendAnnotations as appendAnnotationsAction,
+    setAnnotations as setAnnotationsAction,
 } from 'src/annotations/actions'
+import { Annotation } from 'src/annotations/types'
 
 export const defaultState: State = {
     annotationsManager: null,
@@ -73,8 +74,8 @@ const pageReducer = createReducer<Page>(on => {
 }, defaultState.page)
 
 const annotationsReducer = createReducer<Annotation[]>(on => {
-    on(setAnnotations1, setAnnotations)
-    on(appendAnnotations, (state, payload) => [...state, ...payload])
+    on(setAnnotationsAction, setAnnotations)
+    on(appendAnnotationsAction, (state, payload) => [...payload, ...state])
 }, defaultState.annotations)
 
 const activeAnnotationUrlReducer = createReducer<string>(on => {

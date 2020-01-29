@@ -1,5 +1,4 @@
 import { createAction } from 'redux-act'
-import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { Thunk } from 'src/sidebar-overlay/types'
 import * as selectors from 'src/sidebar-overlay/sidebar/selectors'
 import { RES_PAGE_SIZE } from 'src/sidebar-overlay/sidebar/constants'
@@ -13,12 +12,13 @@ import {
     setIsLoading,
     setResultsExhausted,
 } from 'src/sidebar-overlay/sidebar/actions'
+import { Annotation } from 'src/annotations/types'
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 export const appendAnnotations = createAction<Annotation[]>(
     'sidebar/appendAnnotations',
 )
-export const fetchAnnotations: (
+export const fetchAnnotationsForPageUrl: (
     isSocialPost?: boolean,
 ) => Thunk = isSocialPost => async (dispatch, getState) => {
     dispatch(setIsLoading(true))
@@ -28,6 +28,7 @@ export const fetchAnnotations: (
     const annotationsManager = selectors.annotationsManager(state)
     const { url } = selectors.page(state)
 
+    // TODO (ch - annotations): Why would there not be an annotationManager when fetching annotations? This feels like an error/bug
     if (annotationsManager) {
         const annotations = await annotationsManager.fetchAnnotationsWithTags(
             url,
@@ -41,7 +42,7 @@ export const fetchAnnotations: (
 
     dispatch(setIsLoading(false))
 }
-export const fetchMoreAnnotations: (
+export const fetchMoreAnnotationsForPageUrl: (
     isSocialPost?: boolean,
 ) => Thunk = isSocialPost => async (dispatch, getState) => {
     dispatch(setIsLoading(true))
@@ -82,7 +83,7 @@ export const createAnnotation: (
     const { url, title } = selectors.page(state)
 
     if (annotationsManager) {
-        await annotationsManager.createAnnotation({
+        const annotation = await annotationsManager.createAnnotation({
             url,
             title,
             body,
@@ -93,12 +94,28 @@ export const createAnnotation: (
             isSocialPost,
         })
 
+        dispatch(appendAnnotations([annotation]))
+
+        // TODO (ch - annotations): Why was this done previously? just to add the single new annotation?
         // Re-fetch annotations.
-        dispatch(fetchAnnotations(isSocialPost))
+        //dispatch(fetchAnnotationsForPageUrl(isSocialPost))
+
+        //TODO (ch - annotations): ( need to dispatch the append action here)
 
         dispatch(checkAndSetCongratsMessage())
     }
 }
+
+/* export const updateAnnotationState: (
+    isSocialPost?: boolean,
+) => Thunk = (annotationId, annotation) => async (dispatch, getState) => {
+    const state = getState()
+    const annotationsManager = selectors.annotationsManager(state)
+    const { url } = selectors.page(state)
+
+    dispatch(setAnnotations({ ...state., annotation }))
+} */
+
 export const editAnnotation: (
     url: string,
     comment: string,

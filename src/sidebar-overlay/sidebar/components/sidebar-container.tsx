@@ -8,7 +8,7 @@ import {
     selectors as commentBoxSelectors,
 } from '../../comment-box'
 import Sidebar from './sidebar'
-import { Annotation, Page } from '../types'
+import { Page } from '../types'
 import RootState, { MapDispatchToProps } from '../../types'
 import AnnotationsManager from '../../../annotations/annotations-manager'
 import {
@@ -20,9 +20,10 @@ import { removeTempHighlights } from 'src/highlighting/ui/highlight-interactions
 import {
     deleteAnnotation,
     editAnnotation,
-    fetchAnnotations,
-    fetchMoreAnnotations,
+    fetchAnnotationsForPageUrl,
+    fetchMoreAnnotationsForPageUrl,
 } from 'src/annotations/actions'
+import { Annotation } from 'src/annotations/types'
 
 interface StateProps {
     isOpen: boolean
@@ -196,7 +197,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
         dispatch(editAnnotation(url, comment, tags)),
     handleDeleteAnnotation: url => dispatch(deleteAnnotation(url)),
     handleScrollPagination: (isSocialSearch?: boolean) =>
-        dispatch(fetchMoreAnnotations(isSocialSearch)),
+        dispatch(fetchMoreAnnotationsForPageUrl(isSocialSearch)),
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
     onQueryChange: searchValue =>
         dispatch(searchBarActs.setQueryTagsDomains(searchValue, false)),
@@ -219,7 +220,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
                 title: null,
             }),
         )
-        dispatch(fetchAnnotations())
+        dispatch(fetchAnnotationsForPageUrl())
     },
 })
 

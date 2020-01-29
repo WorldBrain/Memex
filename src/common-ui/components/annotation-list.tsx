@@ -5,11 +5,11 @@ import cx from 'classnames'
 import { MapDispatchToProps } from 'src/sidebar-overlay/types'
 import * as actions from 'src/sidebar-overlay/sidebar/actions'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
-import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 
 import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 import { removeTempHighlights } from 'src/highlighting/ui/highlight-interactions'
 import { deleteAnnotation, editAnnotation } from 'src/annotations/actions'
+import { Annotation } from 'src/annotations/types'
 
 const styles = require('./annotation-list.css')
 

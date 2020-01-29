@@ -14,7 +14,10 @@ import {
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
-import { fetchAnnotations, setAnnotations } from 'src/annotations/actions'
+import {
+    fetchAnnotationsForPageUrl,
+    setAnnotations,
+} from 'src/annotations/actions'
 
 // Remote function declarations.
 const processEventRPC = remoteFunction('processEvent')
@@ -82,7 +85,7 @@ export const openSidebar: (
 
     const annots = selectors.annotations(getState())
     if (forceFetch || !annots.length) {
-        await dispatch(fetchAnnotations(isSocialPost))
+        await dispatch(fetchAnnotationsForPageUrl(isSocialPost))
     }
 
     if (activeUrl) {

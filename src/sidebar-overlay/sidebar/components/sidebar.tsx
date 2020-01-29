@@ -6,7 +6,7 @@ import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
-import { Annotation, Page } from '../types'
+import { Page } from '../types'
 import { openSettings } from '../../utils'
 import FiltersSidebarContainer from './filters-sidebar-container'
 import ResultsContainer from './results-container'
@@ -16,6 +16,7 @@ import SearchTypeSwitch from './search-type-switch'
 import PageInfo from './page-info'
 import cx from 'classnames'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import { Annotation } from 'src/annotations/types'
 
 const styles = require('./sidebar.css')
 

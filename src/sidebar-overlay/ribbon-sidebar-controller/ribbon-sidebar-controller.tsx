@@ -5,7 +5,8 @@ import configureStore from '../store'
 import RibbonSidebarContainer from './ribbon-sidebar-container'
 import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
+import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
+import { Annotation } from 'src/annotations/types'
 
 const store = configureStore()
 
