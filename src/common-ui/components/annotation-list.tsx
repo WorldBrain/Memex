@@ -9,6 +9,7 @@ import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 
 import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 import { removeTempHighlights } from 'src/highlighting/ui/highlight-interactions'
+import { deleteAnnotation, editAnnotation } from 'src/annotations/actions'
 
 const styles = require('./annotation-list.css')
 
@@ -209,8 +210,8 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps
 > = dispatch => ({
     handleEditAnnotation: (url, comment, tags) =>
-        dispatch(actions.editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
+        dispatch(editAnnotation(url, comment, tags)),
+    handleDeleteAnnotation: url => dispatch(deleteAnnotation(url)),
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
 })
 

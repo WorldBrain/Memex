@@ -5,7 +5,7 @@ import 'rxjs/add/operator/filter'
 import { acts as searchBarActs } from 'src/overview/search-bar'
 import { acts as resultActs } from 'src/overview/results'
 import { actions as filterActs } from 'src/search-filters'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
+import { searchAnnotations } from 'src/annotations/actions'
 
 const searchUpdateActions = [
     searchBarActs.setQuery.getType(),
@@ -49,4 +49,4 @@ export const refreshSidebarSearchResultsUponQueryChange = action$ =>
     action$
         .filter(action => searchUpdateActions.includes(action.type))
         .debounceTime(500) // wait until typing stops for 500ms
-        .map(() => sidebarActs.searchAnnotations())
+        .map(() => searchAnnotations())
