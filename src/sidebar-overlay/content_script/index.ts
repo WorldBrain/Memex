@@ -4,23 +4,24 @@ import * as interactions from './ribbon-interactions'
 import { getSidebarState } from '../utils'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { runOnScriptShutdown } from 'src/content-tooltip/utils'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
 
-const onKeydown = (
-    e: KeyboardEvent,
-    {
-        annotationsManager,
-        toolbarNotifications,
-    }: {
-        annotationsManager: AnnotationsManager
-        toolbarNotifications: ToolbarNotifications
-    },
-) => {
-    if (e.key !== 'm') {
-        return
-    }
-
-    interactions.insertRibbon({ annotationsManager, toolbarNotifications })
+interface ContentScriptProps {
+    annotationsManager: AnnotationsManager
+    toolbarNotifications: ToolbarNotifications
+    highlighter: HighlightInteractionInterface
 }
+
+// TODO (ch - annotations extra) - huh? If commenting this out doesn't break anything remove it
+// const onKeydown = (
+//     e: KeyboardEvent,
+//     props: ContentScriptProps,
+// ) => {
+//     if (e.key !== 'm') {
+//         return
+//     }
+//     interactions.insertRibbon(props)
+// }
 
 const initRibbonAndSidebar = async ({
     annotationsManager,
@@ -36,16 +37,18 @@ const initRibbonAndSidebar = async ({
     if (!isSidebarEnabled) {
         return
     }
-
-    const onKeydownWrapper = (e: KeyboardEvent) => {
-        onKeydown(e, { annotationsManager, toolbarNotifications })
-    }
+    // // TODO (ch - annotations extra) - huh?
+    // const onKeydownWrapper = (e: KeyboardEvent) => {
+    //     onKeydown(e, { annotationsManager, toolbarNotifications })
+    // }
 
     await interactiveLoader()
-    document.addEventListener('keydown', onKeydownWrapper, false)
+    // TODO (ch - annotations extra) - huh?
+    // document.addEventListener('keydown', onKeydownWrapper, false)
 
     await bodyLoader()
-    document.removeEventListener('keydown', onKeydownWrapper, false)
+    // TODO (ch - annotations extra) - huh?
+    // document.removeEventListener('keydown', onKeydownWrapper, false)
 
     interactions.insertRibbon({ annotationsManager, toolbarNotifications })
 }

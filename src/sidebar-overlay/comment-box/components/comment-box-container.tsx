@@ -9,8 +9,9 @@ import State from '../types'
 import { AnnotationHighlight } from '../../components'
 import CommentBoxForm from './comment-box-form'
 import { MapDispatchToProps } from '../../types'
-import { Anchor } from 'src/highlighting/types'
-import { removeTempHighlights } from 'src/highlighting/ui/highlight-interactions'
+import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
+import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
+import { createHighlight } from 'src/highlighting/ui'
 
 const styles = require('./comment-box-container.css')
 
@@ -37,6 +38,7 @@ interface OwnProps {
     env?: 'inpage' | 'overview'
     isSocialPost?: boolean
     onSaveCb?: () => void
+    highlighter: HighlightInteractionInterface
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -64,13 +66,17 @@ class CommentBoxContainer extends React.PureComponent<Props> {
         saveComment(anchor, commentText.trim(), tags, isCommentBookmarked)
     }
 
+    cancelComment = async e => {
+        this.props.cancelComment()
+        this.props.highlighter.removeTempHighlights()
+    }
+
     render() {
         const {
             env,
             anchor,
             commentText,
             handleCommentTextChange,
-            cancelComment,
             isCommentBookmarked,
             toggleBookmark,
         } = this.props
@@ -88,7 +94,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
                     commentText={commentText}
                     handleCommentTextChange={handleCommentTextChange}
                     saveComment={this.save}
-                    cancelComment={cancelComment}
+                    cancelComment={this.cancelComment}
                     isCommentBookmarked={isCommentBookmarked}
                     toggleBookmark={toggleBookmark}
                     isAnnotation={true} // TODO: we need to pass the right state here
@@ -115,7 +121,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
 ) => ({
     handleCommentTextChange: comment =>
         dispatch(actions.setCommentText(comment)),
-    saveComment: (anchor, commentText, tags, bookmarked) =>
+    saveComment: async (anchor, commentText, tags, bookmarked) => {
         dispatch(
             actions.saveComment(
                 anchor,
@@ -124,12 +130,14 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
                 bookmarked,
                 props.isSocialPost,
             ),
-        ),
+        )
+    },
     cancelComment: () => {
         dispatch(actions.cancelComment())
-        removeTempHighlights() // TODO: make this a prop or a dispatch, remove the global
     },
     toggleBookmark: () => dispatch(actions.toggleBookmark()),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(CommentBoxContainer)
+export default withSidebarContext(
+    connect(mapStateToProps, mapDispatchToProps)(CommentBoxContainer),
+)

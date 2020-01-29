@@ -2,7 +2,7 @@ import { createAction } from 'redux-act'
 import { Thunk } from 'src/sidebar-overlay/types'
 import * as selectors from 'src/sidebar-overlay/sidebar/selectors'
 import { RES_PAGE_SIZE } from 'src/sidebar-overlay/sidebar/constants'
-import { Anchor } from 'src/highlighting/types'
+import { Anchor, Highlight } from 'src/highlighting/types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import {
@@ -13,6 +13,9 @@ import {
     setResultsExhausted,
 } from 'src/sidebar-overlay/sidebar/actions'
 import { Annotation } from 'src/annotations/types'
+import { createHighlight } from 'src/highlighting/ui'
+import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
+import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 export const appendAnnotations = createAction<Annotation[]>(
@@ -96,11 +99,12 @@ export const createAnnotation: (
 
         dispatch(appendAnnotations([annotation]))
 
-        // TODO (ch - annotations): Why was this done previously? just to add the single new annotation?
-        // Re-fetch annotations.
-        //dispatch(fetchAnnotationsForPageUrl(isSocialPost))
-
-        //TODO (ch - annotations): ( need to dispatch the append action here)
+        renderHighlight(
+            annotation as Highlight,
+            undefined,
+            undefined,
+            toggleSidebarOverlay,
+        )
 
         dispatch(checkAndSetCongratsMessage())
     }

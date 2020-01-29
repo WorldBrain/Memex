@@ -1,8 +1,8 @@
-import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import * as annotations from 'src/highlighting/ui/anchoring/index'
 import { Anchor, Highlight } from 'src/highlighting/types'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 import { Annotation } from 'src/annotations/types'
+import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 
 export async function createHighlight(selection?: any, temporary = false) {
     const url = window.location.href

@@ -7,6 +7,7 @@ import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import { Annotation } from 'src/annotations/types'
+import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 
 const store = configureStore()
 
@@ -14,18 +15,6 @@ interface Props extends Partial<KeyboardActions> {
     annotationsManager: AnnotationsManager
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
-    highlightAll: (
-        highlights: Annotation[],
-        openSidebar: (args: { activeUrl?: string }) => void,
-        focusOnAnnotation: (url: string) => void,
-        hoverAnnotationContainer: (url: string) => void,
-    ) => void
-    highlightAndScroll: (annotation: Annotation) => number
-    removeHighlights: () => void
-    makeHighlightMedium: (annotation: Annotation) => void
-    removeMediumHighlights: () => void
-    removeTempHighlights: () => void
-    sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     setRibbonSidebarRef: any
     forceExpand?: boolean
 }

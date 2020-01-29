@@ -4,16 +4,14 @@ import * as ReactDOM from 'react-dom'
 import RibbonSidebarController from './ribbon-sidebar-controller'
 import AnnotationsManager from '../annotations/annotations-manager'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
-import {
-    renderHighlights,
-    highlightAndScroll,
-    removeHighlights,
-    makeHighlightMedium,
-    removeMediumHighlights,
-    sortAnnotationsByPosition,
-    removeTempHighlights,
-} from '../highlighting/ui/highlight-interactions'
+import { HighlightInteraction } from '../highlighting/ui/highlight-interactions'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { SidebarContextInterface } from 'src/sidebar-overlay/types'
 
+export const SidebarContext = React.createContext<SidebarContextInterface>(null)
+export const sidebarDependencies = {
+    highlighter: new HighlightInteraction(),
+}
 export const setupRibbonAndSidebarUI = (
     target: HTMLElement,
     {
@@ -32,21 +30,16 @@ export const setupRibbonAndSidebarUI = (
     } & Partial<KeyboardActions>,
 ) => {
     ReactDOM.render(
-        <RibbonSidebarController
-            setRibbonSidebarRef={setRibbonSidebarRef}
-            annotationsManager={annotationsManager}
-            handleRemoveRibbon={handleRemoveRibbon}
-            insertOrRemoveTooltip={insertOrRemoveTooltip}
-            highlightAll={renderHighlights}
-            highlightAndScroll={highlightAndScroll}
-            removeHighlights={removeHighlights}
-            makeHighlightMedium={makeHighlightMedium}
-            removeMediumHighlights={removeMediumHighlights}
-            removeTempHighlights={removeTempHighlights}
-            sortAnnotationsByPosition={sortAnnotationsByPosition}
-            forceExpand={forceExpandRibbon}
-            {...props}
-        />,
+        <SidebarContext.Provider value={sidebarDependencies}>
+            <RibbonSidebarController
+                setRibbonSidebarRef={setRibbonSidebarRef}
+                annotationsManager={annotationsManager}
+                handleRemoveRibbon={handleRemoveRibbon}
+                insertOrRemoveTooltip={insertOrRemoveTooltip}
+                forceExpand={forceExpandRibbon}
+                {...props}
+            />
+        </SidebarContext.Provider>,
         target,
     )
 }

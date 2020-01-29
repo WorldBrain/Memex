@@ -18,7 +18,6 @@ import {
     convertKeyboardEventToKeyString,
     runOnScriptShutdown,
 } from './utils'
-import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import { KeyboardShortcuts } from './types'
@@ -28,6 +27,7 @@ import {
     createAnnotationDraftInSidebar as createAnnotationAct,
 } from 'src/annotations'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
+import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
 
 export default async function init({
     toolbarNotifications,

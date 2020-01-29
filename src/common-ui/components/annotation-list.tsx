@@ -7,9 +7,10 @@ import * as actions from 'src/sidebar-overlay/sidebar/actions'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 
 import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
-import { removeTempHighlights } from 'src/highlighting/ui/highlight-interactions'
 import { deleteAnnotation, editAnnotation } from 'src/annotations/actions'
 import { Annotation } from 'src/annotations/types'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 
 const styles = require('./annotation-list.css')
 
@@ -23,6 +24,7 @@ interface OwnProps {
     pageUrl: string
     /** Opens the annotation sidebar with all of the annotations */
     openAnnotationSidebar: MouseEventHandler
+    highlighter: HighlightInteractionInterface
 }
 
 interface DispatchProps {
@@ -46,7 +48,7 @@ interface State {
 
 class AnnotationList extends Component<Props, State> {
     state = {
-        /* The intial value is set to the isExpandedOverride which is
+        /* The initial value is set to the isExpandedOverride which is
         fetched from localStorage. */
         isExpanded: this.props.isExpandedOverride,
         prevIsExpandedOverride: this.props.isExpandedOverride,
@@ -108,6 +110,7 @@ class AnnotationList extends Component<Props, State> {
         this.setState({
             annotations: newAnnotations,
         })
+        this.props.highlighter.removeTempHighlights()
     }
 
     private handleDeleteAnnotation = (url: string) => {
@@ -166,7 +169,6 @@ class AnnotationList extends Component<Props, State> {
                 handleDeleteAnnotation={this.handleDeleteAnnotation}
                 handleEditAnnotation={this.handleEditAnnotation}
                 handleBookmarkToggle={this.handleBookmarkToggle}
-                removeTempHighlights={removeTempHighlights}
                 {...annot}
             />
         ))
@@ -215,4 +217,6 @@ const mapDispatchToProps: MapDispatchToProps<
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
 })
 
-export default connect(null, mapDispatchToProps)(AnnotationList)
+export default withSidebarContext(
+    connect(null, mapDispatchToProps)(AnnotationList),
+)

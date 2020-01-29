@@ -10,11 +10,12 @@ import {
     shortcuts,
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
-import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
 import * as utils from 'src/content-tooltip/utils'
 import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { fetchAnnotationsAndHighlight } from 'src/annotations'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 const styles = require('./ribbon.css')
 
 export interface Props {
@@ -50,6 +51,7 @@ export interface Props {
     setShowCollectionsPicker: (value: boolean) => void
     setShowSearchBox: (value: boolean) => void
     setSearchValue: (value: string) => void
+    highlighter: HighlightInteractionInterface
 }
 
 interface State {
@@ -124,7 +126,7 @@ class Ribbon extends Component<Props, State> {
 
     private toggleHighlights = async () => {
         if (this.props.areHighlightsEnabled) {
-            removeHighlights()
+            this.props.highlighter.removeHighlights()
         } else {
             fetchAnnotationsAndHighlight()
         }
@@ -515,4 +517,4 @@ class Ribbon extends Component<Props, State> {
     }
 }
 
-export default Ribbon
+export default withSidebarContext(Ribbon)

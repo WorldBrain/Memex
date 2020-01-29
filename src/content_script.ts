@@ -10,6 +10,7 @@ import initRibbonAndSidebar from './sidebar-overlay/content_script'
 import 'src/backup-restore/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import initSocialIntegration from 'src/social-integration/content_script'
+import { HighlightInteraction } from './highlighting/ui/highlight-interactions'
 
 const remoteFunctionRegistry = new RemoteFunctionRegistry()
 
@@ -19,8 +20,9 @@ toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 window['toolbarNotifications'] = toolbarNotifications
 
 const annotationsManager = new AnnotationsManager()
+const highlighter = new HighlightInteraction()
 
 initContentTooltip({ toolbarNotifications })
-initRibbonAndSidebar({ annotationsManager, toolbarNotifications })
+initRibbonAndSidebar({ annotationsManager, toolbarNotifications, highlighter })
 
 initSocialIntegration({ annotationsManager })
