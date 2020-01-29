@@ -1,9 +1,9 @@
 import { getOffsetTop } from 'src/sidebar-overlay/utils'
-import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { Highlight } from 'src/highlighting/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
 import * as AllRaven from 'raven-js'
+import { Annotation } from 'src/annotations/types'
 const styles = require('src/highlighting/ui/styles.css')
 const Raven = AllRaven['default']
 
