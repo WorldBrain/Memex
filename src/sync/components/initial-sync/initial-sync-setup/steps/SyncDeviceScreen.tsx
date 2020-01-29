@@ -18,6 +18,8 @@ import {
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { CancelAction } from 'src/common-ui/components/design-library/actions/CancelAction'
 
+const styles = require('./styles.css')
+
 export const SyncDeviceScreen = ({
     error,
     stage,
@@ -42,15 +44,15 @@ export const SyncDeviceScreen = ({
                         {'Make sure both devices stay connected'}
                     </TypographyBodyCenter>
 
-                    <div>
+                    <div className={styles.progressBar}>
                         {!error ? (
-                            <div>
+                            <div className={styles.progressBox}>
                                 <WhiteSpacer20/>  
                                 <CancelAction label={'Cancel'} onClick={() => false} />
                                 {progressPct === undefined ? (
                                     <LoadingIndicator />
                                 ) : (
-                                    <div>
+                                    <div className={styles.progressBar}>
                                         <ProgressBar
                                             progress={progressPct * 100}
                                         />
@@ -59,7 +61,7 @@ export const SyncDeviceScreen = ({
                                 )}
                             </div>
                         ) : (
-                            <div>
+                            <div className={styles.progressBox}>
                                 <Warning>⚠️ Something went wrong</Warning>
                                 <PrimaryAction label={'Retry Syncing'} onClick={() => false} />
                                 <WhiteSpacer30/>                                

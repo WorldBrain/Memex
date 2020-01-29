@@ -11,7 +11,7 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 
 const StyledCancelAction = styled.div`
-    padding: 5px 10px;
+    padding: 10px 20px;
     background: ${props => (props.disabled ? colorDisabled : colorError)};
     border-radius: 5px;
     cursor: pointer;

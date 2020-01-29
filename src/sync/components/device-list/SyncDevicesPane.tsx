@@ -153,12 +153,12 @@ export class SyncDevicesPane extends Component<Props, State> {
                 <div className={styles.container}>
                     <div className={styles.syncLeftCol}>
                         <ButtonTooltip
-                            tooltipText="Until now only one device can be synced"
+                            tooltipText="Until now only one extension and one app can be synced. Soon more."
                             position="bottom"
                         >
                             {this.props.devices.length > 0 ? (
                                 <p className={styles.syncTitle}>
-                                    1 of 1 Paired Devices
+                                    2 of 2 Paired Devices
                                 </p>
                             ) : (
                                 <p className={styles.syncTitle}>
