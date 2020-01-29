@@ -25,7 +25,7 @@ import { KeyboardShortcuts } from './types'
 import { createHighlight } from 'src/highlighting/ui'
 import {
     fetchAnnotationsAndHighlight,
-    openSidebarToAnnotateSelection as createAnnotationAct,
+    createAnnotationDraftInSidebar as createAnnotationAct,
 } from 'src/annotations'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 

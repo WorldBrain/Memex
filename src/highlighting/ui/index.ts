@@ -1,14 +1,8 @@
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
-import { remoteFunction } from 'src/util/webextensionRPC'
 import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import * as annotations from 'src/highlighting/ui/anchoring/index'
 import { Anchor, Highlight } from 'src/highlighting/types'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
-
-export async function createHighlightAndSave(selection?: any) {
-    // FIXME (ch - annotations): Fix this to a typed version
-    await remoteFunction('createAnnotation')(await createHighlight(selection))
-}
 
 export async function createHighlight(selection?: any, temporary = false) {
     const url = window.location.href

@@ -10,7 +10,7 @@ import {
 import Sidebar from './sidebar'
 import { Annotation, Page } from '../types'
 import RootState, { MapDispatchToProps } from '../../types'
-import AnnotationsManager from '../../annotations-manager'
+import AnnotationsManager from '../../../annotations/annotations-manager'
 import {
     acts as searchBarActs,
     selectors as searchBar,

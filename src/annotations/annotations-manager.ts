@@ -1,5 +1,5 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { Omit } from './types'
+import { Omit } from '../sidebar-overlay/types'
 import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import analytics from 'src/analytics'
