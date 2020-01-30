@@ -1,5 +1,5 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color6, color4, radius3 from colors;
+@value color1, color5, color6, color4, radius3 from colors;
 
 .container {
     display: flex;
@@ -8,10 +8,10 @@
 }
 
 .percent {
-    top: 0;
     color: white;
-    float: right;
-    font-size: 15px;
+    font-size: 12px;
+    padding-left: 3px;
+    padding-right: 3px;
     font-weight: 500;
 }
 
@@ -23,7 +23,9 @@
 
 .color {
     background-color: #5671cf;
-    height: 10px;
+    height: 16px;
     align-items: center;
     display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
 }

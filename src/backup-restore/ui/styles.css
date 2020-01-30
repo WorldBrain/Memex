@@ -72,10 +72,11 @@
 
 .WarningIcon {
     composes: WarningIconWhite from '../../common-ui/icons.css';
-    width: 25px;
-    height: 25px;
+    width: 35px;
+    height: 35px;
     display: inline-flex;
     margin-right: 15px;
+    background-size: contain;
 }
 
 /* Upgrade Button */

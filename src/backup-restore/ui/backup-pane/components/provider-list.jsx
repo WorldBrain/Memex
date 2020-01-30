@@ -20,11 +20,10 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                         />
                         <div className={Styles.textBlock}>
                             <div className={Styles.providerTitle}>
-                                Backup locally or to any cloud provider
+                                Any cloud provider via local hard drive
                             </div>
                             <p className={settingsStyle.infoText}>
-                                Backup your data to your hard drive, or to any
-                                cloud provider with a syncing folder on your
+                                Use cloud providers that have a syncing folder on your
                                 computer (e.g. Dropbox, Spideroak, GDrive){' '}
                                 <a
                                     className={Styles.link}

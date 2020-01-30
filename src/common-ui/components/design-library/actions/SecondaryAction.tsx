@@ -13,6 +13,7 @@ const StyledSecondaryAction = styled.div`
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;
+    white-space: nowrap;
 
     &: hover {
         background-color: ${colorMidPurple};

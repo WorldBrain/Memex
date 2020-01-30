@@ -16,13 +16,23 @@ export async function getInitialState({
     const isAuthenticated = await remoteFunction(
         'isBackupBackendAuthenticated',
     )()
+
+    const runningRestore = await localStorage.getItem('backup.restore.restore-running')
+    const runningBackup = await localStorage.getItem('backup.onboarding.running-backup')
+    const progressSuccess = await localStorage.getItem('progress-successful')
+
     return {
         isAuthenticated,
+        runningRestore,
+        runningBackup,
         screen: await getStartScreen({
             isAuthenticated,
             localStorage,
             analytics,
             remoteFunction,
+            runningRestore,    
+            runningBackup,
+            progressSuccess,
         }),
     }
 }
@@ -32,44 +42,47 @@ export async function getStartScreen({
     analytics,
     remoteFunction,
     isAuthenticated,
+    runningRestore,
+    runningBackup,
+    progressSuccess,
 }: {
     analytics: Analytics
     localStorage: any
     remoteFunction: any
     isAuthenticated: boolean
+    runningRestore: string
+    runningBackup: string
+    progressSuccess: string
 }) {
     const hasScreenOverride =
         process.env.BACKUP_START_SCREEN &&
         process.env.BACKUP_START_SCREEN.length
-    if (hasScreenOverride) {
-        const override = process.env.BACKUP_START_SCREEN
-        return override
-    }
 
-    if (localStorage.getItem('backup.restore.authenticating')) {
-        localStorage.removeItem('backup.restore.authenticating')
-        if (isAuthenticated) {
-            return 'restore-running'
-        } else {
-            return 'restore-where'
-        }
-    }
+   // This is for now pretty hacky. What happens is that on a successful progress (backup/restore/import/sync) it saves a
+   // localstorage data point "progrses-successful". Its picked up here and cleared so that on a successful restore/backup the backupoverview is shown again
 
-    if (localStorage.getItem('backup.onboarding')) {
-        if (isAuthenticated && localStorage.getItem('backup.onboarding.authenticating')) {
-            return 'running-backup'
-        } else {
-            localStorage.removeItem('backup.onboarding')
+    if (runningBackup === 'true') {
+        if (progressSuccess === 'true') {
+            await localStorage.removeItem('backup.onboarding')
+            await localStorage.removeItem('progress-successful')
+            await localStorage.removeItem('backup.onboarding.running-backup')
             return 'overview'
-            }
         } else {
+            return 'running-backup'}
+    } else if (runningRestore === 'true') {
+        if (progressSuccess === 'true') {
+            await localStorage.removeItem('backup.onboarding')
+            await localStorage.removeItem('progress-successful')
+            await localStorage.removeItem('backup.restore.restore-running')
             return 'overview'
-        }
-
-        // If we're onboarding, but we don't know anything else, let's go to the first screen'
+        } else {
+            return 'restore-running'}
+    } else {
+        await localStorage.removeItem('backup.onboarding')
+        return 'overview'
     }
 
-    // N.B. No need to return a backup-running here, since the button on the overview will show 'go to backup' in that case.
+    }
 
 export async function processEvent({
     state,
@@ -120,6 +133,12 @@ export async function processEvent({
                     return triggerOnboarding()
                 }
 
+                if (hasInitialBackup === true) {
+                    localStorage.setItem('backup.onboarding.running-backup', true)
+                    return {screen: 'running-backup'}
+                }
+
+
                 /* Navigate to Google Drive login if previous it is not authentication
                     else go to running backup */
                 if (
@@ -128,10 +147,13 @@ export async function processEvent({
                 ) {
                     return { redirect: { to: 'gdrive-login' } }
                 } else {
-                    return { screen: 'running-backup' }
+                    return { screen: 'onboarding-where' }
                 }
             },
             onRestoreRequested: () => {
+                if (localStorage.getItem('backup.restore.restore-running') === true) {
+                    return {screen: 'restore-running'}
+                } 
                 return { screen: 'restore-where' }
             },
             onSubscribeRequested: () => {
@@ -170,8 +192,8 @@ export async function processEvent({
                 ) {
                     return { redirect: { to: 'gdrive-login' } }
                 } else {
-                    return { screen: 'running-backup' }
-                }                
+                    return { screen: 'onboarding-size' }
+                }           
                 return { screen: 'running-backup' }
             },
         },
@@ -214,15 +236,16 @@ export async function processEvent({
                     category: 'Backup',
                     action: 'onboarding-backup-requested',
                 })
-
+                localStorage.setItem('backup.onboarding.running-backup', true)
                 return { screen: 'running-backup' }
             },
         },
         'running-backup': {
-            onFinish: () => {
-                localStorage.removeItem('backup.onboarding')
+            onFinish: async () => {
+                await localStorage.removeItem('backup.onboarding')
+                await localStorage.removeItem('backup.onboarding.authenticating')
+                await localStorage.removeItem('backup.onboarding.running-backup')
                 return { screen: 'overview' }
-                localStorage.removeItem('backup.onboarding.authenticating')
             },
         },
         'restore-where': {
@@ -238,12 +261,14 @@ export async function processEvent({
                     localStorage.setItem('backup.restore.authenticating', true)
                     return { redirect: { to: 'gdrive-login' } }
                 } else {
+                    localStorage.setItem('backup.restore.restore-running', true)
                     return { screen: 'restore-running' }
                 }
             },
         },
         'restore-running': {
             onFinish: () => {
+                localStorage.removeItem('backup.restore.restore-running')
                 return { screen: 'overview' }
             },
         },

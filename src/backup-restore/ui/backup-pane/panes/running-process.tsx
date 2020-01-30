@@ -105,6 +105,7 @@ export default class RunningProcess extends React.Component<Props> {
                 backupId: 'success',
             })
             this.setState({ status: 'success' })
+            localStorage.setItem('progress-successful', 'true')
         } else if (event.type === 'fail') {
             const errorId = await remoteFunction(
                 this.props.functionNames.sendNotif,

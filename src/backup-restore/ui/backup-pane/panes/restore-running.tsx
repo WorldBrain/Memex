@@ -30,7 +30,7 @@ export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
 }
 
 function renderHeader() {
-    return <p className={settingsStyle.sectionHeader}>RESTORING: DON'T CLOSE THIS TAB</p>
+    return <p className={settingsStyle.sectionTitle}>Restore in Progress</p>
 }
 
 function renderFailMessage() {
@@ -39,11 +39,11 @@ function renderFailMessage() {
             <div className={settingsStyle.sectionTitle}>
                 <strong>⚠️ Restore Failed! ⚠️ </strong>
             </div>
-            <p className={settingsStyle.infoText}>
+            <div className={settingsStyle.infoText}>
                 You can retry the restore anytime you want. <br />
                 If you still encounter issues please{' '}
                 <a href="mailto:support@worldbrain.io">contact support</a>.
-            </p>
+            </div>
         </React.Fragment>
     )
 }
@@ -51,14 +51,16 @@ function renderFailMessage() {
 function renderSuccessMessage() {
     return (
         <React.Fragment>
-            <div className={settingsStyle.sectionTitle}>
-                <strong>Restore Successful! 🎉 </strong>
+            <div className={styles.messageBox}>
+                <div className={settingsStyle.sectionTitle}>
+                    <strong>Restore Successful! 🎉 </strong>
+                </div>
+                    <WhiteSpacer20/>
+                <p className={settingsStyle.infoText}>
+                    Return to <a href="#/overview">the dashboard</a> to search,
+                    organise and annotate.
+                </p>
             </div>
-                <WhiteSpacer20/>
-            <p className={settingsStyle.infoText}>
-                Return to <a href="#/overview">the dashboard</a> to search,
-                organise and annotate.
-            </p>
         </React.Fragment>
     )
 }
