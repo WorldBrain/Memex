@@ -2,7 +2,7 @@
 @value color4, color1, color2, color3, color5, color6 from colors;
 
 :root {
-    --height: 100px;
+    --height: 90px;
     --imgWidth: 200px;
     --vertical-spacing: 30px;
     --compact-scale: 0.6;
@@ -65,7 +65,7 @@
 
 .rootContainerOverview {
     width: 800px;
-    height: 100px;
+    height: 90px;
 
     & .displayTime {
         margin-right: 10px;

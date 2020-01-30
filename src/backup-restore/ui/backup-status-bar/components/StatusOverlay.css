@@ -12,8 +12,9 @@
     right: 50px;
     padding: 25px 25px 15px 25px;
     width: 420px;
-    min-height: 166px;
+    min-height: 250px;
     z-index: 999999;
+    height: fit-content;
     background: white;
     background-color: white;
     composes: toolTips from '../../../../common-ui/elements.css';
@@ -29,6 +30,22 @@
     font-weight: 600;
     align-self: center;
     margin-bottom: 15px;
+}
+
+.loadingBlocker {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    height: 90%;
+    background: white;
+    justify-content: center;
+    padding-top: 50px;
+    align-items: flex-start;
+    z-index: 2500000;
+}
+
+.statusSection {
+    width: 100%;
 }
 
 .syncSection {

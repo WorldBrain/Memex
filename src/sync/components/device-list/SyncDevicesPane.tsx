@@ -110,7 +110,7 @@ export class SyncDevicesPane extends Component<Props, State> {
         ) {
             pairButton = (
                 <ButtonTooltip
-                    tooltipText="To sync with your mobile phone, please upgrade your subscription"
+                    tooltipText="To use sync, please login and upgrade your subscription"
                     position="bottom"
                 >
                     <SecondaryAction
@@ -245,6 +245,11 @@ class SyncDevicesPaneContainer extends React.Component<
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
                         Sync your mobile phone
+                        <span
+                                className={styles.labelFree}
+                            >
+                                ⭐️ Pro Feature
+                        </span>
                     </div>
                     <div className={settingsStyle.infoText}>
                         Use an end2end encrypted connection to keep your devices in sync.

@@ -54,6 +54,14 @@
     margin-right: 8px;
 }
 
+.labelFree {
+    composes: h2Color from 'src/common-ui/colors.css';
+    font-size: 14px;
+    vertical-align: middle;
+    font-weight: bold;
+    float: right;
+}
+
 .mobileSection {
     display: flex;
     justify-content: space-between;
