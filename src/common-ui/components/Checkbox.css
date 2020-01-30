@@ -93,7 +93,7 @@
     cursor: pointer;
 
     & > label {
-        cursor: pointer;    
+        cursor: pointer;
     }
 }
 
