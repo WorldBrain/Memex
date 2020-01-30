@@ -94,21 +94,21 @@
 .loadingBlocker {
     position: absolute;
     top: 0;
+    left: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 750px;
+    height: 100%;
     width: 100%;
     text-align: center;
-    padding: 0px 100px;
     z-index: 25000000;
-    background: #fbfafa;
-    opacity: 0.8;
+    background: white;
 }
 
 .loadingMsg {
-    font-weight: bold;
+    margin-top: -30px;
+    composes: sectionTitle from 'src/options/settings/components/settings.css';
 }
 
 .title {
