@@ -208,10 +208,7 @@ export default class PageStorage extends StorageModule {
 
         return this.options.storageManager
             .collection('visits')
-            .updateObjects(
-                { time: visit.time, url: normalizedUrl },
-                { $set: data },
-            )
+            .updateObjects({ time: visit.time, url: normalizedUrl }, data)
             .catch(initErrHandler())
     }
 
