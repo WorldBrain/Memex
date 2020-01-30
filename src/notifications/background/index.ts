@@ -117,7 +117,7 @@ export default class NotificationBackground {
         }
         if (notification.system) {
             // Check if the system has to be notified or not
-            const url = notification.system.buttons[0].action.url
+            const url = (notification.system.buttons || [])[0]?.action?.url
             // console.log(notification.system.title, 'hello')
             await createNotif(
                 {
@@ -126,9 +126,11 @@ export default class NotificationBackground {
                     requireInteraction: false,
                 },
                 () => {
-                    return browser.tabs.create({
-                        url,
-                    })
+                    if (url) {
+                        return browser.tabs.create({
+                            url,
+                        })
+                    }
                 },
             )
         }

@@ -61,6 +61,10 @@ export class DriveBackupBackend extends BackupBackend {
         )
     }
 
+    async isReachable(): Promise<boolean> {
+        return true
+    }
+
     // This is to send a notification to the user
     async sendNotificationOnFailure(
         id: string,

@@ -363,19 +363,21 @@ export class BackupBackgroundModule {
 
         const alreadyStoredRecently =
             !!lastNotifShown && lastNotifShown > lastBackup
-        await this.showBackupProblemNotif({
+        await this.showBackupProblemNotif(notifId, {
             storeNotif: !alreadyStoredRecently,
         })
     }
 
-    async showBackupProblemNotif(options: { storeNotif: boolean }) {
+    async showBackupProblemNotif(
+        notifId: 'incremental_backup_down' | 'backup_error',
+        options: { storeNotif: boolean },
+    ) {
+        await this.notifications.dispatchNotification(notifId, {
+            dontStore: !options.storeNotif,
+        })
         await this.backupInfoStorage.storeDate(
             'lastProblemNotifShown',
             new Date(),
-        )
-        await this.notifications.dispatchNotification(
-            'incremental_backup_down',
-            { dontStore: !options.storeNotif },
         )
     }
 
@@ -436,9 +438,7 @@ export class BackupBackgroundModule {
         } else {
             this.restoreUiCommunication.connect(
                 this.restoreProcedure.events,
-                (name, event) => {
-                    console.log(`RESTORE DEBUG (${name}):`, event)
-                },
+                (name, event) => {},
             )
         }
         runner()
