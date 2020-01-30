@@ -48,13 +48,13 @@ const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
                     </ButtonTooltip>
                 </li>
                 <li className={styles.settingsListItem}>
-                    <Concurrency {...props} />
-                </li>
-                <li className={styles.settingsListItem}>
                     <PrevFailedCheckbox
                         checked={prevFailedValue}
                         onChange={onPrevFailedToggle}
                     />
+                </li>
+                <li className={styles.settingsListItem}>
+                    <Concurrency {...props} />
                 </li>
             </ul>
         </div>
