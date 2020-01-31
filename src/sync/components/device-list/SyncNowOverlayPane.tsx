@@ -177,7 +177,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
 
-                {(this.state.syncAllowed && this.state.devices.length > 0 ) && (
+                {(this.state.syncAllowed && this.state.devices.length > 0 && !this.state.isSyncing) && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
                              <div className={settingsStyle.sectionTitle}>
