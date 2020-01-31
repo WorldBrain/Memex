@@ -20,6 +20,11 @@ export async function getInitialState({
     const runningRestore = await localStorage.getItem('backup.restore.restore-running')
     const runningBackup = await localStorage.getItem('backup.onboarding.running-backup')
     const progressSuccess = await localStorage.getItem('progress-successful')
+    const backendLocation = await remoteFunction('getBackendLocation')()
+    const hasInitialBackup = await remoteFunction('hasInitialBackup')()
+    const driveAuthenticated = await localStorage.getItem('drive-token-access')
+    const isOnboarding = await localStorage.getItem('backup.onboarding')
+    const driveIsAuthenticating = await localStorage.getItem('backup.onboarding.authenticating')
 
     return {
         isAuthenticated,
@@ -33,6 +38,11 @@ export async function getInitialState({
             runningRestore,    
             runningBackup,
             progressSuccess,
+            backendLocation,
+            hasInitialBackup,
+            driveAuthenticated,
+            isOnboarding,
+            driveIsAuthenticating,
         }),
     }
 }
@@ -45,6 +55,11 @@ export async function getStartScreen({
     runningRestore,
     runningBackup,
     progressSuccess,
+    backendLocation,
+    hasInitialBackup,
+    driveAuthenticated,
+    isOnboarding,
+    driveIsAuthenticating,
 }: {
     analytics: Analytics
     localStorage: any
@@ -53,35 +68,54 @@ export async function getStartScreen({
     runningRestore: string
     runningBackup: string
     progressSuccess: string
+    backendLocation: string
+    hasInitialBackup: boolean
+    driveAuthenticated: string
+    isOnboarding:string
+    driveIsAuthenticating: string
 }) {
     const hasScreenOverride =
         process.env.BACKUP_START_SCREEN &&
         process.env.BACKUP_START_SCREEN.length
 
-   // This is for now pretty hacky. What happens is that on a successful progress (backup/restore/import/sync) it saves a
-   // localstorage data point "progrses-successful". Its picked up here and cleared so that on a successful restore/backup the backupoverview is shown again
+        // This is for now pretty hacky. What happens is that on a successful progress (backup/restore/import/sync) it saves a
+        // localstorage data point "progress-successful". Its picked up here and cleared so that on a successful restore/backup the backupoverview is shown again
+        // using explicit "runningbackup/runningrestore" states because that decides which progress bar is loaded after reloading
+        if (runningBackup === 'true') {
+            // using a progressSuccess message because that would allow to separately decide on if any process is finished, so we don't have to implement this for every kind of process.
+            if (progressSuccess === 'true') {
+                await localStorage.removeItem('backup.onboarding')
+                await localStorage.removeItem('progress-successful')
+                await localStorage.removeItem('backup.onboarding.running-backup')
+                return 'overview'
+                } else {
+                    return 'running-backup'
+                }
+            } 
 
-    if (runningBackup === 'true') {
-        if (progressSuccess === 'true') {
+        if (runningRestore === 'true') {
+            if (progressSuccess === 'true') {
+                await localStorage.removeItem('progress-successful')
+                await localStorage.removeItem('backup.restore.restore-running')
+                return 'overview'
+            } else {
+                return 'restore-running'
+            }
+            } 
+                // ensures that on a blocked connection, the page on reload shows the progress screen
+        if (
+            backendLocation === 'google-drive' && 
+            driveAuthenticated && 
+            !hasInitialBackup && 
+            isOnboarding && 
+            driveIsAuthenticating) {
+                return 'onboarding-size'
+            } else {
+            await localStorage.removeItem('backup.onboarding.authenticating')
             await localStorage.removeItem('backup.onboarding')
             await localStorage.removeItem('progress-successful')
-            await localStorage.removeItem('backup.onboarding.running-backup')
             return 'overview'
-        } else {
-            return 'running-backup'}
-    } else if (runningRestore === 'true') {
-        if (progressSuccess === 'true') {
-            await localStorage.removeItem('backup.onboarding')
-            await localStorage.removeItem('progress-successful')
-            await localStorage.removeItem('backup.restore.restore-running')
-            return 'overview'
-        } else {
-            return 'restore-running'}
-    } else {
-        await localStorage.removeItem('backup.onboarding')
-        return 'overview'
-    }
-
+            }
     }
 
 export async function processEvent({
@@ -133,7 +167,9 @@ export async function processEvent({
                     return triggerOnboarding()
                 }
 
-                if (hasInitialBackup === true) {
+                const driveAuthenticated = await localStorage.getItem('drive-token-access')
+
+                if (hasInitialBackup) {
                     localStorage.setItem('backup.onboarding.running-backup', true)
                     return {screen: 'running-backup'}
                 }
@@ -143,7 +179,7 @@ export async function processEvent({
                     else go to running backup */
                 if (
                     backendLocation === 'google-drive' &&
-                    !state.isAuthenticated
+                    (driveAuthenticated === undefined)
                 ) {
                     return { redirect: { to: 'gdrive-login' } }
                 } else {

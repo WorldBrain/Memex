@@ -36,9 +36,7 @@ export default class OnboardingSizeContainer extends React.Component {
             console.error(e)
         }
         this.setState({
-            isAuthenticated: await remoteFunction(
-                'isBackupBackendAuthenticated',
-            )(),
+            isAuthenticated: await localStorage.getItem('drive-token-access'),
             backendLocation: await remoteFunction('getBackendLocation')(),
         })
     }
@@ -99,7 +97,7 @@ export default class OnboardingSizeContainer extends React.Component {
                 <div className={settingsStyle.buttonArea}>
                     <div/>
                     {this.state.backendLocation === 'google-drive' &&
-                        !this.state.isAuthenticated && (
+                        (this.state.isAuthenticated === 'undefined' || this.state.isAuthenticated === null) && (
                             <PrimaryAction
                                 onClick={() => {
                                     this.props.onLoginRequested()
@@ -108,7 +106,7 @@ export default class OnboardingSizeContainer extends React.Component {
                             />
                         )}
                     {this.state.backendLocation === 'google-drive' &&
-                        this.state.isAuthenticated && (
+                        (this.state.isAuthenticated !== 'undefined' && this.state.isAuthenticated) && (
                             <PrimaryAction
                                 onClick={() => {
                                     this.props.onBackupRequested()
@@ -116,8 +114,7 @@ export default class OnboardingSizeContainer extends React.Component {
                                 label={'Backup Now'}
                             />
                         )}
-                    {this.state.backendLocation === 'local' &&
-                        this.state.isAuthenticated && (
+                    {this.state.backendLocation === 'local' && (
                             <PrimaryAction
                                 onClick={() => {
                                     this.props.onBackupRequested()

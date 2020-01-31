@@ -13,6 +13,19 @@
     color: white;
 }
 
+.background {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: -35px;
+    left: -295px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    z-index: 2;
+}
+
 .backupTitle {
     font-size: 24px;
     color: color4;
@@ -141,6 +154,14 @@
     font-weight: 600;
     font-size: 15px;
     margin-right: 8px;
+}
+
+.messageBox {
+    margin-right: 30px;
+
+    & > div {
+        margin-bottom: 0px;
+    }
 }
 
 .subname {
