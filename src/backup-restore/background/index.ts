@@ -300,6 +300,7 @@ export class BackupBackgroundModule {
         }
 
         const msUntilNextBackup = 1000 * 60 * 15
+        // const msUntilNextBackup = 1000 * 30
         this.scheduledAutomaticBackupTimestamp = Date.now() + msUntilNextBackup
         this.automaticBackupTimeout = setTimeout(() => {
             this.doBackup()
@@ -344,6 +345,7 @@ export class BackupBackgroundModule {
         const lastBackup = await this.backupInfoStorage.retrieveDate(
             'lastBackupFinish',
         )
+        // const backupProblemThreshold = 1000 * 60
         const backupProblemThreshold = 1000 * 60 * 60 * 24
         const timeSinceLastBackup = Date.now() - lastBackup.getTime()
         if (timeSinceLastBackup < backupProblemThreshold) {
@@ -353,6 +355,7 @@ export class BackupBackgroundModule {
         const lastNotifShown = await this.backupInfoStorage.retrieveDate(
             'lastProblemNotifShown',
         )
+        // const problemNotifInterval = 1000 * 95
         const problemNotifInterval = 1000 * 60 * 60 * 24 * 7
         if (
             !!lastNotifShown &&
@@ -383,17 +386,21 @@ export class BackupBackgroundModule {
 
     async doBackup() {
         this.clearAutomaticBackupTimeout()
+        const always = () => {
+            this.scheduleAutomaticBackupIfEnabled()
+        }
 
         this.storage.startRecordingChanges()
         if (!(await this.backend.isReachable())) {
             await this.maybeShowBackupProblemNotif('incremental_backup_down')
-            this.scheduleAutomaticBackupIfEnabled()
-            return
+            return always()
         }
 
-        this.backupProcedure.run()
-        const always = () => {
-            this.scheduleAutomaticBackupIfEnabled()
+        try {
+            this.backupProcedure.run()
+        } catch (e) {
+            always()
+            throw e
         }
         this.backupProcedure.events.once('success', async () => {
             // sets a flag that the progress of the backup has been successful so that the UI can set a proper state
