@@ -13,7 +13,7 @@ export interface Props {
 class SemiCircularRibbon extends PureComponent<Props> {
     static defaultProps = {
         title: 'Remove from this collection',
-        crossIconSrc: '/img/cross_grey.svg',
+        crossIconSrc: '/img/remove.svg',
     }
 
     render() {

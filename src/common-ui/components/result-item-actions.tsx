@@ -19,13 +19,6 @@ class ResultItemActions extends PureComponent<Props> {
                     [styles.tweetDetailsContainer]: this.props.isSocial,
                 })}
             >
-                <div className={styles.detailsBox}>
-                    <div className={styles.displayTime}>
-                        {' '}
-                        {this.props.displayTime}
-                    </div>
-                    {this.props.isOverview && this.props.tagHolder}
-                </div>
                 <div
                     className={styles.buttonsContainer}
                     onClick={e => {
@@ -51,11 +44,7 @@ class ResultItemActions extends PureComponent<Props> {
                         })}
                         onClick={this.props.onCommentBtnClick}
                         title="Add/View Commments & Annotations"
-                    >
-                        <span className={styles.annotsCount}>
-                            {this.props.annotsCount}
-                        </span>
-                    </button>
+                    />
                     <button
                         disabled={this.props.isDeleting}
                         className={this.bookmarkClass}

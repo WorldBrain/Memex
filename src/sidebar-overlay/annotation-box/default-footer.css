@@ -6,12 +6,12 @@
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-    padding-bottom: 6px;
-    padding-right: 5px;
+}
 
-    &:hover .commonIcon {
-        opacity: 0.5;
-    }
+.buttonContainer {
+    display: flex;
+    flex-direction: row;
+    margin: 0 7px 3px;
 }
 
 .timestamp {
@@ -19,65 +19,73 @@
     margin-left: 12px;
     font-size: 11px;
     font-weight: 400;
-    color: color6;
+    color: #72727f;
 
     & .lastEdit {
         font-weight: 600;
-        color: color6;
+        color: #72727f;
         margin: 0px;
     }
 }
 
 .commonIcon {
-    composes: hoverColor buttonRadiusSmall from '../../common-ui/colors.css';
-    box-sizing: border-box;
-    background-repeat: no-repeat;
-    background-size: 16px;
-    display: inline-block;
-    cursor: pointer;
-    background-color: transparent;
-    background-position: center;
     border: none;
-    width: 24px;
-    height: 24px;
-    opacity: 0.2;
+    z-index: 2500;
+    min-width: 20px;
+    height: 14px;
+    background-repeat: no-repeat;
+    cursor: pointer;
     outline: none;
-
-    &:hover {
-        opacity: 1;
-    }
-}
-
-.buttonBar {
-    display: flex;
+    background-position: center center;
+    border-radius: 3px;
+    background-size: contain;
+    max-width: 30px;
+    width: fill-available;
+    margin-left: 3px;
+    opacity: 0.3;
 }
 
 .editIcon {
     background-image: url('/img/edit.svg');
-    background-size: 17px;
-    margin-left: 3px;
+
+     &:hover {
+        opacity: 0.6;
+    }
 }
 
 .trashIcon {
     background-image: url('/img/trash.svg');
-    background-position-y: 4px;
+
+    &:hover {
+        opacity: 0.6;
+    }
 }
 
 .goToPageIcon {
     background-image: url('/img/open.svg');
+
+    &:hover {
+        opacity: 0.6;
+    }
 }
 
 .bookmark {
     background-image: url('/img/star_full.svg');
-    opacity: 0.8;
-    background-size: 18px;
-
-    &:hover {
-        opacity: 1;
-    }
+    opacity: 1;
 }
 
 .notBookmark {
     background-image: url('/img/star_empty.svg');
-    background-size: 18px;
+
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
+.tag {
+    background-image: url('/img/tag_empty.svg');
+
+    &:hover {
+        opacity: 0.6;
+    }
 }

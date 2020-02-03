@@ -168,6 +168,7 @@ class ResultListContainer extends PureComponent<Props> {
             <ResultItem
                 key={key}
                 isOverview
+                tags={doc.tags}
                 setTagButtonRef={this.setTagButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
                 setUrlDragged={this.props.setUrlDragged}

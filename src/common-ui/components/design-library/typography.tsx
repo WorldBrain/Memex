@@ -37,7 +37,7 @@ export const TypographyLink = styled.span`
 export const TypographyHeadingPage = styled.span`
     font-size: ${fontSizeBigger}px;
     font-weight: 600;
-    font-family: Inter;
+    font-family: Poppins;
     font-style: normal;
     font-weight: 600;
     font-size: 16px;
@@ -47,7 +47,7 @@ export const TypographyHeadingPage = styled.span`
 `
 
 export const TypographyInputTitle = styled.h2`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeTitle}px;
     font-weight: bold;
     box-sizing: border-box;
@@ -56,7 +56,7 @@ export const TypographyInputTitle = styled.h2`
 `
 
 export const TypographyButtonLabel = styled.span`
-    font-family: Inter;
+    font-family: Poppins;
     font-style: normal;
     font-weight: 600;
     font-size: ${fontSizeSmall}px;
@@ -67,7 +67,7 @@ export const TypographyButtonLabel = styled.span`
 export const TypographyActionText = styled.span`
     line-height: 16px;
     text-align: center;
-    font-family: Inter;
+    font-family: Poppins;
     font-style: normal;
     font-weight: 600;
 `

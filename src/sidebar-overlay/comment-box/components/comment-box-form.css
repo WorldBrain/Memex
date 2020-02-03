@@ -1,4 +1,4 @@
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Poppins/poppins.css');
 
 .textArea {
     composes: TextArea from '../../../common-ui/elements.css';
