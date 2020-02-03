@@ -50,5 +50,5 @@ export interface HighlightInteractionInterface {
     removeHighlights: (onlyRemoveDarkHighlights?: boolean) => void
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     _removeHighlight: (highlight: Element) => void
-    _removeAnnotationHighlights: ({ url }: Annotation) => void
+    removeAnnotationHighlights: (url: string) => void
 }

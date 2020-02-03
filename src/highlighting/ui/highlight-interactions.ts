@@ -282,7 +282,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
      * Removes all the highlights of a given annotation.
      * Called when the annotation is deleted.
      */
-    _removeAnnotationHighlights = ({ url }: Annotation) => {
+    removeAnnotationHighlights = (url: string) => {
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${url}"]`,
