@@ -24,7 +24,7 @@ import { KeyboardShortcuts } from './types'
 import { createHighlight } from 'src/highlighting/ui'
 import {
     fetchAnnotationsAndHighlight,
-    createAnnotationDraftInSidebar as createAnnotationAct,
+    createAnnotationDraftInSidebar,
 } from 'src/annotations'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
@@ -139,7 +139,7 @@ const toggleHighlightsAct = () => {
 const createNewAnnotation = async e => {
     e.preventDefault()
     e.stopPropagation()
-    await createAnnotationAct()
+    await createAnnotationDraftInSidebar()
 
     // Remove onboarding select option notification if it's present
     await conditionallyRemoveSelectOption(STAGES.annotation.annotationCreated)
