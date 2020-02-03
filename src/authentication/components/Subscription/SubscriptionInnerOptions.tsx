@@ -20,8 +20,7 @@ export class SubscriptionInnerOptions extends React.Component<Props> {
                     price={'€2'}
                     infoItems={[
                         'Automatic Backups every 15 min, locally or your favorite cloud provider',
-                        '[SOON] End2End encrypted sync between your devices. 2 devices included',
-                        '+1€ per additional device',
+                        '[SOON] End2End encrypted sync with your mobile device',
                     ]}
                     subscribed={
                         this.props.plans &&
@@ -36,8 +35,7 @@ export class SubscriptionInnerOptions extends React.Component<Props> {
                     title={'Per Year'}
                     infoItems={[
                         'Automatic Backups every 15 min, locally or your favorite cloud provider',
-                        '[SOON] End2End encrypted sync between your devices. 2 devices included',
-                        '+10€ per additional device',
+                        '[SOON] End2End encrypted sync with your mobile device',
                     ]}
                     subscribed={
                         this.props.plans &&
@@ -53,5 +51,8 @@ export class SubscriptionInnerOptions extends React.Component<Props> {
 const styles = {
     subscriptionOptionsContainer: {
         display: 'flex',
+        justifyContent: 'space-around',
+        padding: '0 10px',
+        marginTop: '10px',
     },
 }

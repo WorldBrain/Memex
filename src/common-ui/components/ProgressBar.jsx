@@ -17,7 +17,7 @@ class ProgressBar extends PureComponent {
                 <div className={localStyles.bar}>
                     <div
                         className={localStyles.color}
-                        style={{ width: `${progress}%`, minWidth: '60px'}}
+                        style={{ width: `${progress}%`, minWidth: '25px'}}
                     >
                         <span className={localStyles.percent}>
                             {Math.floor(progress)}%

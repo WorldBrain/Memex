@@ -7,7 +7,6 @@ import { default as RunningBackup } from './panes/running-backup'
 import { default as OnboardingWhere } from './panes/setup-location'
 import OnboardingHow from './panes/setup-manual-or-automatic'
 import { default as OnboardingSize } from './panes/setup-size'
-import { BackupHeader } from './components/backup-header'
 import LoadingBlocker from '../../../common-ui/components/loading-blocker'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
 import RestoreWhere from 'src/backup-restore/ui/backup-pane/panes/restore-where'
@@ -120,7 +119,6 @@ export default class BackupSettingsContainer extends Component {
     render() {
         return (
             <div>
-                <BackupHeader />
                 <div className={styles.screenContainer}>
                     {this.renderScreen()}
                 </div>

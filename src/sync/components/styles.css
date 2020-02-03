@@ -11,13 +11,16 @@
 
 .container {
     display: flex;
+    align-items: center;
     width: 100%;
     flex-wrap: wrap;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 10px;
+    margin-top: 20px;
 }
 
 .syncLeftCol {
     flex: 9;
-    display: flex;
     align-items: center;
 }
 
@@ -33,16 +36,53 @@
 }
 
 .syncTitle {
-    composes: subTitle from '../../options/base.css';
-    margin: 0;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #3a2f45;
 }
 
 .syncSubText {
     composes: h2Color from '../../common-ui/colors.css';
     vertical-align: middle;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
     margin-right: 8px;
+}
+
+.labelFree {
+    composes: h2Color from 'src/common-ui/colors.css';
+    font-size: 14px;
+    vertical-align: middle;
+    font-weight: bold;
+    float: right;
+}
+
+.mobileSection {
+    display: flex;
+    justify-content: space-between;
+}
+
+.contentSection {
+    width: 50%;
+    margin-right: 10px;
+}
+
+.downloadImg {
+    width: 100px;
+    margin-right: 10px;
+    margin-top: 30px;
+}
+
+.mobileImg {
+    width: 45%;
+    margin-bottom: -20px;
+    margin-top: 10px;
+    margin-right: 10px;
 }
 
 .subText {
@@ -63,6 +103,12 @@
     color: color16;
 }
 
-.section {
-    margin-top: 50px;
+.tutorial {
+    composes: helpIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 25px;
+    height: 25px;
+    background-size: 20px;
+    display: flex;
+    align-self: center;
 }

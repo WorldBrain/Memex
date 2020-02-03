@@ -5,10 +5,13 @@ import styles from './settings.css'
 
 const SearchInjection = ({ children }) => {
     return (
-        <div className={styles.container}>
-            <h1 className={styles.header}>
+        <div className={styles.section}>
+            <div className={styles.sectionTitle}>
                 Show Memex Results in Search Engines
-            </h1>
+            </div>
+            <div className={styles.infoText}>
+                Display Memex search results alongside your web searches.
+            </div>
             {children}
         </div>
     )

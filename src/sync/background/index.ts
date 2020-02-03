@@ -20,6 +20,9 @@ import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { filterBlobsFromSyncLog } from './sync-logging'
 import { MemexExtSyncSettingStore } from './setting-store'
 import { resolvablePromise } from 'src/util/promises'
+import { remoteEventEmitter } from 'src/util/webextensionRPC'
+import { AuthRemoteEvents } from 'src/authentication/background/types'
+import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 
 export default class SyncBackground extends SyncService {
     initialSync: MemexInitialSync
@@ -122,5 +125,22 @@ export default class SyncBackground extends SyncService {
 
     async tearDown() {
         await this.continuousSync.tearDown()
+    }
+
+    registerRemoteEmitter() {
+        const remoteEmitter = remoteEventEmitter<InitialSyncEvents>('sync')
+
+        this.initialSync.events.on('progress', args => {
+            return remoteEmitter.emit('progress', args)
+        })
+        this.initialSync.events.on('roleSwitch', args => {
+            return remoteEmitter.emit('roleSwitch', args)
+        })
+        this.initialSync.events.on('error', args => {
+            return remoteEmitter.emit('error', args)
+        })
+        this.initialSync.events.on('finished', args => {
+            return remoteEmitter.emit('finished', args)
+        })
     }
 }

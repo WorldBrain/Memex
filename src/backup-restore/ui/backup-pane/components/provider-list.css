@@ -9,8 +9,14 @@
     vertical-align: middle;
 }
 
-.name {
+.providerTitle {
+    composes: h2Color from '../../../../common-ui/colors.css';
     vertical-align: middle;
+    font-weight: 600;
+    font-size: 17px;
+    margin-right: 8px;
+    margin-bottom: 5px;
+    cursor: pointer;
 }
 
 .vote {

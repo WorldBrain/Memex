@@ -13,6 +13,7 @@ export function setupRequestInterceptors({
             ['blocking'],
         )
     }
+
 }
 
 export function makeGoogleCallbackHandler({ handleLoginRedirectedBack }) {
@@ -23,7 +24,14 @@ export function makeGoogleCallbackHandler({ handleLoginRedirectedBack }) {
         }
 
         handleLoginRedirectedBack(url)
-        const targetUrl = `${browser.extension.getURL('/options.html')}#/backup`
-        return { redirectUrl: targetUrl }
+
+        // to get around the blocked state of the request, we update the original tab with the backup screen. 
+        // this is probably a bit glitchy at first, but we may be able to improve on that experience. For now it should be OK. 
+        setTimeout(()=> {
+            const targetUrl = `${browser.extension.getURL('/options.html')}#/backup`
+            browser.tabs.update(tabId, {active: true, url: targetUrl})
+        }, 1000)
+
+        return {}
     }
 }

@@ -177,29 +177,22 @@ class Ribbon extends Component<Props, State> {
                     {(this.props.isExpanded || this.props.isSidebarOpen) && (
                         <React.Fragment>
                             <div className={styles.generalActions}>
-                                <ButtonTooltip
-                                    tooltipText={'Close Toolbar Once.'}
-                                    position="left"
-                                >
-                                    <button
-                                        className={cx(
-                                            styles.button,
-                                            styles.cancel,
-                                        )}
-                                        onClick={() =>
-                                            this.props.handleRemoveRibbon()
-                                        }
-                                    />
-                                </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText="Open Memex Dashboard"
-                                    position="left"
-                                >
-                                    <button
-                                        onClick={() => this.openOverviewTabRPC()}
-                                        className={cx(styles.button, styles.logo)}
-                                    />
-                                </ButtonTooltip>
+                                <div className={styles.removeSidebar}>
+                                    <ButtonTooltip
+                                        tooltipText={'Close Toolbar Once.'}
+                                        position="left"
+                                    >
+                                        <button
+                                            className={cx(
+                                                styles.button,
+                                                styles.cancel,
+                                            )}
+                                            onClick={() =>
+                                                this.props.handleRemoveRibbon()
+                                            }
+                                        />
+                                    </ButtonTooltip>
+                                </div>
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(
                                         'toggleSidebar',
@@ -218,6 +211,15 @@ class Ribbon extends Component<Props, State> {
                                                 ? this.props.openSidebar({})
                                                 : this.props.closeSidebar()
                                         }
+                                    />
+                                </ButtonTooltip>
+                                 <ButtonTooltip
+                                    tooltipText="Open Memex Dashboard"
+                                    position="left"
+                                    >
+                                    <button
+                                        onClick={() => this.openOverviewTabRPC()}
+                                        className={cx(styles.button, styles.logo)}
                                     />
                                 </ButtonTooltip>
 

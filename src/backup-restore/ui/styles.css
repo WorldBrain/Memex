@@ -13,8 +13,24 @@
     color: white;
 }
 
+.background {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: -35px;
+    left: -295px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    z-index: 2;
+}
+
 .backupTitle {
-    composes: sectionTitle from '../../options/base.css';
+    font-size: 24px;
+    color: color4;
+    font-weight: 600;
+    margin-top: 10px;
 }
 
 .subtitle {
@@ -50,6 +66,9 @@
     padding: 15px 40px;
     background-color: color12;
     align-items: center;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    justify-content: center;
 }
 
 .showWarningText {
@@ -66,10 +85,11 @@
 
 .WarningIcon {
     composes: WarningIconWhite from '../../common-ui/icons.css';
-    width: 25px;
-    height: 25px;
+    width: 35px;
+    height: 35px;
     display: inline-flex;
     margin-right: 15px;
+    background-size: contain;
 }
 
 /* Upgrade Button */
@@ -134,6 +154,14 @@
     font-weight: 600;
     font-size: 15px;
     margin-right: 8px;
+}
+
+.messageBox {
+    margin-right: 30px;
+
+    & > div {
+        margin-bottom: 0px;
+    }
 }
 
 .subname {

@@ -45,9 +45,6 @@ export class SubscriptionPriceBox extends React.PureComponent<Props> {
 
                 {this.props.subscribed ? (
                     <div>
-                        <PricingButton background={'white'}>
-                            Subscribed
-                        </PricingButton>
                         <PricingButton
                             background={'rgb(86, 113, 207)'}
                             onClick={this.props.manageSubscription}

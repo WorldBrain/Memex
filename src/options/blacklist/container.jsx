@@ -10,6 +10,7 @@ import BlacklistRemoveModal from './components/BlacklistRemoveModal'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import styles from './components/base.css'
+import settingsStyle from 'src/options/settings/components/settings.css'
 
 class BlacklistContainer extends Component {
     static propTypes = {
@@ -101,10 +102,10 @@ class BlacklistContainer extends Component {
     renderAddBlacklistSites = () =>
         this.props.blacklist.length ? (
             <div>
-                <p className={styles.subTitle}>
+                <div className={settingsStyle.subSubTitle}>
                     List of blocked pages
-                </p>
-                <p className={styles.subText}>
+                </div>
+                <p className={settingsStyle.infoText}>
                     You are currently not logging visits on URLs that have the
                     following text in them.
                 </p>
@@ -136,14 +137,15 @@ class BlacklistContainer extends Component {
         return (
             <React.Fragment>
                 <div>
-                    <div className={styles.subTitle}>
+                    <div className={settingsStyle.subSubTitle}>
                         Ignore a new domain/url:
                     </div>
                     {this.renderError()}
                     {this.renderBlacklistInputRow()}
-                     <div className={styles.subText}>
+                     <div className={settingsStyle.infoTextSmall}>
                         You can use <a href="https://regexr.com/">RegExp's</a> too!
                     </div>
+                    <div className={settingsStyle.whiteSpacer30}/>
                     {this.renderAddBlacklistSites()}
                     <BlacklistTable>
                         {this.renderBlacklistRows()}

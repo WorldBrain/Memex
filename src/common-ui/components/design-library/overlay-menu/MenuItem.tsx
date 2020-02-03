@@ -11,6 +11,8 @@ export const MenuItem = styled.div`
     font-size: 14px;
     text-decoration: none;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 
     :hover {
         background: ${colorButtonHighlightBackground};

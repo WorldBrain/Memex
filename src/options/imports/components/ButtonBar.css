@@ -26,7 +26,6 @@
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    height: 60px;
 }
 
 .actionButton {
@@ -59,18 +58,14 @@
     background-color: transparent;
     color: color12;
     border: none;
-}
-
-.pause,
-.resume {
-    composes: CTA from '../../../common-ui/elements.css';
-    margin-left: 20px;
+    font-size: 14px;
+    margin-bottom: 30px;
 }
 
 .recalc {
     composes: nakedSquareButton from '../../../common-ui/elements.css';
     color: color4;
-    margin: 0 10px;
+    margin: 0 10px 30px 0;
     width: 35px;
     background: transparent;
     display: flex;
@@ -79,11 +74,14 @@
 }
 
 .startImport {
-    composes: CTA from '../../../common-ui/elements.css';
+    padding: 10px 20px;
+    background: #5cd9a6;
+    border-radius: 5px;
     cursor: pointer;
-    outline: 0;
-    border: none;
-    transition: all 0.1s ease-in;
+    display: inline-block;
+    font-size: 14px;
+    color: #545454;
+    margin-bottom: 30px;
 
     &[disabled] {
         opacity: 0.4;
@@ -91,9 +89,14 @@
     }
 }
 
+.pause,
+.resume {
+    composes: startImport;
+    margin-left: 20px;
+}
+
 .newImport {
-    composes: CTA from '../../../common-ui/elements.css';
+    composes: startImport;
     border: none;
     outline: none;
-    margin-top: 20px;
 }

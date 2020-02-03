@@ -18,10 +18,6 @@
     color: color12;
 }
 
-.advFunctionality {
-    min-height: 300px;
-}
-
 .concurrencyInput {
     position: relative;
 }
@@ -41,7 +37,7 @@
     justify-content: flex-end;
     align-items: center;
     color: color4;
-    font-size: 16px;
+    font-size: 0.9rem;
 
     &:last-child {
         margin-bottom: 1em;

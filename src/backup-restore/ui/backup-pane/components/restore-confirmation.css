@@ -35,7 +35,7 @@
 }
 
 .closeIcon {
-    composes: removeIcon from '../../../../common-ui/icons.css';
+    composes: closeIcon from '../../../../common-ui/icons.css';
     composes: nakedSquareButton from '../../../../common-ui/elements.css';
     cursor: pointer;
     height: 24px;

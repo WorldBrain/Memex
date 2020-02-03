@@ -2,9 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import localStyles from './setup-size.css'
-import { PrimaryButton } from '../../../../common-ui/components/primary-button'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
-import Styles from '../../styles.css'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import {
+    WhiteSpacer20,
+} from 'src/common-ui/components/design-library/typography'
+
+const settingsStyle = require('src/options/settings/components/settings.css')
 
 export default class OnboardingSizeContainer extends React.Component {
     static propTypes = {
@@ -32,9 +36,7 @@ export default class OnboardingSizeContainer extends React.Component {
             console.error(e)
         }
         this.setState({
-            isAuthenticated: await remoteFunction(
-                'isBackupBackendAuthenticated',
-            )(),
+            isAuthenticated: await localStorage.getItem('drive-token-access'),
             backendLocation: await remoteFunction('getBackendLocation')(),
         })
     }
@@ -63,17 +65,15 @@ export default class OnboardingSizeContainer extends React.Component {
         sizes.blobs = sizes.withBlobs - sizes.withoutBlobs
 
         return (
-            <div className={Styles.container}>
-                <p className={Styles.header2}>
+            <div className={settingsStyle.section}>
+                <div className={settingsStyle.sectionTitle}>
                     <strong>STEP 3/5: </strong>
                     Estimating backup size
-                </p>
-                <div className={Styles.subtitle2}>
-                    What do you want to include in the backup?
                 </div>
+                <WhiteSpacer20/>
                 <table className={localStyles.table}>
                     <tbody>
-                        <tr>
+                        <tr className={localStyles.row}>
                             <td className={localStyles.estimationSize}>
                                 {Math.ceil(_bytesToMega(sizes.withoutBlobs))}
                                 MB
@@ -93,37 +93,36 @@ export default class OnboardingSizeContainer extends React.Component {
                         </tr>
                     </tbody>
                 </table>
-
-                {this.state.backendLocation === 'google-drive' &&
-                    !this.state.isAuthenticated && (
-                        <PrimaryButton
-                            onClick={() => {
-                                this.props.onLoginRequested()
-                            }}
-                        >
-                            Connect with Google Drive
-                        </PrimaryButton>
-                    )}
-                {this.state.backendLocation === 'google-drive' &&
-                    this.state.isAuthenticated && (
-                        <PrimaryButton
-                            onClick={() => {
-                                this.props.onBackupRequested()
-                            }}
-                        >
-                            Backup
-                        </PrimaryButton>
-                    )}
-                {this.state.backendLocation === 'local' &&
-                    this.state.isAuthenticated && (
-                        <PrimaryButton
-                            onClick={() => {
-                                this.props.onBackupRequested()
-                            }}
-                        >
-                            Backup
-                        </PrimaryButton>
-                    )}
+                <WhiteSpacer20/>
+                <div className={settingsStyle.buttonArea}>
+                    <div/>
+                    {this.state.backendLocation === 'google-drive' &&
+                        (this.state.isAuthenticated === 'undefined' || this.state.isAuthenticated === null) && (
+                            <PrimaryAction
+                                onClick={() => {
+                                    this.props.onLoginRequested()
+                                }}
+                                label={'Connect with Google Drive'}
+                            />
+                        )}
+                    {this.state.backendLocation === 'google-drive' &&
+                        (this.state.isAuthenticated !== 'undefined' && this.state.isAuthenticated) && (
+                            <PrimaryAction
+                                onClick={() => {
+                                    this.props.onBackupRequested()
+                                }}
+                                label={'Backup Now'}
+                            />
+                        )}
+                    {this.state.backendLocation === 'local' && (
+                            <PrimaryAction
+                                onClick={() => {
+                                    this.props.onBackupRequested()
+                                }}
+                                label={'Backup Now'}
+                            />
+                        )}
+                </div>
             </div>
         )
     }
