@@ -116,6 +116,10 @@ class Sidebar extends React.Component<Props, State> {
         return this.props.pageType === 'page'
     }
 
+    handleDeleteAnnotation = url => {
+        this.props.handleDeleteAnnotation(url)
+    }
+
     private renderAnnots() {
         const annots = this.props.annotations.map(annot => (
             <AnnotationBox
@@ -126,7 +130,7 @@ class Sidebar extends React.Component<Props, State> {
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
                 handleGoToAnnotation={this.props.handleGoToAnnotation(annot)}
                 handleEditAnnotation={this.props.handleEditAnnotation}
-                handleDeleteAnnotation={this.props.handleDeleteAnnotation}
+                handleDeleteAnnotation={this.handleDeleteAnnotation}
                 handleMouseLeave={this.props.handleAnnotationBoxMouseLeave()}
                 handleMouseEnter={this.props.handleAnnotationBoxMouseEnter(
                     annot,

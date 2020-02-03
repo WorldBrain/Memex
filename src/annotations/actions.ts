@@ -13,7 +13,6 @@ import {
     setResultsExhausted,
 } from 'src/sidebar-overlay/sidebar/actions'
 import { Annotation } from 'src/annotations/types'
-import { createHighlight } from 'src/highlighting/ui'
 import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 

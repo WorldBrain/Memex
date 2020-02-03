@@ -114,7 +114,11 @@ class AnnotationList extends Component<Props, State> {
     }
 
     private handleDeleteAnnotation = (url: string) => {
+        // Note this only get's called when editing the annotation on the dashboard results list, not the sidebar
+        // TODO: Why is this state not linked to the redux state?
+
         this.props.handleDeleteAnnotation(url)
+        this.props.highlighter.removeAnnotationHighlights(url)
 
         // Delete the annotation in the state too
         const { annotations } = this.state
@@ -213,7 +217,9 @@ const mapDispatchToProps: MapDispatchToProps<
 > = dispatch => ({
     handleEditAnnotation: (url, comment, tags) =>
         dispatch(editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: url => dispatch(deleteAnnotation(url)),
+    handleDeleteAnnotation: url => {
+        dispatch(deleteAnnotation(url))
+    },
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
 })
 
