@@ -63,7 +63,7 @@ export class SyncNowOverlayPaneContainer extends Component<
 > {
     state = {
         showSync: false,
-        syncEnabled: false,
+        syncEnabled: true,
         syncAllowed: false,
         syncResults: [],
         syncError: null,
@@ -77,27 +77,23 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 
     async componentDidMount() {
-        const syncFeatureEnabled = await features.getFeature('Sync')
         const syncFeatureAllowed = this.props.authorizedFeatures.includes(
             'sync',
         )
         await this.refreshDevices()
 
-        this.setState({ 
-            syncEnabled: syncFeatureEnabled,
+        this.setState({
             syncAllowed: syncFeatureAllowed,
         })
     }
 
     async componentDidUpdate() {
-        const syncFeatureEnabled = await features.getFeature('Sync')
         const syncFeatureAllowed = this.props.authorizedFeatures.includes(
             'sync',
         )
-        this.setState({ 
-            syncEnabled: syncFeatureEnabled,
+        this.setState({
             syncAllowed: syncFeatureAllowed,
-        }) 
+        })
     }
 
     handleOnClickSync = async () => {
@@ -109,7 +105,6 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 
     handleUpgrade = async () => {
-        // console.log("UI: Sync completed with",syncing)
         window.open('https://getmemex.com/#pricingSection')
     }
 

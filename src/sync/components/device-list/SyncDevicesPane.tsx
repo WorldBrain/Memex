@@ -206,11 +206,10 @@ class SyncDevicesPaneContainer extends React.Component<
     UserProps,
     { devices: SyncDevice[]; featureSyncEnabled: boolean }
 > {
-    state = { devices: [], featureSyncEnabled: false }
+    state = { devices: [], featureSyncEnabled: true }
 
     async componentDidMount() {
         await this.refreshDevices()
-        this.setState({ featureSyncEnabled: await features.getFeature('Sync') })
     }
 
     handleRemoveDevice = async (deviceId: string) => {
