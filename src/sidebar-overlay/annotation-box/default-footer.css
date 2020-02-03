@@ -17,7 +17,7 @@
 .timestamp {
     margin-right: auto;
     margin-left: 12px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
     color: #72727f;
 
@@ -32,7 +32,7 @@
     border: none;
     z-index: 2500;
     min-width: 20px;
-    height: 14px;
+    height: 16px;
     background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
@@ -41,12 +41,12 @@
     background-size: contain;
     max-width: 30px;
     width: fill-available;
-    margin-left: 3px;
+    margin-left: 4px;
     opacity: 0.3;
 }
 
 .editIcon {
-    background-image: url('/img/edit.svg');
+    background-image: url('/img/comment_edit.svg');
 
      &:hover {
         opacity: 0.6;

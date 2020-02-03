@@ -64,7 +64,7 @@
 
 .url {
     composes: subTitleColor from '../../common-ui/colors.css';
-    font-size: 13px;
+    font-size: 14px;
     min-width: 0;
     font-weight: 400;
     height: 15px;

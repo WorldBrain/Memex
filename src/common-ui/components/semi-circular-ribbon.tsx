@@ -20,7 +20,7 @@ class SemiCircularRibbon extends PureComponent<Props> {
         return (
             <ButtonTooltip
                 tooltipText="Remove from collection"
-                position="leftNarrow"
+                position="right"
             >
                 <div className={pageStyles.crossRibbon}>
                     <div

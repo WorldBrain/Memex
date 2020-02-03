@@ -43,21 +43,18 @@
 }
 
 .editButton {
-    composes: hoverColor buttonRadiusSmall from '../../../../common-ui/colors.css';
     background-image: url('/img/edit.svg');
     width: 24px;
     height: 24px;
-    background-position-y: 4px;
-    animation: appear 0.2s forwards;
+    background-position: center;
 }
 
 .deleteButton {
-    composes: hoverColor buttonRadiusSmall from '../../../../common-ui/colors.css';
     background-image: url('/img/trash.svg');
     width: 24px;
     height: 24px;
-    margin-left: 2px;
-    animation: appear 0.2s forwards;
+    background-position: center;
+    margin-left: 5px;
 }
 
 .listName {

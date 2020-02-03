@@ -194,11 +194,6 @@
     color: color4;
 }
 
-.hoversidebaropen:hover {
-    background-color: color8;
-    color: color4;
-}
-
 .itemActive {
     color: color4;
     font-weight: 600;

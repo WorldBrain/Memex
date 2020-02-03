@@ -12,7 +12,6 @@
     margin: 5px 0 15px 0;
     text-align: start;
     font-size: 13px;
-    border-top: 0.75px solid #e1e1e1;
     justify-content: center;
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);

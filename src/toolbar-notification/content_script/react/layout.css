@@ -48,8 +48,7 @@
 }
 
 .close {
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
-    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: closeIcon from 'src/common-ui/icons.css';
     position: absolute;
     cursor: pointer;
     top: 5px;

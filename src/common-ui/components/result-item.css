@@ -74,10 +74,11 @@
 
     & .displayTime {
         margin-right: 10px;
-        font-size: 12px;
+        font-size: 13px;
     }
 
     & .url {
+        font-size: 14px;
         margin: -7px 0 0 38px;
     }
 
@@ -93,7 +94,6 @@
     display: flex;
     box-sizing: content-box;
     justify-content: space-between;
-    overflow: hidden;
     padding: 6px 10px;
     width: 100%;
     height: fit-content;
@@ -260,7 +260,7 @@
 
 .url {
     color: #72727f;
-    font-size: 12px;
+    font-size: 14px;
     min-width: 0;
     font-weight: 400;
     white-space: nowrap;
@@ -312,7 +312,7 @@
 }
 
 .displayTime {
-    font-size: 11px;
+    font-size: 12px;
     color: #72727f;
     min-width: fit-content;
 }
@@ -341,6 +341,7 @@
 .actionItems {
     display: flex;
     align-items: center;
+    height: 14px;
 }
 
 .trash {

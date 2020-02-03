@@ -57,7 +57,7 @@
 
 .clearFilters {
     composes: nakedSquareButton from 'src/common-ui/elements.css';
-    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: closeIcon from 'src/common-ui/icons.css';
     background-size: 10px;
     display: inline-block;
     cursor: pointer;
