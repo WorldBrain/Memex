@@ -13,16 +13,19 @@ import SidebarContainer, {
     actions as sidebarActions,
     selectors as sidebarSelectors,
 } from 'src/sidebar-overlay/sidebar'
-import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
+import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import {
     actions as commentBoxActions,
     selectors as commentBoxselectors,
 } from 'src/sidebar-overlay/comment-box'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 import * as bookmarkActs from 'src/popup/bookmark-button/actions'
 import * as popup from 'src/popup/selectors'
 import { retryUntilErrorResolves } from 'src/util/retry-until'
-import { Anchor } from 'src/highlighting/types'
+import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
+import { Annotation } from 'src/annotations/types'
+import { SidebarContext } from 'src/sidebar-overlay'
+import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 
 interface StateProps {
     url: string
@@ -60,18 +63,7 @@ interface OwnProps extends Partial<KeyboardActions> {
     getUrl?: () => string
     handleRemoveRibbon: () => void
     insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
-    highlightAll: (
-        highlights: Annotation[],
-        openSidebar: (args: OpenSidebarArgs) => void,
-        focusOnAnnotation: (url: string) => void,
-        hoverAnnotationContainer: (url: string) => void,
-    ) => void
-    highlightAndScroll: (annotation: Annotation) => number
-    removeHighlights: () => void
-    makeHighlightMedium: (annotation: Annotation) => void
-    removeMediumHighlights: () => void
-    removeTempHighlights: () => void
-    sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
+    highlighter: HighlightInteractionInterface
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -120,14 +112,14 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         // componentDidUpdate and remove annotations (unnecessary) and remove tmp annotations (bug)
         // but really we should get rid of this remove all + re-annotate all, and either calculate the difference
         // or trigger the appropriate add or delete respectively.
-        if (
-            prevProps.annotations.length > 0 &&
-            prevProps.annotations !== annotations &&
-            isSidebarOpen
-        ) {
-            this.props.removeHighlights()
-            this._highlightAnnotations()
-        }
+        // if (
+        //     prevProps.annotations.length > 0 &&
+        //     prevProps.annotations !== annotations &&
+        //     isSidebarOpen
+        // ) {
+        //     this.props.highlighter.removeHighlights()
+        //     this._highlightAnnotations()
+        // }
         if (prevProps.url !== this.getUrl()) {
             this.props.onInit()
         }
@@ -337,15 +329,16 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             this._focusOnAnnotation(activeUrl)
         }
 
-        // Highlight any annotations with anchor.
-        // (Done here as only in-page sidebar requires to do this.)
-        await this._highlightAnnotations()
+        // TODO (ch - annotations): remove me
+        // // Highlight any annotations with anchor.
+        // // (Done here as only in-page sidebar requires to do this.)
+        // await this._highlightAnnotations()
     }
 
     private _closeSidebarCallback = () => {
         this.props.setActiveAnnotationUrl(null)
         this.props.setHoverAnnotationUrl(null)
-        this.props.removeTempHighlights()
+        this.props.highlighter.removeTempHighlights()
     }
 
     private _goToAnnotation = async (annotation: Annotation) => {
@@ -353,29 +346,31 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             setTimeout(async () => {
                 await this.props.openSidebar({ activeUrl: annotation.url })
                 setTimeout(() => {
-                    this.props.highlightAndScroll(annotation)
+                    this.props.highlighter.highlightAndScroll(annotation)
                     this._focusOnAnnotation(annotation.url)
                 }, 1500)
             }, 2000)
         } else {
             setTimeout(() => {
-                this.props.highlightAndScroll(annotation)
+                this.props.highlighter.highlightAndScroll(annotation)
                 this._focusOnAnnotation(annotation.url)
             }, 200)
         }
     }
 
-    private _highlightAnnotations = async () => {
-        const annotations = this.props.annotations.filter(
-            annotation => !!annotation.selector,
-        )
-        await this.props.highlightAll(
-            annotations,
-            this.props.openSidebar,
-            this._focusOnAnnotation,
-            this._hoverAnnotation,
-        )
-    }
+    // TODO (ch - annotations): remove me
+    //
+    // private _highlightAnnotations = async () => {
+    //     const annotations = this.props.annotations.filter(
+    //         annotation => !!annotation.selector,
+    //     )
+    //     await this.props.highlighter.highlightAll(
+    //         annotations,
+    //         this.props.openSidebar,
+    //         this._focusOnAnnotation,
+    //         this._hoverAnnotation,
+    //     )
+    // }
 
     private _focusOnAnnotation = (url: string) => {
         this.props.setActiveAnnotationUrl(url)
@@ -428,10 +423,6 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             isPageFullScreen,
             isSidebarOpen,
             isRibbonEnabled,
-            makeHighlightMedium,
-            removeMediumHighlights,
-            removeTempHighlights,
-            sortAnnotationsByPosition,
             closeSidebar,
             isCommentSaved,
             commentText,
@@ -463,16 +454,14 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
                         annotationsManager={annotationsManager}
                         goToAnnotation={this._goToAnnotation}
                         closeSidebarCallback={this._closeSidebarCallback}
-                        handleAnnotationBoxMouseEnter={makeHighlightMedium}
-                        handleAnnotationBoxMouseLeave={removeMediumHighlights}
-                        sortAnnotationsByPosition={sortAnnotationsByPosition}
-                        removeTempHighlights={removeTempHighlights}
                     />
                 )}
             </div>
         )
     }
 }
+// TODO: Upgrade to React 16.6
+// RibbonSidebarContainer.contextType = SidebarContext;
 
 const mapStateToProps: MapStateToProps<
     StateProps,
@@ -531,9 +520,11 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     toggleBookmark: () => dispatch(bookmarkActs.toggleBookmark()),
 })
 
-export default connect<StateProps, DispatchProps, OwnProps>(
-    mapStateToProps,
-    mapDispatchToProps,
-    null,
-    { withRef: true },
-)(RibbonSidebarContainer)
+export default withSidebarContext(
+    connect<StateProps, DispatchProps, OwnProps>(
+        mapStateToProps,
+        mapDispatchToProps,
+        null,
+        { withRef: true },
+    )(RibbonSidebarContainer),
+)

@@ -1,6 +1,6 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { copyToClipboard } from './utils'
-import { extractAnchor, selectTextFromRange } from 'src/highlighting/ui'
+import { extractAnchor } from 'src/highlighting/ui'
 
 export const createAndCopyDirectLink = async () => {
     const selection = document.getSelection()
@@ -13,6 +13,9 @@ export const createAndCopyDirectLink = async () => {
         anchor,
     })
     copyToClipboard(result.url)
-    selectTextFromRange(range)
+
+    selection.removeAllRanges()
+    selection.addRange(range)
+
     return result
 }

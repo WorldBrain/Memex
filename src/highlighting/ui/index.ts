@@ -1,14 +1,8 @@
-import { Annotation } from 'src/sidebar-overlay/sidebar/types'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import * as annotations from 'src/highlighting/ui/anchoring/index'
 import { Anchor, Highlight } from 'src/highlighting/types'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
-
-export async function createHighlightAndSave(selection?: any) {
-    // FIXME (ch - annotations): Fix this to a typed version
-    await remoteFunction('createAnnotation')(await createHighlight(selection))
-}
+import { Annotation } from 'src/annotations/types'
+import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 
 export async function createHighlight(selection?: any, temporary = false) {
     const url = window.location.href
@@ -45,11 +39,4 @@ export const extractAnchor = async (selection: Selection): Promise<Anchor> => {
         quote,
         descriptor,
     }
-}
-
-// FIXME (ch - annotations): Shouldn't need this once we have temporary highlights
-export const selectTextFromRange = (range: Range) => {
-    const selection = document.getSelection()
-    selection.removeAllRanges()
-    selection.addRange(range)
 }

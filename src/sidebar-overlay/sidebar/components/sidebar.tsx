@@ -6,7 +6,7 @@ import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
-import { Annotation, Page } from '../types'
+import { Page } from '../types'
 import { openSettings } from '../../utils'
 import FiltersSidebarContainer from './filters-sidebar-container'
 import ResultsContainer from './results-container'
@@ -15,6 +15,7 @@ import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
 import SearchTypeSwitch from './search-type-switch'
 import PageInfo from './page-info'
 import cx from 'classnames'
+import { Annotation } from 'src/annotations/types'
 
 const styles = require('./sidebar.css')
 
@@ -40,7 +41,6 @@ interface Props {
         annotation: Annotation,
     ) => (e: React.MouseEvent<HTMLElement>) => void
     handleAddCommentBtnClick: () => void
-    removeTempHighlights: () => void
     handleAnnotationBoxMouseEnter: (
         annotation: Annotation,
     ) => (e: Event) => void
@@ -115,6 +115,10 @@ class Sidebar extends React.Component<Props, State> {
         return this.props.pageType === 'page'
     }
 
+    handleDeleteAnnotation = url => {
+        this.props.handleDeleteAnnotation(url)
+    }
+
     private renderAnnots() {
         const annots = this.props.annotations.map(annot => (
             <AnnotationBox
@@ -125,13 +129,12 @@ class Sidebar extends React.Component<Props, State> {
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
                 handleGoToAnnotation={this.props.handleGoToAnnotation(annot)}
                 handleEditAnnotation={this.props.handleEditAnnotation}
-                handleDeleteAnnotation={this.props.handleDeleteAnnotation}
+                handleDeleteAnnotation={this.handleDeleteAnnotation}
                 handleMouseLeave={this.props.handleAnnotationBoxMouseLeave()}
                 handleMouseEnter={this.props.handleAnnotationBoxMouseEnter(
                     annot,
                 )}
                 handleBookmarkToggle={this.props.handleBookmarkToggle}
-                removeTempHighlights={this.props.removeTempHighlights}
             />
         ))
 

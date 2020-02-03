@@ -1,13 +1,10 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { Omit } from './types'
-import { Annotation } from 'src/sidebar-overlay/sidebar/types'
+import { Omit } from '../sidebar-overlay/types'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import analytics from 'src/analytics'
-import {
-    AnnotSearchParams,
-    BackgroundSearchParams,
-} from 'src/search/background/types'
+import { BackgroundSearchParams } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
+import { Annotation } from 'src/annotations/types'
 
 export default class AnnotationsManager {
     private readonly _processEventRPC = remoteFunction('processEvent')
@@ -64,8 +61,7 @@ export default class AnnotationsManager {
             })
         }
 
-        // Write annotation to database.
-        const uniqueUrl = await this._createAnnotationRPC({
+        const annotation = {
             url,
             title,
             body,
@@ -73,12 +69,23 @@ export default class AnnotationsManager {
             selector: anchor,
             bookmarked,
             isSocialPost,
-        })
+        }
+        // Write annotation to database.
+        const uniqueUrl = await this._createAnnotationRPC(annotation)
 
         // Write tags to database.
         tags.forEach(async tag => {
             await this._addAnnotationTagRPC({ tag, url: uniqueUrl })
         })
+
+        return {
+            ...annotation,
+            pageUrl: annotation.url,
+            url: uniqueUrl, // Weird materialised surrogate key made when creating an annotation for saving.
+            tags,
+            createdWhen: Date.now(),
+            lastEdited: Date.now(),
+        } as Annotation
     }
 
     public fetchAnnotationsWithTags = async (
@@ -161,6 +168,11 @@ export default class AnnotationsManager {
         return this.bookmarkAnnotationRPC({ url })
     }
 
+    public searchAnnotations = async (searchParams: BackgroundSearchParams) => {
+        const annotations = await this.searchAnnotationsRPC(searchParams)
+        return annotations
+    }
+
     private _getTagArrays: (
         oldTags: string[],
         newTags: string[],
@@ -188,10 +200,5 @@ export default class AnnotationsManager {
             tagsToBeAdded,
             tagsToBeDeleted,
         }
-    }
-
-    public searchAnnotations = async (searchParams: BackgroundSearchParams) => {
-        const annotations = await this.searchAnnotationsRPC(searchParams)
-        return annotations
     }
 }
