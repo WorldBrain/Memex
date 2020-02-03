@@ -1,5 +1,5 @@
 import expect from 'expect'
-import { fakeRemoteFunction } from 'src/util/webextensionRPC'
+import { fakeRemoteFunctions } from 'src/util/webextensionRPC'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
 import { FakeAnalytics } from 'src/analytics'
@@ -13,7 +13,7 @@ function setupTest() {
             localStorage,
             analytics,
             event,
-            remoteFunction: fakeRemoteFunction(remoteFunctions),
+            remoteFunction: fakeRemoteFunctions(remoteFunctions),
         })
         if (result.screen) {
             Object.assign(state, result)
@@ -30,10 +30,11 @@ describe('Backup settings container logic', () => {
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
+                getBackendLocation: () => 'google-drive',
             }),
         })
         expect(firstSessionState).toEqual({
@@ -120,7 +121,7 @@ describe('Backup settings container logic', () => {
             localStorage,
             analytics,
             event: { type: 'onLoginRequested' },
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isAutomaticBackupEnabled: () => false,
             }),
         })
@@ -147,7 +148,7 @@ describe('Backup settings container logic', () => {
         const secondSessionState = await logic.getInitialState({
             analytics,
             localStorage,
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
@@ -185,7 +186,7 @@ describe('Backup settings container logic', () => {
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
@@ -279,7 +280,7 @@ describe('Backup settings container logic', () => {
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
@@ -323,7 +324,7 @@ describe('Backup settings container logic', () => {
         const secondSessionState = await logic.getInitialState({
             analytics,
             localStorage,
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
@@ -347,7 +348,7 @@ describe('Backup settings container logic', () => {
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
@@ -391,7 +392,7 @@ describe('Backup settings container logic', () => {
         const secondSessionState = await logic.getInitialState({
             analytics,
             localStorage,
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
@@ -415,7 +416,7 @@ describe('Backup settings container logic', () => {
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
@@ -457,7 +458,7 @@ describe('Backup settings container logic', () => {
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
-            remoteFunction: fakeRemoteFunction({
+            remoteFunction: fakeRemoteFunctions({
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,

@@ -272,7 +272,7 @@ export class RemoteFunctionRegistry {
     }
 }
 
-export function fakeRemoteFunction(functions: {
+export function fakeRemoteFunctions(functions: {
     [name: string]: (...args) => any
 }) {
     return name => {
