@@ -16,7 +16,6 @@ export default class DownloadOverlay extends PureComponent<Props, {}> {
                     <Fragment>
                         Start the app & pick a backup folder. Then return here
                         to continue your backup.
-                        <br />
                         <a
                             className={styles.link}
                             target="_blank"

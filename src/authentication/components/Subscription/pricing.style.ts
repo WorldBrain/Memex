@@ -6,13 +6,10 @@ import {
 
 const PricingTable = styled.div`
     border-radius: 5px;
-    padding: 10px 13px;
-    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-right: 20px;
-
+    margin: 10px 5px;
     border-width: 3px;
     border-style: solid;
     border-color: rgb(92, 217, 166);
@@ -64,14 +61,10 @@ const DeviceSelection = styled.div`
 
 const PricingPlanTitle = styled.h1`
     box-sizing: border-box;
-    margin-bottom: 30px;
-    margin-top: 30px;
-    font-size: 35px;
-    color: black;
-    display: block;
-    font-weight: 700;
+    font-weight: 500;
+    font-size: 20px;
+    margin: 30px 0;
     text-align: center;
-    letter-spacing: 0.1em;
 `
 
 const PricingHead = styled.div`
@@ -88,7 +81,7 @@ const PricingHeadTitle = styled.h2`
 const PricingPrice = styled.div`
     margin-bottom: 20px;
     display: flex;
-    font-size: 2.5rem;
+    font-size: 25px;
     color: rgb(58, 47, 69);
     text-align: center;
 `

@@ -7,40 +7,32 @@ import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { Page, SearchIndex } from 'src/search'
+import { SearchIndex } from 'src/search'
 import { Tab, CustomListsInterface } from './types'
+import PageStorage from 'src/page-indexing/background/storage'
+import { pageIsStub } from 'src/page-indexing/utils'
 
 export default class CustomListBackground {
     storage: CustomListStorage
     _createPage: SearchIndex['createPageViaBmTagActs'] // public so tests can override as a hack
     public remoteFunctions: CustomListsInterface
-    private tabMan: TabManager
-    private windows: Windows.Static
-    private getPage: (url: string) => Promise<Page>
-    private searchIndex: SearchIndex
 
-    constructor({
-        storageManager,
-        tabMan,
-        windows,
-        createPage,
-        getPage,
-        searchIndex,
-    }: {
-        storageManager: Storex
-        tabMan?: TabManager
-        windows?: Windows.Static
-        getPage?: (url: string) => Promise<Page>
-        createPage?: SearchIndex['createPageViaBmTagActs']
-        searchIndex: SearchIndex
-    }) {
+    constructor(
+        private options: {
+            storageManager: Storex
+            searchIndex: SearchIndex
+            pageStorage: PageStorage
+            tabMan?: TabManager
+            windows?: Windows.Static
+            createPage?: SearchIndex['createPageViaBmTagActs']
+        },
+    ) {
         // Makes the custom list Table in indexed DB.
-        this.storage = new CustomListStorage({ storageManager })
-        this.tabMan = tabMan
-        this.searchIndex = searchIndex
-        this.windows = windows
-        this.getPage = getPage || searchIndex.getPage
-        this._createPage = createPage || searchIndex.createPageViaBmTagActs
+        this.storage = new CustomListStorage({
+            storageManager: options.storageManager,
+        })
+        this._createPage =
+            options.createPage || options.searchIndex.createPageViaBmTagActs
 
         this.remoteFunctions = {
             createCustomList: this.createCustomList.bind(this),
@@ -145,14 +137,10 @@ export default class CustomListBackground {
     }
 
     private async createPageIfNeeded({ url }: { url: string }) {
-        let page = await this.getPage(url)
-
-        if (!page) {
-            page = await this._createPage({ url })
-            page.addVisit()
+        const exists = await this.options.pageStorage.pageExists(url)
+        if (!exists) {
+            await this._createPage({ url, visitTime: Date.now(), save: true })
         }
-
-        return page.save()
     }
 
     async insertPageToList({ id, url }: { id: number; url: string }) {
@@ -217,29 +205,30 @@ export default class CustomListBackground {
         tabs?: Array<Tab>
     }) {
         if (!tabs) {
-            const currentWindow = await this.windows.getCurrent()
-            tabs = this.tabMan.getTabUrls(currentWindow.id)
+            const currentWindow = await this.options.windows.getCurrent()
+            tabs = this.options.tabMan.getTabUrls(currentWindow.id)
         }
 
         const time = Date.now()
 
         tabs.forEach(async tab => {
-            let page = await this.searchIndex.getPage(tab.url)
+            const page = await this.options.pageStorage.getPage(tab.url)
 
-            if (page == null || page.isStub) {
-                page = await this._createPage({
+            if (!page || pageIsStub(page)) {
+                await this._createPage({
                     tabId: tab.tabId,
                     url: tab.url,
                     allowScreenshot: false,
+                    visitTime: time,
+                    save: true,
                 })
+            } else {
+                // Add new visit if none, else page won't appear in results
+                await this.options.pageStorage.addPageVisitIfHasNone(
+                    tab.url,
+                    time,
+                )
             }
-
-            // Add new visit if none, else page won't appear in results
-            if (!page.visits.length) {
-                page.addVisit(time)
-            }
-
-            await page.save()
         })
 
         await Promise.all(
@@ -261,8 +250,8 @@ export default class CustomListBackground {
         tabs?: Array<Tab>
     }) {
         if (!tabs) {
-            const currentWindow = await this.windows.getCurrent()
-            tabs = this.tabMan.getTabUrls(currentWindow.id)
+            const currentWindow = await this.options.windows.getCurrent()
+            tabs = this.options.tabMan.getTabUrls(currentWindow.id)
         }
 
         await Promise.all(

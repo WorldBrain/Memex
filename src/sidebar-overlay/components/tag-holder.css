@@ -26,7 +26,7 @@
 .placeholder {
     display: inline-block;
     color: #888;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-weight: 400;
     font-style: italic;
 }
@@ -46,7 +46,7 @@
 }
 
 .remove {
-    composes: removeIcon from '../../common-ui/icons.css';
+    composes: closeIcon from '../../common-ui/icons.css';
     composes: nakedButton hoverColor from '../../common-ui/colors.css';
     padding: 3px;
     width: 8px;

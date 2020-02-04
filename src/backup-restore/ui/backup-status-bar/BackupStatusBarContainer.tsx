@@ -158,13 +158,13 @@ export const calcBackupUIState = (
         ) {
             return {
                 state: 'success',
-                header: 'All good!',
-                message: null,
+                header: 'Backup Status',
+                message: 'All Good!',
             }
         } else {
             return {
                 state: 'fail',
-                header: 'Backup mode: manual',
+                header: 'Backup Status: manual',
                 message: messages.automatic_backup_disabled_first_backup_done,
             }
         }

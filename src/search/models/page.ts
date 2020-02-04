@@ -5,6 +5,9 @@ import AbstractModel from './abstract-model'
 import Visit from './visit'
 import Bookmark from './bookmark'
 import Tag from './tag'
+import { DBGet } from '../types'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { initErrHandler } from '../storage'
 
 // Keep these properties as Symbols to avoid storing them to DB
 const visitsProp = Symbol('assocVisits')
@@ -152,10 +155,6 @@ export default class Page extends AbstractModel
      */
     get shouldDelete() {
         return !this.hasBookmark && this[visitsProp].length === 0
-    }
-
-    get isStub() {
-        return this.text == null && (this.terms == null || !this.terms.length)
     }
 
     set screenshotURI(input: string) {
@@ -417,4 +416,20 @@ export default class Page extends AbstractModel
             },
         )
     }
+}
+
+export const getPage = (getDb: DBGet) => async (url: string) => {
+    const normalizedUrl = normalizeUrl(url, {})
+    const db = await getDb()
+    const page = await db
+        .collection('pages')
+        .findOneObject<Page>({ url: normalizedUrl })
+        .catch(initErrHandler())
+
+    if (page == null) {
+        return null
+    }
+    const result = new Page(db, page)
+    await result.loadRels()
+    return result
 }

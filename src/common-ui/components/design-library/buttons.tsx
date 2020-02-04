@@ -3,10 +3,11 @@ import { colorButtonHighlightBackground } from 'src/common-ui/components/design-
 
 export const ButtonSideMenu = styled.div`
     text-align: center;
-    padding: 1em;
+    padding: 1em 0;
     display: flex;
     cursor: pointer;
-    width: 100%;
+    max-width: 280px;
+    min-width: 260px;
 
     :hover {
         background-color: ${colorButtonHighlightBackground};

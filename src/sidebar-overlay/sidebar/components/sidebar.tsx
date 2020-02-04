@@ -15,6 +15,7 @@ import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
 import SearchTypeSwitch from './search-type-switch'
 import PageInfo from './page-info'
 import cx from 'classnames'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
 const styles = require('./sidebar.css')
 
@@ -174,7 +175,7 @@ class Sidebar extends React.Component<Props, State> {
             <React.Fragment>
                 <Menu
                     isOpen={isOpen}
-                    width={340}
+                    width={450}
                     styles={menuStyles(env)}
                     right
                     noOverlay
@@ -229,7 +230,7 @@ class Sidebar extends React.Component<Props, State> {
                                 this.renderResults()
                             ) : this.props.isLoading &&
                             !this.props.appendLoader ? (
-                                <Loader />
+                                <LoadingIndicator />
                             ) : annotations.length === 0 ? (
                                 <EmptyMessage />
                             ) : (

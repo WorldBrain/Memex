@@ -1,23 +1,23 @@
 .parentExpanded {
     padding-left: 15px;
-    border-left: 6px solid #ededed; /* MAN - Manual Adjustment Needed */
-    margin-top: -17px;
-    padding-top: 9px;
-    margin-left: 2px;
+    border-left: 4px solid #5cd9a6; /* MAN - Manual Adjustment Needed */
+    margin-left: 25px;
     margin-bottom: 35px;
     display: flex;
     flex-direction: column;
 }
 
 .resultCount {
-    composes: subTitleColor nakedButton hoverColor from 'src/common-ui/colors.css';
-    margin: -13px 0 15px 0;
+    color: #3a2f45;
+    margin: 5px 0 15px 0;
     text-align: start;
     font-size: 13px;
     justify-content: center;
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
     display: flex;
+    border-top: 0.75px solid #e1e1e1;
+    padding-top: 3px;
 }
 
 .icon {
@@ -35,7 +35,7 @@
 }
 
 .expandedCount {
-    margin: -5px 0 -5px 0;
+    margin: 0px 0 -5px 0;
     width: fill-available;
 }
 
@@ -57,7 +57,6 @@
 }
 
 .annotation {
-    width: 766px;
     animation: annotationLoad 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
@@ -67,14 +66,7 @@
 }
 
 .commentIcon {
-    background-image: url('/img/comment.svg');
-    width: 10px;
-    height: 10px;
-    background-size: contain;
-    margin-right: 5px;
-    background-repeat: no-repeat;
-    background-position: center;
-    padding: 8px;
+    background-image: url('/img/comment_empty.svg');
 }
 
 @keyframes onload {

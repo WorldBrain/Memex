@@ -16,6 +16,8 @@ import {
     KEYBOARDSHORTCUTS_DEFAULT_STATE,
 } from 'src/content-tooltip/constants'
 import { OPTIONS_URL } from 'src/constants'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 const styles = require('../../components/onboarding-box.css')
 const searchSettingsStyles = require('../../components/search-settings.css')
@@ -30,7 +32,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     State,
     Event
 > {
-    static TOTAL_STEPS = 4
+    static TOTAL_STEPS = 5
     static defaultProps: Partial<Props> = {
         storage: browser.storage.local,
     }
@@ -117,10 +119,11 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 
-    private searchImage = () => <div className={styles.searchGif} />
-    private annotationImage = () => <div className={styles.annotationGif} />
-    private keyboardImage = () => <div className={styles.keyboardGif} />
-    private sidebarImage = () => <div className={styles.sidebarGif} />
+    private searchImage = () => <img src={'/img/searchImage.gif'} className={styles.searchGif} />
+    private annotationImage = () => <img src={'/img/annotationImage.gif'} className={styles.annotationGif} />
+    private keyboardImage = () => <img src={'/img/keyboardImage.gif'} className={styles.keyboardGif} />
+    private sidebarImage = () => <img src={'/img/sidebarImage.gif'} className={styles.sidebarGif} />
+    private mobileImg = () => <img src={'/img/mobileOnboarding.png'} className={styles.mobileImg} />
     private handleTooltipToggle = () => {
         const enabled = !this.state.isTooltipEnabled
         this.processEvent('setTooltipEnabled', { enabled })
@@ -244,15 +247,12 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Setup your Memex in less than 1 minute"
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         renderButton={() => (
-                            <NextStepButton onClick={this.handleNextStepClick}>
-                                Get started
-                            </NextStepButton>
+                            <PrimaryAction 
+                                onClick={this.handleNextStepClick}
+                                label={'Get Started'}
+                            />
                         )}
                     >
-                        <p className={styles.textDark}>
-                            Learn how everything works and make Memex tailormade
-                            for you.
-                        </p>
                         <img
                             src="img/privacy.svg"
                             alt="A person floating above the earth on a laptop"
@@ -267,9 +267,10 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Full-Text Search your Web History"
                         subtitleText="Find any website or PDF again without upfront organisation."
                         renderButton={() => (
-                            <NextStepButton onClick={this.handleNextStepClick}>
-                                Next
-                            </NextStepButton>
+                            <PrimaryAction 
+                                onClick={this.handleNextStepClick}
+                                label={'Next'}
+                            />
                         )}
                         renderImage={() => {
                             if (!this.state.showSearchSettings) {
@@ -289,9 +290,10 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Web Annotations"
                         subtitleText="Add highlight and make notes on websites and (soon) PDFs."
                         renderButton={() => (
-                            <NextStepButton onClick={this.handleNextStepClick}>
-                                Next
-                            </NextStepButton>
+                            <PrimaryAction 
+                                onClick={this.handleNextStepClick}
+                                label={'Next'}
+                            />
                         )}
                         renderImage={this.annotationImage}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
@@ -313,9 +315,10 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Fast & Flexible Content Organisation"
                         subtitleText="Tag, favorite or sort content into collections"
                         renderButton={() => (
-                            <NextStepButton onClick={this.handleNextStepClick}>
-                                Next
-                            </NextStepButton>
+                            <PrimaryAction 
+                                onClick={this.handleNextStepClick}
+                                label={'Next'}
+                            />
                         )}
                         renderImage={this.sidebarImage}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
@@ -335,31 +338,44 @@ export default class OnboardingScreen extends StatefulUIElement<
                 return (
                     <OnboardingStep
                         goToStep={this.handleStepClick}
+                        titleText="Sync with your mobile Phone"
+                        subtitleText="Save, organise & add notes on the go"
+                        renderButton={() => (
+                            <PrimaryAction 
+                                onClick={this.handleNextStepClick}
+                                label={'Next'}
+                            />
+                        )}
+                        renderImage={this.mobileImg}
+                        totalSteps={OnboardingScreen.TOTAL_STEPS}
+                        currentStep={this.state.currentStep - 1}
+                    >
+                        <SecondaryAction
+                            onClick={()=> window.open(`${OPTIONS_URL}#/sync`)}
+                            label={'Setup Sync'}
+                        />
+                    </OnboardingStep>
+                )
+            case 5:
+                return (
+                    <OnboardingStep
+                        goToStep={this.handleStepClick}
                         titleText="Keyboard Shortcuts for Everything"
                         subtitleText="Organise and annotate content without the Highlighter or Sidebar"
                         renderButton={() => (
-                            <NextStepButton onClick={this.props.navToOverview}>
-                                All done! Go to dashboard
-                            </NextStepButton>
+                            <PrimaryAction 
+                                onClick={this.props.navToOverview}
+                                label={'All done! Go to dashboard'}
+                            />
                         )}
                         renderImage={this.keyboardImage}
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         currentStep={this.state.currentStep - 1}
                     >
-                        <SettingsCheckbox
-                            id="onboarding-keyboard-shortcuts-toggle"
-                            isChecked={this.state.areShortcutsEnabled}
-                            handleChange={this.handleShortcutsToggle}
-                        >
-                            Enable keyboard shortcuts
-                        </SettingsCheckbox>
-                        <a
-                            className={searchSettingsStyles.settingsButton}
-                            href={`${OPTIONS_URL}#/settings`}
-                            target="_blank"
-                        >
-                            Change shortcut settings
-                        </a>
+                        <SecondaryAction
+                            onClick={()=> window.open(`${OPTIONS_URL}#/settings`)}
+                            label={'Change Shortcuts'}
+                        />
                     </OnboardingStep>
                 )
         }

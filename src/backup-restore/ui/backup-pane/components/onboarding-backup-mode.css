@@ -8,15 +8,13 @@ input {
     margin-left: 10px;
 }
 
-.name {
-    composes: h2Color from '../../../../common-ui/colors.css';
-    vertical-align: middle;
-    font-size: 15px;
-    font-weight: 500;
+.selectionTitle {
+    composes: providerTitle from 'src/backup-restore/ui/backup-pane/components/provider-list.css';
+    cursor: pointer;
 }
 
 .subname {
-    composes: subText from '../../../../options/base.css';
+    composes: infoText from 'src/options/settings/components/settings.css';
 }
 
 .selectionContainer {

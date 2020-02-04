@@ -20,6 +20,9 @@ import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
 import { filterBlobsFromSyncLog } from './sync-logging'
 import { MemexExtSyncSettingStore } from './setting-store'
 import { resolvablePromise } from 'src/util/promises'
+import { remoteEventEmitter } from 'src/util/webextensionRPC'
+import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
+import { bindMethod } from 'src/util/functions'
 
 export default class SyncBackground extends SyncService {
     initialSync: MemexInitialSync
@@ -60,29 +63,33 @@ export default class SyncBackground extends SyncService {
 
         this.auth = options.auth
 
-        const bound = <Target, Key extends keyof Target>(
-            object: Target,
-            key: Key,
-        ): Target[Key] => (object[key] as any).bind(object)
-
         this.remoteFunctions = {
-            requestInitialSync: bound(this.initialSync, 'requestInitialSync'),
-            answerInitialSync: bound(this.initialSync, 'answerInitialSync'),
-            waitForInitialSync: bound(this.initialSync, 'waitForInitialSync'),
-            waitForInitialSyncConnected: bound(
+            requestInitialSync: bindMethod(
+                this.initialSync,
+                'requestInitialSync',
+            ),
+            answerInitialSync: bindMethod(
+                this.initialSync,
+                'answerInitialSync',
+            ),
+            waitForInitialSync: bindMethod(
+                this.initialSync,
+                'waitForInitialSync',
+            ),
+            waitForInitialSyncConnected: bindMethod(
                 this.initialSync,
                 'waitForInitialSyncConnected',
             ),
-            enableContinuousSync: bound(
+            enableContinuousSync: bindMethod(
                 this.continuousSync,
                 'enableContinuousSync',
             ),
-            forceIncrementalSync: bound(
+            forceIncrementalSync: bindMethod(
                 this.continuousSync,
                 'forceIncrementalSync',
-            ),
-            listDevices: bound(this.syncInfoStorage, 'listDevices'),
-            removeDevice: bound(this.syncInfoStorage, 'removeDevice'),
+            ) as () => Promise<void>,
+            listDevices: bindMethod(this.syncInfoStorage, 'listDevices'),
+            removeDevice: bindMethod(this.syncInfoStorage, 'removeDevice'),
         }
     }
 
@@ -122,5 +129,22 @@ export default class SyncBackground extends SyncService {
 
     async tearDown() {
         await this.continuousSync.tearDown()
+    }
+
+    registerRemoteEmitter() {
+        const remoteEmitter = remoteEventEmitter<InitialSyncEvents>('sync')
+
+        this.initialSync.events.on('progress', args => {
+            return remoteEmitter.emit('progress', args)
+        })
+        this.initialSync.events.on('roleSwitch', args => {
+            return remoteEmitter.emit('roleSwitch', args)
+        })
+        this.initialSync.events.on('error', args => {
+            return remoteEmitter.emit('error', args)
+        })
+        this.initialSync.events.on('finished', args => {
+            return remoteEmitter.emit('finished', args)
+        })
     }
 }

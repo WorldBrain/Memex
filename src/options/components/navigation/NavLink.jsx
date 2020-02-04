@@ -35,6 +35,7 @@ class NavLink extends PureComponent {
                     [icons.settingsIcon] : this.props.icon === "settings",
                     [icons.importIcon] : this.props.icon === "import",
                     [icons.backupIcon] : this.props.icon === "backup",
+                    [icons.syncIcon] : this.props.icon === "sync",
                     [icons.blockIcon] : this.props.icon === "block",
                     [icons.privacyIcon] : this.props.icon === "privacy",
                     [icons.teamIcon] : this.props.icon === "team",

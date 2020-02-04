@@ -13,7 +13,7 @@ const baseStyles = {
         top: '0px',
         zIndex: 2147483646,
         overflowY: 'hidden',
-        width: '350px',
+        width: '450px',
         height: '100%',
         background: '#fff',
         transition: 'all 0.3s cubic-bezier(0.65, 0.05, 0.36, 1)',

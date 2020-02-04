@@ -11,11 +11,18 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
+import {
+    WhiteSpacer10,
+} from 'src/common-ui/components/design-library/typography'
 import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
-import SyncDevicesPane from 'src/sync/components/SyncDevicesPane'
+import SyncDevicesPane from 'src/sync/components/device-list/SyncDevicesPane'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { CancelAction } from 'src/common-ui/components/design-library/actions/CancelAction'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 const styles = require('../../styles.css')
+const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./overview.css')
 
 interface Props {
@@ -82,6 +89,20 @@ export class OverviewContainer extends Component<Props & UserProps> {
 
     openSubscriptionModal = () => this.setState({ subscribeModal: true })
     closeSubscriptionModal = () => this.setState({ subscribeModal: false })
+     
+    enableAutomaticBackup() {
+        if (this.state.hasInitialBackup === true) {
+            localStorage.setItem('backup.automatic-backups-enabled', 'true')
+            this.setState({automaticBackupEnabled : true})
+        } else {
+            this.props.onBackupSetupRequested()
+        }
+    }
+
+    disableAutomaticBackup() {
+        localStorage.setItem('backup.automatic-backups-enabled', 'false')
+        this.setState({automaticBackupEnabled : false})
+    }
 
     render() {
         const automaticBackupsAllowed = this.props.authorizedFeatures.includes(
@@ -117,210 +138,206 @@ export class OverviewContainer extends Component<Props & UserProps> {
                         }
                     />
                 )}
-
-                <p className={styles.header2}>
-                    <strong>BACKUP STATUS</strong>
-                </p>
-                {!this.state.hasInitialBackup ? (
-                    <div className={localStyles.statusLine}>
-                        <p>You haven't set up any backups yet.</p>
-                        <SmallButton
-                            onClick={this.props.onBackupRequested}
-                            color="darkblue"
-                            extraClass={localStyles.right}
-                        >
-                            Start Wizard
-                        </SmallButton>
+                <div className={settingsStyle.section}>
+                    <div className={settingsStyle.sectionTitle}>
+                        Backup Status
                     </div>
-                ) : (
-                    <div>
-                        {/* The status line with last backup time */}
+                    {!this.state.hasInitialBackup ? (
                         <div className={localStyles.statusLine}>
-                            <div>
-                                <span className={localStyles.boldText}>
-                                    Last backup:
-                                </span>
-                                <span className={localStyles.time}>
-                                    {this.state.backupTimes.lastBackup
-                                        ? moment(
-                                              this.state.backupTimes.lastBackup,
-                                          ).fromNow()
-                                        : "You haven't made any backup yet"}
-                                </span>
-                            </div>
-                            <SmallButton
-                                color="green"
+                            <p>You haven't set up any backups yet.</p>
+                            <PrimaryAction 
                                 onClick={this.props.onBackupRequested}
-                            >
-                                {this.state.backupTimes.nextBackup !== 'running'
-                                    ? 'Backup Now'
-                                    : 'Go to Backup'}
-                            </SmallButton>
+                                label={"Start Wizard"}
+                            />
                         </div>
-                        {this.state.backupTimes.nextBackup && (
+                    ) : (
+                        <div>
+                            {/* The status line with last backup time */}
+                            <WhiteSpacer10/>
                             <div className={localStyles.statusLine}>
-                                <span className={localStyles.nextBackupLine}>
-                                    <span className={styles.name}>
-                                        Next backup:
+                                <div>
+                                    <span className={localStyles.boldText}>
+                                        Last backup:
                                     </span>
                                     <span className={localStyles.time}>
-                                        {this.state.backupTimes.nextBackup !==
-                                        'running'
-                                            ? automaticBackupsAllowed &&
-                                              moment(
-                                                  this.state.backupTimes
-                                                      .nextBackup,
+                                        {this.state.backupTimes.lastBackup
+                                            ? moment(
+                                                  this.state.backupTimes.lastBackup,
                                               ).fromNow()
-                                            : 'in progress'}
+                                            : "You haven't made any backup yet"}
                                     </span>
-                                </span>
+                                    {this.state.backupTimes.nextBackup && (
+                                    <div className={localStyles.statusLine}>
+                                        <span className={localStyles.nextBackupLine}>
+                                            <span className={styles.name}>
+                                                Next backup:
+                                            </span>
+                                            <span className={localStyles.time}>
+                                                {this.state.backupTimes.nextBackup !==
+                                                'running'
+                                                    ? automaticBackupsAllowed &&
+                                                      moment(
+                                                          this.state.backupTimes
+                                                              .nextBackup,
+                                                      ).fromNow()
+                                                    : 'in progress'}
+                                            </span>
+                                        </span>
+                                    </div>
+                                )}
+                                </div>
+                                <PrimaryAction 
+                                onClick={this.props.onBackupRequested}
+                                label={this.state.backupTimes.nextBackup !== 'running'
+                                        ? 'Backup Now'
+                                        : 'Go to Backup'}
+                                />
                             </div>
-                        )}
-                    </div>
-                )}
+                        </div>
+                    )}
+                </div>
 
                 {/* Settings Section */}
-                <div>
-                    <p className={styles.header2}>
-                        <strong>SETTINGS</strong>
-                    </p>
+                <div className={settingsStyle.section}>
+                    <div className={settingsStyle.sectionTitle}>
+                        Settings
+                    </div>
                     <div className={styles.option}>
                         {!automaticBackupsAllowed && (
-                            <div>
-                                <span className={styles.name}>
-                                    Enable Automatic Backups
-                                </span>
-                                <SmallButton
-                                    extraClass={localStyles.right}
+                            <div className={localStyles.statusLine}>
+                                <div>
+                                    <span className={styles.name}>
+                                        Enable Automatic Backups
+                                    </span>
+                                    <span
+                                        className={classNames(
+                                            settingsStyle.subname,
+                                            localStyles.limitWidth,
+                                        )}
+                                    >
+                                        Worry-free. Automatically backs up your data
+                                        every 15 minutes.
+                                    </span>
+                                </div>
+                                <SecondaryAction
                                     onClick={this.openSubscriptionModal}
-                                    color={'darkblue'}
-                                >
-                                    {'⭐️ Upgrade'}
-                                </SmallButton>
-                                <span
-                                    className={classNames(
-                                        styles.subname,
-                                        localStyles.limitWidth,
-                                    )}
-                                >
-                                    Worry-free. Automatically backs up your data
-                                    every 15 minutes.
-                                </span>
+                                    label={'⭐️ Upgrade'}
+                                />
                             </div>
                         )}
 
                         {automaticBackupsAllowed &&
                             !this.state.automaticBackupEnabled && (
-                                <div>
-                                    <span className={styles.name}>
-                                        Automatic Backups still disabled
-                                    </span>
-                                    <SmallButton
-                                        extraClass={localStyles.right}
-                                        onClick={
-                                            this.props.onBackupSetupRequested
-                                        }
-                                        color={'red'}
-                                    >
-                                        {'Enable'}
-                                    </SmallButton>
-                                    <span
-                                        className={classNames(
-                                            styles.subname,
-                                            localStyles.limitWidth,
-                                        )}
-                                    >
-                                        {
-                                            "You successfully upgraded but haven't enable automatic backups"
-                                        }
-                                    </span>
+                                <div className={localStyles.statusLine}>
+                                    <div>
+                                        <span className={styles.name}>
+                                            Automatic Backups still disabled
+                                        </span>
+                                        <span
+                                            className={classNames(
+                                                settingsStyle.subname,
+                                                localStyles.limitWidth,
+                                            )}
+                                        >
+                                            {
+                                                "You successfully upgraded but haven't enable automatic backups"
+                                            }
+                                        </span>
+                                    </div>
+                                    <PrimaryAction
+                                        onClick={() => this.enableAutomaticBackup()}
+                                        label={'Enable'}
+                                    />
                                 </div>
                             )}
 
                         {automaticBackupsAllowed &&
                             this.state.automaticBackupEnabled && (
-                                <div>
-                                    <span className={styles.name}>
-                                        Automatic Backups: Enabled
-                                    </span>
-                                    <SmallButton
-                                        extraClass={localStyles.right}
-                                        onClick={this.openSubscriptionModal}
-                                        color={'green'}
-                                    >
-                                        {'✓ Enabled'}
-                                    </SmallButton>
-                                    <span
-                                        className={classNames(
-                                            styles.subname,
-                                            localStyles.limitWidth,
-                                        )}
-                                    >
-                                        All set. Your data is backed up every 15
-                                        minutes.
-                                    </span>
+                                <div className={localStyles.statusLine}>
+                                    <div>
+                                        <span className={styles.name}>
+                                            Automatic Backups: Enabled
+                                        </span>
+                                        <span
+                                            className={classNames(
+                                                settingsStyle.subname,
+                                                localStyles.limitWidth,
+                                            )}
+                                        >
+                                            All set. Your data is backed up every 15
+                                            minutes.
+                                        </span>
+                                    </div>
+                                    <SecondaryAction
+                                        onClick={() => this.disableAutomaticBackup()}
+                                        label={'✓ Enabled'}
+                                    />
                                 </div>
                             )}
                     </div>
+                    {this.state.hasInitialBackup ? (
+                        <div className={styles.option}>
+                            <div className={localStyles.statusLine}>
+                                <div>
+                                    <span className={styles.name}>Backup Location</span>
+                                    {this.state.backupLocation === 'local' ? (
+                                        <span
+                                            className={classNames(
+                                                settingsStyle.subname,
+                                                localStyles.limitWidth,
+                                            )}
+                                        >
+                                         {(this.state.backupPath === null && this.state.backupLocation ==='local') ? 
+                                             ('⚠️Your Memex Backup Helper is not running!'):
+                                             (this.state.backupPath)
+                                         }
+                                        </span>
+                                    ) : (
+                                        <span
+                                            className={classNames(
+                                                settingsStyle.subname,
+                                                localStyles.limitWidth,
+                                            )}
+                                        >
+                                            Google Drive
+                                        </span>
+                                    )}
+                                </div>
+                                <SecondaryAction
+                                    label={'Change'}
+                                    onClick={() => this.props.onBackupRequested(true)}
+                                />
+                            </div>
+                        </div>
+                    ) : null}
                 </div>
-                {this.state.hasInitialBackup ? (
+                <div className={settingsStyle.section}>
+                    <div className={settingsStyle.sectionTitle}>
+                        Restore & Replace
+                    </div>
                     <div className={styles.option}>
-                        <span className={styles.name}>Backup Location</span>
-                        <SmallButton
-                            extraClass={localStyles.right}
-                            color={'green'}
-                            onClick={() => this.props.onBackupRequested(true)}
-                        >
-                            Change
-                        </SmallButton>
-                        {this.state.backupLocation === 'local' ? (
-                            <span
-                                className={classNames(
-                                    styles.subname,
-                                    localStyles.limitWidth,
-                                )}
-                            >
-                                {this.state.backupPath}
-                            </span>
-                        ) : (
-                            <span
-                                className={classNames(
-                                    styles.subname,
-                                    localStyles.limitWidth,
-                                )}
-                            >
-                                Google Drive
-                            </span>
+                        <div className={localStyles.statusLine}>
+                                <span
+                                    className={classNames(
+                                        settingsStyle.subname,
+                                        localStyles.limitWidth,
+                                    )}
+                                >
+                                    <b>Replace</b> all current data with a backup.
+                                </span>
+                                <SecondaryAction
+                                onClick={() =>
+                                    this.setState({ showRestoreConfirmation: true })
+                                }
+                                label={"Restore"}
+                                />
+                        </div>
+                    </div>
+                    <div>
+                        {this.state.subscribeModal && (
+                            <SubscribeModal onClose={this.closeSubscriptionModal} />
                         )}
                     </div>
-                ) : null}
-                <div className={styles.option}>
-                    <span className={styles.name}>Restore &amp; Replace</span>
-                    <SmallButton
-                        onClick={() =>
-                            this.setState({ showRestoreConfirmation: true })
-                        }
-                        color="green"
-                        extraClass={localStyles.right}
-                    >
-                        Restore
-                    </SmallButton>
-
-                    <br />
-                    <span
-                        className={classNames(
-                            styles.subname,
-                            localStyles.limitWidth,
-                        )}
-                    >
-                        <b>Replace</b> all current data with a backup.
-                    </span>
-                </div>
-                <div>
-                    <SyncDevicesPane />
-                    {this.state.subscribeModal && (
-                        <SubscribeModal onClose={this.closeSubscriptionModal} />
-                    )}
                 </div>
             </div>
         )

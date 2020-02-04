@@ -11,7 +11,7 @@
     height: 85px;
     flex-direction: column;
     justify-content: space-between;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .rootContainer > a {
@@ -64,7 +64,7 @@
 
 .url {
     composes: subTitleColor from '../../common-ui/colors.css';
-    font-size: 13px;
+    font-size: 14px;
     min-width: 0;
     font-weight: 400;
     height: 15px;

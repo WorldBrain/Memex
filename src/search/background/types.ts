@@ -164,8 +164,4 @@ export interface SearchInterface {
     delPagesByDomain: SearchIndex['delPagesByDomain']
     delPagesByPattern: SearchIndex['delPagesByPattern']
     getMatchingPageCount: SearchIndex['getMatchingPageCount']
-
-    addPageTag: SearchIndex['addTag']
-    delPageTag: SearchIndex['delTag']
-    fetchPageTags: SearchIndex['fetchPageTags']
 }

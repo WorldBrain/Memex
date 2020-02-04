@@ -7,7 +7,6 @@ import { findFilteredUrls } from './filters'
 import { textSearch } from './text-search'
 import { paginate, applyScores } from './util'
 import { collections } from '../util'
-export { domainHasFavIcon } from './fav-icon'
 import { DexieUtilsPlugin } from '../plugins/dexie-utils'
 
 export const search = (getDb: DBGet) => async ({
