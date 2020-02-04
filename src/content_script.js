@@ -10,7 +10,7 @@ import initRibbonAndSidebar from './sidebar-overlay/content_script'
 import 'src/backup-restore/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import initSocialIntegration from 'src/social-integration/content_script'
-import { HighlightInteraction } from './highlighting/ui/highlight-interactions'
+import configureStore from './sidebar-overlay/store'
 
 const remoteFunctionRegistry = new RemoteFunctionRegistry()
 
@@ -19,10 +19,11 @@ toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 // toolbarNotifications.showToolbarNotification('tooltip-first-close')
 window['toolbarNotifications'] = toolbarNotifications
 
-const annotationsManager = new AnnotationsManager()
-const highlighter = new HighlightInteraction()
+const store = configureStore()
 
-initContentTooltip({ toolbarNotifications })
-initRibbonAndSidebar({ annotationsManager, toolbarNotifications, highlighter })
+const annotationsManager = new AnnotationsManager()
+
+initContentTooltip({ toolbarNotifications, store })
+initRibbonAndSidebar({ annotationsManager, toolbarNotifications, store })
 
 initSocialIntegration({ annotationsManager })

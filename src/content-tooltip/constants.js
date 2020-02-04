@@ -10,11 +10,11 @@ export const KEYBOARDSHORTCUTS_STORAGE_NAME = 'memex-keyboardshortcuts'
 
 export const KEYBOARDSHORTCUTS_DEFAULT_STATE = {
     shortcutsEnabled: true,
-    highlightShortcut: 'n',
     linkShortcut: 'l',
     toggleSidebarShortcut: 'r',
     toggleHighlightsShortcut: 'h',
     createAnnotationShortcut: 'a',
+    createHighlightShortcut: 'n',
     createBookmarkShortcut: 'b',
     addTagShortcut: 't',
     addToCollectionShortcut: 'u',

@@ -14,6 +14,8 @@ import {
     createAnnotationHighlight,
     createAnnotationDraftInSidebar,
 } from 'src/annotations'
+import { extractAnchor } from 'src/highlighting/ui'
+import { createAnnotation as createAnnotationAction } from 'src/annotations/actions'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
@@ -60,7 +62,7 @@ let manualOverride = false
  * Mounts Tooltip React component.
  * Sets up Container <---> webpage Remote functions.
  */
-export const insertTooltip = async ({ toolbarNotifications }) => {
+export const insertTooltip = async ({ toolbarNotifications, store }) => {
     // If target is set, Tooltip has already been injected.
     if (target) {
         return
@@ -76,7 +78,15 @@ export const insertTooltip = async ({ toolbarNotifications }) => {
     showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
         createAnnotation: createAnnotationDraftInSidebar,
-        createHighlight: createAnnotationHighlight,
+        // N.B. that the tooltip registers event listeners here for shortcut keys, they do not trigger in the shortcut specific checks
+        // TODO (ch - annotations) bring consistency between annoting and highlight, from shortcuts and from tooltip presses, (i.e. this function imlementation shouldn't be here)
+        createHighlight: async () => {
+            const anchor = await extractAnchor(document.getSelection())
+            const body = anchor ? anchor.quote : ''
+            await store.dispatch(
+                createAnnotationAction(anchor, body, '', []) as any,
+            )
+        },
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
             manualOverride = true
@@ -113,7 +123,7 @@ export const removeTooltip = () => {
  * Should either be called through the RPC, or pass the `toolbarNotifications`
  * wrapped in an object.
  */
-const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
+const insertOrRemoveTooltip = async ({ toolbarNotifications, store }) => {
     if (manualOverride) {
         return
     }
@@ -122,7 +132,7 @@ const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
     const isTooltipPresent = !!target
 
     if (isTooltipEnabled && !isTooltipPresent) {
-        insertTooltip({ toolbarNotifications })
+        insertTooltip({ toolbarNotifications, store })
     } else if (!isTooltipEnabled && isTooltipPresent) {
         removeTooltip()
     }
@@ -131,11 +141,11 @@ const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
 /**
  * Sets up RPC functions to insert and remove Tooltip from Popup.
  */
-export const setupRPC = ({ toolbarNotifications }) => {
+export const setupRPC = ({ toolbarNotifications, store }) => {
     makeRemotelyCallableType<TooltipInteractionInterface>({
         showContentTooltip: async () => {
             if (!showTooltip) {
-                await insertTooltip({ toolbarNotifications })
+                await insertTooltip({ toolbarNotifications, store })
             }
             if (userSelectedText()) {
                 const position = calculateTooltipPostion()
@@ -144,14 +154,14 @@ export const setupRPC = ({ toolbarNotifications }) => {
         },
         insertTooltip: async ({ override } = {}) => {
             manualOverride = !!override
-            await insertTooltip({ toolbarNotifications })
+            await insertTooltip({ toolbarNotifications, store })
         },
         removeTooltip: async ({ override } = {}) => {
             manualOverride = !!override
             await removeTooltip()
         },
         insertOrRemoveTooltip: async () => {
-            await insertOrRemoveTooltip({ toolbarNotifications })
+            await insertOrRemoveTooltip({ toolbarNotifications, store })
         },
     })
 }

@@ -66,8 +66,8 @@ class TooltipContainer extends React.Component {
         addTag,
         addToCollection,
         createAnnotation,
+        createHighlight,
         createBookmark,
-        highlight,
         link,
         toggleHighlights,
         toggleSidebar,
@@ -119,11 +119,8 @@ class TooltipContainer extends React.Component {
                 case link.shortcut:
                     link.enabled && (await this.createLink())
                     break
-                case highlight.shortcut:
-                    if (highlight.enabled) {
-                        await this.props.createHighlight()
-                        this.toggleHighlightsAct()
-                    }
+                case createHighlight.shortcut:
+                    createHighlight.enabled && (await this.createHighlight(e))
                     break
                 case createAnnotation.shortcut:
                     createAnnotation.enabled && (await this.createAnnotation(e))

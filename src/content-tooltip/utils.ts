@@ -77,7 +77,7 @@ const shortcutStorageToState = (storage): KeyboardShortcuts => {
         'toggleSidebar',
         'toggleHighlights',
         'createAnnotation',
-        'highlight',
+        'createHighlight',
         'link',
         'createBookmark',
         'shortcutsEnabled',
