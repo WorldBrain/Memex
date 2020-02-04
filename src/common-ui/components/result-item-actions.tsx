@@ -90,7 +90,7 @@ class ResultItemActions extends PureComponent<Props> {
                                 </div>
                             </ButtonTooltip>
                         )}
-                    <ButtonTooltip
+                     <ButtonTooltip
                         position="bottom"
                         tooltipText="Add/View Commments & Annotations"
                     >
