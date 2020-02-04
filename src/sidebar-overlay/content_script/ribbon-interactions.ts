@@ -165,7 +165,13 @@ const updateRibbon = async (
     const isRibbonEnabled = await getSidebarState()
     const isTooltipEnabled = await getTooltipState()
 
+    console.log('ribbonSidebarRef', ribbonSidebarRef)
     if (ribbonSidebarRef && ribbonSidebarRef.getWrappedInstance()) {
+        console.log(
+            'ribbonSidebarRef.getWrappedInstance()',
+            ribbonSidebarRef.getWrappedInstance(),
+        )
+
         ribbonSidebarRef.getWrappedInstance().updateRibbonState({
             isRibbonEnabled,
             isTooltipEnabled,

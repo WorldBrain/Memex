@@ -63,5 +63,4 @@ export const maxPossibleTags = (tags: string[]) => {
     }
     return tagsAllowed
 }
-// FIXME (ch - annotations): replace with typed version
 export const toggleSidebarOverlay = remoteFunction('toggleSidebarOverlay')

@@ -104,16 +104,16 @@ export const conditionallyShowOnboardingNotifications = async ({
 }
 
 /**
- * Conditionally removes the Select Option notifcation in Annotation
+ * Conditionally removes the Select Option notification in Annotation
  * Onboarding Flow. Either used when user clicks outside or an annotation
  * is created.
  * @param nextStage Next stage to set for annotations flow
  */
-export const conditionallyRemoveSelectOption = async nextStage => {
+export const conditionallyRemoveOnboardingSelectOption = async nextStage => {
     const annotationStage = await utils.fetchOnboardingStage(FLOWS.annotation)
     if (annotationStage === STAGES.annotation.notifiedSelectOption) {
         await utils.setOnboardingStage(FLOWS.annotation, nextStage)
-        // Close the curren select-option notification manually since
+        // Close the current select-option notification manually since
         // accessing the toolbarNotification instance from here is not possible
         destroyRootElement()
     }

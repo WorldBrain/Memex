@@ -1,31 +1,35 @@
 import React from 'react'
-import { SidebarContext } from 'src/sidebar-overlay'
 import { SidebarContextInterface } from 'src/sidebar-overlay/types'
 import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
 type Optionalize<T extends K, K> = Omit<T, keyof K>
 interface Props extends SidebarContextInterface {
-    children: React.ReactNode
+    children?: React.ReactNode
+    innerRef?: any
 }
 const highlighter = new HighlightInteraction()
 export function withSidebarContext<
     T extends SidebarContextInterface = SidebarContextInterface
->(WrappedComponent: React.ComponentType<T>) {
+>(WrappedComponent: any) {
+    // FIXME: should be something like React.ComponentType<Optionalize<T, Props>> but causes issues with ref
     // Try to create a nice displayName for React Dev Tools.
     const displayName =
         WrappedComponent.displayName ||
         WrappedComponent.name ||
         'ComponentwithSidebarContext'
 
-    return class ComponentWithTheme extends React.Component<
-        Optionalize<T, SidebarContextInterface>
+    return class ComponentWithSidebarContext extends React.Component<
+        any // FIXME: should be something like Optionalize<T, Props> but causes issues with ref
     > {
         public static displayName = `withSidebarContext(${displayName})`
 
         public render() {
+            // @ts-ignore
+            const { innerRef, ...rest } = this.props
             return (
                 <WrappedComponent
+                    ref={innerRef}
                     highlighter={highlighter}
-                    {...(this.props as T)}
+                    {...(rest as T)}
                 />
             )
         }
