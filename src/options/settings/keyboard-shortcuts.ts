@@ -11,7 +11,7 @@ export const shortcuts: ShortcutElData[] = [
     { id: 'link-shortcut', name: 'link', children: 'Create links' },
     {
         id: 'highlight-shortcut',
-        name: 'highlight',
+        name: 'createHighlight',
         children: 'Highlight selected text',
     },
     {

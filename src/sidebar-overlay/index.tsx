@@ -5,7 +5,6 @@ import RibbonSidebarController from './ribbon-sidebar-controller'
 import AnnotationsManager from '../annotations/annotations-manager'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import { HighlightInteraction } from '../highlighting/ui/highlight-interactions'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { SidebarContextInterface } from 'src/sidebar-overlay/types'
 
 export const SidebarContext = React.createContext<SidebarContextInterface>(null)
@@ -20,6 +19,7 @@ export const setupRibbonAndSidebarUI = (
         insertOrRemoveTooltip,
         setRibbonSidebarRef,
         forceExpandRibbon = false,
+        store,
         ...props
     }: {
         annotationsManager: AnnotationsManager
@@ -27,6 +27,7 @@ export const setupRibbonAndSidebarUI = (
         insertOrRemoveTooltip: (isTooltipEnabled: boolean) => void
         setRibbonSidebarRef: any
         forceExpandRibbon?: boolean
+        store: any
     } & Partial<KeyboardActions>,
 ) => {
     ReactDOM.render(
@@ -37,6 +38,7 @@ export const setupRibbonAndSidebarUI = (
                 handleRemoveRibbon={handleRemoveRibbon}
                 insertOrRemoveTooltip={insertOrRemoveTooltip}
                 forceExpand={forceExpandRibbon}
+                store={store}
                 {...props}
             />
         </SidebarContext.Provider>,

@@ -4,13 +4,6 @@ import * as interactions from './ribbon-interactions'
 import { getSidebarState } from '../utils'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { runOnScriptShutdown } from 'src/content-tooltip/utils'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
-
-interface ContentScriptProps {
-    annotationsManager: AnnotationsManager
-    toolbarNotifications: ToolbarNotifications
-    highlighter: HighlightInteractionInterface
-}
 
 // TODO (ch - annotations extra) - huh? If commenting this out doesn't break anything remove it
 // const onKeydown = (
@@ -26,12 +19,14 @@ interface ContentScriptProps {
 const initRibbonAndSidebar = async ({
     annotationsManager,
     toolbarNotifications,
+    store,
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
+    store: any
 }) => {
     runOnScriptShutdown(() => interactions.removeRibbon())
-    interactions.setupRPC({ annotationsManager, toolbarNotifications })
+    interactions.setupRPC({ annotationsManager, toolbarNotifications, store })
 
     const isSidebarEnabled = await getSidebarState()
     if (!isSidebarEnabled) {
@@ -50,7 +45,11 @@ const initRibbonAndSidebar = async ({
     // TODO (ch - annotations extra) - huh?
     // document.removeEventListener('keydown', onKeydownWrapper, false)
 
-    interactions.insertRibbon({ annotationsManager, toolbarNotifications })
+    interactions.insertRibbon({
+        annotationsManager,
+        toolbarNotifications,
+        store,
+    })
 }
 
 export default initRibbonAndSidebar

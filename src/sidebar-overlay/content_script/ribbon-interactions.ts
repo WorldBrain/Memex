@@ -37,11 +37,13 @@ export const insertRibbon = async ({
     annotationsManager,
     toolbarNotifications,
     forceExpandRibbon = false,
+    store,
     ...args
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
     forceExpandRibbon?: boolean
+    store: any
 }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
@@ -72,13 +74,14 @@ export const insertRibbon = async ({
             if (isTooltipEnabled) {
                 removeTooltip()
             } else {
-                await insertTooltip({ toolbarNotifications })
+                await insertTooltip({ toolbarNotifications, store })
             }
         },
         setRibbonSidebarRef: ref => {
             ribbonSidebarRef = ref
         },
         forceExpandRibbon,
+        store,
         ...args,
     })
 }
@@ -121,9 +124,11 @@ export const removeRibbon = () => {
 const _insertOrRemoveRibbon = async ({
     annotationsManager,
     toolbarNotifications,
+    store,
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
+    store
 }) => {
     if (manualOverride) {
         return
@@ -133,7 +138,7 @@ const _insertOrRemoveRibbon = async ({
     const isRibbonPresent = !!target
 
     if (isRibbonEnabled && !isRibbonPresent) {
-        insertRibbon({ annotationsManager, toolbarNotifications })
+        insertRibbon({ annotationsManager, toolbarNotifications, store })
     } else if (!isRibbonEnabled && isRibbonPresent) {
         removeRibbon()
     }
@@ -175,9 +180,11 @@ const updateRibbon = async (
 export const setupRPC = ({
     annotationsManager,
     toolbarNotifications,
+    store,
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
+    store: any
 }) => {
     makeRemotelyCallableType<RibbonInteractionsInterface>({
         /**
@@ -206,6 +213,7 @@ export const setupRPC = ({
             await _insertOrRemoveRibbon({
                 annotationsManager,
                 toolbarNotifications,
+                store,
             })
         },
         /**
