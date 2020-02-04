@@ -21,22 +21,26 @@ import {
 import { STAGES } from 'src/overview/onboarding/constants'
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import { KeyboardShortcuts } from './types'
-import { createHighlight } from 'src/highlighting/ui'
 import {
     fetchAnnotationsAndHighlight,
     createAnnotationDraftInSidebar,
+    createAnnotationHighlight,
 } from 'src/annotations'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
+import { createAnnotation as createAnnotationAction } from 'src/annotations/actions'
+import { extractAnchor } from 'src/highlighting/ui'
 
 export default async function init({
     toolbarNotifications,
+    store,
 }: {
     toolbarNotifications?: ToolbarNotifications
+    store: any
 }) {
     runOnScriptShutdown(() => removeTooltip())
     // Set up the RPC calls even if the tooltip is enabled or not.
-    setupRPC({ toolbarNotifications })
+    setupRPC({ toolbarNotifications, store })
     await conditionallyShowOnboardingNotifications({
         toolbarNotifications,
     })
@@ -49,27 +53,31 @@ export default async function init({
 
         Mousetrap.bind(
             Object.values(shortcuts).map(val => val.shortcut),
-            handleKeyboardShortcuts(shortcuts),
+            handleKeyboardShortcuts(shortcuts, store),
         )
         return
     }
 
     await bodyLoader()
-    await insertTooltip({ toolbarNotifications })
+    await insertTooltip({ toolbarNotifications, store })
 }
 
 let highlightsOn = false
-const handleKeyboardShortcuts = ({
-    addComment,
-    addTag,
-    addToCollection,
-    createAnnotation,
-    createBookmark,
-    highlight,
-    link,
-    toggleHighlights,
-    toggleSidebar,
-}: KeyboardShortcuts) => async e => {
+
+const handleKeyboardShortcuts = (
+    {
+        addComment,
+        addTag,
+        addToCollection,
+        createAnnotation,
+        createHighlight,
+        createBookmark,
+        link,
+        toggleHighlights,
+        toggleSidebar,
+    }: KeyboardShortcuts,
+    store,
+) => async e => {
     if (!userSelectedText()) {
         switch (convertKeyboardEventToKeyString(e)) {
             case toggleSidebar.shortcut:
@@ -117,14 +125,12 @@ const handleKeyboardShortcuts = ({
             case link.shortcut:
                 link.enabled && (await createLink())
                 break
-            case highlight.shortcut:
-                if (highlight.enabled) {
-                    await createHighlight()
-                    toggleHighlightsAct()
-                }
-                break
             case createAnnotation.shortcut:
-                createAnnotation.enabled && (await createNewAnnotation(e))
+                createAnnotation.enabled &&
+                    (await createNewAnnotation(e, store))
+                break
+            case createHighlight.shortcut:
+                createHighlight.enabled && (await createNewHighlight(e, store))
                 break
             default:
         }
@@ -136,13 +142,24 @@ const toggleHighlightsAct = () => {
     highlightsOn = !highlightsOn
 }
 
-const createNewAnnotation = async e => {
+const createNewAnnotation = async (e, store) => {
     e.preventDefault()
     e.stopPropagation()
     await createAnnotationDraftInSidebar()
 
     // Remove onboarding select option notification if it's present
     await conditionallyRemoveSelectOption(STAGES.annotation.annotationCreated)
+}
+// todo (ch - annotations) this does not seem to be called from the keyboard shortcuts, as they are registered from the toolti
+const createNewHighlight = async (e, store) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // const url = window.location.href
+    // const title = document.title
+    const anchor = await extractAnchor(document.getSelection())
+    const body = anchor ? anchor.quote : ''
+    await store.dispatch(createAnnotationAction(anchor, body, '', []) as any)
+    //await createAnnotationHighlight()
 }
 
 const createLink = async () => {

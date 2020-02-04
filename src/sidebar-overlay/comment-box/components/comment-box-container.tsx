@@ -11,7 +11,6 @@ import CommentBoxForm from './comment-box-form'
 import { MapDispatchToProps } from '../../types'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
-import { createHighlight } from 'src/highlighting/ui'
 
 const styles = require('./comment-box-container.css')
 
