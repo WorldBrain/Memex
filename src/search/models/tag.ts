@@ -1,6 +1,9 @@
 import AbstractModel from './abstract-model'
 
 export default class Tag extends AbstractModel {
+    public name: string
+    public url: string
+
     constructor(db, { name, url }) {
         super(db)
         this.name = name
@@ -24,6 +27,6 @@ export default class Tag extends AbstractModel {
     async delete() {
         return this.db
             .collection('tags')
-            .deleteOneObject({ name: this.name, url: this.rul })
+            .deleteOneObject({ name: this.name, url: this.url })
     }
 }

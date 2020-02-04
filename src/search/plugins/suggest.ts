@@ -95,9 +95,7 @@ export class SuggestPlugin extends StorageBackendPlugin<DexieStorageBackend> {
 
         if (options.ignoreCase && options.ignoreCase[0] !== indexName) {
             throw new InvalidFindOptsError(
-                `Specified ignoreCase field '${
-                    options.ignoreCase[0]
-                }' is not in filter query`,
+                `Specified ignoreCase field '${options.ignoreCase[0]}' is not in filter query`,
             )
         }
 

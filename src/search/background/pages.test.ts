@@ -47,11 +47,7 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
                     fullUrl: DATA.PAGE_1.fullUrl,
                     domain: DATA.PAGE_1.domain,
                     hostname: DATA.PAGE_1.hostname,
-                    canonicalUrl: undefined,
-                    fullTitle: undefined,
-                    screenshot: undefined,
                     text: 'just some dummy test text',
-                    titleTerms: [],
                     urlTerms: [],
                     terms: ['dummy', 'test', 'text'],
                 },
@@ -63,13 +59,7 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
                     fullUrl: DATA.PAGE_2.fullUrl,
                     domain: DATA.PAGE_2.domain,
                     hostname: DATA.PAGE_2.hostname,
-                    canonicalUrl: undefined,
-                    fullTitle: undefined,
-                    screenshot: undefined,
-                    text: undefined,
-                    titleTerms: [],
                     urlTerms: [],
-                    terms: [],
                 },
             },
         }),
@@ -352,6 +342,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 })
                             expect(page.terms).toEqual(
                                 expect.arrayContaining([
+                                    'updated',
                                     'text',
                                     'dummy',
                                     'test',

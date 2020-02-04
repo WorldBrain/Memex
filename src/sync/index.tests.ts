@@ -1,21 +1,11 @@
-import {
-    doSync,
-    SyncEvents,
-    SYNC_EVENTS,
-    SyncEventMap,
-} from '@worldbrain/storex-sync'
-import { reconcileSyncLog } from '@worldbrain/storex-sync/lib/reconciliation'
 import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
 import {
     BackgroundIntegrationTest,
     BackgroundIntegrationTestSetup,
-    IntegrationTestStep,
-    BackgroundIntegrationTestContext,
     BackgroundIntegrationTestInstance,
 } from 'src/tests/integration-tests'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { createMemorySharedSyncLog } from './background/index.tests'
-import { EventEmitter } from 'events'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
@@ -309,7 +299,12 @@ async function setupSyncBackgroundTest(options: {
         const setup = setups[deviceIndex]
         await setup.backgroundModules.sync.continuousSync.doIncrementalSync({
             debug: syncOptions.debug,
-            // debug: true
+            prettifier: object =>
+                require('util').inspect(object, {
+                    depth: null,
+                    color: true,
+                    indent: 4,
+                }),
         })
     }
 

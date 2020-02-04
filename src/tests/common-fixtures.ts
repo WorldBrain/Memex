@@ -9,9 +9,7 @@ import * as DATA from './common-fixtures.data'
 export const searchModule = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.search
 
-export const createPageStep: IntegrationTestStep<
-    BackgroundIntegrationTestContext
-> = {
+export const createPageStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
     execute: async ({ setup }) => {
         await searchModule(setup).searchIndex.addPage({
             pageDoc: {
@@ -31,13 +29,7 @@ export const createPageStep: IntegrationTestStep<
                     fullUrl: DATA.PAGE_1.fullUrl,
                     domain: DATA.PAGE_1.domain,
                     hostname: DATA.PAGE_1.hostname,
-                    canonicalUrl: undefined,
-                    fullTitle: undefined,
-                    screenshot: undefined,
-                    text: undefined,
-                    titleTerms: [],
                     urlTerms: [],
-                    terms: [],
                 },
             },
         }),

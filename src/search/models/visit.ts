@@ -4,32 +4,32 @@ export default class Visit extends EventModel {
     /**
      * @type {number} duration Time user was active during visit (ms).
      */
-    duration
+    duration: number
 
     /**
      * @type {number} scrollPx Y-axis pixel scrolled to at point in time.
      */
-    scrollPx
+    scrollPx: number
 
     /**
      * @type {number} scrollPerc
      */
-    scrollPerc
+    scrollPerc: number
 
     /**
      * @type {number} scrollMaxPx Furthest y-axis pixel scrolled to during visit.
      */
-    scrollMaxPx
+    scrollMaxPx: number
 
     /**
      * @type {number} scrollMaxPerc
      */
-    scrollMaxPerc
+    scrollMaxPerc: number
 
     /**
      * @type {boolean} hasChanged
      */
-    hasChanged
+    hasChanged: boolean
 
     constructor(db, { url, time, ...props }) {
         super(db, { url, time })

@@ -19,6 +19,7 @@ import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
 import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 import { SearchIndex } from 'src/search'
+import PageStorage from 'src/page-indexing/background/storage'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -36,6 +37,7 @@ export default class DirectLinkingBackground {
         private options: {
             browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
             storageManager: Storex
+            pageStorage: PageStorage
             socialBg: SocialBG
             searchIndex: SearchIndex
             normalizeUrl?: URLNormalizer
@@ -48,6 +50,7 @@ export default class DirectLinkingBackground {
             storageManager: options.storageManager,
             browserStorageArea: options.browserAPIs.storage.local,
             searchIndex: options.searchIndex,
+            pageStorage: options.pageStorage,
         })
 
         this._normalizeUrl = options.normalizeUrl || normalizeUrl
