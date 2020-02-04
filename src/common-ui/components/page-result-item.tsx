@@ -64,20 +64,15 @@ class PageResultItem extends PureComponent<Props> {
                                     </div>
 
                                 )}
-                            <div className={styles.title}>
+                            <div title={this.props.title} className={styles.title}>
                                     {this.props.title}
                             </div>
                         </div>
                         <div className={styles.actionItems}>
                             <ResultItemActions {...this.props} />
-                            {this.props.isListFilterActive && (
-                                <SemiCircularRibbon
-                                    onClick={this.props.handleCrossRibbonClick}
-                                />
-                            )}
                         </div>
                     </div>
-                    <div className={styles.url}>{this.props.url}</div>
+                    <div title={this.props.url} className={styles.url}>{this.props.url}</div>
                     <div className={styles.bottomLine}>
                         <div className={styles.detailsBox}>
                             <div className={styles.displayTime}>

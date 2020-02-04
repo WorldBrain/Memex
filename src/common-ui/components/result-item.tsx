@@ -41,7 +41,7 @@ export interface Props extends Partial<SocialPage> {
     handleCrossRibbonClick: MouseEventHandler
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
-    setTagButtonRef: (el: HTMLButtonElement) => void
+    setTagButtonRef: (el: HTMLElement) => void
 }
 
 class ResultItem extends PureComponent<Props> {
