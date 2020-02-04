@@ -11,18 +11,18 @@ import {
     InitialComponent,
 } from './tooltip-states'
 
-import { conditionallyRemoveSelectOption } from '../onboarding-interactions'
+import { conditionallyRemoveOnboardingSelectOption } from '../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
-import { userSelectedText } from '../interactions'
-import * as Mousetrap from 'mousetrap'
+// import { userSelectedText } from '../interactions'
+// import * as Mousetrap from 'mousetrap'
 import { removeHighlights } from '../../highlighting/ui/highlight-interactions'
 import {
-    convertKeyboardEventToKeyString,
+    // convertKeyboardEventToKeyString,
     getHighlightsState,
-    getKeyboardShortcutsState,
+    // getKeyboardShortcutsState,
 } from '../utils'
 import { fetchAnnotationsAndHighlight } from '../../annotations'
-import { toggleSidebarOverlay } from '../../sidebar-overlay/utils'
+// import { toggleSidebarOverlay } from '../../sidebar-overlay/utils'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -48,20 +48,21 @@ class TooltipContainer extends React.Component {
         const highlightsOn = await getHighlightsState()
         this.setState(() => ({ highlightsOn }))
 
-        const {
-            shortcutsEnabled,
-            ...shortcuts
-        } = await getKeyboardShortcutsState()
-
-        if (shortcutsEnabled) {
-            Mousetrap.bind(
-                Object.values(shortcuts).map(val => val.shortcut),
-                this.initHandleKeyboardShortcuts(shortcuts),
-            )
-        }
+        // const {
+        //     shortcutsEnabled,
+        //     ...shortcuts
+        // } = await getKeyboardShortcutsState()
+        //
+        // if (shortcutsEnabled) {
+        //     Mousetrap.bind(
+        //         Object.values(shortcuts).map(val => val.shortcut),
+        //         this.initHandleKeyboardShortcuts(shortcuts),
+        //     )
+        // }
     }
 
-    initHandleKeyboardShortcuts = ({
+    /*
+initHandleKeyboardShortcuts = ({
         addComment,
         addTag,
         addToCollection,
@@ -129,6 +130,7 @@ class TooltipContainer extends React.Component {
             }
         }
     }
+    */
 
     toggleHighlightsAct = () => {
         this.state.highlightsOn
@@ -153,7 +155,7 @@ class TooltipContainer extends React.Component {
             position: {},
         })
         // Remove onboarding select option notification if it's present
-        await conditionallyRemoveSelectOption(
+        await conditionallyRemoveOnboardingSelectOption(
             STAGES.annotation.notifiedHighlightText,
         )
     }
@@ -185,7 +187,7 @@ class TooltipContainer extends React.Component {
         await this.props.createAnnotation(document.getSelection())
 
         // Remove onboarding select option notification if it's present
-        await conditionallyRemoveSelectOption(
+        await conditionallyRemoveOnboardingSelectOption(
             STAGES.annotation.annotationCreated,
         )
 

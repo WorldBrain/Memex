@@ -15,6 +15,7 @@ import {
 import { Annotation } from 'src/annotations/types'
 import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
+import { extractAnchor } from 'src/highlighting/ui'
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 export const appendAnnotations = createAction<Annotation[]>(
@@ -70,10 +71,10 @@ export const fetchMoreAnnotationsForPageUrl: (
     dispatch(setIsLoading(false))
 }
 export const createAnnotation: (
-    anchor: Anchor,
-    body: string,
-    comment: string,
-    tags: string[],
+    anchor?: Anchor,
+    body?: string,
+    comment?: string,
+    tags?: string[],
     bookmarked?: boolean,
     isSocialPost?: boolean,
 ) => Thunk = (anchor, body, comment, tags, bookmarked, isSocialPost) => async (
@@ -83,6 +84,11 @@ export const createAnnotation: (
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const { url, title } = selectors.page(state)
+
+    anchor = anchor ? anchor : await extractAnchor(document.getSelection())
+    body = body ? body : anchor ? anchor.quote : ''
+    comment = comment ? comment : ''
+    tags = tags ? tags : []
 
     if (annotationsManager) {
         const annotation = await annotationsManager.createAnnotation({

@@ -11,19 +11,21 @@ import 'src/backup-restore/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import initSocialIntegration from 'src/social-integration/content_script'
 import configureStore from './sidebar-overlay/store'
+import { initKeyboardShortcuts } from 'src/content_script_keyboard_shortcuts'
 
 const remoteFunctionRegistry = new RemoteFunctionRegistry()
-
 const toolbarNotifications = new ToolbarNotifications()
+const annotationsManager = new AnnotationsManager()
+const rootStore = configureStore()
+
 toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
-// toolbarNotifications.showToolbarNotification('tooltip-first-close')
 window['toolbarNotifications'] = toolbarNotifications
 
-const store = configureStore()
-
-const annotationsManager = new AnnotationsManager()
-
-initContentTooltip({ toolbarNotifications, store })
-initRibbonAndSidebar({ annotationsManager, toolbarNotifications, store })
-
+initContentTooltip({ toolbarNotifications, store: rootStore })
+initRibbonAndSidebar({
+    annotationsManager,
+    toolbarNotifications,
+    store: rootStore,
+})
 initSocialIntegration({ annotationsManager })
+initKeyboardShortcuts({ store: rootStore }) // N.B. Keyboard shortcuts must be setup after RibbonAndSidebar due to ref? maybe
