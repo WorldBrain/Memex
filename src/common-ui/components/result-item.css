@@ -298,7 +298,7 @@
     flex-direction: row;
     float: right;
     align-items: center;
-    height: fit-content;
+    height: 16px;
     justify-content: flex-end;
     margin-left: 20px;
 }
@@ -308,7 +308,7 @@
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
-    height: fit-content;
+    height: 16px;
 }
 
 .displayTime {
@@ -321,15 +321,14 @@
     border: none;
     z-index: 2500;
     min-width: 20px;
-    height: 14px;
+    width: auto;
+    height: 16px;
     background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
     background-position: center center;
     border-radius: 3px;
     background-size: contain;
-    max-width: 30px;
-    width: fill-available;
     display: none;
     margin-left: 3px;
 
@@ -341,7 +340,7 @@
 .actionItems {
     display: flex;
     align-items: center;
-    height: 14px;
+    height: 16px;
 }
 
 .trash {
