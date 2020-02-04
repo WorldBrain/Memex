@@ -12,7 +12,9 @@ export class MemoryLocalStorage {
     }
 
     removeItem(key: string) {
-        this.changes.push({ type: 'remove', key })
+        if (key in this.items) {
+            this.changes.push({ type: 'remove', key })
+        }
         delete this.items[key]
     }
 

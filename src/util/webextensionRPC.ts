@@ -276,6 +276,11 @@ export function fakeRemoteFunctions(functions: {
     [name: string]: (...args) => any
 }) {
     return name => {
+        if (!functions[name]) {
+            throw new Error(
+                `Tried to call fake remote function '${name}' for which no implementation was provided`,
+            )
+        }
         return (...args) => {
             return Promise.resolve(functions[name](...args))
         }
