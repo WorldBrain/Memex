@@ -140,6 +140,9 @@ export class DriveBackupBackend extends BackupBackend {
             'appDataFolder',
             collection,
         )
+        if (!collectionFolderId) {
+            return []
+        }
         return Object.keys(await this.client.listFolder(collectionFolderId))
     }
 
