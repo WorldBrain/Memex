@@ -34,7 +34,7 @@
 .removeIcon {
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('/img/removeIcon.svg');
+    background-image: url('/img/remove.svg');
 }
 
 .searchIcon {
@@ -79,6 +79,12 @@
     background-position: center;
     background-repeat: no-repeat;
     background-image: url('/img/settings.svg');
+}
+
+.syncIcon {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/sync.svg');
 }
 
 .upgradeIcon {
@@ -178,6 +184,11 @@
 .arrowUpRight {
     composes: iconPosition;
     background-image: url('/img/arrowUp.svg');
+}
+
+.closeIcon {
+    composes: iconPosition;
+    background-image: url('/img/close.svg');
 }
 
 .reload {

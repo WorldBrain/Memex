@@ -69,7 +69,7 @@ export const saveComment: (
     bookmarked,
     isSocialPost,
 ) => dispatch => {
-    if (commentText.length !== 0 || anchor !== null) {
+    if (commentText.length > 0 || anchor !== null) {
         const body = anchor !== null ? anchor.quote : ''
 
         dispatch(
@@ -83,6 +83,7 @@ export const saveComment: (
             ),
         )
         dispatch(setIsCommentSaved(true))
+        dispatch(setShowCommentBox(false))
         dispatch(resetCommentBox())
     }
 }

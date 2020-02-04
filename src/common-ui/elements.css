@@ -20,7 +20,7 @@
 /* FONTs */
 
 .fontFamily {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* Tag Pill */
@@ -33,7 +33,7 @@
     font-weight: 500;
     letter-spacing: 0.5px;
     height: auto;
-    color: black;
+    color: #3a2f45;
     margin: 2px 3px 2px 0;
     display: flex;
     align-items: center;
@@ -149,7 +149,7 @@
     font-weight: 400;
     font-size: 14px;
     color: #222;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
     border: 1px solid #e2e2e2;
     border-radius: 3px;
     padding: 10px 7px;
@@ -191,14 +191,14 @@
 
 .searchField {
     background-color: color11;
-    color: color4;
+    color: color3;
     border-radius: 3px;
     font-size: 14px;
     font-weight: 400;
     text-align: left;
 
     &::placeholder {
-        color: color6;
+        color: color4;
         font-style: normal;
     }
 

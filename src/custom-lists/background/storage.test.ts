@@ -1,11 +1,8 @@
 import StorageManager from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
-import BookmarksBackground from 'src/bookmarks/background'
-import initStorageManager from '../../search/memory-storex'
 import CustomListBackground from './'
 import * as DATA from './storage.test.data'
-import { createTestPage } from 'src/search/on-demand-indexing'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { SearchIndex } from 'src/search'
 
@@ -57,8 +54,8 @@ describe('Custom List Integrations', () => {
         test('should be able to create list entry for existing page', async () => {
             const newPage = await searchIndex.createTestPage({
                 url: 'http://www.test.com',
+                save: true,
             })
-            await newPage.save()
 
             await customLists.insertPageToList({ id: 1, url: newPage.url })
             const lists = await customLists.fetchListPagesByUrl({
@@ -79,7 +76,7 @@ describe('Custom List Integrations', () => {
             expect(lists[0].pages.length).toBe(1)
             expect(lists[0].pages[0]).toBe(url)
 
-            const newPage = await customLists['getPage'](url)
+            const newPage = await searchIndex.getPage(url)
             expect(newPage.url).toBe(url.substring(11))
         })
     })

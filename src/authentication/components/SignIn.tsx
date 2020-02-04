@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { colorPrimary } from 'src/common-ui/components/design-library/colors'
 import { fontSizeBigger } from 'src/common-ui/components/design-library/typography'
 import { auth } from 'src/util/remote-functions-background'
+import { SYNC_URL } from 'src/constants'
 const styles = require('src/authentication/components/styles.css')
 
 export class SignInScreen extends React.Component {
@@ -21,6 +22,7 @@ export class SignInScreen extends React.Component {
                         signInSuccessWithAuthResult: () => {
                             auth.refreshUserInfo()
                             // Avoid redirects after sign-in.
+                            window.location.href = SYNC_URL
                             return false
                         },
                     },

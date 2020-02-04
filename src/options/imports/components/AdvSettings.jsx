@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
 import { Checkbox } from 'src/common-ui/components'
+import settingsStyle from 'src/options/settings/components/settings.css'
 
 import Concurrency from './Concurrency'
 import PrevFailedCheckbox from './PrevFailedCheckbox'
@@ -11,22 +12,20 @@ import styles from './AdvSettings.css'
 
 const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
     <section className={styles.container}>
-        <div className={styles.title}> 
-            SETTINGS
-        </div>
+        <div className={settingsStyle.sectionTitle}>Settings</div>
         <div className={styles.advFunctionality}>
             <ul className={styles.settingsList}>
                 {(props.allowTypes[TYPE.OTHERS] === SERVICES.POCKET ||
                     props.allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE) && (
                     <li className={styles.settingsListItem}>
                         <Checkbox
-                                id="star-imports"
-                                handleChange={props.onBookmarImportsToggle}
-                                isChecked={props.bookmarkImports}
+                            id="star-imports"
+                            handleChange={props.onBookmarImportsToggle}
+                            isChecked={props.bookmarkImports}
                         >
                             <label htmlFor="star-imports">
                                 'Star' all imported urls
-                             </label>
+                            </label>
                         </Checkbox>
                     </li>
                 )}
@@ -47,13 +46,13 @@ const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
                     </ButtonTooltip>
                 </li>
                 <li className={styles.settingsListItem}>
-                    <Concurrency {...props} />
-                </li>
-                <li className={styles.settingsListItem}>
                     <PrevFailedCheckbox
                         checked={prevFailedValue}
                         onChange={onPrevFailedToggle}
                     />
+                </li>
+                <li className={styles.settingsListItem}>
+                    <Concurrency {...props} />
                 </li>
             </ul>
         </div>

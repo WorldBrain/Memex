@@ -16,6 +16,7 @@ import SearchTypeSwitch from './search-type-switch'
 import PageInfo from './page-info'
 import cx from 'classnames'
 import { Annotation } from 'src/annotations/types'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 
 const styles = require('./sidebar.css')
 
@@ -179,7 +180,7 @@ class Sidebar extends React.Component<Props, State> {
             <React.Fragment>
                 <Menu
                     isOpen={isOpen}
-                    width={340}
+                    width={450}
                     styles={menuStyles(env)}
                     right
                     noOverlay

@@ -146,12 +146,19 @@ export class SubscriptionOptionsChargebee extends React.Component<
                 <Helmet>
                     <script src={chargeBeeScriptSource} />
                 </Helmet>
-
                 <div>
-                    <PricingPlanTitle className={''}>
-                        Subscribe to Memex Pro
-                    </PricingPlanTitle>
-
+                    <HeaderBox>
+                        {this.state.subscribed === true ? (
+                            <PrimaryButton onClick={this.openPortal}>
+                                Manage Existing Subscription
+                            </PrimaryButton>
+                        ) : (
+                            <PricingPlanTitle className={''}>
+                                Subscribe to Memex Pro
+                            </PricingPlanTitle>
+                        )}
+                    </HeaderBox>
+                    <StyledLine />
                     <SubscriptionInnerOptions
                         openCheckoutBackupMonthly={
                             this.openCheckoutBackupMonthly
@@ -160,17 +167,6 @@ export class SubscriptionOptionsChargebee extends React.Component<
                         openPortal={this.openPortal}
                         plans={this.props.plans}
                     />
-                    {this.state.subscribed === true && (
-                        <AlreadySubscribedBox>
-                            <SubscribedSpan>
-                                {' '}
-                                🎉 You've already subscribed to a plan{' '}
-                            </SubscribedSpan>
-                            <PrimaryButton onClick={this.openPortal}>
-                                Manage Existing Subscription
-                            </PrimaryButton>
-                        </AlreadySubscribedBox>
-                    )}
                 </div>
             </div>
         )
@@ -188,6 +184,17 @@ const SubscribedSpan = styled.span`
     font-size: 17px;
     font-weight: bold;
     text-align: center;
+`
+
+const StyledLine = styled.div`
+    border: 0.5px solid #e0e0e0;
+`
+
+const HeaderBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
 `
 
 const SubscriptionOptionsButton = styled.div`

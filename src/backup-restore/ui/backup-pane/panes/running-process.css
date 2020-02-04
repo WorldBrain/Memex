@@ -22,14 +22,13 @@
 .stepNumber {
     composes: h2Color from '../../../../common-ui/colors.css';
     margin-right: 5px;
+    font-size: 16px;
     font-weight: 500;
 }
 
 .actions {
     display: flex;
     flex-direction: row;
-    position: absolute;
-    margin-top: 25px;
 }
 
 .stepStatus {
@@ -59,4 +58,15 @@
 .statusMessageWaiting {
     composes: statusMessageActive;
     composes: subTitleColor from '../../../../common-ui/colors.css';
+}
+
+.finish {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fail {
+    display: flex;
+    flex-direction: column;
 }

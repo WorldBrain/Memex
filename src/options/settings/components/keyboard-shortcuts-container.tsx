@@ -107,12 +107,12 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
     render() {
         return (
-            <div>
-                <h1 className={styles.header}>Keyboard Shortcuts</h1>
-                <h3 className={styles.subHeader}>
+            <div className={styles.section}>
+                <div className={styles.sectionTitle}>Keyboard Shortcuts</div>
+                <div className={styles.infoText}>
                     You can also use shift, ctrl, alt, or meta to define
                     keyboard shortcuts.
-                </h3>
+                </div>
                 <Checkbox
                     id="shortcuts-enabled"
                     isChecked={this.state.shortcutsEnabled}

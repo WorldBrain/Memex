@@ -30,7 +30,7 @@
 
 /* FONTS */
 
-@value mainFont: 'Inter'
+@value mainFont: 'Poppins'
 
 /* CONFIGURATIONS */
 
@@ -135,12 +135,12 @@
     opacity: 1;
 
     &:placeholder-shown {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Poppins', sans-serif;
         color: color3;
     }
 
     &:placeholder {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Poppins', sans-serif;
         color: color3;
     }
 }
@@ -191,11 +191,6 @@
 
 .hoverColor:hover {
     background-color: color7;
-    color: color4;
-}
-
-.hoversidebaropen:hover {
-    background-color: color8;
     color: color4;
 }
 

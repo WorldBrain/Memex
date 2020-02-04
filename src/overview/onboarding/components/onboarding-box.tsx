@@ -13,17 +13,6 @@ class OnboardingBox extends PureComponent<Props> {
                 <div className={styles.flexLayout}>
                     <div className={styles.container}>
                         {this.props.children}
-                        <div className={styles.skipContainer}>
-                            <p
-                                className={styles.skipTitle}
-                                onClick={this.props.navToOverview}
-                            >
-                                Skip setup
-                            </p>
-                            <p className={styles.skipDesc}>
-                                Give me the default settings
-                            </p>
-                        </div>
                     </div>
                     <div className={styles.backgroundColor} />
                 </div>

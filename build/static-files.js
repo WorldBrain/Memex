@@ -4,6 +4,7 @@
  */
 export const htmlAssets = [
     'fonts/Inter/inter.css',
+    'fonts/Poppins/poppins.css',
     'lib/browser-polyfill.js',
 ]
 
@@ -34,7 +35,15 @@ export const copyPatterns = [
     { from: 'node_modules/pdfjs-dist/build/pdf.worker.min.js', to: 'lib/' },
     {
         from: 'fonts/*/*',
+        to: 'fonts/[name].[ext]',
+    },
+    {
+        from: 'fonts/Inter/*',
         to: 'fonts/Inter/[name].[ext]',
+    },
+    {
+        from: 'fonts/Poppins/*',
+        to: 'fonts/Poppins/[name].[ext]',
     },
     {
         from:

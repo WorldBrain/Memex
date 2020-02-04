@@ -7,6 +7,15 @@ import MovingDotsLabel from '../../../../common-ui/components/moving-dots-label'
 import { PrimaryButton } from '../../../../common-ui/components/primary-button'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
 import { FailedOverlay } from '../components/overlays'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import {
+    WhiteSpacer10,
+    WhiteSpacer20,
+    WhiteSpacer30,
+} from 'src/common-ui/components/design-library/typography'
+
+const overviewStyles = require('src/backup-restore/ui/styles.css')
+const settingsStyle = require('src/options/settings/components/settings.css')
 const STYLES = require('../../styles.css')
 
 interface Props {
@@ -96,6 +105,7 @@ export default class RunningProcess extends React.Component<Props> {
                 backupId: 'success',
             })
             this.setState({ status: 'success' })
+            localStorage.setItem('progress-successful', 'true')
         } else if (event.type === 'fail') {
             const errorId = await remoteFunction(
                 this.props.functionNames.sendNotif,
@@ -150,15 +160,24 @@ export default class RunningProcess extends React.Component<Props> {
         return (
             <div>
                 {this.props.renderHeader()}
-                <div className={STYLES.subtitle2}>
-                    With a lot of data (> 25.000 pages) it is recommended
-                    running this over night.
+                <WhiteSpacer10 />
+                <div className={overviewStyles.showWarning}>
+                    <span className={overviewStyles.WarningIcon} />
+                    <span className={overviewStyles.showWarningText}>
+                        With a lot of data (> 25.000 pages) it is recommended
+                        running this over night.
+                    </span>
                 </div>
+                <WhiteSpacer30 />
                 <div className={localStyles.steps}>
                     {this.renderSteps(info)}
                     <ProgressBar progress={progressPercentage} />
                 </div>
-                {this.renderActions(info)}
+                <WhiteSpacer20 />
+                <div className={settingsStyle.buttonArea}>
+                    <div />
+                    {this.renderActions(info)}
+                </div>
             </div>
         )
     }
@@ -169,7 +188,9 @@ export default class RunningProcess extends React.Component<Props> {
                 <div className={localStyles.step}>
                     <div className={localStyles.stepLabel}>
                         <span className={localStyles.stepNumber}>Step 1:</span>
-                        {this.props.preparingStepLabel}
+                        <span className={settingsStyle.infoText}>
+                            {this.props.preparingStepLabel}
+                        </span>
                     </div>
                     <div className={localStyles.stepStatus}>
                         {info.state === 'preparing' && (
@@ -185,7 +206,9 @@ export default class RunningProcess extends React.Component<Props> {
                 <div className={localStyles.step}>
                     <div className={localStyles.stepLabel}>
                         <span className={localStyles.stepNumber}>Step 2:</span>
-                        {this.props.synchingStepLabel}
+                        <span className={settingsStyle.infoText}>
+                            {this.props.synchingStepLabel}
+                        </span>
                     </div>
                     <div className={localStyles.stepStatus}>
                         {info.state === 'preparing' && (
@@ -217,8 +240,9 @@ export default class RunningProcess extends React.Component<Props> {
                             !this.state.canceling && this.handleCancel()
                         }}
                     >
-                        {!this.state.canceling && 'Cancel'}
-                        {this.state.canceling && (
+                        {!this.state.canceling ? (
+                            'Cancel'
+                        ) : (
                             <MovingDotsLabel
                                 text="Finishing current batch"
                                 intervalMs={500}
@@ -234,28 +258,29 @@ export default class RunningProcess extends React.Component<Props> {
         return (
             <div className={localStyles.finish}>
                 {this.props.renderSuccessMessage()}
-                <PrimaryButton
+                <PrimaryAction
                     onClick={() => {
                         this.props.onFinish()
                     }}
-                >
-                    Return to Settings
-                </PrimaryButton>
+                    label={'Return to Settings'}
+                />
             </div>
         )
     }
 
     renderFail() {
         return (
-            <div className={localStyles.finish}>
+            <div className={localStyles.fail}>
                 {this.props.renderFailMessage(this.state.info.state)}
-                <PrimaryButton
-                    onClick={() => {
-                        this.props.onFinish()
-                    }}
-                >
-                    Return to Settings
-                </PrimaryButton>
+                <div className={settingsStyle.buttonArea}>
+                    <div />
+                    <PrimaryAction
+                        onClick={() => {
+                            this.props.onFinish()
+                        }}
+                        label={'Return to Settings'}
+                    />
+                </div>
             </div>
         )
     }
@@ -268,20 +293,22 @@ export default class RunningProcess extends React.Component<Props> {
 
         return (
             <div>
-                {status === 'running' && this.renderRunning(info)}
-                {status === 'success' && this.renderSuccess()}
-                {status === 'fail' && this.renderFail()}
-                <FailedOverlay
-                    disabled={!overlay}
-                    onClick={async action => {
-                        if (action === 'continue') {
-                            await this.startRestore()
-                        }
-                        this.setState({
-                            overlay: null,
-                        })
-                    }}
-                />
+                <div className={settingsStyle.section}>
+                    {status === 'running' && this.renderRunning(info)}
+                    {status === 'success' && this.renderSuccess()}
+                    {status === 'fail' && this.renderFail()}
+                    <FailedOverlay
+                        disabled={!overlay}
+                        onClick={async action => {
+                            if (action === 'continue') {
+                                await this.startRestore()
+                            }
+                            this.setState({
+                                overlay: null,
+                            })
+                        }}
+                    />
+                </div>
             </div>
         )
     }

@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Props } from './result-item'
 import cx from 'classnames'
+import ButtonTooltip from './button-tooltip'
 
 const styles = require('./result-item.css')
 
@@ -19,13 +20,6 @@ class ResultItemActions extends PureComponent<Props> {
                     [styles.tweetDetailsContainer]: this.props.isSocial,
                 })}
             >
-                <div className={styles.detailsBox}>
-                    <div className={styles.displayTime}>
-                        {' '}
-                        {this.props.displayTime}
-                    </div>
-                    {this.props.isOverview && this.props.tagHolder}
-                </div>
                 <div
                     className={styles.buttonsContainer}
                     onClick={e => {
@@ -33,35 +27,48 @@ class ResultItemActions extends PureComponent<Props> {
                         e.stopPropagation()
                     }}
                 >
-                    <button
-                        disabled={this.props.isDeleting}
-                        className={cx(styles.button, styles.trash)}
-                        onClick={this.props.onTrashBtnClick}
-                        title="Delete this page & all related content"
-                    />
-                    <button
-                        className={cx(styles.button, styles.tag)}
-                        onClick={this.props.onTagBtnClick}
-                        ref={this.props.setTagButtonRef}
-                        title="Add/View Tags"
-                    />
-                    <button
-                        className={cx(styles.button, styles.comment, {
-                            [styles.commentActive]: this.props.annotsCount > 0,
-                        })}
-                        onClick={this.props.onCommentBtnClick}
-                        title="Add/View Commments & Annotations"
+                    <ButtonTooltip
+                        position="bottom"
+                        tooltipText="Delete this page & all related content"
                     >
-                        <span className={styles.annotsCount}>
-                            {this.props.annotsCount}
-                        </span>
-                    </button>
-                    <button
-                        disabled={this.props.isDeleting}
-                        className={this.bookmarkClass}
-                        onClick={this.props.onToggleBookmarkClick}
-                        title="Bookmark this page"
-                    />
+                        <button
+                            disabled={this.props.isDeleting}
+                            className={cx(styles.button, styles.trash)}
+                            onClick={this.props.onTrashBtnClick}
+                        />
+                    </ButtonTooltip>
+                    <ButtonTooltip
+                        position="bottom"
+                        tooltipText="Add/View Tags"
+                    >
+                        <button
+                            className={cx(styles.button, styles.tag)}
+                            onClick={this.props.onTagBtnClick}
+                            ref={this.props.setTagButtonRef}
+                            title="Add/View Tags"
+                        />
+                    </ButtonTooltip>
+                    <ButtonTooltip
+                        position="bottom"
+                        tooltipText="Add/View Commments & Annotations"
+                    >
+                        <button
+                            className={cx(styles.button, styles.comment, {
+                                [styles.commentActive]:
+                                    this.props.annotsCount > 0,
+                            })}
+                            onClick={this.props.onCommentBtnClick}
+                            title="Add/View Commments & Annotations"
+                        />
+                    </ButtonTooltip>
+                    <ButtonTooltip position="bottom" tooltipText="Bookmark">
+                        <button
+                            disabled={this.props.isDeleting}
+                            className={this.bookmarkClass}
+                            onClick={this.props.onToggleBookmarkClick}
+                            title="Bookmark this page"
+                        />
+                    </ButtonTooltip>
                 </div>
             </div>
         )

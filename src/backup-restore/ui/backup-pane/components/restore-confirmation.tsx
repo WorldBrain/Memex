@@ -1,6 +1,7 @@
 import React from 'react'
 import * as logic from './restore-confirmation.logic'
 const styles = require('./restore-confirmation.css')
+const settingsStyle = require('src/options/settings/components/settings.css')
 
 interface Props {
     onConfirm: () => void
@@ -35,7 +36,7 @@ export default class RestoreConfirmation extends React.Component<Props, {}> {
                         />
                         <span className={styles.danger}>Danger Zone</span>
                     </div>
-                    <p className={styles.normal}>
+                    <p className={settingsStyle.infoText}>
                         This will delete your existing data and replace it with
                         your backup. You cannot go back.
                     </p>

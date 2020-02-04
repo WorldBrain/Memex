@@ -1,6 +1,4 @@
-import { Annotation } from 'src/direct-linking/types'
 import { ContentTypes, AnnotSearchParams, AnnotPage } from './types'
-import { Page } from '..'
 import { SearchParams as OldSearchParams } from '../types'
 
 export const contentTypeChecks = {

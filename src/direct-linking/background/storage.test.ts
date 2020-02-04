@@ -9,6 +9,7 @@ import AnnotationBackground from './'
 import AnnotationStorage from './storage'
 import CustomListBackground from 'src/custom-lists/background'
 import * as DATA from './storage.test.data'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 describe('Annotations storage', () => {
     let annotationStorage: AnnotationStorage
@@ -60,25 +61,12 @@ describe('Annotations storage', () => {
     }
 
     beforeEach(async () => {
-        storageManager = initStorageManager()
-        const annotBg = new AnnotationBackground({
-            searchIndex: {} as any,
-            storageManager,
-            socialBg: {} as any,
-            browserAPIs: { storage: {} } as any,
-        })
-        customListsBg = new CustomListBackground({
-            storageManager,
-            searchIndex: {} as any,
-        })
-        annotationStorage = annotBg.annotationStorage
+        const setup = await setupBackgroundIntegrationTest()
+        storageManager = setup.storageManager
+        customListsBg = setup.backgroundModules.customLists
+        annotationStorage =
+            setup.backgroundModules.directLinking.annotationStorage
 
-        registerModuleMapCollections(storageManager.registry, {
-            annotations: annotationStorage,
-            customList: customListsBg.storage,
-        })
-
-        await storageManager.finishInitialization()
         await insertTestData()
     })
 

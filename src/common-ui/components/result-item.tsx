@@ -21,6 +21,7 @@ export interface Props extends Partial<SocialPage> {
     screenshot?: string
     displayTime?: string
     isDeleting: boolean
+    tags: string[]
     hasBookmark?: boolean
     isSidebarOpen?: boolean
     isListFilterActive: boolean

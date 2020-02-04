@@ -4,6 +4,9 @@ import * as onboardingConstants from 'src/overview/onboarding/constants'
 import ItemCreator from './item-creator'
 import ImportCache from './cache'
 import { SearchIndex } from 'src/search'
+import { DexieUtilsPlugin } from 'src/search/plugins'
+import StorageManager from '@worldbrain/storex'
+import { initErrHandler } from 'src/search/storage'
 
 /**
  * Object with keys for each import item type and corresponding unsigned int values,
@@ -55,11 +58,11 @@ export class ImportStateManager {
     options = {}
 
     constructor({
-        searchIndex,
+        storageManager,
         cacheBackend = new ImportCache({}),
         itemCreator,
     }: {
-        searchIndex: SearchIndex
+        storageManager: StorageManager
         cacheBackend?: ImportCache
         itemCreator?: ItemCreator
     }) {
@@ -67,7 +70,7 @@ export class ImportStateManager {
         this._itemCreator =
             itemCreator ||
             new ItemCreator({
-                existingKeySource: () => searchIndex.grabExistingKeys(),
+                existingKeySource: () => grabExistingKeys(storageManager),
             })
 
         this._initFromCache()
@@ -243,6 +246,28 @@ export class ImportStateManager {
         this.counts = ImportCache.INIT_ESTS
         await this._cache.clear()
     }
+}
+
+async function grabExistingKeys(db: StorageManager) {
+    let histKeys: Set<string>
+    let bmKeys: Set<string>
+
+    try {
+        histKeys = new Set(
+            await db.operation(DexieUtilsPlugin.GET_PKS_OP, {
+                collection: 'pages',
+            }),
+        )
+        bmKeys = new Set(
+            await db.operation(DexieUtilsPlugin.GET_PKS_OP, {
+                collection: 'bookmarks',
+            }),
+        )
+    } catch (err) {
+        initErrHandler({ histKeys: new Set(), bmKeys: new Set() })(err)
+    }
+
+    return { histKeys, bmKeys }
 }
 
 let globalImportStateManager: ImportStateManager = null

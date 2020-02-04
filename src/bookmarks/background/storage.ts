@@ -7,6 +7,7 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/pages/constants'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export default class BookmarksStorage extends StorageModule {
     static BMS_COLL = COLLECTION_NAMES.bookmark
@@ -39,6 +40,11 @@ export default class BookmarksStorage extends StorageModule {
                 operation: 'deleteObjects',
                 args: { url: '$url:pk' },
             },
+            findBookmarkByUrl: {
+                collection: this.bookmarksColl,
+                operation: 'findObject',
+                args: { url: '$url:string' },
+            },
         },
     })
 
@@ -49,10 +55,25 @@ export default class BookmarksStorage extends StorageModule {
         url: string
         time?: number
     }) {
-        return this.operation('createBookmark', { url, time })
+        const normalizedUrl = normalizeUrl(url, {})
+        return this.operation('createBookmark', { url: normalizedUrl, time })
     }
 
     async delBookmark({ url }: { url: string }) {
-        return this.operation('deleteBookmark', { url })
+        const normalizedUrl = normalizeUrl(url, {})
+        return this.operation('deleteBookmark', { url: normalizedUrl })
+    }
+
+    async createBookmarkIfNeeded(url: string, time: number) {
+        if (!(await this.pageHasBookmark(url))) {
+            await this.addBookmark({ url, time })
+        }
+    }
+
+    async pageHasBookmark(url: string): Promise<boolean> {
+        const normalizedUrl = normalizeUrl(url, {})
+        return !!(await this.operation('findBookmarkByUrl', {
+            url: normalizedUrl,
+        }))
     }
 }

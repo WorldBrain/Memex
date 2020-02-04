@@ -18,9 +18,7 @@ const customLists = (setup: BackgroundIntegrationTestSetup) =>
 
 let annotUrl!: string
 
-const createAnnotationStep: IntegrationTestStep<
-    BackgroundIntegrationTestContext
-> = {
+const createAnnotationStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
     execute: async ({ setup }) => {
         annotUrl = await directLinking(setup).createAnnotation(
             { tab: {} as any },
@@ -442,7 +440,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 await directLinking(setup).toggleAnnotBookmark(
                                     {} as any,
-                                    { url: annotUrl },
+                                    {
+                                        url: annotUrl,
+                                    },
                                 )
                             },
                             expectedStorageChanges: {
@@ -533,7 +533,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 await directLinking(setup).toggleAnnotBookmark(
                                     {} as any,
-                                    { url: annotUrl },
+                                    {
+                                        url: annotUrl,
+                                    },
                                 )
                                 await directLinking(setup).addTagForAnnotation(
                                     {},
@@ -544,7 +546,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ).createCustomList({ name: 'test' })
                                 await directLinking(setup).insertAnnotToList(
                                     {} as any,
-                                    { listId, url: annotUrl },
+                                    {
+                                        listId,
+                                        url: annotUrl,
+                                    },
                                 )
                             },
                             expectedStorageChanges: {
@@ -1063,13 +1068,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             fullUrl: DATA.PAGE_1.fullUrl,
                                             domain: DATA.PAGE_1.domain,
                                             hostname: DATA.PAGE_1.hostname,
-                                            canonicalUrl: undefined,
-                                            fullTitle: undefined,
-                                            screenshot: undefined,
-                                            text: undefined,
-                                            titleTerms: [],
                                             urlTerms: [],
-                                            terms: [],
                                         },
                                     },
                                     [DATA.PAGE_2.url]: {
@@ -1079,29 +1078,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             fullUrl: DATA.PAGE_2.fullUrl,
                                             domain: DATA.PAGE_2.domain,
                                             hostname: DATA.PAGE_2.hostname,
-                                            canonicalUrl: undefined,
-                                            fullTitle: undefined,
-                                            screenshot: undefined,
-                                            text: undefined,
-                                            titleTerms: [],
                                             urlTerms: [],
-                                            terms: [],
                                         },
                                     },
                                 }),
                                 visits: (): StorageCollectionDiff => ({
-                                    [`[${DATA.VISIT_1},"${
-                                        DATA.PAGE_1.url
-                                    }"]`]: {
+                                    [`[${DATA.VISIT_1},"${DATA.PAGE_1.url}"]`]: {
                                         type: 'create',
                                         object: {
                                             time: DATA.VISIT_1,
                                             url: DATA.PAGE_1.url,
                                         },
                                     },
-                                    [`[${DATA.VISIT_1},"${
-                                        DATA.PAGE_2.url
-                                    }"]`]: {
+                                    [`[${DATA.VISIT_1},"${DATA.PAGE_2.url}"]`]: {
                                         type: 'create',
                                         object: {
                                             time: DATA.VISIT_1,

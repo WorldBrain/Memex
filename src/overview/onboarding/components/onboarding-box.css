@@ -23,7 +23,7 @@
     width: 90%;
     max-width: 800px;
     transition: height 0.5s;
-    margin: 2rem auto 1rem;
+    margin: auto auto;
     display: flex;
     padding: 2em 4em;
     border-radius: 10px;
@@ -34,36 +34,18 @@
 }
 
 .whiteBox {
-    animation: scale-in-center 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    background: white;
     color: color5;
     width: 90%;
     max-width: 800px;
-    margin: 2rem auto 1rem;
+    margin: auto auto;
     display: flex;
     padding: 2em 4em;
-    border: solid 1px #f4f4f4;
-    border-radius: 10px;
     flex-direction: column;
-    box-shadow: 0px 2px 30px rgba(164, 180, 182, 0.5);
     text-align: center;
     align-items: center;
     justify-content: space-between;
     min-height: 633px;
-    transition: height 0.25s ease;
     opacity: 1;
-}
-
-@keyframes scale-in-center {
-    0% {
-        transform: scale(0);
-        opacity: 0;
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
 }
 
 .logo {
@@ -89,8 +71,7 @@
 }
 
 .text {
-    color: color6;
-    font-size: calc(0.6rem + 0.3vw);
+    color: #544960;
     margin-bottom: 2rem;
     flex-direction: column;
 }
@@ -128,30 +109,32 @@
     border: 1px solid #eee;
     border-radius: 5px;
     display: flex;
-    height: 258px;
+    height: 250px;
     margin: 0 auto 2rem;
-    width: 400px;
+    width: auto;
 }
 
 .annotationGif {
     composes: onboardingGif;
-    background-image: url('/img/annotationImage.gif');
 }
 
 .searchGif {
     composes: onboardingGif;
-    background-image: url('/img/searchImage.gif');
 }
 
 .sidebarGif {
     composes: onboardingGif;
-    background-image: url('/img/sidebarImage.gif');
 }
 
 .keyboardGif {
     composes: onboardingGif;
-    background-image: url('/img/keyboardImage.gif');
     background-size: cover;
+}
+
+.mobileImg {
+    composes: onboardingGif;
+    background-size: contain;
+    border: none;
 }
 
 .floatingImage {
@@ -228,11 +211,5 @@
 
     100% {
         opacity: 1;
-    }
-}
-
-@media only screen and (max-height: 700px) {
-    .flexLayout {
-        height: auto; /* reset the 100vh which causes scroll issues on smaller screens */
     }
 }

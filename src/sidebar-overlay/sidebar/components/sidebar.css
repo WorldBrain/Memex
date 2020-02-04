@@ -1,7 +1,7 @@
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Poppins/poppins.css');
 
 .sidebar * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .sidebar {

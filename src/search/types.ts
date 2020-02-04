@@ -1,6 +1,5 @@
 import Storex, { FindManyOptions } from '@worldbrain/storex'
 import { Bookmarks } from 'webextension-polyfill-ts'
-import { createPageFromTab } from './on-demand-indexing'
 
 export type DBGet = () => Promise<Storex>
 
@@ -100,18 +99,16 @@ export interface PipelineRes {
 }
 
 export interface SearchIndex {
-    search: (
-        params: {
-            query: string
-            showOnlyBookmarks: boolean
-            mapResultsFunc?: any
-            domains?: string[]
-            domainsExclude?: string[]
-            tags?: any[]
-            lists?: any[]
-            [key: string]: any
-        },
-    ) => Promise<{
+    search: (params: {
+        query: string
+        showOnlyBookmarks: boolean
+        mapResultsFunc?: any
+        domains?: string[]
+        domainsExclude?: string[]
+        tags?: any[]
+        lists?: any[]
+        [key: string]: any
+    }) => Promise<{
         docs: any[]
         isBadTerm?: boolean
         requiresMigration?: boolean
@@ -133,13 +130,11 @@ export interface SearchIndex {
     delPagesByDomain: (url: string) => Promise<any>
     delPagesByPattern: (pattern: string | RegExp) => Promise<any>
 
-    addBookmark: (
-        params: {
-            url: string
-            timestamp?: number
-            tabId?: number
-        },
-    ) => Promise<void>
+    addBookmark: (params: {
+        url: string
+        timestamp?: number
+        tabId?: number
+    }) => Promise<void>
     delBookmark: (params: Partial<Bookmarks.BookmarkTreeNode>) => Promise<void>
     pageHasBookmark: (url: string) => Promise<boolean>
 
@@ -153,29 +148,17 @@ export interface SearchIndex {
     addFavIcon: (url: string, favIconURI: string) => Promise<any>
     domainHasFavIcon: (url: string) => Promise<boolean>
 
-    addTag: (
-        params: { url: string; tag: string; tabId?: number },
-    ) => Promise<void>
-    delTag: (
-        params: { url: string; tag: string; tabId?: number },
-    ) => Promise<void>
-    fetchPageTags: (url: string) => Promise<any>
-
-    grabExistingKeys: () => Promise<{
-        histKeys: Set<string>
-        bmKeys: Set<string>
-    }>
-
-    createPageFromTab: (params: PageCreationProps) => Promise<any>
-    createPageFromUrl: (params: PageCreationProps) => Promise<any>
-    createPageViaBmTagActs: (params: PageCreationProps) => Promise<any>
-    createTestPage: (params: PageCreationProps) => Promise<any>
-
-    dangerousPleaseBeSureDeleteAndRecreateDatabase: () => Promise<void>
+    createPageFromTab: (params: PageCreationProps) => Promise<PipelineRes>
+    createPageFromUrl: (params: PageCreationProps) => Promise<PipelineRes>
+    createPageViaBmTagActs: (params: PageCreationProps) => Promise<PipelineRes>
+    createTestPage: (params: PageCreationProps) => Promise<PipelineRes>
 }
-interface PageCreationProps {
+
+export interface PageCreationProps {
     url: string
     tabId?: number
     stubOnly?: boolean
     allowScreenshot?: boolean
+    save?: boolean
+    visitTime?: number
 }

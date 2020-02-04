@@ -110,12 +110,12 @@
 
 .button {
     composes: nakedButton from 'src/common-ui/elements.css';
-    padding: 3px 6px 3px 8px;
+    padding: 3px 6px 3px 6px;
     display: flex;
     align-items: center;
-    margin-left: 25px;
-    height: 25px;
-    font-size: 15px;
+    margin-left: 24px;
+    height: 24px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     margin-right: -7px;

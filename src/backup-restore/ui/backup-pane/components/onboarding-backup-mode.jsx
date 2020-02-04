@@ -66,7 +66,9 @@ export function OnboardingBackupMode({
                             onChange={() => onModeChange('manual')}
                         />{' '}
                         <div className={Styles.textBlock}>
-                            <p className={Styles.name}>Manual Backup</p>
+                            <div className={Styles.selectionTitle}>
+                                Manual Backup
+                            </div>
                             <p className={Styles.subname}>
                                 You need to regularly remember to back up
                                 yourself.
@@ -89,7 +91,9 @@ export function OnboardingBackupMode({
                             onChange={() => onModeChange('automatic')}
                         />{' '}
                         <div className={Styles.textBlock}>
-                            <p className={Styles.name}>Automatic Backup</p>
+                            <div className={Styles.selectionTitle}>
+                                Automatic Backup
+                            </div>
                             <p className={Styles.subname}>
                                 Worry-free backups every 15 minutes.
                             </p>
@@ -101,11 +105,8 @@ export function OnboardingBackupMode({
                                 Subscribed
                             </span>
                         ) : (
-                            <span
-                                className={Styles.labelPremium}
-                                onClick={launchSubscriptionFlow}
-                            >
-                                ⭐️ Click to Upgrade
+                            <span className={Styles.labelFree}>
+                                ⭐️ Pro Feature
                             </span>
                         )}
                     </div>

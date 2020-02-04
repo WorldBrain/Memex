@@ -3,13 +3,15 @@ import React from 'react'
 // import classNames from 'classnames'
 import * as logic from './restore-where.logic'
 import { ProviderList } from 'src/backup-restore/ui/backup-pane/components/provider-list'
-import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import { DownloadOverlay } from '../components/overlays'
 import {
     fetchBackupPath,
     checkServerStatus,
     changeBackupPath,
 } from '../../utils'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+
+const settingsStyle = require('src/options/settings/components/settings.css')
 const STYLES = require('../../styles.css')
 
 interface Props {
@@ -57,11 +59,11 @@ export default class RestoreWhere extends React.Component<Props> {
 
     render() {
         return (
-            <div>
-                <p className={STYLES.header2}>
+            <div className={settingsStyle.section}>
+                <div className={settingsStyle.sectionTitle}>
                     <strong>STEP 1/2: </strong>
                     FROM WHERE?
-                </p>
+                </div>
                 <ProviderList
                     backupPath={
                         this.state.provider === 'local'
@@ -94,16 +96,18 @@ export default class RestoreWhere extends React.Component<Props> {
                         }
                     }}
                 />
-                <PrimaryButton
-                    disabled={!this.state.valid}
-                    onClick={() =>
-                        this.handleEvent({
-                            type: 'onConfirm',
-                        })
-                    }
-                >
-                    Continue
-                </PrimaryButton>
+                <div className={settingsStyle.buttonArea}>
+                    <div />
+                    <PrimaryAction
+                        disabled={!this.state.valid}
+                        onClick={() =>
+                            this.handleEvent({
+                                type: 'onConfirm',
+                            })
+                        }
+                        label={'Continue'}
+                    />
+                </div>
             </div>
         )
     }
