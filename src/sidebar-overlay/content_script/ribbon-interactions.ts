@@ -128,7 +128,7 @@ const _insertOrRemoveRibbon = async ({
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
-    store
+    store: any
 }) => {
     if (manualOverride) {
         return
@@ -195,6 +195,7 @@ export const setupRPC = ({
             insertRibbon({
                 annotationsManager,
                 toolbarNotifications,
+                store,
                 ...args,
             })
         },
