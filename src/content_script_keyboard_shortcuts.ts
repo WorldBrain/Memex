@@ -43,7 +43,6 @@ function handleShortcut(shortcutIndex, opts) {
 let highlightsOn = false
 
 // FIXME (ch - annotations): replace toggleSidebarOverlay with typed RPC version
-// FIXME (ch - annotations): Fix store so we don't have to dispatch with as any
 const shortcutHandlers: HandleInterface = {
     addComment: () =>
         remoteFunction('toggleSidebarOverlay')({
