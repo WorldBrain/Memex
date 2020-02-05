@@ -24,6 +24,7 @@ const rootStore = configureStore()
 toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 window['toolbarNotifications'] = toolbarNotifications
 
+initStore(rootStore)
 initContentTooltip({ toolbarNotifications, store: rootStore })
 initRibbonAndSidebar({
     annotationsManager,
@@ -31,9 +32,8 @@ initRibbonAndSidebar({
     store: rootStore,
 })
 initSocialIntegration({ annotationsManager })
-initKeyboardShortcuts({ store: rootStore }) // N.B. Keyboard shortcuts must be setup after RibbonAndSidebar due to ref? maybe
+initKeyboardShortcuts({ store: rootStore })
 initHighlights(rootStore)
-initStore(rootStore)
 
 async function initStore(store) {
     store.dispatch(initBasicStore() as any)

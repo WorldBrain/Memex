@@ -22,7 +22,6 @@ const RibbonSidebarController = (props: Props) => {
     return (
         <ErrorBoundary component={RuntimeError}>
             <Provider store={store}>
-                {/* // @ts-ignore */}
                 <RibbonSidebarContainer
                     {...rest}
                     innerRef={setRibbonSidebarRef}

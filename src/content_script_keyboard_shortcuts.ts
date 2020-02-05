@@ -14,7 +14,13 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import Mousetrap from 'mousetrap'
 
 type HandleInterface = {
-    [key in keyof KeyboardShortcuts]: ({ store, event }) => void
+    [key in keyof KeyboardShortcuts]: ({
+        store,
+        event,
+    }: {
+        store: any
+        event: any
+    }) => void
 }
 
 export const initKeyboardShortcuts = async ({ store }) => {
@@ -81,7 +87,7 @@ const shortcutHandlers: HandleInterface = {
 
     createHighlight: ({ store }) => {
         if (userSelectedText()) {
-            store.dispatch(createAnnotationAction() as any)
+            store.dispatch(createAnnotationAction())
         }
     },
 
