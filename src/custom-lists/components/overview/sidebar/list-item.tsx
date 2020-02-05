@@ -138,6 +138,7 @@ class PageList extends Component<Props, State> {
                             <button
                                 className={cx(styles.editButton, styles.button)}
                                 onClick={this.handleEditBtnClick}
+                                title={"Edit"}
                             />
                             <button
                                 className={cx(
@@ -145,6 +146,7 @@ class PageList extends Component<Props, State> {
                                     styles.button,
                                 )}
                                 onClick={this.handleCrossBtnClick}
+                                title={"Delete"}
                             />
                         </React.Fragment>
                     )}
