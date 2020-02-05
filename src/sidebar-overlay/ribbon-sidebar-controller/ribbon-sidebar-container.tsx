@@ -94,10 +94,13 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        this.props.onInit()
         this._setupRPC()
         this.addEventListeners()
-        this.handleKeyboardActions(this.props, this.props.forceExpand)
+        const initAndHandle = async () => {
+            await this.props.onInit()
+            await this.handleKeyboardActions(this.props, this.props.forceExpand)
+        }
+        initAndHandle()
     }
 
     componentWillUnmount() {
