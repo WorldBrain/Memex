@@ -9,71 +9,35 @@ import {
 import { conditionallyRemoveOnboardingSelectOption } from 'src/content-tooltip/onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 import { createAnnotation as createAnnotationAction } from 'src/annotations/actions'
-import * as Mousetrap from 'mousetrap'
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
 import { remoteFunction } from 'src/util/webextensionRPC'
+import Mousetrap from 'mousetrap'
 
-/*
-// N.B. The following should work and allow for a cleaner binding of function calls, but doesn't.
-// Why does the following not work? it always fires the last bound callback, is there something wrong with the execution context or the Mousetrap bind?
-export const initKeyboardShortcuts = async ({ store }) => {
-    const {
-        shortcutsEnabled,
-        ...shortcuts
-    } = await getKeyboardShortcutsState()
-
-    if (shortcutsEnabled) {
-        for (const shortcutIndex of Object.keys(shortcuts)) {
-            const shortcutValue = shortcuts[shortcutIndex]
-
-            console.log(`binding ${shortcutIndex} to ${shortcutValue.shortcut}`)
-            const keyhandler = (event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                console.log(`Keyboard shortcutHandler for ${shortcutIndex} firing...`)
-                return shortcutHandlers[shortcutIndex]({ store, event })
-            }
-            if (shortcutValue.enabled) {
-                Mousetrap.bind(
-                    shortcutValue.shortcut,
-                    keyhandler,
-                )
-            }
-        }
-    }
+type HandleInterface = {
+    [key in keyof KeyboardShortcuts]: ({ store, event }) => void
 }
-*/
-// TODO: for now we'll do this, mapping keys to indexes and indexes to callbacks
-//////
-const shortcutMap = {}
+
 export const initKeyboardShortcuts = async ({ store }) => {
     const { shortcutsEnabled, ...shortcuts } = await getKeyboardShortcutsState()
 
     if (shortcutsEnabled) {
-        for (const shortcutIndex of Object.keys(shortcuts)) {
-            const shortcutValue = shortcuts[shortcutIndex]
-            if (shortcutValue.enabled) {
-                shortcutMap[shortcutValue.shortcut] = shortcutIndex
-            }
+        for (const [shortcutName, shortcutValue] of Object.entries(shortcuts)) {
+            shortcutValue.enabled &&
+                Mousetrap.bind(
+                    shortcutValue.shortcut,
+                    handleShortcut(shortcutName, { store }),
+                )
         }
-        Mousetrap.bind(Object.keys(shortcutMap), shortcutHandler(store))
     }
 }
-const shortcutHandler = store => e => {
-    const shortcutFunction = shortcutHandlers[shortcutMap[e.key]]
 
-    if (shortcutFunction) {
-        e.stopPropagation()
-        e.preventDefault()
-        return shortcutFunction({ store })
-    } else {
-        console.error(`${shortcutMap[e.key]} does not map to a functions`)
+function handleShortcut(shortcutIndex, opts) {
+    // N.B. this function needs to be created here to work with the execution scope above
+    return function(event) {
+        event.preventDefault()
+        event.stopPropagation()
+        return shortcutHandlers[shortcutIndex](opts)
     }
-}
-/////////
-
-type HandleInterface = {
-    [key in keyof KeyboardShortcuts]: ({ store, event }) => void
 }
 
 let highlightsOn = false
