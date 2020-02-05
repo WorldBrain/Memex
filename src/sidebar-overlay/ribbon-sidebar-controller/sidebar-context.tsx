@@ -10,7 +10,7 @@ const highlighter = new HighlightInteraction()
 export function withSidebarContext<
     T extends SidebarContextInterface = SidebarContextInterface
 >(WrappedComponent: any) {
-    // FIXME: should be something like React.ComponentType<Optionalize<T, Props>> but causes issues with ref
+    // FIXME: (ch - annotations) should be something like React.ComponentType<Optionalize<T, Props>> but causes issues with ref
     // Try to create a nice displayName for React Dev Tools.
     const displayName =
         WrappedComponent.displayName ||
@@ -18,7 +18,7 @@ export function withSidebarContext<
         'ComponentwithSidebarContext'
 
     return class ComponentWithSidebarContext extends React.Component<
-        any // FIXME: should be something like Optionalize<T, Props> but causes issues with ref
+        any // FIXME: (ch - annotations)  should be something like Optionalize<T, Props> but causes issues with ref
     > {
         public static displayName = `withSidebarContext(${displayName})`
 
