@@ -6,6 +6,7 @@ import AnnotationsManager from 'src/annotations/annotations-manager'
 import { runOnScriptShutdown } from 'src/content-tooltip/utils'
 
 // TODO (ch - annotations extra) - huh? If commenting this out doesn't break anything remove it
+// Maybe it's for when you've since disabled the sidebar/ribbon
 // const onKeydown = (
 //     e: KeyboardEvent,
 //     props: ContentScriptProps,

@@ -13,7 +13,7 @@ import {
 import * as utils from 'src/content-tooltip/utils'
 import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
-import { fetchAnnotationsAndHighlight } from 'src/annotations'
+import { highlightAnnotations } from 'src/annotations'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 const styles = require('./ribbon.css')
@@ -88,7 +88,7 @@ class Ribbon extends Component<Props, State> {
         await this.props.onInit()
 
         if (this.props.areHighlightsEnabled) {
-            fetchAnnotationsAndHighlight()
+            highlightAnnotations()
         }
 
         this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
@@ -128,7 +128,7 @@ class Ribbon extends Component<Props, State> {
         if (this.props.areHighlightsEnabled) {
             this.props.highlighter.removeHighlights()
         } else {
-            fetchAnnotationsAndHighlight()
+            highlightAnnotations()
         }
 
         await this.props.handleHighlightsToggle()

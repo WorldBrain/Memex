@@ -10,11 +10,7 @@ import {
 import { injectCSS } from '../search-injection/dom'
 import { conditionallyShowHighlightNotification } from './onboarding-interactions'
 import { TooltipInteractionInterface } from 'src/content-tooltip/types'
-import {
-    createAnnotationHighlight,
-    createAnnotationDraftInSidebar,
-} from 'src/annotations'
-import { extractAnchor } from 'src/highlighting/ui'
+import { createAnnotationDraftInSidebar } from 'src/annotations'
 import { createAnnotation as createAnnotationAction } from 'src/annotations/actions'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
@@ -78,15 +74,7 @@ export const insertTooltip = async ({ toolbarNotifications, store }) => {
     showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
         createAnnotation: createAnnotationDraftInSidebar,
-        // N.B. that the tooltip registers event listeners here for shortcut keys, they do not trigger in the shortcut specific checks
-        // TODO (ch - annotations) bring consistency between annoting and highlight, from shortcuts and from tooltip presses, (i.e. this function imlementation shouldn't be here)
-        createHighlight: async () => {
-            const anchor = await extractAnchor(document.getSelection())
-            const body = anchor ? anchor.quote : ''
-            await store.dispatch(
-                createAnnotationAction(anchor, body, '', []) as any,
-            )
-        },
+        createHighlight: () => store.dispatch(createAnnotationAction()),
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
             manualOverride = true

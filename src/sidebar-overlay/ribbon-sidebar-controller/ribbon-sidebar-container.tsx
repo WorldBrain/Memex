@@ -24,7 +24,6 @@ import * as popup from 'src/popup/selectors'
 import { retryUntilErrorResolves } from 'src/util/retry-until'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
 import { Annotation } from 'src/annotations/types'
-import { SidebarContext } from 'src/sidebar-overlay'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 
 interface StateProps {
@@ -106,20 +105,6 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props) {
-        const { annotations, isSidebarOpen } = this.props
-        // TODO (ch - annotations) Added here is the length check, so that on the first load of annotations
-        // (from the default of annotations = [], to the hydrated query result), it doesn't trigger this
-        // componentDidUpdate and remove annotations (unnecessary) and remove tmp annotations (bug)
-        // but really we should get rid of this remove all + re-annotate all, and either calculate the difference
-        // or trigger the appropriate add or delete respectively.
-        // if (
-        //     prevProps.annotations.length > 0 &&
-        //     prevProps.annotations !== annotations &&
-        //     isSidebarOpen
-        // ) {
-        //     this.props.highlighter.removeHighlights()
-        //     this._highlightAnnotations()
-        // }
         if (prevProps.url !== this.getUrl()) {
             this.props.onInit()
         }
@@ -328,11 +313,6 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         if (activeUrl) {
             this._focusOnAnnotation(activeUrl)
         }
-
-        // TODO (ch - annotations): remove me
-        // // Highlight any annotations with anchor.
-        // // (Done here as only in-page sidebar requires to do this.)
-        // await this._highlightAnnotations()
     }
 
     private _closeSidebarCallback = () => {
@@ -357,20 +337,6 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             }, 200)
         }
     }
-
-    // TODO (ch - annotations): remove me
-    //
-    // private _highlightAnnotations = async () => {
-    //     const annotations = this.props.annotations.filter(
-    //         annotation => !!annotation.selector,
-    //     )
-    //     await this.props.highlighter.highlightAll(
-    //         annotations,
-    //         this.props.openSidebar,
-    //         this._focusOnAnnotation,
-    //         this._hoverAnnotation,
-    //     )
-    // }
 
     private _focusOnAnnotation = (url: string) => {
         this.props.setActiveAnnotationUrl(url)
