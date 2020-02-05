@@ -248,7 +248,7 @@ export class BackupBackgroundModule {
             handleLoginRedirectedBack: backend
                 ? backend.handleLoginRedirectedBack.bind(backend)
                 : null,
-            isAutomaticBackupEnabled: () => this.isAutomaticBackupEnabled(),
+            // isAutomaticBackupEnabled: () => this.isAutomaticBackupEnabled(),
             memexCloudOrigin: _getMemexCloudOrigin(),
         })
     }
@@ -346,7 +346,7 @@ export class BackupBackgroundModule {
         this.backupProcedure.events.on('success', async () => {
             // sets a flag that the progress of the backup has been successful so that the UI can set a proper state
             localStorage.setItem('progress-successful', 'true')
-            
+
             this.lastBackupStorage.storeLastBackupFinishTime(new Date())
             always()
         })

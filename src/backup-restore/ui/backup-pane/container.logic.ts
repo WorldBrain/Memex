@@ -23,108 +23,134 @@ export async function getInitialState({
     const runningBackup = await localStorage.getItem(
         'backup.onboarding.running-backup',
     )
-    const progressSuccess = await localStorage.getItem('progress-successful')
+    const progressSuccess = !!(await localStorage.getItem('backup.success'))
     const backendLocation = await remoteFunction('getBackendLocation')()
-    const hasInitialBackup = await remoteFunction('hasInitialBackup')()
-    const driveAuthenticated = await localStorage.getItem('drive-token-access')
-    const isOnboarding = await localStorage.getItem('backup.onboarding')
-    const driveIsAuthenticating = await localStorage.getItem(
+    const hasInitialBackup = !!(await remoteFunction('hasInitialBackup')())
+    const driveAuthenticated = !!(await localStorage.getItem(
+        'drive-token-access',
+    ))
+    const isOnboarding = !!(await localStorage.getItem('backup.onboarding'))
+    const backupIsAuthenticating = !!(await localStorage.getItem(
         'backup.onboarding.authenticating',
-    )
+    ))
+    const restoreIsAuthenticating = !!(await localStorage.getItem(
+        'backup.restore.authenticating',
+    ))
 
     return {
         isAuthenticated,
         runningRestore,
         runningBackup,
-        screen: await getStartScreen({
-            isAuthenticated,
-            localStorage,
-            analytics,
-            remoteFunction,
-            runningRestore,
-            runningBackup,
-            progressSuccess,
-            backendLocation,
-            hasInitialBackup,
-            driveAuthenticated,
-            isOnboarding,
-            driveIsAuthenticating,
-        }),
+        screen: await getStartScreen(
+            {
+                isAuthenticated,
+                runningRestore,
+                runningBackup,
+                progressSuccess,
+                backendLocation,
+                hasInitialBackup,
+                driveAuthenticated,
+                isOnboarding,
+                backupIsAuthenticating,
+                restoreIsAuthenticating,
+            },
+            {
+                remoteFunction,
+                localStorage,
+                analytics,
+            },
+        ),
     }
 }
 
-export async function getStartScreen({
-    localStorage,
-    analytics,
-    remoteFunction,
-    isAuthenticated,
-    runningRestore,
-    runningBackup,
-    progressSuccess,
-    backendLocation,
-    hasInitialBackup,
-    driveAuthenticated,
-    isOnboarding,
-    driveIsAuthenticating,
-}: {
-    analytics: Analytics
-    localStorage: any
-    remoteFunction: any
-    isAuthenticated: boolean
-    runningRestore: string
-    runningBackup: string
-    progressSuccess: string
-    backendLocation: string
-    hasInitialBackup: boolean
-    driveAuthenticated: string
-    isOnboarding: string
-    driveIsAuthenticating: string
-}) {
-    const hasScreenOverride =
-        process.env.BACKUP_START_SCREEN &&
-        process.env.BACKUP_START_SCREEN.length
-
+export async function getStartScreen(
+    state: {
+        isAuthenticated: boolean
+        runningRestore: boolean
+        runningBackup: boolean
+        progressSuccess: boolean
+        backendLocation: string
+        hasInitialBackup: boolean
+        driveAuthenticated: boolean
+        isOnboarding: boolean
+        backupIsAuthenticating: boolean
+        restoreIsAuthenticating: boolean
+    },
+    dependencies: {
+        remoteFunction: any
+        analytics: Analytics
+        localStorage: any
+    },
+) {
     // This is for now pretty hacky. What happens is that on
     // a successful progress (backup/restore/import/sync) it saves a
-    // localstorage data point "progress-successful". Its picked up here
+    // localstorage data point "backup.success". Its picked up here
     // and cleared so that on a successful restore/backup the backupoverview is shown again
     // using explicit "runningbackup/runningrestore" states because that decides which progress
     // bar is loaded after reloading
-    if (runningBackup === 'true') {
+    if (state.runningBackup) {
         // using a progressSuccess message because that would allow to separately decide on if
         // any process is finished, so we don't have to implement this for every kind of process.
-        if (progressSuccess === 'true') {
-            await localStorage.removeItem('backup.onboarding')
-            await localStorage.removeItem('progress-successful')
-            await localStorage.removeItem('backup.onboarding.running-backup')
+        if (state.progressSuccess) {
+            await dependencies.localStorage.removeItem('backup.onboarding')
+            await dependencies.localStorage.removeItem('backup.success')
+            await dependencies.localStorage.removeItem(
+                'backup.onboarding.running-backup',
+            )
             return 'overview'
         } else {
             return 'running-backup'
         }
     }
 
-    if (runningRestore === 'true') {
-        if (progressSuccess === 'true') {
-            await localStorage.removeItem('progress-successful')
-            await localStorage.removeItem('backup.restore.restore-running')
+    if (state.runningRestore) {
+        if (state.progressSuccess) {
+            await dependencies.localStorage.removeItem('backup.success')
+            await dependencies.localStorage.removeItem(
+                'backup.restore.restore-running',
+            )
             return 'overview'
         } else {
             return 'restore-running'
         }
     }
-    // ensures that on a blocked connection, the page on reload shows the progress screen
+
+    await dependencies.localStorage.removeItem('backup.onboarding')
+
+    const driveIsAuthenticating =
+        state.backupIsAuthenticating || state.restoreIsAuthenticating
+    if (driveIsAuthenticating) {
+        if (state.backupIsAuthenticating) {
+            await dependencies.localStorage.removeItem(
+                'backup.onboarding.authenticating',
+            )
+            if (state.driveAuthenticated) {
+                return 'running-backup'
+            } else {
+                return 'onboarding-size'
+            }
+        } else {
+            await dependencies.localStorage.removeItem(
+                'backup.restore.authenticating',
+            )
+            if (state.driveAuthenticated) {
+                return 'restore-running'
+            } else {
+                return 'restore-where'
+            }
+        }
+    }
+
     if (
-        backendLocation === 'google-drive' &&
-        driveAuthenticated &&
-        !hasInitialBackup &&
-        isOnboarding &&
+        state.backendLocation === 'google-drive' &&
+        state.driveAuthenticated &&
+        !state.hasInitialBackup &&
+        state.isOnboarding &&
         driveIsAuthenticating
     ) {
         return 'onboarding-size'
     } else {
-        await localStorage.removeItem('backup.onboarding.authenticating')
-        await localStorage.removeItem('backup.onboarding')
-        await localStorage.removeItem('progress-successful')
+        await dependencies.localStorage.removeItem('backup.success')
         return 'overview'
     }
 }
@@ -248,7 +274,6 @@ export async function processEvent({
                 } else {
                     return { screen: 'onboarding-size' }
                 }
-                return { screen: 'running-backup' }
             },
         },
         'onboarding-how': {
