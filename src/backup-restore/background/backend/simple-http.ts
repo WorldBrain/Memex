@@ -19,10 +19,21 @@ export class MemexLocalBackend extends BackupBackend {
     }
 
     async isConnected() {
-        return true
+        try {
+            const response = await fetch(`${this.url}/status`)
+            return response.status === 200
+        } catch (e) {
+            return false
+        }
     }
+
     async isAuthenticated() {
-        return true
+        // this is for now, until there is some kind of authentication
+        return this.isConnected()
+    }
+
+    async isReachable() {
+        return this.isConnected()
     }
 
     async storeObject({
