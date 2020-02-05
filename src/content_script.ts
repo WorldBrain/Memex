@@ -14,6 +14,7 @@ import configureStore from './sidebar-overlay/store'
 import { initKeyboardShortcuts } from 'src/content_script_keyboard_shortcuts'
 import { fetchAnnotationsForPageUrl } from 'src/annotations/actions'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
+import { initBasicStore } from 'src/popup/actions'
 
 const remoteFunctionRegistry = new RemoteFunctionRegistry()
 const toolbarNotifications = new ToolbarNotifications()
@@ -31,11 +32,14 @@ initRibbonAndSidebar({
 })
 initSocialIntegration({ annotationsManager })
 initKeyboardShortcuts({ store: rootStore }) // N.B. Keyboard shortcuts must be setup after RibbonAndSidebar due to ref? maybe
-initHighlights()
+initHighlights(rootStore)
+initStore(rootStore)
 
-async function initHighlights() {
-    await rootStore.dispatch(
-        sidebarActs.setAnnotationsManager(annotationsManager),
-    )
+async function initStore(store) {
+    store.dispatch(initBasicStore() as any)
+}
+
+async function initHighlights(store) {
+    await store.dispatch(sidebarActs.setAnnotationsManager(annotationsManager))
     rootStore.dispatch(fetchAnnotationsForPageUrl(false, true) as any)
 }
