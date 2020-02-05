@@ -3,7 +3,6 @@ export class DriveTokenManager {
     private accessToken: string
     public memexCloudOrigin: string
     private refreshToken: string
-    private lastTokenRefresh: Date
     private tokenExpiryDate: Date
     private initializationPromise: Promise<any>
 
@@ -58,13 +57,16 @@ export class DriveTokenManager {
         refreshToken?: string
         expiresInSeconds: number
     }) {
-        this.lastTokenRefresh = new Date()
-        this.tokenExpiryDate = new Date(Date.now() + expiresInSeconds * 1000)
-        this.accessToken = accessToken
-        await this.tokenStore.storeAccessToken(
-            this.accessToken,
-            this.tokenExpiryDate,
-        )
+        if (accessToken && expiresInSeconds) {
+            this.tokenExpiryDate = new Date(
+                Date.now() + expiresInSeconds * 1000,
+            )
+            this.accessToken = accessToken
+            await this.tokenStore.storeAccessToken(
+                this.accessToken,
+                this.tokenExpiryDate,
+            )
+        }
         if (refreshToken) {
             this.refreshToken = refreshToken
             await this.tokenStore.storeRefreshToken(this.refreshToken)
@@ -90,7 +92,13 @@ export class DriveTokenManager {
             },
         )
         const { accessToken, expiresInSeconds } = await response.json()
-        await this.handleNewTokens({ accessToken, expiresInSeconds })
+        if (accessToken && expiresInSeconds) {
+            await this.handleNewTokens({ accessToken, expiresInSeconds })
+        } else {
+            console.error(
+                'Tried to refresh Google Drive access token, but got no token from the server',
+            )
+        }
     }
 
     // margin says how much time before the actual expiry time in ms we actually want to refresh the token

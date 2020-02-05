@@ -34,7 +34,7 @@ describe('Backup settings container logic', () => {
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
-                getBackendLocation: () => 'google-drive',
+                getBackendLocation: () => undefined,
             }),
         })
         expect(firstSessionState).toEqual({
@@ -68,13 +68,15 @@ describe('Backup settings container logic', () => {
         ])
 
         // User chooses backup location
+        let backendLocation: string
         await triggerEvent(
             firstSessionState,
             { type: 'onChoice', choice: 'google-drive' },
             {
                 remoteFunctions: {
                     isAutomaticBackupEnabled: () => false,
-                    setBackendLocation: choice => undefined,
+                    setBackendLocation: newChoice =>
+                        (backendLocation = newChoice),
                 },
             },
         )
@@ -90,6 +92,7 @@ describe('Backup settings container logic', () => {
                 },
             },
         ])
+        expect(backendLocation).toEqual('google-drive')
 
         // User chooses manual backup
         await triggerEvent(
@@ -144,6 +147,9 @@ describe('Backup settings container logic', () => {
             },
         ])
 
+        localStorage.setItem('drive-token-access', 'bla token')
+        localStorage.popChanges()
+
         // User lands back on the backup settings page after logging in
         const secondSessionState = await logic.getInitialState({
             analytics,
@@ -152,6 +158,7 @@ describe('Backup settings container logic', () => {
                 isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
+                getBackendLocation: () => backendLocation,
             }),
         })
         expect(secondSessionState).toEqual({
@@ -159,8 +166,8 @@ describe('Backup settings container logic', () => {
             screen: 'running-backup',
         })
         expect(localStorage.popChanges()).toEqual([
-            { type: 'remove', key: 'backup.onboarding.authenticating' },
             { type: 'remove', key: 'backup.onboarding' },
+            { type: 'remove', key: 'backup.onboarding.authenticating' },
         ])
 
         // Backup finished, return to overview
@@ -190,6 +197,7 @@ describe('Backup settings container logic', () => {
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
+                getBackendLocation: () => undefined,
             }),
         })
 
@@ -277,6 +285,7 @@ describe('Backup settings container logic', () => {
     it('should be able to guide the user through the restore flow when they try to restore without being logged in', async () => {
         const { localStorage, analytics, triggerEvent } = setupTest()
 
+        let backendLocation: string
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
@@ -284,6 +293,9 @@ describe('Backup settings container logic', () => {
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
+                getBackendLocation: () => backendLocation,
+                setBackendLocation: (newChoice: string) =>
+                    (backendLocation = newChoice),
             }),
         })
         expect(firstSessionState).toEqual({
@@ -306,7 +318,8 @@ describe('Backup settings container logic', () => {
             { type: 'onChoice', choice: 'google-drive' },
             {
                 remoteFunctions: {
-                    initRestoreProcedure: provider => null,
+                    initRestoreProcedure: provider =>
+                        (backendLocation = provider),
                 },
             },
         )
@@ -321,6 +334,9 @@ describe('Backup settings container logic', () => {
             },
         ])
 
+        localStorage.setItem('drive-token-access', 'bla token')
+        localStorage.popChanges()
+
         const secondSessionState = await logic.getInitialState({
             analytics,
             localStorage,
@@ -328,6 +344,7 @@ describe('Backup settings container logic', () => {
                 isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
+                getBackendLocation: () => backendLocation,
             }),
         })
         expect(secondSessionState).toEqual({
@@ -345,6 +362,7 @@ describe('Backup settings container logic', () => {
     it('should be able to handle a Drive login cancel during restore flow', async () => {
         const { localStorage, analytics, triggerEvent } = setupTest()
 
+        let backendLocation: string
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
@@ -352,6 +370,7 @@ describe('Backup settings container logic', () => {
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
+                getBackendLocation: () => backendLocation,
             }),
         })
         expect(firstSessionState).toEqual({
@@ -375,6 +394,8 @@ describe('Backup settings container logic', () => {
             {
                 remoteFunctions: {
                     initRestoreProcedure: provider => null,
+                    setBackendLocation: (choice: string) =>
+                        (backendLocation = choice),
                 },
             },
         )
@@ -396,6 +417,7 @@ describe('Backup settings container logic', () => {
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
+                getBackendLocation: () => backendLocation,
             }),
         })
         expect(secondSessionState).toEqual({
@@ -413,6 +435,7 @@ describe('Backup settings container logic', () => {
     it('should be able to guide the user through the restore flow when they try to restore while being logged in', async () => {
         const { localStorage, analytics, triggerEvent } = setupTest()
 
+        let backendLocation: string
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
@@ -420,6 +443,7 @@ describe('Backup settings container logic', () => {
                 isBackupBackendAuthenticated: () => true,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
+                getBackendLocation: () => backendLocation,
             }),
         })
         expect(firstSessionState).toEqual({
@@ -442,7 +466,8 @@ describe('Backup settings container logic', () => {
             { type: 'onChoice', choice: 'google-drive' },
             {
                 remoteFunctions: {
-                    initRestoreProcedure: provider => null,
+                    initRestoreProcedure: provider =>
+                        (backendLocation = provider),
                 },
             },
         )
@@ -455,6 +480,7 @@ describe('Backup settings container logic', () => {
     it('should be able to guide the user through the restore flow when using local', async () => {
         const { localStorage, analytics, triggerEvent } = setupTest()
 
+        let backendLocation: string
         const firstSessionState = await logic.getInitialState({
             analytics,
             localStorage,
@@ -462,6 +488,7 @@ describe('Backup settings container logic', () => {
                 isBackupBackendAuthenticated: () => false,
                 hasInitialBackup: () => false,
                 getBackupInfo: () => null,
+                getBackendLocation: () => backendLocation,
             }),
         })
         expect(firstSessionState).toEqual({
@@ -484,7 +511,8 @@ describe('Backup settings container logic', () => {
             { type: 'onChoice', choice: 'local' },
             {
                 remoteFunctions: {
-                    initRestoreProcedure: provider => null,
+                    initRestoreProcedure: provider =>
+                        (backendLocation = provider),
                 },
             },
         )
