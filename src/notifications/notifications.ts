@@ -4,7 +4,7 @@ import * as actionTypes from './action-types'
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-const releaseTime: number = 1559735977587
+export const releaseTime: number = 1559735977587
 
 /* Example Notification:
 {
@@ -57,7 +57,7 @@ const releaseTime: number = 1559735977587
     },
 */
 
-const UPDATE_NOTIFS: NotifDefinition[] = [
+export const UPDATE_NOTIFS: NotifDefinition[] = [
     {
         id: 'Survey1_for_existing_users',
         search: {
@@ -68,8 +68,7 @@ const UPDATE_NOTIFS: NotifDefinition[] = [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url:
-                            'https://worldbrain.typeform.com/to/PHt3uZ',
+                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
                         context: 'new-tab',
                     },
                     label: 'Take Survey',
@@ -84,8 +83,7 @@ const UPDATE_NOTIFS: NotifDefinition[] = [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url:
-                            'https://worldbrain.typeform.com/to/PHt3uZ',
+                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
                         context: 'new-tab',
                     },
                     label: 'Take Survey',
@@ -94,14 +92,12 @@ const UPDATE_NOTIFS: NotifDefinition[] = [
         },
         system: {
             title: 'Take a 2-5min survey',
-            message:
-                'Get 1 month free premium and a chance to win 12 months!',
+            message: 'Get 1 month free premium and a chance to win 12 months!',
             buttons: [
                 {
                     action: {
                         type: actionTypes.OPEN_URL,
-                        url:
-                            'https://worldbrain.typeform.com/to/PHt3uZ',
+                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
                         context: 'new-tab',
                     },
                     label: 'Take Survey',
@@ -111,11 +107,11 @@ const UPDATE_NOTIFS: NotifDefinition[] = [
     },
 ]
 
-interface EventNotifsDict {
+export interface EventNotifsDict {
     [name: string]: NotifDefinition
 }
 
-const EVENT_NOTIFS: EventNotifsDict = {
+export const EVENT_NOTIFS: EventNotifsDict = {
     db_error: {
         id: 'db_error',
         overview: {
@@ -269,6 +265,35 @@ const EVENT_NOTIFS: EventNotifsDict = {
             ],
         },
     },
+    incremental_backup_down: {
+        id: 'incremental_backup_down',
+        system: {
+            title: 'Auto Backup Down',
+            message: `Your Auto Backup hasn't ran in more than 24 hours.`,
+            // buttons: [
+            //     {
+            //         action: {
+            //             type: actionTypes.OPEN_URL,
+            //             url: 'https://worldbrain.io/pricing',
+            //             context: 'self',
+            //         },
+            //         label: 'Renew Subscription',
+            //     },
+            // ],
+        },
+        overview: {
+            title: 'Auto Backup Down',
+            message: `Your Auto Backup hasn't ran in more than 24 hours. Is the Memex Backup Helper running?`,
+            // buttons: [
+            //     {
+            //         action: {
+            //             type: actionTypes.OPEN_URL,
+            //             url: 'https://worldbrain.io/pricing',
+            //             context: 'self',
+            //         },
+            //         label: 'Renew Subscription',
+            //     },
+            // ],
+        },
+    },
 }
-
-export { releaseTime, EVENT_NOTIFS, UPDATE_NOTIFS }

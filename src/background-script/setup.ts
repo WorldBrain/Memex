@@ -171,9 +171,7 @@ export function createBackgroundModules(options: {
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
-            lastBackupStorage: new backupStorage.LocalLastBackupStorage({
-                key: 'lastBackup',
-            }),
+            backupInfoStorage: new backupStorage.LocalBackupInfoStorage(),
             notifications,
             checkAuthorizedForAutoBackup: async () =>
                 auth.remoteFunctions.isAuthorizedForFeature('backup'),

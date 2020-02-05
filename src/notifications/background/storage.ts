@@ -105,34 +105,4 @@ export default class NotificationStorage extends StorageModule {
     async fetchNotifById(id) {
         return this.operation('findNotificationById', { id })
     }
-
-    async dispatchNotification(notification, releaseTime) {
-        if (notification.overview) {
-            const newNotification = {
-                ...notification.overview,
-                id: notification.id,
-                deliveredTime: Date.now(),
-                sentTime: releaseTime,
-            }
-            // Store the notification so that it displays in the inbox
-            await this.storeNotification(newNotification)
-        }
-        if (notification.system) {
-            // Check if the system has to be notified or not
-            const url = notification.system.buttons[0].action.url
-            // console.log(notification.system.title, 'hello')
-            await createNotif(
-                {
-                    title: notification.system.title,
-                    message: notification.system.message,
-                    requireInteraction: false,
-                },
-                () => {
-                    return browser.tabs.create({
-                        url,
-                    })
-                },
-            )
-        }
-    }
 }
