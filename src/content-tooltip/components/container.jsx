@@ -13,16 +13,6 @@ import {
 
 import { conditionallyRemoveOnboardingSelectOption } from '../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
-// import { userSelectedText } from '../interactions'
-// import * as Mousetrap from 'mousetrap'
-import { removeHighlights } from '../../highlighting/ui/highlight-interactions'
-import {
-    // convertKeyboardEventToKeyString,
-    getHighlightsState,
-    // getKeyboardShortcutsState,
-} from '../utils'
-import { fetchAnnotationsAndHighlight } from '../../annotations'
-// import { toggleSidebarOverlay } from '../../sidebar-overlay/utils'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -38,105 +28,10 @@ class TooltipContainer extends React.Component {
         showTooltip: false,
         position: { x: 250, y: 200 },
         tooltipState: 'copied',
-        highlightsOn: false,
     }
 
     async componentDidMount() {
         this.props.onInit(this.showTooltip)
-
-        // Highlights state is coupled to whether or not the tooltip is enabled
-        const highlightsOn = await getHighlightsState()
-        this.setState(() => ({ highlightsOn }))
-
-        // const {
-        //     shortcutsEnabled,
-        //     ...shortcuts
-        // } = await getKeyboardShortcutsState()
-        //
-        // if (shortcutsEnabled) {
-        //     Mousetrap.bind(
-        //         Object.values(shortcuts).map(val => val.shortcut),
-        //         this.initHandleKeyboardShortcuts(shortcuts),
-        //     )
-        // }
-    }
-
-    /*
-initHandleKeyboardShortcuts = ({
-        addComment,
-        addTag,
-        addToCollection,
-        createAnnotation,
-        createHighlight,
-        createBookmark,
-        link,
-        toggleHighlights,
-        toggleSidebar,
-    }) => async e => {
-        if (!userSelectedText()) {
-            switch (convertKeyboardEventToKeyString(e)) {
-                case toggleSidebar.shortcut:
-                    toggleSidebar.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openSidebar: true,
-                        })
-                    break
-                case toggleHighlights.shortcut:
-                    toggleHighlights.enabled && this.toggleHighlightsAct()
-                    break
-                case addTag.shortcut:
-                    addTag.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openToTags: true,
-                        })
-                    break
-                case addToCollection.shortcut:
-                    addToCollection.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openToCollections: true,
-                        })
-                    break
-                case addComment.shortcut:
-                    addComment.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openToComment: true,
-                        })
-                    break
-                case createBookmark.shortcut:
-                    createBookmark.enabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                            openToBookmark: true,
-                        })
-                    break
-                default:
-            }
-        } else {
-            switch (convertKeyboardEventToKeyString(e)) {
-                case link.shortcut:
-                    link.enabled && (await this.createLink())
-                    break
-                case createHighlight.shortcut:
-                    createHighlight.enabled && (await this.createHighlight(e))
-                    break
-                case createAnnotation.shortcut:
-                    createAnnotation.enabled && (await this.createAnnotation(e))
-                    break
-                default:
-            }
-        }
-    }
-    */
-
-    toggleHighlightsAct = () => {
-        this.state.highlightsOn
-            ? removeHighlights()
-            : fetchAnnotationsAndHighlight()
-        this.setState({ highlightsOn: !this.state.highlightsOn })
     }
 
     showTooltip = position => {
@@ -184,7 +79,7 @@ initHandleKeyboardShortcuts = ({
     createAnnotation = async e => {
         e.preventDefault()
         e.stopPropagation()
-        await this.props.createAnnotation(document.getSelection())
+        await this.props.createAnnotation()
 
         // Remove onboarding select option notification if it's present
         await conditionallyRemoveOnboardingSelectOption(
@@ -204,7 +99,7 @@ initHandleKeyboardShortcuts = ({
         this.setState({
             tooltipState: 'running',
         })
-        await this.props.createHighlight(document.getSelection())
+        await this.props.createHighlight()
         this.setState({
             showTooltip: false,
             tooltipState: 'pristine',

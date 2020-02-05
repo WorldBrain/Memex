@@ -16,16 +16,25 @@ import { Annotation } from 'src/annotations/types'
 import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 import { extractAnchor } from 'src/highlighting/ui'
+import { highlightAnnotations } from 'src/annotations/index'
+import { annotations } from 'src/sidebar-overlay/sidebar/selectors'
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 export const appendAnnotations = createAction<Annotation[]>(
     'sidebar/appendAnnotations',
 )
+
 export const fetchAnnotationsForPageUrl: (
     isSocialPost?: boolean,
-) => Thunk = isSocialPost => async (dispatch, getState) => {
+    highlight?: boolean,
+) => Thunk = (isSocialPost: boolean, highlight: boolean) => async (
+    dispatch,
+    getState,
+) => {
     dispatch(setIsLoading(true))
     dispatch(resetResultsPage())
+
+    console.log('fetchAnnotationsForPageUrl')
 
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
@@ -41,6 +50,10 @@ export const fetchAnnotationsForPageUrl: (
         dispatch(setAnnotations(annotations))
         dispatch(nextResultsPage())
         dispatch(setResultsExhausted(annotations.length < RES_PAGE_SIZE))
+    }
+
+    if (highlight) {
+        highlightAnnotations(annotations)
     }
 
     dispatch(setIsLoading(false))
@@ -85,10 +98,10 @@ export const createAnnotation: (
     const annotationsManager = selectors.annotationsManager(state)
     const { url, title } = selectors.page(state)
 
-    anchor = anchor ? anchor : await extractAnchor(document.getSelection())
-    body = body ? body : anchor ? anchor.quote : ''
-    comment = comment ? comment : ''
-    tags = tags ? tags : []
+    anchor = anchor || (await extractAnchor(document.getSelection()))
+    body = body || anchor ? anchor.quote : ''
+    comment = comment || ''
+    tags = tags || []
 
     if (annotationsManager) {
         const annotation = await annotationsManager.createAnnotation({

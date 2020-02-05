@@ -4,7 +4,7 @@ import { userSelectedText } from 'src/content-tooltip/interactions'
 import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
 import {
     createAnnotationDraftInSidebar,
-    fetchAnnotationsAndHighlight,
+    highlightAnnotations,
 } from 'src/annotations'
 import { conditionallyRemoveOnboardingSelectOption } from 'src/content-tooltip/onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
@@ -76,7 +76,7 @@ const shortcutHandlers: HandleInterface = {
         }),
 
     toggleHighlights: () => {
-        highlightsOn ? removeHighlights() : fetchAnnotationsAndHighlight()
+        highlightsOn ? removeHighlights() : highlightAnnotations()
         highlightsOn = !highlightsOn
     },
 
