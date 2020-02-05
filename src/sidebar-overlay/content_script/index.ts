@@ -5,18 +5,6 @@ import { getSidebarState } from '../utils'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { runOnScriptShutdown } from 'src/content-tooltip/utils'
 
-// TODO (ch - annotations extra) - huh? If commenting this out doesn't break anything remove it
-// Maybe it's for when you've since disabled the sidebar/ribbon
-// const onKeydown = (
-//     e: KeyboardEvent,
-//     props: ContentScriptProps,
-// ) => {
-//     if (e.key !== 'm') {
-//         return
-//     }
-//     interactions.insertRibbon(props)
-// }
-
 const initRibbonAndSidebar = async ({
     annotationsManager,
     toolbarNotifications,
@@ -33,18 +21,9 @@ const initRibbonAndSidebar = async ({
     if (!isSidebarEnabled) {
         return
     }
-    // // TODO (ch - annotations extra) - huh?
-    // const onKeydownWrapper = (e: KeyboardEvent) => {
-    //     onKeydown(e, { annotationsManager, toolbarNotifications })
-    // }
 
     await interactiveLoader()
-    // TODO (ch - annotations extra) - huh?
-    // document.addEventListener('keydown', onKeydownWrapper, false)
-
     await bodyLoader()
-    // TODO (ch - annotations extra) - huh?
-    // document.removeEventListener('keydown', onKeydownWrapper, false)
 
     interactions.insertRibbon({
         annotationsManager,

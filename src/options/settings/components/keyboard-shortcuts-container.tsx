@@ -1,8 +1,11 @@
 import * as React from 'react'
 
 import { Checkbox } from '../../../common-ui/components'
-import * as utils from 'src/content-tooltip/utils'
-import { convertKeyboardEventToKeyString } from 'src/content-tooltip/utils'
+import {
+    convertKeyboardEventToKeyString,
+    getKeyboardShortcutsState,
+    setKeyboardShortcutsState,
+} from 'src/content-tooltip/utils'
 import { KeyboardShortcuts } from 'src/content-tooltip/types'
 import { shortcuts, ShortcutElData } from '../keyboard-shortcuts'
 
@@ -33,7 +36,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
     }
 
     async componentDidMount() {
-        const keyboardShortcutsState = await utils.getKeyboardShortcutsState()
+        const keyboardShortcutsState = await getKeyboardShortcutsState()
         this.setState(keyboardShortcutsState)
     }
 
@@ -49,7 +52,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         }
 
         this.setState(reducer, () =>
-            utils.setKeyboardShortcutsState({ ...this.state }),
+            setKeyboardShortcutsState({ ...this.state }),
         )
     }
 
@@ -62,7 +65,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         if (['Escape', 'Backspace'].includes(e.key)) {
             this.setState(
                 state => ({ [name]: { ...state[name], shortcut: '' } } as any),
-                () => utils.setKeyboardShortcutsState({ ...this.state }),
+                () => setKeyboardShortcutsState({ ...this.state }),
             )
             return
         }
@@ -75,7 +78,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
         this.setState(
             state => ({ [name]: { ...state[name], shortcut } } as any),
-            () => utils.setKeyboardShortcutsState({ ...this.state }),
+            () => setKeyboardShortcutsState({ ...this.state }),
         )
     }
 

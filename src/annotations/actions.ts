@@ -17,7 +17,6 @@ import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import { toggleSidebarOverlay } from 'src/sidebar-overlay/utils'
 import { extractAnchor } from 'src/highlighting/ui'
 import { highlightAnnotations } from 'src/annotations/index'
-import { annotations } from 'src/sidebar-overlay/sidebar/selectors'
 
 export const setAnnotations = createAction<Annotation[]>('setAnnotations')
 export const appendAnnotations = createAction<Annotation[]>(
@@ -34,8 +33,6 @@ export const fetchAnnotationsForPageUrl: (
     dispatch(setIsLoading(true))
     dispatch(resetResultsPage())
 
-    console.log('fetchAnnotationsForPageUrl')
-
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const { url } = selectors.page(state)
@@ -50,10 +47,10 @@ export const fetchAnnotationsForPageUrl: (
         dispatch(setAnnotations(annotations))
         dispatch(nextResultsPage())
         dispatch(setResultsExhausted(annotations.length < RES_PAGE_SIZE))
-    }
 
-    if (highlight) {
-        highlightAnnotations(annotations)
+        if (highlight) {
+            highlightAnnotations(annotations)
+        }
     }
 
     dispatch(setIsLoading(false))
