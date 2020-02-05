@@ -19,14 +19,14 @@ type HandleInterface = {
 
 export const initKeyboardShortcuts = async ({ store }) => {
     const { shortcutsEnabled, ...shortcuts } = await getKeyboardShortcutsState()
-
     if (shortcutsEnabled) {
         for (const [shortcutName, shortcutValue] of Object.entries(shortcuts)) {
-            shortcutValue.enabled &&
+            if (shortcutValue) {
                 Mousetrap.bind(
                     shortcutValue.shortcut,
                     handleShortcut(shortcutName, { store }),
                 )
+            }
         }
     }
 }
