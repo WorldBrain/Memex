@@ -1,21 +1,8 @@
 import { bodyLoader } from '../util/loader'
-import {
-    setupRPC,
-    insertTooltip,
-    userSelectedText,
-    removeTooltip,
-} from './interactions'
+import { setupRPC, insertTooltip, removeTooltip } from './interactions'
 import ToolbarNotifications from '../toolbar-notification/content_script'
-import {
-    conditionallyShowOnboardingNotifications,
-    conditionallyRemoveOnboardingSelectOption,
-} from './onboarding-interactions'
-import {
-    getTooltipState,
-    getKeyboardShortcutsState,
-    convertKeyboardEventToKeyString,
-    runOnScriptShutdown,
-} from './utils'
+import { conditionallyShowOnboardingNotifications } from './onboarding-interactions'
+import { runOnScriptShutdown } from './utils'
 
 export default async function init({
     toolbarNotifications,
