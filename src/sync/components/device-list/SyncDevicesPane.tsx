@@ -36,13 +36,9 @@ export class SyncDevicesPane extends Component<Props, State> {
 
     enableSync = () => {
         this.setState({ isTogglingSync: true })
-
-        this.setState({ isTogglingSync: false })
     }
 
     disableSync = () => {
-        this.setState({ isTogglingSync: true })
-
         this.setState({ isTogglingSync: false })
     }
 
