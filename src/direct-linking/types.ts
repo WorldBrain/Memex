@@ -1,4 +1,4 @@
-import { Anchor } from 'src/direct-linking/content_script/interactions'
+import { Anchor } from 'src/highlighting/types'
 
 export interface Annotation {
     pageTitle: string
@@ -35,12 +35,10 @@ export interface StoredAnnotationRequestMap {
     [tabId: string]: StoredAnnotationRequest
 }
 
-export type AnnotationSender = (
-    {
-        annotation,
-        tabId,
-    }: {
-        annotation: Annotation
-        tabId: number
-    },
-) => void
+export type AnnotationSender = ({
+    annotation,
+    tabId,
+}: {
+    annotation: Annotation
+    tabId: number
+}) => void

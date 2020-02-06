@@ -52,20 +52,15 @@ class PageResultItem extends PureComponent<Props> {
                     <div className={styles.firstlineContainer}>
                         <div className={styles.titleContainer}>
                             {this.props.favIcon ? (
-                                    <img
-                                        className={styles.favIcon}
-                                        src={this.props.favIcon}
-                                    />
-                                ):(
-                                    <div 
-                                        className={styles.noFavicon}
-                                    >
-                                    {''}
-                                    </div>
-
-                                )}
+                                <img
+                                    className={styles.favIcon}
+                                    src={this.props.favIcon}
+                                />
+                            ) : (
+                                <div className={styles.noFavicon}>{''}</div>
+                            )}
                             <div className={styles.title}>
-                                    {this.props.title}
+                                {this.props.title}
                             </div>
                         </div>
                         <div className={styles.actionItems}>
@@ -86,9 +81,8 @@ class PageResultItem extends PureComponent<Props> {
                             </div>
                         </div>
                     </div>
-                    {this.props.tags.length > 0 ? (this.props.tagHolder) : (null)}
+                    {this.props.tags.length > 0 ? this.props.tagHolder : null}
                 </div>
-
             </React.Fragment>
         )
     }

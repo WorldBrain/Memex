@@ -5,9 +5,12 @@ import cx from 'classnames'
 import { MapDispatchToProps } from 'src/sidebar-overlay/types'
 import * as actions from 'src/sidebar-overlay/sidebar/actions'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
-import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 
 import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
+import { deleteAnnotation, editAnnotation } from 'src/annotations/actions'
+import { Annotation } from 'src/annotations/types'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 
 const styles = require('./annotation-list.css')
 
@@ -21,6 +24,7 @@ interface OwnProps {
     pageUrl: string
     /** Opens the annotation sidebar with all of the annotations */
     openAnnotationSidebar: MouseEventHandler
+    highlighter: HighlightInteractionInterface
 }
 
 interface DispatchProps {
@@ -44,7 +48,7 @@ interface State {
 
 class AnnotationList extends Component<Props, State> {
     state = {
-        /* The intial value is set to the isExpandedOverride which is
+        /* The initial value is set to the isExpandedOverride which is
         fetched from localStorage. */
         isExpanded: this.props.isExpandedOverride,
         prevIsExpandedOverride: this.props.isExpandedOverride,
@@ -106,10 +110,15 @@ class AnnotationList extends Component<Props, State> {
         this.setState({
             annotations: newAnnotations,
         })
+        this.props.highlighter.removeTempHighlights()
     }
 
     private handleDeleteAnnotation = (url: string) => {
+        // Note this only get's called when editing the annotation on the dashboard results list, not the sidebar
+        // TODO: Why is this state not linked to the redux state?
+
         this.props.handleDeleteAnnotation(url)
+        this.props.highlighter.removeAnnotationHighlights(url)
 
         // Delete the annotation in the state too
         const { annotations } = this.state
@@ -207,12 +216,13 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps
 > = dispatch => ({
     handleEditAnnotation: (url, comment, tags) =>
-        dispatch(actions.editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
+        dispatch(editAnnotation(url, comment, tags)),
+    handleDeleteAnnotation: url => {
+        dispatch(deleteAnnotation(url))
+    },
     handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
 })
 
-export default connect(
-    null,
-    mapDispatchToProps,
-)(AnnotationList)
+export default withSidebarContext(
+    connect(null, mapDispatchToProps)(AnnotationList),
+)

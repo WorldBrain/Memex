@@ -148,15 +148,15 @@ export class SubscriptionOptionsChargebee extends React.Component<
                 </Helmet>
                 <div>
                     <HeaderBox>
-                    {this.state.subscribed === true ? (
-                        <PrimaryButton onClick={this.openPortal}>
-                            Manage Existing Subscription
-                        </PrimaryButton>
-                    ):(
-                     <PricingPlanTitle className={''}>
-                        Subscribe to Memex Pro
-                    </PricingPlanTitle>
-                    )}
+                        {this.state.subscribed === true ? (
+                            <PrimaryButton onClick={this.openPortal}>
+                                Manage Existing Subscription
+                            </PrimaryButton>
+                        ) : (
+                            <PricingPlanTitle className={''}>
+                                Subscribe to Memex Pro
+                            </PricingPlanTitle>
+                        )}
                     </HeaderBox>
                     <StyledLine />
                     <SubscriptionInnerOptions
@@ -187,7 +187,7 @@ const SubscribedSpan = styled.span`
 `
 
 const StyledLine = styled.div`
-    border: 0.5px solid #E0E0E0;
+    border: 0.5px solid #e0e0e0;
 `
 
 const HeaderBox = styled.div`

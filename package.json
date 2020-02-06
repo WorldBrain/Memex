@@ -67,7 +67,7 @@
         "lodash": "^4.17.4",
         "moment": "^2.18.1",
         "moment-timezone": "^0.5.14",
-        "mousetrap": "^1.6.2",
+        "mousetrap": "^1.6.5",
         "normalize-url": "^4.3.0",
         "object-path": "^0.11.4",
         "openpgp": "^4.6.2",

@@ -19,15 +19,15 @@ export class SyncNowOverlayPane extends Component<Props> {
     renderSyncNowButton() {
         if (this.props.isSyncing) {
             return (
-                <PrimaryAction 
-                    disabled={true} 
+                <PrimaryAction
+                    disabled={true}
                     onClick={() => false}
                     label={'Syncing....'}
                 />
             )
         } else {
             return (
-                <PrimaryAction 
+                <PrimaryAction
                     onClick={this.props.onClickSync}
                     label={this.props.label}
                 />
@@ -68,7 +68,7 @@ export class SyncNowOverlayPaneContainer extends Component<
         syncResults: [],
         syncError: null,
         isSyncing: false,
-        devices: []
+        devices: [],
     }
 
     refreshDevices = async () => {
@@ -119,7 +119,7 @@ export class SyncNowOverlayPaneContainer extends Component<
     render() {
         return (
             <div>
-                {(this.state.devices.length === 0 && this.state.syncAllowed) && (
+                {this.state.devices.length === 0 && this.state.syncAllowed && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
@@ -137,7 +137,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
 
-                {(this.state.syncEnabled && !this.state.syncAllowed) && (
+                {this.state.syncEnabled && !this.state.syncAllowed && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
@@ -154,7 +154,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                         />
                     </div>
                 )}
-                {(!this.state.syncEnabled && !this.state.syncAllowed) && (
+                {!this.state.syncEnabled && !this.state.syncAllowed && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
@@ -172,23 +172,25 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
 
-                {(this.state.syncAllowed && this.state.devices.length > 0 && !this.state.isSyncing) && (
-                    <div className={settingsStyle.buttonArea}>
-                        <div>
-                             <div className={settingsStyle.sectionTitle}>
-                                Sync Enabled
+                {this.state.syncAllowed &&
+                    this.state.devices.length > 0 &&
+                    !this.state.isSyncing && (
+                        <div className={settingsStyle.buttonArea}>
+                            <div>
+                                <div className={settingsStyle.sectionTitle}>
+                                    Sync Enabled
+                                </div>
+                                <div className={settingsStyle.infoText}>
+                                    Syncs every 5 min.
+                                </div>
                             </div>
-                            <div className={settingsStyle.infoText}>
-                                Syncs every 5 min.
-                            </div>
+                            <SyncNowOverlayPane
+                                onClickSync={this.handleOnClickSync}
+                                isSyncing={this.state.isSyncing}
+                                label={'Sync Now'}
+                            />
                         </div>
-                        <SyncNowOverlayPane
-                            onClickSync={this.handleOnClickSync}
-                            isSyncing={this.state.isSyncing}
-                            label={'Sync Now'}
-                        />
-                    </div>
-                )}
+                    )}
 
                 {this.state.isSyncing && (
                     <div className={settingsStyle.buttonArea}>

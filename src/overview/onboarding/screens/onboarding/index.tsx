@@ -119,11 +119,24 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 
-    private searchImage = () => <img src={'/img/searchImage.gif'} className={styles.searchGif} />
-    private annotationImage = () => <img src={'/img/annotationImage.gif'} className={styles.annotationGif} />
-    private keyboardImage = () => <img src={'/img/keyboardImage.gif'} className={styles.keyboardGif} />
-    private sidebarImage = () => <img src={'/img/sidebarImage.gif'} className={styles.sidebarGif} />
-    private mobileImg = () => <img src={'/img/mobileOnboarding.png'} className={styles.mobileImg} />
+    private searchImage = () => (
+        <img src={'/img/searchImage.gif'} className={styles.searchGif} />
+    )
+    private annotationImage = () => (
+        <img
+            src={'/img/annotationImage.gif'}
+            className={styles.annotationGif}
+        />
+    )
+    private keyboardImage = () => (
+        <img src={'/img/keyboardImage.gif'} className={styles.keyboardGif} />
+    )
+    private sidebarImage = () => (
+        <img src={'/img/sidebarImage.gif'} className={styles.sidebarGif} />
+    )
+    private mobileImg = () => (
+        <img src={'/img/mobileOnboarding.png'} className={styles.mobileImg} />
+    )
     private handleTooltipToggle = () => {
         const enabled = !this.state.isTooltipEnabled
         this.processEvent('setTooltipEnabled', { enabled })
@@ -247,7 +260,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Setup your Memex in less than 1 minute"
                         totalSteps={OnboardingScreen.TOTAL_STEPS}
                         renderButton={() => (
-                            <PrimaryAction 
+                            <PrimaryAction
                                 onClick={this.handleNextStepClick}
                                 label={'Get Started'}
                             />
@@ -267,7 +280,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Full-Text Search your Web History"
                         subtitleText="Find any website or PDF again without upfront organisation."
                         renderButton={() => (
-                            <PrimaryAction 
+                            <PrimaryAction
                                 onClick={this.handleNextStepClick}
                                 label={'Next'}
                             />
@@ -290,7 +303,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Web Annotations"
                         subtitleText="Add highlight and make notes on websites and (soon) PDFs."
                         renderButton={() => (
-                            <PrimaryAction 
+                            <PrimaryAction
                                 onClick={this.handleNextStepClick}
                                 label={'Next'}
                             />
@@ -315,7 +328,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Fast & Flexible Content Organisation"
                         subtitleText="Tag, favorite or sort content into collections"
                         renderButton={() => (
-                            <PrimaryAction 
+                            <PrimaryAction
                                 onClick={this.handleNextStepClick}
                                 label={'Next'}
                             />
@@ -341,7 +354,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Sync with your mobile Phone"
                         subtitleText="Save, organise & add notes on the go"
                         renderButton={() => (
-                            <PrimaryAction 
+                            <PrimaryAction
                                 onClick={this.handleNextStepClick}
                                 label={'Next'}
                             />
@@ -351,7 +364,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         currentStep={this.state.currentStep - 1}
                     >
                         <SecondaryAction
-                            onClick={()=> window.open(`${OPTIONS_URL}#/sync`)}
+                            onClick={() => window.open(`${OPTIONS_URL}#/sync`)}
                             label={'Setup Sync'}
                         />
                     </OnboardingStep>
@@ -363,7 +376,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         titleText="Keyboard Shortcuts for Everything"
                         subtitleText="Organise and annotate content without the Highlighter or Sidebar"
                         renderButton={() => (
-                            <PrimaryAction 
+                            <PrimaryAction
                                 onClick={this.props.navToOverview}
                                 label={'All done! Go to dashboard'}
                             />
@@ -373,7 +386,9 @@ export default class OnboardingScreen extends StatefulUIElement<
                         currentStep={this.state.currentStep - 1}
                     >
                         <SecondaryAction
-                            onClick={()=> window.open(`${OPTIONS_URL}#/settings`)}
+                            onClick={() =>
+                                window.open(`${OPTIONS_URL}#/settings`)
+                            }
                             label={'Change Shortcuts'}
                         />
                     </OnboardingStep>

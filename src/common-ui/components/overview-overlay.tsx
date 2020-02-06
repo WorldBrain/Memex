@@ -26,12 +26,12 @@ export default class Overlay extends PureComponent<Props, {}> {
             <div>
                 <div className={styles.box}>
                     <h3 className={styles.header}>{this.props.header}</h3>
-                    <WhiteSpacer10/>
+                    <WhiteSpacer10 />
                     <p className={styles.description}>
                         {this.props.description}
                     </p>
                     {this.props.children}
-                    <WhiteSpacer20/>
+                    <WhiteSpacer20 />
                     <div className={settingsStyle.buttonArea}>
                         <CancelAction
                             onClick={this.props.cancelButtonOnClick}

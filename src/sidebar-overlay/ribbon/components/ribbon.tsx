@@ -10,18 +10,19 @@ import {
     shortcuts,
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
-import {
-    highlightAnnotations,
-    removeHighlights,
-} from '../../content_script/highlight-interactions'
 import * as utils from 'src/content-tooltip/utils'
 import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { highlightAnnotations } from 'src/annotations'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 const styles = require('./ribbon.css')
 
 export interface Props {
+    onInit: () => void
     isExpanded: boolean
     isRibbonEnabled: boolean
+    areHighlightsEnabled: boolean
     isTooltipEnabled: boolean
     isSidebarOpen: boolean
     isPaused: boolean
@@ -40,6 +41,7 @@ export interface Props {
     closeSidebar: () => void
     handleRibbonToggle: () => void
     handleTooltipToggle: () => void
+    handleHighlightsToggle: () => void
     handleRemoveRibbon: () => void
     handleBookmarkToggle: () => void
     handlePauseToggle: () => void
@@ -49,6 +51,7 @@ export interface Props {
     setShowCollectionsPicker: (value: boolean) => void
     setShowSearchBox: (value: boolean) => void
     setSearchValue: (value: string) => void
+    highlighter: HighlightInteractionInterface
 }
 
 interface State {
@@ -82,6 +85,12 @@ class Ribbon extends Component<Props, State> {
     }
 
     async componentDidMount() {
+        await this.props.onInit()
+
+        if (this.props.areHighlightsEnabled) {
+            highlightAnnotations()
+        }
+
         this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
         this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
@@ -115,22 +124,14 @@ class Ribbon extends Component<Props, State> {
         this.props.setShowCommentBox(!this.props.showCommentBox)
     }
 
-    private toggleHighlights = () => {
-        if (this.props.isTooltipEnabled) {
-            removeHighlights()
+    private toggleHighlights = async () => {
+        if (this.props.areHighlightsEnabled) {
+            this.props.highlighter.removeHighlights()
         } else {
-            this.fetchAndHighlightAnnotations()
+            highlightAnnotations()
         }
 
-        this.props.handleTooltipToggle()
-    }
-
-    private fetchAndHighlightAnnotations = async () => {
-        const annotations = await remoteFunction('getAllAnnotationsByUrl')({
-            url: window.location.href,
-        })
-        const highlights = annotations.filter(annotation => annotation.selector)
-        highlightAnnotations(highlights, this.props.openSidebar)
+        await this.props.handleHighlightsToggle()
     }
 
     private getTooltipText(name: string): string {
@@ -213,13 +214,18 @@ class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                 </ButtonTooltip>
-                                 <ButtonTooltip
+                                <ButtonTooltip
                                     tooltipText="Open Memex Dashboard"
                                     position="left"
-                                    >
+                                >
                                     <button
-                                        onClick={() => this.openOverviewTabRPC()}
-                                        className={cx(styles.button, styles.logo)}
+                                        onClick={() =>
+                                            this.openOverviewTabRPC()
+                                        }
+                                        className={cx(
+                                            styles.button,
+                                            styles.logo,
+                                        )}
                                     />
                                 </ButtonTooltip>
 
@@ -292,7 +298,7 @@ class Ribbon extends Component<Props, State> {
                                     </ButtonTooltip>
                                 </div>
                             </div>
-                            <div className={styles.horizontalLine}/>
+                            <div className={styles.horizontalLine} />
                             <div className={styles.pageActions}>
                                 <ButtonTooltip
                                     tooltipText={this.getTooltipText(
@@ -412,7 +418,7 @@ class Ribbon extends Component<Props, State> {
                                     </ButtonTooltip>
                                 </div>
                             </div>
-                            <div className={styles.horizontalLine}/>
+                            <div className={styles.horizontalLine} />
                             <div className={styles.settingsActions}>
                                 <ButtonTooltip
                                     tooltipText="Disable this Toolbar (You can still use keyboard shortcuts)"
@@ -441,6 +447,25 @@ class Ribbon extends Component<Props, State> {
                                 >
                                     <button
                                         onClick={this.toggleHighlights}
+                                        className={cx(
+                                            styles.button,
+                                            styles.ribbonIcon,
+                                            {
+                                                [styles.highlightsOn]: this
+                                                    .props.areHighlightsEnabled,
+                                                [styles.highlightsOff]: !this
+                                                    .props.areHighlightsEnabled,
+                                            },
+                                        )}
+                                    />
+                                </ButtonTooltip>
+
+                                <ButtonTooltip
+                                    tooltipText="Toggle tooltip"
+                                    position="left"
+                                >
+                                    <button
+                                        onClick={this.props.handleTooltipToggle}
                                         className={cx(
                                             styles.button,
                                             styles.ribbonIcon,
@@ -494,4 +519,4 @@ class Ribbon extends Component<Props, State> {
     }
 }
 
-export default Ribbon
+export default withSidebarContext(Ribbon)

@@ -9,9 +9,7 @@ export interface Props {
 
 class LoadingIndicator extends PureComponent<Props> {
     render() {
-        return (
-            <div className={styles.loader} />
-        )
+        return <div className={styles.loader} />
     }
 }
 

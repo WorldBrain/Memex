@@ -26,13 +26,12 @@ export default class SyncDeviceItem extends Component<Props> {
         const device = this.props.device
         return (
             <DeviceRow>
-                <ButtonTooltip
-                            position="bottom"
-                            tooltipText={device.deviceId}
-                        >
-                <Item>{device.devicePlatform}</Item>
+                <ButtonTooltip position="bottom" tooltipText={device.deviceId}>
+                    <Item>{device.devicePlatform}</Item>
                 </ButtonTooltip>
-                <MiddleItem>Time Added: {formatTime(device.createdWhen, true)}</MiddleItem>
+                <MiddleItem>
+                    Time Added: {formatTime(device.createdWhen, true)}
+                </MiddleItem>
                 <RemoveButton onClick={this.handleRemoveDevice}>
                     Remove
                 </RemoveButton>
@@ -43,7 +42,7 @@ export default class SyncDeviceItem extends Component<Props> {
 
 const DeviceRow = styled.div`
     display: flex;
-    align-items: center
+    align-items: center;
 `
 
 const Item = styled.div`
@@ -55,7 +54,7 @@ const Item = styled.div`
 `
 const MiddleItem = styled.div`
     padding: 10px;
-    flex: 3
+    flex: 3;
 `
 
 const RemoveButton = styled.div`

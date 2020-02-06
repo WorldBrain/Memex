@@ -97,7 +97,7 @@ export default class RestoreWhere extends React.Component<Props> {
                     }}
                 />
                 <div className={settingsStyle.buttonArea}>
-                    <div/>
+                    <div />
                     <PrimaryAction
                         disabled={!this.state.valid}
                         onClick={() =>

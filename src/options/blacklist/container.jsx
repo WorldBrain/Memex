@@ -142,10 +142,11 @@ class BlacklistContainer extends Component {
                     </div>
                     {this.renderError()}
                     {this.renderBlacklistInputRow()}
-                     <div className={settingsStyle.infoTextSmall}>
-                        You can use <a href="https://regexr.com/">RegExp's</a> too!
+                    <div className={settingsStyle.infoTextSmall}>
+                        You can use <a href="https://regexr.com/">RegExp's</a>{' '}
+                        too!
                     </div>
-                    <div className={settingsStyle.whiteSpacer30}/>
+                    <div className={settingsStyle.whiteSpacer30} />
                     {this.renderAddBlacklistSites()}
                     <BlacklistTable>
                         {this.renderBlacklistRows()}
@@ -188,7 +189,4 @@ const mapDispatchToProps = dispatch => ({
         dispatch(actions.setSiteInputValue({ siteInputValue })),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(BlacklistContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)

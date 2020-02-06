@@ -12,22 +12,20 @@ import styles from './AdvSettings.css'
 
 const AdvSettings = ({ onPrevFailedToggle, prevFailedValue, ...props }) => (
     <section className={styles.container}>
-        <div className={settingsStyle.sectionTitle}>
-            Settings
-        </div>
+        <div className={settingsStyle.sectionTitle}>Settings</div>
         <div className={styles.advFunctionality}>
             <ul className={styles.settingsList}>
                 {(props.allowTypes[TYPE.OTHERS] === SERVICES.POCKET ||
                     props.allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE) && (
                     <li className={styles.settingsListItem}>
                         <Checkbox
-                                id="star-imports"
-                                handleChange={props.onBookmarImportsToggle}
-                                isChecked={props.bookmarkImports}
+                            id="star-imports"
+                            handleChange={props.onBookmarImportsToggle}
+                            isChecked={props.bookmarkImports}
                         >
                             <label htmlFor="star-imports">
                                 'Star' all imported urls
-                             </label>
+                            </label>
                         </Checkbox>
                     </li>
                 )}

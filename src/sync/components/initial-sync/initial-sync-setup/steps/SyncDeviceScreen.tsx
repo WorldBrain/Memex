@@ -47,8 +47,11 @@ export const SyncDeviceScreen = ({
                     <div className={styles.progressBar}>
                         {!error ? (
                             <div className={styles.progressBox}>
-                                <WhiteSpacer20/>  
-                                <CancelAction label={'Cancel'} onClick={() => false} />
+                                <WhiteSpacer20 />
+                                <CancelAction
+                                    label={'Cancel'}
+                                    onClick={() => false}
+                                />
                                 {progressPct === undefined ? (
                                     <LoadingIndicator />
                                 ) : (
@@ -63,8 +66,11 @@ export const SyncDeviceScreen = ({
                         ) : (
                             <div className={styles.progressBox}>
                                 <Warning>⚠️ Something went wrong</Warning>
-                                <PrimaryAction label={'Retry Syncing'} onClick={() => false} />
-                                <WhiteSpacer30/>                                
+                                <PrimaryAction
+                                    label={'Retry Syncing'}
+                                    onClick={() => false}
+                                />
+                                <WhiteSpacer30 />
                             </div>
                         )}
                     </div>

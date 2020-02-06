@@ -1,9 +1,9 @@
 import { UIElement } from 'ui-logic-react'
 import { UILogic } from 'ui-logic-core'
 
-import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { PageUrlsByDay } from 'src/search/background/types'
 import { SocialPage } from 'src/social-integration/types'
+import { Annotation } from 'src/annotations/types'
 
 export interface Result extends SocialPage {
     url: string

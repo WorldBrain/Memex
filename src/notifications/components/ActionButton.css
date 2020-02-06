@@ -1,12 +1,12 @@
 .actionButton {
-	padding: 10px 20px;
+    padding: 10px 20px;
     background: #5cd9a6;
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;
     font-size: 14px;
     color: #545454;
- }
+}
 
 .searchActionButton {
     border: 0;

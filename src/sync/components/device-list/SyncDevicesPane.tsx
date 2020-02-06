@@ -244,14 +244,13 @@ class SyncDevicesPaneContainer extends React.Component<
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
                         Sync your mobile phone
-                        <span
-                                className={styles.labelFree}
-                            >
-                                ⭐️ Pro Feature
+                        <span className={styles.labelFree}>
+                            ⭐️ Pro Feature
                         </span>
                     </div>
                     <div className={settingsStyle.infoText}>
-                        Use an end2end encrypted connection to keep your devices in sync.
+                        Use an end2end encrypted connection to keep your devices
+                        in sync.
                     </div>
                     <SyncDevicesPane
                         devices={this.state.devices}
@@ -269,30 +268,31 @@ class SyncDevicesPaneContainer extends React.Component<
                     />
                 </div>
                 <div className={settingsStyle.section}>
-                        <div className={styles.mobileSection}>
-                            <div className={styles.contentSection}>
-                                <div className={settingsStyle.sectionTitle}>
-                                    Download Memex GO
-                                </div>
-                                <div className={settingsStyle.infoText}>
-                                    Our mobile app to save and organise websites on the Go
-                                </div>
-                                <div>
-                                    <img
-                                        className={styles.downloadImg}
-                                        src={'img/appStore.png'}
-                                    />
-                                    <img
-                                        className={styles.downloadImg}
-                                        src={'img/googlePlay.png'}
-                                    />
-                                </div>
+                    <div className={styles.mobileSection}>
+                        <div className={styles.contentSection}>
+                            <div className={settingsStyle.sectionTitle}>
+                                Download Memex GO
                             </div>
-                            <img 
-                                src={'img/mobilehalf.png'}
-                                className={styles.mobileImg}
-                            />
+                            <div className={settingsStyle.infoText}>
+                                Our mobile app to save and organise websites on
+                                the Go
+                            </div>
+                            <div>
+                                <img
+                                    className={styles.downloadImg}
+                                    src={'img/appStore.png'}
+                                />
+                                <img
+                                    className={styles.downloadImg}
+                                    src={'img/googlePlay.png'}
+                                />
+                            </div>
                         </div>
+                        <img
+                            src={'img/mobilehalf.png'}
+                            className={styles.mobileImg}
+                        />
+                    </div>
                 </div>
             </div>
         )

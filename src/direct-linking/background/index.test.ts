@@ -438,11 +438,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         createAnnotationStep,
                         {
                             execute: async ({ setup }) => {
-                                await directLinking(
-                                    setup,
-                                ).toggleAnnotBookmark({} as any, {
-                                    url: annotUrl,
-                                })
+                                await directLinking(setup).toggleAnnotBookmark(
+                                    {} as any,
+                                    {
+                                        url: annotUrl,
+                                    },
+                                )
                             },
                             expectedStorageChanges: {
                                 annotBookmarks: (): StorageCollectionDiff => ({
@@ -530,11 +531,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         createAnnotationStep,
                         {
                             execute: async ({ setup }) => {
-                                await directLinking(
-                                    setup,
-                                ).toggleAnnotBookmark({} as any, {
-                                    url: annotUrl,
-                                })
+                                await directLinking(setup).toggleAnnotBookmark(
+                                    {} as any,
+                                    {
+                                        url: annotUrl,
+                                    },
+                                )
                                 await directLinking(setup).addTagForAnnotation(
                                     {},
                                     { tag: DATA.TAG_1, url: annotUrl },
@@ -542,12 +544,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 listId = await customLists(
                                     setup,
                                 ).createCustomList({ name: 'test' })
-                                await directLinking(
-                                    setup,
-                                ).insertAnnotToList({} as any, {
-                                    listId,
-                                    url: annotUrl,
-                                })
+                                await directLinking(setup).insertAnnotToList(
+                                    {} as any,
+                                    {
+                                        listId,
+                                        url: annotUrl,
+                                    },
+                                )
                             },
                             expectedStorageChanges: {
                                 annotBookmarks: (): StorageCollectionDiff => ({

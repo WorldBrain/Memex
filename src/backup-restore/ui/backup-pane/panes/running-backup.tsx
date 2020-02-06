@@ -32,11 +32,7 @@ export default function RunningBackup({ onFinish }: { onFinish: () => void }) {
 }
 
 function renderHeader() {
-    return (
-        <div className={settingsStyle.sectionTitle}>
-            Backup in Progress
-        </div>
-    )
+    return <div className={settingsStyle.sectionTitle}>Backup in Progress</div>
 }
 
 function renderFailMessage(errorId: string) {
@@ -46,7 +42,8 @@ function renderFailMessage(errorId: string) {
                 ⚠️ Backup Failed! ⚠️
             </div>
             <div className={settingsStyle.infoText}>
-                Please check your internet connectivity. If you still encounter issues please{' '}
+                Please check your internet connectivity. If you still encounter
+                issues please{' '}
                 <a href="mailto:support@worldbrain.io">contact support</a>.
             </div>
         </React.Fragment>
@@ -69,7 +66,7 @@ function renderSuccessMessage() {
             <div className={settingsStyle.sectionTitle}>
                 Backup Successful! 🎉
             </div>
-            <WhiteSpacer30/>
+            <WhiteSpacer30 />
         </React.Fragment>
     )
 }

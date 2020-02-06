@@ -12,9 +12,7 @@ import {
     fetchBackupPath,
     changeBackupPath,
 } from '../../utils'
-import {
-    WhiteSpacer30,
-} from 'src/common-ui/components/design-library/typography'
+import { WhiteSpacer30 } from 'src/common-ui/components/design-library/typography'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
@@ -165,9 +163,9 @@ export default class SetupLocation extends React.Component {
                         }
                     }}
                 />
-                <WhiteSpacer30/>
+                <WhiteSpacer30 />
                 <div className={settingsStyle.buttonArea}>
-                    <div/>
+                    <div />
                     <PrimaryAction
                         disabled={
                             !this.state.provider ||

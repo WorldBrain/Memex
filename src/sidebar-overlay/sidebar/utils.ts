@@ -1,8 +1,8 @@
 import { browser } from 'webextension-polyfill-ts'
 
 import { remoteFunction, runInTab } from 'src/util/webextensionRPC'
-import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
+import { Annotation } from 'src/annotations/types'
 
 /**
  * Defines how to go to an annotation from the `overview` sidebar.

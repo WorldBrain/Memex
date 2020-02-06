@@ -30,11 +30,9 @@ class IndexingPrefs extends React.PureComponent<Props> {
     render() {
         return (
             <div className={styles.section}>
-                    <div className={styles.sectionTitle}>
-                        Indexing Preferences
-                    </div>
+                <div className={styles.sectionTitle}>Indexing Preferences</div>
                 <h3 className={styles.infoText}>
-                    Define which pages you would like to search. 
+                    Define which pages you would like to search.
                 </h3>
                 <Checkbox
                     id="index-stubs"

@@ -35,12 +35,13 @@ class Tooltip extends React.Component {
 
     render() {
         return (
-           <div className={styles.section}>
+            <div className={styles.section}>
                 <div className={styles.sectionTitle}>
                     Highlights & Annotations
                 </div>
                 <div className={styles.infoText}>
-                    Disable the Highlighting tooltip. You can use keyboard shortcuts instead (see below). 
+                    Disable the Highlighting tooltip. You can use keyboard
+                    shortcuts instead (see below).
                 </div>
                 <Checkbox
                     id="show-memex-link"

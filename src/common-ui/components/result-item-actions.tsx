@@ -54,16 +54,14 @@ class ResultItemActions extends PureComponent<Props> {
                     >
                         <button
                             className={cx(styles.button, styles.comment, {
-                                [styles.commentActive]: this.props.annotsCount > 0,
+                                [styles.commentActive]:
+                                    this.props.annotsCount > 0,
                             })}
                             onClick={this.props.onCommentBtnClick}
                             title="Add/View Commments & Annotations"
                         />
                     </ButtonTooltip>
-                    <ButtonTooltip
-                        position="bottom"
-                        tooltipText="Bookmark"
-                    >
+                    <ButtonTooltip position="bottom" tooltipText="Bookmark">
                         <button
                             disabled={this.props.isDeleting}
                             className={this.bookmarkClass}

@@ -1,7 +1,10 @@
 import React from 'react'
 import styled from 'styled-components'
 import OverlayMenu from 'src/common-ui/components/design-library/overlay-menu/OverlayMenu'
-import { TypographyHeadingSmall, TypographyHeadingBig } from 'src/common-ui/components/design-library/typography'
+import {
+    TypographyHeadingSmall,
+    TypographyHeadingBig,
+} from 'src/common-ui/components/design-library/typography'
 import { auth } from 'src/util/remote-functions-background'
 import {
     UserProps,
@@ -33,9 +36,7 @@ const AccountMenu = (props: UserProps) => {
             <BottomLeft>
                 <ButtonSideMenu onClick={handleLoginClick}>
                     <MemexLogo />
-                    <TypographyHeadingBig>
-                        Login to Memex
-                    </TypographyHeadingBig>
+                    <TypographyHeadingBig>Login to Memex</TypographyHeadingBig>
                 </ButtonSideMenu>
             </BottomLeft>
         )
@@ -47,9 +48,7 @@ const AccountMenu = (props: UserProps) => {
                 menuHeader={
                     <ButtonSideMenu>
                         <MemexLogo />
-                        <TypographyHeadingBig>
-                            My Account
-                        </TypographyHeadingBig>
+                        <TypographyHeadingBig>My Account</TypographyHeadingBig>
                     </ButtonSideMenu>
                 }
                 menuItems={[

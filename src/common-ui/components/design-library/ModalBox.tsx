@@ -27,7 +27,7 @@ const Header = styled.div`
     flex: 1;
 `
 const StyledLine = styled.div`
-    border: 0.5px solid #E0E0E0;
+    border: 0.5px solid #e0e0e0;
 `
 const Actions = styled.div`
     display: flex;
@@ -52,7 +52,7 @@ export const ModalBox = ({
     <StyledModalBox>
         <Header>
             <HeaderText>{header}</HeaderText>
-        <StyledLine />
+            <StyledLine />
         </Header>
         <Body>{children}</Body>
         <Actions>{actions}</Actions>
