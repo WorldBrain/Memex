@@ -3,9 +3,17 @@ import { Props } from './result-item'
 import cx from 'classnames'
 import ButtonTooltip from './button-tooltip'
 import SemiCircularRibbon from './semi-circular-ribbon'
+import { browser } from 'webextension-polyfill-ts'
 
 
 const styles = require('./result-item.css')
+const tagEmpty = browser.extension.getURL('/img/tag_empty_results.svg')
+const tagFull = browser.extension.getURL('/img/tag_full_results.svg')
+const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
+const heartFull = browser.extension.getURL('/img/star_full.svg')
+const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
+const commentFull = browser.extension.getURL('/img/comment_full.svg')
+const deleteItem = browser.extension.getURL('/img/trash.svg')
 
 class ResultItemActions extends PureComponent<Props> {
     get bookmarkClass() {
@@ -37,37 +45,70 @@ class ResultItemActions extends PureComponent<Props> {
                             className={styles.button}
                             onClick={this.props.onTrashBtnClick}
                         >
-                            <img src="/img/trash.svg" className={cx(styles.img, styles.trash)}
+                            <img src={deleteItem} className={cx(styles.img, styles.trash)}
                             />
                         </div>
                     </ButtonTooltip>
-                     <ButtonTooltip
-                        position="bottom"
-                        tooltipText="Add/View Tags"
-                    >
-                        <div
-                            className={styles.button}
-                            onClick={this.props.onTagBtnClick}
-                            ref={this.props.setTagButtonRef}
-                        >
-                            <img src="/img/tag.svg" className={cx(styles.img, styles.tag)}
-                            />
-                        </div>
-                    </ButtonTooltip>
+                    {!this.props.tagManager ? (
+                        this.props.tags.length > 0 ? (
+                            <ButtonTooltip
+                                position="bottom"
+                                tooltipText="Add/View Tags"
+                            >
+                                <div
+                                    className={styles.permanentButton}
+                                >
+                                    <img src={tagFull} onClick={this.props.onTagBtnClick}
+                                    ref={this.props.setTagButtonRef} className={cx(styles.img, styles.tag)}
+                                    />
+                                </div>
+                            </ButtonTooltip> 
+                            ):(
+                                 <ButtonTooltip
+                                    position="bottom"
+                                    tooltipText="Add/View Tags"
+                                >
+                                    <div
+                                        className={styles.button}
+                                    >
+                                        <img src={tagEmpty} onClick={this.props.onTagBtnClick}
+                                        ref={this.props.setTagButtonRef} className={cx(styles.img, styles.tag)}
+                                        />
+                                    </div>
+                                </ButtonTooltip> 
+                            )) : (                   
+                            <ButtonTooltip
+                                position="bottom"
+                                tooltipText="Add/View Tags"
+                            >
+                                <div
+                                    className={styles.permanentButton}
+                                >
+                                    <img src={tagFull} onClick={this.props.onTagBtnClick}
+                                    ref={this.props.setTagButtonRef} className={cx(styles.img, styles.commentActive)}
+                                    />
+                                </div>
+                            </ButtonTooltip>
+                        )}
                     <ButtonTooltip
                         position="bottom"
                         tooltipText="Add/View Commments & Annotations"
                     >
+                        {this.props.annotsCount > 0 ? (
                         <div
                             className={styles.permanentButton}
                             onClick={this.props.onCommentBtnClick}
                         >
-                            {this.props.annotsCount < 1 ? (
-                                    <img src="/img/comment_empty.svg" className={cx(styles.img, styles.comment)}/>
-                                ):(
-                                    <img src="/img/comment_full.svg" className={cx(styles.img, styles.commentActive)}/>
-                            )}
+                            <img src={commentFull} className={cx(styles.img, styles.commentActive)}/>
                         </div>
+                        ):(
+                           <div
+                            className={styles.button}
+                            onClick={this.props.onCommentBtnClick}
+                            >
+                               <img src={commentEmpty} className={cx(styles.img, styles.comment)}/>
+                           </div>
+                        )}
                     </ButtonTooltip>
                     {this.props.hasBookmark ? (
                     <ButtonTooltip
@@ -78,7 +119,7 @@ class ResultItemActions extends PureComponent<Props> {
                             className={styles.permanentButton}
                             onClick={this.props.onToggleBookmarkClick}
                         >        
-                            <img src="/img/star_full.svg" className={cx(styles.img, styles.bookmark)}/>
+                            <img src={heartFull} className={cx(styles.img, styles.bookmark)}/>
                         </div>
                     </ButtonTooltip>) :
                     (
@@ -90,7 +131,7 @@ class ResultItemActions extends PureComponent<Props> {
                             className={styles.button}
                             onClick={this.props.onToggleBookmarkClick}
                         >        
-                            <img src="/img/star_empty.svg" className={cx(styles.img, styles.notbookmark)}/>  
+                            <img src={heartEmpty} className={cx(styles.img, styles.notbookmark)}/>  
                             </div>
                         </ButtonTooltip>
                     )}

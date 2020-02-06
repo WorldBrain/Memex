@@ -1,7 +1,7 @@
 .parentExpanded {
     padding-left: 15px;
     border-left: 4px solid #5cd9a6; /* MAN - Manual Adjustment Needed */
-    margin-left: 25px;
+    margin-left: 15px;
     margin-bottom: 35px;
     display: flex;
     flex-direction: column;

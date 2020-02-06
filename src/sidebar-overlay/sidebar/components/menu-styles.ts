@@ -30,11 +30,15 @@ const baseStyles = {
         display: 'block',
         overflowY: 'scroll',
         flex: '1',
+        overflowX: 'hidden',
+        width: '100%,'
     },
     bmItemList: {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        width: '100%',
+        overflow: 'hidden',
     },
 }
 

@@ -182,7 +182,7 @@ class Ribbon extends Component<Props, State> {
                                         tooltipText={'Close Toolbar Once.'}
                                         position="left"
                                     >
-                                        <button
+                                        <div
                                             className={cx(
                                                 styles.button,
                                                 styles.cancel,
@@ -199,7 +199,7 @@ class Ribbon extends Component<Props, State> {
                                     )}
                                     position="left"
                                 >
-                                    <button
+                                    <div
                                         className={cx(styles.button, {
                                             [styles.arrow]: !this.props
                                                 .isSidebarOpen,
@@ -217,20 +217,18 @@ class Ribbon extends Component<Props, State> {
                                     tooltipText="Open Memex Dashboard"
                                     position="left"
                                     >
-                                    <button
+                                    <div
                                         onClick={() => this.openOverviewTabRPC()}
                                         className={cx(styles.button, styles.logo)}
                                     />
                                 </ButtonTooltip>
-
-                                <div>
                                     <ButtonTooltip
                                         tooltipText={
                                             'Search Memex via Dashboard'
                                         }
                                         position="left"
                                     >
-                                        <button
+                                        <div
                                             className={cx(
                                                 styles.button,
                                                 styles.search,
@@ -290,7 +288,6 @@ class Ribbon extends Component<Props, State> {
                                             </Tooltip>
                                         )}
                                     </ButtonTooltip>
-                                </div>
                             </div>
                             <div className={styles.horizontalLine}/>
                             <div className={styles.pageActions}>
@@ -300,7 +297,7 @@ class Ribbon extends Component<Props, State> {
                                     )}
                                     position="left"
                                 >
-                                    <button
+                                    <div
                                         className={cx(styles.button, {
                                             [styles.bookmark]: this.props
                                                 .isBookmarked,
@@ -312,14 +309,13 @@ class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                 </ButtonTooltip>
-                                <div>
                                     <ButtonTooltip
                                         tooltipText={this.getTooltipText(
                                             'addComment',
                                         )}
                                         position="left"
                                     >
-                                        <button
+                                        <div
                                             className={cx(
                                                 styles.button,
                                                 styles.comments,
@@ -355,15 +351,13 @@ class Ribbon extends Component<Props, State> {
                                             </Tooltip>
                                         )}
                                     </ButtonTooltip>
-                                </div>
-                                <div>
                                     <ButtonTooltip
                                         tooltipText={this.getTooltipText(
                                             'addTag',
                                         )}
                                         position="left"
                                     >
-                                        <button
+                                        <div
                                             className={cx(
                                                 styles.button,
                                                 styles.tag,
@@ -380,16 +374,14 @@ class Ribbon extends Component<Props, State> {
                                             </Tooltip>
                                         )}
                                     </ButtonTooltip>
-                                </div>
 
-                                <div>
                                     <ButtonTooltip
                                         tooltipText={this.getTooltipText(
                                             'addToCollection',
                                         )}
                                         position="left"
                                     >
-                                        <button
+                                        <div
                                             className={cx(
                                                 styles.button,
                                                 styles.collection,
@@ -410,7 +402,6 @@ class Ribbon extends Component<Props, State> {
                                             </Tooltip>
                                         )}
                                     </ButtonTooltip>
-                                </div>
                             </div>
                             <div className={styles.horizontalLine}/>
                             <div className={styles.settingsActions}>
@@ -418,7 +409,7 @@ class Ribbon extends Component<Props, State> {
                                     tooltipText="Disable this Toolbar (You can still use keyboard shortcuts)"
                                     position="left"
                                 >
-                                    <button
+                                    <div
                                         className={cx(
                                             styles.button,
                                             styles.ribbonIcon,
@@ -439,7 +430,7 @@ class Ribbon extends Component<Props, State> {
                                     tooltipText="Toggle highlights"
                                     position="left"
                                 >
-                                    <button
+                                     <div
                                         onClick={this.toggleHighlights}
                                         className={cx(
                                             styles.button,
@@ -458,7 +449,7 @@ class Ribbon extends Component<Props, State> {
                                     tooltipText="Pause indexing"
                                     position="left"
                                 >
-                                    <button
+                                    <div
                                         className={cx(styles.button, {
                                             [styles.playIcon]: this.props
                                                 .isPaused,
@@ -475,7 +466,7 @@ class Ribbon extends Component<Props, State> {
                                     tooltipText="Settings"
                                     position="left"
                                 >
-                                    <button
+                                    <div
                                         className={cx(
                                             styles.button,
                                             styles.settings,

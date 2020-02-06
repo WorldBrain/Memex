@@ -55,7 +55,12 @@
 
     & .removeSidebar {
         visibility: hidden;
+        display: flex;
     }
+}
+
+.removeSidebar {
+    display: flex;
 }
 
 .innerRibbonExpanded {

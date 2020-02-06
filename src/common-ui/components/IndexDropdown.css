@@ -156,7 +156,7 @@
 
 .tagDivFromOverview {
     composes: toolTips from 'src/common-ui/elements.css';
-    margin-top: -10px;
+    margin-top: 45px;
     position: absolute;
     width: 300px;
     z-index: 1;

@@ -51,6 +51,7 @@ class PageResultItem extends PureComponent<Props> {
                 >
                     <div className={styles.firstlineContainer}>
                         <div className={styles.titleContainer}>
+                            <div className={styles.favIconContainer}>
                             {this.props.favIcon ? (
                                     <img
                                         className={styles.favIcon}
@@ -64,6 +65,7 @@ class PageResultItem extends PureComponent<Props> {
                                     </div>
 
                                 )}
+                            </div>
                             <div title={this.props.title} className={styles.title}>
                                     {this.props.title}
                             </div>
