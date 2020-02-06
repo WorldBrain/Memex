@@ -15,6 +15,28 @@ describe('Sync logging preprocessor', () => {
         })
     })
 
+    it('should filter out terms fields from createObject operations', async () => {
+        expect(
+            await filterBlobsFromSyncLog({
+                operation: [
+                    'createObject',
+                    'pages',
+                    {
+                        url: 'http://foo.com',
+                        text: 'one two three',
+                        terms: ['one', 'two', 'three'],
+                    },
+                ],
+            }),
+        ).toEqual({
+            operation: [
+                'createObject',
+                'pages',
+                { url: 'http://foo.com', text: 'one two three' },
+            ],
+        })
+    })
+
     it('should filter out screenshots from updateObjects operations containing other updates', async () => {
         expect(
             await filterBlobsFromSyncLog({
@@ -31,6 +53,29 @@ describe('Sync logging preprocessor', () => {
                 'pages',
                 { url: 'http://foo.com' },
                 { fullTitle: 'blargh!' },
+            ],
+        })
+    })
+
+    it('should filter out term fields from updateObjects operations containing other updates', async () => {
+        expect(
+            await filterBlobsFromSyncLog({
+                operation: [
+                    'updateObjects',
+                    'pages',
+                    { url: 'http://foo.com' },
+                    {
+                        fullTitle: 'one two three',
+                        titleTerms: ['one', 'two', 'three'],
+                    },
+                ],
+            }),
+        ).toEqual({
+            operation: [
+                'updateObjects',
+                'pages',
+                { url: 'http://foo.com' },
+                { fullTitle: 'one two three' },
             ],
         })
     })
