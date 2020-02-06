@@ -2,7 +2,7 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
-import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
+import { CongratsMessage, Topbar, EmptyMessage } from '../../components'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
@@ -17,7 +17,6 @@ import PageInfo from './page-info'
 import cx from 'classnames'
 import { Annotation } from 'src/annotations/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
-import { Annotation } from 'src/annotations/types'
 
 const styles = require('./sidebar.css')
 
@@ -150,7 +149,7 @@ class Sidebar extends React.Component<Props, State> {
         }
 
         if (this.props.isLoading && this.props.appendLoader) {
-            annots.push(<Loader key="more-loading" />)
+            annots.push(<LoadingIndicator />)
         }
 
         return annots
@@ -236,7 +235,7 @@ class Sidebar extends React.Component<Props, State> {
                                 this.renderResults()
                             ) : this.props.isLoading &&
                               !this.props.appendLoader ? (
-                                <Loader />
+                                <LoadingIndicator />
                             ) : annotations.length === 0 ? (
                                 <EmptyMessage />
                             ) : (
