@@ -226,7 +226,7 @@ class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                 </ButtonTooltip>
-                                 <ButtonTooltip
+                                <ButtonTooltip
                                     tooltipText="Open Memex Dashboard"
                                     position="left"
                                     >

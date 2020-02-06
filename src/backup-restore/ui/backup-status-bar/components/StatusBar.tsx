@@ -6,7 +6,6 @@ import StatusOverlay from 'src/backup-restore/ui/backup-status-bar/components/St
 import { BackupTimes } from 'src/backup-restore/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
-
 const styles = require('./StatusBar.css')
 
 interface Props {
@@ -99,9 +98,9 @@ const StatusBar = (props: Props) => {
                                 >
                                     <PrimaryAction
                                         onClick={() =>
-                                                (window.location.href =
-                                                    props.paymentUrl)
-                                            }
+                                            (window.location.href =
+                                                props.paymentUrl)
+                                        }
                                         label={`Upgrade Now`}
                                     />
                                 </StatusOverlay>

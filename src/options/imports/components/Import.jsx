@@ -34,8 +34,8 @@ const Import = ({
                         <Warning>
                             Re-downloading urls may slow down your web browsing.
                             <br />
-                            With more than 10.000 links it is suggested to let this
-                            run overnight.
+                            With more than 10.000 links it is suggested to let
+                            this run overnight.
                         </Warning>
                     </div>
                 </div>
@@ -63,26 +63,25 @@ const Import = ({
                 </div>
             )}
             {isStopped && (
-                <div className={settingsStyle.sectionTitle}>
-                     Import Report       
-                </div>
+                <div className={settingsStyle.sectionTitle}>Import Report</div>
             )}
             <div className={localStyles.mainContainer}>
-                <div className={localStyles.importTableContainer}>{children}</div>
-                {isLoading &&
-                    !allowTypes[IMPORT_TYPE.OTHERS].length && (
-                        <div className={localStyles.loadingBlocker}>
-                            <p className={localStyles.loadingMsg}>{loadingMsg}</p>
-                            <LoadingIndicator />
-                        </div>
-                    )}
+                <div className={localStyles.importTableContainer}>
+                    {children}
+                </div>
+                {isLoading && !allowTypes[IMPORT_TYPE.OTHERS].length && (
+                    <div className={localStyles.loadingBlocker}>
+                        <p className={localStyles.loadingMsg}>{loadingMsg}</p>
+                        <LoadingIndicator />
+                    </div>
+                )}
             </div>
         </div>
-        {shouldRenderEsts &&
+        {shouldRenderEsts && (
             <div className={settingsStyle.section}>
-                 <AdvSettings />
+                <AdvSettings />
             </div>
-        }
+        )}
     </div>
 )
 

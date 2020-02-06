@@ -48,7 +48,7 @@
 .editIcon {
     background-image: url('/img/comment_edit.svg');
 
-     &:hover {
+    &:hover {
         opacity: 0.6;
     }
 }

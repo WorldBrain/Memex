@@ -1,5 +1,5 @@
 .ribbon {
-	composes: button from 'src/common-ui/components/result-item.css';
+    composes: button from 'src/common-ui/components/result-item.css';
     background-image: url('/img/remove.svg');
     opacity: 1;
     background-size: 14px;

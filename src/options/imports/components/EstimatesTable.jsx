@@ -71,11 +71,12 @@ const EstimatesTable = ({
             <tr className={localStyles.importTableRow}>
                 <td>
                     <Checkbox
-                            name="bookmarks"
-                            id="bookmarks"
-                            handleChange={onAllowBookmarksClick}
-                            isChecked={allowTypes[TYPE.BOOKMARK]}
-                    >{' '}
+                        name="bookmarks"
+                        id="bookmarks"
+                        handleChange={onAllowBookmarksClick}
+                        isChecked={allowTypes[TYPE.BOOKMARK]}
+                    >
+                        {' '}
                         <div className={localStyles.labelContainer}>
                             <span className={localStyles.checkboxText}>
                                 Browser Bookmarks
@@ -96,11 +97,11 @@ const EstimatesTable = ({
             <tr className={localStyles.importTableRow}>
                 <td>
                     <Checkbox
-                            type="checkbox"
-                            name="pocket"
-                            id="pocket"
-                            handleChange={onAllowPocketClick}
-                            isChecked={allowTypes[TYPE.OTHERS] === SERVICES.POCKET}
+                        type="checkbox"
+                        name="pocket"
+                        id="pocket"
+                        handleChange={onAllowPocketClick}
+                        isChecked={allowTypes[TYPE.OTHERS] === SERVICES.POCKET}
                     >
                         <div className={localStyles.labelContainer}>
                             <span className={localStyles.checkboxText}>
@@ -112,56 +113,56 @@ const EstimatesTable = ({
                         </div>
                     </Checkbox>
                 </td>
-                {!isLoading &&
-                    blobUrl === null && (
-                        <td colSpan="3">
-                            <div
-                                className={localStyles.uploaderBox}
+                {!isLoading && blobUrl === null && (
+                    <td colSpan="3">
+                        <div className={localStyles.uploaderBox}>
+                            <label
+                                className={classNames(localStyles.selectFile, {
+                                    [localStyles.hidden]:
+                                        allowTypes[TYPE.OTHERS] !==
+                                        SERVICES.POCKET,
+                                })}
+                                htmlFor="file-upload"
                             >
-                                <label
-                                    className={classNames(localStyles.selectFile, {
-                                        [localStyles.hidden]:
-                                            allowTypes[TYPE.OTHERS] !==
-                                            SERVICES.POCKET,
-                                    })}
-                                    htmlFor="file-upload"
+                                Select export file
+                            </label>
+                            <input
+                                type="file"
+                                name="file-upload"
+                                id="file-upload"
+                                onChange={onInputImport}
+                                disabled={
+                                    allowTypes[TYPE.OTHERS] !== SERVICES.POCKET
+                                }
+                            />{' '}
+                            <ButtonTooltip
+                                tooltipText="How can I get that file?"
+                                position="right"
+                            >
+                                <a
+                                    href="https://getpocket.com/export"
+                                    taget="_blank"
                                 >
-                                    Select export file
-                                </label>
-                                <input
-                                    type="file"
-                                    name="file-upload"
-                                    id="file-upload"
-                                    onChange={onInputImport}
-                                    disabled={
-                                        allowTypes[TYPE.OTHERS] !== SERVICES.POCKET
-                                    }
-                                />{' '}
-                                <ButtonTooltip
-                                    tooltipText="How can I get that file?"
-                                    position="right"
-                                >
-                                    <a 
-                                        href="https://getpocket.com/export"
-                                        taget="_blank"
-                                    > 
-                                        <span className={classNames(localStyles.tutorial, {
-                                            [localStyles.hidden]:
-                                                allowTypes[TYPE.OTHERS] !==
-                                                SERVICES.POCKET,
-                                        })}
-                                        />
-                                    </a>
-                                </ButtonTooltip>
-                            </div>
-                        </td>
-                    )}
-                {isLoading &&
-                    allowTypes[TYPE.OTHERS] === SERVICES.POCKET && (
-                        <td colSpan="3">
-                            <LoadingIndicator />
-                        </td>
-                    )}
+                                    <span
+                                        className={classNames(
+                                            localStyles.tutorial,
+                                            {
+                                                [localStyles.hidden]:
+                                                    allowTypes[TYPE.OTHERS] !==
+                                                    SERVICES.POCKET,
+                                            },
+                                        )}
+                                    />
+                                </a>
+                            </ButtonTooltip>
+                        </div>
+                    </td>
+                )}
+                {isLoading && allowTypes[TYPE.OTHERS] === SERVICES.POCKET && (
+                    <td colSpan="3">
+                        <LoadingIndicator />
+                    </td>
+                )}
                 {allowTypes[TYPE.OTHERS] === SERVICES.POCKET &&
                     estimates[TYPE.OTHERS].remaining > 0 &&
                     blobUrl !== null && (
@@ -180,7 +181,9 @@ const EstimatesTable = ({
                     <Checkbox
                         name="html"
                         id="html"
-                        isChecked={allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE}
+                        isChecked={
+                            allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE
+                        }
                         handleChange={onAllowHTMLClick}
                     >
                         <div className={localStyles.labelContainer}>
@@ -193,57 +196,57 @@ const EstimatesTable = ({
                         </div>
                     </Checkbox>
                 </td>
-                {!isLoading &&
-                    blobUrl === null && (
-                        <td colSpan="3">
-                            <div
-                                className={localStyles.uploaderBox}
-                            >
-                                <label
-                                    className={classNames(localStyles.selectFile, {
-                                        [localStyles.hidden]:
-                                            allowTypes[TYPE.OTHERS] !==
-                                            SERVICES.NETSCAPE,
-                                    })}
-                                    htmlFor="netscape-file-upload"
-                                >
-                                    Select export file
-                                </label>
-                                <input
-                                    type="file"
-                                    name="netscape-file-upload"
-                                    id="netscape-file-upload"
-                                    onChange={onInputImport}
-                                    disabled={
+                {!isLoading && blobUrl === null && (
+                    <td colSpan="3">
+                        <div className={localStyles.uploaderBox}>
+                            <label
+                                className={classNames(localStyles.selectFile, {
+                                    [localStyles.hidden]:
                                         allowTypes[TYPE.OTHERS] !==
-                                        SERVICES.NETSCAPE
-                                    }
-                                />{' '}
-                                <ButtonTooltip
-                                    tooltipText="How can I get that file?"
-                                    position="right"
+                                        SERVICES.NETSCAPE,
+                                })}
+                                htmlFor="netscape-file-upload"
+                            >
+                                Select export file
+                            </label>
+                            <input
+                                type="file"
+                                name="netscape-file-upload"
+                                id="netscape-file-upload"
+                                onChange={onInputImport}
+                                disabled={
+                                    allowTypes[TYPE.OTHERS] !==
+                                    SERVICES.NETSCAPE
+                                }
+                            />{' '}
+                            <ButtonTooltip
+                                tooltipText="How can I get that file?"
+                                position="right"
+                            >
+                                <a
+                                    href="https://www.notion.so/worldbrain/7a12d7a019094785a14ff109e99a531d"
+                                    taget="_blank"
                                 >
-                                    <a 
-                                        href="https://www.notion.so/worldbrain/7a12d7a019094785a14ff109e99a531d"
-                                        taget="_blank"
-                                    > 
-                                        <span className={classNames(localStyles.tutorial, {
-                                            [localStyles.hidden]:
-                                                allowTypes[TYPE.OTHERS] !==
-                                                SERVICES.NETSCAPE,
-                                        })}
-                                        />
-                                    </a>
-                                </ButtonTooltip>
-                            </div>
-                        </td>
-                    )}
-                {isLoading &&
-                    allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
-                        <td colSpan="3">
-                            <LoadingIndicator />
-                        </td>
-                    )}
+                                    <span
+                                        className={classNames(
+                                            localStyles.tutorial,
+                                            {
+                                                [localStyles.hidden]:
+                                                    allowTypes[TYPE.OTHERS] !==
+                                                    SERVICES.NETSCAPE,
+                                            },
+                                        )}
+                                    />
+                                </a>
+                            </ButtonTooltip>
+                        </div>
+                    </td>
+                )}
+                {isLoading && allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
+                    <td colSpan="3">
+                        <LoadingIndicator />
+                    </td>
+                )}
                 {allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE &&
                     estimates[TYPE.OTHERS].remaining > 0 &&
                     blobUrl !== null && (

@@ -160,22 +160,22 @@ export default class RunningProcess extends React.Component<Props> {
         return (
             <div>
                 {this.props.renderHeader()}
-                <WhiteSpacer10/>
+                <WhiteSpacer10 />
                 <div className={overviewStyles.showWarning}>
-                        <span className={overviewStyles.WarningIcon} />
-                        <span className={overviewStyles.showWarningText}>
-                            With a lot of data (> 25.000 pages) it is recommended
+                    <span className={overviewStyles.WarningIcon} />
+                    <span className={overviewStyles.showWarningText}>
+                        With a lot of data (> 25.000 pages) it is recommended
                         running this over night.
-                        </span>
+                    </span>
                 </div>
-                <WhiteSpacer30/>
+                <WhiteSpacer30 />
                 <div className={localStyles.steps}>
                     {this.renderSteps(info)}
                     <ProgressBar progress={progressPercentage} />
                 </div>
-                <WhiteSpacer20/>
+                <WhiteSpacer20 />
                 <div className={settingsStyle.buttonArea}>
-                    <div/>
+                    <div />
                     {this.renderActions(info)}
                 </div>
             </div>
@@ -188,7 +188,9 @@ export default class RunningProcess extends React.Component<Props> {
                 <div className={localStyles.step}>
                     <div className={localStyles.stepLabel}>
                         <span className={localStyles.stepNumber}>Step 1:</span>
-                        <span className={settingsStyle.infoText}>{this.props.preparingStepLabel}</span>
+                        <span className={settingsStyle.infoText}>
+                            {this.props.preparingStepLabel}
+                        </span>
                     </div>
                     <div className={localStyles.stepStatus}>
                         {info.state === 'preparing' && (
@@ -204,7 +206,9 @@ export default class RunningProcess extends React.Component<Props> {
                 <div className={localStyles.step}>
                     <div className={localStyles.stepLabel}>
                         <span className={localStyles.stepNumber}>Step 2:</span>
-                        <span className={settingsStyle.infoText}>{this.props.synchingStepLabel}</span>
+                        <span className={settingsStyle.infoText}>
+                            {this.props.synchingStepLabel}
+                        </span>
                     </div>
                     <div className={localStyles.stepStatus}>
                         {info.state === 'preparing' && (
@@ -236,7 +240,9 @@ export default class RunningProcess extends React.Component<Props> {
                             !this.state.canceling && this.handleCancel()
                         }}
                     >
-                        {(!this.state.canceling) ? ('Cancel'): (
+                        {!this.state.canceling ? (
+                            'Cancel'
+                        ) : (
                             <MovingDotsLabel
                                 text="Finishing current batch"
                                 intervalMs={500}
@@ -267,7 +273,7 @@ export default class RunningProcess extends React.Component<Props> {
             <div className={localStyles.fail}>
                 {this.props.renderFailMessage(this.state.info.state)}
                 <div className={settingsStyle.buttonArea}>
-                    <div/>
+                    <div />
                     <PrimaryAction
                         onClick={() => {
                             this.props.onFinish()

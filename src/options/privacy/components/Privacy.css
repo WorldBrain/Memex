@@ -26,10 +26,10 @@
 }
 
 .optOut {
-	display: flex;
-	align-items: center;
+    display: flex;
+    align-items: center;
 
-	& > select {
-		margin-left: 10px;
-	}
+    & > select {
+        margin-left: 10px;
+    }
 }

@@ -45,31 +45,37 @@ class SetupManualOrAutomatic extends React.Component {
                         <div>
                             {this.state.mode === 'manual' && (
                                 <PrimaryAction
-                                    onClick={() => this.props.onChoice({ type: 'manual' })}
+                                    onClick={() =>
+                                        this.props.onChoice({ type: 'manual' })
+                                    }
                                     label={'Continue'}
                                 />
                             )}
-                            {(this.state.mode === 'automatic' && isAuthorizedForAutomaticBackup) && (
-                                <PrimaryAction
-                                    disabled={false}
-                                    onClick={
-                                        isAuthorizedForAutomaticBackup
-                                            ? () =>
-                                                  this.props.onChoice({ type: 'automatic' })
-                                            : () => false
-                                    }
-                                    label={'Next'}
-                                />
-                            )}
-                            {(isAuthorizedForAutomaticBackup === false && this.state.mode === 'automatic') && (
-                                <PrimaryAction
-                                    disabled={false}
-                                    onClick={() => 
-                                        this.openSubscriptionModal()
-                                    }
-                                    label={'Upgrade to Memex Pro'}
-                                />
-                            )}
+                            {this.state.mode === 'automatic' &&
+                                isAuthorizedForAutomaticBackup && (
+                                    <PrimaryAction
+                                        disabled={false}
+                                        onClick={
+                                            isAuthorizedForAutomaticBackup
+                                                ? () =>
+                                                      this.props.onChoice({
+                                                          type: 'automatic',
+                                                      })
+                                                : () => false
+                                        }
+                                        label={'Next'}
+                                    />
+                                )}
+                            {isAuthorizedForAutomaticBackup === false &&
+                                this.state.mode === 'automatic' && (
+                                    <PrimaryAction
+                                        disabled={false}
+                                        onClick={() =>
+                                            this.openSubscriptionModal()
+                                        }
+                                        label={'Upgrade to Memex Pro'}
+                                    />
+                                )}
                         </div>
                     </div>
                     {this.state.subscribeModal && (

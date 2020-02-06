@@ -11,9 +11,7 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
-import {
-    WhiteSpacer10,
-} from 'src/common-ui/components/design-library/typography'
+import { WhiteSpacer10 } from 'src/common-ui/components/design-library/typography'
 import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
 import SyncDevicesPane from 'src/sync/components/device-list/SyncDevicesPane'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
@@ -89,11 +87,11 @@ export class OverviewContainer extends Component<Props & UserProps> {
 
     openSubscriptionModal = () => this.setState({ subscribeModal: true })
     closeSubscriptionModal = () => this.setState({ subscribeModal: false })
-     
+
     enableAutomaticBackup() {
         if (this.state.hasInitialBackup === true) {
             localStorage.setItem('backup.automatic-backups-enabled', 'true')
-            this.setState({automaticBackupEnabled : true})
+            this.setState({ automaticBackupEnabled: true })
         } else {
             this.props.onBackupSetupRequested()
         }
@@ -101,7 +99,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
 
     disableAutomaticBackup() {
         localStorage.setItem('backup.automatic-backups-enabled', 'false')
-        this.setState({automaticBackupEnabled : false})
+        this.setState({ automaticBackupEnabled: false })
     }
 
     render() {
@@ -145,15 +143,15 @@ export class OverviewContainer extends Component<Props & UserProps> {
                     {!this.state.hasInitialBackup ? (
                         <div className={localStyles.statusLine}>
                             <p>You haven't set up any backups yet.</p>
-                            <PrimaryAction 
+                            <PrimaryAction
                                 onClick={this.props.onBackupRequested}
-                                label={"Start Wizard"}
+                                label={'Start Wizard'}
                             />
                         </div>
                     ) : (
                         <div>
                             {/* The status line with last backup time */}
-                            <WhiteSpacer10/>
+                            <WhiteSpacer10 />
                             <div className={localStyles.statusLine}>
                                 <div>
                                     <span className={localStyles.boldText}>
@@ -162,35 +160,47 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                     <span className={localStyles.time}>
                                         {this.state.backupTimes.lastBackup
                                             ? moment(
-                                                  this.state.backupTimes.lastBackup,
+                                                  this.state.backupTimes
+                                                      .lastBackup,
                                               ).fromNow()
                                             : "You haven't made any backup yet"}
                                     </span>
                                     {this.state.backupTimes.nextBackup && (
-                                    <div className={localStyles.statusLine}>
-                                        <span className={localStyles.nextBackupLine}>
-                                            <span className={styles.name}>
-                                                Next backup:
+                                        <div className={localStyles.statusLine}>
+                                            <span
+                                                className={
+                                                    localStyles.nextBackupLine
+                                                }
+                                            >
+                                                <span className={styles.name}>
+                                                    Next backup:
+                                                </span>
+                                                <span
+                                                    className={localStyles.time}
+                                                >
+                                                    {this.state.backupTimes
+                                                        .nextBackup !==
+                                                    'running'
+                                                        ? automaticBackupsAllowed &&
+                                                          moment(
+                                                              this.state
+                                                                  .backupTimes
+                                                                  .nextBackup,
+                                                          ).fromNow()
+                                                        : 'in progress'}
+                                                </span>
                                             </span>
-                                            <span className={localStyles.time}>
-                                                {this.state.backupTimes.nextBackup !==
-                                                'running'
-                                                    ? automaticBackupsAllowed &&
-                                                      moment(
-                                                          this.state.backupTimes
-                                                              .nextBackup,
-                                                      ).fromNow()
-                                                    : 'in progress'}
-                                            </span>
-                                        </span>
-                                    </div>
-                                )}
+                                        </div>
+                                    )}
                                 </div>
-                                <PrimaryAction 
-                                onClick={this.props.onBackupRequested}
-                                label={this.state.backupTimes.nextBackup !== 'running'
-                                        ? 'Backup Now'
-                                        : 'Go to Backup'}
+                                <PrimaryAction
+                                    onClick={this.props.onBackupRequested}
+                                    label={
+                                        this.state.backupTimes.nextBackup !==
+                                        'running'
+                                            ? 'Backup Now'
+                                            : 'Go to Backup'
+                                    }
                                 />
                             </div>
                         </div>
@@ -199,9 +209,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
 
                 {/* Settings Section */}
                 <div className={settingsStyle.section}>
-                    <div className={settingsStyle.sectionTitle}>
-                        Settings
-                    </div>
+                    <div className={settingsStyle.sectionTitle}>Settings</div>
                     <div className={styles.option}>
                         {!automaticBackupsAllowed && (
                             <div className={localStyles.statusLine}>
@@ -215,8 +223,8 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                             localStyles.limitWidth,
                                         )}
                                     >
-                                        Worry-free. Automatically backs up your data
-                                        every 15 minutes.
+                                        Worry-free. Automatically backs up your
+                                        data every 15 minutes.
                                     </span>
                                 </div>
                                 <SecondaryAction
@@ -245,7 +253,9 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                         </span>
                                     </div>
                                     <PrimaryAction
-                                        onClick={() => this.enableAutomaticBackup()}
+                                        onClick={() =>
+                                            this.enableAutomaticBackup()
+                                        }
                                         label={'Enable'}
                                     />
                                 </div>
@@ -264,12 +274,14 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                                 localStyles.limitWidth,
                                             )}
                                         >
-                                            All set. Your data is backed up every 15
-                                            minutes.
+                                            All set. Your data is backed up
+                                            every 15 minutes.
                                         </span>
                                     </div>
                                     <SecondaryAction
-                                        onClick={() => this.disableAutomaticBackup()}
+                                        onClick={() =>
+                                            this.disableAutomaticBackup()
+                                        }
                                         label={'✓ Enabled'}
                                     />
                                 </div>
@@ -279,7 +291,9 @@ export class OverviewContainer extends Component<Props & UserProps> {
                         <div className={styles.option}>
                             <div className={localStyles.statusLine}>
                                 <div>
-                                    <span className={styles.name}>Backup Location</span>
+                                    <span className={styles.name}>
+                                        Backup Location
+                                    </span>
                                     {this.state.backupLocation === 'local' ? (
                                         <span
                                             className={classNames(
@@ -287,10 +301,11 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                                 localStyles.limitWidth,
                                             )}
                                         >
-                                         {(this.state.backupPath === null && this.state.backupLocation ==='local') ? 
-                                             ('⚠️Your Memex Backup Helper is not running!'):
-                                             (this.state.backupPath)
-                                         }
+                                            {this.state.backupPath === null &&
+                                            this.state.backupLocation ===
+                                                'local'
+                                                ? '⚠️Your Memex Backup Helper is not running!'
+                                                : this.state.backupPath}
                                         </span>
                                     ) : (
                                         <span
@@ -305,7 +320,9 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                 </div>
                                 <SecondaryAction
                                     label={'Change'}
-                                    onClick={() => this.props.onBackupRequested(true)}
+                                    onClick={() =>
+                                        this.props.onBackupRequested(true)
+                                    }
                                 />
                             </div>
                         </div>
@@ -317,25 +334,29 @@ export class OverviewContainer extends Component<Props & UserProps> {
                     </div>
                     <div className={styles.option}>
                         <div className={localStyles.statusLine}>
-                                <span
-                                    className={classNames(
-                                        settingsStyle.subname,
-                                        localStyles.limitWidth,
-                                    )}
-                                >
-                                    <b>Replace</b> all current data with a backup.
-                                </span>
-                                <SecondaryAction
+                            <span
+                                className={classNames(
+                                    settingsStyle.subname,
+                                    localStyles.limitWidth,
+                                )}
+                            >
+                                <b>Replace</b> all current data with a backup.
+                            </span>
+                            <SecondaryAction
                                 onClick={() =>
-                                    this.setState({ showRestoreConfirmation: true })
+                                    this.setState({
+                                        showRestoreConfirmation: true,
+                                    })
                                 }
-                                label={"Restore"}
-                                />
+                                label={'Restore'}
+                            />
                         </div>
                     </div>
                     <div>
                         {this.state.subscribeModal && (
-                            <SubscribeModal onClose={this.closeSubscriptionModal} />
+                            <SubscribeModal
+                                onClose={this.closeSubscriptionModal}
+                            />
                         )}
                     </div>
                 </div>

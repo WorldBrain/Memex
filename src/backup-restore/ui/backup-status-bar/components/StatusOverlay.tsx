@@ -12,7 +12,10 @@ import { BackupTimes } from 'src/backup-restore/types'
 import SyncNowOverlayPaneContainer from 'src/sync/components/device-list/SyncNowOverlayPane'
 const styles = require('./StatusOverlay.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
-import { WhiteSpacer20, WhiteSpacer10} from 'src/common-ui/components/design-library/typography'
+import {
+    WhiteSpacer20,
+    WhiteSpacer10,
+} from 'src/common-ui/components/design-library/typography'
 import { LoadingIndicator } from 'src/common-ui/components'
 
 interface Props {
@@ -30,7 +33,6 @@ interface Props {
 }
 
 export default class StatusOverlay extends PureComponent<Props> {
-
     state = {
         hasInitialBackup: false,
         automaticBackupEnabled: null,
@@ -49,10 +51,10 @@ export default class StatusOverlay extends PureComponent<Props> {
         this.overlayRoot = document.createElement(props.rootEl)
     }
 
-    async loadingStates () {
+    async loadingStates() {
         setTimeout(() => {
-             this.setState({
-                isLoading: false
+            this.setState({
+                isLoading: false,
             })
         }, 300)
     }
@@ -79,26 +81,27 @@ export default class StatusOverlay extends PureComponent<Props> {
         this.setState({
             isLoading: false,
         })
-
     }
 
-    onBackupSetupRequested () {
+    onBackupSetupRequested() {
         window.open(`${browser.extension.getURL('/options.html')}#/backup`)
     }
 
     enableAutomaticBackup() {
         if (this.state.hasInitialBackup === true) {
             localStorage.setItem('backup.automatic-backups-enabled', 'true')
-            this.setState({automaticBackupEnabled : true})
-        } 
+            this.setState({ automaticBackupEnabled: true })
+        }
         if (!this.state.hasInitialBackup) {
-            window.location.href = `${browser.extension.getURL('/options.html')}#/backup`
+            window.location.href = `${browser.extension.getURL(
+                '/options.html',
+            )}#/backup`
         }
     }
 
     disableAutomaticBackup() {
         localStorage.setItem('backup.automatic-backups-enabled', 'false')
-        this.setState({automaticBackupEnabled : false})
+        this.setState({ automaticBackupEnabled: false })
     }
 
     render() {
@@ -121,31 +124,39 @@ export default class StatusOverlay extends PureComponent<Props> {
                             <LoadingIndicator />
                         </div>
                     )}
-                    <div className={styles.statusSection}> 
+                    <div className={styles.statusSection}>
                         <div className={styles.syncSection}>
                             <SyncNowOverlayPaneContainer />
                         </div>
-                        <WhiteSpacer20/>
+                        <WhiteSpacer20 />
                         <div className={styles.backupSection}>
                             <div className={settingsStyle.buttonArea}>
                                 <div className={settingsStyle.sectionTitle}>
-                                        {header && (
-                                            <span>{header}</span>
-                                        )}
+                                    {header && <span>{header}</span>}
                                 </div>
                                 {this.props.children}
                             </div>
-                            <WhiteSpacer10/>
+                            <WhiteSpacer10 />
                             <div className={styles.infoBox}>
                                 <div>
                                     {message && (
                                         <div className={styles.description}>
-                                            <span className={settingsStyle.infoText}>{message}</span>
+                                            <span
+                                                className={
+                                                    settingsStyle.infoText
+                                                }
+                                            >
+                                                {message}
+                                            </span>
                                         </div>
                                     )}
-                                    {(errorMessage) && (
+                                    {errorMessage && (
                                         <div className={styles.showWarning}>
-                                            <span className={styles.showWarningText}>
+                                            <span
+                                                className={
+                                                    styles.showWarningText
+                                                }
+                                            >
                                                 {errorMessage}
                                             </span>
                                         </div>
@@ -159,19 +170,22 @@ export default class StatusOverlay extends PureComponent<Props> {
                                     </div>
                                 )}
                             </div>
-                            <WhiteSpacer10/>
+                            <WhiteSpacer10 />
                             {this.props.UIstate === 'autoBackup' ? null : (
                                 <div className={styles.timer}>
                                     {lastBackup && (
                                         <div className={styles.backup}>
                                             <span>Last Backup:</span>
                                             <span>
-                                                {lastBackup === 'Never' && <b>Never</b>}
+                                                {lastBackup === 'Never' && (
+                                                    <b>Never</b>
+                                                )}
                                                 {lastBackup === 'running' && (
                                                     <b>Running</b>
                                                 )}
                                                 {lastBackup !== 'Never' &&
-                                                    lastBackup !== 'running' && (
+                                                    lastBackup !==
+                                                        'running' && (
                                                         <b>
                                                             {moment(
                                                                 lastBackup,
@@ -192,25 +206,32 @@ export default class StatusOverlay extends PureComponent<Props> {
                                                 <span>Next Backup:</span>
                                                 <span>
                                                     <b>
-                                                        {moment(nextBackup).fromNow()}
+                                                        {moment(
+                                                            nextBackup,
+                                                        ).fromNow()}
                                                     </b>
                                                 </span>
                                             </div>
                                         )}
 
-                                    <div
-                                        className={styles.backup}
-                                    >
+                                    <div className={styles.backup}>
                                         <span>Automatic Backup:</span>
                                         <ToggleSwitch
-                                            defaultValue={this.state.automaticBackupEnabled}
+                                            defaultValue={
+                                                this.state
+                                                    .automaticBackupEnabled
+                                            }
                                             onChange={
-                                                this.state.automaticBackupEnabled
-                                                    ? () => this.disableAutomaticBackup()
-                                                    : () => this.enableAutomaticBackup()
+                                                this.state
+                                                    .automaticBackupEnabled
+                                                    ? () =>
+                                                          this.disableAutomaticBackup()
+                                                    : () =>
+                                                          this.enableAutomaticBackup()
                                             }
                                             isChecked={
-                                                this.state.automaticBackupEnabled
+                                                this.state
+                                                    .automaticBackupEnabled
                                                     ? true
                                                     : false
                                             }
@@ -218,7 +239,7 @@ export default class StatusOverlay extends PureComponent<Props> {
                                     </div>
                                 </div>
                             )}
-                            </div>
+                        </div>
                     </div>
                 </div>
             </div>,

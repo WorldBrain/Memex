@@ -42,30 +42,30 @@ export class OverlayMenu extends React.Component<Props, State> {
 
     render() {
         return (
-                <StyledOverlayMenu
-                    onMouseEnter={this.onMouseEnterHandler}
-                    onMouseLeave={this.onMouseLeaveHandler}
-                >
-                    <StyledMenuHeader>{this.props.menuHeader}</StyledMenuHeader>
+            <StyledOverlayMenu
+                onMouseEnter={this.onMouseEnterHandler}
+                onMouseLeave={this.onMouseLeaveHandler}
+            >
+                <StyledMenuHeader>{this.props.menuHeader}</StyledMenuHeader>
 
-                    <DivOverlayParent>
-                        <DivOverlayChild>
-                            {this.state.hover && (
-                                <div>
-                                    {this.props.menuItems.map(item => (
-                                        <MenuItem
-                                            onClick={this.closeAnd(item.handler)}
-                                            key={`overlayMenu-${item.label}`}
-                                        >
-                                            {' '}
-                                            {item.label}
-                                        </MenuItem>
-                                    ))}
-                                </div>
-                            )}
-                        </DivOverlayChild>
-                    </DivOverlayParent>
-                </StyledOverlayMenu>
+                <DivOverlayParent>
+                    <DivOverlayChild>
+                        {this.state.hover && (
+                            <div>
+                                {this.props.menuItems.map(item => (
+                                    <MenuItem
+                                        onClick={this.closeAnd(item.handler)}
+                                        key={`overlayMenu-${item.label}`}
+                                    >
+                                        {' '}
+                                        {item.label}
+                                    </MenuItem>
+                                ))}
+                            </div>
+                        )}
+                    </DivOverlayChild>
+                </DivOverlayParent>
+            </StyledOverlayMenu>
         )
     }
 }

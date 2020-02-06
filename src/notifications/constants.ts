@@ -2,8 +2,7 @@ export const NOTIFICATIONS_PAGE_SIZE: number = 20
 export const BACKUP_STATUS_MESSAGES: any = {
     successful_backup: 'Your last backup was successful. Backup again ',
     unsuccessful_backup_internet: 'No internet connection on your last backup.',
-    unsuccessful_backup_auto_enabled:
-        'Your last backup failed. Retrying soon.',
+    unsuccessful_backup_auto_enabled: 'Your last backup failed. Retrying soon.',
     unsuccessful_backup_drive_size:
         'Your last backup was unsuccessful as there was no space in your google drive. Please clear some space and try again.',
     subscription_expiration:
@@ -18,6 +17,5 @@ export const BACKUP_STATUS_MESSAGES: any = {
         'Automatically backs up your data every 15 minutes.',
     automatic_backup_disabled_first_backup_done:
         'All data is only stored on your computer. Remember to regularly back it up.',
-    backupApp_not_running:
-        'The Backup Helper app is not running.',
+    backupApp_not_running: 'The Backup Helper app is not running.',
 }

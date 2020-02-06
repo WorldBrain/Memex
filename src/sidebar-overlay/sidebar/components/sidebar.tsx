@@ -15,6 +15,7 @@ import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
 import SearchTypeSwitch from './search-type-switch'
 import PageInfo from './page-info'
 import cx from 'classnames'
+import { Annotation } from 'src/annotations/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { Annotation } from 'src/annotations/types'
 
@@ -234,8 +235,8 @@ class Sidebar extends React.Component<Props, State> {
                             {!this.isCurrentPageSearch ? (
                                 this.renderResults()
                             ) : this.props.isLoading &&
-                            !this.props.appendLoader ? (
-                                <LoadingIndicator />
+                              !this.props.appendLoader ? (
+                                <Loader />
                             ) : annotations.length === 0 ? (
                                 <EmptyMessage />
                             ) : (

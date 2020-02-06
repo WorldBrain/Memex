@@ -1,6 +1,9 @@
 import React from 'react'
 import styled from 'styled-components'
-import { colorMidPurple, colorWhite } from 'src/common-ui/components/design-library/colors'
+import {
+    colorMidPurple,
+    colorWhite,
+} from 'src/common-ui/components/design-library/colors'
 import {
     fontSizeSmall,
     TypographyActionText,
@@ -18,9 +21,9 @@ const StyledSecondaryAction = styled.div`
     &: hover {
         background-color: ${colorMidPurple};
         color: ${colorWhite};
-        
+
         & * {
-          color: ${colorWhite};  
+            color: ${colorWhite};
         }
     }
 `
@@ -41,11 +44,11 @@ export const SecondaryAction = ({
     disabled?: boolean
     onClick: () => void
 }) => (
-    <StyledSecondaryAction 
+    <StyledSecondaryAction
         onClick={disabled === true ? undefined : onClick}
-        disabled={disabled} 
+        disabled={disabled}
         key={`button-${label}`}
-        >
+    >
         <StyledSecondaryActionLinkText>{label}</StyledSecondaryActionLinkText>
     </StyledSecondaryAction>
 )

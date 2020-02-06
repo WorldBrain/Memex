@@ -1,9 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './provider-list.css'
-import {
-    WhiteSpacer20,
-} from 'src/common-ui/components/design-library/typography'
+import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 
@@ -23,8 +21,9 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                                 Any cloud provider via local hard drive
                             </div>
                             <p className={settingsStyle.infoText}>
-                                Use cloud providers that have a syncing folder on your
-                                computer (e.g. Dropbox, Spideroak, GDrive){' '}
+                                Use cloud providers that have a syncing folder
+                                on your computer (e.g. Dropbox, Spideroak,
+                                GDrive){' '}
                                 <a
                                     className={Styles.link}
                                     target="_blank"
@@ -69,7 +68,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                         />
                         <div className={Styles.textBlock}>
                             <div className={Styles.providerTitle}>
-                                    Google Drive
+                                Google Drive
                                 <span>
                                     <img
                                         className={Styles.logo}

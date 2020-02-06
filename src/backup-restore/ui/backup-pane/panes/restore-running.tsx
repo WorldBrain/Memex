@@ -1,8 +1,6 @@
 import React from 'react'
 import RunningProcess from './running-process'
-import {
-    WhiteSpacer20,
-} from 'src/common-ui/components/design-library/typography'
+import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 const settingsStyle = require('src/options/settings/components/settings.css')
 
 const styles = require('../../styles.css')
@@ -34,7 +32,11 @@ export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
 }
 
 function renderHeader() {
-    return <p className={settingsStyle.sectionTitle}>Restore in Progress: Don't leave this page</p>
+    return (
+        <p className={settingsStyle.sectionTitle}>
+            Restore in Progress: Don't leave this page
+        </p>
+    )
 }
 
 function renderFailMessage() {
@@ -45,7 +47,8 @@ function renderFailMessage() {
                     <strong>⚠️ Restore Failed! ⚠️ </strong>
                 </div>
                 <div className={settingsStyle.infoText}>
-                    You can retry the restore anytime.<br />
+                    You can retry the restore anytime.
+                    <br />
                     If you still encounter issues please{' '}
                     <a href="mailto:support@worldbrain.io">contact support</a>.
                 </div>

@@ -1,10 +1,10 @@
 .progressBox {
-	display: flex;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
 .progressBar {
-	width: 100%;
+    width: 100%;
 }

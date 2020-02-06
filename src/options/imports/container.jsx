@@ -116,7 +116,7 @@ class ImportContainer extends Component {
             isHidden={!this.props.shouldRenderProgress}
             customClass={'cancel'}
         >
-            {this.state.waitingOnCancelConfirm ? ('Confirm Cancel'):('Cancel')}
+            {this.state.waitingOnCancelConfirm ? 'Confirm Cancel' : 'Cancel'}
         </ActionButton>
     )
 
@@ -360,7 +360,4 @@ const mapDispatchToProps = dispatch => ({
     search: () => dispatch(searchBarActs.search({ overwrite: true })),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(ImportContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(ImportContainer)

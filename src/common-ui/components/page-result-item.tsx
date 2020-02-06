@@ -68,6 +68,7 @@ class PageResultItem extends PureComponent<Props> {
                             </div>
                             <div title={this.props.title} className={styles.title}>
                                     {this.props.title}
+
                             </div>
                         </div>
                         <div className={styles.actionItems}>
@@ -83,9 +84,8 @@ class PageResultItem extends PureComponent<Props> {
                             </div>
                         </div>
                     </div>
-                    {this.props.tags.length > 0 ? (this.props.tagHolder) : (null)}
+                    {this.props.tags.length > 0 ? this.props.tagHolder : null}
                 </div>
-
             </React.Fragment>
         )
     }
