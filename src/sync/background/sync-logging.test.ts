@@ -1,9 +1,9 @@
-import { filterBlobsFromSyncLog } from './sync-logging'
+import { filterSyncLog } from './sync-logging'
 
 describe('Sync logging preprocessor', () => {
     it('should filter out screenshots from createObject operations', async () => {
         expect(
-            await filterBlobsFromSyncLog({
+            await filterSyncLog({
                 operation: [
                     'createObject',
                     'pages',
@@ -11,13 +11,22 @@ describe('Sync logging preprocessor', () => {
                 ],
             }),
         ).toEqual({
-            operation: ['createObject', 'pages', { url: 'http://foo.com' }],
+            operation: [
+                'createObject',
+                'pages',
+                { url: 'http://foo.com', screenshot: 'boohoo' },
+            ],
+            loggedOperation: [
+                'createObject',
+                'pages',
+                { url: 'http://foo.com' },
+            ],
         })
     })
 
     it('should filter out terms fields from createObject operations', async () => {
         expect(
-            await filterBlobsFromSyncLog({
+            await filterSyncLog({
                 operation: [
                     'createObject',
                     'pages',
@@ -32,36 +41,63 @@ describe('Sync logging preprocessor', () => {
             operation: [
                 'createObject',
                 'pages',
+                {
+                    url: 'http://foo.com',
+                    text: 'one two three',
+                    terms: ['one', 'two', 'three'],
+                },
+            ],
+            loggedOperation: [
+                'createObject',
+                'pages',
                 { url: 'http://foo.com', text: 'one two three' },
             ],
         })
     })
 
-    it('should filter out screenshots from updateObjects operations containing other updates', async () => {
-        expect(
-            await filterBlobsFromSyncLog({
+    for (const operationType of ['updateObject', 'updateObjects']) {
+        it(`should filter out screenshots from ${operationType} operations containing other updates`, async () => {
+            expect(
+                await filterSyncLog({
+                    operation: [
+                        operationType,
+                        'pages',
+                        { url: 'http://foo.com' },
+                        { fullTitle: 'blargh!', screenshot: 'boohoo' },
+                    ],
+                }),
+            ).toEqual({
                 operation: [
-                    'updateObjects',
+                    operationType,
                     'pages',
                     { url: 'http://foo.com' },
                     { fullTitle: 'blargh!', screenshot: 'boohoo' },
                 ],
-            }),
-        ).toEqual({
-            operation: [
-                'updateObjects',
-                'pages',
-                { url: 'http://foo.com' },
-                { fullTitle: 'blargh!' },
-            ],
+                loggedOperation: [
+                    operationType,
+                    'pages',
+                    { url: 'http://foo.com' },
+                    { fullTitle: 'blargh!' },
+                ],
+            })
         })
-    })
 
-    it('should filter out term fields from updateObjects operations containing other updates', async () => {
-        expect(
-            await filterBlobsFromSyncLog({
+        it(`should filter out term fields from ${operationType} operations containing other updates`, async () => {
+            expect(
+                await filterSyncLog({
+                    operation: [
+                        operationType,
+                        'pages',
+                        { url: 'http://foo.com' },
+                        {
+                            fullTitle: 'one two three',
+                            titleTerms: ['one', 'two', 'three'],
+                        },
+                    ],
+                }),
+            ).toEqual({
                 operation: [
-                    'updateObjects',
+                    operationType,
                     'pages',
                     { url: 'http://foo.com' },
                     {
@@ -69,27 +105,26 @@ describe('Sync logging preprocessor', () => {
                         titleTerms: ['one', 'two', 'three'],
                     },
                 ],
-            }),
-        ).toEqual({
-            operation: [
-                'updateObjects',
-                'pages',
-                { url: 'http://foo.com' },
-                { fullTitle: 'one two three' },
-            ],
-        })
-    })
-
-    it('should filter out screenshots from updateObjects operations containing no other updates', async () => {
-        expect(
-            await filterBlobsFromSyncLog({
-                operation: [
-                    'updateObjects',
+                loggedOperation: [
+                    operationType,
                     'pages',
                     { url: 'http://foo.com' },
-                    { screenshot: 'boohoo' },
+                    { fullTitle: 'one two three' },
                 ],
-            }),
-        ).toEqual({ operation: null })
-    })
+            })
+        })
+
+        it(`should filter out screenshots from ${operationType} operations containing no other updates`, async () => {
+            expect(
+                await filterSyncLog({
+                    operation: [
+                        operationType,
+                        'pages',
+                        { url: 'http://foo.com' },
+                        { screenshot: 'boohoo' },
+                    ],
+                }),
+            ).toEqual({ operation: null })
+        })
+    }
 })

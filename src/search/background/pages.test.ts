@@ -334,6 +334,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 },
                             }),
                         },
+                        expectedSyncLogEntries: () => [
+                            expect.objectContaining({
+                                collection: 'pages',
+                                pk: DATA.PAGE_1.url,
+                                value: {
+                                    text: 'some new updated text',
+                                },
+                            }),
+                        ],
                         postCheck: async ({ setup }) => {
                             const page = await setup.storageManager
                                 .collection('pages')
