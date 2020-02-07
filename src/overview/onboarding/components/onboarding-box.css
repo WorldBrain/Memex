@@ -45,10 +45,10 @@
 .titleContainer {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: center;
     padding-bottom: 30px;
     align-items: center;
-    height: 30vh;
+    height: 50vh;
     width: 100vw;
 }
 
@@ -76,9 +76,8 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    height: 10vh;
     width: 100%;
-    margin-bottom: 90px;
+    margin-top: 30px;
 }
 
 .settingsAction {

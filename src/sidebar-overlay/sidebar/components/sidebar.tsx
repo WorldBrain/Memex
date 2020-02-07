@@ -159,7 +159,7 @@ class Sidebar extends React.Component<Props, State> {
         return (
             <React.Fragment>
                 <ResultsContainer />
-                <DeleteConfirmModal message="Delete page and related note" />
+                <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
             </React.Fragment>
         )
@@ -181,7 +181,7 @@ class Sidebar extends React.Component<Props, State> {
                 <Menu
                     isOpen={isOpen}
                     width={450}
-                    styles={menuStyles(env)}
+                    styles={menuStyles(env, isOpen)}
                     right
                     noOverlay
                     disableCloseOnEsc

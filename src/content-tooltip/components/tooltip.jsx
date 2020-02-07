@@ -24,7 +24,7 @@ const Tooltip = ({
         id="memex-tooltip"
     >
         <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
-        {_renderButtons({ closeTooltip, state})}
+        
     </div>
 )
 
@@ -40,7 +40,7 @@ export default Tooltip
 
 export function _renderButtons({ closeTooltip, state}) {
     return (
-         <ButtonTooltip
+        <ButtonTooltip
             tooltipText="Close. Disable in Toolbar (R)"
             position="rightContentTooltip"
         >

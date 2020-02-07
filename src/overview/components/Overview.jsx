@@ -60,7 +60,7 @@ class Overview extends PureComponent {
                 <Header />
                 <SidebarLeft />
                 <Results />
-                <DeleteConfirmModal message="Delete page and related note" />
+                <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
                 <div className={styles.productHuntContainer}>
                     <a

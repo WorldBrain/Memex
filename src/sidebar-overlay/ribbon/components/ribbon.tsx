@@ -454,9 +454,9 @@ class Ribbon extends Component<Props, State> {
                                             styles.button,
                                             styles.ribbonIcon,
                                             {
-                                                [styles.highlightsOn]: this
+                                                [styles.tooltipOn]: this
                                                     .props.isTooltipEnabled,
-                                                [styles.highlightsOff]: !this
+                                                [styles.tooltipOff]: !this
                                                     .props.isTooltipEnabled,
                                             },
                                         )}

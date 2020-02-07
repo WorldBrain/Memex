@@ -56,7 +56,7 @@
 .content {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     font-size: 13.5px;
     min-height: 100%;
     height: 100%;

@@ -198,11 +198,11 @@
 }
 
 .tooltipOn {
-    background-image: url('/img/tooltip.svg');
+    background-image: url('/img/tooltip_full.svg');
 }
 
 .tooltipOff {
-    background-image: url('/img/tooltipOff.svg');
+    background-image: url('/img/tooltip_empty.svg');
 }
 
 .ribbonOn {

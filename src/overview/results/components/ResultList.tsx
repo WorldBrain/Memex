@@ -24,7 +24,6 @@ class ResultList extends PureComponent<Props> {
     render() {
 
         const showOnboarding = localStorage.getItem('stage.Onboarding')
-        console.log(showOnboarding)
         return (
             <ul
                 className={cx(this.mainClass, {

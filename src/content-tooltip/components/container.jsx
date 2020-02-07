@@ -119,6 +119,8 @@ class TooltipContainer extends React.Component {
                         createLink={this.createLink}
                         createHighlight={this.createHighlight}
                         createAnnotation={this.createAnnotation}
+                        closeTooltip={this.closeTooltip}
+                        state={this.state.tooltipState}
                     />
                 )
             case 'running':

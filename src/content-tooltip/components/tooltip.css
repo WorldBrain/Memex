@@ -9,7 +9,7 @@
     position: absolute;
     font-size: 13px;
     background-color: #fff;
-    height: 36px;
+    height: 30px;
     min-width: fit-content;
     border-radius: 3px;
     text-align: center;
@@ -75,13 +75,13 @@
 
 .tooltip.statePristine {
     border-radius: 3px;
-    width: 100px;
-    height: 36px;
-    display: grid;
-    justify-content: space-between;
+    height: 20px;
+    width: 110px;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    grid-template-columns: max-content 30px;
-    grid-gap: 6px;
+    padding: 2px 0;
+    overflow: visible;
 
     &::after {
         left: calc(50% - 5px);
@@ -101,11 +101,13 @@
 .copiedMessage,
 .doneComponent {
     position: relative;
-    height: 36px;
+    height: 20px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
+    margin-left: 0px;
+    width: 84px;
+    justify-content: space-between;
 }
 
 .animationWrapper {
@@ -114,13 +116,11 @@
 
 .createButtons {
     z-index: 10;
-    height: 36px;
-    width: 60px;
+    height: 20px;
     display: flex;
     top: 0px;
-    justify-content: flex-start;
+    justify-content: justify-content;
     align-items: center;
-    margin-left: 5px;
     animation: slideIn 0.05s ease-in-out;
 
     & div {
@@ -129,38 +129,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        margin-right: 2px;
     }
-}
-
-.annotateIcon {
-    composes: nakedSquareButton from '../../common-ui/elements.css';
-    background-image: url('/img/comment_add.svg');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 20px;
-    height: 24px;
-    width: 24px;
-}
-
-.highlightIcon {
-    composes: nakedSquareButton from '../../common-ui/elements.css';
-    background-image: url('/img/highlightOn.svg');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 20px;
-    height: 24px;
-    width: 24px;
-}
-
-.shareIcon {
-    composes: nakedSquareButton from '../../common-ui/elements.css';
-    background-image: url('/img/share.svg');
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: 20px;
-    height: 24px;
-    width: 24px;
 }
 
 .progressIndicator {
@@ -237,18 +206,23 @@
 }
 
 /* Right side buttons */
-.buttons {
+
+.button {
     display: flex;
     flex-direction: column;
-    width: 25px;
-    height: 25px;
+    max-width: 20px;
+    height: 16px;
     justify-content: center;
     align-items: center;
     position: absolute;
     z-index: 100001;
-    top: -12px;
     cursor: pointer;
     animation: slideIn 0.05s ease-in-out;
+
+    & img {
+        width: 100%;
+        height: 100%;
+    }
 }
 
 .noShow {

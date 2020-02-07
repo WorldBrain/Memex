@@ -53,11 +53,11 @@ export default class OnboardingStep extends React.PureComponent<Props> {
                         <div className={styles.subTitle2}>
                             {this.props.subtitleText2}
                         </div>
-                    </div>
-                    <div className={styles.settingsContainer}>
+                        <div className={styles.settingsContainer}>
                         <div className={styles.settingsAction}>
                             {this.props.children}
                         </div>
+                    </div>
                     </div>
                     <div className={styles.bottomContainer}>
                         <div className={styles.backButtonArea}/>
