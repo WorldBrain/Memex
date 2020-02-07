@@ -10,6 +10,7 @@
     padding: 0px 8px 150px 8px;
     display: flex;
     flex-direction: column;
+    width: 97%;
 }
 
 .searchSwitch {

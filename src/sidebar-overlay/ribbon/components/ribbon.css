@@ -19,7 +19,7 @@
     align-self: center;
     right: 0;
     width: 15px;
-    top: 0;
+    top: 20px;
     height: 100%;
     z-index: 2147483645;
 
@@ -51,7 +51,7 @@
     background: white;
     height: 100%;
     width: 36px;
-    top: 0;
+    top: 20px;
 
     & .removeSidebar {
         visibility: hidden;
@@ -74,6 +74,7 @@
     flex-direction: column;
     justify-content: space-between;
     padding: 5px 0;
+    margin-top: 0px;
 }
 
 .innerRibbonSidebarOpen {

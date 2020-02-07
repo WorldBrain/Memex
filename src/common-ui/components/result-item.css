@@ -4,6 +4,7 @@
 :root {
     --height: 90px;
     --imgWidth: 200px;
+    --resultWidth: 800px;
     --vertical-spacing: 30px;
     --compact-scale: 0.6;
 }
@@ -66,7 +67,7 @@
 }
 
 .rootContainerOverview {
-    width: 800px;
+    width: var(--resultWidth);
     height: fit-content;
 
     & .button {
@@ -108,7 +109,7 @@
 
 .rootOverview {
     padding: 0;
-    width: 100%;
+    width: var(--resultWidth);
 }
 
 .crossRibbon {
@@ -192,6 +193,7 @@
     width: 100%;
     display: flex;
     flex-direction: row;
+    margin-top: 5px;
 }
 
 .infoContainer {
@@ -294,7 +296,7 @@
     flex-direction: row;
     align-items: flex-end;
     padding-left: 38px;
-    margin: 5px 0;
+    margin: 5px 0 0 0;
 }
 
 .buttonsContainer {

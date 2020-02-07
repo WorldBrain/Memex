@@ -40,6 +40,7 @@ class Overview extends PureComponent {
     handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL
         this.props.setShowOnboardingMessage()
+        localStorage.setItem('stage.Onboarding', 'true')
     }
 
     renderOnboarding() {

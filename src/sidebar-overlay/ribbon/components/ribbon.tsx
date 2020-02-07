@@ -193,20 +193,6 @@ class Ribbon extends Component<Props, State> {
                                     />
                                 </ButtonTooltip>
                                 <ButtonTooltip
-                                    tooltipText="Open Memex Dashboard"
-                                    position="left"
-                                >
-                                    <button
-                                        onClick={() =>
-                                            this.openOverviewTabRPC()
-                                        }
-                                        className={cx(
-                                            styles.button,
-                                            styles.logo,
-                                        )}
-                                    />
-                                </ButtonTooltip>
-                                <ButtonTooltip
                                     tooltipText={this.getTooltipText(
                                         'toggleSidebar',
                                     )}
@@ -462,7 +448,7 @@ class Ribbon extends Component<Props, State> {
                                     tooltipText="Toggle tooltip"
                                     position="left"
                                 >
-                                    <button
+                                    <div
                                         onClick={this.props.handleTooltipToggle}
                                         className={cx(
                                             styles.button,

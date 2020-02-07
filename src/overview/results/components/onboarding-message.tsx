@@ -17,25 +17,20 @@ export default class OnboardingMessage extends React.PureComponent<
 > {
     state: State = { showTooltip: true }
 
+    private dismiss = () => {
+        localStorage.setItem('stage.Onboarding', 'false')
+        this.setState(() => ({ showTooltip: false }))
+    }
+
     render() {
         return (
             <ResultsMessage>
-                  <div className={styles.mainText}>
-                    <p className= {styles.title}>
-                        It looks like you don't have anything saved yet.
-                    </p>
-                    <p className={styles.subTitle}>
-                        Visit some websites to fill your Memex
-                    </p>
-                </div>
                 {this.state.showTooltip && (
                     <OnboardingTooltip
                         descriptionText="Import your existing bookmarks &amp; web history from Pocket, Diigo, Raindrop.io and many more."
                         CTAText="Import"
                         onCTAClick={() => (window.location.hash = '#/import')}
-                        onDismiss={() =>
-                            this.setState(() => ({ showTooltip: false }))
-                        }
+                        onDismiss={this.dismiss}
                     />
                 )}
             </ResultsMessage>

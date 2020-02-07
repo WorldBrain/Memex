@@ -92,7 +92,7 @@ class ResultItemActions extends PureComponent<Props> {
                         )}
                      <ButtonTooltip
                         position="bottom"
-                        tooltipText="Add/View Commments & Annotations"
+                        tooltipText="Add/View Notes"
                     >
                         {this.props.annotsCount > 0 ? (
                         <div

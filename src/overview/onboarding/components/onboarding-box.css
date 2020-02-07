@@ -33,19 +33,91 @@
     justify-content: space-between;
 }
 
-.whiteBox {
-    color: color5;
-    width: 90%;
-    max-width: 800px;
-    margin: auto auto;
+.featuresContainer {
     display: flex;
-    padding: 2em 4em;
+    width: 100vw;
+    height: 100vh;
     flex-direction: column;
-    text-align: center;
-    align-items: center;
     justify-content: space-between;
-    min-height: 633px;
-    opacity: 1;
+    align-items: center;
+}
+
+.titleContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 30px;
+    align-items: center;
+    height: 30vh;
+    width: 100vw;
+}
+
+.title {
+    font-weight: 700;
+    font-size: 30px;
+    color: #3a2f45;
+}
+
+.subTitle {
+    font-weight: 300;
+    font-size: 20px;
+    color: #3a2f45;
+    margin-top: 10px;
+}
+
+.subTitle2 {
+    composes: subTitle;
+    margin-top: 5px;
+}
+
+.settingsContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 10vh;
+    width: 100%;
+    margin-bottom: 90px;
+}
+
+.settingsAction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.bottomContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100vw;
+    height: 50vh;
+}
+
+.backButtonArea {
+    flex: 1;
+}
+
+.featureImageArea {
+    flex: 3;
+    display: flex;
+    height: 100%;
+}
+
+.featureImageAreaMobile {
+    composes: featureImageArea;
+    margin-bottom: 0px;
+}
+
+.nextButtonArea {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    flex-direction: column;
 }
 
 .logo {
@@ -103,38 +175,38 @@
 }
 
 .onboardingGif {
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: contain;
-    border: 1px solid #eee;
-    border-radius: 5px;
-    display: flex;
-    height: 250px;
-    margin: 0 auto 2rem;
-    width: auto;
+    width: 100%;
+    height: 100%;
 }
 
 .annotationGif {
     composes: onboardingGif;
+    margin-top: -50px;
 }
 
 .searchGif {
     composes: onboardingGif;
+    margin-top: -50px;
 }
 
 .sidebarGif {
     composes: onboardingGif;
+    margin-top: -50px;
+}
+
+.privacyImg {
+    composes: onboardingGif;
+    margin-top: -50px;
 }
 
 .keyboardGif {
     composes: onboardingGif;
     background-size: cover;
+    margin-top: -50px;
 }
 
 .mobileImg {
     composes: onboardingGif;
-    background-size: contain;
-    border: none;
 }
 
 .floatingImage {

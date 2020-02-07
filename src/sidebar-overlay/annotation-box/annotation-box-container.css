@@ -3,10 +3,10 @@
 .container {
     composes: boxShadow h2Color buttonRadiusSmall from '../../common-ui/colors.css';
     box-sizing: border-box;
-    width: 100%;
+    width: 96%;
     display: flex;
     flex-direction: column;
-    font-size: 13px;
+    font-size: 12px;
     margin: 10px 0 5px 0;
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -45,7 +45,7 @@
 
 .highlight {
     font-weight: 400;
-    font-size: 14px;
+    font-size: 12px;
     letter-spacing: 0.5px;
     margin: 0 0 5px 0;
     padding: 15px 15px 7px 15px;
@@ -53,10 +53,11 @@
 }
 
 .highlightText {
-    composes: backgroundLightMintGreen titleColor from '../../common-ui/colors.css';
+    composes: backgroundLightMintGreen from '../../common-ui/colors.css';
     padding: 2px 0;
-    line-height: 22px;
+    line-height: 25px;
     font-style: normal;
+    color: #3a2f45;
 }
 
 .newAnnotation {
