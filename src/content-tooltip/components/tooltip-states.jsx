@@ -19,12 +19,12 @@ export const InitialComponent = ({
 }) => (
     <div className={styles.createButtons}>
         <ButtonTooltip tooltipText="Highlight (N)" position="bottom">
-            <div className={styles.button} onMouseDown={createHighlight}>
+            <div className={styles.button} onClick={createHighlight}>
                 <img src={highlighter} />
             </div>
         </ButtonTooltip>
         <ButtonTooltip tooltipText="Annotate (A)" position="bottom">
-            <div className={styles.button} onMouseDown={createAnnotation}>
+            <div className={styles.button} onClick={createAnnotation}>
                 <img src={annotations}/>
             </div>
         </ButtonTooltip>
@@ -32,7 +32,7 @@ export const InitialComponent = ({
             tooltipText="Create Link to Highlight (L)"
             position="bottom"
         >
-            <div className={styles.button} onMouseDown={createLink}>
+            <div className={styles.button} onClick={createLink}>
                 <img src={share}/>
             </div>
         </ButtonTooltip>
