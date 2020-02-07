@@ -17,7 +17,7 @@ import {
     MemexExtSyncInfoStorage,
 } from './storage'
 import { INCREMENTAL_SYNC_FREQUENCY } from './constants'
-import { filterBlobsFromSyncLog } from './sync-logging'
+import { filterSyncLog } from './sync-logging'
 import { MemexExtSyncSettingStore } from './setting-store'
 import { resolvablePromise } from 'src/util/promises'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
@@ -95,7 +95,7 @@ export default class SyncBackground extends SyncService {
 
     async createSyncLoggingMiddleware() {
         const middleware = await super.createSyncLoggingMiddleware()
-        middleware.operationPreprocessor = filterBlobsFromSyncLog
+        middleware.operationPreprocessor = filterSyncLog
         return middleware
     }
 

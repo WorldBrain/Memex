@@ -98,6 +98,7 @@ export default class PageStorage extends StorageModule {
     }
 
     async createOrUpdatePage(pageData: PipelineRes) {
+        pageData = { ...pageData }
         const normalizedUrl = normalizeUrl(pageData.url, {})
 
         const existingPage = await this.getPage(pageData.url)
@@ -113,7 +114,11 @@ export default class PageStorage extends StorageModule {
         for (const fieldName of Object.keys(pageData)) {
             const termsField = getTermsField('pages', fieldName)
             if (termsField) {
-                if (existingPage[fieldName] === pageData[fieldName]) {
+                if (
+                    !pageData[fieldName] ||
+                    existingPage[fieldName] === pageData[fieldName]
+                ) {
+                    delete pageData[fieldName]
                     continue
                 }
 
@@ -136,10 +141,12 @@ export default class PageStorage extends StorageModule {
             }
         }
 
-        await this.operation('updatePage', {
-            url: normalizedUrl,
-            updates,
-        })
+        if (Object.keys(updates).length) {
+            await this.operation('updatePage', {
+                url: normalizedUrl,
+                updates,
+            })
+        }
     }
 
     async createVisitsIfNeeded(url: string, visitTimes: number[]) {
