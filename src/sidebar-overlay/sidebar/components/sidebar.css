@@ -17,10 +17,22 @@
     height: fit-content;
 }
 
+.topSection {
+    position: sticky;
+    top: 0px;
+    z-index: 2600;
+    background: white;
+    overflow: hidden;
+}
+
+.bottomContainer {
+    height: fill-available;
+}
+
 .resultsContainer {
     flex: 1;
     position: relative;
-    top: 45px;
+    top: 15px;
 }
 
 .resultsContainerPage {
@@ -41,9 +53,10 @@
     composes: annotationCard from '../../../common-ui/elements.css';
     background: white;
     border-radius: 3px;
-    top: 50px;
-    margin-bottom: 70px;
+    top: 20px;
+    margin-bottom: 40px;
     position: relative;
+    width: 98%;
 
     &:hover {
         background: white;

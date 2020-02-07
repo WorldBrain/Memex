@@ -53,7 +53,7 @@ interface Props {
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
     clearAllFilters: () => void
-    resetPage: React.MouseEventHandler<HTMLButtonElement>
+    resetPage: React.MouseEventHandler<HTMLDivElement>
 }
 
 interface State {
@@ -186,37 +186,41 @@ class Sidebar extends React.Component<Props, State> {
                     noOverlay
                     disableCloseOnEsc
                 >
-                    <Topbar
-                        {...this.props}
-                        disableAddCommentBtn={showCommentBox}
-                        handleCloseBtnClick={this.handleCloseBtnClick}
-                        handleSettingsBtnClick={this._handleSettingsBtnClick}
-                        handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        handleSearchChange={this.handleSearchChange}
-                        handleSearchEnter={this.handleSearchEnter}
-                        handleClearBtn={this.handleClearBtn}
-                        handleFilterBtnClick={this.toggleShowFilters}
-                        handleClearFiltersBtnClick={
-                            this.handleClearFiltersBtnClick
-                        }
-                    />
                     <div className={styles.sidebar}>
-                        {env === 'inpage' && (
-                            <React.Fragment>
-                                <div className={styles.searchSwitch}>
-                                    <SearchTypeSwitch
-                                        isOverview={
-                                            this.props.env === 'overview'
-                                        }
+                        <div className={styles.topSection}>
+                             <Topbar
+                                {...this.props}
+                                disableAddCommentBtn={showCommentBox}
+                                handleCloseBtnClick={this.handleCloseBtnClick}
+                                handleSettingsBtnClick={this._handleSettingsBtnClick}
+                                handleAddCommentBtnClick={handleAddCommentBtnClick}
+                                handleSearchChange={this.handleSearchChange}
+                                handleSearchEnter={this.handleSearchEnter}
+                                handleClearBtn={this.handleClearBtn}
+                                handleFilterBtnClick={this.toggleShowFilters}
+                                handleClearFiltersBtnClick={
+                                    this.handleClearFiltersBtnClick
+                                }
+                            />
+                            {env === 'inpage' && (
+                                <React.Fragment>
+                                    <div className={styles.searchSwitch}>
+                                        <SearchTypeSwitch
+                                            isOverview={
+                                                this.props.env === 'overview'
+                                            }
+                                            handleAddCommentBtnClick={handleAddCommentBtnClick}
+                                        />
+                                    </div>
+                                    <PageInfo
+                                        page={this.props.page}
+                                        isCurrentPage={this.isCurrentPageSearch}
+                                        resetPage={this.props.resetPage}
                                     />
-                                </div>
-                                <PageInfo
-                                    page={this.props.page}
-                                    isCurrentPage={this.isCurrentPageSearch}
-                                    resetPage={this.props.resetPage}
-                                />
-                            </React.Fragment>
-                        )}
+                                </React.Fragment>
+                            )}
+                        </div>
+                        <div>
                         {showCommentBox && (
                             <div className={styles.commentBoxContainer}>
                                 <CommentBoxContainer
@@ -225,6 +229,7 @@ class Sidebar extends React.Component<Props, State> {
                                 />
                             </div>
                         )}
+                        </div>
                         <div
                             className={cx(styles.resultsContainer, {
                                 [styles.resultsContainerPage]:

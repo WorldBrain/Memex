@@ -27,9 +27,9 @@
 
 .tagPill {
     composes: lightBlueBackground from './colors.css';
-    padding: 2px 9px 3px 9px;
+    padding: 2px 9px;
     border-radius: 3px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.5px;
     height: auto;

@@ -211,13 +211,13 @@
     display: flex;
     flex-direction: column;
     max-width: 20px;
-    height: 16px;
+    width: max-content;
+    height: 14px;
     justify-content: center;
     align-items: center;
     position: absolute;
     z-index: 100001;
     cursor: pointer;
-    animation: slideIn 0.05s ease-in-out;
 
     & img {
         width: 100%;

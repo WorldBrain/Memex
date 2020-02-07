@@ -110,7 +110,7 @@
 
 .button {
     composes: nakedButton from 'src/common-ui/elements.css';
-    padding: 3px 6px 3px 6px;
+    padding: 3px 6px 3px 10px;
     display: flex;
     align-items: center;
     margin-left: 24px;

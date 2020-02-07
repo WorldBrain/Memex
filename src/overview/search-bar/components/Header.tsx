@@ -86,7 +86,7 @@ class Header extends PureComponent<Props> {
                                 autoComplete="off"
                             />
                         </div>
-                        <button
+                        <div
                             className={cx(styles.button, {
                                 [styles.activeButton]: this.props
                                     .showClearFiltersBtn,
@@ -105,7 +105,7 @@ class Header extends PureComponent<Props> {
                                     />
                                 </ButtonTooltip>
                             )}
-                        </button>
+                        </div>
                     </div>
                     <div className={styles.links}>
                         <BackupStatus />

@@ -2,13 +2,14 @@
 @value color1, color4, color6, color2, radius3, color7, color3, color14 from colors;
 
 .masterContainer {
-    position: fixed;
+    position: sticky;
     background-color: white;
     z-index: 2;
     width: 440px;
     margin-left: -8px;
     display: flex;
     align-items: center;
+    flex-direction: column;
     border-bottom: 1px solid color14;
 }
 
@@ -48,6 +49,16 @@
     &:focus {
         background-color: color1;
     }
+}
+
+.notesBox {
+    display: flex;
+    flex-direction: row;
+    align-self: flex-start;
+    margin-left: 10px;
+    margin-bottom: 5px;
+    width: 100%;
+    justify-content: space-between;
 }
 
 .notesBtn {
