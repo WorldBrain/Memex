@@ -6,7 +6,7 @@
     width: 96%;
     display: flex;
     flex-direction: column;
-    font-size: 12px;
+    font-size: 14px;
     margin: 10px 0 5px 0;
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -45,7 +45,7 @@
 
 .highlight {
     font-weight: 400;
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: 0.5px;
     margin: 0 0 5px 0;
     padding: 15px 15px 7px 15px;

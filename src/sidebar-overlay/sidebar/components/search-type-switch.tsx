@@ -9,6 +9,10 @@ import {
 import cx from 'classnames'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
+import { browser } from 'webextension-polyfill-ts'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+
+const commentAdd = browser.extension.getURL('/img/comment_add.svg')
 
 const styles = require('./search-type-switch.css')
 
@@ -179,25 +183,22 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                         </button>
                                     )}
                                     {!this.isCurrentPageSearch && (
-                                        <button
-                                            className={cx(
-                                                styles.unfoldAllBtn,
-                                                styles.btn,
-                                            )}
-                                            onClick={
-                                                this.props.handleUnfoldAllClick
-                                            }
-                                            disabled={this.isCurrentPageSearch}
+                                        <ButtonTooltip
+                                            position="left"
+                                            tooltipText="Add note to this page"
                                         >
                                             <div
                                                 onClick={e => {
                                                     e.stopPropagation()
                                                     this.props.handleAddCommentBtnClick()
                                                 }}    
+                                                className={
+                                                    styles.imgContainer
+                                                }
                                                 > 
-                                                add new        
+                                                <img src={commentAdd} className={styles.img}/>        
                                             </div>
-                                        </button>
+                                        </ButtonTooltip>
                                     )}
                                 </div>
                             </div>

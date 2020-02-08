@@ -74,6 +74,19 @@
     }
 }
 
+.imgContainer {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+
+    & img {
+        max-height: 25px;
+        max-width: 25px;
+        height: 100%;
+        width: 100%;
+    }
+}
+
 .pages {
     margin-right: 2px;
 }

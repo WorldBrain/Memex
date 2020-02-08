@@ -71,7 +71,7 @@ const Topbar = ({
                 </button>
             </React.Fragment>
         )}
-
+        {props.env === 'overview' && (
         <div className={styles.right}>
             {/* Button to add a comment. */}
             <ButtonTooltip
@@ -89,6 +89,7 @@ const Topbar = ({
                 />
             </ButtonTooltip>
         </div>
+        )}
     </div>
 )
 
