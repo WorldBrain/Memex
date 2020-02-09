@@ -42,6 +42,7 @@ import { ConnectivityCheckerBackground } from 'src/connectivity-checker/backgrou
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { combineSearchIndex } from 'src/search/search-index'
+import { StorexHubBackground } from 'src/storex-hub/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -61,6 +62,7 @@ export interface BackgroundModules {
     bgScript: BackgroundScript
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
+    storexHub: StorexHubBackground
 }
 
 export function createBackgroundModules(options: {
@@ -185,6 +187,9 @@ export function createBackgroundModules(options: {
             appVersion: process.env.VERSION,
             postReceiveProcessor,
             disableEncryption: options.disableSyncEnryption,
+        }),
+        storexHub: new StorexHubBackground({
+            storageManager,
         }),
         features: new FeatureOptIns(),
         pages,
