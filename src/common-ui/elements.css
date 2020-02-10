@@ -192,15 +192,17 @@
 
 .searchField {
     background-color: color11;
-    color: color3;
+    color: #3a2f45;
     border-radius: 3px;
     font-size: 14px;
     font-weight: 400;
     text-align: left;
+    height: fit-content;
 
     &::placeholder {
-        color: color4;
-        font-style: normal;
+        color: #3a2f45;
+        font-style: italic;
+        font-weight: 500;
     }
 
     &:focus {

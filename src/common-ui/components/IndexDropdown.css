@@ -5,9 +5,10 @@
     composes: hoverColor from 'src/common-ui/colors.css';
     align-items: center;
     display: flex;
-    padding: 8px 20px 8px 20px;
+    padding: 8px 10px 8px 10px;
+    margin: 0 10px;
     cursor: pointer;
-    border-bottom: 1px solid color9;
+    border-bottom: 1px solid #e8e8e8;
     word-wrap: break-word;
     font-size: 14px;
     height: 38px;
@@ -17,7 +18,7 @@
     &:hover,
     &:focus,
     &:active {
-        background-color: color14;
+        background-color: #f8f8f8;
         outline: none;
     }
 
@@ -88,18 +89,20 @@
 .searchContainer {
     composes: searchField from 'src/common-ui/elements.css';
     justify-content: space-between;
-    padding: 2px 10px 2px 10px;
+    padding: 2px 20px 2px 20px;
     margin: 5px 5px 5px 5px;
     display: flex;
     align-items: center;
 }
 
 .searchIcon {
-    display: flex;
-    composes: searchIcon from 'src/common-ui/icons.css';
-    width: 25px;
-    height: 25px;
-    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.searchImg {
+    height: 100%;
+    width: 100%;
 }
 
 .search {
@@ -120,7 +123,7 @@
     }
 
     &::placeholder {
-        color: #888;
+        color: #3a2f45;
     }
 
     &:focus {
@@ -231,7 +234,7 @@
     opacity: 0.5;
 
     &:hover {
-        opacity: 0.75;
+        opacity: 1;
     }
 }
 

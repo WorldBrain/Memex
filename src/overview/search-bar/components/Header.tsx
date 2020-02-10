@@ -74,6 +74,9 @@ class Header extends PureComponent<Props> {
                         })}
                     >
                         <div className={styles.searchField}>
+                            <span className={styles.searchIconContainer}>
+                                <img src="/img/search.svg" className={styles.searchIconImg}/>
+                            </span>
                             <input
                                 id="query-search-bar"
                                 className={styles.query}

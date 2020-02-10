@@ -117,8 +117,11 @@ class IndexDropdown extends PureComponent<Props> {
                     className={cx(styles.searchContainer, {
                         [styles.commentBox]: this.props.allowAdd,
                     })}
-                >
-                    <span className={styles.searchIcon} />
+                >    
+
+                    <span className={styles.searchIcon}>
+                        <img src="/img/search.svg" className={styles.searchImg}/>
+                    </span>
                     <TextInputControlled
                         className={styles.search}
                         name="query"
