@@ -21,6 +21,7 @@ describe('Custom List Integrations', () => {
         await customLists.createCustomList(DATA.LIST_1)
         await customLists.createCustomList(DATA.LIST_2)
         await customLists.createCustomList(DATA.LIST_3)
+        await customLists.createCustomList(DATA.MOBILE_LIST)
 
         await customLists.insertPageToList(DATA.PAGE_ENTRY_1)
         await customLists.insertPageToList(DATA.PAGE_ENTRY_2)
@@ -83,7 +84,18 @@ describe('Custom List Integrations', () => {
 
     describe('read ops', () => {
         test('fetch all lists', async () => {
-            const lists = await customLists.fetchAllLists({})
+            const lists = await customLists.fetchAllLists({
+                skipMobileList: false,
+            })
+
+            checkDefined(lists)
+            expect(lists.length).toBe(4)
+        })
+
+        test('fetch all lists, skipping mobile list', async () => {
+            const lists = await customLists.fetchAllLists({
+                skipMobileList: true,
+            })
 
             checkDefined(lists)
             expect(lists.length).toBe(3)
@@ -129,6 +141,7 @@ describe('Custom List Integrations', () => {
         test('fetch lists with some urls excluded', async () => {
             const lists = await customLists.fetchAllLists({
                 excludeIds: [1, 2] as any[],
+                skipMobileList: true,
             })
 
             checkDefined(lists)
@@ -140,6 +153,7 @@ describe('Custom List Integrations', () => {
         test('fetch lists with limits', async () => {
             const lists = await customLists.fetchAllLists({
                 limit: 1,
+                skipMobileList: false,
             })
 
             checkDefined(lists)
@@ -162,22 +176,6 @@ describe('Custom List Integrations', () => {
 
             const after = await customLists.fetchListById({ id })
             expect(after.name).toEqual(updatedName)
-        })
-
-        test('fail to update list name', async () => {
-            const updatedList = await customLists.updateList({
-                id: 4,
-                name: 'another new name',
-            })
-            const newName = await customLists.fetchListIgnoreCase({
-                name: 'another new name',
-            })
-            // checkDefined(updatedList)
-
-            // Nothing updated
-            // expect(updatedList).toBe(0)
-            // cannot found anything with the new name
-            expect(newName).toBeNull()
         })
     })
 

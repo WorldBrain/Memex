@@ -84,6 +84,7 @@ export const initState: () => Thunk = () => async dispatch => {
         const lists = await fetchAllListsRPC({
             excludeIds: listsAssocWithPage.map(({ id }) => id),
             limit: 20,
+            skipMobileList: true,
         })
         dispatch(collectionActs.setInitColls([...listsAssocWithPage, ...lists]))
         dispatch(collectionActs.setCollections(listsAssocWithPage))

@@ -114,6 +114,7 @@ class ListContainer extends Component {
                 <ListItem
                     key={i}
                     listName={list.name}
+                    isMobileList={list.isMobileList}
                     isFiltered={list.isFilterIndex}
                     onEditButtonClick={this.props.handleEditBtnClick(i)}
                     onListItemClick={this.props.handleListItemClick(list, i)}
@@ -217,8 +218,10 @@ const mapDispatchToProps = (dispatch, getState) => ({
         dispatch(actions.toggleListFilterIndex(index))
         dispatch(filterActs.toggleListFilter(id))
     },
-    handleAddPageList: ({ id }, index) => (url, isSocialPost) => {
-        dispatch(actions.addUrltoList(url, isSocialPost, index, id))
+    handleAddPageList: ({ id, isMobileList }, index) => (url, isSocialPost) => {
+        if (!isMobileList) {
+            dispatch(actions.addUrltoList(url, isSocialPost, index, id))
+        }
     },
     handleDeleteList: e => {
         e.preventDefault()

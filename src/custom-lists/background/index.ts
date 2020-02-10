@@ -59,9 +59,15 @@ export default class CustomListBackground {
         return Date.now()
     }
 
-    async fetchAllLists({ excludeIds = [], skip = 0, limit = 20 }) {
+    async fetchAllLists({
+        excludeIds = [],
+        skip = 0,
+        limit = 20,
+        skipMobileList,
+    }) {
         return this.storage.fetchAllLists({
             excludedIds: excludeIds,
+            skipMobileList,
             limit,
             skip,
         })
