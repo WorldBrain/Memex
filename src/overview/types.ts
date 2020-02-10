@@ -7,6 +7,7 @@ import { Annotation } from 'src/annotations/types'
 
 export interface Result extends SocialPage {
     url: string
+    fullUrl: string
     title: string
     tags: string[]
     hasBookmark: boolean

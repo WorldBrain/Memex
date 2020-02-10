@@ -15,6 +15,7 @@ const styles = require('./result-item.css')
 
 export interface Props extends Partial<SocialPage> {
     url: string
+    fullUrl: string
     title?: string
     favIcon?: string
     nullImg?: string
@@ -46,7 +47,7 @@ export interface Props extends Partial<SocialPage> {
 
 class ResultItem extends PureComponent<Props> {
     get hrefToPage() {
-        return `http://${this.props.url}`
+        return `${this.props.fullUrl}`
     }
 
     get environment() {
