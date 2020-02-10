@@ -41,6 +41,7 @@ storiesOf('Sync', module)
             waitForInitialSync={async () => {}}
             waitForInitialSyncConnected={async () => {}}
             refreshDevices={async () => {}}
+            handleUpgradeNeeded={() => {}}
         />
     ))
     .add('DevicePane - Not Subscribed', () => (
@@ -53,6 +54,7 @@ storiesOf('Sync', module)
             waitForInitialSync={async () => {}}
             waitForInitialSyncConnected={async () => {}}
             refreshDevices={async () => {}}
+            handleUpgradeNeeded={() => {}}
         />
     ))
     .add('Initial Sync - Modal', () => (

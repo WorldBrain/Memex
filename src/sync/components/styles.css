@@ -60,6 +60,7 @@
     vertical-align: middle;
     font-weight: bold;
     float: right;
+    cursor: pointer;
 }
 
 .mobileSection {

@@ -1,4 +1,4 @@
-import { PricingPlanTitle } from 'src/authentication/components/Subscription/pricing.style'
+import { PricingPlanTitle, PricingPlanItem, LoginTitle, LoginButton, WhiteSpacer30 } from 'src/authentication/components/Subscription/pricing.style'
 import { SubscriptionInnerOptions } from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
 import * as React from 'react'
 
@@ -13,15 +13,31 @@ interface Props {
 export class SubscriptionPreview extends React.Component<Props> {
     render() {
         return (
-            <div onClick={this.props.onPress}>
+            <div>
                 <PricingPlanTitle className={''}>
-                    Subscribe to Memex Pro
+                    ⭐️ Upgrade to Memex Pro
                 </PricingPlanTitle>
+
+                <PricingPlanItem className={''}>
+                            📲 Encrypted Sync with your iOS or Android phone
+                </PricingPlanItem>
+
+                <PricingPlanItem className={''}>
+                    💾 Automatic Backups
+                </PricingPlanItem>
+
+                <WhiteSpacer30/>
 
                 <SubscriptionInnerOptions
                     openCheckoutBackupMonthly={this.props.onPress}
                     openCheckoutBackupYearly={this.props.onPress}
                 />
+                <LoginTitle className={''}>
+                    Already have an account?
+                </LoginTitle>
+                <LoginButton className={''} onClick={this.props.onPress}>
+                    Login 
+                </LoginButton>
             </div>
         )
     }
