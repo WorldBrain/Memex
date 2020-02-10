@@ -140,9 +140,6 @@ class TextInputControlled extends React.Component<
             text: this.textElement.value,
             selection: this.getSelectionFromDom(),
         })
-        if (this.props.onChange) {
-            this.props.onChange(this.textElement.value)
-        }
     }
 
     // Set the selection from our state to the HTML component
@@ -297,7 +294,6 @@ class TextInputControlled extends React.Component<
         selection.start = selection.start + 1
 
         this.updateTextElement({ text: newText, selection })
-        this.props.onChange(this.textElement.value)
     }
 
     private handleBackspaceInput() {
@@ -324,7 +320,6 @@ class TextInputControlled extends React.Component<
         }
 
         this.updateTextElement({ text: newText, selection })
-        this.props.onChange(this.textElement.value)
     }
 
     private handleDeleteInput() {
@@ -338,7 +333,6 @@ class TextInputControlled extends React.Component<
             )
 
         this.updateTextElement({ text: newText, selection })
-        this.props.onChange(this.textElement.value)
     }
 
     // Helper method to jump the selection to a specific position
@@ -360,7 +354,9 @@ class TextInputControlled extends React.Component<
             },
             () => this.syncSelectionToDom(this.textElement, updatedSelection),
         )
-        this.props.onChange(this.state.text)
+        if (this.props.onChange) {
+            this.props.onChange(updatedContent)
+        }
     }
 
     // Update the ref here as well as any parent components that might want to use it
