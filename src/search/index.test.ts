@@ -12,14 +12,16 @@ jest.mock('lodash/fp/flatten')
 jest.mock('lodash/fp/difference')
 
 describe('Search index integration', () => {
-    async function setupTest() {
+    async function setupTest(options?: { excludeTestData?: boolean }) {
         const {
             storageManager,
             backgroundModules,
         } = await setupBackgroundIntegrationTest()
         const { searchIndex } = backgroundModules.search
 
-        await insertTestData(searchIndex, backgroundModules.tags)
+        if (!options?.excludeTestData) {
+            await insertTestData(searchIndex, backgroundModules.tags)
+        }
         return {
             storageManager,
             searchIndex,
@@ -446,6 +448,72 @@ describe('Search index integration', () => {
         })
 
         afterEach(() => (jasmine.DEFAULT_TIMEOUT_INTERVAL = origTimeout))
+
+        test('add page with extra data', async () => {
+            const { searchIndex, storageManager, pages } = await setupTest()
+            pages.storage.disableBlobProcessing = true
+
+            await searchIndex.addPage({
+                pageDoc: {
+                    ...DATA.PAGE_1,
+                    favIconURI: 'bla bla bla',
+                },
+                visits: [DATA.VISIT_1],
+            })
+
+            expect(
+                await storageManager
+                    .collection('pages')
+                    .findObject({ url: DATA.PAGE_ID_1 }),
+            ).toEqual({
+                domain: 'lorem.com',
+                fullTitle: 'page 3 dummy',
+                fullUrl: 'https://www.lorem.com/test2',
+                hostname: 'lorem.com',
+                terms: expect.any(Array),
+                text:
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                titleTerms: expect.any(Array),
+                url: 'lorem.com/test2',
+                urlTerms: expect.any(Array),
+            })
+        })
+
+        test('add page terms with extra data', async () => {
+            const { searchIndex, storageManager, pages } = await setupTest()
+            pages.storage.disableBlobProcessing = true
+
+            await searchIndex.addPage({
+                pageDoc: {
+                    ...DATA.PAGE_1,
+                },
+                visits: [DATA.VISIT_1],
+            })
+
+            await searchIndex.addPageTerms({
+                pageDoc: {
+                    ...DATA.PAGE_1,
+                    favIconURI: 'bla bla bla',
+                },
+            })
+
+            expect(
+                await storageManager
+                    .collection('pages')
+                    .findObject({ url: DATA.PAGE_ID_1 }),
+            ).toEqual({
+                domain: 'lorem.com',
+                fullTitle: 'page 3 dummy',
+                fullUrl: 'https://www.lorem.com/test2',
+                hostname: 'lorem.com',
+                terms: expect.any(Array),
+                text:
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                titleTerms: expect.any(Array),
+                url: 'lorem.com/test2',
+                urlTerms: expect.any(Array),
+            })
+        })
 
         test('add fav-icon', async () => {
             const { searchIndex, storageManager, pages } = await setupTest()

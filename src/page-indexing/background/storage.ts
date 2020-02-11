@@ -7,7 +7,10 @@ import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbra
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
-import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
+import {
+    getTermsField,
+    isTermsField,
+} from '@worldbrain/memex-common/lib/storage/utils'
 import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import decodeBlob from 'src/util/decode-blob'
 
@@ -99,6 +102,15 @@ export default class PageStorage extends StorageModule {
 
     async createOrUpdatePage(pageData: PipelineRes) {
         pageData = { ...pageData }
+        for (const field of Object.keys(pageData)) {
+            if (
+                !this.collections['pages'].fields[field] &&
+                !isTermsField({ collection: 'pages', field })
+            ) {
+                delete pageData[field]
+            }
+        }
+
         const normalizedUrl = normalizeUrl(pageData.url, {})
 
         const existingPage = await this.getPage(pageData.url)
