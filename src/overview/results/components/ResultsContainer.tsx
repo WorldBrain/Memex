@@ -11,7 +11,7 @@ import OnboardingMessage from './onboarding-message'
 import SearchTypeSwitch from './search-type-switch-container'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
-import { RootState } from '../../../options/types'
+import { RootState } from 'src/options/types'
 
 const styles = require('./ResultList.css')
 
@@ -123,7 +123,4 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(ResultsContainer)
+export default connect(mapState, mapDispatch)(ResultsContainer)
