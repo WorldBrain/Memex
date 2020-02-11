@@ -6,6 +6,7 @@ import {
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
+import * as DATA from 'src/direct-linking/background/index.test.data'
 
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
@@ -206,6 +207,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             tags: [],
                                             title: 'bla.com title',
                                             url: 'bla.com',
+                                            fullUrl: 'http://www.bla.com/',
                                         },
                                     ],
                                     resultsExhausted: true,
@@ -298,6 +300,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             tags: [],
                                             title: 'bla.com title',
                                             url: 'bla.com',
+                                            fullUrl: 'http://www.bla.com/',
                                         },
                                     ],
                                     resultsExhausted: true,

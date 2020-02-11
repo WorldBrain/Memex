@@ -1034,6 +1034,7 @@ function mobileSyncTests(suiteOptions: {
                     tags: ['eggs', 'spam'],
                     title: 'This is a test page',
                     url: 'test.com/foo',
+                    fullUrl: testPage.fullUrl,
                 },
             ],
             resultsExhausted: true,
