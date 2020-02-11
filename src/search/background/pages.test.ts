@@ -92,6 +92,7 @@ const expectedPage1Result = {
     tags: [],
     title: undefined,
     url: DATA.PAGE_1.url,
+    fullUrl: DATA.PAGE_1.fullUrl,
 }
 const expectedPage2Result = {
     annotations: [],
@@ -103,6 +104,7 @@ const expectedPage2Result = {
     tags: [],
     title: undefined,
     url: DATA.PAGE_2.url,
+    fullUrl: DATA.PAGE_2.fullUrl,
 }
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
