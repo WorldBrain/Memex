@@ -35,35 +35,31 @@ export const highlightDOMRange = (
     const { startContainer, startOffset, endContainer, endOffset } = rangeObject
 
     // Highlight each node
-    const highlights: HTMLElement[] = nodes.map(node =>
-        highlightNode(node, highlightClass),
-    )
+    // const highlights: HTMLElement[] =
+    nodes.forEach(node => highlightNode(node, highlightClass))
+
+    // Reset selection
+    clearBrowserSelection()
 
     // The rangeObject gets messed up by our DOM changes. Be kind and restore.
     rangeObject.setStart(startContainer, startOffset)
     rangeObject.setEnd(endContainer, endOffset)
+}
 
-    // Return a function that cleans up the highlights.
-    const cleanupHighlights = () => {
-        // Remember range details to restore it later.
-        /* tslint:disable no-shadowed-variable */
-        const {
-            startContainer,
-            startOffset,
-            endContainer,
-            endOffset,
-        } = rangeObject
-        /* tslint:enable */
-
-        // Remove each of the created highlights.
-        highlights.forEach(highlight => removeHighlight(highlight))
-
-        // Be kind and restore the rangeObject again.
-        rangeObject.setStart(startContainer, startOffset)
-        rangeObject.setEnd(endContainer, endOffset)
+// Resets any selected content in the window, useful to stop content script popping up again inconsistently.
+const clearBrowserSelection = () => {
+    if (window.getSelection) {
+        if (window.getSelection().empty) {
+            // Chrome
+            window.getSelection().empty()
+        } else if (window.getSelection().removeAllRanges) {
+            // Firefox
+            window.getSelection().removeAllRanges()
+        }
+    } else if (document['selection']) {
+        // IE
+        document['selection'].empty()
     }
-
-    return cleanupHighlights
 }
 
 // Return an array of the text nodes in the range. Split the start and end nodes if required.
