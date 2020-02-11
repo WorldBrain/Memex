@@ -9,6 +9,10 @@ import {
 import cx from 'classnames'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
+import { browser } from 'webextension-polyfill-ts'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+
+const commentAdd = browser.extension.getURL('/img/comment_add.svg')
 
 const styles = require('./search-type-switch.css')
 
@@ -32,6 +36,7 @@ export interface DispatchProps {
 
 export interface OwnProps {
     isOverview?: boolean
+    handleAddCommentBtnClick: () => void
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -137,48 +142,68 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                             Notes
                         </button>
                     </div>
-                    {this.props.searchType === 'notes' && (
-                        <div className={styles.pageSwitch}>
-                            <span>
-                                <button
-                                    className={cx(
-                                        styles.searchSwitchBtn,
-                                        styles.btn,
-                                    )}
-                                    onClick={this.props.handlePageTypeClick}
-                                    disabled={!this.isCurrentPageSearch}
-                                >
-                                    This page
-                                </button>
-                                <button
-                                    className={cx(
-                                        styles.searchSwitchBtn,
-                                        styles.btn,
-                                    )}
-                                    onClick={this.handleAllBtnClick}
-                                    disabled={this.isCurrentPageSearch}
-                                >
-                                    All
-                                </button>
-                            </span>
-                            <span>
-                                {this.isCurrentPageSearch && (
+                    <div className={styles.notesBox}>
+                        {this.props.searchType === 'notes' && (
+                            <div className={styles.pageSwitch}>
+                                <div>
                                     <button
                                         className={cx(
-                                            styles.unfoldAllBtn,
+                                            styles.searchSwitchBtn,
                                             styles.btn,
                                         )}
-                                        onClick={
-                                            this.props.handleUnfoldAllClick
-                                        }
-                                        disabled={this.isPageSearch}
+                                        onClick={this.props.handlePageTypeClick}
+                                        disabled={!this.isCurrentPageSearch}
                                     >
-                                        {this.unfoldBtnText}
+                                        This page
                                     </button>
-                                )}
-                            </span>
+                                    <button
+                                        className={cx(
+                                            styles.searchSwitchBtn,
+                                            styles.btn,
+                                        )}
+                                        onClick={this.handleAllBtnClick}
+                                        disabled={this.isCurrentPageSearch}
+                                    >
+                                        All
+                                    </button>
+                                </div>
+                                <div>
+                                    {this.isCurrentPageSearch && (
+                                        <button
+                                            className={cx(
+                                                styles.unfoldAllBtn,
+                                                styles.btn,
+                                            )}
+                                            onClick={
+                                                this.props.handleUnfoldAllClick
+                                            }
+                                            disabled={this.isPageSearch}
+                                        >
+                                            {this.unfoldBtnText}
+                                        </button>
+                                    )}
+                                    {!this.isCurrentPageSearch && (
+                                        <ButtonTooltip
+                                            position="left"
+                                            tooltipText="Add note to this page"
+                                        >
+                                            <div
+                                                onClick={e => {
+                                                    e.stopPropagation()
+                                                    this.props.handleAddCommentBtnClick()
+                                                }}    
+                                                className={
+                                                    styles.imgContainer
+                                                }
+                                                > 
+                                                <img src={commentAdd} className={styles.img}/>        
+                                            </div>
+                                        </ButtonTooltip>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                         </div>
-                    )}
                 </div>
             </React.Fragment>
         )

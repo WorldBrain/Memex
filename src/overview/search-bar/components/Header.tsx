@@ -74,6 +74,9 @@ class Header extends PureComponent<Props> {
                         })}
                     >
                         <div className={styles.searchField}>
+                            <span className={styles.searchIconContainer}>
+                                <img src="/img/search.svg" className={styles.searchIconImg}/>
+                            </span>
                             <input
                                 id="query-search-bar"
                                 className={styles.query}
@@ -86,7 +89,7 @@ class Header extends PureComponent<Props> {
                                 autoComplete="off"
                             />
                         </div>
-                        <button
+                        <div
                             className={cx(styles.button, {
                                 [styles.activeButton]: this.props
                                     .showClearFiltersBtn,
@@ -105,7 +108,7 @@ class Header extends PureComponent<Props> {
                                     />
                                 </ButtonTooltip>
                             )}
-                        </button>
+                        </div>
                     </div>
                     <div className={styles.links}>
                         <BackupStatus />

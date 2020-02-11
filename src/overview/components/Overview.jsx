@@ -40,6 +40,7 @@ class Overview extends PureComponent {
     handleOnboardingComplete = () => {
         window.location.href = OVERVIEW_URL
         this.props.setShowOnboardingMessage()
+        localStorage.setItem('stage.Onboarding', 'true')
     }
 
     renderOnboarding() {
@@ -59,7 +60,7 @@ class Overview extends PureComponent {
                 <Header />
                 <SidebarLeft />
                 <Results />
-                <DeleteConfirmModal message="Delete page and related note" />
+                <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
                 <div className={styles.productHuntContainer}>
                     <a

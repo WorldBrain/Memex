@@ -4,6 +4,7 @@
 :root {
     --height: 90px;
     --imgWidth: 200px;
+    --resultWidth: 800px;
     --vertical-spacing: 30px;
     --compact-scale: 0.6;
 }
@@ -33,8 +34,10 @@
     z-index: 0;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
     background-color: white;
-    width: 100%;
+    height: fit-content;
     min-height: var(--height);
+    width: 100%;
+    border-bottom: 0.75px solid #e1e1e1;
 
     &:hover {
         cursor: pointer;
@@ -47,7 +50,7 @@
 
     &:hover .button {
         opacity: 0.3;
-        display: block;
+        display: flex;
 
         &:hover {
             opacity: 0.7;
@@ -55,22 +58,22 @@
         }
     }
 
-    &:hover .bookmark {
-        opacity: 1;
+    &:hover .actionItems {
+        display: flex;
     }
 
-    &:hover .commentActive {
-        opacity: 1;
+    & button {
+        padding: 0;
     }
-
-    /*  &:hover .title {
-        width: 80%;
-    } */
 }
 
 .rootContainerOverview {
-    width: 800px;
+    width: var(--resultWidth);
     height: fit-content;
+
+    & .button {
+        height: 16px;
+    }
 
     & .displayTime {
         margin-right: 10px;
@@ -79,13 +82,18 @@
 
     & .url {
         font-size: 14px;
-        margin: -7px 0 0 38px;
+        margin: -7px 0 4px 38px;
     }
 
     & .title {
         margin-top: -4px;
         letter-spacing: 0.1px;
         font-size: 16px;
+        margin-left: 12px;
+    }
+
+    & .permanentButton {
+        height: 16px;
     }
 }
 
@@ -95,7 +103,7 @@
     box-sizing: content-box;
     justify-content: space-between;
     padding: 6px 10px;
-    width: 100%;
+    width: 95%;
     height: fit-content;
     text-decoration: none;
     flex-direction: row;
@@ -103,6 +111,7 @@
 
 .rootOverview {
     padding: 0;
+    width: var(--resultWidth);
 }
 
 .crossRibbon {
@@ -186,6 +195,7 @@
     width: 100%;
     display: flex;
     flex-direction: row;
+    margin-top: 5px;
 }
 
 .infoContainer {
@@ -194,7 +204,7 @@
     max-width: 100%;
     justify-content: space-between;
     width: fill-available;
-    padding: 20px 0px;
+    padding: 15px 0px;
 }
 
 .infoContainerOverview {
@@ -223,8 +233,9 @@
     flex-direction: row;
     justify-content: flex-start;
     width: 100%;
+    height: 26px;
     white-space: nowrap;
-    overflow-x: hidden;
+    overflow: hidden;
     text-overflow: ellipsis;
     align-items: flex-start;
 }
@@ -232,25 +243,29 @@
 .title {
     color: #3a2f45;
     flex-direction: row;
-    font-size: 15px;
+    font-size: 14px;
+    height: 26px;
     font-weight: 600;
     align-items: flex-start;
     justify-content: flex-start;
-    margin-left: 13px;
+    margin-left: 11px;
     white-space: nowrap;
     overflow-x: hidden;
+    position: relative;
     text-overflow: ellipsis;
-    margin-top: -3px;
     letter-spacing: 0.1px;
 }
 
-.favIcon {
+.favIconContainer {
     width: 25px !important; /* stylelint-disable-line declaration-no-important */
     height: 25px !important; /* stylelint-disable-line declaration-no-important */
-    background-size: contain;
     border: 1px solid #efefef;
     border-radius: 30px;
-    background-position: center center;
+    flex: none;
+}
+
+.favIcon {
+    width: 100%;
 }
 
 .noFavicon {
@@ -260,7 +275,7 @@
 
 .url {
     color: #72727f;
-    font-size: 14px;
+    font-size: 12px;
     min-width: 0;
     font-weight: 400;
     white-space: nowrap;
@@ -268,8 +283,8 @@
     text-overflow: ellipsis;
     align-items: center;
     max-width: 100%;
-    height: fit-content;
-    margin: -6px 0 3px 38px;
+    height: 20px;
+    margin: -5px 0px 0px 38px;
 }
 
 .url a {
@@ -278,41 +293,34 @@
 
 .bottomLine {
     color: #72727f;
+    height: 16px;
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    height: fit-content;
     padding-left: 38px;
-    margin-top: 5px;
-}
-
-.detailsBox {
-    display: flex;
-    align-items: flex-end;
-    width: 90%;
-    overflow: hidden;
+    margin: 5px 0 0 0;
 }
 
 .buttonsContainer {
     display: flex;
     flex-direction: row;
     float: right;
-    align-items: center;
-    height: fit-content;
+    align-items: flex-start;
     justify-content: flex-end;
     margin-left: 20px;
+    height: 20px;
 }
 
 .detailsContainer {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    align-items: center;
-    height: fit-content;
+    align-items: flex-start;
+    height: 20px;
 }
 
 .displayTime {
-    font-size: 12px;
+    font-size: 11px;
     color: #72727f;
     min-width: fit-content;
 }
@@ -320,69 +328,63 @@
 .button {
     border: none;
     z-index: 2500;
-    min-width: 20px;
+    width: auto;
     height: 14px;
     background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
-    background-position: center center;
-    border-radius: 3px;
-    background-size: contain;
-    max-width: 30px;
-    width: fill-available;
     display: none;
-    margin-left: 3px;
+    background-position: center center;
+    background-size: contain;
+    margin-left: 8px;
 
     &:hover {
         opacity: 1;
     }
 }
 
+.permanentButton {
+    border: none;
+    z-index: 2500;
+    height: 14px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    outline: none;
+    background-position: center center;
+    background-size: contain;
+    margin-left: 8px;
+    display: flex;
+
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
+.img {
+    height: 100%;
+}
+
 .actionItems {
     display: flex;
     align-items: center;
-    height: 14px;
-}
-
-.trash {
-    background-image: url('/img/trash.svg');
-
-    &:hover {
-        opacity: 0.6;
-    }
-}
-
-.comment {
-    background-image: url('/img/comment_empty.svg');
-
-    &:hover {
-        opacity: 0.6;
-    }
+    height: 20px;
 }
 
 .commentActive {
-    background-image: url('/img/comment_full.svg');
     opacity: 1;
-    display: block;
 }
 
 .bookmark {
-    background-image: url('/img/star_full.svg');
     opacity: 1;
-    display: block;
 }
 
 .notBookmark {
-    background-image: url('/img/star_empty.svg');
-
     &:hover {
         opacity: 0.6;
     }
 }
 
 .tag {
-    background-image: url('/img/tag_empty.svg');
-
     &:hover {
         opacity: 0.6;
     }

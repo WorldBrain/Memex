@@ -42,6 +42,8 @@ class ResultsContainer extends PureComponent<Props> {
             return <NotificationContainer />
         }
 
+        const showOnboarding = localStorage.getItem('stage.Onboarding')
+
         const renderSearchSwitch = children => (
             <React.Fragment>
                 <SearchTypeSwitch />
@@ -49,8 +51,16 @@ class ResultsContainer extends PureComponent<Props> {
             </React.Fragment>
         )
 
-        if (this.props.showOnboardingMessage) {
-            return <OnboardingMessage />
+        if (showOnboarding === 'true' && this.props.noResults) {
+            return renderSearchSwitch(
+                <ResultsMessage>
+                    <NoResultBadTerm
+                        title="You don't have anything saved yet"
+                    >
+                    <OnboardingMessage />
+                </NoResultBadTerm>
+                </ResultsMessage>,
+            )
         }
 
         if (this.props.isBadTerm) {

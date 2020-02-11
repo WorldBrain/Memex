@@ -4,9 +4,9 @@
 .filtersSidebar {
     position: fixed;
     top: 0px;
-    right: 380px;
+    right: 480px;
     z-index: 2147483646;
-    width: 230px;
+    width: 250px;
     display: flex;
     flex-direction: column;
     height: 100vh;

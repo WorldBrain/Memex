@@ -20,6 +20,13 @@
     text-align: left;
 }
 
+.settingsText {
+    font-size: 16px;
+    color: #3a2f45;
+    font-weight: 300;
+    margin-bottom: 15px;
+}
+
 .number {
     padding: 5px 10px;
     border-radius: 3px;

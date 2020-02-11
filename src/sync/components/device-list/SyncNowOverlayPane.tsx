@@ -87,15 +87,6 @@ export class SyncNowOverlayPaneContainer extends Component<
         })
     }
 
-    async componentDidUpdate() {
-        const syncFeatureAllowed = this.props.authorizedFeatures.includes(
-            'sync',
-        )
-        this.setState({
-            syncAllowed: syncFeatureAllowed,
-        })
-    }
-
     handleOnClickSync = async () => {
         this.setState({ isSyncing: true })
         const syncing = await sync.forceIncrementalSync()

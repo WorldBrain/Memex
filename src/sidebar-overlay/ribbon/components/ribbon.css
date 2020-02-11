@@ -19,7 +19,7 @@
     align-self: center;
     right: 0;
     width: 15px;
-    top: 0;
+    top: 20px;
     height: 100%;
     z-index: 2147483645;
 
@@ -51,11 +51,16 @@
     background: white;
     height: 100%;
     width: 36px;
-    top: 0;
+    top: 20px;
 
     & .removeSidebar {
         visibility: hidden;
+        display: flex;
     }
+}
+
+.removeSidebar {
+    display: flex;
 }
 
 .innerRibbonExpanded {
@@ -69,6 +74,7 @@
     flex-direction: column;
     justify-content: space-between;
     padding: 5px 0;
+    margin-top: 0px;
 }
 
 .innerRibbonSidebarOpen {
@@ -103,7 +109,7 @@
     flex-direction: column;
     margin-bottom: 3px;
     align-items: center;
-    height: 120px;
+    height: 140px;
     justify-content: space-between;
 }
 
@@ -192,11 +198,11 @@
 }
 
 .tooltipOn {
-    background-image: url('/img/tooltip.svg');
+    background-image: url('/img/tooltip_full.svg');
 }
 
 .tooltipOff {
-    background-image: url('/img/tooltipOff.svg');
+    background-image: url('/img/tooltip_empty.svg');
 }
 
 .ribbonOn {

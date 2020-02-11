@@ -39,6 +39,7 @@
     transform: translateY(30px);
     justify-content: center;
     align-items: flex-start;
+    z-index: 250000;
 
     &.tooltipBubble {
         align-items: flex-start;
@@ -96,6 +97,7 @@
 
 .tooltipContainerBottom {
     justify-content: center;
+    align-items: center;
 }
 
 .tooltipContainerCenterCenter {

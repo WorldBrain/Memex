@@ -36,14 +36,16 @@
 }
 
 .section {
-    width: 600px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-bottom: 20px;
 }
 
 .instructionsTitle {
     font-size: 23px;
+    font-weight: 700;
+    color: #3a2f45;
     width: 450px;
     text-align: center;
 }

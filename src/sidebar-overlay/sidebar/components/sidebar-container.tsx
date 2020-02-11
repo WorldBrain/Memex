@@ -60,7 +60,7 @@ interface DispatchProps {
     onQueryChange: (searchValue: string) => void
     handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
     clearAllFilters: () => void
-    resetPage: React.MouseEventHandler<HTMLButtonElement>
+    resetPage: React.MouseEventHandler<HTMLDivElement>
 }
 
 interface ComponentProps {

@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 import {
     ConfirmModal,
@@ -11,12 +12,13 @@ export interface Props extends ConfirmModalProps {
 }
 
 class DeleteConfirmModal extends PureComponent<Props> {
+
     render() {
         const { deleteDocs, ...modalProps } = this.props
 
         return (
             <ConfirmModal {...modalProps} message={this.props.message}>
-                <ConfirmModalBtn onClick={deleteDocs}>Do it!</ConfirmModalBtn>
+                <PrimaryAction label="Delete" onClick={deleteDocs}/>
             </ConfirmModal>
         )
     }

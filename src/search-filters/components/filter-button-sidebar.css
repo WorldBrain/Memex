@@ -18,7 +18,7 @@
     text-align: center;
     background-color: #fff;
     outline: none;
-    padding: 1px 7px 2px 7px;
+    padding: 2px 7px;
 
     &:hover {
         background-color: color1;
