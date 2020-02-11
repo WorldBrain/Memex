@@ -16,6 +16,7 @@ interface Props {
 const settingsStyle = require('src/options/settings/components/settings.css')
 
 export class SyncNowOverlayPane extends Component<Props> {
+
     renderSyncNowButton() {
         if (this.props.isSyncing) {
             return (
@@ -50,8 +51,6 @@ export class SyncNowOverlayPane extends Component<Props> {
 interface ContainerProps {}
 interface ContainerState {
     showSync: boolean
-    syncEnabled: boolean
-    syncAllowed: boolean
     syncResults: any
     syncError: any
     isSyncing: boolean
@@ -63,8 +62,6 @@ export class SyncNowOverlayPaneContainer extends Component<
 > {
     state = {
         showSync: false,
-        syncEnabled: true,
-        syncAllowed: false,
         syncResults: [],
         syncError: null,
         isSyncing: false,
@@ -76,15 +73,8 @@ export class SyncNowOverlayPaneContainer extends Component<
         this.setState({ devices })
     }
 
-    async componentDidMount() {
-        const syncFeatureAllowed = this.props.authorizedFeatures.includes(
-            'sync',
-        )
-        await this.refreshDevices()
-
-        this.setState({
-            syncAllowed: syncFeatureAllowed,
-        })
+    componentDidMount() {
+        this.refreshDevices()
     }
 
     handleOnClickSync = async () => {
@@ -108,9 +98,14 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 
     render() {
+
+         const syncFeatureAllowed = this.props.authorizedFeatures.includes(
+            "sync"
+        )
+
         return (
             <div>
-                {this.state.devices.length === 0 && this.state.syncAllowed && (
+                {this.state.devices.length === 0 && syncFeatureAllowed && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
@@ -128,14 +123,14 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
 
-                {this.state.syncEnabled && !this.state.syncAllowed && (
+                {this.props.currentUser === null && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
                                 Sync Status
                             </div>
                             <div className={settingsStyle.infoText}>
-                                Login to continue syncing
+                                Login to enable sync
                             </div>
                         </div>
                         <SyncNowOverlayPane
@@ -145,7 +140,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                         />
                     </div>
                 )}
-                {!this.state.syncEnabled && !this.state.syncAllowed && (
+                {!syncFeatureAllowed && this.props.currentUser && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
                             <div className={settingsStyle.sectionTitle}>
@@ -163,7 +158,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                     </div>
                 )}
 
-                {this.state.syncAllowed &&
+                {syncFeatureAllowed &&
                     this.state.devices.length > 0 &&
                     !this.state.isSyncing && (
                         <div className={settingsStyle.buttonArea}>
