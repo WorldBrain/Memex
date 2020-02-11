@@ -1059,7 +1059,7 @@ function mobileSyncTests(suiteOptions: {
 
         expect(
             await devices.extension.backgroundModules.customLists.fetchAllLists(
-                {},
+                { skipMobileList: false },
             ),
         ).toEqual([
             {

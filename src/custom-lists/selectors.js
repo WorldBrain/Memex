@@ -1,4 +1,6 @@
 import { createSelector } from 'reselect'
+import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
+
 // import { selectors } from '../search-filters'
 // TODO: check why not working the other way around.
 import * as selectors from '../search-filters/selectors'
@@ -6,6 +8,14 @@ import * as selectors from '../search-filters/selectors'
 
 // TODO: Needs some work.
 const sortAlphabetically = (a, b) => {
+    if (a.name === MOBILE_LIST_NAME) {
+        return -100
+    }
+
+    if (b.name === MOBILE_LIST_NAME) {
+        return 100
+    }
+
     if (a.name.toLowerCase() < b.name.toLowerCase()) {
         return -1
     }
@@ -46,6 +56,7 @@ export const results = createSelector(
             ...pageDoc,
             isEditing: i === listIndex,
             isFilterIndex: Number(listFilter) === pageDoc.id,
+            isMobileList: pageDoc.name === MOBILE_LIST_NAME,
         }))
     },
 )
