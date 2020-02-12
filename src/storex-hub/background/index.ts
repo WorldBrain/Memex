@@ -13,8 +13,8 @@ export class StorexHubBackground {
         },
     ) {}
 
-    async connect() {
-        this.socket = io('http://localhost:3000')
+    async connect(options?: { port?: number }) {
+        this.socket = io(`http://localhost:${options?.port || 3000}`)
         this.client = await createStorexHubSocketClient(this.socket, {
             callbacks: {
                 handleRemoteOperation: async options => {
