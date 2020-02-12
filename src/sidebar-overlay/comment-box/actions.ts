@@ -4,6 +4,7 @@ import { Thunk } from '../types'
 import * as selectors from './selectors'
 import { Anchor } from 'src/highlighting/types'
 import { createAnnotation } from 'src/annotations/actions'
+import { setPageType, setSearchType } from 'src/sidebar-overlay/sidebar/actions'
 
 export const setShowCommentBox = createAction<boolean>('setShowCommentBox')
 
@@ -34,6 +35,8 @@ export const openCommentBoxWithHighlight: (
 ) => Thunk = anchor => dispatch => {
     dispatch(setAnchor(anchor))
     dispatch(setShowCommentBox(true))
+    dispatch(setSearchType('notes'))
+    dispatch(setPageType('page'))
 }
 
 /**
