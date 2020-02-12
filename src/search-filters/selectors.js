@@ -76,9 +76,8 @@ export const usersExc = createSelector(searchFilters, state => state.usersExc)
 export const listFilter = createSelector(searchFilters, state => state.lists)
 
 // Lists for now is just id of one list
-export const listFilterParam = createSelector(
-    listFilter,
-    state => (state === '' ? [] : [state]),
+export const listFilterParam = createSelector(listFilter, state =>
+    state === '' ? [] : [state],
 )
 export const displayDomains = createSelector(
     domainsInc,
@@ -108,10 +107,6 @@ export const displayHashtags = createSelector(
     ],
 )
 
-export const showFilters = createSelector(
-    searchFilters,
-    state => state.showFilters,
-)
 export const onlyBookmarks = createSelector(
     searchFilters,
     state => state.onlyBookmarks,

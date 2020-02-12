@@ -52,6 +52,7 @@ export interface Props {
     setShowSearchBox: (value: boolean) => void
     setSearchValue: (value: string) => void
     highlighter: HighlightInteractionInterface
+    hideOnMouseLeave?: boolean
 }
 
 interface State {
@@ -93,11 +94,14 @@ class Ribbon extends Component<Props, State> {
 
         this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
-        this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
+
+        if (this.props.hideOnMouseLeave) {
+            this.ribbonRef.addEventListener('mouseleave', this.handleMouseLeave)
+        }
     }
 
     componentWillUnmount() {
-        if (this.ribbonRef) {
+        if (this.ribbonRef && this.props.hideOnMouseLeave) {
             this.ribbonRef.removeEventListener(
                 'mouseleave',
                 this.handleMouseLeave,
@@ -326,7 +330,14 @@ class Ribbon extends Component<Props, State> {
                                     />
                                     {this.props.showCommentBox && (
                                         <Tooltip position="left">
-                                            <CommentBoxContainer env="inpage" />
+                                            <CommentBoxContainer
+                                                env="inpage"
+                                                closeComments={() =>
+                                                    this.props.setShowCommentBox(
+                                                        false,
+                                                    )
+                                                }
+                                            />
                                         </Tooltip>
                                     )}
                                     {this.props.isCommentSaved && (
@@ -414,9 +425,10 @@ class Ribbon extends Component<Props, State> {
                                                     .isRibbonEnabled,
                                             },
                                         )}
-                                        onClick={() =>
+                                        onClick={() => {
                                             this.props.handleRibbonToggle()
-                                        }
+                                            this.props.closeSidebar()
+                                        }}
                                     />
                                 </ButtonTooltip>
 

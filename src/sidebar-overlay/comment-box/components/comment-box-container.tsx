@@ -38,6 +38,7 @@ interface OwnProps {
     isSocialPost?: boolean
     onSaveCb?: () => void
     highlighter: HighlightInteractionInterface
+    closeComments?: () => void
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -121,6 +122,10 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     handleCommentTextChange: comment =>
         dispatch(actions.setCommentText(comment)),
     saveComment: async (anchor, commentText, tags, bookmarked) => {
+        if (props.closeComments) {
+            props.closeComments()
+        }
+
         dispatch(
             actions.saveComment(
                 anchor,

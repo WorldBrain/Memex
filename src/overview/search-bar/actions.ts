@@ -35,18 +35,19 @@ const stripTagPattern = tag =>
 export const setQueryTagsDomains: (
     input: string,
     isEnter?: boolean,
-) => Thunk = (input, isEnter = true) => dispatch => {
-    const removeFromInputVal = term =>
-        (input = input.replace(isEnter ? term : `${term} `, ''))
+) => Thunk = (input, isEnter = true) => (dispatch, getState) => {
+    const state = getState()
 
     if (input[input.length - 1] === ' ' || isEnter) {
         // Split input into terms and try to extract any tag/domain patterns to add to filters
         const terms = input.toLowerCase().match(/\S+/g) || []
 
         terms.forEach(term => {
-            // If '#tag' pattern in input, remove it and add to filter state
-            if (constants.HASH_TAG_PATTERN.test(term)) {
-                removeFromInputVal(term)
+            // If '#tag' pattern in input, and not already tracked, add to filter state
+            if (
+                constants.HASH_TAG_PATTERN.test(term) &&
+                !filters.tags(state).includes(stripTagPattern(term))
+            ) {
                 dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
                 analytics.trackEvent({
                     category: 'Tag',
@@ -54,16 +55,25 @@ export const setQueryTagsDomains: (
                 })
             }
 
-            // If 'domain.tld.cctld?' pattern in input, remove it and add to filter state
+            // If 'domain.tld.cctld?' pattern in input, and not already tracked, add to filter state
             if (constants.DOMAIN_TLD_PATTERN.test(term)) {
-                removeFromInputVal(term)
+                let act
+                let currentState
 
                 // Choose to exclude or include domain, basead on pattern
-                const act = constants.EXCLUDE_PATTERN.test(term)
-                    ? filterActs.toggleExcDomainFilter
-                    : filterActs.toggleIncDomainFilter
+                if (constants.EXCLUDE_PATTERN.test(term)) {
+                    currentState = filters.domainsExc(state)
+                    act = filterActs.toggleExcDomainFilter
+                } else {
+                    currentState = filters.domainsInc(state)
+                    act = filterActs.toggleIncDomainFilter
+                }
 
                 term = term.replace(constants.TERM_CLEAN_PATTERN, '')
+                if (currentState.includes(term)) {
+                    return
+                }
+
                 dispatch(act(term))
 
                 analytics.trackEvent({
@@ -96,12 +106,6 @@ export const search: (args?: any) => Thunk = (
     const query = selectors.query(firstState)
     const startDate = selectors.startDate(firstState)
     const endDate = selectors.endDate(firstState)
-
-    // const showTooltip = selectors.showTooltip(firstState)
-
-    if (query.includes('#')) {
-        return
-    }
 
     if (fromOverview) {
         dispatch(sidebarActs.closeSidebar())
@@ -151,8 +155,8 @@ export const search: (args?: any) => Thunk = (
         const searchRPC = results.isSocialPost(state)
             ? socialSearchRPC
             : results.isAnnotsSearch(state)
-                ? annotSearchRPC
-                : pageSearchRPC
+            ? annotSearchRPC
+            : pageSearchRPC
 
         // Tell background script to search
         const searchResult = await searchRPC(searchParams)
@@ -169,4 +173,5 @@ export const search: (args?: any) => Thunk = (
 
 export const init = () => dispatch => {
     dispatch(notifActs.updateUnreadNotif())
+    dispatch(search({ overwrite: true, fromOverview: false }))
 }
