@@ -330,7 +330,14 @@ class Ribbon extends Component<Props, State> {
                                     />
                                     {this.props.showCommentBox && (
                                         <Tooltip position="left">
-                                            <CommentBoxContainer env="inpage" />
+                                            <CommentBoxContainer
+                                                env="inpage"
+                                                closeComments={() =>
+                                                    this.props.setShowCommentBox(
+                                                        false,
+                                                    )
+                                                }
+                                            />
                                         </Tooltip>
                                     )}
                                     {this.props.isCommentSaved && (

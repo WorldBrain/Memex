@@ -133,7 +133,10 @@ class SidebarContainer extends React.Component<Props> {
 
     handleClickOutside = (e: Event) => {
         e.stopPropagation()
-        this.props.closeSidebar()
+
+        if (this.props.env === 'overview') {
+            this.props.closeSidebar()
+        }
     }
 
     render() {
