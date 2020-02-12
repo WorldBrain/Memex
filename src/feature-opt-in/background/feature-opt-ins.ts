@@ -19,7 +19,7 @@ const featureDefaults = {
     SocialIntegration: false,
 }
 const featureDefaultByInstallDate = {
-    SocialIntegration: new Date(2020, 2, 17).valueOf(),
+    SocialIntegration: new Date(2020, 2, 11).valueOf(),
 }
 export type UserFeatureOptInMap = {
     [key in UserFeatureOptIn]: boolean
