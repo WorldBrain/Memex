@@ -425,9 +425,10 @@ class Ribbon extends Component<Props, State> {
                                                     .isRibbonEnabled,
                                             },
                                         )}
-                                        onClick={() =>
+                                        onClick={() => {
                                             this.props.handleRibbonToggle()
-                                        }
+                                            this.props.closeSidebar()
+                                        }}
                                     />
                                 </ButtonTooltip>
 
