@@ -57,7 +57,7 @@ export const InitialComponent = ({
 )
 
 InitialComponent.propTypes = {
-    createLink: PropTypes.func.isRequired,
+    createLink: PropTypes.func,
     createHighlight: PropTypes.func.isRequired,
     createAnnotation: PropTypes.func.isRequired,
     closeTooltip: PropTypes.func.isRequired,
