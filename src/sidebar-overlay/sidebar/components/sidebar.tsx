@@ -17,6 +17,7 @@ import PageInfo from './page-info'
 import cx from 'classnames'
 import { Annotation } from 'src/annotations/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import { features } from 'src/util/remote-functions-background'
 
 const styles = require('./sidebar.css')
 
@@ -59,6 +60,7 @@ interface Props {
 interface State {
     searchValue: string
     showFiltersSidebar: boolean
+    showSocialSearch: boolean
 }
 
 class Sidebar extends React.Component<Props, State> {
@@ -67,6 +69,13 @@ class Sidebar extends React.Component<Props, State> {
     state = {
         searchValue: '',
         showFiltersSidebar: false,
+        showSocialSearch: false,
+    }
+
+    async componentDidMount() {
+        this.setState({
+            showSocialSearch: await features.getFeature('SocialIntegration'),
+        })
     }
 
     private handleSearchChange = (searchQuery: string) => {
@@ -214,6 +223,9 @@ class Sidebar extends React.Component<Props, State> {
                                             }
                                             handleAddCommentBtnClick={
                                                 handleAddCommentBtnClick
+                                            }
+                                            showSocialSearch={
+                                                this.state.showSocialSearch
                                             }
                                         />
                                     </div>

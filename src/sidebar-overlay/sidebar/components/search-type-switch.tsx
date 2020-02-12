@@ -37,6 +37,7 @@ export interface DispatchProps {
 export interface OwnProps {
     isOverview?: boolean
     handleAddCommentBtnClick: () => void
+    showSocialSearch: boolean
 }
 
 export type Props = StateProps & DispatchProps & OwnProps
@@ -118,18 +119,20 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                         >
                             Pages
                         </button>
-                        <button
-                            className={cx(
-                                styles.searchSwitchBtn,
-                                styles.btn,
-                                styles.pages,
-                            )}
-                            onClick={this.handleSocialBtnClick}
-                            disabled={this.props.searchType === 'social'}
-                            id="social"
-                        >
-                            Social
-                        </button>
+                        {this.props.showSocialSearch && (
+                            <button
+                                className={cx(
+                                    styles.searchSwitchBtn,
+                                    styles.btn,
+                                    styles.pages,
+                                )}
+                                onClick={this.handleSocialBtnClick}
+                                disabled={this.props.searchType === 'social'}
+                                id="social"
+                            >
+                                Social
+                            </button>
+                        )}
                         <button
                             className={cx(
                                 styles.searchSwitchBtn,
@@ -191,19 +194,20 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                                 onClick={e => {
                                                     e.stopPropagation()
                                                     this.props.handleAddCommentBtnClick()
-                                                }}    
-                                                className={
-                                                    styles.imgContainer
-                                                }
-                                                > 
-                                                <img src={commentAdd} className={styles.img}/>        
+                                                }}
+                                                className={styles.imgContainer}
+                                            >
+                                                <img
+                                                    src={commentAdd}
+                                                    className={styles.img}
+                                                />
                                             </div>
                                         </ButtonTooltip>
                                     )}
                                 </div>
                             </div>
                         )}
-                        </div>
+                    </div>
                 </div>
             </React.Fragment>
         )
@@ -245,7 +249,4 @@ const mapDispatch: MapDispatchToProps<DispatchProps, OwnProps> = dispatch => ({
         dispatch(resultsActs.setAreAnnotationsExpanded(value)),
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(SearchTypeSwitch)
+export default connect(mapState, mapDispatch)(SearchTypeSwitch)

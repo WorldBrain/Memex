@@ -12,6 +12,7 @@ import SearchTypeSwitch from './search-type-switch-container'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
 import { RootState } from 'src/options/types'
+import { features } from 'src/util/remote-functions-background'
 
 const styles = require('./ResultList.css')
 
@@ -36,7 +37,21 @@ export interface OwnProps {}
 
 export type Props = StateProps & DispatchProps & OwnProps
 
-class ResultsContainer extends PureComponent<Props> {
+interface State {
+    showSocialSearch: boolean
+}
+
+class ResultsContainer extends React.Component<Props, State> {
+    state = {
+        showSocialSearch: false,
+    }
+
+    async componentDidMount() {
+        this.setState({
+            showSocialSearch: await features.getFeature('SocialIntegration'),
+        })
+    }
+
     private renderContent() {
         if (this.props.showInbox) {
             return <NotificationContainer />
@@ -46,7 +61,9 @@ class ResultsContainer extends PureComponent<Props> {
 
         const renderSearchSwitch = children => (
             <React.Fragment>
-                <SearchTypeSwitch />
+                <SearchTypeSwitch
+                    showSocialSearch={this.state.showSocialSearch}
+                />
                 {children}
             </React.Fragment>
         )
@@ -54,11 +71,9 @@ class ResultsContainer extends PureComponent<Props> {
         if (showOnboarding === 'true' && this.props.noResults) {
             return renderSearchSwitch(
                 <ResultsMessage>
-                    <NoResultBadTerm
-                        title="You don't have anything saved yet"
-                    >
-                    <OnboardingMessage />
-                </NoResultBadTerm>
+                    <NoResultBadTerm title="You don't have anything saved yet">
+                        <OnboardingMessage />
+                    </NoResultBadTerm>
                 </ResultsMessage>,
             )
         }
