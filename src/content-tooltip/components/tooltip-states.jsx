@@ -25,28 +25,32 @@ export const InitialComponent = ({
         </ButtonTooltip>
         <ButtonTooltip tooltipText="Annotate (A)" position="bottom">
             <div className={styles.button} onClick={createAnnotation}>
-                <img src={annotations}/>
+                <img src={annotations} />
             </div>
         </ButtonTooltip>
-        <ButtonTooltip
-            tooltipText="Create Link to Highlight (L)"
-            position="bottom"
-        >
-            <div className={styles.button} onClick={createLink}>
-                <img src={share}/>
-            </div>
-        </ButtonTooltip>
+        {createLink && (
+            <ButtonTooltip
+                tooltipText="Create Link to Highlight (L)"
+                position="bottom"
+            >
+                <div className={styles.button} onClick={createLink}>
+                    <img src={share} />
+                </div>
+            </ButtonTooltip>
+        )}
+
         <ButtonTooltip
             tooltipText="Close. Disable in Toolbar (R)"
             position="bottom"
-            >
+        >
             <div
-                onClick={closeTooltip} 
+                onClick={closeTooltip}
                 className={classNames(styles.button, {
-                [styles.noShow] : state === 'running',
-                [styles.noShow] : state === 'copied',
-            })}>
-                <img src={close}/>
+                    [styles.noShow]: state === 'running',
+                    [styles.noShow]: state === 'copied',
+                })}
+            >
+                <img src={close} />
             </div>
         </ButtonTooltip>
     </div>
