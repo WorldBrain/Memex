@@ -42,6 +42,7 @@ storiesOf('Sync', module)
             waitForInitialSyncConnected={async () => {}}
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
+            abortInitialSync={async () => {}}
         />
     ))
     .add('DevicePane - Not Subscribed', () => (
@@ -55,6 +56,7 @@ storiesOf('Sync', module)
             waitForInitialSyncConnected={async () => {}}
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
+            abortInitialSync={async () => {}}
         />
     ))
     .add('Initial Sync - Modal', () => (
@@ -72,6 +74,7 @@ storiesOf('Sync', module)
                         setTimeout(r, 500 * progressStoryData.length, 1),
                     )
                 }
+                abortInitialSync={async () => {}}
                 getSyncEventEmitter={() => {
                     const eventEmitter = new EventEmitter() as TypedEventEmitter<
                         InitialSyncEvents

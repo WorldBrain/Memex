@@ -26,7 +26,8 @@ interface Props {
     waitForInitialSync: () => Promise<void>
     waitForInitialSyncConnected: () => Promise<void>
     refreshDevices: () => Promise<void>
-    handleUpgradeNeeded: () => void 
+    handleUpgradeNeeded: () => void
+    abortInitialSync: () => Promise<void>
 }
 
 interface State {
@@ -180,6 +181,7 @@ export class SyncDevicesPane extends Component<Props, State> {
                     this.props.waitForInitialSyncConnected
                 }
                 waitForInitialSync={this.props.waitForInitialSync}
+                abortInitialSync={this.props.abortInitialSync}
                 getSyncEventEmitter={() => getRemoteEventEmitter('sync')}
                 open={this.state.isAddingNewDevice}
                 onClose={this.handleCloseNewDevice}
@@ -199,9 +201,13 @@ export class SyncDevicesPane extends Component<Props, State> {
 
 class SyncDevicesPaneContainer extends React.Component<
     UserProps,
-    { devices: SyncDevice[]; featureSyncEnabled: boolean, subscribeModal: boolean, }
+    {
+        devices: SyncDevice[]
+        featureSyncEnabled: boolean
+        subscribeModal: boolean
+    }
 > {
-    state = { devices: [], featureSyncEnabled: true, subscribeModal: false, }
+    state = { devices: [], featureSyncEnabled: true, subscribeModal: false }
 
     async componentDidMount() {
         await this.refreshDevices()
@@ -224,12 +230,14 @@ class SyncDevicesPaneContainer extends React.Component<
         await sync.waitForInitialSyncConnected()
     }
 
+    abortInitialSync = async () => sync.abortInitialSync()
+
     refreshDevices = async () => {
         const devices = (await sync.listDevices()) as SyncDevice[]
         this.setState({ devices })
     }
 
-    openSubscriptionModal =  () => {
+    openSubscriptionModal = () => {
         this.setState({ subscribeModal: true })
     }
 
@@ -237,7 +245,8 @@ class SyncDevicesPaneContainer extends React.Component<
         await this.openSubscriptionModal()
     }
 
-    closeSubscriptionModal = async () => this.setState({ subscribeModal: false })
+    closeSubscriptionModal = async () =>
+        this.setState({ subscribeModal: false })
 
     render() {
         if (this.state.featureSyncEnabled === false) {
@@ -249,7 +258,10 @@ class SyncDevicesPaneContainer extends React.Component<
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
                         Sync your mobile phone
-                        <span className={styles.labelFree} onClick={this.handleUpgradeNeeded}>
+                        <span
+                            className={styles.labelFree}
+                            onClick={this.handleUpgradeNeeded}
+                        >
                             ⭐️ Pro Feature
                         </span>
                     </div>
@@ -271,6 +283,7 @@ class SyncDevicesPaneContainer extends React.Component<
                             this.waitForInitialSyncConnected
                         }
                         refreshDevices={this.refreshDevices}
+                        abortInitialSync={this.abortInitialSync}
                     />
                 </div>
                 <div className={settingsStyle.section}>
@@ -302,9 +315,7 @@ class SyncDevicesPaneContainer extends React.Component<
                 </div>
                 <div>
                     {this.state.subscribeModal && (
-                        <SubscribeModal
-                            onClose={this.closeSubscriptionModal}
-                        />
+                        <SubscribeModal onClose={this.closeSubscriptionModal} />
                     )}
                 </div>
             </div>
