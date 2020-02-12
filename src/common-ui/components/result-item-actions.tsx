@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react'
-import { Props } from './result-item'
-import cx from 'classnames'
-import ButtonTooltip from './button-tooltip'
-import SemiCircularRibbon from './semi-circular-ribbon'
 import { browser } from 'webextension-polyfill-ts'
+import cx from 'classnames'
 
+import { Props } from './result-item'
+import SemiCircularRibbon from './semi-circular-ribbon'
+import ResultItemActionBtn from './result-item-action-btn'
 
 const styles = require('./result-item.css')
 const tagEmpty = browser.extension.getURL('/img/tag_empty_results.svg')
@@ -37,104 +37,59 @@ class ResultItemActions extends PureComponent<Props> {
                         e.stopPropagation()
                     }}
                 >
-                    <ButtonTooltip
-                        position="bottom"
+                    <ResultItemActionBtn
+                        imgSrc={deleteItem}
+                        onClick={this.props.onTrashBtnClick}
                         tooltipText="Delete this page & all related content"
-                    >
-                        <div
-                            className={styles.button}
-                            onClick={this.props.onTrashBtnClick}
-                        >
-                            <img src={deleteItem} className={cx(styles.img, styles.trash)}
-                            />
-                        </div>
-                    </ButtonTooltip>
+                        className={styles.trash}
+                    />
                     {!this.props.tagManager ? (
-                        this.props.tags.length > 0 ? (
-                            <ButtonTooltip
-                                position="bottom"
-                                tooltipText="Add/View Tags"
-                            >
-                                <div
-                                    className={styles.permanentButton}
-                                >
-                                    <img src={tagFull} onClick={this.props.onTagBtnClick}
-                                    ref={this.props.setTagButtonRef} className={cx(styles.img, styles.tag)}
-                                    />
-                                </div>
-                            </ButtonTooltip> 
-                            ):(
-                                 <ButtonTooltip
-                                    position="bottom"
-                                    tooltipText="Add/View Tags"
-                                >
-                                    <div
-                                        className={styles.button}
-                                    >
-                                        <img src={tagEmpty} onClick={this.props.onTagBtnClick}
-                                        ref={this.props.setTagButtonRef} className={cx(styles.img, styles.tag)}
-                                        />
-                                    </div>
-                                </ButtonTooltip> 
-                            )) : (                   
-                            <ButtonTooltip
-                                position="bottom"
-                                tooltipText="Add/View Tags"
-                            >
-                                <div
-                                    className={styles.permanentButton}
-                                >
-                                    <img src={tagFull} onClick={this.props.onTagBtnClick}
-                                    ref={this.props.setTagButtonRef} className={cx(styles.img, styles.commentActive)}
-                                    />
-                                </div>
-                            </ButtonTooltip>
-                        )}
-                     <ButtonTooltip
-                        position="bottom"
-                        tooltipText="Add/View Notes"
-                    >
-                        {this.props.annotsCount > 0 ? (
-                        <div
-                            className={styles.permanentButton}
-                            onClick={this.props.onCommentBtnClick}
-                        >
-                            <img src={commentFull} className={cx(styles.img, styles.commentActive)}/>
-                        </div>
-                        ):(
-                           <div
-                            className={styles.button}
-                            onClick={this.props.onCommentBtnClick}
-                            >
-                               <img src={commentEmpty} className={cx(styles.img, styles.comment)}/>
-                           </div>
-                        )}
-                    </ButtonTooltip>
-                    {this.props.hasBookmark ? (
-                    <ButtonTooltip
-                        position="bottom"
-                        tooltipText="Bookmark"
-                    >
-                        <div
-                            className={styles.permanentButton}
-                            onClick={this.props.onToggleBookmarkClick}
-                        >        
-                            <img src={heartFull} className={cx(styles.img, styles.bookmark)}/>
-                        </div>
-                    </ButtonTooltip>) :
-                    (
-                        <ButtonTooltip
-                        position="bottom"
-                        tooltipText="Bookmark"
-                        >
-                        <div
-                            className={styles.button}
-                            onClick={this.props.onToggleBookmarkClick}
-                        >        
-                            <img src={heartEmpty} className={cx(styles.img, styles.notbookmark)}/>  
-                            </div>
-                        </ButtonTooltip>
+                        <ResultItemActionBtn
+                            imgSrc={
+                                this.props.tags.length > 0 ? tagFull : tagEmpty
+                            }
+                            onClick={this.props.onTagBtnClick}
+                            tooltipText="Add/View Tags"
+                            className={styles.tag}
+                            refHandler={this.props.setTagButtonRef}
+                        />
+                    ) : (
+                        <ResultItemActionBtn
+                            permanent
+                            imgSrc={tagFull}
+                            onClick={this.props.onTagBtnClick}
+                            tooltipText="Add/View Tags"
+                            className={styles.commentActive}
+                            refHandler={this.props.setTagButtonRef}
+                        />
                     )}
+                    <ResultItemActionBtn
+                        permanent={this.props.annotsCount > 0}
+                        imgSrc={
+                            this.props.annotsCount > 0
+                                ? commentFull
+                                : commentEmpty
+                        }
+                        className={
+                            this.props.annotsCount > 0
+                                ? styles.commentActive
+                                : styles.comment
+                        }
+                        onClick={this.props.onCommentBtnClick}
+                        tooltipText="Add/View Notes"
+                    />
+
+                    <ResultItemActionBtn
+                        permanent={this.props.hasBookmark}
+                        imgSrc={this.props.hasBookmark ? heartFull : heartEmpty}
+                        className={
+                            this.props.hasBookmark
+                                ? styles.bookmark
+                                : styles.notBookmark
+                        }
+                        onClick={this.props.onToggleBookmarkClick}
+                        tooltipText="Bookmark"
+                    />
                     {this.props.isListFilterActive && (
                         <SemiCircularRibbon
                             onClick={this.props.handleCrossRibbonClick}
