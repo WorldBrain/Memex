@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
+import onClickOutside from 'react-onclickoutside'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -130,6 +131,11 @@ class SidebarContainer extends React.Component<Props> {
         }
     }
 
+    handleClickOutside = (e: Event) => {
+        e.stopPropagation()
+        this.props.closeSidebar()
+    }
+
     render() {
         return (
             <Sidebar
@@ -234,5 +240,8 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
 }
 
 export default withSidebarContext(
-    connect(mapStateToProps, mapDispatchToProps)(SidebarContainer),
+    connect(
+        mapStateToProps,
+        mapDispatchToProps,
+    )(onClickOutside(SidebarContainer)),
 )

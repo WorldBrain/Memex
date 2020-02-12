@@ -121,9 +121,9 @@ class Sidebar extends React.Component<Props, State> {
     }
 
     private renderAnnots() {
-        const annots = this.props.annotations.map(annot => (
+        const annots = this.props.annotations.map((annot, i) => (
             <AnnotationBox
-                key={annot.url}
+                key={i}
                 env={this.props.env}
                 {...annot}
                 isActive={this.props.activeAnnotationUrl === annot.url}
@@ -149,7 +149,7 @@ class Sidebar extends React.Component<Props, State> {
         }
 
         if (this.props.isLoading && this.props.appendLoader) {
-            annots.push(<LoadingIndicator />)
+            annots.push(<LoadingIndicator key="spinner" />)
         }
 
         return annots
@@ -169,7 +169,6 @@ class Sidebar extends React.Component<Props, State> {
         const {
             env,
             isOpen,
-            isLoading,
             annotations,
             showCommentBox,
             showCongratsMessage,
@@ -188,12 +187,16 @@ class Sidebar extends React.Component<Props, State> {
                 >
                     <div className={styles.sidebar}>
                         <div className={styles.topSection}>
-                             <Topbar
+                            <Topbar
                                 {...this.props}
                                 disableAddCommentBtn={showCommentBox}
                                 handleCloseBtnClick={this.handleCloseBtnClick}
-                                handleSettingsBtnClick={this._handleSettingsBtnClick}
-                                handleAddCommentBtnClick={handleAddCommentBtnClick}
+                                handleSettingsBtnClick={
+                                    this._handleSettingsBtnClick
+                                }
+                                handleAddCommentBtnClick={
+                                    handleAddCommentBtnClick
+                                }
                                 handleSearchChange={this.handleSearchChange}
                                 handleSearchEnter={this.handleSearchEnter}
                                 handleClearBtn={this.handleClearBtn}
@@ -209,7 +212,9 @@ class Sidebar extends React.Component<Props, State> {
                                             isOverview={
                                                 this.props.env === 'overview'
                                             }
-                                            handleAddCommentBtnClick={handleAddCommentBtnClick}
+                                            handleAddCommentBtnClick={
+                                                handleAddCommentBtnClick
+                                            }
                                         />
                                     </div>
                                     <PageInfo
@@ -221,14 +226,14 @@ class Sidebar extends React.Component<Props, State> {
                             )}
                         </div>
                         <div>
-                        {showCommentBox && (
-                            <div className={styles.commentBoxContainer}>
-                                <CommentBoxContainer
-                                    env={env}
-                                    isSocialPost={this.props.isSocialPost}
-                                />
-                            </div>
-                        )}
+                            {showCommentBox && (
+                                <div className={styles.commentBoxContainer}>
+                                    <CommentBoxContainer
+                                        env={env}
+                                        isSocialPost={this.props.isSocialPost}
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div
                             className={cx(styles.resultsContainer, {
