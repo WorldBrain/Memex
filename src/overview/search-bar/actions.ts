@@ -173,4 +173,5 @@ export const search: (args?: any) => Thunk = (
 
 export const init = () => dispatch => {
     dispatch(notifActs.updateUnreadNotif())
+    dispatch(search({ overwrite: true, fromOverview: false }))
 }
