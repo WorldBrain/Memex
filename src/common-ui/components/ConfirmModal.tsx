@@ -30,7 +30,9 @@ class ConfirmModal extends PureComponent<Props> {
                     {this.props.message}
                     <Spinner />
                 </div>
-                <div className={styles.btnBar}>{this.props.children}</div>
+                <div className={styles.btnBar} tabIndex={0}>
+                    {this.props.children}
+                </div>
             </Modal>
         )
     }
