@@ -76,7 +76,7 @@
 .tooltip.statePristine {
     border-radius: 3px;
     height: 20px;
-    width: 110px;
+    width: fit-content;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -118,6 +118,7 @@
     z-index: 10;
     height: 20px;
     display: flex;
+    width: 30px;
     top: 0px;
     justify-content: justify-content;
     align-items: center;

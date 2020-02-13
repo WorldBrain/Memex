@@ -298,7 +298,7 @@ class SyncDevicesPaneContainer extends React.Component<
                         </div>
                         <div className={styles.mobileContainer}>
                             <img
-                                src={'img/mobilehalf.png'}
+                                src={'img/mobileHalf.svg'}
                                 className={styles.mobileImg}
                             />
                         </div>

@@ -81,6 +81,7 @@
     width: 20px;
     height: 20px;
     margin-right: 10px;
+    cursor: pointer;
 
     & img {
         max-height: 25px;
