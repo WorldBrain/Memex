@@ -175,44 +175,30 @@ export default class BackupStorage extends StorageModule {
     }
 }
 
-export interface LastBackupStorage {
-    getLastBackupTime(): Promise<Date>
-    storeLastBackupTime(time: Date): Promise<any>
+export type BackupInfoKey =
+    | 'lastBackup'
+    | 'lastBackupFinish'
+    | 'lastProblemNotifShown'
+export interface BackupInfoStorage {
+    storeDate(key: BackupInfoKey, time: Date): Promise<void>
+    retrieveDate(key: BackupInfoKey): Promise<Date | null>
 
-    getLastBackupFinishTime(): Promise<Date>
-    storeLastBackupFinishTime(time: Date): Promise<any>
-    removeBackupTimes(): Promise<void>
+    clear(): Promise<void>
 }
 
-export class LocalLastBackupStorage implements LastBackupStorage {
-    private key: string
+export class LocalBackupInfoStorage implements BackupInfoStorage {
+    // constructor(private localStorage: {
+    //     setItem(key: string, value: string): void,
+    //     getItem(key: string): Promise<string>
+    // }) {
 
-    constructor({ key }: { key: string }) {
-        this.key = key
+    // }
+
+    async storeDate(key: BackupInfoKey, time: Date) {
+        localStorage.setItem(key, time ? JSON.stringify(time.getTime()) : null)
     }
 
-    async getLastBackupTime() {
-        return this._getTime(this.key)
-    }
-
-    async storeLastBackupTime(time: Date) {
-        await this._setDate(this.key, time)
-    }
-
-    async getLastBackupFinishTime() {
-        return this._getTime(`${this.key}Finish`)
-    }
-
-    async storeLastBackupFinishTime(time: Date) {
-        await this._setDate(`${this.key}Finish`, time)
-    }
-
-    async removeBackupTimes() {
-        localStorage.removeItem(this.key)
-        localStorage.removeItem(`${this.key}Finish`)
-    }
-
-    async _getTime(key) {
+    async retrieveDate(key: BackupInfoKey): Promise<Date | null> {
         const value = localStorage.getItem(key)
         if (!value) {
             return null
@@ -220,7 +206,14 @@ export class LocalLastBackupStorage implements LastBackupStorage {
         return new Date(JSON.parse(value))
     }
 
-    async _setDate(key, date) {
-        localStorage.setItem(key, date ? JSON.stringify(date.getTime()) : null)
+    async clear() {
+        const keys: { [Key in BackupInfoKey]: true } = {
+            lastBackup: true,
+            lastBackupFinish: true,
+            lastProblemNotifShown: true,
+        }
+        for (const key of Object.keys(keys)) {
+            localStorage.removeItem(key)
+        }
     }
 }

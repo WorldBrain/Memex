@@ -1,5 +1,13 @@
 import * as React from 'react'
 import { SignInScreen } from 'src/authentication/components/SignIn'
+import {
+    PricingPlanTitle,
+    PricingPlanItem,
+    LoginTitle,
+    LoginButton,
+    WhiteSpacer30,
+} from 'src/authentication/components/Subscription/pricing.style'
+
 import { SubscriptionOptionsChargebee } from 'src/authentication/components/Subscription/SubscriptionOptionsChargebee'
 import {
     UserProps,
@@ -30,20 +38,33 @@ export class Subscribe extends React.PureComponent<Props> {
             <div>
                 {this.props.currentUser == null && (
                     <div className={styles.section}>
-                        <p className={styles.instructionsTitle}>
-                            {' Login or Create an account to subscribe'}
-                        </p>
-                        <p className={styles.instructions}>
+                        <div className={styles.instructionsTitle}>
+                            {' Login or Create an Account'}
+                        </div>
+                        <div className={styles.instructions}>
                             {
                                 ' To create an account just type in a new email address'
                             }
-                        </p>
+                        </div>
                         <SignInScreen />
                     </div>
                 )}
 
                 {this.props.currentUser != null && (
                     <div>
+                        <PricingPlanTitle className={''}>
+                            ⭐️ Upgrade to Memex Pro
+                        </PricingPlanTitle>
+
+                        <PricingPlanItem className={''}>
+                            📲 Encrypted Sync with your iOS or Android phone
+                        </PricingPlanItem>
+
+                        <PricingPlanItem className={''}>
+                            💾 Automatic Backups
+                        </PricingPlanItem>
+
+                        <WhiteSpacer30 />
                         <SubscriptionOptionsChargebee
                             user={this.props.currentUser}
                             plans={this.props.authorizedPlans}

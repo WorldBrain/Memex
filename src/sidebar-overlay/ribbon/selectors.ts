@@ -16,6 +16,11 @@ export const isRibbonEnabled = createSelector(
     state => state.isRibbonEnabled,
 )
 
+export const areHighlightsEnabled = createSelector(
+    ribbon,
+    state => state.areHighlightsEnabled,
+)
+
 export const isTooltipEnabled = createSelector(
     ribbon,
     state => state.isTooltipEnabled,

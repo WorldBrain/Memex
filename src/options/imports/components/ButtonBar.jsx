@@ -7,7 +7,6 @@ const ButtonBar = ({ isRunning, helpText, children }) => (
     <div className={styles.container}>
         <div className={styles.actionContainer}>
             <div className={styles.actionBar}>{children}</div>
-            <div className={styles.helpText}>{helpText}</div>
         </div>
     </div>
 )

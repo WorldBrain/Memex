@@ -1,64 +1,102 @@
 import StorageManager from '@worldbrain/storex'
 import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
 
-import BookmarksBackground from 'src/bookmarks/background'
-import initStorageManager from '../../search/memory-storex'
 import CustomListBackground from './'
 import * as DATA from './storage.test.data'
-import { createTestPage } from 'src/search/on-demand-indexing'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { SearchIndex } from 'src/search'
 
-describe('Custom List Integrations', () => {
-    let customLists: CustomListBackground
-    let searchIndex: SearchIndex
-    let storageManager: StorageManager
+async function insertTestData({
+    customLists,
+}: {
+    customLists: CustomListBackground
+}) {
+    // Insert some test data for all tests to use
+    await customLists.createCustomList(DATA.LIST_1)
+    await customLists.createCustomList(DATA.LIST_2)
+    await customLists.createCustomList(DATA.LIST_3)
+    // await customLists.createCustomList(DATA.MOBILE_LIST)
 
+    await customLists.insertPageToList(DATA.PAGE_ENTRY_1)
+    await customLists.insertPageToList(DATA.PAGE_ENTRY_2)
+    await customLists.insertPageToList(DATA.PAGE_ENTRY_3)
+    await customLists.insertPageToList(DATA.PAGE_ENTRY_4)
+}
+
+async function setupTest() {
+    const {
+        backgroundModules,
+        ...setup
+    } = await setupBackgroundIntegrationTest()
+    const customLists: CustomListBackground = backgroundModules.customLists
+    const searchIndex: SearchIndex = backgroundModules.search.searchIndex
+    const storageManager = setup.storageManager
+
+    // NOTE: Each test starts creating lists at ID `1`
+    let fakeListCount = 0
+    customLists.generateListId = () => ++fakeListCount
+
+    registerModuleMapCollections(storageManager.registry, {
+        customList: customLists.storage,
+        bookmarks: backgroundModules.bookmarks.storage,
+    })
+
+    await storageManager.finishInitialization()
+    await insertTestData({ customLists })
+
+    return { customLists, searchIndex }
+}
+
+describe('Custom List Integrations', () => {
     const checkDefined = currPage => {
         expect(currPage).toBeDefined()
         expect(currPage).not.toBeNull()
     }
 
-    async function insertTestData() {
-        // Insert some test data for all tests to use
-        await customLists.createCustomList(DATA.LIST_1)
-        await customLists.createCustomList(DATA.LIST_2)
-        await customLists.createCustomList(DATA.LIST_3)
+    describe('misc ops', () => {
+        test('should create mobile shared list if not existing in setup', async () => {
+            const { customLists } = await setupTest()
 
-        await customLists.insertPageToList(DATA.PAGE_ENTRY_1)
-        await customLists.insertPageToList(DATA.PAGE_ENTRY_2)
-        await customLists.insertPageToList(DATA.PAGE_ENTRY_3)
-        await customLists.insertPageToList(DATA.PAGE_ENTRY_4)
-    }
+            const shapeExpectedLists = (l: any[]) =>
+                l.map(list => ({
+                    ...list,
+                    id: expect.any(Number),
+                    pages: [],
+                    active: false,
+                    createdAt: expect.any(Date),
+                    isNestable: list.name !== DATA.MOBILE_LIST.name,
+                    isDeletable: list.name !== DATA.MOBILE_LIST.name,
+                }))
 
-    beforeEach(async () => {
-        const {
-            backgroundModules,
-            ...setup
-        } = await setupBackgroundIntegrationTest()
-        customLists = backgroundModules.customLists
-        searchIndex = backgroundModules.search.searchIndex
-        storageManager = setup.storageManager
+            const lists = [DATA.LIST_1, DATA.LIST_2, DATA.LIST_3]
 
-        // NOTE: Each test starts creating lists at ID `1`
-        let fakeListCount = 0
-        customLists.generateListId = () => ++fakeListCount
+            const before = await customLists.fetchAllLists({})
+            expect(before).toEqual(shapeExpectedLists(lists))
 
-        registerModuleMapCollections(storageManager.registry, {
-            customList: customLists.storage,
-            bookmarks: backgroundModules.bookmarks.storage,
+            await customLists.setup()
+
+            const after = await customLists.fetchAllLists({})
+            expect(after).toEqual(
+                shapeExpectedLists([...lists, DATA.MOBILE_LIST]),
+            )
+
+            await customLists.setup()
+
+            const final = await customLists.fetchAllLists({})
+            expect(final).toEqual(
+                shapeExpectedLists([...lists, DATA.MOBILE_LIST]),
+            )
         })
-
-        await storageManager.finishInitialization()
-        await insertTestData()
     })
 
     describe('create ops', () => {
         test('should be able to create list entry for existing page', async () => {
+            const { searchIndex, customLists } = await setupTest()
+
             const newPage = await searchIndex.createTestPage({
                 url: 'http://www.test.com',
+                save: true,
             })
-            await newPage.save()
 
             await customLists.insertPageToList({ id: 1, url: newPage.url })
             const lists = await customLists.fetchListPagesByUrl({
@@ -70,6 +108,8 @@ describe('Custom List Integrations', () => {
         })
 
         test('list entry creates for non-existing pages should create page', async () => {
+            const { searchIndex, customLists } = await setupTest()
+
             const url = 'http://www.test.com'
 
             await customLists.insertPageToList({ id: 1, url })
@@ -79,20 +119,37 @@ describe('Custom List Integrations', () => {
             expect(lists[0].pages.length).toBe(1)
             expect(lists[0].pages[0]).toBe(url)
 
-            const newPage = await customLists['getPage'](url)
+            const newPage = await searchIndex.getPage(url)
             expect(newPage.url).toBe(url.substring(11))
         })
     })
 
     describe('read ops', () => {
         test('fetch all lists', async () => {
-            const lists = await customLists.fetchAllLists({})
+            const { customLists } = await setupTest()
+
+            const lists = await customLists.fetchAllLists({
+                skipMobileList: false,
+            })
+
+            checkDefined(lists)
+            expect(lists.length).toBe(3)
+        })
+
+        test('fetch all lists, skipping mobile list', async () => {
+            const { customLists } = await setupTest()
+
+            const lists = await customLists.fetchAllLists({
+                skipMobileList: true,
+            })
 
             checkDefined(lists)
             expect(lists.length).toBe(3)
         })
 
         test('fetch pages associated with list', async () => {
+            const { customLists } = await setupTest()
+
             const lists = await customLists.fetchListPagesById({ id: 1 })
 
             checkDefined(lists)
@@ -100,6 +157,8 @@ describe('Custom List Integrations', () => {
         })
 
         test('fetch suggestions based on list names', async () => {
+            const { customLists } = await setupTest()
+
             const lists = await customLists.fetchListNameSuggestions({
                 name: 'Go',
                 url: 'https://www.ipsum.com/test',
@@ -112,6 +171,8 @@ describe('Custom List Integrations', () => {
         })
 
         test('Case insensitive name search', async () => {
+            const { customLists } = await setupTest()
+
             const list = await customLists.fetchListIgnoreCase({
                 name: 'somE good things',
             })
@@ -121,6 +182,8 @@ describe('Custom List Integrations', () => {
         })
 
         test('fetch Pages associated with list by url', async () => {
+            const { customLists } = await setupTest()
+
             const lists = await customLists.fetchListPagesByUrl({
                 url: 'https://www.ipsum.com/test',
             })
@@ -130,8 +193,11 @@ describe('Custom List Integrations', () => {
         })
 
         test('fetch lists with some urls excluded', async () => {
+            const { customLists } = await setupTest()
+
             const lists = await customLists.fetchAllLists({
                 excludeIds: [1, 2] as any[],
+                skipMobileList: true,
             })
 
             checkDefined(lists)
@@ -141,8 +207,11 @@ describe('Custom List Integrations', () => {
         })
 
         test('fetch lists with limits', async () => {
+            const { customLists } = await setupTest()
+
             const lists = await customLists.fetchAllLists({
                 limit: 1,
+                skipMobileList: false,
             })
 
             checkDefined(lists)
@@ -152,6 +221,8 @@ describe('Custom List Integrations', () => {
 
     describe('update ops', () => {
         test('update list name', async () => {
+            const { customLists } = await setupTest()
+
             const id = 1
             const updatedName = 'new name'
 
@@ -166,26 +237,12 @@ describe('Custom List Integrations', () => {
             const after = await customLists.fetchListById({ id })
             expect(after.name).toEqual(updatedName)
         })
-
-        test('fail to update list name', async () => {
-            const updatedList = await customLists.updateList({
-                id: 4,
-                name: 'another new name',
-            })
-            const newName = await customLists.fetchListIgnoreCase({
-                name: 'another new name',
-            })
-            // checkDefined(updatedList)
-
-            // Nothing updated
-            // expect(updatedList).toBe(0)
-            // cannot found anything with the new name
-            expect(newName).toBeNull()
-        })
     })
 
     describe('delete ops', () => {
         test('delete list along with associated pages', async () => {
+            const { customLists } = await setupTest()
+
             const lists = await customLists.removeList({ id: 3 })
             checkDefined(lists)
 
@@ -195,6 +252,8 @@ describe('Custom List Integrations', () => {
         })
 
         test('Remove page from list', async () => {
+            const { customLists } = await setupTest()
+
             const pagesBefore = await customLists.fetchListPagesById({ id: 1 })
             const delResult = await customLists.removePageFromList({
                 id: 1,

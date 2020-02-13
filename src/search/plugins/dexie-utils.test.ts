@@ -8,31 +8,17 @@ import { DexieUtilsPlugin } from './dexie-utils'
 import CustomListStorage from 'src/custom-lists/background/storage'
 import BookmarksStorage from 'src/bookmarks/background/storage'
 import AnnotationStorage from 'src/direct-linking/background/storage'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 describe('Dexie Utils storex plugin', () => {
     async function setupTest() {
-        const storageManager = initStorageManager()
-        const customLists = new CustomListStorage({ storageManager })
-        const bookmarks = new BookmarksStorage({ storageManager })
-        const annotations = new AnnotationStorage({
-            storageManager,
-            browserStorageArea: {} as any,
-            searchIndex: {} as any,
-        })
-
-        registerModuleMapCollections(storageManager.registry, {
-            customLists,
-            bookmarks,
-            annotations,
-        })
-        await storageManager.finishInitialization()
-
+        const { storageManager } = await setupBackgroundIntegrationTest()
         await insertTestData(storageManager)
 
-        const plugin = new DexieUtilsPlugin()
-        plugin.install(storageManager.backend as any)
+        // const plugin = new DexieUtilsPlugin()
+        // plugin.install(storageManager.backend as any)
 
-        return { plugin, storageManager }
+        return { storageManager }
     }
 
     async function insertTestData(storageManager: Storex) {
@@ -59,7 +45,7 @@ describe('Dexie Utils storex plugin', () => {
     }
 
     it('should delete pages by URL regexp + assoc. data', async () => {
-        const { plugin, storageManager } = await setupTest()
+        const { storageManager } = await setupTest()
 
         expect(
             await storageManager
@@ -89,7 +75,7 @@ describe('Dexie Utils storex plugin', () => {
         expect(tagsBefore.length).toBe(1)
         expect(annotsBefore.length).toBe(1)
 
-        await plugin.deleteByRegexp({
+        await storageManager.operation(DexieUtilsPlugin.REGEXP_DELETE_OP, {
             collection: 'pages',
             fieldName: 'url',
             pattern: 'com/test2',

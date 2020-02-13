@@ -71,24 +71,25 @@ const Topbar = ({
                 </button>
             </React.Fragment>
         )}
-
-        <div className={styles.right}>
-            {/* Button to add a comment. */}
-            <ButtonTooltip
-                tooltipText="Add notes to page"
-                position="leftNarrow"
-            >
-                <button
-                    className={cx(styles.button, styles.comments, {
-                        [styles.disabled]: disableAddCommentBtn,
-                    })}
-                    onClick={e => {
-                        e.stopPropagation()
-                        handleAddCommentBtnClick()
-                    }}
-                />
-            </ButtonTooltip>
-        </div>
+        {props.env === 'overview' && (
+            <div className={styles.right}>
+                {/* Button to add a comment. */}
+                <ButtonTooltip
+                    tooltipText="Add notes to page"
+                    position="leftNarrow"
+                >
+                    <button
+                        className={cx(styles.button, styles.comments, {
+                            [styles.disabled]: disableAddCommentBtn,
+                        })}
+                        onClick={e => {
+                            e.stopPropagation()
+                            handleAddCommentBtnClick()
+                        }}
+                    />
+                </ButtonTooltip>
+            </div>
+        )}
     </div>
 )
 

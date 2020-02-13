@@ -5,7 +5,6 @@ import {
 } from '@worldbrain/storex-backend-dexie'
 
 import schemaPatcher from './storage/dexie-schema'
-import collections from './old-schema'
 import stemmerSelector from './stemmers'
 import { createStorexPlugins } from './storex-plugins'
 
@@ -25,8 +24,5 @@ export default function initStorex(options: {
     }
 
     const storex = new Storex({ backend })
-
-    storex.registry.registerCollections(collections)
-
     return storex
 }

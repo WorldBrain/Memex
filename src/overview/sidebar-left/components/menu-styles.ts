@@ -15,9 +15,9 @@ const baseStyles = {
         height: '100vh',
         width: '250px',
         top: '55px',
-        opacity: '1',
+        opacity: '0',
         marginLeft: '0px',
-        transition: 'all 0.2s cubic-bezier(0.65, 0.05, 0.36, 1) 0s',
+        transition: 'all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1)',
         // boxShadow:
         //     'rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px',
         fontSize: '0.68rem',

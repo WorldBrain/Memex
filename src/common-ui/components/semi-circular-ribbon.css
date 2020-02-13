@@ -1,9 +1,11 @@
 .ribbon {
-    composes: removeIcon from 'src/common-ui/icons.css';
-    composes: nakedButton hoverColor from 'src/common-ui/colors.css';
-    display: flex;
-    background-size: 12px;
-    width: 22px;
-    height: 22px;
-    cursor: pointer;
+    composes: button from 'src/common-ui/components/result-item.css';
+    background-image: url('/img/remove.svg');
+    opacity: 1;
+    background-size: 14px;
+    height: 14px;
+
+    &:hover {
+        opacity: 0.6;
+    }
 }

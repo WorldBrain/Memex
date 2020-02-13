@@ -44,11 +44,9 @@
             "@worldbrain/storex-pattern-modules/lib/*": [
                 "external/@worldbrain/storex-pattern-modules/ts/*"
             ],
-            "@worldbrain/memex-common": [
-                "external/@worldbrain/memex-common/ts"
-            ],
-            "@worldbrain/memex-common/lib/*": [
-                "external/@worldbrain/memex-common/ts/*"
+            "@worldbrain/storex-hub": ["external/@worldbrain/storex-hub/ts"],
+            "@worldbrain/storex-hub/lib/*": [
+                "external/@worldbrain/storex-hub/ts/*"
             ],
             "@worldbrain/memex-storage": [
                 "external/@worldbrain/memex-storage/ts"

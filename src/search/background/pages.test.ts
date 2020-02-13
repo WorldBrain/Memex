@@ -47,11 +47,7 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
                     fullUrl: DATA.PAGE_1.fullUrl,
                     domain: DATA.PAGE_1.domain,
                     hostname: DATA.PAGE_1.hostname,
-                    canonicalUrl: undefined,
-                    fullTitle: undefined,
-                    screenshot: undefined,
                     text: 'just some dummy test text',
-                    titleTerms: [],
                     urlTerms: [],
                     terms: ['dummy', 'test', 'text'],
                 },
@@ -63,13 +59,7 @@ const createPagesStep: IntegrationTestStep<BackgroundIntegrationTestContext> = {
                     fullUrl: DATA.PAGE_2.fullUrl,
                     domain: DATA.PAGE_2.domain,
                     hostname: DATA.PAGE_2.hostname,
-                    canonicalUrl: undefined,
-                    fullTitle: undefined,
-                    screenshot: undefined,
-                    text: undefined,
-                    titleTerms: [],
                     urlTerms: [],
-                    terms: [],
                 },
             },
         }),
@@ -102,6 +92,7 @@ const expectedPage1Result = {
     tags: [],
     title: undefined,
     url: DATA.PAGE_1.url,
+    fullUrl: DATA.PAGE_1.fullUrl,
 }
 const expectedPage2Result = {
     annotations: [],
@@ -113,6 +104,7 @@ const expectedPage2Result = {
     tags: [],
     title: undefined,
     url: DATA.PAGE_2.url,
+    fullUrl: DATA.PAGE_2.fullUrl,
 }
 
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
@@ -344,6 +336,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 },
                             }),
                         },
+                        expectedSyncLogEntries: () => [
+                            expect.objectContaining({
+                                collection: 'pages',
+                                pk: DATA.PAGE_1.url,
+                                value: {
+                                    text: 'some new updated text',
+                                },
+                            }),
+                        ],
                         postCheck: async ({ setup }) => {
                             const page = await setup.storageManager
                                 .collection('pages')
@@ -352,6 +353,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 })
                             expect(page.terms).toEqual(
                                 expect.arrayContaining([
+                                    'updated',
                                     'text',
                                     'dummy',
                                     'test',

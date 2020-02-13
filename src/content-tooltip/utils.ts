@@ -32,11 +32,20 @@ export const copyToClipboard = text => {
     document.body.removeChild(dummy)
 }
 
-export const getTooltipState = async () =>
+export const getTooltipState: () => Promise<boolean> = async () =>
     getLocalStorage(
         constants.TOOLTIP_STORAGE_NAME,
         constants.TOOLTIP_DEFAULT_OPTION,
     )
+
+export const getHighlightsState: () => Promise<boolean> = async () =>
+    getLocalStorage(
+        constants.HIGHLIGHTS_STORAGE_NAME,
+        constants.HIGHLIGHTS_DEFAULT_OPTION,
+    )
+
+export const setHighlightsState = async highlightsValue =>
+    setLocalStorage(constants.HIGHLIGHTS_STORAGE_NAME, highlightsValue)
 
 export const setTooltipState = async tooltipValue =>
     setLocalStorage(constants.TOOLTIP_STORAGE_NAME, tooltipValue)
@@ -50,9 +59,7 @@ export const getPositionState = async () =>
 export const setPositionState = async positionValue =>
     setLocalStorage(constants.POSITION_STORAGE_NAME, positionValue)
 
-export const getKeyboardShortcutsState = async (): Promise<
-    KeyboardShortcuts
-> => {
+export const getKeyboardShortcutsState = async (): Promise<KeyboardShortcuts> => {
     const storage = await getLocalStorage(
         constants.KEYBOARDSHORTCUTS_STORAGE_NAME,
         constants.KEYBOARDSHORTCUTS_DEFAULT_STATE,
@@ -70,7 +77,7 @@ const shortcutStorageToState = (storage): KeyboardShortcuts => {
         'toggleSidebar',
         'toggleHighlights',
         'createAnnotation',
-        'highlight',
+        'createHighlight',
         'link',
         'createBookmark',
         'shortcutsEnabled',

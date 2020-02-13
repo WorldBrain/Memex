@@ -30,17 +30,22 @@ class NavLink extends PureComponent {
                     className={this.navClasses()}
                     to={this.props.pathname}
                 >
-                    <span className={cx(icons.standardMenu, {
-                    [icons.searchGreyIcon] : this.props.icon === "search",
-                    [icons.settingsIcon] : this.props.icon === "settings",
-                    [icons.importIcon] : this.props.icon === "import",
-                    [icons.backupIcon] : this.props.icon === "backup",
-                    [icons.blockIcon] : this.props.icon === "block",
-                    [icons.privacyIcon] : this.props.icon === "privacy",
-                    [icons.teamIcon] : this.props.icon === "team",
-                    [icons.helpIcon] : this.props.icon === "help",
-                    [icons.tutorialIcon] : this.props.icon === "info",
-                })}/>
+                    <span
+                        className={cx(icons.standardMenu, {
+                            [icons.searchGreyIcon]:
+                                this.props.icon === 'search',
+                            [icons.settingsIcon]:
+                                this.props.icon === 'settings',
+                            [icons.importIcon]: this.props.icon === 'import',
+                            [icons.backupIcon]: this.props.icon === 'backup',
+                            [icons.syncIcon]: this.props.icon === 'sync',
+                            [icons.blockIcon]: this.props.icon === 'block',
+                            [icons.privacyIcon]: this.props.icon === 'privacy',
+                            [icons.teamIcon]: this.props.icon === 'team',
+                            [icons.helpIcon]: this.props.icon === 'help',
+                            [icons.tutorialIcon]: this.props.icon === 'info',
+                        })}
+                    />
                     {this.props.name}
                 </this.LinkComponent>
             </li>

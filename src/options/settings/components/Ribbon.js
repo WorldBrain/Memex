@@ -25,11 +25,13 @@ class Ribbon extends React.Component {
 
     render() {
         return (
-            <div className={styles.container}>
-                <h1 className={styles.header}>Sidebar Ribbon</h1>
-                <p className={styles.subHeader}>
-                    You can always open the sidebar via the Memex icon in the browser extensions menu. 
-                </p>
+            <div className={styles.section}>
+                <div className={styles.sectionTitle}>Website Sidebar</div>
+                <div className={styles.infoText}>
+                    You can open the sidebar via the Memex icon in the browser
+                    extensions menu or by moving your mouse to the right side of
+                    the screen.
+                </div>
                 <Checkbox
                     id="show-memex-ribbon"
                     isChecked={this.state.ribbon}

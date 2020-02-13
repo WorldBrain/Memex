@@ -2,28 +2,32 @@
 @value color6, color3, color4, color14 from colors;
 
 .pageInfoDiv {
-    margin-top: 35px;
+    padding: 5px 5px;
+    top: 0px;
+    background: white;
     position: sticky;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: -30px;
+    flex-direction: row;
+    align-items: center;
+    border-bottom: 0.75px solid #e1e1e1;
 
     & a {
-    	text-decoration: none;
+        text-decoration: none;
+        text-overflow: ellipsis;
+        overflow-x: hidden;
+        white-space: nowrap;
     }
 }
 
 .goBackBtn {
-    composes: nakedButton from 'src/common-ui/elements.css';
-    font-size: 13px;
-    border: none;
-    font-weight: 600;
+    height: 20px;
+    width: 40px;
     cursor: pointer;
-    outline: none;
-    color: color4;
-    width: fit-content;
-    margin: 3px 0 0px 1px;
+
+    & img {
+        width: 100%;
+        height: 100%;
+    }
 }
 
 .pageInfo {
@@ -37,12 +41,12 @@
 }
 
 .title {
-	font-size: 15px;
-	color: color3;
-	font-weight: 600;
+    font-size: 14px;
+    color: #3a2f45;
+    font-weight: 600;
 }
 
 .url {
-	font-size: 13px;
-	color: color6;
+    font-size: 12px;
+    color: #3a2f45;
 }

@@ -6,17 +6,12 @@ import BookmarksBackground from 'src/bookmarks/background'
 import Page, { PageConstructorOptions } from './page'
 import Visit from './visit'
 import * as DATA from './page.test.data'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 async function setupTest() {
-    const storageManager = initStorageManager()
-    const bmBackground = new BookmarksBackground({ storageManager })
+    const setup = await setupBackgroundIntegrationTest()
 
-    registerModuleMapCollections(storageManager.registry, {
-        bookmarks: bmBackground.storage,
-    })
-    await storageManager.finishInitialization()
-
-    return { storageManager }
+    return { storageManager: setup.storageManager }
 }
 
 function compareDBPageWithPageData(

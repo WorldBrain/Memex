@@ -30,13 +30,13 @@ tr {
 .name {
     composes: h2Color from '../../../../common-ui/colors.css';
     vertical-align: top;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 500;
 }
 
 .subname {
-    composes: subTitleColor from '../../../../common-ui/colors.css';
-    font-size: 13px;
+    composes: infoText from 'src/options/settings/components/settings.css';
+    font-size: 14px;
 }
 
 .checkbox {

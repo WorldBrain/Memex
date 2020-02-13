@@ -6,6 +6,7 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-storage/lib/lists/constants'
+import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
 import { PageList, PageListEntry } from './types'
@@ -70,10 +71,15 @@ export default class CustomListStorage extends StorageModule {
                     pageUrl: '$url:string',
                 },
             },
-            findListByName: {
+            findListByNameIgnoreCase: {
                 collection: CustomListStorage.CUSTOM_LISTS_COLL,
                 operation: 'findObject',
                 args: [{ name: '$name:string' }, { ignoreCase: ['name'] }],
+            },
+            findListsByNames: {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                operation: 'findObjects',
+                args: { name: { $in: '$name:string[]' } },
             },
             updateListName: {
                 collection: CustomListStorage.CUSTOM_LISTS_COLL,
@@ -128,21 +134,52 @@ export default class CustomListStorage extends StorageModule {
         }
     }
 
+    async createMobileListIfAbsent({ id }: { id: number }): Promise<string> {
+        const foundMobileLists = await this.operation('findListsByNames', {
+            name: [MOBILE_LIST_NAME],
+        })
+        if (foundMobileLists.length) {
+            return foundMobileLists[0].id
+        }
+
+        return (
+            await this.operation('createList', {
+                id,
+                name: MOBILE_LIST_NAME,
+                isDeletable: false,
+                isNestable: false,
+                createdAt: new Date(),
+            })
+        ).object.id
+    }
+
+    private filterMobileList = (lists: any[]): any[] =>
+        lists.filter(list => list.name !== MOBILE_LIST_NAME)
+
     async fetchAllLists({
         excludedIds = [],
         limit,
         skip,
+        skipMobileList,
     }: {
         excludedIds?: string[]
         limit: number
         skip: number
+        skipMobileList?: boolean
     }) {
         const lists = await this.operation('findListsExcluding', {
             excludedIds,
             limit,
             skip,
         })
-        return lists.map(list => this.prepareList(list))
+
+        const prepared = lists.map(list => this.prepareList(list))
+
+        if (skipMobileList) {
+            return this.filterMobileList(prepared)
+        }
+
+        return prepared
     }
 
     async fetchListById(id: number) {
@@ -181,9 +218,11 @@ export default class CustomListStorage extends StorageModule {
             entriesByListId.set(page.listId, [...current, page.fullUrl])
         })
 
-        const lists: PageList[] = await this.operation('findListsIncluding', {
-            includedIds: [...listIds],
-        })
+        const lists: PageList[] = this.filterMobileList(
+            await this.operation('findListsIncluding', {
+                includedIds: [...listIds],
+            }),
+        )
 
         return lists.map(list => {
             const entries = entriesByListId.get(list.id)
@@ -306,13 +345,15 @@ export default class CustomListStorage extends StorageModule {
             entriesByListId.set(page.listId, [...current, page.fullUrl])
         })
 
-        return lists.map(list => {
-            const entries = entriesByListId.get(list.id)
-            return this.prepareList(list, entries, entries != null)
-        })
+        return this.filterMobileList(
+            lists.map(list => {
+                const entries = entriesByListId.get(list.id)
+                return this.prepareList(list, entries, entries != null)
+            }),
+        )
     }
 
     async fetchListIgnoreCase({ name }: { name: string }) {
-        return this.operation('findListByName', { name })
+        return this.operation('findListByNameIgnoreCase', { name })
     }
 }

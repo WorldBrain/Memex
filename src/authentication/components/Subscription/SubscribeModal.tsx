@@ -49,9 +49,8 @@ class SubscribeModal extends React.PureComponent<Props & UserProps, State> {
 
 const styles = {
     container: {
-        // width: "50dw",
-        // height: "50dh",
-        // backgroundColor: "white",
+        width: '100%',
+        backgroundColor: 'white',
     },
 }
 

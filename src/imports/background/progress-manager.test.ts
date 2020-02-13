@@ -33,8 +33,8 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
             }),
         })
         stateManager = new ImportStateManager({
+            storageManager: null,
             itemCreator,
-            searchIndex: null,
         })
 
         if (DATA.allowTypes) {

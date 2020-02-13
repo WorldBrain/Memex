@@ -12,6 +12,7 @@ import {
 } from 'src/social-integration/constants'
 import decodeBlob from 'src/util/decode-blob'
 import { SearchIndex } from 'src/search'
+import { dangerousPleaseBeSureDeleteAndRecreateDatabase } from 'src/storage/utils'
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
 
@@ -141,7 +142,9 @@ export class BackupRestoreProcedure {
     }
 
     async _clearDatabase() {
-        await this.searchIndex.dangerousPleaseBeSureDeleteAndRecreateDatabase()
+        await dangerousPleaseBeSureDeleteAndRecreateDatabase(
+            this.storageManager,
+        )
     }
 
     _blockDatabase() {}

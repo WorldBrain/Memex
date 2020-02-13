@@ -6,6 +6,7 @@ import {
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
+import * as DATA from 'src/direct-linking/background/index.test.data'
 
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
@@ -95,11 +96,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         object: expect.objectContaining({
                                             domain: 'bla.com',
                                             fullTitle: 'bla.com title',
+                                            titleTerms: ['bla', 'title'],
                                             fullUrl: 'http://www.bla.com/',
                                             hostname: 'bla.com',
-                                            screenshot: undefined,
                                             text: 'home page content',
+                                            terms: ['home', 'page', 'content'],
                                             url: 'bla.com',
+                                            urlTerms: [],
                                         }),
                                     },
                                     'bla.com/foo': {
@@ -109,7 +112,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             fullTitle: 'bla.com foo title',
                                             fullUrl: 'http://www.bla.com/foo',
                                             hostname: 'bla.com',
-                                            screenshot: undefined,
                                             text: 'foo page content',
                                             url: 'bla.com/foo',
                                         }),
@@ -121,12 +123,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         },
                         {
                             execute: async ({ setup }) => {
-                                listEntry = (await customLists(
-                                    setup,
-                                ).insertPageToList({
-                                    id: listId,
-                                    url: 'http://www.bla.com/',
-                                })).object
+                                listEntry = (
+                                    await customLists(setup).insertPageToList({
+                                        id: listId,
+                                        url: 'http://www.bla.com/',
+                                    })
+                                ).object
                             },
                             expectedStorageChanges: {
                                 pageListEntries: (): StorageCollectionDiff => ({
@@ -205,6 +207,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             tags: [],
                                             title: 'bla.com title',
                                             url: 'bla.com',
+                                            fullUrl: 'http://www.bla.com/',
                                         },
                                     ],
                                     resultsExhausted: true,
@@ -218,7 +221,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should create a list, add an entry of an existing page to it and retrieve the list and its pages',
-            { mark: false },
             () => {
                 return {
                     steps: [
@@ -298,6 +300,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             tags: [],
                                             title: 'bla.com title',
                                             url: 'bla.com',
+                                            fullUrl: 'http://www.bla.com/',
                                         },
                                     ],
                                     resultsExhausted: true,

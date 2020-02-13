@@ -109,7 +109,7 @@
     &:placeholder-shown {
         font-style: italic;
         font-weight: 500;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Poppins', sans-serif;
     }
 
     &::placeholder {

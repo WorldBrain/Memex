@@ -47,31 +47,43 @@ class PageResultItem extends PureComponent<Props> {
                 <div
                     className={cx(styles.infoContainer, {
                         [styles.infoContainerOverview]: this.props.isOverview,
-                        [styles.infoContainerScreenshot]: this.props
-                            .areScreenshotsEnabled,
                     })}
                 >
                     <div className={styles.firstlineContainer}>
-                        <div className={styles.title} title={this.props.title}>
-                            {this.props.favIcon && (
-                                <img
-                                    className={styles.favIcon}
-                                    src={this.props.favIcon}
-                                />
-                            )}
-                            <span className={styles.titleText}>
+                        <div className={styles.titleContainer}>
+                            <div className={styles.favIconContainer}>
+                                {this.props.favIcon ? (
+                                    <img
+                                        className={styles.favIcon}
+                                        src={this.props.favIcon}
+                                    />
+                                ) : (
+                                    <div className={styles.noFavicon}>{''}</div>
+                                )}
+                            </div>
+                            <div
+                                title={this.props.title}
+                                className={styles.title}
+                            >
                                 {this.props.title}
-                            </span>
+                            </div>
                         </div>
-                        {this.props.isListFilterActive && (
-                            <SemiCircularRibbon
-                                onClick={this.props.handleCrossRibbonClick}
-                            />
-                        )}
+                        <div className={styles.actionItems}>
+                            <ResultItemActions {...this.props} />
+                        </div>
                     </div>
-                    <div className={styles.url}>{this.props.url}</div>
-                    {!this.props.isOverview && this.props.tagHolder}
-                    <ResultItemActions {...this.props} />
+                    <div title={this.props.url} className={styles.url}>
+                        {this.props.url}
+                    </div>
+                    <div className={styles.bottomLine}>
+                        <div className={styles.detailsBox}>
+                            <div className={styles.displayTime}>
+                                {' '}
+                                {this.props.displayTime}
+                            </div>
+                        </div>
+                    </div>
+                    {this.props.tags.length > 0 ? this.props.tagHolder : null}
                 </div>
             </React.Fragment>
         )

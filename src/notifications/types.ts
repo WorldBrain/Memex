@@ -28,6 +28,8 @@ export interface OneNotifDef {
 export interface NotifDefinition {
     /** Should be unique (feature_name + notification + incNumber) */
     id: string
+    sentTime?: number
+    deliveredTime?: number
     overview?: OneNotifDef
     search?: OneNotifDef
     system?: OneNotifDef

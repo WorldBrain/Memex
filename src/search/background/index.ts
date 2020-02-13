@@ -5,26 +5,19 @@ import { Browser } from 'webextension-polyfill-ts'
 import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
 import { TabManager } from 'src/activity-logger/background'
-import { DBGet } from 'src/search'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import {
-    PageSearchParams,
-    AnnotSearchParams,
-    SocialSearchParams,
-    SearchInterface,
-    BackgroundSearchParams,
-} from './types'
+import { SearchInterface, BackgroundSearchParams } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { SearchIndex } from '../types'
-import { combineSearchIndex } from '../search-index'
+import TagsBackground from 'src/tags/background'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export default class SearchBackground {
     storage: SearchStorage
     searchIndex: SearchIndex
     private tabMan: TabManager
     private queryBuilderFactory: () => QueryBuilder
-    private getDb: DBGet
     public remoteFunctions: {
         bookmarks: BookmarksInterface
         search: SearchInterface
@@ -58,34 +51,31 @@ export default class SearchBackground {
         }
     }
 
-    constructor({
-        storageManager,
-        tabMan,
-        queryBuilder = () => new QueryBuilder(),
-        idx,
-        browserAPIs,
-    }: {
-        storageManager: Storex
-        queryBuilder?: () => QueryBuilder
-        tabMan: TabManager
-        idx?: SearchIndex
-        browserAPIs: Pick<Browser, 'bookmarks'>
-    }) {
-        this.tabMan = tabMan
-        this.getDb = async () => storageManager
-        this.searchIndex =
-            idx || combineSearchIndex({ getDb: this.getDb, tabManager: tabMan })
-        this.queryBuilderFactory = queryBuilder
+    constructor(
+        private options: {
+            storageManager: Storex
+            idx: SearchIndex
+            tags: TagsBackground
+            pages: PageIndexingBackground
+            queryBuilder?: () => QueryBuilder
+            tabMan: TabManager
+            browserAPIs: Pick<Browser, 'bookmarks'>
+        },
+    ) {
+        this.tabMan = options.tabMan
+        this.searchIndex = options.idx
+        this.queryBuilderFactory =
+            options.queryBuilder || (() => new QueryBuilder())
         this.storage = new SearchStorage({
-            storageManager,
+            storageManager: options.storageManager,
             legacySearch: this.searchIndex.fullSearch,
         })
 
         // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
-        browserAPIs.bookmarks.onCreated.addListener(
+        options.browserAPIs.bookmarks.onCreated.addListener(
             this.handleBookmarkCreation.bind(this),
         )
-        browserAPIs.bookmarks.onRemoved.addListener(
+        options.browserAPIs.bookmarks.onRemoved.addListener(
             this.handleBookmarkRemoval.bind(this),
         )
 
@@ -100,13 +90,10 @@ export default class SearchBackground {
             },
             search: {
                 search: this.searchIndex.search,
-                addPageTag: this.searchIndex.addTag,
-                delPageTag: this.searchIndex.delTag,
                 suggest: this.storage.suggest,
                 extendedSuggest: this.storage.suggestExtended,
                 delPages: this.searchIndex.delPages,
 
-                fetchPageTags: this.searchIndex.fetchPageTags,
                 delPagesByDomain: this.searchIndex.delPagesByDomain,
                 delPagesByPattern: this.searchIndex.delPagesByPattern,
                 getMatchingPageCount: this.searchIndex.getMatchingPageCount,
@@ -184,11 +171,11 @@ export default class SearchBackground {
 
         const extra = annotsByDay
             ? {
-                isAnnotsSearch: true,
-                annotsByDay,
-                resultsExhausted:
-                    Object.keys(annotsByDay).length < searchParams.limit,
-            }
+                  isAnnotsSearch: true,
+                  annotsByDay,
+                  resultsExhausted:
+                      Object.keys(annotsByDay).length < searchParams.limit,
+              }
             : {}
 
         return SearchBackground.shapePageResult(docs, searchParams.limit, extra)

@@ -1,5 +1,6 @@
 import React, { ReactChild, PureComponent } from 'react'
 import cx from 'classnames'
+import OnboardingMessage from './onboarding-message'
 
 const styles = require('./ResultList.css')
 
@@ -21,12 +22,14 @@ class ResultList extends PureComponent<Props> {
     }
 
     render() {
+        const showOnboarding = localStorage.getItem('stage.Onboarding')
         return (
             <ul
                 className={cx(this.mainClass, {
                     [styles.filterBarActive]: this.props.isFilterBarActive,
                 })}
             >
+                {showOnboarding === 'true' && <OnboardingMessage />}
                 {this.props.children}
                 <div className={styles.infoBox} />
             </ul>

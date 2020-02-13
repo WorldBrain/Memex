@@ -3,6 +3,8 @@ import { FavIcon } from './models'
 import { SearchIndex } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import StorageOperationLogger from 'src/tests/storage-operation-logger'
+import TagStorage from 'src/tags/background/storage'
+import TagsBackground from 'src/tags/background'
 
 jest.mock('./models/abstract-model')
 jest.mock('lodash/fp/intersection')
@@ -10,17 +12,21 @@ jest.mock('lodash/fp/flatten')
 jest.mock('lodash/fp/difference')
 
 describe('Search index integration', () => {
-    async function setupTest() {
+    async function setupTest(options?: { excludeTestData?: boolean }) {
         const {
             storageManager,
             backgroundModules,
         } = await setupBackgroundIntegrationTest()
         const { searchIndex } = backgroundModules.search
 
-        await insertTestData(searchIndex)
+        if (!options?.excludeTestData) {
+            await insertTestData(searchIndex, backgroundModules.tags)
+        }
         return {
             storageManager,
             searchIndex,
+            pages: backgroundModules.pages,
+            tags: backgroundModules.tags,
             search: (params = {}) =>
                 searchIndex.search({
                     mapResultsFunc: db => res => {
@@ -31,7 +37,10 @@ describe('Search index integration', () => {
         }
     }
 
-    async function insertTestData(searchIndex: SearchIndex) {
+    async function insertTestData(
+        searchIndex: SearchIndex,
+        tags: TagsBackground,
+    ) {
         // Insert some test data for all tests to use
         await searchIndex.addPage({
             pageDoc: DATA.PAGE_3,
@@ -48,9 +57,9 @@ describe('Search index integration', () => {
         })
 
         // // Add some test tags
-        await searchIndex.addTag({ url: DATA.PAGE_3.url, tag: 'good' })
-        await searchIndex.addTag({ url: DATA.PAGE_3.url, tag: 'quality' })
-        await searchIndex.addTag({ url: DATA.PAGE_2.url, tag: 'quality' })
+        await tags.addTag({ url: DATA.PAGE_3.url, tag: 'good' })
+        await tags.addTag({ url: DATA.PAGE_3.url, tag: 'quality' })
+        await tags.addTag({ url: DATA.PAGE_2.url, tag: 'quality' })
     }
 
     describe('read ops', () => {
@@ -440,22 +449,88 @@ describe('Search index integration', () => {
 
         afterEach(() => (jasmine.DEFAULT_TIMEOUT_INTERVAL = origTimeout))
 
+        test('add page with extra data', async () => {
+            const { searchIndex, storageManager, pages } = await setupTest()
+            pages.storage.disableBlobProcessing = true
+
+            await searchIndex.addPage({
+                pageDoc: {
+                    ...DATA.PAGE_1,
+                    favIconURI: 'bla bla bla',
+                },
+                visits: [DATA.VISIT_1],
+            })
+
+            expect(
+                await storageManager
+                    .collection('pages')
+                    .findObject({ url: DATA.PAGE_ID_1 }),
+            ).toEqual({
+                domain: 'lorem.com',
+                fullTitle: 'page 3 dummy',
+                fullUrl: 'https://www.lorem.com/test2',
+                hostname: 'lorem.com',
+                terms: expect.any(Array),
+                text:
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                titleTerms: expect.any(Array),
+                url: 'lorem.com/test2',
+                urlTerms: expect.any(Array),
+            })
+        })
+
+        test('add page terms with extra data', async () => {
+            const { searchIndex, storageManager, pages } = await setupTest()
+            pages.storage.disableBlobProcessing = true
+
+            await searchIndex.addPage({
+                pageDoc: {
+                    ...DATA.PAGE_1,
+                },
+                visits: [DATA.VISIT_1],
+            })
+
+            await searchIndex.addPageTerms({
+                pageDoc: {
+                    ...DATA.PAGE_1,
+                    favIconURI: 'bla bla bla',
+                },
+            })
+
+            expect(
+                await storageManager
+                    .collection('pages')
+                    .findObject({ url: DATA.PAGE_ID_1 }),
+            ).toEqual({
+                domain: 'lorem.com',
+                fullTitle: 'page 3 dummy',
+                fullUrl: 'https://www.lorem.com/test2',
+                hostname: 'lorem.com',
+                terms: expect.any(Array),
+                text:
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                titleTerms: expect.any(Array),
+                url: 'lorem.com/test2',
+                urlTerms: expect.any(Array),
+            })
+        })
+
         test('add fav-icon', async () => {
-            const { searchIndex, storageManager } = await setupTest()
+            const { searchIndex, storageManager, pages } = await setupTest()
+            pages.storage.disableBlobProcessing = true
             const hostname1 = 'lorem.com'
             const hostname2 = 'sub.lorem.com'
 
             await searchIndex.addFavIcon(DATA.PAGE_1.url, DATA.FAV_1)
             await searchIndex.addFavIcon(DATA.PAGE_2.url, DATA.FAV_1)
 
-            const fav1 = await storageManager
+            const favIcons = await storageManager
                 .collection('favIcons')
-                .findObject<FavIcon>({ hostname: hostname1 })
-            const fav2 = await storageManager
-                .collection('favIcons')
-                .findObject<FavIcon>({ hostname: hostname2 })
-            expect(fav1.hostname).toBe(hostname1)
-            expect(fav2.hostname).toBe(hostname2)
+                .findObjects<FavIcon>({})
+            expect(favIcons).toEqual([
+                expect.objectContaining({ hostname: hostname1 }),
+                expect.objectContaining({ hostname: hostname2 }),
+            ])
         })
 
         test('page adding affects search', async () => {
@@ -521,7 +596,7 @@ describe('Search index integration', () => {
         })
 
         test('tag adding affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, tags } = await setupTest()
             const { docs: before } = await search({ tags: ['quality'] })
             expect(before.length).toBe(2)
             expect(before).not.toEqual(
@@ -529,7 +604,7 @@ describe('Search index integration', () => {
             )
 
             // This page doesn't have any tags; 'quality' tag has 2 other pages
-            await searchIndex.addTag({ url: DATA.PAGE_1.url, tag: 'quality' })
+            await tags.addTag({ url: DATA.PAGE_1.url, tag: 'quality' })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(3)
@@ -539,14 +614,14 @@ describe('Search index integration', () => {
         })
 
         test('tag deleting affects search', async () => {
-            const { search, searchIndex } = await setupTest()
+            const { search, tags } = await setupTest()
             const { docs: before } = await search({ tags: ['quality'] })
             expect(before.length).toBe(2)
             expect(before).toEqual(
                 expect.arrayContaining([[DATA.PAGE_ID_2, DATA.VISIT_2]]),
             )
 
-            await searchIndex.delTag({ url: DATA.PAGE_2.url, tag: 'quality' })
+            await tags.delTag({ url: DATA.PAGE_2.url, tag: 'quality' })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(1)
@@ -644,7 +719,7 @@ describe('Search index integration', () => {
         })
 
         test('page re-add appends new terms on updates', async () => {
-            const { search, searchIndex, storageManager } = await setupTest()
+            const { search, searchIndex } = await setupTest()
             const { docs: before } = await search({ query: 'fox' })
             expect(before.length).toBe(1)
 

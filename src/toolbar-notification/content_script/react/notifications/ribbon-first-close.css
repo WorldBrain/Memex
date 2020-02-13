@@ -5,21 +5,21 @@
 
 .title {
     display: flex;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
     flex-direction: row;
     width: 100%;
     padding-left: 10px;
 }
 
 .logo {
-	width: 20px;
-	height: 20px;
-	background-size: 20px;
-	display: inline-flex;
+    width: 20px;
+    height: 20px;
+    background-size: 20px;
+    display: inline-flex;
     vertical-align: sub;
-	composes: logoSquared from 'src/common-ui/icons.css';
+    composes: logoSquared from 'src/common-ui/icons.css';
 }
 
 .arrowUp {
-	composes: arrowUpRight from 'src/common-ui/icons.css';
+    composes: arrowUpRight from 'src/common-ui/icons.css';
 }

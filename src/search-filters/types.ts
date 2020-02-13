@@ -9,7 +9,6 @@ export interface RootState {
     showDatesFilter: boolean
     showFilterBar: boolean
     showDomainFilter: boolean
-    showFilters: boolean
     onlyBookmarks: boolean
     popup: string
     tags: string[]

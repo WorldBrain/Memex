@@ -1,8 +1,19 @@
 import React, { PureComponent } from 'react'
-import { Props } from './result-item'
+import { browser } from 'webextension-polyfill-ts'
 import cx from 'classnames'
 
+import { Props } from './result-item'
+import SemiCircularRibbon from './semi-circular-ribbon'
+import ResultItemActionBtn from './result-item-action-btn'
+
 const styles = require('./result-item.css')
+const tagEmpty = browser.extension.getURL('/img/tag_empty_results.svg')
+const tagFull = browser.extension.getURL('/img/tag_full_results.svg')
+const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
+const heartFull = browser.extension.getURL('/img/star_full.svg')
+const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
+const commentFull = browser.extension.getURL('/img/comment_full.svg')
+const deleteItem = browser.extension.getURL('/img/trash.svg')
 
 class ResultItemActions extends PureComponent<Props> {
     get bookmarkClass() {
@@ -19,13 +30,6 @@ class ResultItemActions extends PureComponent<Props> {
                     [styles.tweetDetailsContainer]: this.props.isSocial,
                 })}
             >
-                <div className={styles.detailsBox}>
-                    <div className={styles.displayTime}>
-                        {' '}
-                        {this.props.displayTime}
-                    </div>
-                    {this.props.isOverview && this.props.tagHolder}
-                </div>
                 <div
                     className={styles.buttonsContainer}
                     onClick={e => {
@@ -33,35 +37,64 @@ class ResultItemActions extends PureComponent<Props> {
                         e.stopPropagation()
                     }}
                 >
-                    <button
-                        disabled={this.props.isDeleting}
-                        className={cx(styles.button, styles.trash)}
+                    <ResultItemActionBtn
+                        imgSrc={deleteItem}
                         onClick={this.props.onTrashBtnClick}
-                        title="Delete this page & all related content"
+                        tooltipText="Delete this page & all related content"
+                        className={styles.trash}
                     />
-                    <button
-                        className={cx(styles.button, styles.tag)}
-                        onClick={this.props.onTagBtnClick}
-                        ref={this.props.setTagButtonRef}
-                        title="Add/View Tags"
-                    />
-                    <button
-                        className={cx(styles.button, styles.comment, {
-                            [styles.commentActive]: this.props.annotsCount > 0,
-                        })}
+                    {!this.props.tagManager ? (
+                        <ResultItemActionBtn
+                            imgSrc={
+                                this.props.tags.length > 0 ? tagFull : tagEmpty
+                            }
+                            onClick={this.props.onTagBtnClick}
+                            tooltipText="Add/View Tags"
+                            className={styles.tag}
+                            refHandler={this.props.setTagButtonRef}
+                        />
+                    ) : (
+                        <ResultItemActionBtn
+                            permanent
+                            imgSrc={tagFull}
+                            onClick={this.props.onTagBtnClick}
+                            tooltipText="Add/View Tags"
+                            className={styles.commentActive}
+                            refHandler={this.props.setTagButtonRef}
+                        />
+                    )}
+                    <ResultItemActionBtn
+                        permanent={this.props.annotsCount > 0}
+                        imgSrc={
+                            this.props.annotsCount > 0
+                                ? commentFull
+                                : commentEmpty
+                        }
+                        className={
+                            this.props.annotsCount > 0
+                                ? styles.commentActive
+                                : styles.comment
+                        }
                         onClick={this.props.onCommentBtnClick}
-                        title="Add/View Commments & Annotations"
-                    >
-                        <span className={styles.annotsCount}>
-                            {this.props.annotsCount}
-                        </span>
-                    </button>
-                    <button
-                        disabled={this.props.isDeleting}
-                        className={this.bookmarkClass}
-                        onClick={this.props.onToggleBookmarkClick}
-                        title="Bookmark this page"
+                        tooltipText="Add/View Notes"
                     />
+
+                    <ResultItemActionBtn
+                        permanent={this.props.hasBookmark}
+                        imgSrc={this.props.hasBookmark ? heartFull : heartEmpty}
+                        className={
+                            this.props.hasBookmark
+                                ? styles.bookmark
+                                : styles.notBookmark
+                        }
+                        onClick={this.props.onToggleBookmarkClick}
+                        tooltipText="Bookmark"
+                    />
+                    {this.props.isListFilterActive && (
+                        <SemiCircularRibbon
+                            onClick={this.props.handleCrossRibbonClick}
+                        />
+                    )}
                 </div>
             </div>
         )

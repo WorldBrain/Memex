@@ -17,7 +17,7 @@ import { Page } from 'src/sidebar-overlay/sidebar/types'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import * as acts from 'src/social-integration/actions'
 import ActionBar from './action-bar'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 import { selectors as commentBox } from 'src/sidebar-overlay/comment-box'
 
 import cx from 'classnames'

@@ -30,7 +30,7 @@ const DefaultFooter = ({
             {isEdited && <span className={styles.lastEdit}>Last Edit: </span>}
             {timestamp}
         </div>
-        <div>
+        <div className={styles.buttonContainer}>
             <button
                 className={cx(styles.commonIcon, styles.trashIcon)}
                 title="Delete note"

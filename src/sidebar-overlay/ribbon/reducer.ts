@@ -7,6 +7,7 @@ const defaultState: State = {
     isPageFullScreen: false,
     isExpanded: false,
     isRibbonEnabled: true,
+    areHighlightsEnabled: true,
     isTooltipEnabled: true,
     showCommentBox: false,
     showSearchBox: false,
@@ -37,8 +38,9 @@ const boolReducer = (stateKey: string, reset = false) => (
 const setIsPageFullScreen = boolReducer('isPageFullScreen')
 const setIsExpanded = boolReducer('isExpanded')
 const setRibbonEnabled = boolReducer('isRibbonEnabled')
+const setHighlightsEnabled = boolReducer('areHighlightsEnabled')
 const setTooltipEnabled = boolReducer('isTooltipEnabled')
-const setShowCommentBox = boolReducer('showCommentBox', true)
+const setShowCommentBox = boolReducer('showCommentBox')
 const setShowSearchBox = boolReducer('showSearchBox')
 const setShowTagsPicker = boolReducer('showTagsPicker', true)
 const setShowCollectionsPicker = boolReducer('showCollectionsPicker', true)
@@ -52,6 +54,7 @@ const reducer = createReducer<State>(on => {
     on(actions.setIsExpanded, setIsExpanded)
     on(actions.setRibbonEnabled, setRibbonEnabled)
     on(actions.setTooltipEnabled, setTooltipEnabled)
+    on(actions.setHighlightsEnabled, setHighlightsEnabled)
     on(actions.setShowCommentBox, setShowCommentBox)
     on(actions.setShowSearchBox, setShowSearchBox)
     on(actions.setShowTagsPicker, setShowTagsPicker)

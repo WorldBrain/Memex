@@ -14,6 +14,7 @@
     align-items: center;
     top: 90px;
     height: calc(100vh - 90px);
+    overflow-x: visible;
 
     &.lessHeight {
         height: calc(100vh - 135px);

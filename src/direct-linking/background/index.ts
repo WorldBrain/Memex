@@ -14,11 +14,13 @@ import AnnotationStorage from './storage'
 import { AnnotationSender, AnnotListEntry } from '../types'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
-import { Annotation, KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
+import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
 import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 import { SearchIndex } from 'src/search'
+import PageStorage from 'src/page-indexing/background/storage'
+import { Annotation } from 'src/annotations/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -36,6 +38,7 @@ export default class DirectLinkingBackground {
         private options: {
             browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
             storageManager: Storex
+            pageStorage: PageStorage
             socialBg: SocialBG
             searchIndex: SearchIndex
             normalizeUrl?: URLNormalizer
@@ -48,6 +51,7 @@ export default class DirectLinkingBackground {
             storageManager: options.storageManager,
             browserStorageArea: options.browserAPIs.storage.local,
             searchIndex: options.searchIndex,
+            pageStorage: options.pageStorage,
         })
 
         this._normalizeUrl = options.normalizeUrl || normalizeUrl
@@ -129,7 +133,7 @@ export default class DirectLinkingBackground {
                 // it off.
                 await runInTab<RibbonInteractionsInterface>(
                     tabId,
-                ).insertRibbon()
+                ).insertRibbon({ forceExpandRibbon: true })
                 await remoteFunction('goToAnnotation', { tabId })(annotation)
                 this.options.browserAPIs.tabs.onUpdated.removeListener(listener)
             }

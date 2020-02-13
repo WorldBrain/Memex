@@ -4,14 +4,17 @@ import { connect, MapStateToProps } from 'react-redux'
 import NotificationContainer, {
     selectors as notifs,
 } from '../../../notifications'
+import { selectors as filters } from 'src/search-filters'
 import NoResultBadTerm from './NoResultBadTerm'
-import ResultsMessage from './ResultsMessage'
+import ResultsMessage from './results-message'
 import ResultList from './ResultListContainer'
 import OnboardingMessage from './onboarding-message'
 import SearchTypeSwitch from './search-type-switch-container'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
-import { RootState } from '../../../options/types'
+import { RootState } from 'src/options/types'
+import { features } from 'src/util/remote-functions-background'
+import MobileAppMessage from './mobile-app-message'
 
 const styles = require('./ResultList.css')
 
@@ -20,6 +23,7 @@ export interface StateProps {
     isBadTerm: boolean
     isLoading: boolean
     showInbox: boolean
+    isMobileListFiltered: boolean
     areAnnotationsExpanded: boolean
     showOnboardingMessage: boolean
     shouldShowCount: boolean
@@ -36,21 +40,53 @@ export interface OwnProps {}
 
 export type Props = StateProps & DispatchProps & OwnProps
 
-class ResultsContainer extends PureComponent<Props> {
+interface State {
+    showSocialSearch: boolean
+}
+
+class ResultsContainer extends React.Component<Props, State> {
+    state = {
+        showSocialSearch: false,
+    }
+
+    async componentDidMount() {
+        this.setState({
+            showSocialSearch: await features.getFeature('SocialIntegration'),
+        })
+    }
+
     private renderContent() {
         if (this.props.showInbox) {
             return <NotificationContainer />
         }
 
+        const showOnboarding = localStorage.getItem('stage.Onboarding')
+
         const renderSearchSwitch = children => (
             <React.Fragment>
-                <SearchTypeSwitch />
+                <SearchTypeSwitch
+                    showSocialSearch={this.state.showSocialSearch}
+                />
                 {children}
             </React.Fragment>
         )
 
-        if (this.props.showOnboardingMessage) {
-            return <OnboardingMessage />
+        if (this.props.isMobileListFiltered && this.props.noResults) {
+            return renderSearchSwitch(
+                <ResultsMessage>
+                    <MobileAppMessage />
+                </ResultsMessage>,
+            )
+        }
+
+        if (showOnboarding === 'true' && this.props.noResults) {
+            return renderSearchSwitch(
+                <ResultsMessage>
+                    <NoResultBadTerm title="You don't have anything saved yet">
+                        <OnboardingMessage />
+                    </NoResultBadTerm>
+                </ResultsMessage>,
+            )
         }
 
         if (this.props.isBadTerm) {
@@ -109,6 +145,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isBadTerm: selectors.isBadTerm(state),
     isLoading: selectors.isLoading(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
+    isMobileListFiltered: filters.isMobileListFiltered(state),
     shouldShowCount: selectors.shouldShowCount(state),
     isInvalidSearch: selectors.isInvalidSearch(state),
     totalResultCount: selectors.totalResultCount(state),
@@ -123,7 +160,4 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(ResultsContainer)
+export default connect(mapState, mapDispatch)(ResultsContainer)

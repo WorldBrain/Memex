@@ -5,7 +5,7 @@ import 'rxjs/add/operator/filter'
 import { acts as searchBarActs } from 'src/overview/search-bar'
 import { acts as resultActs } from 'src/overview/results'
 import { actions as filterActs } from 'src/search-filters'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
+import { searchAnnotations } from 'src/annotations/actions'
 import { doQuery } from 'src/overview/search-bar/actions'
 
 const searchUpdateActions = [
@@ -49,4 +49,4 @@ export const refreshSearchResultsUponQueryChange = action$ => {
 export const refreshSidebarSearchResultsUponQueryChange = action$ =>
     action$
         .filter(action => action.type === doQuery.getType())
-        .map(() => sidebarActs.searchAnnotations())
+        .map(() => searchAnnotations())

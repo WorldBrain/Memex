@@ -109,9 +109,15 @@ export const delPageFromList = (url, isSocialPost) => async (
     }
 }
 
-export const getListFromDB = () => async (dispatch, getState) => {
+export const getListFromDB = ({ skipMobileList } = {}) => async (
+    dispatch,
+    getState,
+) => {
     try {
-        const lists = await remoteFunction('fetchAllLists')({ limit: 1000 })
+        const lists = await remoteFunction('fetchAllLists')({
+            limit: 1000,
+            skipMobileList,
+        })
         dispatch(fetchAllLists(lists || []))
     } catch (err) {
         console.error(err)

@@ -1,4 +1,4 @@
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Poppins/poppins.css');
 
 @value colors: '../../../common-ui/colors.css';
 @value color4, color6 from colors;

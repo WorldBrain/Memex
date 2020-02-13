@@ -24,6 +24,9 @@ import { RemoteFunctionImplementations } from 'src/util/remote-functions-backgro
 import TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
 import { AuthRemoteEvents } from 'src/authentication/background/types'
+import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { Claims } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -124,9 +127,7 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
         // Check if it was *our* listener that responded.
         if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
             throw new RpcError(
-                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${
-                    response[RPC_RESPONSE]
-                }. Response:${response}`,
+                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${response[RPC_RESPONSE]}. Response:${response}`,
             )
         }
 
@@ -271,10 +272,15 @@ export class RemoteFunctionRegistry {
     }
 }
 
-export function fakeRemoteFunction(functions: {
+export function fakeRemoteFunctions(functions: {
     [name: string]: (...args) => any
 }) {
     return name => {
+        if (!functions[name]) {
+            throw new Error(
+                `Tried to call fake remote function '${name}' for which no implementation was provided`,
+            )
+        }
         return (...args) => {
             return Promise.resolve(functions[name](...args))
         }
@@ -307,7 +313,7 @@ export function remoteEventEmitter<T>(
 }
 
 // Receiving Side (e.g. content script, options page, etc)
-const remoteEventEmitters: RemoteEventEmitters = {}
+const remoteEventEmitters: RemoteEventEmitters = {} as RemoteEventEmitters
 type RemoteEventEmitters = {
     [K in keyof RemoteEvents]?: TypedRemoteEventEmitter<K>
 }
@@ -315,9 +321,10 @@ export type TypedRemoteEventEmitter<
     T extends keyof RemoteEvents
 > = TypedEventEmitter<RemoteEvents[T]>
 
-// Statically defined types
+// Statically defined types for now, move this to a registry
 interface RemoteEvents {
     auth: AuthRemoteEvents
+    sync: InitialSyncEvents
 }
 
 function registerRemoteEventForwarder() {
@@ -343,7 +350,7 @@ const remoteEventForwarder = (message, _) => {
 
 export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
     eventType: EventType,
-): TypedRemoteEventEmitter<EventType> {
+): RemoteEventEmitters[EventType] {
     const existingEmitter = remoteEventEmitters[eventType]
     if (existingEmitter) {
         return existingEmitter

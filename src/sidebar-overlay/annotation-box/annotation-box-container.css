@@ -1,4 +1,4 @@
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Poppins/poppins.css');
 
 .container {
     composes: boxShadow h2Color buttonRadiusSmall from '../../common-ui/colors.css';
@@ -6,7 +6,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    font-size: 13px;
+    font-size: 14px;
     margin: 10px 0 5px 0;
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -18,6 +18,24 @@
     &.isEdit:hover {
         background-color: white;
         cursor: default;
+    }
+
+    &:hover .commonIcon {
+        opacity: 0.3;
+        display: block;
+
+        &:hover {
+            opacity: 0.7;
+            cursor: pointer;
+        }
+    }
+
+    &:hover .bookmark {
+        opacity: 1;
+    }
+
+    &:hover .commentActive {
+        opacity: 1;
     }
 }
 
@@ -35,10 +53,11 @@
 }
 
 .highlightText {
-    composes: backgroundLightMintGreen titleColor from '../../common-ui/colors.css';
+    composes: backgroundLightMintGreen from '../../common-ui/colors.css';
     padding: 2px 0;
-    line-height: 22px;
+    line-height: 25px;
     font-style: normal;
+    color: #3a2f45;
 }
 
 .newAnnotation {
@@ -50,28 +69,24 @@
 }
 
 .commonIcon {
-    composes: nakedSquareButton from '../../common-ui/elements.css';
-    box-sizing: border-box;
-    background-repeat: no-repeat;
-    background-size: 16px;
-    display: inline-block;
-    cursor: pointer;
-    background-color: transparent;
-    background-position: center;
     border: none;
-    padding: 3px;
-    width: 24px;
-    height: 24px;
-    margin: 0 0px;
-    opacity: 0.2;
+    z-index: 2500;
+    min-width: 20px;
+    height: 14px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    outline: none;
+    background-position: center center;
+    border-radius: 3px;
+    background-size: contain;
+    max-width: 30px;
+    width: fill-available;
+    display: none;
+    margin-left: 3px;
 
-    &:focus {
-        outline: none;
+    &:hover {
+        opacity: 1;
     }
-}
-
-.commonIcon:hover {
-    opacity: 1;
 }
 
 .buttonBar {
@@ -79,23 +94,27 @@
 }
 
 .editIcon {
-    background-image: url('/img/edit.svg');
-    background-size: 17px;
-    background-position-y: 3px;
+    background-image: url('/img/comment_edit.svg');
+
+    &:hover {
+        opacity: 0.6;
+    }
 }
 
 .trashIcon {
     background-image: url('/img/trash.svg');
-    background-position-y: 3px;
+
+    &:hover {
+        opacity: 0.6;
+    }
 }
 
 .goToPageIcon {
     background-image: url('/img/open.svg');
-    background-position-y: 4px;
-}
 
-.container:hover .commonIcon {
-    opacity: 0.6;
+    &:hover {
+        opacity: 0.6;
+    }
 }
 
 @keyframes onload {

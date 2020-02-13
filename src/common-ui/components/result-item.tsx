@@ -15,12 +15,14 @@ const styles = require('./result-item.css')
 
 export interface Props extends Partial<SocialPage> {
     url: string
+    fullUrl: string
     title?: string
     favIcon?: string
     nullImg?: string
     screenshot?: string
     displayTime?: string
     isDeleting: boolean
+    tags: string[]
     hasBookmark?: boolean
     isSidebarOpen?: boolean
     isListFilterActive: boolean
@@ -40,12 +42,12 @@ export interface Props extends Partial<SocialPage> {
     handleCrossRibbonClick: MouseEventHandler
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
-    setTagButtonRef: (el: HTMLButtonElement) => void
+    setTagButtonRef: (el: HTMLElement) => void
 }
 
 class ResultItem extends PureComponent<Props> {
     get hrefToPage() {
-        return `http://${this.props.url}`
+        return `${this.props.fullUrl}`
     }
 
     get environment() {
@@ -103,6 +105,7 @@ class ResultItem extends PureComponent<Props> {
                 {this.props.isDeleting && (
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
+                {this.props.tagManager}
                 <div
                     className={cx(styles.rootContainer, {
                         [styles.tweetRootContainer]: this.props.isSocial,
@@ -128,7 +131,6 @@ class ResultItem extends PureComponent<Props> {
                         )}
                     </a>
                 </div>
-                {this.props.tagManager}
                 {this.renderAnnotsList()}
             </li>
         )

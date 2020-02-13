@@ -4,7 +4,13 @@ import { Helmet } from 'react-helmet'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { auth } from 'src/util/remote-functions-background'
-import { PricingPlanTitle } from 'src/authentication/components/Subscription/pricing.style'
+import {
+    PricingPlanTitle,
+    PricingPlanItem,
+    LoginTitle,
+    LoginButton,
+    WhiteSpacer30,
+} from 'src/authentication/components/Subscription/pricing.style'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import styled from 'styled-components'
 import { SubscriptionInnerOptions } from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
@@ -146,12 +152,7 @@ export class SubscriptionOptionsChargebee extends React.Component<
                 <Helmet>
                     <script src={chargeBeeScriptSource} />
                 </Helmet>
-
                 <div>
-                    <PricingPlanTitle className={''}>
-                        Subscribe to Memex Pro
-                    </PricingPlanTitle>
-
                     <SubscriptionInnerOptions
                         openCheckoutBackupMonthly={
                             this.openCheckoutBackupMonthly
@@ -160,17 +161,6 @@ export class SubscriptionOptionsChargebee extends React.Component<
                         openPortal={this.openPortal}
                         plans={this.props.plans}
                     />
-                    {this.state.subscribed === true && (
-                        <AlreadySubscribedBox>
-                            <SubscribedSpan>
-                                {' '}
-                                🎉 You've already subscribed to a plan{' '}
-                            </SubscribedSpan>
-                            <PrimaryButton onClick={this.openPortal}>
-                                Manage Existing Subscription
-                            </PrimaryButton>
-                        </AlreadySubscribedBox>
-                    )}
                 </div>
             </div>
         )
@@ -188,6 +178,17 @@ const SubscribedSpan = styled.span`
     font-size: 17px;
     font-weight: bold;
     text-align: center;
+`
+
+const StyledLine = styled.div`
+    border: 0.5px solid #e0e0e0;
+`
+
+const HeaderBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
 `
 
 const SubscriptionOptionsButton = styled.div`

@@ -9,8 +9,7 @@ import { setupRibbonAndSidebarUI, destroyRibbonAndSidebarUI } from '..'
 import { getSidebarState } from '../utils'
 import { getTooltipState } from 'src/content-tooltip/utils'
 import { createRootElement, destroyRootElement } from './rendering'
-import { removeHighlights } from './highlight-interactions'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import { insertTooltip, removeTooltip } from 'src/content-tooltip/interactions'
 import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
@@ -38,11 +37,13 @@ export const insertRibbon = async ({
     annotationsManager,
     toolbarNotifications,
     forceExpandRibbon = false,
+    store,
     ...args
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
     forceExpandRibbon?: boolean
+    store: any
 }) => {
     // If target is set, Ribbon has already been injected.
     if (target) {
@@ -73,13 +74,14 @@ export const insertRibbon = async ({
             if (isTooltipEnabled) {
                 removeTooltip()
             } else {
-                await insertTooltip({ toolbarNotifications })
+                await insertTooltip({ toolbarNotifications, store })
             }
         },
         setRibbonSidebarRef: ref => {
             ribbonSidebarRef = ref
         },
         forceExpandRibbon,
+        store,
         ...args,
     })
 }
@@ -107,7 +109,6 @@ export const removeRibbon = () => {
     if (!target) {
         return
     }
-    removeHighlights()
     destroyRibbonAndSidebarUI(target, shadowRoot)
     destroyRootElement()
     shadowRoot = null
@@ -123,9 +124,11 @@ export const removeRibbon = () => {
 const _insertOrRemoveRibbon = async ({
     annotationsManager,
     toolbarNotifications,
+    store,
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
+    store: any
 }) => {
     if (manualOverride) {
         return
@@ -135,7 +138,7 @@ const _insertOrRemoveRibbon = async ({
     const isRibbonPresent = !!target
 
     if (isRibbonEnabled && !isRibbonPresent) {
-        insertRibbon({ annotationsManager, toolbarNotifications })
+        insertRibbon({ annotationsManager, toolbarNotifications, store })
     } else if (!isRibbonEnabled && isRibbonPresent) {
         removeRibbon()
     }
@@ -177,9 +180,11 @@ const updateRibbon = async (
 export const setupRPC = ({
     annotationsManager,
     toolbarNotifications,
+    store,
 }: {
     annotationsManager: AnnotationsManager
     toolbarNotifications: ToolbarNotifications
+    store: any
 }) => {
     makeRemotelyCallableType<RibbonInteractionsInterface>({
         /**
@@ -190,6 +195,7 @@ export const setupRPC = ({
             insertRibbon({
                 annotationsManager,
                 toolbarNotifications,
+                store,
                 ...args,
             })
         },
@@ -208,6 +214,7 @@ export const setupRPC = ({
             await _insertOrRemoveRibbon({
                 annotationsManager,
                 toolbarNotifications,
+                store,
             })
         },
         /**

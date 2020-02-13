@@ -1,14 +1,14 @@
 import * as React from 'react'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
-
 import { Page } from '../types'
+import { browser } from 'webextension-polyfill-ts'
 
 const styles = require('./page-info.css')
 
 interface Props {
     page: Page
     isCurrentPage: boolean
-    resetPage: React.MouseEventHandler<HTMLButtonElement>
+    resetPage: React.MouseEventHandler<HTMLDivElement>
 }
 
 class PageInfo extends React.Component<Props> {
@@ -28,21 +28,23 @@ class PageInfo extends React.Component<Props> {
 
     render() {
         const { url, title } = this.props.page
+        const backImg = browser.extension.getURL('/img/back.svg')
         return (
             <React.Fragment>
                 {this.showPageInfo && (
                     <div className={styles.pageInfoDiv}>
-                        <button
+                        <div
                             className={styles.goBackBtn}
                             onClick={this.props.resetPage}
                         >
-                            Go back
-                        </button>
+                            <img src={backImg} className={styles.backButton} />
+                        </div>
                         <div className={styles.pageInfo}>
                             <a
                                 target="_blank"
                                 href={this.hrefToPage}
                                 className={styles.title}
+                                title={title}
                             >
                                 {title}
                             </a>
@@ -50,6 +52,7 @@ class PageInfo extends React.Component<Props> {
                                 target="_blank"
                                 href={this.hrefToPage}
                                 className={styles.url}
+                                title={url}
                             >
                                 {url}
                             </a>

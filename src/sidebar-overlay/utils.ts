@@ -1,49 +1,7 @@
 import { browser } from 'webextension-polyfill-ts'
 import { remoteFunction } from 'src/util/webextensionRPC'
-
-import { RetryTimeoutError } from 'src/direct-linking/utils'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import * as constants from './constants'
-
-/**
- * Keeps executing a promiseCreator function till no error is thrown.
- */
-export function retryUntilErrorResolves(
-    promiseCreator,
-    {
-        intervalMilliSeconds,
-        timeoutMilliSeconds,
-    }: { intervalMilliSeconds: number; timeoutMilliSeconds: number },
-) {
-    const startMs = Date.now()
-    return new Promise((resolve, reject) => {
-        const doTry = async () => {
-            let res
-            try {
-                res = await promiseCreator()
-                resolve(res)
-                return true
-            } catch (e) {
-                return false
-            }
-        }
-
-        const tryOrRetryLater = async () => {
-            if (await doTry()) {
-                resolve(true)
-                return
-            }
-
-            if (Date.now() - startMs >= timeoutMilliSeconds) {
-                return reject(new RetryTimeoutError())
-            }
-
-            setTimeout(tryOrRetryLater, intervalMilliSeconds)
-        }
-
-        tryOrRetryLater()
-    })
-}
 
 /**
  * Calculates the number of pixels from the starting of the webpage.
@@ -105,3 +63,4 @@ export const maxPossibleTags = (tags: string[]) => {
     }
     return tagsAllowed
 }
+export const toggleSidebarOverlay = remoteFunction('toggleSidebarOverlay')
