@@ -1,7 +1,7 @@
 @value colors: 'src/common-ui/colors.css';
 @value color3 from colors;
 
- .resultMessage {
+.resultMessage {
     text-align: center;
     margin-top: 10px;
     font-size: 20px;

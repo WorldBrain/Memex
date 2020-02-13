@@ -3,6 +3,7 @@ import ProgressStepContainer from 'src/common-ui/components/progress-step-contai
 import OnboardingTooltip from 'src/overview/onboarding/components/onboarding-tooltip'
 import QRCanvas from 'src/common-ui/components/qr-canvas'
 import React from 'react'
+import ResultsMessageDismissible from 'src/overview/results/components/results-message-dismissible'
 
 storiesOf('Other', module)
     .add('No steps seen/completed', () => (
@@ -16,12 +17,13 @@ storiesOf('Other', module)
         />
     ))
     .add('OnboardingTooltip', () => (
-        <OnboardingTooltip
-            descriptionText="Import your existing bookmarks &amp; web history from Pocket, Diigo, Raindrop.io and many more."
-            CTAText="Import"
-            onCTAClick={() => undefined}
-            onDismiss={() => undefined}
-        />
+        <ResultsMessageDismissible onDismiss={() => undefined}>
+            <OnboardingTooltip
+                descriptionText="Import your existing bookmarks &amp; web history from Pocket, Diigo, Raindrop.io and many more."
+                CTAText="Import"
+                onCTAClick={() => undefined}
+            />
+        </ResultsMessageDismissible>
     ))
     .add('HTML QR Code canvas short example', () => (
         <QRCanvas toEncode="test" />

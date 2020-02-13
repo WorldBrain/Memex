@@ -71,10 +71,15 @@ export default class CustomListStorage extends StorageModule {
                     pageUrl: '$url:string',
                 },
             },
-            findListByName: {
+            findListByNameIgnoreCase: {
                 collection: CustomListStorage.CUSTOM_LISTS_COLL,
                 operation: 'findObject',
                 args: [{ name: '$name:string' }, { ignoreCase: ['name'] }],
+            },
+            findListsByNames: {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                operation: 'findObjects',
+                args: { name: { $in: '$name:string[]' } },
             },
             updateListName: {
                 collection: CustomListStorage.CUSTOM_LISTS_COLL,
@@ -127,6 +132,25 @@ export default class CustomListStorage extends StorageModule {
             pages,
             active,
         }
+    }
+
+    async createMobileListIfAbsent({ id }: { id: number }): Promise<string> {
+        const foundMobileLists = await this.operation('findListsByNames', {
+            name: [MOBILE_LIST_NAME],
+        })
+        if (foundMobileLists.length) {
+            return foundMobileLists[0].id
+        }
+
+        return (
+            await this.operation('createList', {
+                id,
+                name: MOBILE_LIST_NAME,
+                isDeletable: false,
+                isNestable: false,
+                createdAt: new Date(),
+            })
+        ).object.id
     }
 
     private filterMobileList = (lists: any[]): any[] =>
@@ -330,6 +354,6 @@ export default class CustomListStorage extends StorageModule {
     }
 
     async fetchListIgnoreCase({ name }: { name: string }) {
-        return this.operation('findListByName', { name })
+        return this.operation('findListByNameIgnoreCase', { name })
     }
 }

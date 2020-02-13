@@ -232,6 +232,7 @@ export async function setupBackgroundModules(
 
     await backgroundModules.sync.setup()
     backgroundModules.sync.registerRemoteEmitter()
+    await backgroundModules.customLists.setup()
 }
 
 export function getBackgroundStorageModules(

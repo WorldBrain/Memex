@@ -16,6 +16,9 @@ export const setTagFilter = createAction<boolean>('search-filters/setTagFilter')
 export const setDomainFilter = createAction<boolean>(
     'search-filters/setDomainFilter',
 )
+export const setMobileListFiltered = createAction<boolean>(
+    'search-filters/setMobileListFiltered',
+)
 export const setDatesFilter = createAction<boolean>(
     'search-filters/setDatesFilter',
 )
@@ -64,7 +67,7 @@ export const setTagFilters = createAction<string[]>(
 export const setExcTagFilters = createAction<string[]>(
     'search-filters/setExcTagFilters',
 )
-export const setListFilters = createAction('searc-filters/setListFilters')
+export const setListFilters = createAction('search-filters/setListFilters')
 export const setIncDomainFilters = createAction<string[]>(
     'search-filters/setIncDomainFilters',
 )
