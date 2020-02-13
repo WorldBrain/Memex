@@ -7,14 +7,14 @@
 .sidebar {
     height: 100%;
     background: #fff;
-    padding: 0px 8px 150px 8px;
     display: flex;
     flex-direction: column;
-    width: 97%;
+    width: 100%;
 }
 
 .searchSwitch {
     height: fit-content;
+    padding: 0 5px;
 }
 
 .topSection {
@@ -23,6 +23,7 @@
     z-index: 2600;
     background: white;
     overflow: hidden;
+    padding: 0 5px;
 }
 
 .bottomContainer {
@@ -33,6 +34,7 @@
     flex: 1;
     position: relative;
     top: 15px;
+    padding: 0 10px;
 }
 
 .resultsContainerPage {
@@ -54,9 +56,9 @@
     background: white;
     border-radius: 3px;
     top: 20px;
-    margin-bottom: 40px;
+    margin: 0 10px 40px;
     position: relative;
-    width: 98%;
+    width: 93%;
 
     &:hover {
         background: white;

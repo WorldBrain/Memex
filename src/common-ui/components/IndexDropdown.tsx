@@ -2,7 +2,11 @@ import React, { MouseEventHandler, PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+
+import { browser } from 'webextension-polyfill-ts'
 const styles = require('./IndexDropdown.css')
+
+const searchImg = browser.extension.getURL('/img/search.svg')
 
 import { PageList } from 'src/custom-lists/background/types'
 import { ClickHandler } from 'src/popup/types'
@@ -120,7 +124,7 @@ class IndexDropdown extends PureComponent<Props> {
                 >    
 
                     <span className={styles.searchIcon}>
-                        <img src="/img/search.svg" className={styles.searchImg}/>
+                        <img src={searchImg} className={styles.searchImg}/>
                     </span>
                     <TextInputControlled
                         className={styles.search}

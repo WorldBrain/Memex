@@ -44,6 +44,12 @@ const locationSync = ReduxQuerySync.enhancer({
             stringToValue: parseBool,
             defaultValue: false,
         },
+        isMobileListFiltered: {
+            selector: filters.isMobileListFiltered,
+            action: filterActs.setMobileListFiltered,
+            valueToString: parseBool,
+            defaultValue: false,
+        },
         tagsInc: {
             selector: filters.tags,
             action: filterActs.setTagFilters,
@@ -172,9 +178,6 @@ const storageSync = storeCreator => (reducer, initState, enhancer) => {
     return store
 }
 
-const enhancer = compose(
-    locationSync,
-    storageSync,
-)
+const enhancer = compose(locationSync, storageSync)
 
 export default enhancer

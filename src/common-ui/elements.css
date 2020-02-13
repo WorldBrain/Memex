@@ -151,13 +151,13 @@
     font-size: 14px;
     color: #222;
     font-family: 'Poppins', sans-serif;
-    border: 1px solid #e2e2e2;
     border-radius: 3px;
+    border: none;
     padding: 10px 7px;
     margin: 5px 5px 5px 5px;
 
     &::placeholder {
-        color: #888;
+        color: #3a2f45;
     }
 
     &:focus {
@@ -198,11 +198,13 @@
     font-weight: 400;
     text-align: left;
     height: fit-content;
+    width: fill-available;
 
     &::placeholder {
         color: #3a2f45;
         font-style: italic;
         font-weight: 500;
+        opacity: 0.7;
     }
 
     &:focus {

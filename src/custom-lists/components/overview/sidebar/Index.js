@@ -214,9 +214,14 @@ const mapDispatchToProps = (dispatch, getState) => ({
         event.preventDefault()
         dispatch(actions.showListDeleteModal(id, index))
     },
-    handleListItemClick: ({ id }, index) => () => {
+    handleListItemClick: ({ id, isMobileList }, index) => () => {
         dispatch(actions.toggleListFilterIndex(index))
-        dispatch(filterActs.toggleListFilter(id))
+        dispatch(
+            filterActs.toggleListFilter({
+                id,
+                isMobileListFiltered: isMobileList,
+            }),
+        )
     },
     handleAddPageList: ({ id, isMobileList }, index) => (url, isSocialPost) => {
         if (!isMobileList) {

@@ -289,14 +289,16 @@ class SyncDevicesPaneContainer extends React.Component<
                 <div className={settingsStyle.section}>
                     <div className={styles.mobileSection}>
                         <div className={styles.contentSection}>
-                            <div className={settingsStyle.sectionTitle}>
-                                Download Memex GO
+                            <div className={styles.textSection}>
+                                <div className={settingsStyle.sectionTitle}>
+                                    Download Memex GO
+                                </div>
+                                <div className={settingsStyle.infoText}>
+                                    Our mobile app to save and organise websites on
+                                    the Go
+                                </div>
                             </div>
-                            <div className={settingsStyle.infoText}>
-                                Our mobile app to save and organise websites on
-                                the Go
-                            </div>
-                            <div>
+                            <div className={styles.storeSection}>
                                 <img
                                     className={styles.downloadImg}
                                     src={'img/appStore.png'}
@@ -307,10 +309,12 @@ class SyncDevicesPaneContainer extends React.Component<
                                 />
                             </div>
                         </div>
-                        <img
-                            src={'img/mobilehalf.png'}
-                            className={styles.mobileImg}
-                        />
+                        <div className={styles.mobileContainer}>
+                            <img
+                                src={'img/mobileHalf.svg'}
+                                className={styles.mobileImg}
+                            />
+                        </div>
                     </div>
                 </div>
                 <div>

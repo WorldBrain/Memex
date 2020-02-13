@@ -25,6 +25,7 @@ const defaultState = {
     showUserFilter: false,
     showFilterTypes: false,
     onlyBookmarks: false,
+    isMobileListFiltered: false,
     popup: '', // Blank is no popup shown, 'tag' is tags filter, 'domain' is domains filter
     tags: [],
     tagsExc: [],
@@ -124,6 +125,7 @@ const delFilter = filterKey => (state, value) => {
         return {
             ...state,
             [filterKey]: '',
+            isMobileListFiltered: false,
         }
     }
 
@@ -236,6 +238,24 @@ const resetFilterPopups = state => ({
     showDatesFilter: false,
 })
 
+const toggleListFilter = (state, { id, isMobileListFiltered }) => {
+    const removalIndex = state.lists.indexOf(id)
+
+    if (removalIndex === -1) {
+        return {
+            ...state,
+            lists: [id],
+            isMobileListFiltered,
+        }
+    }
+
+    return {
+        ...state,
+        lists: '',
+        isMobileListFiltered: false,
+    }
+}
+
 export default createReducer(
     {
         [actions.setDomainFilter]: boolReducer('showDomainFilter'),
@@ -255,7 +275,7 @@ export default createReducer(
         [actions.toggleTagFilter]: toggleFilter('tags'),
         [actions.addListFilter]: addFilter('lists'),
         [actions.delListFilter]: delFilter('lists'),
-        [actions.toggleListFilter]: toggleFilter('lists'),
+        [actions.toggleListFilter]: toggleListFilter,
         [actions.addExcDomainFilter]: addFilter('domainsExc'),
         [actions.delExcDomainFilter]: delFilter('domainsExc'),
         [actions.addIncDomainFilter]: addFilter('domainsInc'),
@@ -293,6 +313,10 @@ export default createReducer(
         [actions.toggleNotesFilter]: toggleNotesFilter,
         [actions.setAnnotationsFilter]: setAnnotationsFilter,
         [actions.clearFilterTypes]: clearFilterTypes,
+        [actions.setMobileListFiltered]: (state, isMobileListFiltered) => ({
+            ...state,
+            isMobileListFiltered,
+        }),
     },
     defaultState,
 )

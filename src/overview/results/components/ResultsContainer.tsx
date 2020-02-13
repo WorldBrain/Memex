@@ -4,8 +4,9 @@ import { connect, MapStateToProps } from 'react-redux'
 import NotificationContainer, {
     selectors as notifs,
 } from '../../../notifications'
+import { selectors as filters } from 'src/search-filters'
 import NoResultBadTerm from './NoResultBadTerm'
-import ResultsMessage from './ResultsMessage'
+import ResultsMessage from './results-message'
 import ResultList from './ResultListContainer'
 import OnboardingMessage from './onboarding-message'
 import SearchTypeSwitch from './search-type-switch-container'
@@ -13,6 +14,7 @@ import * as actions from '../actions'
 import * as selectors from '../selectors'
 import { RootState } from 'src/options/types'
 import { features } from 'src/util/remote-functions-background'
+import MobileAppMessage from './mobile-app-message'
 
 const styles = require('./ResultList.css')
 
@@ -21,6 +23,7 @@ export interface StateProps {
     isBadTerm: boolean
     isLoading: boolean
     showInbox: boolean
+    isMobileListFiltered: boolean
     areAnnotationsExpanded: boolean
     showOnboardingMessage: boolean
     shouldShowCount: boolean
@@ -67,6 +70,14 @@ class ResultsContainer extends React.Component<Props, State> {
                 {children}
             </React.Fragment>
         )
+
+        if (this.props.isMobileListFiltered && this.props.noResults) {
+            return renderSearchSwitch(
+                <ResultsMessage>
+                    <MobileAppMessage />
+                </ResultsMessage>,
+            )
+        }
 
         if (showOnboarding === 'true' && this.props.noResults) {
             return renderSearchSwitch(
@@ -134,6 +145,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isBadTerm: selectors.isBadTerm(state),
     isLoading: selectors.isLoading(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
+    isMobileListFiltered: filters.isMobileListFiltered(state),
     shouldShowCount: selectors.shouldShowCount(state),
     isInvalidSearch: selectors.isInvalidSearch(state),
     totalResultCount: selectors.totalResultCount(state),

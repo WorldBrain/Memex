@@ -22,6 +22,11 @@ export const datesFilter = createSelector(
     state => state.showDatesFilter,
 )
 
+export const isMobileListFiltered = createSelector(
+    searchFilters,
+    state => state.isMobileListFiltered,
+)
+
 export const filterTypes = createSelector(
     searchFilters,
     state => state.showFilterTypes,

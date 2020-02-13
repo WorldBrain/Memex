@@ -55,6 +55,12 @@ export default class CustomListBackground {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
+    async setup() {
+        await this.storage.createMobileListIfAbsent({
+            id: this.generateListId(),
+        })
+    }
+
     generateListId() {
         return Date.now()
     }
@@ -63,7 +69,7 @@ export default class CustomListBackground {
         excludeIds = [],
         skip = 0,
         limit = 20,
-        skipMobileList,
+        skipMobileList = false,
     }) {
         return this.storage.fetchAllLists({
             excludedIds: excludeIds,

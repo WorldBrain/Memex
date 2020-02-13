@@ -107,43 +107,56 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
             <React.Fragment>
                 <div className={styles.masterContainer}>
                     <div className={styles.container}>
-                        <button
-                            className={cx(
-                                styles.searchSwitchBtn,
-                                styles.btn,
-                                styles.pages,
-                            )}
-                            onClick={this.handlePagesBtnClick}
-                            disabled={this.isPageSearch}
-                            id="pages"
-                        >
-                            Pages
-                        </button>
-                        {this.props.showSocialSearch && (
+                        <div>
                             <button
                                 className={cx(
                                     styles.searchSwitchBtn,
                                     styles.btn,
                                     styles.pages,
                                 )}
-                                onClick={this.handleSocialBtnClick}
-                                disabled={this.props.searchType === 'social'}
-                                id="social"
+                                onClick={this.handlePagesBtnClick}
+                                disabled={this.isPageSearch}
+                                id="pages"
                             >
-                                Social
+                                Pages
                             </button>
-                        )}
-                        <button
-                            className={cx(
-                                styles.searchSwitchBtn,
-                                styles.btn,
-                                styles.notesBtn,
+                            {this.props.showSocialSearch && (
+                                <button
+                                    className={cx(
+                                        styles.searchSwitchBtn,
+                                        styles.btn,
+                                        styles.pages,
+                                    )}
+                                    onClick={this.handleSocialBtnClick}
+                                    disabled={this.props.searchType === 'social'}
+                                    id="social"
+                                >
+                                    Social
+                                </button>
                             )}
-                            onClick={this.handleNotesBtnClick}
-                            disabled={this.props.searchType === 'notes'}
-                        >
-                            Notes
-                        </button>
+                            <button
+                                className={cx(
+                                    styles.searchSwitchBtn,
+                                    styles.btn,
+                                    styles.notesBtn,
+                                )}
+                                onClick={this.handleNotesBtnClick}
+                                disabled={this.props.searchType === 'notes'}
+                            >
+                                Notes
+                            </button>
+                        </div>
+                        <div
+                            onClick={e => {
+                                e.stopPropagation()
+                                this.props.handleAddCommentBtnClick()
+                            }}    
+                            className={
+                                styles.imgContainer
+                            }
+                            > 
+                            <img src={commentAdd} className={styles.img}/>        
+                        </div>
                     </div>
                     <div className={styles.notesBox}>
                         {this.props.searchType === 'notes' && (
@@ -184,25 +197,6 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                         >
                                             {this.unfoldBtnText}
                                         </button>
-                                    )}
-                                    {!this.isCurrentPageSearch && (
-                                        <ButtonTooltip
-                                            position="left"
-                                            tooltipText="Add note to this page"
-                                        >
-                                            <div
-                                                onClick={e => {
-                                                    e.stopPropagation()
-                                                    this.props.handleAddCommentBtnClick()
-                                                }}
-                                                className={styles.imgContainer}
-                                            >
-                                                <img
-                                                    src={commentAdd}
-                                                    className={styles.img}
-                                                />
-                                            </div>
-                                        </ButtonTooltip>
                                     )}
                                 </div>
                             </div>

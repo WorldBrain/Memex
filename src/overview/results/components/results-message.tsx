@@ -1,11 +1,10 @@
-import React, { ReactChild, PureComponent } from 'react'
+import React, { PureComponent } from 'react'
 import cx from 'classnames'
 
-const styles = require('./ResultsMessage.css')
+const styles = require('./results-message.css')
 
 export interface Props {
-    small: boolean
-    children: ReactChild | ReactChild[]
+    small?: boolean
 }
 
 class ResultsMessage extends PureComponent<Props> {
