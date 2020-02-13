@@ -9,6 +9,8 @@ import ActivityLoggerBackground, {
 } from 'src/activity-logger/background'
 import SearchBackground from 'src/search/background'
 import EventLogBackground from 'src/analytics/internal/background'
+import JobSchedulerBackground from 'src/job-scheduler/background'
+import { jobs } from 'src/job-scheduler/background/jobs'
 import CustomListBackground from 'src/custom-lists/background'
 import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
@@ -55,6 +57,7 @@ export interface BackgroundModules {
     search: SearchBackground
     eventLog: EventLogBackground
     customLists: CustomListBackground
+    jobScheduler: JobSchedulerBackground
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
@@ -113,6 +116,12 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
     })
 
+    const jobScheduler = new JobSchedulerBackground({
+        alarmsAPI: options.browserAPIs.alarms,
+        storageAPI: options.browserAPIs.storage,
+        jobs,
+    })
+
     const notifications = new NotificationBackground({ storageManager })
     const social = new SocialBackground({ storageManager })
     const bgScript = new BackgroundScript({
@@ -152,6 +161,7 @@ export function createBackgroundModules(options: {
         social,
         activityLogger,
         connectivityChecker,
+        jobScheduler,
         directLinking: new DirectLinkingBackground({
             browserAPIs: options.browserAPIs,
             storageManager,
@@ -236,6 +246,7 @@ export async function setupBackgroundModules(
     backgroundModules.backupModule.storage.setupChangeTracking()
 
     await backgroundModules.sync.setup()
+    await backgroundModules.jobScheduler.setup()
     backgroundModules.sync.registerRemoteEmitter()
     await backgroundModules.customLists.setup()
 }

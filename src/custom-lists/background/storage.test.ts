@@ -133,7 +133,7 @@ describe('Custom List Integrations', () => {
             })
 
             checkDefined(lists)
-            expect(lists.length).toBe(4)
+            expect(lists.length).toBe(3)
         })
 
         test('fetch all lists, skipping mobile list', async () => {

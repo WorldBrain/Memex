@@ -16,8 +16,3 @@ export const STORAGE_KEYS = {
 
 // Timezone to base milestones on
 export const TIMEZONE = 'Europe/Berlin'
-
-// Ext Alarm schedules for periodic analytics tasks
-export const SCHEDULES = {
-    EVERY_HOUR: 60, // minutes
-}
