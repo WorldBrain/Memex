@@ -13,14 +13,14 @@
 }
 
 .body {
-    color: color6;
+    color: #3a2f45;
 }
 
 .middle {
     flex-grow: 2;
     justify-content: center;
     display: flex;
-    color: color4;
+    color: #3a2f45;
     width: 310px;
     flex-direction: column;
 }
@@ -40,8 +40,8 @@
 
 .title {
     font-size: 1.1em;
-    color: color4;
-    font-weight: 600;
+    color: #3a2f45;
+    font-weight: 700;
     margin-bottom: 5px;
     margin-top: -1px;
     align-self: flex-start;

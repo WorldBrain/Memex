@@ -72,8 +72,8 @@
     } */
 
     &.tooltipBubble {
-        right: 29px;
-        top: -3px;
+        right: 20px;
+        top: 0px;
     }
 }
 

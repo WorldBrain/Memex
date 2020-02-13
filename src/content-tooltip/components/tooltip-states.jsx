@@ -18,41 +18,43 @@ export const InitialComponent = ({
     state,
 }) => (
     <div className={styles.createButtons}>
-        <ButtonTooltip tooltipText="Highlight (N)" position="bottom">
-            <div className={styles.button} onClick={createHighlight}>
-                <img src={highlighter} />
-            </div>
-        </ButtonTooltip>
-        <ButtonTooltip tooltipText="Annotate (A)" position="bottom">
-            <div className={styles.button} onClick={createAnnotation}>
-                <img src={annotations} />
-            </div>
-        </ButtonTooltip>
+        <div className={styles.button} onClick={createHighlight}>
+            <ButtonTooltip tooltipText="Highlight (N)" position="bottom">
+                <img src={highlighter} className={styles.buttonImg} />
+            </ButtonTooltip>
+        </div>
+        
+        <div className={styles.button} onClick={createAnnotation}>
+            <ButtonTooltip tooltipText="Annotate (A)" position="bottom">
+                <img src={annotations} className={styles.buttonImg} />
+            </ButtonTooltip>
+        </div>
         {createLink && (
             <ButtonTooltip
                 tooltipText="Create Link to Highlight (L)"
                 position="bottom"
             >
                 <div className={styles.button} onClick={createLink}>
-                    <img src={share} />
+                    <img src={share} className={styles.buttonImg} />
                 </div>
             </ButtonTooltip>
         )}
 
-        <ButtonTooltip
-            tooltipText="Close. Disable in Toolbar (R)"
-            position="bottom"
+        <div
+            onClick={closeTooltip}
+            className={classNames(styles.button, {
+                [styles.noShow]: state === 'running',
+                [styles.noShow]: state === 'copied',
+            })}
         >
-            <div
-                onClick={closeTooltip}
-                className={classNames(styles.button, {
-                    [styles.noShow]: state === 'running',
-                    [styles.noShow]: state === 'copied',
-                })}
+            <ButtonTooltip
+                tooltipText="Close. Disable in Toolbar (R)"
+                position="bottom"
             >
-                <img src={close} />
-            </div>
-        </ButtonTooltip>
+           
+                <img src={close} className={styles.buttonImg}/>
+            </ButtonTooltip>
+        </div>
     </div>
 )
 
