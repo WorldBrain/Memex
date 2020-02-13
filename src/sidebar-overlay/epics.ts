@@ -9,7 +9,8 @@ import { searchAnnotations } from 'src/annotations/actions'
 import { doQuery } from 'src/overview/search-bar/actions'
 
 const searchUpdateActions = [
-    searchBarActs.setQuery.getType(),
+    // searchBarActs.setQuery.getType(),
+    searchBarActs.doQuery.getType(),
     searchBarActs.setStartDate.getType(),
     searchBarActs.setEndDate.getType(),
     filterActs.toggleBookmarkFilter.getType(),
@@ -40,7 +41,7 @@ const searchUpdateActions = [
 // When the query changed, refresh the search results
 export const refreshSearchResultsUponQueryChange = action$ => {
     return action$
-        .filter(action => action.type === doQuery.getType()) // searchUpdateActions.includes(action.type)
+        .filter(action => searchUpdateActions.includes(action.type))
         .map(() =>
             searchBarActs.search({ overwrite: true, fromOverview: false }),
         )

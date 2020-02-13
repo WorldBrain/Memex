@@ -66,7 +66,10 @@ export default function configureStore({ ReduxDevTools = undefined } = {}) {
     initSentry({ reduxMiddlewares: middlewares, stateTransformer })
 
     const enhancers = [
-        overviewPage.enhancer,
+        // N.B. This overviewPage.enhancer' keeps the search query in sync with the window location
+        // but does it on every change. So it's currently commented out. While we confirm
+        // what is the desired functionality here.
+        // overviewPage.enhancer,
         imports.enhancer,
         applyMiddleware(...middlewares),
     ]

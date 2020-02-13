@@ -1,8 +1,8 @@
 import { createAction } from 'redux-act'
 
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from '../../analytics'
-import { Thunk } from '../../options/types'
+import { Thunk } from 'src/options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
@@ -12,7 +12,7 @@ import {
     selectors as filters,
 } from '../../search-filters'
 import { actions as notifActs } from '../../notifications'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { EVENT_NAMES } from 'src/analytics/internal/constants'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -112,6 +112,10 @@ export const search: (args?: any) => Thunk = (
 
     if (fromOverview) {
         dispatch(sidebarActs.closeSidebar())
+        // TODO: set the query location
+        // dispatch() // window.location += 'query...'
+    } else {
+        // TODO: make sure the sidebar is not in loading state?
     }
 
     dispatch(resultsActs.resetActiveSidebarIndex())
