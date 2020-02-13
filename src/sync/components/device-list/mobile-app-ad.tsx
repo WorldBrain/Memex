@@ -10,17 +10,26 @@ const MobileAppAd: React.StatelessComponent<Props> = props => (
         <div className={styles.contentSection}>
             <div className={settingsStyle.sectionTitle}>Download Memex GO</div>
             <div className={settingsStyle.infoText}>
-                Our mobile to save and organise websites on the Go
+                Our mobile app to save and organise websites on the Go
             </div>
-            <div>
-                <img className={styles.downloadImg} src={'img/appStore.png'} />
+            <div className={settingsStyle.storeSection}>
+                <img 
+                    onClick={()=> {window.open('https://apps.apple.com/app/id1471860331')}}
+                    className={styles.downloadImg} 
+                    src={'img/appStore.png'} />
                 <img
+                    onClick={()=> {window.open('https://play.google.com/store/apps/details?id=io.worldbrain')}}
                     className={styles.downloadImg}
                     src={'img/googlePlay.png'}
                 />
             </div>
         </div>
-        <img src={'img/mobilehalf.png'} className={styles.mobileImg} />
+        <div className={styles.mobileContainer}>
+            <img
+                src={'img/mobileHalf.svg'}
+                className={styles.mobileImg}
+            />
+        </div>
     </div>
 )
 

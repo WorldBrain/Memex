@@ -43,6 +43,7 @@
         "@worldbrain/memex-common": "git+https://github.com/WorldBrain/memex-common.git",
         "@worldbrain/memex-storage": "git+https://github.com/WorldBrain/memex-storage.git",
         "@worldbrain/memex-url-utils": "git+https://github.com/WorldBrain/memex-url-utils.git",
+        "@worldbrain/storex-hub": "git+https://github.com/WorldBrain/storex-hub.git",
         "@worldbrain/storex-sync": "^0.1.1",
         "babel-polyfill": "^6.26.0",
         "blob-util": "^1.2.1",

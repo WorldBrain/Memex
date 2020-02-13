@@ -1,8 +1,6 @@
 .formContainer {
     composes: searchField from '../../common-ui/elements.css';
     display: flex;
-    width: 70%;
-    margin-left: 10px;
 }
 
 .button {

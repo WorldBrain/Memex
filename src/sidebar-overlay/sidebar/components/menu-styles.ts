@@ -31,7 +31,7 @@ const baseStyles = {
         overflowY: 'scroll',
         flex: '1',
         overflowX: 'hidden',
-        width: '100%,'
+        width: '101%,'
     },
     bmItemList: {
         height: '100%',

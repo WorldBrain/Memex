@@ -10,13 +10,14 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 
 const StyledSecondaryAction = styled.div`
-    padding: 10px 20px;
+    padding: 6px 18px;
     border: 1px solid ${colorMidPurple};
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;
     white-space: nowrap;
+    vertical-align: middle;
 
     &: hover {
         background-color: ${colorMidPurple};

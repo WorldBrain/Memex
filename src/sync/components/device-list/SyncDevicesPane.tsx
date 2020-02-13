@@ -13,7 +13,6 @@ import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
-import MobileAppAd from './mobile-app-ad'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const styles = require('../styles.css')
@@ -27,7 +26,7 @@ interface Props {
     waitForInitialSync: () => Promise<void>
     waitForInitialSyncConnected: () => Promise<void>
     refreshDevices: () => Promise<void>
-    handleUpgradeNeeded: () => void
+    handleUpgradeNeeded: () => void 
 }
 
 interface State {
@@ -200,13 +199,9 @@ export class SyncDevicesPane extends Component<Props, State> {
 
 class SyncDevicesPaneContainer extends React.Component<
     UserProps,
-    {
-        devices: SyncDevice[]
-        featureSyncEnabled: boolean
-        subscribeModal: boolean
-    }
+    { devices: SyncDevice[]; featureSyncEnabled: boolean, subscribeModal: boolean, }
 > {
-    state = { devices: [], featureSyncEnabled: true, subscribeModal: false }
+    state = { devices: [], featureSyncEnabled: true, subscribeModal: false, }
 
     async componentDidMount() {
         await this.refreshDevices()
@@ -234,7 +229,7 @@ class SyncDevicesPaneContainer extends React.Component<
         this.setState({ devices })
     }
 
-    openSubscriptionModal = () => {
+    openSubscriptionModal =  () => {
         this.setState({ subscribeModal: true })
     }
 
@@ -242,8 +237,7 @@ class SyncDevicesPaneContainer extends React.Component<
         await this.openSubscriptionModal()
     }
 
-    closeSubscriptionModal = async () =>
-        this.setState({ subscribeModal: false })
+    closeSubscriptionModal = async () => this.setState({ subscribeModal: false })
 
     render() {
         if (this.state.featureSyncEnabled === false) {
@@ -255,10 +249,7 @@ class SyncDevicesPaneContainer extends React.Component<
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
                         Sync your mobile phone
-                        <span
-                            className={styles.labelFree}
-                            onClick={this.handleUpgradeNeeded}
-                        >
+                        <span className={styles.labelFree} onClick={this.handleUpgradeNeeded}>
                             ⭐️ Pro Feature
                         </span>
                     </div>
@@ -283,11 +274,41 @@ class SyncDevicesPaneContainer extends React.Component<
                     />
                 </div>
                 <div className={settingsStyle.section}>
-                    <MobileAppAd />
+                    <div className={styles.mobileSection}>
+                        <div className={styles.contentSection}>
+                            <div className={styles.textSection}>
+                                <div className={settingsStyle.sectionTitle}>
+                                    Download Memex GO
+                                </div>
+                                <div className={settingsStyle.infoText}>
+                                    Our mobile app to save and organise websites on
+                                    the Go
+                                </div>
+                            </div>
+                            <div className={styles.storeSection}>
+                                <img
+                                    className={styles.downloadImg}
+                                    src={'img/appStore.png'}
+                                />
+                                <img
+                                    className={styles.downloadImg}
+                                    src={'img/googlePlay.png'}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.mobileContainer}>
+                            <img
+                                src={'img/mobilehalf.png'}
+                                className={styles.mobileImg}
+                            />
+                        </div>
+                    </div>
                 </div>
                 <div>
                     {this.state.subscribeModal && (
-                        <SubscribeModal onClose={this.closeSubscriptionModal} />
+                        <SubscribeModal
+                            onClose={this.closeSubscriptionModal}
+                        />
                     )}
                 </div>
             </div>

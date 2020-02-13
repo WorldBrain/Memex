@@ -3,7 +3,7 @@
 .container {
     composes: boxShadow h2Color buttonRadiusSmall from '../../common-ui/colors.css';
     box-sizing: border-box;
-    width: 96%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     font-size: 14px;

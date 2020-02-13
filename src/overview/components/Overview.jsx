@@ -22,8 +22,6 @@ import { isDuringInstall } from '../onboarding/utils'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 
-import styles from 'src/styles.css'
-
 class Overview extends PureComponent {
     static propTypes = {
         pageUrl: propTypes.string,
@@ -62,7 +60,8 @@ class Overview extends PureComponent {
                 <Results />
                 <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
-                <div className={styles.productHuntContainer}>
+
+                { /* <div className={styles.productHuntContainer}>
                     <a
                         href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
                         target="_blank"
@@ -73,7 +72,8 @@ class Overview extends PureComponent {
                             className={styles.productHuntBatch}
                         />
                     </a>
-                </div>
+                </div> */ }
+
                 <SidebarContainer
                     env="overview"
                     annotationsManager={this._annotationsManager}

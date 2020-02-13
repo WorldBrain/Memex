@@ -29,11 +29,12 @@
 }
 
 .actionButton {
-    background-color: color1;
-    color: color4;
+    background: #5cd9a6;
     border: none;
-    height: 35px;
+    height: 36px;
     border-radius: 3px;
+    font-weight: 600;
+    cursor: pointer;
 
     &.hidden {
         display: none;
@@ -74,14 +75,10 @@
 }
 
 .startImport {
-    padding: 10px 20px;
-    background: #5cd9a6;
-    border-radius: 5px;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 14px;
-    color: #545454;
     margin-bottom: 30px;
+    padding: 6px 18px;
+    font-size: 14px;
+    color: #2f2f2f;
 
     &[disabled] {
         opacity: 0.4;
