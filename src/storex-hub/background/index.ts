@@ -17,11 +17,11 @@ export class StorexHubBackground {
         this.socket = io(`http://localhost:${options?.port || 3000}`)
         this.client = await createStorexHubSocketClient(this.socket, {
             callbacks: {
-                handleRemoteOperation: async options => {
+                handleRemoteOperation: async event => {
                     return {
                         result: await this.dependencies.storageManager.operation(
-                            options.operation[0],
-                            ...options.operation.slice(1),
+                            event.operation[0],
+                            ...event.operation.slice(1),
                         ),
                     }
                 },
