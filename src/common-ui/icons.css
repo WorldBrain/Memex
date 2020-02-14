@@ -34,13 +34,19 @@
 .removeIcon {
     background-position: center;
     background-repeat: no-repeat;
+    background-image: url('/img/close.svg');
+}
+
+.removeMinusIcon {
+    background-position: center;
+    background-repeat: no-repeat;
     background-image: url('/img/remove.svg');
 }
 
 .searchIcon {
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('/img/searchIcon.svg');
+    background-image: url('/img/search.svg');
 }
 
 .checkMark {

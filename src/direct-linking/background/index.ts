@@ -133,7 +133,7 @@ export default class DirectLinkingBackground {
                 // it off.
                 await runInTab<RibbonInteractionsInterface>(
                     tabId,
-                ).insertRibbon()
+                ).insertRibbon({ forceExpandRibbon: true })
                 await remoteFunction('goToAnnotation', { tabId })(annotation)
                 this.options.browserAPIs.tabs.onUpdated.removeListener(listener)
             }

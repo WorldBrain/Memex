@@ -126,7 +126,10 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         highlight: Highlight,
         focusOnAnnotation: (url: string) => void = _ => undefined,
         hoverAnnotationContainer: (url: string) => void = _ => undefined,
-        openSidebar: (args: { activeUrl?: string }) => void,
+        openSidebar: (args: {
+            activeUrl?: string
+            openSidebar?: boolean
+        }) => void,
     ) => {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
@@ -139,7 +142,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
                 if (!e.target.dataset.annotation) {
                     return
                 }
-                openSidebar({ activeUrl: highlight.url })
+                openSidebar({ activeUrl: highlight.url, openSidebar: true })
                 this.removeHighlights(true)
                 this.makeHighlightDark(highlight)
                 focusOnAnnotation(highlight.url)

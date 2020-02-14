@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
+import onClickOutside from 'react-onclickoutside'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -60,7 +61,7 @@ interface DispatchProps {
     onQueryChange: (searchValue: string) => void
     handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
     clearAllFilters: () => void
-    resetPage: React.MouseEventHandler<HTMLButtonElement>
+    resetPage: React.MouseEventHandler<HTMLDivElement>
 }
 
 interface ComponentProps {
@@ -127,6 +128,14 @@ class SidebarContainer extends React.Component<Props> {
         this.props.setHoverAnnotationUrl(null)
         if (this.props.handleAnnotationBoxMouseLeave) {
             this.props.handleAnnotationBoxMouseLeave()
+        }
+    }
+
+    handleClickOutside = (e: Event) => {
+        e.stopPropagation()
+
+        if (this.props.env === 'overview') {
+            this.props.closeSidebar()
         }
     }
 
@@ -234,5 +243,8 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
 }
 
 export default withSidebarContext(
-    connect(mapStateToProps, mapDispatchToProps)(SidebarContainer),
+    connect(
+        mapStateToProps,
+        mapDispatchToProps,
+    )(onClickOutside(SidebarContainer)),
 )

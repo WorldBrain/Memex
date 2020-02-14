@@ -24,6 +24,7 @@ const boolReducer = (stateKey: string, reset = false) => (
         ? {
               showCommentBox: defaultState.showCommentBox,
               showTagsPicker: defaultState.showTagsPicker,
+              showSearchBox: defaultState.showSearchBox,
               showCollectionsPicker: defaultState.showCollectionsPicker,
           }
         : {}
@@ -41,7 +42,7 @@ const setRibbonEnabled = boolReducer('isRibbonEnabled')
 const setHighlightsEnabled = boolReducer('areHighlightsEnabled')
 const setTooltipEnabled = boolReducer('isTooltipEnabled')
 const setShowCommentBox = boolReducer('showCommentBox', true)
-const setShowSearchBox = boolReducer('showSearchBox')
+const setShowSearchBox = boolReducer('showSearchBox', true)
 const setShowTagsPicker = boolReducer('showTagsPicker', true)
 const setShowCollectionsPicker = boolReducer('showCollectionsPicker', true)
 const setSearchValue = (state: State, searchValue: string) => ({

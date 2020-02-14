@@ -27,8 +27,8 @@ export type Props = OwnProps & StateProps & DispatchProps
 class BookmarkButton extends PureComponent<Props> {
     render() {
         const text = this.props.isBookmarked
-            ? 'Un-Star this Page'
-            : 'Star this Page'
+            ? 'Un-Favorite this Page'
+            : 'Favorite this Page'
 
         return (
             <Button

@@ -32,7 +32,7 @@ export const goToAnnotation = (pageUrl: string) => async (
                 // it off.
                 await runInTab<RibbonInteractionsInterface>(
                     tabId,
-                ).insertRibbon()
+                ).insertRibbon({ forceExpandRibbon: true })
                 await remoteFunction('goToAnnotation', { tabId })(annotation)
                 browser.tabs.onUpdated.removeListener(listener)
             }

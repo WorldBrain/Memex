@@ -65,6 +65,9 @@ export async function setupBackgroundIntegrationTest(options?: {
                 onCreated: { addListener: () => {} },
                 onRemoved: { addListener: () => {} },
             },
+            alarms: {
+                onAlarm: { addListener: () => {} },
+            },
         } as any,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,

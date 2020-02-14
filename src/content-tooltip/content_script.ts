@@ -2,7 +2,7 @@ import { bodyLoader } from '../util/loader'
 import { setupRPC, insertTooltip, removeTooltip } from './interactions'
 import ToolbarNotifications from '../toolbar-notification/content_script'
 import { conditionallyShowOnboardingNotifications } from './onboarding-interactions'
-import { runOnScriptShutdown } from './utils'
+import { getTooltipState, runOnScriptShutdown } from './utils'
 
 export default async function init({
     toolbarNotifications,
@@ -17,6 +17,11 @@ export default async function init({
     await conditionallyShowOnboardingNotifications({
         toolbarNotifications,
     })
+
+    const isTooltipEnabled = await getTooltipState()
+    if (!isTooltipEnabled) {
+        return
+    }
 
     await bodyLoader()
     await insertTooltip({ toolbarNotifications, store })

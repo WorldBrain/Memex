@@ -19,6 +19,10 @@ export const highlightAnnotations = async (annotationList = null) => {
 
 export const createAnnotationDraftInSidebar = async (selection?: any) => {
     const highlight = await createHighlight(selection, true)
-    await toggleSidebarOverlay({ anchor: highlight.selector, override: true })
+    await toggleSidebarOverlay({
+        anchor: highlight.selector,
+        override: true,
+        openSidebar: true,
+    })
     return highlight
 }

@@ -41,7 +41,7 @@ class InPageSwitches extends PureComponent<Props> {
                         btnClass={buttonStyles.highlighterIcon}
                         title={'Open Memex annotation tooltip'}
                     >
-                        Show Highlighter
+                        Enable Highlighter
                         <p className={buttonStyles.subTitle}>
                             only on this page
                         </p>

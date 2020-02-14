@@ -57,55 +57,7 @@ export const releaseTime: number = 1559735977587
     },
 */
 
-export const UPDATE_NOTIFS: NotifDefinition[] = [
-    {
-        id: 'Survey1_for_existing_users',
-        search: {
-            title: 'How disappointed would you be if Memex does not exist?',
-            message:
-                'Take a 2-5min survey, get 1 month free premium and a chance to win 12 additional months.',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
-                        context: 'new-tab',
-                    },
-                    label: 'Take Survey',
-                },
-            ],
-        },
-        overview: {
-            title: 'How disappointed would you be if Memex does not exist?',
-            message:
-                'Take a 2-5min survey, get 1 month free premium and a chance to win 12 additional months.',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
-                        context: 'new-tab',
-                    },
-                    label: 'Take Survey',
-                },
-            ],
-        },
-        system: {
-            title: 'Take a 2-5min survey',
-            message: 'Get 1 month free premium and a chance to win 12 months!',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
-                        context: 'new-tab',
-                    },
-                    label: 'Take Survey',
-                },
-            ],
-        },
-    },
-]
+export const UPDATE_NOTIFS: NotifDefinition[] = []
 
 export interface EventNotifsDict {
     [name: string]: NotifDefinition
@@ -294,6 +246,53 @@ export const EVENT_NOTIFS: EventNotifsDict = {
             //         label: 'Renew Subscription',
             //     },
             // ],
+        },
+    },
+    usage_survey_1: {
+        id: 'usage_survey_1',
+        search: {
+            title: 'How disappointed would you be if Memex does not exist?',
+            message:
+                'Take a 2-5min survey, get 1 month free premium and a chance to win 12 additional months.',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
+                        context: 'new-tab',
+                    },
+                    label: 'Take Survey',
+                },
+            ],
+        },
+        overview: {
+            title: 'How disappointed would you be if Memex does not exist?',
+            message:
+                'Take a 2-5min survey, get 1 month free premium and a chance to win 12 additional months.',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
+                        context: 'new-tab',
+                    },
+                    label: 'Take Survey',
+                },
+            ],
+        },
+        system: {
+            title: 'Take a 2-5min survey',
+            message: 'Get 1 month free premium and a chance to win 12 months!',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
+                        context: 'new-tab',
+                    },
+                    label: 'Take Survey',
+                },
+            ],
         },
     },
 }

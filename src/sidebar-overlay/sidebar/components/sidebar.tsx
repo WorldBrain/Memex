@@ -2,7 +2,7 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
-import { CongratsMessage, Topbar, Loader, EmptyMessage } from '../../components'
+import { CongratsMessage, Topbar, EmptyMessage } from '../../components'
 import AnnotationBox from 'src/sidebar-overlay/annotation-box'
 import menuStyles from './menu-styles'
 import CommentBoxContainer from '../../comment-box'
@@ -17,6 +17,7 @@ import PageInfo from './page-info'
 import cx from 'classnames'
 import { Annotation } from 'src/annotations/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import { features } from 'src/util/remote-functions-background'
 
 const styles = require('./sidebar.css')
 
@@ -53,12 +54,13 @@ interface Props {
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
     clearAllFilters: () => void
-    resetPage: React.MouseEventHandler<HTMLButtonElement>
+    resetPage: React.MouseEventHandler<HTMLDivElement>
 }
 
 interface State {
     searchValue: string
     showFiltersSidebar: boolean
+    showSocialSearch: boolean
 }
 
 class Sidebar extends React.Component<Props, State> {
@@ -67,6 +69,13 @@ class Sidebar extends React.Component<Props, State> {
     state = {
         searchValue: '',
         showFiltersSidebar: false,
+        showSocialSearch: false,
+    }
+
+    async componentDidMount() {
+        this.setState({
+            showSocialSearch: await features.getFeature('SocialIntegration'),
+        })
     }
 
     private handleSearchChange = (searchQuery: string) => {
@@ -121,9 +130,9 @@ class Sidebar extends React.Component<Props, State> {
     }
 
     private renderAnnots() {
-        const annots = this.props.annotations.map(annot => (
+        const annots = this.props.annotations.map((annot, i) => (
             <AnnotationBox
-                key={annot.url}
+                key={i}
                 env={this.props.env}
                 {...annot}
                 isActive={this.props.activeAnnotationUrl === annot.url}
@@ -149,7 +158,7 @@ class Sidebar extends React.Component<Props, State> {
         }
 
         if (this.props.isLoading && this.props.appendLoader) {
-            annots.push(<Loader key="more-loading" />)
+            annots.push(<LoadingIndicator key="spinner" />)
         }
 
         return annots
@@ -159,7 +168,7 @@ class Sidebar extends React.Component<Props, State> {
         return (
             <React.Fragment>
                 <ResultsContainer />
-                <DeleteConfirmModal message="Delete page and related note" />
+                <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
             </React.Fragment>
         )
@@ -169,7 +178,6 @@ class Sidebar extends React.Component<Props, State> {
         const {
             env,
             isOpen,
-            isLoading,
             annotations,
             showCommentBox,
             showCongratsMessage,
@@ -181,50 +189,64 @@ class Sidebar extends React.Component<Props, State> {
                 <Menu
                     isOpen={isOpen}
                     width={450}
-                    styles={menuStyles(env)}
+                    styles={menuStyles(env, isOpen)}
                     right
                     noOverlay
                     disableCloseOnEsc
                 >
-                    <Topbar
-                        {...this.props}
-                        disableAddCommentBtn={showCommentBox}
-                        handleCloseBtnClick={this.handleCloseBtnClick}
-                        handleSettingsBtnClick={this._handleSettingsBtnClick}
-                        handleAddCommentBtnClick={handleAddCommentBtnClick}
-                        handleSearchChange={this.handleSearchChange}
-                        handleSearchEnter={this.handleSearchEnter}
-                        handleClearBtn={this.handleClearBtn}
-                        handleFilterBtnClick={this.toggleShowFilters}
-                        handleClearFiltersBtnClick={
-                            this.handleClearFiltersBtnClick
-                        }
-                    />
                     <div className={styles.sidebar}>
-                        {env === 'inpage' && (
-                            <React.Fragment>
-                                <div className={styles.searchSwitch}>
-                                    <SearchTypeSwitch
-                                        isOverview={
-                                            this.props.env === 'overview'
-                                        }
+                        <div className={styles.topSection}>
+                            <Topbar
+                                {...this.props}
+                                disableAddCommentBtn={showCommentBox}
+                                handleCloseBtnClick={this.handleCloseBtnClick}
+                                handleSettingsBtnClick={
+                                    this._handleSettingsBtnClick
+                                }
+                                handleAddCommentBtnClick={
+                                    handleAddCommentBtnClick
+                                }
+                                handleSearchChange={this.handleSearchChange}
+                                handleSearchEnter={this.handleSearchEnter}
+                                handleClearBtn={this.handleClearBtn}
+                                handleFilterBtnClick={this.toggleShowFilters}
+                                handleClearFiltersBtnClick={
+                                    this.handleClearFiltersBtnClick
+                                }
+                            />
+                            {env === 'inpage' && (
+                                <React.Fragment>
+                                    <div className={styles.searchSwitch}>
+                                        <SearchTypeSwitch
+                                            isOverview={
+                                                this.props.env === 'overview'
+                                            }
+                                            handleAddCommentBtnClick={
+                                                handleAddCommentBtnClick
+                                            }
+                                            showSocialSearch={
+                                                this.state.showSocialSearch
+                                            }
+                                        />
+                                    </div>
+                                    <PageInfo
+                                        page={this.props.page}
+                                        isCurrentPage={this.isCurrentPageSearch}
+                                        resetPage={this.props.resetPage}
+                                    />
+                                </React.Fragment>
+                            )}
+                        </div>
+                        <div>
+                            {showCommentBox && (
+                                <div className={styles.commentBoxContainer}>
+                                    <CommentBoxContainer
+                                        env={env}
+                                        isSocialPost={this.props.isSocialPost}
                                     />
                                 </div>
-                                <PageInfo
-                                    page={this.props.page}
-                                    isCurrentPage={this.isCurrentPageSearch}
-                                    resetPage={this.props.resetPage}
-                                />
-                            </React.Fragment>
-                        )}
-                        {showCommentBox && (
-                            <div className={styles.commentBoxContainer}>
-                                <CommentBoxContainer
-                                    env={env}
-                                    isSocialPost={this.props.isSocialPost}
-                                />
-                            </div>
-                        )}
+                            )}
+                        </div>
                         <div
                             className={cx(styles.resultsContainer, {
                                 [styles.resultsContainerPage]:
@@ -235,7 +257,7 @@ class Sidebar extends React.Component<Props, State> {
                                 this.renderResults()
                             ) : this.props.isLoading &&
                               !this.props.appendLoader ? (
-                                <Loader />
+                                <LoadingIndicator />
                             ) : annotations.length === 0 ? (
                                 <EmptyMessage />
                             ) : (

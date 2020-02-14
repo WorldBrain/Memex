@@ -80,6 +80,7 @@ export default class SyncBackground extends SyncService {
                 this.initialSync,
                 'waitForInitialSyncConnected',
             ),
+            abortInitialSync: bindMethod(this.initialSync, 'abortInitialSync'),
             enableContinuousSync: bindMethod(
                 this.continuousSync,
                 'enableContinuousSync',

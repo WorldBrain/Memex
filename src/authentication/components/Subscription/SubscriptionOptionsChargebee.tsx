@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { auth } from 'src/util/remote-functions-background'
-import { PricingPlanTitle } from 'src/authentication/components/Subscription/pricing.style'
+import { PricingPlanTitle, PricingPlanItem, LoginTitle, LoginButton, WhiteSpacer30 } from 'src/authentication/components/Subscription/pricing.style'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import styled from 'styled-components'
 import { SubscriptionInnerOptions } from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
@@ -147,22 +147,8 @@ export class SubscriptionOptionsChargebee extends React.Component<
                     <script src={chargeBeeScriptSource} />
                 </Helmet>
                 <div>
-                    <HeaderBox>
-                        {this.state.subscribed === true ? (
-                            <PrimaryButton onClick={this.openPortal}>
-                                Manage Existing Subscription
-                            </PrimaryButton>
-                        ) : (
-                            <PricingPlanTitle className={''}>
-                                Subscribe to Memex Pro
-                            </PricingPlanTitle>
-                        )}
-                    </HeaderBox>
-                    <StyledLine />
                     <SubscriptionInnerOptions
-                        openCheckoutBackupMonthly={
-                            this.openCheckoutBackupMonthly
-                        }
+                        openCheckoutBackupMonthly={this.openCheckoutBackupMonthly}
                         openCheckoutBackupYearly={this.openCheckoutBackupYearly}
                         openPortal={this.openPortal}
                         plans={this.props.plans}

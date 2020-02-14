@@ -4,6 +4,8 @@ import { Thunk } from '../types'
 import * as selectors from './selectors'
 import { Anchor } from 'src/highlighting/types'
 import { createAnnotation } from 'src/annotations/actions'
+import { setPageType, setSearchType } from 'src/sidebar-overlay/sidebar/actions'
+import { setIsExpanded } from '../ribbon/actions'
 
 export const setShowCommentBox = createAction<boolean>('setShowCommentBox')
 
@@ -34,6 +36,8 @@ export const openCommentBoxWithHighlight: (
 ) => Thunk = anchor => dispatch => {
     dispatch(setAnchor(anchor))
     dispatch(setShowCommentBox(true))
+    dispatch(setSearchType('notes'))
+    dispatch(setPageType('page'))
 }
 
 /**
@@ -79,6 +83,8 @@ export const saveComment: (
         dispatch(setIsCommentSaved(true))
         dispatch(setShowCommentBox(false))
         dispatch(resetCommentBox())
+
+        setTimeout(() => dispatch(setIsExpanded(false)), 1000)
     }
 }
 
@@ -87,6 +93,7 @@ export const saveComment: (
  * and resets the state of the comment box in the Redux store.
  */
 export const cancelComment: () => Thunk = () => dispatch => {
+    dispatch(setShowCommentBox(false))
     dispatch(resetCommentBox())
 }
 

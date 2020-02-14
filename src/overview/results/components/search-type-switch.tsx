@@ -5,6 +5,7 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 const styles = require('./search-type-switch.css')
 
 export interface Props {
+    showSocialSearch: boolean
     annotsFolded: boolean
     isFilterBarActive: boolean
     searchType: 'page' | 'notes' | 'social'
@@ -58,21 +59,23 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                     >
                         Notes
                     </button>
-                    <button
-                        className={cx(styles.searchSwitchBtn, styles.btn)}
-                        onClick={this.props.handleSearchTypeClick('social')}
-                        disabled={this.isSocialSearch}
-                    >
-                        Social
-                        <span className={styles.betaBox}>
-                            <ButtonTooltip
-                                tooltipText="Saving Tweets is in beta mode. Bugs may appear. Let us know: support@worldbrain.io or github.com/worldbrain"
-                                position="bottom"
-                            >
-                                <span className={styles.beta}>beta</span>
-                            </ButtonTooltip>
-                        </span>
-                    </button>
+                    {this.props.showSocialSearch && (
+                        <button
+                            className={cx(styles.searchSwitchBtn, styles.btn)}
+                            onClick={this.props.handleSearchTypeClick('social')}
+                            disabled={this.isSocialSearch}
+                        >
+                            Social
+                            <span className={styles.betaBox}>
+                                <ButtonTooltip
+                                    tooltipText="Saving Tweets is in beta mode. Bugs may appear. Let us know: support@worldbrain.io or github.com/worldbrain"
+                                    position="bottom"
+                                >
+                                    <span className={styles.beta}>beta</span>
+                                </ButtonTooltip>
+                            </span>
+                        </button>
+                    )}
                 </div>
                 {this.isAnnotSearch && (
                     <button

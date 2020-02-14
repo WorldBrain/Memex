@@ -60,6 +60,7 @@
     vertical-align: middle;
     font-weight: bold;
     float: right;
+    cursor: pointer;
 }
 
 .mobileSection {
@@ -76,13 +77,19 @@
     width: 100px;
     margin-right: 10px;
     margin-top: 30px;
+    cursor: pointer;
+}
+
+.mobileContainer {
+    margin-bottom: -20px;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
 }
 
 .mobileImg {
-    width: 45%;
-    margin-bottom: -20px;
-    margin-top: 10px;
-    margin-right: 10px;
+    width: 90%;
 }
 
 .subText {
@@ -111,4 +118,32 @@
     background-size: 20px;
     display: flex;
     align-self: center;
+}
+
+@media (max-width: 940px) {
+    .mobileSection {
+        flex-direction: column;
+    }
+
+    .contentSection {
+        flex-direction: row;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .textSection {
+        flex-direction: column;
+    }
+
+    .storeSection img {
+        margin-top: 10px;
+    }
+
+    .mobileImg {
+        width: 100%;
+    }
+
+    .mobileContainer {
+        justify-content: center;
+    }
 }

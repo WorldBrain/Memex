@@ -5,21 +5,36 @@
 }
 
 .sidebar {
-    height: 80%;
+    height: 100%;
     background: #fff;
-    padding: 0px 8px 150px 8px;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .searchSwitch {
     height: fit-content;
+    padding: 0 5px;
+}
+
+.topSection {
+    position: sticky;
+    top: 0px;
+    z-index: 2600;
+    background: white;
+    overflow: hidden;
+    padding: 0 5px;
+}
+
+.bottomContainer {
+    height: fill-available;
 }
 
 .resultsContainer {
     flex: 1;
     position: relative;
-    top: 45px;
+    top: 15px;
+    padding: 0 10px;
 }
 
 .resultsContainerPage {
@@ -40,9 +55,10 @@
     composes: annotationCard from '../../../common-ui/elements.css';
     background: white;
     border-radius: 3px;
-    top: 50px;
-    margin-bottom: 70px;
+    top: 10px;
+    margin: 0 10px 40px;
     position: relative;
+    width: 93%;
 
     &:hover {
         background: white;

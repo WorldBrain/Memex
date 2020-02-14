@@ -321,7 +321,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
             sidebarActs.openSidebar({
                 url,
                 title,
-                forceFetch: false,
+                forceFetch: true,
                 isSocialPost,
             }),
         )

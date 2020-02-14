@@ -16,6 +16,7 @@ export interface InitialSyncSetupState {
 export type InitialSyncSetupEvent = UIEvent<{
     start: {}
     backToIntroduction: {}
+    cancel: {}
 }>
 
 export interface InitialSyncSetupDependencies {
@@ -25,6 +26,7 @@ export interface InitialSyncSetupDependencies {
     getInitialSyncMessage: () => Promise<string>
     getSyncEventEmitter: () => TypedEventEmitter<InitialSyncEvents>
     open: boolean
+    abortInitialSync: () => Promise<void>
 }
 
 export default class InitialSyncSetupLogic extends UILogic<
@@ -122,6 +124,10 @@ export default class InitialSyncSetupLogic extends UILogic<
         } catch (e) {
             this.error(e)
         }
+    }
+
+    cancel = () => {
+        return this.dependencies.abortInitialSync()
     }
 
     backToIntroduction = () => {

@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import NoResultBadTerm from 'src/overview/results/components/NoResultBadTerm'
-import ResultsMessage from 'src/overview/results/components/ResultsMessage'
+import ResultsMessage from 'src/overview/results/components/results-message'
 import ResultList from './result-list-container'
 import RootState from 'src/sidebar-overlay/types'
 import {
@@ -94,7 +94,4 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(ResultsContainer)
+export default connect(mapState, mapDispatch)(ResultsContainer)

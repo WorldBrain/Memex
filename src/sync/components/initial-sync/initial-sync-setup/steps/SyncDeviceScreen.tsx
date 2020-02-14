@@ -24,10 +24,12 @@ export const SyncDeviceScreen = ({
     error,
     stage,
     progressPct,
+    handleCancel,
 }: {
     error?: string
     stage: string
     progressPct?: number
+    handleCancel?: () => void
 }) => {
     return (
         <ModalBox
@@ -68,7 +70,7 @@ export const SyncDeviceScreen = ({
                                 <Warning>⚠️ Something went wrong</Warning>
                                 <PrimaryAction
                                     label={'Retry Syncing'}
-                                    onClick={() => false}
+                                    onClick={handleCancel}
                                 />
                                 <WhiteSpacer30 />
                             </div>

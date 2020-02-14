@@ -37,8 +37,8 @@
 .popupLarge {
     composes: popup;
     overflow-y: scroll;
-    width: 750px;
-    height: 430px;
+    width: 800px;
+    height: fit-content;
     max-height: 95vh;
     max-width: 95vw;
 }
@@ -56,9 +56,10 @@
 .content {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     font-size: 13.5px;
     min-height: 100%;
     height: 100%;
     align-items: center;
+    padding: 50px;
 }

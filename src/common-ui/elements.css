@@ -27,9 +27,9 @@
 
 .tagPill {
     composes: lightBlueBackground from './colors.css';
-    padding: 2px 9px 3px 9px;
+    padding: 2px 9px;
     border-radius: 3px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.5px;
     height: auto;
@@ -56,6 +56,7 @@
     box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     background: white;
+    overflow: hidden;
 }
 
 .miniTooltip {
@@ -150,13 +151,13 @@
     font-size: 14px;
     color: #222;
     font-family: 'Poppins', sans-serif;
-    border: 1px solid #e2e2e2;
     border-radius: 3px;
+    border: none;
     padding: 10px 7px;
     margin: 5px 5px 5px 5px;
 
     &::placeholder {
-        color: #888;
+        color: #3a2f45;
     }
 
     &:focus {
@@ -191,15 +192,18 @@
 
 .searchField {
     background-color: color11;
-    color: color3;
+    color: #3a2f45;
     border-radius: 3px;
     font-size: 14px;
     font-weight: 400;
     text-align: left;
+    height: fit-content;
+    width: fill-available;
 
     &::placeholder {
-        color: color4;
-        font-style: normal;
+        color: #3a2f45;
+        font-weight: 500;
+        opacity: 0.7;
     }
 
     &:focus {

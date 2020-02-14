@@ -13,69 +13,21 @@ interface Props {
     manageSubscription?: (...params: any) => any
     title: string
     price: string
-    infoItems: any[]
     subscribed?: boolean
 }
 
 export class SubscriptionPriceBox extends React.PureComponent<Props> {
     public render() {
         return (
-            <PricingTable>
-                <PricingHead>
-                    <PricingHeadTitle> {this.props.title} </PricingHeadTitle>
-                </PricingHead>
-                <PricingPrice>
-                    <span>{this.props.price ? this.props.price : ' '}</span>
-                </PricingPrice>
-
-                {/*<DeviceSelection>*/}
-                {/*    <span>for</span>*/}
-                {/*    <input inputType="number" value="1" />*/}
-                {/*    <span>device</span>*/}
-                {/*</DeviceSelection>*/}
-
-                <PricingList>
-                    {this.props.infoItems.map((item, index) => (
-                        <ListItem key={`pricing-table-list-${index}`}>
-                            <span>{item}</span>
-                        </ListItem>
-                    ))}
-                </PricingList>
-
-                {this.props.subscribed ? (
+            <PricingTable onClick={this.props.onClick}>
                     <div>
-                        <PricingButton
-                            background={'rgb(86, 113, 207)'}
-                            onClick={this.props.manageSubscription}
-                        >
-                            Manage Subscription
-                        </PricingButton>
+                        <PricingHead>
+                            <PricingHeadTitle> {this.props.title} </PricingHeadTitle>
+                        </PricingHead>
+                        <PricingPrice>
+                            <span>{this.props.price ? this.props.price : ' '}</span>
+                        </PricingPrice>
                     </div>
-                ) : this.props.price ? (
-                    <PricingButton onClick={this.props.onClick}>
-                        Upgrade
-                    </PricingButton>
-                ) : (
-                    <div style={{ padding: '20px' }} />
-                )}
-
-                {/*                // <div>
-                //     <h3 style={styles.title}>{this.props.title}</h3>
-                // </div>
-                // <ul style={styles.ul}>
-                //     {this.props.infoItems.map(item => (
-                //         <li style={styles.li}>
-                //             {checkboxGlyph}
-                //             {item}
-                //         </li>
-                //     ))}
-                // </ul>
-                // {this.props.children}
-                // <div style={styles.button} onClick={this.props.onClick}>
-                //     <a style={styles.link} href="#">
-                //         Upgrade
-                //     </a>
-                // </div>*/}
             </PricingTable>
         )
     }

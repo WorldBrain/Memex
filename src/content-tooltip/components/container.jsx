@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import OnClickOutside from 'react-onclickoutside'
+import { features } from 'src/util/remote-functions-background'
 
 import Tooltip from './tooltip'
 import {
@@ -26,12 +27,16 @@ class TooltipContainer extends React.Component {
 
     state = {
         showTooltip: false,
+        showCreateLink: false,
         position: { x: 250, y: 200 },
         tooltipState: 'copied',
     }
 
     async componentDidMount() {
         this.props.onInit(this.showTooltip)
+        this.setState({
+            showCreateLink: await features.getFeature('DirectLink'),
+        })
     }
 
     showTooltip = position => {
@@ -116,9 +121,15 @@ class TooltipContainer extends React.Component {
             case 'pristine':
                 return (
                     <InitialComponent
-                        createLink={this.createLink}
+                        createLink={
+                            this.state.showCreateLink
+                                ? this.createLink
+                                : undefined
+                        }
                         createHighlight={this.createHighlight}
                         createAnnotation={this.createAnnotation}
+                        closeTooltip={this.closeTooltip}
+                        state={this.state.tooltipState}
                     />
                 )
             case 'running':

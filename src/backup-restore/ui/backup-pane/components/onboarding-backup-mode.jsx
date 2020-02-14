@@ -40,6 +40,7 @@ export default class OnboardingBackupModeContainer extends React.Component {
                     isAuthorizedForAutomaticBackup={
                         this.props.isAuthorizedForAutomaticBackup
                     }
+                    subscribeModal={this.state.subscribeModal}
                 />
                 {this.state.subscribeModal && (
                     <SubscribeModal onClose={this.closeSubscriptionModal} />
@@ -105,7 +106,7 @@ export function OnboardingBackupMode({
                                 Subscribed
                             </span>
                         ) : (
-                            <span className={Styles.labelFree}>
+                            <span className={Styles.labelFree} onClick={() => launchSubscriptionFlow()}>
                                 ⭐️ Pro Feature
                             </span>
                         )}

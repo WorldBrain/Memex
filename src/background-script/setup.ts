@@ -9,6 +9,8 @@ import ActivityLoggerBackground, {
 } from 'src/activity-logger/background'
 import SearchBackground from 'src/search/background'
 import EventLogBackground from 'src/analytics/internal/background'
+import JobSchedulerBackground from 'src/job-scheduler/background'
+import { jobs } from 'src/job-scheduler/background/jobs'
 import CustomListBackground from 'src/custom-lists/background'
 import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
@@ -42,6 +44,8 @@ import { ConnectivityCheckerBackground } from 'src/connectivity-checker/backgrou
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { combineSearchIndex } from 'src/search/search-index'
+import { StorexHubBackground } from 'src/storex-hub/background'
+import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -54,6 +58,7 @@ export interface BackgroundModules {
     search: SearchBackground
     eventLog: EventLogBackground
     customLists: CustomListBackground
+    jobScheduler: JobSchedulerBackground
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
@@ -61,6 +66,7 @@ export interface BackgroundModules {
     bgScript: BackgroundScript
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
+    storexHub: StorexHubBackground
 }
 
 export function createBackgroundModules(options: {
@@ -112,6 +118,15 @@ export function createBackgroundModules(options: {
     })
 
     const notifications = new NotificationBackground({ storageManager })
+
+    const jobScheduler = new JobSchedulerBackground({
+        storagePrefix: JobScheduler.STORAGE_PREFIX,
+        storageAPI: options.browserAPIs.storage,
+        alarmsAPI: options.browserAPIs.alarms,
+        notifications,
+        jobs,
+    })
+
     const social = new SocialBackground({ storageManager })
     const bgScript = new BackgroundScript({
         storageManager,
@@ -150,6 +165,7 @@ export function createBackgroundModules(options: {
         social,
         activityLogger,
         connectivityChecker,
+        jobScheduler,
         directLinking: new DirectLinkingBackground({
             browserAPIs: options.browserAPIs,
             storageManager,
@@ -185,6 +201,9 @@ export function createBackgroundModules(options: {
             appVersion: process.env.VERSION,
             postReceiveProcessor,
             disableEncryption: options.disableSyncEnryption,
+        }),
+        storexHub: new StorexHubBackground({
+            storageManager,
         }),
         features: new FeatureOptIns(),
         pages,
@@ -231,7 +250,9 @@ export async function setupBackgroundModules(
     backgroundModules.backupModule.storage.setupChangeTracking()
 
     await backgroundModules.sync.setup()
+    await backgroundModules.jobScheduler.setup()
     backgroundModules.sync.registerRemoteEmitter()
+    await backgroundModules.customLists.setup()
 }
 
 export function getBackgroundStorageModules(

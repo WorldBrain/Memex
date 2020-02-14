@@ -11,7 +11,7 @@
     flex-direction: column;
     position: relative;
     padding: 1rem;
-    margin: 0 auto 17px;
+    margin: 40px auto 17px;
     max-width: 95%;
 }
 
@@ -36,23 +36,6 @@
     &:hover {
         background: #44bc8b;
         color: white;
-    }
-}
-
-.dismissButton {
-    composes: removeIcon from 'src/common-ui/icons.css';
-    border: none;
-    background-size: 12px;
-    background-color: transparent;
-    width: 22px;
-    height: 22px;
-    outline: none;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-
-    &:hover {
-        cursor: pointer;
     }
 }
 

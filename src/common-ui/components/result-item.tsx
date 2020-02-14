@@ -42,7 +42,7 @@ export interface Props extends Partial<SocialPage> {
     handleCrossRibbonClick: MouseEventHandler
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
-    setTagButtonRef: (el: HTMLButtonElement) => void
+    setTagButtonRef: (el: HTMLElement) => void
 }
 
 class ResultItem extends PureComponent<Props> {
@@ -105,6 +105,7 @@ class ResultItem extends PureComponent<Props> {
                 {this.props.isDeleting && (
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
+                {this.props.tagManager}
                 <div
                     className={cx(styles.rootContainer, {
                         [styles.tweetRootContainer]: this.props.isSocial,
@@ -130,7 +131,6 @@ class ResultItem extends PureComponent<Props> {
                         )}
                     </a>
                 </div>
-                {this.props.tagManager}
                 {this.renderAnnotsList()}
             </li>
         )

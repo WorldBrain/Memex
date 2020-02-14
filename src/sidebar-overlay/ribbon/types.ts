@@ -17,7 +17,11 @@ export default interface State {
 }
 
 export interface RibbonInteractionsInterface {
-    insertRibbon: ({ override, ...args }?: { override?: boolean } | any) => any
+    insertRibbon: ({
+        override,
+        forceExpandRibbon,
+        ...args
+    }?: { override?: boolean; forceExpandRibbon?: boolean } | any) => any
     removeRibbon: ({ override }?: { override?: boolean }) => any
     insertOrRemoveRibbon: () => any
     updateRibbon: () => any
