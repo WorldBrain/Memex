@@ -32,6 +32,7 @@ interface StateProps {
     isRibbonEnabled: boolean
     isSidebarOpen: boolean
     isCommentSaved: boolean
+    isFilterOpen: boolean
     commentText: string
     annotations: Annotation[]
 }
@@ -245,6 +246,9 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
     }
 
     private closeRibbonAfterTimeout() {
+        if (this.props.isFilterOpen) {
+            return
+        }
         this.timeoutId = setTimeout(
             this.handleRibbonClose,
             this.props.closeTimeoutMs,
@@ -444,6 +448,7 @@ const mapStateToProps: MapStateToProps<
     commentText: commentBoxselectors.commentText(state),
     annotations: sidebarSelectors.annotations(state),
     isRibbonEnabled: ribbonSelectors.isRibbonEnabled(state),
+    isFilterOpen: ribbonSelectors.isFilterOpen(state),
 })
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (

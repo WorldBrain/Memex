@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect'
 
 import * as RootSelectors from '../selectors'
+import { showTags } from 'src/overview/results/actions'
 
 export const ribbon = RootSelectors.ribbon
 
@@ -43,3 +44,11 @@ export const showCollectionsPicker = createSelector(
     state => state.showCollectionsPicker,
 )
 export const searchValue = createSelector(ribbon, state => state.searchValue)
+
+export const isFilterOpen = createSelector(
+    showCommentBox,
+    showSearchBox,
+    showTagsPicker,
+    showCollectionsPicker,
+    (a, b, c, d) => a || b || c || d,
+)
