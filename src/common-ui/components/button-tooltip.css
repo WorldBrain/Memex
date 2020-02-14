@@ -1,4 +1,4 @@
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Poppins/poppins.css');
 
 .tooltipTrigger {
     display: inline-flex;
@@ -12,7 +12,7 @@
     flex-wrap: nowrap;
     min-width: max-content;
     align-items: center;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .tooltipTop {
@@ -39,6 +39,7 @@
     transform: translateY(30px);
     justify-content: center;
     align-items: flex-start;
+    z-index: 250000;
 
     &.tooltipBubble {
         align-items: flex-start;
@@ -85,7 +86,7 @@
     padding: 0.5em 1em;
     text-align: center;
     width: fit-content;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .tooltipContainer {
@@ -96,6 +97,7 @@
 
 .tooltipContainerBottom {
     justify-content: center;
+    align-items: center;
 }
 
 .tooltipContainerCenterCenter {

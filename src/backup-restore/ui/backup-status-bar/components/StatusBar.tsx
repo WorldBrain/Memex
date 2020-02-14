@@ -4,6 +4,7 @@ import classNames from 'classnames'
 import { BackupUIState } from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
 import StatusOverlay from 'src/backup-restore/ui/backup-status-bar/components/StatusOverlay'
 import { BackupTimes } from 'src/backup-restore/types'
+import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 
 const styles = require('./StatusBar.css')
 
@@ -39,7 +40,7 @@ const StatusBar = (props: Props) => {
                 onMouseLeave={props.onMouseLeave}
             >
                 <div className={styles.headerBox}>
-                    <div className={styles.header}>Backup Status</div>
+                    <div className={styles.header}>Sync Status</div>
                     <div className={styles.IconBox}>
                         {props.backupUIState.state === 'success' ? (
                             <span
@@ -66,16 +67,13 @@ const StatusBar = (props: Props) => {
                                     {...backupProps}
                                     crossIcon={'img/cross.svg'}
                                 >
-                                    <div className={styles.ActionButton}>
-                                        <ActionButton
-                                            handleClick={() =>
-                                                (window.location.href =
-                                                    '/options.html#/backup')
-                                            }
-                                        >
-                                            {` Backup Now `}
-                                        </ActionButton>
-                                    </div>
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            (window.location.href =
+                                                '/options.html#/backup')
+                                        }
+                                        label={` Backup  `}
+                                    />
                                 </StatusOverlay>
                             )}
                             {props.backupUIState.state === 'fail' && (
@@ -83,16 +81,13 @@ const StatusBar = (props: Props) => {
                                     {...backupProps}
                                     crossIcon={'img/cross.svg'}
                                 >
-                                    <div className={styles.ActionButton}>
-                                        <ActionButton
-                                            handleClick={() =>
-                                                (window.location.href =
-                                                    '/options.html#/backup')
-                                            }
-                                        >
-                                            {` Backup Now `}
-                                        </ActionButton>
-                                    </div>
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            (window.location.href =
+                                                '/options.html#/backup')
+                                        }
+                                        label={`Backup Now`}
+                                    />
                                 </StatusOverlay>
                             )}
                             {props.backupUIState.state === 'autoBackup' && (
@@ -101,16 +96,13 @@ const StatusBar = (props: Props) => {
                                     crossIcon={'img/cross.svg'}
                                     message={`Automatically backup your data every 15 minutes.`}
                                 >
-                                    <div className={styles.ActionButton}>
-                                        <ActionButton
-                                            handleClick={() =>
-                                                (window.location.href =
-                                                    props.paymentUrl)
-                                            }
-                                        >
-                                            {` Upgrade Now `}
-                                        </ActionButton>
-                                    </div>
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            (window.location.href =
+                                                props.paymentUrl)
+                                        }
+                                        label={`Upgrade Now`}
+                                    />
                                 </StatusOverlay>
                             )}
                         </div>

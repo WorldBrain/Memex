@@ -7,6 +7,7 @@ export default interface State {
     isPageFullScreen: boolean
     isExpanded: boolean
     isRibbonEnabled: boolean
+    areHighlightsEnabled: boolean
     isTooltipEnabled: boolean
     showCommentBox: boolean
     showSearchBox: boolean
@@ -16,7 +17,11 @@ export default interface State {
 }
 
 export interface RibbonInteractionsInterface {
-    insertRibbon: ({ override, ...args }?: { override?: boolean } | any) => any
+    insertRibbon: ({
+        override,
+        forceExpandRibbon,
+        ...args
+    }?: { override?: boolean; forceExpandRibbon?: boolean } | any) => any
     removeRibbon: ({ override }?: { override?: boolean }) => any
     insertOrRemoveRibbon: () => any
     updateRibbon: () => any

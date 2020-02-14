@@ -66,7 +66,7 @@ export async function main() {
 
     setStorex(storageManager)
 
-    await setupBackgroundModules(backgroundModules)
+    await setupBackgroundModules(backgroundModules, storageManager)
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({

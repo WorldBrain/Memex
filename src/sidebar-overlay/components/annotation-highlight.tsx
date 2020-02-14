@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { Anchor } from 'src/direct-linking/content_script/interactions'
+import { Anchor } from 'src/highlighting/types'
 
 const localStyles = require('./truncated-text-renderer.css')
 const styles = require('../annotation-box/annotation-box-container.css')

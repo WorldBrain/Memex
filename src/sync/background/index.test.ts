@@ -552,9 +552,7 @@ function extensionSyncTests(suiteOptions: {
             },
         })
 
-        await devices[0].backgroundModules.sync.continuousSync.forceIncrementalSync(
-            { debug: true },
-        )
+        await devices[0].backgroundModules.sync.continuousSync.forceIncrementalSync()
         await syncModule(devices[1]).setup()
         await syncModule(devices[1]).firstContinuousSyncPromise
 
@@ -568,10 +566,6 @@ function extensionSyncTests(suiteOptions: {
             fullUrl: mockPage.fullUrl,
             domain: mockPage.domain,
             hostname: mockPage.hostname,
-            fullTitle: undefined,
-            text: undefined,
-            terms: [],
-            titleTerms: [],
             urlTerms: [],
         })
 
@@ -1040,6 +1034,7 @@ function mobileSyncTests(suiteOptions: {
                     tags: ['eggs', 'spam'],
                     title: 'This is a test page',
                     url: 'test.com/foo',
+                    fullUrl: testPage.fullUrl,
                 },
             ],
             resultsExhausted: true,
@@ -1065,7 +1060,7 @@ function mobileSyncTests(suiteOptions: {
 
         expect(
             await devices.extension.backgroundModules.customLists.fetchAllLists(
-                {},
+                { skipMobileList: false },
             ),
         ).toEqual([
             {

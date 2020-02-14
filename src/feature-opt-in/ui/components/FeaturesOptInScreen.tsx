@@ -9,7 +9,7 @@ export class FeaturesOptInScreen extends React.Component<any, any> {
         await this.refreshFeatures()
     }
 
-    private async refreshFeatures() {
+    refreshFeatures = async () => {
         const featureOptions = await features.getFeatures()
         this.setState({ featureOptions })
     }

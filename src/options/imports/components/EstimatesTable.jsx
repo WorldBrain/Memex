@@ -71,11 +71,12 @@ const EstimatesTable = ({
             <tr className={localStyles.importTableRow}>
                 <td>
                     <Checkbox
-                            name="bookmarks"
-                            id="bookmarks"
-                            handleChange={onAllowBookmarksClick}
-                            isChecked={allowTypes[TYPE.BOOKMARK]}
-                    >{' '}
+                        name="bookmarks"
+                        id="bookmarks"
+                        handleChange={onAllowBookmarksClick}
+                        isChecked={allowTypes[TYPE.BOOKMARK]}
+                    >
+                        {' '}
                         <div className={localStyles.labelContainer}>
                             <span className={localStyles.checkboxText}>
                                 Browser Bookmarks
@@ -96,11 +97,11 @@ const EstimatesTable = ({
             <tr className={localStyles.importTableRow}>
                 <td>
                     <Checkbox
-                            type="checkbox"
-                            name="pocket"
-                            id="pocket"
-                            handleChange={onAllowPocketClick}
-                            isChecked={allowTypes[TYPE.OTHERS] === SERVICES.POCKET}
+                        type="checkbox"
+                        name="pocket"
+                        id="pocket"
+                        handleChange={onAllowPocketClick}
+                        isChecked={allowTypes[TYPE.OTHERS] === SERVICES.POCKET}
                     >
                         <div className={localStyles.labelContainer}>
                             <span className={localStyles.checkboxText}>
@@ -112,9 +113,9 @@ const EstimatesTable = ({
                         </div>
                     </Checkbox>
                 </td>
-                {!isLoading &&
-                    blobUrl === null && (
-                        <td colSpan="3">
+                {!isLoading && blobUrl === null && (
+                    <td colSpan="3">
+                        <div className={localStyles.uploaderBox}>
                             <label
                                 className={classNames(localStyles.selectFile, {
                                     [localStyles.hidden]:
@@ -138,21 +139,30 @@ const EstimatesTable = ({
                                 tooltipText="How can I get that file?"
                                 position="right"
                             >
-                                <a 
+                                <a
                                     href="https://getpocket.com/export"
                                     taget="_blank"
-                                > 
-                                    <span className={localStyles.tutorial}/>
+                                >
+                                    <span
+                                        className={classNames(
+                                            localStyles.tutorial,
+                                            {
+                                                [localStyles.hidden]:
+                                                    allowTypes[TYPE.OTHERS] !==
+                                                    SERVICES.POCKET,
+                                            },
+                                        )}
+                                    />
                                 </a>
                             </ButtonTooltip>
-                        </td>
-                    )}
-                {isLoading &&
-                    allowTypes[TYPE.OTHERS] === SERVICES.POCKET && (
-                        <td colSpan="3">
-                            <LoadingIndicator />
-                        </td>
-                    )}
+                        </div>
+                    </td>
+                )}
+                {isLoading && allowTypes[TYPE.OTHERS] === SERVICES.POCKET && (
+                    <td colSpan="3">
+                        <LoadingIndicator />
+                    </td>
+                )}
                 {allowTypes[TYPE.OTHERS] === SERVICES.POCKET &&
                     estimates[TYPE.OTHERS].remaining > 0 &&
                     blobUrl !== null && (
@@ -171,7 +181,9 @@ const EstimatesTable = ({
                     <Checkbox
                         name="html"
                         id="html"
-                        isChecked={allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE}
+                        isChecked={
+                            allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE
+                        }
                         handleChange={onAllowHTMLClick}
                     >
                         <div className={localStyles.labelContainer}>
@@ -184,9 +196,9 @@ const EstimatesTable = ({
                         </div>
                     </Checkbox>
                 </td>
-                {!isLoading &&
-                    blobUrl === null && (
-                        <td colSpan="3">
+                {!isLoading && blobUrl === null && (
+                    <td colSpan="3">
+                        <div className={localStyles.uploaderBox}>
                             <label
                                 className={classNames(localStyles.selectFile, {
                                     [localStyles.hidden]:
@@ -211,21 +223,30 @@ const EstimatesTable = ({
                                 tooltipText="How can I get that file?"
                                 position="right"
                             >
-                                <a 
+                                <a
                                     href="https://www.notion.so/worldbrain/7a12d7a019094785a14ff109e99a531d"
                                     taget="_blank"
-                                > 
-                                    <span className={localStyles.tutorial}/>
+                                >
+                                    <span
+                                        className={classNames(
+                                            localStyles.tutorial,
+                                            {
+                                                [localStyles.hidden]:
+                                                    allowTypes[TYPE.OTHERS] !==
+                                                    SERVICES.NETSCAPE,
+                                            },
+                                        )}
+                                    />
                                 </a>
                             </ButtonTooltip>
-                        </td>
-                    )}
-                {isLoading &&
-                    allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
-                        <td colSpan="3">
-                            <LoadingIndicator />
-                        </td>
-                    )}
+                        </div>
+                    </td>
+                )}
+                {isLoading && allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
+                    <td colSpan="3">
+                        <LoadingIndicator />
+                    </td>
+                )}
                 {allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE &&
                     estimates[TYPE.OTHERS].remaining > 0 &&
                     blobUrl !== null && (

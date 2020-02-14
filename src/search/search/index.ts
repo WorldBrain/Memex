@@ -7,7 +7,6 @@ import { findFilteredUrls } from './filters'
 import { textSearch } from './text-search'
 import { paginate, applyScores } from './util'
 import { collections } from '../util'
-export { domainHasFavIcon } from './fav-icon'
 import { DexieUtilsPlugin } from '../plugins/dexie-utils'
 
 export const search = (getDb: DBGet) => async ({
@@ -94,7 +93,7 @@ export const getMatchingPageCount = (getDb: DBGet) => async pattern => {
 }
 
 /**
- * Main search logic. Calls the rest of serach depending on input search params.
+ * Main search logic. Calls the rest of search depending on input search params.
  */
 export const fullSearch = (getDb: DBGet) => async ({
     terms = [],

@@ -17,13 +17,13 @@ import * as acts from '../actions'
 import { actions as listActs } from 'src/custom-lists'
 import { acts as deleteConfActs } from '../../delete-confirm-modal'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
-import { Annotation } from 'src/sidebar-overlay/sidebar/types'
 import { selectors as sidebarLeft } from '../../sidebar-left'
 import { actions as filterActs, selectors as filters } from 'src/search-filters'
 import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
+import { Annotation } from 'src/annotations/types'
 
 const styles = require('./ResultList.css')
 
@@ -168,6 +168,7 @@ class ResultListContainer extends PureComponent<Props> {
             <ResultItem
                 key={key}
                 isOverview
+                tags={doc.tags}
                 setTagButtonRef={this.setTagButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
                 setUrlDragged={this.props.setUrlDragged}
@@ -352,7 +353,4 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(ResultListContainer)
+export default connect(mapState, mapDispatch)(ResultListContainer)

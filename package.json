@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "1.5.3",
+    "version": "2.0.0",
     "homepage": "https://worldbrain.io",
     "license": "MIT",
     "repository": {
@@ -39,10 +39,7 @@
         }
     },
     "dependencies": {
-        "@worldbrain/memex-common": "git+https://github.com/WorldBrain/memex-common.git",
-        "@worldbrain/memex-storage": "git+https://github.com/WorldBrain/memex-storage.git",
-        "@worldbrain/memex-url-utils": "git+https://github.com/WorldBrain/memex-url-utils.git",
-        "@worldbrain/storex-sync": "^0.1.1",
+        "@types/socket.io-client": "^1.4.32",
         "babel-polyfill": "^6.26.0",
         "blob-util": "^1.2.1",
         "cheerio": "^1.0.0-rc.2",
@@ -67,7 +64,7 @@
         "lodash": "^4.17.4",
         "moment": "^2.18.1",
         "moment-timezone": "^0.5.14",
-        "mousetrap": "^1.6.2",
+        "mousetrap": "^1.6.5",
         "normalize-url": "^4.3.0",
         "object-path": "^0.11.4",
         "openpgp": "^4.6.2",
@@ -105,6 +102,7 @@
         "scroll-to-element": "^2.0.0",
         "simple-peer": "^9.5.0",
         "simple-signalling": "^0.2.1",
+        "socket.io-client": "^2.3.0",
         "strict-uri-encode": "^2.0.0",
         "string.prototype.matchall": "^3.0.1",
         "styled-components": "^4.4.1",
@@ -137,8 +135,6 @@
         "@types/sinon": "^7.0.3",
         "@types/url-regex": "^4.1.0",
         "@types/whatwg-url": "^6.4.0",
-        "@worldbrain/storex-backend-firestore": "^0.1.1",
-        "@worldbrain/storex-backend-typeorm": "git+https://github.com/WorldBrain/storex-backend-typeorm.git",
         "atob": "^2.1.2",
         "autoprefixer": "^7.1.1",
         "babel-core": "^6.26.3",

@@ -1,6 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './provider-list.css'
+import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
+
+const settingsStyle = require('src/options/settings/components/settings.css')
 
 export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
     return (
@@ -14,13 +17,13 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             onChange={() => onChange('local')}
                         />
                         <div className={Styles.textBlock}>
-                            <p className={Styles.title}>
-                                Backup locally or to any cloud provider
-                            </p>
-                            <p className={Styles.description}>
-                                Backup your data to your hard drive, or to any
-                                cloud provider with a syncing folder on your
-                                computer (e.g. Dropbox, Spideroak, GDrive){' '}
+                            <div className={Styles.providerTitle}>
+                                Any cloud provider via local hard drive
+                            </div>
+                            <p className={settingsStyle.infoText}>
+                                Use cloud providers that have a syncing folder
+                                on your computer (e.g. Dropbox, Spideroak,
+                                GDrive){' '}
                                 <a
                                     className={Styles.link}
                                     target="_blank"
@@ -55,7 +58,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                         </div>
                     </div>
                 </label>
-                <br />
+                <WhiteSpacer20 />
                 <label className={Styles.label}>
                     <div className={Styles.option}>
                         <input
@@ -64,14 +67,16 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             onChange={() => onChange('google-drive')}
                         />
                         <div className={Styles.textBlock}>
-                            <span className={Styles.title}>Google Drive</span>
-                            <span>
-                                <img
-                                    className={Styles.logo}
-                                    src={'img/google-drive.png'}
-                                />
-                            </span>
-                            <p className={Styles.description}>
+                            <div className={Styles.providerTitle}>
+                                Google Drive
+                                <span>
+                                    <img
+                                        className={Styles.logo}
+                                        src={'img/google-drive.png'}
+                                    />
+                                </span>
+                            </div>
+                            <p className={settingsStyle.infoText}>
                                 Make sure you are trying to backup your data to
                                 the same Google Account than the one logged into
                                 your browser profile.

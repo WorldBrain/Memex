@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
+import onClickOutside from 'react-onclickoutside'
 
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -8,14 +9,25 @@ import {
     selectors as commentBoxSelectors,
 } from '../../comment-box'
 import Sidebar from './sidebar'
-import { Annotation, Page } from '../types'
-import RootState, { MapDispatchToProps } from '../../types'
-import AnnotationsManager from '../../annotations-manager'
+import { Page } from '../types'
+import RootState, {
+    MapDispatchToProps,
+    SidebarContextInterface,
+} from '../../types'
+import AnnotationsManager from '../../../annotations/annotations-manager'
 import {
     acts as searchBarActs,
     selectors as searchBar,
 } from 'src/overview/search-bar'
 import { actions as filterActs } from 'src/search-filters'
+import {
+    deleteAnnotation,
+    editAnnotation,
+    fetchAnnotationsForPageUrl,
+    fetchMoreAnnotationsForPageUrl,
+} from 'src/annotations/actions'
+import { Annotation } from 'src/annotations/types'
+import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 
 interface StateProps {
     isOpen: boolean
@@ -49,10 +61,10 @@ interface DispatchProps {
     onQueryChange: (searchValue: string) => void
     handlePageTypeClick: React.MouseEventHandler<HTMLButtonElement>
     clearAllFilters: () => void
-    resetPage: React.MouseEventHandler<HTMLButtonElement>
+    resetPage: React.MouseEventHandler<HTMLDivElement>
 }
 
-interface OwnProps {
+interface ComponentProps {
     env: 'inpage' | 'overview'
     annotationsManager: AnnotationsManager
     sortAnnotationsByPosition?: (annotations: Annotation[]) => Annotation[]
@@ -64,6 +76,8 @@ interface OwnProps {
     /** Optional callback function that gets called when the mouse leaves the annotation box area. */
     handleAnnotationBoxMouseLeave?: () => void
 }
+
+type OwnProps = ComponentProps & SidebarContextInterface
 
 type Props = StateProps & DispatchProps & OwnProps
 
@@ -117,6 +131,14 @@ class SidebarContainer extends React.Component<Props> {
         }
     }
 
+    handleClickOutside = (e: Event) => {
+        e.stopPropagation()
+
+        if (this.props.env === 'overview') {
+            this.props.closeSidebar()
+        }
+    }
+
     render() {
         return (
             <Sidebar
@@ -164,57 +186,65 @@ const mapStateToProps: MapStateToProps<
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     dispatch,
     props,
-) => ({
-    onInit: () => dispatch(actions.initState()),
-    setAnnotationsManager: annotationsManager =>
-        dispatch(actions.setAnnotationsManager(annotationsManager)),
-    closeSidebar: () => {
-        // This state is not used in the content script version of sidebar
-        //  statically importing causes big issues
-        if (props.env === 'overview') {
-            const {
-                resetActiveSidebarIndex,
-            } = require('src/overview/results/actions')
-            dispatch(resetActiveSidebarIndex())
-        }
+) => {
+    return {
+        onInit: () => dispatch(actions.initState()),
+        setAnnotationsManager: annotationsManager =>
+            dispatch(actions.setAnnotationsManager(annotationsManager)),
+        closeSidebar: () => {
+            // This state is not used in the content script version of sidebar
+            //  statically importing causes big issues
+            if (props.env === 'overview') {
+                const {
+                    resetActiveSidebarIndex,
+                } = require('src/overview/results/actions')
+                dispatch(resetActiveSidebarIndex())
+            }
 
-        dispatch(actions.closeSidebar())
-    },
-    handleAddCommentBtnClick: () =>
-        dispatch(commentBoxActions.setShowCommentBox(true)),
-    setHoverAnnotationUrl: url => dispatch(actions.setHoverAnnotationUrl(url)),
-    handleEditAnnotation: (url, comment, tags) =>
-        dispatch(actions.editAnnotation(url, comment, tags)),
-    handleDeleteAnnotation: url => dispatch(actions.deleteAnnotation(url)),
-    handleScrollPagination: (isSocialSearch?: boolean) =>
-        dispatch(actions.fetchMoreAnnotations(isSocialSearch)),
-    handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
-    onQueryChange: searchValue =>
-        dispatch(searchBarActs.setQueryTagsDomains(searchValue, false)),
-    onQueryKeyDown: searchValue =>
-        dispatch(searchBarActs.setQueryTagsDomains(searchValue, true)),
-    handlePageTypeClick: e => {
-        e.preventDefault()
-        dispatch(actions.togglePageType())
-    },
-    clearAllFilters: () => {
-        dispatch(filterActs.resetFilters())
-        dispatch(searchBarActs.clearFilters())
-    },
-    resetPage: e => {
-        e.preventDefault()
-        dispatch(actions.setPageType('all'))
-        dispatch(
-            actions.setPage({
-                url: null,
-                title: null,
-            }),
-        )
-        dispatch(actions.fetchAnnotations())
-    },
-})
+            dispatch(actions.closeSidebar())
+        },
+        handleAddCommentBtnClick: () =>
+            dispatch(commentBoxActions.setShowCommentBox(true)),
+        setHoverAnnotationUrl: url =>
+            dispatch(actions.setHoverAnnotationUrl(url)),
+        handleEditAnnotation: (url, comment, tags) =>
+            dispatch(editAnnotation(url, comment, tags)),
+        handleDeleteAnnotation: url => {
+            props.highlighter.removeAnnotationHighlights(url)
+            dispatch(deleteAnnotation(url))
+        },
+        handleScrollPagination: (isSocialSearch?: boolean) =>
+            dispatch(fetchMoreAnnotationsForPageUrl(isSocialSearch)),
+        handleBookmarkToggle: url => dispatch(actions.toggleBookmark(url)),
+        onQueryChange: searchValue =>
+            dispatch(searchBarActs.setQueryTagsDomains(searchValue, false)),
+        onQueryKeyDown: searchValue =>
+            dispatch(searchBarActs.setQueryTagsDomains(searchValue, true)),
+        handlePageTypeClick: e => {
+            e.preventDefault()
+            dispatch(actions.togglePageType())
+        },
+        clearAllFilters: () => {
+            dispatch(filterActs.resetFilters())
+            dispatch(searchBarActs.clearFilters())
+        },
+        resetPage: e => {
+            e.preventDefault()
+            dispatch(actions.setPageType('all'))
+            dispatch(
+                actions.setPage({
+                    url: null,
+                    title: null,
+                }),
+            )
+            dispatch(fetchAnnotationsForPageUrl())
+        },
+    }
+}
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(SidebarContainer)
+export default withSidebarContext(
+    connect(
+        mapStateToProps,
+        mapDispatchToProps,
+    )(onClickOutside(SidebarContainer)),
+)

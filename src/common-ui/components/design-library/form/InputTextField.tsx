@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 export const InputTextField = styled.input`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
     font-size: 14px;
     font-weight: 400;
     text-align: left;

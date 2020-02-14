@@ -7,7 +7,7 @@ import * as actions from './actions'
  * @property {boolean} showTagFilter Show Filter tag dropdown
  * @property {boolean} showDomainFilter Show domain dropdown in sidebar
  * @property {boolean} showFilterTypes Show filter types in sidebar
- * @property {boolean} showFilters REMOVE
+ * @property {boolean} showFilterBar REMOVE
  * @property {boolean} onlyBookmarks show only bookmark filters
  * @property {string} popup REMOVE
  * @property {tags} string[] Tags to be filtered
@@ -24,8 +24,8 @@ const defaultState = {
     showDomainFilter: false,
     showUserFilter: false,
     showFilterTypes: false,
-    showFilters: false,
     onlyBookmarks: false,
+    isMobileListFiltered: false,
     popup: '', // Blank is no popup shown, 'tag' is tags filter, 'domain' is domains filter
     tags: [],
     tagsExc: [],
@@ -116,7 +116,7 @@ const addFilter = filterKey => (state, value) => {
     return {
         ...state,
         [filterKey]: [...state[filterKey], value],
-        showFilters: true,
+        showFilterBar: true,
     }
 }
 
@@ -125,6 +125,7 @@ const delFilter = filterKey => (state, value) => {
         return {
             ...state,
             [filterKey]: '',
+            isMobileListFiltered: false,
         }
     }
 
@@ -140,7 +141,7 @@ const delFilter = filterKey => (state, value) => {
             ...state[filterKey].slice(0, removalIndex),
             ...state[filterKey].slice(removalIndex + 1),
         ],
-        showFilters: true,
+        showFilterBar: true,
     }
 }
 
@@ -164,7 +165,7 @@ const toggleFilter = filterKey => (state, value) => {
             ...state[filterKey].slice(0, removalIndex),
             ...state[filterKey].slice(removalIndex + 1),
         ],
-        showFilters: true,
+        showFilterBar: true,
     }
 }
 
@@ -184,7 +185,7 @@ const setFilters = filterKey => (state, filters) => {
         [filterKey]: decideFilters(filterKey, filters),
     }
 
-    newState.showFilters =
+    newState.showFilterBar =
         newState.tags.length > 0 ||
         newState.tagsExc.length > 0 ||
         newState.domainsExc.length > 0 ||
@@ -226,7 +227,7 @@ const setSuggestedHashtags = (state, hashtags) => ({
 const resetFilters = state => ({
     ...defaultState,
     lists: state.lists,
-    showFilters: state.showFilters,
+    showFilterBar: state.showFilterBar,
 })
 
 const resetFilterPopups = state => ({
@@ -236,6 +237,24 @@ const resetFilterPopups = state => ({
     showFilterTypes: false,
     showDatesFilter: false,
 })
+
+const toggleListFilter = (state, { id, isMobileListFiltered }) => {
+    const removalIndex = state.lists.indexOf(id)
+
+    if (removalIndex === -1) {
+        return {
+            ...state,
+            lists: [id],
+            isMobileListFiltered,
+        }
+    }
+
+    return {
+        ...state,
+        lists: '',
+        isMobileListFiltered: false,
+    }
+}
 
 export default createReducer(
     {
@@ -256,7 +275,7 @@ export default createReducer(
         [actions.toggleTagFilter]: toggleFilter('tags'),
         [actions.addListFilter]: addFilter('lists'),
         [actions.delListFilter]: delFilter('lists'),
-        [actions.toggleListFilter]: toggleFilter('lists'),
+        [actions.toggleListFilter]: toggleListFilter,
         [actions.addExcDomainFilter]: addFilter('domainsExc'),
         [actions.delExcDomainFilter]: delFilter('domainsExc'),
         [actions.addIncDomainFilter]: addFilter('domainsInc'),
@@ -287,13 +306,17 @@ export default createReducer(
         [actions.setSuggestedHashtags]: setSuggestedHashtags,
         [actions.showFilter]: state => ({
             ...state,
-            showFilters: !state.showFilters,
+            showFilterBar: !state.showFilterBar,
         }),
         [actions.toggleWebsitesFilter]: toggleWebsitesFilter,
         [actions.toggleHighlightsFilter]: toggleHighlightsFilter,
         [actions.toggleNotesFilter]: toggleNotesFilter,
         [actions.setAnnotationsFilter]: setAnnotationsFilter,
         [actions.clearFilterTypes]: clearFilterTypes,
+        [actions.setMobileListFiltered]: (state, isMobileListFiltered) => ({
+            ...state,
+            isMobileListFiltered,
+        }),
     },
     defaultState,
 )

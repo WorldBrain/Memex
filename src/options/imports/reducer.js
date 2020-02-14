@@ -23,8 +23,7 @@ const defaultState = {
     success: defaultStats, // Success counts for completed import items
     totals: defaultStats, // Static state to use to derive remaining counts from
     importStatus: STATUS.LOADING,
-    loadingMsg:
-        'Analysing your browsing history & bookmarks for importing. This can take a few moments.',
+    loadingMsg: 'Calculating size of history & bookmarks',
     downloadDataFilter: FILTERS.ALL,
     concurrency: DEF_CONCURRENCY,
     isAdvEnabled: false,
@@ -98,7 +97,7 @@ const prepareImportReducer = state => {
     return {
         ...state,
         importStatus: STATUS.LOADING,
-        loadingMsg: 'Recalculating Download Size.',
+        loadingMsg: 'Calculating size of history & bookmarks',
     }
 }
 
@@ -106,7 +105,7 @@ const cancelImportReducer = state => ({
     ...state,
     importStatus: STATUS.LOADING,
     blobUrl: null,
-    loadingMsg: 'Please wait as import progress gets recorded.',
+    loadingMsg: 'Import progress gets saved',
 })
 
 const initEstimateCounts = (state, { remaining, completed }) => ({
@@ -174,7 +173,7 @@ export default createReducer(
             ...state,
             processErrors,
             importStatus: STATUS.LOADING,
-            loadingMsg: 'Preparing import.',
+            loadingMsg: 'Preparing Import.',
         }),
         [actions.setBlobUrl]: (state, blobUrl) => ({
             ...state,

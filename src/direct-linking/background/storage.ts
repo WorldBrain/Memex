@@ -18,6 +18,7 @@ import { AnnotationsListPlugin } from 'src/search/background/annots-list'
 import { AnnotSearchParams } from 'src/search/background/types'
 import { Annotation, AnnotListEntry } from '../types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
+import PageStorage from 'src/page-indexing/background/storage'
 
 // TODO: Move to src/annotations in the future
 export default class AnnotationStorage extends StorageModule {
@@ -33,17 +34,20 @@ export default class AnnotationStorage extends StorageModule {
     private db: Storex
     private searchIndex: SearchIndex
 
-    constructor(options: {
-        storageManager: Storex
-        browserStorageArea: Storage.StorageArea
-        annotationsColl?: string
-        pagesColl?: string
-        tagsColl?: string
-        bookmarksColl?: string
-        listsColl?: string
-        listEntriesColl?: string
-        searchIndex: SearchIndex
-    }) {
+    constructor(
+        private options: {
+            storageManager: Storex
+            browserStorageArea: Storage.StorageArea
+            annotationsColl?: string
+            pageStorage: PageStorage
+            pagesColl?: string
+            tagsColl?: string
+            bookmarksColl?: string
+            listsColl?: string
+            listEntriesColl?: string
+            searchIndex: SearchIndex
+        },
+    ) {
         super({ storageManager: options.storageManager })
 
         this.db = options.storageManager
@@ -243,15 +247,9 @@ export default class AnnotationStorage extends StorageModule {
             stubOnly: !indexingPrefs.shouldIndexLinks,
         })
 
-        await page.loadRels()
-
-        // Add new visit if none, else page won't appear in results
-        // TODO: remove once search changes to incorporate assoc. page data apart from bookmarks/visits
-        if (!page.visits.length) {
-            page.addVisit()
-        }
-
-        await page.save()
+        await this.options.pageStorage.createVisitsIfNeeded(page.url, [
+            Date.now(),
+        ])
     }
 
     async getAnnotationByPk(url: string): Promise<Annotation> {

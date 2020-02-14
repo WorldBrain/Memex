@@ -5,7 +5,7 @@ import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
 import { TwitterObserver, addPostButton } from '../observers'
 import SaveToMemexContainer from './components'
 import configureStore from '../store'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 
 export default function initTwitterIntegration({
     annotationsManager,

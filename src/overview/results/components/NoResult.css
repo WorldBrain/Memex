@@ -2,21 +2,21 @@
 @value color4, color6 from colors;
 
 .title {
-    color: color4;
-    font-size: 30px;
-    font-weight: 800;
+    color: #3a2f45;
+    font-size: 25px;
+    font-weight: 700;
     padding-top: 30px;
     margin-bottom: 20px;
 }
 
 .subtitle {
-    color: color6;
+    color: #3a2f45;
     font-size: 18px;
-    font-weight: 400;
+    font-weight: 300;
 }
 
 .subsubtitle {
-    color: color4;
+    color: #3a2f45;
     font-size: 15px;
     margin-right: 10px;
     font-weight: 300;

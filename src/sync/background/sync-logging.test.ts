@@ -1,9 +1,9 @@
-import { filterBlobsFromSyncLog } from './sync-logging'
+import { filterSyncLog } from './sync-logging'
 
 describe('Sync logging preprocessor', () => {
     it('should filter out screenshots from createObject operations', async () => {
         expect(
-            await filterBlobsFromSyncLog({
+            await filterSyncLog({
                 operation: [
                     'createObject',
                     'pages',
@@ -11,40 +11,120 @@ describe('Sync logging preprocessor', () => {
                 ],
             }),
         ).toEqual({
-            operation: ['createObject', 'pages', { url: 'http://foo.com' }],
-        })
-    })
-
-    it('should filter out screenshots from updateObjects operations containing other updates', async () => {
-        expect(
-            await filterBlobsFromSyncLog({
-                operation: [
-                    'updateObjects',
-                    'pages',
-                    { url: 'http://foo.com' },
-                    { fullTitle: 'blargh!', screenshot: 'boohoo' },
-                ],
-            }),
-        ).toEqual({
             operation: [
-                'updateObjects',
+                'createObject',
+                'pages',
+                { url: 'http://foo.com', screenshot: 'boohoo' },
+            ],
+            loggedOperation: [
+                'createObject',
                 'pages',
                 { url: 'http://foo.com' },
-                { fullTitle: 'blargh!' },
             ],
         })
     })
 
-    it('should filter out screenshots from updateObjects operations containing no other updates', async () => {
+    it('should filter out terms fields from createObject operations', async () => {
         expect(
-            await filterBlobsFromSyncLog({
+            await filterSyncLog({
                 operation: [
-                    'updateObjects',
+                    'createObject',
                     'pages',
-                    { url: 'http://foo.com' },
-                    { screenshot: 'boohoo' },
+                    {
+                        url: 'http://foo.com',
+                        text: 'one two three',
+                        terms: ['one', 'two', 'three'],
+                    },
                 ],
             }),
-        ).toEqual({ operation: null })
+        ).toEqual({
+            operation: [
+                'createObject',
+                'pages',
+                {
+                    url: 'http://foo.com',
+                    text: 'one two three',
+                    terms: ['one', 'two', 'three'],
+                },
+            ],
+            loggedOperation: [
+                'createObject',
+                'pages',
+                { url: 'http://foo.com', text: 'one two three' },
+            ],
+        })
     })
+
+    for (const operationType of ['updateObject', 'updateObjects']) {
+        it(`should filter out screenshots from ${operationType} operations containing other updates`, async () => {
+            expect(
+                await filterSyncLog({
+                    operation: [
+                        operationType,
+                        'pages',
+                        { url: 'http://foo.com' },
+                        { fullTitle: 'blargh!', screenshot: 'boohoo' },
+                    ],
+                }),
+            ).toEqual({
+                operation: [
+                    operationType,
+                    'pages',
+                    { url: 'http://foo.com' },
+                    { fullTitle: 'blargh!', screenshot: 'boohoo' },
+                ],
+                loggedOperation: [
+                    operationType,
+                    'pages',
+                    { url: 'http://foo.com' },
+                    { fullTitle: 'blargh!' },
+                ],
+            })
+        })
+
+        it(`should filter out term fields from ${operationType} operations containing other updates`, async () => {
+            expect(
+                await filterSyncLog({
+                    operation: [
+                        operationType,
+                        'pages',
+                        { url: 'http://foo.com' },
+                        {
+                            fullTitle: 'one two three',
+                            titleTerms: ['one', 'two', 'three'],
+                        },
+                    ],
+                }),
+            ).toEqual({
+                operation: [
+                    operationType,
+                    'pages',
+                    { url: 'http://foo.com' },
+                    {
+                        fullTitle: 'one two three',
+                        titleTerms: ['one', 'two', 'three'],
+                    },
+                ],
+                loggedOperation: [
+                    operationType,
+                    'pages',
+                    { url: 'http://foo.com' },
+                    { fullTitle: 'one two three' },
+                ],
+            })
+        })
+
+        it(`should filter out screenshots from ${operationType} operations containing no other updates`, async () => {
+            expect(
+                await filterSyncLog({
+                    operation: [
+                        operationType,
+                        'pages',
+                        { url: 'http://foo.com' },
+                        { screenshot: 'boohoo' },
+                    ],
+                }),
+            ).toEqual({ operation: null })
+        })
+    }
 })

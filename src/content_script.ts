@@ -1,0 +1,45 @@
+import 'babel-polyfill'
+import { RemoteFunctionRegistry } from './util/webextensionRPC'
+import 'src/activity-logger/content_script'
+import 'src/page-analysis/content_script'
+import 'src/search-injection/content_script'
+import AnnotationsManager from 'src/annotations/annotations-manager'
+import initContentTooltip from 'src/content-tooltip/content_script'
+import 'src/direct-linking/content_script'
+import initRibbonAndSidebar from './sidebar-overlay/content_script'
+import 'src/backup-restore/content_script'
+import ToolbarNotifications from 'src/toolbar-notification/content_script'
+import initSocialIntegration from 'src/social-integration/content_script'
+import configureStore from './sidebar-overlay/store'
+import { initKeyboardShortcuts } from 'src/content_script_keyboard_shortcuts'
+import { fetchAnnotationsForPageUrl } from 'src/annotations/actions'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
+import { initBasicStore } from 'src/popup/actions'
+
+const remoteFunctionRegistry = new RemoteFunctionRegistry()
+const toolbarNotifications = new ToolbarNotifications()
+const annotationsManager = new AnnotationsManager()
+const rootStore = configureStore()
+
+toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
+window['toolbarNotifications'] = toolbarNotifications
+
+initStore(rootStore)
+initContentTooltip({ toolbarNotifications, store: rootStore })
+initRibbonAndSidebar({
+    annotationsManager,
+    toolbarNotifications,
+    store: rootStore,
+})
+initSocialIntegration({ annotationsManager })
+initKeyboardShortcuts({ store: rootStore })
+initHighlights(rootStore)
+
+async function initStore(store) {
+    store.dispatch(initBasicStore() as any)
+}
+
+async function initHighlights(store) {
+    await store.dispatch(sidebarActs.setAnnotationsManager(annotationsManager))
+    rootStore.dispatch(fetchAnnotationsForPageUrl(false, true) as any)
+}

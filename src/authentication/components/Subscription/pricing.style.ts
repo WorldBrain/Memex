@@ -5,39 +5,20 @@ import {
 } from 'src/common-ui/components/design-library/colors'
 
 const PricingTable = styled.div`
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
-    padding: 10px 13px;
-    margin-bottom: 20px;
+    font-family: 
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-right: 20px;
-
-    border-width: 3px;
-    border-style: solid;
-    border-color: rgb(92, 217, 166);
+    justify-content: center;
     color: rgb(84, 73, 96);
+    width: 200px;
+    margin: 10px;
 
-    &.free-plan {
-        border: 3px solid ${colorPrimary};
-        margin-right: 15px;
-        h2 {
-            color: ${colorPrimary};
-        }
-        @media (max-width: 767px) {
-            margin-right: 0;
-        }
-    }
-
-    &.pro-plan {
-        border: 3px solid ${colorSecondary};
-        margin-left: 15px;
-        h2 {
-            color: ${colorSecondary};
-        }
-        @media (max-width: 767px) {
-            margin-left: 0;
-        }
+    &:hover {
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
     }
 
     @media (max-width: 767px) {
@@ -64,33 +45,61 @@ const DeviceSelection = styled.div`
 
 const PricingPlanTitle = styled.h1`
     box-sizing: border-box;
-    margin-bottom: 30px;
-    margin-top: 30px;
-    font-size: 35px;
-    color: black;
-    display: block;
     font-weight: 700;
+    font-size: 30px;
+    color: #3a2f45;
+    margin: 0 0 30px;
     text-align: center;
-    letter-spacing: 0.1em;
+`
+
+const PricingPlanItem = styled.div`
+    box-sizing: border-box;
+    font-weight: 300;
+    font-size: 18px;
+    margin: 30px 0;
+    text-align: center;
+`
+const LoginTitle = styled.div`
+    box-sizing: border-box;
+    font-weight: 300;
+    font-size: 18px;
+    margin: 30px 0 10px;
+    text-align: center;
+`
+const LoginButton = styled.div`
+    box-sizing: border-box;
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 20px;
+    text-align: center;
+    cursor: pointer;
 `
 
 const PricingHead = styled.div`
     display: flex;
+    justify-content: center;
+    color: #3a2f45;
+    font-weight: 700;
+`
+
+const WhiteSpacer30 = styled.div `
+    height: 30px;
 `
 
 const PricingHeadTitle = styled.h2`
     font-size: 1.5rem;
-    font-weight: 500;
-    color: ${colorPrimary};
+    font-weight: 700;
+    color: #3a2f45;
     text-align: center;
 `
 
 const PricingPrice = styled.div`
     margin-bottom: 20px;
     display: flex;
-    font-size: 2.5rem;
-    color: rgb(58, 47, 69);
+    font-size: 25px;
+    color: #5cd9a6;
     text-align: center;
+    justify-content: center;
 `
 
 const PricingButton = styled.div`
@@ -228,8 +237,12 @@ const PricingButtonWrapper = styled.div`
 
 export {
     PricingPlanTitle,
+    PricingPlanItem,
+    LoginTitle, 
+    LoginButton,
     PricingHead,
     PricingPrice,
+    WhiteSpacer30,
     PricingButton,
     PricingList,
     PricingHeadTitle,

@@ -16,6 +16,7 @@ export const initState: (url: string) => Thunk = url => async dispatch => {
     try {
         const listsAssocWithPage = await fetchSocialPostLists({ url })
         const lists = await fetchAllListsRPC({
+            skipMobileList: true,
             excludeIds: listsAssocWithPage.map(({ id }) => id),
             limit: 20,
         })

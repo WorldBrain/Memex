@@ -4,13 +4,10 @@ import {
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
-import {
-    TypographyHeadingPage,
-    TypographyInputTitle,
-} from 'src/common-ui/components/design-library/typography'
-import { InputTextField } from 'src/common-ui/components/design-library/form/InputTextField'
+import { TypographyHeadingPage } from 'src/common-ui/components/design-library/typography'
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
+import Link from 'src/common-ui/components/link'
 
 interface Props {
     initiallyShowSubscriptionModal?: boolean
@@ -40,6 +37,7 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
     render() {
         const user = this.props.currentUser
         const features = this.props.authorizedFeatures
+        const url = 'https://getmemex.com/subscriptions'
         return (
             <FullPage>
                 <TypographyHeadingPage>My Account</TypographyHeadingPage>
@@ -48,18 +46,8 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
                 )}
                 {user != null && (
                     <div>
-                        <TypographyInputTitle>
-                            {' '}
-                            Email Address{' '}
-                        </TypographyInputTitle>
-                        <InputTextField
-                            type={'text'}
-                            defaultValue={user.email}
-                            readonly
-                        />
-
-                        <PrimaryButton onClick={this.showSubscriptionModal}>
-                            Manage Subscriptions
+                        <PrimaryButton>
+                            <Link url={url} text={'Manage Subscriptions'} />
                         </PrimaryButton>
 
                         <input

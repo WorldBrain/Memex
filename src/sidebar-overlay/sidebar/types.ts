@@ -4,29 +4,12 @@
  */
 
 import { State as CommentBoxState } from '../comment-box'
-import AnnotationsManager from '../annotations-manager'
-import { Anchor } from 'src/direct-linking/content_script/interactions'
+import AnnotationsManager from '../../annotations/annotations-manager'
+import { Annotation } from 'src/annotations/types'
 
 export interface Page {
     url: string | null
     title: string | null
-}
-
-export interface Annotation {
-    /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
-    url: string
-    /** URL for display. */
-    pageUrl: string
-    /** Defined for annotations with highlighted text. */
-    body?: string
-    /** Defined for annotations with a user comment. */
-    comment?: string
-    /** Selector required for highlighting annotations. */
-    selector: Anchor
-    createdWhen: number
-    lastEdited: number
-    tags: string[]
-    hasBookmark?: boolean
 }
 
 export default interface State {

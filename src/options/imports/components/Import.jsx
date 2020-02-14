@@ -5,6 +5,7 @@ import AdvSettings from './AdvSettingsContainer'
 import { LoadingIndicator } from 'src/common-ui/components'
 import localStyles from './Import.css'
 import { IMPORT_TYPE } from '../constants'
+import settingsStyle from 'src/options/settings/components/settings.css'
 
 const Warning = ({ children }) => (
     <div className={localStyles.warning}>
@@ -22,57 +23,66 @@ const Import = ({
     children,
     allowTypes,
 }) => (
-    <form>
-        {shouldRenderEsts && (
-            <div>
-                <div className={localStyles.stepNumber}>
-                    Import urls from other services{' '}
+    <div>
+        <div className={settingsStyle.section}>
+            {shouldRenderEsts && (
+                <div>
+                    <div className={settingsStyle.sectionTitle}>
+                        Import urls from other services
+                    </div>
+                    <div className={localStyles.stepText}>
+                        <Warning>
+                            Re-downloading urls may slow down your web browsing.
+                            <br />
+                            With more than 10.000 links it is suggested to let
+                            this run overnight.
+                        </Warning>
+                    </div>
                 </div>
-                <div className={localStyles.stepText}>
-                    <Warning>
-                        Re-downloading urls may slow down your web browsing.
-                        <br />
-                        With more than 10.000 links it is suggested to let this
-                        run overnight.
-                    </Warning>
+            )}
+            {shouldRenderProgress && (
+                <div>
+                    <div className={settingsStyle.sectionTitle}>
+                        Import Progress
+                    </div>
+                    <div className={localStyles.stepText}>
+                        <Warning>
+                            The import may freeze because of a browser setting.
+                            <br />
+                            No need to worry. Go to{' '}
+                            <a
+                                className={localStyles.link}
+                                target="_blank"
+                                href="http://memex.link/2Jw-R3BQh/worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway"
+                            >
+                                <b>worldbrain.io/import_bug</b>
+                            </a>{' '}
+                            to fix it.
+                        </Warning>
+                    </div>
                 </div>
-            </div>
-        )}
-        {shouldRenderProgress && (
-            <div>
-                <div className={localStyles.stepNumber}>Import Progress </div>
-                <div className={localStyles.warningContainer}>
-                    <Warning>
-                        The import may freeze because of a browser setting.
-                        <br />
-                        No need to worry. Go to{' '}
-                        <a
-                            className={localStyles.link}
-                            target="_blank"
-                            href="http://memex.link/2Jw-R3BQh/worldbrain.helprace.com/i49-prevent-your-imports-from-stopping-midway"
-                        >
-                            <b>worldbrain.io/import_bug</b>
-                        </a>{' '}
-                        to fix it.
-                    </Warning>
+            )}
+            {isStopped && (
+                <div className={settingsStyle.sectionTitle}>Import Report</div>
+            )}
+            <div className={localStyles.mainContainer}>
+                <div className={localStyles.importTableContainer}>
+                    {children}
                 </div>
-            </div>
-        )}
-        {isStopped && (
-            <div className={localStyles.stepNumber}>Status Report </div>
-        )}
-        <div className={localStyles.mainContainer}>
-            <div className={localStyles.importTableContainer}>{children}</div>
-            {isLoading &&
-                !allowTypes[IMPORT_TYPE.OTHERS].length && (
+                {isLoading && !allowTypes[IMPORT_TYPE.OTHERS].length && (
                     <div className={localStyles.loadingBlocker}>
                         <p className={localStyles.loadingMsg}>{loadingMsg}</p>
                         <LoadingIndicator />
                     </div>
                 )}
+            </div>
         </div>
-        {shouldRenderEsts && <AdvSettings />}
-    </form>
+        {shouldRenderEsts && (
+            <div className={settingsStyle.section}>
+                <AdvSettings />
+            </div>
+        )}
+    </div>
 )
 
 Warning.propTypes = {

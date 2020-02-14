@@ -9,14 +9,7 @@ export interface Props {
 
 class LoadingIndicator extends PureComponent<Props> {
     render() {
-        return (
-            <div className={styles.ldsEllipsis}>
-                <div />
-                <div />
-                <div />
-                <div />
-            </div>
-        )
+        return <div className={styles.loader} />
     }
 }
 

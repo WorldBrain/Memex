@@ -22,12 +22,13 @@ import {
 } from 'src/popup/bookmark-button'
 import * as popup from 'src/popup/selectors'
 import { PageList } from 'src/custom-lists/background/types'
-import AnnotationsManager from 'src/sidebar-overlay/annotations-manager'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar/'
 
 interface StateProps {
     isExpanded: boolean
     isTooltipEnabled: boolean
+    areHighlightsEnabled: boolean
     isPaused: boolean
     isBookmarked: boolean
     tabId: number
@@ -47,6 +48,7 @@ interface DispatchProps {
     setAnnotationsManager: (annotationsManager: AnnotationsManager) => void
     handleRibbonToggle: () => void
     handleTooltipToggle: () => void
+    handleHighlightsToggle: () => void
     handlePauseToggle: () => void
     handleBookmarkToggle: () => void
     onTagAdd: (tag: string) => void
@@ -80,7 +82,6 @@ type Props = StateProps & DispatchProps & OwnProps
 
 class RibbonContainer extends Component<Props> {
     componentDidMount() {
-        this.props.onInit()
         this.props.setAnnotationsManager(this.props.annotationsManager)
     }
 
@@ -140,6 +141,7 @@ const mapStateToProps: MapStateToProps<
 > = state => ({
     isExpanded: selectors.isExpanded(state),
     isTooltipEnabled: selectors.isTooltipEnabled(state),
+    areHighlightsEnabled: selectors.areHighlightsEnabled(state),
     showCollectionsPicker: selectors.showCollectionsPicker(state),
     showCommentBox: selectors.showCommentBox(state),
     showSearchBox: selectors.showSearchBox(state),
@@ -164,6 +166,7 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     handleRibbonToggle: () => dispatch(actions.toggleRibbon()),
     handleTooltipToggle: () => dispatch(actions.toggleTooltip()),
+    handleHighlightsToggle: () => dispatch(actions.toggleHighlights()),
     handlePauseToggle: () => dispatch(pauseActs.togglePaused()),
     handleBookmarkToggle: () => dispatch(bookmarkActs.toggleBookmark()),
     onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
@@ -183,7 +186,4 @@ const mapDispatchToProps: MapDispatchToProps<
         dispatch(actions.setShowCollsPicker(value)),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(RibbonContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(RibbonContainer)

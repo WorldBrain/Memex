@@ -24,3 +24,12 @@
 .link {
     color: color3;
 }
+
+.optOut {
+    display: flex;
+    align-items: center;
+
+    & > select {
+        margin-left: 10px;
+    }
+}

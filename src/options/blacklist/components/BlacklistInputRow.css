@@ -28,11 +28,11 @@
 .blacklistButton {
     composes: CTA from 'src/common-ui/elements.css';
     border: none;
-    font-size: 14px;
+    font-size: 15px;
     outline: none;
     cursor: pointer;
     width: max-content;
-    padding: 5px 10px;
+    padding: 5px 40px;
 
     &:disabled {
         opacity: 0.5;

@@ -6,8 +6,14 @@ import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import cx from 'classnames'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { browser } from 'webextension-polyfill-ts'
 
 const styles = require('./comment-box-form.css')
+
+const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
+const tagFull = browser.extension.getURL('/img/tag_full.svg')
+const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
+const heartFull = browser.extension.getURL('/img/star_full.svg')
 
 interface Props {
     env?: 'inpage' | 'overview'
@@ -15,8 +21,8 @@ interface Props {
     isCommentBookmarked: boolean
     handleCommentTextChange: (comment: string) => void
     saveComment: React.EventHandler<React.SyntheticEvent>
-    cancelComment: ClickHandler<HTMLButtonElement>
-    toggleBookmark: ClickHandler<HTMLButtonElement>
+    cancelComment: ClickHandler<HTMLDivElement>
+    toggleBookmark: ClickHandler<HTMLDivElement>
     isAnnotation: boolean
 }
 
@@ -29,9 +35,9 @@ interface State {
 class CommentBoxForm extends React.Component<Props, State> {
     /** Ref of the tag button element to focus on it when tabbing. */
     private tagBtnRef: HTMLElement
-    private saveBtnRef: HTMLButtonElement
-    private cancelBtnRef: HTMLButtonElement
-    private bmBtnRef: HTMLButtonElement
+    private saveBtnRef: HTMLDivElement
+    private cancelBtnRef: HTMLDivElement
+    private bmBtnRef: HTMLDivElement
 
     state: State = {
         isTagInputActive: false,
@@ -152,39 +158,32 @@ class CommentBoxForm extends React.Component<Props, State> {
                 {/* Save and Cancel buttons. */}
                 <div className={styles.footer}>
                     <div className={styles.interactions}>
-                        <button
-                            ref={this.setTagButtonRef}
-                            className={cx(styles.button, styles.tag)}
-                            title={'Add tags'}
-                        />
-                        <button
-                            ref={ref => (this.bmBtnRef = ref)}
-                            className={cx(styles.button, {
-                                [styles.bookmark]: this.props
-                                    .isCommentBookmarked,
-                                [styles.notBookmark]: !this.props
-                                    .isCommentBookmarked,
-                            })}
-                            title={
-                                !this.props.isCommentBookmarked
-                                    ? 'Bookmark'
-                                    : 'Remove bookmark'
+                        <div ref={this.setTagButtonRef} className={styles.interactionsImgContainer}>
+                            <img src={tagEmpty} className={cx(styles.button, styles.tag)}/>
+                        </div>
+                        <div ref={ref => (this.bmBtnRef = ref)} className={styles.interactionsImgContainer}>
+                            {this.props.isCommentBookmarked ? (
+                                <img src={heartFull} className={cx(styles.button, styles.bookmark)}/>
+                            ):(
+                                <img src={heartEmpty} className={cx(styles.button, styles.notbookmark)}/>
+                            )
                             }
-                        />
+                        </div>
                     </div>
                     <div className={styles.confirmButtons}>
-                        <button
+
+                        <div
                             ref={ref => (this.cancelBtnRef = ref)}
                             className={styles.cancelBtn}
                         >
                             Cancel
-                        </button>
-                        <button
+                        </div>
+                        <div
                             className={styles.saveBtn}
                             ref={ref => (this.saveBtnRef = ref)}
                         >
                             Save
-                        </button>
+                        </div>
                     </div>
                 </div>
                 <span

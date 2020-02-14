@@ -93,11 +93,13 @@ describe.skip('annots search plugin', () => {
             storageManager,
             socialBg: {} as any,
             browserAPIs: {} as any,
+            pageStorage: {} as any,
             searchIndex: {} as any,
         })
         customListsBg = new CustomListBg({
             storageManager,
             searchIndex: {} as any,
+            pageStorage: {} as any,
         })
 
         await storageManager.finishInitialization()

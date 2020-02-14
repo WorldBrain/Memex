@@ -19,7 +19,7 @@ export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
 
-export const initState: () => Thunk = () => async dispatch => {
+const getCurrentTab = async () => {
     let currentTab
     if (browser.tabs) {
         ;[currentTab] = await browser.tabs.query({
@@ -33,25 +33,58 @@ export const initState: () => Thunk = () => async dispatch => {
         }
     }
 
+    return currentTab
+}
+const setTabAndUrl: (id: number, url: string) => Thunk = (
+    id,
+    url,
+) => async dispatch => {
+    await dispatch(setTabId(id))
+    await dispatch(setUrl(url))
+}
+
+const setTabIsBookmarked: (
+    tabId: number,
+) => Thunk = tabId => async dispatch => {
+    const internalTab = await fetchInternalTabRPC(tabId)
+    await dispatch(bookmarkActs.setIsBookmarked(internalTab.isBookmarked))
+}
+
+// N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.
+export const initBasicStore: () => Thunk = () => async dispatch => {
+    const currentTab = await getCurrentTab()
+
     // If we can't get the tab data, then can't init action button states
     if (!currentTab || !currentTab.url) {
+        console.warn("initBasicStore - Couldn't get a currentTab url")
+        return false
+    }
+    await dispatch(setTabAndUrl(currentTab.id, currentTab.url))
+    await dispatch(setTabIsBookmarked(currentTab.id))
+}
+
+export const initState: () => Thunk = () => async dispatch => {
+    const currentTab = await getCurrentTab()
+
+    // If we can't get the tab data, then can't init action button states
+    if (!currentTab || !currentTab.url) {
+        console.warn("initState - Couldn't get a currentTab url")
         return
     }
 
-    dispatch(setTabId(currentTab.id))
-    dispatch(setUrl(currentTab.url))
+    await dispatch(setTabAndUrl(currentTab.id, currentTab.url))
 
     const isBlacklisted = await isURLBlacklistedRPC(currentTab.url)
     dispatch(blacklistActs.setIsBlacklisted(isBlacklisted))
 
     try {
-        const internalTab = await fetchInternalTabRPC(currentTab.id)
-        dispatch(bookmarkActs.setIsBookmarked(internalTab.isBookmarked))
+        await dispatch(setTabIsBookmarked(currentTab.id))
 
         const listsAssocWithPage = await fetchListsRPC({ url: currentTab.url })
         const lists = await fetchAllListsRPC({
             excludeIds: listsAssocWithPage.map(({ id }) => id),
             limit: 20,
+            skipMobileList: true,
         })
         dispatch(collectionActs.setInitColls([...listsAssocWithPage, ...lists]))
         dispatch(collectionActs.setCollections(listsAssocWithPage))
@@ -66,5 +99,6 @@ export const initState: () => Thunk = () => async dispatch => {
         dispatch(tagActs.setTags(pageTags))
     } catch (err) {
         // Do nothing; just catch the error - means page doesn't exist for URL
+        console.warn('initState - Error', err)
     }
 }

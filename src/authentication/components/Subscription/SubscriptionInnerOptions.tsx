@@ -16,13 +16,8 @@ export class SubscriptionInnerOptions extends React.Component<Props> {
                 <SubscriptionPriceBox
                     key={'SubscriptionBoxBackupsMonthly'}
                     onClick={this.props.openCheckoutBackupMonthly}
-                    title={'Per Month'}
+                    title={'Monthly'}
                     price={'€2'}
-                    infoItems={[
-                        'Automatic Backups every 15 min, locally or your favorite cloud provider',
-                        '[SOON] End2End encrypted sync between your devices. 2 devices included',
-                        '+1€ per additional device',
-                    ]}
                     subscribed={
                         this.props.plans &&
                         this.props.plans.includes('pro-monthly')
@@ -33,12 +28,7 @@ export class SubscriptionInnerOptions extends React.Component<Props> {
                     key={'SubscriptionBoxBackupsYearly'}
                     onClick={this.props.openCheckoutBackupYearly}
                     price={'€20'}
-                    title={'Per Year'}
-                    infoItems={[
-                        'Automatic Backups every 15 min, locally or your favorite cloud provider',
-                        '[SOON] End2End encrypted sync between your devices. 2 devices included',
-                        '+10€ per additional device',
-                    ]}
+                    title={'Yearly'}
                     subscribed={
                         this.props.plans &&
                         this.props.plans.includes('pro-yearly')
@@ -53,5 +43,7 @@ export class SubscriptionInnerOptions extends React.Component<Props> {
 const styles = {
     subscriptionOptionsContainer: {
         display: 'flex',
+        justifyContent: 'center',
+        marginTop: '10px',
     },
 }

@@ -6,7 +6,6 @@ export interface Props {
     imgSrc?: string
     CTAText?: string
     descriptionText: string
-    onDismiss: () => void
     onCTAClick?: () => void
 }
 
@@ -36,7 +35,7 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
 
     render() {
         return (
-            <div className={styles.container}>
+            <>
                 {this.renderImg()}
                 <div className={styles.textContainer}>
                     <p className={styles.containerTitle}>
@@ -48,11 +47,7 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
                     </p>
                 </div>
                 {this.renderCTAButton()}
-                <button
-                    className={styles.dismissButton}
-                    onClick={this.props.onDismiss}
-                />
-            </div>
+            </>
         )
     }
 }

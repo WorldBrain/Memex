@@ -93,7 +93,10 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
 
     const coffee = {
         test: /\.coffee?$/,
-        include: path.resolve(context, './src/direct-linking'),
+        include: path.resolve(
+            context,
+            './src/highlighting/ui/anchoring/anchoring',
+        ),
         use: [babelLoader, coffeescriptLoader],
     }
 

@@ -9,6 +9,7 @@ import UserScreen from '../authentication/components/UserScreen'
 import SubscribeModal from '../authentication/components/Subscription/SubscribeModal'
 import { FeaturesOptInScreen } from '../feature-opt-in/ui/components/FeaturesOptInScreen'
 import React from 'react'
+import SyncSettingsScreen from '../sync/components/settings/settings'
 export default [
     {
         name: 'Usage Statistics',
@@ -47,6 +48,12 @@ export default [
         pathname: '/backup',
         component: BackupSettingsContainer,
         icon: 'backup',
+    },
+    {
+        name: 'Sync',
+        pathname: '/sync',
+        component: SyncSettingsScreen,
+        icon: 'sync',
     },
     {
         name: 'Blocklist',

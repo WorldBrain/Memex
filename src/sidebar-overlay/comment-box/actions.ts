@@ -1,9 +1,11 @@
 import { createAction } from 'redux-act'
 
-import { Anchor } from 'src/direct-linking/content_script/interactions'
 import { Thunk } from '../types'
-import { createAnnotation } from '../sidebar/actions'
 import * as selectors from './selectors'
+import { Anchor } from 'src/highlighting/types'
+import { createAnnotation } from 'src/annotations/actions'
+import { setPageType, setSearchType } from 'src/sidebar-overlay/sidebar/actions'
+import { setIsExpanded } from '../ribbon/actions'
 
 export const setShowCommentBox = createAction<boolean>('setShowCommentBox')
 
@@ -34,6 +36,8 @@ export const openCommentBoxWithHighlight: (
 ) => Thunk = anchor => dispatch => {
     dispatch(setAnchor(anchor))
     dispatch(setShowCommentBox(true))
+    dispatch(setSearchType('notes'))
+    dispatch(setPageType('page'))
 }
 
 /**
@@ -62,28 +66,25 @@ export const saveComment: (
     tags: string[],
     bookmarked: boolean,
     isSocialPost?: boolean,
-) => Thunk = (
-    anchor,
-    commentText,
-    tags,
-    bookmarked,
-    isSocialPost,
-) => dispatch => {
-    if (commentText.length !== 0 || anchor !== null) {
+) => Thunk = (anchor, comment, tags, bookmarked, isSocialPost) => dispatch => {
+    if (comment.length > 0 || anchor !== null) {
         const body = anchor !== null ? anchor.quote : ''
 
         dispatch(
             createAnnotation(
                 anchor,
                 body,
-                commentText,
+                comment,
                 tags,
                 bookmarked,
                 isSocialPost,
             ),
         )
         dispatch(setIsCommentSaved(true))
+        dispatch(setShowCommentBox(false))
         dispatch(resetCommentBox())
+
+        setTimeout(() => dispatch(setIsExpanded(false)), 1000)
     }
 }
 
@@ -92,6 +93,7 @@ export const saveComment: (
  * and resets the state of the comment box in the Redux store.
  */
 export const cancelComment: () => Thunk = () => dispatch => {
+    dispatch(setShowCommentBox(false))
     dispatch(resetCommentBox())
 }
 

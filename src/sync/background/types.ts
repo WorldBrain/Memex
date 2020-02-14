@@ -1,3 +1,5 @@
+import { SyncReturnValue } from '@worldbrain/storex-sync/lib/index'
+
 export interface PublicSyncInterface {
     requestInitialSync(options?: {
         preserveChannel?: boolean
@@ -8,8 +10,9 @@ export interface PublicSyncInterface {
     waitForInitialSync(): Promise<void>
 
     enableContinuousSync(): Promise<void>
-    forceIncrementalSync(): Promise<void>
+    forceIncrementalSync(): Promise<void | SyncReturnValue>
 
     listDevices(): Promise<any>
     removeDevice(deviceId: string): Promise<any>
+    abortInitialSync(): Promise<void>
 }

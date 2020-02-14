@@ -2,7 +2,7 @@
 @value color11, color14, color4, color6, color9 from colors;
 
 .tagContainer * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .menuItem {

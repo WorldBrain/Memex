@@ -1,11 +1,7 @@
 import { browser } from 'webextension-polyfill-ts'
 
 import { delayed, getPositionState, getTooltipState } from './utils'
-import {
-    createAndCopyDirectLink,
-    createAnnotation,
-    createHighlight,
-} from '../direct-linking/content_script/interactions'
+import { createAndCopyDirectLink } from '../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
 import {
     remoteFunction,
@@ -14,13 +10,9 @@ import {
 import { injectCSS } from '../search-injection/dom'
 import { conditionallyShowHighlightNotification } from './onboarding-interactions'
 import { TooltipInteractionInterface } from 'src/content-tooltip/types'
-import {
-    highlightAnnotations,
-    removeHighlights,
-} from 'src/sidebar-overlay/content_script/highlight-interactions'
-import { toggleSidebarOverlay } from 'src/direct-linking/content_script/interactions'
+import { createAnnotationDraftInSidebar } from 'src/annotations'
+import { createAnnotation as createAnnotationAction } from 'src/annotations/actions'
 
-const getAnnotsByUrlRPC = remoteFunction('getAllAnnotationsByUrl')
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
 
@@ -66,7 +58,7 @@ let manualOverride = false
  * Mounts Tooltip React component.
  * Sets up Container <---> webpage Remote functions.
  */
-export const insertTooltip = async ({ toolbarNotifications }) => {
+export const insertTooltip = async ({ toolbarNotifications, store }) => {
     // If target is set, Tooltip has already been injected.
     if (target) {
         return
@@ -81,8 +73,8 @@ export const insertTooltip = async ({ toolbarNotifications }) => {
 
     showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
-        createAnnotation,
-        createHighlight,
+        createAnnotation: createAnnotationDraftInSidebar,
+        createHighlight: () => store.dispatch(createAnnotationAction()),
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
             manualOverride = true
@@ -119,7 +111,7 @@ export const removeTooltip = () => {
  * Should either be called through the RPC, or pass the `toolbarNotifications`
  * wrapped in an object.
  */
-const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
+const insertOrRemoveTooltip = async ({ toolbarNotifications, store }) => {
     if (manualOverride) {
         return
     }
@@ -128,7 +120,7 @@ const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
     const isTooltipPresent = !!target
 
     if (isTooltipEnabled && !isTooltipPresent) {
-        insertTooltip({ toolbarNotifications })
+        insertTooltip({ toolbarNotifications, store })
     } else if (!isTooltipEnabled && isTooltipPresent) {
         removeTooltip()
     }
@@ -137,11 +129,11 @@ const insertOrRemoveTooltip = async ({ toolbarNotifications }) => {
 /**
  * Sets up RPC functions to insert and remove Tooltip from Popup.
  */
-export const setupRPC = ({ toolbarNotifications }) => {
+export const setupRPC = ({ toolbarNotifications, store }) => {
     makeRemotelyCallableType<TooltipInteractionInterface>({
         showContentTooltip: async () => {
             if (!showTooltip) {
-                await insertTooltip({ toolbarNotifications })
+                await insertTooltip({ toolbarNotifications, store })
             }
             if (userSelectedText()) {
                 const position = calculateTooltipPostion()
@@ -150,22 +142,14 @@ export const setupRPC = ({ toolbarNotifications }) => {
         },
         insertTooltip: async ({ override } = {}) => {
             manualOverride = !!override
-            await insertTooltip({ toolbarNotifications })
-            const annotations = await getAnnotsByUrlRPC({
-                url: window.location.href,
-            })
-            await highlightAnnotations(
-                annotations.filter(annot => annot.selector),
-                toggleSidebarOverlay,
-            )
+            await insertTooltip({ toolbarNotifications, store })
         },
         removeTooltip: async ({ override } = {}) => {
             manualOverride = !!override
             await removeTooltip()
-            removeHighlights()
         },
         insertOrRemoveTooltip: async () => {
-            await insertOrRemoveTooltip({ toolbarNotifications })
+            await insertOrRemoveTooltip({ toolbarNotifications, store })
         },
     })
 }

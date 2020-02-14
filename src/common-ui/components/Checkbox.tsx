@@ -50,7 +50,9 @@ class Checkbox extends React.PureComponent<Props> {
                                 })}
                             />
                         </span>
-                        {this.props.children}
+                        <span className={styles.childrenBox}>
+                            {this.props.children}
+                        </span>
                     </span>
                 </label>
             </div>

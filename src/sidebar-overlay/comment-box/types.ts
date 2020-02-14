@@ -3,7 +3,7 @@
  * Default export is the Comment Box's state's type declaration.
  */
 
-import { Anchor } from 'src/direct-linking/content_script/interactions'
+import { Anchor } from 'src/highlighting/types'
 
 export default interface State {
     /** Denotes whether or not the sidebar should show the comment box. */
