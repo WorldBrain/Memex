@@ -1,5 +1,5 @@
 import { JobScheduler } from './job-scheduler'
-import { Job } from './jobs'
+import { JobDefinition, PrimedJob } from './types'
 import { Alarms } from 'webextension-polyfill-ts'
 
 class MockAlarmsApi {
@@ -47,7 +47,7 @@ describe('JobScheduler tests', () => {
         const { scheduler, alarmsAPI, storageAPI } = await setupTest()
 
         let timesRun = 0
-        const testJob: Job = {
+        const testJob: JobDefinition<PrimedJob> = {
             name: 'test-1',
             periodInMinutes: 1,
             job: () => {
@@ -90,7 +90,7 @@ describe('JobScheduler tests', () => {
         const { scheduler, alarmsAPI, storageAPI } = await setupTest()
 
         let timesRun = 0
-        const testJob: Job = {
+        const testJob: JobDefinition<PrimedJob> = {
             name: 'test-1',
             delayInMinutes: 1,
             job: () => {

@@ -56,73 +56,60 @@ class ResultsContainer extends React.Component<Props, State> {
     }
 
     private renderContent() {
-        if (this.props.showInbox) {
-            return <NotificationContainer />
-        }
-
         const showOnboarding = localStorage.getItem('stage.Onboarding')
 
-        const renderSearchSwitch = children => (
-            <React.Fragment>
-                <SearchTypeSwitch
-                    showSocialSearch={this.state.showSocialSearch}
-                />
-                {children}
-            </React.Fragment>
-        )
-
         if (this.props.isMobileListFiltered && this.props.noResults) {
-            return renderSearchSwitch(
+            return (
                 <ResultsMessage>
                     <MobileAppMessage />
-                </ResultsMessage>,
+                </ResultsMessage>
             )
         }
 
         if (showOnboarding === 'true' && this.props.noResults) {
-            return renderSearchSwitch(
+            return (
                 <ResultsMessage>
                     <NoResultBadTerm title="You don't have anything saved yet">
                         <OnboardingMessage />
                     </NoResultBadTerm>
-                </ResultsMessage>,
+                </ResultsMessage>
             )
         }
 
         if (this.props.isBadTerm) {
-            return renderSearchSwitch(
+            return (
                 <ResultsMessage>
                     <NoResultBadTerm>
                         Search terms are too common, or have been filtered out
                         to increase performance.
                     </NoResultBadTerm>
-                </ResultsMessage>,
+                </ResultsMessage>
             )
         }
 
         if (this.props.isInvalidSearch) {
-            return renderSearchSwitch(
+            return (
                 <ResultsMessage>
                     <NoResultBadTerm title="Invalid search query">
                         You can't exclude terms without including at least 1
                         term to search
                     </NoResultBadTerm>
-                </ResultsMessage>,
+                </ResultsMessage>
             )
         }
 
         if (this.props.noResults) {
-            return renderSearchSwitch(
+            return (
                 <ResultsMessage>
                     <NoResultBadTerm>
                         found for this query. ¯\_(ツ)_/¯
                     </NoResultBadTerm>
-                </ResultsMessage>,
+                </ResultsMessage>
             )
         }
 
         // No issues; render out results list view
-        return renderSearchSwitch(
+        return (
             <React.Fragment>
                 {this.props.shouldShowCount && (
                     <ResultsMessage small>
@@ -130,12 +117,25 @@ class ResultsContainer extends React.Component<Props, State> {
                     </ResultsMessage>
                 )}
                 <ResultList />
-            </React.Fragment>,
+            </React.Fragment>
         )
     }
 
     render() {
-        return <div className={styles.main}>{this.renderContent()}</div>
+        return (
+            <div className={styles.main}>
+                {this.props.showInbox ? (
+                    <NotificationContainer />
+                ) : (
+                    <>
+                        <SearchTypeSwitch
+                            showSocialSearch={this.state.showSocialSearch}
+                        />
+                        {this.renderContent()}
+                    </>
+                )}
+            </div>
+        )
     }
 }
 
