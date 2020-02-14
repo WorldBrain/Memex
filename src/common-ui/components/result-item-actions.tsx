@@ -7,8 +7,8 @@ import SemiCircularRibbon from './semi-circular-ribbon'
 import ResultItemActionBtn from './result-item-action-btn'
 
 const styles = require('./result-item.css')
-const tagEmpty = browser.extension.getURL('/img/tag_empty_results.svg')
-const tagFull = browser.extension.getURL('/img/tag_full_results.svg')
+const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
+const tagFull = browser.extension.getURL('/img/tag_full.svg')
 const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 const heartFull = browser.extension.getURL('/img/star_full.svg')
 const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')

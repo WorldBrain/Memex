@@ -55,7 +55,7 @@
     composes: annotationCard from '../../../common-ui/elements.css';
     background: white;
     border-radius: 3px;
-    top: 20px;
+    top: 10px;
     margin: 0 10px 40px;
     position: relative;
     width: 93%;

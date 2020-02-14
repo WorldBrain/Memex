@@ -10,8 +10,8 @@ import { browser } from 'webextension-polyfill-ts'
 
 const styles = require('./comment-box-form.css')
 
-const tagEmpty = browser.extension.getURL('/img/tag_empty_results.svg')
-const tagFull = browser.extension.getURL('/img/tag_full_results.svg')
+const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
+const tagFull = browser.extension.getURL('/img/tag_full.svg')
 const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 const heartFull = browser.extension.getURL('/img/star_full.svg')
 

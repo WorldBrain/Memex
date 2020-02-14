@@ -202,7 +202,6 @@
 
     &::placeholder {
         color: #3a2f45;
-        font-style: italic;
         font-weight: 500;
         opacity: 0.7;
     }
