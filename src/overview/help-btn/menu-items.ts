@@ -8,7 +8,7 @@ export const menuItems: MenuOptions = [
     },
     '-',
     {
-        text: 'Re-enable Onboarding Help',
+        text: 'Onboarding Help',
         link: '#/overview?install=true',
     },
     '-',
@@ -28,7 +28,7 @@ export const menuItems: MenuOptions = [
     },
     '-',
     {
-        text: "What's New?",
+        text: "Changelog & Roadmap",
         link: 'https://www.notion.so/262a367f7a2a48ff8115d2c71f700c14',
     },
     '-',

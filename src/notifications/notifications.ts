@@ -253,7 +253,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
         search: {
             title: 'How disappointed would you be if Memex does not exist?',
             message:
-                'Take a 2-5min survey, get 1 month free premium and a chance to win 12 additional months.',
+                'Take a 2-5min survey, get 1 month Memex Pro',
             buttons: [
                 {
                     action: {
