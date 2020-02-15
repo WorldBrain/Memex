@@ -1,6 +1,7 @@
+import { Alarms } from 'webextension-polyfill-ts'
+
 import { JobScheduler } from './job-scheduler'
 import { JobDefinition, PrimedJob } from './types'
-import { Alarms } from 'webextension-polyfill-ts'
 
 class MockAlarmsApi {
     listener: (alarm: Alarms.Alarm, now?: number) => Promise<void>
@@ -77,11 +78,13 @@ describe('JobScheduler tests', () => {
 
         expect(timesRun).toBe(0)
 
+        const now = Date.now()
         for (const i of [1, 2, 3, 4, 5]) {
             await alarmsAPI.listener(
                 { name: testJob.name } as any,
-                Date.now() + testJob.periodInMinutes * i * 60 * 1000,
+                now + testJob.periodInMinutes * i * 60 * 1000 + 500,
             )
+
             expect(timesRun).toBe(i)
         }
     })
@@ -120,10 +123,11 @@ describe('JobScheduler tests', () => {
 
         expect(timesRun).toBe(0)
 
+        const now = Date.now()
         for (const i of [1, 2, 3, 4, 5]) {
             await alarmsAPI.listener(
                 { name: testJob.name } as any,
-                Date.now() + testJob.delayInMinutes * i * 60 * 1000,
+                now + testJob.delayInMinutes * i * 60 * 1000 + 500,
             )
 
             expect(

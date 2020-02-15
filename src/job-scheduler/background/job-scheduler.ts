@@ -59,7 +59,7 @@ export class JobScheduler {
             await job()
             await this.setTimeoutKey(
                 name,
-                JobScheduler.calcTimeFromNow(periodInMinutes, now),
+                JobScheduler.calcTimeFromNow(periodInMinutes),
             )
         }
     }
