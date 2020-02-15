@@ -38,7 +38,6 @@ const Body = styled.div`
     display: flex;
     align-content: center;
     padding: 40px 50px;
-    margin: 0 40px;
     flex: 5;
 `
 export const ModalBox = ({

@@ -139,7 +139,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
 
     private privacyImg = () => (
-        <img src={'/img/privacyIllustration.svg'} className={styles.privacyImg} />
+        <img src={'/img/privacyIllustration.png'} className={styles.privacyImg} />
     )
 
     private handleTooltipToggle = () => {
