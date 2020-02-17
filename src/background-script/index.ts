@@ -6,6 +6,7 @@ import {
     Commands,
     Storage,
 } from 'webextension-polyfill-ts'
+import { URLNormalizer, normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import * as utils from './utils'
 import ActivityLoggerBackground from 'src/activity-logger/background'
@@ -24,6 +25,7 @@ class BackgroundScript {
     private activityLoggerBackground: ActivityLoggerBackground
     private storageChangesMan: StorageChangesManager
     private storageManager: Storex
+    private urlNormalizer: URLNormalizer
     private storageAPI: Storage.Static
     private runtimeAPI: Runtime.Static
     private commandsAPI: Commands.Static
@@ -36,6 +38,7 @@ class BackgroundScript {
         loggerBackground,
         utilFns = utils,
         storageChangesMan,
+        urlNormalizer = normalizeUrl,
         storageAPI = browser.storage,
         runtimeAPI = browser.runtime,
         commandsAPI = browser.commands,
@@ -44,6 +47,7 @@ class BackgroundScript {
         storageManager: Storex
         notifsBackground: NotifsBackground
         loggerBackground: ActivityLoggerBackground
+        urlNormalizer?: URLNormalizer
         utilFns?: typeof utils
         storageChangesMan: StorageChangesManager
         storageAPI?: Storage.Static
@@ -60,6 +64,7 @@ class BackgroundScript {
         this.runtimeAPI = runtimeAPI
         this.commandsAPI = commandsAPI
         this.alarmsAPI = alarmsAPI
+        this.urlNormalizer = urlNormalizer
     }
 
     get defaultUninstallURL() {
@@ -118,7 +123,10 @@ class BackgroundScript {
                 continue
             }
 
-            await migration(this.storageManager.backend['dexieInstance'])
+            await migration({
+                db: this.storageManager.backend['dexieInstance'],
+                normalizeUrl: this.urlNormalizer,
+            })
             await this.storageAPI.local.set({ [storageKey]: true })
         }
     }

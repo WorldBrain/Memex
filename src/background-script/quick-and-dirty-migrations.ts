@@ -1,15 +1,20 @@
 import Dexie from 'dexie'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { URLNormalizer } from '@worldbrain/memex-url-utils'
+
+export interface MigrationProps {
+    db: Dexie
+    normalizeUrl: URLNormalizer
+}
 
 export interface Migrations {
-    [storageKey: string]: (db: Dexie) => Promise<void>
+    [storageKey: string]: (props: MigrationProps) => Promise<void>
 }
 
 export const migrations: Migrations = {
     /**
      * If pageUrl is undefined, then re-derive it from url field.
      */
-    'annots-undefined-pageUrl-field': async db => {
+    'annots-undefined-pageUrl-field': async ({ db, normalizeUrl }) => {
         await db
             .table('annotations')
             .toCollection()
@@ -21,7 +26,7 @@ export const migrations: Migrations = {
     /**
      * If lastEdited is undefined, then set it to createdWhen value.
      */
-    'annots-created-when-to-last-edited': async db => {
+    'annots-created-when-to-last-edited': async ({ db }) => {
         await db
             .table('annotations')
             .toCollection()
