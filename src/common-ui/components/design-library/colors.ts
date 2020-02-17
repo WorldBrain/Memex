@@ -1,4 +1,4 @@
-export const colorButtonHighlightBackground = `rgba(196, 196, 196, 0.3)`
+export const colorButtonHighlightBackground = `rgba(196, 196, 196, 1)`
 
 export const colorBrandMintGreen = `#5CD9A6`
 export const colorPrimary = `${colorBrandMintGreen};`

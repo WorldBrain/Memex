@@ -8,6 +8,7 @@
     margin: 0px;
     padding: 0 15px 10px 15px;
     line-height: 1.4;
+    text-align: left;
 
     &.isJustComment {
         border-top: none;
