@@ -41,7 +41,6 @@ export const SCREENS = {
         events: {
             onChoice: { argument: 'choice' },
             onBackRequested: true,
-            onSubscribeRequested: true,
         },
     },
     'onboarding-size': {

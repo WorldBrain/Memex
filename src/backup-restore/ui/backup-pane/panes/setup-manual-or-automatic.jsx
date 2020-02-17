@@ -5,18 +5,15 @@ import Styles from '../../styles.css'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
+import { connect } from 'react-redux'
+import { show } from 'src/overview/modals/actions'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 
 class SetupManualOrAutomatic extends React.Component {
     state = {
         mode: null,
-        subscribeModal: false,
     }
-
-    openSubscriptionModal = () => this.setState({ subscribeModal: true })
-    closeSubscriptionModal = () => this.setState({ subscribeModal: false })
 
     render() {
         const isAuthorizedForAutomaticBackup = this.props.authorizedFeatures.includes(
@@ -32,7 +29,7 @@ class SetupManualOrAutomatic extends React.Component {
                     <OnboardingBackupMode
                         className={Styles.selectionlist}
                         onModeChange={mode => this.setState({ mode })}
-                        launchSubscriptionFlow={this.props.onSubscribeRequested}
+                        showSubscriptionModal={this.props.showSubscriptionModal}
                         isAuthorizedForAutomaticBackup={
                             isAuthorizedForAutomaticBackup
                         }
@@ -70,28 +67,27 @@ class SetupManualOrAutomatic extends React.Component {
                                 this.state.mode === 'automatic' && (
                                     <PrimaryAction
                                         disabled={false}
-                                        onClick={() =>
-                                            this.openSubscriptionModal()
+                                        onClick={
+                                            this.props.showSubscriptionModal
                                         }
                                         label={'Upgrade to Memex Pro'}
                                     />
                                 )}
                         </div>
                     </div>
-                    {this.state.subscribeModal && (
-                        <SubscribeModal onClose={this.closeSubscriptionModal} />
-                    )}
                 </div>
             </div>
         )
     }
 }
 
-export default withCurrentUser(SetupManualOrAutomatic)
+export default connect(null, dispatch => ({
+    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+}))(withCurrentUser(SetupManualOrAutomatic))
 
 SetupManualOrAutomatic.propTypes = {
     onChoice: PropTypes.func.isRequired,
     onBackRequested: PropTypes.func.isRequired,
-    onSubscribeRequested: PropTypes.func.isRequired,
+    showSubscriptionModal: PropTypes.func.isRequired,
     authorizedFeatures: PropTypes.array.isRequired,
 }

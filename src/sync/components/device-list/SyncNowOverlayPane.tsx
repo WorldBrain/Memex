@@ -7,6 +7,8 @@ import {
 } from 'src/authentication/components/AuthConnector'
 import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 import { SyncDevice } from 'src/sync/components/types'
+import { connect } from 'react-redux'
+import { show } from 'src/overview/modals/actions'
 
 interface Props {
     onClickSync: () => void
@@ -48,7 +50,9 @@ export class SyncNowOverlayPane extends Component<Props> {
     }
 }
 
-interface ContainerProps {}
+interface ContainerProps {
+    showSubscriptionModal: () => void
+}
 interface ContainerState {
     showSync: boolean
     syncResults: any
@@ -86,7 +90,7 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 
     handleUpgrade = async () => {
-        window.open('https://getmemex.com/#pricingSection')
+        this.props.showSubscriptionModal()
     }
 
     handleLogin = async () => {
@@ -217,4 +221,6 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 }
 
-export default withCurrentUser(SyncNowOverlayPaneContainer)
+export default connect(null, dispatch => ({
+    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+}))(withCurrentUser(SyncNowOverlayPaneContainer))

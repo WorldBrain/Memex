@@ -6,10 +6,10 @@ import Statistics from './statistics'
 import Settings from './settings'
 import Overview from '../overview'
 import UserScreen from '../authentication/components/UserScreen'
-import SubscribeModal from '../authentication/components/Subscription/SubscribeModal'
 import { FeaturesOptInScreen } from '../feature-opt-in/ui/components/FeaturesOptInScreen'
 import React from 'react'
-import SyncSettingsScreen from '../sync/components/settings/settings'
+import SyncDevicesPaneContainer from '../sync/components/device-list/SyncDevicesPane'
+
 export default [
     {
         name: 'Usage Statistics',
@@ -23,13 +23,6 @@ export default [
         component: Overview,
         icon: 'search',
         useOwnLayout: true,
-    },
-
-    {
-        name: 'Subscribe',
-        pathname: '/subscribe',
-        component: SubscribeModal,
-        hideFromSidebar: true,
     },
     {
         name: 'Settings',
@@ -52,7 +45,7 @@ export default [
     {
         name: 'Sync',
         pathname: '/sync',
-        component: SyncSettingsScreen,
+        component: SyncDevicesPaneContainer,
         icon: 'sync',
     },
     {
