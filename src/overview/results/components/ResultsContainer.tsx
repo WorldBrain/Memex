@@ -57,11 +57,14 @@ class ResultsContainer extends React.Component<Props, State> {
 
     private renderContent() {
         const showOnboarding = localStorage.getItem('stage.Onboarding')
+        const showMobileAd = localStorage.getItem('stage.MobileAppAd') ?? 'true'
 
         if (this.props.isMobileListFiltered && this.props.noResults) {
             return (
                 <ResultsMessage>
-                    <MobileAppMessage />
+                    <NoResultBadTerm title="You don't have anything saved from the mobile app yet">
+                        {showMobileAd === 'true' && <MobileAppMessage />}
+                    </NoResultBadTerm>
                 </ResultsMessage>
             )
         }

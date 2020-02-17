@@ -7,7 +7,6 @@ export interface Props {
     roomToImproveUrl?: string
     reportProbUrl?: string
     title?: string
-    children: ReactChild
 }
 
 class NoResultBadTerm extends PureComponent<Props> {
@@ -19,9 +18,7 @@ class NoResultBadTerm extends PureComponent<Props> {
         return (
             <div>
                 <div className={styles.title}>{this.props.title}</div>
-                <div className={styles.subtitle}>
-                    {this.props.children}
-                </div>
+                <div className={styles.subtitle}>{this.props.children}</div>
             </div>
         )
     }
