@@ -1,5 +1,6 @@
 import Dexie from 'dexie'
 import { URLNormalizer } from '@worldbrain/memex-url-utils'
+import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
 
 export interface MigrationProps {
     db: Dexie
@@ -39,5 +40,49 @@ export const migrations: Migrations = {
             .modify(annot => {
                 annot.lastEdited = annot.createdWhen
             })
+    },
+    'unify-duped-mobile-lists': async ({ db }) => {
+        const lists = await db
+            .table('customLists')
+            .where('name')
+            .equals(MOBILE_LIST_NAME)
+            .toArray()
+
+        if (lists.length < 2) {
+            return
+        }
+
+        const entries = [
+            await db
+                .table('pageListEntries')
+                .where('listId')
+                .equals(lists[0].id)
+                .toArray(),
+            await db
+                .table('pageListEntries')
+                .where('listId')
+                .equals(lists[1].id)
+                .toArray(),
+        ] as any[]
+
+        const listToKeep = entries[0].length > entries[1].length ? 0 : 1
+        const listToRemove = listToKeep === 0 ? 1 : 0
+
+        for (const entry of entries[listToRemove]) {
+            await db
+                .table('pageListEntries')
+                .put({ ...entry, listId: lists[listToKeep].id })
+        }
+
+        await db
+            .table('pageListEntries')
+            .where('listId')
+            .equals(lists[listToRemove].id)
+            .delete()
+        await db
+            .table('customLists')
+            .where('id')
+            .equals(lists[listToRemove].id)
+            .delete()
     },
 }
