@@ -78,7 +78,7 @@
 .tagDropdown {
     position: relative;
     top: 3px;
-    right: 44%;
+    right: 150px;
 }
 
 @keyframes slideIn {

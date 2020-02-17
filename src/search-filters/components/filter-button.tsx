@@ -122,7 +122,9 @@ class FilterButton extends PureComponent<Props, State> {
                                             />
                                         </ButtonTooltip>
                                     )}
-                                {this.props.source}
+                                <span className={this.styles.pillTitle}>
+                                   {this.props.source}
+                                </span>
                                 </div>
                                 {this.renderCount()}
                             </React.Fragment>
@@ -140,10 +142,10 @@ class FilterButton extends PureComponent<Props, State> {
                                     />
                             </ButtonTooltip>
                                 <div className={this.styles.dateTopBox}>
-                                    {this.props.source}
-                                    <span className={this.styles.renderCount}>
-                                        {this.renderCount()}
+                                    <span className={this.styles.pillTitle}>
+                                        {this.props.source}
                                     </span>
+                                    {this.renderCount()}
                                 </div>
                             </div>
                             ):(

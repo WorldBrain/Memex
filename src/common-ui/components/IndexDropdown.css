@@ -180,7 +180,7 @@
 }
 
 .tagDivForFilterSB {
-    z-index: 1;
+    z-index: 250000;
     background-color: #fff;
     width: 100%;
 }
@@ -191,14 +191,14 @@
     position: absolute;
     right: 0px;
     width: 250px;
-    z-index: 1;
+    z-index: 250000;
     background-color: #fff;
     border-radius: 3px;
 }
 
 .tagDivForFilter {
     width: 300px;
-    z-index: 1;
+    z-index: 250000;
     background-color: #fff;
     border-radius: 3px;
 }
