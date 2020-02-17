@@ -78,6 +78,7 @@ export const saveComment: (
                 tags,
                 bookmarked,
                 isSocialPost,
+                { skipRender: true },
             ),
         )
         dispatch(setIsCommentSaved(true))

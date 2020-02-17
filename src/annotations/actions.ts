@@ -87,10 +87,18 @@ export const createAnnotation: (
     tags?: string[],
     bookmarked?: boolean,
     isSocialPost?: boolean,
-) => Thunk = (anchor, body, comment, tags, bookmarked, isSocialPost) => async (
-    dispatch,
-    getState,
-) => {
+    options?: {
+        skipRender?: boolean
+    },
+) => Thunk = (
+    anchor,
+    body,
+    comment,
+    tags,
+    bookmarked,
+    isSocialPost,
+    options,
+) => async (dispatch, getState) => {
     const state = getState()
     const annotationsManager = selectors.annotationsManager(state)
     const { url, title } = selectors.page(state)
@@ -114,12 +122,14 @@ export const createAnnotation: (
 
         dispatch(appendAnnotations([annotation]))
 
-        renderHighlight(
-            annotation as Highlight,
-            undefined,
-            undefined,
-            toggleSidebarOverlay,
-        )
+        if (!options?.skipRender) {
+            renderHighlight(
+                annotation as Highlight,
+                undefined,
+                undefined,
+                toggleSidebarOverlay,
+            )
+        }
 
         dispatch(checkAndSetCongratsMessage())
     }
