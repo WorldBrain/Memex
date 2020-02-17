@@ -236,14 +236,6 @@ export async function processEvent({
                 }
                 return { screen: 'restore-where' }
             },
-            onSubscribeRequested: () => {
-                const { choice } = event
-
-                localStorage.setItem('backup.onboarding.authenticating', true)
-                return {
-                    redirect: { to: 'automatic-backup-purchase', choice },
-                }
-            },
             onBlobPreferenceChange: _onBlobPreferenceChange,
         },
         'onboarding-where': {
@@ -416,10 +408,6 @@ export const getScreenHandlers = ({
 export function doRedirect(redirect) {
     const redirects = {
         'gdrive-login': () => redirectToGDriveLogin(),
-        'automatic-backup-purchase': () => {
-            // TODO: (ch) should probably pop up a dialog, and use a redirect function, but for now we'll just navigate
-            window.location.href = `${OPTIONS_URL}#/subscribe`
-        },
     }
     return redirects[redirect.to]()
 }

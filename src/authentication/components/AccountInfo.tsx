@@ -3,34 +3,22 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
-import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 import { TypographyHeadingPage } from 'src/common-ui/components/design-library/typography'
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import Link from 'src/common-ui/components/link'
+import { connect } from 'react-redux'
+import { show } from 'src/overview/modals/actions'
 
 interface Props {
     initiallyShowSubscriptionModal?: boolean
+    showSubscriptionModal: () => void
 }
 
-interface State {
-    showSubscriptionModal: boolean
-}
-
-export class AccountInfo extends React.Component<Props & UserProps, State> {
-    state = { showSubscriptionModal: false }
-
-    hideSubscriptionModal = () => {
-        this.setState({ showSubscriptionModal: false })
-        // If the url has subscription, remove it
-    }
-
-    showSubscriptionModal = () => this.setState({ showSubscriptionModal: true })
-    // if the url does not have subscription, add it
-
+export class AccountInfo extends React.PureComponent<Props & UserProps> {
     componentDidMount(): void {
         if (this.props.initiallyShowSubscriptionModal) {
-            this.setState({ showSubscriptionModal: true })
+            this.props.showSubscriptionModal()
         }
     }
 
@@ -41,9 +29,6 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
         return (
             <FullPage>
                 <TypographyHeadingPage>My Account</TypographyHeadingPage>
-                {this.state.showSubscriptionModal === true && (
-                    <SubscribeModal onClose={this.hideSubscriptionModal} />
-                )}
                 {user != null && (
                     <div>
                         <PrimaryButton>
@@ -83,4 +68,6 @@ export class AccountInfo extends React.Component<Props & UserProps, State> {
     }
 }
 
-export default withCurrentUser(AccountInfo)
+export default connect(null, dispatch => ({
+    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+}))(withCurrentUser(AccountInfo))

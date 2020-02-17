@@ -7,6 +7,7 @@ import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
 import configureStore from './store'
 import Router from './router'
 import routes from './routes'
+import { ModalsContainer } from '../overview/modals/components/ModalsContainer'
 
 // Include development tools if we are not building for production
 const ReduxDevTools =
@@ -21,6 +22,7 @@ ReactDOM.render(
         <ErrorBoundary component={RuntimeError}>
             <Router routes={routes} />
             {ReduxDevTools && <ReduxDevTools />}
+            <ModalsContainer />
         </ErrorBoundary>
     </Provider>,
     document.getElementById('app'),

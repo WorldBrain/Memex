@@ -2,17 +2,18 @@ import React, { Component } from 'react'
 import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import { SyncDevicesList } from 'src/sync/components/device-list/SyncDevicesList'
 import { SyncDevice } from 'src/sync/components/types'
-import { UPGRADE_URL, LOGIN_URL } from 'src/constants'
+import { LOGIN_URL } from 'src/constants'
 import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
-import { features, sync } from 'src/util/remote-functions-background'
+import { sync } from 'src/util/remote-functions-background'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
+import { connect } from 'react-redux'
+import { show } from 'src/overview/modals/actions'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const styles = require('../styles.css')
@@ -200,14 +201,13 @@ export class SyncDevicesPane extends Component<Props, State> {
 }
 
 class SyncDevicesPaneContainer extends React.Component<
-    UserProps,
+    UserProps & { showSubscriptionModal: () => void },
     {
         devices: SyncDevice[]
         featureSyncEnabled: boolean
-        subscribeModal: boolean
     }
 > {
-    state = { devices: [], featureSyncEnabled: true, subscribeModal: false }
+    state = { devices: [], featureSyncEnabled: true }
 
     async componentDidMount() {
         await this.refreshDevices()
@@ -237,16 +237,9 @@ class SyncDevicesPaneContainer extends React.Component<
         this.setState({ devices })
     }
 
-    openSubscriptionModal = () => {
-        this.setState({ subscribeModal: true })
-    }
-
     handleUpgradeNeeded = async () => {
-        await this.openSubscriptionModal()
+        this.props.showSubscriptionModal()
     }
-
-    closeSubscriptionModal = async () =>
-        this.setState({ subscribeModal: false })
 
     render() {
         if (this.state.featureSyncEnabled === false) {
@@ -294,8 +287,8 @@ class SyncDevicesPaneContainer extends React.Component<
                                     Download Memex GO
                                 </div>
                                 <div className={settingsStyle.infoText}>
-                                    Our mobile app to save and organise websites on
-                                    the Go
+                                    Our mobile app to save and organise websites
+                                    on the Go
                                 </div>
                             </div>
                             <div className={styles.storeSection}>
@@ -317,14 +310,11 @@ class SyncDevicesPaneContainer extends React.Component<
                         </div>
                     </div>
                 </div>
-                <div>
-                    {this.state.subscribeModal && (
-                        <SubscribeModal onClose={this.closeSubscriptionModal} />
-                    )}
-                </div>
             </div>
         )
     }
 }
 
-export default withCurrentUser(SyncDevicesPaneContainer)
+export default connect(null, dispatch => ({
+    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+}))(withCurrentUser(SyncDevicesPaneContainer))

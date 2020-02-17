@@ -2,22 +2,19 @@ import moment from 'moment'
 import React, { Component } from 'react'
 import classNames from 'classnames'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import SmallButton from '../../../../common-ui/components/small-button'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
-import { browser } from 'webextension-polyfill-ts'
-import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
 import { WhiteSpacer10 } from 'src/common-ui/components/design-library/typography'
 import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
-import SyncDevicesPane from 'src/sync/components/device-list/SyncDevicesPane'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { CancelAction } from 'src/common-ui/components/design-library/actions/CancelAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
+import { connect } from 'react-redux'
+import { show } from 'src/overview/modals/actions'
 
 const styles = require('../../styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -31,6 +28,7 @@ interface Props {
     onPaymentRequested: (...args: any[]) => any
     authorizedFeatures: UserFeature[]
     backupPath: string
+    showSubscriptionModal: () => void
 }
 
 export class OverviewContainer extends Component<Props & UserProps> {
@@ -85,8 +83,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
         })
     }
 
-    openSubscriptionModal = () => this.setState({ subscribeModal: true })
-    closeSubscriptionModal = () => this.setState({ subscribeModal: false })
+    openSubscriptionModal = () => this.props.showSubscriptionModal()
 
     enableAutomaticBackup() {
         if (this.state.hasInitialBackup === true) {
@@ -352,17 +349,12 @@ export class OverviewContainer extends Component<Props & UserProps> {
                             />
                         </div>
                     </div>
-                    <div>
-                        {this.state.subscribeModal && (
-                            <SubscribeModal
-                                onClose={this.closeSubscriptionModal}
-                            />
-                        )}
-                    </div>
                 </div>
             </div>
         )
     }
 }
 
-export default withCurrentUser(OverviewContainer)
+export default connect(null, dispatch => ({
+    showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
+}))(withCurrentUser(OverviewContainer))
