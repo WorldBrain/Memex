@@ -61,7 +61,7 @@ class Overview extends PureComponent {
                 <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
 
-                { /* <div className={styles.productHuntContainer}>
+                {/* <div className={styles.productHuntContainer}>
                     <a
                         href="https://www.producthunt.com/posts/memex-1-0?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-memex-1-0"
                         target="_blank"
@@ -72,7 +72,7 @@ class Overview extends PureComponent {
                             className={styles.productHuntBatch}
                         />
                     </a>
-                </div> */ }
+                </div> */}
 
                 <SidebarContainer
                     env="overview"
@@ -99,7 +99,9 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    init: () => dispatch(searchBarActs.init()),
+    init: () => {
+        return dispatch(searchBarActs.init())
+    },
     setShowOnboardingMessage: () =>
         dispatch(resultActs.setShowOnboardingMessage(true)),
 })

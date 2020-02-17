@@ -2,19 +2,17 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './onboarding-backup-mode.css'
 import classNames from 'classnames'
-import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 
 export default class OnboardingBackupModeContainer extends React.Component {
     static propTypes = {
         onModeChange: PropTypes.func,
-        launchSubscriptionFlow: PropTypes.func,
+        showSubscriptionModal: PropTypes.func,
         mode: PropTypes.string,
         isAuthorizedForAutomaticBackup: PropTypes.bool,
     }
 
     state = {
         mode: null,
-        subscribeModal: false,
     }
 
     componentDidMount() {
@@ -22,9 +20,6 @@ export default class OnboardingBackupModeContainer extends React.Component {
             this.setState({ mode: this.props.mode })
         }
     }
-
-    openSubscriptionModal = () => this.setState({ subscribeModal: true })
-    closeSubscriptionModal = () => this.setState({ subscribeModal: false })
 
     render() {
         return (
@@ -36,15 +31,12 @@ export default class OnboardingBackupModeContainer extends React.Component {
                         this.setState({ mode })
                         this.props.onModeChange && this.props.onModeChange(mode)
                     }}
-                    launchSubscriptionFlow={this.openSubscriptionModal}
+                    launchSubscriptionFlow={this.props.showSubscriptionModal}
                     isAuthorizedForAutomaticBackup={
                         this.props.isAuthorizedForAutomaticBackup
                     }
                     subscribeModal={this.state.subscribeModal}
                 />
-                {this.state.subscribeModal && (
-                    <SubscribeModal onClose={this.closeSubscriptionModal} />
-                )}
             </div>
         )
     }
@@ -106,7 +98,10 @@ export function OnboardingBackupMode({
                                 Subscribed
                             </span>
                         ) : (
-                            <span className={Styles.labelFree} onClick={() => launchSubscriptionFlow()}>
+                            <span
+                                className={Styles.labelFree}
+                                onClick={() => launchSubscriptionFlow()}
+                            >
                                 ⭐️ Pro Feature
                             </span>
                         )}
