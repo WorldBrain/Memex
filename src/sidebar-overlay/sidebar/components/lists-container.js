@@ -83,6 +83,7 @@ class ListContainer extends Component {
 
     handleCreateListSubmit = event => {
         event.preventDefault()
+        event.stopPropagation()
         const { value } = event.target.elements['listName']
         // value = list name
         this.props.createPageList(
