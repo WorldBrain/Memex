@@ -2,6 +2,8 @@ import Storex from '@worldbrain/storex'
 import { Windows, Tabs } from 'webextension-polyfill-ts'
 
 import TagStorage from './storage'
+import { TabManager } from 'src/activity-logger/background/tab-manager'
+import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { SearchIndex } from 'src/search'
 import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
