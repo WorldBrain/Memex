@@ -1,6 +1,7 @@
-import { JobScheduler } from './job-scheduler'
-import { Job } from './jobs'
 import { Alarms } from 'webextension-polyfill-ts'
+
+import { JobScheduler } from './job-scheduler'
+import { JobDefinition, PrimedJob } from './types'
 
 class MockAlarmsApi {
     listener: (alarm: Alarms.Alarm, now?: number) => Promise<void>
@@ -47,7 +48,7 @@ describe('JobScheduler tests', () => {
         const { scheduler, alarmsAPI, storageAPI } = await setupTest()
 
         let timesRun = 0
-        const testJob: Job = {
+        const testJob: JobDefinition<PrimedJob> = {
             name: 'test-1',
             periodInMinutes: 1,
             job: () => {
@@ -77,11 +78,13 @@ describe('JobScheduler tests', () => {
 
         expect(timesRun).toBe(0)
 
+        const now = Date.now()
         for (const i of [1, 2, 3, 4, 5]) {
             await alarmsAPI.listener(
                 { name: testJob.name } as any,
-                Date.now() + testJob.periodInMinutes * i * 60 * 1000,
+                now + testJob.periodInMinutes * i * 60 * 1000 + 500,
             )
+
             expect(timesRun).toBe(i)
         }
     })
@@ -90,7 +93,7 @@ describe('JobScheduler tests', () => {
         const { scheduler, alarmsAPI, storageAPI } = await setupTest()
 
         let timesRun = 0
-        const testJob: Job = {
+        const testJob: JobDefinition<PrimedJob> = {
             name: 'test-1',
             delayInMinutes: 1,
             job: () => {
@@ -120,10 +123,11 @@ describe('JobScheduler tests', () => {
 
         expect(timesRun).toBe(0)
 
+        const now = Date.now()
         for (const i of [1, 2, 3, 4, 5]) {
             await alarmsAPI.listener(
                 { name: testJob.name } as any,
-                Date.now() + testJob.delayInMinutes * i * 60 * 1000,
+                now + testJob.delayInMinutes * i * 60 * 1000 + 500,
             )
 
             expect(

@@ -108,7 +108,7 @@ export default class SearchSettings extends React.PureComponent<Props> {
 
         return (
             <div className={styles.container}>
-                <p className={styles.settingsHeader}>General settings</p>
+                <div className={styles.settingsHeader}>General settings</div>
                 <Checkbox
                     id="index-stubs"
                     isChecked={this.props.stubs}
@@ -116,9 +116,9 @@ export default class SearchSettings extends React.PureComponent<Props> {
                 >
                     Make title and URL always searchable (recommended)
                 </Checkbox>
-                <p className={styles.settingsHeader}>
+                <div className={styles.settingsHeader}>
                     Full-text search websites and PDFs
-                </p>
+                </div>
                 <Checkbox
                     id="index-all"
                     isChecked={this.props.areAllSettingsChecked}

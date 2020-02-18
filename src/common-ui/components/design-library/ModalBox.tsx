@@ -11,18 +11,18 @@ const StyledModalBox = styled.div`
     overflow-y: hidden;
 `
 const HeaderText = styled.h2`
-    font-family: Inter;
+    font-family: Poppins;
     font-style: normal;
-    font-weight: 500;
-    font-size: 20px;
-    margin: 30px 0;
+    font-weight: 600;
+    font-size: 25px;
+    margin: 0px 0 30px;
     text-align: center;
 
     /* Website - Text Colour */
-    color: #544960;
+    color: #3a2f45;
 `
 const Header = styled.div`
-    color: #544960;
+    color: #3a2f45;
     font-weight: 600;
     flex: 1;
 `

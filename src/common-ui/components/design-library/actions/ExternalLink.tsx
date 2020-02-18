@@ -9,8 +9,6 @@ import {
 const StyledExternalLink = styled.a`
     cursor: pointer;
     display: inline-block;
-    padding-left: 5px;
-    padding-right: 5px;
 `
 const StyledExternalLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeNormal}px;
@@ -19,7 +17,6 @@ const StyledExternalLinkText = styled(TypographyActionText)`
     color: ${colorText};
     &::after {
         content: '↗';
-        padding-left: 5px;
         text-decoration-line: none;
     }
 `
@@ -30,7 +27,7 @@ export const ExternalLink = ({
     label: string
     href: string
 }) => (
-    <StyledExternalLink href={href}>
+    <StyledExternalLink target="_blank" href={href}>
         <StyledExternalLinkText>{label}</StyledExternalLinkText>
     </StyledExternalLink>
 )

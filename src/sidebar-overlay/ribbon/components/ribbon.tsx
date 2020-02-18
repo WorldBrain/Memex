@@ -349,11 +349,6 @@ class Ribbon extends Component<Props, State> {
                                                 <span
                                                     className={styles.saveIcon}
                                                 />
-                                                <span
-                                                    className={styles.saveText}
-                                                >
-                                                    Saved!
-                                                </span>
                                             </div>
                                         </Tooltip>
                                     )}

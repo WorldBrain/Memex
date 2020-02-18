@@ -1,8 +1,8 @@
 import { JobScheduler, Props as JobSchedulerProps } from './job-scheduler'
-import { Job } from './jobs'
+import { JobDefinition, JobProps } from './types'
 
-export interface Props extends JobSchedulerProps {
-    jobs?: Job[]
+export interface Props extends JobSchedulerProps, JobProps {
+    jobs?: JobDefinition[]
 }
 
 export default class JobSchedulerBackground {
@@ -18,7 +18,10 @@ export default class JobSchedulerBackground {
 
     async setup() {
         for (const job of this.props.jobs) {
-            await this.scheduler.scheduleJob(job)
+            await this.scheduler.scheduleJob({
+                ...job,
+                job: job.job.bind(job, this.props),
+            })
         }
     }
 }

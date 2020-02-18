@@ -36,17 +36,27 @@ export const Introduction = ({
             <ModalColLeft>
                 <TypographyHeadingPage>STEP 1</TypographyHeadingPage>
                 <TypographyBodyBlock>
-                    You will need to download the Memex mobile app and then make
-                    sure the devices you want to pair are on the same wifi
-                    connection.
+                    Download Memex Go app and then make sure the devices you
+                    want to pair are on the same wifi connection.
                 </TypographyBodyBlock>
                 <TypographyBodyBlock>
-                    You will be able to find Memex on Google Play and on the
-                    Apple App Store.
+                    You can download Memex Go for{' '}
+                    <ExternalLink
+                        label={'Android'}
+                        href={
+                            'https://play.google.com/store/apps/details?id=io.worldbrain'
+                        }
+                    />{' '}
+                    and{' '}
+                    <ExternalLink
+                        label={'iOS'}
+                        href={'https://apps.apple.com/app/id1471860331'}
+                    />
+                    .
                 </TypographyBodyBlock>
             </ModalColLeft>
             <ModalColRight>
-                <img src={'/img/wifiDevices.png'} />
+                <img src={'/img/wifiDevices.svg'} />
             </ModalColRight>
         </ModalBox>
     )

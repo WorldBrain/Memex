@@ -45,6 +45,7 @@ import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { combineSearchIndex } from 'src/search/search-index'
 import { StorexHubBackground } from 'src/storex-hub/background'
+import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -116,13 +117,16 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
     })
 
+    const notifications = new NotificationBackground({ storageManager })
+
     const jobScheduler = new JobSchedulerBackground({
-        alarmsAPI: options.browserAPIs.alarms,
+        storagePrefix: JobScheduler.STORAGE_PREFIX,
         storageAPI: options.browserAPIs.storage,
+        alarmsAPI: options.browserAPIs.alarms,
+        notifications,
         jobs,
     })
 
-    const notifications = new NotificationBackground({ storageManager })
     const social = new SocialBackground({ storageManager })
     const bgScript = new BackgroundScript({
         storageManager,

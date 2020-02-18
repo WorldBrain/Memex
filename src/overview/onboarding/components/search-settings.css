@@ -1,5 +1,5 @@
 .container {
-    margin-top: 4.25rem;
+    margin-bottom: -15.75rem;
 }
 
 .settingsButton {
@@ -11,8 +11,9 @@
 
 .settingsHeader {
     text-align: left;
-    font-size: calc(0.6em + 0.5vh);
     font-weight: bold;
+    font-size: 17px;
+    margin: 15px 0 10px 0;
 }
 
 .textSearchHeader {
