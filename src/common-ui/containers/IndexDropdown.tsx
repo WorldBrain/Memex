@@ -12,7 +12,7 @@ import { ClickHandler } from '../../popup/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications } from 'src/util/remote-functions-background'
+import { notifications, tags } from 'src/util/remote-functions-background'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -81,7 +81,6 @@ class IndexDropdownContainer extends Component<Props, State> {
 
     private err: { timestamp: number; err: Error }
     private suggestRPC
-    private addTagRPC
     private delTagRPC
     private addTagsToOpenTabsRPC
     private delTagsFromOpenTabsRPC
@@ -94,7 +93,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         super(props)
 
         this.suggestRPC = remoteFunction('suggest')
-        this.addTagRPC = remoteFunction(this.addTagRPCName)
         this.delTagRPC = remoteFunction(this.delTagRPCName)
         this.addTagsToOpenTabsRPC = remoteFunction('addTagsToOpenTabs')
         this.delTagsFromOpenTabsRPC = remoteFunction('delTagsFromOpenTabs')
@@ -160,20 +158,23 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    private get addTagRPCName(): string {
-        if (this.props.isSocialPost) {
-            return 'addTagForTweet'
-        }
-
-        if (this.props.isForAnnotation) {
-            return 'addAnnotationTag'
-        }
-
+    private get addTagRPC() {
         if (this.props.fromOverview) {
-            return 'addTag'
+            return tags.addTag
         }
 
-        return 'addPageTag'
+        let rpcName
+        if (this.props.isSocialPost) {
+            rpcName = 'addTagForTweet'
+        } else if (this.props.isForAnnotation) {
+            rpcName = 'addAnnotationTag'
+        } else if (this.props.fromOverview) {
+            rpcName = 'addTag'
+        } else {
+            rpcName = 'addPageTag'
+        }
+
+        return remoteFunction(rpcName)
     }
 
     private get delTagRPCName(): string {

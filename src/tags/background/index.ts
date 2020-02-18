@@ -1,10 +1,9 @@
 import Storex from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Windows } from 'webextension-polyfill-ts'
 
 import TagStorage from './storage'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { SearchIndex } from 'src/search'
 import { pageIsStub } from 'src/page-indexing/utils'
 import PageStorage from 'src/page-indexing/background/storage'
@@ -37,7 +36,7 @@ export default class TagsBackground {
         this.remoteFunctions = {
             addTag: bindMethod(this, 'addTag'),
             delTag: bindMethod(this, 'delTag'),
-            addPageTag: params => {
+            addTagToPage: params => {
                 return this._modifyTag(true, params)
             },
             delPageTag: params => {
@@ -57,7 +56,7 @@ export default class TagsBackground {
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable(this.remoteFunctions)
+        makeRemotelyCallableType<RemoteTagsInterface>(this.remoteFunctions)
     }
 
     async addTagsToOpenTabs(params: {
@@ -126,6 +125,24 @@ export default class TagsBackground {
 
     async delTag({ tag, url }: { tag: string; url: string }) {
         return this.storage.delTag({ name: tag, url })
+    }
+
+    async addTagToPage(url: string, tag: string, tabId?: number) {
+        let page = await this.options.pageStorage.getPage(url)
+
+        if (page == null || pageIsStub(page)) {
+            page = await this.searchIndex.createPageViaBmTagActs({
+                url,
+                tabId,
+            })
+        }
+
+        // Add new visit if none, else page won't appear in results
+        await this.options.pageStorage.addPageVisitIfHasNone(
+            page.url,
+            Date.now(),
+        )
+        await this.storage.addTag({ url, name: tag }).catch(initErrHandler())
     }
 
     async _modifyTag(
