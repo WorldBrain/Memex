@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color5 from colors;
+
 .linkbox {
     grid-area: linkbox;
     display: inline-block;
@@ -6,8 +9,8 @@
 }
 
 .logo {
-    width: 2em;
-    height: 2em;
+    width: 3em;
+    height: 3em;
     margin: 0px 20px;
     cursor: pointer;
     opacity: 0.6;
@@ -25,4 +28,8 @@
     composes: darkBlue from '../../../../../common-ui/colors.css';
     font-weight: 600;
     text-decoration: none;
+}
+
+.text {
+    color: color5;
 }
