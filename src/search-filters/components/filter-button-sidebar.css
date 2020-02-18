@@ -10,7 +10,7 @@
     border-radius: 3px;
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: color3;
     width: fit-content;
@@ -29,6 +29,7 @@
     composes: tagButton;
     background-color: color2;
     padding: 0px 4px 1px 7px;
+    display: flex;
 }
 
 .dateBox {
@@ -68,8 +69,12 @@
     align-items: center;
 }
 
+.filterItem {
+    display: flex;
+}
+
 .renderCount {
-    margin-left: 10px;
+    margin-left: 5px;
     display: flex;
     align-items: center;
     flex-direction: row;
@@ -90,6 +95,15 @@
     background-color: color2;
 }
 
+.filterPill {
+    align-items: center;
+}
+
+.pillTitle {
+    vertical-align: middle;
+    height: 100%;
+}
+
 .clearFilters {
     composes: removeIcon from 'src/common-ui/icons.css';
     composes: nakedSquareButton from 'src/common-ui/elements.css';
@@ -98,9 +112,8 @@
     width: 14px;
     height: 14px;
     position: relative;
-    margin-left: 5px;
+    margin: 0 5px 0 -5px;
     background-position: center center;
-    right: -1px;
 
     &:hover {
         background-color: color8;

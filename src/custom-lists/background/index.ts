@@ -55,12 +55,6 @@ export default class CustomListBackground {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
-    async setup() {
-        await this.storage.createMobileListIfAbsent({
-            id: this.generateListId(),
-        })
-    }
-
     generateListId() {
         return Date.now()
     }

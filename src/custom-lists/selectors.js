@@ -39,6 +39,14 @@ export const listFilterIndex = createSelector(
 )
 
 export const getSortedLists = createSelector(allLists, lists => {
+    const mobileListIndex = lists.findIndex(
+        ({ name }) => name === MOBILE_LIST_NAME,
+    )
+
+    if (mobileListIndex === -1) {
+        lists = [...lists, { name: MOBILE_LIST_NAME, id: -1 }]
+    }
+
     return lists.sort(sortAlphabetically)
 })
 

@@ -1,15 +1,21 @@
 import Dexie from 'dexie'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { URLNormalizer } from '@worldbrain/memex-url-utils'
+import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
+
+export interface MigrationProps {
+    db: Dexie
+    normalizeUrl: URLNormalizer
+}
 
 export interface Migrations {
-    [storageKey: string]: (db: Dexie) => Promise<void>
+    [storageKey: string]: (props: MigrationProps) => Promise<void>
 }
 
 export const migrations: Migrations = {
     /**
      * If pageUrl is undefined, then re-derive it from url field.
      */
-    'annots-undefined-pageUrl-field': async db => {
+    'annots-undefined-pageUrl-field': async ({ db, normalizeUrl }) => {
         await db
             .table('annotations')
             .toCollection()
@@ -21,7 +27,7 @@ export const migrations: Migrations = {
     /**
      * If lastEdited is undefined, then set it to createdWhen value.
      */
-    'annots-created-when-to-last-edited': async db => {
+    'annots-created-when-to-last-edited': async ({ db }) => {
         await db
             .table('annotations')
             .toCollection()
@@ -34,5 +40,49 @@ export const migrations: Migrations = {
             .modify(annot => {
                 annot.lastEdited = annot.createdWhen
             })
+    },
+    'unify-duped-mobile-lists': async ({ db }) => {
+        const lists = await db
+            .table('customLists')
+            .where('name')
+            .equals(MOBILE_LIST_NAME)
+            .toArray()
+
+        if (lists.length < 2) {
+            return
+        }
+
+        const entries = [
+            await db
+                .table('pageListEntries')
+                .where('listId')
+                .equals(lists[0].id)
+                .toArray(),
+            await db
+                .table('pageListEntries')
+                .where('listId')
+                .equals(lists[1].id)
+                .toArray(),
+        ] as any[]
+
+        const listToKeep = entries[0].length > entries[1].length ? 0 : 1
+        const listToRemove = listToKeep === 0 ? 1 : 0
+
+        for (const entry of entries[listToRemove]) {
+            await db
+                .table('pageListEntries')
+                .put({ ...entry, listId: lists[listToKeep].id })
+        }
+
+        await db
+            .table('pageListEntries')
+            .where('listId')
+            .equals(lists[listToRemove].id)
+            .delete()
+        await db
+            .table('customLists')
+            .where('id')
+            .equals(lists[listToRemove].id)
+            .delete()
     },
 }

@@ -252,7 +252,6 @@ export async function setupBackgroundModules(
     await backgroundModules.sync.setup()
     await backgroundModules.jobScheduler.setup()
     backgroundModules.sync.registerRemoteEmitter()
-    await backgroundModules.customLists.setup()
 }
 
 export function getBackgroundStorageModules(

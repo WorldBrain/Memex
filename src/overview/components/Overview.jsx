@@ -39,6 +39,7 @@ class Overview extends PureComponent {
         window.location.href = OVERVIEW_URL
         this.props.setShowOnboardingMessage()
         localStorage.setItem('stage.Onboarding', 'true')
+        localStorage.setItem('stage.MobileAppAd', 'true')
     }
 
     renderOnboarding() {

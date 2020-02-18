@@ -53,42 +53,6 @@ describe('Custom List Integrations', () => {
         expect(currPage).not.toBeNull()
     }
 
-    describe('misc ops', () => {
-        test('should create mobile shared list if not existing in setup', async () => {
-            const { customLists } = await setupTest()
-
-            const shapeExpectedLists = (l: any[]) =>
-                l.map(list => ({
-                    ...list,
-                    id: expect.any(Number),
-                    pages: [],
-                    active: false,
-                    createdAt: expect.any(Date),
-                    isNestable: list.name !== DATA.MOBILE_LIST.name,
-                    isDeletable: list.name !== DATA.MOBILE_LIST.name,
-                }))
-
-            const lists = [DATA.LIST_1, DATA.LIST_2, DATA.LIST_3]
-
-            const before = await customLists.fetchAllLists({})
-            expect(before).toEqual(shapeExpectedLists(lists))
-
-            await customLists.setup()
-
-            const after = await customLists.fetchAllLists({})
-            expect(after).toEqual(
-                shapeExpectedLists([...lists, DATA.MOBILE_LIST]),
-            )
-
-            await customLists.setup()
-
-            const final = await customLists.fetchAllLists({})
-            expect(final).toEqual(
-                shapeExpectedLists([...lists, DATA.MOBILE_LIST]),
-            )
-        })
-    })
-
     describe('create ops', () => {
         test('should be able to create list entry for existing page', async () => {
             const { searchIndex, customLists } = await setupTest()

@@ -50,10 +50,11 @@
     margin: 0 0 5px 0;
     padding: 15px 15px 7px 15px;
     line-height: 20px;
+    text-align: left;
 }
 
 .highlightText {
-    composes: backgroundLightMintGreen from '../../common-ui/colors.css';
+    background-color: #00d88b;
     padding: 2px 0;
     line-height: 25px;
     font-style: normal;
