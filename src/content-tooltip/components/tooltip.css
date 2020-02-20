@@ -194,11 +194,9 @@
 .button {
     display: contents;
     flex-direction: column;
-    max-width: 20px;
     height: 14px;
     justify-content: center;
     align-items: center;
-    position: absolute;
     z-index: 100001;
     cursor: pointer;
     width: 20px;
