@@ -54,6 +54,7 @@ export const showClearFiltersBtn = createSelector(
     filterSelectors.usersExc,
     filterSelectors.hashtagsInc,
     filterSelectors.hashtagsExc,
+    filterSelectors.listFilter,
     startDate,
     endDate,
     (
@@ -66,6 +67,7 @@ export const showClearFiltersBtn = createSelector(
         usersExc,
         hashtagsInc,
         hashtagsExc,
+        listFilter,
         startDate,
         endDate,
     ) =>
@@ -78,6 +80,7 @@ export const showClearFiltersBtn = createSelector(
         !!usersExc.length ||
         !!hashtagsInc.length ||
         !!hashtagsExc.length ||
+        !!listFilter.length ||
         startDate ||
         endDate,
 )

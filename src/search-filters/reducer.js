@@ -194,6 +194,7 @@ const setFilters = filterKey => (state, filters) => {
         newState.usersInc.length > 0 ||
         newState.hashtagsInc.length > 0 ||
         newState.hashtagsExc.length > 0 ||
+        newState.lists.length > 0 ||
         newState.onlyBookmarks
 
     return newState
@@ -226,7 +227,7 @@ const setSuggestedHashtags = (state, hashtags) => ({
 
 const resetFilters = state => ({
     ...defaultState,
-    lists: state.lists,
+    lists: '',
     showFilterBar: state.showFilterBar,
 })
 
