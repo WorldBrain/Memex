@@ -82,5 +82,5 @@ Memex is MIT licensed. View full [License](./License)
 
 # Funders
 WorldBrain.io, the company behind Memex, has been funded by a set of courageous investors & grant givers. 
-See a full & up-to-date list [here](https://worldbrain.io/team). 
+See a full & up-to-date list [here](https://www.notion.so/worldbrain/The-Worldbrain-io-Team-9ca5429f6a5c480289386a5cb49f173c#480df7140d124dc68595316dd666fd9a). 
  
