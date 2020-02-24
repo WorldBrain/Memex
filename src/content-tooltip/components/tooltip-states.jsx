@@ -23,7 +23,7 @@ export const InitialComponent = ({
                 <img src={highlighter} className={styles.buttonImg} />
             </ButtonTooltip>
         </div>
-        
+
         <div className={styles.button} onClick={createAnnotation}>
             <ButtonTooltip tooltipText="Annotate (A)" position="bottom">
                 <img src={annotations} className={styles.buttonImg} />
@@ -42,7 +42,7 @@ export const InitialComponent = ({
 
         <div
             onClick={closeTooltip}
-            className={classNames(styles.button, {
+            className={classNames(styles.button, styles.closeBtn, {
                 [styles.noShow]: state === 'running',
                 [styles.noShow]: state === 'copied',
             })}
@@ -51,8 +51,7 @@ export const InitialComponent = ({
                 tooltipText="Close. Disable in Toolbar (R)"
                 position="bottom"
             >
-           
-                <img src={close} className={styles.buttonImg}/>
+                <img src={close} className={styles.buttonImg} />
             </ButtonTooltip>
         </div>
     </div>
