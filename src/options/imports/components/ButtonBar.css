@@ -92,6 +92,19 @@
     margin-left: 20px;
 }
 
+.dashboard {
+    composes: startImport;
+    border: 1px solid #5671cf;
+    cursor: pointer;
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    color: #5671cf;
+    font-size: 14px;
+    background: none;
+    margin-left: 10px;
+}
+
 .newImport {
     composes: startImport;
     border: none;

@@ -196,7 +196,7 @@ class PopupContainer extends PureComponent<Props> {
                         icon="help"
                         btnClass={btnStyles.help}
                     />
-                    <NotifButton />
+                    {/*<NotifButton />*/}
                 </div>
             </React.Fragment>
         )

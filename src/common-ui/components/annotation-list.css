@@ -8,6 +8,10 @@
     width: 783px;
 }
 
+.parentExpandedSidebar {
+    width: 92%;
+}
+
 .resultCount {
     color: #3a2f45;
     margin: 0px 0 15px 0;

@@ -85,4 +85,31 @@ export const migrations: Migrations = {
             .equals(lists[listToRemove].id)
             .delete()
     },
+    /*
+     * There was a bug in the mobile app where new page meta data could be created for
+     * a page shared from an unsupported app, meaning the URL (the main field used to
+     * associate meta data with pages) was empty.
+     */
+    'remove-empty-url': async ({ db }) => {
+        await db
+            .table('tags')
+            .where('url')
+            .equals('')
+            .delete()
+        await db
+            .table('visits')
+            .where('url')
+            .equals('')
+            .delete()
+        await db
+            .table('annotations')
+            .where('pageUrl')
+            .equals('')
+            .delete()
+        await db
+            .table('pageListEntries')
+            .where('pageUrl')
+            .equals('')
+            .delete()
+    },
 }

@@ -3,12 +3,16 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
-import { TypographyHeadingPage } from 'src/common-ui/components/design-library/typography'
+import {
+    TypographyHeadingPage,
+    TypographyInputTitle,
+} from 'src/common-ui/components/design-library/typography'
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import Link from 'src/common-ui/components/link'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
+import { InputTextField } from 'src/common-ui/components/design-library/form/InputTextField'
 
 interface Props {
     initiallyShowSubscriptionModal?: boolean
@@ -25,14 +29,28 @@ export class AccountInfo extends React.PureComponent<Props & UserProps> {
     render() {
         const user = this.props.currentUser
         const features = this.props.authorizedFeatures
-        const url = 'https://getmemex.com/subscriptions'
         return (
             <FullPage>
                 <TypographyHeadingPage>My Account</TypographyHeadingPage>
+                <br />
                 {user != null && (
                     <div>
-                        <PrimaryButton>
-                            <Link url={url} text={'Manage Subscriptions'} />
+                        <TypographyInputTitle>
+                            {' '}
+                            Email Address{' '}
+                        </TypographyInputTitle>
+
+                        <InputTextField
+                            type={'text'}
+                            defaultValue={user.email}
+                            readonly
+                            disabled
+                        />
+
+                        <PrimaryButton
+                            onClick={this.props.showSubscriptionModal}
+                        >
+                            {'Manage Subscriptions'}
                         </PrimaryButton>
 
                         <input

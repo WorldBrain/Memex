@@ -1,4 +1,10 @@
-import { PricingPlanTitle, PricingPlanItem, LoginTitle, LoginButton, WhiteSpacer30 } from 'src/authentication/components/Subscription/pricing.style'
+import {
+    PricingPlanTitle,
+    PricingPlanItem,
+    LoginTitle,
+    LoginButton,
+    WhiteSpacer30,
+} from 'src/authentication/components/Subscription/pricing.style'
 import { SubscriptionInnerOptions } from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
 import * as React from 'react'
 
@@ -19,24 +25,24 @@ export class SubscriptionPreview extends React.Component<Props> {
                 </PricingPlanTitle>
 
                 <PricingPlanItem className={''}>
-                            📲 Encrypted Sync with your iOS or Android phone
+                    📲 Encrypted Sync with your iOS or Android phone
                 </PricingPlanItem>
 
                 <PricingPlanItem className={''}>
                     💾 Automatic Backups
                 </PricingPlanItem>
 
-                <WhiteSpacer30/>
+                <WhiteSpacer30 />
 
                 <SubscriptionInnerOptions
                     openCheckoutBackupMonthly={this.props.onPress}
                     openCheckoutBackupYearly={this.props.onPress}
                 />
                 <LoginTitle className={''}>
-                    Already have an account?
+                    Already have a subscription?
                 </LoginTitle>
                 <LoginButton className={''} onClick={this.props.onPress}>
-                    Login 
+                    Login
                 </LoginButton>
             </div>
         )
