@@ -184,6 +184,8 @@ class AnnotationList extends Component<Props, State> {
             <div
                 className={cx({
                     [styles.parentExpanded]: isExpanded,
+                    [styles.parentExpandedSidebar]:
+                        isExpanded && this.props.env === 'inpage',
                 })}
             >
                 {/* Annotation count text and toggle arrow */}
