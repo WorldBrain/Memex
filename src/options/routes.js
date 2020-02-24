@@ -18,7 +18,7 @@ export default [
         hideFromSidebar: true,
     },
     {
-        name: 'Go back to Search',
+        name: 'Search Dashboard',
         pathname: '/overview',
         component: Overview,
         icon: 'search',

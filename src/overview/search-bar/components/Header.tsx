@@ -75,7 +75,10 @@ class Header extends PureComponent<Props> {
                     >
                         <div className={styles.searchField}>
                             <span className={styles.searchIconContainer}>
-                                <img src="/img/search.svg" className={styles.searchIconImg}/>
+                                <img
+                                    src="/img/search.svg"
+                                    className={styles.searchIconImg}
+                                />
                             </span>
                             <input
                                 id="query-search-bar"
@@ -112,12 +115,12 @@ class Header extends PureComponent<Props> {
                     </div>
                     <div className={styles.links}>
                         <BackupStatus />
-                        <InboxButton
+                        {/*<InboxButton
                             toggleInbox={this.props.toggleInbox}
                             showInbox={this.props.showInbox}
                             unreadNotifCount={this.props.unreadNotifCount}
                             showUnreadCount={this.props.showUnreadCount}
-                        />
+                        />*/}
                         <Link to={this.props.settingsRoute}>
                             <span
                                 title="Settings"

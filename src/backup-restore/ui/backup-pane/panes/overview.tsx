@@ -139,7 +139,18 @@ export class OverviewContainer extends Component<Props & UserProps> {
                     </div>
                     {!this.state.hasInitialBackup ? (
                         <div className={localStyles.statusLine}>
-                            <p>You haven't set up any backups yet.</p>
+                            <div>
+                                <p
+                                    className={classNames(
+                                        settingsStyle.subname,
+                                        localStyles.limitWidth,
+                                    )}
+                                >
+                                    Backup your data to your local hard drive or
+                                    your favorite cloud provider.
+                                </p>
+                                <p>You haven't set up any backups yet.</p>
+                            </div>
                             <PrimaryAction
                                 onClick={this.props.onBackupRequested}
                                 label={'Start Wizard'}
