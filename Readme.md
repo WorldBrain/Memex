@@ -20,7 +20,7 @@ Its name and functionalities are heavily inspired by [Vannevar Bush's vision of 
 Search with every word of all websites & PDFs you visited & filter by time, domain, tags or bookmarks. 
 ![](https://user-images.githubusercontent.com/7870039/75158724-a8b7d500-570e-11ea-9d35-0255cb9ea2da.gif)
  
-## Web Annotations:
+## Highlights, Notes & Annotations:
 Add notes to websites and pieces of text in them 
 ![](https://user-images.githubusercontent.com/7870039/75158717-a3f32100-570e-11ea-901d-8241b0710d60.gif)
 
@@ -35,6 +35,7 @@ For more info please see our [privacy policy](https://worldbrain.io/privacy)
 ## Mobile apps for iOS & Android + Encrypted Sync
 With [Memex Go](https://getmemex.com) you can save & organise content on the go. 
 Sync is end2end encrypted with [TweetNaCl](https://github.com/dchest/tweetnacl-js)
+
 <img width="1025" alt="mobileSync" src="https://user-images.githubusercontent.com/7870039/75159422-07ca1980-5710-11ea-845e-25f5157bcfd0.png">
 
 ## No VC money, no Exit: Your data & attention stays yours
@@ -51,8 +52,7 @@ More about our choice you find [in this post](https://community.worldbrain.io/t/
 🗂Tab manager: add all open tabs to a collection or tag
 
 ## Changelog & Roadmap:
-Let us know what you want to see in Memex. We plan to release these new features in 2020:
-**Full Changelog Roadmap:** worldbrain.io/roadmap
+See a list of our past updates and upcoming features [here](https://worldbrain.io/roadmap).
 
 # Contributing
 ## Near term features where contributions are welcome
@@ -68,8 +68,8 @@ Let us know what you want to see in Memex. We plan to release these new features
 
 ⭐️Nested Collections
 
-Drop by in our [team chat](http://join-worldbrain.herokuapp.com/)) if you're interested in contributing to those features. 
-Experience in React or React Native & Test Driven Development required.
+Drop by in our [team chat](http://join-worldbrain.herokuapp.com/) if you're interested in contributing to those features. 
+***Experience in React or React Native & Test Driven Development required***
 
 ## Bugs & Feature Requests
 Head over to our [community forums](https://community.worldbrain.io) to post your requests. 
