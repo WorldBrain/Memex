@@ -140,7 +140,7 @@ export default class TabChangeListeners {
         return {
             shouldLogStubs: !!storage[IDXING_PREF_KEYS.STUBS],
             shouldLogVisits: !!storage[IDXING_PREF_KEYS.VISITS],
-            shouldCaptureScreenshots: !!storage[IDXING_PREF_KEYS.SCREENSHOTS],
+            shouldCaptureScreenshots: false,
             logDelay: storage[IDXING_PREF_KEYS.VISIT_DELAY],
         }
     }

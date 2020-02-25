@@ -5,6 +5,11 @@
     margin-bottom: 35px;
     display: flex;
     flex-direction: column;
+    width: 783px;
+}
+
+.parentExpandedSidebar {
+    width: 92%;
 }
 
 .resultCount {
@@ -16,7 +21,6 @@
     cursor: pointer;
     animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
     display: flex;
-    border-top: 0.75px solid #e1e1e1;
     padding-top: 3px;
 }
 

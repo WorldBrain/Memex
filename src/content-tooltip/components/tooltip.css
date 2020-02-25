@@ -92,8 +92,8 @@
 .copiedMessage,
 .doneComponent {
     position: relative;
-    height: 20px;
     display: flex;
+    padding: 0 3px;
     flex-direction: row;
     align-items: center;
     margin-left: 0px;
@@ -107,9 +107,9 @@
 
 .createButtons {
     z-index: 10;
-    height: 20px;
     display: flex;
     top: 0px;
+    padding: 0 3px;
     width: fit-content;
     justify-content: space-between;
     align-items: center;
@@ -194,14 +194,10 @@
 .button {
     display: contents;
     flex-direction: column;
-    max-width: 20px;
-    height: 14px;
     justify-content: center;
     align-items: center;
-    position: absolute;
     z-index: 100001;
     cursor: pointer;
-    width: 20px;
 
     &:hover {
         opacity: 0.7;
@@ -210,12 +206,16 @@
 
 .buttonImg {
     width: auto;
-    height: 12px;
+    height: 16px !important; /* stylelint-disable-line declaration-no-important */
     margin: 0 5px;
 
     &:hover {
         opacity: 0.7;
     }
+}
+
+.closeBtn {
+    height: 14px !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .noShow {

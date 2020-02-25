@@ -18,7 +18,6 @@ interface Props {
 const settingsStyle = require('src/options/settings/components/settings.css')
 
 export class SyncNowOverlayPane extends Component<Props> {
-
     renderSyncNowButton() {
         if (this.props.isSyncing) {
             return (
@@ -102,9 +101,8 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 
     render() {
-
-         const syncFeatureAllowed = this.props.authorizedFeatures.includes(
-            "sync"
+        const syncFeatureAllowed = this.props.authorizedFeatures.includes(
+            'sync',
         )
 
         return (
@@ -171,7 +169,7 @@ export class SyncNowOverlayPaneContainer extends Component<
                                     Sync Enabled
                                 </div>
                                 <div className={settingsStyle.infoText}>
-                                    Syncs every 5 min.
+                                    Syncs every 2 minutes
                                 </div>
                             </div>
                             <SyncNowOverlayPane

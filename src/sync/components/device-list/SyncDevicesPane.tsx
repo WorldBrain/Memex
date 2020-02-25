@@ -295,10 +295,20 @@ class SyncDevicesPaneContainer extends React.Component<
                                 <img
                                     className={styles.downloadImg}
                                     src={'img/appStore.png'}
+                                    onClick={() => {
+                                        window.open(
+                                            'https://apps.apple.com/app/id1471860331',
+                                        )
+                                    }}
                                 />
                                 <img
                                     className={styles.downloadImg}
                                     src={'img/googlePlay.png'}
+                                    onClick={() => {
+                                        window.open(
+                                            'https://play.google.com/store/apps/details?id=io.worldbrain',
+                                        )
+                                    }}
                                 />
                             </div>
                         </div>

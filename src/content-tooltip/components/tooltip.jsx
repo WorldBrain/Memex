@@ -11,20 +11,13 @@ const deriveTooltipClass = state =>
         [styles.stateCopied]: state === 'copied',
     })
 
-const Tooltip = ({
-    x,
-    y,
-    state,
-    tooltipComponent,
-    closeTooltip,
-}) => (
+const Tooltip = ({ x, y, state, tooltipComponent, closeTooltip }) => (
     <div
         className={deriveTooltipClass(state)}
-        style={{ left: x, top: y }}
+        style={{ left: x, top: y, height: 28, width: 85 }}
         id="memex-tooltip"
     >
         <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
-        
     </div>
 )
 
@@ -38,18 +31,20 @@ Tooltip.propTypes = {
 
 export default Tooltip
 
-export function _renderButtons({ closeTooltip, state}) {
+export function _renderButtons({ closeTooltip, state }) {
     return (
         <ButtonTooltip
             tooltipText="Close. Disable in Toolbar (R)"
             position="rightContentTooltip"
         >
-        <span className={classNames(styles.buttons, {
-            [styles.noShow] : state === 'running',
-            [styles.noShow] : state === 'copied',
-        })}>
-            <a className={styles.imgCross} onClick={closeTooltip}/>
-        </span>
+            <span
+                className={classNames(styles.buttons, {
+                    [styles.noShow]: state === 'running',
+                    [styles.noShow]: state === 'copied',
+                })}
+            >
+                <a className={styles.imgCross} onClick={closeTooltip} />
+            </span>
         </ButtonTooltip>
     )
 }

@@ -25,8 +25,14 @@ export const Success = ({ onClose }: { onClose: () => void }) => {
                     with your Desktop memex.
                 </TypographyBodyBlock>
                 <TypographyBodyBlock>
-                    View our <ExternalLink label={'Roadmap'} href={''} /> to
-                    learn about the full set of upcoming sync and mobile
+                    View our{' '}
+                    <ExternalLink
+                        label={'Roadmap'}
+                        href={
+                            'https://www.notion.so/262a367f7a2a48ff8115d2c71f700c14'
+                        }
+                    />{' '}
+                    to learn about the full set of upcoming sync and mobile
                     features.
                 </TypographyBodyBlock>
             </ModalColLeft>
