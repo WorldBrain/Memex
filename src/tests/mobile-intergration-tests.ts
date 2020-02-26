@@ -52,6 +52,7 @@ export async function setupMobileIntegrationTest(options?: {
         },
         // connectionOptions: { type: 'sqlite', database: ':memory:', logging: true },
         // connectionOptions: { type: 'sqlite', database: '/tmp/test.sqlite', logging: true },
+        legacyMemexCompatibility: true,
     })
 
     const storageManager = new StorageManager({ backend })

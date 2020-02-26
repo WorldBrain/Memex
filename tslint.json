@@ -42,6 +42,7 @@
                 "@worldbrain/storex-backend-firestore",
                 "@worldbrain/storex-backend-typeorm",
                 "@worldbrain/storex-pattern-modules",
+                "@worldbrain/storex-middleware-change-watcher",
                 "@worldbrain/storex-hub",
                 "@worldbrain/memex-url-utils",
                 "@worldbrain/memex-stemmer",

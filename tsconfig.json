@@ -41,6 +41,12 @@
             "@worldbrain/storex-pattern-modules": [
                 "external/@worldbrain/storex-pattern-modules/ts"
             ],
+            "@worldbrain/storex-middleware-change-watcher/lib/*": [
+                "external/@worldbrain/storex-middleware-change-watcher/ts/*"
+            ],
+            "@worldbrain/storex-middleware-change-watcher": [
+                "external/@worldbrain/storex-middleware-change-watcher/ts"
+            ],
             "@worldbrain/storex-pattern-modules/lib/*": [
                 "external/@worldbrain/storex-pattern-modules/ts/*"
             ],
