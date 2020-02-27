@@ -50,6 +50,7 @@
 
     &:hover .button {
         opacity: 0.4;
+        display: flex;
     }
 
     &:hover .actionItems {
@@ -68,6 +69,8 @@
 
     & .button {
         height: 16px;
+        padding: 0.2;
+        display: flex;
     }
 
     & .displayTime {
@@ -78,11 +81,6 @@
     & .url {
         font-size: 14px;
         margin: -7px 0 4px 38px;
-    }
-
-    & .button {
-        padding: 0.2;
-        opacity: 0;
     }
 
     & .title {
