@@ -223,32 +223,40 @@ export default class CustomListBackground {
 
         const time = Date.now()
 
-        tabs.forEach(async tab => {
-            const page = await this.options.pageStorage.getPage(tab.url)
+        const fullUrlsToAdd: string[] = []
+        await Promise.all(
+            tabs.map(async tab => {
+                const page = await this.options.pageStorage.getPage(tab.url)
 
-            if (!page || pageIsStub(page)) {
-                await this._createPage({
-                    tabId: tab.tabId,
-                    url: tab.url,
-                    allowScreenshot: false,
-                    visitTime: time,
-                    save: true,
-                })
-            } else {
-                // Add new visit if none, else page won't appear in results
-                await this.options.pageStorage.addPageVisitIfHasNone(
-                    tab.url,
-                    time,
-                )
-            }
-        })
+                try {
+                    if (!page || pageIsStub(page)) {
+                        await this._createPage({
+                            tabId: tab.tabId,
+                            url: tab.url,
+                            allowScreenshot: false,
+                            visitTime: time,
+                            save: true,
+                        })
+                    } else {
+                        // Add new visit if none, else page won't appear in results
+                        await this.options.pageStorage.addPageVisitIfHasNone(
+                            tab.url,
+                            time,
+                        )
+                    }
+                    fullUrlsToAdd.push(tab.url)
+                } catch (e) {
+                    console.error(e)
+                }
+            }),
+        )
 
         await Promise.all(
-            tabs.map(tab => {
+            fullUrlsToAdd.map(fullUrl => {
                 this.storage.insertPageToList({
                     listId,
-                    fullUrl: tab.url,
-                    pageUrl: normalizeUrl(tab.url),
+                    fullUrl,
+                    pageUrl: normalizeUrl(fullUrl),
                 })
             }),
         )
