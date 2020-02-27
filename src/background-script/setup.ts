@@ -106,7 +106,7 @@ export function createBackgroundModules(options: {
         storageManager,
         pageStorage: pages.storage,
         searchIndex,
-        tabMan: activityLogger.tabManager,
+        queryTabs: bindMethod(browser.tabs, 'query'),
         windows: browser.windows,
     })
     const search = new SearchBackground({

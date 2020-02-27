@@ -10,8 +10,9 @@ import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { SearchIndex } from 'src/search'
 import { Tab, CustomListsInterface } from './types'
 import PageStorage from 'src/page-indexing/background/storage'
-import { pageIsStub } from 'src/page-indexing/utils'
+import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
 import { bindMethod } from 'src/util/functions'
+import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 
 export default class CustomListBackground {
     storage: CustomListStorage
@@ -215,44 +216,22 @@ export default class CustomListBackground {
         tabs?: Array<{ tabId: number; url: string }>
     }) {
         if (!tabs) {
-            tabs = await this._getCurrentTabs()
+            tabs = await getOpenTabsInCurrentWindow(
+                this.options.windows,
+                this.options.queryTabs,
+            )
         }
-
-        // console.log('tabs after', tabs)
-        // if (1) return
 
         const time = Date.now()
 
-        const fullUrlsToAdd: string[] = []
-        await Promise.all(
-            tabs.map(async tab => {
-                const page = await this.options.pageStorage.getPage(tab.url)
-
-                try {
-                    if (!page || pageIsStub(page)) {
-                        await this._createPage({
-                            tabId: tab.tabId,
-                            url: tab.url,
-                            allowScreenshot: false,
-                            visitTime: time,
-                            save: true,
-                        })
-                    } else {
-                        // Add new visit if none, else page won't appear in results
-                        await this.options.pageStorage.addPageVisitIfHasNone(
-                            tab.url,
-                            time,
-                        )
-                    }
-                    fullUrlsToAdd.push(tab.url)
-                } catch (e) {
-                    console.error(e)
-                }
-            }),
-        )
+        const indexed = await maybeIndexTabs(tabs, {
+            pageStorage: this.options.pageStorage,
+            createPage: this._createPage,
+            time,
+        })
 
         await Promise.all(
-            fullUrlsToAdd.map(fullUrl => {
+            indexed.map(({ fullUrl }) => {
                 this.storage.insertPageToList({
                     listId,
                     fullUrl,
@@ -270,7 +249,10 @@ export default class CustomListBackground {
         tabs?: Array<{ tabId: number; url: string }>
     }) {
         if (!tabs) {
-            tabs = await this._getCurrentTabs()
+            tabs = await getOpenTabsInCurrentWindow(
+                this.options.windows,
+                this.options.queryTabs,
+            )
         }
 
         await Promise.all(
@@ -281,12 +263,5 @@ export default class CustomListBackground {
                 }),
             ),
         )
-    }
-
-    async _getCurrentTabs(): Promise<Array<{ tabId: number; url: string }>> {
-        const currentWindow = await this.options.windows.getCurrent()
-        return (await this.options.queryTabs({ windowId: currentWindow.id }))
-            .map(tab => ({ tabId: tab.id, url: tab.url }))
-            .filter(tab => tab.tabId !== browser.tabs.TAB_ID_NONE)
     }
 }
