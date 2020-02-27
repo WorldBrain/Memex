@@ -46,6 +46,7 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 import { combineSearchIndex } from 'src/search/search-index'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import { bindMethod } from 'src/util/functions'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -105,7 +106,7 @@ export function createBackgroundModules(options: {
         storageManager,
         pageStorage: pages.storage,
         searchIndex,
-        tabMan: activityLogger.tabManager,
+        queryTabs: bindMethod(browser.tabs, 'query'),
         windows: browser.windows,
     })
     const search = new SearchBackground({
@@ -177,7 +178,7 @@ export function createBackgroundModules(options: {
         eventLog: new EventLogBackground({ storageManager }),
         customLists: new CustomListBackground({
             storageManager,
-            tabMan: activityLogger.tabManager,
+            queryTabs: bindMethod(browser.tabs, 'query'),
             windows: browser.windows,
             searchIndex: search.searchIndex,
             pageStorage: pages.storage,
