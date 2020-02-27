@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { Windows } from 'webextension-polyfill-ts'
+import { Windows, Tabs, browser } from 'webextension-polyfill-ts'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
@@ -11,6 +11,7 @@ import { SearchIndex } from 'src/search'
 import { Tab, CustomListsInterface } from './types'
 import PageStorage from 'src/page-indexing/background/storage'
 import { pageIsStub } from 'src/page-indexing/utils'
+import { bindMethod } from 'src/util/functions'
 
 export default class CustomListBackground {
     storage: CustomListStorage
@@ -22,7 +23,7 @@ export default class CustomListBackground {
             storageManager: Storex
             searchIndex: SearchIndex
             pageStorage: PageStorage
-            tabMan?: TabManager
+            queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             createPage?: SearchIndex['createPageViaBmTagActs']
         },
@@ -35,19 +36,22 @@ export default class CustomListBackground {
             options.createPage || options.searchIndex.createPageViaBmTagActs
 
         this.remoteFunctions = {
-            createCustomList: this.createCustomList.bind(this),
-            insertPageToList: this.insertPageToList.bind(this),
-            updateListName: this.updateList.bind(this),
-            removeList: this.removeList.bind(this),
-            removePageFromList: this.removePageFromList.bind(this),
-            fetchAllLists: this.fetchAllLists.bind(this),
-            fetchListById: this.fetchListById.bind(this),
-            fetchListPagesByUrl: this.fetchListPagesByUrl.bind(this),
-            fetchListNameSuggestions: this.fetchListNameSuggestions.bind(this),
-            fetchListPagesById: this.fetchListPagesById.bind(this),
-            fetchListIgnoreCase: this.fetchListIgnoreCase.bind(this),
-            addOpenTabsToList: this.addOpenTabsToList.bind(this),
-            removeOpenTabsFromList: this.removeOpenTabsFromList.bind(this),
+            createCustomList: bindMethod(this, 'createCustomList'),
+            insertPageToList: bindMethod(this, 'insertPageToList'),
+            updateListName: bindMethod(this, 'updateList'),
+            removeList: bindMethod(this, 'removeList'),
+            removePageFromList: bindMethod(this, 'removePageFromList'),
+            fetchAllLists: bindMethod(this, 'fetchAllLists'),
+            fetchListById: bindMethod(this, 'fetchListById'),
+            fetchListPagesByUrl: bindMethod(this, 'fetchListPagesByUrl'),
+            fetchListNameSuggestions: bindMethod(
+                this,
+                'fetchListNameSuggestions',
+            ),
+            fetchListPagesById: bindMethod(this, 'fetchListPagesById'),
+            fetchListIgnoreCase: bindMethod(this, 'fetchListIgnoreCase'),
+            addOpenTabsToList: bindMethod(this, 'addOpenTabsToList'),
+            removeOpenTabsFromList: bindMethod(this, 'removeOpenTabsFromList'),
         }
     }
 
@@ -208,12 +212,14 @@ export default class CustomListBackground {
         tabs,
     }: {
         listId: number
-        tabs?: Array<Tab>
+        tabs?: Array<{ tabId: number; url: string }>
     }) {
         if (!tabs) {
-            const currentWindow = await this.options.windows.getCurrent()
-            tabs = this.options.tabMan.getTabUrls(currentWindow.id)
+            tabs = await this._getCurrentTabs()
         }
+
+        // console.log('tabs after', tabs)
+        // if (1) return
 
         const time = Date.now()
 
@@ -253,11 +259,10 @@ export default class CustomListBackground {
         tabs,
     }: {
         listId: number
-        tabs?: Array<Tab>
+        tabs?: Array<{ tabId: number; url: string }>
     }) {
         if (!tabs) {
-            const currentWindow = await this.options.windows.getCurrent()
-            tabs = this.options.tabMan.getTabUrls(currentWindow.id)
+            tabs = await this._getCurrentTabs()
         }
 
         await Promise.all(
@@ -268,5 +273,12 @@ export default class CustomListBackground {
                 }),
             ),
         )
+    }
+
+    async _getCurrentTabs(): Promise<Array<{ tabId: number; url: string }>> {
+        const currentWindow = await this.options.windows.getCurrent()
+        return (await this.options.queryTabs({ windowId: currentWindow.id }))
+            .map(tab => ({ tabId: tab.id, url: tab.url }))
+            .filter(tab => tab.tabId !== browser.tabs.TAB_ID_NONE)
     }
 }
