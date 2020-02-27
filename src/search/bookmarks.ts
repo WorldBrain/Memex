@@ -10,23 +10,17 @@ export const addBookmark = (
     pages: PageIndexingBackground,
     bookmarksStorage: BookmarksStorage,
     tabManager: TabManager,
-) => async ({
-    url,
-    timestamp = Date.now(),
-    tabId,
-}: {
-    url: string
-    timestamp?: number
-    tabId?: number
-}) => {
-    const page = await pages.storage.getPage(url)
-
+) => async (params: { url: string; timestamp?: number; tabId?: number }) => {
+    let page = await pages.storage.getPage(params.url)
     if (page == null || pageIsStub(page)) {
-        await pages.createPageViaBmTagActs({ url, tabId })
+        page = await pages.createPageViaBmTagActs({
+            url: params.url,
+            tabId: params.tabId,
+        })
     }
 
-    await bookmarksStorage.createBookmarkIfNeeded(page.url, timestamp)
-    tabManager.setBookmarkState(url, true)
+    await bookmarksStorage.createBookmarkIfNeeded(page.url, params.timestamp)
+    tabManager.setBookmarkState(params.url, true)
 }
 
 export const delBookmark = (
