@@ -12,7 +12,7 @@ const isDOMContentLoaded = () =>
         }, 50)
     })
 
-async function sniff() {
+export async function sniffWordpressWorldbrainUser() {
     await isDOMContentLoaded()
 
     const script = document.querySelector('script#user-id')
@@ -30,8 +30,4 @@ async function sniff() {
             window.location.href = window.location.pathname + 'redirect/'
         }, 1000 * 5)
     }
-}
-
-if (window.location.hostname === 'worldbrain.io') {
-    sniff()
 }

@@ -1,13 +1,16 @@
 import 'babel-polyfill'
 import { RemoteFunctionRegistry } from './util/webextensionRPC'
-import 'src/activity-logger/content_script'
-import 'src/page-analysis/content_script'
-import 'src/search-injection/content_script'
+import { setupScrollReporter } from './activity-logger/content_script'
+import { setupPageContentRPC } from 'src/page-analysis/content_script'
+import { initSearchInjection } from 'src/search-injection/content_script'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import initContentTooltip from 'src/content-tooltip/content_script'
-import 'src/direct-linking/content_script'
+import {
+    loadAnnotationWhenReady,
+    setupRemoteDirectLinkFunction,
+} from 'src/direct-linking/content_script'
 import initRibbonAndSidebar from './sidebar-overlay/content_script'
-import 'src/backup-restore/content_script'
+import { sniffWordpressWorldbrainUser } from 'src/backup-restore/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import initSocialIntegration from 'src/social-integration/content_script'
 import configureStore from './sidebar-overlay/store'
@@ -15,6 +18,16 @@ import { initKeyboardShortcuts } from 'src/content_script_keyboard_shortcuts'
 import { fetchAnnotationsForPageUrl } from 'src/annotations/actions'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { initBasicStore } from 'src/popup/actions'
+
+setupScrollReporter()
+setupPageContentRPC()
+initSearchInjection()
+loadAnnotationWhenReady()
+setupRemoteDirectLinkFunction()
+
+if (window.location.hostname === 'worldbrain.io') {
+    sniffWordpressWorldbrainUser()
+}
 
 const remoteFunctionRegistry = new RemoteFunctionRegistry()
 const toolbarNotifications = new ToolbarNotifications()
