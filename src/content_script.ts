@@ -19,40 +19,46 @@ import { fetchAnnotationsForPageUrl } from 'src/annotations/actions'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { initBasicStore } from 'src/popup/actions'
 
-setupScrollReporter()
-setupPageContentRPC()
-initSearchInjection()
-loadAnnotationWhenReady()
-setupRemoteDirectLinkFunction()
+export function main() {
+    setupScrollReporter()
+    setupPageContentRPC()
+    initSearchInjection()
+    loadAnnotationWhenReady()
+    setupRemoteDirectLinkFunction()
 
-if (window.location.hostname === 'worldbrain.io') {
-    sniffWordpressWorldbrainUser()
+    if (window.location.hostname === 'worldbrain.io') {
+        sniffWordpressWorldbrainUser()
+    }
+
+    const remoteFunctionRegistry = new RemoteFunctionRegistry()
+    const toolbarNotifications = new ToolbarNotifications()
+    const annotationsManager = new AnnotationsManager()
+    const rootStore = configureStore()
+
+    toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
+    window['toolbarNotifications'] = toolbarNotifications
+
+    initStore(rootStore)
+    initContentTooltip({ toolbarNotifications, store: rootStore })
+    initRibbonAndSidebar({
+        annotationsManager,
+        toolbarNotifications,
+        store: rootStore,
+    })
+    initSocialIntegration({ annotationsManager })
+    initKeyboardShortcuts({ store: rootStore })
+    initHighlights(rootStore)
+
+    async function initStore(store) {
+        store.dispatch(initBasicStore() as any)
+    }
+
+    async function initHighlights(store) {
+        await store.dispatch(
+            sidebarActs.setAnnotationsManager(annotationsManager),
+        )
+        rootStore.dispatch(fetchAnnotationsForPageUrl(false, true) as any)
+    }
 }
 
-const remoteFunctionRegistry = new RemoteFunctionRegistry()
-const toolbarNotifications = new ToolbarNotifications()
-const annotationsManager = new AnnotationsManager()
-const rootStore = configureStore()
-
-toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
-window['toolbarNotifications'] = toolbarNotifications
-
-initStore(rootStore)
-initContentTooltip({ toolbarNotifications, store: rootStore })
-initRibbonAndSidebar({
-    annotationsManager,
-    toolbarNotifications,
-    store: rootStore,
-})
-initSocialIntegration({ annotationsManager })
-initKeyboardShortcuts({ store: rootStore })
-initHighlights(rootStore)
-
-async function initStore(store) {
-    store.dispatch(initBasicStore() as any)
-}
-
-async function initHighlights(store) {
-    await store.dispatch(sidebarActs.setAnnotationsManager(annotationsManager))
-    rootStore.dispatch(fetchAnnotationsForPageUrl(false, true) as any)
-}
+main()

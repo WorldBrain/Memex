@@ -5,6 +5,7 @@ import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 import { runInTab } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
+import extractPageContentFromRawContent from './content-extraction'
 
 export type PageAnalyzer = (args: {
     tabId: number
@@ -30,8 +31,15 @@ const analysePage: PageAnalyzer = async ({
     await whenPageDOMLoaded({ tabId })
 
     // Set up to run these functions in the content script in the tab.
-    const extractPageContent = runInTab<PageAnalyzerInterface>(tabId)
-        .extractPageContent
+    const extractPageContent = async () => {
+        const rawContent = await runInTab<PageAnalyzerInterface>(
+            tabId,
+        ).extractRawPageContent()
+        const extractedContent = await extractPageContentFromRawContent(
+            rawContent,
+        )
+        return extractedContent
+    }
 
     // Fetch the data
     const dataFetchingPromises = [
