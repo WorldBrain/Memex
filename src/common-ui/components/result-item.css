@@ -49,20 +49,16 @@
     }
 
     &:hover .button {
-        opacity: 0.3;
+        opacity: 0.4;
         display: flex;
-
-        &:hover {
-            opacity: 0.7;
-            cursor: pointer;
-        }
     }
 
     &:hover .actionItems {
         display: flex;
     }
 
-    & button {
+    & .button {
+        display: none;
         padding: 0;
     }
 }
@@ -73,6 +69,8 @@
 
     & .button {
         height: 16px;
+        padding: 0.2;
+        display: flex;
     }
 
     & .displayTime {
@@ -329,17 +327,19 @@
     border: none;
     z-index: 2500;
     width: auto;
+    display: flex;
+    opacity: 0.2;
     height: 14px;
     background-repeat: no-repeat;
     cursor: pointer;
     outline: none;
-    display: none;
     background-position: center center;
     background-size: contain;
     margin-left: 8px;
 
     &:hover {
         opacity: 1;
+        cursor: pointer;
     }
 }
 
@@ -354,6 +354,7 @@
     background-size: contain;
     margin-left: 8px;
     display: flex;
+    opacity: 0.8;
 
     &:hover {
         opacity: 0.6;
@@ -371,11 +372,11 @@
 }
 
 .commentActive {
-    opacity: 1;
+    opacity: 0.8;
 }
 
 .bookmark {
-    opacity: 1;
+    opacity: 0.8;
 }
 
 .notBookmark {
@@ -385,6 +386,18 @@
 }
 
 .tag {
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
+.trash {
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
+.comment {
     &:hover {
         opacity: 0.6;
     }

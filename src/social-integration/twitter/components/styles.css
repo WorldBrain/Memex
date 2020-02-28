@@ -74,13 +74,13 @@
 }
 
 .button {
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
     height: 25px;
     width: 25px;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 18px;
     outline: none;
+    opacity: 0.7;
 }
 
 .commentIcon {

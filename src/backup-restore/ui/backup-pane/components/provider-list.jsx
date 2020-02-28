@@ -78,7 +78,7 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             </div>
                             <p className={settingsStyle.infoText}>
                                 Make sure you are trying to backup your data to
-                                the same Google Account than the one logged into
+                                the same Google Account as the one logged into
                                 your browser profile.
                                 <a
                                     className={Styles.link}

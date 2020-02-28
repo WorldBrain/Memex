@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { Windows } from 'webextension-polyfill-ts'
+import { Windows, Tabs, browser } from 'webextension-polyfill-ts'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
@@ -10,7 +10,9 @@ import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { SearchIndex } from 'src/search'
 import { Tab, CustomListsInterface } from './types'
 import PageStorage from 'src/page-indexing/background/storage'
-import { pageIsStub } from 'src/page-indexing/utils'
+import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
+import { bindMethod } from 'src/util/functions'
+import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 
 export default class CustomListBackground {
     storage: CustomListStorage
@@ -22,7 +24,7 @@ export default class CustomListBackground {
             storageManager: Storex
             searchIndex: SearchIndex
             pageStorage: PageStorage
-            tabMan?: TabManager
+            queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             createPage?: SearchIndex['createPageViaBmTagActs']
         },
@@ -35,19 +37,22 @@ export default class CustomListBackground {
             options.createPage || options.searchIndex.createPageViaBmTagActs
 
         this.remoteFunctions = {
-            createCustomList: this.createCustomList.bind(this),
-            insertPageToList: this.insertPageToList.bind(this),
-            updateListName: this.updateList.bind(this),
-            removeList: this.removeList.bind(this),
-            removePageFromList: this.removePageFromList.bind(this),
-            fetchAllLists: this.fetchAllLists.bind(this),
-            fetchListById: this.fetchListById.bind(this),
-            fetchListPagesByUrl: this.fetchListPagesByUrl.bind(this),
-            fetchListNameSuggestions: this.fetchListNameSuggestions.bind(this),
-            fetchListPagesById: this.fetchListPagesById.bind(this),
-            fetchListIgnoreCase: this.fetchListIgnoreCase.bind(this),
-            addOpenTabsToList: this.addOpenTabsToList.bind(this),
-            removeOpenTabsFromList: this.removeOpenTabsFromList.bind(this),
+            createCustomList: bindMethod(this, 'createCustomList'),
+            insertPageToList: bindMethod(this, 'insertPageToList'),
+            updateListName: bindMethod(this, 'updateList'),
+            removeList: bindMethod(this, 'removeList'),
+            removePageFromList: bindMethod(this, 'removePageFromList'),
+            fetchAllLists: bindMethod(this, 'fetchAllLists'),
+            fetchListById: bindMethod(this, 'fetchListById'),
+            fetchListPagesByUrl: bindMethod(this, 'fetchListPagesByUrl'),
+            fetchListNameSuggestions: bindMethod(
+                this,
+                'fetchListNameSuggestions',
+            ),
+            fetchListPagesById: bindMethod(this, 'fetchListPagesById'),
+            fetchListIgnoreCase: bindMethod(this, 'fetchListIgnoreCase'),
+            addOpenTabsToList: bindMethod(this, 'addOpenTabsToList'),
+            removeOpenTabsFromList: bindMethod(this, 'removeOpenTabsFromList'),
         }
     }
 
@@ -208,41 +213,29 @@ export default class CustomListBackground {
         tabs,
     }: {
         listId: number
-        tabs?: Array<Tab>
+        tabs?: Array<{ tabId: number; url: string }>
     }) {
         if (!tabs) {
-            const currentWindow = await this.options.windows.getCurrent()
-            tabs = this.options.tabMan.getTabUrls(currentWindow.id)
+            tabs = await getOpenTabsInCurrentWindow(
+                this.options.windows,
+                this.options.queryTabs,
+            )
         }
 
         const time = Date.now()
 
-        tabs.forEach(async tab => {
-            const page = await this.options.pageStorage.getPage(tab.url)
-
-            if (!page || pageIsStub(page)) {
-                await this._createPage({
-                    tabId: tab.tabId,
-                    url: tab.url,
-                    allowScreenshot: false,
-                    visitTime: time,
-                    save: true,
-                })
-            } else {
-                // Add new visit if none, else page won't appear in results
-                await this.options.pageStorage.addPageVisitIfHasNone(
-                    tab.url,
-                    time,
-                )
-            }
+        const indexed = await maybeIndexTabs(tabs, {
+            pageStorage: this.options.pageStorage,
+            createPage: this._createPage,
+            time,
         })
 
         await Promise.all(
-            tabs.map(tab => {
+            indexed.map(({ fullUrl }) => {
                 this.storage.insertPageToList({
                     listId,
-                    fullUrl: tab.url,
-                    pageUrl: normalizeUrl(tab.url),
+                    fullUrl,
+                    pageUrl: normalizeUrl(fullUrl),
                 })
             }),
         )
@@ -253,11 +246,13 @@ export default class CustomListBackground {
         tabs,
     }: {
         listId: number
-        tabs?: Array<Tab>
+        tabs?: Array<{ tabId: number; url: string }>
     }) {
         if (!tabs) {
-            const currentWindow = await this.options.windows.getCurrent()
-            tabs = this.options.tabMan.getTabUrls(currentWindow.id)
+            tabs = await getOpenTabsInCurrentWindow(
+                this.options.windows,
+                this.options.queryTabs,
+            )
         }
 
         await Promise.all(

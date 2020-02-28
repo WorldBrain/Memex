@@ -12,6 +12,7 @@
     display: flex;
     flex-direction: row;
     margin: 0 7px 3px;
+    z-index: 0;
 }
 
 .timestamp {
