@@ -18,6 +18,7 @@ import { AuthBackground } from 'src/authentication/background'
 import { ClientSyncLogStorage } from '@worldbrain/storex-sync/lib/client-sync-log'
 import { SyncInfoStorage } from '@worldbrain/memex-common/lib/sync/storage'
 import { MemexExtSyncSettingStore } from 'src/sync/background/setting-store'
+import { setStorageMiddleware } from 'src/storage/middleware'
 
 export interface MobileIntegrationTestSetup {
     storage: {
@@ -105,6 +106,9 @@ export async function setupMobileIntegrationTest(options?: {
     })
     await storageManager.finishInitialization()
 
+    await setStorageMiddleware(storageManager, {
+        syncService: sync,
+    })
     storageManager.setMiddleware([await sync.createSyncLoggingMiddleware()])
 
     await storageManager.backend.migrate()

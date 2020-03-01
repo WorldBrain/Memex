@@ -109,7 +109,8 @@ export async function setupBackgroundIntegrationTest(options?: {
     }
 
     await setStorageMiddleware(storageManager, {
-        backgroundModules,
+        syncService: backgroundModules.sync,
+        storexHub: backgroundModules.storexHub,
         modifyMiddleware: originalMiddleware => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations

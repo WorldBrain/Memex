@@ -3,11 +3,14 @@ import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
 import { BackgroundModules } from 'src/background-script/setup'
 import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
+import SyncService from '@worldbrain/memex-common/lib/sync'
+import { StorexHubBackground } from 'src/storex-hub/background'
 
 export async function setStorageMiddleware(
     storageManager: StorageManager,
     options: {
-        backgroundModules: BackgroundModules
+        syncService: SyncService
+        storexHub?: StorexHubBackground
         modifyMiddleware?: (
             middleware: StorageMiddleware[],
         ) => StorageMiddleware[]
@@ -24,12 +27,10 @@ export async function setStorageMiddleware(
                 shouldWatchCollection: collection =>
                     syncedCollections.has(collection),
                 postprocessOperation: async event => {
-                    await options.backgroundModules.storexHub.handlePostStorageChange(
-                        event,
-                    )
+                    await options.storexHub.handlePostStorageChange(event)
                 },
             }),
-            await options.backgroundModules.sync.createSyncLoggingMiddleware(),
+            await options.syncService.createSyncLoggingMiddleware(),
         ]),
     )
 }
