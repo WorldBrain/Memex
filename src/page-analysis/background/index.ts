@@ -7,16 +7,18 @@ import { runInTab } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import extractPageContentFromRawContent from './content-extraction'
 
+export interface PageAnalysis {
+    favIconURI: string
+    screenshotURI: string
+    content: any
+}
+
 export type PageAnalyzer = (args: {
     tabId: number
     allowContent?: boolean
     allowScreenshot?: boolean
     allowFavIcon?: boolean
-}) => Promise<{
-    favIconURI: string
-    screenshotURI: string
-    content: any
-}>
+}) => Promise<PageAnalysis>
 
 /**
  * Performs page content analysis on a given Tab's ID.
