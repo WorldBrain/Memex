@@ -43,26 +43,18 @@ class ResultItemActions extends PureComponent<Props> {
                         tooltipText="Delete this page & all related content"
                         className={styles.trash}
                     />
-                    {!this.props.tagManager ? (
-                        <ResultItemActionBtn
-                            imgSrc={
-                                this.props.tags.length > 0 ? tagFull : tagEmpty
-                            }
-                            onClick={this.props.onTagBtnClick}
-                            tooltipText="Add/View Tags"
-                            className={styles.tag}
-                            refHandler={this.props.setTagButtonRef}
-                        />
-                    ) : (
-                        <ResultItemActionBtn
-                            permanent
-                            imgSrc={tagFull}
-                            onClick={this.props.onTagBtnClick}
-                            tooltipText="Add/View Tags"
-                            className={styles.commentActive}
-                            refHandler={this.props.setTagButtonRef}
-                        />
-                    )}
+                    <ResultItemActionBtn
+                        permanent={this.props.tags.length > 0}
+                        imgSrc={this.props.tags.length > 0 ? tagFull : tagEmpty}
+                        className={
+                            this.props.tags.length > 0
+                                ? styles.commentActive
+                                : styles.tag
+                        }
+                        onClick={this.props.onTagBtnClick}
+                        tooltipText="Add/View Notes"
+                        refHandler={this.props.setTagButtonRef}
+                    />
                     <ResultItemActionBtn
                         permanent={this.props.annotsCount > 0}
                         imgSrc={

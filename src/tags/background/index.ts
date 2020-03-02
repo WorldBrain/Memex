@@ -1,15 +1,17 @@
 import Storex from '@worldbrain/storex'
-import { Windows } from 'webextension-polyfill-ts'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { Windows, Tabs } from 'webextension-polyfill-ts'
 
 import TagStorage from './storage'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { SearchIndex } from 'src/search'
-import { pageIsStub } from 'src/page-indexing/utils'
+import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
 import PageStorage from 'src/page-indexing/background/storage'
 import { TagTab, RemoteTagsInterface } from './types'
 import { bindMethod } from 'src/util/functions'
 import { initErrHandler } from 'src/search/storage'
+import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 
 export default class TagsBackground {
     storage: TagStorage
@@ -17,7 +19,6 @@ export default class TagsBackground {
 
     _createPageFromTab: SearchIndex['createPageFromTab']
 
-    private tabMan: TabManager
     private windows: Windows.Static
     private searchIndex: SearchIndex
 
@@ -26,7 +27,7 @@ export default class TagsBackground {
             storageManager: Storex
             pageStorage: PageStorage
             searchIndex: SearchIndex
-            tabMan?: TabManager
+            queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
         },
     ) {
@@ -49,7 +50,6 @@ export default class TagsBackground {
             addTagsToOpenTabs: bindMethod(this, 'addTagsToOpenTabs'),
             delTagsFromOpenTabs: bindMethod(this, 'delTagsFromOpenTabs'),
         }
-        this.tabMan = options.tabMan
         this.windows = options.windows
         this.searchIndex = options.searchIndex
         this._createPageFromTab = options.searchIndex.createPageFromTab
@@ -64,36 +64,22 @@ export default class TagsBackground {
         tabs?: TagTab[]
         time?: number
     }) {
-        if (!params.tabs) {
-            const currentWindow = await this.windows.getCurrent()
-            params.tabs = this.tabMan.getTabUrls(currentWindow.id)
-        }
+        const tabs =
+            params.tabs ||
+            (await getOpenTabsInCurrentWindow(
+                this.windows,
+                this.options.queryTabs,
+            ))
 
-        params.time = params.time || Date.now()
-
-        await Promise.all(
-            params.tabs.map(async tab => {
-                let page = await this.searchIndex.getPage(tab.url)
-
-                if (!page || pageIsStub(page)) {
-                    page = await this._createPageFromTab({
-                        tabId: tab.tabId,
-                        url: tab.url,
-                        allowScreenshot: false,
-                    })
-                }
-
-                // Add new visit if none, else page won't appear in results
-                await this.options.pageStorage.addPageVisitIfHasNone(
-                    page.url,
-                    params.time,
-                )
-            }),
-        )
+        const indexed = await maybeIndexTabs(tabs, {
+            pageStorage: this.options.pageStorage,
+            createPage: this._createPageFromTab,
+            time: params.time || Date.now(),
+        })
 
         await this.storage.addTagToPages({
             name: params.name,
-            urls: params.tabs.map(tab => tab.url),
+            urls: indexed.map(tab => tab.fullUrl),
         })
     }
 
@@ -105,8 +91,10 @@ export default class TagsBackground {
         tabs?: TagTab[]
     }) {
         if (!tabs) {
-            const currentWindow = await this.windows.getCurrent()
-            tabs = this.tabMan.getTabUrls(currentWindow.id)
+            tabs = await getOpenTabsInCurrentWindow(
+                this.windows,
+                this.options.queryTabs,
+            )
         }
 
         return this.storage.delTagsFromPages({

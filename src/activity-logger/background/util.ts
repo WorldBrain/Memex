@@ -2,6 +2,7 @@ import { blacklist } from '../../blacklist/background'
 import { isLoggable, getPauseState } from '..'
 import { LoggableTabChecker, VisitInteractionUpdater, TabState } from './types'
 import { SearchIndex } from 'src/search'
+import { browser, Windows, Tabs } from 'webextension-polyfill-ts'
 
 /**
  * Combines all "loggable" conditions for logging on given tab data to determine
@@ -39,4 +40,14 @@ export const updateVisitInteractionData: VisitInteractionUpdater = (
             scrollMaxPerc: scrollState.maxPercent,
         })
         .catch(f => f)
+}
+
+export async function getOpenTabsInCurrentWindow(
+    windows: Windows.Static,
+    queryTabs: Tabs.Static['query'],
+): Promise<Array<{ tabId: number; url: string }>> {
+    const currentWindow = await windows.getCurrent()
+    return (await queryTabs({ windowId: currentWindow.id }))
+        .map(tab => ({ tabId: tab.id, url: tab.url }))
+        .filter(tab => tab.tabId !== browser.tabs.TAB_ID_NONE)
 }

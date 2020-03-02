@@ -3,15 +3,17 @@
 }
 
 .rootContainer {
-    width: 100%;
-    composes: boxShadow from '../../common-ui/colors.css';
+    border-top: 0.75px solid #e1e1e1;
     display: flex;
-    max-width: 100%;
-    margin-bottom: 10px;
-    height: 85px;
-    flex-direction: column;
-    justify-content: space-between;
-    font-family: 'Poppins', sans-serif;
+    flex-direction: row;
+    position: relative;
+    color: inherit;
+    text-decoration: none;
+    z-index: 0;
+    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
+    background-color: white;
+    width: 100%;
+    height: 90px;
 }
 
 .rootContainer > a {
@@ -19,6 +21,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 100%;
 }
 
 .infoContainer {
@@ -32,7 +35,7 @@
 }
 
 .firstlineContainer {
-    composes: darkBlue from '../../common-ui/colors.css' !important; /* stylelint-disable-line declaration-no-important */
+    color: #3a2f45 !important; /* stylelint-disable-line declaration-no-important */
     width: 100%;
     font-size: 15px;
     flex-wrap: wrap;
@@ -41,19 +44,19 @@
     overflow: hidden;
     white-space: nowrap;
     overflow-wrap: break-word;
-    font-weight: 500;
+    font-weight: 700;
     height: 25px;
 }
 
 .title {
-    composes: darkBlue from '../../common-ui/colors.css' !important; /* stylelint-disable-line declaration-no-important */
+    color: #3a2f45 !important; /* stylelint-disable-line declaration-no-important */
     display: flex;
     flex-direction: row;
     font-size: 16px;
     align-items: center;
     width: 97%;
     flex-basis: 95%;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .favIcon {
@@ -63,17 +66,17 @@
 }
 
 .url {
-    composes: subTitleColor from '../../common-ui/colors.css';
+    color: #3a2f45;
     font-size: 14px;
     min-width: 0;
     font-weight: 400;
-    height: 15px;
+    height: 20px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     align-items: center;
     width: 100%;
-    margin-top: -15px;
+    margin-top: -5px;
 }
 
 .url a {
@@ -88,7 +91,7 @@
 
 .displayTime {
     font-size: 12px;
-    color: #bfbdbe;
+    color: #3a2f45;
     height: 15px;
 }
 

@@ -106,14 +106,13 @@ class FiltersSidebar extends Component<Props, State> {
                             env="inpage"
                         />
                     </div>
-                     <div className={styles.filterDiv}>
+                    <div className={styles.filterDiv}>
                         <UsersFilter tooltipPosition="inpage" env="inpage" />
                     </div>
                     <div className={styles.filterDiv}>
                         <HashtagsFilter tooltipPosition="inpage" env="inpage" />
                     </div>
                 </div>
-                {this.renderListSidebar()}
             </div>
         )
     }

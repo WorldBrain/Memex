@@ -55,7 +55,9 @@
     font-size: 14px;
     text-align: center;
     padding: 10px;
-    margin-top: 20px;
+    margin-top: 10px;
+    border-top: 1px solid #c9c9c9;
+    padding-top: 20px;
 }
 
 .plus {
