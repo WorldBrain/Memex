@@ -132,6 +132,7 @@ export interface SearchIndex {
 
     addBookmark: (params: {
         url: string
+        fullUrl?: string
         timestamp?: number
         tabId?: number
     }) => Promise<void>
@@ -156,6 +157,7 @@ export interface SearchIndex {
 
 export interface PageCreationProps {
     url: string
+    fullUrl?: string
     tabId?: number
     stubOnly?: boolean
     allowScreenshot?: boolean
