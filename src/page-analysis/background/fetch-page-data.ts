@@ -3,7 +3,9 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import extractFavIcon from 'src/page-analysis/background/content-extraction/extract-fav-icon'
 import extractPdfContent from 'src/page-analysis/background/content-extraction/extract-pdf-content'
 import extractRawPageContent from 'src/page-analysis/content_script/extract-page-content'
-import extractPageContentFromRawContent from './content-extraction'
+import extractPageMetadataFromRawContent, {
+    getPageFullText,
+} from './content-extraction'
 import { PageDataResult } from './types'
 import { FetchPageDataError } from './fetch-page-data-error'
 
@@ -79,7 +81,11 @@ const fetchPageData: FetchPageData = ({
 
             const extractPageContent = async () => {
                 const rawContent = await extractRawPageContent(doc, url)
-                return extractPageContentFromRawContent(rawContent)
+                const metadata = await extractPageMetadataFromRawContent(
+                    rawContent,
+                )
+                const fullText = await getPageFullText(rawContent, metadata)
+                return { ...metadata, fullText }
             }
 
             return {

@@ -2,7 +2,9 @@
 
 import { JSDOM } from 'jsdom'
 import extractRawPageContent from './content_script/extract-page-content'
-import extractPageContentFromRawContent from './background/content-extraction'
+import extractPageMetadataFromRawContent, {
+    getPageFullText,
+} from './background/content-extraction'
 
 describe('Extract page content', () => {
     // beforeAll(() => {
@@ -46,8 +48,9 @@ describe('Extract page content', () => {
             dom.window.document,
             'https://test.com',
         )
-        const content = await extractPageContentFromRawContent(rawContent)
-        expect(content).toEqual({
+        const metadata = await extractPageMetadataFromRawContent(rawContent)
+        const fullText = await getPageFullText(rawContent, metadata)
+        expect({ ...metadata, fullText }).toEqual({
             fullText: ' Hello world ',
             lang: 'en',
             canonicalUrl: undefined,
