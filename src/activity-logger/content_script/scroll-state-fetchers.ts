@@ -13,10 +13,9 @@ export const fetchScrollableHeight = (
 export const fetchScrollOffset = () =>
     window.pageYOffset !== undefined
         ? window.pageYOffset
-        : (document.documentElement ||
+        : ((document.documentElement ||
               document.body.parentNode ||
-              document.body
-          ).scrollTop
+              document.body) as HTMLElement).scrollTop
 
 export const fetchWindowHeight = () =>
     window.innerHeight || document.documentElement.clientHeight

@@ -11,7 +11,7 @@ const matched = utils.matchURL(url)
  * Fetches SearchInjection user preferance from storage.
  * If set, proceed with matching URL and fetching search query
  */
-async function init() {
+export async function initSearchInjection() {
     const searchInjection = await utils.getLocalStorage(
         constants.SEARCH_INJECTION_KEY,
         constants.SEARCH_INJECTION_DEFAULT,
@@ -30,5 +30,3 @@ async function init() {
         }
     }
 }
-
-init()
