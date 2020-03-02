@@ -54,18 +54,15 @@ export default async function extractPdfContent(
         blob = await response.blob()
     }
 
-    return new Promise(function(resolve, reject) {
+    const pdfData = new Promise(function(resolve, reject) {
         const fileReader = new FileReader()
         fileReader.onload = async event => {
-            const pdfData = event.target.result
-            try {
-                const pdfContent = await extractContent(pdfData)
-                resolve(pdfContent)
-            } catch (err) {
-                reject(err)
-            }
+            resolve(event.target.result)
         }
         fileReader.onerror = event => reject(event.target.error)
         fileReader.readAsArrayBuffer(blob)
     })
+
+    const pdfContent = await extractContent(pdfData)
+    return pdfContent
 }

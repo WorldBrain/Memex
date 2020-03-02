@@ -10,7 +10,7 @@ import analyzePage, {
 } from '../../page-analysis/background'
 
 import { FavIconChecker } from './types'
-import { SearchIndex } from 'src/search'
+import { SearchIndex, PageDoc } from 'src/search'
 
 interface Props {
     tabManager: TabManager
@@ -111,10 +111,11 @@ export default class PageVisitLogger {
             }
 
             // Don't index full-text in this stage
-            const pageDoc = {
+            const pageDoc: PageDoc = {
                 url: tab.url,
                 ...update(pageAnalysis, {
                     content: { $unset: ['fullText'] },
+                    $unset: ['getFullText'],
                 }),
             }
 
@@ -134,7 +135,19 @@ export default class PageVisitLogger {
         pageAnalysis: PageLoggingPreparation,
         textOnly = true,
     ) {
-        const pageDoc = { url: tab.url, ...pageAnalysis }
+        const pageDoc: PageDoc = {
+            url: tab.url,
+            ...update(pageAnalysis, {
+                content: {
+                    fullText: {
+                        $set:
+                            pageAnalysis.content.fullText ||
+                            (await pageAnalysis.getFullText()),
+                    },
+                },
+                $unset: ['getFullText'],
+            }),
+        }
 
         if (textOnly) {
             return this._addPageTerms({ pageDoc })
