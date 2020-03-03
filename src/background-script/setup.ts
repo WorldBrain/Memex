@@ -90,6 +90,7 @@ export function createBackgroundModules(options: {
     const pages = new PageIndexingBackground({
         storageManager,
         bookmarksStorage: bookmarks.storage,
+        fetchPageData: options.fetchPageDataProcessor,
     })
     const searchIndex = combineSearchIndex({
         getDb: async () => storageManager,
