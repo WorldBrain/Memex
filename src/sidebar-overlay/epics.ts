@@ -2,9 +2,9 @@ import 'rxjs/add/operator/debounceTime'
 import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/filter'
 
-import { acts as searchBarActs } from 'src/overview/search-bar'
-import { acts as resultActs } from 'src/overview/results'
-import { actions as filterActs } from 'src/search-filters'
+import * as searchBarActs from 'src/overview/search-bar/actions'
+import * as resultActs from 'src/overview/results/actions'
+import * as filterActs from 'src/search-filters/actions'
 import { searchAnnotations } from 'src/annotations/actions'
 
 const searchUpdateActions = [

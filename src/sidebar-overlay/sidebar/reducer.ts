@@ -5,8 +5,8 @@ import * as actions from './actions'
 import State, { Page } from './types'
 import {
     defaultState as defCommentBoxState,
-    reducer as commentBoxReducer,
-} from '../comment-box'
+    default as commentBoxReducer,
+} from '../comment-box/reducer'
 import AnnotationsManager from '../../annotations/annotations-manager'
 import {
     appendAnnotations as appendAnnotationsAction,

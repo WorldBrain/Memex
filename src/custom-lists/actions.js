@@ -3,7 +3,7 @@ import { createAction } from 'redux-act'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
 
-import { selectors as filters } from 'src/search-filters'
+import * as filters from 'src/search-filters/selectors'
 import analytics from 'src/analytics'
 import * as Raven from 'src/util/raven' // eslint-disable-line
 

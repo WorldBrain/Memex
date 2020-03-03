@@ -2,7 +2,7 @@ import { createSelector } from 'reselect'
 
 import { RootState } from '../types'
 import * as popup from '../selectors'
-import { selectors as blacklist } from '../blacklist-button'
+import * as blacklist from '../blacklist-button/selectors'
 
 const bookmarkBtn = (state: RootState) => state.bookmarkBtn
 

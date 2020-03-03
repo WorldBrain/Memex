@@ -5,7 +5,7 @@ import { bindActionCreators } from 'redux'
 import onClickOutside from 'react-onclickoutside'
 
 import { selectors, actions } from '..'
-import { actions as filterActs } from 'src/search-filters'
+import * as filterActs from 'src/search-filters/actions'
 import { selectors as customLists } from '../../../custom-lists'
 import { ListSideBar } from '../../../custom-lists/components'
 

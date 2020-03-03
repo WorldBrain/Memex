@@ -1,6 +1,6 @@
 import { Thunk } from './types'
-import { actions as ribbonActions } from './ribbon'
-import { actions as sidebarActions } from './sidebar'
+import * as ribbonActions from './ribbon/actions'
+import * as sidebarActions from './sidebar/actions'
 import * as popupActs from 'src/popup/actions'
 
 export const initState: () => Thunk = () => dispatch => {

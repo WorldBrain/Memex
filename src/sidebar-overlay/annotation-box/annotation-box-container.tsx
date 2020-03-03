@@ -11,7 +11,7 @@ import niceTime from '../../util/nice-time'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
-import { actions as filterActs } from 'src/search-filters'
+import * as filterActs from 'src/search-filters/actions'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
 

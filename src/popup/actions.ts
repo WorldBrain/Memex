@@ -2,10 +2,10 @@ import { browser } from 'webextension-polyfill-ts'
 import { createAction } from 'redux-act'
 import { remoteFunction } from '../util/webextensionRPC'
 import { Thunk } from './types'
-import { acts as bookmarkActs } from './bookmark-button'
-import { acts as tagActs } from './tags-button'
-import { acts as collectionActs } from './collections-button'
-import { acts as blacklistActs } from './blacklist-button'
+import * as bookmarkActs from './bookmark-button/actions'
+import * as tagActs from './tags-button/actions'
+import * as collectionActs from './collections-button/actions'
+import * as blacklistActs from './blacklist-button/actions'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')

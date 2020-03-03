@@ -5,13 +5,12 @@ import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
-import { acts as resultsActs, selectors as results } from '../results'
-import {
-    actions as filterActs,
-    selectors as filters,
-} from '../../search-filters'
-import { actions as notifActs } from '../../notifications'
+import * as sidebarActs from 'src/sidebar-overlay/sidebar/actions'
+import * as resultsActs from '../results/actions'
+import * as results from '../results/selectors'
+import * as filterActs from '../../search-filters/actions'
+import * as filters from '../../search-filters/selectors'
+import * as notifActs from '../../notifications/actions'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import * as Raven from 'src/util/raven'
 

@@ -2,7 +2,8 @@ import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import { RootState } from 'src/options/types'
 import { MapDispatchToProps } from 'src/util/types'
-import { actions, selectors } from 'src/search-filters'
+import * as actions from 'src/search-filters/actions'
+import * as selectors from 'src/search-filters/selectors'
 
 import { Tooltip } from 'src/common-ui/components'
 import { IndexDropdown } from 'src/common-ui/containers'
@@ -122,7 +123,4 @@ const mapDispatchToProps: MapDispatchToProps<
     resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(HashtagsFilter)
+export default connect(mapStateToProps, mapDispatchToProps)(HashtagsFilter)

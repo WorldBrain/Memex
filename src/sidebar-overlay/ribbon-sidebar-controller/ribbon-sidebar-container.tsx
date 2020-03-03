@@ -5,19 +5,15 @@ import { connect, MapStateToProps } from 'react-redux'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import * as actions from '../actions'
 import RootState, { MapDispatchToProps, OpenSidebarArgs } from '../types'
-import RibbonContainer, {
-    actions as ribbonActions,
-    selectors as ribbonSelectors,
-} from '../ribbon'
-import SidebarContainer, {
-    actions as sidebarActions,
-    selectors as sidebarSelectors,
-} from 'src/sidebar-overlay/sidebar'
+import RibbonContainer from '../ribbon/components/ribbon-container'
+import * as ribbonActions from '../ribbon/actions'
+import * as ribbonSelectors from '../ribbon/selectors'
+import SidebarContainer from 'src/sidebar-overlay/sidebar/components/sidebar-container'
+import * as sidebarActions from 'src/sidebar-overlay/sidebar/actions'
+import * as sidebarSelectors from 'src/sidebar-overlay/sidebar/selectors'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
-import {
-    actions as commentBoxActions,
-    selectors as commentBoxselectors,
-} from 'src/sidebar-overlay/comment-box'
+import * as commentBoxActions from 'src/sidebar-overlay/comment-box/actions'
+import * as commentBoxselectors from 'src/sidebar-overlay/comment-box/selectors'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import * as bookmarkActs from 'src/popup/bookmark-button/actions'
 import * as popup from 'src/popup/selectors'

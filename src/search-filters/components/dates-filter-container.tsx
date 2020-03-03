@@ -6,12 +6,13 @@ import { RootState } from 'src/options/types'
 import { Tooltip } from 'src/common-ui/components'
 import DateRangeSelection from 'src/overview/search-bar/components/DateRangeSelection'
 import FilterButton from './filter-button'
-import { actions, selectors } from 'src/search-filters'
+import * as actions from 'src/search-filters/actions'
+import * as selectors from 'src/search-filters/selectors'
 import {
     acts as searchBarActs,
     selectors as searchBar,
 } from 'src/overview/search-bar'
-import { acts as tooltipActs } from 'src/overview/tooltips'
+import * as tooltipActs from 'src/overview/tooltips/actions'
 
 import cx from 'classnames'
 
@@ -133,7 +134,4 @@ const mapDispatchToProps: MapDispatchToProps<
     resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(DatesFilter)
+export default connect(mapStateToProps, mapDispatchToProps)(DatesFilter)

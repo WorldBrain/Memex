@@ -1,14 +1,12 @@
 /* tslint:disable:no-shadowed-variable */
 import { createSelector } from 'reselect'
-import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
 
 import { RootState } from '../../options/types'
-import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
+import * as deleteConfSelectors from '../delete-confirm-modal/selectors'
 
 import { PAGE_SIZE } from '../search-bar/constants'
 import * as sidebarLeft from '../sidebar-left/selectors'
 import { query } from '../search-bar/selectors'
-import { listFilter } from 'src/search-filters/selectors'
 import * as constants from './constants'
 import { ResultsByUrl } from '../types'
 

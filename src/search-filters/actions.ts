@@ -1,7 +1,7 @@
 import { createAction } from 'redux-act'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { selectors } from './'
+import * as selectors from './selectors'
 import { results } from '../overview/results/selectors'
 import { User } from 'src/social-integration/types'
 import { Thunk } from 'src/options/types'

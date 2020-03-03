@@ -17,7 +17,7 @@ import DownloadDetails from './components/DownloadDetails'
 import DownloadDetailsRow from './components/DownloadDetailsRow'
 import StatusReport from './components/StatusReport'
 // import ShowDownloadDetails from './components/ShowDownloadDetails'
-import { acts as searchBarActs } from 'src/overview/search-bar'
+import * as searchBarActs from 'src/overview/search-bar/actions'
 import styles from './components/ActionButton.css'
 import { OPTIONS_URL } from 'src/constants'
 

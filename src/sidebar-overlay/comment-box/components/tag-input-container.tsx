@@ -5,7 +5,7 @@ import * as actions from '../actions'
 import * as selectors from '../selectors'
 import State from '../types'
 import { MapDispatchToProps } from '../../types'
-import { IndexDropdown } from 'src/common-ui/containers'
+import IndexDropdown from 'src/common-ui/containers/IndexDropdown'
 
 interface StateProps {
     tags: string[]
@@ -58,7 +58,4 @@ const mapDispatchToProps: MapDispatchToProps<
     deleteTag: tag => dispatch(actions.deleteTag(tag)),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(TagsContainer)
+export default connect(mapStateToProps, mapDispatchToProps)(TagsContainer)

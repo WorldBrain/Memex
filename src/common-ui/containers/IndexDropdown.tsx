@@ -3,11 +3,9 @@ import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
 import { remoteFunction } from '../../util/webextensionRPC'
-import {
-    IndexDropdown,
-    IndexDropdownNewRow,
-    IndexDropdownRow,
-} from '../components'
+import IndexDropdown from '../components/IndexDropdown'
+import IndexDropdownRow from '../components/IndexDropdownRow'
+import IndexDropdownNewRow from '../components/IndexDropdownNewRow'
 import { ClickHandler } from '../../popup/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'

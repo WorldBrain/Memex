@@ -1,6 +1,6 @@
 import { connect, MapStateToProps } from 'react-redux'
 import RootState, { MapDispatchToProps } from 'src/sidebar-overlay/types'
-import { actions as filterActs } from 'src/search-filters'
+import * as filterActs from 'src/search-filters/actions'
 import {
     acts as searchBarActs,
     selectors as searchBar,
@@ -54,7 +54,4 @@ const mapDispatchToProps: MapDispatchToProps<
     resetFilterPopups: () => dispatch(filterActs.resetFilterPopups()),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(FiltersSidebar)
+export default connect(mapStateToProps, mapDispatchToProps)(FiltersSidebar)

@@ -19,7 +19,7 @@ import {
     acts as searchBarActs,
     selectors as searchBar,
 } from 'src/overview/search-bar'
-import { actions as filterActs } from 'src/search-filters'
+import * as filterActs from 'src/search-filters/actions'
 import {
     deleteAnnotation,
     editAnnotation,

@@ -1,6 +1,6 @@
 import { Thunk, Tweet } from './types'
-import { acts as tagActs } from 'src/popup/tags-button'
-import { acts as collectionActs } from 'src/popup/collections-button'
+import * as tagActs from 'src/popup/tags-button/actions'
+import * as collectionActs from 'src/popup/collections-button/actions'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { getTweetInfo } from './observers/get-tweet-data'
 

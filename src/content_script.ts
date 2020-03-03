@@ -16,7 +16,7 @@ import initSocialIntegration from 'src/social-integration/content_script'
 import configureStore from './sidebar-overlay/store'
 import { initKeyboardShortcuts } from 'src/content_script_keyboard_shortcuts'
 import { fetchAnnotationsForPageUrl } from 'src/annotations/actions'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
+import * as sidebarActs from 'src/sidebar-overlay/sidebar/actions'
 import { initBasicStore } from 'src/popup/actions'
 
 export function main() {

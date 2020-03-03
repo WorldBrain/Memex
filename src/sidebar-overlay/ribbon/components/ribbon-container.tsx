@@ -10,20 +10,18 @@ import {
     IndexDropdown,
     AddListDropdownContainer,
 } from 'src/common-ui/containers'
-import { selectors as pause, acts as pauseActs } from 'src/popup/pause-button'
-import { acts as tagActs, selectors as tags } from 'src/popup/tags-button'
-import {
-    selectors as collections,
-    acts as collectionActs,
-} from 'src/popup/collections-button'
-import {
-    acts as bookmarkActs,
-    selectors as bookmark,
-} from 'src/popup/bookmark-button'
+import * as pauseActs from 'src/popup/pause-button/actions'
+import * as pause from 'src/popup/pause-button/selectors'
+import * as tagActs from 'src/popup/tags-button/actions'
+import * as tags from 'src/popup/tags-button/selectors'
+import * as collectionActs from 'src/popup/collections-button/actions'
+import * as collections from 'src/popup/collections-button/selectors'
+import * as bookmarkActs from 'src/popup/bookmark-button/actions'
+import * as bookmark from 'src/popup/bookmark-button/selectors'
 import * as popup from 'src/popup/selectors'
 import { PageList } from 'src/custom-lists/background/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar/'
+import * as sidebarActs from 'src/sidebar-overlay/sidebar/actions'
 
 interface StateProps {
     isExpanded: boolean

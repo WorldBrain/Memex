@@ -2,7 +2,8 @@ import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import { MapDispatchToProps } from 'src/util/types'
 import { RootState } from 'src/options/types'
-import { actions, selectors } from 'src/search-filters'
+import * as actions from 'src/search-filters/actions'
+import * as selectors from 'src/search-filters/selectors'
 
 import cx from 'classnames'
 
@@ -50,7 +51,4 @@ const mapDispatchToProps: MapDispatchToProps<
     onShowOnlyBookmarksChange: () => dispatch(actions.toggleBookmarkFilter()),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(BookmarkFilter)
+export default connect(mapStateToProps, mapDispatchToProps)(BookmarkFilter)

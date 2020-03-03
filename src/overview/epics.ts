@@ -2,9 +2,9 @@ import 'rxjs/add/operator/debounceTime'
 import 'rxjs/add/operator/map'
 import 'rxjs/add/operator/filter'
 
-import { acts as searchBarActs } from './search-bar'
-import { acts as resultActs } from './results'
-import { actions as filterActs } from '../search-filters'
+import * as searchBarActs from './search-bar/actions'
+import * as resultActs from './results/actions'
+import * as filterActs from '../search-filters/actions'
 
 const searchUpdateActions = [
     searchBarActs.setQuery.getType(),

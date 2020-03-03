@@ -2,10 +2,12 @@ import { connect } from 'react-redux'
 
 import * as acts from '../actions'
 import * as selectors from '../selectors'
-import { actions as notifActs, selectors as notifs } from 'src/notifications'
-import { acts as tooltipActs } from '../../tooltips'
-import { actions as filterActs, selectors as filters } from 'src/search-filters'
-import { actions as onboardingActs } from '../../onboarding'
+import * as notifActs from 'src/notifications/actions'
+import * as notifs from 'src/notifications/selectors'
+import * as tooltipActs from '../../tooltips/actions'
+import * as filterActs from 'src/search-filters/actions'
+import * as filters from 'src/search-filters/selectors'
+import * as onboardingActs from '../../onboarding/actions'
 import Header, { Props } from './Header'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
@@ -54,7 +56,4 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(Header)
+export default connect(mapState, mapDispatch)(Header)

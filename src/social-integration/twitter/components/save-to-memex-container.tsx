@@ -14,7 +14,7 @@ import {
     acts as collectionActs,
 } from 'src/popup/collections-button'
 import { Page } from 'src/sidebar-overlay/sidebar/types'
-import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
+import * as sidebarActs from 'src/sidebar-overlay/sidebar/actions'
 import * as acts from 'src/social-integration/actions'
 import ActionBar from './action-bar'
 import AnnotationsManager from 'src/annotations/annotations-manager'

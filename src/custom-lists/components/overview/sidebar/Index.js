@@ -4,13 +4,14 @@ import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
 import cx from 'classnames'
 
-import { actions, selectors } from 'src/custom-lists'
+import * as actions from 'src/custom-lists/actions'
+import * as selectors from 'src/custom-lists/selectors'
 import extStyles from './Index.css'
 import MyCollection from './my-collections'
 import CreateListForm from './CreateListForm'
 import ListItem from './list-item'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
-import { actions as filterActs } from 'src/search-filters'
+import * as filterActs from 'src/search-filters/actions'
 import { selectors as sidebar } from 'src/overview/sidebar-left'
 
 class ListContainer extends Component {
