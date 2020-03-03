@@ -2,13 +2,13 @@ import React, { Component } from 'react'
 import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
-import { remoteFunction } from '../../util/webextensionRPC'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import {
     IndexDropdown,
     IndexDropdownNewRow,
     IndexDropdownRow,
 } from '../components'
-import { ClickHandler } from '../../popup/types'
+import { ClickHandler } from 'src/popup/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
@@ -160,7 +160,7 @@ class IndexDropdownContainer extends Component<Props, State> {
 
     private get addTagRPC() {
         if (this.props.fromOverview) {
-            return tags.addTag
+            return tags.addTagToExistingUrl
         }
 
         let rpcName

@@ -1,10 +1,12 @@
 export interface RemoteTagsInterface {
-    addTag(args: { tag: string; url: string }): Promise<void>
+    addTagToExistingUrl(args: { tag: string; url: string }): Promise<void>
+    addTagToPage(args: {
+        tag: string
+        url: string
+        tabId?: number
+    }): Promise<void>
     delTag(args: { tag: string; url: string }): Promise<void>
-
-    addTagToPage(args: { tag: string; url: string }): Promise<void>
-    delPageTag(args: { tag: string; url: string }): Promise<void>
-    fetchPageTags(url: string): Promise<string[]>
+    fetchPageTags(args: { url: string }): Promise<string[]>
 
     addTagsToOpenTabs(args: {
         name: string
@@ -16,5 +18,10 @@ export interface RemoteTagsInterface {
 
 export interface TagTab {
     tabId: number
+    url: string
+}
+
+export interface Tag {
+    name: string
     url: string
 }

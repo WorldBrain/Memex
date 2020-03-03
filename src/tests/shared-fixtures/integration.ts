@@ -58,7 +58,7 @@ export async function insertIntegrationTestData(
         })
     }
     if (includeCollection('tags')) {
-        await backgroundModules.tags.addTag({
+        await backgroundModules.tags.addTagToExistingUrl({
             tag: 'my-tag',
             url: pages[0].url,
         })

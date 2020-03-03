@@ -385,7 +385,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                             await bookmarks(setup).addBookmark({
                                 url: DATA.PAGE_1.url,
                             })
-                            await tags(setup).addTag({
+                            await tags(setup).addTagToExistingUrl({
                                 url: DATA.PAGE_1.fullUrl,
                                 tag: DATA.TAG_1,
                             })
