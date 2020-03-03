@@ -11,6 +11,7 @@ export const entry = {
     background: './src/background.ts',
     popup: './src/popup/index.tsx',
     content_script: './src/content_script.ts',
+    content_script_search_injection: './src/content_script.search-injection.ts',
     options: './src/options/options.jsx',
 }
 

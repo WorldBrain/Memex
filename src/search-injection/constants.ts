@@ -1,3 +1,5 @@
+import { SearchEngineName, SearchEngineInfo } from './types'
+
 // Limit for the number of search results to be fetched
 export const LIMIT = {
     above: 4,
@@ -8,7 +10,9 @@ export const LIMIT = {
 // container - ID of the container to append elements
 // containerType - specify what element type the container is
 
-export const SEARCH_ENGINES = {
+export const SEARCH_ENGINES: {
+    [Name in SearchEngineName]: SearchEngineInfo
+} = {
     google: {
         regex: /(http[s]?:\/\/)?(www.)?google[.\w]+\/search\?.*/,
         container: {

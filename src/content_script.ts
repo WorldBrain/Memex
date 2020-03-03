@@ -2,7 +2,6 @@ import 'babel-polyfill'
 import { RemoteFunctionRegistry } from './util/webextensionRPC'
 import { setupScrollReporter } from './activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
-import { initSearchInjection } from 'src/search-injection/content_script'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import initContentTooltip from 'src/content-tooltip/content_script'
 import {
@@ -18,11 +17,16 @@ import { initKeyboardShortcuts } from 'src/content_script_keyboard_shortcuts'
 import { fetchAnnotationsForPageUrl } from 'src/annotations/actions'
 import * as sidebarActs from 'src/sidebar-overlay/sidebar/actions'
 import { initBasicStore } from 'src/popup/actions'
+import { shouldIncludeSearchInjection } from './search-injection/detection'
+import { browser } from 'webextension-polyfill-ts'
 
 export function main() {
+    if (shouldIncludeSearchInjection(window.location.hostname)) {
+        loadContentScriptComponent('search_injection')
+    }
+
     setupScrollReporter()
     setupPageContentRPC()
-    initSearchInjection()
     loadAnnotationWhenReady()
     setupRemoteDirectLinkFunction()
 
@@ -59,6 +63,13 @@ export function main() {
         )
         rootStore.dispatch(fetchAnnotationsForPageUrl(false, true) as any)
     }
+}
+
+export function loadContentScriptComponent(component: 'search_injection') {
+    const script = document.createElement('script')
+    script.src = browser.extension.getURL(`/content_script_${component}.js`)
+    script.id = `memex_${component}`
+    document.body.appendChild(script)
 }
 
 main()
