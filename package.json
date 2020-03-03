@@ -125,6 +125,8 @@
         "@storybook/addon-knobs": "^5.2.6",
         "@storybook/addons": "^5.2.6",
         "@storybook/react": "^5.2.6",
+        "@testing-library/jest-dom": "^5.1.1",
+        "@testing-library/react": "^9.4.1",
         "@types/jest": "^23.3.1",
         "@types/js-combinatorics": "^0.5.31",
         "@types/mongodb": "^3.0.21",
