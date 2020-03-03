@@ -6,7 +6,7 @@ import {
     scrollToHighlight,
 } from 'src/highlighting/ui/highlight-interactions'
 
-export async function init() {
+export async function loadAnnotationWhenReady() {
     await bodyLoader()
     setTimeout(() => {
         remoteFunction('followAnnotationRequest')()
@@ -15,20 +15,20 @@ export async function init() {
 
 export function setupAnchorFallbackOverlay() {}
 
-browser.runtime.onMessage.addListener(request => {
-    if (request.type !== 'direct-link') {
-        return
-    }
-
-    ;(async () => {
-        const highlightSuccessful = await renderHighlight(request)
-        if (highlightSuccessful) {
-            makeHighlightDark(request.annotation)
-            scrollToHighlight(request.annotation)
-        } else {
-            setupAnchorFallbackOverlay()
+export function setupRemoteDirectLinkFunction() {
+    browser.runtime.onMessage.addListener(request => {
+        if (request.type !== 'direct-link') {
+            return
         }
-    })()
-})
 
-init()
+        ;(async () => {
+            const highlightSuccessful = await renderHighlight(request)
+            if (highlightSuccessful) {
+                makeHighlightDark(request.annotation)
+                scrollToHighlight(request.annotation)
+            } else {
+                setupAnchorFallbackOverlay()
+            }
+        })()
+    })
+}

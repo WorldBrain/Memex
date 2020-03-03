@@ -1,13 +1,10 @@
 export interface BookmarksInterface {
-    addPageBookmark({
-        url,
-        timestamp,
-        tabId,
-    }: {
+    addPageBookmark(args: {
         url: string
+        fullUrl?: string
         timestamp?: number
         tabId?: number
     }): Promise<any>
 
-    delPageBookmark({ url }: { url: string }): Promise<any>
+    delPageBookmark(args: { url: string }): Promise<any>
 }
