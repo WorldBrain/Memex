@@ -35,18 +35,10 @@ export default class TagsBackground {
             storageManager: options.storageManager,
         })
         this.remoteFunctions = {
-            addTag: bindMethod(this, 'addTag'),
+            addTagToExistingUrl: bindMethod(this, 'addTagToExistingUrl'),
             delTag: bindMethod(this, 'delTag'),
-            addTagToPage: params => {
-                return this._modifyTag(true, params)
-            },
-            delPageTag: params => {
-                return this._modifyTag(false, params)
-            },
-            fetchPageTags: async (url: string) => {
-                return this.storage.fetchPageTags({ url })
-            },
-
+            addTagToPage: bindMethod(this, 'addTagToPage'),
+            fetchPageTags: bindMethod(this, 'fetchPageTags'),
             addTagsToOpenTabs: bindMethod(this, 'addTagsToOpenTabs'),
             delTagsFromOpenTabs: bindMethod(this, 'delTagsFromOpenTabs'),
         }
@@ -77,7 +69,7 @@ export default class TagsBackground {
             time: params.time || Date.now(),
         })
 
-        await this.storage.addTagToPages({
+        await this.storage.addTags({
             name: params.name,
             urls: indexed.map(tab => tab.fullUrl),
         })
@@ -97,7 +89,7 @@ export default class TagsBackground {
             )
         }
 
-        return this.storage.delTagsFromPages({
+        return this.storage.delTags({
             name,
             urls: tabs.map(tab => tab.url),
         })
@@ -107,7 +99,7 @@ export default class TagsBackground {
         return this.storage.fetchPageTags({ url })
     }
 
-    async addTag({ tag, url }: { tag: string; url: string }) {
+    async addTagToExistingUrl({ tag, url }: { tag: string; url: string }) {
         return this.storage.addTag({ name: tag, url })
     }
 
@@ -115,7 +107,16 @@ export default class TagsBackground {
         return this.storage.delTag({ name: tag, url })
     }
 
-    async addTagToPage(url: string, tag: string, tabId?: number) {
+    // Makes sure the page exists first, creating it if it doesn't, before tagging.
+    async addTagToPage({
+        url,
+        tag,
+        tabId,
+    }: {
+        url: string
+        tag: string
+        tabId?: number
+    }) {
         let page = await this.options.pageStorage.getPage(url)
 
         if (page == null || pageIsStub(page)) {
@@ -123,6 +124,11 @@ export default class TagsBackground {
                 url,
                 tabId,
             })
+            if (page == null) {
+                throw new Error(
+                    'Tried to addTagToPage, but could not create the page.',
+                )
+            }
         }
 
         // Add new visit if none, else page won't appear in results
@@ -131,40 +137,5 @@ export default class TagsBackground {
             Date.now(),
         )
         await this.storage.addTag({ url, name: tag }).catch(initErrHandler())
-    }
-
-    async _modifyTag(
-        shouldAdd: boolean,
-        params: {
-            url: string
-            tag: string
-            tabId?: number
-        },
-    ) {
-        const pageStorage = this.options.pageStorage
-
-        if (shouldAdd) {
-            let page = await pageStorage.getPage(params.url)
-
-            if (page == null || pageIsStub(page)) {
-                page = await this.searchIndex.createPageViaBmTagActs({
-                    url: params.url,
-                    tabId: params.tabId,
-                })
-            }
-
-            // Add new visit if none, else page won't appear in results
-            await pageStorage.addPageVisitIfHasNone(page.url, Date.now())
-        }
-
-        if (shouldAdd) {
-            await this.storage
-                .addTag({ url: params.url, name: params.tag })
-                .catch(initErrHandler())
-        } else {
-            await this.storage
-                .delTag({ url: params.url, name: params.tag })
-                .catch(initErrHandler())
-        }
     }
 }

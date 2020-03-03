@@ -96,7 +96,7 @@ export default class ImportItemProcessor {
             tagsModule: TagsBackground
             customListsModule: CustomListBackground
         },
-    ) { }
+    ) {}
 
     /**
      * Hacky way of enabling cancellation. Checks state and throws an Error if detected change.
@@ -144,7 +144,10 @@ export default class ImportItemProcessor {
                     })
                 }),
                 ...tags.map(async tag => {
-                    await this.options.tagsModule.addTag({ url, tag })
+                    await this.options.tagsModule.addTagToExistingUrl({
+                        url,
+                        tag,
+                    })
                 }),
             ])
         } catch (e) {
@@ -196,11 +199,11 @@ export default class ImportItemProcessor {
         const pageDoc = !options.indexTitle
             ? await this._createPageDoc(importItem)
             : {
-                url: importItem.url,
-                content: {
-                    title: importItem.title,
-                },
-            }
+                  url: importItem.url,
+                  content: {
+                      title: importItem.title,
+                  },
+              }
 
         const visits = await getVisitTimes(importItem)
 
@@ -225,24 +228,18 @@ export default class ImportItemProcessor {
         importItem,
         options: { indexTitle?: any; bookmarkImports?: any } = {},
     ) {
-        const {
-            url,
-            title,
-            tags,
-            collections,
-            annotations,
-        } = importItem
+        const { url, title, tags, collections, annotations } = importItem
 
         const timeAdded = padShortTimestamp(importItem.timeAdded)
 
         const pageDoc = !options.indexTitle
             ? await this._createPageDoc({ url })
             : {
-                url,
-                content: {
-                    title,
-                },
-            }
+                  url,
+                  content: {
+                      title,
+                  },
+              }
 
         const visits = await getVisitTimes({ url })
 

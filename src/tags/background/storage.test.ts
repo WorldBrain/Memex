@@ -7,8 +7,8 @@ describe('Tags', () => {
     async function setupTest() {
         const setup = await setupBackgroundIntegrationTest()
         const tagsModule = setup.backgroundModules.tags
-        await tagsModule.addTag(DATA.TAGS_1)
-        await tagsModule.addTag(DATA.TAGS_2)
+        await tagsModule.addTagToExistingUrl(DATA.TAGS_1)
+        await tagsModule.addTagToExistingUrl(DATA.TAGS_2)
         return { tagsModule }
     }
 
