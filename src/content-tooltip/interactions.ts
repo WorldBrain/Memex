@@ -7,7 +7,7 @@ import {
     remoteFunction,
     makeRemotelyCallableType,
 } from '../util/webextensionRPC'
-import { injectCSS } from '../search-injection/dom'
+import { injectCSS } from '../util/content-injection'
 import { conditionallyShowHighlightNotification } from './onboarding-interactions'
 import { TooltipInteractionInterface } from 'src/content-tooltip/types'
 import { createAnnotationDraftInSidebar } from 'src/annotations'

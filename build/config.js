@@ -10,8 +10,12 @@ export const extensions = ['.ts', '.tsx', '.js', '.jsx', '.coffee']
 export const entry = {
     background: './src/background.ts',
     popup: './src/popup/index.tsx',
-    content_script: './src/content_script.ts',
-    content_script_search_injection: './src/content_script.search-injection.ts',
+    content_script: './src/content-scripts/global.ts',
+    content_script_search_injection:
+        './src/content-scripts/search-injection.ts',
+    content_script_ribbon: './src/content-scripts/ribbon.ts',
+    content_script_sidebar: './src/content-scripts/sidebar.ts',
+    content_script_tooltip: './src/content-scripts/tooltip.ts',
     options: './src/options/options.jsx',
 }
 

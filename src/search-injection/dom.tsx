@@ -1,32 +1,14 @@
 /*
 DOM manipulation helper functions
 */
-
+import { browser } from 'webextension-polyfill-ts'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
 import Container from './components/container'
 import * as utils from './utils'
 import * as constants from './constants'
-
-/**
- * Injects a CSS stylesheet into the webpage.
- * @param {string} cssUrl URL of the stylesheet to inject
- */
-export const injectCSS = (cssUrl, root = null) => {
-    // Check if the css file is already present in the webpage
-    const node = (root || document).querySelector(`link[href="${cssUrl}"]`)
-    if (node) {
-        return
-    }
-
-    const link = document.createElement('link')
-    link.type = 'text/css'
-    link.rel = 'stylesheet'
-    link.href = cssUrl
-    const d = root || document.body || document.head || document.documentElement
-    d.prepend(link)
-}
+import { injectCSS } from '../util/content-injection'
 
 export const handleRender = (
     { docs, totalCount, requiresMigration },
