@@ -164,7 +164,6 @@ class ListContainer extends Component {
                         {this.props.lists.length === 1 ? (
                             <div>
                                 {this.renderAllLists()}
-                                <hr />
                                 <div className={extStyles.noLists}>
                                     <strong>
                                         You don't have any collections{' '}

@@ -1,13 +1,9 @@
 import { getMetadata } from 'page-metadata-parser'
 
-import transformPageHTML from 'src/util/transform-page-html'
-import PAGE_METADATA_RULES from './page-metadata-rules'
-import extractPdfContent from './extract-pdf-content'
+import PAGE_METADATA_RULES from '../page-metadata-rules'
+import { ExtractRawPageContent } from '../types'
 
 export const DEF_LANG = 'en'
-
-const pick = keys => obj =>
-    Object.assign({}, ...keys.map(key => ({ [key]: obj[key] })))
 
 /**
  * Extracts content from the DOM, both searchable terms and other metadata.
@@ -16,26 +12,25 @@ const pick = keys => obj =>
  * @param {string} [url=location.href]
  * @returns {any} Object containing `fullText` text and other extracted meta content from the input page.
  */
-export default async function extractPageContent(
+
+const extractRawPageContent: ExtractRawPageContent = async (
     doc = document,
     url = location.href,
-) {
-    // If it is a PDF, run code for pdf instead.
+) => {
     if (url.endsWith('.pdf')) {
-        return extractPdfContent({ url, blob: undefined })
-    }
-
-    // Apply simple transformations to clean the page's HTML
-    const { text: processedHtml } = transformPageHTML({
-        html: doc.body.innerHTML,
-    })
-
-    const metadata = getMetadata(doc, url, PAGE_METADATA_RULES)
-
-    return {
-        fullText: processedHtml,
-        lang: doc.documentElement.lang || DEF_LANG,
-        // Picking desired fields, as getMetadata adds some unrequested stuff.
-        ...pick(Object.keys(PAGE_METADATA_RULES))(metadata),
+        return {
+            type: 'pdf',
+            url,
+        }
+    } else {
+        return {
+            type: 'html',
+            url,
+            body: doc.body.innerHTML,
+            lang: doc.documentElement.lang || DEF_LANG,
+            metadata: getMetadata(doc, url, PAGE_METADATA_RULES),
+        }
     }
 }
+
+export default extractRawPageContent

@@ -176,7 +176,7 @@ export class PageIndexingBackground {
 
     async createPageFromUrl(props: PageCreationProps) {
         const fetchRes = await fetchPageData({
-            url: props.url,
+            url: props.fullUrl,
             opts: {
                 includePageContent: true,
                 includeFavIcon: false,

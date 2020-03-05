@@ -1,3 +1,4 @@
+import { browser } from 'webextension-polyfill-ts'
 import throttle from 'lodash/fp/throttle'
 
 import * as scrollStateFetchers from './scroll-state-fetchers'
@@ -16,4 +17,5 @@ const sendCurrentSrollState = () =>
         })
         .catch(noop)
 
-window.addEventListener('scroll', throttle(500)(sendCurrentSrollState))
+export const setupScrollReporter = () =>
+    window.addEventListener('scroll', throttle(500)(sendCurrentSrollState))
