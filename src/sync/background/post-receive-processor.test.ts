@@ -10,8 +10,10 @@ import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-
 
 const createMockStdPageFetcher = ({
     errorType,
+    favIconURI,
 }: {
     errorType?: FetchPageDataErrorType
+    favIconURI?: string
 }) => ({ url }) => ({
     cancel: () => undefined,
     run: async () => {
@@ -20,13 +22,23 @@ const createMockStdPageFetcher = ({
         }
 
         return {
-            content: { title: 'test title', fullText: 'some test text' },
+            content: {
+                title: 'test title',
+                fullText: 'some test text',
+                favIconURI,
+            },
             url,
         }
     },
 })
 
-function setupTest({ pageFetcher = createMockStdPageFetcher({}) }) {
+function setupTest({
+    pageFetcher = createMockStdPageFetcher({}),
+    favIconAdder = () => undefined,
+}: {
+    pageFetcher?: any
+    favIconAdder?: any
+}) {
     const mockPagePipeline = async ({ pageDoc }) => ({
         url: pageDoc.url,
         fullUrl: pageDoc.url,
@@ -38,6 +50,7 @@ function setupTest({ pageFetcher = createMockStdPageFetcher({}) }) {
         urlTerms: [],
         titleTerms: [],
         text: pageDoc.content.fullText,
+        favIconURI: pageDoc.content.favIconURI,
     })
 
     const mockBacklog = {
@@ -49,6 +62,7 @@ function setupTest({ pageFetcher = createMockStdPageFetcher({}) }) {
 
     return {
         processor: new PostReceiveProcessor({
+            pages: { addFavIconIfNeeded: favIconAdder } as any,
             pageFetchBacklog: mockBacklog as any,
             fetchPageData: new FetchPageDataProcessor({
                 pagePipeline: mockPagePipeline,
@@ -105,6 +119,44 @@ describe('sync post-receive processor', () => {
                 },
             },
         })
+    })
+
+    it('should process a page-create sync entry, filling in missing data + create a favIcon', async () => {
+        const testFav = 'test'
+        let favIconAdderArgs: [string, string]
+
+        const { processor } = setupTest({
+            pageFetcher: createMockStdPageFetcher({ favIconURI: testFav }),
+            favIconAdder: (a, b) => (favIconAdderArgs = [a, b]),
+        })
+
+        expect(favIconAdderArgs).toBeUndefined()
+
+        expect(await processor({ entry: DATA.pageCreateA })).toEqual({
+            entry: {
+                ...DATA.pageCreateA,
+                data: {
+                    ...DATA.pageCreateA.data,
+                    value: {
+                        url: DATA.pageCreateA.data.value.fullUrl,
+                        fullUrl: DATA.pageCreateA.data.value.fullUrl,
+                        fullTitle: 'test title',
+                        domain: DATA.pageCreateA.data.value.fullUrl,
+                        hostname: DATA.pageCreateA.data.value.fullUrl,
+                        tags: [],
+                        terms: [],
+                        urlTerms: [],
+                        titleTerms: [],
+                        text: 'some test text',
+                    },
+                },
+            },
+        })
+
+        expect(favIconAdderArgs).toEqual([
+            DATA.pageCreateA.data.value.fullUrl,
+            testFav,
+        ])
     })
 
     it('should process a stub entry with URL as title on permanent failures', async () => {
