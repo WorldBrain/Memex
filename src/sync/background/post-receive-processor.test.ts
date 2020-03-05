@@ -62,7 +62,7 @@ function setupTest({
 
     return {
         processor: new PostReceiveProcessor({
-            pages: { addFavIconIfNeeded: favIconAdder },
+            pages: { addFavIconIfNeeded: favIconAdder } as any,
             pageFetchBacklog: mockBacklog as any,
             fetchPageData: new FetchPageDataProcessor({
                 pagePipeline: mockPagePipeline,
