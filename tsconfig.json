@@ -69,6 +69,9 @@
             "@worldbrain/memex-stemmer": [
                 "external/@worldbrain/memex-stemmer/ts"
             ],
+            "@worldbrain/memex-stemmer/lib/*": [
+                "external/@worldbrain/memex-stemmer/ts/*"
+            ],
             "@worldbrain/storex-sync": ["external/@worldbrain/storex-sync/ts"],
             "@worldbrain/storex-sync/lib/*": [
                 "external/@worldbrain/storex-sync/ts/*"

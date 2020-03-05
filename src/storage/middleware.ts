@@ -1,7 +1,6 @@
 import StorageManager from '@worldbrain/storex'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
-import { BackgroundModules } from 'src/background-script/setup'
 import { SYNCED_COLLECTIONS } from '@worldbrain/memex-common/lib/sync/constants'
 import SyncService from '@worldbrain/memex-common/lib/sync'
 import { StorexHubBackground } from 'src/storex-hub/background'

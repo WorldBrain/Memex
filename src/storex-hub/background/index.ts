@@ -15,6 +15,7 @@ export class StorexHubBackground {
     ) {}
 
     async connect(options?: { port?: number }) {
+        let subscriptionCount = 0
         this.socket = io(`http://localhost:${options?.port || 3000}`)
         this.client = await createStorexHubSocketClient(this.socket, {
             callbacks: {
@@ -26,6 +27,9 @@ export class StorexHubBackground {
                         ),
                     }
                 },
+                handleSubscription: async () => {
+                    return { subscriptionId: (++subscriptionCount).toString() }
+                },
             },
         })
         await this.client.registerApp({
@@ -36,6 +40,7 @@ export class StorexHubBackground {
     }
 
     handlePostStorageChange(event: StorageOperationEvent<'post'>) {
+        console.log('handle post storage change')
         if (!this.client) {
             return
         }
