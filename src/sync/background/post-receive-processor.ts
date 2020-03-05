@@ -4,10 +4,12 @@ import { COLLECTION_NAMES as PAGES_COLLECTION_NAMES } from '@worldbrain/memex-st
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { SharedSyncLogEntry } from '@worldbrain/storex-sync/lib/shared-sync-log/types'
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
+import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export class PostReceiveProcessor {
     constructor(
         private props: {
+            pages: PageIndexingBackground
             fetchPageData: FetchPageProcessor
             pageFetchBacklog?: PageFetchBacklogBackground
         },
@@ -43,9 +45,22 @@ export class PostReceiveProcessor {
     processor: SyncPostReceiveProcessor = async ({ entry, ...params }) => {
         if (this.shouldPostProcess(entry)) {
             try {
-                const value = await this.props.fetchPageData.process(
+                const pageData = await this.props.fetchPageData.process(
                     entry.data.value.fullUrl,
                 )
+
+                let value: any
+                if (pageData.favIconURI) {
+                    const { favIconURI, ...rest } = pageData
+
+                    await this.props.pages.addFavIconIfNeeded(
+                        pageData.url,
+                        favIconURI,
+                    )
+                    value = rest
+                } else {
+                    value = pageData
+                }
 
                 return {
                     entry: { ...entry, data: { ...entry.data, value } },

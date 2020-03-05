@@ -156,6 +156,7 @@ export function createBackgroundModules(options: {
 
     const postReceiveProcessor = options.includePostSyncProcessor
         ? new PostReceiveProcessor({
+              pages,
               pageFetchBacklog,
               fetchPageData: options.fetchPageDataProcessor,
           }).processor

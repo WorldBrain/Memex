@@ -68,6 +68,12 @@ export class PageIndexingBackground {
         }
     }
 
+    async addFavIconIfNeeded(url: string, favIcon: string) {
+        const { hostname } = transformUrl(url)
+
+        return this.storage.createFavIconIfNeeded(hostname, favIcon)
+    }
+
     async addPageTerms(pipelineReq: PipelineReq): Promise<void> {
         const pageData = await pipeline(pipelineReq)
         await this.storage.createOrUpdatePage(pageData)
