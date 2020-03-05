@@ -27,8 +27,8 @@ export type Props = OwnProps & StateProps & DispatchProps
 class BookmarkButton extends PureComponent<Props> {
     render() {
         const text = this.props.isBookmarked
-            ? 'Un-Favorite this Page'
-            : 'Favorite this Page'
+            ? 'Un-Bookmark this Page'
+            : 'Bookmark this Page'
 
         return (
             <Button
@@ -61,7 +61,4 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(BookmarkButton)
+export default connect(mapState, mapDispatch)(BookmarkButton)
