@@ -263,7 +263,7 @@ class Ribbon extends Component<Props, State> {
                                                 />
                                                 <TextInputControlled
                                                     autoFocus={false}
-                                                    setRef={this.setInputRef}
+                                                    updateRef={this.setInputRef}
                                                     className={
                                                         styles.searchInput
                                                     }

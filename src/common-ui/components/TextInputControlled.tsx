@@ -21,7 +21,6 @@
 // of HTML elements that this event should come from. (real event is on shadow root, but path will
 // indicate the intended element)
 import * as React from 'react'
-import ReactDOM from 'react-dom'
 const matchAll = require('string.prototype.matchall')
 
 type ReTargetedTextElementEvent = React.KeyboardEvent<
@@ -29,6 +28,12 @@ type ReTargetedTextElementEvent = React.KeyboardEvent<
 > & {
     path: (HTMLElement & HTMLTextAreaElement & HTMLInputElement)[]
 }
+
+type TextInputAttributes = Omit<
+    Partial<React.TextareaHTMLAttributes<any>>,
+    'onChange'
+> &
+    Omit<Partial<React.InputHTMLAttributes<any>>, 'onChange'>
 
 export interface ControlledTextInputProps {
     onChange: (s: string) => void
@@ -46,8 +51,9 @@ interface ControlledTextInputState {
     text: string
     selection: Selection
 }
+
 class TextInputControlled extends React.Component<
-    ControlledTextInputProps & Partial<ReactDOM.IntrinsicElements.textElement>,
+    TextInputAttributes & ControlledTextInputProps,
     ControlledTextInputState
 > {
     textElement: HTMLTextAreaElement | HTMLInputElement
