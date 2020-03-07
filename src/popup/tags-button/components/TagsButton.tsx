@@ -34,17 +34,6 @@ class TagsButton extends PureComponent<Props> {
                 >
                     Add Tag(s)
                 </Button>
-                <ButtonTooltip
-                    tooltipText="Tag all tabs in window"
-                    position="popupLeft"
-                >
-                    <Button
-                        onClick={this.props.toggleAllTabsPopup}
-                        disabled={this.props.isDisabled}
-                        btnClass={styles.allTabs}
-                        itemClass={styles.buttonBulk}
-                    />
-                </ButtonTooltip>
             </div>
         )
     }
