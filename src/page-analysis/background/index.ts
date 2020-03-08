@@ -41,6 +41,11 @@ const analysePage: PageAnalyzer = async ({
         const rawContent = await runInTab<PageAnalyzerInterface>(
             tabId,
         ).extractRawPageContent()
+
+        if (!rawContent) {
+            return { metadata: {}, getFullText: async () => '' }
+        }
+
         const metadata = await extractPageMetadataFromRawContent(rawContent)
         const getFullText = async () => getPageFullText(rawContent, metadata)
         return { metadata, getFullText }
@@ -63,8 +68,8 @@ const analysePage: PageAnalyzer = async ({
     return {
         favIconURI,
         screenshotURI,
-        content: content.metadata || {},
-        getFullText: content.getFullText,
+        content: content?.metadata ?? {},
+        getFullText: content?.getFullText,
     }
 }
 
