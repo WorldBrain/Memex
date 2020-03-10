@@ -21,4 +21,8 @@ class TagList extends React.PureComponent<Props> {
 export default styled(TagList)`
     display: flex;
     overflow-y: scroll;
+    border: 2px solid purple;
+    background: orange;
+    width: 20px;
+    height: 20px;
 `

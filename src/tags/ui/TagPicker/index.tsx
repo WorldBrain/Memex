@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
@@ -29,12 +30,31 @@ class TagPicker extends StatefulUIElement<
                 : this.state.initialTags
 
         return (
-            <>
-                <TagSearchInput onChange={this.handleSearchInputChanged} />
-                <TagList tags={tags} />
-            </>
+            <ThemeProvider theme={lightTheme}>
+                {/* can we pass down the theme to these components?)*/}
+                <TagPickerContainer>
+                    <TagSearchInput onChange={this.handleSearchInputChanged} />
+                    <TagList tags={tags} />
+                </TagPickerContainer>
+            </ThemeProvider>
         )
     }
 }
+
+const lightTheme = {
+    background: '#fff',
+}
+
+const TagPickerContainer = styled.div`
+    border: 1px solid #ceced9;
+    box-shadow: 0px 0px 25px #dadbe7;
+    background: ${props => props.theme.background};
+    border-radius: 5px;
+    max-height: 150px;
+    padding: 8px;
+    width: 350px;
+`
+
 const StyledTagPicker = styled(TagPicker)``
+
 export default StyledTagPicker
