@@ -2,6 +2,8 @@ import { browser } from 'webextension-polyfill-ts'
 import throttle from 'lodash/fp/throttle'
 
 import * as scrollStateFetchers from './scroll-state-fetchers'
+import { runInBackground } from 'src/util/webextensionRPC'
+import { ActivityLoggerInterface } from '../background/types'
 
 const noop = err => {}
 

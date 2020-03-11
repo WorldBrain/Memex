@@ -1,5 +1,12 @@
 import { WebNavigation, Tabs } from 'webextension-polyfill-ts'
 import { SearchIndex } from 'src/search'
+import Tab from './tab-state'
+
+export interface ActivityLoggerInterface {
+    toggleLoggingPause(minutes?: number): void
+    fetchTab(id: number): Tab
+    fetchTabByUrl(url: string): Tab
+}
 
 export type NavState = Partial<WebNavigation.OnCommittedDetailsType> & {
     type?: WebNavigation.TransitionType
