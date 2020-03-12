@@ -207,7 +207,6 @@ export default class TabChangeListeners {
             return
         }
 
-        await this._pageDOMLoaded({ tabId })
         const preparation = await this._pageVisitLogger.preparePageLogging({
             tab,
             allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
