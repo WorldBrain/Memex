@@ -1,9 +1,6 @@
 import { Runtime, WebNavigation, Tabs, Browser } from 'webextension-polyfill-ts'
 
-import {
-    makeRemotelyCallable,
-    makeRemotelyCallableType,
-} from 'src/util/webextensionRPC'
+import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { mapChunks } from 'src/util/chunk'
 import initPauser from './pause-logging'
 import { updateVisitInteractionData } from './util'
