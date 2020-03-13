@@ -97,6 +97,10 @@ export default class OnboardingScreen extends StatefulUIElement<
             await grabVal(TOOLTIP_STORAGE_NAME, defs.isTooltipEnabled),
         )
         this.processEvent(
+            'setPrivacySetting',
+            await grabVal(TOOLTIP_STORAGE_NAME, defs.setPrivacySetting),
+        )
+        this.processEvent(
             'setSidebarEnabled',
             await grabVal(SIDEBAR_STORAGE_NAME, defs.isSidebarEnabled),
         )
@@ -129,17 +133,26 @@ export default class OnboardingScreen extends StatefulUIElement<
         />
     )
     private keyboardImage = () => (
-        <img src={'/img/shortcutsIllustration.svg'} className={styles.keyboardGif} />
+        <img
+            src={'/img/shortcutsIllustration.svg'}
+            className={styles.keyboardGif}
+        />
     )
     private sidebarImage = () => (
-        <img src={'/img/sidebarIllustration.svg'} className={styles.sidebarGif} />
+        <img
+            src={'/img/sidebarIllustration.svg'}
+            className={styles.sidebarGif}
+        />
     )
     private mobileImg = () => (
         <img src={'/img/mobileIllustration.svg'} className={styles.mobileImg} />
     )
 
     private privacyImg = () => (
-        <img src={'/img/privacyIllustration.png'} className={styles.privacyImg} />
+        <img
+            src={'/img/privacyIllustration.png'}
+            className={styles.privacyImg}
+        />
     )
 
     private handleTooltipToggle = () => {
@@ -416,9 +429,28 @@ export default class OnboardingScreen extends StatefulUIElement<
                         currentStep={this.state.currentStep - 1}
                     >
                         <SecondaryAction
-                            onClick={() => window.open(`https://community.worldbrain.io/t/why-worldbrain-io-does-not-take-venture-capital/75`)}
+                            onClick={() =>
+                                window.open(
+                                    `https://community.worldbrain.io/t/why-worldbrain-io-does-not-take-venture-capital/75`,
+                                )
+                            }
                             label={'Learn More'}
                         />
+                        <SettingsCheckbox
+                            id="onboarding-tooltip-toggle"
+                            isChecked={this.state.setPrivacySetting}
+                            handleChange={this.handleTooltipToggle}
+                        >
+                            Share anonymous error reports and interaction data (
+                            <span
+                                onClick={() =>
+                                    window.open(`https://worldbrain.io/privacy`)
+                                }
+                            >
+                                ?
+                            </span>
+                            )
+                        </SettingsCheckbox>
                     </OnboardingStep>
                 )
         }
