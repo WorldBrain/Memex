@@ -8,6 +8,7 @@ export interface State {
     isSidebarEnabled: boolean
     areStubsEnabled: boolean
     areVisitsEnabled: boolean
+    isTrackingEnabled: boolean
     areShortcutsEnabled: boolean
     areBookmarksEnabled: boolean
     areAnnotationsEnabled: boolean
@@ -25,6 +26,7 @@ export type Event = UIEvent<{
     setSearchSettingsShown: { shown: boolean }
     setStubsEnabled: { enabled: boolean }
     setVisitsEnabled: { enabled: boolean }
+    setTrackingEnabled: { enabled: boolean }
     setBookmarksEnabled: { enabled: boolean }
     setAnnotationsEnabled: { enabled: boolean }
     setScreenshotsEnabled: { enabled: boolean }
@@ -38,6 +40,7 @@ export default class Logic extends UILogic<State, Event> {
             currentStep: 0,
             isTooltipEnabled: true,
             isSidebarEnabled: true,
+            isTrackingEnabled: true,
             areShortcutsEnabled: true,
             areStubsEnabled: true,
             areVisitsEnabled: true,
@@ -47,6 +50,12 @@ export default class Logic extends UILogic<State, Event> {
             areCollectionsEnabled: true,
             showSearchSettings: false,
         }
+    }
+
+    setTrackingEnabled(
+        incoming: IncomingUIEvent<State, Event, 'setTrackingEnabled'>,
+    ): UIMutation<State> {
+        return { isTrackingEnabled: { $set: incoming.event.enabled } }
     }
 
     setStep(

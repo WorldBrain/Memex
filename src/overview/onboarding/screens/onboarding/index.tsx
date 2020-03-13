@@ -5,12 +5,12 @@ import { StatefulUIElement } from 'src/overview/types'
 import Logic, { State, Event } from './logic'
 import OnboardingBox from '../../components/onboarding-box'
 import OnboardingStep from '../../components/onboarding-step'
-import NextStepButton from '../../components/next-step-button'
 import SettingsCheckbox from '../../components/settings-checkbox'
 import SearchSettings from '../../components/search-settings'
 import { STORAGE_KEYS } from 'src/options/settings/constants'
 import { SIDEBAR_STORAGE_NAME } from 'src/sidebar-overlay/constants'
 import {
+    TRACKING_STORAGE_NAME,
     TOOLTIP_STORAGE_NAME,
     KEYBOARDSHORTCUTS_STORAGE_NAME,
     KEYBOARDSHORTCUTS_DEFAULT_STATE,
@@ -97,8 +97,8 @@ export default class OnboardingScreen extends StatefulUIElement<
             await grabVal(TOOLTIP_STORAGE_NAME, defs.isTooltipEnabled),
         )
         this.processEvent(
-            'setPrivacySetting',
-            await grabVal(TOOLTIP_STORAGE_NAME, defs.setPrivacySetting),
+            'setTrackingEnabled',
+            await grabVal(TOOLTIP_STORAGE_NAME, defs.isTrackingEnabled),
         )
         this.processEvent(
             'setSidebarEnabled',
@@ -154,6 +154,12 @@ export default class OnboardingScreen extends StatefulUIElement<
             className={styles.privacyImg}
         />
     )
+
+    private handleTrackingToggle = () => {
+        const enabled = !this.state.isTrackingEnabled
+        this.processEvent('setTrackingEnabled', { enabled })
+        return this.props.storage.set({ [TRACKING_STORAGE_NAME]: enabled })
+    }
 
     private handleTooltipToggle = () => {
         const enabled = !this.state.isTooltipEnabled
@@ -437,9 +443,9 @@ export default class OnboardingScreen extends StatefulUIElement<
                             label={'Learn More'}
                         />
                         <SettingsCheckbox
-                            id="onboarding-tooltip-toggle"
-                            isChecked={this.state.setPrivacySetting}
-                            handleChange={this.handleTooltipToggle}
+                            id="onboarding-privacy-toggle"
+                            isChecked={this.state.isTrackingEnabled}
+                            handleChange={this.handleTrackingToggle}
                         >
                             Share anonymous error reports and interaction data (
                             <span
