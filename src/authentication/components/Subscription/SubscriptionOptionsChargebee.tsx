@@ -15,7 +15,7 @@ import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import styled from 'styled-components'
 import { SubscriptionInnerOptions } from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
 import { CenterText } from 'src/common-ui/components/design-library/typography'
-import chargeBeeScriptSource from 'chargebee'
+const chargeBeeScriptSource = '/scripts/chargebeescript.js'
 
 export const subscriptionConfig = {
     site:
@@ -150,6 +150,9 @@ export class SubscriptionOptionsChargebee extends React.Component<
     render() {
         return (
             <div className={''}>
+                <Helmet>
+                    <script src={chargeBeeScriptSource} />
+                </Helmet>
                 <div>
                     <SubscriptionInnerOptions
                         openCheckoutBackupMonthly={
