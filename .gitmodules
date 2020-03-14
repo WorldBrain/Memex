@@ -37,3 +37,6 @@
 [submodule "external/@worldbrain/storex-hub"]
 	path = external/@worldbrain/storex-hub
 	url = https://github.com/WorldBrain/storex-hub
+[submodule "external/@worldbrain/storex-middleware-change-watcher"]
+	path = external/@worldbrain/storex-middleware-change-watcher
+	url = https://github.com/WorldBrain/storex-middleware-change-watcher
