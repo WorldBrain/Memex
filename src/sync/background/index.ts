@@ -59,6 +59,7 @@ export default class SyncBackground extends SyncService {
             productType: 'ext',
             productVersion: options.appVersion,
             postReceiveProcessor: options.postReceiveProcessor,
+            continuousSyncBatchSize: 50,
         })
 
         this.auth = options.auth

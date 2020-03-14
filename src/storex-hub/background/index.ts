@@ -40,7 +40,6 @@ export class StorexHubBackground {
     }
 
     handlePostStorageChange(event: StorageOperationEvent<'post'>) {
-        console.log('handle post storage change')
         if (!this.client) {
             return
         }
