@@ -96,9 +96,6 @@ class BackgroundScript {
             switch (details.reason) {
                 case 'install':
                     this.notifsBackground.deliverStaticNotifications()
-                    this.activityLoggerBackground.trackExistingTabs({
-                        isNewInstall: true,
-                    })
                     return onInstall()
                 case 'update':
                     this.notifsBackground.deliverStaticNotifications()
