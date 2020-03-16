@@ -1,7 +1,10 @@
 /* eslint-env jest */
 
 import { JSDOM } from 'jsdom'
-import extractPageContent from './extract-page-content'
+import extractRawPageContent from './content_script/extract-page-content'
+import extractPageMetadataFromRawContent, {
+    getPageFullText,
+} from './background/content-extraction'
 
 describe('Extract page content', () => {
     // beforeAll(() => {
@@ -41,11 +44,13 @@ describe('Extract page content', () => {
             </body>
             </html>
         `)
-        const content = await extractPageContent(
+        const rawContent = await extractRawPageContent(
             dom.window.document,
             'https://test.com',
         )
-        expect(content).toEqual({
+        const metadata = await extractPageMetadataFromRawContent(rawContent)
+        const fullText = await getPageFullText(rawContent, metadata)
+        expect({ ...metadata, fullText }).toEqual({
             fullText: ' Hello world ',
             lang: 'en',
             canonicalUrl: undefined,

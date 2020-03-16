@@ -66,10 +66,11 @@ export const setSearchType = createAction<'page' | 'notes' | 'social'>(
 export const initSearchCount = createAction('overview/initSearchCount')
 export const incSearchCount = createAction('overview/incSearchCount')
 
-export const toggleBookmark: (url: string, i: number) => Thunk = (
-    url,
-    index,
-) => async (dispatch, getState) => {
+export const toggleBookmark: (args: {
+    url: string
+    fullUrl: string
+    index: number
+}) => Thunk = ({ url, fullUrl, index }) => async (dispatch, getState) => {
     const results = selectors.results(getState())
     const { hasBookmark, user } = results[index]
     dispatch(changeHasBookmark(index))
@@ -87,7 +88,7 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
             : EVENT_NAMES.CREATE_RESULT_BOOKMARK,
     })
 
-    let bookmarkRPC: (args: { url: string }) => Promise<void>
+    let bookmarkRPC: (args: { url: string; fullUrl: string }) => Promise<void>
     // tslint:disable-next-line: prefer-conditional-expression
     if (hasBookmark) {
         bookmarkRPC = user ? deleteSocialBookmarkRPC : bookmarks.delPageBookmark
@@ -96,7 +97,7 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
     }
 
     try {
-        await bookmarkRPC({ url })
+        await bookmarkRPC({ url, fullUrl })
     } catch (err) {
         dispatch(changeHasBookmark(index))
         handleDBQuotaErrors(

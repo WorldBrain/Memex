@@ -14,7 +14,7 @@ import { Page, PageCreationProps } from 'src/search'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { DexieUtilsPlugin } from 'src/search/plugins'
 import analysePage from 'src/page-analysis/background'
-import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from 'src/options/settings/constants'
 
 export class PageIndexingBackground {
@@ -22,8 +22,9 @@ export class PageIndexingBackground {
 
     constructor(
         private options: {
-            storageManager: StorageManager
             bookmarksStorage: BookmarksStorage
+            storageManager: StorageManager
+            fetchPageData?: FetchPageProcessor
         },
     ) {
         this.storage = new PageStorage({
@@ -65,6 +66,12 @@ export class PageIndexingBackground {
                 favIconURI,
             )
         }
+    }
+
+    async addFavIconIfNeeded(url: string, favIcon: string) {
+        const { hostname } = transformUrl(url)
+
+        return this.storage.createFavIconIfNeeded(hostname, favIcon)
     }
 
     async addPageTerms(pipelineReq: PipelineReq): Promise<void> {
@@ -175,22 +182,18 @@ export class PageIndexingBackground {
     }
 
     async createPageFromUrl(props: PageCreationProps) {
-        const fetchRes = await fetchPageData({
-            url: props.url,
-            opts: {
-                includePageContent: true,
-                includeFavIcon: false,
-            },
-        }).run()
-
-        if (props.stubOnly && fetchRes.content) {
-            delete fetchRes.content.fullText
+        if (!this.options.fetchPageData) {
+            throw new Error(
+                'Instantiation error: fetch-page-data implementation was not given to constructor',
+            )
         }
 
-        const pageData = await pipeline({
-            pageDoc: { ...fetchRes, url: props.url },
-            rejectNoContent: !props.stubOnly,
-        })
+        const pageData = await this.options.fetchPageData.process(props.fullUrl)
+
+        if (props.stubOnly && pageData.text && pageData.terms?.length) {
+            delete pageData.text
+            delete pageData.terms
+        }
 
         await this.storage.createPageIfNotExists(pageData)
         if (props.visitTime) {

@@ -161,12 +161,17 @@ class ListContainer extends Component {
                                 .isSidebarLocked,
                         })}
                     >
-                        {this.props.lists.length === 0 ? (
-                            <div className={extStyles.noLists}>
-                                <strong>You don't have any collections </strong>
-                                <br />
-                                Create one with the + icon and drag and drop
-                                items into it.
+                        {this.props.lists.length === 1 ? (
+                            <div>
+                                {this.renderAllLists()}
+                                <div className={extStyles.noLists}>
+                                    <strong>
+                                        You don't have any collections{' '}
+                                    </strong>
+                                    <br />
+                                    Create one with the + icon and drag and drop
+                                    items into it.
+                                </div>
                             </div>
                         ) : (
                             <div>{this.renderAllLists()}</div>

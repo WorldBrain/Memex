@@ -1,8 +1,11 @@
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-import extractPageContent from 'src/page-analysis/content_script/extract-page-content'
-import extractFavIcon from 'src/page-analysis/content_script/extract-fav-icon'
-import extractPdfContent from 'src/page-analysis/content_script/extract-pdf-content'
+import extractFavIcon from 'src/page-analysis/background/content-extraction/extract-fav-icon'
+import extractPdfContent from 'src/page-analysis/background/content-extraction/extract-pdf-content'
+import extractRawPageContent from 'src/page-analysis/content_script/extract-page-content'
+import extractPageMetadataFromRawContent, {
+    getPageFullText,
+} from './content-extraction'
 import { PageDataResult } from './types'
 import { FetchPageDataError } from './fetch-page-data-error'
 
@@ -76,12 +79,21 @@ const fetchPageData: FetchPageData = ({
                 throw new FetchPageDataError('Cannot fetch DOM', 'temporary')
             }
 
+            const extractPageContent = async () => {
+                const rawContent = await extractRawPageContent(doc, url)
+                const metadata = await extractPageMetadataFromRawContent(
+                    rawContent,
+                )
+                const fullText = await getPageFullText(rawContent, metadata)
+                return { ...metadata, fullText }
+            }
+
             return {
                 favIconURI: opts.includeFavIcon
                     ? await extractFavIcon(doc)
                     : undefined,
                 content: opts.includePageContent
-                    ? await extractPageContent(doc, url)
+                    ? await extractPageContent()
                     : undefined,
             }
         }

@@ -302,9 +302,9 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
             }),
         )
     },
-    handleToggleBm: ({ url }, index) => event => {
+    handleToggleBm: ({ url, fullUrl }, index) => event => {
         event.preventDefault()
-        dispatch(resultActs.toggleBookmark(url, index))
+        dispatch(resultActs.toggleBookmark({ url, fullUrl, index }))
     },
     handleTrashBtnClick: ({ url }, index) => event => {
         event.preventDefault()
@@ -329,7 +329,4 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(ResultListContainer)
+export default connect(mapState, mapDispatch)(ResultListContainer)

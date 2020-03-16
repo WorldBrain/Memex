@@ -1,10 +1,9 @@
+import { browser } from 'webextension-polyfill-ts'
+import PDFJS from 'pdfjs-dist'
 import transformPageText from 'src/util/transform-page-text'
 
 // Run PDF.js to extract text from each page and read document metadata.
 async function extractContent(pdfData) {
-    // Import PDF.js only when needed, as it is large.
-    require('pdfjs-dist') /* global PDFJS */
-
     // Point PDF.js to its worker code, a static file in the extension.
     PDFJS.workerSrc = browser.extension.getURL('/lib/pdf.worker.min.js')
 
@@ -37,10 +36,14 @@ async function extractContent(pdfData) {
 }
 
 // Given a PDF as blob or URL, return a promise of its text and metadata.
-export default async function extractPdfContent({ url, blob = undefined }) {
+export default async function extractPdfContent(
+    input: { url: string } | { blob: Blob },
+) {
     // Fetch document if only a URL is given.
-    if (blob === undefined) {
-        const response = await fetch(url)
+    let blob = 'blob' in input ? input.blob : undefined
+
+    if (!('blob' in input)) {
+        const response = await fetch(input.url)
 
         if (response.status >= 400 && response.status < 600) {
             return Promise.reject(
@@ -51,18 +54,15 @@ export default async function extractPdfContent({ url, blob = undefined }) {
         blob = await response.blob()
     }
 
-    return new Promise(function(resolve, reject) {
+    const pdfData = new Promise(function(resolve, reject) {
         const fileReader = new FileReader()
         fileReader.onload = async event => {
-            const pdfData = event.target.result
-            try {
-                const pdfContent = await extractContent(pdfData)
-                resolve(pdfContent)
-            } catch (err) {
-                reject(err)
-            }
+            resolve(event.target.result)
         }
-        fileReader.onerror = event => reject(new Error(event.target.error))
+        fileReader.onerror = event => reject(event.target.error)
         fileReader.readAsArrayBuffer(blob)
     })
+
+    const pdfContent = await extractContent(pdfData)
+    return pdfContent
 }
