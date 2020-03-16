@@ -2,17 +2,17 @@ export class RetryTimeoutError extends Error {
     static isRetryTimeoutError = true
 }
 
-export function retryUntil(
-    promiseCreator,
-    condition,
-    { intervalMiliseconds, timeoutMiliseconds },
-) {
+export function retryUntil<T>(
+    task: () => Promise<T>,
+    condition: (value: T) => boolean,
+    options: { intervalMiliseconds: number; timeoutMiliseconds: number },
+): Promise<T> {
     const startMs = Date.now()
     return new Promise((resolve, reject) => {
         const doTry = async () => {
             let res
             try {
-                res = await promiseCreator()
+                res = await task()
             } catch (e) {
                 reject(e)
                 return true
@@ -30,11 +30,11 @@ export function retryUntil(
                 return
             }
 
-            if (Date.now() - startMs >= timeoutMiliseconds) {
+            if (Date.now() - startMs >= options.timeoutMiliseconds) {
                 return reject(new RetryTimeoutError())
             }
 
-            setTimeout(tryOrRetryLater, intervalMiliseconds)
+            setTimeout(tryOrRetryLater, options.intervalMiliseconds)
         }
 
         tryOrRetryLater()

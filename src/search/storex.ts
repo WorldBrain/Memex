@@ -17,6 +17,7 @@ export default function initStorex(options: {
         schemaPatcher,
         dbName: options.dbName,
         idbImplementation: options.idbImplementation,
+        legacyMemexCompatibility: true,
     })
 
     for (const plugin of createStorexPlugins()) {

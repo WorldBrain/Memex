@@ -1,7 +1,7 @@
 import { getMetadata } from 'page-metadata-parser'
 
 import PAGE_METADATA_RULES from '../page-metadata-rules'
-import { ExtractRawPageContent } from '../types'
+import { ExtractRawPageContent, RawPageContent } from '../types'
 
 export const DEF_LANG = 'en'
 
@@ -18,18 +18,20 @@ const extractRawPageContent: ExtractRawPageContent = async (
     url = location.href,
 ) => {
     if (url.endsWith('.pdf')) {
-        return {
+        const rawContent: RawPageContent = {
             type: 'pdf',
             url,
         }
+        return rawContent
     } else {
-        return {
+        const rawContent: RawPageContent = {
             type: 'html',
             url,
             body: doc.body.innerHTML,
             lang: doc.documentElement.lang || DEF_LANG,
             metadata: getMetadata(doc, url, PAGE_METADATA_RULES),
         }
+        return rawContent
     }
 }
 

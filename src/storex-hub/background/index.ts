@@ -2,6 +2,7 @@ import io from 'socket.io-client'
 import StorageManager from '@worldbrain/storex'
 import { createStorexHubSocketClient } from '@worldbrain/storex-hub/lib/client'
 import { StorexHubApi_v0 } from '@worldbrain/storex-hub/lib/public-api'
+import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 
 export class StorexHubBackground {
     private socket?: SocketIOClient.Socket
@@ -14,6 +15,7 @@ export class StorexHubBackground {
     ) {}
 
     async connect(options?: { port?: number }) {
+        let subscriptionCount = 0
         this.socket = io(`http://localhost:${options?.port || 3000}`)
         this.client = await createStorexHubSocketClient(this.socket, {
             callbacks: {
@@ -25,12 +27,25 @@ export class StorexHubBackground {
                         ),
                     }
                 },
+                handleSubscription: async () => {
+                    return { subscriptionId: (++subscriptionCount).toString() }
+                },
             },
         })
         await this.client.registerApp({
             name: 'memex',
             remote: true,
             identify: true,
+        })
+    }
+
+    handlePostStorageChange(event: StorageOperationEvent<'post'>) {
+        if (!this.client) {
+            return
+        }
+
+        this.client.emitEvent({
+            event: { type: 'storage-change', info: event.info },
         })
     }
 }

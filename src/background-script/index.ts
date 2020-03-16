@@ -93,18 +93,13 @@ class BackgroundScript {
      */
     private setupInstallHooks() {
         this.runtimeAPI.onInstalled.addListener(details => {
+            this.notifsBackground.deliverStaticNotifications()
+            this.activityLoggerBackground.trackExistingTabs()
+
             switch (details.reason) {
                 case 'install':
-                    this.notifsBackground.deliverStaticNotifications()
-                    this.activityLoggerBackground.trackExistingTabs({
-                        isNewInstall: true,
-                    })
                     return onInstall()
                 case 'update':
-                    this.notifsBackground.deliverStaticNotifications()
-                    this.activityLoggerBackground.trackExistingTabs({
-                        isNewInstall: false,
-                    })
                     this.runQuickAndDirtyMigrations()
                     return onUpdate()
                 default:

@@ -25,6 +25,7 @@ import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
+import { setStorageMiddleware } from 'src/storage/middleware'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -107,15 +108,18 @@ export async function setupBackgroundIntegrationTest(options?: {
         },
     }
 
-    const middleware: StorageMiddleware[] = [
-        ...((options && options.customMiddleware) || []),
-        ...(options && options.debugStorageOperations
-            ? [storageOperationDebugger]
-            : []),
-        storageOperationLogger.asMiddleware(),
-        await backgroundModules.sync.createSyncLoggingMiddleware(),
-    ]
-    storageManager.setMiddleware(middleware)
+    await setStorageMiddleware(storageManager, {
+        syncService: backgroundModules.sync,
+        storexHub: backgroundModules.storexHub,
+        modifyMiddleware: originalMiddleware => [
+            ...((options && options.customMiddleware) || []),
+            ...(options && options.debugStorageOperations
+                ? [storageOperationDebugger]
+                : []),
+            storageOperationLogger.asMiddleware(),
+            ...originalMiddleware,
+        ],
+    })
 
     setStorex(storageManager)
 

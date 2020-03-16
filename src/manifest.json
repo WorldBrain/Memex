@@ -15,7 +15,8 @@
             "run_at": "document_end"
         }
     ],
-    "content_security_policy": "script-src 'self' https://js.chargebee.com/v2/chargebee.js https://js.chargebee.com https://www.gstatic.com https://*.firebaseio.com https://www.googleapis.com; object-src 'self' https://js.chargebee.com/v2/chargebee.js https://js.chargebee.com https://www.gstatic.com https://*.firebaseio.com https://www.googleapis.com;",
+    "content_security_policy": "connect-src 'self' * data: http://* https://*; script-src 'self' https://js.chargebee.com https://www.gstatic.com https://*.firebaseio.com https://www.googleapis.com; object-src 'self' https://js.chargebee.com https://www.gstatic.com https://*.firebaseio.com https://www.googleapis.com;",
+    "Content-Security-Policy-Report-Only": "upgrade-insecure-requests;",
     "browser_action": {
         "default_title": "WorldBrain's Memex",
         "default_popup": "./popup.html"

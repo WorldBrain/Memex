@@ -1117,7 +1117,7 @@ function mobileSyncTests(suiteOptions: {
                     await devices.extension.backgroundModules.bookmarks.addBookmark(
                         {
                             url: 'http://toolate.com/',
-                            time: new Date('2019-10-10').getTime(),
+                            time: new Date('2019-10-11').getTime(),
                         },
                     )
                 }
@@ -1152,7 +1152,7 @@ function mobileSyncTests(suiteOptions: {
                     ...extensionStorageContents.bookmarks,
                     {
                         url: 'toolate.com',
-                        time: new Date('2019-10-10').getTime(),
+                        time: new Date('2019-10-11').getTime(),
                     },
                 ],
             },

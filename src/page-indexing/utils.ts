@@ -26,6 +26,7 @@ export async function maybeIndexTabs(
                         url: tab.url,
                         allowScreenshot: false,
                         visitTime: options.time,
+                        stubOnly: true,
                         save: true,
                     })
                 } catch (e) {

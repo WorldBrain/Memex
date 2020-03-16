@@ -19,12 +19,12 @@ import {
     LoggableTabChecker,
     VisitInteractionUpdater,
     FavIconFetcher,
-    FavIconChecker,
-    FavIconCreator,
     BookmarkChecker,
     TabIndexer,
 } from './types'
 import { SearchIndex } from 'src/search'
+import { getDefaultState } from 'src/overview/onboarding/screens/onboarding/default-state'
+import { PageAnalysis } from 'src/page-analysis/background'
 
 export default class TabChangeListeners {
     /**
@@ -102,7 +102,7 @@ export default class TabChangeListeners {
                 ),
                 page: throttle(
                     tab =>
-                        this._handleVisitIndexing(tabId, {}, tab).catch(
+                        this._handleVisitIndexing(tabId, tab).catch(
                             console.error,
                         ),
                     TabChangeListeners.URL_CHANGE_THRESHOLD,
@@ -130,12 +130,14 @@ export default class TabChangeListeners {
         shouldCaptureScreenshots: boolean
         logDelay: number
     }> {
-        const storage = await this._storage.get([
-            IDXING_PREF_KEYS.STUBS,
-            IDXING_PREF_KEYS.VISITS,
-            IDXING_PREF_KEYS.SCREENSHOTS,
-            IDXING_PREF_KEYS.VISIT_DELAY,
-        ])
+        const defs = getDefaultState()
+
+        const storage = await this._storage.get({
+            [IDXING_PREF_KEYS.STUBS]: defs.areStubsEnabled,
+            [IDXING_PREF_KEYS.VISITS]: defs.areVisitsEnabled,
+            [IDXING_PREF_KEYS.SCREENSHOTS]: defs.areScreenshotsEnabled,
+            [IDXING_PREF_KEYS.VISIT_DELAY]: defs.visitDelay,
+        })
 
         return {
             shouldLogStubs: !!storage[IDXING_PREF_KEYS.STUBS],
@@ -200,24 +202,44 @@ export default class TabChangeListeners {
         }
     }
 
-    _handleVisitIndexing: TabChangeListener = async (tabId, _, tab) => {
+    private async logTabWhenActive(
+        tab: Tabs.Tab,
+        preparation: PageAnalysis,
+        skipStubLog?: boolean,
+    ) {
+        await this._tabActive({ tabId: tab.id })
+
         const indexingPrefs = await this.fetchIndexingPrefs()
 
         if (!indexingPrefs.shouldLogStubs && !indexingPrefs.shouldLogVisits) {
             return
         }
 
-        await this._pageDOMLoaded({ tabId })
+        return this._pageVisitLogger.logPageVisit(
+            tab,
+            preparation,
+            !skipStubLog && indexingPrefs.shouldLogStubs,
+        )
+    }
+
+    _handleVisitIndexing = async (
+        tabId: number,
+        tab: Tabs.Tab,
+        opts: { skipStubLog?: boolean } = {},
+    ) => {
+        const indexingPrefs = await this.fetchIndexingPrefs()
+
         const preparation = await this._pageVisitLogger.preparePageLogging({
             tab,
             allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
         })
+
         if (!preparation) {
             return
         }
 
         // Run stage 1 of visit indexing immediately (depends on user settings)
-        if (indexingPrefs.shouldLogStubs) {
+        if (!opts.skipStubLog && indexingPrefs.shouldLogStubs) {
             await this._pageVisitLogger.logPageStub(tab, preparation)
         }
 
@@ -225,15 +247,8 @@ export default class TabChangeListeners {
         if (indexingPrefs.shouldLogVisits) {
             await this._tabManager.scheduleTabLog(
                 tabId,
-                () =>
-                    this._tabActive({ tabId }).then(() =>
-                        this._pageVisitLogger.logPageVisit(
-                            tab,
-                            preparation,
-                            indexingPrefs.shouldLogStubs,
-                        ),
-                    ),
-                indexingPrefs.logDelay,
+                () => this.logTabWhenActive(tab, preparation, opts.skipStubLog),
+                opts.skipStubLog ? 0 : indexingPrefs.logDelay,
             )
         }
     }

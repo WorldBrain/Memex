@@ -4,11 +4,12 @@ import { whenPageDOMLoaded } from 'src/util/tab-events'
 import getFavIcon from './get-fav-icon'
 import makeScreenshot from './make-screenshot'
 import { runInTab } from 'src/util/webextensionRPC'
-import { PageAnalyzerInterface } from 'src/page-analysis/types'
+import { PageAnalyzerInterface, RawPageContent } from 'src/page-analysis/types'
 import extractPageMetadataFromRawContent, {
     getPageFullText,
 } from './content-extraction'
 import { PageContent } from 'src/search'
+import { retryUntil } from 'src/util/retry-until'
 
 export interface PageAnalysis {
     favIconURI?: string
@@ -38,9 +39,17 @@ const analysePage: PageAnalyzer = async ({
 
     // Set up to run these functions in the content script in the tab.
     const extractPageContent = async () => {
-        const rawContent = await runInTab<PageAnalyzerInterface>(
-            tabId,
-        ).extractRawPageContent()
+        const rawContent = await retryUntil<RawPageContent>(
+            () =>
+                runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
+            value => !!value,
+            { intervalMiliseconds: 50, timeoutMiliseconds: 1000 },
+        )
+
+        if (!rawContent) {
+            return { metadata: {}, getFullText: async () => '' }
+        }
+
         const metadata = await extractPageMetadataFromRawContent(rawContent)
         const getFullText = async () => getPageFullText(rawContent, metadata)
         return { metadata, getFullText }
@@ -57,14 +66,16 @@ const analysePage: PageAnalyzer = async ({
     const [content, screenshotURI, favIconURI] = await whenAllSettled(
         dataFetchingPromises,
         {
-            onRejection: err => undefined,
+            onRejection: err => {
+                // console.log(`Failed to extract page content for tab ${tabId}:`, err)
+            },
         },
     )
     return {
         favIconURI,
         screenshotURI,
-        content: content.metadata || {},
-        getFullText: content.getFullText,
+        content: content?.metadata ?? {},
+        getFullText: content?.getFullText,
     }
 }
 
