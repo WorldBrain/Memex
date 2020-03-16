@@ -75,7 +75,7 @@ export default class ActivityLoggerBackground {
         this.setupTabLifecycleHandling()
     }
 
-    async trackExistingTabs({ isNewInstall = false }) {
+    async trackExistingTabs() {
         let resolveTabQueryP
         this.tabQueryP = new Promise(resolve => (resolveTabQueryP = resolve))
         const tabs = await this.tabsAPI.query({})
@@ -90,19 +90,13 @@ export default class ActivityLoggerBackground {
 
             await this.tabChangeListener
                 .injectContentScripts(browserTab)
-                .catch(e => e)
+                .catch(console.error)
 
-            if (!isNewInstall) {
-                return
-            }
-
-            if (browserTab.url) {
-                this.tabChangeListener._handleVisitIndexing(
-                    browserTab.id,
-                    browserTab,
-                    browserTab,
-                )
-            }
+            await this.tabChangeListener._handleVisitIndexing(
+                browserTab.id,
+                browserTab,
+                { skipStubLog: true },
+            )
         })
 
         resolveTabQueryP()
