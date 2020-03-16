@@ -92,7 +92,8 @@ export default class ActivityLoggerBackground {
                 .injectContentScripts(browserTab)
                 .catch(console.error)
 
-            await this.tabChangeListener._handleVisitIndexing(
+            // NOTE: Important we don't wait on this, as the Promise won't resolve until the tab is activated - if we wait, the next chunk to map over may not happen
+            this.tabChangeListener._handleVisitIndexing(
                 browserTab.id,
                 browserTab,
                 { skipStubLog: true },

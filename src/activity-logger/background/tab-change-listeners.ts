@@ -24,6 +24,7 @@ import {
 } from './types'
 import { SearchIndex } from 'src/search'
 import { getDefaultState } from 'src/overview/onboarding/screens/onboarding/default-state'
+import { PageAnalysis } from 'src/page-analysis/background'
 
 export default class TabChangeListeners {
     /**
@@ -201,6 +202,26 @@ export default class TabChangeListeners {
         }
     }
 
+    private async logTabWhenActive(
+        tab: Tabs.Tab,
+        preparation: PageAnalysis,
+        skipStubLog?: boolean,
+    ) {
+        await this._tabActive({ tabId: tab.id })
+
+        const indexingPrefs = await this.fetchIndexingPrefs()
+
+        if (!indexingPrefs.shouldLogStubs && !indexingPrefs.shouldLogVisits) {
+            return
+        }
+
+        return this._pageVisitLogger.logPageVisit(
+            tab,
+            preparation,
+            !skipStubLog && indexingPrefs.shouldLogStubs,
+        )
+    }
+
     _handleVisitIndexing = async (
         tabId: number,
         tab: Tabs.Tab,
@@ -208,14 +229,11 @@ export default class TabChangeListeners {
     ) => {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
-        if (!indexingPrefs.shouldLogStubs && !indexingPrefs.shouldLogVisits) {
-            return
-        }
-
         const preparation = await this._pageVisitLogger.preparePageLogging({
             tab,
             allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
         })
+
         if (!preparation) {
             return
         }
@@ -229,14 +247,7 @@ export default class TabChangeListeners {
         if (indexingPrefs.shouldLogVisits) {
             await this._tabManager.scheduleTabLog(
                 tabId,
-                () =>
-                    this._tabActive({ tabId }).then(() => {
-                        return this._pageVisitLogger.logPageVisit(
-                            tab,
-                            preparation,
-                            !opts.skipStubLog && indexingPrefs.shouldLogStubs,
-                        )
-                    }),
+                () => this.logTabWhenActive(tab, preparation, opts.skipStubLog),
                 opts.skipStubLog ? 0 : indexingPrefs.logDelay,
             )
         }
