@@ -29,7 +29,7 @@ export default class AnalyticsManager implements Analytics {
             return
         }
 
-        const eventInfo = ANALYTICS_EVENTS[event.category][event.action]
+        const eventInfo = ANALYTICS_EVENTS[event.category]?.[event.action]
         if (eventInfo) {
             await this.options.backend.trackEvent(event, options)
         } else if (process.env.NODE_ENV !== 'production') {
