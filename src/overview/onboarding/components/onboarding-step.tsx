@@ -6,6 +6,7 @@ const styles = require('./onboarding-box.css')
 
 export interface Props {
     isInitStep?: boolean
+    privacyStep?: boolean
     titleText: string
     subtitleText?: string
     subtitleText2?: string
@@ -30,11 +31,41 @@ export default class OnboardingStep extends React.PureComponent<Props> {
             return (
                 <div className={styles.startingPage}>
                     <div className={styles.stepContainer}>
+                         <div className={styles.featureImageArea}>
+                            {this.props.renderImage()}
+                        </div>
                         <h1 className={this.headerClassName}>
                             {this.props.titleText}
                         </h1>
+                        <div className={styles.subTitle}>
+                            {this.props.subtitleText}
+                        </div>
+                        <div className={styles.whiteSpace30}/>
+                    </div>
+                    <div className={styles.navigation}>
+                        {this.props.renderButton()}
+                    </div>
+                </div>
+            )
+        }
+        if (this.props.privacyStep) {
+            return (
+                <div className={styles.startingPage}>
+                    <div className={styles.stepContainer}>
+                        <h1 className={this.headerClassName}>
+                            {this.props.titleText}
+                        </h1>
+                        <div className={styles.subTitle}>
+                            {this.props.subtitleText}
+                        </div>
+                        <div className={styles.subTitle2}>
+                            {this.props.subtitleText2}
+                        </div>
+                        <div className={styles.whiteSpace30}/>
                         <div>{this.props.children}</div>
                     </div>
+                    <div className={styles.whiteSpace30}/>
+                    <div className={styles.whiteSpace30}/>
                     <div className={styles.navigation}>
                         {this.props.renderButton()}
                     </div>

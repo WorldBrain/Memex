@@ -32,7 +32,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     State,
     Event
 > {
-    static TOTAL_STEPS = 6
+    static TOTAL_STEPS = 7
     static defaultProps: Partial<Props> = {
         storage: browser.storage.local,
     }
@@ -148,9 +148,23 @@ export default class OnboardingScreen extends StatefulUIElement<
         <img src={'/img/mobileIllustration.svg'} className={styles.mobileImg} />
     )
 
-    private privacyImg = () => (
+    private dataImg = () => (
         <img
             src={'/img/privacyIllustration.png'}
+            className={styles.privacyImg}
+        />
+    )
+
+    private logoImage = () => (
+        <img
+            src={'/img/memexLogo.svg'}
+            className={styles.logoImg}
+        />
+    )
+
+    private privacyImg = () => (
+        <img
+            src={'/img/privacy.svg'}
             className={styles.privacyImg}
         />
     )
@@ -279,23 +293,21 @@ export default class OnboardingScreen extends StatefulUIElement<
             default:
             case 0:
                 return (
-                    <OnboardingStep
-                        isInitStep
-                        titleText="Setup your Memex in less than 1 minute"
-                        totalSteps={OnboardingScreen.TOTAL_STEPS}
-                        renderButton={() => (
-                            <OnboardingAction
-                                onClick={this.handleNextStepClick}
-                                label={'Get Started'}
-                            />
-                        )}
-                    >
-                        <img
-                            src="img/privacy.svg"
-                            alt="A person floating above the earth on a laptop"
-                            className={styles.floatingImage}
+                    <div>
+                        <OnboardingStep
+                            isInitStep
+                            titleText="Let's get started"
+                            subtitleText="Setup your Memex in less than 1 minute"
+                            totalSteps={OnboardingScreen.TOTAL_STEPS}
+                            renderButton={() => (
+                                <OnboardingAction
+                                    onClick={this.handleNextStepClick}
+                                    label={'Get Started'}
+                                />
+                            )}
+                            renderImage={this.logoImage}
                         />
-                    </OnboardingStep>
+                    </div>
                 )
             case 1:
                 return (
@@ -423,7 +435,35 @@ export default class OnboardingScreen extends StatefulUIElement<
                         goToStep={this.handleStepClick}
                         titleText="Your Data & Attention is Yours"
                         subtitleText="All data is stored offline-first and synced with End2End encryption."
-                        subtitleText2="Memex is funded without Venture Capital investments"
+                        subtitleText2="Memex is funded without Venture Capital investments."
+                        renderButton={() => (
+                            <OnboardingAction
+                                onClick={this.handleNextStepClick}
+                                label={'Next'}
+                            />
+                        )}
+                        renderImage={this.dataImg}
+                        totalSteps={OnboardingScreen.TOTAL_STEPS}
+                        currentStep={this.state.currentStep - 1}
+                    >
+                        <SecondaryAction
+                            onClick={() =>
+                                window.open(
+                                    `https://community.worldbrain.io/t/why-worldbrain-io-does-not-take-venture-capital/75`,
+                                )
+                            }
+                            label={'Learn More'}
+                        />
+                    </OnboardingStep>
+                )
+                case 7:
+                return (
+                    <OnboardingStep
+                        privacyStep
+                        goToStep={this.handleStepClick}
+                        titleText="Adjust your privacy settings"
+                        subtitleText="Memex only shares error messages & anonymous usage statistics."
+                        subtitleText2="It never sends content you save or search for."
                         renderButton={() => (
                             <OnboardingAction
                                 onClick={this.props.navToOverview}
@@ -436,27 +476,19 @@ export default class OnboardingScreen extends StatefulUIElement<
                     >
                         <SecondaryAction
                             onClick={() =>
-                                window.open(
-                                    `https://community.worldbrain.io/t/why-worldbrain-io-does-not-take-venture-capital/75`,
-                                )
+                                window.open(``)
                             }
-                            label={'Learn More'}
+                            label={'See full privacy statement'}
                         />
-                        <SettingsCheckbox
-                            id="onboarding-privacy-toggle"
-                            isChecked={this.state.isTrackingEnabled}
-                            handleChange={this.handleTrackingToggle}
-                        >
-                            Share anonymous error reports and interaction data (
-                            <span
-                                onClick={() =>
-                                    window.open(`https://worldbrain.io/privacy`)
-                                }
+                        <div className={styles.settingsBox}>
+                            <SettingsCheckbox
+                                id="onboarding-privacy-toggle"
+                                isChecked={this.state.isTrackingEnabled}
+                                handleChange={this.handleTrackingToggle}
                             >
-                                ?
-                            </span>
-                            )
-                        </SettingsCheckbox>
+                                Share anonymous usage statistics and error logs
+                            </SettingsCheckbox>
+                        </div>
                     </OnboardingStep>
                 )
         }
