@@ -462,7 +462,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         privacyStep
                         goToStep={this.handleStepClick}
                         titleText="Adjust your privacy settings"
-                        subtitleText="Memex only shares error messages & anonymous usage statistics."
+                        subtitleText="Memex only shares error logs & anonymous usage statistics."
                         subtitleText2="It never sends content you save or search for."
                         renderButton={() => (
                             <OnboardingAction
@@ -476,7 +476,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     >
                         <SecondaryAction
                             onClick={() =>
-                                window.open(``)
+                                window.open(`https://worldbrain.io/privacy`)
                             }
                             label={'See full privacy statement'}
                         />
