@@ -4,6 +4,7 @@ import randomString from 'src/util/random-string'
 import { shouldTrack } from './utils'
 import { AnalyticsBackend } from './backend/types'
 import { AnalyticsEvent, Analytics, AnalyticsTrackEventOptions } from './types'
+import { ANALYTICS_EVENTS } from './constants'
 
 const TRACK_BY_DEFAULT = true
 
@@ -27,7 +28,15 @@ export default class AnalyticsManager implements Analytics {
         if (!shouldTrackValue) {
             return
         }
-        await this.options.backend.trackEvent(event, options)
+
+        const eventInfo = ANALYTICS_EVENTS[event.category][event.action]
+        if (eventInfo) {
+            await this.options.backend.trackEvent(event, options)
+        } else if (process.env.NODE_ENV !== 'production') {
+            console.warn(
+                `Ignoring analytics of non-documented event: '${event.category}' -> '${event.action}'`,
+            ) // tslint:disable-line
+        }
     }
 
     /**

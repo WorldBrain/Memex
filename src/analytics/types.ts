@@ -15,3 +15,12 @@ export interface AnalyticsEvent {
 export interface AnalyticsTrackEventOptions {
     waitForCompletion?: boolean
 }
+
+export interface AnalyticsEvents {
+    Annotations: 'createWithTags' | 'createWithoutTags'
+    Privacy: 'Change tracking pref'
+}
+
+export interface AnalyticsEventInfo {
+    purposes: string[]
+}
