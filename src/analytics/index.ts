@@ -1,13 +1,8 @@
 import AnalyticsManager from './analytics'
 import { AnalyticsEvent, Analytics, AnalyticsTrackEventOptions } from './types'
-import CountlyAnalyticsBackend from './backend/countly'
+import FirebaseAnalyticsBackend from './backend/firebase'
 
-const createBackend = () =>
-    new CountlyAnalyticsBackend({
-        url: process.env.COUNTLY_HOST,
-        appKey: process.env.COUNTLY_APP_KEY,
-        countlyConnector: null,
-    })
+const createBackend = () => new FirebaseAnalyticsBackend()
 let realBackend = null
 const backend = new Proxy(
     {},
