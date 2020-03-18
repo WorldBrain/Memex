@@ -103,20 +103,22 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         tabManager,
     })
+
+    const search = new SearchBackground({
+        storageManager,
+        pages,
+        idx: searchIndex,
+        tabMan: tabManager,
+        browserAPIs: options.browserAPIs,
+    })
+
     const tags = new TagsBackground({
         storageManager,
         pageStorage: pages.storage,
         searchIndex,
         queryTabs: bindMethod(browser.tabs, 'query'),
         windows: browser.windows,
-    })
-    const search = new SearchBackground({
-        storageManager,
-        tags,
-        pages,
-        idx: searchIndex,
-        tabMan: tabManager,
-        browserAPIs: options.browserAPIs,
+        searchBackgroundModule: search,
     })
 
     const notifications = new NotificationBackground({ storageManager })

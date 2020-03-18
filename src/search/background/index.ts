@@ -10,7 +10,6 @@ import { SearchInterface, BackgroundSearchParams } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { SearchIndex } from '../types'
-import TagsBackground from 'src/tags/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 
 export default class SearchBackground {
@@ -55,7 +54,6 @@ export default class SearchBackground {
         private options: {
             storageManager: Storex
             idx: SearchIndex
-            tags: TagsBackground
             pages: PageIndexingBackground
             queryBuilder?: () => QueryBuilder
             tabMan: TabManager

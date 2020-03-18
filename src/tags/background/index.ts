@@ -1,9 +1,6 @@
 import Storex from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Windows, Tabs } from 'webextension-polyfill-ts'
-
 import TagStorage from './storage'
-import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { SearchIndex } from 'src/search'
 import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
@@ -12,6 +9,7 @@ import { TagTab, RemoteTagsInterface } from './types'
 import { bindMethod } from 'src/util/functions'
 import { initErrHandler } from 'src/search/storage'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
+import SearchBackground from 'src/search/background'
 
 export default class TagsBackground {
     storage: TagStorage
@@ -29,6 +27,7 @@ export default class TagsBackground {
             searchIndex: SearchIndex
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
+            searchBackgroundModule: SearchBackground
         },
     ) {
         this.storage = new TagStorage({
@@ -41,6 +40,10 @@ export default class TagsBackground {
             fetchPageTags: bindMethod(this, 'fetchPageTags'),
             addTagsToOpenTabs: bindMethod(this, 'addTagsToOpenTabs'),
             delTagsFromOpenTabs: bindMethod(this, 'delTagsFromOpenTabs'),
+            searchForTagSuggestions: bindMethod(
+                this,
+                'searchForTagSuggestions',
+            ),
         }
         this.windows = options.windows
         this.searchIndex = options.searchIndex
@@ -49,6 +52,13 @@ export default class TagsBackground {
 
     setupRemoteFunctions() {
         makeRemotelyCallableType<RemoteTagsInterface>(this.remoteFunctions)
+    }
+
+    async searchForTagSuggestions(args: { query: string; limit?: number }) {
+        return this.options.searchBackgroundModule.storage.suggest({
+            type: 'tag',
+            ...args,
+        })
     }
 
     async addTagsToOpenTabs(params: {
