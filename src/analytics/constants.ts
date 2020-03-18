@@ -24,17 +24,28 @@ export const ANALYTICS_EVENTS: {
         [Action in AnalyticsEvents[Category]]: AnalyticsEventInfo
     }
 } = {
+    'Activity Pings': {
+        daily: {
+            description: '',
+        },
+        weekly: {
+            description: '',
+        },
+        monthly: {
+            description: '',
+        },
+    },
     Annotations: {
         createWithTags: {
-            purposes: [],
+            description: '',
         },
         createWithoutTags: {
-            purposes: [],
+            description: '',
         },
     },
     Privacy: {
         'Change tracking pref': {
-            purposes: [],
+            description: '',
         },
     },
 }

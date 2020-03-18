@@ -56,6 +56,7 @@ export async function main() {
         authOptions: {
             devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
         },
+        analyticsManager: analytics,
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
     await storageManager.finishInitialization()

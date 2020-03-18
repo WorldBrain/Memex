@@ -25,6 +25,8 @@ import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
+import { FakeAnalytics } from 'src/analytics/mock'
+import AnalyticsManager from 'src/analytics/analytics'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -53,9 +55,13 @@ export async function setupBackgroundIntegrationTest(options?: {
         authService,
         subscriptionService,
     })
+    const analyticsManager = new AnalyticsManager({
+        backend: new FakeAnalytics(),
+    })
 
     const backgroundModules = createBackgroundModules({
         storageManager,
+        analyticsManager,
         localStorageChangesManager: null,
         browserAPIs: {
             storage: {

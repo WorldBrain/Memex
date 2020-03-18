@@ -47,9 +47,12 @@ import { combineSearchIndex } from 'src/search/search-index'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
+import { AnalyticsBackground } from 'src/analytics/background'
+import AnalyticsManager from 'src/analytics/analytics'
 
 export interface BackgroundModules {
     auth: AuthBackground
+    analytics: AnalyticsBackground
     notifications: NotificationBackground
     social: SocialBackground
     activityLogger: ActivityLoggerBackground
@@ -79,6 +82,7 @@ export function createBackgroundModules(options: {
     fetchPageDataProcessor: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
+    analyticsManager: AnalyticsManager
     authOptions?: { devAuthState: DevAuthState }
     includePostSyncProcessor?: boolean
     disableSyncEnryption?: boolean
@@ -164,6 +168,9 @@ export function createBackgroundModules(options: {
 
     return {
         auth,
+        analytics: new AnalyticsBackground(options.analyticsManager, {
+            localBrowserStorage: options.browserAPIs.storage.local,
+        }),
         notifications,
         social,
         activityLogger,
@@ -253,6 +260,7 @@ export async function setupBackgroundModules(
     backgroundModules.backupModule.storage.setupChangeTracking()
 
     await backgroundModules.sync.setup()
+    await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
     backgroundModules.sync.registerRemoteEmitter()
 }

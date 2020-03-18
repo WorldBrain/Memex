@@ -17,10 +17,11 @@ export interface AnalyticsTrackEventOptions {
 }
 
 export interface AnalyticsEvents {
+    'Activity Pings': 'daily' | 'weekly' | 'monthly'
     Annotations: 'createWithTags' | 'createWithoutTags'
     Privacy: 'Change tracking pref'
 }
 
 export interface AnalyticsEventInfo {
-    purposes: string[]
+    description: string
 }
