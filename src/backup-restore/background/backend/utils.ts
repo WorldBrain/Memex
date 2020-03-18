@@ -1,14 +1,10 @@
-import * as AllRaven from 'raven-js'
-
 import {
     ObjectChangeImages,
     ObjectChange,
 } from 'src/backup-restore/background/backend/types'
 import encodeBlob from 'src/util/encode-blob'
+import * as Raven from 'src/util/raven'
 import { USERS_COLL } from 'src/social-integration/constants'
-
-// tslint:disable-next-line:variable-name
-const Raven = AllRaven['default']
 
 export async function separateDataFromImageChanges(changes: ObjectChange[]) {
     const images = []

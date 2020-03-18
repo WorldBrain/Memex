@@ -5,11 +5,10 @@ import {
 } from 'src/highlighting/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
-import * as AllRaven from 'raven-js'
+import * as Raven from 'src/util/raven'
 import { Annotation } from 'src/annotations/types'
 
 const styles = require('src/highlighting/ui/styles.css')
-const Raven = AllRaven['default']
 
 export class HighlightInteraction implements HighlightInteractionInterface {
     /**
