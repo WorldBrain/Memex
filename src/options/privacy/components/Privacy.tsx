@@ -1,9 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { ANALYTICS_EVENTS } from 'src/analytics/constants'
 import { OutLink } from 'src/common-ui/containers'
-import localStyles from './Privacy.css'
-import settingsStyle from 'src/options/settings/components/settings.css'
+const localStyles = require('./Privacy.css')
+const settingsStyle = require('src/options/settings/components/settings.css')
 
 const Privacy = props => (
     <div className={localStyles.privacy}>
@@ -57,6 +58,22 @@ const Privacy = props => (
                 </select>
             </div>
         </div>
+
+        {Object.entries(ANALYTICS_EVENTS).map(([categoryName, actions]) => (
+            <div key={categoryName}>
+                {Object.entries(actions).map(([actionName, actionInfo]) => (
+                    <div
+                        key={`${categoryName}::${actionName}`}
+                        style={{ marginBottom: '10px' }}
+                    >
+                        <div>
+                            Event: {categoryName}::{actionName}
+                        </div>
+                        <div>Description: {actionInfo.description}</div>
+                    </div>
+                ))}
+            </div>
+        ))}
     </div>
 )
 

@@ -26,26 +26,31 @@ export const ANALYTICS_EVENTS: {
 } = {
     'Activity Pings': {
         daily: {
-            description: '',
+            description:
+                'Daily ping sent to track how many people use Memex daily and what features they use daily',
         },
         weekly: {
-            description: '',
+            description:
+                'Weekly ping sent to track how many people use Memex daily and what features they use weekly',
         },
         monthly: {
-            description: '',
+            description:
+                'Monthly ping sent to track how many people use Memex daily and what features they use monthly',
         },
     },
     Annotations: {
         createWithTags: {
-            description: '',
+            description: 'The creation of an annotation with tags',
         },
         createWithoutTags: {
-            description: '',
+            description: 'The creation of an annotation without tags',
         },
     },
     Privacy: {
         'Change tracking pref': {
-            description: '',
+            description:
+                `You changed whether you allow us to collect anonymous usage information to improve our product. ` +
+                `If you decide not to, this is the last thing we'll know about your usage of Memex,`,
         },
     },
 }
