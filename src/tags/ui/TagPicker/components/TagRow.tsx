@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Tag } from 'src/tags/background/types'
-import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
+import { TagResultItem } from 'src/tags/ui/TagPicker/components/TagResultItem'
 
 interface TagRowItemEvents {
     onClick: (tag: Tag) => void
@@ -20,7 +20,7 @@ class TagRow extends React.PureComponent<Props> {
         return (
             <>
                 <Row onClick={this.onClick}>
-                    <TagItem>{name}</TagItem>
+                    <TagResultItem>{name}</TagResultItem>
                     <span>
                         {/* the filter actions would be include or exclude */}
                         icon
@@ -30,21 +30,6 @@ class TagRow extends React.PureComponent<Props> {
         )
     }
 }
-
-const TagItem = styled.div`
-    background: green;
-    display: inline-flex;
-    border: 2px solid transparent;
-    min-height: 16px;
-    padding: 4px 8px;
-    border-radius: 5px;
-    font-size: ${fontSizeSmall};
-
-    &:hover {
-        background: blue;
-        cursor: pointer;
-    }
-`
 
 const Row = styled.div`
     border-bottom: 1px solid #e2e2ea;

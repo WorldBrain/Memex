@@ -18,7 +18,11 @@ import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
 import { NotifButton } from './notif-button'
 import { HistoryPauser } from './pause-button'
-import { selectors as tags, acts as tagActs, TagsButton } from './tags-button'
+import {
+    selectors as tagsSelectors,
+    acts as tagActs,
+    TagsButton,
+} from './tags-button'
 import {
     selectors as collections,
     acts as collectionActs,
@@ -35,7 +39,8 @@ import * as acts from './actions'
 import { ClickHandler, RootState } from './types'
 import { PageList } from '../custom-lists/background/types'
 import { EVENT_NAMES } from '../analytics/internal/constants'
-
+import TagPicker from 'src/tags/ui/TagPicker'
+import { tags } from 'src/util/remote-functions-background'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 
@@ -108,7 +113,7 @@ class PopupContainer extends PureComponent<Props> {
 
         if (this.props.showTagsPicker) {
             return (
-                <IndexDropdown
+                /*                <IndexDropdown
                     url={this.props.url}
                     tabId={this.props.tabId}
                     initFilters={this.props.tags}
@@ -118,6 +123,18 @@ class PopupContainer extends PureComponent<Props> {
                     onFilterAdd={this.props.onTagAdd}
                     onFilterDel={this.props.onTagDel}
                     allTabs={this.props.allTabs}
+                />*/
+
+                <TagPicker
+                    loadSuggestions={() =>
+                        this.props.initTagSuggs.map(s => ({ name: s, url: s }))
+                    }
+                    url={this.props.url}
+                    queryTags={(query: string) =>
+                        tags.searchForTagSuggestions({ query })
+                    }
+                    onUpdateTagSelection={selectedTags => null}
+                    initialSelectedTags={[]}
                 />
             )
         }
@@ -215,10 +232,10 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     showCollectionsPicker: collections.showCollectionsPicker(state),
     collections: collections.collections(state),
     initCollSuggs: collections.initCollSuggestions(state),
-    showTagsPicker: tags.showTagsPicker(state),
-    tags: tags.tags(state),
-    initTagSuggs: tags.initTagSuggestions(state),
-    allTabs: tags.allTabs(state),
+    showTagsPicker: tagsSelectors.showTagsPicker(state),
+    tags: tagsSelectors.tags(state),
+    initTagSuggs: tagsSelectors.initTagSuggestions(state),
+    allTabs: tagsSelectors.allTabs(state),
     allTabsCollection: collections.allTabs(state),
 })
 

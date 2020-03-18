@@ -1,6 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
-import { ThemeProvider } from 'styled-components'
+import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
@@ -9,7 +8,9 @@ import TagPickerLogic, {
     TagPickerState,
 } from 'src/tags/ui/TagPicker/logic'
 import { TagSearchInput } from 'src/tags/ui/TagPicker/components/TagSearchInput'
-import TagList from 'src/tags/ui/TagPicker/components/TagList'
+import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedList'
+import { Tag } from 'src/tags/background/types'
+import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -20,29 +21,55 @@ class TagPicker extends StatefulUIElement<
         super(props, new TagPickerLogic(props))
     }
 
-    handleSearchInputChanged = (query: string) =>
-        this.processEvent('searchInputChanged', { query })
+    handleSearchInputChanged = (query: string) => {
+        return this.processEvent('searchInputChanged', { query })
+    }
+
+    handleSelectedTagPress = (tag: Tag) =>
+        this.processEvent('selectedTagPress', { tag })
 
     render() {
-        const tags =
-            (this.state.queryResults?.length ?? 0) > 0
-                ? this.state.queryResults
-                : this.state.initialTags
+        const tags = TagPickerLogic.getTagsToDisplay(this.state)
 
         return (
             <ThemeProvider theme={lightTheme}>
-                {/* can we pass down the theme to these components?)*/}
                 <TagPickerContainer>
-                    <TagSearchInput onChange={this.handleSearchInputChanged} />
-                    <TagList tags={tags} />
+                    <TagSearchInput onChange={this.handleSearchInputChanged}>
+                        <TagSelectedList
+                            tagsSelected={this.state.selectedTags}
+                            onPress={this.handleSelectedTagPress}
+                        />
+                    </TagSearchInput>
+
+                    <TagResultsList tags={tags} />
                 </TagPickerContainer>
             </ThemeProvider>
         )
     }
 }
 
+// themes should be global to go into a theme file and are referenced from a higher component (even app.js) for now its just here (proof of concept)
 const lightTheme = {
     background: '#fff',
+    searchBackground: '#F1F1F5',
+    tag: {
+        tag: '#44ff88',
+        border: '#83c9f4',
+        hover: '#83c9f4',
+        selected: '#83c9f4',
+        text: '#083957',
+    },
+}
+const darkTheme = {
+    text: '#72727F',
+    searchBackground: '#F1F1F5',
+    tag: {
+        tag: '#44ff88',
+        border: '#83c9f4',
+        hover: '#83c9f4',
+        selected: '#83c9f4',
+        text: '#083957',
+    },
 }
 
 const TagPickerContainer = styled.div`
@@ -55,6 +82,4 @@ const TagPickerContainer = styled.div`
     width: 350px;
 `
 
-const StyledTagPicker = styled(TagPicker)``
-
-export default StyledTagPicker
+export default TagPicker

@@ -7,7 +7,7 @@ interface Props {
     tags: Tag[]
 }
 
-class TagList extends React.PureComponent<Props> {
+class TagResultsList extends React.PureComponent<Props> {
     render() {
         if (!this.props.tags) {
             return null
@@ -18,7 +18,7 @@ class TagList extends React.PureComponent<Props> {
     }
 }
 
-export default styled(TagList)`
+export default styled(TagResultsList)`
     display: flex;
     overflow-y: scroll;
     border: 2px solid purple;
