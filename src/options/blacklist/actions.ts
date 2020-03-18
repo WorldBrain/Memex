@@ -43,7 +43,7 @@ export const initBlacklist = () => async dispatch => {
         const parsedBlacklist = JSON.parse(blacklist)
         dispatch(setBlacklist(parsedBlacklist))
     } catch (err) {
-        Raven.captureBreadcrumb(err)
+        Raven.captureException(err)
         dispatch(setBlacklist([]))
     } finally {
         dispatch(setIsLoading(false))
@@ -80,7 +80,7 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
             dispatch(setMatchedCount(count))
         }
     } catch (error) {
-        Raven.captureBreadcrumb(error)
+        Raven.captureException(error)
     } finally {
         dispatch(setIsLoading(false))
         dirtyEstsCache() // Force import ests to recalc next visit
