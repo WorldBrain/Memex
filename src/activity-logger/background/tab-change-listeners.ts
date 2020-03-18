@@ -25,6 +25,7 @@ import {
 import { SearchIndex } from 'src/search'
 import { getDefaultState } from 'src/overview/onboarding/screens/onboarding/default-state'
 import { PageAnalysis } from 'src/page-analysis/background'
+import * as Raven from 'src/util/raven'
 
 export default class TabChangeListeners {
     /**
@@ -102,9 +103,9 @@ export default class TabChangeListeners {
                 ),
                 page: throttle(
                     tab =>
-                        this._handleVisitIndexing(tabId, tab).catch(
-                            console.error,
-                        ),
+                        this._handleVisitIndexing(tabId, tab).catch(err => {
+                            Raven.captureException(err)
+                        }),
                     TabChangeListeners.URL_CHANGE_THRESHOLD,
                     { leading: false },
                 ),
@@ -229,18 +230,25 @@ export default class TabChangeListeners {
     ) => {
         const indexingPrefs = await this.fetchIndexingPrefs()
 
-        const preparation = await this._pageVisitLogger.preparePageLogging({
-            tab,
-            allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
-        })
-
-        if (!preparation) {
+        let preparation: PageAnalysis
+        try {
+            preparation = await this._pageVisitLogger.preparePageLogging({
+                tab,
+                allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
+            })
+        } catch (err) {
+            Raven.captureException(err)
             return
         }
 
         // Run stage 1 of visit indexing immediately (depends on user settings)
         if (!opts.skipStubLog && indexingPrefs.shouldLogStubs) {
-            await this._pageVisitLogger.logPageStub(tab, preparation)
+            try {
+                await this._pageVisitLogger.logPageStub(tab, preparation)
+            } catch (err) {
+                Raven.captureException(err)
+                return
+            }
         }
 
         // Schedule stage 2 of visit indexing soon after - if user stays on page

@@ -57,17 +57,12 @@ export default class PageVisitLogger {
         }
 
         const allowFavIcon = !(await this._checkFavIcon(params.tab.url))
-        try {
-            const analysisRes = await this._analyzePage({
-                tabId: params.tab.id,
-                allowFavIcon,
-                allowScreenshot: params.allowScreenshot,
-            })
-            return analysisRes
-        } catch (err) {
-            console.error(err)
-            return null
-        }
+        const analysisRes = await this._analyzePage({
+            tabId: params.tab.id,
+            allowFavIcon,
+            allowScreenshot: params.allowScreenshot,
+        })
+        return analysisRes
     }
 
     /**

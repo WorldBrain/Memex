@@ -72,6 +72,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
                 )
             })
         } catch (e) {
+            Raven.captureException(e)
             console.error(
                 'MEMEX: Error during annotation anchoring/highlighting:',
                 e,

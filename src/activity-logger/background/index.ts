@@ -11,6 +11,7 @@ import PageVisitLogger from './log-page-visit'
 import { CONCURR_TAB_LOAD } from '../constants'
 import { SearchIndex } from 'src/search'
 import { bindMethod } from 'src/util/functions'
+import * as Raven from 'src/util/raven'
 
 export default class ActivityLoggerBackground {
     static SCROLL_UPDATE_FN = 'updateScrollState'
@@ -90,7 +91,9 @@ export default class ActivityLoggerBackground {
 
             await this.tabChangeListener
                 .injectContentScripts(browserTab)
-                .catch(console.error)
+                .catch(err => {
+                    Raven.captureBreadcrumb(err)
+                })
 
             // NOTE: Important we don't wait on this, as the Promise won't resolve until the tab is activated - if we wait, the next chunk to map over may not happen
             this.tabChangeListener._handleVisitIndexing(
