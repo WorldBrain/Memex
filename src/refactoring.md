@@ -314,3 +314,7 @@ There seems to be duplication between the usage of this directly, via the `creat
 Move everything that has to do with tabs to something like src/ipc or src/rpc.
 
 ## Misc
+
+1. `src/backup-restore/ui/utils.js` exports some functions that have inconstent return types depending on outcome of async calls, use of old remoteFunctions API, written in JS.
+2. Direct usages of `window` global object: may or may not be issue, depending on case, but I'm always confused when we're meant to use things like this directly - making a decision and defining guidelines would be good.
+3. `src/search/storage/index.ts` exports `initErrHandler` used in a lot of places to ignore certain errors. So does `src/util/error-handler`... Let's make a proper decision about how we're going to handle these.
