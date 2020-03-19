@@ -15,6 +15,7 @@ import { ProcedureUiCommunication } from 'src/backup-restore/background/procedur
 import NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
 import { SearchIndex } from 'src/search'
+import * as Raven from 'src/util/raven'
 
 export * from './backend'
 
@@ -399,6 +400,7 @@ export class BackupBackgroundModule {
         try {
             this.backupProcedure.run()
         } catch (e) {
+            Raven.captureException(e)
             always()
             throw e
         }

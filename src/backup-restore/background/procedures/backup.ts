@@ -1,6 +1,6 @@
 // tslint:disable:no-console
 import Storex from '@worldbrain/storex'
-import * as AllRaven from 'raven-js'
+import * as Raven from 'src/util/raven'
 import { EventEmitter } from 'events'
 
 import BackupStorage, { BackupInfoStorage } from '../storage'
@@ -130,6 +130,7 @@ export default class BackupProcedure {
                     await this.storage.forgetAllChanges()
                     await this._queueInitialBackup() // Pushes all the objects in the DB to the queue for the incremental backup
                 } catch (err) {
+                    Raven.captureException(err)
                     throw err
                 } finally {
                     console.timeEnd('put initial backup into changes table')
@@ -162,8 +163,7 @@ export default class BackupProcedure {
                 .catch(async e => {
                     this.running = false
                     if (process.env.NODE_ENV === 'production') {
-                        const raven = AllRaven['default']
-                        raven.captureException(e)
+                        Raven.captureException(e)
                     }
 
                     console.error(e)

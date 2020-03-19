@@ -13,6 +13,7 @@ import {
 } from '../../search-filters'
 import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import * as Raven from 'src/util/raven'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
@@ -167,6 +168,7 @@ export const search: (args?: any) => Thunk = (
         }
     } catch (error) {
         console.error(`Search for '${query}' errored: ${error.toString()}`)
+        Raven.captureException(error)
         dispatch(resultsActs.setLoading(false))
     }
 }

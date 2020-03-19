@@ -1,3 +1,5 @@
+import * as Raven from 'src/util/raven'
+
 export const dbQuotaErrors = new Set<string>([
     'AbortError',
     'OpenFailedError',
@@ -12,6 +14,7 @@ export const handleDBQuotaErrors = <R = any>(
     notableErrors = dbQuotaErrors,
 ) => (err: Error) => {
     if (!notableErrors.has(err.name)) {
+        Raven.captureException(err)
         return defaultHandler(err)
     }
 
