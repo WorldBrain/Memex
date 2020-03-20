@@ -7,6 +7,8 @@ import { Link } from 'src/common-ui/components/design-library/actions/Link'
 import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import { Tip } from 'src/common-ui/components/design-library/Tip'
+import { NotificationBar } from 'src/common-ui/components/design-library/NotificationBar'
+
 import {
     ModalBox,
     ModalColLeft,
@@ -31,6 +33,11 @@ storiesOf('Design Library', module)
         <FlexContainer>
             <Tip>The device paired but had a problem syncing data</Tip>
         </FlexContainer>
+    ))
+    .add('Notification Bar', () => (
+        <NotificationBar onClick={undefined} onClose={undefined}>
+            We've just released an API! Learn more...
+        </NotificationBar>
     ))
     .add('Modal', () => (
         <div>

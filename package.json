@@ -71,6 +71,7 @@
         "openpgp": "^4.6.2",
         "page-metadata-parser": "git+https://github.com/Treora/page-metadata-parser.git#npm-testable",
         "pdfjs-dist": "^1.8.492",
+        "polished": "^3.4.4",
         "postcss-modules-values": "^2.0.0",
         "promise-limit": "^2.5.0",
         "prop-types": "^15.5.10",
