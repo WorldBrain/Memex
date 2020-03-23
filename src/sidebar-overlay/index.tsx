@@ -6,6 +6,7 @@ import AnnotationsManager from '../annotations/annotations-manager'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import { HighlightInteraction } from '../highlighting/ui/highlight-interactions'
 import { SidebarContextInterface } from 'src/sidebar-overlay/types'
+import { StyleSheetManager } from 'styled-components'
 
 export const SidebarContext = React.createContext<SidebarContextInterface>(null)
 export const sidebarDependencies = {
@@ -32,17 +33,19 @@ export const setupRibbonAndSidebarUI = (
     } & Partial<KeyboardActions>,
 ) => {
     ReactDOM.render(
-        <SidebarContext.Provider value={sidebarDependencies}>
-            <RibbonSidebarController
-                setRibbonSidebarRef={setRibbonSidebarRef}
-                annotationsManager={annotationsManager}
-                handleRemoveRibbon={handleRemoveRibbon}
-                insertOrRemoveTooltip={insertOrRemoveTooltip}
-                forceExpand={forceExpandRibbon}
-                store={store}
-                {...props}
-            />
-        </SidebarContext.Provider>,
+        <StyleSheetManager target={shadow}>
+            <SidebarContext.Provider value={sidebarDependencies}>
+                <RibbonSidebarController
+                    setRibbonSidebarRef={setRibbonSidebarRef}
+                    annotationsManager={annotationsManager}
+                    handleRemoveRibbon={handleRemoveRibbon}
+                    insertOrRemoveTooltip={insertOrRemoveTooltip}
+                    forceExpand={forceExpandRibbon}
+                    store={store}
+                    {...props}
+                />
+            </SidebarContext.Provider>
+        </StyleSheetManager>,
         target,
     )
 }
