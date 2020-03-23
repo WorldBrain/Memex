@@ -3,6 +3,8 @@ import styled from 'styled-components'
 
 interface Props {
     onChange: (value: string) => void
+    value: string
+    before: any
 }
 export class TagSearchInput extends React.PureComponent<Props> {
     onChange = (e: ChangeEvent<HTMLInputElement>) =>
@@ -11,8 +13,11 @@ export class TagSearchInput extends React.PureComponent<Props> {
     render() {
         return (
             <SearchBox>
-                {this.props.children}
-                <SearchInput onChange={this.onChange} />
+                {this.props.before}
+                <SearchInput
+                    value={this.props.value}
+                    onChange={this.onChange}
+                />
             </SearchBox>
         )
     }
@@ -32,10 +37,6 @@ const SearchBox = styled.div`
     font-size: 1rem;
     padding: 8px 8px 8px 32px;
     transition: border 0.2s;
-    &:focus {
-        border: 2px solid #e2e2ea;
-        outline: none;
-    }
 `
 
 const SearchInput = styled.input`
@@ -53,6 +54,7 @@ const SearchInput = styled.input`
         -webkit-box-shadow: none;
         -moz-box-shadow: none;
         box-shadow: none;
+        outline: none;
     }
 
     font-size: 1rem;

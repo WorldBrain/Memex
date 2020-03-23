@@ -13,6 +13,7 @@ export const sidebarDependencies = {
 }
 export const setupRibbonAndSidebarUI = (
     target: HTMLElement,
+    shadow: HTMLElement,
     {
         annotationsManager,
         handleRemoveRibbon,

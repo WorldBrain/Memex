@@ -15706,6 +15706,11 @@ react-focus-lock@^2.1.0:
     use-callback-ref "^1.2.1"
     use-sidecar "^1.0.1"
 
+react-frame-component@^4.0.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/react-frame-component/-/react-frame-component-4.1.1.tgz#ea8f7c518ef6b5ad72146dd1f648752369826894"
+  integrity sha512-NfJp90AvYA1R6+uSYafQ+n+UM2HjHqi4WGHeprVXa6quU9d8o6ZFRzQ36uemY82dlkZFzf2jigFx6E4UzNFajA==
+
 react-helmet-async@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/react-helmet-async/-/react-helmet-async-1.0.2.tgz#bb55dd8268f7b15aac69c6b22e2f950abda8cc44"
@@ -15849,6 +15854,11 @@ react-shadow-dom-retarget-events@^1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/react-shadow-dom-retarget-events/-/react-shadow-dom-retarget-events-1.0.8.tgz#411fe79194d974d7d1944622508ac271cc3a4346"
 
+react-shadow@^16.3.1:
+  version "16.3.2"
+  resolved "https://registry.yarnpkg.com/react-shadow/-/react-shadow-16.3.2.tgz#a431a7101b0e222dbc669c4070ab395f42dbb675"
+  integrity sha512-NxFoBvEg2WD3V25jgiWgIltpDfs2XBCbDyi63jEM6Gch8g8r2cqJxSWy2GfG666EfOpRR5Zsrhu0Qn5yze1PrA==
+
 react-side-effect@^1.1.0:
   version "1.1.5"
   resolved "https://registry.yarnpkg.com/react-side-effect/-/react-side-effect-1.1.5.tgz#f26059e50ed9c626d91d661b9f3c8bb38cd0ff2d"
@@ -15872,6 +15882,20 @@ react-string-replace@^0.4.4:
   integrity sha512-FAMkhxmDpCsGTwTZg7p/2v+/GTmxAp73so3fbSvlAcBBX36ujiGRNEaM/1u+jiYQrArhns+7eE92g2pi5E5FUA==
   dependencies:
     lodash "^4.17.4"
+
+react-styled-frame@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/react-styled-frame/-/react-styled-frame-1.1.0.tgz#8c36168c3b00386e128df16a97c6458e7cc56310"
+  integrity sha512-/qcjXG4ZEySJao1kyUrri+we4sQYNgfkz1/Hw5/dJ+zGUUqkeZSHycSCVqe8CVPT0o9EP4JRA6IqwzjOXyDXCA==
+  dependencies:
+    react-frame-component "^4.0.1"
+
+react-styled-shadow-dom@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-styled-shadow-dom/-/react-styled-shadow-dom-1.0.0.tgz#81e238b436b0324b0431fbc5c0277570c5037a0f"
+  integrity sha512-I5NTFRIUCz8v0cX0bocVhq6p2N9Qlyzr2Ym+jbTsnqjz/lBg39acT4HKrrEvmnJAP3Kv1wb9DEhJlX36DvobBQ==
+  dependencies:
+    react-shadow "^16.3.1"
 
 react-syntax-highlighter@^11.0.2:
   version "11.0.2"

@@ -5,24 +5,22 @@ import { Tag } from 'src/tags/background/types'
 
 interface Props {
     tags: Tag[]
+    onPress: (tag: Tag) => void
 }
 
-class TagResultsList extends React.PureComponent<Props> {
-    render() {
-        if (!this.props.tags) {
-            return null
-        }
-        return this.props.tags.map(tag => (
-            <TagRowItem {...tag} key={`Tag-${tag.url}`} />
-        ))
-    }
+export default class TagResultsList extends React.PureComponent<Props> {
+    render = () => (
+        <StyledContainer>
+            {this.props.tags?.map(tag => (
+                <TagRowItem
+                    {...tag}
+                    onPress={this.props.onPress}
+                    key={`TagKeyName-${tag.name}`}
+                />
+            )) || null}
+        </StyledContainer>
+    )
 }
-
-export default styled(TagResultsList)`
-    display: flex;
+const StyledContainer = styled.div`
     overflow-y: scroll;
-    border: 2px solid purple;
-    background: orange;
-    width: 20px;
-    height: 20px;
 `

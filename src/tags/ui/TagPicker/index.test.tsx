@@ -88,6 +88,8 @@ test('Shows relevant tags when typed into search box', async () => {
     })
     expect(input.value).toEqual(query)
 
+    // 'Add tag: $query'
+
     // Wait for the query results list to show an element which includes a textual tag result from our test data
     const [tagEl1] = await waitForElement(
         () => [

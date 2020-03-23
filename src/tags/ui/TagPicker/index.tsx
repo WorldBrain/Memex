@@ -9,8 +9,9 @@ import TagPickerLogic, {
 } from 'src/tags/ui/TagPicker/logic'
 import { TagSearchInput } from 'src/tags/ui/TagPicker/components/TagSearchInput'
 import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedList'
-import { Tag } from 'src/tags/background/types'
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
+import { Tag } from 'src/tags/background/types'
+import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -28,21 +29,33 @@ class TagPicker extends StatefulUIElement<
     handleSelectedTagPress = (tag: Tag) =>
         this.processEvent('selectedTagPress', { tag })
 
+    handleResultTagPress = (tag: Tag) =>
+        this.processEvent('resultTagPress', { tag })
+
     render() {
         const tags = TagPickerLogic.getTagsToDisplay(this.state)
 
         return (
             <ThemeProvider theme={lightTheme}>
-                <TagPickerContainer>
-                    <TagSearchInput onChange={this.handleSearchInputChanged}>
-                        <TagSelectedList
-                            tagsSelected={this.state.selectedTags}
-                            onPress={this.handleSelectedTagPress}
-                        />
-                    </TagSearchInput>
-
-                    <TagResultsList tags={tags} />
-                </TagPickerContainer>
+                <StyledContainer>
+                    <TagSearchInput
+                        onChange={this.handleSearchInputChanged}
+                        value={this.state.query}
+                        before={
+                            <TagSelectedList
+                                tagsSelected={this.state.selectedTags}
+                                onPress={this.handleSelectedTagPress}
+                            />
+                        }
+                    />
+                    {this.state.newTagName && (
+                        <AddNewTag name={this.state.newTagName} />
+                    )}
+                    <TagResultsList
+                        tags={tags}
+                        onPress={this.handleResultTagPress}
+                    />
+                </StyledContainer>
             </ThemeProvider>
         )
     }
@@ -72,7 +85,7 @@ const darkTheme = {
     },
 }
 
-const TagPickerContainer = styled.div`
+const StyledContainer = styled.div`
     border: 1px solid #ceced9;
     box-shadow: 0px 0px 25px #dadbe7;
     background: ${props => props.theme.background};

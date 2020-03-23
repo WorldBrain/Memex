@@ -11,7 +11,10 @@ import {
     AddListDropdownContainer,
 } from 'src/common-ui/containers'
 import { selectors as pause, acts as pauseActs } from 'src/popup/pause-button'
-import { acts as tagActs, selectors as tags } from 'src/popup/tags-button'
+import {
+    acts as tagActs,
+    selectors as tagSelector,
+} from 'src/popup/tags-button'
 import {
     selectors as collections,
     acts as collectionActs,
@@ -24,6 +27,8 @@ import * as popup from 'src/popup/selectors'
 import { PageList } from 'src/custom-lists/background/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar/'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { tags } from 'src/util/remote-functions-background'
 
 interface StateProps {
     isExpanded: boolean
@@ -90,18 +95,30 @@ class RibbonContainer extends Component<Props> {
         this.props.handleTooltipToggle()
     }
 
+    // TODO: can we put this somewhere else with less indirection?
     private renderTagsManager() {
         return (
-            <IndexDropdown
-                env="inpage"
+            // <IndexDropdown
+            //     env="inpage"
+            //     url={this.props.getUrl()}
+            //     tabId={this.props.tabId}
+            //     initFilters={this.props.tags}
+            //     initSuggestions={this.props.initTagSuggs}
+            //     source="tag"
+            //     onFilterAdd={this.props.onTagAdd}
+            //     onFilterDel={this.props.onTagDel}
+            //     isForRibbon
+            // />
+            <TagPicker
                 url={this.props.getUrl()}
-                tabId={this.props.tabId}
-                initFilters={this.props.tags}
-                initSuggestions={this.props.initTagSuggs}
-                source="tag"
-                onFilterAdd={this.props.onTagAdd}
-                onFilterDel={this.props.onTagDel}
-                isForRibbon
+                loadSuggestions={() =>
+                    this.props.initTagSuggs.map(s => ({ name: s, url: s }))
+                }
+                onUpdateTagSelection={() => null}
+                queryTags={async query => {
+                    const res = await tags.searchForTagSuggestions({ query })
+                    return res.map(s => ({ name: s, url: s }))
+                }}
             />
         )
     }
@@ -150,8 +167,8 @@ const mapStateToProps: MapStateToProps<
     isPaused: pause.isPaused(state),
     isBookmarked: bookmark.isBookmarked(state),
     tabId: popup.tabId(state),
-    tags: tags.tags(state),
-    initTagSuggs: tags.initTagSuggestions(state),
+    tags: tagSelector.tags(state),
+    initTagSuggs: tagSelector.initTagSuggestions(state),
     collections: collections.collections(state),
     initCollSuggs: collections.initCollSuggestions(state),
 })

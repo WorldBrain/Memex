@@ -19,7 +19,7 @@ export interface RemoteTagsInterface {
     searchForTagSuggestions(args: {
         query: string
         limit?: number
-    }): Promise<Tag[]>
+    }): Promise<string[]>
 }
 
 export interface TagTab {

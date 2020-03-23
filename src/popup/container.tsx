@@ -130,9 +130,12 @@ class PopupContainer extends PureComponent<Props> {
                         this.props.initTagSuggs.map(s => ({ name: s, url: s }))
                     }
                     url={this.props.url}
-                    queryTags={(query: string) =>
-                        tags.searchForTagSuggestions({ query })
-                    }
+                    queryTags={async (query: string) => {
+                        const tagsres = await tags.searchForTagSuggestions({
+                            query,
+                        })
+                        return tagsres.map(s => ({ name: s, url: s }))
+                    }}
                     onUpdateTagSelection={selectedTags => null}
                     initialSelectedTags={[]}
                 />

@@ -4,29 +4,23 @@ import { Tag } from 'src/tags/background/types'
 import { TagResultItem } from 'src/tags/ui/TagPicker/components/TagResultItem'
 
 interface TagRowItemEvents {
-    onClick: (tag: Tag) => void
+    onPress: (tag: Tag) => void
 }
 type Props = Tag & TagRowItemEvents & {}
 
 class TagRow extends React.PureComponent<Props> {
-    onClick = () => {
+    handleTagPress = () => {
         const { url, name } = this.props
-        this.props.onClick && this.props.onClick({ url, name })
+        this.props.onPress && this.props.onPress({ url, name })
     }
 
     render() {
         const { name } = this.props
 
         return (
-            <>
-                <Row onClick={this.onClick}>
-                    <TagResultItem>{name}</TagResultItem>
-                    <span>
-                        {/* the filter actions would be include or exclude */}
-                        icon
-                    </span>
-                </Row>
-            </>
+            <Row onClick={this.handleTagPress}>
+                <TagResultItem>{name}</TagResultItem>
+            </Row>
         )
     }
 }

@@ -6,12 +6,12 @@ import TagList from 'src/tags/ui/TagPicker/components/TagResultsList'
 
 import { Tag } from 'src/tags/background/types'
 const tags = [
-    { name: 'initial', url: 'http://test2' },
-    { name: 'tag', url: 'http://test2' },
-    { name: 'abcde1', url: 'http://test1' },
-    { name: 'abcde2', url: 'http://test2' },
-    { name: 'tag 1', url: 'http://test2' },
-    { name: 'tag 2', url: 'http://test2' },
+    { name: 'initial', url: 'http://test2a' },
+    { name: 'tag', url: 'http://test2b' },
+    { name: 'abcde1', url: 'http://test1c' },
+    { name: 'abcde2', url: 'http://test2d' },
+    { name: 'tag 1', url: 'http://test2e' },
+    { name: 'tag 2', url: 'http://test2f' },
 ] as Tag[]
 
 storiesOf('Tags Refactored', module)
@@ -31,7 +31,7 @@ storiesOf('Tags Refactored', module)
 
     .add('Tag List', () => (
         <div>
-            <TagList tags={tags} />
+            <TagList tags={tags} onPress={t => null} />
         </div>
     ))
 

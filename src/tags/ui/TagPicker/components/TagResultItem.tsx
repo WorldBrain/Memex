@@ -2,7 +2,7 @@ import { fontSizeSmall } from 'src/common-ui/components/design-library/typograph
 import styled from 'styled-components'
 
 export const TagResultItem = styled.div`
-    display: inline-flex;
+    display: flex;
     min-height: 16px;
 
     background: ${props => props.theme.tag.selected};
@@ -15,7 +15,6 @@ export const TagResultItem = styled.div`
     font-size: ${fontSizeSmall}px;
 
     &:hover {
-        background: blue;
         cursor: pointer;
     }
 `
