@@ -117,7 +117,11 @@ describe('Annotations search', () => {
 
     async function setupTest() {
         const setup = await setupBackgroundIntegrationTest({
-            tabManager: { getActiveTab: () => ({ id: 1, url: 'test' }) } as any,
+            tabManager: {
+                getActiveTab: () => ({ id: 1, url: 'test' }),
+                getTabState: () => undefined,
+                getTabStateByUrl: () => undefined,
+            } as any,
         })
         await insertTestData(setup)
 

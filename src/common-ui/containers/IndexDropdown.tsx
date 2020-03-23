@@ -13,6 +13,7 @@ import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications, tags } from 'src/util/remote-functions-background'
+import * as Raven from 'src/util/raven'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -285,6 +286,7 @@ class IndexDropdownContainer extends Component<Props, State> {
     }
 
     private handleError = (err: Error) => {
+        Raven.captureException(err)
         this.setState(() => ({ showError: true, errMsg: err.message }))
         this.err = {
             timestamp: Date.now(),
@@ -577,7 +579,7 @@ class IndexDropdownContainer extends Component<Props, State> {
                 })
             }
         } catch (err) {
-            console.error(err)
+            this.handleError(err)
         } finally {
             this.setState(state => ({
                 ...state,

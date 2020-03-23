@@ -273,7 +273,11 @@ class ResultListContainer extends PureComponent<Props> {
 
         // Add loading spinner to the list end, if loading
         if (this.props.isLoading) {
-            resultItems.push(<LoadingIndicator key="loading" />)
+            resultItems.push(
+                <div className={styles.LoadingIndicatorContainer}>
+                    <LoadingIndicator key="loading" />
+                </div>,
+            )
         }
 
         return resultItems

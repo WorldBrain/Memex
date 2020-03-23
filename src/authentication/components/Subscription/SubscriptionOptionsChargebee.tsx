@@ -15,7 +15,7 @@ import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import styled from 'styled-components'
 import { SubscriptionInnerOptions } from 'src/authentication/components/Subscription/SubscriptionInnerOptions'
 import { CenterText } from 'src/common-ui/components/design-library/typography'
-const chargeBeeScriptSource = 'https://js.chargebee.com/v2/chargebee.js'
+const chargeBeeScriptSource = '/scripts/chargebeescript.js'
 
 export const subscriptionConfig = {
     site:

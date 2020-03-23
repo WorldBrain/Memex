@@ -314,3 +314,8 @@ There seems to be duplication between the usage of this directly, via the `creat
 Move everything that has to do with tabs to something like src/ipc or src/rpc.
 
 ## Misc
+
+1. `src/backup-restore/ui/utils.js` exports some functions that have inconstent return types depending on outcome of async calls, use of old remoteFunctions API, written in JS.
+2. Direct usages of `window` global object: may or may not be issue, depending on case, but I'm always confused when we're meant to use things like this directly - making a decision and defining guidelines would be good.
+3. `src/search/storage/index.ts` exports `initErrHandler` used in a lot of places to ignore certain errors. So does `src/util/error-handler`... Let's make a proper decision about how we're going to handle these.
+4. `src/util/raven` module exists for all the interactions with Sentry. In the mobile app repo we have the idea of Services, which are just wrappers around misc. dependencies, like Sentry. It would be nice to bring that over and replace the usage of this module with an error-tracking service instance.

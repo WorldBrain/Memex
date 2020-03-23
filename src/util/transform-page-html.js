@@ -25,7 +25,6 @@ export default function transformHTML({ html = '' }) {
     $('script').remove()
     $('noscript').remove()
     $('svg').remove()
-    $('code').remove()
     $('select').remove()
 
     // Remove style only after removing hidden elements

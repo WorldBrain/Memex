@@ -46,8 +46,7 @@ export async function getOpenTabsInCurrentWindow(
     windows: Windows.Static,
     queryTabs: Tabs.Static['query'],
 ): Promise<Array<{ tabId: number; url: string }>> {
-    const currentWindow = await windows.getCurrent()
-    return (await queryTabs({ windowId: currentWindow.id }))
+    return (await queryTabs({ windowId: windows.WINDOW_ID_CURRENT }))
         .map(tab => ({ tabId: tab.id, url: tab.url }))
         .filter(tab => tab.tabId !== browser.tabs.TAB_ID_NONE)
 }

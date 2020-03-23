@@ -12,6 +12,7 @@ import { PageList } from '../../custom-lists/background/types'
 import { ClickHandler } from '../../popup/types'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
+import * as Raven from 'src/util/raven'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -178,6 +179,7 @@ class AddListDropdownContainer extends Component<Props, State> {
     }
 
     private handleError = (err: Error) => {
+        Raven.captureException(err)
         this.setState(() => ({ showError: true, errMsg: err.message }))
         this.err = {
             timestamp: Date.now(),
@@ -249,7 +251,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 url: this.props.url,
             })
         } catch (err) {
-            console.error(err)
+            this.handleError(err)
         }
 
         this.setState(state => ({

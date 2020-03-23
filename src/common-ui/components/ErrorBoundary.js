@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import Raven from 'raven-js'
+
+import * as Raven from 'src/util/raven'
 
 class ErrorBoundary extends Component {
     static propTypes = {

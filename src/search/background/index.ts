@@ -11,6 +11,7 @@ import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { SearchIndex } from '../types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
+import * as Raven from 'src/util/raven'
 
 export default class SearchBackground {
     storage: SearchStorage
@@ -211,7 +212,11 @@ export default class SearchBackground {
             return
         }
 
-        return this.searchIndex.delBookmark(node).catch(console.error)
+        try {
+            await this.searchIndex.delBookmark(node)
+        } catch (err) {
+            Raven.captureException(err)
+        }
     }
 
     async handleBookmarkCreation(id, node) {

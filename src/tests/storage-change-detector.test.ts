@@ -21,6 +21,7 @@ async function setupTest(options?: {
     const storageBackend = new DexieStorageBackend({
         dbName: 'test',
         idbImplementation: inMemory(),
+        legacyMemexCompatibility: true,
     })
     const storageManager = new StorageManager({ backend: storageBackend })
     const collectionDefinitions =
@@ -43,10 +44,12 @@ describe('Storage change detector for tests', () => {
 
         const url = 'http://test.com'
         const title = 'Test page'
-        const pageId = (await storageManager.collection('page').createObject({
-            url,
-            title,
-        })).object.id
+        const pageId = (
+            await storageManager.collection('page').createObject({
+                url,
+                title,
+            })
+        ).object.id
         expect(await changeDetector.compare()).toEqual({
             page: {
                 [pageId]: {
@@ -66,10 +69,12 @@ describe('Storage change detector for tests', () => {
 
         const url = 'http://test.com'
         const firstTitle = 'Test page'
-        const pageId = (await storageManager.collection('page').createObject({
-            url,
-            title: firstTitle,
-        })).object.id
+        const pageId = (
+            await storageManager.collection('page').createObject({
+                url,
+                title: firstTitle,
+            })
+        ).object.id
 
         await changeDetector.capture()
 
@@ -98,9 +103,11 @@ describe('Storage change detector for tests', () => {
         const { storageManager, changeDetector } = await setupTest()
 
         const url = 'http://test.com'
-        const pageId = (await storageManager.collection('page').createObject({
-            url,
-        })).object.id
+        const pageId = (
+            await storageManager.collection('page').createObject({
+                url,
+            })
+        ).object.id
 
         await changeDetector.capture()
 
@@ -130,10 +137,12 @@ describe('Storage change detector for tests', () => {
 
         const url = 'http://test.com'
         const firstTitle = 'Test page'
-        const pageId = (await storageManager.collection('page').createObject({
-            url,
-            title: firstTitle,
-        })).object.id
+        const pageId = (
+            await storageManager.collection('page').createObject({
+                url,
+                title: firstTitle,
+            })
+        ).object.id
 
         await changeDetector.capture()
 
@@ -163,10 +172,12 @@ describe('Storage change detector for tests', () => {
 
         const url = 'http://test.com'
         const firstTitle = 'Test page'
-        const pageId = (await storageManager.collection('page').createObject({
-            url,
-            title: firstTitle,
-        })).object.id
+        const pageId = (
+            await storageManager.collection('page').createObject({
+                url,
+                title: firstTitle,
+            })
+        ).object.id
 
         await changeDetector.capture()
         await storageManager.collection('page').deleteObjects({ id: pageId })
@@ -183,19 +194,19 @@ describe('Storage change detector for tests', () => {
     it('should correctly detect unintended updates (query too wide)', async () => {
         const { storageManager, changeDetector } = await setupTest()
 
-        const firstPageId = (await storageManager
-            .collection('page')
-            .createObject({
+        const firstPageId = (
+            await storageManager.collection('page').createObject({
                 url: 'first-url',
                 title: 'first-title',
-            })).object.id
+            })
+        ).object.id
 
-        const secondPageId = (await storageManager
-            .collection('page')
-            .createObject({
+        const secondPageId = (
+            await storageManager.collection('page').createObject({
                 url: 'second-url',
                 title: 'second-title',
-            })).object.id
+            })
+        ).object.id
 
         await changeDetector.capture()
 
@@ -227,19 +238,19 @@ describe('Storage change detector for tests', () => {
     it('should correctly detect unintended deletions (query too wide)', async () => {
         const { storageManager, changeDetector } = await setupTest()
 
-        const firstPageId = (await storageManager
-            .collection('page')
-            .createObject({
+        const firstPageId = (
+            await storageManager.collection('page').createObject({
                 url: 'first-url',
                 title: 'first-title',
-            })).object.id
+            })
+        ).object.id
 
-        const secondPageId = (await storageManager
-            .collection('page')
-            .createObject({
+        const secondPageId = (
+            await storageManager.collection('page').createObject({
                 url: 'second-url',
                 title: 'second-title',
-            })).object.id
+            })
+        ).object.id
 
         await changeDetector.capture()
 
