@@ -53,6 +53,10 @@
     overflow: scroll;
 }
 
+.LoadingIndicatorContainer {
+    margin: 50px 0 100px;
+}
+
 .proTip {
     margin-left: 1px;
     font-size: 11px;

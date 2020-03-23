@@ -2,6 +2,7 @@ import { UILogic, UIEvent } from 'ui-logic-core'
 import TypedEventEmitter from 'typed-emitter'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
+import * as Raven from 'src/util/raven'
 
 type SyncSetupState = 'introduction' | 'pair' | 'sync' | 'done'
 
@@ -143,7 +144,7 @@ export default class InitialSyncSetupLogic extends UILogic<
     }
 
     error(e) {
-        console.error(e)
+        Raven.captureException(e)
         this.emitMutation({
             error: { $set: `${e}` },
         })

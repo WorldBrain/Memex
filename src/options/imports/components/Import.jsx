@@ -48,8 +48,7 @@ const Import = ({
                     <div className={localStyles.stepText}>
                         <Warning>
                             The import may freeze because of a browser setting.
-                            <br />
-                            No need to worry. Go to{' '}
+                            Go to{' '}
                             <a
                                 className={localStyles.link}
                                 target="_blank"
@@ -58,6 +57,8 @@ const Import = ({
                                 <b>worldbrain.io/import_bug</b>
                             </a>{' '}
                             to fix it.
+                            <br/>
+                            It can also happen that virtually all URLs fail. Restart your extension and start over. 
                         </Warning>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ import * as selectors from './selectors'
 
 import { selectors as filters } from 'src/search-filters'
 import analytics from 'src/analytics'
+import * as Raven from 'src/util/raven' // eslint-disable-line
 
 export const fetchAllLists = createAction('custom-lists/listData')
 export const createList = createAction('custom-lists/addList')
@@ -105,7 +106,7 @@ export const delPageFromList = (url, isSocialPost) => async (
 
         dispatch(hidePageFromList(url, index))
     } catch (err) {
-        console.error(err)
+        Raven.captureException(err)
     }
 }
 
@@ -120,7 +121,7 @@ export const getListFromDB = ({ skipMobileList } = {}) => async (
         })
         dispatch(fetchAllLists(lists || []))
     } catch (err) {
-        console.error(err)
+        Raven.captureException(err)
     }
 }
 
@@ -153,7 +154,7 @@ export const createPageList = (name, cb) => async (dispatch, getState) => {
             dispatch(showCommonNameWarning())
         }
     } catch (err) {
-        console.error(err)
+        Raven.captureException(err)
     }
 }
 
@@ -163,7 +164,7 @@ export const updateList = (index, name, id) => async (dispatch, getState) => {
         await remoteFunction('updateListName')({ id, name })
         dispatch(updateListName(name, index))
     } catch (err) {
-        console.error(err)
+        Raven.captureException(err)
     }
 }
 
@@ -174,7 +175,7 @@ export const deletePageList = () => async (dispatch, getState) => {
         // DB call to remove List by ID.
         await remoteFunction('removeList')({ id })
     } catch (err) {
-        console.error(err)
+        Raven.captureException(err)
     } finally {
         dispatch(deleteList(id, deleting))
         dispatch(resetListDeleteModal())
@@ -192,7 +193,7 @@ export const addUrltoList = (
     try {
         await remoteFunction(addPagetoListRPC)({ id, url })
     } catch (err) {
-        console.error(err)
+        Raven.captureException(err)
     } finally {
         dispatch(addPagetoList(url, index))
     }

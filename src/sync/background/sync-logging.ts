@@ -1,7 +1,8 @@
-import { SyncLoggingOperationPreprocessor } from '@worldbrain/storex-sync/lib/logging-middleware'
+import cloneDeep from 'lodash/cloneDeep'
+import { SyncChangeInfoPreprocessor } from '@worldbrain/storex-sync/lib/logging-middleware'
 import { isTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 
-export const filterSyncLog: SyncLoggingOperationPreprocessor = async args => {
+export const filterSyncLog: SyncChangeInfoPreprocessor = async changeInfo => {
     const removeTermFields = (object: any, collection: string) => {
         for (const field of Object.keys(object)) {
             if (isTermsField({ collection, field })) {
@@ -10,30 +11,24 @@ export const filterSyncLog: SyncLoggingOperationPreprocessor = async args => {
         }
     }
 
-    let { operation } = args
-    if (operation[0] === 'createObject') {
-        const collection = operation[1]
-        if (collection === 'pages') {
-            operation = [...operation]
-            const object = (operation[2] = { ...operation[2] })
-            delete object.screenshot
-            removeTermFields(object, collection)
-        }
-    } else if (
-        operation[0] === 'updateObject' ||
-        operation[0] === 'updateObjects'
-    ) {
-        const collection = operation[1]
-        if (collection === 'pages') {
-            operation = [...operation]
-            const updates = (operation[3] = { ...operation[3] })
-            delete updates.screenshot
-            removeTermFields(updates, collection)
-
-            if (!Object.keys(updates).length) {
-                return { operation: null }
+    changeInfo = cloneDeep(changeInfo)
+    const newChangeInfo: typeof changeInfo = { changes: [] }
+    for (const change of changeInfo.changes) {
+        if (change.type === 'create') {
+            if (change.collection === 'pages') {
+                delete change.values.screenshot
+                removeTermFields(change.values, change.collection)
+            }
+        } else if (change.type === 'modify') {
+            if (change.collection === 'pages') {
+                delete change.updates.screenshot
+                removeTermFields(change.updates, change.collection)
+                if (!Object.keys(change.updates).length) {
+                    continue
+                }
             }
         }
+        newChangeInfo.changes.push(change)
     }
-    return { operation: args.operation, loggedOperation: operation }
+    return newChangeInfo
 }

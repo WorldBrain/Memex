@@ -105,7 +105,7 @@ export default function({
                 exclude: [/\.map/],
             }),
             new PostCompilePlugin(() =>
-                exec('git archive -o dist/source-code.zip master'),
+                exec('git-archive-all dist/source-code.zip'),
             ),
         )
     }

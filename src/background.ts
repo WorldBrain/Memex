@@ -31,6 +31,7 @@ import { FeatureOptIns } from 'src/feature-opt-in/background/feature-opt-ins'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from 'src/search/pipeline'
+import { setStorageMiddleware } from './storage/middleware'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -60,9 +61,10 @@ export async function main() {
     registerBackgroundModuleCollections(storageManager, backgroundModules)
     await storageManager.finishInitialization()
 
-    storageManager.setMiddleware([
-        await backgroundModules.sync.createSyncLoggingMiddleware(),
-    ])
+    await setStorageMiddleware(storageManager, {
+        syncService: backgroundModules.sync,
+        storexHub: backgroundModules.storexHub,
+    })
 
     setStorex(storageManager)
 

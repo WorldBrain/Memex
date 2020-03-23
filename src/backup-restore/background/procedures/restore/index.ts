@@ -13,6 +13,7 @@ import {
 import decodeBlob from 'src/util/decode-blob'
 import { SearchIndex } from 'src/search'
 import { dangerousPleaseBeSureDeleteAndRecreateDatabase } from 'src/storage/utils'
+import * as Raven from 'src/util/raven'
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
 
@@ -121,6 +122,7 @@ export class BackupRestoreProcedure {
                 if (this.logErrors) {
                     console.error(e)
                 }
+                Raven.captureException(e)
                 this.events.emit('fail', { error: e.message })
                 return 'fail'
             } finally {
@@ -225,6 +227,7 @@ export class BackupRestoreProcedure {
         try {
             await collection.updateOneObject(where, updates)
         } catch (e) {
+            Raven.captureException(e)
             console.error('Failed to commit image', where, image, updates)
         }
     }
