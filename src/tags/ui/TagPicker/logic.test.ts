@@ -13,7 +13,7 @@ describe('TagPickerLogic', () => {
             new TagPickerLogic({
                 onUpdateTagSelection: () => {},
                 queryTags: async (query: string) => [],
-                loadSuggestions: () => ['bla', 'why?'],
+                loadDefaultSuggestions: () => ['bla', 'why?'],
                 url: '',
                 initialSelectedTags: [],
             }),

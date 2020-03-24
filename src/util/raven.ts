@@ -10,7 +10,7 @@ const raven = AllRaven['default']
 let sentryEnabled = false
 
 // Init the enabled state based on stored flag
-browser.storage.local // tslint:disable-line
+browser.storage.local
     .get(SHOULD_TRACK)
     .then(storage => (sentryEnabled = !!storage[SHOULD_TRACK]))
 

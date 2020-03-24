@@ -1,5 +1,10 @@
 import React from 'react'
 
-export default props => {
-    return <div> Create: {props.tag}</div>
+interface Props {
+    onPress: () => void
+    tag: string
+}
+
+export default (props: Props) => {
+    return <div onClick={props.onPress}> Create: {props.tag}</div>
 }

@@ -1,5 +1,7 @@
 import { storiesOf } from '@storybook/react'
 import React from 'react'
+import { action } from '@storybook/addon-actions'
+
 import TagPicker from 'src/tags/ui/TagPicker'
 import TagRow from 'src/tags/ui/TagPicker/components/TagRow'
 import TagList from 'src/tags/ui/TagPicker/components/TagResultsList'
@@ -10,9 +12,9 @@ storiesOf('Tags Refactored', module)
     .add('Tag Picker - All together', () => (
         <div>
             <TagPicker
-                onUpdateTagSelection={() => null}
+                onUpdateTagSelection={selectedTags => action('updatedTags')}
                 queryTags={async term => tags.filter(t => t.includes(term))}
-                loadSuggestions={() => [tags[4], tags[5]]}
+                loadDefaultSuggestions={() => [tags[4], tags[5]]}
                 url={''}
                 initialSelectedTags={[tags[0], tags[1]]}
             />
@@ -21,12 +23,15 @@ storiesOf('Tags Refactored', module)
 
     .add('Tag List', () => (
         <div>
-            <TagList tags={tags} onPress={t => null} />
+            <TagList
+                tags={tags.map(t => ({ name: t, selected: false }))}
+                onPress={t => null}
+            />
         </div>
     ))
 
     .add('Tag Row', () => (
         <div>
-            <TagRow url={''} name={'tag'} />
+            <TagRow name={'tag'} selected={false} />
         </div>
     ))

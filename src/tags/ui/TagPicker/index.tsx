@@ -3,6 +3,7 @@ import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
+    DisplayTag,
     TagPickerDependencies,
     TagPickerEvent,
     TagPickerState,
@@ -28,12 +29,13 @@ class TagPicker extends StatefulUIElement<
     handleSelectedTagPress = (tag: string) =>
         this.processEvent('selectedTagPress', { tag })
 
-    handleResultTagPress = (tag: string) =>
+    handleResultTagPress = (tag: DisplayTag) =>
         this.processEvent('resultTagPress', { tag })
 
-    render() {
-        const tags = TagPickerLogic.getTagsToDisplay(this.state)
+    handleNewTagPress = () =>
+        this.processEvent('newTagPress', { tag: this.state.newTagName })
 
+    render() {
         return (
             <ThemeProvider theme={lightTheme}>
                 <StyledContainer>
@@ -48,10 +50,13 @@ class TagPicker extends StatefulUIElement<
                         }
                     />
                     {this.state.newTagName && (
-                        <AddNewTag name={this.state.newTagName} />
+                        <AddNewTag
+                            tag={this.state.newTagName}
+                            onPress={this.handleNewTagPress}
+                        />
                     )}
                     <TagResultsList
-                        tags={tags}
+                        tags={this.state.displayTags}
                         onPress={this.handleResultTagPress}
                     />
                 </StyledContainer>

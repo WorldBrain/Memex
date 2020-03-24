@@ -5,7 +5,8 @@ export const TagResultItem = styled.div`
     display: flex;
     min-height: 16px;
 
-    background: ${props => props.theme.tag.selected};
+    background: ${props =>
+        props.selected ? 'green' : props.theme.tag.selected};
     border: 2px solid ${props => props.theme.tag.border};
     border-radius: 5px;
     color: ${props => props.theme.tag.text};

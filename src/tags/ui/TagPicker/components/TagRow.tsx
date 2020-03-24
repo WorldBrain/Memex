@@ -1,23 +1,31 @@
 import React from 'react'
 import styled from 'styled-components'
 import { TagResultItem } from 'src/tags/ui/TagPicker/components/TagResultItem'
+import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
 
-interface TagRowItemEvents {
-    onPress: (tag: string) => void
+interface Props {
+    onPress?: (tag: DisplayTag) => void
+    name: string
+    selected?: boolean
 }
-type Props = { tag: string } & TagRowItemEvents & {}
 
 class TagRow extends React.PureComponent<Props> {
     handleTagPress = () => {
-        this.props.onPress && this.props.onPress(this.props.tag)
+        this.props.onPress &&
+            this.props.onPress({
+                name: this.props.name,
+                selected: this.props.selected,
+            })
     }
 
     render() {
-        const { tag } = this.props
+        const { name } = this.props
 
         return (
             <Row onClick={this.handleTagPress}>
-                <TagResultItem>{tag}</TagResultItem>
+                <TagResultItem selected={this.props.selected}>
+                    {name}
+                </TagResultItem>
             </Row>
         )
     }
@@ -35,4 +43,4 @@ const Row = styled.div`
     }
 `
 
-export default styled(TagRow)``
+export default TagRow

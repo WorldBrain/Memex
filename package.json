@@ -121,6 +121,7 @@
     "devDependencies": {
         "@firebase/testing": "^0.13.1",
         "@sentry/webpack-plugin": "^1.5.2",
+        "@storybook/addon-actions": "^5.3.17",
         "@storybook/addon-knobs": "^5.3.14",
         "@storybook/addons": "^5.2.6",
         "@storybook/react": "^5.2.6",

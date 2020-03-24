@@ -1,10 +1,11 @@
 import React from 'react'
 import styled from 'styled-components'
 import TagRowItem from './TagRow'
+import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
 
 interface Props {
-    tags: string[]
-    onPress: (tag: string) => void
+    tags: DisplayTag[]
+    onPress: (tag: DisplayTag) => void
 }
 
 export default class TagResultsList extends React.PureComponent<Props> {
@@ -13,8 +14,9 @@ export default class TagResultsList extends React.PureComponent<Props> {
             {this.props.tags?.map(tag => (
                 <TagRowItem
                     onPress={this.props.onPress}
-                    key={`TagKeyName-${tag}`}
-                    tag={tag}
+                    key={`TagKeyName-${tag.name}-${tag.selected}`}
+                    name={tag.name}
+                    selected={tag.selected}
                 />
             )) || null}
         </StyledContainer>

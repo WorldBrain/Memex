@@ -23,7 +23,7 @@ const setup = () => {
     const result = render(
         <TagPicker
             queryTags={async query => tags.filter(t => t.includes(query))}
-            loadSuggestions={() => initialSuggestions}
+            loadDefaultSuggestions={() => initialSuggestions}
             url={''}
             onUpdateTagSelection={tags1 => null}
             initialSelectedTags={tagsSelected}
