@@ -1,5 +1,6 @@
 import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
+import { colorGrey3 } from 'src/common-ui/components/design-library/colors'
 import { Search as SearchIcon } from '@styled-icons/feather'
 
 interface Props {
@@ -7,18 +8,25 @@ interface Props {
     value: string
     before: any
 }
-export class TagSearchInput extends React.PureComponent<Props> {
+
+interface State {
+    isFocused: boolean
+}
+export class TagSearchInput extends React.Component<Props, State> {
+    state = { isFocused: false }
     onChange = (e: ChangeEvent<HTMLInputElement>) =>
         this.props.onChange(e.target.value)
 
     render() {
         return (
-            <SearchBox>
+            <SearchBox isFocused={this.state.isFocused}>
                 <StyledSearchIcon size={24} />
                 {this.props.before}
                 <SearchInput
                     value={this.props.value}
                     onChange={this.onChange}
+                    onFocus={() => this.setState({ isFocused: true })}
+                    onBlur={() => this.setState({ isFocused: false })}
                 />
             </SearchBox>
         )
@@ -32,8 +40,9 @@ const StyledSearchIcon = styled(SearchIcon)`
 `
 
 const SearchBox = styled.div`
-    background-color: ${props => props.theme.searchBackground};
-    border: 2px solid ${props => props.theme.searchBackground};
+    background-color: ${props => props.theme.inputBackground};
+    border: 2px solid;
+    border-color: ${props => (props.isFocused ? colorGrey3 : 'transparent')};
     border-radius: 3px;
     color: ${props => props.theme.text};
     display: flex;
@@ -41,6 +50,7 @@ const SearchBox = styled.div`
     font-size: 1rem;
     padding: 2px 8px;
     transition: border 0.2s;
+    margin-bottom: 1px;
 `
 
 const SearchInput = styled.input`
@@ -50,6 +60,7 @@ const SearchInput = styled.input`
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
+    color: ${props => props.theme.text};
 
     &:focus {
         border: none;

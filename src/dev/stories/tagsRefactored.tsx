@@ -4,8 +4,6 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import TagRow from 'src/tags/ui/TagPicker/components/TagRow'
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
 import { Tag } from 'src/tags/background/types'
-import styled, { ThemeProvider } from 'styled-components'
-import * as Colors from 'src/common-ui/components/design-library/colors'
 
 const tags = [
     { name: 'initial', url: 'http://test2a' },
@@ -28,22 +26,6 @@ storiesOf('Tags Refactored', module)
                 url={''}
                 initialSelectedTags={[tags[0], tags[1]]}
             />
-        </div>
-    ))
-
-    .add('Tag Picker - Dark theme', () => (
-        <div>
-            <ThemeProvider theme={Colors.lightTheme}>
-                <TagPicker
-                    onUpdateTagSelection={() => null}
-                    queryTags={async term =>
-                        tags.filter(t => t.name.includes(term))
-                    }
-                    loadSuggestions={() => [tags[4], tags[5]]}
-                    url={''}
-                    initialSelectedTags={[tags[0], tags[1]]}
-                />
-            </ThemeProvider>
         </div>
     ))
 

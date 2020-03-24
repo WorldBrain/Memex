@@ -15,13 +15,16 @@ export default props => {
 }
 
 export const AddNew = styled.div`
-    align-items: center;
+    align-items: start;
     display: flex;
-    color: ${props => props.theme.tag.text};
+    color: ${props => props.theme.text};
     font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeSmall}px;
     padding: 4px;
+    word-break: break-all;
     span {
         margin-right: 10px;
+        min-width: 87px;
+        padding-top: 3px;
     }
 `
