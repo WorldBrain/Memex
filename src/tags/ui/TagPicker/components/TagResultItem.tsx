@@ -4,18 +4,28 @@ import styled from 'styled-components'
 export const TagResultItem = styled.div`
     display: flex;
     min-height: 16px;
-
+    border: 2px solid;
     background: ${props =>
-        props.selected ? 'green' : props.theme.tag.selected};
-    border: 2px solid ${props => props.theme.tag.border};
+        props.isHovering
+            ? props.isSelected
+                ? props.theme.tag.tag
+                : props.theme.tag.selected
+            : props.isSelected
+            ? props.theme.tag.selected
+            : props.theme.tag.tag}
+    border-color: ${props =>
+        props.isHovering ? props.theme.tag.tag : 'transparent'};
     border-radius: 5px;
     color: ${props => props.theme.tag.text};
-    padding: 2px 8px;
+    padding: 0 8px;
     margin: 2px 4px 2px 0;
     font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeSmall}px;
+    transition: all .3s;
 
     &:hover {
-        cursor: pointer;
+      background: ${props => props.theme.tag.selected};
+      border-color: ${props => props.theme.tag.tag};
+      cursor: pointer;
     }
 `

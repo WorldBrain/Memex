@@ -36,6 +36,8 @@
         }
     },
     "dependencies": {
+        "@styled-icons/feather": "^10.0.0",
+        "@styled-icons/styled-icon": "^10.0.0",
         "@types/socket.io-client": "^1.4.32",
         "babel-polyfill": "^6.26.0",
         "blob-util": "^1.2.1",
@@ -69,6 +71,7 @@
         "openpgp": "^4.6.2",
         "page-metadata-parser": "git+https://github.com/Treora/page-metadata-parser.git#npm-testable",
         "pdfjs-dist": "^1.8.492",
+        "polished": "^3.5.1",
         "postcss-modules-values": "^2.0.0",
         "promise-limit": "^2.5.0",
         "prop-types": "^15.5.10",

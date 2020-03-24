@@ -23,5 +23,6 @@ export default class TagResultsList extends React.PureComponent<Props> {
     )
 }
 const StyledContainer = styled.div`
-    overflow-y: scroll;
+    overflow-y: auto;
+    max-height: 270px;
 `

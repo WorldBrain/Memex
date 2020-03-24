@@ -9,7 +9,7 @@ import TagList from 'src/tags/ui/TagPicker/components/TagResultsList'
 const tags = ['initial', 'tag', 'abcde1', 'abcde2', 'tag 1', 'tag 2']
 
 storiesOf('Tags Refactored', module)
-    .add('Tag Picker - All together', () => (
+    .add('Tag Picker - All together, Default theme', () => (
         <div>
             <TagPicker
                 onUpdateTagSelection={selectedTags => action('updatedTags')}
