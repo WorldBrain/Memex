@@ -1,19 +1,27 @@
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import styled from 'styled-components'
 
+const backgroundHoverSelected = props => {
+    if (props.selected) {
+        if (props.isHovering) {
+            return props.theme.tag.tag
+        } else {
+            return props.theme.tag.selected
+        }
+    } else if (!props.selected) {
+        if (props.isHovering) {
+            return props.theme.tag.selected
+        } else {
+            return props.theme.tag.tag
+        }
+    }
+}
+
 export const TagResultItem = styled.div`
     display: flex;
     min-height: 16px;
-    border: 2px solid;
-    background: ${props =>
-        props.isHovering
-            ? props.isSelected
-                ? props.theme.tag.tag
-                : props.theme.tag.selected
-            : props.isSelected
-            ? props.theme.tag.selected
-            : props.theme.tag.tag}
-    border-color: ${props =>
+    background: ${backgroundHoverSelected}
+    border: 2px solid ${props =>
         props.isHovering ? props.theme.tag.tag : 'transparent'};
     border-radius: 5px;
     color: ${props => props.theme.tag.text};
@@ -21,11 +29,9 @@ export const TagResultItem = styled.div`
     margin: 2px 4px 2px 0;
     font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeSmall}px;
-    transition: all .3s;
+    transition: all .1s;
 
     &:hover {
-      background: ${props => props.theme.tag.selected};
-      border-color: ${props => props.theme.tag.tag};
       cursor: pointer;
     }
 `

@@ -1,5 +1,6 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
+import { KeyboardEvent } from 'react'
 
 export const INITIAL_STATE = {
     query: '',
@@ -32,15 +33,11 @@ export type TagPickerEvent = UIEvent<{
     loadedSuggestions: {}
     loadedQueryResults: {}
     tagClicked: {}
-    // keyPressEnter: {}
-    // keyPressDown: {}
-    // keyPressUp: {}
-    // keyPressOther: {}
-    // updatedQuery: {}
     searchInputChanged: { query: string }
     selectedTagPress: { tag: string }
     resultTagPress: { tag: DisplayTag }
     newTagPress: { tag: string }
+    keyPress: { e: KeyboardEvent<any> }
 }>
 
 interface TagPickerUIEvent<T extends keyof TagPickerEvent> {
@@ -56,7 +53,8 @@ export default class TagPickerLogic extends UILogic<
         super()
     }
 
-    defaultTags: DisplayTag[] = []
+    private defaultTags: DisplayTag[] = []
+    private inputRef: HTMLTextAreaElement | HTMLInputElement
 
     getInitialState(): TagPickerState {
         return {
@@ -80,6 +78,33 @@ export default class TagPickerLogic extends UILogic<
         })
     }
 
+    keyPress = ({
+        event: { e },
+        previousState,
+    }: TagPickerUIEvent<'keyPress'>) => {
+        console.log(e)
+
+        if (e.key === 'Enter') {
+            // If 'create new tag' is present, action that
+            if (previousState.newTagName && previousState.newTagName !== '') {
+                this.newTagPress({
+                    previousState,
+                    event: { tag: previousState.newTagName },
+                })
+            } else {
+                // If search results list is present, action the index item
+            }
+        }
+
+        if (e.key === 'ArrowUp') {
+            // if search results is present, move up index to limit
+        }
+
+        if (e.key === 'ArrowDown') {
+            // if search results is present, move down index to limit
+        }
+    }
+
     searchInputChanged = ({
         event: { query },
         previousState,
@@ -89,10 +114,12 @@ export default class TagPickerLogic extends UILogic<
         if (query === '') {
             this.emitMutation({
                 displayTags: { $set: this.defaultTags },
+                query: { $set: query },
             })
+            return
+        } else {
+            this._query(query, previousState.selectedTags)
         }
-
-        this._query(query, previousState.selectedTags)
     }
 
     _queryBoth = async (term: string, selectedTags: string[]) => {
@@ -256,7 +283,7 @@ export default class TagPickerLogic extends UILogic<
     /**
      * Takes a list of tag results and selected tags and combines them to return which tag
      * is selected and which is not.
-     * Runs through in linear time O log(n)
+     * Runs through in log time rather than exponential time
      */
     static decorateTagList = (
         tagList: string[],

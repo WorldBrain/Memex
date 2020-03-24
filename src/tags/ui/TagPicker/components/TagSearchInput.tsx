@@ -2,9 +2,11 @@ import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
 import { colorGrey3 } from 'src/common-ui/components/design-library/colors'
 import { Search as SearchIcon } from '@styled-icons/feather'
+import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 
 interface Props {
     onChange: (value: string) => void
+    onKeyPress: (e) => void
     value: string
     before: any
 }
@@ -14,19 +16,32 @@ interface State {
 }
 export class TagSearchInput extends React.Component<Props, State> {
     state = { isFocused: false }
-    onChange = (e: ChangeEvent<HTMLInputElement>) =>
-        this.props.onChange(e.target.value)
 
+    onChange = (value: string) => this.props.onChange(value)
+
+    handleSpecialKeyPress = {
+        test: (e: KeyboardEvent) =>
+            e.key === 'Enter' ||
+            e.key === 'ArrowUp' ||
+            e.key === 'ArrowDown' ||
+            e.key === 'Tab',
+        handle: this.props.onKeyPress,
+    }
+
+    // TODO: clicking anywhere on the search box should focus the input
     render() {
         return (
-            <SearchBox isFocused={this.state.isFocused}>
+            <SearchBox isFocused={this.state.isFocused} id={'tagSearchBox'}>
                 <StyledSearchIcon size={24} />
                 {this.props.before}
                 <SearchInput
-                    value={this.props.value}
+                    defaultValue={this.props.value}
                     onChange={this.onChange}
                     onFocus={() => this.setState({ isFocused: true })}
                     onBlur={() => this.setState({ isFocused: false })}
+                    specialHandlers={[this.handleSpecialKeyPress]}
+                    type={'input'}
+                    autofocus
                 />
             </SearchBox>
         )
@@ -41,19 +56,18 @@ const StyledSearchIcon = styled(SearchIcon)`
 
 const SearchBox = styled.div`
     background-color: ${props => props.theme.inputBackground};
-    border: 2px solid;
-    border-color: ${props => (props.isFocused ? colorGrey3 : 'transparent')};
+    border: 2px solid ${props => (props.isFocused ? colorGrey3 : 'transparent')};
     border-radius: 3px;
     color: ${props => props.theme.text};
     display: flex;
     flex-wrap: wrap;
     font-size: 1rem;
     padding: 2px 8px;
-    transition: border 0.2s;
+    transition: border 0.1s;
     margin-bottom: 1px;
 `
 
-const SearchInput = styled.input`
+const SearchInput = styled(TextInputControlled)`
     border: none;
     background-image: none;
     background-color: transparent;
@@ -70,7 +84,6 @@ const SearchInput = styled.input`
         -webkit-box-shadow: none;
         -moz-box-shadow: none;
         box-shadow: none;
-        outline: none;
     }
 
     font-size: 1rem;

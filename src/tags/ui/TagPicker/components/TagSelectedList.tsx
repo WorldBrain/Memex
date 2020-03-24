@@ -1,6 +1,6 @@
 import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
-import { ActiveTab } from 'src/tags/ui/TagPicker/components/ActiveTab'
+import { ActiveTag } from 'src/tags/ui/TagPicker/components/ActiveTag'
 import { X as XIcon } from '@styled-icons/feather'
 import { darken } from 'polished'
 
@@ -32,8 +32,9 @@ export class TagSelectedList extends React.PureComponent<Props> {
     }
 }
 
-const StyledActiveTab = styled(ActiveTab)`
+const StyledActiveTab = styled(ActiveTag)`
     display: inline-flex;
+    cursor: pointer;
 `
 
 const StyledXIcon = styled(XIcon)`

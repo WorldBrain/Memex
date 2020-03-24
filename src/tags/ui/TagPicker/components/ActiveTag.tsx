@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 
-export const ActiveTab = styled.div`
+export const ActiveTag = styled.div`
     align-items: center;
     background: ${props => props.theme.tag.selected};
     border: 2px solid ${props => props.theme.tag.tag};

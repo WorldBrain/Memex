@@ -7,7 +7,7 @@ const styles = require('./search-box.css')
 
 export interface Props {
     searchValue: string
-    onSearchEnter?: (e: SyntheticEvent<HTMLInputElement>) => void
+    onSearchEnter?: (e) => void
     onSearchChange?: (searchQuery: string) => void
     onClearBtn?: ClickHandler<HTMLElement>
     placeholder: string

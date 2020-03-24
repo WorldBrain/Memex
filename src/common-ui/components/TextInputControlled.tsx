@@ -37,6 +37,7 @@ type TextInputAttributes = Omit<
 
 export interface ControlledTextInputProps {
     onChange: (s: string) => void
+    // TODO: change these e's to KeyboardEvent ? and change usage
     specialHandlers?: { test: (e) => boolean; handle: (e) => void }[]
     updateRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
     defaultValue?: string
@@ -89,6 +90,22 @@ class TextInputControlled extends React.Component<
 
     componentWillUnmount() {
         this.deRegisterEventListeners()
+    }
+
+    componentDidUpdate(
+        prevProps: Readonly<TextInputAttributes & ControlledTextInputProps>,
+        prevState: Readonly<ControlledTextInputState>,
+        snapshot?: any,
+    ): void {
+        if (this.props.defaultValue !== this.state.text) {
+            this.updateTextElement({
+                text: this.props.defaultValue,
+                selection: {
+                    start: this.props.defaultValue.length,
+                    end: this.props.defaultValue.length,
+                },
+            })
+        }
     }
 
     registerEventListeners = () => {

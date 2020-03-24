@@ -1,8 +1,9 @@
 import React from 'react'
 import styled from 'styled-components'
 import { TagResultItem } from 'src/tags/ui/TagPicker/components/TagResultItem'
-import { Check, Layers } from '@styled-icons/feather'
+import { Check, Layers, X as XIcon } from '@styled-icons/feather'
 import { StyledIconBase } from '@styled-icons/styled-icon'
+
 import { opacify } from 'polished'
 import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
 
@@ -27,7 +28,7 @@ class TagRow extends React.Component<Props, State> {
     }
 
     render() {
-        const { name } = this.props
+        const { name, selected } = this.props
 
         return (
             <Row
@@ -36,15 +37,24 @@ class TagRow extends React.Component<Props, State> {
                 onMouseLeave={() => this.setState({ isHovering: false })}
             >
                 <TagResultItem
-                    selected={this.props.selected}
+                    selected={selected}
                     isHovering={this.state.isHovering}
                 >
                     {name}
                 </TagResultItem>
-                <IconStyleWrapper isHovering={this.state.isHovering}>
-                    <Layers size={24} />
-                    <Check size={24} />
-                </IconStyleWrapper>
+
+                {!selected && (
+                    <IconStyleWrapper visibility={this.state.isHovering}>
+                        <Layers size={24} />
+                        <Check size={24} onClick={this.handleTagPress} />
+                    </IconStyleWrapper>
+                )}
+
+                {selected && (
+                    <IconStyleWrapper visibility={true}>
+                        <XIcon size={24} onClick={this.handleTagPress} />
+                    </IconStyleWrapper>
+                )}
             </Row>
         )
     }
@@ -55,7 +65,7 @@ const IconStyleWrapper = styled.div`
         stroke-width: 2px;
         color: ${props => opacify(0.5, props.theme.tag.subtleIcon)};
         margin-left: 8px;
-        opacity: ${props => (props.isHovering ? '1' : '0')};
+        opacity: ${props => (props.visibility ? '1' : '0')};
         transition: all 0.3s;
 
         &:hover {

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { EventHandler, KeyboardEvent, KeyboardEventHandler } from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
@@ -35,12 +35,16 @@ class TagPicker extends StatefulUIElement<
     handleNewTagPress = () =>
         this.processEvent('newTagPress', { tag: this.state.newTagName })
 
+    handleKeyPress = (e: KeyboardEvent<any>) =>
+        this.processEvent('keyPress', { e })
+
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
-                <StyledContainer>
+                <StyledContainer onKeyPress={this.handleKeyPress}>
                     <TagSearchInput
                         onChange={this.handleSearchInputChanged}
+                        onKeyPress={this.handleKeyPress}
                         value={this.state.query}
                         before={
                             <TagSelectedList
@@ -64,7 +68,8 @@ class TagPicker extends StatefulUIElement<
         )
     }
 }
-//TODO we need an empty state. No tags in the search box show 'Search tags' if its a filter... 'search or filter tags'
+
+// TODO we need an empty state. No tags in the search box show 'Search tags' if its a filter... 'search or filter tags'
 
 const StyledContainer = styled.div`
     border: 1px solid #ceced9;

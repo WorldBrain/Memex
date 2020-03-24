@@ -30,4 +30,5 @@ export const AddNew = styled.div`
         min-width: 87px;
         padding-top: 3px;
     }
+    cursor: pointer;
 `

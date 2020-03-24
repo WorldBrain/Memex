@@ -8,19 +8,21 @@ interface Props {
     onPress: (tag: DisplayTag) => void
 }
 
-export default class TagResultsList extends React.PureComponent<Props> {
-    render = () => (
-        <StyledContainer>
-            {this.props.tags?.map(tag => (
-                <TagRowItem
-                    onPress={this.props.onPress}
-                    key={`TagKeyName-${tag.name}-${tag.selected}`}
-                    name={tag.name}
-                    selected={tag.selected}
-                />
-            )) || null}
-        </StyledContainer>
-    )
+export default class TagResultsList extends React.Component<Props> {
+    render = () => {
+        return (
+            <StyledContainer id={'tagResults'}>
+                {this.props.tags?.map(tag => (
+                    <TagRowItem
+                        onPress={this.props.onPress}
+                        key={`TagKeyName-${tag.name}`}
+                        name={tag.name}
+                        selected={tag.selected}
+                    />
+                )) || null}
+            </StyledContainer>
+        )
+    }
 }
 const StyledContainer = styled.div`
     overflow-y: auto;
