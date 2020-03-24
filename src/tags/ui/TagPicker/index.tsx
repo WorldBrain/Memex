@@ -1,6 +1,5 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
-
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
     TagPickerDependencies,
@@ -12,6 +11,7 @@ import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedLis
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
 import { Tag } from 'src/tags/background/types'
 import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
+import * as Colors from 'src/common-ui/components/design-library/colors'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -36,7 +36,7 @@ class TagPicker extends StatefulUIElement<
         const tags = TagPickerLogic.getTagsToDisplay(this.state)
 
         return (
-            <ThemeProvider theme={lightTheme}>
+            <ThemeProvider theme={Colors.lightTheme}>
                 <StyledContainer>
                     <TagSearchInput
                         onChange={this.handleSearchInputChanged}
@@ -60,37 +60,14 @@ class TagPicker extends StatefulUIElement<
         )
     }
 }
-
-// themes should be global to go into a theme file and are referenced from a higher component (even app.js) for now its just here (proof of concept)
-const lightTheme = {
-    background: '#fff',
-    searchBackground: '#F1F1F5',
-    tag: {
-        tag: '#44ff88',
-        border: '#83c9f4',
-        hover: '#83c9f4',
-        selected: '#83c9f4',
-        text: '#083957',
-    },
-}
-const darkTheme = {
-    text: '#72727F',
-    searchBackground: '#F1F1F5',
-    tag: {
-        tag: '#44ff88',
-        border: '#83c9f4',
-        hover: '#83c9f4',
-        selected: '#83c9f4',
-        text: '#083957',
-    },
-}
+//TODO we need an empty state. No tags in the search box show 'Search tags' if its a filter... 'search or filter tags'
 
 const StyledContainer = styled.div`
     border: 1px solid #ceced9;
     box-shadow: 0px 0px 25px #dadbe7;
     background: ${props => props.theme.background};
     border-radius: 5px;
-    max-height: 150px;
+    height: auto;
     padding: 8px;
     width: 350px;
 `

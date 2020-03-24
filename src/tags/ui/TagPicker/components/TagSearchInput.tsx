@@ -1,5 +1,6 @@
 import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
+import { Search as SearchIcon } from '@styled-icons/feather'
 
 interface Props {
     onChange: (value: string) => void
@@ -13,6 +14,7 @@ export class TagSearchInput extends React.PureComponent<Props> {
     render() {
         return (
             <SearchBox>
+                <StyledSearchIcon size={24} />
                 {this.props.before}
                 <SearchInput
                     value={this.props.value}
@@ -23,19 +25,21 @@ export class TagSearchInput extends React.PureComponent<Props> {
     }
 }
 
-const SearchBox = styled.div`
-    display: flex;
+const StyledSearchIcon = styled(SearchIcon)`
+    stroke: ${props => props.theme.searchIcon};
+    stroke-width: 2px;
+    margin-right: 8px;
+`
 
-    background: ${props => props.theme.searchBackground};
+const SearchBox = styled.div`
     background-color: ${props => props.theme.searchBackground};
     border: 2px solid ${props => props.theme.searchBackground};
     border-radius: 3px;
-    background: url(/img/search.svg) no-repeat 8px 50%;
-    background-size: 20px;
     color: ${props => props.theme.text};
-    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
     font-size: 1rem;
-    padding: 8px 8px 8px 32px;
+    padding: 2px 8px;
     transition: border 0.2s;
 `
 
@@ -49,6 +53,7 @@ const SearchInput = styled.input`
 
     &:focus {
         border: none;
+        outline: none;
         background-image: none;
         background-color: transparent;
         -webkit-box-shadow: none;
