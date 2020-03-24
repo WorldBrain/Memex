@@ -1,25 +1,23 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Tag } from 'src/tags/background/types'
 import { TagResultItem } from 'src/tags/ui/TagPicker/components/TagResultItem'
 
 interface TagRowItemEvents {
-    onPress: (tag: Tag) => void
+    onPress: (tag: string) => void
 }
-type Props = Tag & TagRowItemEvents & {}
+type Props = { tag: string } & TagRowItemEvents & {}
 
 class TagRow extends React.PureComponent<Props> {
     handleTagPress = () => {
-        const { url, name } = this.props
-        this.props.onPress && this.props.onPress({ url, name })
+        this.props.onPress && this.props.onPress(this.props.tag)
     }
 
     render() {
-        const { name } = this.props
+        const { tag } = this.props
 
         return (
             <Row onClick={this.handleTagPress}>
-                <TagResultItem>{name}</TagResultItem>
+                <TagResultItem>{tag}</TagResultItem>
             </Row>
         )
     }

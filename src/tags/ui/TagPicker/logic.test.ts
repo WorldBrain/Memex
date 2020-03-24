@@ -13,7 +13,7 @@ describe('TagPickerLogic', () => {
             new TagPickerLogic({
                 onUpdateTagSelection: () => {},
                 queryTags: async (query: string) => [],
-                loadSuggestions: () => [{ name: 'bla', url: 'why?' }],
+                loadSuggestions: () => ['bla', 'why?'],
                 url: '',
                 initialSelectedTags: [],
             }),
@@ -21,7 +21,7 @@ describe('TagPickerLogic', () => {
 
         await element.init()
         expect(element.state).toEqual({
-            initialTags: [{ name: 'bla', url: 'why?' }],
+            initialTags: ['bla', 'why?'],
             loadingQueryResults: false,
             loadingSuggestions: false,
             query: '',

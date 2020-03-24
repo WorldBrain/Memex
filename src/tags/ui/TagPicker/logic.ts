@@ -1,5 +1,4 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
-import { Tag } from 'src/tags/background/types'
 import debounce from 'lodash/debounce'
 
 export const INITIAL_STATE = {
@@ -14,9 +13,9 @@ export const INITIAL_STATE = {
 export interface TagPickerState {
     query?: string
     newTagName?: string
-    queryResults?: Tag[]
-    initialTags?: Tag[]
-    selectedTags: Tag[]
+    queryResults?: string[]
+    initialTags?: string[]
+    selectedTags: string[]
     loadingSuggestions: boolean
     loadingQueryResults: boolean
 }
@@ -31,16 +30,16 @@ export type TagPickerEvent = UIEvent<{
     // keyPressOther: {}
     // updatedQuery: {}
     searchInputChanged: { query: string }
-    selectedTagPress: { tag: Tag }
-    resultTagPress: { tag: Tag }
+    selectedTagPress: { tag: string }
+    resultTagPress: { tag: string }
 }>
 
 export interface TagPickerDependencies {
-    onUpdateTagSelection: (tags: Tag[]) => void
-    queryTags: (query: string) => Promise<Tag[]>
-    loadSuggestions: () => Tag[]
+    onUpdateTagSelection: (tags: string[]) => void
+    queryTags: (query: string) => Promise<string[]>
+    loadSuggestions: () => string[]
     url: string
-    initialSelectedTags?: Tag[]
+    initialSelectedTags?: string[]
 }
 
 interface TagPickerUIEvent<T extends keyof TagPickerEvent> {
@@ -56,7 +55,7 @@ export default class TagPickerLogic extends UILogic<
         super()
     }
 
-    initialTags: Tag[] = []
+    initialTags: string[] = []
 
     getInitialState(): TagPickerState {
         return {
@@ -115,7 +114,7 @@ export default class TagPickerLogic extends UILogic<
      * If the term provided does not exist in the tag list, then set the new tag state to the term.
      * (controls the 'Add a new Tag: ...')
      */
-    _setNewTag = (list: Tag[], term: string) => {
+    _setNewTag = (list: string[], term: string) => {
         if (this._isTermInTagList(list, term)) {
             this.emitMutation({ newTagName: { $set: null } })
         } else {
@@ -126,9 +125,9 @@ export default class TagPickerLogic extends UILogic<
     /**
      * Loops through a list of tags and exits if a match is found
      */
-    _isTermInTagList = (tagList: Tag[], term: string) => {
+    _isTermInTagList = (tagList: string[], term: string) => {
         for (const tag of tagList) {
-            if (tag.name === term) {
+            if (tag === term) {
                 return true
             }
         }
@@ -136,7 +135,7 @@ export default class TagPickerLogic extends UILogic<
     }
 
     _queryInitialSuggestions = term =>
-        this.initialTags.filter(tag => tag.name.includes(term))
+        this.initialTags.filter(tag => tag.includes(term))
 
     selectedTagPress = ({
         event: { tag },
@@ -147,8 +146,8 @@ export default class TagPickerLogic extends UILogic<
         )
     }
 
-    _removeTagFromList = (tag: Tag, list: Tag[]) =>
-        list.filter(t => t.name !== tag.name)
+    _removeTagFromList = (tag: string, list: string[]) =>
+        list.filter(t => t !== tag)
 
     resultTagPress = ({
         event: { tag },
@@ -167,12 +166,12 @@ export default class TagPickerLogic extends UILogic<
         this.dependencies.onUpdateTagSelection(selectedTags)
     }
 
-    _addTagToList = (tag: Tag, list: Tag[]) => {
+    _addTagToList = (tag: string, list: string[]) => {
         list.push(tag)
         return list
     }
 
-    static getTagsToDisplay = (state: TagPickerState): Tag[] => {
+    static getTagsToDisplay = (state: TagPickerState): string[] => {
         if (!state.query) {
             return state.initialTags
         }

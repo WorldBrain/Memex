@@ -4,24 +4,14 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import TagRow from 'src/tags/ui/TagPicker/components/TagRow'
 import TagList from 'src/tags/ui/TagPicker/components/TagResultsList'
 
-import { Tag } from 'src/tags/background/types'
-const tags = [
-    { name: 'initial', url: 'http://test2a' },
-    { name: 'tag', url: 'http://test2b' },
-    { name: 'abcde1', url: 'http://test1c' },
-    { name: 'abcde2', url: 'http://test2d' },
-    { name: 'tag 1', url: 'http://test2e' },
-    { name: 'tag 2', url: 'http://test2f' },
-] as Tag[]
+const tags = ['initial', 'tag', 'abcde1', 'abcde2', 'tag 1', 'tag 2']
 
 storiesOf('Tags Refactored', module)
     .add('Tag Picker - All together', () => (
         <div>
             <TagPicker
                 onUpdateTagSelection={() => null}
-                queryTags={async term =>
-                    tags.filter(t => t.name.includes(term))
-                }
+                queryTags={async term => tags.filter(t => t.includes(term))}
                 loadSuggestions={() => [tags[4], tags[5]]}
                 url={''}
                 initialSelectedTags={[tags[0], tags[1]]}

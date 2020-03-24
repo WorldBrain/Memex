@@ -1,11 +1,10 @@
 import React from 'react'
 import styled from 'styled-components'
 import TagRowItem from './TagRow'
-import { Tag } from 'src/tags/background/types'
 
 interface Props {
-    tags: Tag[]
-    onPress: (tag: Tag) => void
+    tags: string[]
+    onPress: (tag: string) => void
 }
 
 export default class TagResultsList extends React.PureComponent<Props> {
@@ -13,9 +12,9 @@ export default class TagResultsList extends React.PureComponent<Props> {
         <StyledContainer>
             {this.props.tags?.map(tag => (
                 <TagRowItem
-                    {...tag}
                     onPress={this.props.onPress}
-                    key={`TagKeyName-${tag.name}`}
+                    key={`TagKeyName-${tag}`}
+                    tag={tag}
                 />
             )) || null}
         </StyledContainer>

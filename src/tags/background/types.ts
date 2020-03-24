@@ -26,8 +26,3 @@ export interface TagTab {
     tabId: number
     url: string
 }
-
-export interface Tag {
-    name: string
-    url: string
-}

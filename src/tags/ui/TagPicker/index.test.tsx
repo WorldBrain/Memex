@@ -9,32 +9,20 @@ import {
     waitForElement,
 } from '@testing-library/react'
 import TagPicker from './index'
-import { Tag } from 'src/tags/background/types'
 
 const setup = () => {
     // Testing Data
 
-    const initialSuggestions = [
-        { name: 'suggested tag', url: 'http://sugg' },
-        { name: 'another suggested tag', url: 'http://sugg2' },
-    ] as Tag[]
+    const initialSuggestions = ['suggested tag', 'another suggested tag']
 
-    const tags = [
-        { name: 'abcde1', url: 'http://test1' },
-        { name: 'abcde2', url: 'http://test2' },
-        { name: 'abcde2 tag', url: 'http://test3' },
-        ...initialSuggestions,
-    ] as Tag[]
+    const tags = ['abcde1', 'abcde2', 'abcde2 tag', ...initialSuggestions]
 
-    const tagsSelected = [
-        { name: 'Selected', url: 'http://selected' },
-        { name: 'Tag', url: 'http://tag' },
-    ]
+    const tagsSelected = ['Selected', 'Tag']
 
     // Render the tag picker
     const result = render(
         <TagPicker
-            queryTags={async query => tags.filter(t => t.name.includes(query))}
+            queryTags={async query => tags.filter(t => t.includes(query))}
             loadSuggestions={() => initialSuggestions}
             url={''}
             onUpdateTagSelection={tags1 => null}
@@ -61,8 +49,8 @@ test('Shows the active tags passed to it', async () => {
     const { tagsSelected, container } = setup()
     await waitForElement(
         () => [
-            getByText(container, tagsSelected[0].name),
-            getByText(container, tagsSelected[1].name),
+            getByText(container, tagsSelected[0]),
+            getByText(container, tagsSelected[1]),
         ],
         { container },
     )
@@ -76,8 +64,8 @@ test('Shows relevant tags when typed into search box', async () => {
     expect(input.value).toEqual('')
     await waitForElement(
         () => [
-            getByText(container, initialSuggestions[0].name),
-            getByText(container, initialSuggestions[1].name),
+            getByText(container, initialSuggestions[0]),
+            getByText(container, initialSuggestions[1]),
         ],
         { container },
     )
@@ -93,9 +81,9 @@ test('Shows relevant tags when typed into search box', async () => {
     // Wait for the query results list to show an element which includes a textual tag result from our test data
     const [tagEl1] = await waitForElement(
         () => [
-            getByText(container, tags[2].name),
-            getByText(container, initialSuggestions[0].name),
-            getByText(container, initialSuggestions[1].name),
+            getByText(container, tags[2]),
+            getByText(container, initialSuggestions[0]),
+            getByText(container, initialSuggestions[1]),
         ],
         { container },
     )

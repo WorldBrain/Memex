@@ -1,16 +1,12 @@
 import React, { ChangeEvent } from 'react'
-import { Tag } from 'src/tags/background/types'
 import { ActiveTab } from 'src/tags/ui/TagPicker/components/ActiveTab'
 
 interface Props {
-    tagsSelected: Tag[]
-    onPress: (tag: Tag) => void
+    tagsSelected: string[]
+    onPress: (tag: string) => void
 }
 export class TagSelectedList extends React.PureComponent<Props> {
-    _getTagAttr = event => ({
-        name: event.target.getAttribute('data-tag-name'),
-        url: event.target.getAttribute('data-tag-url'),
-    })
+    _getTagAttr = event => event.target.getAttribute('data-tag-name')
 
     handleSelectedTabPress = (event: ChangeEvent) =>
         this.props.onPress(this._getTagAttr(event))
@@ -20,12 +16,12 @@ export class TagSelectedList extends React.PureComponent<Props> {
             <React.Fragment>
                 {this.props.tagsSelected?.map(tag => (
                     <ActiveTab
-                        key={`ActiveTab-${tag.name}`}
-                        data-tag-name={tag.name}
-                        data-tag-url={tag.url}
+                        onMouse
+                        key={`ActiveTab-${tag}`}
+                        data-tag-name={tag}
                         onClick={this.handleSelectedTabPress}
                     >
-                        {tag.name}
+                        {tag}
                     </ActiveTab>
                 ))}
             </React.Fragment>

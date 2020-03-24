@@ -10,7 +10,6 @@ import TagPickerLogic, {
 import { TagSearchInput } from 'src/tags/ui/TagPicker/components/TagSearchInput'
 import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedList'
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
-import { Tag } from 'src/tags/background/types'
 import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
 
 class TagPicker extends StatefulUIElement<
@@ -26,10 +25,10 @@ class TagPicker extends StatefulUIElement<
         return this.processEvent('searchInputChanged', { query })
     }
 
-    handleSelectedTagPress = (tag: Tag) =>
+    handleSelectedTagPress = (tag: string) =>
         this.processEvent('selectedTagPress', { tag })
 
-    handleResultTagPress = (tag: Tag) =>
+    handleResultTagPress = (tag: string) =>
         this.processEvent('resultTagPress', { tag })
 
     render() {
