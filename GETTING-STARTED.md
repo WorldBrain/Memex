@@ -23,7 +23,7 @@ installation page](https://yarnpkg.com/en/docs/install).
 
 **Run `yarn` to install dependencies**
 
-This could take a while....
+in the cloned folder Memex run `yarn`, This could take a while....
 
 ```sh
 $ yarn
