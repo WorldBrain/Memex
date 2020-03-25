@@ -154,7 +154,8 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
 
 // === Executing side ===
 
-const remotelyCallableFunctions = {}
+const remotelyCallableFunctions = (window['remotelyCallableFunctions'] =
+    window['remotelyCallableFunctions'] ?? {})
 
 async function incomingRPCListener(message, sender) {
     if (!message || message[RPC_CALL] !== RPC_CALL) {

@@ -6,7 +6,10 @@ import { createSelfTests } from '@worldbrain/memex-common/lib/self-tests'
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
 import initSentry from './util/raven'
-import { setupRemoteFunctionsImplementations } from 'src/util/webextensionRPC'
+import {
+    setupRemoteFunctionsImplementations,
+    makeRemotelyCallable,
+} from 'src/util/webextensionRPC'
 import { StorageChangesManager } from 'src/util/storage-changes'
 
 // Features that require manual instantiation to setup
@@ -69,6 +72,17 @@ export async function main() {
     setStorex(storageManager)
 
     await setupBackgroundModules(backgroundModules, storageManager)
+
+    makeRemotelyCallable(
+        {
+            injectContent: async ({ tab }, { scriptPaths }) => {
+                for (const file of (scriptPaths as string[]) || []) {
+                    browser.tabs.executeScript(tab.id, { file })
+                }
+            },
+        },
+        { insertExtraArg: true },
+    )
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({

@@ -13,9 +13,7 @@ export const entry = {
     content_script: './src/content-scripts/global.ts',
     content_script_search_injection:
         './src/content-scripts/search-injection.ts',
-    content_script_ribbon: './src/content-scripts/ribbon.ts',
-    content_script_sidebar: './src/content-scripts/sidebar.ts',
-    content_script_tooltip: './src/content-scripts/tooltip.ts',
+    content_script_in_page_ui: './src/content-scripts/in-page-ui.ts',
     options: './src/options/options.jsx',
 }
 
