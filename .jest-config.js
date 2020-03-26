@@ -12,7 +12,8 @@ for (const externalTsModule of externalTsModules) {
 module.exports = {
     globals: {
         'ts-jest': {
-            tsConfig: true,
+            tsConfig: 'tsconfig.jest.json',
+            babelConfig: true,
         },
         browser: {},
     },
