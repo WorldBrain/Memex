@@ -26,7 +26,7 @@ export function registerSyncBackgroundIntegrationTests(
         describe('should work when synced in various patterns across 2 devices', () => {
             registerSyncBackAndForthTests(test)
         })
-        describe('should work when doing the same action on two devices, then syncing', async () => {
+        describe('should work when doing the same action on two devices, then syncing', () => {
             registerConflictGenerationTests(test)
         })
     })
