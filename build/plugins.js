@@ -34,8 +34,9 @@ export default function({
     webExtReloadPort = 9090,
     mode = 'development',
     template,
-    notifsEnabled = false,
     isCI = false,
+    runSentry = false,
+    notifsEnabled = false,
     shouldPackage = false,
     packagePath = '../dist',
     extPackageName = 'extension.zip',
@@ -79,7 +80,7 @@ export default function({
             new SentryPlugin({
                 release: process.env.npm_package_version,
                 include: output.path,
-                dryRun: !shouldPackage,
+                dryRun: !runSentry,
             }),
         )
     }

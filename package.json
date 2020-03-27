@@ -9,6 +9,7 @@
         "build:ci": "npm run build:clean && webpack --env.ci",
         "build:prod": "npm run build:clean && webpack --env.prod",
         "build:package": "npm run build:clean && webpack --env.prod --env.package",
+        "build:package-sentry": "npm run build:clean && webpack --env.prod --env.package --env.sentry",
         "build:clean": "rimraf ./extension",
         "watch": "npm run build:clean && webpack --watch",
         "watch:notif": "webpack --watch --env.notifs",
