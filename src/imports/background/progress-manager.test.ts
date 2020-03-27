@@ -15,7 +15,7 @@ jest.mock('src/activity-logger')
 jest.mock('./cache')
 jest.mock('./data-sources')
 
-const runSuite = (DATA: TestData, skip = false) => async () => {
+const runSuite = (DATA: TestData, skip = false) => () => {
     let stateManager
 
     beforeAll(() => {
