@@ -1,2 +1,6 @@
 [auth]
 token=afd51bdbe7ee48b3967a2da9d6a34542ec4ebbf9a13c4ec6b48e9570076bc22d
+
+[defaults]
+org = worldbrain-ug
+project = javascript
