@@ -1,7 +1,6 @@
 import { storiesOf } from '@storybook/react'
 import React from 'react'
 import { action } from '@storybook/addon-actions'
-
 import TagPicker from 'src/tags/ui/TagPicker'
 import TagRow from 'src/tags/ui/TagPicker/components/TagRow'
 import TagList from 'src/tags/ui/TagPicker/components/TagResultsList'

@@ -22,12 +22,13 @@ export const TagResultItem = styled.div`
     min-height: 16px;
     background: ${backgroundHoverSelected}
     border: 2px solid ${props =>
-        props.isHovering ? props.theme.tag.tag : 'transparent'};
+        props.isHovering || props.selected
+            ? props.theme.tag.tag
+            : 'transparent'};
     border-radius: 5px;
     color: ${props => props.theme.tag.text};
     padding: 0 8px;
     margin: 2px 4px 2px 0;
-    font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeSmall}px;
     transition: all .1s;
 

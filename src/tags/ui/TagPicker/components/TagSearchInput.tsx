@@ -74,6 +74,7 @@ const SearchInput = styled(TextInputControlled)`
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
+    flex: 1;
     color: ${props => props.theme.text};
 
     &:focus {

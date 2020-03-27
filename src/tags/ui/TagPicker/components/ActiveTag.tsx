@@ -7,7 +7,6 @@ export const ActiveTag = styled.div`
     border: 2px solid ${props => props.theme.tag.tag};
     border-radius: 5px;
     color: ${props => props.theme.tag.text};
-    font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeSmall}px;
     padding: 0 4px 0 8px;
     margin: 2px 4px 2px 0;

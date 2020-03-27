@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { TagResultItem } from 'src/tags/ui/TagPicker/components/TagResultItem'
 import { Check, Layers, X as XIcon } from '@styled-icons/feather'
 import { StyledIconBase } from '@styled-icons/styled-icon'
-
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { opacify } from 'polished'
 import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
 
@@ -45,7 +45,12 @@ class TagRow extends React.Component<Props, State> {
 
                 {!selected && (
                     <IconStyleWrapper visibility={this.state.isHovering}>
-                        <Layers size={24} />
+                        <ButtonTooltip
+                            tooltipText="Tag all tabs in window"
+                            position="popupLeft"
+                        >
+                            <Layers size={24} />
+                        </ButtonTooltip>
                         <Check size={24} onClick={this.handleTagPress} />
                     </IconStyleWrapper>
                 )}
@@ -61,6 +66,8 @@ class TagRow extends React.Component<Props, State> {
 }
 
 const IconStyleWrapper = styled.div`
+    display: inline-flex;
+
     ${StyledIconBase} {
         stroke-width: 2px;
         color: ${props => opacify(0.5, props.theme.tag.subtleIcon)};

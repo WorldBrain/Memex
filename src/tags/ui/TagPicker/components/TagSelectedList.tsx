@@ -41,6 +41,8 @@ const StyledXIcon = styled(XIcon)`
     stroke: ${props => props.theme.tag.text};
     stroke-width: 2px;
     margin-left: 4px;
+    display: flex;
+    flex-shrink: 0;
 
     &:hover {
         stroke-width: 3px;

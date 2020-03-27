@@ -6,7 +6,7 @@
 
 .tooltipBubble {
     position: absolute;
-    height: 20px;
+    height: 18px;
     border-radius: 5px;
     display: flex;
     flex-wrap: nowrap;
@@ -50,14 +50,12 @@
     justify-content: flex-end;
     right: 50px;
     align-items: center;
-    top: 9px;
 }
 
 .tooltipLeft {
     justify-content: flex-end;
     right: 30px;
     align-items: center;
-    top: 3px;
 }
 
 .tooltipLeftBig {
@@ -92,6 +90,7 @@
 .tooltipContainer {
     position: relative;
     display: inline-flex;
+    align-items: center;
     z-index: 2;
 }
 

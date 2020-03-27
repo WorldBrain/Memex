@@ -79,6 +79,7 @@ const StyledContainer = styled.div`
     height: auto;
     padding: 8px;
     width: 350px;
+    font-family: 'Poppins', sans-serif;
 `
 
 export default TagPicker
