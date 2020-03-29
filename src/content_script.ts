@@ -1,4 +1,4 @@
-import 'babel-polyfill'
+import 'core-js'
 import { RemoteFunctionRegistry } from './util/webextensionRPC'
 import { setupScrollReporter } from './activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
