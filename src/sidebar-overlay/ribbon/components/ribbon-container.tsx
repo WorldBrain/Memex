@@ -112,8 +112,18 @@ class RibbonContainer extends Component<Props> {
             <TagPicker
                 url={this.props.getUrl()}
                 loadDefaultSuggestions={() => this.props.initTagSuggs}
-                onUpdateTagSelection={() => null}
+                onUpdateTagSelection={(_, added, deleted) => {
+                    if (added) {
+                        return this.props.onTagAdd(added)
+                    }
+                    if (deleted) {
+                        return this.props.onTagDel(deleted)
+                    }
+                }}
                 queryTags={query => tags.searchForTagSuggestions({ query })}
+                initialSelectedTags={async () =>
+                    tags.fetchPageTags({ url: this.props.getUrl() })
+                }
             />
         )
     }

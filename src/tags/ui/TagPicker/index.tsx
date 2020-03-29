@@ -32,6 +32,9 @@ class TagPicker extends StatefulUIElement<
     handleResultTagPress = (tag: DisplayTag) =>
         this.processEvent('resultTagPress', { tag })
 
+    handleResultTagFocus = (tag: DisplayTag) =>
+        this.processEvent('resultTagFocus', { tag })
+
     handleNewTagPress = () =>
         this.processEvent('newTagPress', { tag: this.state.newTagName })
 
@@ -62,6 +65,7 @@ class TagPicker extends StatefulUIElement<
                     <TagResultsList
                         tags={this.state.displayTags}
                         onPress={this.handleResultTagPress}
+                        onFocus={this.handleResultTagFocus}
                     />
                 </StyledContainer>
             </ThemeProvider>
@@ -73,12 +77,11 @@ class TagPicker extends StatefulUIElement<
 
 const StyledContainer = styled.div`
     border: 1px solid #ceced9;
-    box-shadow: 0px 0px 25px #dadbe7;
+    box-shadow: 0 0 25px #dadbe7;
     background: ${props => props.theme.background};
     border-radius: 5px;
     height: auto;
     padding: 8px;
-    width: 350px;
     font-family: 'Poppins', sans-serif;
 `
 

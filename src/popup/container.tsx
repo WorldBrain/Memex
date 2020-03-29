@@ -113,7 +113,9 @@ class PopupContainer extends PureComponent<Props> {
 
         if (this.props.showTagsPicker) {
             return (
-                /*                <IndexDropdown
+                /*
+                // Old Tag Picker Implementation
+                <IndexDropdown
                     url={this.props.url}
                     tabId={this.props.tabId}
                     initFilters={this.props.tags}
@@ -129,8 +131,17 @@ class PopupContainer extends PureComponent<Props> {
                     loadDefaultSuggestions={() => this.props.initTagSuggs}
                     url={this.props.url}
                     queryTags={query => tags.searchForTagSuggestions({ query })}
-                    onUpdateTagSelection={selectedTags => null}
-                    initialSelectedTags={[]}
+                    onUpdateTagSelection={(_, added, deleted) => {
+                        if (added) {
+                            return this.props.onTagAdd(added)
+                        }
+                        if (deleted) {
+                            return this.props.onTagDel(deleted)
+                        }
+                    }}
+                    initialSelectedTags={async () =>
+                        tags.fetchPageTags({ url: this.props.url })
+                    }
                 />
             )
         }

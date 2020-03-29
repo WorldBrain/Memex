@@ -9,42 +9,43 @@ import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
 
 interface Props {
     onPress?: (tag: DisplayTag) => void
+    onFocus?: (tag: DisplayTag) => void
+    index: number
     name: string
     selected?: boolean
+    focused?: boolean
 }
 
-interface State {
-    isHovering: boolean
-}
-
-class TagRow extends React.Component<Props, State> {
-    state = { isHovering: false }
+class TagRow extends React.Component<Props> {
     handleTagPress = () => {
-        this.props.onPress &&
-            this.props.onPress({
-                name: this.props.name,
-                selected: this.props.selected,
-            })
+        const { index, name, selected, focused } = this.props
+        const tag = { index, name, selected, focused }
+
+        this.props.onPress && this.props.onPress(tag)
+    }
+
+    handleMouseEnter = () => {
+        const { index, name, selected, focused } = this.props
+        const tag = { index, name, selected, focused }
+
+        this.props.onFocus && this.props.onFocus(tag)
     }
 
     render() {
-        const { name, selected } = this.props
+        const { name, selected, focused } = this.props
 
         return (
             <Row
                 onClick={this.handleTagPress}
-                onMouseEnter={() => this.setState({ isHovering: true })}
-                onMouseLeave={() => this.setState({ isHovering: false })}
+                onMouseEnter={this.handleMouseEnter}
+                isFocused={focused}
             >
-                <TagResultItem
-                    selected={selected}
-                    isHovering={this.state.isHovering}
-                >
+                <TagResultItem selected={selected} isFocused={focused}>
                     {name}
                 </TagResultItem>
 
                 {!selected && (
-                    <IconStyleWrapper visibility={this.state.isHovering}>
+                    <IconStyleWrapper visibility={this.props.focused}>
                         <ButtonTooltip
                             tooltipText="Tag all tabs in window"
                             position="popupLeft"
@@ -65,19 +66,18 @@ class TagRow extends React.Component<Props, State> {
     }
 }
 
-const IconStyleWrapper = styled.div`
+const IconStyleWrapper = styled(({ visibility, ...rest }) => <div {...rest} />)`
     display: inline-flex;
 
     ${StyledIconBase} {
         stroke-width: 2px;
-        color: ${props => opacify(0.5, props.theme.tag.subtleIcon)};
+        color: ${props =>
+            props.isFocused
+                ? props.theme.tag.hoverIcon
+                : opacify(0.5, props.theme.tag.subtleIcon)};
         margin-left: 8px;
         opacity: ${props => (props.visibility ? '1' : '0')};
         transition: all 0.3s;
-
-        &:hover {
-            color: ${props => props.theme.tag.hoverIcon};
-        }
     }
 `
 
@@ -88,11 +88,9 @@ const Row = styled.div`
     padding: 4px 8px;
     justify-content: space-between;
     transition: background 0.3s;
+    cursor: pointer;
 
-    &:hover {
-        background: ${props => props.theme.tag.shade};
-        cursor: pointer;
-    }
+    background: ${props => props.isFocused && props.theme.tag.shade};
 `
 
 export default TagRow

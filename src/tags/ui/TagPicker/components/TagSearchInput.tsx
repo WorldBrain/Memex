@@ -41,7 +41,7 @@ export class TagSearchInput extends React.Component<Props, State> {
                     onBlur={() => this.setState({ isFocused: false })}
                     specialHandlers={[this.handleSpecialKeyPress]}
                     type={'input'}
-                    autofocus
+                    autoFocus
                 />
             </SearchBox>
         )

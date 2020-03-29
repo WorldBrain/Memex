@@ -3,13 +3,13 @@ import styled from 'styled-components'
 
 const backgroundHoverSelected = props => {
     if (props.selected) {
-        if (props.isHovering) {
+        if (props.isFocused) {
             return props.theme.tag.tag
         } else {
             return props.theme.tag.selected
         }
     } else if (!props.selected) {
-        if (props.isHovering) {
+        if (props.isFocused) {
             return props.theme.tag.selected
         } else {
             return props.theme.tag.tag
@@ -22,7 +22,7 @@ export const TagResultItem = styled.div`
     min-height: 16px;
     background: ${backgroundHoverSelected}
     border: 2px solid ${props =>
-        props.isHovering || props.selected
+        props.isFocused || props.selected
             ? props.theme.tag.tag
             : 'transparent'};
     border-radius: 5px;

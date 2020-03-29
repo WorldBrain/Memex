@@ -15,22 +15,31 @@ storiesOf('Tags Refactored', module)
                 queryTags={async term => tags.filter(t => t.includes(term))}
                 loadDefaultSuggestions={() => [tags[4], tags[5]]}
                 url={''}
-                initialSelectedTags={[tags[0], tags[1]]}
+                initialSelectedTags={async () => [tags[0], tags[1]]}
             />
         </div>
     ))
 
-    .add('Tag List', () => (
-        <div>
-            <TagList
-                tags={tags.map(t => ({ name: t, selected: false }))}
-                onPress={t => null}
-            />
-        </div>
-    ))
+    .add('Tag List', () => {
+        let i = 0
+        return (
+            <div>
+                <TagList
+                    tags={tags.map(t => ({
+                        name: t,
+                        selected: false,
+                        focused: false,
+                        index: i++,
+                    }))}
+                    onPress={t => null}
+                    onFocus={t => null}
+                />
+            </div>
+        )
+    })
 
     .add('Tag Row', () => (
         <div>
-            <TagRow name={'tag'} selected={false} />
+            <TagRow name={'tag'} selected={false} index={1} />
         </div>
     ))

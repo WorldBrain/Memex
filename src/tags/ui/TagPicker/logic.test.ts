@@ -15,18 +15,51 @@ describe('TagPickerLogic', () => {
                 queryTags: async (query: string) => [],
                 loadDefaultSuggestions: () => ['bla', 'why?'],
                 url: '',
-                initialSelectedTags: [],
+                initialSelectedTags: async () => [],
             }),
         )
 
         await element.init()
+
         expect(element.state).toEqual({
-            initialTags: ['bla', 'why?'],
             loadingQueryResults: false,
             loadingSuggestions: false,
             query: '',
-            queryResults: [],
+            displayTags: [],
             selectedTags: [],
+            suggestions: [],
+        })
+    })
+
+    it('should correctly load initial tags', async ({ device }) => {
+        const testTags = ['test1', 'test2', 'test3']
+
+        const element = device.createElement(
+            new TagPickerLogic({
+                onUpdateTagSelection: () => {},
+                queryTags: async (query: string) => testTags,
+                loadDefaultSuggestions: () => ['bla', 'why?'],
+                url: '',
+                initialSelectedTags: async () => [],
+            }),
+        )
+
+        await element.init()
+
+        await element.processEvent('searchInputChanged', { query: 'test' })
+
+        expect(element.state).toEqual({
+            loadingQueryResults: false,
+            loadingSuggestions: false,
+            query: 'test',
+            // TODO: Why isn't this as expected?
+            displayTags: [
+                { name: 'test1' },
+                { name: 'test2' },
+                { name: 'test3' },
+            ],
+            selectedTags: [],
+            newTagName: 'test',
             suggestions: [],
         })
     })

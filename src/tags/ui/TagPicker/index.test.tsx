@@ -8,6 +8,7 @@ import {
     getByText,
     findByText,
     waitForElement,
+    queryByText,
 } from '@testing-library/react'
 import TagPicker from './index'
 import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
@@ -23,7 +24,7 @@ const renderTag = (opts: Partial<TagPickerDependencies> = {}) => {
             loadDefaultSuggestions={() => initialSuggestions}
             url={''}
             onUpdateTagSelection={tags1 => null}
-            initialSelectedTags={tagsSelected}
+            initialSelectedTags={async () => tagsSelected}
             {...opts}
         />,
     )
@@ -74,7 +75,7 @@ test('After search and select, adds the selected tag, subsequent clicks remove',
     const queryResult2Tag = await findByText(tagResults as HTMLElement, query)
     queryResult2Tag.click()
     await expectToSeeText(tagSearchBox, [...tagsSelected])
-    expect(getByText(tagSearchBox as HTMLElement, query)).toBeNull()
+    expect(queryByText(tagSearchBox as HTMLElement, query)).toBeNull()
 })
 
 test('After search and select, removes the selected tag', async () => {
