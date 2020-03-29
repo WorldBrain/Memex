@@ -1,5 +1,4 @@
-import 'babel-polyfill'
-import 'core-js/es7/symbol'
+import 'core-js'
 import { browser } from 'webextension-polyfill-ts'
 import { createSelfTests } from '@worldbrain/memex-common/lib/self-tests'
 

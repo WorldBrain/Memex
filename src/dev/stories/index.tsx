@@ -1,4 +1,4 @@
-import 'babel-polyfill'
+import 'core-js'
 import React from 'react'
 
 import './design-library'

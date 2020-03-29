@@ -2,8 +2,8 @@
     "compilerOptions": {
         "baseUrl": ".",
         "allowJs": true,
-        "target": "es6",
-        "module": "ES2015",
+        "target": "ES6",
+        "module": "ES6",
         "moduleResolution": "node",
         "jsx": "react",
         "noImplicitAny": false,

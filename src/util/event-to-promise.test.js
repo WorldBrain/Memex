@@ -1,6 +1,5 @@
 /* eslint-env jest */
 
-import 'core-js/fn/object/entries' // shim Object.entries
 import pull from 'lodash/pull'
 
 import eventToPromise from './event-to-promise'
