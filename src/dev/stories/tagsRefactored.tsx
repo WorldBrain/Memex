@@ -4,10 +4,12 @@ import { action } from '@storybook/addon-actions'
 import TagPicker from 'src/tags/ui/TagPicker'
 import TagRow from 'src/tags/ui/TagPicker/components/TagRow'
 import TagList from 'src/tags/ui/TagPicker/components/TagResultsList'
+import { withGlobalStyles } from 'src/dev/stories/decorators'
 
 const tags = ['initial', 'tag', 'abcde1', 'abcde2', 'tag 1', 'tag 2']
 
 storiesOf('Tags Refactored', module)
+    .addDecorator(withGlobalStyles)
     .add('Tag Picker - All together, Default theme', () => (
         <div>
             <TagPicker
