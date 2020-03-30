@@ -79,6 +79,7 @@ const IconStyleWrapper = styled(({ visibility, ...rest }) => <div {...rest} />)`
         margin-left: 8px;
         opacity: ${props => (props.visibility ? '1' : '0')};
         transition: all 0.3s;
+        pointer-events: none;
     }
 `
 

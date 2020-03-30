@@ -43,6 +43,7 @@ const StyledXIcon = styled(XIcon)`
     margin-left: 4px;
     display: flex;
     flex-shrink: 0;
+    pointer-events: none;
 
     &:hover {
         stroke-width: 3px;
