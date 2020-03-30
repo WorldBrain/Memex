@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
+import { browser, Tabs } from 'webextension-polyfill-ts'
 
 import { LoadingIndicator, ToggleSwitch } from 'src/common-ui/components'
 import * as actions from './actions'
@@ -20,27 +20,37 @@ import { EVENT_NAMES } from '../analytics/internal/constants'
 
 const processEvent = remoteFunction('processEvent')
 
-class NotificationContainer extends Component {
-    static propTypes = {
-        unreadNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
-        readNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
-        init: PropTypes.func.isRequired,
-        showMoreIndex: PropTypes.string,
-        handleToggleShowMore: PropTypes.func.isRequired,
-        handleTick: PropTypes.func.isRequired,
-        onBottomReached: PropTypes.func.isRequired,
-        isLoading: PropTypes.bool.isRequired,
-        needsWaypoint: PropTypes.bool.isRequired,
-        isReadExpanded: PropTypes.bool.isRequired,
-        toggleReadExpand: PropTypes.func.isRequired,
-        isReadShow: PropTypes.bool.isRequired,
-        messageCharLimit: PropTypes.number.isRequired,
-        localStorageNotif: PropTypes.object.isRequired,
-        isLoadingBar: PropTypes.bool.isRequired,
-        tabs: PropTypes.object,
-    }
+type Notification = any
 
-    static defaultProps = {
+export type Props = OwnProps & DispatchProps & StateProps
+
+export interface OwnProps {
+    messageCharLimit?: number
+    tabs?: Tabs.Static
+}
+
+export interface DispatchProps {
+    handleToggleShowMore: (id?: number) => void
+    handleTick: (notif: Notification) => void
+    toggleReadExpand: () => void
+    onBottomReached: () => void
+    init: () => void
+}
+
+export interface StateProps {
+    unreadNotificationList: Notification[]
+    readNotificationList: Notification[]
+    isReadExpanded: boolean
+    needsWaypoint: boolean
+    isLoadingBar: boolean
+    isReadShow: boolean
+    isLoading: boolean
+    localStorageNotif: any
+    showMoreIndex: string
+}
+
+class NotificationContainer extends Component<Props> {
+    static defaultProps: OwnProps = {
         messageCharLimit: 250,
         tabs: browser.tabs,
     }
@@ -269,7 +279,7 @@ const mapDispatchToProps = dispatch => ({
     ),
     handleToggleShowMore: index => event => {
         event.preventDefault()
-        dispatch(actions.setShowMoreIndex(index))
+        dispatch((actions.setShowMoreIndex as any)(index))
     },
     handleTick: notification => event => {
         event.preventDefault()
@@ -277,7 +287,7 @@ const mapDispatchToProps = dispatch => ({
     },
 })
 
-export default connect(
+export default connect<StateProps, DispatchProps, OwnProps>(
     mapStateToProps,
     mapDispatchToProps,
 )(NotificationContainer)
