@@ -285,4 +285,36 @@ describe('TagPickerLogic', () => {
             }),
         )
     })
+
+    it('should show default tags after selecting a tag', async ({ device }) => {
+        const initialSuggestions = ['sugg1', 'sugg2']
+        const initialSelectedTags = ['something']
+
+        const element = await setupLogicHelper({
+            device,
+            initialSuggestions,
+            initialSelectedTags,
+            queryTagResults: ['test1'],
+        })
+        await element.processEvent('searchInputChanged', { query: 'test' })
+
+        // expect(element.state).toEqual(
+        //     stateHelper({
+        //         selectedTags: ['test1'],
+        //         query: 'test',
+        //         newTagButton: true,
+        //     }),
+        // )
+        //
+        // await element.processEvent('searchInputChanged', { query: '' })
+        //
+        // expect(element.state).toEqual(
+        //     stateHelper({
+        //         tagResultListNotSelected: [],
+        //         selectedTags: [],
+        //         query: '',
+        //         newTagButton: false,
+        //     }),
+        // )
+    })
 })

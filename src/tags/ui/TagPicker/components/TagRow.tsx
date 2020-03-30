@@ -9,7 +9,7 @@ import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
 
 interface Props {
     onPress?: (tag: DisplayTag) => void
-    onFocus?: (tag: DisplayTag, index: number) => void
+    onFocus?: (tag: DisplayTag, index?: number) => void
     index: number
     name: string
     selected?: boolean
@@ -17,18 +17,22 @@ interface Props {
 }
 
 class TagRow extends React.Component<Props> {
-    handleTagPress = () => {
+    _getTag = props => {
         const { name, selected, focused } = this.props
-        const tag = { name, selected, focused }
+        return { name, selected, focused }
+    }
 
-        this.props.onPress && this.props.onPress(tag)
+    handleTagPress = () => {
+        this.props.onPress && this.props.onPress(this._getTag(this.props))
     }
 
     handleMouseEnter = () => {
-        const { index, name, selected, focused } = this.props
-        const tag = { index, name, selected, focused }
+        this.props.onFocus &&
+            this.props.onFocus(this._getTag(this.props), this.props.index)
+    }
 
-        this.props.onFocus && this.props.onFocus(tag, index)
+    handleMouseLeave = () => {
+        this.props.onFocus && this.props.onFocus(this._getTag(this.props), null)
     }
 
     render() {
@@ -39,6 +43,7 @@ class TagRow extends React.Component<Props> {
             <Row
                 onClick={this.handleTagPress}
                 onMouseEnter={this.handleMouseEnter}
+                onMouseLeave={this.handleMouseLeave}
                 isFocused={focused}
             >
                 <TagResultItem selected={selected} isFocused={focused}>

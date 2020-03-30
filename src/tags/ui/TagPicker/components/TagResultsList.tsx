@@ -10,7 +10,7 @@ import { fontSizeSmall } from 'src/common-ui/components/design-library/typograph
 interface Props {
     tags: DisplayTag[]
     onPress: (tag: DisplayTag) => void
-    onFocus: (tag: DisplayTag, index: number) => void
+    onFocus: (tag: DisplayTag, index?: number) => void
 }
 
 export default class TagResultsList extends React.Component<Props> {
