@@ -252,4 +252,37 @@ describe('TagPickerLogic', () => {
             ['ArrowDown', 'test1'],
         ])
     })
+
+    it('should correctly remove search', async ({ device }) => {
+        const initialSuggestions = ['sugg1', 'sugg2']
+        const initialSelectedTags = ['something']
+
+        const element = await setupLogicHelper({
+            device,
+            initialSuggestions,
+            initialSelectedTags,
+            queryTagResults: ['test1'],
+        })
+        await element.processEvent('searchInputChanged', { query: 'test' })
+
+        expect(element.state).toEqual(
+            stateHelper({
+                tagResultListNotSelected: ['test1'],
+                selectedTags: initialSelectedTags,
+                query: 'test',
+                newTagButton: true,
+            }),
+        )
+
+        await element.processEvent('searchInputChanged', { query: '' })
+
+        expect(element.state).toEqual(
+            stateHelper({
+                tagResultListNotSelected: initialSuggestions,
+                selectedTags: initialSelectedTags,
+                query: '',
+                newTagButton: false,
+            }),
+        )
+    })
 })

@@ -127,10 +127,11 @@ export default class TagPickerLogic extends UILogic<
     }: TagPickerUIEvent<'searchInputChanged'>) => {
         this.emitMutation({ query: { $set: query } })
 
-        if (query === '') {
+        if (!query || query === '') {
             this.emitMutation({
                 displayTags: { $set: this.defaultTags },
                 query: { $set: query },
+                newTagName: { $set: query },
             })
         } else {
             return this._query(query, previousState.selectedTags)

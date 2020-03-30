@@ -128,8 +128,6 @@ test('Shows relevant tags when typed into search box', async () => {
         elements.tagResults,
     )
 
-    console.log(tagEl1)
-
     // 'Add tag: $query'
     fireEvent.click(tagEl1)
 

@@ -35,7 +35,7 @@ export class TagSearchInput extends React.Component<Props, State> {
 
     handleSpecialKeyPress = {
         test: (e: KeyboardEvent) => keyEvents.includes(e.key as KeyEvent),
-        handle: this.props.onKeyPress,
+        handle: (e: KeyboardEvent) => this.props.onKeyPress(e.key as KeyEvent),
     }
 
     // TODO: clicking anywhere on the search box should focus the input

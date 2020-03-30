@@ -85,6 +85,7 @@ class TextInputControlled extends React.Component<
                 start: this.props.defaultValue.length,
                 end: this.props.defaultValue.length,
             },
+            fireChange: false,
         })
     }
 
@@ -104,6 +105,7 @@ class TextInputControlled extends React.Component<
                     start: this.props.defaultValue.length,
                     end: this.props.defaultValue.length,
                 },
+                fireChange: false,
             })
         }
     }
@@ -367,7 +369,7 @@ class TextInputControlled extends React.Component<
     }
 
     // Helper method to update our state with intended content or selection for the textElement
-    updateTextElement = ({ text, selection }) => {
+    updateTextElement = ({ text, selection, fireChange = true }) => {
         const updatedContent = text
         const updatedSelection = selection
         this.setState(
@@ -377,7 +379,7 @@ class TextInputControlled extends React.Component<
             },
             () => this.syncSelectionToDom(this.textElement, updatedSelection),
         )
-        if (this.props.onChange) {
+        if (this.props.onChange && fireChange) {
             this.props.onChange(updatedContent)
         }
     }
