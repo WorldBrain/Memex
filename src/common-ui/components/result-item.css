@@ -201,7 +201,7 @@
     flex-direction: column;
     max-width: 100%;
     justify-content: space-between;
-    width: fill-available;
+    width: stretch;
     padding: 15px 0px;
 }
 
@@ -601,7 +601,7 @@
 
 .tweetDetailsContainer {
     margin-top: -5px;
-    width: fill-available;
+    width: stretch;
 }
 
 .tweetInfoContainerSidebar {
