@@ -1,7 +1,7 @@
 import path from 'path'
 import initConf from '../build'
 
-module.exports = initConf({
+export default initConf({
     context: path.resolve(__dirname, '..'),
     mode: 'development',
     injectStyles: true,
