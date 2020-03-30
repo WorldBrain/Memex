@@ -1,6 +1,7 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
 import { KeyEvent } from 'src/tags/ui/TagPicker/components/TagSearchInput'
+import { ReactElement } from 'react'
 
 export const INITIAL_STATE = {
     query: '',
@@ -28,6 +29,7 @@ export interface TagPickerDependencies {
     queryTags: (query: string) => Promise<string[]>
     loadDefaultSuggestions: () => string[]
     initialSelectedTags?: () => Promise<string[]>
+    children?: any
 }
 
 export type TagPickerEvent = UIEvent<{

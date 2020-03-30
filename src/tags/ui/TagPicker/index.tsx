@@ -69,6 +69,7 @@ class TagPicker extends StatefulUIElement<
                         onPress={this.handleResultTagPress}
                         onFocus={this.handleResultTagFocus}
                     />
+                    {this.props.children}
                 </StyledContainer>
             </ThemeProvider>
         )

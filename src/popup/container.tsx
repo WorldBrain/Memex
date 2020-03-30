@@ -41,6 +41,7 @@ import { PageList } from '../custom-lists/background/types'
 import { EVENT_NAMES } from '../analytics/internal/constants'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags } from 'src/util/remote-functions-background'
+import { BackContainer } from 'src/popup/components/BackContainer'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 
@@ -147,7 +148,13 @@ class PopupContainer extends PureComponent<Props> {
                     initialSelectedTags={async () =>
                         tags.fetchPageTags({ url: this.props.url })
                     }
-                />
+                >
+                    {/*
+                        // TODO: I feel it would make more sense to have this component as a wrapper (make it a parent of TagPicker)
+                        // but then it there's a styling issue with the rounded boarders, not sure how best to solve.
+                        */}
+                    <BackContainer onClick={this.props.toggleShowTagsPicker} />
+                </TagPicker>
             )
         }
 
