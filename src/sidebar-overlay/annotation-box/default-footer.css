@@ -41,7 +41,7 @@
     border-radius: 3px;
     background-size: contain;
     max-width: 30px;
-    width: fill-available;
+    width: stretch;
     margin-left: 4px;
     opacity: 0.3;
 }

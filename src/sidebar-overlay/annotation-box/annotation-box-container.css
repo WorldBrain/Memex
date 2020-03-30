@@ -81,7 +81,7 @@
     border-radius: 3px;
     background-size: contain;
     max-width: 30px;
-    width: fill-available;
+    width: stretch;
     display: none;
     margin-left: 3px;
 
