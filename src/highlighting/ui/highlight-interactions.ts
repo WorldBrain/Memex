@@ -295,6 +295,8 @@ export class HighlightInteraction implements HighlightInteractionInterface {
 }
 
 // FIXME: Refactor the parts of the code that need these global function imports
+export const makeHighlightDark = new HighlightInteraction().makeHighlightDark
+export const scrollToHighlight = new HighlightInteraction().scrollToHighlight
 export const renderHighlights = new HighlightInteraction().renderHighlights
 export const renderHighlight = new HighlightInteraction().renderHighlight
 export const removeHighlights = new HighlightInteraction().removeHighlights
