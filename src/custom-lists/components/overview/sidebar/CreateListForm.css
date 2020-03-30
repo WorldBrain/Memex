@@ -14,7 +14,7 @@
     display: flex;
     background: #d7d7d7;
     height: 40px;
-    width: fill-available;
+    width: stretch;
     align-items: center;
     position: relative;
     padding: 2px 5px 2px 15px;

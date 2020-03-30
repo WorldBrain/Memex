@@ -198,7 +198,7 @@
     font-weight: 400;
     text-align: left;
     height: fit-content;
-    width: fill-available;
+    width: stretch;
 
     &::placeholder {
         color: #3a2f45;
