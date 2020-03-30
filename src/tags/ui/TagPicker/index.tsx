@@ -7,7 +7,10 @@ import TagPickerLogic, {
     TagPickerEvent,
     TagPickerState,
 } from 'src/tags/ui/TagPicker/logic'
-import { TagSearchInput } from 'src/tags/ui/TagPicker/components/TagSearchInput'
+import {
+    KeyEvent,
+    TagSearchInput,
+} from 'src/tags/ui/TagPicker/components/TagSearchInput'
 import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedList'
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
 import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
@@ -32,14 +35,13 @@ class TagPicker extends StatefulUIElement<
     handleResultTagPress = (tag: DisplayTag) =>
         this.processEvent('resultTagPress', { tag })
 
-    handleResultTagFocus = (tag: DisplayTag) =>
-        this.processEvent('resultTagFocus', { tag })
+    handleResultTagFocus = (tag: DisplayTag, index: number) =>
+        this.processEvent('resultTagFocus', { tag, index })
 
     handleNewTagPress = () =>
         this.processEvent('newTagPress', { tag: this.state.newTagName })
 
-    handleKeyPress = (e: KeyboardEvent<any>) =>
-        this.processEvent('keyPress', { e })
+    handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
     render() {
         return (
@@ -56,7 +58,7 @@ class TagPicker extends StatefulUIElement<
                             />
                         }
                     />
-                    {this.state.newTagName && (
+                    {this.state.newTagName !== '' && (
                         <AddNewTag
                             tag={this.state.newTagName}
                             onPress={this.handleNewTagPress}

@@ -16,14 +16,12 @@ storiesOf('Tags Refactored', module)
                 onUpdateTagSelection={selectedTags => action('updatedTags')}
                 queryTags={async term => tags.filter(t => t.includes(term))}
                 loadDefaultSuggestions={() => [tags[4], tags[5]]}
-                url={''}
                 initialSelectedTags={async () => [tags[0], tags[1]]}
             />
         </div>
     ))
 
     .add('Tag List', () => {
-        let i = 0
         return (
             <div>
                 <TagList
@@ -31,7 +29,6 @@ storiesOf('Tags Refactored', module)
                         name: t,
                         selected: false,
                         focused: false,
-                        index: i++,
                     }))}
                     onPress={t => null}
                     onFocus={t => null}

@@ -13,31 +13,56 @@ import {
 import TagPicker from './index'
 import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
 
-const initialSuggestions = ['suggested tag', 'another suggested tag']
-const tags = ['abcde1', 'abcde2', 'abcde2 tag', ...initialSuggestions]
+const initialSuggestions = ['suggested tag', 'another tag']
+const tags = ['tag a', 'abcde1', 'abcde2', 'abcde2 tag', ...initialSuggestions]
 const tagsSelected = ['Selected', 'Tag', 'suggested tag']
+
+const setupDependencies = () => {
+    // const queryTags = tags.
+}
 
 const renderTag = (opts: Partial<TagPickerDependencies> = {}) => {
     const renderResult = render(
         <TagPicker
             queryTags={async query => tags.filter(t => t.includes(query))}
             loadDefaultSuggestions={() => initialSuggestions}
-            url={''}
             onUpdateTagSelection={tags1 => null}
             initialSelectedTags={async () => tagsSelected}
             {...opts}
         />,
     )
-
-    const container = renderResult.container
-    const input = container.querySelector('input')
-    const tagSearchBox = container.querySelector('#tagSearchBox')
-    const tagResults = container.querySelector('#tagResults')
-
-    return { input, container, tagSearchBox, tagResults }
+    return renderResult.container
 }
 
-const expectToSeeText = (container, text: string[]) =>
+const findElements = container => ({
+    container,
+    input: container.querySelector('input'),
+    tagSearchBox: container.querySelector('#tagSearchBox'),
+    tagResults: container.querySelector('#tagResults'),
+})
+
+const testUtils = ({ input, container }) => ({
+    changes: {
+        typeIntoInput: text => {
+            for (let i = 1; i < text.length - 1; i++) {
+                fireEvent.change(input, { target: { value: text.slice(0, i) } })
+            }
+        },
+    },
+
+    tests: {
+        expectInputToEqual: val => expect(input.value).toEqual(val),
+        expectToFindStrings: (text: string[], element?: any) =>
+            waitForElement(
+                () => text.map(tag => getByText(element ?? container, tag)),
+                {
+                    container: element ?? container,
+                },
+            ),
+    },
+})
+
+const expectToFindTexts = (container, text: string[]) =>
     waitForElement(() => text.map(tag => getByText(container, tag)), {
         container,
     })
@@ -49,7 +74,7 @@ const changeInput = (input, text) =>
 
 // TODO: if query has been changed back to nothing, make sure the initial tags are shown
 
-test('Shows the pre-selected tags', async () => {
+/*test('Shows the pre-selected tags', async () => {
     const { tagSearchBox } = renderTag()
     await expectToSeeText(tagSearchBox, tagsSelected)
 })
@@ -83,40 +108,29 @@ test('After search and select, removes the selected tag', async () => {
     await expectToSeeText(container, tagsSelected)
     changeInput(input, 'Test Search')
     await expectToSeeText(container, tagsSelected)
-})
+})*/
 
 test('Shows relevant tags when typed into search box', async () => {
-    const { input, container } = renderTag()
+    const container = renderTag()
+    const elements = findElements(container)
+    const { changes, tests } = testUtils(elements)
     const query = 'tag'
 
-    // Should first show initial tag suggestions
-    expect(input.value).toEqual('')
-    await waitForElement(
-        () => [
-            getByText(container, initialSuggestions[0]),
-            getByText(container, initialSuggestions[1]),
-        ],
-        { container },
-    )
+    await tests.expectToFindStrings(initialSuggestions, elements.tagSearchBox)
 
     // Then on changing the input,
-    fireEvent.change(input, {
-        target: { value: query },
-    })
-    expect(input.value).toEqual(query)
-
-    // 'Add tag: $query'
+    changes.typeIntoInput(query)
+    tests.expectInputToEqual(query)
 
     // Wait for the query results list to show an element which includes a textual tag result from our test data
-    const [tagEl1] = await waitForElement(
-        () => [
-            getByText(container, tags[2]),
-            getByText(container, initialSuggestions[0]),
-            getByText(container, initialSuggestions[1]),
-        ],
-        { container },
+    const [tagEl1] = await tests.expectToFindStrings(
+        ['tag a', ...initialSuggestions],
+        elements.tagResults,
     )
 
+    console.log(tagEl1)
+
+    // 'Add tag: $query'
     fireEvent.click(tagEl1)
 
     // TODO: Expect the input/TagPicker to have changed in way that reflects this click of a tag (Once implemented in the TagPicker itself)

@@ -1,10 +1,10 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { KeyboardEvent } from 'react'
+import { KeyEvent } from 'src/tags/ui/TagPicker/components/TagSearchInput'
 
 export const INITIAL_STATE = {
     query: '',
-    suggestions: [],
+    newTagName: '',
     selectedTags: [],
     loadingQueryResults: false,
     loadingSuggestions: false,
@@ -12,7 +12,7 @@ export const INITIAL_STATE = {
 
 export interface TagPickerState {
     query?: string
-    newTagName?: string
+    newTagName: string
     selectedTags: string[]
     displayTags: DisplayTag[]
     loadingSuggestions: boolean
@@ -27,7 +27,6 @@ export interface TagPickerDependencies {
     ) => void
     queryTags: (query: string) => Promise<string[]>
     loadDefaultSuggestions: () => string[]
-    url: string
     initialSelectedTags?: () => Promise<string[]>
 }
 
@@ -38,9 +37,9 @@ export type TagPickerEvent = UIEvent<{
     searchInputChanged: { query: string }
     selectedTagPress: { tag: string }
     resultTagPress: { tag: DisplayTag }
-    resultTagFocus: { tag: DisplayTag }
+    resultTagFocus: { tag: DisplayTag; index: number }
     newTagPress: { tag: string }
-    keyPress: { e: KeyboardEvent<any> }
+    keyPress: { key: KeyEvent }
 }>
 
 interface TagPickerUIEvent<T extends keyof TagPickerEvent> {
@@ -58,7 +57,6 @@ export default class TagPickerLogic extends UILogic<
 
     private defaultTags: DisplayTag[] = []
     private focusIndex = -1
-    private inputRef: HTMLTextAreaElement | HTMLInputElement
 
     getInitialState(): TagPickerState {
         return {
@@ -86,10 +84,10 @@ export default class TagPickerLogic extends UILogic<
     }
 
     keyPress = ({
-        event: { e },
+        event: { key },
         previousState,
     }: TagPickerUIEvent<'keyPress'>) => {
-        if (e.key === 'Enter') {
+        if (key === 'Enter') {
             if (
                 this.focusIndex >= 0 &&
                 previousState.displayTags[this.focusIndex]
@@ -99,10 +97,7 @@ export default class TagPickerLogic extends UILogic<
                     previousState,
                 })
             } else {
-                if (
-                    previousState.newTagName &&
-                    previousState.newTagName !== ''
-                ) {
+                if (previousState.newTagName !== '') {
                     this.newTagPress({
                         previousState,
                         event: { tag: previousState.newTagName },
@@ -111,13 +106,13 @@ export default class TagPickerLogic extends UILogic<
             }
         }
 
-        if (e.key === 'ArrowUp') {
+        if (key === 'ArrowUp') {
             if (this.focusIndex > -1) {
                 this._updateFocus(--this.focusIndex, previousState.displayTags)
             }
         }
 
-        if (e.key === 'ArrowDown') {
+        if (key === 'ArrowDown') {
             if (this.focusIndex < previousState.displayTags.length - 1) {
                 this._updateFocus(++this.focusIndex, previousState.displayTags)
             }
@@ -191,7 +186,7 @@ export default class TagPickerLogic extends UILogic<
     ) => {
         if (this._isTermInTagList(list, term)) {
             this.emitMutation({
-                newTagName: { $set: null },
+                newTagName: { $set: '' },
             })
             this._updateFocus(0, displayTags)
         } else {
@@ -275,10 +270,10 @@ export default class TagPickerLogic extends UILogic<
     }
 
     resultTagFocus = ({
-        event: { tag },
+        event: { tag, index },
         previousState,
     }: TagPickerUIEvent<'resultTagFocus'>) => {
-        this._updateFocus(tag.index, previousState.displayTags)
+        this._updateFocus(index, previousState.displayTags)
     }
 
     newTagPress = ({
@@ -314,6 +309,11 @@ export default class TagPickerLogic extends UILogic<
             selectedTags: { $set: selectedTags },
         })
         this.dependencies.onUpdateTagSelection(selectedTags, added, deleted)
+        console.log('this.dependencies.onUpdateTagSelection', {
+            selectedTags,
+            added,
+            deleted,
+        })
     }
 
     _addTagSelected = (
@@ -355,55 +355,19 @@ export default class TagPickerLogic extends UILogic<
     /**
      * Takes a list of tag results and selected tags and combines them to return which tag
      * is selected and which is not.
-     * Runs through in log time rather than exponential time
      */
     static decorateTagList = (
         tagList: string[],
         selectedTags: string[],
-    ): DisplayTag[] => {
-        if (selectedTags?.length ?? 0 === 0) {
-            let index = 0
-            return tagList.map(t => ({
-                index: index++,
-                name: t,
-                selected: false,
-                focused: false,
-            }))
-        }
-
-        const displayList = []
-        tagList.sort()
-        selectedTags.sort()
-        for (
-            let i = 0, j = 0;
-            i < tagList.length && j < selectedTags.length;
-
-        ) {
-            if (tagList[i] === selectedTags[j]) {
-                displayList[i] = {
-                    index: i,
-                    name: tagList[i],
-                    selected: true,
-                    focused: false,
-                }
-                i++
-                j++
-            } else {
-                displayList[i] = {
-                    index: i,
-                    name: tagList[i],
-                    selected: false,
-                    focused: false,
-                }
-                i++
-            }
-        }
-        return displayList
-    }
+    ): DisplayTag[] =>
+        tagList.map(tag => ({
+            name: tag,
+            focused: false,
+            selected: selectedTags?.includes(tag) ?? false,
+        }))
 }
 
 export interface DisplayTag {
-    index: number
     name: string
     selected: boolean
     focused: boolean

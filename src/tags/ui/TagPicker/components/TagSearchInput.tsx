@@ -6,7 +6,7 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 
 interface Props {
     onChange: (value: string) => void
-    onKeyPress: (e) => void
+    onKeyPress: (key: KeyEvent) => void
     value: string
     before: any
 }
@@ -14,17 +14,27 @@ interface Props {
 interface State {
     isFocused: boolean
 }
+
+export type KeyEvent = 'Enter' | 'ArrowUp' | 'ArrowDown' | ',' | 'Backspace'
+
+export const keyEvents: KeyEvent[] = [
+    'Enter',
+    'ArrowUp',
+    'ArrowDown',
+    ',',
+    // TODO: adding backspace as a special handler here prevents regular backspace in the field.
+    // if we want to delete tags on backspace, perhaps the controlled text input needs to check
+    // the handler return function to know whether to prevent it's default or proceed with it.
+    // 'Backspace',
+]
+
 export class TagSearchInput extends React.Component<Props, State> {
     state = { isFocused: false }
 
     onChange = (value: string) => this.props.onChange(value)
 
     handleSpecialKeyPress = {
-        test: (e: KeyboardEvent) =>
-            e.key === 'Enter' ||
-            e.key === 'ArrowUp' ||
-            e.key === 'ArrowDown' ||
-            e.key === 'Tab',
+        test: (e: KeyboardEvent) => keyEvents.includes(e.key as KeyEvent),
         handle: this.props.onKeyPress,
     }
 

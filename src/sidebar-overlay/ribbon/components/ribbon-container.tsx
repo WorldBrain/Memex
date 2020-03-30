@@ -110,13 +110,18 @@ class RibbonContainer extends Component<Props> {
             //     isForRibbon
             // />
             <TagPicker
-                url={this.props.getUrl()}
                 loadDefaultSuggestions={() => this.props.initTagSuggs}
                 onUpdateTagSelection={(_, added, deleted) => {
                     if (added) {
-                        return this.props.onTagAdd(added)
+                        tags.addTagToPage({
+                            tag: added,
+                            url: this.props.getUrl(),
+                            tabId: this.props.tabId,
+                        })
+                        this.props.onTagAdd(added)
                     }
                     if (deleted) {
+                        tags.delTag({ tag: deleted, url: this.props.getUrl() })
                         return this.props.onTagDel(deleted)
                     }
                 }}

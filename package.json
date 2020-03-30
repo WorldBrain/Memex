@@ -190,6 +190,7 @@
         "identity-obj-proxy": "^3.0.0",
         "jest": "^25.1.0",
         "jest-cli": "^25.1.0",
+        "jest-extended": "^0.11.5",
         "jest-fetch-mock": "^1.2.0",
         "jest-mock": "^23.2.0",
         "jest-sourcemaps": "^1.0.1",

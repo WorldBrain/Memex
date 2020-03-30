@@ -129,13 +129,18 @@ class PopupContainer extends PureComponent<Props> {
 
                 <TagPicker
                     loadDefaultSuggestions={() => this.props.initTagSuggs}
-                    url={this.props.url}
                     queryTags={query => tags.searchForTagSuggestions({ query })}
                     onUpdateTagSelection={(_, added, deleted) => {
                         if (added) {
-                            return this.props.onTagAdd(added)
+                            tags.addTagToPage({
+                                tag: added,
+                                url: this.props.url,
+                                tabId: this.props.tabId,
+                            })
+                            this.props.onTagAdd(added)
                         }
                         if (deleted) {
+                            tags.delTag({ tag: deleted, url: this.props.url })
                             return this.props.onTagDel(deleted)
                         }
                     }}
