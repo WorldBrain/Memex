@@ -119,6 +119,7 @@
         "when-all-settled": "^0.1.1"
     },
     "devDependencies": {
+        "@babel/helper-validator-identifier": "^7.9.0",
         "@firebase/testing": "^0.13.1",
         "@sentry/webpack-plugin": "^1.5.2",
         "@storybook/addon-knobs": "^5.2.6",
