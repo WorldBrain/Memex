@@ -164,6 +164,7 @@ export default class TagPickerLogic extends UILogic<
     _queryRemote = async (term: string, selectedTags: string[]) => {
         this.emitMutation({ loadingQueryResults: { $set: true } })
         const results = await this.dependencies.queryTags(term)
+        results.sort()
         const displayTags = TagPickerLogic.decorateTagList(
             results,
             selectedTags,
@@ -178,7 +179,6 @@ export default class TagPickerLogic extends UILogic<
     }
 
     _query = debounce(this._queryBoth, 150, { leading: true })
-    //_query = this._queryBoth
 
     /**
      * If the term provided does not exist in the tag list, then set the new tag state to the term.
@@ -334,7 +334,13 @@ export default class TagPickerLogic extends UILogic<
             displayTags: { $set: displayTags },
             selectedTags: { $set: selectedTags },
         })
-        this.dependencies.onUpdateTagSelection(selectedTags, added, deleted)
+
+        try {
+            this.dependencies.onUpdateTagSelection(selectedTags, added, deleted)
+        } catch (e) {
+            // TODO: change back if hasn't worked.
+            throw e
+        }
     }
 
     _addTagSelected = (
