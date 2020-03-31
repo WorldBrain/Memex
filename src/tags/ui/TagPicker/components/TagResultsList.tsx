@@ -9,8 +9,7 @@ import { fontSizeSmall } from 'src/common-ui/components/design-library/typograph
 
 interface Props {
     tags: DisplayTag[]
-    onPress: (tag: DisplayTag) => void
-    onFocus: (tag: DisplayTag, index?: number) => void
+    renderTagRow: (tag: DisplayTag, index: number) => React.ReactElement<any>
 }
 
 export default class TagResultsList extends React.Component<Props> {
@@ -23,17 +22,7 @@ export default class TagResultsList extends React.Component<Props> {
                     <MinusCircle size={18} />
                 </FilterHelp>
                 */}
-                {this.props.tags?.map((tag, index) => (
-                    <TagRowItem
-                        onPress={this.props.onPress}
-                        onFocus={this.props.onFocus}
-                        key={`TagKeyName-${tag.name}`}
-                        index={index}
-                        name={tag.name}
-                        selected={tag.selected}
-                        focused={tag.focused}
-                    />
-                )) || null}
+                {this.props.tags?.map(this.props.renderTagRow) || null}
             </StyledContainer>
         )
     }

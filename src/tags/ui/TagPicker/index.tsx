@@ -15,6 +15,7 @@ import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedLis
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
 import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
 import * as Colors from 'src/common-ui/components/design-library/colors'
+import TagRowItem from 'src/tags/ui/TagPicker/components/TagRow'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -46,6 +47,19 @@ class TagPicker extends StatefulUIElement<
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
+    renderTagRow = (tag: DisplayTag, index: number) => (
+        <TagRowItem
+            onPress={this.handleResultTagPress}
+            onPressTagAll={this.handleResultTagAllPress}
+            onFocus={this.handleResultTagFocus}
+            key={`TagKeyName-${tag.name}`}
+            index={index}
+            name={tag.name}
+            selected={tag.selected}
+            focused={tag.focused}
+        />
+    )
+
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
@@ -69,8 +83,7 @@ class TagPicker extends StatefulUIElement<
                     )}
                     <TagResultsList
                         tags={this.state.displayTags}
-                        onPress={this.handleResultTagPress}
-                        onFocus={this.handleResultTagFocus}
+                        renderTagRow={this.renderTagRow}
                     />
                     {this.props.children}
                 </StyledContainer>

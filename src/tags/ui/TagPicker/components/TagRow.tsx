@@ -47,7 +47,6 @@ class TagRow extends React.Component<Props> {
     render() {
         const { name, selected, focused } = this.props
 
-        // TODO: onClick={this.handleTagPressEvent} add specific layers? or fire event for press? probably event, quite similar
         return (
             <Row
                 onClick={this.handleTagPress}

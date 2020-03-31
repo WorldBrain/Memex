@@ -31,8 +31,9 @@ storiesOf('Tags Refactored', module)
                         selected: false,
                         focused: false,
                     }))}
-                    onPress={t => null}
-                    onFocus={t => null}
+                    renderTagRow={() => (
+                        <TagRow name={'tag'} selected={false} index={1} />
+                    )}
                 />
             </div>
         )
