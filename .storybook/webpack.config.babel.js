@@ -19,7 +19,7 @@ export default merge(
                 resource => {
                     const absMockPath = path.resolve(
                         __dirname,
-                        '../__mocks__/webextension-polyfill-ts.js',
+                        'mocks/webextension-polyfill-ts.js',
                     )
 
                     resource.request = path.relative(
