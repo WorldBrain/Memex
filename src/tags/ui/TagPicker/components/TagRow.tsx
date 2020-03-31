@@ -35,12 +35,12 @@ class TagRow extends React.Component<Props> {
         return false
     }
 
-    handleMouseEnter = () => {
+    handleMouseOver = () => {
         this.props.onFocus &&
             this.props.onFocus(this._getTag(this.props), this.props.index)
     }
 
-    handleMouseLeave = () => {
+    handleMouseOut = () => {
         this.props.onFocus && this.props.onFocus(this._getTag(this.props), null)
     }
 
@@ -50,15 +50,15 @@ class TagRow extends React.Component<Props> {
         return (
             <Row
                 onClick={this.handleTagPress}
-                onMouseEnter={this.handleMouseEnter}
-                onMouseLeave={this.handleMouseLeave}
+                onMouseOver={this.handleMouseOver}
+                onMouseOut={this.handleMouseOut}
                 isFocused={focused}
             >
                 <TagResultItem selected={selected} isFocused={focused}>
                     {name}
                 </TagResultItem>
 
-                <IconStyleWrapper visibility={this.props.focused}>
+                <IconStyleWrapper show={focused}>
                     {selected && (
                         <XIcon size={24} onClick={this.handleTagPress} />
                     )}
@@ -81,7 +81,7 @@ const TagAllTabsButton = styled(Layers)`
     pointer-events: auto !important;
 `
 
-const IconStyleWrapper = styled(({ visibility, ...rest }) => <div {...rest} />)`
+const IconStyleWrapper = styled.div`
     display: inline-flex;
 
     ${StyledIconBase} {
@@ -91,7 +91,7 @@ const IconStyleWrapper = styled(({ visibility, ...rest }) => <div {...rest} />)`
                 ? props.theme.tag.hoverIcon
                 : opacify(0.5, props.theme.tag.subtleIcon)};
         margin-left: 8px;
-        opacity: ${props => (props.visibility ? '1' : '0')};
+        opacity: ${props => (props.show ? '1' : '0')};
         transition: all 0.3s;
         pointer-events: none;
     }
