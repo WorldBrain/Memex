@@ -148,6 +148,9 @@ class PopupContainer extends PureComponent<Props> {
                     initialSelectedTags={async () =>
                         tags.fetchPageTags({ url: this.props.url })
                     }
+                    tagAllTabs={(tagName: string) =>
+                        tags.addTagsToOpenTabs({ name: tagName })
+                    }
                 >
                     {/*
                         // TODO: I feel it would make more sense to have this component as a wrapper (make it a parent of TagPicker)

@@ -26,6 +26,7 @@ export interface TagPickerDependencies {
         deleted: string,
     ) => void
     queryTags: (query: string) => Promise<string[]>
+    tagAllTabs: (query: string) => void
     loadDefaultSuggestions: () => string[]
     initialSelectedTags?: () => Promise<string[]>
     children?: any
@@ -37,6 +38,7 @@ export type TagPickerEvent = UIEvent<{
     tagClicked: {}
     searchInputChanged: { query: string }
     selectedTagPress: { tag: string }
+    resultTagAllPress: { tag: DisplayTag }
     resultTagPress: { tag: DisplayTag }
     resultTagFocus: { tag: DisplayTag; index: number }
     newTagPress: { tag: string }
@@ -284,6 +286,13 @@ export default class TagPickerLogic extends UILogic<
                 deleted: null,
             })
         }
+    }
+
+    resultTagAllPress = ({
+        event: { tag },
+    }: TagPickerUIEvent<'resultTagPress'>) => {
+        // TODO: feedback?
+        this.dependencies.tagAllTabs(tag.name)
     }
 
     resultTagFocus = ({

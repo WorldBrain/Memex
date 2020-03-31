@@ -72,6 +72,7 @@ const setupLogicHelper = async ({
                     : async (query: string) => [],
             loadDefaultSuggestions: () => initialSuggestions ?? [],
             initialSelectedTags: async () => initialSelectedTags ?? [],
+            tagAllTabs: async tab => null,
         }),
     )
     await logic.init()

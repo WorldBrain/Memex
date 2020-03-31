@@ -28,6 +28,7 @@ const renderTag = (opts: Partial<TagPickerDependencies> = {}) => {
             loadDefaultSuggestions={() => initialSuggestions}
             onUpdateTagSelection={tags1 => null}
             initialSelectedTags={async () => tagsSelected}
+            tagAllTabs={(tagName: string) => null}
             {...opts}
         />,
     )

@@ -129,6 +129,9 @@ class RibbonContainer extends Component<Props> {
                 initialSelectedTags={async () =>
                     tags.fetchPageTags({ url: this.props.getUrl() })
                 }
+                tagAllTabs={(tagName: string) =>
+                    tags.addTagsToOpenTabs({ name: tagName })
+                }
             />
         )
     }

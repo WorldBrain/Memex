@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { SyntheticEvent } from 'react'
 import styled from 'styled-components'
 import { TagResultItem } from 'src/tags/ui/TagPicker/components/TagResultItem'
 import { Check, Layers, X as XIcon } from '@styled-icons/feather'
@@ -10,6 +10,7 @@ import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
 interface Props {
     onPress?: (tag: DisplayTag) => void
     onFocus?: (tag: DisplayTag, index?: number) => void
+    onPressTagAll?: (tag: DisplayTag, index?: number) => void
     index: number
     name: string
     selected?: boolean
@@ -24,6 +25,14 @@ class TagRow extends React.Component<Props> {
 
     handleTagPress = () => {
         this.props.onPress && this.props.onPress(this._getTag(this.props))
+    }
+
+    handleTagAllPress = (e: SyntheticEvent) => {
+        this.props.onPressTagAll &&
+            this.props.onPressTagAll(this._getTag(this.props))
+        e.preventDefault()
+        e.stopPropagation()
+        return false
     }
 
     handleMouseEnter = () => {
@@ -50,27 +59,28 @@ class TagRow extends React.Component<Props> {
                     {name}
                 </TagResultItem>
 
-                {!selected && (
-                    <IconStyleWrapper visibility={this.props.focused}>
-                        <ButtonTooltip
-                            tooltipText="Tag all tabs in window"
-                            position="popupLeft"
-                        >
-                            <Layers size={24} />
-                        </ButtonTooltip>
-                        <Check size={24} onClick={this.handleTagPress} />
-                    </IconStyleWrapper>
-                )}
-
-                {selected && (
-                    <IconStyleWrapper visibility={true}>
+                <IconStyleWrapper visibility={this.props.focused}>
+                    {selected && (
                         <XIcon size={24} onClick={this.handleTagPress} />
-                    </IconStyleWrapper>
-                )}
+                    )}
+                    <ButtonTooltip
+                        tooltipText="Tag all tabs in window"
+                        position="popupLeft"
+                    >
+                        <TagAllTabsButton
+                            size={24}
+                            onClick={this.handleTagAllPress}
+                        />
+                    </ButtonTooltip>
+                </IconStyleWrapper>
             </Row>
         )
     }
 }
+
+const TagAllTabsButton = styled(Layers)`
+    pointer-events: auto !important;
+`
 
 const IconStyleWrapper = styled(({ visibility, ...rest }) => <div {...rest} />)`
     display: inline-flex;
