@@ -53,8 +53,9 @@
     "web_accessible_resources": [
         "/lib/pdf.worker.min.js",
         "/img/*",
-        "/content_script.css",
+        "/content_script*.css",
         "/fonts/*",
+        "content_script_*.js",
         "sidebar.html"
     ],
     "omnibox": {

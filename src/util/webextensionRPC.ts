@@ -46,6 +46,14 @@ export class RemoteError extends Error {
     }
 }
 
+export type RemoteFunction<
+    Role extends 'provider' | 'caller',
+    Params,
+    Returns = void
+> = Role extends 'provider'
+    ? (info: { tab: { id: number } }, params: Params) => Promise<Returns>
+    : (params: Params) => Promise<Returns>
+
 // === Initiating side ===
 
 // The extra options available when calling a remote function
@@ -206,7 +214,7 @@ async function incomingRPCListener(message, sender) {
 let enabled = false
 
 export function setupRemoteFunctionsImplementations<T>(
-    implementations: RemoteFunctionImplementations,
+    implementations: RemoteFunctionImplementations<'provider'>,
 ): void {
     for (const [group, functions] of Object.entries(implementations)) {
         makeRemotelyCallableType<typeof functions>(functions)

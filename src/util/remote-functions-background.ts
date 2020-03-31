@@ -6,7 +6,9 @@ import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions
 import { PublicSyncInterface } from 'src/sync/background/types'
 import { FeaturesInterface } from 'src/feature-opt-in/background/feature-opt-ins'
 
-export interface RemoteFunctionImplementations {
+export interface RemoteFunctionImplementations<
+    Role extends 'provider' | 'caller'
+> {
     notifications: NotificationCreator
     bookmarks: BookmarksInterface
     auth: AuthRemoteFunctionsInterface
@@ -17,7 +19,7 @@ export interface RemoteFunctionImplementations {
 
 // See `src/background.ts` for the concrete remote function bindings
 // (in setupRemoteFunctionsImplementations and elsewhere)
-export const remoteFunctions: RemoteFunctionImplementations = {
+export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     notifications: runInBackground<NotificationCreator>(),
     bookmarks: runInBackground<BookmarksInterface>(),
     auth: runInBackground<AuthRemoteFunctionsInterface>(),

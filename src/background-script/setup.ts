@@ -47,6 +47,7 @@ import { combineSearchIndex } from 'src/search/search-index'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
+import { ContentScriptsBackground } from 'src/content-scripts/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -65,6 +66,7 @@ export interface BackgroundModules {
     backupModule: backup.BackupBackgroundModule
     sync: SyncBackground
     bgScript: BackgroundScript
+    contentScripts: ContentScriptsBackground
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
@@ -212,6 +214,10 @@ export function createBackgroundModules(options: {
         pages,
         bgScript,
         pageFetchBacklog,
+        contentScripts: new ContentScriptsBackground({
+            injectScriptInTab: (tabId, injection) =>
+                browser.tabs.executeScript(tabId, injection),
+        }),
     }
 }
 
@@ -245,6 +251,7 @@ export async function setupBackgroundModules(
     backgroundModules.backupModule.setupRemoteFunctions()
     backgroundModules.backupModule.startRecordingChangesIfNeeded()
     backgroundModules.bgScript.setupRemoteFunctions()
+    backgroundModules.contentScripts.setupRemoteFunctions()
     backgroundModules.bgScript.setupWebExtAPIHandlers()
     backgroundModules.bgScript.setupAlarms(alarms)
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()
