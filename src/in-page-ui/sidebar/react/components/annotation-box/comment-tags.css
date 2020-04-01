@@ -1,0 +1,37 @@
+.annotationText {
+    composes: h2Color from '../../common-ui/colors.css';
+    font-size: 14px;
+    font-weight: 400;
+    overflow: hidden;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    margin: 0px;
+    padding: 0 15px 10px 15px;
+    line-height: 1.4;
+    text-align: left;
+
+    &.isJustComment {
+        border-top: none;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        padding: 15px 15px 15px;
+    }
+}
+
+.tagsContainer {
+    height: auto;
+    padding-top: 13px;
+    display: flex;
+    flex-wrap: wrap;
+
+    /* TODO: (Untested). */
+    &.noComment {
+        margin-top: -8px;
+        margin-left: 15px;
+        padding-bottom: 15px;
+    }
+}
+
+.tagPill {
+    composes: tagPill from '../../common-ui/elements.css';
+}

@@ -1,0 +1,56 @@
+.commentBoxContainer {
+    composes: boxShadow h2Color from '../../../common-ui/colors.css';
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    background: white;
+    width: 100%;
+
+    &:hover {
+        background: white;
+    }
+
+    & * {
+        font-family: 'Poppins', sans-serif;
+    }
+}
+
+.tagsInput {
+    width: 300px;
+    height: 18px;
+    border-radius: 10px;
+    background-color: #fdfbfb;
+    margin-left: 8px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    padding: 2px 10px 3px 10px;
+    color: #3eb995;
+    box-shadow: #0000005c 0px 0px 5px 0px inset;
+    border: 0.5px #0000005c solid;
+
+    &::placeholder {
+        color: #3eb995;
+    }
+}
+
+.disabled {
+    filter: saturation(0);
+    cursor: not-allowed;
+    opacity: 0.6;
+    background: #aaa;
+    color: #fff;
+    padding: 3px 20px;
+    border-radius: 10px;
+    border: none;
+}
+
+.noDisplay {
+    display: none;
+}
+
+.inPage {
+    box-shadow: none;
+    margin-top: 1px;
+    cursor: default;
+}
