@@ -27,7 +27,7 @@
 }
 
 .bottomContainer {
-    height: fill-available;
+    height: stretch;
 }
 
 .resultsContainer {
