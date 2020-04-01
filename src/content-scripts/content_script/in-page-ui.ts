@@ -5,11 +5,11 @@ import initRibbonAndSidebar from 'src/sidebar-overlay/content_script'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import initSocialIntegration from 'src/social-integration/content_script'
 import configureStore from 'src/sidebar-overlay/store'
-import { initKeyboardShortcuts } from 'src/content_script_keyboard_shortcuts'
+// import { initKeyboardShortcuts } from 'src/content_script_keyboard_shortcuts'
 import { fetchAnnotationsForPageUrl } from 'src/annotations/actions'
 import * as sidebarActs from 'src/sidebar-overlay/sidebar/actions'
 import { initBasicStore } from 'src/popup/actions'
-import { ContentScriptRegistry } from './types'
+// import { ContentScriptRegistry } from './types'
 
 export async function main() {
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
@@ -29,7 +29,7 @@ export async function main() {
         store: rootStore,
     })
     initSocialIntegration({ annotationsManager })
-    initKeyboardShortcuts({ store: rootStore })
+    // initKeyboardShortcuts({ store: rootStore })
     initHighlights(rootStore)
 
     async function initHighlights(store) {

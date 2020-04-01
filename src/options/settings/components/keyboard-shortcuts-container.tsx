@@ -3,11 +3,11 @@ import * as React from 'react'
 import { Checkbox } from '../../../common-ui/components'
 import {
     convertKeyboardEventToKeyString,
-    getKeyboardShortcutsState,
     setKeyboardShortcutsState,
-} from 'src/content-tooltip/utils'
-import { KeyboardShortcuts } from 'src/content-tooltip/types'
+} from 'src/in-page-ui/keyboard-shortcuts/utils'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { shortcuts, ShortcutElData } from '../keyboard-shortcuts'
+import { KeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/types'
 
 const styles = require('./settings.css')
 

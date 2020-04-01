@@ -48,6 +48,7 @@ import { StorexHubBackground } from 'src/storex-hub/background'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
 import { ContentScriptsBackground } from 'src/content-scripts/background'
+import { InPageUIBackground } from 'src/in-page-ui/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -67,6 +68,7 @@ export interface BackgroundModules {
     sync: SyncBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
+    inPageUI: InPageUIBackground
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
@@ -218,6 +220,9 @@ export function createBackgroundModules(options: {
             injectScriptInTab: (tabId, injection) =>
                 browser.tabs.executeScript(tabId, injection),
         }),
+        inPageUI: new InPageUIBackground({
+            queryTabs: bindMethod(browser.tabs, 'query'),
+        }),
     }
 }
 
@@ -252,6 +257,7 @@ export async function setupBackgroundModules(
     backgroundModules.backupModule.startRecordingChangesIfNeeded()
     backgroundModules.bgScript.setupRemoteFunctions()
     backgroundModules.contentScripts.setupRemoteFunctions()
+    backgroundModules.inPageUI.setupRemoteFunctions()
     backgroundModules.bgScript.setupWebExtAPIHandlers()
     backgroundModules.bgScript.setupAlarms(alarms)
     backgroundModules.pageFetchBacklog.setupBacklogProcessing()

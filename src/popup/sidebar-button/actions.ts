@@ -46,5 +46,6 @@ export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
         return
     }
 
-    await remoteFunction('toggleSidebarOverlay')({ override: true })
+    console.log('showing sidebar')
+    await remoteFunction('showSidebar')()
 }

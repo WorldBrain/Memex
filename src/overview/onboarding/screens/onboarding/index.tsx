@@ -12,12 +12,14 @@ import { SIDEBAR_STORAGE_NAME } from 'src/sidebar-overlay/constants'
 import {
     TRACKING_STORAGE_NAME,
     TOOLTIP_STORAGE_NAME,
-    KEYBOARDSHORTCUTS_STORAGE_NAME,
-    KEYBOARDSHORTCUTS_DEFAULT_STATE,
 } from 'src/content-tooltip/constants'
 import { OPTIONS_URL } from 'src/constants'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { OnboardingAction } from 'src/common-ui/components/design-library/actions/OnboardingAction'
+import {
+    KEYBOARDSHORTCUTS_STORAGE_NAME,
+    KEYBOARDSHORTCUTS_DEFAULT_STATE,
+} from 'src/in-page-ui/keyboard-shortcuts/constants'
 
 const styles = require('../../components/onboarding-box.css')
 const searchSettingsStyles = require('../../components/search-settings.css')
@@ -156,17 +158,11 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
 
     private logoImage = () => (
-        <img
-            src={'/img/memexLogo.svg'}
-            className={styles.logoImg}
-        />
+        <img src={'/img/memexLogo.svg'} className={styles.logoImg} />
     )
 
     private privacyImg = () => (
-        <img
-            src={'/img/privacy.svg'}
-            className={styles.privacyImg}
-        />
+        <img src={'/img/privacy.svg'} className={styles.privacyImg} />
     )
 
     private handleTrackingToggle = () => {
@@ -456,7 +452,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         />
                     </OnboardingStep>
                 )
-                case 7:
+            case 7:
                 return (
                     <OnboardingStep
                         privacyStep

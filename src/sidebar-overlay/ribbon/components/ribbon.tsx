@@ -11,7 +11,11 @@ import {
     ShortcutElData,
 } from 'src/options/settings/keyboard-shortcuts'
 import * as utils from 'src/content-tooltip/utils'
-import { KeyboardShortcuts, Shortcut } from 'src/content-tooltip/types'
+import * as getKeyboardShortcutsState from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import {
+    KeyboardShortcuts,
+    Shortcut,
+} from 'src/in-page-ui/keyboard-shortcuts/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { highlightAnnotations } from 'src/annotations'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
@@ -92,7 +96,7 @@ class Ribbon extends Component<Props, State> {
             highlightAnnotations()
         }
 
-        this.keyboardShortcuts = await utils.getKeyboardShortcutsState()
+        this.keyboardShortcuts = await getKeyboardShortcutsState.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
 
         if (this.props.hideOnMouseLeave) {

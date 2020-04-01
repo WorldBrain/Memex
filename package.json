@@ -52,6 +52,7 @@
         "dom-anchor-fragment": "^1.0.4",
         "dom-anchor-text-quote": "^4.0.2",
         "dom-highlight-range": "^1.0.1",
+        "event-emitter": "^0.3.5",
         "fathom-web": "^2.1.0",
         "firebase": "^7.6.1-canary.af162f9",
         "firebaseui": "^4.2.0",

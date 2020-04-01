@@ -46,8 +46,9 @@ export class RemoteError extends Error {
     }
 }
 
+export type RemoteFunctionRole = 'provider' | 'caller'
 export type RemoteFunction<
-    Role extends 'provider' | 'caller',
+    Role extends RemoteFunctionRole,
     Params,
     Returns = void
 > = Role extends 'provider'
