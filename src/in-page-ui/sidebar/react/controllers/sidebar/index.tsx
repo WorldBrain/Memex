@@ -6,6 +6,7 @@ import {
     SidebarControllerEvents,
 } from './logic'
 import { StatefulUIElement } from 'src/util/ui-logic'
+import Sidebar from '../../components/sidebar'
 
 export interface SidebarControllerProps extends SidebarControllerDependencies {}
 
@@ -37,6 +38,6 @@ export default class SidebarController extends StatefulUIElement<
     }
 
     render() {
-        return <div style={{ color: 'red' }}>{this.state.state}</div>
+        return <Sidebar isLoading={false} isOpen={true} env={'inpage'} />
     }
 }
