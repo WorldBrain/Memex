@@ -59,14 +59,15 @@ export class TagSearchInput extends React.Component<Props, State> {
 }
 
 const StyledSearchIcon = styled(SearchIcon)`
-    stroke: ${props => props.theme.searchIcon};
+    stroke: ${props => props.theme.tag.searchIcon};
     stroke-width: 2px;
     margin-right: 8px;
 `
 
 const SearchBox = styled.div`
+    align-items: center;
     background-color: ${props => props.theme.inputBackground};
-    border: 2px solid ${props => (props.isFocused ? colorGrey3 : 'transparent')};
+    border: 1px solid ${props => (props.isFocused ? colorGrey3 : 'transparent')};
     border-radius: 3px;
     color: ${props => props.theme.text};
     display: flex;

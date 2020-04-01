@@ -97,6 +97,7 @@ class TagPicker extends StatefulUIElement<
 const StyledContainer = styled.div`
     border: 1px solid #ceced9;
     box-shadow: 0 0 25px #dadbe7;
+    font-weight: normal;
     background: ${props => props.theme.background};
     border-radius: 5px;
     height: auto;

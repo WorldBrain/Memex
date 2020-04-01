@@ -29,16 +29,16 @@ export const colorGrey10 = `#281C34`
 export const lightTheme = {
     background: '#fff',
     inputBackground: colorGrey2,
-    searchIcon: colorGrey10,
     text: colorDarkText,
+    border: colorGrey2,
     tag: {
         tag: colorBlue,
+        searchIcon: colorGrey7,
         hover: colorBlue,
         selected: lighten(0.18, colorBlue),
         text: darken(0.5, desaturate(0.5, colorBlue)),
-        shade: colorGrey2,
-        subtleIcon: colorGrey6,
-        hoverIcon: colorGrey8,
+        icon: colorGrey6,
+        iconHover: colorGrey8,
     },
 }
 

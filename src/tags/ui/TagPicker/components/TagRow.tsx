@@ -60,14 +60,14 @@ class TagRow extends React.Component<Props> {
 
                 <IconStyleWrapper show={focused}>
                     {selected && (
-                        <XIcon size={24} onClick={this.handleTagPress} />
+                        <XIcon size={20} onClick={this.handleTagPress} />
                     )}
                     <ButtonTooltip
                         tooltipText="Tag all tabs in window"
                         position="popupLeft"
                     >
                         <TagAllTabsButton
-                            size={24}
+                            size={20}
                             onClick={this.handleTagAllPress}
                         />
                     </ButtonTooltip>
@@ -86,27 +86,27 @@ const IconStyleWrapper = styled.div`
 
     ${StyledIconBase} {
         stroke-width: 2px;
-        color: ${props =>
-            props.isFocused
-                ? props.theme.tag.hoverIcon
-                : opacify(0.5, props.theme.tag.subtleIcon)};
+        color: ${props => props.theme.tag.icon};
         margin-left: 8px;
         opacity: ${props => (props.show ? '1' : '0')};
         transition: all 0.3s;
         pointer-events: none;
+
+        &:hover {
+            color: ${props => props.theme.tag.iconHover};
+        }
     }
 `
 
 const Row = styled.div`
     align-items: center;
-    border-bottom: 1px solid ${props => props.theme.tag.shade};
+    border-bottom: 1px solid ${props => props.theme.border};
     display: flex;
     padding: 4px 8px;
     justify-content: space-between;
     transition: background 0.3s;
     cursor: pointer;
-
-    background: ${props => props.isFocused && props.theme.tag.shade};
+    background: ${props => props.isFocused && props.theme.border};
 `
 
 export default TagRow
