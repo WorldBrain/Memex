@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { Footer } from '../components'
+import Footer from '../footer'
 import DefaultFooter from './default-footer'
 
 const styles = require('./all-modes-footer.css')

@@ -7,7 +7,7 @@ import AnnotationHighlight from '../annotation-highlight'
 import CommentBoxForm from './comment-box-form'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
 
-const styles = require('./comment-box-container.css')
+const styles = require('./comment-box.css')
 
 interface StateProps {
     anchor: Anchor
@@ -38,7 +38,7 @@ interface OwnProps {
 
 type Props = StateProps & DispatchProps & OwnProps
 
-class CommentBoxContainer extends React.PureComponent<Props> {
+export default class CommentBoxContainer extends React.PureComponent<Props> {
     static defaultProps: Partial<Props> = {
         onSaveCb: noop,
     }
@@ -99,6 +99,11 @@ class CommentBoxContainer extends React.PureComponent<Props> {
                     isCommentBookmarked={isCommentBookmarked}
                     toggleBookmark={toggleBookmark}
                     isAnnotation={true} // TODO: we need to pass the right state here
+                    addTag={() => {}}
+                    deleteTag={() => {}}
+                    initTagSuggestions={[]}
+                    tagSuggestions={[]}
+                    tags={[]}
                 />
             </div>
         )

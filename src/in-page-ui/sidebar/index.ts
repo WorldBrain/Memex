@@ -1,14 +1,14 @@
 import EventEmitter from 'event-emitter'
 import retargetEvents from 'react-shadow-dom-retarget-events'
 import {
-    SidebarUIControllerInterface,
-    SidebarUIControllerEventEmitter,
+    SidebarControllerInterface,
+    SidebarControllerEventEmitter,
 } from './types'
 import { createInPageUIRoot } from '../dom'
 import { setupSidebarUI } from './react'
 
-export class Sidebar implements SidebarUIControllerInterface {
-    private events = new EventEmitter() as SidebarUIControllerEventEmitter
+export class Sidebar implements SidebarControllerInterface {
+    private events = new EventEmitter() as SidebarControllerEventEmitter
     private mount?: { rootElement: HTMLElement; shadowRoot?: ShadowRoot }
 
     constructor(

@@ -1,18 +1,12 @@
+import Mousetrap from 'mousetrap'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { userSelectedText } from 'src/content-tooltip/interactions'
-import { removeHighlights } from 'src/highlighting/ui/highlight-interactions'
-import {
-    createAnnotationDraftInSidebar,
-    highlightAnnotations,
-} from 'src/annotations'
+import { createAnnotationDraftInSidebar } from 'src/annotations'
 import { conditionallyRemoveOnboardingSelectOption } from 'src/content-tooltip/onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
-import { createAnnotation as createAnnotationAction } from 'src/annotations/actions'
 import { createAndCopyDirectLink } from 'src/direct-linking/content_script/interactions'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import Mousetrap from 'mousetrap'
-import { KeyboardShortcuts } from '../types'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { KeyboardShortcuts } from '../types'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => void

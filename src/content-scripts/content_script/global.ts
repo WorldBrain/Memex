@@ -18,18 +18,18 @@ import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content
 import { InPageUI } from 'src/in-page-ui/shared-state'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { RibbonControllerInterface } from 'src/in-page-ui/ribbon/types'
-import { SidebarUIControllerInterface } from 'src/in-page-ui/sidebar/types'
+import { SidebarControllerInterface } from 'src/in-page-ui/sidebar/types'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 
 export function main() {
     const controllers: {
         ribbon?: Resolvable<RibbonControllerInterface>
-        sidebar?: Resolvable<SidebarUIControllerInterface>
+        sidebar?: Resolvable<SidebarControllerInterface>
     } = {}
     async function getController<
         Which extends
             | { type: RibbonControllerInterface; component: 'ribbon' }
-            | { type: SidebarUIControllerInterface; component: 'sidebar' }
+            | { type: SidebarControllerInterface; component: 'sidebar' }
     >(component: Which['component']): Promise<Which['type']> {
         if (!controllers[component]) {
             controllers[component] = resolvablePromise<Which['type']>() as any
@@ -79,7 +79,7 @@ export function main() {
             showSidebar: async () => {
                 ;(
                     await getController<{
-                        type: SidebarUIControllerInterface
+                        type: SidebarControllerInterface
                         component: 'sidebar'
                     }>('sidebar')
                 ).showSidebar()
@@ -87,7 +87,7 @@ export function main() {
             hideSidebar: async () => {
                 ;(
                     await getController<{
-                        type: SidebarUIControllerInterface
+                        type: SidebarControllerInterface
                         component: 'sidebar'
                     }>('sidebar')
                 ).hideSidebar()
@@ -114,11 +114,11 @@ export function main() {
         sniffWordpressWorldbrainUser()
     }
 
-    global['worldbrainMemex'] = {
-        inPageUI,
-        controllers,
-    }
-    inPageUI.showSidebar()
+    // global['worldbrainMemex'] = {
+    //     inPageUI,
+    //     controllers,
+    // }
+    // inPageUI.showSidebar()
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>

@@ -12,10 +12,10 @@ import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 
-const styles = require('./annotation-box-container.css')
+const styles = require('./annotation-box.css')
 const footerStyles = require('./default-footer.css')
 
-interface Props {
+export interface AnnotationBoxProps {
     /** Required to decide how to go to an annotation when it's clicked. */
     env: 'inpage' | 'overview'
     url: string
@@ -40,7 +40,7 @@ interface Props {
     displayCrowdfunding: boolean
 }
 
-export default class AnnotationBoxContainer extends React.Component<Props> {
+export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
     static defaultProps = {
         handleMouseEnter: () => undefined,
         handleMouseLeave: () => undefined,

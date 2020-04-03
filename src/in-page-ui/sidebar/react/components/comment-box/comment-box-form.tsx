@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ClickHandler } from '../../types'
-import TagsContainer from './tag-input-container'
+import TagsContainer, { TagsContainerProps } from './tag-input'
 import { Tooltip } from 'src/common-ui/components'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
@@ -15,7 +15,7 @@ const tagFull = browser.extension.getURL('/img/tag_full.svg')
 const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 const heartFull = browser.extension.getURL('/img/star_full.svg')
 
-interface Props {
+interface OwnProps {
     env?: 'inpage' | 'overview'
     commentText: string
     isCommentBookmarked: boolean
@@ -25,6 +25,7 @@ interface Props {
     toggleBookmark: ClickHandler<HTMLDivElement>
     isAnnotation: boolean
 }
+type Props = OwnProps & TagsContainerProps
 
 interface State {
     isTagInputActive: boolean
@@ -128,6 +129,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                 <TagsContainer
                     env={this.props.env}
                     tagSuggestions={this.state.tagSuggestions}
+                    {...this.props}
                 />
             </Tooltip>
         )

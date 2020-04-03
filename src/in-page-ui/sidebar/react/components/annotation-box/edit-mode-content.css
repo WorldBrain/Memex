@@ -9,7 +9,7 @@
 }
 
 .textArea {
-    composes: TextArea from '../../common-ui/elements.css';
+    composes: TextArea from 'src/common-ui/elements.css';
     min-height: 100px;
 }
 

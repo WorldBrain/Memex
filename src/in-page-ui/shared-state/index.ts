@@ -1,6 +1,6 @@
 import { InPageUIInterface } from './types'
 import { RibbonControllerInterface } from '../ribbon/types'
-import { SidebarUIControllerInterface } from '../sidebar/types'
+import { SidebarControllerInterface } from '../sidebar/types'
 
 export class InPageUI implements InPageUIInterface {
     state: 'ribbon' | 'sidebar' | null = null
@@ -8,7 +8,7 @@ export class InPageUI implements InPageUIInterface {
     constructor(
         private options: {
             ribbonController: RibbonControllerInterface
-            sidebarController: SidebarUIControllerInterface
+            sidebarController: SidebarControllerInterface
         },
     ) {}
 

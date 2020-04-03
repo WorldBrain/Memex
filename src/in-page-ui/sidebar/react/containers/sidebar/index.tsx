@@ -1,22 +1,22 @@
 import * as React from 'react'
 import {
-    SidebarControllerDependencies,
-    SidebarControllerState,
-    SidebarControllerLogic,
-    SidebarControllerEvents,
+    SidebarContainerDependencies,
+    SidebarContainerState,
+    SidebarContainerLogic,
+    SidebarContainerEvents,
 } from './logic'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Sidebar from '../../components/sidebar'
 
-export interface SidebarControllerProps extends SidebarControllerDependencies {}
+export interface SidebarContainerProps extends SidebarContainerDependencies {}
 
-export default class SidebarController extends StatefulUIElement<
-    SidebarControllerProps,
-    SidebarControllerState,
-    SidebarControllerEvents
+export default class SidebarContainer extends StatefulUIElement<
+    SidebarContainerProps,
+    SidebarContainerState,
+    SidebarContainerEvents
 > {
     constructor(props) {
-        super(props, new SidebarControllerLogic(props))
+        super(props, new SidebarContainerLogic(props))
     }
 
     componentDidMount() {
@@ -38,6 +38,7 @@ export default class SidebarController extends StatefulUIElement<
     }
 
     render() {
-        return <Sidebar isLoading={false} isOpen={true} env={'inpage'} />
+        return null
+        // return <Sidebar isLoading={false} isOpen={true} env={'inpage'} />
     }
 }

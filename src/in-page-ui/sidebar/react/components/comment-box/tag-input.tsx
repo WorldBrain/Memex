@@ -15,10 +15,10 @@ interface OwnProps {
     initTagSuggestions: string[]
 }
 
-type Props = DispatchProps & OwnProps
+export type TagsContainerProps = DispatchProps & OwnProps
 
 /* tslint:disable-next-line variable-name */
-const TagsContainer = (props: Props) => (
+const TagsContainer = (props: TagsContainerProps) => (
     <IndexDropdown
         env={props.env}
         isForAnnotation
@@ -32,3 +32,4 @@ const TagsContainer = (props: Props) => (
         source="tag"
     />
 )
+export default TagsContainer

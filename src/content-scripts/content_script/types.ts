@@ -1,5 +1,5 @@
 import { RibbonControllerInterface } from 'src/in-page-ui/ribbon/types'
-import { SidebarUIControllerInterface } from 'src/in-page-ui/sidebar/types'
+import { SidebarControllerInterface } from 'src/in-page-ui/sidebar/types'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(
@@ -7,7 +7,7 @@ export interface ContentScriptRegistry {
     ): Promise<void>
     registerSidebarScript(
         main: () => Promise<{
-            sidebarController: SidebarUIControllerInterface
+            sidebarController: SidebarControllerInterface
         }>,
     ): Promise<void>
     registerHighlightingScript(main: () => Promise<void>): Promise<void>

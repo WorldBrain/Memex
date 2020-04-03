@@ -1,14 +1,14 @@
 import TypedEventEmitter from 'typed-emitter'
 
-export interface SidebarUIControllerInterface {
+export interface SidebarControllerInterface {
     showSidebar(): void
     hideSidebar(): void
 }
 
-export interface SidebarUIControllerEvents {
+export interface SidebarControllerEvents {
     showSidebar(): void
     hideSidebar(): void
 }
-export type SidebarUIControllerEventEmitter = TypedEventEmitter<
-    SidebarUIControllerEvents
+export type SidebarControllerEventEmitter = TypedEventEmitter<
+    SidebarControllerEvents
 >

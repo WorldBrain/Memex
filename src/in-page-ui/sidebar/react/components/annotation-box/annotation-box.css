@@ -1,7 +1,7 @@
 @import url('/fonts/Poppins/poppins.css');
 
 .container {
-    composes: boxShadow h2Color buttonRadiusSmall from '../../common-ui/colors.css';
+    composes: boxShadow h2Color buttonRadiusSmall from 'src/common-ui/colors.css';
     box-sizing: border-box;
     width: 100%;
     display: flex;
@@ -62,7 +62,7 @@
 }
 
 .newAnnotation {
-    composes: h2Color from '../../common-ui/colors.css';
+    composes: h2Color from 'src/common-ui/colors.css';
     font-size: 15px;
     margin-bottom: 10px;
     font-weight: 600;

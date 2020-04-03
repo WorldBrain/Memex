@@ -1,5 +1,5 @@
 .annotationText {
-    composes: h2Color from '../../common-ui/colors.css';
+    composes: h2Color from 'src/common-ui/colors.css';
     font-size: 14px;
     font-weight: 400;
     overflow: hidden;
@@ -33,5 +33,5 @@
 }
 
 .tagPill {
-    composes: tagPill from '../../common-ui/elements.css';
+    composes: tagPill from 'src/common-ui/elements.css';
 }

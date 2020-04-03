@@ -1,7 +1,7 @@
 @import url('/fonts/Poppins/poppins.css');
 
 .textArea {
-    composes: TextArea from '../../../common-ui/elements.css';
+    composes: TextArea from 'src/common-ui/elements.css';
     min-height: 100px;
     width: auto;
 
@@ -26,7 +26,7 @@
 }
 
 .saveBtn {
-    composes: footerBoldText from '../../annotation-box/all-modes-footer.css';
+    composes: footerBoldText from '../annotation-box/all-modes-footer.css';
     margin-left: 2px;
     background: transparent;
 
@@ -36,7 +36,7 @@
 }
 
 .cancelBtn {
-    composes: footerText from '../../annotation-box/all-modes-footer.css';
+    composes: footerText from '../annotation-box/all-modes-footer.css';
     background: transparent;
 
     &:focus {

@@ -1,15 +1,15 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import SidebarController from './controllers/sidebar'
-import { SidebarUIControllerEventEmitter } from '../types'
+import SidebarContainer from './containers/sidebar'
+import { SidebarControllerEventEmitter } from '../types'
 
 export function setupSidebarUI(
     target: HTMLElement,
     options: {
-        sidebarEvents: SidebarUIControllerEventEmitter
+        sidebarEvents: SidebarControllerEventEmitter
     },
 ) {
-    ReactDOM.render(<SidebarController {...options} />, target)
+    ReactDOM.render(<SidebarContainer {...options} />, target)
 }
 
 export function destroySidebarUI(target: HTMLElement, shadowRoot?: ShadowRoot) {
