@@ -20,13 +20,23 @@ export interface Props {
 }
 
 class Checkbox extends React.PureComponent<Props> {
+    private get labelClass() {
+        return cx(styles.label, this.props.labelClass, {
+            [styles.disabledLabel]: !!this.props.isDisabled,
+        })
+    }
+
+    private get iconClass() {
+        return cx(styles.icon, {
+            [styles.checkedIcon]: !!this.props.isChecked,
+            [styles.disabledIcon]: !!this.props.isDisabled,
+        })
+    }
+
     render() {
         return (
             <div className={cx(styles.container, this.props.containerClass)}>
-                <label
-                    className={cx(styles.label, this.props.labelClass)}
-                    htmlFor={this.props.id}
-                >
+                <label className={this.labelClass} htmlFor={this.props.id}>
                     <input
                         className={cx(
                             styles.label__checkbox,
@@ -43,12 +53,7 @@ class Checkbox extends React.PureComponent<Props> {
                         className={cx(styles.label__text, this.props.textClass)}
                     >
                         <span className={styles.label__check}>
-                            <span
-                                className={cx(styles.icon, {
-                                    [styles.checkedIcon]:
-                                        this.props.isChecked === true,
-                                })}
-                            />
+                            <span className={this.iconClass} />
                         </span>
                         <span className={styles.childrenBox}>
                             {this.props.children}
