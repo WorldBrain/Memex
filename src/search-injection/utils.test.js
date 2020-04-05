@@ -15,6 +15,7 @@ describe('URL', () => {
         },
         ddg: {
             simple: 'https://duckduckgo.com/?q=test&t=canonical&ia=web',
+            unordered: 'https://duckduckgo.com/?t=canonical&q=test&ia=web',
             spacedquery: 'https://duckduckgo.com/?q=spaced+query&t=hb&ia=qa',
             nomatch: 'https://duckduckgo.com/?t=canonical&ia=web',
         },
@@ -27,6 +28,7 @@ describe('URL', () => {
 
     test('should match duckduckgo url', () => {
         expect(utils.matchURL(URLS.ddg.simple)).toBe('duckduckgo')
+        expect(utils.matchURL(URLS.ddg.unordered)).toBe('duckduckgo')
         expect(utils.matchURL(URLS.ddg.spacedquery)).toBe('duckduckgo')
     })
 
