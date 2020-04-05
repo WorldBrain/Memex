@@ -1,5 +1,6 @@
 import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
+import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import { colorGrey3 } from 'src/common-ui/components/design-library/colors'
 import { Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
@@ -59,7 +60,7 @@ export class TagSearchInput extends React.Component<Props, State> {
 }
 
 const StyledSearchIcon = styled(SearchIcon)`
-    stroke: ${props => props.theme.tag.searchIcon};
+    color: ${props => props.theme.tag.searchIcon};
     stroke-width: 2px;
     margin-right: 8px;
 `
@@ -67,7 +68,6 @@ const StyledSearchIcon = styled(SearchIcon)`
 const SearchBox = styled.div`
     align-items: center;
     background-color: ${props => props.theme.inputBackground};
-    border: 1px solid ${props => (props.isFocused ? colorGrey3 : 'transparent')};
     border-radius: 3px;
     color: ${props => props.theme.text};
     display: flex;
@@ -87,6 +87,8 @@ const SearchInput = styled(TextInputControlled)`
     box-shadow: none;
     flex: 1;
     color: ${props => props.theme.text};
+    font-family: 'Poppins', sans-serif;
+    font-size: ${fontSizeSmall}px;
 
     &:focus {
         border: none;
@@ -97,6 +99,4 @@ const SearchInput = styled(TextInputControlled)`
         -moz-box-shadow: none;
         box-shadow: none;
     }
-
-    font-size: 1rem;
 `

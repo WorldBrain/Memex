@@ -16,6 +16,7 @@ import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
 import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import TagRowItem from 'src/tags/ui/TagPicker/components/TagRow'
+import { colorGrey5 } from 'src/common-ui/components/design-library/colors'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -95,13 +96,9 @@ class TagPicker extends StatefulUIElement<
 // TODO we need an empty state. No tags in the search box show 'Search tags' if its a filter... 'search or filter tags'
 
 const StyledContainer = styled.div`
-    border: 1px solid #ceced9;
-    box-shadow: 0 0 25px #dadbe7;
-    font-weight: normal;
     background: ${props => props.theme.background};
-    border-radius: 5px;
-    height: auto;
     padding: 8px;
+    border-radius: 3px;
 `
 
 export default TagPicker

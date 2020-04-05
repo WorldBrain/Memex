@@ -33,12 +33,13 @@ export const lightTheme = {
     border: colorGrey2,
     tag: {
         tag: colorBlue,
-        searchIcon: colorGrey7,
+        searchIcon: colorGrey8,
         hover: colorBlue,
         selected: lighten(0.18, colorBlue),
         text: darken(0.5, desaturate(0.5, colorBlue)),
         icon: colorGrey6,
         iconHover: colorGrey8,
+        iconHoverBg: colorGrey4,
     },
 }
 

@@ -15,7 +15,6 @@ const backgroundHoverSelected = props => {
 
 export const TagResultItem = styled.div`
     display: flex;
-    min-height: 16px;
     background: ${props =>
         props.selected ? props.theme.tag.selected : props.theme.tag.tag};
     border: 2px solid

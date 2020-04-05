@@ -1,5 +1,11 @@
 import styled from 'styled-components'
 import React from 'react'
+import {
+    colorGrey3,
+    colorGrey4,
+    colorGrey9,
+} from 'src/common-ui/components/design-library/colors'
+import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 
 interface Props {
     children?: any
@@ -16,27 +22,19 @@ export const BackContainer = (props: Props) => (
 )
 
 const Container = styled.div`
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1.5fr 1fr;
-    grid-template-areas: 'backButton . .';
-    padding: 7px 0 10px 0px;
-    border-radius: 0 0 3px 3px;
-    background: white;
+    margin: 8px 0 0 8px;
 `
 
 const BackButton = styled.button`
     padding: 3px 8px 3px 8px;
+    border: 0;
     border-radius: 3px;
-    background-color: #e8e8e8;
-    color: rgb(54, 54, 46);
-    font-weight: 500;
-    border: none;
-    outline: none;
-    grid-area: backButton;
-    justify-self: center;
-    align-self: center;
-    font-size: 15px;
-    margin-top: 3px;
+    background: ${colorGrey3};
+    color: ${colorGrey9};
+    font-size: ${fontSizeSmall}px;
     cursor: pointer;
+
+    &:hover {
+        background: ${colorGrey4};
+    }
 `

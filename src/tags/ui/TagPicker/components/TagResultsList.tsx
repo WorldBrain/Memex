@@ -2,7 +2,6 @@ import React from 'react'
 import styled from 'styled-components'
 import TagRowItem from './TagRow'
 import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
-import { colorGrey5 } from 'src/common-ui/components/design-library/colors'
 import { Check, MinusCircle } from '@styled-icons/feather'
 import { StyledIconBase } from '@styled-icons/styled-icon'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
@@ -30,7 +29,7 @@ export default class TagResultsList extends React.Component<Props> {
 
 const StyledContainer = styled.div`
     overflow-y: auto;
-    max-height: 270px;
+    max-height: 296px;
 `
 const FilterHelp = styled.div`
     font-size: ${fontSizeSmall}px;
