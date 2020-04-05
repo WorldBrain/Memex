@@ -37,7 +37,7 @@ export default class extends React.PureComponent {
 
     getBanner() {
         return this.props.showBanner
-            ? browser.extension.getURL('img/worldbrain-logo.png')
+            ? browser.extension.getURL('img/memex-logo.png')
             : undefined
     }
 

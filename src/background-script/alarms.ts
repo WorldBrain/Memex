@@ -12,16 +12,17 @@ export interface AlarmsConfig {
     [key: string]: AlarmConfig
 }
 
-export default {
-    storageQuotaCheck: {
-        periodInMinutes: 180,
-        async listener(bg) {
-            const { usage, quota } = await navigator.storage.estimate()
-            const percUsed = Math.trunc((usage / quota) * 100)
+export const storageQuotaCheck: AlarmConfig = {
+    periodInMinutes: 180,
+    async listener(bg) {
+        const { usage, quota } = await navigator.storage.estimate()
+        const percUsed = Math.trunc((usage / quota) * 100)
 
-            if (percUsed >= QUOTA_USAGE_WARN_PERC || quota <= 3000000000) {
-                await bg.sendNotification(EVENT_NOTIFS.quota_warning.id)
-            }
-        },
+        if (percUsed >= QUOTA_USAGE_WARN_PERC) {
+            await bg.sendNotification(EVENT_NOTIFS.quota_warning.id)
+        }
     },
-} as AlarmsConfig
+}
+
+// Schedule alarm configs to run in here:
+export default { storageQuotaCheck } as AlarmsConfig

@@ -26,15 +26,15 @@
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    height: 60px;
 }
 
 .actionButton {
-    background-color: color1;
-    color: color4;
+    background: #5cd9a6;
     border: none;
-    height: 35px;
+    height: 36px;
     border-radius: 3px;
+    font-weight: 600;
+    cursor: pointer;
 
     &.hidden {
         display: none;
@@ -59,18 +59,14 @@
     background-color: transparent;
     color: color12;
     border: none;
-}
-
-.pause,
-.resume {
-    composes: CTA from '../../../common-ui/elements.css';
-    margin-left: 20px;
+    font-size: 14px;
+    margin-bottom: 30px;
 }
 
 .recalc {
     composes: nakedSquareButton from '../../../common-ui/elements.css';
     color: color4;
-    margin: 0 10px;
+    margin: 0 10px 30px 0;
     width: 35px;
     background: transparent;
     display: flex;
@@ -79,11 +75,10 @@
 }
 
 .startImport {
-    composes: CTA from '../../../common-ui/elements.css';
-    cursor: pointer;
-    outline: 0;
-    border: none;
-    transition: all 0.1s ease-in;
+    margin-bottom: 30px;
+    padding: 6px 18px;
+    font-size: 14px;
+    color: #2f2f2f;
 
     &[disabled] {
         opacity: 0.4;
@@ -91,9 +86,27 @@
     }
 }
 
+.pause,
+.resume {
+    composes: startImport;
+    margin-left: 20px;
+}
+
+.dashboard {
+    composes: startImport;
+    border: 1px solid #5671cf;
+    cursor: pointer;
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+    color: #5671cf;
+    font-size: 14px;
+    background: none;
+    margin-left: 10px;
+}
+
 .newImport {
-    composes: CTA from '../../../common-ui/elements.css';
+    composes: startImport;
     border: none;
     outline: none;
-    margin-top: 20px;
 }

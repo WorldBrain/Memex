@@ -1,7 +1,8 @@
 {
     "extends": "./tsconfig",
     "compilerOptions": {
-        "target": "ES6",
-        "module": "commonjs"
+        "module": "commonjs",
+        "sourceMap": false,
+        "inlineSourceMap": true
     }
 }

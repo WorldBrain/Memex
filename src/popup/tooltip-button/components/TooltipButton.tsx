@@ -41,7 +41,7 @@ class InPageSwitches extends PureComponent<Props> {
                         btnClass={buttonStyles.highlighterIcon}
                         title={'Open Memex annotation tooltip'}
                     >
-                        Show Highlighter
+                        Enable Highlighter
                         <p className={buttonStyles.subTitle}>
                             only on this page
                         </p>
@@ -72,7 +72,6 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     props,
 ) => ({
     showTooltip: async e => {
-        // console.log('dispatch')
         e.preventDefault()
         await dispatch(acts.showTooltip())
         setTimeout(props.closePopup, 200)

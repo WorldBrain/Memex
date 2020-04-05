@@ -1,6 +1,5 @@
 /* eslint-env jest */
 
-import 'core-js/fn/object/entries' // shim Object.entries
 import pull from 'lodash/pull'
 
 import eventToPromise from './event-to-promise'
@@ -30,16 +29,21 @@ describe('eventToPromise', () => {
     })
 
     test('should listen and unlisten to the events', async () => {
+        const listeners = new Set()
+
         // We try both passing multiple events (for resolveOpts) and a single event (for rejectOpts).
         const resolveOpts = [
             { event: new MockEvent() },
             { event: new MockEvent() },
         ]
         const rejectOpts = { event: new MockEvent() }
-        eventToPromise({
-            resolve: resolveOpts,
-            reject: rejectOpts,
-        })
+        eventToPromise(
+            {
+                resolve: resolveOpts,
+                reject: rejectOpts,
+            },
+            listeners,
+        )
 
         // We use a bogus await statement to let any resolved promises invoke their callbacks.
         // XXX Not sure if we can rely on this in every ES implementation.
@@ -47,6 +51,7 @@ describe('eventToPromise', () => {
         expect(resolveOpts[0].event.listeners.length).toBe(1)
         expect(resolveOpts[1].event.listeners.length).toBe(1)
         expect(rejectOpts.event.listeners.length).toBe(1)
+        expect(listeners.size).toBe(3)
 
         // Trigger any of the events.
         resolveOpts[1].event.trigger()
@@ -55,6 +60,7 @@ describe('eventToPromise', () => {
         expect(resolveOpts[0].event.listeners.length).toBe(0)
         expect(resolveOpts[1].event.listeners.length).toBe(0)
         expect(rejectOpts.event.listeners.length).toBe(0)
+        expect(listeners.size).toBe(0)
     })
 
     describe('should resolve with given value when a resolve-event occurs', () => {

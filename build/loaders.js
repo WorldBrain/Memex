@@ -49,6 +49,10 @@ export const cssModulesLoader = {
     },
 }
 
+export const localIdentName = {
+    localIdentName: '[path]__[local]--[hash:base64:5]',
+}
+
 export const cssVanillaLoader = {
     loader: 'css-loader',
 }
@@ -89,7 +93,10 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
 
     const coffee = {
         test: /\.coffee?$/,
-        include: path.resolve(context, './src/direct-linking'),
+        include: path.resolve(
+            context,
+            './src/highlighting/ui/anchoring/anchoring',
+        ),
         use: [babelLoader, coffeescriptLoader],
     }
 
@@ -123,6 +130,10 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
 
     if (mode !== 'production') {
         main.use = [threadLoader, ...main.use]
+        cssModulesLoader.options = Object.assign(
+            cssModulesLoader.options,
+            localIdentName,
+        )
     }
 
     return [main, coffee, imgLoader, lint, cssModules, cssVanilla]

@@ -1,22 +1,4 @@
-import Dexie from 'dexie'
-import { CollectionDefinitions } from '@worldbrain/storex'
-
-import { StorageManager } from '../types'
-
-export abstract class FeatureStorage {
-    protected collections: { [name: string]: CollectionDefinitions }
-
-    constructor(protected storageManager: StorageManager) {}
-
-    registerCollections() {
-        for (const name of Object.keys(this.collections || {})) {
-            this.storageManager.registry.registerCollection(
-                name,
-                this.collections[name],
-            )
-        }
-    }
-}
+import Dexie, { DexieError } from 'dexie'
 
 /**
  * Error hanlder captures `OpenFailedError`s relating to `createObjectStore` IDB issues,
@@ -24,11 +6,11 @@ export abstract class FeatureStorage {
  * with this error rendering the DB unusable, but spamming our sentry error tracker.
  */
 export const initErrHandler = <T>(defReturnVal: T = null) => (
-    err: Dexie.DexieError,
+    err: DexieError,
 ) => {
     if (
         err.message === 'Data fetch failed' ||
-        (err.name === Dexie.errnames.OpenFailed &&
+        (err.name === Dexie.errnames.OpenFailedError &&
             err.message.includes('createObjectStore'))
     ) {
         return defReturnVal

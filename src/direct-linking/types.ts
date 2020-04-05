@@ -1,15 +1,18 @@
+import { Anchor } from 'src/highlighting/types'
+
 export interface Annotation {
     pageTitle: string
     pageUrl: string
-    body: string
-    selector: object
+    body?: string
+    selector?: Anchor
     createdWhen?: Date
     lastEdited?: Date
-    url?: string
+    url: string
     comment?: string
     _body_terms?: string[]
     _comment_terms?: string[]
     hasBookmark?: boolean
+    tags?: string[]
 }
 
 export interface AnnotListEntry {

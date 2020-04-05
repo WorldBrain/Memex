@@ -37,15 +37,10 @@
     justify-content: center;
     outline: none;
     background-image: url('/img/star_blue_empty1.svg');
-
     background-repeat: no-repeat;
     background-position: center;
 
     &:hover {
-        outline: none;
-    }
-
-    &:focus {
         outline: none;
     }
 }
@@ -58,8 +53,8 @@
 .label__checkbox:checked + .label__text .label__check {
     transform-origin: center center;
     border: none;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     outline: none;
     background-image: url('/img/star_blue_full.svg');
 }
@@ -116,4 +111,39 @@
         opacity: 1;
         outline: none;
     }
+}
+
+.button {
+    border: 1px solid color9;
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    background-size: 16px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+    cursor: pointer;
+    outline: none;
+
+    &:hover {
+        background-color: color1;
+    }
+
+    &:active {
+        opacity: 1;
+    }
+
+    &:focus {
+        background-color: color1;
+    }
+}
+
+.bookmark {
+    background-image: url('/img/star_full.svg');
+    margin-top: 1px;
+}
+
+.notBookmark {
+    background-image: url('/img/star_empty.svg');
+    margin-top: 1px;
 }

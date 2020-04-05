@@ -1,5 +1,5 @@
-import * as expect from 'expect'
-import { remoteFunction, fakeRemoteFunction } from './webextensionRPC'
+import expect from 'expect'
+import { remoteFunction, fakeRemoteFunctions } from './webextensionRPC'
 
 describe('remoteFunction', () => {
     const jest =
@@ -86,7 +86,7 @@ describe('remoteFunction', () => {
     })
 
     it('should create fake remote functions', async () => {
-        const remoteFunc = fakeRemoteFunction({
+        const remoteFunc = fakeRemoteFunctions({
             foo: (a, b) => a + b + 5,
         })
         expect(await remoteFunc('foo')(1, 2)).toEqual(8)

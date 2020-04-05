@@ -1,10 +1,11 @@
 import {
     SearchParams,
-    FilteredURLs,
+    FilteredIDs,
     TermsIndexName,
     PageResultsMap,
-    Dexie,
+    DBGet,
 } from '..'
+import { DexieUtilsPlugin, GetPksProps } from '../plugins/dexie-utils'
 
 const some = require('lodash/some')
 
@@ -17,17 +18,21 @@ export interface TermResults {
 /**
  * Performs a query for a single term on a given multi-index.
  */
-const termQuery = (
-    term: string,
-    excluded: string[],
-    getDb: () => Promise<Dexie>,
-) => async (index: TermsIndexName) => {
+const termQuery = (term: string, excluded: string[], getDb: DBGet) => async (
+    index: TermsIndexName,
+) => {
     const db = await getDb()
-    let coll = db.pages.where(index).equals(term)
 
-    // Adding a `.filter/.and` clause to a collection means it needs to iterate through
+    const opts: GetPksProps = {
+        collection: 'pages',
+        fieldName: index,
+        opName: 'equals',
+        opValue: term,
+    }
+
     if (excluded.length) {
-        coll = coll.filter(page => {
+        // Adding a `.filter/.and` clause slows down a query a lot
+        opts.filter = page => {
             const uniqueTerms = new Set([
                 ...page.terms,
                 ...page.titleTerms,
@@ -35,16 +40,16 @@ const termQuery = (
             ])
 
             return !some(excluded, t => uniqueTerms.has(t))
-        })
+        }
     }
 
-    return coll.primaryKeys()
+    return db.operation(DexieUtilsPlugin.GET_PKS_OP, opts)
 }
 
 /**
  * Performs a query for a single term on a all terms indexes.
  */
-const lookupTerm = (excluded: string[], getDb: () => Promise<Dexie>) =>
+const lookupTerm = (excluded: string[], getDb: DBGet) =>
     async function(term: string): Promise<TermResults> {
         const queryIndex = termQuery(term, excluded, getDb)
 
@@ -58,7 +63,7 @@ const lookupTerm = (excluded: string[], getDb: () => Promise<Dexie>) =>
 /**
  * Handles scoring results for a given term according to which index the results where found in.
  */
-const scoreTermResults = (filteredUrls: FilteredURLs) =>
+const scoreTermResults = (filteredUrls: FilteredIDs) =>
     function(result: TermResults): PageResultsMap {
         const urlScoreMap: PageResultsMap = new Map()
 
@@ -84,9 +89,9 @@ const scoreTermResults = (filteredUrls: FilteredURLs) =>
 const intersectTermResults = (a: PageResultsMap, b: PageResultsMap) =>
     new Map([...a].filter(([url]) => b.has(url)))
 
-export const textSearch = (getDb: () => Promise<Dexie>) => async (
+export const textSearch = (getDb: DBGet) => async (
     { terms, termsExclude }: Partial<SearchParams>,
-    filteredUrls: FilteredURLs,
+    filteredUrls: FilteredIDs,
 ): Promise<PageResultsMap> => {
     // For each term create an object of with props of matched URL arrays for each index: content, title, and url
     const termResults = await Promise.all(

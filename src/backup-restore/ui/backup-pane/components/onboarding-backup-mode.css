@@ -1,0 +1,93 @@
+.disabled {
+    color: grey;
+    vertical-align: middle;
+}
+
+input {
+    margin-right: 15px;
+    margin-left: 10px;
+}
+
+.selectionTitle {
+    composes: providerTitle from 'src/backup-restore/ui/backup-pane/components/provider-list.css';
+    cursor: pointer;
+}
+
+.subname {
+    composes: infoText from 'src/options/settings/components/settings.css';
+}
+
+.selectionContainer {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.selection {
+    display: flex;
+}
+
+.option {
+    vertical-align: top;
+    display: flex;
+    width: 90%;
+    cursor: pointer;
+    justify-content: space-between;
+
+    & p {
+        margin: 0px;
+    }
+}
+
+.textBlock {
+    display: flex;
+    flex-direction: column;
+}
+
+.labelFree {
+    composes: h2Color from '../../../../common-ui/colors.css';
+    font-size: 14px;
+    vertical-align: middle;
+    font-weight: bold;
+    float: right;
+}
+
+.labelPremium {
+    composes: CTAdarkBlue from '../../../../common-ui/colors.css';
+    padding-left: 20px;
+    padding-right: 20px;
+    font-weight: 500;
+    padding-top: 5px;
+    padding-bottom: 7px;
+    font-size: 14px;
+    vertical-align: middle;
+    float: right;
+}
+
+.star {
+    font-size: 18px;
+    vertical-align: text-top;
+    margin-right: 5px;
+    margin-top: 1px;
+}
+
+.period {
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.price {
+    composes: darkBlue from '../../../../common-ui/colors.css';
+    font-size: 16px;
+    vertical-align: middle;
+    line-height: 25px;
+    font-weight: bold;
+}
+
+.selectionDiv {
+    margin-top: 15px;
+}
+
+.billingChoice {
+    margin-left: 40px;
+    margin-top: -5px;
+}

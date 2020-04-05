@@ -1,50 +1,62 @@
-import { FeatureStorage } from 'src/search/storage'
+import {
+    StorageModule,
+    StorageModuleConfig,
+} from '@worldbrain/storex-pattern-modules'
+import {
+    COLLECTION_DEFINITIONS,
+    COLLECTION_NAMES,
+} from '@worldbrain/memex-storage/lib/tags/constants'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-export default class TagStorage extends FeatureStorage {
-    static TAGS_COLL = 'tags'
+export default class TagStorage extends StorageModule {
+    static TAGS_COLL = COLLECTION_NAMES.tag
 
-    constructor({ storageManager }) {
-        super(storageManager)
-    }
+    getConfig = (): StorageModuleConfig => ({
+        collections: {
+            ...COLLECTION_DEFINITIONS,
+        },
+        operations: {
+            findAllTagsOfPage: {
+                collection: TagStorage.TAGS_COLL,
+                operation: 'findObjects',
+                args: { url: '$url:string' },
+            },
+            createTag: {
+                collection: TagStorage.TAGS_COLL,
+                operation: 'createObject',
+            },
+            deleteTag: {
+                collection: TagStorage.TAGS_COLL,
+                operation: 'deleteObjects',
+                args: { name: '$name:string', url: '$url:string' },
+            },
+        },
+    })
 
-    async fetchPageTags({ url }: { url: string }) {
-        const tags = await this.storageManager
-            .collection(TagStorage.TAGS_COLL)
-            .findObjects({
-                url,
-            })
+    async fetchPageTags({ url }: { url: string }): Promise<string[]> {
+        const tags: Array<{
+            name: string
+        }> = await this.operation('findAllTagsOfPage', {
+            url: normalizeUrl(url, {}),
+        })
         return tags.map(({ name }) => name)
     }
 
-    async fetchPages({ name }: { name: string }) {
-        return this.storageManager
-            .collection(TagStorage.TAGS_COLL)
-            .findObjects({ name })
-    }
-
     async addTag({ name, url }: { name: string; url: string }) {
-        return this.storageManager
-            .collection(TagStorage.TAGS_COLL)
-            .createObject({ name, url })
+        url = normalizeUrl(url, {})
+        return this.operation('createTag', { name, url })
     }
 
     async delTag({ name, url }: { name: string; url: string }) {
-        return this.storageManager
-            .collection(TagStorage.TAGS_COLL)
-            .deleteObjects({ name, url })
+        url = normalizeUrl(url, {})
+        return this.operation('deleteTag', { name, url })
     }
 
-    async addTagsToOpenTabs({
-        name,
-        urls,
-    }: {
-        name: string
-        urls: Array<string>
-    }) {
+    async addTagToPages({ name, urls }: { name: string; urls: Array<string> }) {
         await Promise.all(urls.map(url => this.addTag({ name, url })))
     }
 
-    async delTagsFromOpenTabs({
+    async delTagsFromPages({
         name,
         urls,
     }: {

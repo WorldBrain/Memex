@@ -4,6 +4,7 @@ import { Thunk } from '../types'
 import { PageList } from '../../custom-lists/background/types'
 import * as selectors from './selectors'
 import * as onboarding from 'src/overview/onboarding/popup-helper'
+import analytics from 'src/analytics'
 
 export const setShowCollectionsPicker = createAction<boolean>(
     'collections/showCollectionsPicker',
@@ -25,6 +26,10 @@ export const deleteCollection = createAction<PageList>(
 )
 
 export const addCollectionToPage = (collection: PageList) => async dispatch => {
+    analytics.trackEvent({
+        category: 'Collections',
+        action: 'addToPageFromPopup',
+    })
     dispatch(addCollection(collection))
     await onboarding.checkForTaggingStage()
 }

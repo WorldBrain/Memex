@@ -1,43 +1,62 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color3, color4, color5, color6, color11, color12, radius3 from colors;
+@value color1, color2, color3, color4, color5, color6, color7, color8, color11, color12, color16, radius3 from colors;
+
+/* Animations */
+
+.fadeIn {
+    animation: fadeIn 500ms ease;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
 
 /* FONTs */
 
 .fontFamily {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* Tag Pill */
 
 .tagPill {
     composes: lightBlueBackground from './colors.css';
-    padding: 2px 9px 3px 9px;
+    padding: 2px 9px;
     border-radius: 3px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.5px;
-    height: 21px;
-    color: black;
-    margin-right: 3px;
+    height: auto;
+    color: #3a2f45;
+    margin: 2px 3px 2px 0;
     display: flex;
     align-items: center;
+    white-space: nowrap;
 }
 
 .tagPillSuggestions {
-	composes: tagPill;
+    composes: tagPill;
 }
 
 .tagPillRemove {
-	composes: tagPill;
-	padding: 2px 4px 3px 9px;
+    composes: tagPill;
+    padding: 2px 4px 3px 9px;
 }
 
 /* Tooltips */
 
 .toolTips {
     border-radius: 3px;
-    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+    box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     background: white;
+    overflow: hidden;
 }
 
 .miniTooltip {
@@ -71,6 +90,21 @@
     composes: nakedButton hoverColor warningColor from './colors.css';
 }
 
+.grayActionButton {
+    background-color: color7;
+    border-radius: 22px;
+    color: color16;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1.2rem;
+    padding: 0.3rem 0.8rem;
+    transition: background-color 200ms ease-in-out;
+
+    &:hover {
+        background-color: color8;
+    }
+}
+
 .CTA {
     background: color1;
     color: color4;
@@ -81,10 +115,16 @@
     cursor: pointer;
     text-decoration: none;
     border: none;
+    transition: all 200ms ease-in-out;
 
     &:hover {
         background: color2;
         color: color5;
+    }
+
+    &:active,
+    &:focus {
+        outline: none;
     }
 }
 
@@ -110,18 +150,20 @@
     font-weight: 400;
     font-size: 14px;
     color: #222;
-    font-family: 'Inter', sans-serif;
-    border: 1px solid #e2e2e2;
+    font-family: 'Poppins', sans-serif;
     border-radius: 3px;
+    border: none;
     padding: 10px 7px;
     margin: 5px 5px 5px 5px;
 
-     &::placeholder {
-        color: #888;
+    &::placeholder {
+        color: #3a2f45;
     }
 
     &:focus {
         outline: none;
+        box-shadow: none;
+        border: none;
     }
 }
 
@@ -129,7 +171,8 @@
 
 .annotationCard {
     border-radius: 3px;
-    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+    box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px,
+        rgba(15, 15, 15, 0.1) 0px 2px 4px;
     transition: background 120ms ease-in 0s;
 
     &:hover {
@@ -144,24 +187,28 @@
     font-weight: 600;
     composes: darkBlue from './colors.css';
     composes: nakedButton;
-    display: inline-block;
+    display: inline-flex;
 }
 
 .searchField {
     background-color: color11;
-    color: color4;
+    color: #3a2f45;
     border-radius: 3px;
     font-size: 14px;
     font-weight: 400;
     text-align: left;
+    height: fit-content;
+    width: stretch;
 
     &::placeholder {
-        color: color6;
-        font-style: normal;
+        color: #3a2f45;
+        font-weight: 500;
+        opacity: 0.7;
     }
 
     &:focus {
         outline: none;
         border: none;
+        box-shadow: none;
     }
 }

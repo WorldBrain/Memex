@@ -13,7 +13,6 @@
     & td {
         border-collapse: collapse;
         color: #777;
-        border-bottom: 1px solid #3eb9954f;
         padding: 15px 20px;
     }
 
@@ -32,6 +31,14 @@
 
         &:first-child {
             text-align: left;
+        }
+    }
+
+    & tr {
+        border-bottom: 1px solid #3eb9954f;
+
+        &:last-child {
+            border-bottom: none;
         }
     }
 }

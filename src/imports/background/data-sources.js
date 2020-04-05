@@ -20,11 +20,18 @@ export default class ImportDataSources {
      *  Chrome and FF seem to ID their bookmark data differently. Root works from '' in FF
      *  but needs '0' in Chrome.
      */
-    static ROOT_BM = {
-        id: browserIsChrome() ? '0' : '',
+    get ROOT_BM() {
+        return {
+            id: browserIsChrome() ? '0' : '',
+        }
     }
 
-    constructor({ history = browser.history, bookmarks = browser.bookmarks }) {
+    constructor({
+        history = typeof browser !== 'undefined' ? browser.history : undefined,
+        bookmarks = typeof browser !== 'undefined'
+            ? browser.bookmarks
+            : undefined,
+    }) {
         this._history = history
         this._bookmarks = bookmarks
     }
@@ -63,7 +70,11 @@ export default class ImportDataSources {
      * @param {browser.BookmarkTreeNode} [dirNode] BM node representing a bookmark directory.
      * @return {AsyncIterable<BrowserItem[]>} Bookmark items in current level.
      */
-    async *bookmarks(dirNode = ImportDataSources.ROOT_BM) {
+    async *bookmarks(dirNode = null) {
+        if (!dirNode) {
+            dirNode = this.ROOT_BM
+        }
+
         // Folders don't contain `url`; recurse!
         const children = await this._bookmarks.getChildren(dirNode.id)
 

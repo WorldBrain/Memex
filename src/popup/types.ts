@@ -11,15 +11,15 @@ import { State as TooltipBtnState } from './tooltip-button/reducer'
 import { State as PopupState } from './reducer'
 
 export interface RootState {
-    blacklistBtn: BlacklistBtnState
-    bookmarkBtn: BookmarkBtnState
+    blacklistBtn?: BlacklistBtnState
+    bookmarkBtn?: BookmarkBtnState
     tagsBtn: TagsBtnState
     collectionsBtn: CollectionsBtnState
-    pauseBtn: PauseBtnState
-    sidebarBtn: SidebarBtnState
-    tooltipBtn: TooltipBtnState
-    notifsBtn: NotifsBtnState
-    popup: PopupState
+    pauseBtn?: PauseBtnState
+    sidebarBtn?: SidebarBtnState
+    tooltipBtn?: TooltipBtnState
+    notifsBtn?: NotifsBtnState
+    popup?: PopupState
 }
 
 export type ClickHandler<T extends HTMLElement> = (

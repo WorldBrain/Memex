@@ -11,7 +11,7 @@ export const STORAGE_KEYS = {
  * All value units in seconds.
  */
 export const VISIT_DELAY_RANGE = {
-    MIN: 1,
+    MIN: 0,
     MAX: 600,
-    DEF: 2,
+    DEF: 5,
 }

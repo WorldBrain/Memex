@@ -5,7 +5,7 @@ import analytics from '../../analytics'
 import { Thunk } from '../../options/types'
 import * as constants from './constants'
 import * as selectors from './selectors'
-import { actions as sidebarActs } from 'src/sidebar-common/sidebar'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
 import { acts as resultsActs, selectors as results } from '../results'
 import {
     actions as filterActs,
@@ -13,10 +13,12 @@ import {
 } from '../../search-filters'
 import { actions as notifActs } from '../../notifications'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import * as Raven from 'src/util/raven'
 
 const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
 const annotSearchRPC = remoteFunction('searchAnnotations')
+const socialSearchRPC = remoteFunction('searchSocial')
 
 export const setQuery = createAction<string>('header/setQuery')
 export const setStartDate = createAction<number>('header/setStartDate')
@@ -34,18 +36,19 @@ const stripTagPattern = tag =>
 export const setQueryTagsDomains: (
     input: string,
     isEnter?: boolean,
-) => Thunk = (input, isEnter = true) => dispatch => {
-    const removeFromInputVal = term =>
-        (input = input.replace(isEnter ? term : `${term} `, ''))
+) => Thunk = (input, isEnter = true) => (dispatch, getState) => {
+    const state = getState()
 
     if (input[input.length - 1] === ' ' || isEnter) {
         // Split input into terms and try to extract any tag/domain patterns to add to filters
         const terms = input.toLowerCase().match(/\S+/g) || []
 
         terms.forEach(term => {
-            // If '#tag' pattern in input, remove it and add to filter state
-            if (constants.HASH_TAG_PATTERN.test(term)) {
-                removeFromInputVal(term)
+            // If '#tag' pattern in input, and not already tracked, add to filter state
+            if (
+                constants.HASH_TAG_PATTERN.test(term) &&
+                !filters.tags(state).includes(stripTagPattern(term))
+            ) {
                 dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
                 analytics.trackEvent({
                     category: 'Tag',
@@ -53,16 +56,25 @@ export const setQueryTagsDomains: (
                 })
             }
 
-            // If 'domain.tld.cctld?' pattern in input, remove it and add to filter state
+            // If 'domain.tld.cctld?' pattern in input, and not already tracked, add to filter state
             if (constants.DOMAIN_TLD_PATTERN.test(term)) {
-                removeFromInputVal(term)
+                let act
+                let currentState
 
                 // Choose to exclude or include domain, basead on pattern
-                const act = constants.EXCLUDE_PATTERN.test(term)
-                    ? filterActs.toggleExcDomainFilter
-                    : filterActs.toggleIncDomainFilter
+                if (constants.EXCLUDE_PATTERN.test(term)) {
+                    currentState = filters.domainsExc(state)
+                    act = filterActs.toggleExcDomainFilter
+                } else {
+                    currentState = filters.domainsInc(state)
+                    act = filterActs.toggleIncDomainFilter
+                }
 
                 term = term.replace(constants.TERM_CLEAN_PATTERN, '')
+                if (currentState.includes(term)) {
+                    return
+                }
+
                 dispatch(act(term))
 
                 analytics.trackEvent({
@@ -86,22 +98,20 @@ export const setQueryTagsDomains: (
  * state will also be used to perform relevant pagination logic.
  *
  * @param [overwrite=false] Denotes whether to overwrite existing results or just append.
+ * @param [fromOverview=true] Denotes whether search is done from overview or inpage.
  */
 export const search: (args?: any) => Thunk = (
-    { overwrite } = { overwrite: false },
+    { fromOverview, overwrite } = { fromOverview: true, overwrite: false },
 ) => async (dispatch, getState) => {
     const firstState = getState()
     const query = selectors.query(firstState)
     const startDate = selectors.startDate(firstState)
     const endDate = selectors.endDate(firstState)
 
-    // const showTooltip = selectors.showTooltip(firstState)
-
-    if (query.includes('#')) {
-        return
+    if (fromOverview) {
+        dispatch(sidebarActs.closeSidebar())
     }
 
-    dispatch(sidebarActs.closeSidebar())
     dispatch(resultsActs.resetActiveSidebarIndex())
     dispatch(resultsActs.setLoading(true))
 
@@ -112,6 +122,7 @@ export const search: (args?: any) => Thunk = (
     // Overwrite of results should always reset the current page before searching
     if (overwrite) {
         dispatch(resultsActs.resetPage())
+        dispatch(resultsActs.resetSearchResult())
     }
 
     if (/thank you/i.test(query)) {
@@ -134,13 +145,19 @@ export const search: (args?: any) => Thunk = (
         skip: results.resultsSkip(state),
         lists: filters.listFilterParam(state),
         contentTypes: filters.contentType(state),
+        base64Img: !fromOverview,
+        usersInc: filters.usersInc(state),
+        usersExc: filters.usersExc(state),
+        hashtagsInc: filters.hashtagsInc(state),
+        hashtagsExc: filters.hashtagsExc(state),
     }
 
     try {
-        const searchRPC =
-            results.searchType(state) === 'page'
-                ? pageSearchRPC
-                : annotSearchRPC
+        const searchRPC = results.isSocialPost(state)
+            ? socialSearchRPC
+            : results.isAnnotsSearch(state)
+            ? annotSearchRPC
+            : pageSearchRPC
 
         // Tell background script to search
         const searchResult = await searchRPC(searchParams)
@@ -151,10 +168,12 @@ export const search: (args?: any) => Thunk = (
         }
     } catch (error) {
         console.error(`Search for '${query}' errored: ${error.toString()}`)
+        Raven.captureException(error)
         dispatch(resultsActs.setLoading(false))
     }
 }
 
 export const init = () => dispatch => {
     dispatch(notifActs.updateUnreadNotif())
+    dispatch(search({ overwrite: true, fromOverview: false }))
 }

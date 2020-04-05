@@ -3,9 +3,11 @@
 
 .root {
     list-style: none;
-    margin: 40px auto;
+    margin: 70px auto 40px;
     padding: 0;
     max-width: 800px;
+    display: flex;
+    flex-direction: column;
 }
 
 .heading {

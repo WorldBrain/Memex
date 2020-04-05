@@ -9,8 +9,8 @@ const styles = require('./ConfirmModal.css')
 export interface Props {
     isShown: boolean
     message: string
-    isLoading: boolean
-    children: ReactChild | ReactChild[]
+    isLoading?: boolean
+    children?: ReactChild | ReactChild[]
     onClose: () => void
 }
 
@@ -30,7 +30,9 @@ class ConfirmModal extends PureComponent<Props> {
                     {this.props.message}
                     <Spinner />
                 </div>
-                <div className={styles.btnBar}>{this.props.children}</div>
+                <div className={styles.btnBar} tabIndex={0}>
+                    {this.props.children}
+                </div>
             </Modal>
         )
     }

@@ -1,0 +1,95 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color12 from colors;
+
+.TopContainer {
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    z-index: 2147483647;
+
+    @media (max-width: 700px) {
+        display: none;
+    }
+}
+
+.header {
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    margin-right: 5px;
+    text-align: right;
+    align-self: inherit;
+    width: max-content;
+
+    @media (max-width: 1150px) {
+        display: none;
+    }
+}
+
+.headerBox {
+    composes: nakedButton from '../../../../common-ui/elements.css';
+    padding: 3px 8px 3px 12px;
+    display: flex;
+    align-items: center;
+    height: 24px;
+}
+
+.iconBox {
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    background-size: 95%;
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+.paymentOptions {
+    padding-left: 15px;
+    padding-bottom: 5px;
+    align-self: flex-start;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.ActionButton {
+    margin-top: 20px;
+}
+
+.period {
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.price {
+    composes: darkBlue from '../../../../common-ui/colors.css';
+    font-size: 16px;
+    vertical-align: middle;
+    line-height: 25px;
+    font-weight: bold;
+}
+
+.backupOverlay {
+    position: relative;
+}
+
+.successIcon {
+    composes: checkMark from '../../../../common-ui/icons.css';
+}
+
+.failIcon {
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-image: url('/img/removeIcon.svg');
+    background-color: color12;
+    mask-size: 16px;
+}

@@ -1,15 +1,26 @@
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Poppins/poppins.css');
 
 :host * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
+}
+
+.horizontalLine {
+    width: 18px;
+    border: solid 0.5px #d8d8d8;
+    border-radius: 5px;
+    margin: 10px 0px;
 }
 
 .ribbon {
     position: fixed;
-    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
     right: 0;
-    width: 20px;
-    height: 100%;
+    width: 34px;
+    top: 25%;
+    height: 50%;
     z-index: 2147483645;
 
     /* z-index: 2147483647;
@@ -17,53 +28,87 @@
     border-bottom-left-radius: 5px;
     border: 1px solid #7777775c;
     border-right: none; */
-    transform: translate(0, 0);
+    transform: translate(0, -20px);
     transition: all 0.1s ease-in-out;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
     text-align: start;
-    display: flex;
-    flex-direction: row;
     align-items: center;
 }
 
 .ribbonExpanded {
-    composes: sideBarColorOpen from '../../../common-ui/colors.css';
-    display: grid;
-    width: 35px;
-    z-index: 2147483647;
-    grid-template-rows: 25% 50% 25%;
-    grid-row-gap: 30px;
-    transition: all 0.2s ease-in-out;
+    display: flex;
+    width: 34px;
+    transition: all 0.1s ease-in-out;
+}
+
+.ribbonSidebarOpen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: none;
+    background: white;
+    height: 105vh;
+    width: 34px;
+    top: 0px;
+
+    & .removeSidebar {
+        visibility: hidden;
+        display: flex;
+    }
+}
+
+.removeSidebar {
+    display: flex;
+}
+
+.innerRibbonExpanded {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    box-shadow: -1px 1px 7px 2px #13131321;
+    background: white;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 5px 0;
+    margin-top: 0px;
+}
+
+.innerRibbonSidebarOpen {
+    box-shadow: none;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
 }
 
 /* SECTIONS */
 
 .generalActions {
-    grid-row-gap: 20px;
-    display: grid;
-    justify-items: flex-start;
-    align-self: flex-start;
-    margin-top: 20px;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
 }
 
 .pageActions {
-    grid-row-gap: 20px;
-    display: grid;
-    justify-items: flex-start;
-    align-self: flex-start;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
 }
 
 .settingsActions {
-    grid-row-gap: 20px;
-    display: grid;
+    display: flex;
     flex-direction: column;
-    align-self: flex-end;
-    margin-bottom: 40px;
-    justify-content: center;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
 }
 
 /* ICONS */
@@ -74,21 +119,17 @@
 }
 
 .button {
-    composes: nakedButton from '../../../common-ui/elements.css';
-    composes: hoversidebaropen from '../../../common-ui/colors.css';
-    width: 26px;
-    height: 26px;
-    border-radius: 3px;
-    opacity: 0.8;
-    background-size: 16px;
+    width: 18px;
+    height: 20px;
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     border: none;
-    background-color: transparent;
     cursor: pointer;
+    margin: 5px 0;
 
     &:hover {
-        opacity: 1;
+        opacity: 0.7;
     }
 
     &:active {
@@ -101,13 +142,7 @@
 }
 
 .logo {
-    composes: logoSquared from 'src/common-ui/icons.css';
-    background-size: 20px;
-
-    &:hover {
-        background-image: url('/img/open.svg');
-        background-size: 16px;
-    }
+    background-image: url('/img/open.svg');
 }
 
 .dashboard {
@@ -115,18 +150,18 @@
 }
 
 .arrow {
-    background-image: url('/img/arrow.svg');
+    background-image: url('/img/openSidebar.svg');
     transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
 }
 
 .arrowReverse {
-    background-image: url('/img/arrow.svg');
+    background-image: url('/img/openSidebar.svg');
     transform: rotate(180deg);
     transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
 }
 
 .search {
-    background-image: url('/img/searchGrey.svg');
+    background-image: url('/img/search.svg');
 }
 
 .tag {
@@ -159,24 +194,14 @@
 
 .highlightsOff {
     background-image: url('/img/highlightOff.svg');
-    opacity: 0.3;
-
-    &:hover {
-        opacity: 0.4;
-    }
 }
 
 .tooltipOn {
-    background-image: url('/img/tooltip.svg');
+    background-image: url('/img/tooltip_full.svg');
 }
 
 .tooltipOff {
-    background-image: url('/img/tooltip.svg');
-    opacity: 0.3;
-
-    &:hover {
-        opacity: 0.4;
-    }
+    background-image: url('/img/tooltip_empty.svg');
 }
 
 .ribbonOn {
@@ -185,15 +210,6 @@
 
 .ribbonOff {
     background-image: url('/img/ribbonOff.svg');
-    opacity: 0.3;
-
-    &:hover {
-        opacity: 0.4;
-    }
-}
-
-.ribbonIcon {
-    padding-top: 1px;
 }
 
 .pauseIcon {
@@ -244,8 +260,8 @@
 .commentSaved {
     border-radius: 50px;
     border: 1px solid #5cd9a6;
-    width: 100px;
-    height: 35px;
+    height: 28px;
+    width: 28px;
 }
 
 .commentText {
@@ -261,15 +277,11 @@
 
 .saveIcon {
     background-image: url('/img/saveIcon.svg');
-    width: 35px;
-    height: 35px;
     background-repeat: no-repeat;
     background-position: center;
-}
-
-.saveText {
-    font-weight: 600;
-    margin-left: 10px;
+    width: 28px;
+    height: 28px;
+    background-size: 30px;
 }
 
 .toggler,
@@ -280,73 +292,6 @@
 }
 
 .cancel {
-    background-image: url('/img/removeIcon.svg');
+    background-image: url('/img/close.svg');
     background-size: 14px;
-}
-
-@media (max-height: 450px) {
-    .button {
-        width: 20px;
-        height: 20px;
-        background-size: 12px;
-    }
-
-    .logo {
-        background-size: 16px;
-    }
-
-    .ribbonExpanded {
-        grid-row-gap: 3px;
-    }
-
-    .generalActions {
-        grid-row-gap: 7px;
-        margin-top: 10px;
-    }
-
-    .pageActions {
-        grid-row-gap: 7px;
-    }
-
-    .settingsActions {
-        grid-row-gap: 7px;
-        margin-bottom: 10px;
-    }
-
-    .cancel {
-        background-image: url('/img/removeIcon.svg');
-        background-size: 10px;
-    }
-}
-
-@media (min-height: 451px) and (max-height: 600px) {
-    .button {
-        width: 20px;
-        height: 20px;
-        background-size: 12px;
-    }
-
-    .ribbonExpanded {
-        grid-row-gap: 15px;
-    }
-
-    .logo {
-        background-size: 16px;
-    }
-
-    .generalActions {
-        grid-row-gap: 10px;
-    }
-
-    .pageActions {
-        grid-row-gap: 10px;
-    }
-
-    .settingsActions {
-        grid-row-gap: 10px;
-    }
-
-    .cancel {
-        background-size: 10px;
-    }
 }

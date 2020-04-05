@@ -47,6 +47,8 @@
 }
 
 .tooltipbottom {
+    top: 6px;
+
     /*    &::after {
         border-left: 9px solid transparent;
         border-right: 9px solid transparent;
@@ -70,8 +72,9 @@
     } */
 
     &.tooltipBubble {
-        right: 30px;
-        top: -3px;
+        right: 20px;
+        top: 0px;
+        overflow: visible;
     }
 }
 
@@ -94,6 +97,12 @@
         left: 0;
         transform: translateY(-50%);
     } */
+}
+
+.inPageTooltip {
+    right: 100px;
+    top: -24px;
+    z-index: 1;
 }
 
 .searchBar .tooltipBubble {

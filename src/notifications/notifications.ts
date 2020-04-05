@@ -1,11 +1,10 @@
 // Use these keys in case of action buttons, import the keys in the storage-keys-notif module
-import * as storageKeys from './storage-keys-notif'
 import * as actionTypes from './action-types'
 
 import { NotifDefinition } from './types'
 
 /** Time when create the notif, get the current unix time (Date.now()) - Important, the notif insertation in db depends on it */
-export const releaseTime: number = 1554816049946
+export const releaseTime: number = 1559735977587
 
 /* Example Notification:
 {
@@ -58,58 +57,26 @@ export const releaseTime: number = 1554816049946
     },
 */
 
-export const UPDATE_NOTIFS: NotifDefinition[] = [
-    {
-        id: 'new_filters_09.04.2019',
-        search: {
-            title:
-                '🗄 Updated collection sidebar and filters + exclusion filters',
-            message:
-                'You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url:
-                            'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
-                        context: 'new-tab',
-                    },
-                    label: 'Find out more',
-                },
-            ],
-        },
-        overview: {
-            title:
-                '🗄 Updated collection sidebar and filters + exclusion filters',
-            message:
-                'You can now leave your collection sidebar permanently open and enjoy better filters in the dashboard',
-            buttons: [
-                {
-                    action: {
-                        type: actionTypes.OPEN_URL,
-                        url:
-                            'https://www.notion.so/worldbrain/b15bab0b275d47f6aa3bffefd813432e',
-                        context: 'new-tab',
-                    },
-                    label: 'Find out more',
-                },
-            ],
-        },
-    },
-]
+export const UPDATE_NOTIFS: NotifDefinition[] = []
 
-interface EventNotifsDict {
+export interface EventNotifsDict {
     [name: string]: NotifDefinition
 }
 
 export const EVENT_NOTIFS: EventNotifsDict = {
+    db_error: {
+        id: 'db_error',
+        overview: {
+            title: 'Database errors encountered.',
+            message:
+                'Your memex may be functioning unexpectedly due to issues with your database. It may be low on space.',
+        },
+    },
     quota_warning: {
         id: 'quota_warning',
         system: {
-            title: 
-                '⚠️ Low storage space',
-            message: 
-                'Data might be deleted. Click to backup & free up space.',
+            title: '⚠️ Low storage space',
+            message: 'Data might be deleted. Click to backup & free up space.',
             buttons: [
                 {
                     action: {
@@ -122,9 +89,9 @@ export const EVENT_NOTIFS: EventNotifsDict = {
             ],
         },
         overview: {
-            title: 
-                '⚠️ Your almost out of storage space. Your browser may delete Memex data',
-            message: 
+            title:
+                "⚠️ You're almost out of storage space. Your browser may delete Memex data",
+            message:
                 'Due to the browsers policy to evict local storage when space gets low it might happen that your Memex data gets deleted. Free up disk space and make sure to backup your data for the worst case',
             buttons: [
                 {
@@ -139,7 +106,7 @@ export const EVENT_NOTIFS: EventNotifsDict = {
         },
         search: {
             title:
-                '⚠️ Your almost out of disk space. Your browser might delete Memex data',
+                "⚠️ You're almost out of storage space. Your browser may delete Memex data",
             message:
                 'Due to the browsers policy to evict local storage on low disc space it might happen that your Memex data gets deleted. Free up disk space and make sure to backup your data for the worst case',
             buttons: [
@@ -246,6 +213,84 @@ export const EVENT_NOTIFS: EventNotifsDict = {
                         context: 'self',
                     },
                     label: 'Renew Subscription',
+                },
+            ],
+        },
+    },
+    incremental_backup_down: {
+        id: 'incremental_backup_down',
+        system: {
+            title: 'Auto Backup Down',
+            message: `Your Auto Backup hasn't ran in more than 24 hours.`,
+            // buttons: [
+            //     {
+            //         action: {
+            //             type: actionTypes.OPEN_URL,
+            //             url: 'https://worldbrain.io/pricing',
+            //             context: 'self',
+            //         },
+            //         label: 'Renew Subscription',
+            //     },
+            // ],
+        },
+        overview: {
+            title: 'Auto Backup Down',
+            message: `Your Auto Backup hasn't ran in more than 24 hours. Is the Memex Backup Helper running?`,
+            // buttons: [
+            //     {
+            //         action: {
+            //             type: actionTypes.OPEN_URL,
+            //             url: 'https://worldbrain.io/pricing',
+            //             context: 'self',
+            //         },
+            //         label: 'Renew Subscription',
+            //     },
+            // ],
+        },
+    },
+    usage_survey_1: {
+        id: 'usage_survey_1',
+        search: {
+            title: 'How disappointed would you be if Memex does not exist?',
+            message:
+                'Take a 2-5min survey, get 1 month Memex Pro',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
+                        context: 'new-tab',
+                    },
+                    label: 'Take Survey',
+                },
+            ],
+        },
+        overview: {
+            title: 'How disappointed would you be if Memex does not exist?',
+            message:
+                'Take a 2-5min survey, get 1 month free premium and a chance to win 12 additional months.',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
+                        context: 'new-tab',
+                    },
+                    label: 'Take Survey',
+                },
+            ],
+        },
+        system: {
+            title: 'Take a 2-5min survey',
+            message: 'Get 1 month free premium and a chance to win 12 months!',
+            buttons: [
+                {
+                    action: {
+                        type: actionTypes.OPEN_URL,
+                        url: 'https://worldbrain.typeform.com/to/PHt3uZ',
+                        context: 'new-tab',
+                    },
+                    label: 'Take Survey',
                 },
             ],
         },

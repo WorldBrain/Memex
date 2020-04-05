@@ -3,7 +3,7 @@
 
 .container {
     display: flex;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
     flex-direction: row;
     width: 100%;
 }
@@ -33,4 +33,34 @@
     margin-top: 15px;
     padding: 0 80px;
     line-height: 20px;
+}
+
+.keyboardM {
+    box-shadow: 0px 1px 4px #bababa;
+    font-size: 25px;
+    color: color4;
+    background-color: white;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    border-radius: 3px;
+}
+
+.keyboardPlus {
+    color: color4;
+    font-size: 20px;
+    margin: 0 15px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    height: 45px;
+    vertical-align: middle;
+}
+
+.keyboardSpace {
+    composes: keyboardM;
+    width: 180px;
 }

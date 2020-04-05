@@ -1,14 +1,14 @@
 .container {
-    margin: 10px 0;
+    margin: 5px 0;
 }
 
 .icon {
     composes: checkMark from '../icons.css';
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     opacity: 0;
     color: transparent;
-    transition: opacity 0.2s 0.1s ease-in-out;
+    transition: opacity 0.1s 0.1s ease-in-out;
     -webkit-text-stroke: 3px rgba(0, 0, 0, 0.5);
     background-size: 15px;
 }
@@ -20,12 +20,14 @@
     height: 25px;
     color: white;
     -webkit-text-stroke: 0;
-    animation: icon 0.2s cubic-bezier(1, 0.008, 0.565, 1.65) 1 forwards;
+    animation: icon 0.1s cubic-bezier(1, 0.008, 0.565, 1.65) 1 forwards;
 }
 
 .label {
     display: flex;
     align-items: center;
+    width: 100%;
+    cursor: pointer;
 }
 
 .label__check {
@@ -40,8 +42,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border 0.3s ease;
-    outline: none;
 
     /* background-image: url('../../../img/check-solid.svg'); */
 
@@ -60,33 +60,47 @@
 
 .label__checkbox {
     display: none;
-    outline: none;
+    cursor: pointer;
+    padding: 2px;
 }
 
 .label__text {
+    font-size: 0.9rem;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    font-size: 15px;
-    cursor: pointer;
+    width: inherit;
 
     &:hover {
-        font-weight: 500;
+        color: black;
     }
 }
 
 .label__checkbox:checked + .label__text .label__check {
-    animation: check 0.2s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
+    animation: check 0.1s cubic-bezier(0.895, 0.03, 0.685, 0.22) forwards;
     transform-origin: center center;
     border: none;
     width: 25px;
     height: 25px;
-    outline: none;
+    background: #5cd9a6;
+}
+
+.childrenBox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+
+    & > label {
+        cursor: pointer;
+    }
 }
 
 @keyframes icon {
     from {
         opacity: 0;
-        transform: scale(0.3);
+        transform: scale(0.6);
     }
 
     to {
@@ -97,43 +111,15 @@
 
 @keyframes check {
     0% {
-        width: 25px;
-        height: 25px;
-        padding: 2px;
-        outline: none;
-    }
-
-    10% {
-        width: 25px;
-        height: 25px;
         opacity: 0.1;
-        padding: 2px;
-        background: rgba(0, 0, 0, 0.2);
-        outline: none;
-    }
-
-    12% {
-        width: 25px;
-        height: 25px;
-        opacity: 0.4;
-        padding: 2px;
-        background: rgba(0, 0, 0, 0.1);
     }
 
     50% {
-        width: 25px;
-        height: 25px;
-        background: #5cd9a6;
-        opacity: 0.6;
-        outline: none;
+        opacity: 0.5;
     }
 
     100% {
-        width: 25px;
-        height: 25px;
-        background: #5cd9a6;
         opacity: 1;
-        outline: none;
     }
 }
 

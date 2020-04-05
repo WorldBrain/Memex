@@ -1,5 +1,6 @@
 /* tslint:disable:no-shadowed-variable */
 import { createSelector } from 'reselect'
+import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
 
 import { RootState } from '../../options/types'
 import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
@@ -7,6 +8,7 @@ import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
 import { PAGE_SIZE } from '../search-bar/constants'
 import * as sidebarLeft from '../sidebar-left/selectors'
 import { query } from '../search-bar/selectors'
+import { listFilter } from 'src/search-filters/selectors'
 import * as constants from './constants'
 import { ResultsByUrl } from '../types'
 
@@ -41,6 +43,10 @@ const editPageResults = ({ modalShown, deleting, tagIndex }) => (
 
 const resultsState = (state: RootState) => state.results
 
+export const showOnboardingMessage = createSelector(
+    resultsState,
+    state => state.showOnboardingMessage,
+)
 export const isLoading = createSelector(resultsState, state => state.isLoading)
 export const resultDocs = createSelector(resultsState, state => state.results)
 export const activeTagIndex = createSelector(
@@ -151,7 +157,12 @@ export const searchType = createSelector(
 
 export const isAnnotsSearch = createSelector(
     searchType,
-    state => state === 'annot',
+    state => state === 'notes',
+)
+
+export const isSocialPost = createSelector(
+    searchType,
+    state => state === 'social',
 )
 
 export const resultsClusteredByDay = createSelector(
@@ -168,7 +179,7 @@ export const resultsByUrl = createSelector(
 
         if (isAnnotsSearch) {
             resultDocs.forEach((doc, index) => {
-                pages.set(doc.url, {
+                pages.set(doc.pageId, {
                     ...doc,
                     index,
                 })

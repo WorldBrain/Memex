@@ -64,4 +64,9 @@ async function publishFF() {
     }
 }
 
-publishFF().then(publishChrome)
+switch (process.argv[2]) {
+    case '--ff':
+        return publishFF()
+    case '--chrome':
+        return publishChrome()
+}

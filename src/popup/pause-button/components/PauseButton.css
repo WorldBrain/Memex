@@ -39,8 +39,8 @@
 
     &:hover,
     &:focus {
-        font-weight: 500;
+        font-weight: 400;
         outline: 0;
-        color: color5;
+        color: #3a2f45;
     }
 }

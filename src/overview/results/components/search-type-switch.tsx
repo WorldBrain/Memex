@@ -5,13 +5,14 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 const styles = require('./search-type-switch.css')
 
 export interface Props {
+    showSocialSearch: boolean
     annotsFolded: boolean
     isFilterBarActive: boolean
-    searchType: 'page' | 'annot'
-    pageCount?: number
-    annotCount?: number
+    searchType: 'page' | 'notes' | 'social'
     handleUnfoldAllClick: React.MouseEventHandler<HTMLButtonElement>
-    handleSearchTypeClick: React.MouseEventHandler<HTMLButtonElement>
+    handleSearchTypeClick: (
+        searchType: 'page' | 'notes' | 'social',
+    ) => React.MouseEventHandler<HTMLButtonElement>
 }
 
 export class SearchTypeSwitch extends React.PureComponent<Props> {
@@ -23,12 +24,12 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
         return this.props.searchType === 'page'
     }
 
-    renderSearchCount(count?: number) {
-        if (!count) {
-            return null
-        }
+    get isAnnotSearch() {
+        return this.props.searchType === 'notes'
+    }
 
-        return <span className={styles.searchCount}>{count}</span>
+    get isSocialSearch() {
+        return this.props.searchType === 'social'
     }
 
     render() {
@@ -45,37 +46,46 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                             styles.btn,
                             styles.pages,
                         )}
-                        onClick={this.props.handleSearchTypeClick}
+                        onClick={this.props.handleSearchTypeClick('page')}
                         disabled={this.isPageSearch}
                         id="pages"
                     >
-                        {this.renderSearchCount(this.props.pageCount)}
                         Pages
                     </button>
                     <button
                         className={cx(styles.searchSwitchBtn, styles.btn)}
-                        onClick={this.props.handleSearchTypeClick}
-                        disabled={!this.isPageSearch}
+                        onClick={this.props.handleSearchTypeClick('notes')}
+                        disabled={this.isAnnotSearch}
                     >
-                        {this.renderSearchCount(this.props.annotCount)}
                         Notes
-                        <span className={styles.betaBox}>
-                            <ButtonTooltip
-                                tooltipText="Searching notes is in beta mode. Bugs may appear. Let us know: support@worldbrain.io or github.com/worldbrain"
-                                position="bottom"
-                            >
-                                <span className={styles.beta}>beta</span>
-                            </ButtonTooltip>
-                        </span>
                     </button>
+                    {this.props.showSocialSearch && (
+                        <button
+                            className={cx(styles.searchSwitchBtn, styles.btn)}
+                            onClick={this.props.handleSearchTypeClick('social')}
+                            disabled={this.isSocialSearch}
+                        >
+                            Social
+                            <span className={styles.betaBox}>
+                                <ButtonTooltip
+                                    tooltipText="Saving Tweets is in beta mode. Bugs may appear. Let us know: support@worldbrain.io or github.com/worldbrain"
+                                    position="bottom"
+                                >
+                                    <span className={styles.beta}>beta</span>
+                                </ButtonTooltip>
+                            </span>
+                        </button>
+                    )}
                 </div>
-                <button
-                    className={cx(styles.unfoldAllBtn, styles.btn)}
-                    onClick={this.props.handleUnfoldAllClick}
-                    disabled={this.isPageSearch}
-                >
-                    {this.unfoldBtnText}
-                </button>
+                {this.isAnnotSearch && (
+                    <button
+                        className={cx(styles.unfoldAllBtn, styles.btn)}
+                        onClick={this.props.handleUnfoldAllClick}
+                        disabled={this.isPageSearch}
+                    >
+                        {this.unfoldBtnText}
+                    </button>
+                )}
             </div>
         )
     }

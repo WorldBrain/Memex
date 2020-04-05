@@ -1,4 +1,4 @@
-import { NotifOpts } from '../../util/notifications'
+import { NotifOpts } from '../../util/notification-types'
 
 export const REMINDER_NOTIF: Partial<NotifOpts> = {
     title: 'Memex Importer',

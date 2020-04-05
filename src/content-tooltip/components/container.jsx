@@ -1,30 +1,19 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import OnClickOutside from 'react-onclickoutside'
+import { features } from 'src/util/remote-functions-background'
 
 import Tooltip from './tooltip'
 import {
-    InitialComponent,
-    CreatingLinkComponent,
     CopiedComponent,
-    ErrorComponent,
+    CreatingLinkComponent,
     DoneComponent,
+    ErrorComponent,
+    InitialComponent,
 } from './tooltip-states'
 
-import { conditionallyRemoveSelectOption } from '../onboarding-interactions'
+import { conditionallyRemoveOnboardingSelectOption } from '../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
-import { userSelectedText } from '../interactions'
-import * as Mousetrap from 'mousetrap'
-import { remoteFunction } from 'src/util/webextensionRPC'
-import {
-    highlightAnnotations,
-    removeHighlights,
-} from '../../sidebar-overlay/content_script/highlight-interactions'
-import {
-    getKeyboardShortcutsState,
-    convertKeyboardEventToKeyString,
-} from '../utils'
-import { toggleSidebarOverlay } from 'src/direct-linking/content_script/interactions'
 
 class TooltipContainer extends React.Component {
     static propTypes = {
@@ -38,99 +27,16 @@ class TooltipContainer extends React.Component {
 
     state = {
         showTooltip: false,
+        showCreateLink: false,
         position: { x: 250, y: 200 },
         tooltipState: 'copied',
-        highlightsOn: false,
     }
 
     async componentDidMount() {
         this.props.onInit(this.showTooltip)
-
-        const shortcutsState = await getKeyboardShortcutsState()
-        const {
-            shortcutsEnabled,
-            highlightShortcut,
-            linkShortcut,
-            toggleSidebarShortcut,
-            toggleHighlightsShortcut,
-            createAnnotationShortcut,
-        } = shortcutsState
-
-        if (shortcutsEnabled) {
-            Mousetrap.bind(
-                [
-                    highlightShortcut,
-                    linkShortcut,
-                    toggleHighlightsShortcut,
-                    createAnnotationShortcut,
-                    toggleSidebarShortcut,
-                ],
-                this.initHandleKeyboardShortcuts(shortcutsState),
-            )
-        }
-    }
-
-    initHandleKeyboardShortcuts = settingsState => async e => {
-        const {
-            highlightShortcut,
-            linkShortcut,
-            toggleSidebarShortcut,
-            toggleHighlightsShortcut,
-            createAnnotationShortcut,
-            highlightShortcutEnabled,
-            linkShortcutEnabled,
-            toggleSidebarShortcutEnabled,
-            toggleHighlightsShortcutEnabled,
-            createAnnotationShortcutEnabled,
-        } = settingsState
-        if (!userSelectedText()) {
-            switch (convertKeyboardEventToKeyString(e)) {
-                case toggleSidebarShortcut:
-                    toggleSidebarShortcutEnabled &&
-                        toggleSidebarOverlay({
-                            override: true,
-                        })
-                    break
-                case toggleHighlightsShortcut:
-                    toggleHighlightsShortcutEnabled && this.toggleHighlights()
-                    break
-            }
-        } else {
-            switch (convertKeyboardEventToKeyString(e)) {
-                case linkShortcut:
-                    linkShortcutEnabled && (await this.createLink())
-                    break
-                case highlightShortcut:
-                    if (highlightShortcutEnabled) {
-                        this.props.createHighlight()
-                        this.setState({
-                            highlightsOn: true,
-                        })
-                    }
-                    break
-                case createAnnotationShortcut:
-                    createAnnotationShortcutEnabled &&
-                        (await this.createAnnotation(e))
-                    break
-            }
-        }
-    }
-
-    fetchAndHighlightAnnotations = async () => {
-        const annotations = await remoteFunction('getAllAnnotationsByUrl')({
-            url: window.location.href,
+        this.setState({
+            showCreateLink: await features.getFeature('DirectLink'),
         })
-        const highlightables = annotations.filter(
-            annotation => annotation.selector,
-        )
-        highlightAnnotations(highlightables, toggleSidebarOverlay)
-    }
-
-    toggleHighlights = () => {
-        this.state.highlightsOn
-            ? removeHighlights()
-            : this.fetchAndHighlightAnnotations()
-        this.setState({ highlightsOn: !this.state.highlightsOn })
     }
 
     showTooltip = position => {
@@ -149,7 +55,7 @@ class TooltipContainer extends React.Component {
             position: {},
         })
         // Remove onboarding select option notification if it's present
-        await conditionallyRemoveSelectOption(
+        await conditionallyRemoveOnboardingSelectOption(
             STAGES.annotation.notifiedHighlightText,
         )
     }
@@ -181,7 +87,7 @@ class TooltipContainer extends React.Component {
         await this.props.createAnnotation()
 
         // Remove onboarding select option notification if it's present
-        await conditionallyRemoveSelectOption(
+        await conditionallyRemoveOnboardingSelectOption(
             STAGES.annotation.annotationCreated,
         )
 
@@ -194,6 +100,16 @@ class TooltipContainer extends React.Component {
             })
         }, 400)
     }
+    createHighlight = async e => {
+        this.setState({
+            tooltipState: 'running',
+        })
+        await this.props.createHighlight()
+        this.setState({
+            showTooltip: false,
+            tooltipState: 'pristine',
+        })
+    }
 
     openSettings = event => {
         event.preventDefault()
@@ -205,8 +121,15 @@ class TooltipContainer extends React.Component {
             case 'pristine':
                 return (
                     <InitialComponent
-                        createLink={this.createLink}
+                        createLink={
+                            this.state.showCreateLink
+                                ? this.createLink
+                                : undefined
+                        }
+                        createHighlight={this.createHighlight}
                         createAnnotation={this.createAnnotation}
+                        closeTooltip={this.closeTooltip}
+                        state={this.state.tooltipState}
                     />
                 )
             case 'running':

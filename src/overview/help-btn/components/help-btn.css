@@ -1,0 +1,26 @@
+.footerBar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    height: 0px;
+
+    @media (max-width: 1100px) {
+        display: none;
+    }
+}
+
+.btn {
+    composes: helpIcon from '../../../common-ui/icons.css';
+    composes: nakedSquareButton from '../../../common-ui/elements.css';
+    background-size: 30px;
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    position: fixed;
+    border: none;
+    bottom: 1em;
+    right: 1em;
+    cursor: pointer;
+    outline: none;
+    background-color: transparent;
+}

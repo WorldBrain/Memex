@@ -4,31 +4,26 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 
-import { LoadingIndicator } from '../../../common-ui/components'
-import { IndexDropdown } from '../../../common-ui/containers'
-import PageResultItem from './PageResultItem'
+import { selectors as opt } from 'src/options/settings'
+import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
+import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './ResultList'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
-import { RootState } from '../../../options/types'
+import { RootState } from 'src/options/types'
 import { Result, ResultsByUrl } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
-import { actions as listActs } from '../../../custom-lists'
+import { actions as listActs } from 'src/custom-lists'
 import { acts as deleteConfActs } from '../../delete-confirm-modal'
-import { actions as sidebarActs } from '../../../sidebar-common'
-import {
-    actions as sidebarLeftActs,
-    selectors as sidebarLeft,
-} from '../../sidebar-left'
-import {
-    actions as filterActs,
-    selectors as filters,
-} from '../../../search-filters'
-import { selectors as searchBar } from '../../search-bar'
-import { PageUrlsByDay } from 'src/search/background/types'
+import { actions as sidebarActs } from 'src/sidebar-overlay/sidebar'
+import { selectors as sidebarLeft } from '../../sidebar-left'
+import { actions as filterActs, selectors as filters } from 'src/search-filters'
+import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
+import niceTime from 'src/util/nice-time'
+import { Annotation } from 'src/annotations/types'
 
 const styles = require('./ResultList.css')
 
@@ -41,11 +36,13 @@ export interface StateProps {
     isListFilterActive: boolean
     resultsClusteredByDay: boolean
     areAnnotationsExpanded: boolean
+    areScreenshotsEnabled: boolean
     activeSidebarIndex: number
     searchResults: Result[]
     resultsByUrl: ResultsByUrl
     annotsByDay: PageUrlsByDay
     isFilterBarActive: boolean
+    isSocialPost: boolean
 }
 
 export interface DispatchProps {
@@ -56,8 +53,15 @@ export interface DispatchProps {
     delTag: (i: number) => (f: string) => void
     handlePillClick: (tag: string) => MouseEventHandler
     handleTagBtnClick: (i: number) => MouseEventHandler
-    handleCommentBtnClick: (doc: Result, index: number) => MouseEventHandler
-    handleCrossRibbonClick: (doc: Result) => MouseEventHandler
+    handleCommentBtnClick: (
+        doc: Result,
+        index: number,
+        isSocialPost?: boolean,
+    ) => MouseEventHandler
+    handleCrossRibbonClick: (
+        doc: Result,
+        isSocialPost: boolean,
+    ) => MouseEventHandler
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
@@ -82,12 +86,10 @@ class ResultListContainer extends PureComponent<Props> {
         tagSuggestions: [],
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
         this.setState({ tagSuggestions: tagSuggestions.reverse() })
-    }
 
-    componentDidMount() {
         document.addEventListener('click', this.handleOutsideClick, false)
     }
 
@@ -126,6 +128,7 @@ class ResultListContainer extends PureComponent<Props> {
                 onFilterAdd={this.props.addTag(index)}
                 onFilterDel={this.props.delTag(index)}
                 setTagDivRef={this.setTagDivRef}
+                isSocialPost={this.props.isSocialPost}
                 initFilters={tags}
                 initSuggestions={[
                     ...new Set([...tags, ...this.state.tagSuggestions]),
@@ -133,6 +136,7 @@ class ResultListContainer extends PureComponent<Props> {
                 source="tag"
                 isForRibbon
                 hover
+                fromOverview
             />
         )
     }
@@ -144,6 +148,7 @@ class ResultListContainer extends PureComponent<Props> {
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
             handleTagBtnClick={this.props.handleTagBtnClick(resultIndex)}
+            env={'overview'}
         />
     )
 
@@ -156,13 +161,16 @@ class ResultListContainer extends PureComponent<Props> {
         })
     }
 
-    private attachDocWithPageResultItem(doc, index, key) {
+    private attachDocWithPageResultItem(doc: Result, index, key) {
+        const isSocialPost = doc.hasOwnProperty('user')
+
         return (
-            <PageResultItem
+            <ResultItem
                 key={key}
+                isOverview
+                tags={doc.tags}
                 setTagButtonRef={this.setTagButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
-                isSidebarOpen={this.props.isSidebarOpen}
                 setUrlDragged={this.props.setUrlDragged}
                 tagManager={this.renderTagsManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}
@@ -170,13 +178,23 @@ class ResultListContainer extends PureComponent<Props> {
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
-                onCommentBtnClick={this.props.handleCommentBtnClick(doc, index)}
-                handleCrossRibbonClick={this.props.handleCrossRibbonClick(doc)}
+                onCommentBtnClick={this.props.handleCommentBtnClick(
+                    doc,
+                    index,
+                    isSocialPost,
+                )}
+                handleCrossRibbonClick={this.props.handleCrossRibbonClick(
+                    doc,
+                    isSocialPost,
+                )}
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
+                areScreenshotsEnabled={this.props.areScreenshotsEnabled}
                 isResponsibleForSidebar={
                     this.props.activeSidebarIndex === index
                 }
+                isSocial={isSocialPost}
                 {...doc}
+                displayTime={niceTime(doc.displayTime)}
             />
         )
     }
@@ -194,6 +212,10 @@ class ResultListContainer extends PureComponent<Props> {
             )
         }
 
+        if (!this.props.annotsByDay) {
+            return []
+        }
+
         const els: JSX.Element[] = []
 
         const sortedKeys = Object.keys(this.props.annotsByDay)
@@ -207,7 +229,8 @@ class ResultListContainer extends PureComponent<Props> {
                 </p>,
             )
 
-            const currentCluster = this.props.annotsByDay[day]
+            const currentCluster: { [key: string]: Annotation[] } = this.props
+                .annotsByDay[day]
             for (const [pageUrl, annotations] of Object.entries(
                 currentCluster,
             )) {
@@ -219,7 +242,7 @@ class ResultListContainer extends PureComponent<Props> {
 
                 els.push(
                     this.attachDocWithPageResultItem(
-                        { ...page, annotations },
+                        { ...page, annotations } as any,
                         page.index,
                         `${day}${pageUrl}`,
                     ),
@@ -250,7 +273,11 @@ class ResultListContainer extends PureComponent<Props> {
 
         // Add loading spinner to the list end, if loading
         if (this.props.isLoading) {
-            resultItems.push(<LoadingIndicator key="loading" />)
+            resultItems.push(
+                <div className={styles.LoadingIndicatorContainer}>
+                    <LoadingIndicator key="loading" />
+                </div>,
+            )
         }
 
         return resultItems
@@ -274,6 +301,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     resultsByUrl: selectors.resultsByUrl(state),
     annotsByDay: selectors.annotsByDay(state),
     isSidebarOpen: sidebarLeft.isSidebarOpen(state),
+    areScreenshotsEnabled: opt.screenshots(state),
     needsWaypoint: selectors.needsPagWaypoint(state),
     isListFilterActive: filters.listFilterActive(state),
     isScrollDisabled: selectors.isScrollDisabled(state),
@@ -281,7 +309,8 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isNewSearchLoading: selectors.isNewSearchLoading(state),
     resultsClusteredByDay: selectors.resultsClusteredByDay(state),
     areAnnotationsExpanded: selectors.areAnnotationsExpanded(state),
-    isFilterBarActive: searchBar.showFilterBar(state),
+    isFilterBarActive: filters.showFilterBar(state),
+    isSocialPost: selectors.isSocialPost(state),
 })
 
 const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
@@ -289,14 +318,21 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
         event.preventDefault()
         dispatch(acts.showTags(index))
     },
-    handleCommentBtnClick: ({ url, title }, index) => event => {
+    handleCommentBtnClick: ({ url, title }, index, isSocialPost) => event => {
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
-        dispatch(sidebarActs.openSidebar({ url, title, forceFetch: true }))
+        dispatch(
+            sidebarActs.openSidebar({
+                url,
+                title,
+                forceFetch: true,
+                isSocialPost,
+            }),
+        )
     },
-    handleToggleBm: ({ url }, index) => event => {
+    handleToggleBm: ({ url, fullUrl }, index) => event => {
         event.preventDefault()
-        dispatch(acts.toggleBookmark(url, index))
+        dispatch(acts.toggleBookmark({ url, fullUrl, index }))
     },
     handleTrashBtnClick: ({ url }, index) => event => {
         event.preventDefault()
@@ -305,6 +341,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     handleScrollPagination: args => dispatch(acts.getMoreResults()),
     handlePillClick: tag => event => {
         event.preventDefault()
+        event.stopPropagation()
         dispatch(filterActs.toggleTagFilter(tag))
     },
     addTag: resultIndex => tag => dispatch(acts.addTag(tag, resultIndex)),
@@ -312,14 +349,12 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
     resetActiveTagIndex: () => dispatch(acts.resetActiveTagIndex()),
     setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
-    handleCrossRibbonClick: ({ url }) => event => {
+    handleCrossRibbonClick: ({ url }, isSocialPost) => event => {
         event.preventDefault()
-        dispatch(listActs.delPageFromList(url))
+        event.stopPropagation()
+        dispatch(listActs.delPageFromList(url, isSocialPost))
         dispatch(acts.hideResultItem(url))
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(ResultListContainer)
+export default connect(mapState, mapDispatch)(ResultListContainer)

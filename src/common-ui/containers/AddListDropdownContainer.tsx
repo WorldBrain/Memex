@@ -10,6 +10,9 @@ import {
 } from '../components'
 import { PageList } from '../../custom-lists/background/types'
 import { ClickHandler } from '../../popup/types'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { notifications } from 'src/util/remote-functions-background'
+import * as Raven from 'src/util/raven'
 
 export interface Props {
     env?: 'inpage' | 'overview'
@@ -28,9 +31,14 @@ export interface Props {
     allTabsCollection?: boolean
     isList: boolean
     isForRibbon: boolean
+    addPageToListRPC?: string
+    delPageFromListRPC?: string
+    onListClickCb?: () => void
 }
 
 export interface State {
+    showError: boolean
+    errMsg: string
     searchVal: string
     isLoading: boolean
     displayFilters: PageList[]
@@ -45,8 +53,12 @@ class AddListDropdownContainer extends Component<Props, State> {
         onFilterDel: noop,
         initLists: [],
         isForRibbon: false,
+        addPageToListRPC: 'insertPageToList',
+        delPageFromListRPC: 'removePageFromList',
+        onListClickCb: noop,
     }
 
+    private err: { timestamp: number; err: Error }
     private addListRPC
     private addPageToListRPC
     private deletePageFromListRPC
@@ -60,8 +72,8 @@ class AddListDropdownContainer extends Component<Props, State> {
         super(props)
 
         this.addListRPC = remoteFunction('createCustomList')
-        this.addPageToListRPC = remoteFunction('insertPageToList')
-        this.deletePageFromListRPC = remoteFunction('removePageFromList')
+        this.addPageToListRPC = remoteFunction(props.addPageToListRPC)
+        this.deletePageFromListRPC = remoteFunction(props.delPageFromListRPC)
         this.addOpenTabsToListRPC = remoteFunction('addOpenTabsToList')
         this.removeOpenTabsFromListRPC = remoteFunction(
             'removeOpenTabsFromList',
@@ -74,8 +86,10 @@ class AddListDropdownContainer extends Component<Props, State> {
         this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
 
         this.state = {
+            errMsg: '',
             searchVal: '',
             isLoading: false,
+            showError: false,
             displayFilters: props.initSuggestions
                 ? props.initSuggestions
                 : props.initLists, // Display state objects; will change all the time
@@ -85,10 +99,24 @@ class AddListDropdownContainer extends Component<Props, State> {
         }
     }
 
-    componentWillMount() {
+    componentDidMount() {
         // The temporary list array gets updated.
         if (this.overviewMode) {
             this.props.setTempLists()
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.err && Date.now() - this.err.timestamp <= 1000) {
+            handleDBQuotaErrors(
+                err =>
+                    notifications.create({
+                        requireInteraction: false,
+                        title: 'Memex error: list adding',
+                        message: err.message,
+                    }),
+                () => remoteFunction('dispatchNotification')('db_error'),
+            )(this.err.err)
         }
     }
 
@@ -150,12 +178,21 @@ class AddListDropdownContainer extends Component<Props, State> {
         )
     }
 
-    // private addPageToList = () => {}
+    private handleError = (err: Error) => {
+        Raven.captureException(err)
+        this.setState(() => ({ showError: true, errMsg: err.message }))
+        this.err = {
+            timestamp: Date.now(),
+            err,
+        }
+    }
 
     /**
      * Used for 'Enter' presses or 'Add new tag' clicks.
      */
     private createList = async () => {
+        await this.props.onListClickCb()
+
         const listName = this.getSearchVal()
 
         if (this.allowIndexUpdate) {
@@ -175,7 +212,7 @@ class AddListDropdownContainer extends Component<Props, State> {
 
                 this.props.onFilterAdd(newList)
             } catch (err) {
-                console.error(err)
+                this.handleError(err)
             }
         }
 
@@ -214,7 +251,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 url: this.props.url,
             })
         } catch (err) {
-            console.error(err)
+            this.handleError(err)
         }
 
         this.setState(state => ({
@@ -227,8 +264,6 @@ class AddListDropdownContainer extends Component<Props, State> {
     private handleSearchEnterPress = (
         event: React.KeyboardEvent<HTMLInputElement>,
     ) => {
-        event.preventDefault()
-
         if (
             this.canCreateList() &&
             this.state.focused === this.state.displayFilters.length
@@ -245,24 +280,27 @@ class AddListDropdownContainer extends Component<Props, State> {
     }
 
     private async handleSingleCollectionEdit(list) {
-        if (!this.pageBelongsToList(list)) {
-            if (this.allowIndexUpdate) {
-                await this.addPageToListRPC({
-                    id: list.id,
-                    url: this.props.url,
-                }).catch(console.error)
-            }
+        let updateState
+        let revertState
+        let updateDb
 
-            this.props.onFilterAdd(list)
+        if (this.pageBelongsToList(list)) {
+            updateState = this.props.onFilterDel
+            revertState = this.props.onFilterAdd
+            updateDb = this.deletePageFromListRPC
         } else {
-            if (this.allowIndexUpdate) {
-                await this.deletePageFromListRPC({
-                    id: list.id,
-                    url: this.props.url,
-                }).catch(console.error)
-            }
+            updateState = this.props.onFilterAdd
+            revertState = this.props.onFilterDel
+            updateDb = this.addPageToListRPC
+        }
 
-            this.props.onFilterDel(list)
+        updateState(list)
+
+        try {
+            await updateDb({ id: list.id, url: this.props.url })
+        } catch (err) {
+            this.handleError(err)
+            revertState(list)
         }
     }
 
@@ -288,6 +326,8 @@ class AddListDropdownContainer extends Component<Props, State> {
      * the page depending on their current status as associated lists or not.
      */
     private handleListClick = (index: number) => async event => {
+        await this.props.onListClickCb()
+
         const list = this.state.displayFilters[index]
 
         // Either add or remove the list, let Redux handle the store changes.
@@ -338,37 +378,7 @@ class AddListDropdownContainer extends Component<Props, State> {
         }))
     }
 
-    private handleSearchKeyDown = (
-        event: React.KeyboardEvent<HTMLInputElement>,
-    ) => {
-        if (
-            this.props.env === 'inpage' &&
-            !(event.ctrlKey || event.metaKey) &&
-            /[a-zA-Z0-9-_ ]/.test(String.fromCharCode(event.keyCode))
-        ) {
-            event.preventDefault()
-            event.stopPropagation()
-            this.setState(state => ({ searchVal: state.searchVal + event.key }), this.fetchListSuggestions)
-            return
-        }
-        switch (event.key) {
-            case 'Enter':
-                return this.handleSearchEnterPress(event)
-            case 'ArrowUp':
-            case 'ArrowDown':
-                return this.handleSearchArrowPress(event)
-            default:
-        }
-    }
-
-    private handleSearchChange = (
-        event: React.SyntheticEvent<HTMLInputElement>,
-    ) => {
-        const searchVal =
-            this.props.env === 'inpage'
-                ? this.inputEl.value
-                : event.currentTarget.value
-
+    private handleSearchChange = (searchVal: string) => {
         // If user backspaces to clear input, show the list of suggested lists again.
         const displayFilters = !searchVal.length
             ? this.props.initSuggestions
@@ -383,21 +393,21 @@ class AddListDropdownContainer extends Component<Props, State> {
     }
 
     private renderLists() {
-        const lists = this.getDisplayLists()
-
-        const listOptions: React.ReactNode[] = lists.map((list, i) => (
-            <IndexDropdownRow
-                {...list}
-                key={i}
-                onClick={this.handleListClick(i)}
-                scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                isForSidebar={false}
-                isList
-            />
-        ))
+        let listOpts: React.ReactNode[] = this.getDisplayLists().map(
+            (list, i) => (
+                <IndexDropdownRow
+                    {...list}
+                    key={i}
+                    onClick={this.handleListClick(i)}
+                    scrollIntoView={this.scrollElementIntoViewIfNeeded}
+                    isForSidebar={false}
+                    isList
+                />
+            ),
+        )
 
         if (this.canCreateList()) {
-            const addRow: React.ReactNode = (
+            listOpts = [
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
@@ -407,27 +417,32 @@ class AddListDropdownContainer extends Component<Props, State> {
                         this.state.focused === this.state.displayFilters.length
                     }
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
-                />
-            )
-            return [addRow, ...listOptions]
+                />,
+                ...listOpts,
+            ]
         }
 
-        return listOptions
+        return listOpts
     }
 
     render() {
         return (
             <IndexDropdown
                 onTagSearchChange={this.handleSearchChange}
-                onTagSearchKeyDown={this.handleSearchKeyDown}
+                onTagSearchSpecialKeyHandlers={[
+                    {
+                        test: e => e.key === 'ArrowDown' || e.key === 'ArrowUp',
+                        handle: e => this.handleSearchArrowPress(e),
+                    },
+                    {
+                        test: e => e.key === 'Enter',
+                        handle: e => this.handleSearchEnterPress(e),
+                    },
+                ]}
                 setInputRef={this.setInputRef}
-                numberOfTags={
-                    this.props.allTabsCollection
-                        ? this.state.multiEdit.size
-                        : this.state.filters.length
-                }
                 tagSearchValue={this.state.searchVal}
                 source="list"
+                {...this.state}
                 {...this.props}
             >
                 {this.renderLists()}

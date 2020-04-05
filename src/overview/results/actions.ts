@@ -9,10 +9,12 @@ import { SearchResult } from '../types'
 import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { handleDBQuotaErrors } from 'src/util/error-handler'
+import { bookmarks, notifications } from 'src/util/remote-functions-background'
 
 const processEventRPC = remoteFunction('processEvent')
-const createBookmarkRPC = remoteFunction('addBookmark')
-const removeBookmarkRPC = remoteFunction('delBookmark')
+const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
+const deleteSocialBookmarkRPC = remoteFunction('delSocialBookmark')
 
 export const addTag = createAction('results/localAddTag', (tag, index) => ({
     tag,
@@ -24,10 +26,15 @@ export const delTag = createAction('results/localDelTag', (tag, index) => ({
     index,
 }))
 
+export const setShowOnboardingMessage = createAction<boolean>(
+    'results/setShowOnboardingMessage',
+)
+
 export const hideResultItem = createAction<string>('results/hideResultItem')
 export const changeHasBookmark = createAction<number>(
     'results/changeHasBookmark',
 )
+export const resetSearchResult = createAction('results/resetSearchResult')
 export const setSearchResult = createAction<SearchResult>(
     'results/setSearchResult',
 )
@@ -35,7 +42,7 @@ export const appendSearchResult = createAction<SearchResult>(
     'results/appendSearchResult',
 )
 export const setLoading = createAction<boolean>('results/setLoading')
-export const setAreAnnotationsExpanded = createAction(
+export const setAreAnnotationsExpanded = createAction<boolean>(
     'results/setAreAnnotationsExpanded',
 )
 export const toggleAreAnnotationsExpanded = createAction(
@@ -53,26 +60,20 @@ export const setActiveSidebarIndex = createAction<number>(
 )
 export const nextPage = createAction('results/nextPage')
 export const resetPage = createAction('results/resetPage')
-export const setSearchType = createAction<'page' | 'annot'>(
+export const setSearchType = createAction<'page' | 'notes' | 'social'>(
     'results/setSearchType',
 )
 export const initSearchCount = createAction('overview/initSearchCount')
 export const incSearchCount = createAction('overview/incSearchCount')
 
-export const toggleSearchType: () => Thunk = () => (dispatch, getState) => {
-    dispatch(setLoading(true))
-    const currSearchType = selectors.searchType(getState())
-    const newSearchType = currSearchType === 'page' ? 'annot' : 'page'
-    dispatch(setSearchType(newSearchType))
-}
-
-export const toggleBookmark: (url: string, i: number) => Thunk = (
-    url,
-    index,
-) => async (dispatch, getState) => {
+export const toggleBookmark: (args: {
+    url: string
+    fullUrl: string
+    index: number
+}) => Thunk = ({ url, fullUrl, index }) => async (dispatch, getState) => {
     const results = selectors.results(getState())
-    const { hasBookmark } = results[index]
-    dispatch(changeHasBookmark(index)) // Reset UI state in case of error
+    const { hasBookmark, user } = results[index]
+    dispatch(changeHasBookmark(index))
 
     analytics.trackEvent({
         category: 'Overview',
@@ -87,14 +88,27 @@ export const toggleBookmark: (url: string, i: number) => Thunk = (
             : EVENT_NAMES.CREATE_RESULT_BOOKMARK,
     })
 
-    // Reset UI state in case of error
-    const errHandler = err => dispatch(changeHasBookmark(index))
-
-    // Either perform adding or removal of bookmark; do not wait for ops to complete
+    let bookmarkRPC: (args: { url: string; fullUrl: string }) => Promise<void>
+    // tslint:disable-next-line: prefer-conditional-expression
     if (hasBookmark) {
-        removeBookmarkRPC({ url }).catch(errHandler)
+        bookmarkRPC = user ? deleteSocialBookmarkRPC : bookmarks.delPageBookmark
     } else {
-        createBookmarkRPC({ url }).catch(errHandler)
+        bookmarkRPC = user ? createSocialBookmarkRPC : bookmarks.addPageBookmark
+    }
+
+    try {
+        await bookmarkRPC({ url, fullUrl })
+    } catch (err) {
+        dispatch(changeHasBookmark(index))
+        handleDBQuotaErrors(
+            error =>
+                notifications.create({
+                    requireInteraction: false,
+                    title: 'Memex error: starring page',
+                    message: error.message,
+                }),
+            () => remoteFunction('dispatchNotification')('db_error'),
+        )(err)
     }
 }
 
@@ -146,9 +160,11 @@ export const showTags: (i: number) => Thunk = index => (dispatch, getState) => {
 /**
  * Increments the page state before scheduling another search.
  */
-export const getMoreResults: () => Thunk = () => dispatch => {
+export const getMoreResults: (fromOverview?: boolean) => Thunk = (
+    fromOverview = true,
+) => dispatch => {
     dispatch(nextPage())
-    dispatch(searchBarActs.search())
+    dispatch(searchBarActs.search({ fromOverview }))
 }
 
 // Analytics use
@@ -183,8 +199,8 @@ function storeSearch(searchResult, overwrite, state) {
         searchResult.totalCount === 0
             ? EVENT_NAMES.UNSUCCESSFUL_SEARCH
             : overwrite
-                ? EVENT_NAMES.SUCCESSFUL_SEARCH
-                : EVENT_NAMES.PAGINATE_SEARCH
+            ? EVENT_NAMES.SUCCESSFUL_SEARCH
+            : EVENT_NAMES.PAGINATE_SEARCH
 
     processEventRPC({ type })
 

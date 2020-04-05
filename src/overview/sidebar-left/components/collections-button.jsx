@@ -1,7 +1,5 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import cx from 'classnames'
-
 import styles from './collections-button.css'
 
 class CollectionsButton extends PureComponent {
@@ -9,44 +7,28 @@ class CollectionsButton extends PureComponent {
         listBtnClick: PropTypes.func.isRequired,
         onShowBtnClick: PropTypes.func,
         isListFilterActive: PropTypes.bool.isRequired,
-        activeCollectionName: PropTypes.string,
-        isSidebarLocked: PropTypes.bool,
     }
 
     render() {
         return (
-            <div 
-                className={cx(styles.buttonContainer, {
-                        [styles.longContainer]: !this.props.isSidebarLocked,
-                })}
+            <div
+                className={styles.buttonContainer}
+                onDragEnter={this.props.listBtnClick}
             >
-                <div
-                    className={cx(styles.enabled, {
-                        [styles.sidebarLocked]: this.props.isSidebarLocked,
-                    })}
-                    onClick={this.props.listBtnClick}
-                    onDragEnter={this.props.listBtnClick}
-                >
-                    <span
-                        className={cx(styles.listButton, styles.button)}
-                        id="collection-icon"
-                    />
-                    <span className={cx(styles.title, {
-                        [styles.longTitle]: !this.props.isSidebarLocked,
-                    })}
+                {this.props.isListFilterActive ? (
+                    <div
+                        onClick={this.props.onShowBtnClick}
+                        className={styles.enabled}
                     >
-                        {this.props.activeCollectionName || 'All Collections'}
-                    </span>
-                </div>
-                {this.props.isListFilterActive && (
-                    <React.Fragment>
-                        <div
-                            onClick={this.props.onShowBtnClick}
-                            className={styles.smallButton}
-                        >
-                            show all
-                        </div>
-                    </React.Fragment>
+                        Show History
+                    </div>
+                ) : (
+                    <div
+                        onClick={this.props.listBtnClick}
+                        className={styles.enabled}
+                    >
+                        Collections
+                    </div>
                 )}
             </div>
         )

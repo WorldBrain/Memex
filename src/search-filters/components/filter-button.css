@@ -2,7 +2,7 @@
 @value color1, color2, color3, color4, color6, color8, color12, color9 from colors;
 
 .tagButton {
-    height: 24px;
+    height: 26px;
 
     /* ultra-light */
     border: 1px solid color9;
@@ -10,7 +10,7 @@
     border-radius: 3px;
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: color3;
     width: fit-content;
@@ -18,7 +18,7 @@
     text-align: center;
     background-color: #fff;
     outline: none;
-    padding: 1px 7px 2px 7px;
+    padding: 2px 7px;
 
     &:hover {
         background-color: color1;
@@ -28,7 +28,11 @@
 .tagButtonSelected {
     composes: tagButton;
     background-color: color2;
-    padding: 1px 4px 2px 7px;
+    padding: 0px 6px 0 0px;
+}
+
+.tagButtonDate {
+    composes: tagButtonSelected;
 }
 
 .tagButton:focus {
@@ -39,11 +43,27 @@
     background-color: color2;
 }
 
+.renderCount {
+    margin-left: 5px;
+    display: inline-flex;
+    align-items: center;
+    color: color4;
+}
+
+.pillContent {
+    display: flex;
+    align-items: center;
+}
+
 .buttonFocusSelected {
     text-align: left;
     width: 101px;
     height: 24px;
     background-color: color2;
+}
+
+.filterItem {
+    display: flex;
 }
 
 .clearFilters {
@@ -53,19 +73,25 @@
     cursor: pointer;
     width: 18px;
     height: 18px;
-    margin-left: 10px;
+    margin: 0 5px;
     background-position: center center;
+    display: inline-flex;
 
     &:hover {
         background-color: color8;
     }
 }
 
+.dateTopBox {
+    display: flex;
+    align-items: center;
+}
+
 .detailsFilter {
     display: grid;
     color: color4;
-    font-size: 14px;
-    margin-left: 10px;
+    font-size: 12px;
+    margin-left: 5px;
 }
 
 .spanInc {

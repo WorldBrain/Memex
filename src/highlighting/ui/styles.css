@@ -1,0 +1,23 @@
+.memex-highlight {
+    background: #00d88b;
+    transition: all 0.1s;
+    cursor: pointer;
+
+    &.medium {
+        background: #89e9ff;
+    }
+
+    &.dark {
+        background: #89e9ff;
+    }
+
+    &.tmp {
+        background: #00d88b;
+    }
+}
+
+.memex-highlight-tmp {
+    background: #00d88b;
+    transition: all 0.1s;
+    cursor: pointer;
+}

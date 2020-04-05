@@ -7,36 +7,28 @@
     align-items: center;
     flex-wrap: wrap;
     position: absolute;
-    font-size: 13px;
     background-color: #fff;
-    height: 36px;
+    height: 30px;
     min-width: fit-content;
     border-radius: 3px;
-    text-align: center;
     transform: translate(-50%, 50%);
     z-index: 100000;
     opacity: 1;
-    box-sizing: content-box;
     transition: all 1s ease-in-out;
 
-    & img {
-        margin-bottom: 0px !important; /* stylelint-disable-line declaration-no-important */
-        padding: 0px !important; /* stylelint-disable-line declaration-no-important */
-    }
-
     & > * {
-        font-family: 'Inter';
+        font-family: 'Poppins';
     }
 }
 
 .tooltip::after {
     box-sizing: content-box;
-    left: calc(50% - 5px);
-    top: -6px;
+    left: calc(50% - 3px);
+    top: -4px;
     border: solid transparent;
     content: ' ';
-    height: 10px;
-    width: 10px;
+    height: 6px;
+    width: 6px;
     position: absolute;
     pointer-events: none;
     border-color: rgba(15, 15, 15, 0.2);
@@ -59,8 +51,8 @@
 }
 
 .tooltipWithCloseMessage::after {
-    bottom: calc(80px - 5px);
-    top: -6px;
+    bottom: calc(80px - 3px);
+    top: -4px;
 }
 
 .tooltip.stateCopied {
@@ -68,24 +60,23 @@
     animation-fill-mode: forwards;
 
     &::after {
-        left: calc(50% - 5px);
-        top: -6;
+        left: calc(50% - 3px);
+        top: -4px;
     }
 }
 
 .tooltip.statePristine {
     border-radius: 3px;
-    width: 100px;
-    height: 36px;
-    display: grid;
-    justify-content: space-between;
+    height: 20px;
+    width: fit-content;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    grid-template-columns: max-content 30px;
-    grid-gap: 6px;
+    overflow: visible;
 
     &::after {
-        left: calc(50% - 5px);
-        top: -6px;
+        left: calc(50% - 3px);
+        top: -4px;
     }
 }
 
@@ -101,11 +92,13 @@
 .copiedMessage,
 .doneComponent {
     position: relative;
-    height: 36px;
     display: flex;
+    padding: 0 3px;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
+    margin-left: 0px;
+    width: 84px;
+    justify-content: space-between;
 }
 
 .animationWrapper {
@@ -114,43 +107,13 @@
 
 .createButtons {
     z-index: 10;
-    height: 36px;
-    width: 60px;
     display: flex;
     top: 0px;
-    justify-content: flex-start;
+    padding: 0 3px;
+    width: fit-content;
+    justify-content: space-between;
     align-items: center;
-    margin-left: 5px;
     animation: slideIn 0.05s ease-in-out;
-
-    & div {
-        cursor: pointer;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        margin-right: 2px;
-    }
-}
-
-.annotateIcon {
-        composes: nakedSquareButton from '../../common-ui/elements.css';
-        background-image: url('/img/comment_add.svg');
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: 20px;
-        height: 24px;
-        width: 24px;
-}
-
-.shareIcon {
-        composes: nakedSquareButton from '../../common-ui/elements.css';
-        background-image: url('/img/share.svg');
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: 20px;
-        height: 24px;
-        width: 24px;
 }
 
 .progressIndicator {
@@ -227,18 +190,32 @@
 }
 
 /* Right side buttons */
-.buttons {
-    display: flex;
+
+.button {
+    display: contents;
     flex-direction: column;
-    width: 25px;
-    height: 25px;
     justify-content: center;
     align-items: center;
-    position: absolute;
     z-index: 100001;
-    top: -12px;
     cursor: pointer;
-    animation: slideIn 0.05s ease-in-out;
+
+    &:hover {
+        opacity: 0.7;
+    }
+}
+
+.buttonImg {
+    width: auto;
+    height: 16px !important; /* stylelint-disable-line declaration-no-important */
+    margin: 0 5px;
+
+    &:hover {
+        opacity: 0.7;
+    }
+}
+
+.closeBtn {
+    height: 14px !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .noShow {

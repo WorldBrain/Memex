@@ -8,8 +8,6 @@ import {
     constants as blacklistConsts,
     blacklist,
 } from '../blacklist/background'
-import { trackExistingTabs } from '../activity-logger/background/tab-bridge'
-import countlyAnalytics from '../analytics/countly'
 
 export async function onInstall() {
     const now = Date.now()
@@ -17,9 +15,7 @@ export async function onInstall() {
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
 
-    analytics.trackEvent({ category: 'Global', action: 'Install' }, true)
-
-    countlyAnalytics.trackEvent({ type: 'install' })
+    analytics.trackEvent({ category: 'Global', action: 'Install' })
 
     // Open onboarding page
     browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })
@@ -27,7 +23,6 @@ export async function onInstall() {
     // Store the timestamp of when the extension was installed
     browser.storage.local.set({ [INSTALL_TIME_KEY]: now })
 
-    await trackExistingTabs({ isNewInstall: true })
     await generateTokenIfNot({ installTime: now })
 }
 
@@ -50,6 +45,5 @@ export async function onUpdate() {
         INSTALL_TIME_KEY
     ]
 
-    await trackExistingTabs({ isNewInstall: false })
     await generateTokenIfNot({ installTime })
 }

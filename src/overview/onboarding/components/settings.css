@@ -1,0 +1,37 @@
+@value colors: '../../../common-ui/colors.css';
+@value color6 from colors;
+
+.container * {
+    font-family: 'Poppins', sans-serif;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+.block input {
+    margin-right: 10px;
+    vertical-align: middle;
+    margin-left: 10px;
+    margin-top: 0px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid #d2d2d2;
+    width: 100px;
+    text-align: center;
+}
+
+.dropdown {
+    margin-left: 5px;
+    vertical-align: 1px;
+}
+
+.subText {
+    font-size: 14px;
+    color: color6;
+}
+
+.center {
+    justify-content: center;
+}

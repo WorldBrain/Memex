@@ -7,7 +7,9 @@ Note that lots of our existing codebase will not be following these guidelines w
 
 **This assumes a basic knowledge of `git`, `npm` and usage of the `command line`.**
 
-** Please ensure you are running on an environment using [the latest LTS version of Node](https://nodejs.org/en/).**
+**Please ensure you are running on an environment using [a v10.x release of Node](https://nodejs.org/en/).** As of writing, this is currently Node [v10.17.0](https://nodejs.org/download/release/v10.17.0/).
+
+Newer versions could result in a failing `yarn install` as they haven't been assessed just yet.
 
 ### First steps:
 
@@ -24,7 +26,7 @@ installation page](https://yarnpkg.com/en/docs/install).
 
 **Run `yarn` to install dependencies**
 
-This could take a while....
+in the cloned folder Memex run `yarn`, This could take a while....
 
 ```sh
 $ yarn
@@ -233,7 +235,7 @@ To keep things modular, the source code in [`src/`](./src/) is split into "featu
 
 For new BG script features, these should go into the `background/` dirs of top-level (`src/`) feature modules.
 
-An existing example top-level feature module is [`backup/`](./src/backup). You'll see `background/` and `content_script/` dirs in there containing BG script and content script logic related to that feature, respectively. The `backup/background/index` module acts as the BG script entrypoint for the backup feature, exporting a main class, `BackupBackgroundModule`, which accepts a few different args upon instantiation. Most important being `storageManager`; this allows access to the DB. The `BackupBackgroundModule` class has a lot of different methods to cover different feature behaviours, but all DB manipulation itself is done in another class in the `backup/background/storage` module.
+An existing example top-level feature module is [`backup/`](src/backup-restore). You'll see `background/` and `content_script/` dirs in there containing BG script and content script logic related to that feature, respectively. The `backup/background/index` module acts as the BG script entrypoint for the backup feature, exporting a main class, `BackupBackgroundModule`, which accepts a few different args upon instantiation. Most important being `storageManager`; this allows access to the DB. The `BackupBackgroundModule` class has a lot of different methods to cover different feature behaviours, but all DB manipulation itself is done in another class in the `backup/background/storage` module.
 
 Looking into that, you'll see it extends the abstract [`FeatureStorage` class](./src/search/storage/index.ts#L6-L19), which affords consistent set up to interact with the `storageManager` DB instance and set up new Storex ([our DB](https://github.com/WorldBrain/storex)) data collections.
 Finally, all BG script features should be instantiated in the [BG script entrypoint module](./src/background.ts#L44).

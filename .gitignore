@@ -13,3 +13,7 @@ stats.json
 .sentryclirc
 .DS_Store
 local-backup
+.idea
+*-debug.log
+private/
+.env

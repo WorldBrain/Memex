@@ -1,0 +1,91 @@
+@value colors: 'src/common-ui/colors.css';
+@value color1, color 2, color3, color6, color8, color4, color14 from colors;
+
+.pageList {
+    display: flex;
+    align-items: center;
+    height: 30px;
+    position: relative;
+    width: 100%;
+    cursor: pointer;
+
+    &:hover {
+        background-color: color8;
+
+        & .buttonContainer {
+            display: flex;
+        }
+    }
+}
+
+.pageListDrag {
+    background-color: #d7d7d7;
+}
+
+.filtered {
+    composes: itemActive hoverSidebarActive from '../../../../common-ui/colors.css';
+}
+
+.filtered div {
+    font-weight: bold;
+    color: #222;
+}
+
+.button {
+    display: inline;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: 60%;
+    background-position: center;
+    cursor: pointer;
+    outline: none;
+}
+
+.editButton {
+    background-image: url('/img/edit.svg');
+    width: 24px;
+    height: 24px;
+    background-position: center;
+}
+
+.deleteButton {
+    background-image: url('/img/trash.svg');
+    width: 24px;
+    height: 24px;
+    background-position: center;
+    margin-left: 5px;
+}
+
+.listName {
+    composes: menuItem from '../../../../common-ui/colors.css';
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0px 15px 0px 16px;
+    font-size: 14px;
+    color: color4;
+    font-weight: 400;
+    cursor: pointer;
+    width: 100%;
+}
+
+.buttonContainer {
+    margin-right: 5px;
+    justify-content: flex-end;
+    width: fit-content;
+    align-items: center;
+    display: none;
+}
+
+@keyframes appear {
+    0% {
+        transform: translateX(5px);
+        visibility: hidden;
+    }
+
+    100% {
+        transform: translateX(0px);
+        visibility: visible;
+    }
+}

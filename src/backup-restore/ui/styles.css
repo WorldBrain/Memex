@@ -1,0 +1,174 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4, color12 from colors;
+
+.screenContainer {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    margin-top: 10px;
+}
+
+.dangerButton {
+    background-color: red;
+    color: white;
+}
+
+.background {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: -35px;
+    left: -295px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    z-index: 2;
+}
+
+.backupTitle {
+    font-size: 24px;
+    color: color4;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.subtitle {
+    composes: subTitleColor from '../../common-ui/colors.css';
+}
+
+.subtitle2 {
+    composes: subText from '../../options/base.css';
+    margin-bottom: 30px;
+}
+
+.header2 {
+    composes: subTitle from '../../options/base.css';
+}
+
+.back {
+    composes: warningColor hoverColor from '../../common-ui/colors.css';
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 20px;
+    padding: 3px 5px;
+    font-size: 15px;
+    border-radius: 3px;
+}
+
+/* Warning section */
+
+.showWarning {
+    display: flex;
+    top: 0;
+    right: 0;
+    width: 100%;
+    padding: 15px 40px;
+    background-color: color12;
+    align-items: center;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+
+.showWarningText {
+    font-size: 15px;
+    text-align: center;
+    font-weight: 500;
+    color: white;
+}
+
+.underline {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.WarningIcon {
+    composes: WarningIconWhite from '../../common-ui/icons.css';
+    width: 35px;
+    height: 35px;
+    display: inline-flex;
+    margin-right: 15px;
+    background-size: contain;
+}
+
+/* Upgrade Button */
+
+.labelFree {
+    color: white;
+    background: #3eb995;
+}
+
+.labelContribute {
+    color: #3eb995;
+    border: 2px solid #3eb995;
+    background: transparent;
+}
+
+.labelPremium {
+    color: white;
+    background: #173766;
+}
+
+.star {
+    font-size: 18px;
+    vertical-align: text-top;
+    margin-right: 5px;
+    margin-top: 1px;
+}
+
+.label {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-size: 15px;
+    vertical-align: middle;
+    margin-left: 10px;
+    border-radius: 3px;
+}
+
+.label:hover {
+    background: white;
+    border: solid 2px #3eb995;
+    color: #3eb995;
+}
+
+/* Elements for selections */
+
+.option {
+    vertical-align: middle;
+    display: inline-block;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.optionLine {
+    display: flex;
+    justify-content: space-between;
+}
+
+.name {
+    composes: h2Color from '../../common-ui/colors.css';
+    vertical-align: middle;
+    font-weight: 600;
+    font-size: 15px;
+    margin-right: 8px;
+}
+
+.messageBox {
+    margin-right: 30px;
+
+    & > div {
+        margin-bottom: 0px;
+    }
+}
+
+.subname {
+    composes: subText from '../../options/base.css';
+    margin-top: 4px;
+}
+
+.selectionlist {
+    margin-top: 10px;
+}

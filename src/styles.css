@@ -1,4 +1,4 @@
-@import url('/fonts/Inter/Inter.css');
+@import url('/fonts/Poppins/poppins.css');
 
 .title {
     color: #3eb995;
@@ -15,4 +15,25 @@
     letter-spacing: 1px;
     width: 60%;
     min-width: 450px;
+}
+
+.productHuntBatch {
+    width: 180px;
+    height: 54px;
+    opacity: 0.7;
+
+    @media (max-width: 1100px) {
+        display: none;
+    }
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.productHuntContainer {
+    position: absolute;
+    bottom: 0px;
+    float: right;
+    right: 60px;
 }

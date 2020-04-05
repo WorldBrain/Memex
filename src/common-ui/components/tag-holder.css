@@ -3,8 +3,15 @@
 
 .tagList {
     display: flex;
-    flex-grow: 2;
-    margin-left: 10px;
+    flex-wrap: nowrap;
+    margin: 4px 0 0 0;
+    overflow-x: auto;
+    padding-left: 38px;
+}
+
+.tagListSidebar {
+    flex-wrap: wrap;
+    padding: 7px 0 0 38px;
 }
 
 .tagname {

@@ -2,7 +2,7 @@ import { browser } from 'webextension-polyfill-ts'
 import * as AllRaven from 'raven-js'
 import createRavenMiddleware from 'raven-for-redux'
 
-import { storageChangesManager } from './storage-changes'
+import { StorageChangesManager } from './storage-changes'
 import { SHOULD_TRACK_STORAGE_KEY as SHOULD_TRACK } from '../options/privacy/constants'
 
 // Issue with the export being a default but something with our tsconfig; TODO
@@ -14,21 +14,28 @@ browser.storage.local // tslint:disable-line
     .get(SHOULD_TRACK)
     .then(storage => (sentryEnabled = !!storage[SHOULD_TRACK]))
 
-// Update global tracking flag every time stored flag changes
-storageChangesManager.addListener(
-    'local',
-    SHOULD_TRACK,
-    ({ newValue }) => (sentryEnabled = newValue),
-)
-
 /**
  * Inits Sentry's JS client Raven. Optionally supports adding redux middleware,
  * if middleware array passed in. Note this array will be updated.
  */
-export default function initSentry(
-    reduxMiddlewares?: Function[], // tslint:disable-line
+export default function initSentry({
+    reduxMiddlewares,
     stateTransformer = f => f,
-) {
+    storageChangesManager = new StorageChangesManager({
+        storage: browser.storage,
+    }),
+}: {
+    reduxMiddlewares?: Function[] // tslint:disable-line
+    stateTransformer?: (state: any) => any
+    storageChangesManager?: StorageChangesManager
+}) {
+    // Update global tracking flag every time stored flag changes
+    storageChangesManager.addListener(
+        'local',
+        SHOULD_TRACK,
+        ({ newValue }) => (sentryEnabled = newValue),
+    )
+
     if (process.env.SENTRY_DSN) {
         raven
             .config(process.env.SENTRY_DSN, {
@@ -44,3 +51,8 @@ export default function initSentry(
         }
     }
 }
+
+export const context = (cb: () => Promise<void> | void) => raven.context(cb)
+export const captureException = (error: Error) => raven.captureException(error)
+export const captureBreadcrumb = (details: any) =>
+    raven.captureBreadcrumb(details)

@@ -90,16 +90,6 @@ export class ToolbarNotification extends Component<Props> {
                                 this.props.onCloseRequested()
                                 this.props.triggerNextNotification()
                             }}
-                            openDashboard={async () => {
-                                this.processEventRPC({
-                                    type: EVENT_NAMES.POWERSEARCH_GOTO_DASH,
-                                })
-                                await setOnboardingStage(
-                                    FLOWS.powerSearch,
-                                    STAGES.powerSearch.overviewTooltips,
-                                )
-                                this.openOptionsTab('overview')
-                            }}
                         />
                     )}
                 </div>

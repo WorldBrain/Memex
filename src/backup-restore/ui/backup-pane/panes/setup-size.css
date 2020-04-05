@@ -1,0 +1,61 @@
+.headerEmphasis {
+    font-size: 1.3em;
+    text-transform: uppercase;
+}
+
+.sumCell {
+    padding: 20px 0;
+    border-top: 2px solid black;
+    margin-right: 20px;
+    vertical-align: top;
+}
+
+tr {
+    vertical-align: top;
+}
+
+.include {
+    font-size: 16px;
+    vertical-align: middle;
+    padding-left: 10px;
+}
+
+.option {
+    vertical-align: top;
+    display: inline-block;
+    margin-bottom: 15px;
+    padding-left: 10px;
+}
+
+.name {
+    composes: h2Color from '../../../../common-ui/colors.css';
+    vertical-align: top;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.subname {
+    composes: infoText from 'src/options/settings/components/settings.css';
+    font-size: 14px;
+}
+
+.checkbox {
+    margin-left: -0px;
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 1px;
+    vertical-align: middle;
+    margin-top: -5px;
+    margin-right: 10px;
+}
+
+.estimationSize {
+    composes: darkMintGreen from '../../../../common-ui/colors.css';
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.table {
+    margin-top: -10px;
+}

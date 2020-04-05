@@ -9,6 +9,7 @@ const ConfirmModalBtn = ({ children, cancel = false, ...btnProps }) => (
         className={cx(styles.btn, styles.confirmBtn, {
             [styles.cancelBtn]: cancel,
         })}
+        data-annotation="sidebar"
         {...btnProps}
     >
         {children}

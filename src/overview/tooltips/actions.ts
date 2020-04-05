@@ -21,11 +21,6 @@ export const initOnboardingTooltips = (index = 0) => dispatch => {
 
 export const fetchOnboardingState = () => async dispatch => {
     const onboardingState = await fetchOnboardingStage(FLOWS.powerSearch)
-    if (onboardingState === STAGES.powerSearch.overviewTooltips) {
-        dispatch(initOnboardingTooltips())
-    } else if (onboardingState === STAGES.powerSearch.skipToTimeFilters) {
-        dispatch(initOnboardingTooltips(1))
-    }
 }
 
 export const processAndSetWhichTooltip = (whichTooltip: number) => dispatch => {

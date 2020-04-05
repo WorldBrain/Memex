@@ -1,36 +1,29 @@
 .box {
     composes: toolTips from 'src/common-ui/elements.css';
     position: absolute;
-    padding: 40px;
-    width: 105%;
+    padding: 40px 25px 25px;
+    width: 90%;
     max-width: 600px;
     z-index: 2500;
     margin: auto auto;
     background: white;
     margin-top: -130px;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-    grid-row-gap: 10px;
-    grid-template-areas:
-        'header'
-        'description'
-        'linkbox'
-        'buttonbox';
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .header {
-    composes: h2color from '../colors.css';
-    grid-area: header;
+    composes: sectionTitle from 'src/options/settings/components/settings.css';
     margin: 0px;
     text-align: center;
     font-size: 21px;
+    cursor: pointer;
 }
 
 .description {
-    composes: subTitleColor from '../colors.css';
-    grid-area: description;
-    font-size: 0.9rem;
+    composes: infoText from 'src/options/settings/components/settings.css';
     margin: 0px;
     text-align: center;
 }

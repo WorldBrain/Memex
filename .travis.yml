@@ -1,13 +1,14 @@
 language: node_js
 node_js:
-    - 'lts/*'
+    - '10'
 install:
     - git submodule update --init --recursive
-    - yarn install --frozen-lockfile
+    - yarn install --frozen-lockfile --network-concurrency 1
 script:
-    - npm run test
+    - npm run test -- --detectOpenHandles
     - npm run lint
     - npm run build:ci
+    - npm run storybook:ci
 cache:
     yarn: true
     directories:

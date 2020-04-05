@@ -19,6 +19,11 @@
 
 /* LOGOS */
 
+.logo {
+    composes: iconPosition;
+    background-image: url('/img/memex-logo.png');
+}
+
 .logoSquared {
     composes: iconPosition;
     background-image: url('/img/worldbrain-logo-narrow-bw-48.png');
@@ -29,19 +34,31 @@
 .removeIcon {
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('/img/removeIcon.svg');
+    background-image: url('/img/close.svg');
+}
+
+.removeMinusIcon {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/remove.svg');
 }
 
 .searchIcon {
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url('/img/searchIcon.svg');
+    background-image: url('/img/search.svg');
 }
 
 .checkMark {
     background-position: center;
     background-repeat: no-repeat;
     background-image: url('/img/check.svg');
+}
+
+.checkRound {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/checkRound.svg');
 }
 
 .starMark {
@@ -68,6 +85,12 @@
     background-position: center;
     background-repeat: no-repeat;
     background-image: url('/img/settings.svg');
+}
+
+.syncIcon {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('/img/sync.svg');
 }
 
 .upgradeIcon {
@@ -169,6 +192,11 @@
     background-image: url('/img/arrowUp.svg');
 }
 
+.closeIcon {
+    composes: iconPosition;
+    background-image: url('/img/close.svg');
+}
+
 .reload {
     composes: iconPosition;
     background-image: url('/img/reload.svg');
@@ -177,4 +205,11 @@
 .excluded {
     composes: iconPosition;
     background-image: url('/img/exclusion.svg');
+}
+
+.tipIcon {
+    composes: iconPosition;
+    background-image: url('/img/icon_tooltip.svg');
+    height: 21px;
+    width: 16px;
 }

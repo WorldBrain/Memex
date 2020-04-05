@@ -1,17 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-
-import styles from './AdvSettings.css'
+import { Checkbox } from 'src/common-ui/components'
 
 const PrevFailedCheckbox = props => (
     <React.Fragment>
-        <label htmlFor="process-failed">Include previously failed urls</label>
-        <input
-            className={styles.prevFailedCheckbox}
-            id="process-failed"
-            type="checkbox"
-            {...props}
-        />
+        <Checkbox
+                id="process-failed"
+                handleChange={props.onChange}
+                isChecked={props.checked}
+        >
+            <label htmlFor="process-failed">Include previously failed urls</label>
+        </Checkbox>
     </React.Fragment>
 )
 

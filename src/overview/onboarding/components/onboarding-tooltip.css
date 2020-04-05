@@ -1,0 +1,65 @@
+@value colors: 'src/common-ui/colors.css';
+@value color2, color3, color5, color17 from colors;
+
+.container {
+    composes: boxShadow from 'src/common-ui/colors.css';
+    composes: fadeIn from 'src/common-ui/elements.css';
+    align-items: center;
+    background-color: white;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 1rem;
+    margin: 40px auto 17px;
+    max-width: 95%;
+}
+
+.img {
+    flex: 1;
+}
+
+.textContainer {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ctaButton {
+    display: inline-flex;
+    composes: CTA from 'src/common-ui/elements.css';
+    background: color2;
+    color: white;
+    font-size: 14px;
+
+    &:hover {
+        background: #44bc8b;
+        color: white;
+    }
+}
+
+.containerTitle {
+    color: color17;
+    display: flex;
+    flex-direction: normal;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.tipIcon {
+    composes: tipIcon from 'src/common-ui/icons.css';
+    margin: 0 5px 0 -21px; /* width of the icon to offset */
+    position: relative;
+    display: flex;
+}
+
+.descriptionText {
+    font-size: 16px;
+    color: color3;
+    font-weight: normal;
+    width: 75%;
+    margin: 1rem auto;
+    text-align: center;
+}

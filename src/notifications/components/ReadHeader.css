@@ -1,22 +1,28 @@
 .readHeader {
     font-size: 18px;
     text-align: center;
-    margin-top: 70px;
+    margin-top: 30px;
     color: #777;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    composes: nakedButton from 'src/common-ui/elements.css';
+    width: fit-content;
+    align-self: center;
 }
 
 .expIcon {
     width: 25px;
-    height: auto;
+    height: 25px;
     margin: auto 0 auto 5px;
     cursor: pointer;
+    composes: arrowTriangle from 'src/common-ui/icons.css';
+    display: flex;
+    transform: rotate(-90deg);
 }
 
 .expanded {
-    transform: rotate(180deg);
+    transform: rotate(90deg);
     cursor: pointer;
 }

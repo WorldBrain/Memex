@@ -2,7 +2,6 @@
     "search.exclude": {
         "**/node_modules": true,
         "**/extension": true,
-        "**/external": true,
         "yarn.lock": true
     },
     "stylelint.enable": true,

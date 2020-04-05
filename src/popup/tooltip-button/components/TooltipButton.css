@@ -4,14 +4,13 @@
 
 .switch {
     align-items: center;
-    margin: 0 20px 0px 0px;
     display: flex;
-    padding-left: 10px;
+    justify-content: center;
+    flex: 1;
 }
 
 .icon {
     display: inline-block;
-    margin-left: 10px;
     cursor: pointer;
 }
 
@@ -31,4 +30,5 @@
     width: 100%;
     align-items: center;
     display: flex;
+    flex: 2;
 }

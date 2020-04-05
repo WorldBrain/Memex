@@ -1,0 +1,159 @@
+@value colors: '../../../../common-ui/colors.css';
+@value color11, color6, color12, radius3 from colors;
+
+.overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 50px;
+    right: 50px;
+    padding: 25px 25px 15px 25px;
+    width: 420px;
+    min-height: 250px;
+    z-index: 999999;
+    height: fit-content;
+    background: white;
+    background-color: white;
+    composes: toolTips from '../../../../common-ui/elements.css';
+
+    /* &:disabled,
+    &[disabled] {
+        cursor: default;
+    } */
+}
+
+.overlayHeader {
+    font-size: 18px;
+    font-weight: 600;
+    align-self: center;
+    margin-bottom: 15px;
+}
+
+.loadingBlocker {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    height: 90%;
+    background: white;
+    justify-content: center;
+    padding-top: 50px;
+    align-items: flex-start;
+    z-index: 2500000;
+}
+
+.statusSection {
+    width: 100%;
+}
+
+.syncSection {
+    width: 100%;
+}
+
+.description {
+    display: flex;
+    text-align: left;
+    justify-content: space-between;
+
+    & > span {
+        margin: 0 10px 0 0;
+    }
+}
+
+.timer {
+    width: 100%;
+}
+
+.infoBox {
+    display: flex;
+    align-items: flex-start;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.errorMessage {
+    padding: 15px;
+    font-size: 15px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    text-align: left;
+    background-color: color12;
+    border-radius: radius3;
+}
+
+.errorDescInfo {
+    font-weight: 500;
+    color: white;
+    line-height: 20px;
+}
+
+.showWarning {
+    display: flex;
+    top: 0;
+    right: 0;
+    width: 100%;
+    padding: 15px 40px;
+    background-color: color12;
+    align-items: center;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+
+.showWarningText {
+    font-size: 15px;
+    text-align: center;
+    font-weight: 500;
+    color: white;
+}
+
+.backupSection {
+    width: 100%;
+}
+
+.backup {
+    font-size: 15px;
+    padding: 10px 0px;
+    width: 100%;
+    font-weight: 400;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bottomBorder {
+    width: 90%;
+    height: 1px;
+    border-bottom: 1px solid rgba(55, 53, 47, 0.2);
+}
+
+.icon {
+    height: 20px;
+    width: 20px;
+    background-size: 20px;
+    background-position: center;
+}
+
+.checkedIcon {
+    composes: icon;
+}
+
+.crossIcon {
+    composes: icon;
+    color: red;
+}
+
+.descInfo {
+    font-size: 16px;
+    color: color6;
+    text-align: left;
+}
+
+.button {
+    margin-bottom: 10px;
+}

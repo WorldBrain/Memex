@@ -20,6 +20,13 @@
 
 import mapValues from 'lodash/fp/mapValues'
 import { browser } from 'webextension-polyfill-ts'
+import { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
+import TypedEventEmitter from 'typed-emitter'
+import { EventEmitter } from 'events'
+import { AuthRemoteEvents } from 'src/authentication/background/types'
+import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { Claims } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 // Our secret tokens to recognise our messages
 const RPC_CALL = '__RPC_CALL__'
@@ -41,6 +48,51 @@ export class RemoteError extends Error {
 
 // === Initiating side ===
 
+// The extra options available when calling a remote function
+interface RPCOpts {
+    tabId?: number
+}
+
+// runInBackground and runInTab create a Proxy object that looks like the real interface but actually calls remote functions
+//
+// When the Proxy is asked for a property (such as a method)
+// return a function that executes the requested method over the RPC interface
+//
+// Example Usage:
+//      interface AnalyticsInterface { trackEvent({}) => any }
+//      const analytics = runInBackground<AnalyticsInterface>()
+//      analytics.trackEvent(...)
+
+// Runs a remoteFunction in the background script
+export function runInBackground<T extends object>(): T {
+    return new Proxy<T>({} as T, {
+        get(target, property): any {
+            return (...args) => {
+                return _remoteFunction(property.toString())(...args)
+            }
+        },
+    })
+}
+
+// Runs a remoteFunction in the content script on a certain tab
+export function runInTab<T extends object>(tabId): T {
+    return new Proxy<T>({} as T, {
+        get(target, property): any {
+            return (...args) => {
+                return _remoteFunction(property.toString(), { tabId })(...args)
+            }
+        },
+    })
+}
+
+// @depreciated - Don't call this function directly. Instead use the above typesafe version runInBackground
+export function remoteFunction(
+    funcName: string,
+    { tabId }: { tabId?: number } = {},
+) {
+    return _remoteFunction(funcName, { tabId })
+}
+
 // Create a proxy function that invokes the specified remote function.
 // Arguments
 // - funcName (required): name of the function as registered on the remote side.
@@ -48,15 +100,7 @@ export class RemoteError extends Error {
 //       tabId: The id of the tab whose content script is the remote side.
 //              Leave undefined to call the background script (from a tab).
 //   }
-export function remoteFunction(
-    funcName: string,
-    {
-        tabId,
-        throwWhenNoResponse,
-    }: { tabId?: number; throwWhenNoResponse?: boolean } = {},
-) {
-    throwWhenNoResponse =
-        throwWhenNoResponse == null || throwWhenNoResponse === true
+function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
     const otherSide =
         tabId !== undefined
             ? "the tab's content script"
@@ -77,19 +121,13 @@ export function remoteFunction(
                     ? await browser.tabs.sendMessage(tabId, message)
                     : await browser.runtime.sendMessage(message)
         } catch (err) {
-            if (throwWhenNoResponse) {
-                throw new RpcError(
-                    `Got no response when trying to call '${funcName}'. ` +
-                        `Did you enable RPC in ${otherSide}?`,
-                )
-            }
             return
         }
 
         // Check if it was *our* listener that responded.
         if (!response || response[RPC_RESPONSE] !== RPC_RESPONSE) {
             throw new RpcError(
-                `RPC got a response from an interfering listener.`,
+                `RPC got a response from an interfering listener. Wanted ${RPC_RESPONSE} but got ${response[RPC_RESPONSE]}. Response:${response}`,
             )
         }
 
@@ -167,6 +205,14 @@ async function incomingRPCListener(message, sender) {
 // A bit of global state to ensure we only attach the event listener once.
 let enabled = false
 
+export function setupRemoteFunctionsImplementations<T>(
+    implementations: RemoteFunctionImplementations,
+): void {
+    for (const [group, functions] of Object.entries(implementations)) {
+        makeRemotelyCallableType<typeof functions>(functions)
+    }
+}
+
 // Register a function to allow remote scripts to call it.
 // Arguments:
 // - functions (required):
@@ -178,20 +224,36 @@ let enabled = false
 //           argument before the arguments it was invoked with, an object with
 //           the details of the tab that sent the message.
 //   }
-
-export function makeRemotelyCallable(
-    functions: { [fnName: string]: (...args: any[]) => any },
+export function makeRemotelyCallableType<T = never>(
+    functions: { [P in keyof T]: T[P] },
+    { insertExtraArg = false } = {},
+) {
+    return makeRemotelyCallable(functions, { insertExtraArg })
+}
+// @Depreciated to call this directly. Should use the above typesafe version
+export function makeRemotelyCallable<T>(
+    functions: { [P in keyof T]: T[P] },
     { insertExtraArg = false } = {},
 ) {
     // Every function is passed an extra argument with sender information,
     // so remove this from the call if this was not desired.
     if (!insertExtraArg) {
         // Replace each func with...
+        // @ts-ignore
         const wrapFunctions = mapValues(func =>
             // ...a function that calls func, but hides the inserted argument.
+            // @ts-ignore
             (extraArg, ...args) => func(...args),
         )
+        // @ts-ignore
         functions = wrapFunctions(functions)
+    }
+
+    for (const functionName of Object.keys(functions)) {
+        if (remotelyCallableFunctions.hasOwnProperty(functionName)) {
+            const error = `RPC function with name ${functionName} has already been registered `
+            console.warn(error)
+        }
     }
 
     // Add the functions to our global repetoir.
@@ -210,12 +272,92 @@ export class RemoteFunctionRegistry {
     }
 }
 
-export function fakeRemoteFunction(functions: {
+export function fakeRemoteFunctions(functions: {
     [name: string]: (...args) => any
 }) {
     return name => {
+        if (!functions[name]) {
+            throw new Error(
+                `Tried to call fake remote function '${name}' for which no implementation was provided`,
+            )
+        }
         return (...args) => {
             return Promise.resolve(functions[name](...args))
         }
     }
+}
+
+export interface RemoteEventEmitter<T> {
+    emit: (eventName: keyof T, data: any) => Promise<any>
+}
+const __REMOTE_EVENT__ = '__REMOTE_EVENT__'
+const __REMOTE_EVENT_TYPE__ = '__REMOTE_EVENT_TYPE__'
+const __REMOTE_EVENT_NAME__ = '__REMOTE_EVENT_NAME__'
+
+// Sending Side, (e.g. background script)
+export function remoteEventEmitter<T>(
+    eventType: string,
+): RemoteEventEmitter<T> {
+    const message = {
+        __REMOTE_EVENT__,
+        __REMOTE_EVENT_TYPE__: eventType,
+    }
+    return {
+        emit: async (eventName, data) =>
+            browser.runtime.sendMessage({
+                ...message,
+                __REMOTE_EVENT_NAME__: eventName,
+                data,
+            }),
+    }
+}
+
+// Receiving Side (e.g. content script, options page, etc)
+const remoteEventEmitters: RemoteEventEmitters = {} as RemoteEventEmitters
+type RemoteEventEmitters = {
+    [K in keyof RemoteEvents]?: TypedRemoteEventEmitter<K>
+}
+export type TypedRemoteEventEmitter<
+    T extends keyof RemoteEvents
+> = TypedEventEmitter<RemoteEvents[T]>
+
+// Statically defined types for now, move this to a registry
+interface RemoteEvents {
+    auth: AuthRemoteEvents
+    sync: InitialSyncEvents
+}
+
+function registerRemoteEventForwarder() {
+    if (browser.runtime.onMessage.hasListener(remoteEventForwarder)) {
+        return
+    }
+    browser.runtime.onMessage.addListener(remoteEventForwarder)
+}
+const remoteEventForwarder = (message, _) => {
+    if (message == null || message[__REMOTE_EVENT__] !== __REMOTE_EVENT__) {
+        return
+    }
+
+    const emitterType = message[__REMOTE_EVENT_TYPE__]
+    const emitter = remoteEventEmitters[emitterType]
+
+    if (emitter == null) {
+        return
+    }
+
+    emitter.emit(message[__REMOTE_EVENT_NAME__], message.data)
+}
+
+export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
+    eventType: EventType,
+): RemoteEventEmitters[EventType] {
+    const existingEmitter = remoteEventEmitters[eventType]
+    if (existingEmitter) {
+        return existingEmitter
+    }
+
+    const newEmitter = new EventEmitter() as any
+    remoteEventEmitters[eventType] = newEmitter
+    registerRemoteEventForwarder()
+    return newEmitter
 }

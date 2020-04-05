@@ -6,7 +6,7 @@
     width: 100%;
     overflow: scroll;
     margin: 0px auto;
-    padding: 1px 0px;
+    padding: 10px 0 50px 0;
     display: flex;
     flex-direction: column;
     position: absolute;
@@ -14,6 +14,7 @@
     align-items: center;
     top: 90px;
     height: calc(100vh - 90px);
+    overflow-x: visible;
 
     &.lessHeight {
         height: calc(100vh - 135px);
@@ -49,6 +50,11 @@
     flex-direction: column;
     height: 100vh;
     align-items: center;
+    overflow: scroll;
+}
+
+.LoadingIndicatorContainer {
+    margin: 50px 0 100px;
 }
 
 .proTip {
@@ -70,7 +76,7 @@
     align-items: center;
     justify-content: center;
     width: 500px;
-    margin: 30px auto 50px auto;
+    margin: 50px auto 20px auto;
     font-size: 11px;
     color: color4;
 }

@@ -13,15 +13,13 @@
     & th,
     & td {
         padding: 15px 10px 10px 10px;
+        width: 21.5%;
+        color: color4;
+        font-weight: 300;
     }
 
     & th {
         font-weight: 600;
-    }
-
-    & td {
-        color: color4;
-        font-weight: 300;
     }
 
     & td.importTableCellSepar {
@@ -31,8 +29,12 @@
     & td:first-child {
         text-align: initial;
         font-weight: 500;
-        width: 30%;
-        padding: 15px 5px 15px 15px;
+        width: 35%;
+        padding: 15px 0px 15px 15px;
+    }
+
+    & tr:last-child {
+        border-bottom: none;
     }
 }
 
@@ -44,16 +46,14 @@
 
 .importTableRow {
     font-size: 14px;
-    height: 110px;
+    height: 90px;
     vertical-align: middle;
+    border-bottom: solid 1px #efefef;
+}
 
-    &:nth-child(even) {
-        background-color: transparent;
-    }
-
-    &:nth-child(odd) {
-        background-color: #eceff390;
-    }
+.labelContainer {
+    display: flex;
+    flex-direction: column;
 }
 
 .link {
@@ -94,19 +94,21 @@
 .loadingBlocker {
     position: absolute;
     top: 0;
+    left: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 750px;
-    width: 830px;
+    height: 100%;
+    width: 100%;
+    text-align: center;
     z-index: 25000000;
-    background: #fbfafa;
-    opacity: 0.8;
+    background: white;
 }
 
 .loadingMsg {
-    font-weight: bold;
+    margin-top: -30px;
+    composes: sectionTitle from 'src/options/settings/components/settings.css';
 }
 
 .title {
@@ -147,10 +149,15 @@
     display: flex;
     margin: 1em 0;
     flex-direction: row;
-    color: color12;
+    color: white;
     align-items: center;
     font-weight: 500;
     margin-top: 20px;
+    border: 2px solid color12;
+    padding: 10px 10px;
+    border-radius: 6px;
+    justify-content: center;
+    background: #f29d9d;
 }
 
 .warningText {
@@ -158,6 +165,7 @@
     position: relative;
     margin: 0;
     line-height: 22px;
+    font-size: 14px;
 }
 
 .warningCode {
@@ -180,10 +188,9 @@
 }
 
 .checkboxSubText {
-    margin-left: 24px;
     font-size: 12px;
     color: color6;
-    display: inline-block
+    display: inline-block;
 }
 
 .checkbox {
@@ -299,4 +306,47 @@
     &:hover {
         cursor: pointer;
     }
+}
+
+.selectFile {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid #5671cf;
+    display: inline-block;
+    font-size: 14px;
+    color: #5671cf;
+
+    &[disabled] {
+        opacity: 0;
+        cursor: not-allowed;
+    }
+}
+
+.hidden {
+    composes: selectFile;
+    opacity: 0;
+    cursor: not-allowed;
+    vertical-align: super;
+}
+
+input[type='file'] {
+    display: none;
+}
+
+.tutorial {
+    composes: helpIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 25px;
+    height: 25px;
+    background-size: 20px;
+    display: flex;
+    vertical-align: middle;
+}
+
+.uploaderBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

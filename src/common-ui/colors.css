@@ -4,16 +4,21 @@
 @value color2: #5cd9a6; /* darkMintGreen */
 @value color3: #1a2f58; /* darkBlue */
 @value color4: rgb(54, 54, 46); /* BrownBlack */
-@value color5: #111; /* AlmostBlack */
+@value color5: #222222; /* AlmostBlack */
 @value color6: #a2a2a2; /* LightGrey (for subtitles) */
 @value color7: #e8e8e8; /* LightGrey (for onhover) */
 @value color8: rgba(55, 53, 47, 0.2); /* Darkergrey (for non-white onhover) */
+
+/* TODO: This is not LightGrey, it's the same lightMintGreen as color1 ??? */
 @value color9: #8fffd7; /* LightGrey (for borders) */
 @value color10: #83c9f4; /* lightBlue */
 @value color11: #f7f7f7; /* lightgrey for edit fields */
 @value color12: #f29d9d; /* mint-red for warning colors */
 @value color13: #edf0f4; /* light blue for fixed sidebars */
 @value color14: #efefef; /* light grey for selecting options */
+@value color15: #dfdfdf; /* loadingindicator */
+@value color16: #555555; /* mid grey */
+@value color17: #667bcc; /* light purple */
 
 /* BORDER RADIUS */
 @value radius1: 1px;
@@ -25,7 +30,7 @@
 
 /* FONTS */
 
-@value mainFont: 'Inter'
+@value mainFont: 'Poppins'
 
 /* CONFIGURATIONS */
 
@@ -130,12 +135,12 @@
     opacity: 1;
 
     &:placeholder-shown {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Poppins', sans-serif;
         color: color3;
     }
 
     &:placeholder {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Poppins', sans-serif;
         color: color3;
     }
 }
@@ -154,7 +159,7 @@
 }
 
 .menuItem {
-    color: #555;
+    color: color5;
     font-weight: 400;
 }
 
@@ -186,11 +191,6 @@
 
 .hoverColor:hover {
     background-color: color7;
-    color: color4;
-}
-
-.hoversidebaropen:hover {
-    background-color: color8;
     color: color4;
 }
 

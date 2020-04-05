@@ -4,15 +4,7 @@ import PropTypes from 'prop-types'
 import IndexDropdownRow from './IndexDropdownRow'
 
 const IndexDropdownNewRow = ({ value, isNew = true, ...props }) => (
-    <IndexDropdownRow
-        {...props}
-        value={
-            <React.Fragment>
-                <span>{value}</span>
-            </React.Fragment>
-        }
-        isNew
-    />
+    <IndexDropdownRow {...props} value={<span>{value}</span>} isNew />
 )
 
 IndexDropdownNewRow.propTypes = {

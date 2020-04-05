@@ -1,0 +1,13 @@
+.primaryBtn {
+    composes: CTA from 'src/common-ui/colors.css';
+    display: inline-block;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+.disabled {
+    composes: CTA from 'src/common-ui/colors.css';
+    opacity: 0.4;
+    cursor: not-allowed;
+}

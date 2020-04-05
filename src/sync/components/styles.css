@@ -1,0 +1,149 @@
+.test {
+    color: blue;
+}
+
+@value colors: 'src/common-ui/colors.css';
+@value color16, h2color from colors;
+
+.syncDevicesContainer {
+    composes: radius4 from 'src/common-ui/colors.css';
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 10px;
+    margin-top: 20px;
+}
+
+.syncLeftCol {
+    flex: 9;
+    align-items: center;
+}
+
+.syncRightCol {
+    flex: 1;
+    padding: 10px;
+    margin: auto;
+}
+
+.syncHeaderText {
+    composes: sectionTitle from 'src/options/base.css';
+    display: block;
+}
+
+.syncTitle {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #3a2f45;
+}
+
+.syncSubText {
+    composes: h2Color from '../../common-ui/colors.css';
+    vertical-align: middle;
+    font-weight: 600;
+    font-size: 14px;
+    margin-right: 8px;
+}
+
+.labelFree {
+    composes: h2Color from 'src/common-ui/colors.css';
+    font-size: 14px;
+    vertical-align: middle;
+    font-weight: bold;
+    float: right;
+    cursor: pointer;
+}
+
+.mobileSection {
+    display: flex;
+    justify-content: space-between;
+}
+
+.contentSection {
+    width: 50%;
+    margin-right: 10px;
+}
+
+.downloadImg {
+    width: 100px;
+    margin-right: 10px;
+    margin-top: 30px;
+    cursor: pointer;
+}
+
+.mobileContainer {
+    margin-bottom: -20px;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.mobileImg {
+    width: 90%;
+}
+
+.subText {
+    composes: subText from 'src/options/base.css';
+    display: block;
+}
+
+.button {
+    composes: CTA from 'src/common-ui/colors.css';
+}
+
+.removeText {
+    padding-left: 40px;
+}
+
+.noDevices {
+    font-size: 15px;
+    color: color16;
+}
+
+.tutorial {
+    composes: helpIcon from 'src/common-ui/icons.css';
+    composes: nakedSquareButton from 'src/common-ui/elements.css';
+    width: 25px;
+    height: 25px;
+    background-size: 20px;
+    display: flex;
+    align-self: center;
+}
+
+@media (max-width: 940px) {
+    .mobileSection {
+        flex-direction: column;
+    }
+
+    .contentSection {
+        flex-direction: row;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .textSection {
+        flex-direction: column;
+    }
+
+    .storeSection img {
+        margin-top: 10px;
+    }
+
+    .mobileImg {
+        width: 100%;
+    }
+
+    .mobileContainer {
+        justify-content: center;
+    }
+}

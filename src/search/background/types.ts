@@ -1,8 +1,11 @@
 import { Annotation } from 'src/direct-linking/types'
+import { User } from 'src/social-integration/types'
+import SearchStorage from './storage'
+import { SearchIndex } from '../types'
 
 export interface AnnotPage {
     url: string
-    title: string
+    title?: string
     hasBookmark: boolean
     /** Object URL to the in-memory location of the assoc. screenshot. */
     screenshot?: string
@@ -12,6 +15,7 @@ export interface AnnotPage {
     /** Total count of annots associated with this page. (regardless of search) */
     annotsCount: number
     annotations: Annotation[]
+    pageId?: string
 }
 
 export interface AnnotSearchParams {
@@ -71,6 +75,32 @@ export interface UrlFilters {
 }
 
 /**
+ * Types for the search functions of the background class
+ */
+export interface BackgroundSearchParams {
+    query?: string
+    domains?: any[]
+    domainsExclude?: any[]
+    tagsInc?: any[]
+    tagsExc?: any[]
+    lists?: any[]
+    contentTypes?: ContentTypes
+    skip?: number
+    limit?: number
+    showOnlyBookmarks?: boolean
+    bookmarksOnly?: boolean
+
+    startDate?: number | Date
+    endDate?: number | Date
+    base64Img?: boolean
+    usersInc?: any
+    usersExc?: any
+    hashtagsInc?: any
+    hashtagsExc?: any
+    url?: string
+}
+
+/**
  * Maps day (start of day timestamp) to list of pages that have annots created/edited
  * on that day.
  */
@@ -87,4 +117,51 @@ export interface PagesByUrl {
 
 export interface AnnotsByPageUrl {
     [pageUrl: string]: Annotation[]
+}
+
+export interface SocialSearchParams extends AnnotSearchParams {
+    usersInc?: User[]
+    usersExc?: User[]
+    hashtagsInc?: string[]
+    hashtagsExc?: string[]
+}
+
+// Todo: add proper types and refactor RPC usage in-line with 'refactoring.md'
+export interface SearchBackend {
+    addPage: any
+    addPageTerms: any
+    addBookmark: any
+    delBookmark: any
+    updateTimestampMeta: any
+    addVisit: any
+    addFavIcon: any
+    delPages: any
+    delPagesByDomain: any
+    delPagesByPattern: any
+    addTag: any
+    delTag: any
+    fetchPageTags: any
+    pageHasBookmark: any
+    getPage: any
+    grabExistingKeys: any
+    search: any
+    getMatchingPageCount: any
+    domainHasFavIcon: any
+    createPageFromTab: any
+    createPageFromUrl: any
+}
+
+export interface SearchInterface {
+    search: SearchIndex['search']
+    searchAnnotations: (params: AnnotSearchParams) => any
+    searchPages: (params: PageSearchParams) => any
+    searchSocial: (params: SocialSearchParams) => any
+
+    suggest: SearchStorage['suggest']
+    extendedSuggest: SearchStorage['suggestExtended']
+
+    delPages: SearchIndex['delPages']
+    delPagesByDomain: SearchIndex['delPagesByDomain']
+    delPagesByPattern: SearchIndex['delPagesByPattern']
+    getMatchingPageCount: SearchIndex['getMatchingPageCount']
 }

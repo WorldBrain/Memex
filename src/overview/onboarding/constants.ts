@@ -39,8 +39,6 @@ export const STAGES = {
     },
     powerSearch: {
         notifiedBrowsePage: 'power-search-browse-shown',
-        overviewTooltips: 'overview-tooltips',
-        skipToTimeFilters: 'skip-to-time-filters',
     },
     tagging: {
         notifiedTagPage: 'tag-page-notification-shown',

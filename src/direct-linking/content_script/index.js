@@ -1,9 +1,12 @@
 import { bodyLoader } from 'src/util/loader'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import * as rendering from './rendering'
-import * as interactions from 'src/sidebar-overlay/content_script/highlight-interactions'
+import {
+    makeHighlightDark,
+    renderHighlight,
+    scrollToHighlight,
+} from 'src/highlighting/ui/highlight-interactions'
 
-export async function init() {
+export async function loadAnnotationWhenReady() {
     await bodyLoader()
     setTimeout(() => {
         remoteFunction('followAnnotationRequest')()
@@ -12,22 +15,20 @@ export async function init() {
 
 export function setupAnchorFallbackOverlay() {}
 
-browser.runtime.onMessage.addListener(request => {
-    if (request.type !== 'direct-link') {
-        return
-    }
-
-    ;(async () => {
-        const highlightSuccessful = await rendering.highlightAnnotation({
-            annotation: request.annotation,
-        })
-        if (highlightSuccessful) {
-            interactions.makeHighlightDark(request.annotation)
-            interactions.scrollToHighlight(request.annotation)
-        } else {
-            setupAnchorFallbackOverlay()
+export function setupRemoteDirectLinkFunction() {
+    browser.runtime.onMessage.addListener(request => {
+        if (request.type !== 'direct-link') {
+            return
         }
-    })()
-})
 
-init()
+        ;(async () => {
+            const highlightSuccessful = await renderHighlight(request)
+            if (highlightSuccessful) {
+                makeHighlightDark(request.annotation)
+                scrollToHighlight(request.annotation)
+            } else {
+                setupAnchorFallbackOverlay()
+            }
+        })()
+    })
+}

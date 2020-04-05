@@ -1,4 +1,6 @@
-import * as fromPairs from 'lodash/fromPairs'
+import fromPairs from 'lodash/fromPairs'
+import { UILogic } from 'ui-logic-core'
+import { UIElement } from 'ui-logic-react'
 
 export type EventProcessor<Dependencies> = (
     args: EventProcessorArgs<Dependencies>,
@@ -140,4 +142,26 @@ export function setupUiLogicTest({
         eventProcessor,
     )
     return { state, setState, props, events, trigger }
+}
+
+// New
+
+export abstract class StatefulUIElement<Props, State, Event> extends UIElement<
+    Props,
+    State,
+    Event
+> {
+    constructor(props: Props, logic: UILogic<State, Event>) {
+        super(props, { logic })
+    }
+}
+
+export abstract class NavigationScreen<
+    Props,
+    State,
+    Event
+> extends StatefulUIElement<Props, State, Event> {
+    constructor(props: Props, options: { logic: UILogic<State, Event> }) {
+        super(props, options.logic)
+    }
 }

@@ -1,14 +1,16 @@
-import { browser, Storage, Tabs } from 'webextension-polyfill-ts'
+import { browser, Storage, Tabs, Browser } from 'webextension-polyfill-ts'
 import throttle from 'lodash/throttle'
 
-import * as searchIndex from '../../search'
 import {
     TabEventChecker,
     whenPageDOMLoaded,
     whenTabActive,
 } from '../../util/tab-events'
 import PageVisitLogger from './log-page-visit'
-import { fetchFavIcon } from '../../page-analysis/background/get-fav-icon'
+import {
+    fetchFavIcon,
+    FavIconFetchError,
+} from '../../page-analysis/background/get-fav-icon'
 import { shouldLogTab, updateVisitInteractionData } from './util'
 import { TabManager } from './tab-manager'
 import { STORAGE_KEYS as IDXING_PREF_KEYS } from '../../options/settings/constants'
@@ -17,26 +19,13 @@ import {
     LoggableTabChecker,
     VisitInteractionUpdater,
     FavIconFetcher,
-    FavIconChecker,
-    FavIconCreator,
     BookmarkChecker,
     TabIndexer,
 } from './types'
-
-interface Props {
-    tabManager: TabManager
-    pageVisitLogger: PageVisitLogger
-    storageArea?: Storage.StorageArea
-    visitUpdate?: VisitInteractionUpdater
-    favIconFetch?: FavIconFetcher
-    favIconCheck?: FavIconChecker
-    domLoadCheck?: TabEventChecker
-    favIconCreate?: FavIconCreator
-    bookmarkCheck?: BookmarkChecker
-    tabActiveCheck?: TabEventChecker
-    loggableTabCheck?: LoggableTabChecker
-    contentScriptPaths?: string[]
-}
+import { SearchIndex } from 'src/search'
+import { getDefaultState } from 'src/overview/onboarding/screens/onboarding/default-state'
+import { PageAnalysis } from 'src/page-analysis/background'
+import * as Raven from 'src/util/raven'
 
 export default class TabChangeListeners {
     /**
@@ -53,12 +42,11 @@ export default class TabChangeListeners {
 
     private _contentScriptPaths: string[]
     private _tabManager: TabManager
+    private _searchIndex: SearchIndex
     private _storage: Storage.StorageArea
     private _checkTabLoggable: LoggableTabChecker
     private _updateTabVisit: VisitInteractionUpdater
     private _fetchFavIcon: FavIconFetcher
-    private _checkFavIcon: FavIconChecker
-    private _createFavIcon: FavIconCreator
     private _pageDOMLoaded: TabEventChecker
     private _tabActive: TabEventChecker
     private _pageVisitLogger: PageVisitLogger
@@ -76,32 +64,31 @@ export default class TabChangeListeners {
         { favIcon: TabIndexer; page: TabIndexer }
     >()
 
-    constructor({
-        tabManager,
-        pageVisitLogger,
-        storageArea = browser.storage.local,
-        loggableTabCheck = shouldLogTab,
-        visitUpdate = updateVisitInteractionData,
-        favIconFetch = fetchFavIcon,
-        favIconCheck = searchIndex.domainHasFavIcon(searchIndex.getDb),
-        favIconCreate = searchIndex.addFavIcon(searchIndex.getDb),
-        domLoadCheck = whenPageDOMLoaded,
-        tabActiveCheck = whenTabActive,
-        bookmarkCheck = searchIndex.pageHasBookmark(searchIndex.getDb),
-        contentScriptPaths = TabChangeListeners.DEF_CONTENT_SCRIPTS,
-    }: Props) {
-        this._tabManager = tabManager
-        this._pageVisitLogger = pageVisitLogger
-        this._storage = storageArea
-        this._checkTabLoggable = loggableTabCheck
-        this._updateTabVisit = visitUpdate
-        this._fetchFavIcon = favIconFetch
-        this._checkFavIcon = favIconCheck
-        this._createFavIcon = favIconCreate
-        this._pageDOMLoaded = domLoadCheck
-        this._tabActive = tabActiveCheck
-        this.checkBookmark = bookmarkCheck
-        this._contentScriptPaths = contentScriptPaths
+    constructor(options: {
+        tabManager: TabManager
+        pageVisitLogger: PageVisitLogger
+        browserAPIs: Pick<Browser, 'storage'>
+        searchIndex: SearchIndex
+        storageArea?: Storage.StorageArea
+        favIconFetch?: FavIconFetcher
+        domLoadCheck?: TabEventChecker
+        tabActiveCheck?: TabEventChecker
+        loggableTabCheck?: LoggableTabChecker
+        contentScriptPaths?: string[]
+    }) {
+        this._tabManager = options.tabManager
+        this._pageVisitLogger = options.pageVisitLogger
+        this._storage = options.storageArea || options.browserAPIs.storage.local
+        this._searchIndex = options.searchIndex
+        this._checkTabLoggable = options.loggableTabCheck || shouldLogTab
+        this._updateTabVisit = updateVisitInteractionData
+        this._fetchFavIcon = options.favIconFetch || fetchFavIcon
+        this._pageDOMLoaded = options.domLoadCheck || whenPageDOMLoaded
+        this._tabActive = options.tabActiveCheck || whenTabActive
+        this._contentScriptPaths =
+            options.contentScriptPaths || TabChangeListeners.DEF_CONTENT_SCRIPTS
+
+        this.checkBookmark = options.searchIndex.pageHasBookmark
     }
 
     private getOrCreateTabIndexers(tabId: number) {
@@ -116,9 +103,9 @@ export default class TabChangeListeners {
                 ),
                 page: throttle(
                     tab =>
-                        this._handleVisitIndexing(tabId, {}, tab).catch(
-                            console.error,
-                        ),
+                        this._handleVisitIndexing(tabId, tab).catch(err => {
+                            Raven.captureException(err)
+                        }),
                     TabChangeListeners.URL_CHANGE_THRESHOLD,
                     { leading: false },
                 ),
@@ -144,17 +131,19 @@ export default class TabChangeListeners {
         shouldCaptureScreenshots: boolean
         logDelay: number
     }> {
-        const storage = await this._storage.get([
-            IDXING_PREF_KEYS.STUBS,
-            IDXING_PREF_KEYS.VISITS,
-            IDXING_PREF_KEYS.SCREENSHOTS,
-            IDXING_PREF_KEYS.VISIT_DELAY,
-        ])
+        const defs = getDefaultState()
+
+        const storage = await this._storage.get({
+            [IDXING_PREF_KEYS.STUBS]: defs.areStubsEnabled,
+            [IDXING_PREF_KEYS.VISITS]: defs.areVisitsEnabled,
+            [IDXING_PREF_KEYS.SCREENSHOTS]: defs.areScreenshotsEnabled,
+            [IDXING_PREF_KEYS.VISIT_DELAY]: defs.visitDelay,
+        })
 
         return {
             shouldLogStubs: !!storage[IDXING_PREF_KEYS.STUBS],
             shouldLogVisits: !!storage[IDXING_PREF_KEYS.VISITS],
-            shouldCaptureScreenshots: !!storage[IDXING_PREF_KEYS.SCREENSHOTS],
+            shouldCaptureScreenshots: false,
             logDelay: storage[IDXING_PREF_KEYS.VISIT_DELAY],
         }
     }
@@ -181,7 +170,7 @@ export default class TabChangeListeners {
             oldTab.url !== url &&
             oldTab.activeTime > TabChangeListeners.FAUX_VISIT_THRESHOLD
         ) {
-            await this._updateTabVisit(oldTab)
+            await this._updateTabVisit(oldTab, this._searchIndex)
         }
     }
 
@@ -214,52 +203,77 @@ export default class TabChangeListeners {
         }
     }
 
-    _handleVisitIndexing: TabChangeListener = async (tabId, _, tab) => {
+    private async logTabWhenActive(
+        tab: Tabs.Tab,
+        preparation: PageAnalysis,
+        skipStubLog?: boolean,
+    ) {
+        await this._tabActive({ tabId: tab.id })
+
         const indexingPrefs = await this.fetchIndexingPrefs()
 
-        // Run stage 1 of visit indexing immediately (depends on user settings)
-        await this._pageDOMLoaded({ tabId })
-        if (indexingPrefs.shouldLogStubs) {
-            await this._pageVisitLogger.logPageStub(
+        if (!indexingPrefs.shouldLogStubs && !indexingPrefs.shouldLogVisits) {
+            return
+        }
+
+        return this._pageVisitLogger.logPageVisit(
+            tab,
+            preparation,
+            !skipStubLog && indexingPrefs.shouldLogStubs,
+        )
+    }
+
+    _handleVisitIndexing = async (
+        tabId: number,
+        tab: Tabs.Tab,
+        opts: { skipStubLog?: boolean } = {},
+    ) => {
+        const indexingPrefs = await this.fetchIndexingPrefs()
+
+        let preparation: PageAnalysis
+        try {
+            preparation = await this._pageVisitLogger.preparePageLogging({
                 tab,
-                indexingPrefs.shouldCaptureScreenshots,
-            )
+                allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
+            })
+        } catch (err) {
+            Raven.captureException(err)
+            return
+        }
+
+        // Run stage 1 of visit indexing immediately (depends on user settings)
+        if (!opts.skipStubLog && indexingPrefs.shouldLogStubs) {
+            try {
+                await this._pageVisitLogger.logPageStub(tab, preparation)
+            } catch (err) {
+                Raven.captureException(err)
+                return
+            }
         }
 
         // Schedule stage 2 of visit indexing soon after - if user stays on page
         if (indexingPrefs.shouldLogVisits) {
             await this._tabManager.scheduleTabLog(
                 tabId,
-                () =>
-                    this._tabActive({ tabId })
-                        .then(() =>
-                            this._pageVisitLogger.logPageVisit(
-                                tab,
-                                indexingPrefs.shouldCaptureScreenshots,
-                                indexingPrefs.shouldLogStubs,
-                            ),
-                        )
-                        .catch(console.error),
-                indexingPrefs.logDelay,
+                () => this.logTabWhenActive(tab, preparation, opts.skipStubLog),
+                opts.skipStubLog ? 0 : indexingPrefs.logDelay,
             )
         }
     }
 
-    private _handleFavIcon: TabChangeListener = async (
-        tabId,
-        { favIconUrl },
-        tab,
-    ) => {
+    private _handleFavIcon: TabChangeListener = async (tabId, _, tab) => {
         try {
             if (
                 (await this._checkTabLoggable(tab)) &&
-                !(await this._checkFavIcon(tab.url))
+                !(await this._searchIndex.domainHasFavIcon(tab.url))
             ) {
-                const favIconDataUrl = await this._fetchFavIcon(favIconUrl)
-                await this._createFavIcon(tab.url, favIconDataUrl)
+                const favIconDataUrl = await this._fetchFavIcon(tab.favIconUrl)
+                await this._searchIndex.addFavIcon(tab.url, favIconDataUrl)
             }
         } catch (err) {
-            console.error(err)
+            if (!(err instanceof FavIconFetchError)) {
+                throw err
+            }
         }
     }
 }

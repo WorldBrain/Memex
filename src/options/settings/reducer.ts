@@ -1,5 +1,6 @@
 import { createReducer } from 'redux-act'
 
+import browserIsChrome from 'src/util/check-browser'
 import * as acts from './actions'
 import { VISIT_DELAY_RANGE } from './constants'
 
@@ -13,11 +14,11 @@ export interface State {
 }
 
 export const defaultState: State = {
+    stubs: true,
     visits: true,
     bookmarks: true,
     memexLinks: true,
-    stubs: true,
-    screenshots: true,
+    screenshots: false,
     visitDelay: VISIT_DELAY_RANGE.DEF,
 }
 

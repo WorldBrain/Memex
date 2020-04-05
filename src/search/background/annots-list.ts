@@ -1,9 +1,6 @@
-import { browser } from 'webextension-polyfill-ts'
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
-import diff from 'lodash/difference'
 
-import { INSTALL_TIME_KEY } from 'src/constants'
 import { AnnotSearchParams } from './types'
 import { transformUrl } from '../pipeline'
 import { Annotation } from 'src/direct-linking/types'
@@ -136,14 +133,14 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             .anyOf(ids)
             .primaryKeys()
 
-        const pageUrls = new Set(pageEntries.map(([, url]) => url))
+        const pageUrls = new Set(pageEntries.map(pk => pk[1]))
 
         return this.backend.dexieInstance
             .table(AnnotsStorage.ANNOTS_COLL)
             .where('url')
             .anyOf(urls)
             .and(annot => pageUrls.has(annot.pageUrl))
-            .primaryKeys()
+            .primaryKeys() as Promise<string[]>
 
         // IMPLEMENTATION FOR ANNOTS COLLECTIONS
         // const [listIds, entries] = await Promise.all([
@@ -225,17 +222,19 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
     }
 
     private async calcHardLowerTimeBound({ startDate }: AnnotSearchParams) {
-        const annotsRelease = startDate
-            ? moment(startDate)
-            : moment('2018-06-01')
+        const earliestAnnot: Annotation = await this.backend.dexieInstance
+            .table(AnnotsStorage.ANNOTS_COLL)
+            .orderBy('lastEdited')
+            .first()
 
-        const {
-            [INSTALL_TIME_KEY]: installTime,
-        } = await browser.storage.local.get(INSTALL_TIME_KEY)
+        if (
+            earliestAnnot &&
+            moment(earliestAnnot.lastEdited).isAfter(startDate || 0)
+        ) {
+            return moment(earliestAnnot.lastEdited)
+        }
 
-        return annotsRelease.isAfter(installTime)
-            ? annotsRelease
-            : moment(installTime)
+        return startDate ? moment(new Date(startDate)) : moment('2018-06-01') // The date annots feature was released
     }
 
     private mergeResults(
@@ -291,7 +290,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         return annotsByPage
     }
 
-    private async queryAnnotsByDay(startDate: number, endDate: null) {
+    private async queryAnnotsByDay(startDate: Date, endDate: Date) {
         const collection = this.backend.dexieInstance
             .table<Annotation>(AnnotsStorage.ANNOTS_COLL)
             .where('lastEdited')
@@ -321,7 +320,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             )
         }
 
-        return coll.primaryKeys()
+        return coll.primaryKeys() as Promise<string[]>
     }
 
     private async lookupTerms({
@@ -445,7 +444,10 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
             )
 
             const filteredPks = new Set(
-                await this.filterResults(annots.map(a => a.url), params),
+                await this.filterResults(
+                    annots.map(a => a.url),
+                    params,
+                ),
             )
             annots = annots.filter(annot => filteredPks.has(annot.url))
 

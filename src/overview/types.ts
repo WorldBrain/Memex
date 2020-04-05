@@ -1,8 +1,13 @@
-import { Annotation } from 'src/sidebar-common/sidebar/types'
-import { PageUrlsByDay } from 'src/search/background/types'
+import { UIElement } from 'ui-logic-react'
+import { UILogic } from 'ui-logic-core'
 
-export interface Result {
+import { PageUrlsByDay } from 'src/search/background/types'
+import { SocialPage } from 'src/social-integration/types'
+import { Annotation } from 'src/annotations/types'
+
+export interface Result extends SocialPage {
     url: string
+    fullUrl: string
     title: string
     tags: string[]
     hasBookmark: boolean
@@ -14,6 +19,7 @@ export interface Result {
     favIcon: string
     annotsCount: number
     annotations: Annotation[]
+    pageId: string
 }
 
 export interface ResultWithIndex extends Result {
@@ -35,4 +41,14 @@ export interface SearchResult {
 export interface Tooltip {
     title: string
     description: string
+}
+
+export abstract class StatefulUIElement<Props, State, Event> extends UIElement<
+    Props,
+    State,
+    Event
+> {
+    constructor(props: Props, logic: UILogic<State, Event>) {
+        super(props, { logic })
+    }
 }

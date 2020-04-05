@@ -7,3 +7,36 @@
 [submodule "external/@worldbrain/memex-stemmer"]
 	path = external/@worldbrain/memex-stemmer
 	url = https://github.com/WorldBrain/memex-stemmer.git
+[submodule "external/@worldbrain/storex-pattern-modules"]
+	path = external/@worldbrain/storex-pattern-modules
+	url = https://github.com/WorldBrain/storex-pattern-modules
+[submodule "external/user-logic"]
+	path = external/user-logic
+	url = https://github.com/ShishKabab/user-logic
+[submodule "external/@worldbrain/storex-sync"]
+	path = external/@worldbrain/storex-sync
+	url = https://github.com/WorldBrain/storex-sync.git
+[submodule "external/simple-signalling"]
+	path = external/simple-signalling
+	url = https://github.com/WorldBrain/simple-signalling.git
+[submodule "external/@worldbrain/memex-storage"]
+	path = external/@worldbrain/memex-storage
+	url = https://github.com/WorldBrain/memex-storage.git
+[submodule "external/@worldbrain/storex-backend-firestore"]
+	path = external/@worldbrain/storex-backend-firestore
+	url = https://github.com/WorldBrain/storex-backend-firestore.git
+[submodule "external/@worldbrain/memex-url-utils"]
+	path = external/@worldbrain/memex-url-utils
+	url = https://github.com/WorldBrain/memex-url-utils.git
+[submodule "external/@worldbrain/memex-common"]
+	path = external/@worldbrain/memex-common
+	url = https://github.com/WorldBrain/memex-common.git
+[submodule "external/@worldbrain/storex-backend-typeorm"]
+	path = external/@worldbrain/storex-backend-typeorm
+	url = https://github.com/WorldBrain/storex-backend-typeorm.git
+[submodule "external/@worldbrain/storex-hub"]
+	path = external/@worldbrain/storex-hub
+	url = https://github.com/WorldBrain/storex-hub
+[submodule "external/@worldbrain/storex-middleware-change-watcher"]
+	path = external/@worldbrain/storex-middleware-change-watcher
+	url = https://github.com/WorldBrain/storex-middleware-change-watcher

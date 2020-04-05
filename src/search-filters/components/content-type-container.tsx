@@ -22,9 +22,9 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
-    toggleFilterTypes?: () => void
+    setFilterTypes?: (value: boolean) => void
     clearFilterTypes?: () => void
-    hideFilterTypes?: () => void
+    resetFilterPopups?: () => void
     toggleWebsitesFilter: () => void
     toggleHighlightsFilter: () => void
     toggleNotesFilter: () => void
@@ -93,6 +93,15 @@ class ContentTypeContainer extends PureComponent<Props, State> {
         return filterNodes
     }
 
+    private togglePopup: React.MouseEventHandler<HTMLButtonElement> = e => {
+        if (this.props.env === 'inpage' && !this.props.showFilteredTypes) {
+            this.props.resetFilterPopups()
+        }
+        this.props.showFilteredTypes
+            ? this.props.setFilterTypes(false)
+            : this.props.setFilterTypes(true)
+    }
+
     render() {
         if (!this.props.isAnnotsSearch) {
             return null
@@ -100,12 +109,14 @@ class ContentTypeContainer extends PureComponent<Props, State> {
 
         return (
             <FilterButton
+                env={this.props.env}
                 source="Types"
                 filteredItems={[]}
-                togglePopup={this.props.toggleFilterTypes}
-                hidePopup={this.props.hideFilterTypes}
+                togglePopup={this.togglePopup}
+                showPopup={this.props.setFilterTypes}
                 clearFilters={this.props.clearFilterTypes}
                 displayFilters={this.renderDisplayFilters}
+                disableOnClickOutside={this.props.env === 'inpage'}
             >
                 {/* The Content Type checklist */}
                 {this.props.showFilteredTypes && (
@@ -148,13 +159,13 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps,
     RootState
 > = dispatch => ({
-    toggleFilterTypes: () => dispatch(actions.toggleFilterTypes()),
+    setFilterTypes: value => dispatch(actions.setFilterTypes(value)),
     clearFilterTypes: () => dispatch(actions.clearFilterTypes()),
-    hideFilterTypes: () => dispatch(actions.hideFilterTypes()),
     toggleWebsitesFilter: () => dispatch(actions.toggleWebsitesFilter()),
     toggleHighlightsFilter: () => dispatch(actions.toggleHighlightsFilter()),
     toggleNotesFilter: () => dispatch(actions.toggleNotesFilter()),
     toggleAnnotationsFilter: () => dispatch(actions.toggleAnnotationsFilter()),
+    resetFilterPopups: () => dispatch(actions.resetFilterPopups()),
 })
 
 export default connect<StateProps, DispatchProps, OwnProps>(

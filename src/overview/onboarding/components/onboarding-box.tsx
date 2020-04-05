@@ -1,35 +1,22 @@
 import React, { PureComponent } from 'react'
-import OnboardingChecklist from './checklist-container'
 
 const styles = require('./onboarding-box.css')
 
-class OnboardingBox extends PureComponent {
+export interface Props {
+    navToOverview: () => void
+}
+
+class OnboardingBox extends PureComponent<Props> {
     render() {
         return (
-            <React.Fragment>
-                <div className={styles.logo}/>
-                <div className={styles.container}>
-                    <OnboardingChecklist />
-                </div>
-                <div className={styles.footer}>
-                    <div className={styles.textContainer}>
-                        <p className={styles.bold}>
-                            All data stored on your computer
-                        </p>
-                        <p className={styles.subtextGreen}>
-                            Your data is not our business model
-                        </p>
+            <div>
+                <div className={styles.flexLayout}>
+                    <div className={styles.container}>
+                        {this.props.children}
                     </div>
-                    <a
-                        className={styles.learnMore}
-                        target="_blank"
-                        href="https://worldbrain.io/privacy"
-                    >
-                        Learn more
-                    </a>
-                    {/* <a className={styles.settings} href="#privacy" /> */}
+                    <div className={styles.backgroundColor} />
                 </div>
-            </React.Fragment>
+            </div>
         )
     }
 }

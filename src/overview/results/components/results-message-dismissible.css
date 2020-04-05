@@ -1,0 +1,30 @@
+.container {
+    composes: boxShadow from 'src/common-ui/colors.css';
+    composes: fadeIn from 'src/common-ui/elements.css';
+    align-items: center;
+    background-color: white;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 1rem;
+    margin: 40px auto 17px;
+    max-width: 95%;
+}
+
+.dismissButton {
+    composes: removeIcon from 'src/common-ui/icons.css';
+    border: none;
+    background-size: 12px;
+    background-color: transparent;
+    width: 22px;
+    height: 22px;
+    outline: none;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+
+    &:hover {
+        cursor: pointer;
+    }
+}

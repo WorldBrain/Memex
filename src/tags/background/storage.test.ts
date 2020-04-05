@@ -1,43 +1,32 @@
 import initStorageManager from '../../search/memory-storex'
 import TagsBackground from './'
 import * as DATA from './storage.test.data'
-import { getDb } from 'src/search'
+import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
 describe('Tags', () => {
-    let bg: TagsBackground
-
-    async function insertTestData() {
-        // Insert some test data for all tests to use
-        await bg.addTag(DATA.TAGS_1)
-        await bg.addTag(DATA.TAGS_2)
+    async function setupTest() {
+        const setup = await setupBackgroundIntegrationTest()
+        const tagsModule = setup.backgroundModules.tags
+        await tagsModule.addTag(DATA.TAGS_1)
+        await tagsModule.addTag(DATA.TAGS_2)
+        return { tagsModule }
     }
-
-    beforeEach(async () => {
-        const storageManager = initStorageManager()
-        bg = new TagsBackground({ storageManager, getDb })
-
-        await storageManager.finishInitialization()
-        await insertTestData()
-    })
 
     describe('read ops', () => {
         test('fetch page tags', async () => {
+            const { tagsModule } = await setupTest()
             const { url } = DATA.TAGS_1
-            const tags = await bg.fetchPageTags({ url })
+            const tags = await tagsModule.fetchPageTags({ url })
             expect(tags.length).toBe(1)
-        })
-
-        test('fetch pages', async () => {
-            const pages = await bg.fetchPages({ name: 'lorem' })
-            expect(pages.length).toBe(1)
         })
     })
 
     describe('delete ops', () => {
         test('Remove tags', async () => {
-            const { name, url } = DATA.TAGS_1
-            await bg.delTag({ name, url })
-            const tags = await bg.fetchPageTags({ url })
+            const { tagsModule } = await setupTest()
+            const { tag, url } = DATA.TAGS_1
+            await tagsModule.delTag({ tag, url })
+            const tags = await tagsModule.fetchPageTags({ url })
             expect(tags.length).toBe(0)
         })
     })

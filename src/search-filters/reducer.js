@@ -7,7 +7,7 @@ import * as actions from './actions'
  * @property {boolean} showTagFilter Show Filter tag dropdown
  * @property {boolean} showDomainFilter Show domain dropdown in sidebar
  * @property {boolean} showFilterTypes Show filter types in sidebar
- * @property {boolean} showFilters REMOVE
+ * @property {boolean} showFilterBar REMOVE
  * @property {boolean} onlyBookmarks show only bookmark filters
  * @property {string} popup REMOVE
  * @property {tags} string[] Tags to be filtered
@@ -18,21 +18,29 @@ import * as actions from './actions'
 
 const defaultState = {
     showTagFilter: false,
+    showHashtagFilter: false,
     showDatesFilter: false,
     showFilterBar: false,
     showDomainFilter: false,
+    showUserFilter: false,
     showFilterTypes: false,
-    showFilters: false,
     onlyBookmarks: false,
+    isMobileListFiltered: false,
     popup: '', // Blank is no popup shown, 'tag' is tags filter, 'domain' is domains filter
     tags: [],
     tagsExc: [],
+    hashtagsInc: [],
+    hashtagsExc: [],
     domainsInc: [],
     domainsExc: [],
+    usersInc: [],
+    usersExc: [],
     // Will contain **ID** only one list for now
     lists: '',
     suggestedTags: [],
+    suggestedHashtags: [],
     suggestedDomains: [],
+    suggestedUsers: [],
 
     /* Object way */
     contentTypes: {
@@ -42,49 +50,9 @@ const defaultState = {
     },
 }
 
-const hideDomainFilter = state => ({
+const boolReducer = stateKey => (state, payload) => ({
     ...state,
-    showDomainFilter: false,
-})
-
-const showDomainFilter = state => ({
-    ...state,
-    showDomainFilter: true,
-})
-
-const hideDatesFilter = state => ({
-    ...state,
-    showDatesFilter: false,
-})
-
-const showDatesFilter = state => ({
-    ...state,
-    showDatesFilter: true,
-})
-
-const hideTagFilter = state => ({
-    ...state,
-    showTagFilter: false,
-})
-
-const showTagFilter = state => ({
-    ...state,
-    showTagFilter: true,
-})
-
-const hideFilterTypes = state => ({
-    ...state,
-    showFilterTypes: false,
-})
-
-const showFilterTypes = state => ({
-    ...state,
-    showFilterTypes: true,
-})
-
-const toggleFilterTypes = state => ({
-    ...state,
-    showFilterTypes: !state.showFilterTypes,
+    [stateKey]: payload,
 })
 
 const toggleWebsitesFilter = state => ({
@@ -148,7 +116,7 @@ const addFilter = filterKey => (state, value) => {
     return {
         ...state,
         [filterKey]: [...state[filterKey], value],
-        showFilters: true,
+        showFilterBar: true,
     }
 }
 
@@ -157,6 +125,7 @@ const delFilter = filterKey => (state, value) => {
         return {
             ...state,
             [filterKey]: '',
+            isMobileListFiltered: false,
         }
     }
 
@@ -172,7 +141,7 @@ const delFilter = filterKey => (state, value) => {
             ...state[filterKey].slice(0, removalIndex),
             ...state[filterKey].slice(removalIndex + 1),
         ],
-        showFilters: true,
+        showFilterBar: true,
     }
 }
 
@@ -196,7 +165,7 @@ const toggleFilter = filterKey => (state, value) => {
             ...state[filterKey].slice(0, removalIndex),
             ...state[filterKey].slice(removalIndex + 1),
         ],
-        showFilters: true,
+        showFilterBar: true,
     }
 }
 
@@ -216,11 +185,15 @@ const setFilters = filterKey => (state, filters) => {
         [filterKey]: decideFilters(filterKey, filters),
     }
 
-    newState.showFilters =
+    newState.showFilterBar =
         newState.tags.length > 0 ||
         newState.tagsExc.length > 0 ||
         newState.domainsExc.length > 0 ||
         newState.domainsInc.length > 0 ||
+        newState.usersExc.length > 0 ||
+        newState.usersInc.length > 0 ||
+        newState.hashtagsInc.length > 0 ||
+        newState.hashtagsExc.length > 0 ||
         newState.onlyBookmarks
 
     return newState
@@ -241,25 +214,60 @@ const setSuggestedDomains = (state, domains) => ({
     suggestedDomains: domains,
 })
 
+const setSuggestedUsers = (state, users) => ({
+    ...state,
+    suggestedUsers: users,
+})
+
+const setSuggestedHashtags = (state, hashtags) => ({
+    ...state,
+    suggestedHashtags: hashtags,
+})
+
 const resetFilters = state => ({
     ...defaultState,
     lists: state.lists,
-    showFilters: state.showFilters,
+    showFilterBar: state.showFilterBar,
 })
+
+const resetFilterPopups = state => ({
+    ...state,
+    showDomainFilter: false,
+    showTagFilter: false,
+    showFilterTypes: false,
+    showDatesFilter: false,
+})
+
+const toggleListFilter = (state, { id, isMobileListFiltered }) => {
+    const removalIndex = state.lists.indexOf(id)
+
+    if (removalIndex === -1) {
+        return {
+            ...state,
+            lists: [id],
+            isMobileListFiltered,
+        }
+    }
+
+    return {
+        ...state,
+        lists: '',
+        isMobileListFiltered: false,
+    }
+}
 
 export default createReducer(
     {
-        [actions.hideDomainFilter]: hideDomainFilter,
-        [actions.showDomainFilter]: showDomainFilter,
-        [actions.hideDatesFilter]: hideDatesFilter,
-        [actions.showDatesFilter]: showDatesFilter,
-        [actions.hideTagFilter]: hideTagFilter,
-        [actions.showTagFilter]: showTagFilter,
-        [actions.showFilterTypes]: showFilterTypes,
-        [actions.hideFilterTypes]: hideFilterTypes,
-        [actions.toggleFilterTypes]: toggleFilterTypes,
+        [actions.setDomainFilter]: boolReducer('showDomainFilter'),
+        [actions.setHashtagFilter]: boolReducer('showHashtagFilter'),
+        [actions.setDatesFilter]: boolReducer('showDatesFilter'),
+        [actions.setUserFilter]: boolReducer('showUserFilter'),
+        [actions.setTagFilter]: boolReducer('showTagFilter'),
+        [actions.setFilterTypes]: boolReducer('showFilterTypes'),
+        [actions.setShowFilterBar]: boolReducer('showFilterBar'),
         [actions.toggleFilterBar]: toggleFilterBar,
         [actions.resetFilters]: resetFilters,
+        [actions.resetFilterPopups]: resetFilterPopups,
         [actions.addTagFilter]: addFilter('tags'),
         [actions.delTagFilter]: delFilter('tags'),
         [actions.addExcTagFilter]: addFilter('tagsExc'),
@@ -267,30 +275,48 @@ export default createReducer(
         [actions.toggleTagFilter]: toggleFilter('tags'),
         [actions.addListFilter]: addFilter('lists'),
         [actions.delListFilter]: delFilter('lists'),
-        [actions.toggleListFilter]: toggleFilter('lists'),
+        [actions.toggleListFilter]: toggleListFilter,
         [actions.addExcDomainFilter]: addFilter('domainsExc'),
         [actions.delExcDomainFilter]: delFilter('domainsExc'),
         [actions.addIncDomainFilter]: addFilter('domainsInc'),
         [actions.delIncDomainFilter]: delFilter('domainsInc'),
+        [actions.addExcUserFilter]: addFilter('usersExc'),
+        [actions.delExcUserFilter]: delFilter('usersExc'),
+        [actions.addIncUserFilter]: addFilter('usersInc'),
+        [actions.delIncUserFilter]: delFilter('usersInc'),
+        [actions.addIncHashtagFilter]: addFilter('hashtagsInc'),
+        [actions.delIncHashtagFilter]: delFilter('hashtagsInc'),
+        [actions.addExcHashtagFilter]: addFilter('hashtagsExc'),
+        [actions.delExcHashtagFilter]: delFilter('hashtagsExc'),
         [actions.toggleIncDomainFilter]: toggleFilter('domainsInc'),
         [actions.toggleExcDomainFilter]: toggleFilter('domainsExc'),
         [actions.setTagFilters]: setFilters('tags'),
         [actions.setExcTagFilters]: setFilters('tagsExc'),
+        [actions.setIncHashtagFilters]: setFilters('hashtagsInc'),
+        [actions.setExcHashtagFilters]: setFilters('hashtagsExc'),
         [actions.setListFilters]: setFilters('lists'),
         [actions.setIncDomainFilters]: setFilters('domainsInc'),
         [actions.setExcDomainFilters]: setFilters('domainsExc'),
+        [actions.setIncUserFilters]: setFilters('usersInc'),
+        [actions.setExcUserFilters]: setFilters('usersExc'),
         [actions.toggleBookmarkFilter]: toggleBookmarkFilter,
         [actions.setSuggestedTags]: setSuggestedTags,
         [actions.setSuggestedDomains]: setSuggestedDomains,
+        [actions.setSuggestedUsers]: setSuggestedUsers,
+        [actions.setSuggestedHashtags]: setSuggestedHashtags,
         [actions.showFilter]: state => ({
             ...state,
-            showFilters: !state.showFilters,
+            showFilterBar: !state.showFilterBar,
         }),
         [actions.toggleWebsitesFilter]: toggleWebsitesFilter,
         [actions.toggleHighlightsFilter]: toggleHighlightsFilter,
         [actions.toggleNotesFilter]: toggleNotesFilter,
         [actions.setAnnotationsFilter]: setAnnotationsFilter,
         [actions.clearFilterTypes]: clearFilterTypes,
+        [actions.setMobileListFiltered]: (state, isMobileListFiltered) => ({
+            ...state,
+            isMobileListFiltered,
+        }),
     },
     defaultState,
 )

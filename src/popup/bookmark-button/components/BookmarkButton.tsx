@@ -1,4 +1,4 @@
-import React, { PureComponent, SyntheticEvent } from 'react'
+import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import cx from 'classnames'
 
@@ -27,8 +27,8 @@ export type Props = OwnProps & StateProps & DispatchProps
 class BookmarkButton extends PureComponent<Props> {
     render() {
         const text = this.props.isBookmarked
-            ? 'Un-Star this Page'
-            : 'Star this Page'
+            ? 'Un-Bookmark this Page'
+            : 'Bookmark this Page'
 
         return (
             <Button
@@ -61,7 +61,4 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     },
 })
 
-export default connect(
-    mapState,
-    mapDispatch,
-)(BookmarkButton)
+export default connect(mapState, mapDispatch)(BookmarkButton)

@@ -17,7 +17,7 @@ const mapState = state => ({
     showUnreadCount: notifs.showUnreadCount(state),
     showInbox: notifs.showInbox(state),
     query: selectors.query(state),
-    showFilterBar: selectors.showFilterBar(state),
+    showFilterBar: filters.showFilterBar(state),
     showClearFiltersBtn: selectors.showClearFiltersBtn(state),
 })
 
@@ -45,9 +45,12 @@ const mapDispatch: (dispatch: any) => Partial<Props> = dispatch => ({
         })
         dispatch(filterActs.toggleFilterBar())
     },
-    clearFilters: () => {
+    clearFilters: e => {
+        e.stopPropagation()
+
         dispatch(filterActs.resetFilters())
         dispatch(acts.clearFilters())
+        dispatch(filterActs.setShowFilterBar(false))
     },
 })
 

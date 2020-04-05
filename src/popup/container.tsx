@@ -13,7 +13,6 @@ import {
 } from '../common-ui/containers'
 import Search from './components/Search'
 import LinkButton from './components/LinkButton'
-import UpgradeButton from './components/UpgradeButton'
 import ButtonIcon from './components/ButtonIcon'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
@@ -146,18 +145,18 @@ class PopupContainer extends PureComponent<Props> {
                     onSearchEnter={this.onSearchEnter}
                 />
                 <div className={styles.item}>
-                <LinkButton
-                    btnClass={btnStyles.openIcon}
-                    href={`${constants.OPTIONS_URL}#/overview`}
-                >
-                    Go to Dashboard
-                </LinkButton>
+                    <LinkButton
+                        btnClass={btnStyles.openIcon}
+                        href={`${constants.OPTIONS_URL}#/overview`}
+                    >
+                        Go to Dashboard
+                    </LinkButton>
                 </div>
                 <hr />
                 <div className={styles.item}>
                     <BookmarkButton closePopup={this.closePopup} />
                 </div>
-                
+
                 <div className={styles.item}>
                     <TagsButton />
                 </div>
@@ -166,13 +165,13 @@ class PopupContainer extends PureComponent<Props> {
                     <CollectionsButton />
                 </div>
                 <hr />
-                
+
                 <div className={styles.item}>
-                <HistoryPauser />
+                    <HistoryPauser />
                 </div>
-                
+
                 <div className={styles.item}>
-                <BlacklistButton />
+                    <BlacklistButton />
                 </div>
                 <hr />
 
@@ -197,7 +196,7 @@ class PopupContainer extends PureComponent<Props> {
                         icon="help"
                         btnClass={btnStyles.help}
                     />
-                    <NotifButton />
+                    {/*<NotifButton />*/}
                 </div>
             </React.Fragment>
         )

@@ -1,24 +1,21 @@
+@value colors: 'src/common-ui/colors.css';
+@value color3, color4, color12 from colors;
+
 .container {
     margin: 15px;
+}
+
+.title {
+    color: color3;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .warning {
     font-style: italic;
     font-size: 0.85em;
     margin: 15px 0 0;
-    color: #ff5722;
-}
-
-.advModeToggle {
-    font-size: 0.85em;
-    display: flex;
-    justify-content: space-between;
-    margin-right: 20px;
-    color: #777;
-}
-
-.advFunctionality {
-    min-height: 300px;
+    color: color12;
 }
 
 .concurrencyInput {
@@ -39,11 +36,17 @@
     flex-direction: row-reverse;
     justify-content: flex-end;
     align-items: center;
-    margin: 1em 0;
-    color: #777;
-    font-size: 16px;
+    color: color4;
+    font-size: 0.9rem;
 
     &:last-child {
         margin-bottom: 1em;
+    }
+
+    & input {
+        padding: 5px 0px 5px 10px;
+        margin-left: 0px;
+        width: 40px;
+        margin-right: 5px;
     }
 }

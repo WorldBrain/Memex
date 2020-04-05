@@ -1,126 +1,300 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6, color3 from colors;
+@value color1, color2, color4, color5, color6 from colors;
 
-.container {
-    /* composes: boxShadow from '../../../common-ui/colors.css'; */
-    composes: toolTips from 'src/common-ui/elements.css';
-    width: 95%;
-    max-width: 50rem;
-    margin: 90px auto 30px auto;
+.flexLayout {
     display: flex;
-    border: solid 1px #f4f4f4;
+    flex-direction: column;
+    justify-content: center; /* We need the white box to sit in the middle of the screen */
+    height: 100vh;
+}
+
+/* We cant target the body class easily to set a bg color since it shares the layout with the whole extension */
+.backgroundColor {
+    width: 100%;
+    height: 100vh;
+    background: #f6fcfa;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -2;
+}
+
+.whiteSpace30 {
+    margin-bottom: 30px;
+}
+
+.startingPage {
+    width: 90%;
+    max-width: 900px;
+    transition: height 0.5s;
+    margin: auto auto;
+    display: flex;
+    padding: 2em 4em;
     border-radius: 10px;
-    height: 570px;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.featuresContainer {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.titleContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 30px;
+    align-items: center;
+    height: 50vh;
+    width: 100vw;
+}
+
+.title {
+    font-weight: 700;
+    font-size: 30px;
+    color: #3a2f45;
+}
+
+.settingsBox {
+    margin-top: 20px;
+}
+
+.subTitle {
+    font-weight: 300;
+    font-size: 20px;
+    color: #3a2f45;
+    margin-top: 10px;
+}
+
+.subTitle2 {
+    composes: subTitle;
+    margin-top: 5px;
+}
+
+.settingsContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.settingsAction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.bottomContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100vw;
+    height: 50vh;
+}
+
+.backButtonArea {
+    flex: 1;
+}
+
+.featureImageArea {
+    flex: 3;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+}
+
+.featureImageAreaMobile {
+    composes: featureImageArea;
+    margin-bottom: 0px;
+}
+
+.nextButtonArea {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
     flex-direction: column;
 }
 
+.logoImg {
+    width: 80px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
 .logo {
-    background-image: url('/img/memex_beta_logo.png');
+    background-image: url('/img/memex-logo.png');
     width: 210px;
-    height: 50px;
+    height: 55px;
     display: flex;
     background-size: 100%;
     background-repeat: no-repeat;
     margin: 40px auto -40px auto;
 }
 
-.text {
-    composes: subTextColor from '../../../common-ui/colors.css';
-    font-size: 0.9rem;
-    text-align: center;
-    letter-spacing: 0.7px;
+.heading1 {
+    color: color5;
+    font-size: calc(1.3rem + 0.3vh);
+    margin: 1rem auto 1rem;
 }
 
-.privacyImage {
-    background-repeat: no-repeat;
+.heading2 {
+    color: color5;
+    font-size: calc(1.1rem + 0.3vw);
+    margin: 1rem auto 0.5rem;
+}
+
+.text {
+    color: #544960;
+    margin-bottom: 2rem;
+    flex-direction: column;
+}
+
+.textLarge {
+    font-size: calc(0.8rem + 0.3vw);
+    margin: 0 auto 1.5rem;
+    color: color4;
+}
+
+.placeholder {
+    background: color6;
+    margin: auto;
+    display: inline-flex;
+}
+
+.navigation {
     display: flex;
-    background-image: url('/img/privacy.svg');
-    fill: white;
-    background-size: contain;
-    width: 65%;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.skipContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.onboardingGif {
     height: 100%;
-    margin-left: auto;
-    margin-top: 25px;
-    margin-right: auto;
+}
+
+.annotationGif {
+    composes: onboardingGif;
+    margin-top: -50px;
+}
+
+.searchGif {
+    composes: onboardingGif;
+    margin-top: -50px;
+}
+
+.sidebarGif {
+    composes: onboardingGif;
+    margin-top: -50px;
+}
+
+.privacyImg {
+    composes: onboardingGif;
+    margin-top: -50px;
+}
+
+.keyboardGif {
+    composes: onboardingGif;
+    background-size: cover;
+    margin-top: -50px;
+}
+
+.mobileImg {
+    composes: onboardingGif;
+}
+
+.floatingImage {
+    animation-name: float, scale-in-center;
+    animation-duration: 6s, 1s;
+    animation-timing-function: ease-in-out, ease;
+    animation-iteration-count: infinite, 1;
+    width: 210px;
+    margin: 1rem auto 2rem;
+}
+
+.skipTitle {
+    font-size: 1.1rem;
+    text-decoration: underline;
+    margin-bottom: 0.2rem;
+    font-weight: 500;
+    z-index: 1;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+
+    /* A little underline animation */
+    &::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background: color2;
+        visibility: hidden;
+        transform: scaleX(0);
+        transition: 0.25s linear;
+    }
+
+    &:hover::before,
+    &:focus::before {
+        visibility: visible;
+        transform: scaleX(1);
+    }
+}
+
+.skipDesc {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
 }
 
 .footer {
     display: flex;
     flex-direction: column;
-    margin: 0px auto;
+    margin: 20px auto;
     justify-content: space-evenly;
     align-items: center;
 }
 
-.bold {
-    composes: h2Color from '../../../common-ui/colors.css';
-    font-size: 1rem;
-    font-weight: 600;
-    margin-top: 20px;
-    margin-bottom: 0px;
-}
-
-.subtextGreen {
-    composes: subTextColor from '../../../common-ui/colors.css';
-    font-size: 0.8125rem;
-    text-align: center;
-    margin-top: 5px;
-    margin-bottom: 13px;
-}
-
-.learnMore {
-    composes: CTA from '../../../common-ui/colors.css';
-    font-size: 0.8125rem;
-    padding: 7px 24px 8px 24px;
-    cursor: pointer;
-    margin-top: 6px;
-    margin-bottom: 72px;
-    margin-right: 4px;
-}
-
-/* .settings {
-    background-repeat: no-repeat;
-    display: inline-block;
-    cursor: pointer;
-    background-image: url('/img/settings.svg');
-    fill: white;
-    background-size: 20px;
-    width: 20px;
-    height: 20px;
-    margin-left: -19px;
-    margin-top: 9px;
-} */
-
-@media only screen and (max-width: 820px) {
-    .container {
-        composes: h2Color from '../../../common-ui/colors.css';
-        margin-top: 75px;
+@keyframes float {
+    0% {
+        transform: translateY(0px);
     }
 
-    .welcome {
-        font-size: 1.2rem;
-        line-height: 1.5rem;
+    50% {
+        transform: translateY(-20px);
     }
 
-    .logo {
-        width: 90px;
-    }
-
-    .text {
-        font-size: 0.875rem;
-    }
-
-    .leftParent {
-        padding: 40px 30px 30px 30px;
-        width: 50%;
-    }
-
-    .privacyImage {
-        width: 85%;
-        height: 100%;
-        margin-left: 10px;
-        margin-top: 40px;
-        margin-right: auto;
+    100% {
+        transform: translateY(0px);
     }
 }
 
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

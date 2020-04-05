@@ -9,13 +9,16 @@ class Modal extends PureComponent {
     static propTypes = {
         onClose: PropTypes.func,
         children: Overlay.propTypes.children,
+        large: PropTypes.bool,
     }
 
     render() {
         return (
             <Overlay
                 className={styles.overlay}
-                innerClassName={styles.popup}
+                innerClassName={
+                    this.props.large === true ? styles.popupLarge : styles.popup
+                }
                 onClose={this.props.onClose}
                 onClick={this.props.onClose}
             >
@@ -23,6 +26,7 @@ class Modal extends PureComponent {
                     <button
                         className={cx(styles.close, styles.button)}
                         onClick={this.props.onClose}
+                        data-annotation="sidebar"
                     />
                 )}
                 <div className={styles.content}>{this.props.children}</div>

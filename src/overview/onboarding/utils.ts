@@ -46,16 +46,6 @@ export const fetchAllStages = async () => {
  */
 export const conditionallySkipToTimeFilter = async () => {
     const powerSearchStage = await fetchOnboardingStage(FLOWS.powerSearch)
-
-    if (
-        powerSearchStage === 'power-search-browse-shown' ||
-        powerSearchStage === 'overview-tooltips'
-    ) {
-        await setOnboardingStage(
-            FLOWS.powerSearch,
-            STAGES.powerSearch.skipToTimeFilters,
-        )
-    }
 }
 
 /**

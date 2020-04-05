@@ -7,17 +7,16 @@
 .overlay {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 99999;
+    z-index: 2147483646;
     background: rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    padding-top: 200px;
+    justify-content: center;
+    align-items: center;
 
     &:disabled,
     &[disabled] {
@@ -27,18 +26,25 @@
 
 .popup {
     composes: toolTips from 'src/common-ui/elements.css';
-    padding: 30px;
     background: #fff;
     width: 340px;
     height: 150px;
     position: relative;
-    transition: all 1s ease-in-out;
+    transition: all 0.2s ease-in-out;
     cursor: default;
 }
 
+.popupLarge {
+    composes: popup;
+    overflow-y: scroll;
+    width: 800px;
+    height: fit-content;
+    max-height: 95vh;
+    max-width: 95vw;
+}
+
 .close {
-    composes: nakedSquareButton from 'src/common-ui/elements.css';
-    composes: removeIcon from 'src/common-ui/icons.css';
+    composes: closeIcon from 'src/common-ui/icons.css';
     position: absolute;
     top: 5px;
     right: 5px;
@@ -50,8 +56,10 @@
 .content {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     font-size: 13.5px;
     min-height: 100%;
+    height: 100%;
     align-items: center;
+    padding: 50px;
 }

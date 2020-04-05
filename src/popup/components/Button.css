@@ -14,7 +14,7 @@
 .item {
     text-decoration: none;
     display: flex;
-    color: color4;
+    color: #3a2f45;
     align-items: center;
     cursor: default;
     font-weight: 400;
@@ -24,8 +24,8 @@
     &:hover,
     &:focus {
         outline: 0;
-        color: color5;
-        font-weight: 500;
+        color: #3a2f45;
+        font-weight: 400;
     }
 }
 
@@ -35,28 +35,27 @@
     font-size: 1em;
     cursor: pointer;
     font-weight: 400;
-    color: #555;
-    color: color4;
+    color: #3a2f45;
     padding-left: 20px;
     background: none !important;
 
     &:disabled {
-        color: color6;
+        color: #3a2f45;
         cursor: unset;
         background: none;
 
         &:hover {
             cursor: not-allowed;
             font-weight: 400;
-            color: color6;
+            color: #3a2f45;
         }
     }
 
     &:hover,
     &:focus {
         outline: 0;
-        color: color5;
-        font-weight: 500;
+        color: #3a2f45;
+        font-weight: 400;
     }
 }
 
@@ -151,7 +150,7 @@
 }
 
 .highlighterIcon {
-    background-image: url('/img/tooltip.svg');
+    background-image: url('/img/highlightOff.svg');
     background-repeat: no-repeat;
     background-size: 24px;
     float: left;
@@ -188,6 +187,6 @@
     margin-left: 30px;
     margin-top: auto;
     font-size: 10px;
-    color: #777;
+    color: #3a2f45;
     margin-bottom: 0px;
 }
