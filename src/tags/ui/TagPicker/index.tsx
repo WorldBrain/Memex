@@ -27,6 +27,10 @@ class TagPicker extends StatefulUIElement<
         super(props, new TagPickerLogic(props))
     }
 
+    handleSetSearchInputRef = (ref: HTMLInputElement) =>
+        this.processEvent('setSearchInputRef', { ref })
+    handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
+
     handleSearchInputChanged = (query: string) => {
         return this.processEvent('searchInputChanged', { query })
     }
@@ -64,8 +68,12 @@ class TagPicker extends StatefulUIElement<
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
-                <StyledContainer onKeyPress={this.handleKeyPress}>
+                <OuterSearchBox
+                    onKeyPress={this.handleKeyPress}
+                    onClick={this.handleOuterSearchBoxClick}
+                >
                     <TagSearchInput
+                        searchInputRef={this.handleSetSearchInputRef}
                         onChange={this.handleSearchInputChanged}
                         onKeyPress={this.handleKeyPress}
                         value={this.state.query}
@@ -87,7 +95,7 @@ class TagPicker extends StatefulUIElement<
                         renderTagRow={this.renderTagRow}
                     />
                     {this.props.children}
-                </StyledContainer>
+                </OuterSearchBox>
             </ThemeProvider>
         )
     }
@@ -95,7 +103,7 @@ class TagPicker extends StatefulUIElement<
 
 // TODO we need an empty state. No tags in the search box show 'Search tags' if its a filter... 'search or filter tags'
 
-const StyledContainer = styled.div`
+const OuterSearchBox = styled.div`
     background: ${props => props.theme.background};
     padding: 8px;
     border-radius: 3px;

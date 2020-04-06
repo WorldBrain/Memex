@@ -33,6 +33,7 @@ export interface TagPickerDependencies {
 }
 
 export type TagPickerEvent = UIEvent<{
+    setSearchInputRef: { ref: HTMLInputElement }
     loadedSuggestions: {}
     loadedQueryResults: {}
     tagClicked: {}
@@ -43,6 +44,7 @@ export type TagPickerEvent = UIEvent<{
     resultTagFocus: { tag: DisplayTag; index: number }
     newTagPress: { tag: string }
     keyPress: { key: KeyEvent }
+    focusInput: {}
 }>
 
 interface TagPickerUIEvent<T extends keyof TagPickerEvent> {
@@ -54,6 +56,8 @@ export default class TagPickerLogic extends UILogic<
     TagPickerState,
     TagPickerEvent
 > {
+    private searchInputRef?: HTMLInputElement
+
     constructor(private dependencies: TagPickerDependencies) {
         super()
     }
@@ -84,6 +88,17 @@ export default class TagPickerLogic extends UILogic<
             displayTags: { $set: this.defaultTags },
             selectedTags: { $set: initialSelectedTags },
         })
+    }
+
+    setSearchInputRef = ({
+        event: { ref },
+        previousState,
+    }: TagPickerUIEvent<'setSearchInputRef'>) => {
+        this.searchInputRef = ref
+    }
+
+    focusInput = () => {
+        this.searchInputRef?.focus()
     }
 
     keyPress = ({
