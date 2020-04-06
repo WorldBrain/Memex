@@ -188,7 +188,9 @@ export class PageIndexingBackground {
             )
         }
 
-        const pageData = await this.options.fetchPageData.process(props.fullUrl)
+        const pageData = await this.options.fetchPageData.process(
+            props.fullUrl ?? props.url,
+        )
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
             delete pageData.text

@@ -10,6 +10,7 @@ import { bindMethod } from 'src/util/functions'
 import { initErrHandler } from 'src/search/storage'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 import SearchBackground from 'src/search/background'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 export default class TagsBackground {
     storage: TagStorage
@@ -130,9 +131,13 @@ export default class TagsBackground {
     }) {
         let page = await this.options.pageStorage.getPage(url)
 
+        const fullUrl = url
+        const normalizedUrl = normalizeUrl(url, {})
+
         if (page == null || pageIsStub(page)) {
             page = await this.searchIndex.createPageViaBmTagActs({
-                url,
+                fullUrl,
+                url: normalizedUrl,
                 tabId,
             })
             if (page == null) {
