@@ -40,6 +40,7 @@ export type TagPickerEvent = UIEvent<{
     searchInputChanged: { query: string }
     selectedTagPress: { tag: string }
     resultTagAllPress: { tag: DisplayTag }
+    newTagAllPress: { }
     resultTagPress: { tag: DisplayTag }
     resultTagFocus: { tag: DisplayTag; index: number }
     newTagPress: { tag: string }
@@ -308,6 +309,13 @@ export default class TagPickerLogic extends UILogic<
     }: TagPickerUIEvent<'resultTagPress'>) => {
         // TODO: feedback?
         this.dependencies.tagAllTabs(tag.name)
+    }
+
+    newTagAllPress = ({
+        event: {  },
+        previousState,
+    }: TagPickerUIEvent<'newTagAllPress'>) => {
+        this.dependencies.tagAllTabs(previousState.query)
     }
 
     resultTagFocus = ({

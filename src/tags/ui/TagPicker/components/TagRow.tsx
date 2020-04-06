@@ -77,11 +77,11 @@ class TagRow extends React.Component<Props> {
     }
 }
 
-const TagAllTabsButton = styled(Layers)`
+export const TagAllTabsButton = styled(Layers)`
     pointer-events: auto !important;
 `
 
-const IconStyleWrapper = styled.div`
+export const IconStyleWrapper = styled.div`
     display: inline-flex;
 
     ${StyledIconBase} {
