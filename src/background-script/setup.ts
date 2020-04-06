@@ -1,4 +1,4 @@
-import { browser, Browser } from 'webextension-polyfill-ts'
+import { Browser } from 'webextension-polyfill-ts'
 import StorageManager from '@worldbrain/storex'
 import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import NotificationBackground from 'src/notifications/background'
@@ -111,8 +111,8 @@ export function createBackgroundModules(options: {
         storageManager,
         pageStorage: pages.storage,
         searchIndex,
-        queryTabs: bindMethod(browser.tabs, 'query'),
-        windows: browser.windows,
+        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+        windows: options.browserAPIs.windows,
     })
     const search = new SearchBackground({
         storageManager,
@@ -184,8 +184,8 @@ export function createBackgroundModules(options: {
         eventLog: new EventLogBackground({ storageManager }),
         customLists: new CustomListBackground({
             storageManager,
-            queryTabs: bindMethod(browser.tabs, 'query'),
-            windows: browser.windows,
+            queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+            windows: options.browserAPIs.windows,
             searchIndex: search.searchIndex,
             pageStorage: pages.storage,
         }),
@@ -218,10 +218,10 @@ export function createBackgroundModules(options: {
         pageFetchBacklog,
         contentScripts: new ContentScriptsBackground({
             injectScriptInTab: (tabId, injection) =>
-                browser.tabs.executeScript(tabId, injection),
+                options.browserAPIs.tabs.executeScript(tabId, injection),
         }),
         inPageUI: new InPageUIBackground({
-            queryTabs: bindMethod(browser.tabs, 'query'),
+            queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         }),
     }
 }

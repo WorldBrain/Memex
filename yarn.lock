@@ -19114,10 +19114,10 @@ uglifyjs-webpack-plugin@^1.2.4, uglifyjs-webpack-plugin@^1.2.7:
     webpack-sources "^1.1.0"
     worker-farm "^1.5.2"
 
-ui-logic-core@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/ui-logic-core/-/ui-logic-core-0.1.2.tgz#abf8f9309cb9adab4b3fb4a7fa42dde5350b87b3"
-  integrity sha512-F33khWXi1bcC3zha/0GiobzCp2pMieLtAmP+HioHtVgdcZLXtCbqgWnlyU0/kEiKPY1Ps/5b0p87KXDVJgS8Zw==
+ui-logic-core@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/ui-logic-core/-/ui-logic-core-0.2.0.tgz#d5e12ebf62f55280c9b19a5344af0e7981d8353b"
+  integrity sha512-AR3qmy+ujB5p44XCO2Ot5/xPjpms+s9wal6uQ43L+kgeysM/U011ZFWTKuYxFuGki3f9s4rYUWuGxaws40xShA==
   dependencies:
     events "^3.0.0"
     source-map-support "^0.4.18"

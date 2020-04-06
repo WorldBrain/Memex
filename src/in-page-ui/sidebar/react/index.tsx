@@ -9,7 +9,7 @@ export function setupSidebarUI(
         sidebarEvents: SidebarControllerEventEmitter
     },
 ) {
-    ReactDOM.render(<SidebarContainer {...options} />, target)
+    // ReactDOM.render(<SidebarContainer {...options} />, target)
 }
 
 export function destroySidebarUI(target: HTMLElement, shadowRoot?: ShadowRoot) {

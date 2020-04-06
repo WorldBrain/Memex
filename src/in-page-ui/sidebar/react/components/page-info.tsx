@@ -6,7 +6,7 @@ import { browser } from 'webextension-polyfill-ts'
 const styles = require('./page-info.css')
 
 interface Props {
-    page: Page
+    page: { url: string; title: string }
     isCurrentPage: boolean
     resetPage: () => void
 }

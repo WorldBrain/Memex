@@ -222,7 +222,15 @@ export default class DirectLinkingBackground {
         { tab }: TabArg,
         { url, limit = 1000, skip = 0, ...params }: AnnotSearchParams,
         isSocialPost?: boolean,
-    ) {
+    ): Promise<
+        Array<
+            Annotation & {
+                hasBookmark: boolean
+                createdWhen: number
+                lastEdited?: number
+            }
+        >
+    > {
         url = url == null && tab != null ? tab.url : url
         url = isSocialPost
             ? await this.lookupSocialId(url)
@@ -237,7 +245,7 @@ export default class DirectLinkingBackground {
             },
         )
 
-        const annotResults = await Promise.all(
+        const annotResults = (await Promise.all(
             annotations.map(
                 async ({ createdWhen, lastEdited, ...annotation }) => ({
                     ...annotation,
@@ -251,7 +259,7 @@ export default class DirectLinkingBackground {
                             : undefined,
                 }),
             ),
-        )
+        )) as any
 
         return annotResults
     }

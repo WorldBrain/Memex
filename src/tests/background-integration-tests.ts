@@ -69,6 +69,9 @@ export async function setupBackgroundIntegrationTest(options?: {
             alarms: {
                 onAlarm: { addListener: () => {} },
             },
+            tabs: {
+                query: () => {},
+            },
         } as any,
         tabManager: options?.tabManager,
         signalTransportFactory: options?.signalTransportFactory,

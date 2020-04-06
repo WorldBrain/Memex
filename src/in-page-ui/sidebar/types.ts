@@ -6,6 +6,7 @@ export interface SidebarControllerInterface {
 }
 
 export interface SidebarControllerEvents {
+    requestCloseSidebar(): void
     showSidebar(): void
     hideSidebar(): void
 }

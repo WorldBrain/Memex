@@ -6,3 +6,5 @@ export interface Page {
 export type ClickHandler<T extends HTMLElement> = (
     e: React.SyntheticEvent<T>,
 ) => void
+
+export type SidebarEnv = 'inpage' | 'overview'

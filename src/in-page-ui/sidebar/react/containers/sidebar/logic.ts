@@ -5,10 +5,16 @@ import {
     IncomingUIEvent,
     UIMutation,
 } from 'ui-logic-core'
+import { uiLoad } from 'ui-logic-core/lib/patterns'
+import { TaskState } from 'ui-logic-core/lib/types'
 import { SidebarControllerEventEmitter } from '../../../types'
+import { SidebarEnv } from '../../types'
+import { Annotation } from 'src/annotations/types'
 
 export interface SidebarContainerState {
     state: 'visible' | 'hidden'
+    loadState: TaskState
+    annotations: Annotation[]
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -18,11 +24,17 @@ export type SidebarContainerEvents = UIEvent<{
 
 export interface SidebarContainerDependencies {
     sidebarEvents: SidebarControllerEventEmitter
+    env: SidebarEnv
+    currentTab: { id: number; url: string }
+    loadAnnotatons(url: string): Promise<Annotation[]>
 }
 
-export class SidebarContainerLogic
-    extends UILogic<SidebarContainerState, SidebarContainerEvents>
-    implements UIEventHandlers<SidebarContainerState, SidebarContainerEvents> {
+export class SidebarContainerLogic extends UILogic<
+    SidebarContainerState,
+    SidebarContainerEvents
+>
+// implements UIEventHandlers<SidebarContainerState, SidebarContainerEvents>
+{
     constructor(private dependencies: SidebarContainerDependencies) {
         super()
     }
@@ -30,10 +42,20 @@ export class SidebarContainerLogic
     getInitialState(): SidebarContainerState {
         return {
             state: 'visible',
+            loadState: 'pristine',
+            annotations: [],
         }
     }
 
-    init() {}
+    async init() {
+        await uiLoad<SidebarContainerState>(this, async () => {
+            const loadAnnotations = this.dependencies.loadAnnotatons(
+                this.dependencies.currentTab.url,
+            )
+            const [annotations] = await Promise.all([loadAnnotations])
+            this.emitMutation({ annotations: { $set: annotations } })
+        })
+    }
 
     cleanup() {}
 

@@ -111,7 +111,7 @@
         "tweetnacl-async": "^2.0.0",
         "tweetnacl-util": "^0.15.0",
         "typed-emitter": "^0.1.0",
-        "ui-logic-core": "^0.1.2",
+        "ui-logic-core": "^0.2.0",
         "ui-logic-react": "^0.1.3",
         "url-regex": "^4.1.1",
         "uuid": "^3.3.2",
