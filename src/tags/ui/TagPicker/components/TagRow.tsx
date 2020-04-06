@@ -6,7 +6,6 @@ import { StyledIconBase } from '@styled-icons/styled-icon'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { opacify } from 'polished'
 import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
-import { colorGrey4 } from 'src/common-ui/components/design-library/colors'
 
 interface Props {
     onPress?: (tag: DisplayTag) => void
@@ -59,22 +58,19 @@ class TagRow extends React.Component<Props> {
                     {name}
                 </TagResultItem>
 
-                <IconStyleWrapper>
-                    {focused && selected && (
+                <IconStyleWrapper show={focused}>
+                    {selected && (
                         <XIcon size={20} onClick={this.handleTagPress} />
                     )}
-
-                    {(selected || focused) && (
-                        <ButtonTooltip
-                            tooltipText="Tag all tabs in window"
-                            position="left"
-                        >
-                            <TagAllTabsButton
-                                size={20}
-                                onClick={this.handleTagAllPress}
-                            />
-                        </ButtonTooltip>
-                    )}
+                    <ButtonTooltip
+                        tooltipText="Tag all tabs in window"
+                        position="left"
+                    >
+                        <TagAllTabsButton
+                            size={20}
+                            onClick={this.handleTagAllPress}
+                        />
+                    </ButtonTooltip>
                 </IconStyleWrapper>
             </Row>
         )
@@ -90,12 +86,16 @@ const IconStyleWrapper = styled.div`
 
     ${StyledIconBase} {
         stroke-width: 2px;
-        color: ${props => props.theme.tag.icon};
+        color: ${props =>
+            props.isFocused
+                ? props.theme.tag.hoverIcon
+                : opacify(0.5, props.theme.tag.icon)};
         margin-left: 8px;
+        opacity: ${props => (props.show ? '1' : '0')};
         transition: all 0.3s;
+        pointer-events: none;
         padding: 2px;
         border-radius: 3px;
-
         &:hover {
             color: ${props => props.theme.tag.iconHover};
             background: ${props => props.theme.tag.iconHoverBg};
@@ -111,6 +111,7 @@ const Row = styled.div`
     justify-content: space-between;
     transition: background 0.3s;
     cursor: pointer;
+
     background: ${props => props.isFocused && props.theme.border};
 `
 
