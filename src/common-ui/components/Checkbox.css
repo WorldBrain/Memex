@@ -1,3 +1,6 @@
+@value colors: 'src/common-ui/colors.css';
+@value color14 from colors;
+
 .container {
     margin: 5px 0;
 }
@@ -30,6 +33,14 @@
     cursor: pointer;
 }
 
+.disabledIcon {
+    background-color: color14;
+}
+
+.disabledLabel {
+    cursor: default;
+}
+
 .label__check {
     border-radius: 3px;
     border: 2px solid rgba(0, 0, 0, 0.1);
@@ -38,16 +49,9 @@
     margin-right: 20px;
     width: 25px;
     height: 25px;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* background-image: url('../../../img/check-solid.svg'); */
-
-    /* background-repeat: no-repeat; */
-
-    /* background-position: center; */
 
     &:hover {
         outline: none;
@@ -60,13 +64,11 @@
 
 .label__checkbox {
     display: none;
-    cursor: pointer;
     padding: 2px;
 }
 
 .label__text {
     font-size: 0.9rem;
-    cursor: pointer;
     display: flex;
     align-items: center;
     width: inherit;
@@ -90,11 +92,6 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    cursor: pointer;
-
-    & > label {
-        cursor: pointer;
-    }
 }
 
 @keyframes icon {
