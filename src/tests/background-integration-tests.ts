@@ -75,8 +75,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         getSharedSyncLog: async () => options?.sharedSyncLog,
         includePostSyncProcessor: options?.includePostSyncProcessor,
         fetchPageDataProcessor:
-            options &&
-            (options.fetchPageProcessor || new MockFetchPageDataProcessor()),
+            options?.fetchPageProcessor ?? new MockFetchPageDataProcessor(),
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
     })
