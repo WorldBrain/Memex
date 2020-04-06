@@ -8,7 +8,6 @@ export interface ShortcutElData {
 }
 
 export const shortcuts: ShortcutElData[] = [
-    { id: 'link-shortcut', name: 'link', children: 'Create links' },
     {
         id: 'highlight-shortcut',
         name: 'createHighlight',
