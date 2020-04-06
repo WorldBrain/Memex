@@ -318,4 +318,6 @@ describe('TagPickerLogic', () => {
         //     }),
         // )
     })
+
+    // TODO cause an error in the backend and check the tags are right
 })

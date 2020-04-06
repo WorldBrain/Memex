@@ -337,11 +337,13 @@ export default class TagPickerLogic extends UILogic<
         selectedTags = [],
         added,
         deleted,
+        skipUpdateCallback,
     }: {
         displayTags: DisplayTag[]
         selectedTags: string[]
         added: string
         deleted: string
+        skipUpdateCallback?: boolean
     }) => {
         this.emitMutation({
             query: { $set: '' },
@@ -350,11 +352,34 @@ export default class TagPickerLogic extends UILogic<
             selectedTags: { $set: selectedTags },
         })
 
+        if (skipUpdateCallback === true) {
+            return
+        }
+
         try {
             this.dependencies.onUpdateTagSelection(selectedTags, added, deleted)
         } catch (e) {
-            // TODO: change back if hasn't worked.
+            this._undoAfterError({ displayTags, selectedTags, added, deleted })
             throw e
+        }
+    }
+
+    _undoAfterError({ displayTags, selectedTags, added, deleted }) {
+        // Reverse the logic skipping the call to run the update callback
+        if (added) {
+            this._updateSelectedTagState({
+                ...this._removeTagSelected(added, displayTags, selectedTags),
+                added: null,
+                deleted: added,
+                skipUpdateCallback: true,
+            })
+        } else {
+            this._updateSelectedTagState({
+                ...this._addTagSelected(deleted, displayTags, selectedTags),
+                added: deleted,
+                deleted: null,
+                skipUpdateCallback: true,
+            })
         }
     }
 
