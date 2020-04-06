@@ -66,6 +66,15 @@ export default class TagPickerLogic extends UILogic<
     private defaultTags: DisplayTag[] = []
     private focusIndex = -1
 
+    // For now, the only thing that needs to know if this has finished, is the tests.
+    private _processingUpstreamOperation: Promise<void>
+    get processingUpstreamOperation() {
+        return this._processingUpstreamOperation
+    }
+    set processingUpstreamOperation(val) {
+        this._processingUpstreamOperation = val
+    }
+
     getInitialState(): TagPickerState {
         return {
             ...INITIAL_STATE,
@@ -365,7 +374,11 @@ export default class TagPickerLogic extends UILogic<
         }
 
         try {
-            this.dependencies.onUpdateTagSelection(selectedTags, added, deleted)
+            this._processingUpstreamOperation = this.dependencies.onUpdateTagSelection(
+                selectedTags,
+                added,
+                deleted,
+            )
         } catch (e) {
             this._undoAfterError({ displayTags, selectedTags, added, deleted })
             throw e
