@@ -56,12 +56,13 @@ const setupLogicHelper = async ({
     initialSuggestions,
     initialSelectedTags,
 }: {
-    device: any
-    onUpdateTagSelection?: () => false
+    device: UILogicTestDevice
+    onUpdateTagSelection?: (_: string[], added :string,deleted: string ) => Promise<void>
     queryTags?: (query: string) => Promise<string[]>
     queryTagResults?: string[]
     initialSuggestions?: string[]
     initialSelectedTags?: string[]
+    url?: string,
 }) => {
     const logic = device.createElement(
         new TagPickerLogic({

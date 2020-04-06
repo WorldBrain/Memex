@@ -37,6 +37,7 @@ export default class TagsBackground {
             addTagToExistingUrl: bindMethod(this, 'addTagToExistingUrl'),
             delTag: bindMethod(this, 'delTag'),
             addTagToPage: bindMethod(this, 'addTagToPage'),
+            updateTagForPage: bindMethod(this, 'updateTagForPage'),
             fetchPageTags: bindMethod(this, 'fetchPageTags'),
             addTagsToOpenTabs: bindMethod(this, 'addTagsToOpenTabs'),
             delTagsFromOpenTabs: bindMethod(this, 'delTagsFromOpenTabs'),
@@ -147,5 +148,25 @@ export default class TagsBackground {
             Date.now(),
         )
         await this.storage.addTag({ url, name: tag }).catch(initErrHandler())
+    }
+
+    // Sugar for the Tag picking UI component
+    async updateTagForPage({
+        added,
+        deleted,
+        url,
+        tabId,
+    }: {
+        added: string
+        deleted: string
+        url: string
+        tabId?: number
+    }) {
+        if (added) {
+            await this.addTagToPage({ url, tag: added, tabId })
+        }
+        if (deleted) {
+            await this.delTag({ url, tag: deleted })
+        }
     }
 }

@@ -95,46 +95,38 @@ class RibbonContainer extends Component<Props> {
         this.props.handleTooltipToggle()
     }
 
-    // TODO: can we put this somewhere else with less indirection?
-    private renderTagsManager() {
-        return (
-            // <IndexDropdown
-            //     env="inpage"
-            //     url={this.props.getUrl()}
-            //     tabId={this.props.tabId}
-            //     initFilters={this.props.tags}
-            //     initSuggestions={this.props.initTagSuggs}
-            //     source="tag"
-            //     onFilterAdd={this.props.onTagAdd}
-            //     onFilterDel={this.props.onTagDel}
-            //     isForRibbon
-            // />
-            <TagPicker
-                loadDefaultSuggestions={() => this.props.initTagSuggs}
-                onUpdateTagSelection={(_, added, deleted) => {
-                    if (added) {
-                        tags.addTagToPage({
-                            tag: added,
-                            url: this.props.getUrl(),
-                            tabId: this.props.tabId,
-                        })
-                        this.props.onTagAdd(added)
-                    }
-                    if (deleted) {
-                        tags.delTag({ tag: deleted, url: this.props.getUrl() })
-                        return this.props.onTagDel(deleted)
-                    }
-                }}
-                queryTags={query => tags.searchForTagSuggestions({ query })}
-                initialSelectedTags={async () =>
-                    tags.fetchPageTags({ url: this.props.getUrl() })
-                }
-                tagAllTabs={(tagName: string) =>
-                    tags.addTagsToOpenTabs({ name: tagName })
-                }
-            />
-        )
+    handleTagsUpdate = async (_: string[], added: string, deleted: string) => {
+        const backedResult = tags.updateTagForPage({
+            added,
+            deleted,
+            url: this.props.getUrl(),
+        })
+        // Redux actions
+        if (added) {
+            this.props.onTagAdd(added)
+        }
+        if (deleted) {
+            return this.props.onTagDel(deleted)
+        }
+        return backedResult
     }
+    handleTagAllTabs = (tagName: string) =>
+        tags.addTagsToOpenTabs({ name: tagName })
+    handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
+    fetchTagsForPage = async () =>
+        tags.fetchPageTags({ url: this.props.getUrl() })
+    fetchTagSuggestions = () => this.props.initTagSuggs
+
+    // TODO: can we put this somewhere else with less indirection?
+    private renderTagsManager = () => (
+        <TagPicker
+            loadDefaultSuggestions={this.fetchTagSuggestions}
+            queryTags={this.handleTagQuery}
+            onUpdateTagSelection={this.handleTagsUpdate}
+            initialSelectedTags={this.fetchTagsForPage}
+            tagAllTabs={this.handleTagAllTabs}
+        />
+    )
 
     private renderCollectionsManager() {
         return (

@@ -13,7 +13,9 @@ storiesOf('Tags Refactored', module)
     .add('Tag Picker - All together, Default theme', () => (
         <div>
             <TagPicker
-                onUpdateTagSelection={selectedTags => action('updatedTags')}
+                onUpdateTagSelection={async selectedTags => {
+                    action('updatedTags')
+                }}
                 queryTags={async term => tags.filter(t => t.includes(term))}
                 loadDefaultSuggestions={() => [tags[4], tags[5]]}
                 initialSelectedTags={async () => [tags[0], tags[1]]}

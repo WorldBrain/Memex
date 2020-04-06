@@ -20,6 +20,12 @@ export interface RemoteTagsInterface {
         query: string
         limit?: number
     }): Promise<string[]>
+    updateTagForPage(args: {
+        added: string
+        deleted: string
+        url: string
+        tabId?: number
+    }): Promise<void>
 }
 
 export interface TagTab {
