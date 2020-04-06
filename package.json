@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "2.0.13",
+    "version": "2.0.18",
     "homepage": "https://worldbrain.io",
     "license": "MIT",
     "repository": "https://github.com/WorldBrain/Memex",
@@ -9,6 +9,7 @@
         "build:ci": "npm run build:clean && webpack --env.ci",
         "build:prod": "npm run build:clean && webpack --env.prod",
         "build:package": "npm run build:clean && webpack --env.prod --env.package",
+        "build:package-sentry": "npm run build:clean && webpack --env.prod --env.package --env.sentry",
         "build:clean": "rimraf ./extension",
         "watch": "npm run build:clean && webpack --watch",
         "watch:notif": "webpack --watch --env.notifs",
@@ -133,6 +134,7 @@
         "@babel/preset-env": "^7.9.0",
         "@babel/preset-react": "^7.9.4",
         "@babel/register": "^7.9.0",
+        "@babel/helper-validator-identifier": "^7.9.0",
         "@firebase/testing": "^0.13.1",
         "@sentry/webpack-plugin": "^1.5.2",
         "@storybook/addon-actions": "^5.3.17",

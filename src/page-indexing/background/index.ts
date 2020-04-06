@@ -166,6 +166,8 @@ export class PageIndexingBackground {
 
         if (props.stubOnly && analysisRes.content) {
             delete analysisRes.content.fullText
+        } else if (analysisRes.content) {
+            analysisRes.content.fullText = await analysisRes.getFullText()
         }
 
         const pageData = await pipeline({
