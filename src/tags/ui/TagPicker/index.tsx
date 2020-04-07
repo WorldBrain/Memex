@@ -104,8 +104,6 @@ class TagPicker extends StatefulUIElement<
     }
 }
 
-// TODO we need an empty state. No tags in the search box show 'Search tags' if its a filter... 'search or filter tags'
-
 const OuterSearchBox = styled.div`
     background: ${props => props.theme.background};
     padding: 8px;
