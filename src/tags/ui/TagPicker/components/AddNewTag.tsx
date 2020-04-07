@@ -2,9 +2,16 @@ import React from 'react'
 import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import { TagResultItem } from './TagResultItem'
+import { X as XIcon } from '@styled-icons/feather/X'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import {
+    IconStyleWrapper,
+    TagAllTabsButton,
+} from 'src/tags/ui/TagPicker/components/TagRow'
 
 interface Props {
     onPress: () => void
+    onPressTagAll: () => void
     tag: string
 }
 
@@ -13,9 +20,22 @@ export default (props: Props) => {
         <AddNew onClick={props.onPress}>
             <span>Create new:</span>
             <TagResultItem>{props.tag}</TagResultItem>
+            <Flex />
+            <IconStyleWrapper show>
+                <ButtonTooltip
+                    tooltipText="Tag all tabs in window"
+                    position="left"
+                >
+                    <TagAllTabsButton size={20} onClick={props.onPressTagAll} />
+                </ButtonTooltip>
+            </IconStyleWrapper>
         </AddNew>
     )
 }
+
+const Flex = styled.div`
+    flex: 1;
+`
 
 export const AddNew = styled.div`
     align-items: start;

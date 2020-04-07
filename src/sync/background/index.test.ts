@@ -117,7 +117,7 @@ function extensionSyncTests(suiteOptions: {
         ) => BackgroundIntegrationTestSetup['backgroundModules']['search']
         customLists: (
             setup: BackgroundIntegrationTestSetup,
-        ) => BackgroundIntegrationTestSetup['backgroundModules']['customLists']['remoteFunctions']
+        ) => BackgroundIntegrationTestSetup['backgroundModules']['customLists']
         sharedSyncLog: SharedSyncLogStorage
         userId: number | string
         fetchPageProcessor?: MockFetchPageDataProcessor
@@ -169,7 +169,7 @@ function extensionSyncTests(suiteOptions: {
             const searchModule = (setup: BackgroundIntegrationTestSetup) =>
                 setup.backgroundModules.search
             const customLists = (setup: BackgroundIntegrationTestSetup) =>
-                setup.backgroundModules.customLists.remoteFunctions
+                setup.backgroundModules.customLists
 
             const userId: string = options.userId || uuid()
 
@@ -298,7 +298,7 @@ function extensionSyncTests(suiteOptions: {
 
         // Force incremental sync from second device back to first
 
-        await customLists(devices[1]).updateListName({
+        await customLists(devices[1]).updateList({
             id: listId,
             name: 'Updated List Title',
         })
@@ -322,7 +322,7 @@ function extensionSyncTests(suiteOptions: {
 
         // Force incremental sync from first device to second
 
-        await customLists(devices[0]).updateListName({
+        await customLists(devices[0]).updateList({
             id: listId,
             name: 'Another Updated List Title',
         })

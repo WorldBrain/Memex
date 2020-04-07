@@ -13,7 +13,22 @@ storiesOf('Tags Refactored', module)
     .add('Tag Picker - All together, Default theme', () => (
         <div>
             <TagPicker
-                onUpdateTagSelection={selectedTags => action('updatedTags')}
+                onUpdateTagSelection={async selectedTags => {
+                    action('updatedTags')
+                }}
+                queryTags={async term => tags.filter(t => t.includes(term))}
+                loadDefaultSuggestions={() => [tags[4], tags[5]]}
+                initialSelectedTags={async () => [tags[0], tags[1]]}
+                tagAllTabs={async tag => action('Tag All tabs')}
+            />
+        </div>
+    ))
+    .add('Tag Picker - Errors', () => (
+        <div>
+            <TagPicker
+                onUpdateTagSelection={selectedTags => {
+                    throw new Error('Causing error for test')
+                }}
                 queryTags={async term => tags.filter(t => t.includes(term))}
                 loadDefaultSuggestions={() => [tags[4], tags[5]]}
                 initialSelectedTags={async () => [tags[0], tags[1]]}

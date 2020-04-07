@@ -24,7 +24,7 @@ export interface TagPickerDependencies {
         tags: string[],
         added: string,
         deleted: string,
-    ) => void
+    ) => Promise<void>
     queryTags: (query: string) => Promise<string[]>
     tagAllTabs: (query: string) => void
     loadDefaultSuggestions: () => string[]
@@ -33,16 +33,19 @@ export interface TagPickerDependencies {
 }
 
 export type TagPickerEvent = UIEvent<{
+    setSearchInputRef: { ref: HTMLInputElement }
     loadedSuggestions: {}
     loadedQueryResults: {}
     tagClicked: {}
     searchInputChanged: { query: string }
     selectedTagPress: { tag: string }
     resultTagAllPress: { tag: DisplayTag }
+    newTagAllPress: {}
     resultTagPress: { tag: DisplayTag }
     resultTagFocus: { tag: DisplayTag; index: number }
     newTagPress: { tag: string }
     keyPress: { key: KeyEvent }
+    focusInput: {}
 }>
 
 interface TagPickerUIEvent<T extends keyof TagPickerEvent> {
@@ -54,12 +57,23 @@ export default class TagPickerLogic extends UILogic<
     TagPickerState,
     TagPickerEvent
 > {
+    private searchInputRef?: HTMLInputElement
+
     constructor(private dependencies: TagPickerDependencies) {
         super()
     }
 
     private defaultTags: DisplayTag[] = []
     private focusIndex = -1
+
+    // For now, the only thing that needs to know if this has finished, is the tests.
+    private _processingUpstreamOperation: Promise<void>
+    get processingUpstreamOperation() {
+        return this._processingUpstreamOperation
+    }
+    set processingUpstreamOperation(val) {
+        this._processingUpstreamOperation = val
+    }
 
     getInitialState(): TagPickerState {
         return {
@@ -84,6 +98,17 @@ export default class TagPickerLogic extends UILogic<
             displayTags: { $set: this.defaultTags },
             selectedTags: { $set: initialSelectedTags },
         })
+    }
+
+    setSearchInputRef = ({
+        event: { ref },
+        previousState,
+    }: TagPickerUIEvent<'setSearchInputRef'>) => {
+        this.searchInputRef = ref
+    }
+
+    focusInput = () => {
+        this.searchInputRef?.focus()
     }
 
     keyPress = ({
@@ -295,6 +320,13 @@ export default class TagPickerLogic extends UILogic<
         this.dependencies.tagAllTabs(tag.name)
     }
 
+    newTagAllPress = ({
+        event: {},
+        previousState,
+    }: TagPickerUIEvent<'newTagAllPress'>) => {
+        this.dependencies.tagAllTabs(previousState.query)
+    }
+
     resultTagFocus = ({
         event: { tag, index },
         previousState,
@@ -322,11 +354,13 @@ export default class TagPickerLogic extends UILogic<
         selectedTags = [],
         added,
         deleted,
+        skipUpdateCallback,
     }: {
         displayTags: DisplayTag[]
         selectedTags: string[]
         added: string
         deleted: string
+        skipUpdateCallback?: boolean
     }) => {
         this.emitMutation({
             query: { $set: '' },
@@ -335,11 +369,38 @@ export default class TagPickerLogic extends UILogic<
             selectedTags: { $set: selectedTags },
         })
 
+        if (skipUpdateCallback === true) {
+            return
+        }
+
         try {
-            this.dependencies.onUpdateTagSelection(selectedTags, added, deleted)
+            this._processingUpstreamOperation = this.dependencies.onUpdateTagSelection(
+                selectedTags,
+                added,
+                deleted,
+            )
         } catch (e) {
-            // TODO: change back if hasn't worked.
+            this._undoAfterError({ displayTags, selectedTags, added, deleted })
             throw e
+        }
+    }
+
+    _undoAfterError({ displayTags, selectedTags, added, deleted }) {
+        // Reverse the logic skipping the call to run the update callback
+        if (added) {
+            this._updateSelectedTagState({
+                ...this._removeTagSelected(added, displayTags, selectedTags),
+                added: null,
+                deleted: added,
+                skipUpdateCallback: true,
+            })
+        } else {
+            this._updateSelectedTagState({
+                ...this._addTagSelected(deleted, displayTags, selectedTags),
+                added: deleted,
+                deleted: null,
+                skipUpdateCallback: true,
+            })
         }
     }
 

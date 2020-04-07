@@ -107,6 +107,27 @@ class PopupContainer extends PureComponent<Props> {
         }
     }
 
+    handleTagsUpdate = async (_: string[], added: string, deleted: string) => {
+        const backedResult = tags.updateTagForPage({
+            added,
+            deleted,
+            url: this.props.url,
+        })
+        // Redux actions
+        if (added) {
+            this.props.onTagAdd(added)
+        }
+        if (deleted) {
+            return this.props.onTagDel(deleted)
+        }
+        return backedResult
+    }
+    handleTagAllTabs = (tagName: string) =>
+        tags.addTagsToOpenTabs({ name: tagName })
+    handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
+    fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
+    fetchTagSuggestions = () => this.props.initTagSuggs
+
     renderChildren() {
         if (this.props.blacklistConfirm) {
             return <BlacklistConfirm />
@@ -114,48 +135,13 @@ class PopupContainer extends PureComponent<Props> {
 
         if (this.props.showTagsPicker) {
             return (
-                /*
-                // Old Tag Picker Implementation
-                <IndexDropdown
-                    url={this.props.url}
-                    tabId={this.props.tabId}
-                    initFilters={this.props.tags}
-                    initSuggestions={this.props.initTagSuggs}
-                    source="tag"
-                    onBackBtnClick={this.props.toggleShowTagsPicker}
-                    onFilterAdd={this.props.onTagAdd}
-                    onFilterDel={this.props.onTagDel}
-                    allTabs={this.props.allTabs}
-                />*/
-
                 <TagPicker
-                    loadDefaultSuggestions={() => this.props.initTagSuggs}
-                    queryTags={query => tags.searchForTagSuggestions({ query })}
-                    onUpdateTagSelection={(_, added, deleted) => {
-                        if (added) {
-                            tags.addTagToPage({
-                                tag: added,
-                                url: this.props.url,
-                                tabId: this.props.tabId,
-                            })
-                            this.props.onTagAdd(added)
-                        }
-                        if (deleted) {
-                            tags.delTag({ tag: deleted, url: this.props.url })
-                            return this.props.onTagDel(deleted)
-                        }
-                    }}
-                    initialSelectedTags={async () =>
-                        tags.fetchPageTags({ url: this.props.url })
-                    }
-                    tagAllTabs={(tagName: string) =>
-                        tags.addTagsToOpenTabs({ name: tagName })
-                    }
+                    loadDefaultSuggestions={this.fetchTagSuggestions}
+                    queryTags={this.handleTagQuery}
+                    onUpdateTagSelection={this.handleTagsUpdate}
+                    initialSelectedTags={this.fetchTagsForPage}
+                    tagAllTabs={this.handleTagAllTabs}
                 >
-                    {/*
-                        // TODO: I feel it would make more sense to have this component as a wrapper (make it a parent of TagPicker)
-                        // but then it there's a styling issue with the rounded boarders, not sure how best to solve.
-                        */}
                     <BackContainer onClick={this.props.toggleShowTagsPicker} />
                 </TagPicker>
             )

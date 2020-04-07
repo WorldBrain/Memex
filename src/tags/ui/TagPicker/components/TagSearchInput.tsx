@@ -10,6 +10,7 @@ interface Props {
     onKeyPress: (key: KeyEvent) => void
     value: string
     before: any
+    searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
 }
 
 interface State {
@@ -52,6 +53,7 @@ export class TagSearchInput extends React.Component<Props, State> {
                     onBlur={() => this.setState({ isFocused: false })}
                     specialHandlers={[this.handleSpecialKeyPress]}
                     type={'input'}
+                    updateRef={this.props.searchInputRef}
                     autoFocus
                 />
             </SearchBox>
