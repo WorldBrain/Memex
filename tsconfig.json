@@ -85,7 +85,13 @@
             "simple-signalling/lib/*": ["external/simple-signalling/ts/*"],
             "src/*": ["src/*"]
         },
-        "lib": ["es2017", "dom", "dom.iterable", "esnext.asynciterable"]
+        "lib": [
+            "es2017",
+            "es2018.promise",
+            "dom",
+            "dom.iterable",
+            "esnext.asynciterable"
+        ]
     },
     "include": ["./src/**/*"],
     "exclude": ["node_modules", "./src/**/*.js", "./src/**/*.jsx"]
