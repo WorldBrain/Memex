@@ -29,7 +29,13 @@ class ButtonIcon extends PureComponent<Props> {
                 tabIndex="-1"
                 to={this.props.href}
             >
-                <div />
+                <div
+                    className={cx(
+                        styles.customIcon,
+                        styles.buttonIcons,
+                        this.props.btnClass,
+                    )}
+                />
                 {this.renderBadge()}
             </OutLink>
         )

@@ -111,7 +111,6 @@ const Row = styled.div`
     justify-content: space-between;
     transition: background 0.3s;
     cursor: pointer;
-
     background: ${props => props.isFocused && props.theme.border};
 `
 
