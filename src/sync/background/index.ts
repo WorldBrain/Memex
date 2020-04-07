@@ -38,6 +38,7 @@ export default class SyncBackground extends SyncService {
         storageManager: StorageManager
         signalTransportFactory: SignalTransportFactory
         getSharedSyncLog: () => Promise<SharedSyncLog>
+        getIceServers?: () => Promise<string[]>
         browserAPIs: Pick<Browser, 'storage'>
         appVersion: string
         disableEncryption?: boolean

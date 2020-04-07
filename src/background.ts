@@ -31,6 +31,7 @@ import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from 'src/search/pipeline'
 import { setStorageMiddleware } from './storage/middleware'
+import { getFirebase } from './util/firebase-app-initialized'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -55,6 +56,14 @@ export async function main() {
         getSharedSyncLog,
         authOptions: {
             devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
+        },
+        getIceServers: async () => {
+            const firebase = await getFirebase()
+            const generateToken = firebase
+                .functions()
+                .httpsCallable('generateTwilioNTSToken')
+            const response = await generateToken()
+            return response.data.iceServers
         },
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
