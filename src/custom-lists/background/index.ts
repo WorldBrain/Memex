@@ -38,7 +38,14 @@ export default class CustomListBackground {
 
         this.remoteFunctions = {
             createCustomList: bindMethod(this, 'createCustomList'),
-            insertPageToList: bindMethod(this, 'insertPageToList'),
+            insertPageToList: async params => {
+                const currentTab = await this.options.queryTabs?.({
+                    active: true,
+                    currentWindow: true,
+                })
+                params.tabId = currentTab?.[0]?.id
+                return this.insertPageToList(params)
+            },
             updateListName: bindMethod(this, 'updateList'),
             removeList: bindMethod(this, 'removeList'),
             removePageFromList: bindMethod(this, 'removePageFromList'),
@@ -147,19 +154,38 @@ export default class CustomListBackground {
         })
     }
 
-    private async createPageIfNeeded({ url }: { url: string }) {
+    private async createPageIfNeeded({
+        url,
+        tabId,
+    }: {
+        url: string
+        tabId?: number
+    }) {
         const exists = await this.options.pageStorage.pageExists(url)
         if (!exists) {
-            await this._createPage({ url, visitTime: Date.now(), save: true })
+            await this._createPage({
+                url,
+                tabId,
+                visitTime: Date.now(),
+                save: true,
+            })
         }
     }
 
-    async insertPageToList({ id, url }: { id: number; url: string }) {
+    async insertPageToList({
+        id,
+        url,
+        tabId,
+    }: {
+        id: number
+        url: string
+        tabId?: number
+    }) {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
-        await this.createPageIfNeeded({ url })
+        await this.createPageIfNeeded({ url, tabId })
 
         return this.storage.insertPageToList({
             listId: id,

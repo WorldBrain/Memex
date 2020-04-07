@@ -19,10 +19,9 @@ const Notification = props => (
                             <div className={styles.title}>{props.title}</div>
                             <div
                                 className={styles.message}
-                                dangerouslySetInnerHTML={{
-                                    __html: props.message,
-                                }}
-                            />
+                            >
+                            <p>{props.message}</p>
+                            </div>
                             {props.isShowMore && (
                                 <div
                                     className={styles.showMore}

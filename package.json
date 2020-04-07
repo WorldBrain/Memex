@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "2.0.13",
+    "version": "2.0.18",
     "homepage": "https://worldbrain.io",
     "license": "MIT",
     "repository": "https://github.com/WorldBrain/Memex",
@@ -9,6 +9,7 @@
         "build:ci": "npm run build:clean && webpack --env.ci",
         "build:prod": "npm run build:clean && webpack --env.prod",
         "build:package": "npm run build:clean && webpack --env.prod --env.package",
+        "build:package-sentry": "npm run build:clean && webpack --env.prod --env.package --env.sentry",
         "build:clean": "rimraf ./extension",
         "watch": "npm run build:clean && webpack --watch",
         "watch:notif": "webpack --watch --env.notifs",
@@ -28,6 +29,7 @@
         "lint:css": "stylelint 'src/**/*.css'",
         "format": "prettier --config prettier.config.js --write '**/*.{ts,js,tsx,jsx,css}'",
         "storybook": "start-storybook -p 9001 -c .storybook",
+        "storybook:ci": "start-storybook -c .storybook --ci --smoke-test",
         "storage-explorer": "TS_NODE_PROJECT=tsconfig.jest.json ts-node -r tsconfig-paths/register src/tools/storage-explorer.ts"
     },
     "husky": {
@@ -128,6 +130,7 @@
         "@babel/preset-env": "^7.9.0",
         "@babel/preset-react": "^7.9.4",
         "@babel/register": "^7.9.0",
+        "@babel/helper-validator-identifier": "^7.9.0",
         "@firebase/testing": "^0.13.1",
         "@sentry/webpack-plugin": "^1.5.2",
         "@storybook/addon-knobs": "^5.2.6",
@@ -229,6 +232,7 @@
         "webpack-build-notifier": "^0.1.25",
         "webpack-chrome-extension-reloader": "^0.8.3",
         "webpack-cli": "^3.1.0",
+        "webpack-merge": "^4.2.2",
         "whatwg-url": "^7.0.0",
         "wrtc": "^0.4.1",
         "zip-webpack-plugin": "^3.0.0"
