@@ -6,15 +6,18 @@ import SearchBox from './search-box'
 
 const styles = require('./topbar.css')
 
-interface Props {
+export interface TopbarState {
     env: 'inpage' | 'overview'
     searchValue: string
     showClearFiltersBtn: boolean
+    disableAddCommentBtn: boolean
+}
+
+export interface TopbarProps extends TopbarState {
     handleSearchChange: (searchQuery: string) => void
     handleSearchEnter: (e: React.KeyboardEvent<HTMLInputElement>) => void
     handleClearBtn: (e: React.MouseEvent<HTMLButtonElement>) => void
     handleFilterBtnClick: () => void
-    disableAddCommentBtn: boolean
     handleCloseBtnClick: () => void
     handleSettingsBtnClick: () => void
     handleAddCommentBtnClick: () => void
@@ -28,7 +31,7 @@ const Topbar = ({
     handleSettingsBtnClick,
     handleAddCommentBtnClick,
     ...props
-}: Props) => (
+}: TopbarProps) => (
     <div className={styles.topbar}>
         {props.env === 'overview' && (
             <ButtonTooltip tooltipText="Close (ESC)" position="rightCentered">

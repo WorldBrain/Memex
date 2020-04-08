@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { TagInput } from 'src/sidebar-overlay/components'
+import TagInput from '../tag-input'
 import AllModesFooter from './all-modes-footer'
 // import * as constants from '../comment-box/constants'
 import { getLocalStorage } from 'src/util/storage'

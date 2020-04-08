@@ -26,7 +26,7 @@ export interface DispatchProps {
 
 export interface OwnProps {
     isOverview?: boolean
-    handleAddCommentBtnClick: () => void
+    handleAddPageCommentBtnClick: () => void
     showSocialSearch: boolean
 }
 
@@ -144,7 +144,7 @@ export default class SearchTypeSwitch extends React.PureComponent<
                         <div
                             onClick={e => {
                                 e.stopPropagation()
-                                this.props.handleAddCommentBtnClick()
+                                this.props.handleAddPageCommentBtnClick()
                             }}
                             className={styles.imgContainer}
                         >

@@ -6,6 +6,7 @@ import { setupBackgroundIntegrationTest } from 'src/tests/background-integration
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 import SidebarContainer from 'src/in-page-ui/sidebar/react/containers/sidebar'
 import { InPageUI } from 'src/in-page-ui/shared-state'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 
 const CREATED_WHEN = Date.now() - 1000 * 60 * 60
 
@@ -33,79 +34,79 @@ class WithDependencies<Dependencies> extends React.Component<
 const stories = storiesOf('Sidebar', module)
 stories.addDecorator(knobs.withKnobs)
 
-stories.add('Random', () => (
-    <Sidebar
-        env={'inpage'}
-        isOpen={true}
-        isLoading={false}
-        needsWaypoint={false}
-        appendLoader={false}
-        annotations={[]}
-        activeAnnotationUrl={''}
-        hoverAnnotationUrl={''}
-        showCommentBox={false}
-        searchValue={''}
-        showCongratsMessage={false}
-        showClearFiltersBtn={false}
-        isSocialPost={false}
-        page={{} as any}
-        pageType={'page'}
-        searchType={'notes'}
-        closeSidebar={() => {}}
-        handleGoToAnnotation={() => {}}
-        handleAddCommentBtnClick={() => {}}
-        handleAnnotationBoxMouseEnter={() => {}}
-        handleAnnotationBoxMouseLeave={() => {}}
-        handleEditAnnotation={() => {}}
-        handleDeleteAnnotation={() => {}}
-        handleScrollPagination={() => {}}
-        handleBookmarkToggle={() => {}}
-        onQueryKeyDown={() => {}}
-        onQueryChange={() => {}}
-        onShowFiltersSidebarChange={() => {}}
-        onOpenSettings={() => {}}
-        clearAllFilters={() => {}}
-        resetPage={() => {}}
-        showFiltersSidebar={false}
-        showSocialSearch={false}
-        annotsFolded={false}
-        resultsSearchType={'page'}
-        pageCount={0}
-        annotCount={0}
-        handleUnfoldAllClick={() => {}}
-        setSearchType={() => {}}
-        setPageType={() => {}}
-        setResultsSearchType={() => {}}
-        setAnnotationsExpanded={() => {}}
-        handlePageTypeToggle={() => {}}
-        noResults={false}
-        isBadTerm={false}
-        areAnnotationsExpanded={false}
-        shouldShowCount={false}
-        isInvalidSearch={false}
-        totalResultCount={0}
-        toggleAreAnnotationsExpanded={(e: React.SyntheticEvent) => {}}
-        isNewSearchLoading={false}
-        isListFilterActive={false}
-        searchResults={[]}
-        resultsByUrl={new Map()}
-        resultsClusteredByDay={false}
-        annotsByDay={{}}
-        isSocialSearch={false}
-        tagSuggestions={[]}
-        resetUrlDragged={() => {}}
-        resetActiveTagIndex={() => {}}
-        setUrlDragged={(url: string) => {}}
-        addTag={(i: number) => (f: string) => {}}
-        delTag={(i: number) => (f: string) => {}}
-        handlePillClick={(tag: string) => () => {}}
-        handleTagBtnClick={(i: number) => () => {}}
-        handleCommentBtnClick={() => {}}
-        handleCrossRibbonClick={() => () => {}}
-        handleToggleBm={() => () => {}}
-        handleTrashBtnClick={() => () => {}}
-    />
-))
+// stories.add('Random', () => (
+//     <Sidebar
+//         env={'inpage'}
+//         isOpen={true}
+//         isLoading={false}
+//         needsWaypoint={false}
+//         appendLoader={false}
+//         annotations={[]}
+//         activeAnnotationUrl={''}
+//         hoverAnnotationUrl={''}
+//         showCommentBox={false}
+//         searchValue={''}
+//         showCongratsMessage={false}
+//         showClearFiltersBtn={false}
+//         isSocialPost={false}
+//         page={{} as any}
+//         pageType={'page'}
+//         searchType={'notes'}
+//         closeSidebar={() => {}}
+//         handleGoToAnnotation={() => {}}
+//         handleAddPageCommentBtnClick={() => {}}
+//         handleAnnotationBoxMouseEnter={() => {}}
+//         handleAnnotationBoxMouseLeave={() => {}}
+//         handleEditAnnotation={() => {}}
+//         handleDeleteAnnotation={() => {}}
+//         handleScrollPagination={() => {}}
+//         handleBookmarkToggle={() => {}}
+//         onQueryKeyDown={() => {}}
+//         onQueryChange={() => {}}
+//         onShowFiltersSidebarChange={() => {}}
+//         onOpenSettings={() => {}}
+//         clearAllFilters={() => {}}
+//         resetPage={() => {}}
+//         showFiltersSidebar={false}
+//         showSocialSearch={false}
+//         annotsFolded={false}
+//         resultsSearchType={'page'}
+//         pageCount={0}
+//         annotCount={0}
+//         handleUnfoldAllClick={() => {}}
+//         setSearchType={() => {}}
+//         setPageType={() => {}}
+//         setResultsSearchType={() => {}}
+//         setAnnotationsExpanded={() => {}}
+//         handlePageTypeToggle={() => {}}
+//         noResults={false}
+//         isBadTerm={false}
+//         areAnnotationsExpanded={false}
+//         shouldShowCount={false}
+//         isInvalidSearch={false}
+//         totalResultCount={0}
+//         toggleAreAnnotationsExpanded={(e: React.SyntheticEvent) => {}}
+//         isNewSearchLoading={false}
+//         isListFilterActive={false}
+//         searchResults={[]}
+//         resultsByUrl={new Map()}
+//         resultsClusteredByDay={false}
+//         annotsByDay={{}}
+//         isSocialSearch={false}
+//         tagSuggestions={[]}
+//         resetUrlDragged={() => {}}
+//         resetActiveTagIndex={() => {}}
+//         setUrlDragged={(url: string) => {}}
+//         addTag={(i: number) => (f: string) => {}}
+//         delTag={(i: number) => (f: string) => {}}
+//         handlePillClick={(tag: string) => () => {}}
+//         handleTagBtnClick={(i: number) => () => {}}
+//         handleCommentBtnClick={() => {}}
+//         handleCrossRibbonClick={() => () => {}}
+//         handleToggleBm={() => () => {}}
+//         handleTrashBtnClick={() => () => {}}
+//     />
+// ))
 
 stories.add('Dynamic - In page', () => (
     <WithDependencies
@@ -121,16 +122,22 @@ stories.add('Dynamic - In page', () => (
                     createdWhen: new Date(),
                 },
             )
+            const annotationManager = new AnnotationsManager()
+            annotationManager._getAllAnnotationsByUrlRPC =
+                testSetup.backgroundModules.directLinking.getAllAnnotationsByUrl
+
             return {
                 testSetup,
+                annotationManager,
                 inPageUIController: null,
             }
         }}
     >
-        {({ testSetup }) => (
+        {({ testSetup, annotationManager }) => (
             <SidebarContainer
                 env={'inpage'}
                 currentTab={{ id: 654, url: 'https://www.foo.com' }}
+                annotationManager={annotationManager}
                 sidebarEvents={
                     {
                         on: () => {},
@@ -143,6 +150,11 @@ stories.add('Dynamic - In page', () => (
                         { url },
                     )
                 }
+                loadTagSuggestions={async () => [
+                    // await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+                    'first suggestion',
+                    'second suggestion',
+                ]}
             />
         )}
     </WithDependencies>

@@ -33,9 +33,9 @@ interface OwnProps {
     toggleShowFilters: () => void
 }
 
-type Props = StateProps & DispatchProps & OwnProps
+export type FiltersSidebarProps = StateProps & DispatchProps & OwnProps
 
-export default class FiltersSidebar extends Component<Props> {
+export default class FiltersSidebar extends Component<FiltersSidebarProps> {
     private filtersRef: HTMLDivElement
 
     componentDidMount() {

@@ -28,7 +28,7 @@
         "lint:css": "stylelint 'src/**/*.css'",
         "format": "prettier --config prettier.config.js --write '**/*.{ts,js,tsx,jsx,css}'",
         "storybook": "start-storybook -p 9001 -c .storybook",
-        "storybook:ci": "start-storybook -c .storybook --ci --smoke-test",
+        "storybook:ci": "start-storybook -c .storybook -s ./extension --ci --smoke-test",
         "storage-explorer": "TS_NODE_PROJECT=tsconfig.jest.json ts-node -r tsconfig-paths/register src/tools/storage-explorer.ts"
     },
     "husky": {

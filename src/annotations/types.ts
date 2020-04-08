@@ -16,3 +16,12 @@ export interface Annotation {
     tags: string[]
     hasBookmark?: boolean
 }
+
+export interface AnnotationsManagerInterface {
+    fetchAnnotationsWithTags(
+        url: string,
+        // limit = 10,
+        // skip = 0,
+        isSocialPost?: boolean,
+    ): Promise<Array<any>>
+}

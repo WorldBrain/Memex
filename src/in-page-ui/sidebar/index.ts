@@ -35,7 +35,6 @@ export class Sidebar implements SidebarControllerInterface {
             classNames: ['memex-sidebar'],
             cssFile: this.options.cssFile,
         })
-        console.log(this.mount)
 
         retargetEvents(this.mount.shadowRoot)
 

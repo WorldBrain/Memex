@@ -20,6 +20,7 @@ import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_scr
 import { RibbonControllerInterface } from 'src/in-page-ui/ribbon/types'
 import { SidebarControllerInterface } from 'src/in-page-ui/sidebar/types'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
+import AnnotationsManager from 'src/annotations/annotations-manager'
 
 export function main() {
     const controllers: {
@@ -38,6 +39,7 @@ export function main() {
         return controllers[component]! as Promise<Which['type']>
     }
 
+    const annotationManager = new AnnotationsManager()
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
             const ribbon = await execute()
@@ -47,7 +49,7 @@ export function main() {
             execute()
         },
         async registerSidebarScript(execute): Promise<void> {
-            const sidebar = await execute()
+            const sidebar = await execute({ annotationManager })
             controllers.sidebar!.resolve(sidebar.sidebarController)
         },
         async registerTooltipScript(execute): Promise<void> {

@@ -7,6 +7,7 @@ import {
 } from './logic'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Sidebar from '../../components/sidebar'
+import { Anchor } from 'src/highlighting/types'
 
 export interface SidebarContainerProps extends SidebarContainerDependencies {}
 
@@ -40,82 +41,198 @@ export default class SidebarContainer extends StatefulUIElement<
     }
 
     render() {
+        const isLoading = this.state.loadState !== 'success'
         return (
             <Sidebar
-                // Main sidebar props
                 env={this.props.env}
                 isOpen={this.state.state === 'visible'}
-                isLoading={this.state.loadState === 'success'}
-                needsWaypoint={false}
-                appendLoader={false}
+                isLoading={isLoading}
+                needsWaypoint={this.state.needsWaypoint}
+                appendLoader={this.state.appendLoader}
                 annotations={this.state.annotations}
-                activeAnnotationUrl={''}
-                hoverAnnotationUrl={''}
-                showCommentBox={false}
-                searchValue={''}
-                showCongratsMessage={false}
-                showClearFiltersBtn={false}
-                isSocialPost={false}
-                page={{} as any}
-                pageType={'page'}
-                searchType={'notes'}
+                activeAnnotationUrl={this.state.activeAnnotationUrl}
+                hoverAnnotationUrl={this.state.hoverAnnotationUrl}
+                showCommentBox={this.state.showCommentBox}
+                searchValue={this.state.searchValue}
+                showCongratsMessage={this.state.showCongratsMessage}
+                page={this.state.page}
+                pageType={this.state.pageType}
+                showFiltersSidebar={this.state.showFiltersSidebar}
+                showSocialSearch={false}
+                annotationModes={this.state.annotationModes}
                 closeSidebar={() =>
                     this.props.sidebarEvents.emit('requestCloseSidebar')
                 }
-                handleGoToAnnotation={() => {}}
-                handleAddCommentBtnClick={() => {}}
-                handleAnnotationBoxMouseEnter={() => {}}
-                handleAnnotationBoxMouseLeave={() => {}}
-                handleEditAnnotation={() => {}}
-                handleDeleteAnnotation={() => {}}
-                handleScrollPagination={() => {}}
-                handleBookmarkToggle={() => {}}
+                handleAddPageCommentBtnClick={() =>
+                    this.processEvent('addNewPageComment', null)
+                }
+                annotationProps={{
+                    handleAnnotationTagClick: event => {},
+                    handleAnnotationModeSwitch: event =>
+                        this.processEvent('handleAnnotationModeSwitch', event),
+                    handleGoToAnnotation: annnotation =>
+                        this.processEvent('goToAnnotation', { annnotation }),
+                    handleAnnotationBoxMouseEnter: () =>
+                        console.log('handleAnnotationBoxMouseEnter'),
+                    handleAnnotationBoxMouseLeave: () =>
+                        console.log('handleAnnotationBoxMouseLeave'),
+                    handleEditAnnotation: annnotationUrl =>
+                        this.processEvent('editAnnotation', { annnotationUrl }),
+                    handleDeleteAnnotation: annnotationUrl =>
+                        this.processEvent('deleteAnnotation', {
+                            annnotationUrl,
+                        }),
+                }}
+                handleScrollPagination={() =>
+                    console.log('handleScrollPagination')
+                }
+                handleAnnotationBookmarkToggle={annnotationUrl =>
+                    this.processEvent('toggleAnnotationBookmark', {
+                        annnotationUrl,
+                    })
+                }
                 onQueryKeyDown={() => {}}
-                onQueryChange={() => {}}
+                onQueryChange={searchQuery => {
+                    this.processEvent('changeSearchQuery', { searchQuery })
+                }}
                 onShowFiltersSidebarChange={() => {}}
                 onOpenSettings={() => {}}
                 clearAllFilters={() => {}}
                 resetPage={() => {}}
-                // Filter sidebar props
-                showFiltersSidebar={false}
-                showSocialSearch={false}
-                annotsFolded={false}
-                resultsSearchType={'page'}
-                pageCount={0}
-                annotCount={0}
-                handleUnfoldAllClick={() => {}}
-                setSearchType={() => {}}
-                setPageType={() => {}}
-                setResultsSearchType={() => {}}
-                setAnnotationsExpanded={() => {}}
-                handlePageTypeToggle={() => {}}
-                // Search result props
-                noResults={false}
-                isBadTerm={false}
-                areAnnotationsExpanded={false}
-                shouldShowCount={false}
-                isInvalidSearch={false}
-                totalResultCount={0}
-                toggleAreAnnotationsExpanded={(e: React.SyntheticEvent) => {}}
-                isNewSearchLoading={false}
-                isListFilterActive={false}
-                searchResults={[]}
-                resultsByUrl={new Map()}
-                resultsClusteredByDay={false}
-                annotsByDay={{}}
-                isSocialSearch={false}
-                tagSuggestions={[]}
-                resetUrlDragged={() => {}}
-                resetActiveTagIndex={() => {}}
-                setUrlDragged={(url: string) => {}}
-                addTag={(i: number) => (f: string) => {}}
-                delTag={(i: number) => (f: string) => {}}
-                handlePillClick={(tag: string) => () => {}}
-                handleTagBtnClick={(i: number) => () => {}}
-                handleCommentBtnClick={() => {}}
-                handleCrossRibbonClick={() => () => {}}
-                handleToggleBm={() => () => {}}
-                handleTrashBtnClick={() => () => {}}
+                // Subcomponents
+                commentBox={{
+                    ...this.state.commentBox,
+                    env: this.props.env,
+                    isSocialPost: false,
+                    highlighter: {} as any,
+                    form: {
+                        env: this.props.env,
+                        ...this.state.commentBox.form,
+                        handleCommentTextChange: (comment: string) =>
+                            this.processEvent('changePageCommentText', {
+                                comment,
+                            }),
+                        cancelComment: () =>
+                            this.processEvent('cancelNewPageComment', null),
+                        toggleBookmark: () =>
+                            this.processEvent(
+                                'toggleNewPageCommentBookmark',
+                                null,
+                            ),
+                        toggleTagPicker: () =>
+                            this.processEvent(
+                                'toggleNewPageCommentTagPicker',
+                                null,
+                            ),
+                        addTag: tag =>
+                            this.processEvent('addNewPageCommentTag', { tag }),
+                        deleteTag: tag =>
+                            this.processEvent('deleteNewPageCommentTag', {
+                                tag,
+                            }),
+                    },
+                    saveComment: (
+                        anchor: Anchor,
+                        commentText: string,
+                        tags: string[],
+                        bookmarked: boolean,
+                    ) =>
+                        this.processEvent('saveNewPageComment', {
+                            anchor,
+                            commentText,
+                            tags,
+                            bookmarked,
+                        }),
+                    onSaveCb: () => {},
+                    closeComments: () => console.log('close comments'),
+                    // this.processEvent('closeComments', null),
+                }}
+                resultsContainer={{
+                    isLoading,
+                    needsWaypoint: this.state.needsWaypoint,
+                    noResults: this.state.noResults,
+                    isBadTerm: this.state.isBadTerm,
+                    areAnnotationsExpanded: this.state.areAnnotationsExpanded,
+                    shouldShowCount: this.state.shouldShowCount,
+                    isInvalidSearch: this.state.isInvalidSearch,
+                    totalResultCount: this.state.totalResultCount,
+                    toggleAreAnnotationsExpanded: (
+                        e: React.SyntheticEvent,
+                    ) => {},
+
+                    isNewSearchLoading: this.state.isNewSearchLoading,
+                    isListFilterActive: this.state.isListFilterActive,
+                    searchResults: this.state.searchResults,
+                    resultsByUrl: this.state.resultsByUrl,
+                    resultsClusteredByDay: this.state.resultsClusteredByDay,
+                    annotsByDay: this.state.annotsByDay,
+                    isSocialSearch: this.state.isSocialSearch,
+                    tagSuggestions: this.state.tagSuggestions,
+                    resetUrlDragged: () => {},
+                    resetActiveTagIndex: () => {},
+                    setUrlDragged: (url: string) => {},
+                    addTag: (i: number) => (f: string) => {},
+                    delTag: (i: number) => (f: string) => {},
+                    handlePillClick: (tag: string) => () =>
+                        console.log('handlePillClick'),
+                    handleTagBtnClick: (i: number) => () =>
+                        console.log('handleTagBtnClick'),
+                    handleCommentBtnClick: () =>
+                        console.log('handleCommentBtnClick'),
+                    handleCrossRibbonClick: () => () =>
+                        console.log('handleCrossRibbonClick'),
+                    handleScrollPagination: () => {},
+                    handleToggleBm: () => () => console.log('handleToggleBm'),
+                    handleTrashBtnClick: () => () =>
+                        console.log('handleTrashBtnClick'),
+                }}
+                searchTypeSwitch={{
+                    annotsFolded: this.state.annotsFolded,
+                    resultsSearchType: this.state.resultsSearchType,
+                    searchType: this.state.searchType,
+                    pageType: this.state.pageType,
+                    pageCount: this.state.pageCount,
+                    annotCount: this.state.annotCount,
+                    handleUnfoldAllClick: () => {},
+                    setSearchType: (type: 'notes' | 'page') =>
+                        this.processEvent('setSearchType', { type }),
+                    setPageType: (type: 'page' | 'all') =>
+                        this.processEvent('setPageType', { type }),
+                    setResultsSearchType: (type: 'page' | 'notes' | 'social') =>
+                        this.processEvent('setResultsSearchType', { type }),
+                    setAnnotationsExpanded: (value: boolean) =>
+                        this.processEvent('setAnnotationsExpanded', { value }),
+                    handlePageTypeToggle: () => {
+                        this.processEvent('togglePageType', null)
+                    },
+                    isOverview: this.props.env === 'overview',
+                    handleAddPageCommentBtnClick: () =>
+                        this.processEvent('addNewPageComment', null),
+                    showSocialSearch: false,
+                }}
+                filtersSidebar={{
+                    env: this.props.env,
+                    showClearFiltersBtn: this.state.showClearFiltersBtn,
+                    isSocialSearch: this.state.isSocialSearch,
+                    clearAllFilters: () =>
+                        this.processEvent('clearAllFilters', null),
+                    fetchSuggestedTags: () =>
+                        this.processEvent('fetchSuggestedTags', null),
+                    fetchSuggestedDomains: () => () =>
+                        this.processEvent('fetchSuggestedDomains', null),
+                    fetchSuggestedUsers: () => {},
+                    fetchSuggestedHashtags: () => {},
+                    resetFilterPopups: () =>
+                        this.processEvent('resetFiterPopups', null),
+                    toggleShowFilters: () =>
+                        this.processEvent('toggleShowFilters', null),
+                }}
+                topBar={{
+                    env: this.props.env,
+                    searchValue: this.state.searchValue,
+                    showClearFiltersBtn: this.state.showClearFiltersBtn,
+                    disableAddCommentBtn: this.state.showCommentBox,
+                }}
             />
         )
     }

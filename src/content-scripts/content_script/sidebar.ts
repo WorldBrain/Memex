@@ -1,8 +1,8 @@
-import { ContentScriptRegistry } from './types'
+import { ContentScriptRegistry, SidebarScriptMain } from './types'
 import { Sidebar } from 'src/in-page-ui/sidebar'
 import { browser } from 'webextension-polyfill-ts'
 
-export async function main() {
+export const main: SidebarScriptMain = async dependencies => {
     const cssFile = browser.extension.getURL(`/content_script_ribbon.css`)
     const sidebar = new Sidebar({ cssFile })
     return { sidebarController: sidebar }

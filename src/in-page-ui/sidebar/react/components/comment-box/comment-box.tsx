@@ -4,77 +4,56 @@ import classNames from 'classnames'
 import noop from 'lodash/fp/noop'
 
 import AnnotationHighlight from '../annotation-highlight'
-import CommentBoxForm from './comment-box-form'
+import CommentBoxForm, { CommentBoxFormProps } from './comment-box-form'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
 
 const styles = require('./comment-box.css')
 
 interface StateProps {
-    anchor: Anchor
-    commentText: string
-    tags: string[]
-    isCommentBookmarked: boolean
+    anchor: Anchor | null
+    form: Omit<CommentBoxFormProps, 'saveComment'>
 }
 
-interface DispatchProps {
-    handleCommentTextChange: (comment: string) => void
+interface CommentBoxDispatchProps {
     saveComment: (
         anchor: Anchor,
         commentText: string,
         tags: string[],
         bookmarked: boolean,
     ) => void
-    cancelComment: () => void
-    toggleBookmark: () => void
 }
 
 interface OwnProps {
-    env?: 'inpage' | 'overview'
+    env: 'inpage' | 'overview'
     isSocialPost?: boolean
-    onSaveCb?: () => void
+    onSaveCb: () => void
     highlighter: HighlightInteractionInterface
     closeComments?: () => void
 }
 
-type Props = StateProps & DispatchProps & OwnProps
+export type CommentBoxProps = StateProps & CommentBoxDispatchProps & OwnProps
 
-export default class CommentBoxContainer extends React.PureComponent<Props> {
-    static defaultProps: Partial<Props> = {
-        onSaveCb: noop,
-    }
-
+export default class CommentBoxContainer extends React.PureComponent<
+    CommentBoxProps
+> {
     save = async e => {
         e.preventDefault()
         e.stopPropagation()
 
-        const {
-            anchor,
-            commentText,
-            tags,
-            saveComment,
-            isCommentBookmarked,
-            onSaveCb,
-        } = this.props
+        const { anchor, form, saveComment, onSaveCb } = this.props
 
         await onSaveCb()
 
-        saveComment(anchor, commentText.trim(), tags, isCommentBookmarked)
-    }
-
-    cancelComment = async e => {
-        this.props.cancelComment()
-        this.props.highlighter.removeTempHighlights()
+        saveComment(
+            anchor,
+            form.commentText.trim(),
+            form.tags,
+            form.isCommentBookmarked,
+        )
     }
 
     render() {
-        const {
-            env,
-            anchor,
-            commentText,
-            handleCommentTextChange,
-            isCommentBookmarked,
-            toggleBookmark,
-        } = this.props
+        const { env, anchor } = this.props
 
         return (
             <div
@@ -91,19 +70,9 @@ export default class CommentBoxContainer extends React.PureComponent<Props> {
                 )}
 
                 <CommentBoxForm
-                    env={env}
-                    commentText={commentText}
-                    handleCommentTextChange={handleCommentTextChange}
+                    {...this.props.form}
                     saveComment={this.save}
-                    cancelComment={this.cancelComment}
-                    isCommentBookmarked={isCommentBookmarked}
-                    toggleBookmark={toggleBookmark}
                     isAnnotation={true} // TODO: we need to pass the right state here
-                    addTag={() => {}}
-                    deleteTag={() => {}}
-                    initTagSuggestions={[]}
-                    tagSuggestions={[]}
-                    tags={[]}
                 />
             </div>
         )

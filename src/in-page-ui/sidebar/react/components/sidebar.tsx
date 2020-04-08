@@ -2,14 +2,14 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
-import Topbar from './topbar'
+import Topbar, { TopbarState } from './topbar'
 import CongratsMessage from './congrats-message'
 import EmptyMessage from './empty-message'
 import AnnotationBox from './annotation-box'
 import menuStyles from './menu-styles'
-import CommentBoxContainer from './comment-box'
+import CommentBoxContainer, { CommentBoxProps } from './comment-box/comment-box'
 import { Page } from '../types'
-import FiltersSidebar from './filters-sidebar'
+import FiltersSidebar, { FiltersSidebarProps } from './filters-sidebar'
 import ResultsContainer, { ResultsContainerProps } from './results-container'
 import DragElement from 'src/overview/components/DragElement'
 import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
@@ -34,31 +34,52 @@ interface OwnProps {
     showCommentBox: boolean
     searchValue: string
     showCongratsMessage: boolean
-    showClearFiltersBtn: boolean
-    isSocialPost: boolean
     page: Page
     pageType: 'page' | 'all'
-    searchType: 'notes' | 'page' | 'social'
+    showFiltersSidebar: boolean
+    showSocialSearch: boolean
+
     closeSidebar: () => void
-    handleGoToAnnotation: (annotation: Annotation) => void
-    handleAddCommentBtnClick: () => void
-    handleAnnotationBoxMouseEnter: (annotation: Annotation) => void
-    handleAnnotationBoxMouseLeave: () => void
-    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
-    handleDeleteAnnotation: (url: string) => void
+
+    handleAddPageCommentBtnClick: () => void
+
+    annotationModes: { [annotationUrl: string]: 'default' | 'edit' | 'delete' }
+    annotationProps: {
+        handleGoToAnnotation: (annotation: Annotation) => void
+        handleAnnotationBoxMouseEnter: (annotation: Annotation) => void
+        handleAnnotationBoxMouseLeave: () => void
+        handleAnnotationModeSwitch: (event: {
+            annotationUrl: string
+            mode: 'default' | 'edit' | 'delete'
+        }) => void
+        handleAnnotationTagClick: (event: {
+            annotationUrl: string
+            tag: string
+        }) => void
+        handleEditAnnotation: (
+            url: string,
+            comment: string,
+            tags: string[],
+        ) => void
+        handleDeleteAnnotation: (url: string) => void
+    }
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
-    handleBookmarkToggle: (url: string) => void
+    handleAnnotationBookmarkToggle: (url: string) => void
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
     onShowFiltersSidebarChange: (value: boolean) => void
     onOpenSettings: () => void
     clearAllFilters: () => void
     resetPage: () => void
-    showFiltersSidebar: boolean
-    showSocialSearch: boolean
+
+    commentBox: CommentBoxProps
+    resultsContainer: ResultsContainerProps
+    searchTypeSwitch: SearchTypeSwitchProps
+    filtersSidebar: FiltersSidebarProps
+    topBar: TopbarState
 }
 
-type Props = OwnProps & SearchTypeSwitchProps & ResultsContainerProps
+type Props = OwnProps
 
 export default class Sidebar extends React.Component<Props> {
     async componentDidMount() {
@@ -84,10 +105,6 @@ export default class Sidebar extends React.Component<Props> {
         this.props.onQueryChange('')
     }
 
-    private toggleShowFilters = () => {
-        this.props.onShowFiltersSidebarChange(!this.props.showFiltersSidebar)
-    }
-
     private handleCloseBtnClick = () => {
         this.props.closeSidebar()
         this.props.onShowFiltersSidebarChange(false)
@@ -108,40 +125,42 @@ export default class Sidebar extends React.Component<Props> {
         return this.props.pageType === 'page'
     }
 
-    handleDeleteAnnotation = url => {
-        this.props.handleDeleteAnnotation(url)
-    }
-
     handleGoToAnnotation = (annot: Annotation) => (
         event: React.MouseEvent<HTMLElement>,
     ) => {
         event.preventDefault()
-        this.props.handleGoToAnnotation(annot)
+        this.props.annotationProps.handleGoToAnnotation(annot)
     }
 
     private renderAnnots() {
+        const { annotationProps } = this.props
         const annots = this.props.annotations.map((annot, i) => (
             <AnnotationBox
                 key={i}
                 env={this.props.env}
                 highlighter={null}
-                mode={'default'}
+                mode={this.props.annotationModes[annot.url] || 'default'}
                 displayCrowdfunding={false}
                 {...annot}
+                {...this.props.annotationProps}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
                 handleGoToAnnotation={this.handleGoToAnnotation(annot)}
-                handleEditAnnotation={this.props.handleEditAnnotation}
-                handleDeleteAnnotation={this.handleDeleteAnnotation}
+                handleAnnotationTagClick={tag =>
+                    annotationProps.handleAnnotationTagClick({
+                        annotationUrl: annot.url,
+                        tag,
+                    })
+                }
                 handleMouseLeave={event => {
                     event.preventDefault()
-                    this.props.handleAnnotationBoxMouseLeave()
+                    annotationProps.handleAnnotationBoxMouseLeave()
                 }}
                 handleMouseEnter={event => {
                     event.preventDefault()
-                    this.props.handleAnnotationBoxMouseEnter(annot)
+                    annotationProps.handleAnnotationBoxMouseEnter(annot)
                 }}
-                handleBookmarkToggle={this.props.handleBookmarkToggle}
+                handleBookmarkToggle={this.props.handleAnnotationBookmarkToggle}
             />
         ))
 
@@ -164,7 +183,7 @@ export default class Sidebar extends React.Component<Props> {
     private renderResults() {
         return (
             <React.Fragment>
-                <ResultsContainer {...this.props} />
+                <ResultsContainer {...this.props.resultsContainer} />
                 <DeleteConfirmModal message="Delete page and related notes" />
                 <DragElement />
             </React.Fragment>
@@ -178,7 +197,7 @@ export default class Sidebar extends React.Component<Props> {
             annotations,
             showCommentBox,
             showCongratsMessage,
-            handleAddCommentBtnClick,
+            handleAddPageCommentBtnClick: handleAddCommentBtnClick,
         } = this.props
 
         return (
@@ -194,8 +213,7 @@ export default class Sidebar extends React.Component<Props> {
                     <div className={styles.sidebar}>
                         <div className={styles.topSection}>
                             <Topbar
-                                {...this.props}
-                                disableAddCommentBtn={showCommentBox}
+                                {...this.props.topBar}
                                 handleCloseBtnClick={this.handleCloseBtnClick}
                                 handleSettingsBtnClick={
                                     this.props.onOpenSettings
@@ -206,7 +224,9 @@ export default class Sidebar extends React.Component<Props> {
                                 handleSearchChange={this.handleSearchChange}
                                 handleSearchEnter={this.handleSearchEnter}
                                 handleClearBtn={this.handleClearBtn}
-                                handleFilterBtnClick={this.toggleShowFilters}
+                                handleFilterBtnClick={
+                                    this.props.filtersSidebar.toggleShowFilters
+                                }
                                 handleClearFiltersBtnClick={
                                     this.handleClearFiltersBtnClick
                                 }
@@ -215,11 +235,11 @@ export default class Sidebar extends React.Component<Props> {
                                 <React.Fragment>
                                     <div className={styles.searchSwitch}>
                                         <SearchTypeSwitch
-                                            {...this.props}
+                                            {...this.props.searchTypeSwitch}
                                             isOverview={
                                                 this.props.env === 'overview'
                                             }
-                                            handleAddCommentBtnClick={
+                                            handleAddPageCommentBtnClick={
                                                 handleAddCommentBtnClick
                                             }
                                             showSocialSearch={
@@ -239,8 +259,7 @@ export default class Sidebar extends React.Component<Props> {
                             {showCommentBox && (
                                 <div className={styles.commentBoxContainer}>
                                     <CommentBoxContainer
-                                        env={env}
-                                        isSocialPost={this.props.isSocialPost}
+                                        {...this.props.commentBox}
                                     />
                                 </div>
                             )}
@@ -268,18 +287,7 @@ export default class Sidebar extends React.Component<Props> {
                     </div>
                 </Menu>
                 {this.props.showFiltersSidebar && (
-                    <FiltersSidebar
-                        env={this.props.env}
-                        toggleShowFilters={this.toggleShowFilters}
-                        showClearFiltersBtn={false}
-                        isSocialSearch={false}
-                        clearAllFilters={() => {}}
-                        fetchSuggestedTags={() => {}}
-                        fetchSuggestedDomains={() => {}}
-                        fetchSuggestedUsers={() => {}}
-                        fetchSuggestedHashtags={() => {}}
-                        resetFilterPopups={() => {}}
-                    />
+                    <FiltersSidebar {...this.props.filtersSidebar} />
                 )}
             </React.Fragment>
         )

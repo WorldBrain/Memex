@@ -19,37 +19,31 @@ interface OwnProps {
     env?: 'inpage' | 'overview'
     commentText: string
     isCommentBookmarked: boolean
+    isAnnotation: boolean
     handleCommentTextChange: (comment: string) => void
     saveComment: React.EventHandler<React.SyntheticEvent>
     cancelComment: ClickHandler<HTMLDivElement>
     toggleBookmark: ClickHandler<HTMLDivElement>
-    isAnnotation: boolean
+    toggleTagPicker: () => void
 }
-type Props = OwnProps & TagsContainerProps
-
-interface State {
+interface CommentBoxFormStateProps {
     isTagInputActive: boolean
     showTagsPicker: boolean
     tagSuggestions: string[]
 }
+export type CommentBoxFormProps = OwnProps &
+    CommentBoxFormStateProps &
+    TagsContainerProps
 
-class CommentBoxForm extends React.Component<Props, State> {
+class CommentBoxForm extends React.Component<CommentBoxFormProps> {
     /** Ref of the tag button element to focus on it when tabbing. */
     private tagBtnRef: HTMLElement
     private saveBtnRef: HTMLDivElement
     private cancelBtnRef: HTMLDivElement
     private bmBtnRef: HTMLDivElement
 
-    state: State = {
-        isTagInputActive: false,
-        showTagsPicker: false,
-        tagSuggestions: [],
-    }
-
     async componentDidMount() {
         this.attachEventListeners()
-        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
-        this.setState({ tagSuggestions: tagSuggestions.reverse() })
     }
 
     componentWillUnmount() {
@@ -89,9 +83,7 @@ class CommentBoxForm extends React.Component<Props, State> {
     private handleTagBtnClick = e => {
         e.preventDefault()
         e.stopPropagation()
-        this.setState(prevState => ({
-            showTagsPicker: !prevState.showTagsPicker,
-        }))
+        this.props.toggleTagPicker()
     }
 
     private handleCancelBtnClick = e => {
@@ -108,11 +100,6 @@ class CommentBoxForm extends React.Component<Props, State> {
 
     private saveComment = e => {
         this.props.saveComment(e)
-        if (this.state.showTagsPicker) {
-            this.setState({
-                showTagsPicker: false,
-            })
-        }
     }
 
     setTagInputActive = (isTagInputActive: boolean) => {
@@ -120,7 +107,7 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     renderTagsTooltip() {
-        if (!this.state.showTagsPicker) {
+        if (!this.props.showTagsPicker) {
             return null
         }
 
@@ -128,7 +115,7 @@ class CommentBoxForm extends React.Component<Props, State> {
             <Tooltip position="bottomLeft">
                 <TagsContainer
                     env={this.props.env}
-                    tagSuggestions={this.state.tagSuggestions}
+                    tagSuggestions={this.props.tagSuggestions}
                     {...this.props}
                 />
             </Tooltip>
