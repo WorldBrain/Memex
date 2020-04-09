@@ -1,6 +1,5 @@
 /* eslint-env jest */
 
-import 'core-js/fn/object/entries' // shim Object.entries
 import pull from 'lodash/pull'
 
 import eventToPromise from './event-to-promise'
@@ -19,7 +18,7 @@ class MockEvent {
     }
 
     trigger(...args) {
-        this.listeners.forEach(listener => listener.apply(null, args))
+        this.listeners.forEach((listener) => listener.apply(null, args))
     }
 }
 

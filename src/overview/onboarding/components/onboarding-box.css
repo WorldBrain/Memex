@@ -19,9 +19,13 @@
     z-index: -2;
 }
 
+.whiteSpace30 {
+    margin-bottom: 30px;
+}
+
 .startingPage {
     width: 90%;
-    max-width: 800px;
+    max-width: 900px;
     transition: height 0.5s;
     margin: auto auto;
     display: flex;
@@ -56,6 +60,10 @@
     font-weight: 700;
     font-size: 30px;
     color: #3a2f45;
+}
+
+.settingsBox {
+    margin-top: 20px;
 }
 
 .subTitle {
@@ -118,6 +126,12 @@
     align-items: center;
     height: 100%;
     flex-direction: column;
+}
+
+.logoImg {
+    width: 80px;
+    height: auto;
+    margin-bottom: 20px;
 }
 
 .logo {

@@ -32,7 +32,7 @@ class ResultItemActions extends PureComponent<Props> {
             >
                 <div
                     className={styles.buttonsContainer}
-                    onClick={e => {
+                    onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
                     }}
@@ -52,7 +52,7 @@ class ResultItemActions extends PureComponent<Props> {
                                 : styles.tag
                         }
                         onClick={this.props.onTagBtnClick}
-                        tooltipText="Add/View Notes"
+                        tooltipText="Edit Tags"
                         refHandler={this.props.setTagButtonRef}
                     />
                     <ResultItemActionBtn

@@ -7,6 +7,7 @@ import { STORAGE_KEY } from './constants'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
+import * as Raven from 'src/util/raven'
 
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')
@@ -30,7 +31,7 @@ export const removeSiteFromBlacklist = createAction(
     'settings/removeSiteFromBlacklist',
 ) as any
 
-export const initBlacklist = () => async dispatch => {
+export const initBlacklist = () => async (dispatch) => {
     dispatch(setIsLoading(true))
     try {
         const { [STORAGE_KEY]: blacklist } = await window[
@@ -42,13 +43,14 @@ export const initBlacklist = () => async dispatch => {
         const parsedBlacklist = JSON.parse(blacklist)
         dispatch(setBlacklist(parsedBlacklist))
     } catch (err) {
+        Raven.captureException(err)
         dispatch(setBlacklist([]))
     } finally {
         dispatch(setIsLoading(false))
     }
 }
 
-export const addToBlacklist = expression => async (dispatch, getState) => {
+export const addToBlacklist = (expression) => async (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Blacklist',
         action: 'Add blacklist entry',
@@ -78,14 +80,14 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
             dispatch(setMatchedCount(count))
         }
     } catch (error) {
-        // Do nothing
+        Raven.captureException(error)
     } finally {
         dispatch(setIsLoading(false))
         dirtyEstsCache() // Force import ests to recalc next visit
     }
 }
 
-export const removeFromBlacklist = index => async (dispatch, getState) => {
+export const removeFromBlacklist = (index) => async (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Blacklist',
         action: 'Remove blacklist entry',
@@ -113,7 +115,10 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
     dirtyEstsCache() // Force import ests to recalc next visit
 }
 
-export const removeMatchingDocs = expression => async (dispatch, getState) => {
+export const removeMatchingDocs = (expression) => async (
+    dispatch,
+    getState,
+) => {
     analytics.trackEvent({
         category: 'Blacklist',
         action: 'Delete matching pages',
@@ -125,7 +130,7 @@ export const removeMatchingDocs = expression => async (dispatch, getState) => {
         await deletePagesByPattern(expression) // To be run in background; can take long
     } catch (err) {
         handleDBQuotaErrors(
-            error =>
+            (error) =>
                 notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: deleting page',

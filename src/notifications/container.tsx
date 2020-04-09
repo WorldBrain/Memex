@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import Waypoint from 'react-waypoint'
+import { browser, Tabs } from 'webextension-polyfill-ts'
 
 import { LoadingIndicator, ToggleSwitch } from 'src/common-ui/components'
 import * as actions from './actions'
@@ -20,27 +20,37 @@ import { EVENT_NAMES } from '../analytics/internal/constants'
 
 const processEvent = remoteFunction('processEvent')
 
-class NotificationContainer extends Component {
-    static propTypes = {
-        unreadNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
-        readNotificationList: PropTypes.arrayOf(PropTypes.object).isRequired,
-        init: PropTypes.func.isRequired,
-        showMoreIndex: PropTypes.string,
-        handleToggleShowMore: PropTypes.func.isRequired,
-        handleTick: PropTypes.func.isRequired,
-        onBottomReached: PropTypes.func.isRequired,
-        isLoading: PropTypes.bool.isRequired,
-        needsWaypoint: PropTypes.bool.isRequired,
-        isReadExpanded: PropTypes.bool.isRequired,
-        toggleReadExpand: PropTypes.func.isRequired,
-        isReadShow: PropTypes.bool.isRequired,
-        messageCharLimit: PropTypes.number.isRequired,
-        localStorageNotif: PropTypes.object.isRequired,
-        isLoadingBar: PropTypes.bool.isRequired,
-        tabs: PropTypes.object,
-    }
+type Notification = any
 
-    static defaultProps = {
+export type Props = OwnProps & DispatchProps & StateProps
+
+export interface OwnProps {
+    messageCharLimit?: number
+    tabs?: Tabs.Static
+}
+
+export interface DispatchProps {
+    handleToggleShowMore: (id?: number) => void
+    handleTick: (notif: Notification) => void
+    toggleReadExpand: () => void
+    onBottomReached: () => void
+    init: () => void
+}
+
+export interface StateProps {
+    unreadNotificationList: Notification[]
+    readNotificationList: Notification[]
+    isReadExpanded: boolean
+    needsWaypoint: boolean
+    isLoadingBar: boolean
+    isReadShow: boolean
+    isLoading: boolean
+    localStorageNotif: any
+    showMoreIndex: string
+}
+
+class NotificationContainer extends Component<Props> {
+    static defaultProps: OwnProps = {
         messageCharLimit: 250,
         tabs: browser.tabs,
     }
@@ -119,7 +129,7 @@ class NotificationContainer extends Component {
                     <OptIn key={i} label={button.label}>
                         <ToggleSwitch
                             defaultValue={localStorageNotif[action.key]}
-                            onChange={val =>
+                            onChange={(val) =>
                                 this.handleToggleStorageOption(action, val, id)
                             }
                         />{' '}
@@ -246,7 +256,7 @@ class NotificationContainer extends Component {
     }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
     readNotificationList: selectors.readNotificationList(state),
     unreadNotificationList: selectors.unreadNotificationList(state),
     showMoreIndex: selectors.showMoreIndex(state),
@@ -258,7 +268,7 @@ const mapStateToProps = state => ({
     isLoadingBar: selectors.isLoadingBar(state),
 })
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
     ...bindActionCreators(
         {
             init: actions.init,
@@ -267,17 +277,17 @@ const mapDispatchToProps = dispatch => ({
         },
         dispatch,
     ),
-    handleToggleShowMore: index => event => {
+    handleToggleShowMore: (index) => (event) => {
         event.preventDefault()
-        dispatch(actions.setShowMoreIndex(index))
+        dispatch((actions.setShowMoreIndex as any)(index))
     },
-    handleTick: notification => event => {
+    handleTick: (notification) => (event) => {
         event.preventDefault()
         dispatch(actions.handleReadNotif(notification))
     },
 })
 
-export default connect(
+export default connect<StateProps, DispatchProps, OwnProps>(
     mapStateToProps,
     mapDispatchToProps,
 )(NotificationContainer)

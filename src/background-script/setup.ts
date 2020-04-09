@@ -153,7 +153,7 @@ export function createBackgroundModules(options: {
         storageManager,
         connectivityChecker,
         fetchPageData: options.fetchPageDataProcessor,
-        storePageContent: async content => {
+        storePageContent: async (content) => {
             await pages.storage.createOrUpdatePage(content)
         },
     })
@@ -242,8 +242,8 @@ export async function setupBackgroundModules(
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
     backgroundModules.directLinking.setupRequestInterceptor()
-    backgroundModules.activityLogger.setupRemoteFunctions()
     backgroundModules.activityLogger.setupWebExtAPIHandlers()
+    backgroundModules.activityLogger.setupRemoteFunctions()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
     backgroundModules.customLists.setupRemoteFunctions()

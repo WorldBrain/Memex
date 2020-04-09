@@ -1,6 +1,6 @@
 // tslint:disable:no-console
 import Storex from '@worldbrain/storex'
-import * as AllRaven from 'raven-js'
+import * as Raven from 'src/util/raven'
 import { EventEmitter } from 'events'
 
 import BackupStorage, { BackupInfoStorage } from '../storage'
@@ -72,7 +72,7 @@ export default class BackupProcedure {
         }
 
         this.info.state = 'paused'
-        this.pausePromise = new Promise(resolve => {
+        this.pausePromise = new Promise((resolve) => {
             this.resolvePausePromise = resolve
         })
         this.events.emit('info', this.info)
@@ -94,7 +94,7 @@ export default class BackupProcedure {
         this.events = null
         this.info.state = 'cancelled'
         await this.completionPromise
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
             setTimeout(resolve, 1000)
         })
     }
@@ -109,7 +109,7 @@ export default class BackupProcedure {
         }
 
         let resolveCompletionPromise
-        this.completionPromise = new Promise(resolve => {
+        this.completionPromise = new Promise((resolve) => {
             resolveCompletionPromise = resolve
         })
 
@@ -130,6 +130,7 @@ export default class BackupProcedure {
                     await this.storage.forgetAllChanges()
                     await this._queueInitialBackup() // Pushes all the objects in the DB to the queue for the incremental backup
                 } catch (err) {
+                    Raven.captureException(err)
                     throw err
                 } finally {
                     console.timeEnd('put initial backup into changes table')
@@ -159,11 +160,10 @@ export default class BackupProcedure {
                     this.reset()
                     resolveCompletionPromise()
                 })
-                .catch(async e => {
+                .catch(async (e) => {
                     this.running = false
                     if (process.env.NODE_ENV === 'production') {
-                        const raven = AllRaven['default']
-                        raven.captureException(e)
+                        Raven.captureException(e)
                     }
 
                     console.error(e)
@@ -191,7 +191,7 @@ export default class BackupProcedure {
 
     async _queueInitialBackup(chunkSize = 1000) {
         const collections = this._getCollectionsToBackup().map(
-            coll => coll.name,
+            (coll) => coll.name,
         )
         await this.storageManager.operation(BackupPlugin.QUEUE_CHANGES, {
             collections,
@@ -252,7 +252,7 @@ export default class BackupProcedure {
 
         // console.log('uploading batch')
         if (process.env.MOCK_BACKUP_BACKEND === 'true') {
-            await new Promise(resolve => setTimeout(resolve, 500))
+            await new Promise((resolve) => setTimeout(resolve, 500))
         } else {
             await this.backend.backupChanges({
                 changes: batch.changes,

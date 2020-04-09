@@ -1,20 +1,24 @@
 import { Runtime, WebNavigation, Tabs, Browser } from 'webextension-polyfill-ts'
 
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { mapChunks } from 'src/util/chunk'
 import initPauser from './pause-logging'
 import { updateVisitInteractionData } from './util'
 import { TabManager } from './tab-manager'
-import { TabChangeListener } from './types'
+import { TabChangeListener, ActivityLoggerInterface } from './types'
 import TabChangeListeners from './tab-change-listeners'
 import PageVisitLogger from './log-page-visit'
 import { CONCURR_TAB_LOAD } from '../constants'
 import { SearchIndex } from 'src/search'
+import { bindMethod } from 'src/util/functions'
+import * as Raven from 'src/util/raven'
 
 export default class ActivityLoggerBackground {
     static SCROLL_UPDATE_FN = 'updateScrollState'
 
     tabManager: TabManager
+    remoteFunctions: ActivityLoggerInterface
+
     private searchIndex: SearchIndex
     private tabsAPI: Tabs.Static
     private runtimeAPI: Runtime.Static
@@ -27,7 +31,7 @@ export default class ActivityLoggerBackground {
      * Used to stop of tab updated event listeners while the
      * tracking of existing tabs is happening.
      */
-    private tabQueryP = new Promise(resolve => resolve())
+    private tabQueryP = new Promise((resolve) => resolve())
 
     constructor(options: {
         tabManager: TabManager
@@ -42,6 +46,11 @@ export default class ActivityLoggerBackground {
         this.runtimeAPI = options.browserAPIs.runtime
         this.webNavAPI = options.browserAPIs.webNavigation
         this.searchIndex = options.searchIndex
+        this.remoteFunctions = {
+            toggleLoggingPause: this.toggleLoggingPause,
+            fetchTab: bindMethod(this.tabManager, 'getTabState'),
+            fetchTabByUrl: bindMethod(this.tabManager, 'getTabStateByUrl'),
+        }
 
         this.pageVisitLogger = new PageVisitLogger({
             searchIndex: options.searchIndex,
@@ -58,11 +67,7 @@ export default class ActivityLoggerBackground {
     static isTabLoaded = (tab: Tabs.Tab) => tab.status === 'complete'
 
     setupRemoteFunctions() {
-        makeRemotelyCallable({
-            toggleLoggingPause: this.toggleLoggingPause,
-            fetchTab: id => this.tabManager.getTabState(id),
-            fetchTabByUrl: url => this.tabManager.getTabStateByUrl(url),
-        })
+        makeRemotelyCallableType<ActivityLoggerInterface>(this.remoteFunctions)
     }
 
     setupWebExtAPIHandlers() {
@@ -71,35 +76,36 @@ export default class ActivityLoggerBackground {
         this.setupTabLifecycleHandling()
     }
 
-    async trackExistingTabs({ isNewInstall = false }) {
+    async trackExistingTabs() {
         let resolveTabQueryP
-        this.tabQueryP = new Promise(resolve => (resolveTabQueryP = resolve))
+        this.tabQueryP = new Promise((resolve) => (resolveTabQueryP = resolve))
         const tabs = await this.tabsAPI.query({})
 
-        await mapChunks<Tabs.Tab>(tabs, CONCURR_TAB_LOAD, async browserTab => {
-            this.tabManager.trackTab(browserTab, {
-                isLoaded: ActivityLoggerBackground.isTabLoaded(browserTab),
-                isBookmarked: await this.tabChangeListener.checkBookmark(
-                    browserTab.url,
-                ),
-            })
+        await mapChunks<Tabs.Tab>(
+            tabs,
+            CONCURR_TAB_LOAD,
+            async (browserTab) => {
+                this.tabManager.trackTab(browserTab, {
+                    isLoaded: ActivityLoggerBackground.isTabLoaded(browserTab),
+                    isBookmarked: await this.tabChangeListener.checkBookmark(
+                        browserTab.url,
+                    ),
+                })
 
-            await this.tabChangeListener
-                .injectContentScripts(browserTab)
-                .catch(e => e)
+                await this.tabChangeListener
+                    .injectContentScripts(browserTab)
+                    .catch((err) => {
+                        Raven.captureException(err)
+                    })
 
-            if (!isNewInstall) {
-                return
-            }
-
-            if (browserTab.url) {
+                // NOTE: Important we don't wait on this, as the Promise won't resolve until the tab is activated - if we wait, the next chunk to map over may not happen
                 this.tabChangeListener._handleVisitIndexing(
                     browserTab.id,
                     browserTab,
-                    browserTab,
+                    { skipStubLog: true },
                 )
-            }
-        })
+            },
+        )
 
         resolveTabQueryP()
     }
@@ -144,7 +150,7 @@ export default class ActivityLoggerBackground {
         })
 
         // Runs stage 3 of the visit indexing
-        this.tabsAPI.onRemoved.addListener(tabId => {
+        this.tabsAPI.onRemoved.addListener((tabId) => {
             // Remove tab from tab tracking state and update the visit with tab-derived metadata
             const tab = this.tabManager.removeTab(tabId)
 

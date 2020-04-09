@@ -19,12 +19,13 @@ import {
     LoggableTabChecker,
     VisitInteractionUpdater,
     FavIconFetcher,
-    FavIconChecker,
-    FavIconCreator,
     BookmarkChecker,
     TabIndexer,
 } from './types'
 import { SearchIndex } from 'src/search'
+import { getDefaultState } from 'src/overview/onboarding/screens/onboarding/default-state'
+import { PageAnalysis } from 'src/page-analysis/background'
+import * as Raven from 'src/util/raven'
 
 export default class TabChangeListeners {
     /**
@@ -96,15 +97,15 @@ export default class TabChangeListeners {
         if (!indexers) {
             this.tabIndexers.set(tabId, {
                 favIcon: throttle(
-                    tab => this._handleFavIcon(tabId, {}, tab),
+                    (tab) => this._handleFavIcon(tabId, {}, tab),
                     TabChangeListeners.FAV_ICON_CHANGE_THRESHOLD,
                     { leading: false },
                 ),
                 page: throttle(
-                    tab =>
-                        this._handleVisitIndexing(tabId, {}, tab).catch(
-                            console.error,
-                        ),
+                    (tab) =>
+                        this._handleVisitIndexing(tabId, tab).catch((err) => {
+                            Raven.captureException(err)
+                        }),
                     TabChangeListeners.URL_CHANGE_THRESHOLD,
                     { leading: false },
                 ),
@@ -130,12 +131,14 @@ export default class TabChangeListeners {
         shouldCaptureScreenshots: boolean
         logDelay: number
     }> {
-        const storage = await this._storage.get([
-            IDXING_PREF_KEYS.STUBS,
-            IDXING_PREF_KEYS.VISITS,
-            IDXING_PREF_KEYS.SCREENSHOTS,
-            IDXING_PREF_KEYS.VISIT_DELAY,
-        ])
+        const defs = getDefaultState()
+
+        const storage = await this._storage.get({
+            [IDXING_PREF_KEYS.STUBS]: defs.areStubsEnabled,
+            [IDXING_PREF_KEYS.VISITS]: defs.areVisitsEnabled,
+            [IDXING_PREF_KEYS.SCREENSHOTS]: defs.areScreenshotsEnabled,
+            [IDXING_PREF_KEYS.VISIT_DELAY]: defs.visitDelay,
+        })
 
         return {
             shouldLogStubs: !!storage[IDXING_PREF_KEYS.STUBS],
@@ -200,40 +203,60 @@ export default class TabChangeListeners {
         }
     }
 
-    _handleVisitIndexing: TabChangeListener = async (tabId, _, tab) => {
+    private async logTabWhenActive(
+        tab: Tabs.Tab,
+        preparation: PageAnalysis,
+        skipStubLog?: boolean,
+    ) {
+        await this._tabActive({ tabId: tab.id })
+
         const indexingPrefs = await this.fetchIndexingPrefs()
 
         if (!indexingPrefs.shouldLogStubs && !indexingPrefs.shouldLogVisits) {
             return
         }
 
-        await this._pageDOMLoaded({ tabId })
-        const preparation = await this._pageVisitLogger.preparePageLogging({
+        return this._pageVisitLogger.logPageVisit(
             tab,
-            allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
-        })
-        if (!preparation) {
+            preparation,
+            !skipStubLog && indexingPrefs.shouldLogStubs,
+        )
+    }
+
+    _handleVisitIndexing = async (
+        tabId: number,
+        tab: Tabs.Tab,
+        opts: { skipStubLog?: boolean } = {},
+    ) => {
+        const indexingPrefs = await this.fetchIndexingPrefs()
+
+        let preparation: PageAnalysis
+        try {
+            preparation = await this._pageVisitLogger.preparePageLogging({
+                tab,
+                allowScreenshot: indexingPrefs.shouldCaptureScreenshots,
+            })
+        } catch (err) {
+            Raven.captureException(err)
             return
         }
 
         // Run stage 1 of visit indexing immediately (depends on user settings)
-        if (indexingPrefs.shouldLogStubs) {
-            await this._pageVisitLogger.logPageStub(tab, preparation)
+        if (!opts.skipStubLog && indexingPrefs.shouldLogStubs) {
+            try {
+                await this._pageVisitLogger.logPageStub(tab, preparation)
+            } catch (err) {
+                Raven.captureException(err)
+                return
+            }
         }
 
         // Schedule stage 2 of visit indexing soon after - if user stays on page
         if (indexingPrefs.shouldLogVisits) {
             await this._tabManager.scheduleTabLog(
                 tabId,
-                () =>
-                    this._tabActive({ tabId }).then(() =>
-                        this._pageVisitLogger.logPageVisit(
-                            tab,
-                            preparation,
-                            indexingPrefs.shouldLogStubs,
-                        ),
-                    ),
-                indexingPrefs.logDelay,
+                () => this.logTabWhenActive(tab, preparation, opts.skipStubLog),
+                opts.skipStubLog ? 0 : indexingPrefs.logDelay,
             )
         }
     }

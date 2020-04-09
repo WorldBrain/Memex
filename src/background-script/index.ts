@@ -78,7 +78,7 @@ class BackgroundScript {
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/commands
      */
     private setupCommands() {
-        this.commandsAPI.onCommand.addListener(command => {
+        this.commandsAPI.onCommand.addListener((command) => {
             switch (command) {
                 case 'openOverview':
                     return this.utils.openOverview()
@@ -92,19 +92,14 @@ class BackgroundScript {
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onInstalled
      */
     private setupInstallHooks() {
-        this.runtimeAPI.onInstalled.addListener(details => {
+        this.runtimeAPI.onInstalled.addListener((details) => {
+            this.notifsBackground.deliverStaticNotifications()
+            this.activityLoggerBackground.trackExistingTabs()
+
             switch (details.reason) {
                 case 'install':
-                    this.notifsBackground.deliverStaticNotifications()
-                    this.activityLoggerBackground.trackExistingTabs({
-                        isNewInstall: true,
-                    })
                     return onInstall()
                 case 'update':
-                    this.notifsBackground.deliverStaticNotifications()
-                    this.activityLoggerBackground.trackExistingTabs({
-                        isNewInstall: false,
-                    })
                     this.runQuickAndDirtyMigrations()
                     return onUpdate()
                 default:

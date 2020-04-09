@@ -1,5 +1,6 @@
 import { PipelineRes, SearchIndex } from 'src/search'
 import PageStorage from './background/storage'
+import * as Raven from 'src/util/raven'
 
 export function pageIsStub(page: PipelineRes): boolean {
     return page.text == null && (page.terms == null || !page.terms.length)
@@ -15,7 +16,7 @@ export async function maybeIndexTabs(
 ) {
     const indexed: { fullUrl: string }[] = []
     await Promise.all(
-        tabs.map(async tab => {
+        tabs.map(async (tab) => {
             const page = await options.pageStorage.getPage(tab.url)
 
             let error = false
@@ -26,9 +27,11 @@ export async function maybeIndexTabs(
                         url: tab.url,
                         allowScreenshot: false,
                         visitTime: options.time,
+                        stubOnly: true,
                         save: true,
                     })
                 } catch (e) {
+                    Raven.captureException(e)
                     error = true
                     console.error(e)
                 }

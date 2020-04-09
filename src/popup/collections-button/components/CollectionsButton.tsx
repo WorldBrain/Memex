@@ -39,29 +39,29 @@ class CollectionsButton extends PureComponent<Props> {
                     tooltipText="Add all tabs in window"
                     position="popupLeft"
                 >
-                <Button
-                    onClick={this.props.toggleAllTabsPopup}
-                    disabled={this.props.isDisabled}
-                    btnClass={styles.allTabs}
-                    itemClass={styles.buttonBulk}
-                />
+                    <Button
+                        onClick={this.props.toggleAllTabsPopup}
+                        disabled={this.props.isDisabled}
+                        btnClass={styles.allTabs}
+                        itemClass={styles.buttonBulk}
+                    />
                 </ButtonTooltip>
             </div>
         )
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isDisabled: !popup.isLoggable(state),
 })
 
 const mapDispatch = (dispatch): DispatchProps => ({
-    toggleCollectionsPopup: event => {
+    toggleCollectionsPopup: (event) => {
         event.preventDefault()
         dispatch(acts.setAllTabs(false))
         dispatch(acts.toggleShowTagsPicker())
     },
-    toggleAllTabsPopup: event => {
+    toggleAllTabsPopup: (event) => {
         event.preventDefault()
         dispatch(acts.setAllTabs(true))
         dispatch(acts.toggleShowTagsPicker())

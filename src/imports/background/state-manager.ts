@@ -1,9 +1,7 @@
 /* eslint prefer-const: 0 */
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
-import * as onboardingConstants from 'src/overview/onboarding/constants'
 import ItemCreator from './item-creator'
 import ImportCache from './cache'
-import { SearchIndex } from 'src/search'
 import { DexieUtilsPlugin } from 'src/search/plugins'
 import StorageManager from '@worldbrain/storex'
 import { initErrHandler } from 'src/search/storage'
@@ -25,7 +23,7 @@ import { initErrHandler } from 'src/search/storage'
 
 export class ImportStateManager {
     static QUICK_MODE_ITEM_LIMITS = {
-        histLimit: onboardingConstants['ONBOARDING_LIM'],
+        histLimit: 30,
         bmLimit: 0,
     }
 

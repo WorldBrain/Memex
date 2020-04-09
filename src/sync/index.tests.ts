@@ -26,7 +26,7 @@ export function registerSyncBackgroundIntegrationTests(
         describe('should work when synced in various patterns across 2 devices', () => {
             registerSyncBackAndForthTests(test)
         })
-        describe('should work when doing the same action on two devices, then syncing', async () => {
+        describe('should work when doing the same action on two devices, then syncing', () => {
             registerConflictGenerationTests(test)
         })
     })
@@ -237,7 +237,7 @@ async function runSyncBackgroundTest(options: {
                 const executedOperations = setup.storageOperationLogger.popOperations()
                 expect(
                     executedOperations.filter(
-                        entry => entry.operation[1] !== 'clientSyncLogEntry',
+                        (entry) => entry.operation[1] !== 'clientSyncLogEntry',
                     ),
                 ).toEqual(integrationTestStep.expectedStorageOperations())
             }
@@ -299,7 +299,7 @@ async function setupSyncBackgroundTest(options: {
         const setup = setups[deviceIndex]
         await setup.backgroundModules.sync.continuousSync.doIncrementalSync({
             debug: syncOptions.debug,
-            prettifier: object =>
+            prettifier: (object) =>
                 require('util').inspect(object, {
                     depth: null,
                     color: true,

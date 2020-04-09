@@ -27,6 +27,7 @@ import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fe
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
+import { setStorageMiddleware } from 'src/storage/middleware'
 
 export async function setupBackgroundIntegrationTest(options?: {
     customMiddleware?: StorageMiddleware[]
@@ -113,15 +114,18 @@ export async function setupBackgroundIntegrationTest(options?: {
         },
     }
 
-    const middleware: StorageMiddleware[] = [
-        ...((options && options.customMiddleware) || []),
-        ...(options && options.debugStorageOperations
-            ? [storageOperationDebugger]
-            : []),
-        storageOperationLogger.asMiddleware(),
-        await backgroundModules.sync.createSyncLoggingMiddleware(),
-    ]
-    storageManager.setMiddleware(middleware)
+    await setStorageMiddleware(storageManager, {
+        syncService: backgroundModules.sync,
+        storexHub: backgroundModules.storexHub,
+        modifyMiddleware: (originalMiddleware) => [
+            ...((options && options.customMiddleware) || []),
+            ...(options && options.debugStorageOperations
+                ? [storageOperationDebugger]
+                : []),
+            storageOperationLogger.asMiddleware(),
+            ...originalMiddleware,
+        ],
+    })
 
     setStorex(storageManager)
 
@@ -188,14 +192,15 @@ export async function runBackgroundIntegrationTest(
         if (step.expectedStorageChanges) {
             try {
                 expect(await setup.storageChangeDetector.compare()).toEqual(
-                    mapValues(step.expectedStorageChanges, getChanges =>
+                    mapValues(step.expectedStorageChanges, (getChanges) =>
                         getChanges(),
                     ),
                 )
             } catch (e) {
                 console.error(
-                    `Unexpected storage changes in step number ${stepIndex +
-                        1} (counting from 1)`,
+                    `Unexpected storage changes in step number ${
+                        stepIndex + 1
+                    } (counting from 1)`,
                 )
                 throw e
             }

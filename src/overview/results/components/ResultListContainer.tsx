@@ -97,7 +97,7 @@ class ResultListContainer extends PureComponent<Props> {
         document.removeEventListener('click', this.handleOutsideClick, false)
     }
 
-    private handleOutsideClick: EventListener = event => {
+    private handleOutsideClick: EventListener = (event) => {
         // Reduces to `true` if any on input elements were clicked
         const wereAnyClicked = reduce((res, el) => {
             const isEqual = el != null ? el.isEqualNode(event.target) : false
@@ -218,9 +218,7 @@ class ResultListContainer extends PureComponent<Props> {
 
         const els: JSX.Element[] = []
 
-        const sortedKeys = Object.keys(this.props.annotsByDay)
-            .sort()
-            .reverse()
+        const sortedKeys = Object.keys(this.props.annotsByDay).sort().reverse()
 
         for (const day of sortedKeys) {
             els.push(
@@ -273,7 +271,11 @@ class ResultListContainer extends PureComponent<Props> {
 
         // Add loading spinner to the list end, if loading
         if (this.props.isLoading) {
-            resultItems.push(<LoadingIndicator key="loading" />)
+            resultItems.push(
+                <div className={styles.LoadingIndicatorContainer}>
+                    <LoadingIndicator key="loading" />
+                </div>,
+            )
         }
 
         return resultItems
@@ -291,7 +293,7 @@ class ResultListContainer extends PureComponent<Props> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isLoading: selectors.isLoading(state),
     searchResults: selectors.results(state),
     resultsByUrl: selectors.resultsByUrl(state),
@@ -309,12 +311,14 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isSocialPost: selectors.isSocialPost(state),
 })
 
-const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
-    handleTagBtnClick: index => event => {
+const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
+    dispatch,
+) => ({
+    handleTagBtnClick: (index) => (event) => {
         event.preventDefault()
         dispatch(acts.showTags(index))
     },
-    handleCommentBtnClick: ({ url, title }, index, isSocialPost) => event => {
+    handleCommentBtnClick: ({ url, title }, index, isSocialPost) => (event) => {
         event.preventDefault()
         dispatch(acts.setActiveSidebarIndex(index))
         dispatch(
@@ -326,26 +330,26 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
             }),
         )
     },
-    handleToggleBm: ({ url, fullUrl }, index) => event => {
+    handleToggleBm: ({ url, fullUrl }, index) => (event) => {
         event.preventDefault()
         dispatch(acts.toggleBookmark({ url, fullUrl, index }))
     },
-    handleTrashBtnClick: ({ url }, index) => event => {
+    handleTrashBtnClick: ({ url }, index) => (event) => {
         event.preventDefault()
         dispatch(deleteConfActs.show(url, index))
     },
-    handleScrollPagination: args => dispatch(acts.getMoreResults()),
-    handlePillClick: tag => event => {
+    handleScrollPagination: (args) => dispatch(acts.getMoreResults()),
+    handlePillClick: (tag) => (event) => {
         event.preventDefault()
         event.stopPropagation()
         dispatch(filterActs.toggleTagFilter(tag))
     },
-    addTag: resultIndex => tag => dispatch(acts.addTag(tag, resultIndex)),
-    delTag: resultIndex => tag => dispatch(acts.delTag(tag, resultIndex)),
+    addTag: (resultIndex) => (tag) => dispatch(acts.addTag(tag, resultIndex)),
+    delTag: (resultIndex) => (tag) => dispatch(acts.delTag(tag, resultIndex)),
     resetActiveTagIndex: () => dispatch(acts.resetActiveTagIndex()),
-    setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
+    setUrlDragged: (url) => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
-    handleCrossRibbonClick: ({ url }, isSocialPost) => event => {
+    handleCrossRibbonClick: ({ url }, isSocialPost) => (event) => {
         event.preventDefault()
         event.stopPropagation()
         dispatch(listActs.delPageFromList(url, isSocialPost))

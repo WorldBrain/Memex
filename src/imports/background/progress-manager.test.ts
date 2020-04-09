@@ -15,7 +15,7 @@ jest.mock('src/activity-logger')
 jest.mock('./cache')
 jest.mock('./data-sources')
 
-const runSuite = (DATA: TestData, skip = false) => async () => {
+const runSuite = (DATA: TestData, skip = false) => () => {
     let stateManager
 
     beforeAll(() => {
@@ -69,7 +69,7 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
         await promise
 
         // Should all be marked as finished now (we awaited the progress to complete)
-        progress.processors.forEach(proc =>
+        progress.processors.forEach((proc) =>
             expect(proc).toMatchObject({ finished: true, cancelled: false }),
         )
 
@@ -100,7 +100,7 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
 
         // Processors should all be marked as cancelled + unfinished now
         expect(progress.processors.length).toBeLessThanOrEqual(concurrency)
-        progress.processors.forEach(proc =>
+        progress.processors.forEach((proc) =>
             expect(proc).toMatchObject({ finished: false, cancelled: true }),
         )
 
@@ -127,7 +127,7 @@ const runSuite = (DATA: TestData, skip = false) => async () => {
         await progress.start() // Restart and wait for completion
 
         // Run all the same "full progress" tests; should all pass same as if progress wasn't interrupted
-        progress.processors.forEach(proc =>
+        progress.processors.forEach((proc) =>
             expect(proc).toMatchObject({ finished: true, cancelled: false }),
         )
         const numProcessed =

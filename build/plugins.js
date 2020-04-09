@@ -23,19 +23,20 @@ import { output } from './config'
 /**
  * @param {boolean} tslint Denotes whether or not to enable linting on this thread as well as type checking.
  */
-const initTsPlugin = tslint =>
+const initTsPlugin = (tslint) =>
     new ForkTsPlugin({
         checkSyntacticErrors: true,
         async: false,
         tslint,
     })
 
-export default function({
+export default function ({
     webExtReloadPort = 9090,
     mode = 'development',
     template,
-    notifsEnabled = false,
     isCI = false,
+    runSentry = false,
+    notifsEnabled = false,
     shouldPackage = false,
     packagePath = '../dist',
     extPackageName = 'extension.zip',
@@ -79,7 +80,7 @@ export default function({
             new SentryPlugin({
                 release: process.env.npm_package_version,
                 include: output.path,
-                dryRun: !shouldPackage,
+                dryRun: !runSentry,
             }),
         )
     }
@@ -105,7 +106,7 @@ export default function({
                 exclude: [/\.map/],
             }),
             new PostCompilePlugin(() =>
-                exec('git archive -o dist/source-code.zip master'),
+                exec('git-archive-all dist/source-code.zip'),
             ),
         )
     }

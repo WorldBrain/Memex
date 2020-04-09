@@ -13,6 +13,7 @@ import {
 import decodeBlob from 'src/util/decode-blob'
 import { SearchIndex } from 'src/search'
 import { dangerousPleaseBeSureDeleteAndRecreateDatabase } from 'src/storage/utils'
+import * as Raven from 'src/util/raven'
 const sorted = require('lodash/sortBy')
 const zipObject = require('lodash/zipObject')
 
@@ -121,6 +122,7 @@ export class BackupRestoreProcedure {
                 if (this.logErrors) {
                     console.error(e)
                 }
+                Raven.captureException(e)
                 this.events.emit('fail', { error: e.message })
                 return 'fail'
             } finally {
@@ -177,7 +179,7 @@ export class BackupRestoreProcedure {
                 const batch = await queue.getNext()
                 await this.interruptable.forOfLoop(
                     batch.changes || batch.images,
-                    async change => {
+                    async (change) => {
                         await writeObject(change)
                     },
                 )
@@ -225,12 +227,13 @@ export class BackupRestoreProcedure {
         try {
             await collection.updateOneObject(where, updates)
         } catch (e) {
+            Raven.captureException(e)
             console.error('Failed to commit image', where, image, updates)
         }
     }
 
     _createDownloadQueue(collection: string, timestamps: string[]) {
-        const items = sorted(timestamps).map(timestamp => [
+        const items = sorted(timestamps).map((timestamp) => [
             collection,
             timestamp,
         ])
@@ -383,6 +386,6 @@ export function _migrateObject(change: ObjectChange) {
     migrate({
         collection: 'annotations',
         field: 'lastEdited',
-        value: prev => prev.createdWhen,
+        value: (prev) => prev.createdWhen,
     })
 }

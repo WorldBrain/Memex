@@ -5,11 +5,10 @@ import {
 } from 'src/highlighting/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange, markRange } from './anchoring/index'
-import * as AllRaven from 'raven-js'
+import * as Raven from 'src/util/raven'
 import { Annotation } from 'src/annotations/types'
 
 const styles = require('src/highlighting/ui/styles.css')
-const Raven = AllRaven['default']
 
 export class HighlightInteraction implements HighlightInteractionInterface {
     /**
@@ -22,7 +21,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         hoverHighlightContainer?: (url: string) => void,
     ) => {
         await Promise.all(
-            highlights.map(async highlight =>
+            highlights.map(async (highlight) =>
                 this.renderHighlight(
                     highlight,
                     focusOnHighlight,
@@ -56,7 +55,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
 
                 const range = await retryUntil(
                     () => descriptorToRange({ descriptor }),
-                    _range => _range !== null,
+                    (_range) => _range !== null,
                     {
                         intervalMiliseconds: 200,
                         timeoutMiliseconds: 5000,
@@ -73,6 +72,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
                 )
             })
         } catch (e) {
+            Raven.captureException(e)
             console.error(
                 'MEMEX: Error during annotation anchoring/highlighting:',
                 e,
@@ -124,8 +124,8 @@ export class HighlightInteraction implements HighlightInteractionInterface {
      */
     attachEventListenersToNewHighlights = (
         highlight: Highlight,
-        focusOnAnnotation: (url: string) => void = _ => undefined,
-        hoverAnnotationContainer: (url: string) => void = _ => undefined,
+        focusOnAnnotation: (url: string) => void = (_) => undefined,
+        hoverAnnotationContainer: (url: string) => void = (_) => undefined,
         openSidebar: (args: {
             activeUrl?: string
             openSidebar?: boolean
@@ -134,10 +134,10 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
         )
-        newHighlights.forEach(highlightEl => {
+        newHighlights.forEach((highlightEl) => {
             ;(highlightEl as HTMLElement).dataset.annotation = highlight.url
 
-            const clickListener = async e => {
+            const clickListener = async (e) => {
                 e.preventDefault()
                 if (!e.target.dataset.annotation) {
                     return
@@ -149,7 +149,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             }
             highlightEl.addEventListener('click', clickListener, false)
 
-            const mouseenterListener = e => {
+            const mouseenterListener = (e) => {
                 if (!e.target.dataset.annotation) {
                     return
                 }
@@ -163,7 +163,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
                 false,
             )
 
-            const mouseleaveListener = e => {
+            const mouseleaveListener = (e) => {
                 if (!e.target.dataset.annotation) {
                     return
                 }
@@ -187,7 +187,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         const prevHighlights = document.querySelectorAll(
             `.${baseClass}.${mediumClass}`,
         )
-        prevHighlights.forEach(highlight =>
+        prevHighlights.forEach((highlight) =>
             highlight.classList.remove(mediumClass),
         )
     }
@@ -195,7 +195,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
     removeTempHighlights = () => {
         const baseClass = styles['memex-highlight-tmp']
         const prevHighlights = document.querySelectorAll(`.${baseClass}`)
-        prevHighlights.forEach(highlight => this._removeHighlight(highlight))
+        prevHighlights.forEach((highlight) => this._removeHighlight(highlight))
     }
     /**
      * Makes the given annotation as a medium highlight.
@@ -208,7 +208,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${url}"]`,
         )
-        highlights.forEach(highlight => highlight.classList.add(mediumClass))
+        highlights.forEach((highlight) => highlight.classList.add(mediumClass))
     }
     /**
      * Makes the highlight a dark highlight.
@@ -219,7 +219,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
             `.${baseClass}[data-annotation="${url}"]`,
         )
 
-        highlights.forEach(highlight => {
+        highlights.forEach((highlight) => {
             highlight.classList.add(styles['dark'])
         })
     }
@@ -236,11 +236,11 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         const highlights = document.querySelectorAll(highlightClass)
 
         if (onlyRemoveDarkHighlights) {
-            highlights.forEach(highlight =>
+            highlights.forEach((highlight) =>
                 highlight.classList.remove(styles['dark']),
             )
         } else {
-            highlights.forEach(highlight => this._removeHighlight(highlight))
+            highlights.forEach((highlight) => this._removeHighlight(highlight))
         }
     }
     /**
@@ -265,7 +265,7 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         )
 
         return sortedOffsetTopObjects.map(
-            offsetTopObject => annotations[offsetTopObject.index],
+            (offsetTopObject) => annotations[offsetTopObject.index],
         )
     }
 
@@ -290,11 +290,13 @@ export class HighlightInteraction implements HighlightInteractionInterface {
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${url}"]`,
         )
-        highlights.forEach(highlight => this._removeHighlight(highlight))
+        highlights.forEach((highlight) => this._removeHighlight(highlight))
     }
 }
 
 // FIXME: Refactor the parts of the code that need these global function imports
+export const makeHighlightDark = new HighlightInteraction().makeHighlightDark
+export const scrollToHighlight = new HighlightInteraction().scrollToHighlight
 export const renderHighlights = new HighlightInteraction().renderHighlights
 export const renderHighlight = new HighlightInteraction().renderHighlight
 export const removeHighlights = new HighlightInteraction().removeHighlights
