@@ -62,7 +62,7 @@ export async function main() {
             const generateToken = firebase
                 .functions()
                 .httpsCallable('generateTwilioNTSToken')
-            const response = await generateToken()
+            const response = await generateToken({})
             return response.data.iceServers
         },
     })
