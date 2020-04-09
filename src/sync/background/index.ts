@@ -94,8 +94,6 @@ export default class SyncBackground extends SyncService {
             listDevices: bindMethod(this.syncInfoStorage, 'listDevices'),
             removeDevice: bindMethod(this.syncInfoStorage, 'removeDevice'),
         }
-
-        this.initialSync.debug = true
     }
 
     async createSyncLoggingMiddleware() {
