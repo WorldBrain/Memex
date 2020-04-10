@@ -46,7 +46,7 @@ export interface AnalyticsEvents {
     Tag:
         | 'pageFromPopup'
         | 'addToExistingAnnotation'
-        | 'fromResults'
+        | 'deleteFromResults'
         | 'Filter by Tag'
     Domain: 'Filter by Domain'
     Collections: 'create' | 'addToPageFromPopup'

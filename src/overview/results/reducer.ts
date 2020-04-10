@@ -68,7 +68,10 @@ const handleSearchResult = (overwrite: boolean) => (
         isAnnotsSearch: payload.isAnnotsSearch,
     }
 
-    if (state.searchType === 'social' && payload.docs.every(doc => !doc.user)) {
+    if (
+        state.searchType === 'social' &&
+        payload.docs.every((doc) => !doc.user)
+    ) {
         return {
             ...state,
             ...commonState,
@@ -116,10 +119,10 @@ reducer.on(acts.addTag, (state, { tag, index }) => {
 })
 
 reducer.on(acts.delTag, (state, { tag, index }) => {
-    analytics.trackEvent({ category: 'Tag', action: 'fromResults' })
+    analytics.trackEvent({ category: 'Tag', action: 'deleteFromResults' })
 
     const doc = state.results[index]
-    const removalIndex = doc.tags.findIndex(val => val === tag)
+    const removalIndex = doc.tags.findIndex((val) => val === tag)
 
     if (removalIndex === -1) {
         return state
@@ -142,7 +145,7 @@ reducer.on(acts.delTag, (state, { tag, index }) => {
 })
 
 reducer.on(acts.hideResultItem, (state, url) => {
-    const removalIndex = state.results.findIndex(doc => doc.url === url)
+    const removalIndex = state.results.findIndex((doc) => doc.url === url)
 
     if (removalIndex === -1) {
         return state
@@ -173,7 +176,7 @@ reducer.on(acts.changeHasBookmark, (state, index) => {
     }
 })
 
-reducer.on(acts.resetActiveTagIndex, state => ({
+reducer.on(acts.resetActiveTagIndex, (state) => ({
     ...state,
     activeTagIndex: defState.activeTagIndex,
 }))
@@ -183,7 +186,7 @@ reducer.on(acts.setActiveTagIndex, (state, payload) => ({
     activeTagIndex: payload,
 }))
 
-reducer.on(acts.resetActiveSidebarIndex, state => ({
+reducer.on(acts.resetActiveSidebarIndex, (state) => ({
     ...state,
     activeSidebarIndex: defState.activeSidebarIndex,
 }))
@@ -198,26 +201,26 @@ reducer.on(acts.setAreAnnotationsExpanded, (state, payload) => ({
     areAnnotationsExpanded: payload,
 }))
 
-reducer.on(acts.toggleAreAnnotationsExpanded, state => ({
+reducer.on(acts.toggleAreAnnotationsExpanded, (state) => ({
     ...state,
     areAnnotationsExpanded: !state.areAnnotationsExpanded,
 }))
 
-reducer.on(acts.nextPage, state => ({
+reducer.on(acts.nextPage, (state) => ({
     ...state,
     currentPage: state.currentPage + 1,
 }))
-reducer.on(acts.resetPage, state => ({
+reducer.on(acts.resetPage, (state) => ({
     ...state,
     currentPage: defState.currentPage,
 }))
 
-reducer.on(acts.incSearchCount, state => ({
+reducer.on(acts.incSearchCount, (state) => ({
     ...state,
     searchCount: state.searchCount + 1,
 }))
 
-reducer.on(acts.initSearchCount, state => ({
+reducer.on(acts.initSearchCount, (state) => ({
     ...state,
     searchCount: defState.searchCount,
 }))
@@ -227,7 +230,7 @@ reducer.on(acts.setLoading, (state, payload) => ({
     isLoading: payload,
 }))
 reducer.on(acts.appendSearchResult, handleSearchResult(false))
-reducer.on(acts.resetSearchResult, state => ({
+reducer.on(acts.resetSearchResult, (state) => ({
     ...state,
     resultsExhausted: defState.resultsExhausted,
     totalCount: defState.totalCount,

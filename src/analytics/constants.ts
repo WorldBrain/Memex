@@ -53,4 +53,162 @@ export const ANALYTICS_EVENTS: {
                 `If you decide not to, this is the last thing we'll know about your usage of Memex,`,
         },
     },
+    Overview: {
+        'Create result bookmark': {
+            description: 'The creation of a page bookmark',
+        },
+        'Remove result bookmark': {
+            description: 'The deletion of a page bookmark',
+        },
+        'Delete result': {
+            description: 'The deletion of a page',
+        },
+    },
+    'Overview start date': {
+        'Successful NLP query': {
+            description:
+                'The entering of a valid NLP query for the start date search filter',
+        },
+        'Unsuccessful NLP query': {
+            description:
+                'The entering of an invalid NLP query for the start date search filter',
+        },
+        'Date selection': {
+            description:
+                'The manual selection of a date for the start date search filter',
+        },
+        'Date clear': {
+            description: 'The manual clearing of the start date search filter',
+        },
+    },
+    'Overview end date': {
+        'Successful NLP query': {
+            description:
+                'The entering of a valid NLP query for the end date search filter',
+        },
+        'Unsuccessful NLP query': {
+            description:
+                'The entering of an invalid NLP query for the end date search filter',
+        },
+        'Date selection': {
+            description:
+                'The manual selection of a date for the end date search filter',
+        },
+        'Date clear': {
+            description: 'The manual clearing of the end date search filter',
+        },
+    },
+    Popup: {
+        'Blacklist domain': {
+            description: 'The blacklisting of a domain via the popup menu',
+        },
+        'Blacklist site': {
+            description: 'The blacklisting of a website via the popup menu',
+        },
+        'Delete blacklisted pages': {
+            description:
+                'The deletion of all matching pages to a newly blacklisted website/domain via the popup menu',
+        },
+        'Pause indexing': {
+            description: 'The pausing of page indexing via the popup menu',
+        },
+        'Resume indexing': {
+            description: 'The resuming of page indexing via the popup menu',
+        },
+    },
+    Global: {
+        'Page Visit': {
+            description: 'UNUSED',
+        },
+        'External Link': {
+            description: 'The visit of a link pointing to an external webpage',
+        },
+        Install: {
+            description: 'The install of an extension',
+        },
+    },
+    Tag: {
+        pageFromPopup: {
+            description: 'The creation of a tag for a page via the popup menu',
+        },
+        addToExistingAnnotation: {
+            description: 'The tagging of an annotation',
+        },
+        'Filter by Tag': {
+            description: 'The applying of tags search filter',
+        },
+        deleteFromResults: {
+            description: 'The deletion of a tag for a page via the overview',
+        },
+    },
+    Domain: {
+        'Filter by Domain': {
+            description: 'The applying of domains search filter',
+        },
+    },
+    Collections: {
+        create: {
+            description: 'The creation of a new page collection',
+        },
+        addToPageFromPopup: {
+            description: 'The creation of a new page entry in a list',
+        },
+    },
+    Search: {
+        'Paginate search': {
+            description: 'The invoking of pagination for a given search',
+        },
+        'Popup search': {
+            description: 'The invoking of search via the popup menu',
+        },
+        'Successful search': {
+            description: 'A search that returns results via the overview',
+        },
+        'Unsuccessful search': {
+            description: 'A search that returns no results via the overview',
+        },
+        'Successful omnibar search': {
+            description: 'A search that returns results via the address bar',
+        },
+        'Unsuccessful omnibar search': {
+            description: 'A search that returns no results via the address bar',
+        },
+    },
+    'Search integration': {
+        Disabled: {
+            description:
+                'The disabling of Memex search results integrated in third-party search engines',
+        },
+    },
+    Blacklist: {
+        'Add blacklist entry': {
+            description:
+                'The blacklisting of a regex entry via the blacklist options page',
+        },
+        'Remove blacklist entry': {
+            description:
+                'The unblacklisting of a regex entry via the blacklist options page',
+        },
+        'Delete matching pages': {
+            description:
+                'The deletion of all matching pages to a newly blacklisted regex entry via the blacklist options page',
+        },
+    },
+    Imports: {
+        'Cancel import': {
+            description: 'The cancelling of an in-progress import',
+        },
+        'Start import': {
+            description: 'The starting of an import process',
+        },
+        'Pause import': {
+            description: 'The pausing of an in-progress import process',
+        },
+        'Resume import': {
+            description: 'The resumption of a paused import process',
+        },
+        'Finish import': {
+            description: 'The finishing of an import process',
+        },
+    },
 }
