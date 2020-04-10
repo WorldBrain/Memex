@@ -3,7 +3,12 @@ import { idleManager } from 'src/util/idle'
 import randomString from 'src/util/random-string'
 import { shouldTrack } from './utils'
 import { AnalyticsBackend } from './backend/types'
-import { AnalyticsEvent, Analytics, AnalyticsTrackEventOptions } from './types'
+import {
+    AnalyticsEvent,
+    AnalyticsEvents,
+    Analytics,
+    AnalyticsTrackEventOptions,
+} from './types'
 import { ANALYTICS_EVENTS } from './constants'
 
 const TRACK_BY_DEFAULT = true
@@ -17,8 +22,8 @@ export default class AnalyticsManager implements Analytics {
      * @param {EventTrackInfo} eventArgs
      * @param {boolean} [force=false] Whether or not to send immediately or just add to request pool.
      */
-    async trackEvent(
-        event: AnalyticsEvent,
+    async trackEvent<Category extends keyof AnalyticsEvents>(
+        event: AnalyticsEvent<Category>,
         options?: AnalyticsTrackEventOptions,
     ) {
         const shouldTrackValue = await this._shouldTrack()
@@ -29,7 +34,10 @@ export default class AnalyticsManager implements Analytics {
             return
         }
 
-        const eventInfo = ANALYTICS_EVENTS[event.category]?.[event.action]
+        const eventInfo = (ANALYTICS_EVENTS[event.category] as any)?.[
+            event.action
+        ]
+
         if (eventInfo) {
             await this.options.backend.trackEvent(event, options)
         } else if (process.env.NODE_ENV !== 'production') {

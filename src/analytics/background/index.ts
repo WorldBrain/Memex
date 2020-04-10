@@ -7,7 +7,7 @@ import { bindMethod } from 'src/util/functions'
 import ActivityPings from './activity-pings'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { ActivityPingSettings } from './activity-pings/types'
-import { AnalyticsEvent } from '../types'
+import { AnalyticsEvent, AnalyticsEvents } from '../types'
 
 export class AnalyticsBackground {
     remoteFunctions: AnalyticsInterface
@@ -37,7 +37,9 @@ export class AnalyticsBackground {
         await this.activityPings.setup()
     }
 
-    async trackEvent(event: AnalyticsEvent) {
+    async trackEvent<Category extends keyof AnalyticsEvents>(
+        event: AnalyticsEvent<Category>,
+    ) {
         if (this.activityPings.isActivityPing(event)) {
             this.activityPings.storeActivity(event)
         } else {

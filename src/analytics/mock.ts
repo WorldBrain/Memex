@@ -1,11 +1,17 @@
-import { AnalyticsEvent, Analytics, AnalyticsTrackEventOptions } from './types'
+import {
+    AnalyticsEvent,
+    AnalyticsEvents,
+    Analytics,
+    AnalyticsTrackEventOptions,
+} from './types'
+
 export class FakeAnalytics implements Analytics {
     events: Array<{
-        eventArgs: AnalyticsEvent
+        eventArgs: AnalyticsEvent<keyof AnalyticsEvents>
         options: AnalyticsTrackEventOptions
     }>
     newEvents: Array<{
-        eventArgs: AnalyticsEvent
+        eventArgs: AnalyticsEvent<keyof AnalyticsEvents>
         options: AnalyticsTrackEventOptions
     }>
     constructor() {

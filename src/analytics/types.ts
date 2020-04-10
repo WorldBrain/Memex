@@ -1,13 +1,13 @@
 export interface Analytics {
-    trackEvent(
-        event: AnalyticsEvent,
+    trackEvent<Category extends keyof AnalyticsEvents>(
+        event: AnalyticsEvent<Category>,
         options?: AnalyticsTrackEventOptions,
     ): Promise<any>
 }
 
-export interface AnalyticsEvent {
-    category: string // ('Search', 'Blacklist', etc.).
-    action: string // ('Add Entry', etc.).
+export interface AnalyticsEvent<Category extends keyof AnalyticsEvents> {
+    action: AnalyticsEvents[Category] // ('Add Entry', etc.).
+    category: Category // ('Search', 'Blacklist', etc.).
     name?: string // (user input - other custom info)
     value?: any
 }
