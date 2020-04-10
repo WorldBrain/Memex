@@ -48,7 +48,7 @@ import { StorexHubBackground } from 'src/storex-hub/background'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
 import { AnalyticsBackground } from 'src/analytics/background'
-import AnalyticsManager from 'src/analytics/analytics'
+import { Analytics } from 'src/analytics/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -82,7 +82,7 @@ export function createBackgroundModules(options: {
     fetchPageDataProcessor: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
-    analyticsManager: AnalyticsManager
+    analyticsManager: Analytics
     authOptions?: { devAuthState: DevAuthState }
     includePostSyncProcessor?: boolean
     disableSyncEnryption?: boolean

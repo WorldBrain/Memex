@@ -47,21 +47,7 @@ export default class AnalyticsManager implements Analytics {
         }
     }
 
-    /**
-     * Track user link clicks.
-     *
-     * @param {LinkTrackInfo} linkArgs
-     */
-    async trackLink({ linkType, url }) {}
-
-    /**
-     * Track user page visits.
-     *
-     * @param {string} args.title The title of the page to track
-     */
-    async trackPage({ title }) {}
-
-    async _shouldTrack() {
+    private async _shouldTrack() {
         return shouldTrack(TRACK_BY_DEFAULT)
     }
 }
