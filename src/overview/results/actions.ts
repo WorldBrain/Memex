@@ -101,7 +101,7 @@ export const toggleBookmark: (args: {
     } catch (err) {
         dispatch(changeHasBookmark(index))
         handleDBQuotaErrors(
-            error =>
+            (error) =>
                 notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
@@ -126,7 +126,7 @@ export const updateSearchResult: (a: any) => Thunk = ({
 }
 
 // Egg
-export const easter: () => Thunk = () => dispatch =>
+export const easter: () => Thunk = () => (dispatch) =>
     dispatch(
         updateSearchResult({
             overwrite: true,
@@ -147,7 +147,10 @@ export const easter: () => Thunk = () => dispatch =>
         }),
     )
 
-export const showTags: (i: number) => Thunk = index => (dispatch, getState) => {
+export const showTags: (i: number) => Thunk = (index) => (
+    dispatch,
+    getState,
+) => {
     const activeTagIndex = selectors.activeTagIndex(getState())
 
     if (activeTagIndex === index) {
@@ -162,7 +165,7 @@ export const showTags: (i: number) => Thunk = index => (dispatch, getState) => {
  */
 export const getMoreResults: (fromOverview?: boolean) => Thunk = (
     fromOverview = true,
-) => dispatch => {
+) => (dispatch) => {
     dispatch(nextPage())
     dispatch(searchBarActs.search({ fromOverview }))
 }
@@ -175,16 +178,12 @@ function trackSearch(searchResult, overwrite, state) {
             ? searchResult.totalCount
             : undefined
 
-    let action =
+    const action =
         searchResult.totalCount > 0
             ? overwrite
                 ? 'Successful search'
                 : 'Paginate search'
             : 'Unsuccessful search'
-
-    if (filters.onlyBookmarks(state)) {
-        action += ' (BM only)'
-    }
 
     const name = overwrite
         ? searchBar.queryParamsDisplay(state)
