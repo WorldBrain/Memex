@@ -54,6 +54,7 @@ export class TagSearchInput extends React.Component<Props, State> {
                     type={'input'}
                     updateRef={this.props.searchInputRef}
                     autoFocus
+                    size="5"
                 />
             </SearchBox>
         )
@@ -86,6 +87,7 @@ const SearchInput = styled(TextInputControlled)`
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
+    display: flex;
     flex: 1;
     color: ${props => props.theme.text};
     font-family: 'Poppins', sans-serif;
@@ -94,8 +96,6 @@ const SearchInput = styled(TextInputControlled)`
     &:focus {
         border: none;
         outline: none;
-        background-image: none;
-        background-color: transparent;
         -webkit-box-shadow: none;
         -moz-box-shadow: none;
         box-shadow: none;
