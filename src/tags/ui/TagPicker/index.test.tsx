@@ -10,6 +10,7 @@ import {
     waitForElement,
     queryByText,
 } from '@testing-library/react'
+import { waitFor, wait } from '@testing-library/dom'
 import TagPicker from './index'
 import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
 
@@ -48,11 +49,13 @@ const testUtils = ({ input, container }) => ({
             for (let i = 1; i < text.length - 1; i++) {
                 fireEvent.change(input, { target: { value: text.slice(0, i) } })
             }
+            input.value = text
         },
     },
 
     tests: {
-        expectInputToEqual: val => expect(input.value).toEqual(val),
+        expectInputToEqual: val =>
+            waitFor(() => expect(input.value).toEqual(val), { timeout: 200 }),
         expectToFindStrings: (text: string[], element?: any) =>
             waitForElement(
                 () => text.map(tag => getByText(element ?? container, tag)),
@@ -117,20 +120,22 @@ test('Shows relevant tags when typed into search box', async () => {
     const { changes, tests } = testUtils(elements)
     const query = 'tag'
 
-    await tests.expectToFindStrings(initialSuggestions, elements.tagSearchBox)
+    await tests.expectToFindStrings(tagsSelected, elements.tagSearchBox)
+    await tests.expectToFindStrings(initialSuggestions, elements.tagResults)
 
     // Then on changing the input,
     changes.typeIntoInput(query)
-    tests.expectInputToEqual(query)
+    await tests.expectInputToEqual(query)
 
     // Wait for the query results list to show an element which includes a textual tag result from our test data
     const [tagEl1] = await tests.expectToFindStrings(
-        ['tag a', ...initialSuggestions],
+        ['suggested tag'],
         elements.tagResults,
     )
 
     // 'Add tag: $query'
     fireEvent.click(tagEl1)
 
-    // TODO: Expect the input/TagPicker to have changed in way that reflects this click of a tag (Once implemented in the TagPicker itself)
+    // TODO: Perhaps need to make this into an E2E test with a backend storage implementation for this to work, instead of dummy functions.
+    // await waitFor( async() =>  tests.expectToFindStrings(['suggested tag'],elements.tagSearchBox))
 })

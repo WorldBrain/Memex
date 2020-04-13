@@ -371,8 +371,9 @@ describe('TagPickerLogic', () => {
         device,
     }) => {
         const initialSuggestions = ['sugg1', 'sugg2']
+        const testError = new Error('test error')
         const onUpdateTagSelection = async () => {
-            throw new Error('test error')
+            throw testError
         }
         const { testLogic, tagPickerLogic } = await setupLogicHelper({
             onUpdateTagSelection,
@@ -384,13 +385,13 @@ describe('TagPickerLogic', () => {
             url: TESTURL,
         })
 
-        expect(
-            await testLogic.processEvent('resultTagPress', {
-                tag: { name: 'sugg1', focused: false, selected: false },
-            }),
-        ).toThrowError()
+        await testLogic.processEvent('resultTagPress', {
+            tag: { name: 'sugg1', focused: false, selected: false },
+        })
 
-        await tagPickerLogic.processingUpstreamOperation
+        await expect(
+            tagPickerLogic.processingUpstreamOperation,
+        ).rejects.toEqual(testError)
 
         const tagsAfter = await device.backgroundModules.tags.fetchPageTags({
             url: TESTURL,
