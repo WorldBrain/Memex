@@ -1,4 +1,3 @@
-import { fetchUserId } from '../utils'
 import { AnalyticsBackend } from './types'
 import {
     AnalyticsEvent,
@@ -12,6 +11,7 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
     constructor(
         private props: {
             countlyConnector: any
+            fetchUserId: () => Promise<string>
             appKey: string
             url: string
         },
@@ -31,7 +31,7 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
     }
 
     private enqueueEvent({ key, userId, value = null }) {
-        const event = [
+        this.countlyQueue.push([
             'add_event',
             {
                 key,
@@ -41,15 +41,14 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
                     ...(value ? { value } : {}),
                 },
             },
-        ]
-        this.countlyQueue.push(event)
+        ])
     }
 
     async trackEvent<Category extends keyof AnalyticsEvents>(
         event: AnalyticsEvent<Category>,
         options?: AnalyticsTrackEventOptions,
     ) {
-        const userId = await fetchUserId()
+        const userId = await this.props.fetchUserId()
         if (!userId) {
             return
         }

@@ -4,6 +4,7 @@ import AnalyticsManager from './analytics'
 import CountlyAnalyticsBackend from './backend/countly'
 import { FakeAnalytics } from './mock'
 import { Analytics } from './types'
+import { fetchUserId } from './utils'
 
 let analytics: Analytics
 
@@ -12,6 +13,7 @@ try {
         countlyConnector: Countly,
         appKey: process.env.COUNTLY_APP_KEY,
         url: process.env.COUNTLY_SERVER_URL,
+        fetchUserId: () => fetchUserId(),
     })
 
     analytics = new AnalyticsManager({ backend })
