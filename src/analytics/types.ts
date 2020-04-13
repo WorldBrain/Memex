@@ -48,8 +48,12 @@ export interface AnalyticsEvents {
         | 'addToExistingAnnotation'
         | 'deleteFromResults'
         | 'Filter by Tag'
+        | 'createForPageFromOverview'
+    Sync: 'initSyncStarted' | 'initSyncFinished'
     Domain: 'Filter by Domain'
     Collections: 'create' | 'addToPageFromPopup'
+    InPageTooltip: 'highlightText' | 'annotateText' | 'showTooltip'
+    InPageSidebar: 'tempDisable' | 'permaDisable' | 'showSidebar'
     Search:
         | 'Successful omnibar search'
         | 'Unsuccessful omnibar search'

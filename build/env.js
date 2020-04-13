@@ -40,7 +40,7 @@ export default ({ mode }) => {
         env.PIWIK_HOST = 'http://localhost:1234'
         env.SENTRY_DSN = ''
         env.COUNTLY_HOST = 'http://localhost:1234'
-        env.COUNTLY_APP_KEY = ''
+        // env.COUNTLY_APP_KEY = ''
     } else if (mode === 'production' || process.env.DEV_ANALYTICS === 'true') {
         if (process.env.DEV_ANALYTICS === 'true') {
             console.warn(
@@ -51,7 +51,7 @@ export default ({ mode }) => {
         env.SENTRY_DSN =
             'https://205014a0f65e4160a29db2935250b47c@sentry.io/305612'
         env.COUNTLY_HOST = 'https://analytics2.worldbrain.io'
-        env.COUNTLY_APP_KEY = '47678cda223ca2570cb933959c9037613a751283'
+        // env.COUNTLY_APP_KEY = '47678cda223ca2570cb933959c9037613a751283'
     }
 
     return env

@@ -12,6 +12,7 @@ import { TagTab, RemoteTagsInterface } from './types'
 import { bindMethod } from 'src/util/functions'
 import { initErrHandler } from 'src/search/storage'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
+import { Analytics } from 'src/analytics/types'
 
 export default class TagsBackground {
     storage: TagStorage
@@ -27,6 +28,7 @@ export default class TagsBackground {
             storageManager: Storex
             pageStorage: PageStorage
             searchIndex: SearchIndex
+            analytics: Analytics
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
         },
@@ -37,10 +39,10 @@ export default class TagsBackground {
         this.remoteFunctions = {
             addTag: bindMethod(this, 'addTag'),
             delTag: bindMethod(this, 'delTag'),
-            addPageTag: params => {
+            addPageTag: (params) => {
                 return this._modifyTag(true, params)
             },
-            delPageTag: params => {
+            delPageTag: (params) => {
                 return this._modifyTag(false, params)
             },
             fetchPageTags: async (url: string) => {
@@ -79,7 +81,7 @@ export default class TagsBackground {
 
         await this.storage.addTagToPages({
             name: params.name,
-            urls: indexed.map(tab => tab.fullUrl),
+            urls: indexed.map((tab) => tab.fullUrl),
         })
     }
 
@@ -99,7 +101,7 @@ export default class TagsBackground {
 
         return this.storage.delTagsFromPages({
             name,
-            urls: tabs.map(tab => tab.url),
+            urls: tabs.map((tab) => tab.url),
         })
     }
 
@@ -108,6 +110,10 @@ export default class TagsBackground {
     }
 
     async addTag({ tag, url }: { tag: string; url: string }) {
+        this.options.analytics.trackEvent({
+            category: 'Tag',
+            action: 'createForPageFromOverview',
+        })
         return this.storage.addTag({ name: tag, url })
     }
 

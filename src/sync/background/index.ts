@@ -23,8 +23,10 @@ import { resolvablePromise } from 'src/util/promises'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { bindMethod } from 'src/util/functions'
+import { Analytics } from 'src/analytics/types'
 
 export default class SyncBackground extends SyncService {
+    private analytics: Analytics
     initialSync: MemexInitialSync
     remoteFunctions: PublicSyncInterface
     firstContinuousSyncPromise?: Promise<void>
@@ -40,6 +42,7 @@ export default class SyncBackground extends SyncService {
         getSharedSyncLog: () => Promise<SharedSyncLog>
         browserAPIs: Pick<Browser, 'storage'>
         appVersion: string
+        analytics: Analytics
         disableEncryption?: boolean
         postReceiveProcessor?: SyncPostReceiveProcessor
     }) {
@@ -63,6 +66,7 @@ export default class SyncBackground extends SyncService {
         })
 
         this.auth = options.auth
+        this.analytics = options.analytics
 
         this.remoteFunctions = {
             requestInitialSync: bindMethod(
@@ -73,10 +77,7 @@ export default class SyncBackground extends SyncService {
                 this.initialSync,
                 'answerInitialSync',
             ),
-            waitForInitialSync: bindMethod(
-                this.initialSync,
-                'waitForInitialSync',
-            ),
+            waitForInitialSync: bindMethod(this, 'waitForInitialSync'),
             waitForInitialSyncConnected: bindMethod(
                 this.initialSync,
                 'waitForInitialSyncConnected',
@@ -93,6 +94,18 @@ export default class SyncBackground extends SyncService {
             listDevices: bindMethod(this.syncInfoStorage, 'listDevices'),
             removeDevice: bindMethod(this.syncInfoStorage, 'removeDevice'),
         }
+    }
+
+    async waitForInitialSync() {
+        this.analytics.trackEvent({
+            category: 'Sync',
+            action: 'initSyncStarted',
+        })
+        await this.initialSync.waitForInitialSync()
+        this.analytics.trackEvent({
+            category: 'Sync',
+            action: 'initSyncFinished',
+        })
     }
 
     async createSyncLoggingMiddleware() {

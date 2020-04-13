@@ -140,6 +140,17 @@ export const ANALYTICS_EVENTS: {
         deleteFromResults: {
             description: 'The deletion of a tag for a page via the overview',
         },
+        createForPageFromOverview: {
+            description: 'the creation of a tage for a page via the overview',
+        },
+    },
+    Sync: {
+        initSyncStarted: {
+            description: 'The initial sync between two devices has started.',
+        },
+        initSyncFinished: {
+            description: 'The initial sync between two devices has finished.',
+        },
     },
     Domain: {
         'Filter by Domain': {
@@ -152,6 +163,33 @@ export const ANALYTICS_EVENTS: {
         },
         addToPageFromPopup: {
             description: 'The creation of a new page entry in a list',
+        },
+    },
+    InPageTooltip: {
+        annotateText: {
+            description:
+                'The creation on an annotation via the in-page tooltip',
+        },
+        highlightText: {
+            description:
+                'The creation of a text highlight via the in-page tooltip',
+        },
+        showTooltip: {
+            description:
+                'The showing of the in-page tooltip, triggered by webpage text selection',
+        },
+    },
+    InPageSidebar: {
+        showSidebar: {
+            description:
+                'The showing of the in-page sidebar, triggered by numerous user actions',
+        },
+        tempDisable: {
+            description:
+                'The temporary disabling of the in-page sidebar on any webpage',
+        },
+        permaDisable: {
+            description: 'The permanent disabling of the in-page sidebar',
         },
     },
     Search: {

@@ -90,6 +90,10 @@ export function createBackgroundModules(options: {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
 
+    const analytics = new AnalyticsBackground(options.analyticsManager, {
+        localBrowserStorage: options.browserAPIs.storage.local,
+    })
+
     const bookmarks = new BookmarksBackground({ storageManager })
     const pages = new PageIndexingBackground({
         storageManager,
@@ -113,6 +117,7 @@ export function createBackgroundModules(options: {
         searchIndex,
         queryTabs: bindMethod(browser.tabs, 'query'),
         windows: browser.windows,
+        analytics,
     })
     const search = new SearchBackground({
         storageManager,
@@ -168,14 +173,12 @@ export function createBackgroundModules(options: {
 
     return {
         auth,
-        analytics: new AnalyticsBackground(options.analyticsManager, {
-            localBrowserStorage: options.browserAPIs.storage.local,
-        }),
-        notifications,
         social,
+        analytics,
+        jobScheduler,
+        notifications,
         activityLogger,
         connectivityChecker,
-        jobScheduler,
         directLinking: new DirectLinkingBackground({
             browserAPIs: options.browserAPIs,
             storageManager,
@@ -211,6 +214,7 @@ export function createBackgroundModules(options: {
             appVersion: process.env.VERSION,
             postReceiveProcessor,
             disableEncryption: options.disableSyncEnryption,
+            analytics,
         }),
         storexHub: new StorexHubBackground({
             storageManager,
