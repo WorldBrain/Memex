@@ -58,6 +58,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     })
     const analyticsManager = new AnalyticsManager({
         backend: new FakeAnalytics(),
+        shouldTrack: async () => true,
     })
 
     const backgroundModules = createBackgroundModules({

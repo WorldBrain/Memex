@@ -4,7 +4,7 @@ import AnalyticsManager from './analytics'
 import CountlyAnalyticsBackend from './backend/countly'
 import { FakeAnalytics } from './mock'
 import { Analytics } from './types'
-import { fetchUserId } from './utils'
+import { fetchUserId, shouldTrack } from './utils'
 
 let analytics: Analytics
 
@@ -16,7 +16,10 @@ try {
         fetchUserId: () => fetchUserId(),
     })
 
-    analytics = new AnalyticsManager({ backend })
+    analytics = new AnalyticsManager({
+        backend,
+        shouldTrack: (def) => shouldTrack(def),
+    })
 } catch (err) {
     analytics = new FakeAnalytics()
 }

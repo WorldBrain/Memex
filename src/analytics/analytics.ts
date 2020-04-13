@@ -1,7 +1,4 @@
 /* eslint no-console: 0 */
-import { idleManager } from 'src/util/idle'
-import randomString from 'src/util/random-string'
-import { shouldTrack } from './utils'
 import { AnalyticsBackend } from './backend/types'
 import {
     AnalyticsEvent,
@@ -14,7 +11,12 @@ import { ANALYTICS_EVENTS } from './constants'
 const TRACK_BY_DEFAULT = true
 
 export default class AnalyticsManager implements Analytics {
-    constructor(private options: { backend: AnalyticsBackend }) {}
+    constructor(
+        private options: {
+            backend: AnalyticsBackend
+            shouldTrack: (def?: boolean) => Promise<boolean>
+        },
+    ) {}
 
     /**
      * Track any user-invoked events.
@@ -26,7 +28,9 @@ export default class AnalyticsManager implements Analytics {
         event: AnalyticsEvent<Category>,
         options?: AnalyticsTrackEventOptions,
     ) {
-        const shouldTrackValue = await this._shouldTrack()
+        const shouldTrackValue = await this.options.shouldTrack(
+            TRACK_BY_DEFAULT,
+        )
         if (process.env.DEBUG_ANALYTICS_EVENTS === 'true') {
             console.log('Tracking event', shouldTrackValue, event, options) // tslint:disable-line
         }
@@ -45,9 +49,5 @@ export default class AnalyticsManager implements Analytics {
                 `Ignoring analytics of non-documented event: '${event.category}' -> '${event.action}'`,
             ) // tslint:disable-line
         }
-    }
-
-    private async _shouldTrack() {
-        return shouldTrack(TRACK_BY_DEFAULT)
     }
 }
