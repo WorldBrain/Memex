@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import Button from '../../components/Button'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { ClickHandler, RootState } from '../../types'
 import * as acts from '../actions'
 import * as popup from '../../selectors'
@@ -34,18 +33,6 @@ class CollectionsButton extends PureComponent<Props> {
                 >
                     Add To Collection(s)
                 </Button>
-
-                <ButtonTooltip
-                    tooltipText="Add all tabs in window"
-                    position="popupLeft"
-                >
-                    <Button
-                        onClick={this.props.toggleAllTabsPopup}
-                        disabled={this.props.isDisabled}
-                        btnClass={styles.allTabs}
-                        itemClass={styles.buttonBulk}
-                    />
-                </ButtonTooltip>
             </div>
         )
     }
