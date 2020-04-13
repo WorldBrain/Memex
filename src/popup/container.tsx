@@ -42,6 +42,8 @@ import { EVENT_NAMES } from '../analytics/internal/constants'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags } from 'src/util/remote-functions-background'
 import { BackContainer } from 'src/popup/components/BackContainer'
+import { TagAllTabs } from 'src/tags/ui/TagPicker/components/row-buttons/TagAllTabs'
+import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 

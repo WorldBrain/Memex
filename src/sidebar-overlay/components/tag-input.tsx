@@ -2,6 +2,8 @@ import * as React from 'react'
 
 import { IndexDropdown } from 'src/common-ui/containers'
 import TagHolder from './tag-holder'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { tags } from 'src/util/remote-functions-background'
 
 interface Props {
     env?: 'inpage' | 'overview'
@@ -16,7 +18,7 @@ interface Props {
 /* tslint:disable-next-line variable-name */
 const TagInput = ({
     isTagInputActive,
-    tags,
+    tags: initialSelectedTags,
     initTagSuggestions,
     addTag,
     deleteTag,
@@ -24,23 +26,34 @@ const TagInput = ({
     env,
 }: Props) => {
     if (isTagInputActive) {
+        const handleTagsUpdate = async (
+            _: string[],
+            added: string,
+            deleted: string,
+        ) => {
+            if (added) {
+                return addTag(added)
+            }
+            if (deleted) {
+                return deleteTag(deleted)
+            }
+        }
+
         return (
-            <IndexDropdown
-                env={env}
-                isForAnnotation
-                allowAdd
-                initFilters={tags}
-                initSuggestions={initTagSuggestions}
-                onFilterAdd={addTag}
-                onFilterDel={deleteTag}
-                source="tag"
+            <TagPicker
+                loadDefaultSuggestions={() => initTagSuggestions ?? []}
+                queryTags={(query: string) =>
+                    tags.searchForTagSuggestions({ query })
+                }
+                onUpdateTagSelection={handleTagsUpdate}
+                initialSelectedTags={async () => initialSelectedTags}
             />
         )
     }
 
     return (
         <TagHolder
-            tags={tags}
+            tags={initialSelectedTags}
             clickHandler={e => {
                 e.stopPropagation()
                 setTagInputActive(true)
