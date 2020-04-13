@@ -46,6 +46,7 @@ export class TagSearchInput extends React.Component<Props, State> {
                 <StyledSearchIcon size={24} />
                 {this.props.before}
                 <SearchInput
+                    placeholder={'Search & add tags'}
                     defaultValue={this.props.value}
                     onChange={this.onChange}
                     onFocus={() => this.setState({ isFocused: true })}
