@@ -26,7 +26,7 @@ export interface TagPickerDependencies {
         deleted: string,
     ) => Promise<void>
     queryTags: (query: string) => Promise<string[]>
-    tagAllTabs: (query: string) => void
+    tagAllTabs?: (query: string) => Promise<void>
     loadDefaultSuggestions: () => string[]
     initialSelectedTags?: () => Promise<string[]>
     children?: any
@@ -224,8 +224,14 @@ export default class TagPickerLogic extends UILogic<
             // showing the tick and it might seem like it's already selected.
             this._updateFocus(0, displayTags, false)
         } else {
+            let tag
+            try {
+                tag = this._validateTag(term)
+            } catch (e) {
+                return
+            }
             this.emitMutation({
-                newTagName: { $set: term },
+                newTagName: { $set: tag },
             })
             this._updateFocus(-1, displayTags)
         }
@@ -266,11 +272,11 @@ export default class TagPickerLogic extends UILogic<
     _queryInitialSuggestions = term =>
         this.defaultTags.filter(tag => tag.name.includes(term))
 
-    selectedTagPress = ({
+    selectedTagPress = async ({
         event: { tag },
         previousState,
     }: TagPickerUIEvent<'selectedTagPress'>) => {
-        this._updateSelectedTagState({
+        await this._updateSelectedTagState({
             ...this._removeTagSelected(
                 tag,
                 previousState.displayTags,
@@ -281,7 +287,7 @@ export default class TagPickerLogic extends UILogic<
         })
     }
 
-    resultTagPress = ({
+    resultTagPress = async ({
         event: { tag },
         previousState,
     }: TagPickerUIEvent<'resultTagPress'>) => {
@@ -291,7 +297,7 @@ export default class TagPickerLogic extends UILogic<
         const displayTags = this.defaultTags
 
         if (tag.selected) {
-            this._updateSelectedTagState({
+            await this._updateSelectedTagState({
                 ...this._removeTagSelected(
                     tag.name,
                     displayTags,
@@ -301,7 +307,7 @@ export default class TagPickerLogic extends UILogic<
                 deleted: tag.name,
             })
         } else {
-            this._updateSelectedTagState({
+            await this._updateSelectedTagState({
                 ...this._addTagSelected(
                     tag.name,
                     displayTags,
@@ -313,18 +319,28 @@ export default class TagPickerLogic extends UILogic<
         }
     }
 
-    resultTagAllPress = ({
+    resultTagAllPress = async ({
         event: { tag },
+        previousState,
     }: TagPickerUIEvent<'resultTagPress'>) => {
-        // TODO: feedback?
-        this.dependencies.tagAllTabs(tag.name)
+        // TODO: present feedback to the user?
+
+        const name = this._validateTag(tag.name)
+        this._processingUpstreamOperation = this.dependencies.tagAllTabs(name)
+
+        // Note `newTagPres` is used below to ensure when validating that this tag pressed is not
+        // already selected. Otherwise the Tag All Tabs might behave strangely - i.e. Unselecting
+        // from this page but still tag all the other tabs.
+        await this.newTagPress({ event: { tag: name }, previousState })
     }
 
-    newTagAllPress = ({
+    newTagAllPress = async ({
         event: {},
         previousState,
     }: TagPickerUIEvent<'newTagAllPress'>) => {
-        this.dependencies.tagAllTabs(previousState.query)
+        const tag = this._validateTag(previousState.query)
+        await this.newTagPress({ event: { tag: name }, previousState })
+        this._processingUpstreamOperation = this.dependencies.tagAllTabs(tag)
     }
 
     resultTagFocus = ({
@@ -334,11 +350,17 @@ export default class TagPickerLogic extends UILogic<
         this._updateFocus(index, previousState.displayTags)
     }
 
-    newTagPress = ({
+    newTagPress = async ({
         event: { tag },
         previousState,
     }: TagPickerUIEvent<'newTagPress'>) => {
-        this._updateSelectedTagState({
+        tag = this._validateTag(tag)
+
+        if (previousState.selectedTags.includes(tag)) {
+            return
+        }
+
+        await this._updateSelectedTagState({
             ...this._addTagSelected(
                 tag,
                 this.defaultTags,
@@ -349,7 +371,16 @@ export default class TagPickerLogic extends UILogic<
         })
     }
 
-    _updateSelectedTagState = ({
+    _validateTag = (tag: string) => {
+        tag = tag.trim()
+
+        if (tag === '') {
+            throw Error(`Tag Validation: Can't add tag with only whitespace`)
+        }
+        return tag
+    }
+
+    _updateSelectedTagState = async ({
         displayTags,
         selectedTags = [],
         added,
@@ -374,7 +405,7 @@ export default class TagPickerLogic extends UILogic<
         }
 
         try {
-            this._processingUpstreamOperation = this.dependencies.onUpdateTagSelection(
+            await this.dependencies.onUpdateTagSelection(
                 selectedTags,
                 added,
                 deleted,
@@ -385,17 +416,17 @@ export default class TagPickerLogic extends UILogic<
         }
     }
 
-    _undoAfterError({ displayTags, selectedTags, added, deleted }) {
+    async _undoAfterError({ displayTags, selectedTags, added, deleted }) {
         // Reverse the logic skipping the call to run the update callback
         if (added) {
-            this._updateSelectedTagState({
+            await this._updateSelectedTagState({
                 ...this._removeTagSelected(added, displayTags, selectedTags),
                 added: null,
                 deleted: added,
                 skipUpdateCallback: true,
             })
         } else {
-            this._updateSelectedTagState({
+            await this._updateSelectedTagState({
                 ...this._addTagSelected(deleted, displayTags, selectedTags),
                 added: deleted,
                 deleted: null,

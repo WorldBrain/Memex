@@ -13,10 +13,13 @@ import {
 } from 'src/tags/ui/TagPicker/components/TagSearchInput'
 import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedList'
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
-import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
+import AddNewTag, { AddNew } from 'src/tags/ui/TagPicker/components/AddNewTag'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import TagRowItem from 'src/tags/ui/TagPicker/components/TagRow'
-import { colorGrey5 } from 'src/common-ui/components/design-library/colors'
+import TagRowItem, {
+    IconStyleWrapper,
+    TagAllTabsButton,
+} from 'src/tags/ui/TagPicker/components/TagRow'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -57,7 +60,11 @@ class TagPicker extends StatefulUIElement<
     renderTagRow = (tag: DisplayTag, index: number) => (
         <TagRowItem
             onPress={this.handleResultTagPress}
-            onPressTagAll={this.handleResultTagAllPress}
+            onPressTagAll={
+                this.props.tagAllTabs
+                    ? t => this.handleResultTagAllPress(t)
+                    : undefined
+            }
             onFocus={this.handleResultTagFocus}
             key={`TagKeyName-${tag.name}`}
             index={index}
@@ -65,6 +72,17 @@ class TagPicker extends StatefulUIElement<
             selected={tag.selected}
             focused={tag.focused}
         />
+    )
+
+    renderNewTagAllTabsButton = () => (
+        <IconStyleWrapper show>
+            <ButtonTooltip tooltipText="Tag all tabs in window" position="left">
+                <TagAllTabsButton
+                    size={20}
+                    onClick={this.handleNewTagAllPress}
+                />
+            </ButtonTooltip>
+        </IconStyleWrapper>
     )
 
     render() {
@@ -90,8 +108,9 @@ class TagPicker extends StatefulUIElement<
                         <AddNewTag
                             tag={this.state.newTagName}
                             onPress={this.handleNewTagPress}
-                            onPressTagAll={this.handleNewTagAllPress}
-                        />
+                        >
+                            {this.renderNewTagAllTabsButton}
+                        </AddNewTag>
                     )}
                     <TagResultsList
                         tags={this.state.displayTags}

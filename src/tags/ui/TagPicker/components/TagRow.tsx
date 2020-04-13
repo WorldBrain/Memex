@@ -45,7 +45,7 @@ class TagRow extends React.Component<Props> {
     }
 
     render() {
-        const { name, selected, focused } = this.props
+        const { name, selected, focused, onPressTagAll } = this.props
 
         return (
             <Row
@@ -62,15 +62,17 @@ class TagRow extends React.Component<Props> {
                     {selected && (
                         <XIcon size={20} onClick={this.handleTagPress} />
                     )}
-                    <ButtonTooltip
-                        tooltipText="Tag all tabs in window"
-                        position="left"
-                    >
-                        <TagAllTabsButton
-                            size={20}
-                            onClick={this.handleTagAllPress}
-                        />
-                    </ButtonTooltip>
+                    {onPressTagAll && (
+                        <ButtonTooltip
+                            tooltipText="Tag all tabs in window"
+                            position="left"
+                        >
+                            <TagAllTabsButton
+                                size={20}
+                                onClick={this.handleTagAllPress}
+                            />
+                        </ButtonTooltip>
+                    )}
                 </IconStyleWrapper>
             </Row>
         )

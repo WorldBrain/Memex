@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import { TagResultItem } from './TagResultItem'
@@ -11,8 +11,8 @@ import {
 
 interface Props {
     onPress: () => void
-    onPressTagAll: () => void
     tag: string
+    children: ReactNode | ReactNode[]
 }
 
 export default (props: Props) => {
@@ -21,14 +21,7 @@ export default (props: Props) => {
             <span>Create new:</span>
             <TagResultItem>{props.tag}</TagResultItem>
             <Flex />
-            <IconStyleWrapper show>
-                <ButtonTooltip
-                    tooltipText="Tag all tabs in window"
-                    position="left"
-                >
-                    <TagAllTabsButton size={20} onClick={props.onPressTagAll} />
-                </ButtonTooltip>
-            </IconStyleWrapper>
+            {props.children}
         </AddNew>
     )
 }

@@ -19,7 +19,9 @@ storiesOf('Tags Refactored', module)
                 queryTags={async term => tags.filter(t => t.includes(term))}
                 loadDefaultSuggestions={() => [tags[4], tags[5]]}
                 initialSelectedTags={async () => [tags[0], tags[1]]}
-                tagAllTabs={async tag => action('Tag All tabs')}
+                tagAllTabs={async tag => {
+                    action('Tag All tabs')
+                }}
             />
         </div>
     ))
@@ -32,7 +34,24 @@ storiesOf('Tags Refactored', module)
                 queryTags={async term => tags.filter(t => t.includes(term))}
                 loadDefaultSuggestions={() => [tags[4], tags[5]]}
                 initialSelectedTags={async () => [tags[0], tags[1]]}
-                tagAllTabs={async tag => action('Tag All tabs')}
+                tagAllTabs={async tag => {
+                    action('Tag All tabs')
+                }}
+            />
+        </div>
+    ))
+    .add('Tag Picker - Long delays in saving shouldnt effect UI', () => (
+        <div>
+            <TagPicker
+                onUpdateTagSelection={selectedTags => {
+                    return new Promise(resolve => setTimeout(resolve, 5000))
+                }}
+                queryTags={async term => tags.filter(t => t.includes(term))}
+                loadDefaultSuggestions={() => [tags[4], tags[5]]}
+                initialSelectedTags={async () => [tags[0], tags[1]]}
+                tagAllTabs={async tag => {
+                    action('Tag All tabs')
+                }}
             />
         </div>
     ))

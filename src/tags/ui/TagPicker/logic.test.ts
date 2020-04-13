@@ -385,14 +385,10 @@ describe('TagPickerLogic', () => {
             url: TESTURL,
         })
 
-        await testLogic.processEvent('resultTagPress', {
+        await expect(testLogic.processEvent('resultTagPress', {
             tag: { name: 'sugg1', focused: false, selected: false },
-        })
-
-        await expect(
-            tagPickerLogic.processingUpstreamOperation,
-        ).rejects.toEqual(testError)
-
+        })).rejects.toEqual(testError)
+        
         const tagsAfter = await device.backgroundModules.tags.fetchPageTags({
             url: TESTURL,
         })
