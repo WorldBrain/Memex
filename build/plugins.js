@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import { EnvironmentPlugin, DefinePlugin } from 'webpack'
+import { EnvironmentPlugin } from 'webpack'
 import ForkTsPlugin from 'fork-ts-checker-webpack-plugin'
 import CopyPlugin from 'copy-webpack-plugin'
 import HtmlPlugin from 'html-webpack-plugin'
@@ -11,11 +11,6 @@ import CssExtractPlugin from 'mini-css-extract-plugin'
 import SentryPlugin from '@sentry/webpack-plugin'
 import ZipPlugin from 'zip-webpack-plugin'
 import PostCompilePlugin from 'post-compile-webpack-plugin'
-const Dotenv = require('dotenv-webpack')
-
-// Disabling this for now as it adds 2-4 seconds to inc. build time - look into finding out why
-// import WebExtReloadPlugin from 'webpack-chrome-extension-reloader'
-
 import initEnv from './env'
 import * as staticFiles from './static-files'
 import { output } from './config'
@@ -45,7 +40,6 @@ export default function ({
     const envs = initEnv({ mode })
     const plugins = [
         new EnvironmentPlugin(envs),
-        new Dotenv(),
         new CopyPlugin(staticFiles.copyPatterns),
         new HtmlPlugin({
             title: 'Popup',
@@ -69,12 +63,7 @@ export default function ({
     ]
 
     if (mode === 'development') {
-        plugins.push(
-            new HardSourcePlugin(),
-            // new WebExtReloadPlugin({
-            //     port: webExtReloadPort,
-            // }),
-        )
+        plugins.push(new HardSourcePlugin())
     } else if (mode === 'production') {
         plugins.push(
             new SentryPlugin({
