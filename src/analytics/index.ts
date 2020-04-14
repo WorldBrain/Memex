@@ -6,22 +6,28 @@ import { FakeAnalytics } from './mock'
 import { Analytics } from './types'
 import { fetchUserId, shouldTrack } from './utils'
 
+const appKey = process.env.COUNTLY_APP_KEY
+const url = process.env.COUNTLY_SERVER_URL
+
 let analytics: Analytics
 
-try {
-    const backend = new CountlyAnalyticsBackend({
-        countlyConnector: Countly,
-        appKey: process.env.COUNTLY_APP_KEY,
-        url: process.env.COUNTLY_SERVER_URL,
-        fetchUserId: () => fetchUserId(),
-    })
-
-    analytics = new AnalyticsManager({
-        backend,
-        shouldTrack: (def) => shouldTrack(def),
-    })
-} catch (err) {
+if (
+    !appKey ||
+    !url ||
+    (process.env.NODE_ENV === 'development' &&
+        process.env.DEV_ANALYTICS !== 'true')
+) {
     analytics = new FakeAnalytics()
+} else {
+    analytics = new AnalyticsManager({
+        shouldTrack: (def) => shouldTrack(def),
+        backend: new CountlyAnalyticsBackend({
+            fetchUserId: () => fetchUserId(),
+            countlyConnector: Countly,
+            appKey,
+            url,
+        }),
+    })
 }
 
 export default analytics

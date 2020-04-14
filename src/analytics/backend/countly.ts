@@ -5,44 +5,48 @@ import {
     AnalyticsTrackEventOptions,
 } from '../types'
 
+export type CountlyEvent = any
+export type CountlyQueue = Array<[string, CountlyEvent]>
+
+export interface Props {
+    fetchUserId: () => Promise<string>
+    countlyConnector: any
+    appKey: string
+    url: string
+}
+
 export default class CountlyAnalyticsBackend implements AnalyticsBackend {
     static DEF_TRACKING = true
+    private isSetup = false
 
-    constructor(
-        private props: {
-            countlyConnector: any
-            fetchUserId: () => Promise<string>
-            appKey: string
-            url: string
-        },
-    ) {
-        // TODO: what if invalid appkey/url is passed? Does Countly.init() throw an error?
-        if (
-            !props.appKey ||
-            !props.url ||
-            (process.env.NODE_ENV === 'development' &&
-                process.env.DEV_ANALYTICS !== 'true')
-        ) {
-            throw new Error('Cannot connect to Countly server')
+    constructor(private props: Props) {}
+
+    async init() {
+        if (this.isSetup) {
+            return
         }
 
-        props.countlyConnector.app_key = props.appKey
-        props.countlyConnector.url = props.url
-        props.countlyConnector.init()
+        const userId = await this.props.fetchUserId()
+
+        this.props.countlyConnector.app_key = this.props.appKey
+        this.props.countlyConnector.url = this.props.url
+        this.props.countlyConnector.device_id = userId
+        this.props.countlyConnector.init()
+
+        this.isSetup = true
     }
 
-    private get countlyQueue() {
+    private get countlyQueue(): CountlyQueue {
         return this.props.countlyConnector.q
     }
 
-    private enqueueEvent({ key, userId, value = null }) {
+    private enqueueEvent({ key, value = null }: { key: string; value: any }) {
         this.countlyQueue.push([
             'add_event',
             {
                 key,
                 count: 1,
                 segmentation: {
-                    userId,
                     ...(value ? { value } : {}),
                 },
             },
@@ -53,13 +57,9 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
         event: AnalyticsEvent<Category>,
         options?: AnalyticsTrackEventOptions,
     ) {
-        const userId = await this.props.fetchUserId()
-        if (!userId) {
-            return
-        }
+        await this.init()
 
         this.enqueueEvent({
-            userId,
             key: `${event.category}::${event.action}`,
             value: event.value,
         })
