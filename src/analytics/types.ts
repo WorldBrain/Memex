@@ -26,7 +26,11 @@ export interface AnalyticsEvents {
         | 'deleteViaRegexBlacklist'
         | 'deleteViaSiteBlacklist'
         | 'deleteViaOverview'
-    Global: 'visitPage' | 'installExtension' | 'visitExternalLink'
+    Global:
+        | 'visitPage'
+        | 'installExtension'
+        | 'uninstallExtension'
+        | 'visitExternalLink'
     Tags:
         | 'createForPageViaPopup'
         | 'createForAnnotation'

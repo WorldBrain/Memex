@@ -88,7 +88,10 @@ export const ANALYTICS_EVENTS: {
             description: 'The visit of a link pointing to an external webpage',
         },
         installExtension: {
-            description: 'The install of an extension',
+            description: 'The install of Memex',
+        },
+        uninstallExtension: {
+            description: 'The uninstall of Memex',
         },
     },
     Tags: {
