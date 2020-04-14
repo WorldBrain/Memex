@@ -311,7 +311,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         activeUrl,
     }: OpenSidebarArgs & { anchor: Anchor }) => {
         analytics.trackEvent({
-            category: 'InPageSidebar',
+            category: 'Sidebar',
             action: 'showSidebar',
         })
 

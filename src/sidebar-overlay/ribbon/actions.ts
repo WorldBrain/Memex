@@ -46,8 +46,8 @@ export const toggleRibbon: () => Thunk = () => async (dispatch, getState) => {
 
     if (isRibbonEnabled) {
         analytics.trackEvent({
-            category: 'InPageSidebar',
-            action: 'permaDisable',
+            category: 'Sidebar',
+            action: 'disablePermanently',
         })
     }
 

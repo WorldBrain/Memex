@@ -99,12 +99,12 @@ export default class SyncBackground extends SyncService {
     async waitForInitialSync() {
         this.analytics.trackEvent({
             category: 'Sync',
-            action: 'initSyncStarted',
+            action: 'startInitSync',
         })
         await this.initialSync.waitForInitialSync()
         this.analytics.trackEvent({
             category: 'Sync',
-            action: 'initSyncFinished',
+            action: 'finishInitSync',
         })
     }
 

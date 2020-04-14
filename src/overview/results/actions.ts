@@ -76,10 +76,8 @@ export const toggleBookmark: (args: {
     dispatch(changeHasBookmark(index))
 
     analytics.trackEvent({
-        category: 'Overview',
-        action: hasBookmark
-            ? 'Remove result bookmark'
-            : 'Create result bookmark',
+        category: 'Bookmarks',
+        action: hasBookmark ? 'deleteForPage' : 'createForPage',
     })
 
     processEventRPC({
@@ -181,9 +179,9 @@ function trackSearch(searchResult, overwrite, state) {
     const action =
         searchResult.totalCount > 0
             ? overwrite
-                ? 'Successful search'
-                : 'Paginate search'
-            : 'Unsuccessful search'
+                ? 'successViaOverview'
+                : 'paginateSearch'
+            : 'failViaOverview'
 
     const name = overwrite
         ? searchBar.queryParamsDisplay(state)

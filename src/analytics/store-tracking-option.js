@@ -9,15 +9,15 @@ export async function storeTrackingOption(isOptIn, skipEventTrack = false) {
             [SHOULD_TRACK]: isOptIn,
         })
 
-    const trackEvent = force => {
+    const trackEvent = (force) => {
         if (skipEventTrack) {
             return Promise.resolve()
         }
 
         const trackEvent = analytics.trackEvent(
             {
-                category: 'Privacy',
-                action: 'Change tracking pref',
+                category: 'Settings',
+                action: 'toggleTracking',
                 name: isOptIn ? 'opt-in' : 'opt-out',
             },
             force,

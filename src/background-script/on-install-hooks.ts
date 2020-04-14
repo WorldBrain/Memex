@@ -15,7 +15,7 @@ export async function onInstall() {
     // Ensure default blacklist entries are stored (before doing anything else)
     await blacklist.addToBlacklist(blacklistConsts.DEF_ENTRIES)
 
-    analytics.trackEvent({ category: 'Global', action: 'Install' })
+    analytics.trackEvent({ category: 'Global', action: 'installExtension' })
 
     // Open onboarding page
     browser.tabs.create({ url: `${OVERVIEW_URL}?install=true` })
@@ -28,9 +28,9 @@ export async function onInstall() {
 
 export async function onUpdate() {
     // Check whether old Search Injection boolean exists and replace it with new object
-    const searchInjectionKey = (await browser.storage.local.get(
-        SEARCH_INJECTION_KEY,
-    ))[SEARCH_INJECTION_KEY]
+    const searchInjectionKey = (
+        await browser.storage.local.get(SEARCH_INJECTION_KEY)
+    )[SEARCH_INJECTION_KEY]
 
     if (typeof searchInjectionKey === 'boolean') {
         browser.storage.local.set({

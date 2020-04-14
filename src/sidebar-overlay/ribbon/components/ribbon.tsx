@@ -199,8 +199,8 @@ class Ribbon extends Component<Props, State> {
                                         )}
                                         onClick={() => {
                                             analytics.trackEvent({
-                                                category: 'InPageSidebar',
-                                                action: 'tempDisable',
+                                                category: 'Sidebar',
+                                                action: 'disableTemporarily',
                                             })
                                             this.props.handleRemoveRibbon()
                                         }}

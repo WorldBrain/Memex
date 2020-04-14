@@ -83,7 +83,7 @@ export default class ActivityPings {
 
     async sendPing(frequency: ActivityPingFrequency) {
         await this.options.analytics.trackEvent({
-            category: 'Activity Pings',
+            category: 'ActivityPings',
             action: frequency,
             value: { usedFeatures: this.pendingPings[frequency] },
         })

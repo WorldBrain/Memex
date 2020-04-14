@@ -70,7 +70,7 @@ export async function main() {
         })
     }
 
-    const pageToSuggestion = timeFilterApplied => doc => {
+    const pageToSuggestion = (timeFilterApplied) => (doc) => {
         const url = escapeHtml(shortUrl(doc.url))
         const title = escapeHtml(doc.title)
         const time = formatTime(doc.displayTime, timeFilterApplied)
@@ -114,8 +114,8 @@ export async function main() {
             category: 'Search',
             action:
                 searchResults.totalCount > 0
-                    ? 'Successful omnibar search'
-                    : 'Unsuccessful omnibar search',
+                    ? 'successViaOmnibar'
+                    : 'failViaOmnibar',
             name: queryFiltersDisplay(queryFilters),
             value: searchResults.totalCount,
         })
@@ -164,7 +164,7 @@ export async function main() {
      * @param {string} text The omnibar text input.
      * @returns {string} Overview page URL with `text` formatted as query string params.
      */
-    const formOverviewQuery = text => {
+    const formOverviewQuery = (text) => {
         const queryFilters = extractTimeFiltersFromQuery(text)
         const queryParams = qs.stringify(queryFilters)
 

@@ -111,8 +111,8 @@ export default class TagsBackground {
 
     async addTag({ tag, url }: { tag: string; url: string }) {
         this.options.analytics.trackEvent({
-            category: 'Tag',
-            action: 'createForPageFromOverview',
+            category: 'Tags',
+            action: 'createForPageViaOverview',
         })
         return this.storage.addTag({ name: tag, url })
     }

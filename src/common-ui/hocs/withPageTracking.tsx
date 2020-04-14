@@ -34,7 +34,7 @@ const withPageTracking = (componentClass: typeof React.Component) =>
         _trackPage = () =>
             analytics.trackEvent({
                 category: 'Global',
-                action: 'Page Visit',
+                action: 'visitPage',
                 value: document.title,
             })
 

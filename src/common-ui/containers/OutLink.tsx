@@ -12,7 +12,7 @@ class OutLink extends React.PureComponent<any> {
     trackLinkClick = () =>
         analytics.trackEvent({
             category: 'Global',
-            action: 'External Link',
+            action: 'visitExternalLink',
             value: this.props.to,
         })
 

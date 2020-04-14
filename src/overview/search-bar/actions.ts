@@ -47,8 +47,8 @@ export const setQueryTagsDomains: (
             ) {
                 dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
                 analytics.trackEvent({
-                    category: 'Tag',
-                    action: 'Filter by Tag',
+                    category: 'SearchFilters',
+                    action: 'addTagFilterViaQuery',
                 })
             }
 
@@ -74,8 +74,8 @@ export const setQueryTagsDomains: (
                 dispatch(act(term))
 
                 analytics.trackEvent({
-                    category: 'Domain',
-                    action: 'Filter by Domain',
+                    category: 'SearchFilters',
+                    action: 'addDomainFilterViaQuery',
                 })
             }
         })
