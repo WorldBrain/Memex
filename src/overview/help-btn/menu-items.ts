@@ -8,10 +8,14 @@ export const menuItems: MenuOptions = [
     },
     '-',
     {
-        text: 'Onboarding Help',
+        text: 'Onboarding Wizard',
         link: '#/overview?install=true',
     },
     '-',
+     {
+        text: 'OpenCollective',
+        link: 'https://opencollective.com/worldbrain',
+    },
     {
         text: 'GitHub',
         link: 'https://github.com/worldbrain/memex',
