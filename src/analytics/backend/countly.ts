@@ -17,7 +17,12 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
         },
     ) {
         // TODO: what if invalid appkey/url is passed? Does Countly.init() throw an error?
-        if (!props.appKey || !props.url) {
+        if (
+            !props.appKey ||
+            !props.url ||
+            (process.env.NODE_ENV === 'development' &&
+                process.env.DEV_ANALYTICS !== 'true')
+        ) {
             throw new Error('Cannot connect to Countly server')
         }
 
