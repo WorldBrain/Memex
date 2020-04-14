@@ -82,7 +82,7 @@ export const ANALYTICS_EVENTS: {
     },
     Global: {
         visitPage: {
-            description: 'UNUSED',
+            description: 'The visit and indexing of any external page',
         },
         visitExternalLink: {
             description: 'The visit of a link pointing to an external webpage',

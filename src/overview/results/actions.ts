@@ -177,7 +177,7 @@ function trackSearch(searchResult, overwrite, state) {
             : undefined
 
     const action =
-        searchResult.totalCount > 0
+        searchResult.docs.length > 0
             ? overwrite
                 ? 'successViaOverview'
                 : 'paginateSearch'
