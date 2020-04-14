@@ -1,4 +1,5 @@
-const externalTsModules = require('./build//external').externalTsModules
+const { jsWithTs: tsjPreset } = require('ts-jest/presets')
+const externalTsModules = require('./build/external').externalTsModules
 
 const externalTsModuleMappings = {}
 for (const externalTsModule of externalTsModules) {
@@ -11,15 +12,15 @@ for (const externalTsModule of externalTsModules) {
 module.exports = {
     globals: {
         'ts-jest': {
-            tsConfigFile: 'tsconfig.jest.json',
+            tsConfig: 'tsconfig.jest.json',
+            babelConfig: true,
         },
         browser: {},
     },
     testMatch: ['<rootDir>/src/**/*.test.(js|jsx|ts|tsx)'],
     rootDir: '.',
     transform: {
-        '^.+\\.(js|jsx)$': '<rootDir>/node_modules/babel-jest',
-        '^.+\\.(ts|tsx)$': '<rootDir>/node_modules/ts-jest',
+        ...tsjPreset.transform,
     },
     modulePaths: ['<rootDir>'],
     moduleNameMapper: {

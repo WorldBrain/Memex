@@ -100,6 +100,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                             value={this.state[name].shortcut}
                             onKeyDown={this.recordBinding}
                             onChange={e => e.preventDefault()}
+                            disabled={!this.state.shortcutsEnabled}
                             name={name}
                         />{' '}
                     </Checkbox>

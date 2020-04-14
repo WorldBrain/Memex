@@ -40,7 +40,7 @@
 
 .expandedCount {
     margin: 0px 0 -5px 0;
-    width: fill-available;
+    width: stretch;
 }
 
 .inverted {

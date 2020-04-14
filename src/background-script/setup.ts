@@ -82,6 +82,7 @@ export function createBackgroundModules(options: {
     authOptions?: { devAuthState: DevAuthState }
     includePostSyncProcessor?: boolean
     disableSyncEnryption?: boolean
+    getIceServers?: () => Promise<string[]>
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
@@ -204,6 +205,7 @@ export function createBackgroundModules(options: {
             appVersion: process.env.VERSION,
             postReceiveProcessor,
             disableEncryption: options.disableSyncEnryption,
+            getIceServers: options.getIceServers,
         }),
         storexHub: new StorexHubBackground({
             storageManager,

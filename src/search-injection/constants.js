@@ -18,7 +18,7 @@ export const SEARCH_ENGINES = {
         containerType: 'id',
     },
     duckduckgo: {
-        regex: /(http[s]?:\/\/)?(www.)?duckduckgo[.\w]+\/\?q=.*/,
+        regex: /(http[s]?:\/\/)?(www.)?duckduckgo[.\w]+\/.*?[?&]q=.*/,
         container: {
             above: 'results--main',
             side: 'results--sidebar',
