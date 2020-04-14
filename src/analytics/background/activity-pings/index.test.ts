@@ -38,7 +38,7 @@ describe('Analytics activity pings', () => {
         expect(analytics.popNew()).toEqual([
             {
                 eventArgs: {
-                    category: 'Activity Pings',
+                    category: 'ActivityPings',
                     action: 'daily',
                     value: { usedFeatures: ['Annotations'] },
                 },
@@ -59,14 +59,14 @@ describe('Analytics activity pings', () => {
         expect(analytics.popNew()).toEqual([
             {
                 eventArgs: {
-                    category: 'Activity Pings',
+                    category: 'ActivityPings',
                     action: 'daily',
                     value: { usedFeatures: [] },
                 },
             },
             {
                 eventArgs: {
-                    category: 'Activity Pings',
+                    category: 'ActivityPings',
                     action: 'weekly',
                     value: { usedFeatures: ['Annotations'] },
                 },
@@ -91,21 +91,21 @@ describe('Analytics activity pings', () => {
         expect(analytics.popNew()).toEqual([
             {
                 eventArgs: {
-                    category: 'Activity Pings',
+                    category: 'ActivityPings',
                     action: 'daily',
                     value: { usedFeatures: [] },
                 },
             },
             {
                 eventArgs: {
-                    category: 'Activity Pings',
+                    category: 'ActivityPings',
                     action: 'weekly',
                     value: { usedFeatures: [] },
                 },
             },
             {
                 eventArgs: {
-                    category: 'Activity Pings',
+                    category: 'ActivityPings',
                     action: 'monthly',
                     value: { usedFeatures: ['Annotations'] },
                 },
