@@ -57,6 +57,12 @@ class TagPicker extends StatefulUIElement<
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
+    componentDidUpdate = (
+        prevProps: Readonly<TagPickerDependencies>,
+        prevState: Readonly<TagPickerState>,
+        snapshot?: any,
+    ) => this.processEvent('componentDidUpdate', { prevProps, prevState })
+
     renderTagRow = (tag: DisplayTag, index: number) => (
         <TagRowItem
             onPress={this.handleResultTagPress}

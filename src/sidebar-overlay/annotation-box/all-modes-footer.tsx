@@ -18,6 +18,7 @@ interface Props {
     handleCancelDeletion?: () => void
     editIconClickHandler?: () => void
     trashIconClickHandler?: () => void
+    tagsIconClickHandler?: () => void
     handleBookmarkToggle?: () => void
 }
 
@@ -50,6 +51,7 @@ const AllModesFooter = (props: Props) => (
                 displayGoToAnnotation={props.displayGoToAnnotation}
                 goToAnnotationHandler={props.handleGoToAnnotation}
                 editIconClickHandler={props.editIconClickHandler}
+                tagsIconClickHandler={props.tagsIconClickHandler}
                 trashIconClickHandler={props.trashIconClickHandler}
                 handleBookmarkToggle={props.handleBookmarkToggle}
             />

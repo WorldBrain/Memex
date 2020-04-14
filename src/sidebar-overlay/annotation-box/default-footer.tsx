@@ -11,6 +11,7 @@ interface Props {
     goToAnnotationHandler: (e: React.MouseEvent<HTMLElement>) => void
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
+    tagsIconClickHandler: () => void
     handleBookmarkToggle: () => void
 }
 
@@ -23,6 +24,7 @@ const DefaultFooter = ({
     goToAnnotationHandler,
     editIconClickHandler,
     trashIconClickHandler,
+    tagsIconClickHandler,
     handleBookmarkToggle,
 }: Props) => (
     <div className={styles.annotationBoxDefaultFooter}>
@@ -62,6 +64,16 @@ const DefaultFooter = ({
                     shareIconClickHandler()
                 }}
             /> */}
+            {tagsIconClickHandler && (
+                <button
+                    className={cx(styles.commonIcon, styles.tag)}
+                    title="Edit Tags"
+                    onClick={e => {
+                        e.stopPropagation()
+                        tagsIconClickHandler()
+                    }}
+                />
+            )}
             <button
                 className={cx(styles.commonIcon, {
                     [styles.bookmark]: hasBookmark,

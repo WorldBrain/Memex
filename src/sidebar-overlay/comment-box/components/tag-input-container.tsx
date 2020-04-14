@@ -56,6 +56,7 @@ class TagAnnotationContainer extends React.Component<Props> {
             queryTags={this.handleTagQuery}
             onUpdateTagSelection={this.handleTagsUpdate}
             initialSelectedTags={this.fetchTagsForAnnotation}
+            // updatedSelectedTags={this.props.tags}
         />
     )
 }

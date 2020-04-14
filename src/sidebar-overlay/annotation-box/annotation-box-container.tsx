@@ -1,12 +1,12 @@
 import * as React from 'react'
 import cx from 'classnames'
 import noop from 'lodash/fp/noop'
-import { connect } from 'react-redux'
+import { connect, MapStateToProps } from 'react-redux'
 
 import { MapDispatchToProps } from '../types'
 import DefaultDeleteModeContent from './default-delete-mode-content'
 import EditModeContent from './edit-mode-content'
-import { TruncatedTextRenderer } from '../components'
+import { TagInput, TruncatedTextRenderer } from '../components'
 import niceTime from '../../util/nice-time'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
 import { remoteFunction } from 'src/util/webextensionRPC'
@@ -14,6 +14,9 @@ import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { actions as filterActs } from 'src/search-filters'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
+import { tags } from 'src/util/remote-functions-background'
+import { selectors as tagsSelectors } from 'src/popup/tags-button'
+import { RootState } from 'src/popup/types'
 
 const styles = require('./annotation-box-container.css')
 const footerStyles = require('./default-footer.css')
@@ -44,11 +47,17 @@ interface DispatchProps {
     handleTagClick: (tag: string) => void
 }
 
-type Props = OwnProps & DispatchProps
+interface StateProps {
+    initTagSuggs: string[]
+}
+
+type Props = OwnProps & DispatchProps & StateProps
 
 interface State {
+    showTagInput: boolean
     mode: 'default' | 'edit' | 'delete'
     displayCrowdfunding: boolean
+    tagsSelected: string[]
 }
 
 class AnnotationBoxContainer extends React.Component<Props, State> {
@@ -64,10 +73,13 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
     state: State = {
         mode: 'default',
         displayCrowdfunding: false,
+        tagsSelected: [],
+        showTagInput: false,
     }
 
     componentDidMount() {
         this._setupEventListeners()
+        this.state.tagsSelected = this.props.tags
     }
 
     componentWillUnmount() {
@@ -151,12 +163,13 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
         }
     }
 
-    private _handleEditAnnotation = (
-        commentText: string,
-        tagsInput: string[],
-    ) => {
+    private _handleEditAnnotation = (commentText: string) => {
         const { url } = this.props
-        this.props.handleEditAnnotation(url, commentText.trim(), tagsInput)
+        this.props.handleEditAnnotation(
+            url,
+            commentText.trim(),
+            this.state.tagsSelected,
+        )
         this.setState({ mode: 'default' })
     }
 
@@ -170,6 +183,10 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     private _handleTrashIconClick = () => {
         this.setState({ mode: 'delete' })
+    }
+
+    private _handleTagIconClick = () => {
+        this.setState({ showTagInput: !this.state.showTagInput })
     }
 
     private _handleShareIconClick = () => {
@@ -191,6 +208,24 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
 
     private _setBoxRef = (ref: HTMLDivElement) => {
         this._boxRef = ref
+    }
+
+    private _addTag = (tag: string) => {
+        this.setState(prevState => ({
+            tagsSelected: [tag, ...prevState.tagsSelected],
+        }))
+    }
+
+    private _deleteTag = (tag: string) => {
+        const tagIndex = this.state.tagsSelected.indexOf(tag)
+        if (tagIndex !== -1) {
+            this.setState(prevState => ({
+                tagsSelected: [
+                    ...prevState.tagsSelected.slice(0, tagIndex),
+                    ...prevState.tagsSelected.slice(tagIndex + 1),
+                ],
+            }))
+        }
     }
 
     render() {
@@ -255,6 +290,7 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                         editIconClickHandler={this._handleEditIconClick}
                         trashIconClickHandler={this._handleTrashIconClick}
                         shareIconClickHandler={this._handleShareIconClick}
+                        tagsIconClickHandler={this._handleTagIconClick}
                         getTruncatedTextObject={this._getTruncatedTextObject}
                         handleBookmarkToggle={this.handleBookmarkToggle}
                     />
@@ -262,9 +298,17 @@ class AnnotationBoxContainer extends React.Component<Props, State> {
                     <EditModeContent
                         env={this.props.env}
                         comment={this.props.comment}
-                        tags={this.props.tags}
                         handleCancelOperation={this._handleCancelOperation}
                         handleEditAnnotation={this._handleEditAnnotation}
+                    />
+                )}
+                {this.state.showTagInput && (
+                    <TagInput
+                        tags={this.state.tagsSelected}
+                        initTagSuggestions={this.props.initTagSuggs}
+                        isTagInputActive={this.state.showTagInput}
+                        addTag={this._addTag}
+                        deleteTag={this._deleteTag}
                     />
                 )}
             </div>
@@ -279,6 +323,14 @@ const mapDispatchToProps: MapDispatchToProps<
     handleTagClick: tag => dispatch(filterActs.toggleTagFilter(tag)),
 })
 
+const mapStateToProps: MapStateToProps<
+    StateProps,
+    OwnProps,
+    RootState
+> = state => ({
+    initTagSuggs: tagsSelectors.initTagSuggestions(state),
+})
+
 export default withSidebarContext(
-    connect(null, mapDispatchToProps)(AnnotationBoxContainer),
+    connect(mapStateToProps, mapDispatchToProps)(AnnotationBoxContainer),
 )

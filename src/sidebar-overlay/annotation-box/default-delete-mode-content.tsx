@@ -18,6 +18,7 @@ interface Props {
     editIconClickHandler: () => void
     trashIconClickHandler: () => void
     shareIconClickHandler: () => void
+    tagsIconClickHandler?: () => void
     handleTagClick: (tag: string) => void
     handleBookmarkToggle: () => void
     getTruncatedTextObject: (
@@ -54,6 +55,7 @@ const DefaultDeleteModeContent = (props: Props) => (
             handleCancelDeletion={props.handleCancelOperation}
             editIconClickHandler={props.editIconClickHandler}
             trashIconClickHandler={props.trashIconClickHandler}
+            tagsIconClickHandler={props.tagsIconClickHandler}
             handleBookmarkToggle={props.handleBookmarkToggle}
         />
     </React.Fragment>

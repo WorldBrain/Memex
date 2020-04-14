@@ -28,7 +28,10 @@ export interface TagPickerDependencies {
     queryTags: (query: string) => Promise<string[]>
     tagAllTabs?: (query: string) => Promise<void>
     loadDefaultSuggestions: () => string[]
+    // Allows the calling code an async way of providing current tags at the time of render, leaving the tag picker to be the source of truth
     initialSelectedTags?: () => Promise<string[]>
+    // Allows the calling code a way of providing current tags and updating them triggering updates in the tag picker
+    updatedSelectedTags?: string[]
     children?: any
 }
 
@@ -46,6 +49,10 @@ export type TagPickerEvent = UIEvent<{
     newTagPress: { tag: string }
     keyPress: { key: KeyEvent }
     focusInput: {}
+    componentDidUpdate: {
+        prevProps: TagPickerDependencies
+        prevState: TagPickerState
+    }
 }>
 
 interface TagPickerUIEvent<T extends keyof TagPickerEvent> {
@@ -98,6 +105,23 @@ export default class TagPickerLogic extends UILogic<
             displayTags: { $set: this.defaultTags },
             selectedTags: { $set: initialSelectedTags },
         })
+    }
+
+    componentDidUpdate = ({ event: { prevProps }, previousState }) => {
+        console.log(`componentDidUpdate()`, prevProps)
+        if (
+            prevProps.updatedSelectedTags !==
+            this.dependencies.updatedSelectedTags
+        ) {
+            console.log(
+                `prevProps.updatedSelectedTags !== this.dependencies.updatedSelectedTags`,
+                prevProps.updatedSelectedTags,
+                this.dependencies.updatedSelectedTags,
+            )
+            // this.emitMutation({
+            //     selectedTags: { $set:  this.dependencies.updatedSelectedTags },
+            // })
+        }
     }
 
     setSearchInputRef = ({

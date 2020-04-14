@@ -3,10 +3,8 @@ import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
-
 import { selectors as opt } from 'src/options/settings'
-import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
-import { IndexDropdown } from 'src/common-ui/containers'
+import { LoadingIndicator, ResultItem, Tooltip } from 'src/common-ui/components'
 import ResultList from './ResultList'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
@@ -24,6 +22,8 @@ import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
 import { Annotation } from 'src/annotations/types'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { tags } from 'src/util/remote-functions-background'
 
 const styles = require('./ResultList.css')
 
@@ -117,27 +117,46 @@ class ResultListContainer extends PureComponent<Props> {
         }
     }
 
-    private renderTagsManager({ shouldDisplayTagPopup, url, tags }, index) {
+    handleTagUpdate = index => async (
+        tagsUpdate: string[],
+        added: string,
+        deleted: string,
+    ) => {
+        if (added) {
+            this.props.addTag(index)(added)
+        }
+        if (deleted) {
+            this.props.delTag(index)(deleted)
+        }
+    }
+
+    private renderTagsManager(
+        { shouldDisplayTagPopup, url, tags: selectedTags },
+        index,
+    ) {
         if (!shouldDisplayTagPopup) {
             return null
         }
 
         return (
-            <IndexDropdown
-                url={url}
-                onFilterAdd={this.props.addTag(index)}
-                onFilterDel={this.props.delTag(index)}
-                setTagDivRef={this.setTagDivRef}
-                isSocialPost={this.props.isSocialPost}
-                initFilters={tags}
-                initSuggestions={[
-                    ...new Set([...tags, ...this.state.tagSuggestions]),
-                ]}
-                source="tag"
-                isForRibbon
-                hover
-                fromOverview
-            />
+            <Tooltip position="bottomRight">
+                <div ref={ref => this.setTagDivRef(ref)}>
+                    <TagPicker
+                        onUpdateTagSelection={this.handleTagUpdate(index)}
+                        queryTags={query =>
+                            tags.searchForTagSuggestions({ query })
+                        }
+                        loadDefaultSuggestions={() => [
+                            ...new Set([
+                                ...selectedTags,
+                                ...this.state.tagSuggestions,
+                            ]),
+                        ]}
+                        initialSelectedTags={() => selectedTags}
+                        updatedSelectedTags={selectedTags}
+                    />
+                </div>
+            </Tooltip>
         )
     }
 

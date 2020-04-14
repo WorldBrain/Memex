@@ -76,14 +76,14 @@ class CommentBoxForm extends React.Component<Props, State> {
         this.tagBtnRef = ref
     }
 
-    private handleTagBtnKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-        if (e.key === 'Tab') {
-            this.setState({
-                showTagsPicker: false,
-            })
-            this.tagBtnRef.focus()
-        }
-    }
+    // private handleTagBtnKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    //     if (e.key === 'Tab') {
+    //         this.setState({
+    //             showTagsPicker: false,
+    //         })
+    //         this.tagBtnRef.focus()
+    //     }
+    // }
 
     private handleTagBtnClick = e => {
         e.preventDefault()
@@ -123,14 +123,7 @@ class CommentBoxForm extends React.Component<Props, State> {
             return null
         }
 
-        return (
-            <Tooltip position="bottomLeft">
-                <TagsContainer
-                    // env={this.props.env}
-                    tagSuggestions={this.state.tagSuggestions}
-                />
-            </Tooltip>
-        )
+        return <TagsContainer tagSuggestions={this.state.tagSuggestions} />
     }
 
     onEnterSaveHandler = {
@@ -207,7 +200,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                 </div>
                 <span
                     className={styles.tagDropdown}
-                    onKeyDown={this.handleTagBtnKeyDown}
+                    // onKeyDown={this.handleTagBtnKeyDown}
                 >
                     {this.renderTagsTooltip()}
                 </span>
