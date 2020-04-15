@@ -6,7 +6,8 @@ import {
 } from '../types'
 
 export type CountlyEvent = any
-export type CountlyQueue = Array<[string, CountlyEvent]>
+export type CountlyQueue = Array<CountlyQueueEntry>
+export type CountlyQueueEntry = [string, CountlyEvent] | [string]
 
 export interface Props {
     fetchUserId: () => Promise<string>
@@ -17,14 +18,19 @@ export interface Props {
 
 export default class CountlyAnalyticsBackend implements AnalyticsBackend {
     static DEF_TRACKING = true
-    private isSetup = false
+    private setupPromise: Promise<void>
+    private resolveSetupPromise: () => void
 
     constructor(private props: Props) {}
 
     private async init() {
-        if (this.isSetup) {
-            return
+        if (this.setupPromise) {
+            return this.setupPromise
         }
+
+        this.setupPromise = new Promise<void>((resolve) => {
+            this.resolveSetupPromise = resolve
+        })
 
         const userId = await this.props.fetchUserId()
 
@@ -35,8 +41,7 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
         })
         this.enqueue('track_sessions')
         this.enqueue('track_pageview')
-
-        this.isSetup = true
+        return this.resolveSetupPromise()
     }
 
     private get countlyQueue(): CountlyQueue {
@@ -44,7 +49,8 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
     }
 
     private enqueue<T = any>(key: string, payload?: T) {
-        this.countlyQueue.push([key, payload])
+        const entry: CountlyQueueEntry = payload ? [key, payload] : [key]
+        this.countlyQueue.push(entry)
     }
 
     private enqueueEvent({
