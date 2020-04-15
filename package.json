@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "2.0.18",
+    "version": "2.0.19",
     "homepage": "https://worldbrain.io",
     "license": "MIT",
     "repository": "https://github.com/WorldBrain/Memex",
@@ -38,6 +38,7 @@
         }
     },
     "dependencies": {
+        "@josephg/resolvable": "^1.0.0",
         "@types/socket.io-client": "^1.4.32",
         "blob-util": "^1.2.1",
         "chargebee": ">=2 <3",
@@ -101,7 +102,6 @@
         "rxjs": "^5.5.5",
         "scroll-to-element": "^2.0.0",
         "simple-peer": "^9.5.0",
-        "simple-signalling": "^0.2.1",
         "socket.io-client": "^2.3.0",
         "strict-uri-encode": "^2.0.0",
         "string.prototype.matchall": "^3.0.1",

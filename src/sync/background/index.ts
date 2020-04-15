@@ -40,6 +40,7 @@ export default class SyncBackground extends SyncService {
         storageManager: StorageManager
         signalTransportFactory: SignalTransportFactory
         getSharedSyncLog: () => Promise<SharedSyncLog>
+        getIceServers?: () => Promise<string[]>
         browserAPIs: Pick<Browser, 'storage'>
         appVersion: string
         analytics: Analytics
@@ -94,6 +95,8 @@ export default class SyncBackground extends SyncService {
             listDevices: bindMethod(this.syncInfoStorage, 'listDevices'),
             removeDevice: bindMethod(this.syncInfoStorage, 'removeDevice'),
         }
+
+        this.initialSync.debug = true
     }
 
     async waitForInitialSync() {

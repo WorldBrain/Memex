@@ -17466,14 +17466,6 @@ simple-peer@^9.5.0:
     randombytes "^2.0.3"
     readable-stream "^3.4.0"
 
-simple-signalling@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/simple-signalling/-/simple-signalling-0.2.1.tgz#ec7645628b2e6d8839105d7fa800b7f4d8d3ffea"
-  integrity sha512-h/YhG0E2UNCxkm32AWAwvSTBE+a+kzXzlwDfv2QCnwyQN8EC3gSWTBKKArb46oTPS5fMV4S/LWSGoHnmncXf1w==
-  dependencies:
-    "@josephg/resolvable" "^1.0.0"
-    events "^3.0.0"
-
 simple-swizzle@^0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/simple-swizzle/-/simple-swizzle-0.2.2.tgz#a4da6b635ffcccca33f70d17cb92592de95e557a"
