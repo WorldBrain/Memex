@@ -1,7 +1,8 @@
 import * as fs from 'fs'
 import * as webdriver from 'selenium-webdriver'
 import { Options } from 'selenium-webdriver/chrome'
-import * as expect from 'expect'
+import 'chromedriver'
+import expect from 'expect'
 import * as mocha from 'mocha'
 
 const basePath = process.env.PWD
