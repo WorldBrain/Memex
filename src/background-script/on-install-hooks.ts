@@ -1,6 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 
-import { generateTokenIfNot } from '../util/generate-token'
+import { generateUserId } from 'src/analytics/utils'
 import { INSTALL_TIME_KEY, OVERVIEW_URL } from '../constants'
 import analytics from '../analytics'
 import { SEARCH_INJECTION_KEY } from '../search-injection/constants'
@@ -23,7 +23,7 @@ export async function onInstall() {
     // Store the timestamp of when the extension was installed
     browser.storage.local.set({ [INSTALL_TIME_KEY]: now })
 
-    await generateTokenIfNot({ installTime: now })
+    await generateUserId({})
 }
 
 export async function onUpdate() {
@@ -41,9 +41,5 @@ export async function onUpdate() {
         })
     }
 
-    const installTime = (await browser.storage.local.get(INSTALL_TIME_KEY))[
-        INSTALL_TIME_KEY
-    ]
-
-    await generateTokenIfNot({ installTime })
+    await generateUserId({})
 }

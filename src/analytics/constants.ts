@@ -14,6 +14,8 @@ export const STORAGE_KEYS = {
 
     // Used for timestamp of last "activity-indicating" action (user needs 1 in last week to be active)
     LAST_ACTIVE: 'last-search-timestamp',
+
+    USER_ID: 'user-id',
 }
 
 // Timezone to base milestones on

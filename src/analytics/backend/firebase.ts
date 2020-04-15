@@ -1,5 +1,5 @@
 // tslint:disable:no-console
-import { fetchUserId } from '../utils'
+import { generateUserId } from '../utils'
 import { AnalyticsBackend } from './types'
 import { AnalyticsEvent, AnalyticsTrackEventOptions } from '../types'
 import { getFirebase } from 'src/util/firebase-app-initialized'
@@ -10,7 +10,7 @@ export default class FirebaseAnalyticsBackend implements AnalyticsBackend {
         options?: AnalyticsTrackEventOptions,
     ) {
         const firebase = getFirebase()
-        firebase.analytics().setUserId(await fetchUserId())
+        firebase.analytics().setUserId(await generateUserId({}))
         firebase.analytics().logEvent(
             `${event.category}::${event.action}`,
             event.value

@@ -4,7 +4,7 @@ import AnalyticsManager from './analytics'
 import CountlyAnalyticsBackend from './backend/countly'
 import { FakeAnalytics } from './mock'
 import { Analytics } from './types'
-import { fetchUserId, shouldTrack } from './utils'
+import { generateUserId, shouldTrack } from './utils'
 
 const appKey = process.env.COUNTLY_APP_KEY
 const url = process.env.COUNTLY_SERVER_URL
@@ -22,7 +22,7 @@ if (
     analytics = new AnalyticsManager({
         shouldTrack: (def) => shouldTrack(def),
         backend: new CountlyAnalyticsBackend({
-            fetchUserId: () => fetchUserId(),
+            fetchUserId: () => generateUserId({}),
             countlyConnector: Countly,
             appKey,
             url,
