@@ -1,4 +1,5 @@
 # WorldBrain's Memex
+[![Financial Contributors on Open Collective](https://opencollective.com/worldbrain/all/badge.svg?label=financial+contributors)](https://opencollective.com/worldbrain) 
 
 ## Table Of Content
 
@@ -76,6 +77,30 @@ Head over to our [community forums](https://community.worldbrain.io) to post you
 
 ## Getting started as a developer
 [Click here](./GETTING-STARTED.md#installation) for all instructions on how to build Memex so you can hack on it.
+
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+
+<a href="https://github.com/worldbrain/memex/graphs/contributors"><img src="https://opencollective.com/worldbrain/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/worldbrain/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/worldbrain"><img src="https://opencollective.com/worldbrain/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/worldbrain/contribute)]
+
+<a href="https://opencollective.com/worldbrain/organization/0/website"><img src="https://opencollective.com/worldbrain/organization/0/avatar.svg"></a>
+
 
 # License
 Memex is MIT licensed. View full [License](./License)
