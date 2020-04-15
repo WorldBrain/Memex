@@ -21,17 +21,20 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
 
     constructor(private props: Props) {}
 
-    async init() {
+    private async init() {
         if (this.isSetup) {
             return
         }
 
         const userId = await this.props.fetchUserId()
 
-        this.props.countlyConnector.app_key = this.props.appKey
-        this.props.countlyConnector.url = this.props.url
-        this.props.countlyConnector.device_id = userId
-        this.props.countlyConnector.init()
+        this.props.countlyConnector.init({
+            device_id: userId,
+            app_key: this.props.appKey,
+            url: this.props.url,
+        })
+        this.enqueue('track_sessions')
+        this.enqueue('track_pageview')
 
         this.isSetup = true
     }
@@ -40,17 +43,26 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
         return this.props.countlyConnector.q
     }
 
-    private enqueueEvent({ key, value = null }: { key: string; value: any }) {
-        this.countlyQueue.push([
-            'add_event',
-            {
-                key,
-                count: 1,
-                segmentation: {
-                    ...(value ? { value } : {}),
-                },
+    private enqueue<T = any>(key: string, payload?: T) {
+        this.countlyQueue.push([key, payload])
+    }
+
+    private enqueueEvent({
+        name,
+        value = null,
+        count = 1,
+    }: {
+        name: string
+        value?: any
+        count?: number
+    }) {
+        return this.enqueue('add_event', {
+            key: name,
+            count,
+            segmentation: {
+                ...(value ? { value } : {}),
             },
-        ])
+        })
     }
 
     async trackEvent<Category extends keyof AnalyticsEvents>(
@@ -60,7 +72,7 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
         await this.init()
 
         this.enqueueEvent({
-            key: `${event.category}::${event.action}`,
+            name: `${event.category}::${event.action}`,
             value: event.value,
         })
     }
