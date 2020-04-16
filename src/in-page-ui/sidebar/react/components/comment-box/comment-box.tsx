@@ -27,7 +27,6 @@ interface OwnProps {
     env: 'inpage' | 'overview'
     isSocialPost?: boolean
     onSaveCb: () => void
-    highlighter: HighlightInteractionInterface
     closeComments?: () => void
 }
 

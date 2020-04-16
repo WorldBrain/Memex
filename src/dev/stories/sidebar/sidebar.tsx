@@ -1,14 +1,10 @@
 import { storiesOf } from '@storybook/react'
 import * as knobs from '@storybook/addon-knobs'
 import React from 'react'
-import Sidebar from 'src/in-page-ui/sidebar/react/components/sidebar'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 import SidebarContainer from 'src/in-page-ui/sidebar/react/containers/sidebar'
-import { InPageUI } from 'src/in-page-ui/shared-state'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-
-const CREATED_WHEN = Date.now() - 1000 * 60 * 60
+import { ResultsByUrl } from 'src/overview/types'
 
 class WithDependencies<Dependencies> extends React.Component<
     {
@@ -34,87 +30,13 @@ class WithDependencies<Dependencies> extends React.Component<
 const stories = storiesOf('Sidebar', module)
 stories.addDecorator(knobs.withKnobs)
 
-// stories.add('Random', () => (
-//     <Sidebar
-//         env={'inpage'}
-//         isOpen={true}
-//         isLoading={false}
-//         needsWaypoint={false}
-//         appendLoader={false}
-//         annotations={[]}
-//         activeAnnotationUrl={''}
-//         hoverAnnotationUrl={''}
-//         showCommentBox={false}
-//         searchValue={''}
-//         showCongratsMessage={false}
-//         showClearFiltersBtn={false}
-//         isSocialPost={false}
-//         page={{} as any}
-//         pageType={'page'}
-//         searchType={'notes'}
-//         closeSidebar={() => {}}
-//         handleGoToAnnotation={() => {}}
-//         handleAddPageCommentBtnClick={() => {}}
-//         handleAnnotationBoxMouseEnter={() => {}}
-//         handleAnnotationBoxMouseLeave={() => {}}
-//         handleEditAnnotation={() => {}}
-//         handleDeleteAnnotation={() => {}}
-//         handleScrollPagination={() => {}}
-//         handleBookmarkToggle={() => {}}
-//         onQueryKeyDown={() => {}}
-//         onQueryChange={() => {}}
-//         onShowFiltersSidebarChange={() => {}}
-//         onOpenSettings={() => {}}
-//         clearAllFilters={() => {}}
-//         resetPage={() => {}}
-//         showFiltersSidebar={false}
-//         showSocialSearch={false}
-//         annotsFolded={false}
-//         resultsSearchType={'page'}
-//         pageCount={0}
-//         annotCount={0}
-//         handleUnfoldAllClick={() => {}}
-//         setSearchType={() => {}}
-//         setPageType={() => {}}
-//         setResultsSearchType={() => {}}
-//         setAnnotationsExpanded={() => {}}
-//         handlePageTypeToggle={() => {}}
-//         noResults={false}
-//         isBadTerm={false}
-//         areAnnotationsExpanded={false}
-//         shouldShowCount={false}
-//         isInvalidSearch={false}
-//         totalResultCount={0}
-//         toggleAreAnnotationsExpanded={(e: React.SyntheticEvent) => {}}
-//         isNewSearchLoading={false}
-//         isListFilterActive={false}
-//         searchResults={[]}
-//         resultsByUrl={new Map()}
-//         resultsClusteredByDay={false}
-//         annotsByDay={{}}
-//         isSocialSearch={false}
-//         tagSuggestions={[]}
-//         resetUrlDragged={() => {}}
-//         resetActiveTagIndex={() => {}}
-//         setUrlDragged={(url: string) => {}}
-//         addTag={(i: number) => (f: string) => {}}
-//         delTag={(i: number) => (f: string) => {}}
-//         handlePillClick={(tag: string) => () => {}}
-//         handleTagBtnClick={(i: number) => () => {}}
-//         handleCommentBtnClick={() => {}}
-//         handleCrossRibbonClick={() => () => {}}
-//         handleToggleBm={() => () => {}}
-//         handleTrashBtnClick={() => () => {}}
-//     />
-// ))
-
 stories.add('Dynamic - In page', () => (
     <WithDependencies
         setup={async () => {
             const testSetup = await setupBackgroundIntegrationTest()
             await testSetup.backgroundModules.directLinking.annotationStorage.createAnnotation(
                 {
-                    pageTitle: 'Page title',
+                    pageTitle: 'Foo title',
                     pageUrl: 'foo.com',
                     url: 'foo.com#4r234523453',
                     body: 'Annotation body',
@@ -122,18 +44,36 @@ stories.add('Dynamic - In page', () => (
                     createdWhen: new Date(),
                 },
             )
+            await testSetup.backgroundModules.pages.addPage({
+                bookmark: Date.now(),
+                visits: [Date.now() - 1000 * 60 * 5],
+                pageDoc: {
+                    url: 'http://foo.com',
+                    content: {
+                        title: 'Foo title',
+                        fullText: 'Foo page text',
+                    },
+                },
+                rejectNoContent: true,
+            })
+
             const annotationManager = new AnnotationsManager()
             annotationManager._getAllAnnotationsByUrlRPC =
                 testSetup.backgroundModules.directLinking.getAllAnnotationsByUrl
+
+            const highlighter = {
+                removeTempHighlights: async () => {},
+            }
 
             return {
                 testSetup,
                 annotationManager,
                 inPageUIController: null,
+                highlighter,
             }
         }}
     >
-        {({ testSetup, annotationManager }) => (
+        {({ testSetup, annotationManager, highlighter }) => (
             <SidebarContainer
                 env={'inpage'}
                 currentTab={{ id: 654, url: 'https://www.foo.com' }}
@@ -144,17 +84,53 @@ stories.add('Dynamic - In page', () => (
                         removeListener: () => {},
                     } as any
                 }
-                loadAnnotatons={url =>
-                    testSetup.backgroundModules.directLinking.getAllAnnotationsByUrl(
-                        { tab: null },
-                        { url },
-                    )
-                }
                 loadTagSuggestions={async () => [
                     // await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
                     'first suggestion',
                     'second suggestion',
                 ]}
+                loadAnnotations={async pageUrl => {
+                    return testSetup.backgroundModules.directLinking.getAllAnnotationsByUrl(
+                        { tab: null },
+                        { url: pageUrl },
+                    )
+                }}
+                searchPages={async query => {
+                    const result = await testSetup.backgroundModules.search.searchPages(
+                        {
+                            query: query.length ? query : undefined,
+                            contentTypes: {
+                                pages: true,
+                                notes: true,
+                                highlights: true,
+                            },
+                        },
+                    )
+                    return result.docs
+                }}
+                searchAnnotations={async query => {
+                    const result = await testSetup.backgroundModules.search.searchAnnotations(
+                        {
+                            query: query.length ? query : undefined,
+                        },
+                    )
+
+                    const resultsByUrl: ResultsByUrl = new Map()
+                    result.docs.forEach((doc, index) => {
+                        resultsByUrl.set(doc.pageId, {
+                            ...doc,
+                            index,
+                        })
+                    })
+
+                    return {
+                        results: result.docs,
+                        resultsByUrl,
+                        annotsByDay: result['annotsByDay'],
+                    }
+                }}
+                deleteAnnotation={async () => {}}
+                highlighter={highlighter}
             />
         )}
     </WithDependencies>

@@ -41,14 +41,15 @@ export default class SidebarContainer extends StatefulUIElement<
     }
 
     render() {
-        const isLoading = this.state.loadState !== 'success'
         return (
             <Sidebar
+                loadState={this.state.loadState}
+                annotationLoadState={this.state.annotationLoadState}
+                searchLoadState={this.state.searchLoadState}
+                appendLoader={this.state.appendLoader}
                 env={this.props.env}
                 isOpen={this.state.state === 'visible'}
-                isLoading={isLoading}
                 needsWaypoint={this.state.needsWaypoint}
-                appendLoader={this.state.appendLoader}
                 annotations={this.state.annotations}
                 activeAnnotationUrl={this.state.activeAnnotationUrl}
                 hoverAnnotationUrl={this.state.hoverAnnotationUrl}
@@ -66,7 +67,16 @@ export default class SidebarContainer extends StatefulUIElement<
                 handleAddPageCommentBtnClick={() =>
                     this.processEvent('addNewPageComment', null)
                 }
+                pageDeleteDialog={{
+                    isDeletePageModelShown: this.state.deletePagesModel
+                        .isDeletePagesModelShown,
+                    handleDeletePages: () =>
+                        this.processEvent('deletePages', null),
+                    handleDeletePagesModalClose: () =>
+                        this.processEvent('closeDeletePagesModal', null),
+                }}
                 annotationProps={{
+                    highlighter: this.props.highlighter,
                     handleAnnotationTagClick: event => {},
                     handleAnnotationModeSwitch: event =>
                         this.processEvent('handleAnnotationModeSwitch', event),
@@ -104,7 +114,6 @@ export default class SidebarContainer extends StatefulUIElement<
                     ...this.state.commentBox,
                     env: this.props.env,
                     isSocialPost: false,
-                    highlighter: {} as any,
                     form: {
                         env: this.props.env,
                         ...this.state.commentBox.form,
@@ -148,7 +157,6 @@ export default class SidebarContainer extends StatefulUIElement<
                     // this.processEvent('closeComments', null),
                 }}
                 resultsContainer={{
-                    isLoading,
                     needsWaypoint: this.state.needsWaypoint,
                     noResults: this.state.noResults,
                     isBadTerm: this.state.isBadTerm,
@@ -160,11 +168,14 @@ export default class SidebarContainer extends StatefulUIElement<
                         e: React.SyntheticEvent,
                     ) => {},
 
-                    isNewSearchLoading: this.state.isNewSearchLoading,
+                    isNewSearchLoading:
+                        this.state.searchLoadState !== 'success',
                     isListFilterActive: this.state.isListFilterActive,
                     searchResults: this.state.searchResults,
                     resultsByUrl: this.state.resultsByUrl,
-                    resultsClusteredByDay: this.state.resultsClusteredByDay,
+                    resultsClusteredByDay:
+                        this.state.searchType === 'notes' &&
+                        this.state.pageType === 'all',
                     annotsByDay: this.state.annotsByDay,
                     isSocialSearch: this.state.isSocialSearch,
                     tagSuggestions: this.state.tagSuggestions,
@@ -188,7 +199,7 @@ export default class SidebarContainer extends StatefulUIElement<
                 }}
                 searchTypeSwitch={{
                     annotsFolded: this.state.annotsFolded,
-                    resultsSearchType: this.state.resultsSearchType,
+                    resultsSearchType: this.state.searchType,
                     searchType: this.state.searchType,
                     pageType: this.state.pageType,
                     pageCount: this.state.pageCount,
@@ -198,7 +209,7 @@ export default class SidebarContainer extends StatefulUIElement<
                         this.processEvent('setSearchType', { type }),
                     setPageType: (type: 'page' | 'all') =>
                         this.processEvent('setPageType', { type }),
-                    setResultsSearchType: (type: 'page' | 'notes' | 'social') =>
+                    setResultsSearchType: (type: 'page' | 'notes') =>
                         this.processEvent('setResultsSearchType', { type }),
                     setAnnotationsExpanded: (value: boolean) =>
                         this.processEvent('setAnnotationsExpanded', { value }),

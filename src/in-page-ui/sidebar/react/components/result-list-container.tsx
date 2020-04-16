@@ -17,7 +17,7 @@ import niceTime from 'src/util/nice-time'
 const styles = require('./result-list.css')
 
 interface StateProps {
-    isLoading: boolean
+    // isLoading: boolean
     needsWaypoint: boolean
     isNewSearchLoading: boolean
     isListFilterActive: boolean
@@ -239,10 +239,10 @@ export default class ResultListContainer extends PureComponent<
             )
         }
 
-        // Add loading spinner to the list end, if loading
-        if (this.props.isLoading) {
-            resultItems.push(<LoadingIndicator key="loading" />)
-        }
+        // // Add loading spinner to the list end, if loading
+        // if (this.props.isLoading) {
+        //     resultItems.push(<LoadingIndicator key="loading" />)
+        // }
 
         return resultItems
     }

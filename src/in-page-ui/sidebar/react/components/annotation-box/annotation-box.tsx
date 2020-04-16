@@ -39,7 +39,7 @@ export interface AnnotationBoxProps {
         annotationUrl: string
         mode: 'default' | 'edit' | 'delete'
     }) => void
-    highlighter: HighlightInteractionInterface
+    highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
     mode: 'default' | 'edit' | 'delete'
     displayCrowdfunding: boolean
 }

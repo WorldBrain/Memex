@@ -1,23 +1,26 @@
 import {
     UILogic,
     UIEvent,
-    UIEventHandlers,
     IncomingUIEvent,
-    UIMutation,
     UIEventHandler,
+    UIMutation,
 } from 'ui-logic-core'
-import { uiLoad } from 'ui-logic-core/lib/patterns'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { SidebarControllerEventEmitter } from '../../../types'
 import { SidebarEnv, Page } from '../../types'
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
 import { Result, ResultsByUrl } from 'src/overview/types'
 import { PageUrlsByDay } from 'src/search/background/types'
-import { Anchor } from 'src/highlighting/types'
+import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
+import { loadInitial, executeUITask } from 'src/util/ui-logic'
+import { page } from 'src/sidebar-overlay/sidebar/selectors'
 
 export interface SidebarContainerState {
-    state: 'visible' | 'hidden'
     loadState: TaskState
+    annotationLoadState: TaskState
+    searchLoadState: TaskState
+
+    state: 'visible' | 'hidden'
     needsWaypoint: boolean
     appendLoader: boolean
 
@@ -39,40 +42,45 @@ export interface SidebarContainerState {
         }
     }
 
+    deletePagesModel: {
+        isDeletePagesModelShown: boolean
+    }
+
+    searchValue: string
+    pageType: 'page' | 'all'
+    searchType: 'notes' | 'page' | 'social'
+    pageCount?: number
+    noResults: boolean
+    isBadTerm: boolean
+    searchResults: Result[]
+    resultsByUrl: ResultsByUrl
+    resultsClusteredByDay: boolean
+    annotsByDay: PageUrlsByDay
+
     // Everything below here is temporary
 
     activeAnnotationUrl: string
     hoverAnnotationUrl: string
-    searchValue: string
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
     isSocialPost: boolean
     page: Page
-    pageType: 'page' | 'all'
-    searchType: 'notes' | 'page' | 'social'
 
     // Filter sidebar props
     showFiltersSidebar: boolean
     showSocialSearch: boolean
     annotsFolded: boolean
-    resultsSearchType: 'page' | 'notes' | 'social'
-    pageCount?: number
+    // resultsSearchType: 'page' | 'notes' | 'social'
+
     annotCount?: number
 
     // Search result props
-    noResults: boolean
-    isBadTerm: boolean
     areAnnotationsExpanded: boolean
     shouldShowCount: boolean
     isInvalidSearch: boolean
     totalResultCount: number
 
-    isNewSearchLoading: boolean
     isListFilterActive: boolean
-    searchResults: Result[]
-    resultsByUrl: ResultsByUrl
-    resultsClusteredByDay: boolean
-    annotsByDay: PageUrlsByDay
     isSocialSearch: boolean
     tagSuggestions: string[]
 }
@@ -97,6 +105,10 @@ export type SidebarContainerEvents = UIEvent<{
     addNewPageCommentTag: { tag: string }
     deleteNewPageCommentTag: { tag: string }
     // closeComments: null,
+
+    // Delete page(s) modal
+    deletePages: null
+    closeDeletePagesModal: null
 
     // Annotation boxes
     goToAnnotation: { annnotation: Annotation }
@@ -127,8 +139,22 @@ export interface SidebarContainerDependencies {
     env: SidebarEnv
     annotationManager: AnnotationsManagerInterface
     currentTab: { id: number; url: string }
-    loadAnnotatons(url: string): Promise<Annotation[]>
+    highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
+
     loadTagSuggestions: () => Promise<string[]>
+
+    loadAnnotations(pageUrl: string): Promise<Annotation[]>
+    searchAnnotations(
+        query: string,
+        pageUrl: string | null,
+    ): Promise<{
+        results: Result[]
+        annotsByDay: PageUrlsByDay
+        resultsByUrl: ResultsByUrl
+    }>
+    searchPages(query: string): Promise<Result[]>
+
+    deleteAnnotation: (annotationUrl: string) => Promise<void>
 }
 
 type Incoming<EventName extends keyof SidebarContainerEvents> = IncomingUIEvent<
@@ -166,14 +192,25 @@ export class SidebarContainerLogic extends UILogic<
 
     getInitialState(): SidebarContainerState {
         return {
-            state: 'visible',
             loadState: 'pristine',
+            annotationLoadState: 'pristine',
+            searchLoadState: 'pristine',
+
+            state: 'visible',
             annotationModes: {},
 
             commentBox: { ...INITIAL_COMMENT_BOX_STATE },
+            deletePagesModel: {
+                isDeletePagesModelShown: false,
+            },
 
-            pageType: 'page',
+            pageType: 'all',
+            // pageType: 'page',
             searchType: 'notes',
+            // searchType: 'page',
+            // resultsSearchType: 'page',
+
+            annotsFolded: false,
             isSocialPost: false,
             needsWaypoint: false,
             appendLoader: false,
@@ -187,8 +224,6 @@ export class SidebarContainerLogic extends UILogic<
             page: {} as any,
             showFiltersSidebar: false,
             showSocialSearch: false,
-            annotsFolded: false,
-            resultsSearchType: 'page',
             pageCount: 0,
             annotCount: 0,
             noResults: false,
@@ -197,7 +232,6 @@ export class SidebarContainerLogic extends UILogic<
             shouldShowCount: false,
             isInvalidSearch: false,
             totalResultCount: 0,
-            isNewSearchLoading: false,
             isListFilterActive: false,
             searchResults: [],
             resultsByUrl: new Map(),
@@ -208,15 +242,54 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    async init() {
-        await uiLoad<SidebarContainerState>(this, async () => {
-            console.log('loading')
-            const loadAnnotations = this.dependencies.loadAnnotatons(
+    init: EventHandler<'init'> = async ({ previousState }) => {
+        await loadInitial<SidebarContainerState>(this, async () => {
+            await this._maybeLoad(previousState, {})
+        })
+    }
+
+    private async _loadAnnotations() {
+        // Notes tab
+        await executeUITask(this, 'annotationLoadState', async () => {
+            const annotations = await this.dependencies.loadAnnotations(
                 this.dependencies.currentTab.url,
             )
-            const [annotations] = await Promise.all([loadAnnotations])
             this.emitMutation({ annotations: { $set: annotations } })
-            console.log('loading complete')
+        })
+    }
+
+    private async _doSearch(
+        state: Pick<
+            SidebarContainerState,
+            'searchType' | 'searchValue' | 'pageType'
+        >,
+    ) {
+        // Pages tab
+        await executeUITask(this, 'searchLoadState', async () => {
+            if (state.searchType === 'page') {
+                const results = await this.dependencies.searchPages(
+                    state.searchValue,
+                )
+                this.emitMutation({
+                    searchResults: { $set: results },
+                    pageCount: { $set: results.length },
+                    noResults: { $set: !results.length },
+                })
+            } else if (state.searchType === 'notes') {
+                const result = await this.dependencies.searchAnnotations(
+                    state.searchValue,
+                    state.pageType === 'page'
+                        ? this.dependencies.currentTab.url
+                        : null,
+                )
+                this.emitMutation({
+                    searchResults: { $set: result.results },
+                    pageCount: { $set: result.results.length },
+                    noResults: { $set: !result.results.length },
+                    annotsByDay: { $set: result.annotsByDay },
+                    resultsByUrl: { $set: result.resultsByUrl },
+                })
+            }
         })
     }
 
@@ -336,7 +409,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     deleteAnnotation: EventHandler<'deleteAnnotation'> = incoming => {
-        // console.log('delete annm')
+        this.dependencies.deleteAnnotation(incoming.event.annnotationUrl)
         return {
             annotationModes: {
                 [incoming.event.annnotationUrl]: { $set: 'default' },
@@ -353,13 +426,6 @@ export class SidebarContainerLogic extends UILogic<
         const currentlyBookmarked =
             incoming.previousState.annotations[annotationIndex].hasBookmark
         const shouldBeBookmarked = !currentlyBookmarked
-        console.log({
-            annotations: {
-                [annotationIndex]: {
-                    hasBookmark: { $set: shouldBeBookmarked },
-                },
-            },
-        })
         this.emitMutation({
             annotations: {
                 [annotationIndex]: {
@@ -389,30 +455,40 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     togglePageType: EventHandler<'togglePageType'> = incoming => {
-        return {
-            pageType: {
-                $apply: pageType => (pageType === 'all' ? 'page' : 'all'),
-            },
-        }
+        const currentPageType = incoming.previousState.pageType
+        const toggledPageType = currentPageType === 'all' ? 'page' : 'all'
+        this.setPageType({ ...incoming, event: { type: toggledPageType } })
     }
 
-    setPageType: EventHandler<'setPageType'> = incoming => {
-        return {
-            pageType: { $set: incoming.event.type },
+    setPageType: EventHandler<'setPageType'> = async ({
+        previousState,
+        event,
+    }) => {
+        console.log('set page type', event)
+        const mutation = {
+            pageType: { $set: event.type },
         }
+        this.emitMutation(mutation)
+        await this._maybeLoad(previousState, mutation)
     }
 
-    setSearchType: EventHandler<'setSearchType'> = incoming => {
-        return {
-            searchType: { $set: incoming.event.type },
+    setSearchType: EventHandler<'setSearchType'> = async ({
+        previousState,
+        event,
+    }) => {
+        console.log('set search type', event)
+        const mutation = {
+            searchType: { $set: event.type },
         }
+        this.emitMutation(mutation)
+        await this._maybeLoad(previousState, mutation)
     }
 
-    setResultsSearchType: EventHandler<'setResultsSearchType'> = incoming => {
-        return {
-            resultsSearchType: { $set: incoming.event.type },
-        }
-    }
+    // setResultsSearchType: EventHandler<'setResultsSearchType'> = incoming => {
+    //     this.emitMutation({
+    //         resultsSearchType: { $set: incoming.event.type },
+    //     })
+    // }
 
     setAnnotationsExpanded: EventHandler<
         'setAnnotationsExpanded'
@@ -430,5 +506,17 @@ export class SidebarContainerLogic extends UILogic<
 
     toggleShowFilters: EventHandler<'toggleShowFilters'> = incoming => {
         return { showFiltersSidebar: { $apply: show => !show } }
+    }
+
+    async _maybeLoad(
+        state: SidebarContainerState,
+        changes: UIMutation<SidebarContainerState>,
+    ) {
+        const nextState = this.withMutation(state, changes)
+        if (nextState.searchType === 'notes' && nextState.pageType === 'page') {
+            await this._loadAnnotations()
+        } else {
+            await this._doSearch(nextState)
+        }
     }
 }

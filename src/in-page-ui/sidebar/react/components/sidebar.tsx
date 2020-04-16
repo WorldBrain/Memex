@@ -12,21 +12,26 @@ import { Page } from '../types'
 import FiltersSidebar, { FiltersSidebarProps } from './filters-sidebar'
 import ResultsContainer, { ResultsContainerProps } from './results-container'
 import DragElement from 'src/overview/components/DragElement'
-import { DeleteConfirmModal } from 'src/overview/delete-confirm-modal'
+import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import SearchTypeSwitch, { SearchTypeSwitchProps } from './search-type-switch'
 import PageInfo from './page-info'
 import cx from 'classnames'
 import { Annotation } from 'src/annotations/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { features } from 'src/util/remote-functions-background'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 const styles = require('./sidebar.css')
 
 interface OwnProps {
     env: 'inpage' | 'overview'
     isOpen: boolean
-    isLoading: boolean
-    needsWaypoint?: boolean
+    loadState: TaskState
+    annotationLoadState: TaskState
+    searchLoadState: TaskState
+
+    needsWaypoint: boolean
     appendLoader: boolean
     annotations: Annotation[]
     activeAnnotationUrl: string
@@ -43,8 +48,15 @@ interface OwnProps {
 
     handleAddPageCommentBtnClick: () => void
 
+    pageDeleteDialog: {
+        isDeletePageModelShown: boolean
+        handleDeletePages: () => Promise<void>
+        handleDeletePagesModalClose: () => void
+    }
+
     annotationModes: { [annotationUrl: string]: 'default' | 'edit' | 'delete' }
     annotationProps: {
+        highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
         handleGoToAnnotation: (annotation: Annotation) => void
         handleAnnotationBoxMouseEnter: (annotation: Annotation) => void
         handleAnnotationBoxMouseLeave: () => void
@@ -121,10 +133,6 @@ export default class Sidebar extends React.Component<Props> {
         this.props.clearAllFilters()
     }
 
-    get isCurrentPageSearch(): boolean {
-        return this.props.pageType === 'page'
-    }
-
     handleGoToAnnotation = (annot: Annotation) => (
         event: React.MouseEvent<HTMLElement>,
     ) => {
@@ -138,7 +146,7 @@ export default class Sidebar extends React.Component<Props> {
             <AnnotationBox
                 key={i}
                 env={this.props.env}
-                highlighter={null}
+                highlighter={this.props.annotationProps.highlighter}
                 mode={this.props.annotationModes[annot.url] || 'default'}
                 displayCrowdfunding={false}
                 {...annot}
@@ -173,7 +181,10 @@ export default class Sidebar extends React.Component<Props> {
             )
         }
 
-        if (this.props.isLoading && this.props.appendLoader) {
+        if (
+            this.props.annotationLoadState !== 'success' &&
+            this.props.appendLoader
+        ) {
             annots.push(<LoadingIndicator key="spinner" />)
         }
 
@@ -184,21 +195,97 @@ export default class Sidebar extends React.Component<Props> {
         return (
             <React.Fragment>
                 <ResultsContainer {...this.props.resultsContainer} />
-                <DeleteConfirmModal message="Delete page and related notes" />
+                <DeleteConfirmModal
+                    deleteDocs={this.props.pageDeleteDialog.handleDeletePages}
+                    isShown={this.props.pageDeleteDialog.isDeletePageModelShown}
+                    onClose={
+                        this.props.pageDeleteDialog.handleDeletePagesModalClose
+                    }
+                    message="Delete page and related notes"
+                />
                 <DragElement />
             </React.Fragment>
         )
     }
 
-    render() {
+    renderAnnotsOrResults() {
+        const { annotations, showCongratsMessage } = this.props
+
+        if (
+            this.props.searchTypeSwitch.searchType !== 'page' ||
+            this.props.searchTypeSwitch.pageType !== 'page'
+        ) {
+            return this.renderResults()
+        }
+        if (
+            this.props.annotationLoadState !== 'success' &&
+            !this.props.appendLoader
+        ) {
+            return <LoadingIndicator />
+        }
+        if (annotations.length === 0) {
+            return <EmptyMessage />
+        }
+
+        return (
+            <div className={styles.annotationsSection}>
+                {this.renderAnnots()}
+                {showCongratsMessage && <CongratsMessage />}
+            </div>
+        )
+    }
+
+    renderTopBar() {
         const {
-            env,
-            isOpen,
-            annotations,
-            showCommentBox,
-            showCongratsMessage,
             handleAddPageCommentBtnClick: handleAddCommentBtnClick,
         } = this.props
+
+        return (
+            <Topbar
+                {...this.props.topBar}
+                handleCloseBtnClick={this.handleCloseBtnClick}
+                handleSettingsBtnClick={this.props.onOpenSettings}
+                handleAddCommentBtnClick={handleAddCommentBtnClick}
+                handleSearchChange={this.handleSearchChange}
+                handleSearchEnter={this.handleSearchEnter}
+                handleClearBtn={this.handleClearBtn}
+                handleFilterBtnClick={
+                    this.props.filtersSidebar.toggleShowFilters
+                }
+                handleClearFiltersBtnClick={this.handleClearFiltersBtnClick}
+            />
+        )
+    }
+
+    renderSearchTypeSwitch() {
+        const {
+            handleAddPageCommentBtnClick: handleAddCommentBtnClick,
+        } = this.props
+
+        return (
+            <div className={styles.searchSwitch}>
+                <SearchTypeSwitch
+                    {...this.props.searchTypeSwitch}
+                    isOverview={this.props.env === 'overview'}
+                    handleAddPageCommentBtnClick={handleAddCommentBtnClick}
+                    showSocialSearch={this.props.showSocialSearch}
+                />
+            </div>
+        )
+    }
+
+    renderPageInfo() {
+        return (
+            <PageInfo
+                page={this.props.page}
+                isCurrentPage={this.props.pageType === 'page'}
+                resetPage={this.props.resetPage}
+            />
+        )
+    }
+
+    render() {
+        const { env, isOpen, showCommentBox } = this.props
 
         return (
             <React.Fragment>
@@ -212,77 +299,22 @@ export default class Sidebar extends React.Component<Props> {
                 >
                     <div className={styles.sidebar}>
                         <div className={styles.topSection}>
-                            <Topbar
-                                {...this.props.topBar}
-                                handleCloseBtnClick={this.handleCloseBtnClick}
-                                handleSettingsBtnClick={
-                                    this.props.onOpenSettings
-                                }
-                                handleAddCommentBtnClick={
-                                    handleAddCommentBtnClick
-                                }
-                                handleSearchChange={this.handleSearchChange}
-                                handleSearchEnter={this.handleSearchEnter}
-                                handleClearBtn={this.handleClearBtn}
-                                handleFilterBtnClick={
-                                    this.props.filtersSidebar.toggleShowFilters
-                                }
-                                handleClearFiltersBtnClick={
-                                    this.handleClearFiltersBtnClick
-                                }
-                            />
+                            {this.renderTopBar()}
                             {env === 'inpage' && (
                                 <React.Fragment>
-                                    <div className={styles.searchSwitch}>
-                                        <SearchTypeSwitch
-                                            {...this.props.searchTypeSwitch}
-                                            isOverview={
-                                                this.props.env === 'overview'
-                                            }
-                                            handleAddPageCommentBtnClick={
-                                                handleAddCommentBtnClick
-                                            }
-                                            showSocialSearch={
-                                                this.props.showSocialSearch
-                                            }
-                                        />
-                                    </div>
-                                    <PageInfo
-                                        page={this.props.page}
-                                        isCurrentPage={this.isCurrentPageSearch}
-                                        resetPage={this.props.resetPage}
-                                    />
+                                    {this.renderSearchTypeSwitch()}
+                                    {this.renderPageInfo()}
                                 </React.Fragment>
                             )}
                         </div>
-                        <div>
-                            {showCommentBox && (
-                                <div className={styles.commentBoxContainer}>
-                                    <CommentBoxContainer
-                                        {...this.props.commentBox}
-                                    />
-                                </div>
-                            )}
-                        </div>
+                        <div>{showCommentBox && this.renderCommentBox()}</div>
                         <div
                             className={cx(styles.resultsContainer, {
                                 [styles.resultsContainerPage]:
                                     env === 'overview',
                             })}
                         >
-                            {!this.isCurrentPageSearch ? (
-                                this.renderResults()
-                            ) : this.props.isLoading &&
-                              !this.props.appendLoader ? (
-                                <LoadingIndicator />
-                            ) : annotations.length === 0 ? (
-                                <EmptyMessage />
-                            ) : (
-                                <div className={styles.annotationsSection}>
-                                    {this.renderAnnots()}
-                                    {showCongratsMessage && <CongratsMessage />}
-                                </div>
-                            )}
+                            {this.renderAnnotsOrResults()}
                         </div>
                     </div>
                 </Menu>
@@ -290,6 +322,14 @@ export default class Sidebar extends React.Component<Props> {
                     <FiltersSidebar {...this.props.filtersSidebar} />
                 )}
             </React.Fragment>
+        )
+    }
+
+    private renderCommentBox(): React.ReactNode {
+        return (
+            <div className={styles.commentBoxContainer}>
+                <CommentBoxContainer {...this.props.commentBox} />
+            </div>
         )
     }
 }

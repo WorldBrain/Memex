@@ -10,7 +10,6 @@ const styles = require('./result-list.css')
 export interface StateProps {
     noResults: boolean
     isBadTerm: boolean
-    isLoading: boolean
     areAnnotationsExpanded: boolean
     shouldShowCount: boolean
     isInvalidSearch: boolean
