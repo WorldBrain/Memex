@@ -170,11 +170,12 @@ export const getMoreResults: (fromOverview?: boolean) => Thunk = (
 
 // Analytics use
 function trackSearch(searchResult, overwrite, state) {
+    if (searchBar.isEmptyQuery(state)) {
+        return
+    }
+
     // Value should be set as # results (if non-default search)
-    const value =
-        overwrite && !searchBar.isEmptyQuery(state)
-            ? searchResult.totalCount
-            : undefined
+    const value = overwrite ? searchResult.totalCount : undefined
 
     const action =
         searchResult.docs.length > 0

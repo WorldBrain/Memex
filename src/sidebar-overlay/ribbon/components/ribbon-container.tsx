@@ -134,11 +134,9 @@ class RibbonContainer extends Component<Props> {
     }
 }
 
-const mapStateToProps: MapStateToProps<
-    StateProps,
-    OwnProps,
-    RootState
-> = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+    state,
+) => ({
     isExpanded: selectors.isExpanded(state),
     isTooltipEnabled: selectors.isTooltipEnabled(state),
     areHighlightsEnabled: selectors.areHighlightsEnabled(state),
@@ -156,20 +154,20 @@ const mapStateToProps: MapStateToProps<
     initCollSuggs: collections.initCollSuggestions(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+) => ({
     onInit: () => dispatch(actions.initState()),
     openRibbon: () => dispatch(actions.setIsExpanded(true)),
-    setAnnotationsManager: annotationsManager =>
+    setAnnotationsManager: (annotationsManager) =>
         dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     handleRibbonToggle: () => dispatch(actions.toggleRibbon()),
     handleTooltipToggle: () => dispatch(actions.toggleTooltip()),
     handleHighlightsToggle: () => dispatch(actions.toggleHighlights()),
     handlePauseToggle: () => dispatch(pauseActs.togglePaused()),
     handleBookmarkToggle: () => dispatch(bookmarkActs.toggleBookmark()),
-    onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
+    onTagAdd: (tag: string) =>
+        dispatch(tagActs.addTagToPage(tag, { fromRibbon: true })),
     onTagDel: (tag: string) => dispatch(tagActs.deleteTag(tag)),
     onCollectionAdd: (collection: PageList) =>
         dispatch(collectionActs.addCollectionToPage(collection)),

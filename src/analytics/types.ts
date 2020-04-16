@@ -29,9 +29,10 @@ export interface AnalyticsEvents {
     Global: 'installExtension' | 'uninstallExtension' | 'visitExternalLink'
     Tags:
         | 'createForPageViaPopup'
-        | 'createForAnnotation'
+        | 'createForPageViaRibbon'
         | 'createForPageViaOverview'
         | 'deleteForPageViaOverview'
+        | 'createForAnnotation'
     Sync: 'startInitSync' | 'finishInitSync'
     Collections: 'create' | 'addPageViaPopup'
     InPageTooltip: 'highlightText' | 'annotateText' | 'showTooltip'

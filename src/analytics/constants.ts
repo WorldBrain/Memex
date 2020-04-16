@@ -97,14 +97,17 @@ export const ANALYTICS_EVENTS: {
         createForPageViaPopup: {
             description: 'The creation of a tag for a page via the popup menu',
         },
-        createForAnnotation: {
-            description: 'The tagging of an annotation',
+        createForPageViaRibbon: {
+            description: 'The creation of a tag for a page via the ribbon',
         },
         deleteForPageViaOverview: {
             description: 'The deletion of a tag for a page via the overview',
         },
         createForPageViaOverview: {
             description: 'the creation of a tage for a page via the overview',
+        },
+        createForAnnotation: {
+            description: 'The tagging of an annotation',
         },
     },
     Sync: {
