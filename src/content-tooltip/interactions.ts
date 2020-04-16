@@ -90,6 +90,10 @@ export const insertTooltip = async ({ toolbarNotifications, store }) => {
         },
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
+            analytics.trackEvent({
+                category: 'InPageTooltip',
+                action: 'closeTooltip',
+            })
             manualOverride = true
             removeTooltip()
 

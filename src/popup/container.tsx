@@ -71,6 +71,10 @@ export type Props = OwnProps & StateProps & DispatchProps
 
 class PopupContainer extends PureComponent<Props> {
     componentDidMount() {
+        analytics.trackEvent({
+            category: 'Global',
+            action: 'openPopup',
+        })
         this.props.initState()
     }
 

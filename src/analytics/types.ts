@@ -26,16 +26,31 @@ export interface AnalyticsEvents {
         | 'deleteViaRegexBlacklist'
         | 'deleteViaSiteBlacklist'
         | 'deleteViaOverview'
-    Global: 'installExtension' | 'uninstallExtension' | 'visitExternalLink'
+    Global:
+        | 'installExtension'
+        | 'uninstallExtension'
+        | 'visitExternalLink'
+        | 'openPopup'
     Tags:
         | 'createForPageViaPopup'
         | 'createForPageViaRibbon'
         | 'createForPageViaOverview'
         | 'deleteForPageViaOverview'
         | 'createForAnnotation'
-    Sync: 'startInitSync' | 'finishInitSync'
-    Collections: 'create' | 'addPageViaPopup'
-    InPageTooltip: 'highlightText' | 'annotateText' | 'showTooltip'
+    Sync:
+        | 'startInitSync'
+        | 'finishInitSync'
+        | 'failInitSync'
+        | 'clickPairNewDevice'
+        | 'generateQRPairingCode'
+    Collections: 'create' | 'addPageViaPopup' | 'addPageViaDragAndDrop'
+    InPageTooltip:
+        | 'highlightText'
+        | 'annotateText'
+        | 'showTooltip'
+        | 'closeTooltip'
+        | 'disableTooltipViaRibbon'
+        | 'disableTooltipViaPopup'
     Sidebar: 'disableTemporarily' | 'disablePermanently' | 'showSidebar'
     Search:
         | 'successViaOmnibar'
@@ -65,6 +80,9 @@ export interface AnalyticsEvents {
         | 'toggleTracking'
         | 'pauseIndexingViaPopup'
         | 'resumeIndexingViaPopup'
+        | 'changeIndexingSetting'
+        | 'enableKeyboardShortcuts'
+        | 'disableKeyboardShortcuts'
 }
 
 export interface AnalyticsEventInfo {

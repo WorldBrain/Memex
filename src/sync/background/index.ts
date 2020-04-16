@@ -104,11 +104,22 @@ export default class SyncBackground extends SyncService {
             category: 'Sync',
             action: 'startInitSync',
         })
-        await this.initialSync.waitForInitialSync()
-        this.analytics.trackEvent({
-            category: 'Sync',
-            action: 'finishInitSync',
-        })
+
+        try {
+            await this.initialSync.waitForInitialSync()
+
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'finishInitSync',
+            })
+        } catch (err) {
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'failInitSync',
+            })
+
+            throw err
+        }
     }
 
     async createSyncLoggingMiddleware() {

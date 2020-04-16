@@ -73,6 +73,18 @@ export const ANALYTICS_EVENTS: {
         resumeIndexingViaPopup: {
             description: 'The resuming of page indexing via the popup menu',
         },
+        enableKeyboardShortcuts: {
+            description:
+                'The enabling of keyboard shortcuts for Memex actions via the settings page',
+        },
+        disableKeyboardShortcuts: {
+            description:
+                'The disabling of keyboard shortcuts for Memex actions via the settings page',
+        },
+        changeIndexingSetting: {
+            description:
+                'The changing of any setting in the "Indexing Preferences" menu',
+        },
     },
     Bookmarks: {
         createForPage: {
@@ -91,6 +103,9 @@ export const ANALYTICS_EVENTS: {
         },
         uninstallExtension: {
             description: 'The uninstall of Memex',
+        },
+        openPopup: {
+            description: 'The opening of the extension popup menu',
         },
     },
     Tags: {
@@ -117,13 +132,28 @@ export const ANALYTICS_EVENTS: {
         finishInitSync: {
             description: 'The initial sync between two devices has finished.',
         },
+        failInitSync: {
+            description: 'The initial sync between two devices has failed.',
+        },
+        clickPairNewDevice: {
+            description:
+                'The "Pair New Device" button was clicked in the sync settings',
+        },
+        generateQRPairingCode: {
+            description: 'A new QR code has been generated for pairing devices',
+        },
     },
     Collections: {
         create: {
             description: 'The creation of a new page collection',
         },
         addPageViaPopup: {
-            description: 'The creation of a new page entry in a list',
+            description:
+                'The creation of a new page entry in a list via the popup menu',
+        },
+        addPageViaDragAndDrop: {
+            description:
+                'The creation of a new page entry in a list via dragging and dropping a page result to a list in the overview',
         },
     },
     InPageTooltip: {
@@ -138,6 +168,18 @@ export const ANALYTICS_EVENTS: {
         showTooltip: {
             description:
                 'The showing of the in-page tooltip, triggered by webpage text selection',
+        },
+        closeTooltip: {
+            description:
+                'The closing of the in-page tooltip, by pressing the "X" button',
+        },
+        disableTooltipViaRibbon: {
+            description:
+                'The disabling of the in-page tooltip via the in-page sidebar ribbon',
+        },
+        disableTooltipViaPopup: {
+            description:
+                'The disabling of the in-page tooltip via the popup menu',
         },
     },
     Sidebar: {

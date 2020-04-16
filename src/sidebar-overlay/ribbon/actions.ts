@@ -62,6 +62,13 @@ export const toggleRibbon: () => Thunk = () => async (dispatch, getState) => {
 export const toggleTooltip: () => Thunk = () => async (dispatch, getState) => {
     const isTooltipEnabled = selectors.isTooltipEnabled(getState())
 
+    if (isTooltipEnabled) {
+        analytics.trackEvent({
+            category: 'InPageTooltip',
+            action: 'disableTooltipViaRibbon',
+        })
+    }
+
     dispatch(setTooltipEnabled(!isTooltipEnabled))
     await setTooltipState(!isTooltipEnabled)
 }

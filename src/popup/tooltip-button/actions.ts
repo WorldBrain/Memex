@@ -8,12 +8,13 @@ import * as popup from '../selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 import { TooltipInteractionInterface } from 'src/content-tooltip/types'
+import analytics from 'src/analytics'
 
 const processEventRPC = remoteFunction('processEvent')
 
 export const setTooltipFlag = createAction<boolean>('tooltip/setTooltipFlag')
 
-export const init: () => Thunk = () => async dispatch => {
+export const init: () => Thunk = () => async (dispatch) => {
     const sidebar = await getTooltipState()
     dispatch(setTooltipFlag(sidebar))
 }
@@ -30,6 +31,13 @@ export const toggleTooltipFlag: () => Thunk = () => async (
             ? EVENT_NAMES.DISABLE_TOOLTIP_POPUP
             : EVENT_NAMES.ENABLE_TOOLTIP_POPUP,
     })
+
+    if (wasEnabled) {
+        analytics.trackEvent({
+            category: 'InPageTooltip',
+            action: 'disableTooltipViaPopup',
+        })
+    }
 
     dispatch(setTooltipFlag(!wasEnabled))
     await setTooltipState(!wasEnabled)
