@@ -69,8 +69,8 @@ class BackgroundScript {
 
     get defaultUninstallURL() {
         return process.env.NODE_ENV === 'production'
-            ? 'http://worldbrain.io/uninstall'
-            : 'http://worldbrain.io/uninstall'
+            ? 'https://us-central1-worldbrain-1057.cloudfunctions.net/uninstall'
+            : 'https://us-central1-worldbrain-staging.cloudfunctions.net/uninstall'
     }
 
     /**
