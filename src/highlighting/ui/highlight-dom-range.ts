@@ -219,14 +219,12 @@ function rgbToHex(rgb: number[]): number {
 
 const MIDDLE_HEX_COLOR = 0x7fffff
 const checkBGColor = (color: string) => {
-    console.log(color)
     if (!color.startsWith('#')) {
         const extractedRgb: number[] = color
             .replace(/\w+\(?(.+)\)/, '$1')
             .split(',')
             .map((n) => parseInt(n, 10))
         const parsed = rgbToHex(extractedRgb)
-        console.log(parsed < MIDDLE_HEX_COLOR)
         return parsed < MIDDLE_HEX_COLOR
     } else {
         return parseInt(color.replace('#', '0x'), 16) < MIDDLE_HEX_COLOR
@@ -248,7 +246,9 @@ const highlightNode = (node: Node, highlightClass: string) => {
     // Create a highlight
     const highlight: HTMLElement = document.createElement('memex-highlight')
     highlight.classList.add(highlightClass)
-    isDark && highlight.classList.add(styles['dark-mode'])
+    if (isDark) {
+        highlight.classList.add(styles['dark-mode'])
+    }
 
     // Wrap it around the text node
     node.parentNode.replaceChild(highlight, node)
