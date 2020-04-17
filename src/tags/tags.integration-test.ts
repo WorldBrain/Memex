@@ -64,11 +64,74 @@ describe('Selenium Demo Test Suite', function() {
     }
 
     // todo: Give HTML elements in question an id so we can find them more robustly
-    const selectorSidebarBookmarkButton =
-        'div > div > div > div > div.src-sidebar-overlay-ribbon-components-__pageActions--HxmKI > div:nth-child(1) > div'
+    const selectorSidebarResultsContainer =
+        'div > div:nth-child(2) > div.bm-menu-wrap > div.bm-menu > nav > div > div.src-sidebar-overlay-sidebar-components-__resultsContainer--3Z_17 > div'
+    const selectorRibbonGeneralActions =
+        'div > div > div > div > div.src-sidebar-overlay-ribbon-components-__generalActions--1YrZ4'
+    const selectorToggleSidebarBtn = `${selectorRibbonGeneralActions} > div:nth-child(2) > div`
+    const selectorRibbonPageActions =
+        'div > div > div > div > div.src-sidebar-overlay-ribbon-components-__pageActions--HxmKI'
+    const selectorRibbonBookmarkBtn = `${selectorRibbonPageActions} > div:nth-child(1) > div`
+    const selectorRibbonAddNotetn = `${selectorRibbonPageActions} > div:nth-child(2) > div`
     const selectorPageResultsUl =
         '#app > div:nth-child(1) > div.src-overview-results-components-__main--dzcJi > ul'
     const selectorFirstPageTitle = `${selectorPageResultsUl} > li:nth-child(1) > div > a > div > div > div > div:nth-child(2)`
+
+    it('should add a note to a page from the ribbon, and that note be present in search results for notes', async function() {
+        const TEST_NOTE = 'this is a test'
+        const url = EXT_URL + OVERVIEW_PATH
+        await driver.get(url)
+        const currentUrl = await driver.getCurrentUrl()
+        expect(currentUrl).toContain(url)
+
+        // The new installation tab often pops up and steals focus
+        // Make sure focus is set to the tab we set
+        await driver.switchTo().window((await driver.getAllWindowHandles())[0])
+
+        // Navigate to a new page
+        await driver.get('https://en.wikipedia.org/wiki/Memex')
+
+        const ribbonSidebar = await waitUntilShadowDomElementLocated(
+            webdriver.By.id('memex-ribbon-sidebar'),
+        )
+
+        await triggerRibbonShow(ribbonSidebar)
+
+        await driver.sleep(1000)
+
+        // Click on the add note button
+        const addNoteBtn = await ribbonSidebar.findElement(
+            webdriver.By.css(selectorRibbonAddNotetn),
+        )
+        await addNoteBtn.click()
+
+        // Write note text and save via keyboard
+        const noteInput = driver.switchTo().activeElement()
+        noteInput.sendKeys(
+            TEST_NOTE,
+            webdriver.Key.COMMAND,
+            webdriver.Key.ENTER,
+        )
+
+        // Open the sidebar
+        const toggleSidebarBtn = await ribbonSidebar.findElement(
+            webdriver.By.css(selectorToggleSidebarBtn),
+        )
+        await toggleSidebarBtn.click()
+        await driver.sleep(500)
+
+        // Test that there should only be a single note result
+        const noteResults = await ribbonSidebar.findElements(
+            webdriver.By.css(selectorSidebarResultsContainer + ' > div'),
+        )
+        expect(noteResults).toHaveLength(1)
+
+        // Test that the result contains the same text as entered
+        const noteResultTitle = await ribbonSidebar.findElement(
+            webdriver.By.css(selectorSidebarResultsContainer + ' > div > div'),
+        )
+        expect(await noteResultTitle.getText()).toEqual(TEST_NOTE)
+    })
 
     it('should bookmark a page from the ribbon, and that bookmark be present in search results for bookmarks', async function() {
         const url = EXT_URL + OVERVIEW_PATH
@@ -83,12 +146,6 @@ describe('Selenium Demo Test Suite', function() {
         // Navigate to a new page
         await driver.get('https://en.wikipedia.org/wiki/Memex')
 
-        // Open the sidebar
-        // todo: this relies on the 'r' key, need a more programmatic way of opening the sidebar here
-        const page = await driver.findElement(webdriver.By.css('body'))
-        await page.sendKeys('r')
-
-        // Click on the bookmark button
         const ribbonSidebar = await waitUntilShadowDomElementLocated(
             webdriver.By.id('memex-ribbon-sidebar'),
         )
@@ -97,11 +154,12 @@ describe('Selenium Demo Test Suite', function() {
 
         await driver.sleep(1000) // TODO: Why does this need to be here? (following selector fails if removed)
 
-        const button = await ribbonSidebar.findElement(
-            webdriver.By.css(selectorSidebarBookmarkButton),
+        // Click on the bookmark button
+        const bookmarkBtn = await ribbonSidebar.findElement(
+            webdriver.By.css(selectorRibbonBookmarkBtn),
         )
 
-        await button.click()
+        await bookmarkBtn.click()
         await driver.sleep(500)
 
         // Do a bookmarks filtered page search
