@@ -1,3 +1,4 @@
+const styles = require('src/highlighting/ui/styles.css')
 /**
  * Custom implementation of `dom-highlight-range`.
  * The original implementation is available here: https://github.com/Treora/dom-highlight-range
@@ -36,7 +37,7 @@ export const highlightDOMRange = (
 
     // Highlight each node
     // const highlights: HTMLElement[] =
-    nodes.forEach(node => highlightNode(node, highlightClass))
+    nodes.forEach((node) => highlightNode(node, highlightClass))
 
     // Reset selection
     clearBrowserSelection()
@@ -203,11 +204,51 @@ const getFirstTextNode = (node: Node) => {
     return walker.firstChild()
 }
 
+function decimalToHex(num: number) {
+    const hex = num.toString(16)
+    return hex.length === 1 ? '0' + hex : hex
+}
+
+function rgbToHex(rgb: number[]): number {
+    const [r, g, b] = rgb
+    return parseInt(
+        '0x' + decimalToHex(r) + decimalToHex(g) + decimalToHex(b),
+        16,
+    )
+}
+
+const MIDDLE_HEX_COLOR = 0x7fffff
+const checkBGColor = (color: string) => {
+    console.log(color)
+    if (!color.startsWith('#')) {
+        const extractedRgb: number[] = color
+            .replace(/\w+\(?(.+)\)/, '$1')
+            .split(',')
+            .map((n) => parseInt(n, 10))
+        const parsed = rgbToHex(extractedRgb)
+        console.log(parsed < MIDDLE_HEX_COLOR)
+        return parsed < MIDDLE_HEX_COLOR
+    } else {
+        return parseInt(color.replace('#', '0x'), 16) < MIDDLE_HEX_COLOR
+    }
+}
+
+const calculateParentBG = (el: HTMLElement): boolean => {
+    const computedStyles = getComputedStyle(el)
+    const { background, backgroundColor } = computedStyles
+    if (background.length > 0) {
+        return checkBGColor(background)
+    }
+    return checkBGColor(backgroundColor)
+}
+
 // Replace [node] with <memex-highlight class=[highlightClass]>[node]</memex-highlight>
 const highlightNode = (node: Node, highlightClass: string) => {
+    const isDark = calculateParentBG(node.parentElement.parentElement)
     // Create a highlight
     const highlight: HTMLElement = document.createElement('memex-highlight')
     highlight.classList.add(highlightClass)
+    isDark && highlight.classList.add(styles['dark-mode'])
 
     // Wrap it around the text node
     node.parentNode.replaceChild(highlight, node)
