@@ -40,7 +40,6 @@ export default class CountlyAnalyticsBackend implements AnalyticsBackend {
             url: this.props.url,
         })
         this.enqueue('track_sessions')
-        this.enqueue('track_pageview')
         return this.resolveSetupPromise()
     }
 
