@@ -111,7 +111,7 @@ export type SidebarContainerEvents = UIEvent<{
     closeDeletePagesModal: null
 
     // Annotation boxes
-    goToAnnotation: { annnotation: Annotation }
+    goToAnnotation: { annnotationUrl: string }
     editAnnotation: { annnotationUrl: string }
     deleteAnnotation: { annnotationUrl: string }
     toggleAnnotationBookmark: { annnotationUrl: string }
@@ -139,7 +139,10 @@ export interface SidebarContainerDependencies {
     env: SidebarEnv
     annotationManager: AnnotationsManagerInterface
     currentTab: { id: number; url: string }
-    highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
+    highlighter: Pick<
+        HighlightInteractionInterface,
+        'removeTempHighlights' | 'removeAnnotationHighlights'
+    >
 
     loadTagSuggestions: () => Promise<string[]>
 

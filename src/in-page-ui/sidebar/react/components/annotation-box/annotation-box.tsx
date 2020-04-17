@@ -15,9 +15,13 @@ import { HighlightInteractionInterface } from 'src/highlighting/types'
 const styles = require('./annotation-box.css')
 const footerStyles = require('./default-footer.css')
 
-export interface AnnotationBoxProps {
-    /** Required to decide how to go to an annotation when it's clicked. */
+export interface AnnotationBoxGeneralProps {
     env: 'inpage' | 'overview'
+    highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
+}
+
+export interface AnnotationBoxAnnotationProps {
+    /** Required to decide how to go to an annotation when it's clicked. */
     url: string
     className?: string
     isActive?: boolean
@@ -28,21 +32,27 @@ export interface AnnotationBoxProps {
     comment?: string
     tags: string[]
     hasBookmark?: boolean
-    handleGoToAnnotation: (e: React.MouseEvent<HTMLElement>) => void
-    handleMouseEnter?: (e: Event) => void
-    handleMouseLeave?: (e: Event) => void
-    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
-    handleDeleteAnnotation: (url: string) => void
-    handleBookmarkToggle: (url: string) => void
-    handleAnnotationTagClick: (tag: string) => void
-    handleAnnotationModeSwitch: (event: {
-        annotationUrl: string
-        mode: 'default' | 'edit' | 'delete'
-    }) => void
-    highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
     mode: 'default' | 'edit' | 'delete'
     displayCrowdfunding: boolean
 }
+
+export interface AnnotationBoxEventProps {
+    handleGoToAnnotation: (url: string) => void
+    handleMouseEnter?: (url: string) => void
+    handleMouseLeave?: (url: string) => void
+    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
+    handleDeleteAnnotation: (url: string) => void
+    handleBookmarkToggle: (url: string) => void
+    handleAnnotationTagClick: (url: string, tag: string) => void
+    handleAnnotationModeSwitch: (
+        url: string,
+        mode: 'default' | 'edit' | 'delete',
+    ) => void
+}
+
+type AnnotationBoxProps = AnnotationBoxGeneralProps &
+    AnnotationBoxAnnotationProps &
+    AnnotationBoxEventProps
 
 export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
     private _boxRef: HTMLDivElement = null
@@ -61,26 +71,22 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
 
     private _setupEventListeners = () => {
         if (this._boxRef) {
-            this._boxRef.addEventListener(
-                'mouseenter',
-                this.props.handleMouseEnter,
+            this._boxRef.addEventListener('mouseenter', () =>
+                this.props.handleMouseEnter(this.props.url),
             )
-            this._boxRef.addEventListener(
-                'mouseleave',
-                this.props.handleMouseLeave,
+            this._boxRef.addEventListener('mouseleave', () =>
+                this.props.handleMouseLeave(this.props.url),
             )
         }
     }
 
     private _removeEventListeners = () => {
         if (this._boxRef) {
-            this._boxRef.addEventListener(
-                'mouseenter',
-                this.props.handleMouseEnter,
+            this._boxRef.addEventListener('mouseenter', () =>
+                this.props.handleMouseEnter(this.props.url),
             )
-            this._boxRef.addEventListener(
-                'mouseleave',
-                this.props.handleMouseLeave,
+            this._boxRef.addEventListener('mouseleave', () =>
+                this.props.handleMouseLeave(this.props.url),
             )
         }
     }
@@ -145,17 +151,11 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
     }
 
     private _handleEditIconClick = () => {
-        this.props.handleAnnotationModeSwitch({
-            annotationUrl: this.props.url,
-            mode: 'edit',
-        })
+        this.props.handleAnnotationModeSwitch(this.props.url, 'edit')
     }
 
     private _handleTrashIconClick = () => {
-        this.props.handleAnnotationModeSwitch({
-            annotationUrl: this.props.url,
-            mode: 'delete',
-        })
+        this.props.handleAnnotationModeSwitch(this.props.url, 'delete')
     }
 
     private _handleShareIconClick = () => {
@@ -168,10 +168,7 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
 
     private _handleCancelOperation = () => {
         this.props.highlighter.removeTempHighlights()
-        this.props.handleAnnotationModeSwitch({
-            annotationUrl: this.props.url,
-            mode: 'default',
-        })
+        this.props.handleAnnotationModeSwitch(this.props.url, 'default')
     }
 
     private handleBookmarkToggle = () => {
@@ -237,10 +234,17 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                         isEdited={this.isEdited}
                         timestamp={timestamp}
                         hasBookmark={this.props.hasBookmark}
-                        handleGoToAnnotation={this.props.handleGoToAnnotation}
+                        handleGoToAnnotation={() =>
+                            this.props.handleGoToAnnotation(this.props.url)
+                        }
                         handleDeleteAnnotation={this._handleDeleteAnnotation}
                         handleCancelOperation={this._handleCancelOperation}
-                        handleTagClick={this.props.handleAnnotationTagClick}
+                        handleTagClick={tag =>
+                            this.props.handleAnnotationTagClick(
+                                this.props.url,
+                                tag,
+                            )
+                        }
                         editIconClickHandler={this._handleEditIconClick}
                         trashIconClickHandler={this._handleTrashIconClick}
                         shareIconClickHandler={this._handleShareIconClick}

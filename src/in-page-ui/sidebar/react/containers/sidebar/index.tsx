@@ -46,6 +46,8 @@ export default class SidebarContainer extends StatefulUIElement<
                 loadState={this.state.loadState}
                 annotationLoadState={this.state.annotationLoadState}
                 searchLoadState={this.state.searchLoadState}
+                //
+                highlighter={this.props.highlighter}
                 appendLoader={this.state.appendLoader}
                 env={this.props.env}
                 isOpen={this.state.state === 'visible'}
@@ -76,15 +78,17 @@ export default class SidebarContainer extends StatefulUIElement<
                         this.processEvent('closeDeletePagesModal', null),
                 }}
                 annotationProps={{
-                    highlighter: this.props.highlighter,
-                    handleAnnotationTagClick: event => {},
-                    handleAnnotationModeSwitch: event =>
-                        this.processEvent('handleAnnotationModeSwitch', event),
-                    handleGoToAnnotation: annnotation =>
-                        this.processEvent('goToAnnotation', { annnotation }),
-                    handleAnnotationBoxMouseEnter: () =>
+                    handleAnnotationTagClick: (annotationUrl, tag) => {},
+                    handleAnnotationModeSwitch: (annotationUrl, mode) =>
+                        this.processEvent('handleAnnotationModeSwitch', {
+                            annotationUrl,
+                            mode,
+                        }),
+                    handleGoToAnnotation: annnotationUrl =>
+                        this.processEvent('goToAnnotation', { annnotationUrl }),
+                    handleMouseEnter: annnotationUrl =>
                         console.log('handleAnnotationBoxMouseEnter'),
-                    handleAnnotationBoxMouseLeave: () =>
+                    handleMouseLeave: annnotationUrl =>
                         console.log('handleAnnotationBoxMouseLeave'),
                     handleEditAnnotation: annnotationUrl =>
                         this.processEvent('editAnnotation', { annnotationUrl }),
@@ -92,6 +96,7 @@ export default class SidebarContainer extends StatefulUIElement<
                         this.processEvent('deleteAnnotation', {
                             annnotationUrl,
                         }),
+                    handleBookmarkToggle: annnotationUrl => {},
                 }}
                 handleScrollPagination={() =>
                     console.log('handleScrollPagination')
@@ -179,6 +184,17 @@ export default class SidebarContainer extends StatefulUIElement<
                     annotsByDay: this.state.annotsByDay,
                     isSocialSearch: this.state.isSocialSearch,
                     tagSuggestions: this.state.tagSuggestions,
+                    highlighter: this.props.highlighter,
+                    annotationEventProps: {
+                        handleAnnotationTagClick: (annotationUrl, tag) => {},
+                        handleAnnotationModeSwitch: (annotationUrl, mode) => {},
+                        handleGoToAnnotation: annnotationUrl => {},
+                        handleMouseEnter: annnotationUrl => {},
+                        handleMouseLeave: annnotationUrl => {},
+                        handleEditAnnotation: annnotationUrl => {},
+                        handleDeleteAnnotation: annnotationUrl => {},
+                        handleBookmarkToggle: annnotationUrl => {},
+                    },
                     resetUrlDragged: () => {},
                     resetActiveTagIndex: () => {},
                     setUrlDragged: (url: string) => {},

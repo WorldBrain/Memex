@@ -3,7 +3,8 @@ import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 
-import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
+import { LoadingIndicator } from 'src/common-ui/components'
+import ResultItem from './result-item'
 import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
@@ -13,6 +14,8 @@ import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { AnnotationBoxEventProps } from './annotation-box/annotation-box'
 
 const styles = require('./result-list.css')
 
@@ -45,7 +48,13 @@ interface DispatchProps {
     handleTrashBtnClick: (doc: Result, i: number) => void
 }
 
-interface OwnProps {}
+interface OwnProps {
+    highlighter: Pick<
+        HighlightInteractionInterface,
+        'removeTempHighlights' | 'removeAnnotationHighlights'
+    >
+    annotationEventProps: AnnotationBoxEventProps
+}
 
 export type ResultListContainerProps = StateProps & DispatchProps & OwnProps
 
@@ -166,6 +175,8 @@ export default class ResultListContainer extends PureComponent<
                 }
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
                 isSocial={isSocialPost}
+                highlighter={this.props.highlighter}
+                annotationEventProps={this.props.annotationEventProps}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />

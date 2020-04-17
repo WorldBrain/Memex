@@ -63,6 +63,7 @@ stories.add('Dynamic - In page', () => (
 
             const highlighter = {
                 removeTempHighlights: async () => {},
+                removeAnnotationHighlights: async () => {},
             }
 
             return {

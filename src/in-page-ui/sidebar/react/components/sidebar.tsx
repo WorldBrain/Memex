@@ -21,6 +21,7 @@ import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { features } from 'src/util/remote-functions-background'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { TaskState } from 'ui-logic-core/lib/types'
+import { AnnotationBoxEventProps } from './annotation-box/annotation-box'
 
 const styles = require('./sidebar.css')
 
@@ -55,26 +56,8 @@ interface OwnProps {
     }
 
     annotationModes: { [annotationUrl: string]: 'default' | 'edit' | 'delete' }
-    annotationProps: {
-        highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
-        handleGoToAnnotation: (annotation: Annotation) => void
-        handleAnnotationBoxMouseEnter: (annotation: Annotation) => void
-        handleAnnotationBoxMouseLeave: () => void
-        handleAnnotationModeSwitch: (event: {
-            annotationUrl: string
-            mode: 'default' | 'edit' | 'delete'
-        }) => void
-        handleAnnotationTagClick: (event: {
-            annotationUrl: string
-            tag: string
-        }) => void
-        handleEditAnnotation: (
-            url: string,
-            comment: string,
-            tags: string[],
-        ) => void
-        handleDeleteAnnotation: (url: string) => void
-    }
+    highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
+    annotationProps: AnnotationBoxEventProps
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleAnnotationBookmarkToggle: (url: string) => void
     onQueryKeyDown: (searchValue: string) => void
@@ -137,7 +120,7 @@ export default class Sidebar extends React.Component<Props> {
         event: React.MouseEvent<HTMLElement>,
     ) => {
         event.preventDefault()
-        this.props.annotationProps.handleGoToAnnotation(annot)
+        this.props.annotationProps.handleGoToAnnotation(annot.url)
     }
 
     private renderAnnots() {
@@ -146,29 +129,13 @@ export default class Sidebar extends React.Component<Props> {
             <AnnotationBox
                 key={i}
                 env={this.props.env}
-                highlighter={this.props.annotationProps.highlighter}
+                highlighter={this.props.highlighter}
                 mode={this.props.annotationModes[annot.url] || 'default'}
                 displayCrowdfunding={false}
                 {...annot}
                 {...this.props.annotationProps}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
-                handleGoToAnnotation={this.handleGoToAnnotation(annot)}
-                handleAnnotationTagClick={tag =>
-                    annotationProps.handleAnnotationTagClick({
-                        annotationUrl: annot.url,
-                        tag,
-                    })
-                }
-                handleMouseLeave={event => {
-                    event.preventDefault()
-                    annotationProps.handleAnnotationBoxMouseLeave()
-                }}
-                handleMouseEnter={event => {
-                    event.preventDefault()
-                    annotationProps.handleAnnotationBoxMouseEnter(annot)
-                }}
-                handleBookmarkToggle={this.props.handleAnnotationBookmarkToggle}
             />
         ))
 
