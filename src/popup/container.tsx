@@ -71,6 +71,10 @@ export type Props = OwnProps & StateProps & DispatchProps
 
 class PopupContainer extends PureComponent<Props> {
     componentDidMount() {
+        analytics.trackEvent({
+            category: 'Global',
+            action: 'openPopup',
+        })
         this.props.initState()
     }
 
@@ -78,12 +82,12 @@ class PopupContainer extends PureComponent<Props> {
 
     closePopup = () => window.close()
 
-    onSearchEnter: KeyboardEventHandler<HTMLInputElement> = event => {
+    onSearchEnter: KeyboardEventHandler<HTMLInputElement> = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault()
             analytics.trackEvent({
                 category: 'Search',
-                action: 'Popup search',
+                action: 'searchViaPopup',
             })
 
             this.processEvent({
@@ -207,7 +211,7 @@ class PopupContainer extends PureComponent<Props> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     tabId: selectors.tabId(state),
     url: selectors.url(state),
     searchValue: selectors.searchValue(state),
@@ -224,7 +228,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
 
 const mapDispatch = (dispatch): DispatchProps => ({
     initState: () => dispatch(acts.initState()),
-    handleSearchChange: e => {
+    handleSearchChange: (e) => {
         e.preventDefault()
         const input = e.target as HTMLInputElement
         dispatch(acts.setSearchVal(input.value))

@@ -85,14 +85,14 @@ export class PageIndexingBackground {
             .findObjects<PipelineRes>(query)
 
         return Promise.all(
-            pages.map(page =>
+            pages.map((page) =>
                 new Page(this.options.storageManager, page).delete(),
             ),
         ).catch(initErrHandler())
     }
 
     async delPages(urls: string[]): Promise<{ info: any }[]> {
-        const normalizedUrls: string[] = urls.map(url => normalizeUrl(url))
+        const normalizedUrls: string[] = urls.map((url) => normalizeUrl(url))
 
         return this._deletePages({ url: { $in: normalizedUrls } })
     }

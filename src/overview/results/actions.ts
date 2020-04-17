@@ -76,10 +76,8 @@ export const toggleBookmark: (args: {
     dispatch(changeHasBookmark(index))
 
     analytics.trackEvent({
-        category: 'Overview',
-        action: hasBookmark
-            ? 'Remove result bookmark'
-            : 'Create result bookmark',
+        category: 'Bookmarks',
+        action: hasBookmark ? 'deleteForPage' : 'createForPage',
     })
 
     processEventRPC({
@@ -101,7 +99,7 @@ export const toggleBookmark: (args: {
     } catch (err) {
         dispatch(changeHasBookmark(index))
         handleDBQuotaErrors(
-            error =>
+            (error) =>
                 notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
@@ -126,7 +124,7 @@ export const updateSearchResult: (a: any) => Thunk = ({
 }
 
 // Egg
-export const easter: () => Thunk = () => dispatch =>
+export const easter: () => Thunk = () => (dispatch) =>
     dispatch(
         updateSearchResult({
             overwrite: true,
@@ -147,7 +145,10 @@ export const easter: () => Thunk = () => dispatch =>
         }),
     )
 
-export const showTags: (i: number) => Thunk = index => (dispatch, getState) => {
+export const showTags: (i: number) => Thunk = (index) => (
+    dispatch,
+    getState,
+) => {
     const activeTagIndex = selectors.activeTagIndex(getState())
 
     if (activeTagIndex === index) {
@@ -162,29 +163,26 @@ export const showTags: (i: number) => Thunk = index => (dispatch, getState) => {
  */
 export const getMoreResults: (fromOverview?: boolean) => Thunk = (
     fromOverview = true,
-) => dispatch => {
+) => (dispatch) => {
     dispatch(nextPage())
     dispatch(searchBarActs.search({ fromOverview }))
 }
 
 // Analytics use
 function trackSearch(searchResult, overwrite, state) {
-    // Value should be set as # results (if non-default search)
-    const value =
-        overwrite && !searchBar.isEmptyQuery(state)
-            ? searchResult.totalCount
-            : undefined
-
-    let action =
-        searchResult.totalCount > 0
-            ? overwrite
-                ? 'Successful search'
-                : 'Paginate search'
-            : 'Unsuccessful search'
-
-    if (filters.onlyBookmarks(state)) {
-        action += ' (BM only)'
+    if (searchBar.isEmptyQuery(state)) {
+        return
     }
+
+    // Value should be set as # results (if non-default search)
+    const value = overwrite ? searchResult.totalCount : undefined
+
+    const action =
+        searchResult.docs.length > 0
+            ? overwrite
+                ? 'successViaOverview'
+                : 'paginateSearch'
+            : 'failViaOverview'
 
     const name = overwrite
         ? searchBar.queryParamsDisplay(state)

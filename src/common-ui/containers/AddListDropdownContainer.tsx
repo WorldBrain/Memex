@@ -109,7 +109,7 @@ class AddListDropdownContainer extends Component<Props, State> {
     componentWillUnmount() {
         if (this.err && Date.now() - this.err.timestamp <= 1000) {
             handleDBQuotaErrors(
-                err =>
+                (err) =>
                     notifications.create({
                         requireInteraction: false,
                         title: 'Memex error: list adding',
@@ -159,7 +159,10 @@ class AddListDropdownContainer extends Component<Props, State> {
     }
 
     private pageBelongsToList = (list: PageList) =>
-        !(this.state.filters.findIndex(filter => filter.id === list.id) === -1)
+        !(
+            this.state.filters.findIndex((filter) => filter.id === list.id) ===
+            -1
+        )
     private setInputRef = (el: HTMLInputElement) => (this.inputEl = el)
 
     private canCreateList() {
@@ -200,7 +203,7 @@ class AddListDropdownContainer extends Component<Props, State> {
                 // Add a list as well as add this page to the list.
                 const id = await this.addListRPC({ name: listName })
                 if (this.props.allTabsCollection) {
-                    this.setState(state => ({
+                    this.setState((state) => ({
                         multiEdit: state.multiEdit.add(id),
                     }))
                     await this.addOpenTabsToListRPC({ listId: id })
@@ -254,7 +257,7 @@ class AddListDropdownContainer extends Component<Props, State> {
             this.handleError(err)
         }
 
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             displayFilters: suggestions || [],
             focused: 0,
@@ -325,7 +328,7 @@ class AddListDropdownContainer extends Component<Props, State> {
      * Used for clicks on displayed lists. Will either add or remove lists to
      * the page depending on their current status as associated lists or not.
      */
-    private handleListClick = (index: number) => async event => {
+    private handleListClick = (index: number) => async (event) => {
         await this.props.onListClickCb()
 
         const list = this.state.displayFilters[index]
@@ -361,18 +364,18 @@ class AddListDropdownContainer extends Component<Props, State> {
         // Calculate the next focused index depending on current focus and direction
         let focusedReducer
         if (event.key === 'ArrowUp') {
-            focusedReducer = focused =>
+            focusedReducer = (focused) =>
                 focused < 1
                     ? this.state.displayFilters.length - offset
                     : focused - 1
         } else {
-            focusedReducer = focused =>
+            focusedReducer = (focused) =>
                 focused === this.state.displayFilters.length - offset
                     ? 0
                     : focused + 1
         }
 
-        this.setState(state => ({
+        this.setState((state) => ({
             ...state,
             focused: focusedReducer(state.focused),
         }))
@@ -387,7 +390,7 @@ class AddListDropdownContainer extends Component<Props, State> {
             : this.state.displayFilters
 
         this.setState(
-            state => ({ ...state, searchVal, displayFilters }),
+            (state) => ({ ...state, searchVal, displayFilters }),
             this.fetchListSuggestions, // Debounced suggestion fetch
         )
     }
@@ -431,12 +434,13 @@ class AddListDropdownContainer extends Component<Props, State> {
                 onTagSearchChange={this.handleSearchChange}
                 onTagSearchSpecialKeyHandlers={[
                     {
-                        test: e => e.key === 'ArrowDown' || e.key === 'ArrowUp',
-                        handle: e => this.handleSearchArrowPress(e),
+                        test: (e) =>
+                            e.key === 'ArrowDown' || e.key === 'ArrowUp',
+                        handle: (e) => this.handleSearchArrowPress(e),
                     },
                     {
-                        test: e => e.key === 'Enter',
-                        handle: e => this.handleSearchEnterPress(e),
+                        test: (e) => e.key === 'Enter',
+                        handle: (e) => this.handleSearchEnterPress(e),
                     },
                 ]}
                 setInputRef={this.setInputRef}

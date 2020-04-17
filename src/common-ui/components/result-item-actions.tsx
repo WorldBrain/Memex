@@ -32,7 +32,7 @@ class ResultItemActions extends PureComponent<Props> {
             >
                 <div
                     className={styles.buttonsContainer}
-                    onClick={e => {
+                    onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
                     }}

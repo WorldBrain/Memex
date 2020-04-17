@@ -38,7 +38,7 @@ export default class CustomListBackground {
 
         this.remoteFunctions = {
             createCustomList: bindMethod(this, 'createCustomList'),
-            insertPageToList: async params => {
+            insertPageToList: async (params) => {
                 const currentTab = await this.options.queryTabs?.({
                     active: true,
                     currentWindow: true,
@@ -104,10 +104,10 @@ export default class CustomListBackground {
             }
         }
 
-        const missing = names.filter(name => !existingLists.has(name))
+        const missing = names.filter((name) => !existingLists.has(name))
 
         const missingEntries = await Promise.all(
-            missing.map(async name => {
+            missing.map(async (name) => {
                 let id: number
                 try {
                     id = await this.createCustomList({ name })
@@ -121,7 +121,7 @@ export default class CustomListBackground {
 
         const listIds = new Map([...existingLists, ...missingEntries])
 
-        return names.map(name => listIds.get(name))
+        return names.map((name) => listIds.get(name))
     }
 
     async fetchListPagesById({ id }: { id: number }) {
@@ -282,7 +282,7 @@ export default class CustomListBackground {
         }
 
         await Promise.all(
-            tabs.map(tab =>
+            tabs.map((tab) =>
                 this.storage.removePageFromList({
                     listId,
                     pageUrl: normalizeUrl(tab.url),

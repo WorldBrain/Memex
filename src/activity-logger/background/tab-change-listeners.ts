@@ -97,13 +97,13 @@ export default class TabChangeListeners {
         if (!indexers) {
             this.tabIndexers.set(tabId, {
                 favIcon: throttle(
-                    tab => this._handleFavIcon(tabId, {}, tab),
+                    (tab) => this._handleFavIcon(tabId, {}, tab),
                     TabChangeListeners.FAV_ICON_CHANGE_THRESHOLD,
                     { leading: false },
                 ),
                 page: throttle(
-                    tab =>
-                        this._handleVisitIndexing(tabId, tab).catch(err => {
+                    (tab) =>
+                        this._handleVisitIndexing(tabId, tab).catch((err) => {
                             Raven.captureException(err)
                         }),
                     TabChangeListeners.URL_CHANGE_THRESHOLD,

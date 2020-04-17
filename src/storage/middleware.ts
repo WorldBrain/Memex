@@ -16,16 +16,16 @@ export async function setStorageMiddleware(
     },
 ) {
     const modifyMiddleware =
-        options.modifyMiddleware ?? (middleware => middleware)
+        options.modifyMiddleware ?? ((middleware) => middleware)
 
     const syncedCollections = new Set(SYNCED_COLLECTIONS)
     storageManager.setMiddleware(
         modifyMiddleware([
             new ChangeWatchMiddleware({
                 storageManager,
-                shouldWatchCollection: collection =>
+                shouldWatchCollection: (collection) =>
                     syncedCollections.has(collection),
-                postprocessOperation: async event => {
+                postprocessOperation: async (event) => {
                     await options.storexHub.handlePostStorageChange(event)
                 },
             }),

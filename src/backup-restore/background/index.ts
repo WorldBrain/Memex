@@ -149,7 +149,7 @@ export class BackupBackgroundModule {
                     this.setupRequestInterceptor()
                     this.initBackendDependants()
                 },
-                getBackendLocation: async info => {
+                getBackendLocation: async (info) => {
                     this.backendLocation = await this.backendSelect.restoreBackendLocation()
                     return this.backendLocation
                 },

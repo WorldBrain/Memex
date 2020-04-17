@@ -31,7 +31,7 @@ export default class OnboardingStep extends React.PureComponent<Props> {
             return (
                 <div className={styles.startingPage}>
                     <div className={styles.stepContainer}>
-                         <div className={styles.featureImageArea}>
+                        <div className={styles.featureImageArea}>
                             {this.props.renderImage()}
                         </div>
                         <h1 className={this.headerClassName}>
@@ -40,7 +40,7 @@ export default class OnboardingStep extends React.PureComponent<Props> {
                         <div className={styles.subTitle}>
                             {this.props.subtitleText}
                         </div>
-                        <div className={styles.whiteSpace30}/>
+                        <div className={styles.whiteSpace30} />
                     </div>
                     <div className={styles.navigation}>
                         {this.props.renderButton()}
@@ -61,11 +61,11 @@ export default class OnboardingStep extends React.PureComponent<Props> {
                         <div className={styles.subTitle2}>
                             {this.props.subtitleText2}
                         </div>
-                        <div className={styles.whiteSpace30}/>
+                        <div className={styles.whiteSpace30} />
                         <div>{this.props.children}</div>
                     </div>
-                    <div className={styles.whiteSpace30}/>
-                    <div className={styles.whiteSpace30}/>
+                    <div className={styles.whiteSpace30} />
+                    <div className={styles.whiteSpace30} />
                     <div className={styles.navigation}>
                         {this.props.renderButton()}
                     </div>
@@ -73,38 +73,36 @@ export default class OnboardingStep extends React.PureComponent<Props> {
             )
         }
         return (
-                <div className={styles.featuresContainer}>
-                    <div className={styles.titleContainer}>
-                        <div className={styles.title}>
-                            {this.props.titleText}
-                        </div>
-                        <div className={styles.subTitle}>
-                            {this.props.subtitleText}
-                        </div>
-                        <div className={styles.subTitle2}>
-                            {this.props.subtitleText2}
-                        </div>
-                        <div className={styles.settingsContainer}>
+            <div className={styles.featuresContainer}>
+                <div className={styles.titleContainer}>
+                    <div className={styles.title}>{this.props.titleText}</div>
+                    <div className={styles.subTitle}>
+                        {this.props.subtitleText}
+                    </div>
+                    <div className={styles.subTitle2}>
+                        {this.props.subtitleText2}
+                    </div>
+                    <div className={styles.settingsContainer}>
                         <div className={styles.settingsAction}>
                             {this.props.children}
                         </div>
                     </div>
+                </div>
+                <div className={styles.bottomContainer}>
+                    <div className={styles.backButtonArea} />
+                    <div className={styles.featureImageArea}>
+                        {this.props.renderImage()}
                     </div>
-                    <div className={styles.bottomContainer}>
-                        <div className={styles.backButtonArea}/>
-                        <div className={styles.featureImageArea}>
-                            {this.props.renderImage()}
-                        </div>
-                        <div className={styles.nextButtonArea}>
-                            {this.props.renderButton()}
-                            <ProgressStepContainer
-                                onStepClick={this.props.goToStep}
-                                totalSteps={this.props.totalSteps}
-                                currentStep={this.props.currentStep}
-                            />
-                        </div>
+                    <div className={styles.nextButtonArea}>
+                        {this.props.renderButton()}
+                        <ProgressStepContainer
+                            onStepClick={this.props.goToStep}
+                            totalSteps={this.props.totalSteps}
+                            currentStep={this.props.currentStep}
+                        />
                     </div>
                 </div>
+            </div>
         )
     }
 }

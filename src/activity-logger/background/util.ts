@@ -8,7 +8,7 @@ import { browser, Windows, Tabs } from 'webextension-polyfill-ts'
  * Combines all "loggable" conditions for logging on given tab data to determine
  * whether or not a tab should be logged.
  */
-export const shouldLogTab: LoggableTabChecker = async function({ url }) {
+export const shouldLogTab: LoggableTabChecker = async function ({ url }) {
     // Short-circuit before async logic, if possible
     if (!url || !isLoggable({ url })) {
         return false
@@ -39,7 +39,7 @@ export const updateVisitInteractionData: VisitInteractionUpdater = (
             scrollPerc: scrollState.percent,
             scrollMaxPerc: scrollState.maxPercent,
         })
-        .catch(f => f)
+        .catch((f) => f)
 }
 
 export async function getOpenTabsInCurrentWindow(
@@ -47,6 +47,6 @@ export async function getOpenTabsInCurrentWindow(
     queryTabs: Tabs.Static['query'],
 ): Promise<Array<{ tabId: number; url: string }>> {
     return (await queryTabs({ windowId: windows.WINDOW_ID_CURRENT }))
-        .map(tab => ({ tabId: tab.id, url: tab.url }))
-        .filter(tab => tab.tabId !== browser.tabs.TAB_ID_NONE)
+        .map((tab) => ({ tabId: tab.id, url: tab.url }))
+        .filter((tab) => tab.tabId !== browser.tabs.TAB_ID_NONE)
 }

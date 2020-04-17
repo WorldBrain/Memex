@@ -23,14 +23,14 @@ import { output } from './config'
 /**
  * @param {boolean} tslint Denotes whether or not to enable linting on this thread as well as type checking.
  */
-const initTsPlugin = tslint =>
+const initTsPlugin = (tslint) =>
     new ForkTsPlugin({
         checkSyntacticErrors: true,
         async: false,
         tslint,
     })
 
-export default function({
+export default function ({
     webExtReloadPort = 9090,
     mode = 'development',
     template,
@@ -70,7 +70,13 @@ export default function({
 
     if (mode === 'development') {
         plugins.push(
-            new HardSourcePlugin(),
+            new HardSourcePlugin({
+                environmentHash: {
+                    root: process.cwd(),
+                    directories: [],
+                    files: ['package-lock.json', 'yarn.lock', '.env'],
+                },
+            }),
             // new WebExtReloadPlugin({
             //     port: webExtReloadPort,
             // }),

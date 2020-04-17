@@ -69,7 +69,7 @@ const runSuite = (DATA: TestData, skip = false) => () => {
         await promise
 
         // Should all be marked as finished now (we awaited the progress to complete)
-        progress.processors.forEach(proc =>
+        progress.processors.forEach((proc) =>
             expect(proc).toMatchObject({ finished: true, cancelled: false }),
         )
 
@@ -100,7 +100,7 @@ const runSuite = (DATA: TestData, skip = false) => () => {
 
         // Processors should all be marked as cancelled + unfinished now
         expect(progress.processors.length).toBeLessThanOrEqual(concurrency)
-        progress.processors.forEach(proc =>
+        progress.processors.forEach((proc) =>
             expect(proc).toMatchObject({ finished: false, cancelled: true }),
         )
 
@@ -127,7 +127,7 @@ const runSuite = (DATA: TestData, skip = false) => () => {
         await progress.start() // Restart and wait for completion
 
         // Run all the same "full progress" tests; should all pass same as if progress wasn't interrupted
-        progress.processors.forEach(proc =>
+        progress.processors.forEach((proc) =>
             expect(proc).toMatchObject({ finished: true, cancelled: false }),
         )
         const numProcessed =

@@ -74,7 +74,7 @@ export default class AnnotationsManager {
         const uniqueUrl = await this._createAnnotationRPC(annotation)
 
         // Write tags to database.
-        tags.forEach(async tag => {
+        tags.forEach(async (tag) => {
             await this._addAnnotationTagRPC({ tag, url: uniqueUrl })
         })
 
@@ -107,12 +107,12 @@ export default class AnnotationsManager {
         )
 
         return Promise.all(
-            annotationsWithoutTags.map(async annotation => {
+            annotationsWithoutTags.map(async (annotation) => {
                 const annotationTags: {
                     name: string
                     url: string
                 }[] = await this._getTagsByAnnotationUrlRPC(annotation.url)
-                const tags = annotationTags.map(tag => tag.name)
+                const tags = annotationTags.map((tag) => tag.name)
                 return {
                     ...annotation,
                     tags,
@@ -153,8 +153,8 @@ export default class AnnotationsManager {
 
         if (tagsToBeAdded) {
             analytics.trackEvent({
-                category: 'Tag',
-                action: 'addToExistingAnnotation',
+                category: 'Tags',
+                action: 'createForAnnotation',
             })
         }
     }

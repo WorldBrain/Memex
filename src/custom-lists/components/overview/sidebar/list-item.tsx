@@ -1,6 +1,8 @@
 import React, { Component, DragEventHandler } from 'react'
 import cx from 'classnames'
 
+import analytics from 'src/analytics'
+
 const styles = require('./list-item.css')
 
 export interface Props {
@@ -70,31 +72,31 @@ class ListItem extends Component<Props, State> {
     }
 
     private handleMouseEnter = () => {
-        this.setState(state => ({
+        this.setState((state) => ({
             isMouseInside: true,
         }))
     }
 
     private handleMouseLeave = () => {
-        this.setState(state => ({
+        this.setState((state) => ({
             isMouseInside: false,
         }))
     }
 
-    private handleDragOver = e => {
+    private handleDragOver = (e) => {
         e.preventDefault()
-        this.setState(state => ({
+        this.setState((state) => ({
             isDragInside: true,
         }))
     }
 
     private handleDragLeave = () => {
-        this.setState(state => ({
+        this.setState((state) => ({
             isDragInside: false,
         }))
     }
 
-    private handleDrop: DragEventHandler = e => {
+    private handleDrop: DragEventHandler = (e) => {
         e.preventDefault()
         this.handleDragLeave()
         // const url = e.dataTransfer.getData('URL')
@@ -102,20 +104,26 @@ class ListItem extends Component<Props, State> {
         const { url, isSocialPost } = JSON.parse(
             e.dataTransfer.getData('text/plain'),
         )
+
+        analytics.trackEvent({
+            category: 'Collections',
+            action: 'addPageViaDragAndDrop',
+        })
+
         // this.props.resetUrlDragged()
         this.props.onAddPageToList(url, isSocialPost)
     }
 
-    private handleEditBtnClick: React.MouseEventHandler<
-        HTMLButtonElement
-    > = e => {
+    private handleEditBtnClick: React.MouseEventHandler<HTMLButtonElement> = (
+        e,
+    ) => {
         e.stopPropagation()
         this.props.onEditButtonClick(e)
     }
 
-    private handleCrossBtnClick: React.MouseEventHandler<
-        HTMLButtonElement
-    > = e => {
+    private handleCrossBtnClick: React.MouseEventHandler<HTMLButtonElement> = (
+        e,
+    ) => {
         e.stopPropagation()
         this.props.onCrossButtonClick(e)
     }
@@ -139,7 +147,7 @@ class ListItem extends Component<Props, State> {
                             <button
                                 className={cx(styles.editButton, styles.button)}
                                 onClick={this.handleEditBtnClick}
-                                title={"Edit"}
+                                title={'Edit'}
                             />
                             <button
                                 className={cx(
@@ -147,7 +155,7 @@ class ListItem extends Component<Props, State> {
                                     styles.button,
                                 )}
                                 onClick={this.handleCrossBtnClick}
-                                title={"Delete"}
+                                title={'Delete'}
                             />
                         </React.Fragment>
                     )}

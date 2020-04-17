@@ -53,6 +53,7 @@ async function main() {
     const backgroundModules = createBackgroundModules({
         getSharedSyncLog: null,
         signalTransportFactory: null,
+        analyticsManager: null,
         storageManager,
         localStorageChangesManager: null,
         browserAPIs: {

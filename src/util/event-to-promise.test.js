@@ -18,7 +18,7 @@ class MockEvent {
     }
 
     trigger(...args) {
-        this.listeners.forEach(listener => listener.apply(null, args))
+        this.listeners.forEach((listener) => listener.apply(null, args))
     }
 }
 

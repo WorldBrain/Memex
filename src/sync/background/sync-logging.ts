@@ -2,7 +2,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import { SyncChangeInfoPreprocessor } from '@worldbrain/storex-sync/lib/logging-middleware'
 import { isTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 
-export const filterSyncLog: SyncChangeInfoPreprocessor = async changeInfo => {
+export const filterSyncLog: SyncChangeInfoPreprocessor = async (changeInfo) => {
     const removeTermFields = (object: any, collection: string) => {
         for (const field of Object.keys(object)) {
             if (isTermsField({ collection, field })) {

@@ -59,7 +59,7 @@ export const toggleListFilterIndex = createAction(
 
 export const setUrlDragged = createAction(
     'custom-lists/setUrlDragged',
-    url => url,
+    (url) => url,
 )
 export const resetUrlDragged = createAction('custom-lists/resetUrlDragged')
 export const closeCreateListForm = createAction(
@@ -78,7 +78,7 @@ export const removeCommonNameWarning = createAction(
     'custom-lists/removeCommonNameWarning',
 )
 
-export const showEditBox = index => (dispatch, getState) => {
+export const showEditBox = (index) => (dispatch, getState) => {
     const activeListIndex = selectors.activeListIndex(getState())
     if (activeListIndex === index) {
         dispatch(resetActiveListIndex())
@@ -182,12 +182,9 @@ export const deletePageList = () => async (dispatch, getState) => {
     }
 }
 
-export const addUrltoList = (
-    url,
-    isSocialPost,
-    index,
-    id,
-) => async dispatch => {
+export const addUrltoList = (url, isSocialPost, index, id) => async (
+    dispatch,
+) => {
     const addPagetoListRPC = isSocialPost ? 'addPostToList' : 'insertPageToList'
 
     try {

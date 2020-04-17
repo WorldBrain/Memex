@@ -156,17 +156,11 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
 
     private logoImage = () => (
-        <img
-            src={'/img/memexLogo.svg'}
-            className={styles.logoImg}
-        />
+        <img src={'/img/memexLogo.svg'} className={styles.logoImg} />
     )
 
     private privacyImg = () => (
-        <img
-            src={'/img/privacy.svg'}
-            className={styles.privacyImg}
-        />
+        <img src={'/img/privacy.svg'} className={styles.privacyImg} />
     )
 
     private handleTrackingToggle = () => {
@@ -456,7 +450,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         />
                     </OnboardingStep>
                 )
-                case 7:
+            case 7:
                 return (
                     <OnboardingStep
                         privacyStep

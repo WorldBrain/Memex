@@ -16,6 +16,7 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { highlightAnnotations } from 'src/annotations'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
+import analytics from 'src/analytics'
 const styles = require('./ribbon.css')
 
 export interface Props {
@@ -76,7 +77,7 @@ class Ribbon extends Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.shortcutsData = new Map(
-            props.shortcutsData.map(s => [s.name, s]) as [
+            props.shortcutsData.map((s) => [s.name, s]) as [
                 string,
                 ShortcutElData,
             ][],
@@ -116,9 +117,9 @@ class Ribbon extends Component<Props, State> {
         }
     }
 
-    private handleSearchEnterPress: KeyboardEventHandler<
-        HTMLInputElement
-    > = event => {
+    private handleSearchEnterPress: KeyboardEventHandler<HTMLInputElement> = (
+        event,
+    ) => {
         const queryFilters = extractQueryFilters(this.props.searchValue)
         const queryParams = qs.stringify(queryFilters)
 
@@ -171,7 +172,7 @@ class Ribbon extends Component<Props, State> {
 
         return (
             <div
-                ref={ref => (this.ribbonRef = ref)}
+                ref={(ref) => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
                     [styles.ribbonExpanded]: this.props.isExpanded,
                     [styles.ribbonSidebarOpen]: this.props.isSidebarOpen,
@@ -196,9 +197,13 @@ class Ribbon extends Component<Props, State> {
                                             styles.button,
                                             styles.cancel,
                                         )}
-                                        onClick={() =>
+                                        onClick={() => {
+                                            analytics.trackEvent({
+                                                category: 'Sidebar',
+                                                action: 'disableTemporarily',
+                                            })
                                             this.props.handleRemoveRibbon()
-                                        }
+                                        }}
                                     />
                                 </ButtonTooltip>
                                 <ButtonTooltip
@@ -276,10 +281,10 @@ class Ribbon extends Component<Props, State> {
                                                     }
                                                     specialHandlers={[
                                                         {
-                                                            test: e =>
+                                                            test: (e) =>
                                                                 e.key ===
                                                                 'Enter',
-                                                            handle: e =>
+                                                            handle: (e) =>
                                                                 this.handleSearchEnterPress(
                                                                     e,
                                                                 ),

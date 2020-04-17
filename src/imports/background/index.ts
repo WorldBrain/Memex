@@ -21,7 +21,7 @@ export function setupImportBackgroundModule(options: {
     })
 
     // Allow content-script or UI to connect and communicate control of imports
-    browser.runtime.onConnect.addListener(port => {
+    browser.runtime.onConnect.addListener((port) => {
         // Make sure to only handle connection logic for imports (allows other use of runtime.connect)
         if (port.name === MAIN_CONN) {
             return new ConnHandler({ port, ...options })

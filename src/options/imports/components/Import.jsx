@@ -57,6 +57,9 @@ const Import = ({
                                 <b>worldbrain.io/import_bug</b>
                             </a>{' '}
                             to fix it.
+                            <br />
+                            It can also happen that virtually all URLs fail.
+                            Restart your extension and start over.
                         </Warning>
                     </div>
                 </div>
