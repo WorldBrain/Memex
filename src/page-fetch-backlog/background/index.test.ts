@@ -9,7 +9,7 @@ import { FetchPageDataError } from 'src/page-analysis/background/fetch-page-data
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import delay from 'src/util/delay'
 
-const DEF_PROC_INTERVAL = 500
+const DEF_PROC_INTERVAL = 100
 const DEF_RETRY_LIMIT = 4
 
 const mockTempFailurePageFetcher = ({ url }) => ({
