@@ -189,10 +189,10 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
             'mouseenter',
             this.handleRibbonMouseEnter,
         )
-        this.ribbonRef.addEventListener(
-            'mouseleave',
-            this.handleRibbonMouseLeave,
-        )
+        // this.ribbonRef.addEventListener(
+        //     'mouseleave',
+        //     this.handleRibbonMouseLeave,
+        // )
 
         this.containerRef.addEventListener('mouseenter', this.handleMouseEnter)
         this.containerRef.addEventListener('mouseleave', this.handleMouseLeave)
