@@ -7,7 +7,7 @@ const commentAdd = browser.extension.getURL('/img/comment_add.svg')
 const styles = require('./search-type-switch.css')
 
 export interface StateProps {
-    annotsFolded: boolean
+    allAnnotationsExpanded: boolean
     resultsSearchType: 'page' | 'notes' | 'social'
     searchType: 'notes' | 'page' | 'social'
     pageType: 'page' | 'all'
@@ -16,7 +16,7 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
-    handleUnfoldAllClick: React.MouseEventHandler<HTMLButtonElement>
+    handleAllAnnotationsFoldToggle: React.MouseEventHandler<HTMLButtonElement>
     setSearchType: (value: 'notes' | 'page' | 'social') => void
     setPageType: (value: 'page' | 'all') => void
     setResultsSearchType: (value: 'page' | 'notes' | 'social') => void
@@ -36,7 +36,7 @@ export default class SearchTypeSwitch extends React.PureComponent<
     SearchTypeSwitchProps
 > {
     get unfoldBtnText() {
-        return this.props.annotsFolded ? 'Fold All' : 'Unfold All'
+        return this.props.allAnnotationsExpanded ? 'Fold All' : 'Unfold All'
     }
 
     get isPageSearch() {
@@ -187,7 +187,8 @@ export default class SearchTypeSwitch extends React.PureComponent<
                                                 styles.btn,
                                             )}
                                             onClick={
-                                                this.props.handleUnfoldAllClick
+                                                this.props
+                                                    .handleAllAnnotationsFoldToggle
                                             }
                                             disabled={this.isPageSearch}
                                         >

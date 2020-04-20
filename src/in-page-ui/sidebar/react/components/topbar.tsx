@@ -53,7 +53,7 @@ const Topbar = ({
                     onSearchEnter={props.handleSearchEnter}
                     onClearBtn={props.handleClearBtn}
                 />
-                <button
+                {/* <button
                     onClick={props.handleFilterBtnClick}
                     className={cx(styles.filterButton, {
                         [styles.filterButtonActive]: props.showClearFiltersBtn,
@@ -71,7 +71,7 @@ const Topbar = ({
                             />
                         </ButtonTooltip>
                     )}
-                </button>
+                </button> */}
             </React.Fragment>
         )}
         {props.env === 'overview' && (

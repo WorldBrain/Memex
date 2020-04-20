@@ -84,6 +84,7 @@ export default class SidebarContainer extends StatefulUIElement<
                     }),
             }
         }
+        // console.log(this.state)
 
         return (
             <Sidebar
@@ -94,17 +95,17 @@ export default class SidebarContainer extends StatefulUIElement<
                 pageAnnotations={{
                     env: this.props.env,
                     highlighter: this.props.highlighter,
-                    needsWaypoint: this.state.needsWaypoint,
+                    needsWaypoint: false,
                     annotations: this.state.annotations,
                     annotationModes: this.state.annotationModes.pageAnnotations,
-                    activeAnnotationUrl: this.state.activeAnnotationUrl,
-                    hoverAnnotationUrl: this.state.hoverAnnotationUrl,
-                    appendLoader: this.state.appendLoader,
+                    activeAnnotationUrl: '',
+                    hoverAnnotationUrl: this.state.hoverAnnotationUrl
+                        .pageAnnotations,
+                    appendLoader: false,
                     annotationEventHandlers: createAnnotationEventHandlers(
                         'pageAnnotations',
                     ),
-                    handleScrollPagination: () =>
-                        console.log('handleScrollPagination'),
+                    handleScrollPagination: () => {},
                     showCongratsMessage: this.state.showCongratsMessage,
                 }}
                 highlighter={this.props.highlighter}
@@ -187,10 +188,10 @@ export default class SidebarContainer extends StatefulUIElement<
                     // this.processEvent('closeComments', null),
                 }}
                 resultsContainer={{
-                    needsWaypoint: this.state.needsWaypoint,
+                    needsWaypoint: false,
                     noResults: this.state.noResults,
                     isBadTerm: this.state.isBadTerm,
-                    areAnnotationsExpanded: this.state.areAnnotationsExpanded,
+                    areAnnotationsExpanded: this.state.allAnnotationsExpanded,
                     shouldShowCount: this.state.shouldShowCount,
                     isInvalidSearch: this.state.isInvalidSearch,
                     totalResultCount: this.state.totalResultCount,
@@ -217,8 +218,8 @@ export default class SidebarContainer extends StatefulUIElement<
                     resetUrlDragged: () => {},
                     resetActiveTagIndex: () => {},
                     setUrlDragged: (url: string) => {},
-                    addTag: (i: number) => (f: string) => {},
-                    delTag: (i: number) => (f: string) => {},
+                    addTag: (i: number) => (filter: string) => {},
+                    delTag: (i: number) => (filter: string) => {},
                     handlePillClick: (tag: string) => () =>
                         console.log('handlePillClick'),
                     handleTagBtnClick: (i: number) => () =>
@@ -233,13 +234,14 @@ export default class SidebarContainer extends StatefulUIElement<
                         console.log('handleTrashBtnClick'),
                 }}
                 searchTypeSwitch={{
-                    annotsFolded: this.state.annotsFolded,
+                    allAnnotationsExpanded: this.state.allAnnotationsExpanded,
                     resultsSearchType: this.state.searchType,
                     searchType: this.state.searchType,
                     pageType: this.state.pageType,
                     pageCount: this.state.pageCount,
                     annotCount: this.state.annotCount,
-                    handleUnfoldAllClick: () => {},
+                    handleAllAnnotationsFoldToggle: () =>
+                        this.processEvent('toggleAllAnnotationsFold', null),
                     setSearchType: (type: 'notes' | 'page') =>
                         this.processEvent('setSearchType', { type }),
                     setPageType: (type: 'page' | 'all') =>

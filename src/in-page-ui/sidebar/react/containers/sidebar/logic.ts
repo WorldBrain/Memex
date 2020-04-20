@@ -21,14 +21,20 @@ export interface SidebarContainerState {
     searchLoadState: TaskState
 
     state: 'visible' | 'hidden'
-    needsWaypoint: boolean
-    appendLoader: boolean
+    // needsWaypoint: boolean
+    // appendLoader: boolean
 
     annotations: Annotation[]
     annotationModes: {
         [context in AnnotationEventContext]: {
             [annotationUrl: string]: AnnotationMode
         }
+    }
+    // activeAnnotationUrl: {
+    //     [context in AnnotationEventContext]: string
+    // }
+    hoverAnnotationUrl: {
+        [context in AnnotationEventContext]: string
     }
 
     showCommentBox: boolean
@@ -63,8 +69,6 @@ export interface SidebarContainerState {
 
     // Everything below here is temporary
 
-    activeAnnotationUrl: string
-    hoverAnnotationUrl: string
     showCongratsMessage: boolean
     showClearFiltersBtn: boolean
     isSocialPost: boolean
@@ -73,16 +77,15 @@ export interface SidebarContainerState {
     // Filter sidebar props
     showFiltersSidebar: boolean
     showSocialSearch: boolean
-    annotsFolded: boolean
     // resultsSearchType: 'page' | 'notes' | 'social'
 
     annotCount?: number
 
     // Search result props
-    areAnnotationsExpanded: boolean
     shouldShowCount: boolean
     isInvalidSearch: boolean
     totalResultCount: number
+    allAnnotationsExpanded: boolean
 
     isListFilterActive: boolean
     isSocialSearch: boolean
@@ -146,6 +149,7 @@ export type SidebarContainerEvents = UIEvent<{
     setSearchType: { type: 'notes' | 'page' | 'social' }
     setResultsSearchType: { type: 'notes' | 'page' | 'social' }
     setAnnotationsExpanded: { value: boolean }
+    toggleAllAnnotationsFold: null
     clearAllFilters: null
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
@@ -236,13 +240,13 @@ export class SidebarContainerLogic extends UILogic<
             // searchType: 'page',
             // resultsSearchType: 'page',
 
-            annotsFolded: false,
+            allAnnotationsExpanded: false,
             isSocialPost: false,
-            needsWaypoint: false,
-            appendLoader: false,
+            // needsWaypoint: false,
+            // appendLoader: false,
             annotations: [],
-            activeAnnotationUrl: '',
-            hoverAnnotationUrl: '',
+            // activeAnnotationUrl: { pageAnnotations: '', searchResults: ''},
+            hoverAnnotationUrl: { pageAnnotations: '', searchResults: '' },
             showCommentBox: false,
             searchValue: '',
             showCongratsMessage: false,
@@ -254,7 +258,6 @@ export class SidebarContainerLogic extends UILogic<
             annotCount: 0,
             noResults: false,
             isBadTerm: false,
-            areAnnotationsExpanded: false,
             shouldShowCount: false,
             isInvalidSearch: false,
             totalResultCount: 0,
@@ -480,6 +483,10 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    // annotationMouseEnter: EventHandler<'annotationMouseEnter'> = incoming => {
+    //     return { hoverAnnotationUrl}
+    // }
+
     changeSearchQuery: EventHandler<'changeSearchQuery'> = incoming => {
         return {
             searchValue: { $set: incoming.event.searchQuery },
@@ -536,6 +543,28 @@ export class SidebarContainerLogic extends UILogic<
 
     toggleShowFilters: EventHandler<'toggleShowFilters'> = incoming => {
         return { showFiltersSidebar: { $apply: show => !show } }
+    }
+
+    toggleAllAnnotationsFold: EventHandler<
+        'toggleAllAnnotationsFold'
+    > = incoming => {
+        return { allAnnotationsExpanded: { $apply: value => !value } }
+    }
+
+    annotationMouseEnter: EventHandler<'annotationMouseEnter'> = incoming => {
+        return {
+            hoverAnnotationUrl: {
+                [incoming.event.context]: {
+                    $set: incoming.event.annnotationUrl,
+                },
+            },
+        }
+    }
+
+    annotationMouseLeave: EventHandler<'annotationMouseLeave'> = incoming => {
+        return {
+            hoverAnnotationUrl: { [incoming.event.context]: { $set: '' } },
+        }
     }
 
     async _maybeLoad(
