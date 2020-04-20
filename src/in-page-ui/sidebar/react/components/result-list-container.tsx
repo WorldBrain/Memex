@@ -15,7 +15,7 @@ import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
-import { AnnotationBoxEventProps } from './annotation-box/annotation-box'
+import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
 import { AnnotationMode } from '../types'
 
 const styles = require('./result-list.css')

@@ -11,7 +11,7 @@ import { SocialPage } from 'src/social-integration/types'
 import PageResultItem from 'src/common-ui/components/page-result-item'
 import SocialResultItem from 'src/common-ui/components/social-result-item'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
-import { AnnotationBoxEventProps } from './annotation-box/annotation-box'
+import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
 import { AnnotationMode } from '../types'
 
 const styles = require('./result-item.css')

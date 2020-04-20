@@ -1,13 +1,11 @@
 import * as React from 'react'
-import Waypoint from 'react-waypoint'
 import Menu from 'react-burger-menu/lib/menus/slide'
 
 import Topbar, { TopbarState } from './topbar'
-import CongratsMessage from './congrats-message'
-import EmptyMessage from './empty-message'
-import AnnotationBox from './annotation-box'
 import menuStyles from './menu-styles'
-import CommentBoxContainer, { CommentBoxProps } from './comment-box/comment-box'
+import CommentBoxContainer, {
+    CommentBoxProps,
+} from '../../../components/comment-box/comment-box'
 import { Page } from '../types'
 import FiltersSidebar, { FiltersSidebarProps } from './filters-sidebar'
 import ResultsContainer, { ResultsContainerProps } from './results-container'
@@ -18,10 +16,8 @@ import PageInfo from './page-info'
 import cx from 'classnames'
 import { Annotation } from 'src/annotations/types'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
-import { features } from 'src/util/remote-functions-background'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { TaskState } from 'ui-logic-core/lib/types'
-import { AnnotationBoxEventProps } from './annotation-box/annotation-box'
 import PageAnnotations, { PageAnnotationsProps } from './page-annotations'
 
 const styles = require('./sidebar.css')

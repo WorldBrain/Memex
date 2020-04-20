@@ -13,7 +13,6 @@ import { Result, ResultsByUrl } from 'src/overview/types'
 import { PageUrlsByDay } from 'src/search/background/types'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
-import { page } from 'src/sidebar-overlay/sidebar/selectors'
 
 export interface SidebarContainerState {
     loadState: TaskState
@@ -223,7 +222,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationLoadState: 'pristine',
             searchLoadState: 'pristine',
 
-            state: 'visible',
+            state: 'hidden',
             annotationModes: {
                 pageAnnotations: {},
                 searchResults: {},

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ClickHandler } from '../../types'
+import { ClickHandler } from '../../sidebar/react/types'
 import TagsContainer, { TagsContainerProps } from './tag-input'
 import { Tooltip } from 'src/common-ui/components'
 import { getLocalStorage } from 'src/util/storage'

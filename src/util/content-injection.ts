@@ -2,7 +2,7 @@
  * Injects a CSS stylesheet into the webpage.
  * @param {string} cssUrl URL of the stylesheet to inject
  */
-export function injectCSS(cssUrl: string, root: Element = null) {
+export function injectCSS(cssUrl: string, root: ShadowRoot | Element = null) {
     // Check if the css file is already present in the webpage
     const node = (root || document).querySelector(`link[href="${cssUrl}"]`)
     if (node) {

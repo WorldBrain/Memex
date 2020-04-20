@@ -1,12 +1,12 @@
 import React, { Component, MouseEventHandler } from 'react'
 import cx from 'classnames'
 
-import AnnotationBox from './annotation-box'
+import AnnotationBox from 'src/in-page-ui/components/annotation-box'
 
 import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 import { Annotation } from 'src/annotations/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
-import { AnnotationBoxEventProps } from './annotation-box/annotation-box'
+import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
 import { AnnotationMode } from '../types'
 
 const styles = require('./annotation-list.css')

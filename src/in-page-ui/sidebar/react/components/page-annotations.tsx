@@ -4,7 +4,7 @@ import { Annotation } from 'src/annotations/types'
 import AnnotationBox, {
     AnnotationBoxEventProps,
     AnnotationBoxGeneralProps,
-} from './annotation-box/annotation-box'
+} from 'src/in-page-ui/components/annotation-box/annotation-box'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { SidebarEnv, AnnotationMode } from '../types'
 import CongratsMessage from './congrats-message'
