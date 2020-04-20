@@ -27,22 +27,19 @@ interface OwnProps {
 
 type Props = StateProps & DispatchProps & OwnProps
 
+// N.B. this is used for creating new annotations
 class TagAnnotationContainer extends React.Component<Props> {
     handleTagsUpdate = async (_: string[], added: string, deleted: string) => {
-        // TODO: is it the case we don't need to update the backed here because the annotation tags are handled differently by some paren
-        // component or prop? Where's the URL / ID ?
-        // const backedResult = remoteFunction('editAnnotationTags')({ added, deleted, url: this.props.url})
         if (added) {
             this.props.onAnnotationTagAdd(added)
         }
         if (deleted) {
             return this.props.onAnnotationTagDel(deleted)
         }
-        // return backedResult
     }
 
     handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
-    fetchTagsForAnnotation = async () => [] // this.props.selected
+    fetchTagsForAnnotation = async () => this.props.tags
     fetchTagSuggestions = () => [
         ...new Set([
             ...this.props.initTagSuggestions,

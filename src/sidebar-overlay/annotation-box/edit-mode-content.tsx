@@ -6,6 +6,7 @@ import * as constants from '../comment-box/constants'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { Hover } from 'src/common-ui/components/design-library/Hover'
 
 const styles = require('./edit-mode-content.css')
 
@@ -101,20 +102,22 @@ class EditModeContent extends React.Component<Props, State> {
                 />
 
                 <div onKeyDown={this._handleTagInputKeydown}>
-                    <TagInput
-                        env={this.props.env}
-                        tags={this.state.tagsInput}
-                        initTagSuggestions={[
-                            ...new Set([
-                                ...this.state.tagsInput,
-                                ...this.state.tagSuggestions,
-                            ]),
-                        ]}
-                        isTagInputActive={this.state.isTagInputActive}
-                        setTagInputActive={this._setTagInputActive}
-                        addTag={this._addTag}
-                        deleteTag={this._deleteTag}
-                    />
+                    <Hover>
+                        <TagInput
+                            env={this.props.env}
+                            tags={this.state.tagsInput}
+                            initTagSuggestions={[
+                                ...new Set([
+                                    ...this.state.tagsInput,
+                                    ...this.state.tagSuggestions,
+                                ]),
+                            ]}
+                            isTagInputActive={this.state.isTagInputActive}
+                            setTagInputActive={this._setTagInputActive}
+                            addTag={this._addTag}
+                            deleteTag={this._deleteTag}
+                        />
+                    </Hover>
                 </div>
 
                 <AllModesFooter

@@ -24,7 +24,7 @@ import niceTime from 'src/util/nice-time'
 import { Annotation } from 'src/annotations/types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags } from 'src/util/remote-functions-background'
-import { Hover } from 'src/common-ui/components/design-library/Hover'
+import { HoverDashboard } from 'src/common-ui/components/design-library/Hover'
 
 const styles = require('./ResultList.css')
 
@@ -143,7 +143,7 @@ class ResultListContainer extends PureComponent<Props> {
         }
 
         return (
-            <Hover>
+            <HoverDashboard>
                 <div ref={ref => this.setTagDivRef(ref)}>
                     <TagPicker
                         onUpdateTagSelection={this.handleTagUpdate(index)}
@@ -159,7 +159,7 @@ class ResultListContainer extends PureComponent<Props> {
                         initialSelectedTags={() => selectedTags}
                     />
                 </div>
-            </Hover>
+            </HoverDashboard>
         )
     }
 
