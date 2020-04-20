@@ -111,11 +111,12 @@ export default class TagPickerLogic extends UILogic<
         this.searchInputRef?.focus()
     }
 
+    newTabKeys = ['Enter', ',', 'Tab']
     keyPress = ({
         event: { key },
         previousState,
     }: TagPickerUIEvent<'keyPress'>) => {
-        if (key === 'Enter') {
+        if (this.newTabKeys.includes(key)) {
             if (previousState.newTagName !== '' && !(this.focusIndex >= 0)) {
                 return this.newTagPress({
                     previousState,
@@ -133,13 +134,19 @@ export default class TagPickerLogic extends UILogic<
 
         if (key === 'ArrowUp') {
             if (this.focusIndex > -1) {
-                this._updateFocus(--this.focusIndex, previousState.displayTags)
+                return this._updateFocus(
+                    --this.focusIndex,
+                    previousState.displayTags,
+                )
             }
         }
 
         if (key === 'ArrowDown') {
             if (this.focusIndex < previousState.displayTags.length - 1) {
-                this._updateFocus(++this.focusIndex, previousState.displayTags)
+                return this._updateFocus(
+                    ++this.focusIndex,
+                    previousState.displayTags,
+                )
             }
         }
     }

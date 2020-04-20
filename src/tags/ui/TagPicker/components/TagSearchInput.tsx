@@ -17,10 +17,17 @@ interface State {
     isFocused: boolean
 }
 
-export type KeyEvent = 'Enter' | 'ArrowUp' | 'ArrowDown' | ',' | 'Backspace'
+export type KeyEvent =
+    | 'Enter'
+    | 'ArrowUp'
+    | 'ArrowDown'
+    | ','
+    | 'Tab'
+    | 'Backspace'
 
 export const keyEvents: KeyEvent[] = [
     'Enter',
+    'Tab',
     'ArrowUp',
     'ArrowDown',
     ',',
