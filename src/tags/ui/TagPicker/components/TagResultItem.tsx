@@ -1,4 +1,4 @@
-import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
+import { fontSizeSmallest } from 'src/common-ui/components/design-library/typography'
 import styled from 'styled-components'
 
 const backgroundHoverSelected = props => {
@@ -19,12 +19,14 @@ export const TagResultItem = styled.div`
         props.selected ? props.theme.tag.selected : props.theme.tag.tag};
     border: 2px solid
         ${props => (props.selected ? props.theme.tag.tag : 'transparent')};
-    border-radius: 5px;
+    border-radius: 4px;
     color: ${props => props.theme.tag.text};
     padding: 0 8px;
     margin: 2px 4px 2px 0;
-    font-size: ${fontSizeSmall}px;
+    font-weight: 400;
+    font-size: ${fontSizeSmallest}px;
     transition: all 0.1s;
+    word-break: break-word;
 
     &:hover {
         cursor: pointer;

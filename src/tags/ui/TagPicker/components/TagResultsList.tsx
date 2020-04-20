@@ -29,7 +29,7 @@ export default class TagResultsList extends React.Component<Props> {
 
 const StyledContainer = styled.div`
     overflow-y: auto;
-    max-height: 296px;
+    max-height: 280px;
 `
 const FilterHelp = styled.div`
     font-size: ${fontSizeSmall}px;

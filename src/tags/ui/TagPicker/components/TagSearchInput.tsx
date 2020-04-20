@@ -93,6 +93,7 @@ const SearchInput = styled(TextInputControlled)`
     color: ${props => props.theme.text};
     font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeSmall}px;
+    min-height: 24px;
 
     &:focus {
         border: none;

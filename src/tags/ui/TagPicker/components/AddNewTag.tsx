@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import styled from 'styled-components'
-import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
+import { fontSizeSmallest } from 'src/common-ui/components/design-library/typography'
 import { TagResultItem } from './TagResultItem'
 import { X as XIcon } from '@styled-icons/feather/X'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -34,9 +34,10 @@ export const AddNew = styled.div`
     align-items: start;
     display: flex;
     color: ${props => props.theme.text};
-    font-size: ${fontSizeSmall}px;
+    font-size: ${fontSizeSmallest}px;
     padding: 4px;
-    word-break: break-all;
+    font-weight: 400;
+    word-break: break-word;
     span {
         margin-right: 10px;
         min-width: 87px;
