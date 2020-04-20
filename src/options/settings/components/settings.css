@@ -19,6 +19,14 @@
     line-height: 22px;
     color: #3a2f45;
     font-size: 18px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.sectionTitleText {
+    display: flex;
+    align-items: center;
 }
 
 .subname {
@@ -88,4 +96,18 @@
 .subText {
     font-size: 14px;
     color: color6;
+}
+
+.betaPill {
+    width: 60px;
+    background-color: #5cd9a6;
+    color: #3a2f45;
+    height: 30px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 15px;
 }
