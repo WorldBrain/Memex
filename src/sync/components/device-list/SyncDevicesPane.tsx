@@ -262,7 +262,7 @@ class SyncDevicesPaneContainer extends React.Component<
                         Use an end2end encrypted connection to keep your devices
                         in sync.
                     </div>
-                    <div className={settingsStyle.infoText}>
+                    <div className={settingsStyle.infoTextSmall}>
                         <strong>This feature is in beta status. You may experience bugs. <a href="https://community.worldbrain.io/c/bug-reports" target="_blank">Let us know if you do!</a></strong>
                     </div>
                     <SyncDevicesPane

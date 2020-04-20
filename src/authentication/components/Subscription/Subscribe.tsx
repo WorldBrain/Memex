@@ -7,6 +7,9 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
+import {
+    hasValidPlan,
+} from '../../background/utils'
 import { auth } from 'src/util/remote-functions-background'
 const styles = require('../styles.css')
 
@@ -44,7 +47,7 @@ export class Subscribe extends React.PureComponent<Props> {
                     </div>
                 )}
 
-                {this.props.currentUser != null && (
+                {this.props.currentUser != null && !this.props.authorizedPlans && (
                     <div>
                         <PricingPlanTitle className={''}>
                             ⭐️ Upgrade to Memex Pro
@@ -58,6 +61,20 @@ export class Subscribe extends React.PureComponent<Props> {
                             💾 Automatic Backups
                         </PricingPlanItem>
 
+                        <WhiteSpacer30/>
+                        <SubscriptionOptionsChargebee
+                            user={this.props.currentUser}
+                            plans={this.props.authorizedPlans}
+                            onClose={this.handleClose}
+                            subscriptionChanged={this.handleSubscriptionChanged}
+                        />
+                    </div>)}
+
+                {this.props.currentUser != null && this.props.authorizedPlans && (
+                    <div>
+                        <PricingPlanTitle className={''}>
+                            💫 You're subscribed!
+                        </PricingPlanTitle>
                         <WhiteSpacer30/>
                         <SubscriptionOptionsChargebee
                             user={this.props.currentUser}

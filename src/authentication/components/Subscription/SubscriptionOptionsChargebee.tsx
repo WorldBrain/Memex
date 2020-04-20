@@ -7,6 +7,9 @@ import { auth } from 'src/util/remote-functions-background'
 import {
     PricingPlanTitle,
     PricingPlanItem,
+    PlanTitle,
+    PlanName,
+    PlanBox,
     LoginTitle,
     LoginButton,
     WhiteSpacer30,
@@ -154,7 +157,8 @@ export class SubscriptionOptionsChargebee extends React.Component<
                     <script src={chargeBeeScriptSource} />
                 </Helmet>
                 <div>
-                    <SubscriptionInnerOptions
+                    {!this.props.plans ?( 
+                        <SubscriptionInnerOptions
                         openCheckoutBackupMonthly={
                             this.openCheckoutBackupMonthly
                         }
@@ -162,11 +166,16 @@ export class SubscriptionOptionsChargebee extends React.Component<
                         openPortal={this.openPortal}
                         plans={this.props.plans}
                     />
-
+                    ):(
+                        <PlanBox>
+                            <PlanTitle>Your plan:{' '}</PlanTitle>
+                            <PlanName>{this.props.plans}</PlanName>
+                        </PlanBox>
+                    )}
                     <CenterText>
                         {this.state.subscribed && (
                             <PrimaryButton onClick={this.openPortal}>
-                                {'Existing Subscriptions'}
+                                {'Edit Subscriptions'}
                             </PrimaryButton>
                         )}
                     </CenterText>
