@@ -2,7 +2,7 @@ import expect from 'expect'
 import { fakeRemoteFunctions } from 'src/util/webextensionRPC'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
-import { FakeAnalytics } from 'src/analytics'
+import { FakeAnalytics } from 'src/analytics/mock'
 
 function setupTest() {
     const localStorage = new MemoryLocalStorage()

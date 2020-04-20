@@ -191,7 +191,8 @@ const mapDispatchToProps: MapDispatchToProps<
     handleHighlightsToggle: () => dispatch(actions.toggleHighlights()),
     handlePauseToggle: () => dispatch(pauseActs.togglePaused()),
     handleBookmarkToggle: () => dispatch(bookmarkActs.toggleBookmark()),
-    onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
+    onTagAdd: (tag: string) =>
+        dispatch(tagActs.addTagToPage(tag, { fromRibbon: true })),
     onTagDel: (tag: string) => dispatch(tagActs.deleteTag(tag)),
     onCollectionAdd: (collection: PageList) =>
         dispatch(collectionActs.addCollectionToPage(collection)),

@@ -153,8 +153,8 @@ export default class AnnotationsManager {
 
         if (tagsToBeAdded) {
             analytics.trackEvent({
-                category: 'Tag',
-                action: 'addToExistingAnnotation',
+                category: 'Tags',
+                action: 'createForAnnotation',
             })
         }
     }

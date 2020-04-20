@@ -25,8 +25,8 @@ export const togglePaused: () => Thunk = () => (dispatch, getState) => {
     const pauseTime = selectors.pauseTime(state)
 
     analytics.trackEvent({
-        category: 'Popup',
-        action: isPaused ? 'Resume indexing' : 'Pause indexing',
+        category: 'Settings',
+        action: isPaused ? 'resumeIndexingViaPopup' : 'pauseIndexingViaPopup',
         value: isPaused ? undefined : pauseTime,
     })
 

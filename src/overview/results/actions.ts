@@ -76,10 +76,8 @@ export const toggleBookmark: (args: {
     dispatch(changeHasBookmark(index))
 
     analytics.trackEvent({
-        category: 'Overview',
-        action: hasBookmark
-            ? 'Remove result bookmark'
-            : 'Create result bookmark',
+        category: 'Bookmarks',
+        action: hasBookmark ? 'deleteForPage' : 'createForPage',
     })
 
     processEventRPC({
@@ -169,22 +167,19 @@ export const getMoreResults: (fromOverview?: boolean) => Thunk = (
 
 // Analytics use
 function trackSearch(searchResult, overwrite, state) {
-    // Value should be set as # results (if non-default search)
-    const value =
-        overwrite && !searchBar.isEmptyQuery(state)
-            ? searchResult.totalCount
-            : undefined
-
-    let action =
-        searchResult.totalCount > 0
-            ? overwrite
-                ? 'Successful search'
-                : 'Paginate search'
-            : 'Unsuccessful search'
-
-    if (filters.onlyBookmarks(state)) {
-        action += ' (BM only)'
+    if (searchBar.isEmptyQuery(state)) {
+        return
     }
+
+    // Value should be set as # results (if non-default search)
+    const value = overwrite ? searchResult.totalCount : undefined
+
+    const action =
+        searchResult.docs.length > 0
+            ? overwrite
+                ? 'successViaOverview'
+                : 'paginateSearch'
+            : 'failViaOverview'
 
     const name = overwrite
         ? searchBar.queryParamsDisplay(state)

@@ -8,6 +8,7 @@ import {
 } from 'src/content-tooltip/utils'
 import { KeyboardShortcuts } from 'src/content-tooltip/types'
 import { shortcuts, ShortcutElData } from '../keyboard-shortcuts'
+import analytics from 'src/analytics'
 
 const styles = require('./settings.css')
 
@@ -42,13 +43,19 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
 
     handleEnabledToggle = async e => {
         const name = e.target.name as string
-        const value = e.target.checked as boolean
+        const enabled = e.target.checked as boolean
 
         const reducer = state => {
             if (name === 'shortcutsEnabled') {
-                return { shortcutsEnabled: value }
+                analytics.trackEvent({
+                    category: 'Settings',
+                    action: enabled
+                        ? 'enableKeyboardShortcuts'
+                        : 'disableKeyboardShortcuts',
+                })
+                return { shortcutsEnabled: enabled }
             }
-            return { [name]: { ...state[name], enabled: value } } as any
+            return { [name]: { ...state[name], enabled } } as any
         }
 
         this.setState(reducer, () =>

@@ -459,6 +459,13 @@
   dependencies:
     "@babel/types" "^7.7.4"
 
+"@babel/helper-split-export-declaration@^7.8.3":
+  version "7.8.3"
+  resolved "https://registry.yarnpkg.com/@babel/helper-split-export-declaration/-/helper-split-export-declaration-7.8.3.tgz#31a9f30070f91368a7182cf05f831781065fc7a9"
+  integrity sha512-3x3yOeyBhW851hroze7ElzdkeRXQYQbFIb7gLK1WQYsw2GWDay5gAJNw1sWJ0VFP6z5J1whqeXH/WCdCjZv6dA==
+  dependencies:
+    "@babel/types" "^7.8.3"
+
 "@babel/helper-validator-identifier@^7.9.0":
   version "7.9.0"
   resolved "https://registry.yarnpkg.com/@babel/helper-validator-identifier/-/helper-validator-identifier-7.9.0.tgz#ad53562a7fc29b3b9a91bbf7d10397fd146346ed"
@@ -7143,9 +7150,10 @@ cosmiconfig@^5.2.0, cosmiconfig@^5.2.1:
     js-yaml "^3.13.1"
     parse-json "^4.0.0"
 
-countly-sdk-web@^18.11.0:
-  version "18.11.0"
-  resolved "https://registry.yarnpkg.com/countly-sdk-web/-/countly-sdk-web-18.11.0.tgz#ab835a2b9f058a048ff2fe96ee1d558b1d4abf5d"
+countly-sdk-web@^19.8.0:
+  version "19.8.0"
+  resolved "https://registry.yarnpkg.com/countly-sdk-web/-/countly-sdk-web-19.8.0.tgz#7d769652f52acd03cfaace71a5bc8be33e77bf26"
+  integrity sha512-qRytPpAEBRujc9w+v9gsPoBSzCBL8czn7irMHJATljxO7vDiy/8uqG3ojthEf/B8rhJIZ/rvvjXPz8OT7kFJNg==
 
 crc32-stream@^2.0.0:
   version "2.0.0"
@@ -16012,10 +16020,10 @@ preserve@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
 
-prettier@^1.19.1:
-  version "1.19.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.19.1.tgz#f7d7f5ff8a9cd872a7be4ca142095956a60797cb"
-  integrity sha512-s7PoyDv/II1ObgQunCbB9PdLmUcBZcnWOcxDh7O0N/UwDEsHyqkW+Qh28jW+mVuCdx7gLB0BotYI1Y6uI9iyew==
+prettier@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.0.4.tgz#2d1bae173e355996ee355ec9830a7a1ee05457ef"
+  integrity sha512-SVJIQ51spzFDvh4fIbCLvciiDMCrRhlN3mbZvv/+ycjvmF5E73bKdGfU8QDLNmjYJf+lsGnDBC4UUnvTe5OO0w==
 
 pretty-error@^2.0.2, pretty-error@^2.1.1:
   version "2.1.1"
@@ -18201,14 +18209,6 @@ simple-peer@^9.5.0:
     inherits "^2.0.1"
     randombytes "^2.0.3"
     readable-stream "^3.4.0"
-
-simple-signalling@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/simple-signalling/-/simple-signalling-0.2.1.tgz#ec7645628b2e6d8839105d7fa800b7f4d8d3ffea"
-  integrity sha512-h/YhG0E2UNCxkm32AWAwvSTBE+a+kzXzlwDfv2QCnwyQN8EC3gSWTBKKArb46oTPS5fMV4S/LWSGoHnmncXf1w==
-  dependencies:
-    "@josephg/resolvable" "^1.0.0"
-    events "^3.0.0"
 
 simple-swizzle@^0.2.2:
   version "0.2.2"

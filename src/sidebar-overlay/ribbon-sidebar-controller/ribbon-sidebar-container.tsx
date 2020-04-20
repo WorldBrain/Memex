@@ -25,6 +25,7 @@ import { retryUntilErrorResolves } from 'src/util/retry-until'
 import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
 import { Annotation } from 'src/annotations/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
+import analytics from 'src/analytics'
 
 interface StateProps {
     url: string
@@ -309,9 +310,12 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         anchor = null,
         activeUrl,
     }: OpenSidebarArgs & { anchor: Anchor }) => {
-        await this.props.openSidebar({
-            activeUrl,
+        analytics.trackEvent({
+            category: 'Sidebar',
+            action: 'showSidebar',
         })
+
+        await this.props.openSidebar({ activeUrl })
 
         if (anchor) {
             this.props.openCommentBoxWithHighlight(anchor)

@@ -1,6 +1,8 @@
 import React, { Component, DragEventHandler } from 'react'
 import cx from 'classnames'
 
+import analytics from 'src/analytics'
+
 const styles = require('./list-item.css')
 
 export interface Props {
@@ -102,6 +104,12 @@ class ListItem extends Component<Props, State> {
         const { url, isSocialPost } = JSON.parse(
             e.dataTransfer.getData('text/plain'),
         )
+
+        analytics.trackEvent({
+            category: 'Collections',
+            action: 'addPageViaDragAndDrop',
+        })
+
         // this.props.resetUrlDragged()
         this.props.onAddPageToList(url, isSocialPost)
     }
@@ -139,7 +147,7 @@ class ListItem extends Component<Props, State> {
                             <button
                                 className={cx(styles.editButton, styles.button)}
                                 onClick={this.handleEditBtnClick}
-                                title={"Edit"}
+                                title={'Edit'}
                             />
                             <button
                                 className={cx(
@@ -147,7 +155,7 @@ class ListItem extends Component<Props, State> {
                                     styles.button,
                                 )}
                                 onClick={this.handleCrossBtnClick}
-                                title={"Delete"}
+                                title={'Delete'}
                             />
                         </React.Fragment>
                     )}

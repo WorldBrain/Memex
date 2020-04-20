@@ -142,7 +142,7 @@ export const stop = makePortMessagingThunk({
     cb: () => {
         analytics.trackEvent({
             category: 'Imports',
-            action: 'Cancel import',
+            action: 'cancel',
         })
 
         processEvent({
@@ -157,7 +157,7 @@ export const pause = makePortMessagingThunk({
     cb: () => {
         analytics.trackEvent({
             category: 'Imports',
-            action: 'Pause import',
+            action: 'pause',
         })
 
         processEvent({
@@ -172,7 +172,7 @@ export const resume = makePortMessagingThunk({
     cb: () => {
         analytics.trackEvent({
             category: 'Imports',
-            action: 'Resume import',
+            action: 'resume',
         })
 
         processEvent({
@@ -187,7 +187,7 @@ export const finish = makePortMessagingThunk({
     cb: () => {
         analytics.trackEvent({
             category: 'Imports',
-            action: 'Finish import',
+            action: 'finish',
         })
 
         processEvent({
@@ -201,7 +201,7 @@ export const start = () => (dispatch, getState) => {
 
     analytics.trackEvent({
         category: 'Imports',
-        action: 'Start import',
+        action: 'start',
         name: selectors.allowTypesString(state),
         value: selectors.concurrency(state),
     })

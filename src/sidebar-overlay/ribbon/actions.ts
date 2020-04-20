@@ -9,6 +9,7 @@ import {
     getHighlightsState,
     setHighlightsState,
 } from 'src/content-tooltip/utils'
+import analytics from 'src/analytics'
 
 export const setIsPageFullScreen = createAction<boolean>('setIsPageFullScreen')
 
@@ -43,6 +44,13 @@ export const initState: () => Thunk = () => async dispatch => {
 export const toggleRibbon: () => Thunk = () => async (dispatch, getState) => {
     const isRibbonEnabled = selectors.isRibbonEnabled(getState())
 
+    if (isRibbonEnabled) {
+        analytics.trackEvent({
+            category: 'Sidebar',
+            action: 'disablePermanently',
+        })
+    }
+
     dispatch(setRibbonEnabled(!isRibbonEnabled))
 
     // TODO: Delete the following `setSidebarState` call and let the content
@@ -53,6 +61,13 @@ export const toggleRibbon: () => Thunk = () => async (dispatch, getState) => {
 
 export const toggleTooltip: () => Thunk = () => async (dispatch, getState) => {
     const isTooltipEnabled = selectors.isTooltipEnabled(getState())
+
+    if (isTooltipEnabled) {
+        analytics.trackEvent({
+            category: 'InPageTooltip',
+            action: 'disableTooltipViaRibbon',
+        })
+    }
 
     dispatch(setTooltipEnabled(!isTooltipEnabled))
     await setTooltipState(!isTooltipEnabled)

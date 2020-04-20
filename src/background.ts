@@ -47,13 +47,14 @@ export async function main() {
 
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
-        storageManager,
-        localStorageChangesManager,
-        includePostSyncProcessor: true,
-        browserAPIs: browser,
         signalTransportFactory: createFirebaseSignalTransport,
+        includePostSyncProcessor: true,
+        analyticsManager: analytics,
+        localStorageChangesManager,
         fetchPageDataProcessor,
+        browserAPIs: browser,
         getSharedSyncLog,
+        storageManager,
         authOptions: {
             devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
         },

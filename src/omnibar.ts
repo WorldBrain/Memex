@@ -114,8 +114,8 @@ export async function main() {
             category: 'Search',
             action:
                 searchResults.totalCount > 0
-                    ? 'Successful omnibar search'
-                    : 'Unsuccessful omnibar search',
+                    ? 'successViaOmnibar'
+                    : 'failViaOmnibar',
             name: queryFiltersDisplay(queryFilters),
             value: searchResults.totalCount,
         })

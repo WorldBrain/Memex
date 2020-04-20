@@ -53,7 +53,7 @@ export const initBlacklist = () => async dispatch => {
 export const addToBlacklist = expression => async (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Blacklist',
-        action: 'Add blacklist entry',
+        action: 'createEntryViaSettings',
     })
 
     processEvent({
@@ -90,7 +90,7 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
 export const removeFromBlacklist = index => async (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Blacklist',
-        action: 'Remove blacklist entry',
+        action: 'deleteEntryViaSettings',
     })
 
     processEvent({
@@ -117,8 +117,8 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
 
 export const removeMatchingDocs = expression => async (dispatch, getState) => {
     analytics.trackEvent({
-        category: 'Blacklist',
-        action: 'Delete matching pages',
+        category: 'Pages',
+        action: 'deleteViaRegexBlacklist',
         value: selectors.matchedDocCount(getState()),
     })
     dispatch(setModalShow(false))

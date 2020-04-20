@@ -16,8 +16,8 @@ export async function storeTrackingOption(isOptIn, skipEventTrack = false) {
 
         const trackEvent = analytics.trackEvent(
             {
-                category: 'Privacy',
-                action: 'Change tracking pref',
+                category: 'Settings',
+                action: 'toggleTracking',
                 name: isOptIn ? 'opt-in' : 'opt-out',
             },
             force,

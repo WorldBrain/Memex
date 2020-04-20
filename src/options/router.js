@@ -2,8 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { Router, Route, IndexRedirect } from 'react-router'
 import history from './history'
-
-import { withPageTracking } from 'src/common-ui/hocs'
 import Layout from './layout'
 
 class MemexRouter extends React.Component {
@@ -32,7 +30,7 @@ class MemexRouter extends React.Component {
         return (
             <Router history={history}>
                 <Route path="/">
-                    <Route component={withPageTracking(Layout)}>
+                    <Route component={Layout}>
                         <IndexRedirect to="/blacklist" />
                         {this.renderRoutes(this.optionsRoutes)}
                     </Route>

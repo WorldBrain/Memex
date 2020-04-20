@@ -47,9 +47,12 @@ import { combineSearchIndex } from 'src/search/search-index'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
+import { AnalyticsBackground } from 'src/analytics/background'
+import { Analytics } from 'src/analytics/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
+    analytics: AnalyticsBackground
     notifications: NotificationBackground
     social: SocialBackground
     activityLogger: ActivityLoggerBackground
@@ -79,6 +82,7 @@ export function createBackgroundModules(options: {
     fetchPageDataProcessor: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
+    analyticsManager: Analytics
     authOptions?: { devAuthState: DevAuthState }
     includePostSyncProcessor?: boolean
     disableSyncEnryption?: boolean
@@ -86,6 +90,10 @@ export function createBackgroundModules(options: {
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
+
+    const analytics = new AnalyticsBackground(options.analyticsManager, {
+        localBrowserStorage: options.browserAPIs.storage.local,
+    })
 
     const bookmarks = new BookmarksBackground({ storageManager })
     const pages = new PageIndexingBackground({
@@ -120,6 +128,7 @@ export function createBackgroundModules(options: {
         queryTabs: bindMethod(browser.tabs, 'query'),
         windows: browser.windows,
         searchBackgroundModule: search,
+        analytics,
     })
 
     const notifications = new NotificationBackground({ storageManager })
@@ -167,11 +176,12 @@ export function createBackgroundModules(options: {
 
     return {
         auth,
-        notifications,
         social,
+        analytics,
+        jobScheduler,
+        notifications,
         activityLogger,
         connectivityChecker,
-        jobScheduler,
         directLinking: new DirectLinkingBackground({
             browserAPIs: options.browserAPIs,
             storageManager,
@@ -199,15 +209,16 @@ export function createBackgroundModules(options: {
                 auth.remoteFunctions.isAuthorizedForFeature('backup'),
         }),
         sync: new SyncBackground({
-            auth: auth.authService,
             signalTransportFactory: options.signalTransportFactory,
-            storageManager,
+            disableEncryption: options.disableSyncEnryption,
             getSharedSyncLog: options.getSharedSyncLog,
+            getIceServers: options.getIceServers,
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
+            auth: auth.authService,
             postReceiveProcessor,
-            disableEncryption: options.disableSyncEnryption,
-            getIceServers: options.getIceServers,
+            storageManager,
+            analytics,
         }),
         storexHub: new StorexHubBackground({
             storageManager,
@@ -257,6 +268,7 @@ export async function setupBackgroundModules(
     backgroundModules.backupModule.storage.setupChangeTracking()
 
     await backgroundModules.sync.setup()
+    await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
     backgroundModules.sync.registerRemoteEmitter()
 }

@@ -116,7 +116,10 @@ reducer.on(acts.addTag, (state, { tag, index }) => {
 })
 
 reducer.on(acts.delTag, (state, { tag, index }) => {
-    analytics.trackEvent({ category: 'Tag', action: 'fromResults' })
+    analytics.trackEvent({
+        category: 'Tags',
+        action: 'deleteForPageViaOverview',
+    })
 
     const doc = state.results[index]
     const removalIndex = doc.tags.findIndex(val => val === tag)

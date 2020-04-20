@@ -16,6 +16,7 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { highlightAnnotations } from 'src/annotations'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
+import analytics from 'src/analytics'
 const styles = require('./ribbon.css')
 
 export interface Props {
@@ -196,9 +197,13 @@ class Ribbon extends Component<Props, State> {
                                             styles.button,
                                             styles.cancel,
                                         )}
-                                        onClick={() =>
+                                        onClick={() => {
+                                            analytics.trackEvent({
+                                                category: 'Sidebar',
+                                                action: 'disableTemporarily',
+                                            })
                                             this.props.handleRemoveRibbon()
-                                        }
+                                        }}
                                     />
                                 </ButtonTooltip>
                                 <ButtonTooltip

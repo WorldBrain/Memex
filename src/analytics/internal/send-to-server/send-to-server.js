@@ -1,5 +1,5 @@
 import { idleManager } from 'src/util/idle'
-import { shouldTrack, fetchUserId } from '../../utils'
+import { shouldTrack, generateUserId } from '../../utils'
 
 class SendToServer {
     static DEF_TRACKING = true
@@ -55,7 +55,7 @@ class SendToServer {
             return
         }
 
-        const userId = await fetchUserId()
+        const userId = await generateUserId({})
 
         if (!userId) {
             return
@@ -83,7 +83,7 @@ class SendToServer {
             return
         }
 
-        const userId = await fetchUserId()
+        const userId = await generateUserId({})
 
         if (!userId) {
             return

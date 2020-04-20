@@ -113,10 +113,17 @@ class DateRangeSelection extends Component<Props> {
 
         const nlpDate = chrono.parseDate(dateState)
 
-        analytics.trackEvent({
-            category: isStartDate ? 'Overview start date' : 'Overview end date',
-            action: nlpDate ? 'Successful NLP query' : 'Unsuccessful NLP query',
-        })
+        let action
+
+        if (nlpDate && isStartDate) {
+            action = 'addStartDateFilterViaQuery'
+        } else if (nlpDate && !isStartDate) {
+            action = 'addEndDateFilterViaQuery'
+        } else {
+            action = 'addInvalidDateFilterQuery'
+        }
+
+        analytics.trackEvent({ category: 'SearchFilters', action })
 
         processEvent({
             type: isStartDate
@@ -191,10 +198,17 @@ class DateRangeSelection extends Component<Props> {
      * Runs against date selected in the date dropdown component.
      */
     handleDateChange = ({ isStartDate }) => date => {
-        analytics.trackEvent({
-            category: isStartDate ? 'Overview start date' : 'Overview end date',
-            action: date ? 'Date selection' : 'Date clear',
-        })
+        let action
+
+        // tslint:disable-next-line
+        if (date) {
+            action = isStartDate
+                ? 'addStartDateFilterViaPicker'
+                : 'addEndDateFilterViaPicker'
+        } else {
+            action = isStartDate ? 'clearStartDateFilter' : 'clearEndDateFilter'
+        }
+        analytics.trackEvent({ category: 'SearchFilters', action })
 
         processEvent({
             type: date
@@ -202,8 +216,8 @@ class DateRangeSelection extends Component<Props> {
                     ? EVENT_NAMES.DATEPICKER_DROPDOWN_START
                     : EVENT_NAMES.DATEPICKER_DROPDOWN_END
                 : isStartDate
-                    ? EVENT_NAMES.DATEPICKER_CLEAR_START
-                    : EVENT_NAMES.DATEPICKER_CLEAR_END,
+                ? EVENT_NAMES.DATEPICKER_CLEAR_START
+                : EVENT_NAMES.DATEPICKER_CLEAR_END,
         })
 
         const updateDate = isStartDate

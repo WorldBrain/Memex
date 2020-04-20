@@ -70,7 +70,13 @@ export default function({
 
     if (mode === 'development') {
         plugins.push(
-            new HardSourcePlugin(),
+            new HardSourcePlugin({
+                environmentHash: {
+                    root: process.cwd(),
+                    directories: [],
+                    files: ['package-lock.json', 'yarn.lock', '.env'],
+                },
+            }),
             // new WebExtReloadPlugin({
             //     port: webExtReloadPort,
             // }),

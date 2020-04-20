@@ -17,8 +17,14 @@ export const toggleShowTagsPicker: () => Thunk = () => (dispatch, getState) =>
 export const addTag = createAction<string>('tags/addTag')
 export const deleteTag = createAction<string>('tags/deleteTag')
 
-export const addTagToPage = (tag: string) => async dispatch => {
-    analytics.trackEvent({ category: 'Tag', action: 'pageFromPopup' })
+export const addTagToPage = (
+    tag: string,
+    { fromRibbon = false } = {},
+) => async dispatch => {
+    const action = fromRibbon
+        ? 'createForPageViaRibbon'
+        : 'createForPageViaPopup'
+    analytics.trackEvent({ category: 'Tags', action })
     dispatch(addTag(tag))
     await onboarding.checkForTaggingStage()
 }

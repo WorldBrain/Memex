@@ -25,7 +25,7 @@ class SearchInjectionContainer extends React.Component {
         })
     }
 
-    bindToggleInjection = name => async () => {
+    private bindToggleInjection = name => async () => {
         const { injectionPreference } = this.state
         // Toggle that particular search engine key
         injectionPreference[name] = !injectionPreference[name]
@@ -33,8 +33,8 @@ class SearchInjectionContainer extends React.Component {
 
         if (!injectionPreference[name]) {
             analytics.trackEvent({
-                category: 'Search integration',
-                action: 'Disabled',
+                category: 'SearchEngineIntegration',
+                action: 'disableSearchIntegration',
                 name,
             })
         }

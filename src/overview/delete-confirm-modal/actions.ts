@@ -27,8 +27,8 @@ export const deleteDocs: () => Thunk = () => async (dispatch, getState) => {
     const isForSocial = results.isSocialPost(getState())
 
     analytics.trackEvent({
-        category: 'Overview',
-        action: 'Delete result',
+        category: 'Pages',
+        action: 'deleteViaOverview',
     })
 
     processEventRPC({

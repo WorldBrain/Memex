@@ -13,11 +13,11 @@ import ActivityLoggerBackground from 'src/activity-logger/background'
 import NotifsBackground from '../notifications/background'
 import { onInstall, onUpdate } from './on-install-hooks'
 import { makeRemotelyCallable } from '../util/webextensionRPC'
-import { USER_ID } from '../util/generate-token'
 import { StorageChangesManager } from '../util/storage-changes'
 import { migrations } from './quick-and-dirty-migrations'
 import { AlarmsConfig } from './alarms'
-import { fetchUserId } from 'src/analytics/utils'
+import { generateUserId } from 'src/analytics/utils'
+import { STORAGE_KEYS } from 'src/analytics/constants'
 
 class BackgroundScript {
     private utils: typeof utils
@@ -69,8 +69,8 @@ class BackgroundScript {
 
     get defaultUninstallURL() {
         return process.env.NODE_ENV === 'production'
-            ? 'http://worldbrain.io/uninstall'
-            : 'http://worldbrain.io/uninstall'
+            ? 'https://us-central1-worldbrain-1057.cloudfunctions.net/uninstall'
+            : 'https://us-central1-worldbrain-staging.cloudfunctions.net/uninstall'
     }
 
     /**
@@ -133,16 +133,19 @@ class BackgroundScript {
     private setupUninstallURL() {
         this.runtimeAPI.setUninstallURL(this.defaultUninstallURL)
         setTimeout(async () => {
-            const userId = await fetchUserId()
+            const userId = await generateUserId({})
             this.runtimeAPI.setUninstallURL(
                 `${this.defaultUninstallURL}?user=${userId}`,
             )
         }, 1000)
 
-        this.storageChangesMan.addListener('local', USER_ID, ({ newValue }) =>
-            this.runtimeAPI.setUninstallURL(
-                `${this.defaultUninstallURL}?user=${newValue}`,
-            ),
+        this.storageChangesMan.addListener(
+            'local',
+            STORAGE_KEYS.USER_ID,
+            ({ newValue }) =>
+                this.runtimeAPI.setUninstallURL(
+                    `${this.defaultUninstallURL}?user=${newValue}`,
+                ),
         )
     }
 

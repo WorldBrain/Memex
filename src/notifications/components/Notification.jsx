@@ -17,10 +17,8 @@ const Notification = props => (
                     <div className={styles.messageWhy}>
                         <div className={styles.titleMessage}>
                             <div className={styles.title}>{props.title}</div>
-                            <div
-                                className={styles.message}
-                            >
-                            <p>{props.message}</p>
+                            <div className={styles.message}>
+                                <p>{props.message}</p>
                             </div>
                             {props.isShowMore && (
                                 <div
@@ -43,7 +41,7 @@ const Notification = props => (
                                     onClick={props.handleTick}
                                     title="Mark as read"
                                 >
-                                Mark as Read
+                                    Mark as Read
                                 </div>
                             )}
                         </div>

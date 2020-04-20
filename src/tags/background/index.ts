@@ -11,6 +11,7 @@ import { initErrHandler } from 'src/search/storage'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 import SearchBackground from 'src/search/background'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { Analytics } from 'src/analytics/types'
 
 export default class TagsBackground {
     storage: TagStorage
@@ -26,6 +27,7 @@ export default class TagsBackground {
             storageManager: Storex
             pageStorage: PageStorage
             searchIndex: SearchIndex
+            analytics: Analytics
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             searchBackgroundModule: SearchBackground
@@ -112,6 +114,10 @@ export default class TagsBackground {
     }
 
     async addTagToExistingUrl({ tag, url }: { tag: string; url: string }) {
+        this.options.analytics.trackEvent({
+            category: 'Tags',
+            action: 'createForPageViaOverview',
+        })
         return this.storage.addTag({ name: tag, url })
     }
 

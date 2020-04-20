@@ -36,6 +36,7 @@
             "dev",
             [
                 "user-logic",
+                "simple-signalling",
                 "@worldbrain/storex",
                 "@worldbrain/storex-sync",
                 "@worldbrain/storex-backend-dexie",

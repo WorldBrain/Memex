@@ -46,8 +46,10 @@ export const addURLToBlacklist: (
     const state = getState()
 
     analytics.trackEvent({
-        category: 'Popup',
-        action: isDomainChoice ? 'Blacklist domain' : 'Blacklist site',
+        category: 'Blacklist',
+        action: isDomainChoice
+            ? 'createDomainEntryViaPopup'
+            : 'createSiteEntryViaPopup',
     })
 
     processEventRPC({
@@ -73,8 +75,8 @@ export const deleteBlacklistData: () => Thunk = () => async (
     const state = getState()
 
     analytics.trackEvent({
-        category: 'Popup',
-        action: 'Delete blacklisted pages',
+        category: 'Pages',
+        action: 'deleteViaSiteBlacklist',
     })
 
     const url = popup.url(state)

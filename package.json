@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "2.0.18",
+    "version": "2.0.20",
     "homepage": "https://worldbrain.io",
     "license": "MIT",
     "repository": "https://github.com/WorldBrain/Memex",
@@ -38,6 +38,7 @@
         }
     },
     "dependencies": {
+        "@josephg/resolvable": "^1.0.0",
         "@styled-icons/feather": "^10.0.0",
         "@styled-icons/styled-icon": "^10.0.0",
         "@types/socket.io-client": "^1.4.32",
@@ -47,7 +48,7 @@
         "chrono-node": "^1.3.1",
         "classnames": "^2.2.5",
         "core-js": "^3.6.4",
-        "countly-sdk-web": "^18.11.0",
+        "countly-sdk-web": "^19.8.0",
         "dataurl-to-blob": "^0.0.1",
         "dexie": "3.0.0-beta.1",
         "dexie-mongoify": "^1.3.0",
@@ -104,7 +105,6 @@
         "rxjs": "^5.5.5",
         "scroll-to-element": "^2.0.0",
         "simple-peer": "^9.5.0",
-        "simple-signalling": "^0.2.1",
         "socket.io-client": "^2.3.0",
         "strict-uri-encode": "^2.0.0",
         "string.prototype.matchall": "^3.0.1",
@@ -124,6 +124,7 @@
     },
     "devDependencies": {
         "@babel/core": "^7.9.0",
+        "@babel/helper-validator-identifier": "^7.9.0",
         "@babel/plugin-proposal-do-expressions": "^7.8.3",
         "@babel/plugin-proposal-export-default-from": "^7.8.3",
         "@babel/plugin-proposal-function-bind": "^7.8.3",
@@ -134,7 +135,6 @@
         "@babel/preset-env": "^7.9.0",
         "@babel/preset-react": "^7.9.4",
         "@babel/register": "^7.9.0",
-        "@babel/helper-validator-identifier": "^7.9.0",
         "@firebase/testing": "^0.13.1",
         "@sentry/webpack-plugin": "^1.5.2",
         "@storybook/addon-actions": "^5.3.17",
@@ -207,7 +207,7 @@
         "post-compile-webpack-plugin": "^0.1.2",
         "postcss-cssnext": "^3.1.0",
         "postcss-loader": "^2.1.5",
-        "prettier": "^1.19.1",
+        "prettier": "^2.0.4",
         "pretty-quick": "^2.0.1",
         "react-test-renderer": "^16.4.2",
         "redux-devtools": "^3.4.1",

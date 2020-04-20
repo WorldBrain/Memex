@@ -7,6 +7,13 @@ import * as selectors from '../selectors'
 import { defaultState as defs } from '../reducer'
 import { STORAGE_KEYS as KEYS } from '../constants'
 import IndexingPrefs, { Props as IndexingPrefsProps } from './IndexingPrefs'
+import analytics from 'src/analytics'
+
+const trackIndexingSettingChange = () =>
+    analytics.trackEvent({
+        category: 'Settings',
+        action: 'changeIndexingSetting',
+    })
 
 export interface Props {
     storage: Storage.LocalStorageArea
@@ -66,30 +73,39 @@ const mapDispatchToProps = (
     initScreenshots: val => dispatch(acts.initScreenshots(val)),
     initVisits: val => dispatch(acts.initVisits(val)),
     initVisitDelay: val => dispatch(acts.initVisitDelay(val)),
-    toggleBookmarks: () =>
+    toggleBookmarks: () => {
+        trackIndexingSettingChange()
+
         dispatch((_, getState) => {
             const state = getState()
             dispatch(acts.toggleBookmarks())
             return browser.storage.local.set({
                 [KEYS.BOOKMARKS]: !selectors.bookmarks(state),
             })
-        }),
-    toggleLinks: () =>
+        })
+    },
+    toggleLinks: () => {
+        trackIndexingSettingChange()
+
         dispatch((_, getState) => {
             const state = getState()
             dispatch(acts.toggleLinks())
             return browser.storage.local.set({
                 [KEYS.LINKS]: !selectors.memexLinks(state),
             })
-        }),
-    toggleStubs: () =>
+        })
+    },
+    toggleStubs: () => {
+        trackIndexingSettingChange()
+
         dispatch((_, getState) => {
             const state = getState()
             dispatch(acts.toggleStubs())
             return browser.storage.local.set({
                 [KEYS.STUBS]: !selectors.stubs(state),
             })
-        }),
+        })
+    },
     toggleScreenshots: () =>
         dispatch((_, getState) => {
             const state = getState()
@@ -98,15 +114,20 @@ const mapDispatchToProps = (
                 [KEYS.SCREENSHOTS]: !selectors.screenshots(state),
             })
         }),
-    toggleVisits: () =>
+    toggleVisits: () => {
+        trackIndexingSettingChange()
+
         dispatch((_, getState) => {
             const state = getState()
             dispatch(acts.toggleVisits())
             return browser.storage.local.set({
                 [KEYS.VISITS]: !selectors.visits(state),
             })
-        }),
+        })
+    },
     handleVisitDelayChange: ev => {
+        trackIndexingSettingChange()
+
         const el = ev.target as HTMLInputElement
         dispatch(acts.changeVisitDelay(+el.value))
         return browser.storage.local.set({

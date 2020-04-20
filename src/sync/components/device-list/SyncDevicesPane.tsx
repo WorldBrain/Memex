@@ -14,6 +14,7 @@ import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
+import analytics from 'src/analytics'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const styles = require('../styles.css')
@@ -61,6 +62,7 @@ export class SyncDevicesPane extends Component<Props, State> {
     }
 
     handleOpenNewDevice = () => {
+        analytics.trackEvent({ category: 'Sync', action: 'clickPairNewDevice' })
         this.setState({
             isAddingNewDevice: true,
         })
@@ -219,7 +221,12 @@ class SyncDevicesPaneContainer extends React.Component<
     }
 
     getInitialSyncMessage = async () => {
-        return (await sync.requestInitialSync()).initialMessage
+        const { initialMessage } = await sync.requestInitialSync()
+        analytics.trackEvent({
+            category: 'Sync',
+            action: 'generateQRPairingCode',
+        })
+        return initialMessage
     }
 
     waitForInitialSync = async () => {

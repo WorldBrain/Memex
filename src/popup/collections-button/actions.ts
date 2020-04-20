@@ -28,7 +28,7 @@ export const deleteCollection = createAction<PageList>(
 export const addCollectionToPage = (collection: PageList) => async dispatch => {
     analytics.trackEvent({
         category: 'Collections',
-        action: 'addToPageFromPopup',
+        action: 'addPageViaPopup',
     })
     dispatch(addCollection(collection))
     await onboarding.checkForTaggingStage()
