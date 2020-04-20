@@ -3,10 +3,8 @@ import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
-
 import { selectors as opt } from 'src/options/settings'
-import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
-import { IndexDropdown } from 'src/common-ui/containers'
+import { LoadingIndicator, ResultItem, Tooltip } from 'src/common-ui/components'
 import ResultList from './ResultList'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
@@ -24,6 +22,9 @@ import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
 import { Annotation } from 'src/annotations/types'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { tags } from 'src/util/remote-functions-background'
+import { Hover } from 'src/common-ui/components/design-library/Hover'
 
 const styles = require('./ResultList.css')
 
@@ -117,33 +118,54 @@ class ResultListContainer extends PureComponent<Props> {
         }
     }
 
-    private renderTagsManager({ shouldDisplayTagPopup, url, tags }, index) {
+    handleTagUpdate = index => async (
+        tagsUpdate: string[],
+        added: string,
+        deleted: string,
+    ) => {
+        const url = this.props.searchResults[index].url
+        if (added) {
+            this.props.addTag(index)(added)
+            tags.addTagToPage({ tag: added, url })
+        }
+        if (deleted) {
+            this.props.delTag(index)(deleted)
+            tags.delTag({ tag: deleted, url })
+        }
+    }
+
+    private renderTagsManager(
+        { shouldDisplayTagPopup, url, tags: selectedTags },
+        index,
+    ) {
         if (!shouldDisplayTagPopup) {
             return null
         }
 
         return (
-            <IndexDropdown
-                url={url}
-                onFilterAdd={this.props.addTag(index)}
-                onFilterDel={this.props.delTag(index)}
-                setTagDivRef={this.setTagDivRef}
-                isSocialPost={this.props.isSocialPost}
-                initFilters={tags}
-                initSuggestions={[
-                    ...new Set([...tags, ...this.state.tagSuggestions]),
-                ]}
-                source="tag"
-                isForRibbon
-                hover
-                fromOverview
-            />
+            <Hover>
+                <div ref={ref => this.setTagDivRef(ref)}>
+                    <TagPicker
+                        onUpdateTagSelection={this.handleTagUpdate(index)}
+                        queryTags={query =>
+                            tags.searchForTagSuggestions({ query })
+                        }
+                        loadDefaultSuggestions={() => [
+                            ...new Set([
+                                ...selectedTags,
+                                ...this.state.tagSuggestions,
+                            ]),
+                        ]}
+                        initialSelectedTags={() => selectedTags}
+                    />
+                </div>
+            </Hover>
         )
     }
 
-    private renderTagHolder = ({ tags }, resultIndex) => (
+    private renderTagHolder = ({ tags: currentTags }, resultIndex) => (
         <TagHolder
-            tags={[...new Set([...tags])]}
+            tags={[...new Set([...currentTags])]}
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={this.props.handlePillClick}
