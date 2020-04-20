@@ -256,7 +256,7 @@ export class OverviewContainer extends Component<Props & UserProps> {
                                             )}
                                         >
                                             {
-                                                "You successfully upgraded but haven't enable automatic backups"
+                                                "You successfully upgraded but haven't enabled automatic backups"
                                             }
                                         </span>
                                     </div>
@@ -366,6 +366,6 @@ export class OverviewContainer extends Component<Props & UserProps> {
     }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(OverviewContainer))
