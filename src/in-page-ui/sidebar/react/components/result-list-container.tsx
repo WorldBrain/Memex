@@ -16,6 +16,7 @@ import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from './annotation-box/annotation-box'
+import { AnnotationMode } from '../types'
 
 const styles = require('./result-list.css')
 
@@ -31,6 +32,9 @@ interface StateProps {
     annotsByDay: PageUrlsByDay
     isSocialSearch: boolean
     tagSuggestions: string[]
+    annotationModes: {
+        [annotationUrl: string]: AnnotationMode
+    }
 }
 
 interface DispatchProps {
@@ -53,7 +57,7 @@ interface OwnProps {
         HighlightInteractionInterface,
         'removeTempHighlights' | 'removeAnnotationHighlights'
     >
-    annotationEventProps: AnnotationBoxEventProps
+    annotationEventHandlers: AnnotationBoxEventProps
 }
 
 export type ResultListContainerProps = StateProps & DispatchProps & OwnProps
@@ -176,7 +180,8 @@ export default class ResultListContainer extends PureComponent<
                 areAnnotationsExpanded={this.props.areAnnotationsExpanded}
                 isSocial={isSocialPost}
                 highlighter={this.props.highlighter}
-                annotationEventProps={this.props.annotationEventProps}
+                annotationModes={this.props.annotationModes}
+                annotationEventProps={this.props.annotationEventHandlers}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
             />

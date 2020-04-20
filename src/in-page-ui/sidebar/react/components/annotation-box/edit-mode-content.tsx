@@ -16,7 +16,6 @@ interface Props {
     commentText: string
     tagsInput: string[]
     rows: number
-    isTagInputActive: boolean
     tagSuggestions: string[]
     handleCancelOperation: () => void
     handleEditAnnotation: (commentText: string, tagsInput: string[]) => void
@@ -24,12 +23,11 @@ interface Props {
     onDeleteTag: (tag: string) => void
 }
 
-class EditModeContent extends React.PureComponent<Props> {
-    async componentDidMount() {
-        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
-        this.setState({ tagSuggestions: tagSuggestions.reverse() })
-    }
+interface State {
+    isTagInputActive: boolean
+}
 
+class EditModeContent extends React.PureComponent<Props, State> {
     private _handleEditAnnotation = () => {
         const { commentText, tagsInput } = this.props
         this.props.handleEditAnnotation(commentText, tagsInput)
@@ -48,35 +46,13 @@ class EditModeContent extends React.PureComponent<Props> {
         this.setState({ isTagInputActive })
     }
 
-    // private _addTag = (tag: string) => {
-    //     this.setState(prevState => ({
-    //         tagsInput: [tag, ...prevState.tagsInput],
-    //     }))
-    // }
-
-    // private _deleteTag = (tag: string) => {
-    //     const tagIndex = this.state.tagsInput.indexOf(tag)
-    //     if (tagIndex !== -1) {
-    //         this.setState(prevState => ({
-    //             tagsInput: [
-    //                 ...prevState.tagsInput.slice(0, tagIndex),
-    //                 ...prevState.tagsInput.slice(tagIndex + 1),
-    //             ],
-    //         }))
-    //     }
-    // }
-
     private onEnterSaveHandler = {
         test: e => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: e =>
-            this.props.handleEditAnnotation(
-                this.props.commentText,
-                this.props.tagsInput,
-            ),
+        handle: e => this._handleCommentChange,
     }
 
     private _handleCommentChange = commentText => {
-        this.setState({ commentText })
+        this.props.handleEditAnnotation(commentText, this.props.tagsInput)
     }
 
     render() {
@@ -101,7 +77,7 @@ class EditModeContent extends React.PureComponent<Props> {
                                 ...this.props.tagSuggestions,
                             ]),
                         ]}
-                        isTagInputActive={this.props.isTagInputActive}
+                        isTagInputActive={this.state.isTagInputActive}
                         setTagInputActive={this._setTagInputActive}
                         addTag={this.props.onAddTag}
                         deleteTag={this.props.onDeleteTag}

@@ -41,28 +41,83 @@ export default class SidebarContainer extends StatefulUIElement<
     }
 
     render() {
+        const createAnnotationEventHandlers = (
+            context: 'pageAnnotations' | 'searchResults',
+        ) => {
+            return {
+                handleAnnotationTagClick: (annotationUrl, tag) => {},
+                handleAnnotationModeSwitch: (annotationUrl, mode) =>
+                    this.processEvent('switchAnnotationMode', {
+                        context,
+                        annotationUrl,
+                        mode,
+                    }),
+                handleGoToAnnotation: annnotationUrl =>
+                    this.processEvent('goToAnnotation', {
+                        context,
+                        annnotationUrl,
+                    }),
+                handleMouseEnter: annnotationUrl =>
+                    this.processEvent('annotationMouseEnter', {
+                        context,
+                        annnotationUrl,
+                    }),
+                handleMouseLeave: annnotationUrl =>
+                    this.processEvent('annotationMouseLeave', {
+                        context,
+                        annnotationUrl,
+                    }),
+                handleEditAnnotation: annnotationUrl =>
+                    this.processEvent('editAnnotation', {
+                        context,
+                        annnotationUrl,
+                    }),
+                handleDeleteAnnotation: annnotationUrl =>
+                    this.processEvent('deleteAnnotation', {
+                        context,
+                        annnotationUrl,
+                    }),
+                handleBookmarkToggle: annnotationUrl =>
+                    this.processEvent('toggleAnnotationBookmark', {
+                        context,
+                        annnotationUrl,
+                    }),
+            }
+        }
+
         return (
             <Sidebar
                 loadState={this.state.loadState}
                 annotationLoadState={this.state.annotationLoadState}
                 searchLoadState={this.state.searchLoadState}
-                //
-                highlighter={this.props.highlighter}
-                appendLoader={this.state.appendLoader}
                 env={this.props.env}
+                pageAnnotations={{
+                    env: this.props.env,
+                    highlighter: this.props.highlighter,
+                    needsWaypoint: this.state.needsWaypoint,
+                    annotations: this.state.annotations,
+                    annotationModes: this.state.annotationModes.pageAnnotations,
+                    activeAnnotationUrl: this.state.activeAnnotationUrl,
+                    hoverAnnotationUrl: this.state.hoverAnnotationUrl,
+                    appendLoader: this.state.appendLoader,
+                    annotationEventHandlers: createAnnotationEventHandlers(
+                        'pageAnnotations',
+                    ),
+                    handleScrollPagination: () =>
+                        console.log('handleScrollPagination'),
+                    showCongratsMessage: this.state.showCongratsMessage,
+                }}
+                highlighter={this.props.highlighter}
                 isOpen={this.state.state === 'visible'}
-                needsWaypoint={this.state.needsWaypoint}
-                annotations={this.state.annotations}
-                activeAnnotationUrl={this.state.activeAnnotationUrl}
-                hoverAnnotationUrl={this.state.hoverAnnotationUrl}
                 showCommentBox={this.state.showCommentBox}
                 searchValue={this.state.searchValue}
-                showCongratsMessage={this.state.showCongratsMessage}
-                page={this.state.page}
+                pageInfo={{
+                    page: this.state.page,
+                    resetPage: () => {},
+                }}
                 pageType={this.state.pageType}
                 showFiltersSidebar={this.state.showFiltersSidebar}
                 showSocialSearch={false}
-                annotationModes={this.state.annotationModes}
                 closeSidebar={() =>
                     this.props.sidebarEvents.emit('requestCloseSidebar')
                 }
@@ -77,35 +132,6 @@ export default class SidebarContainer extends StatefulUIElement<
                     handleDeletePagesModalClose: () =>
                         this.processEvent('closeDeletePagesModal', null),
                 }}
-                annotationProps={{
-                    handleAnnotationTagClick: (annotationUrl, tag) => {},
-                    handleAnnotationModeSwitch: (annotationUrl, mode) =>
-                        this.processEvent('handleAnnotationModeSwitch', {
-                            annotationUrl,
-                            mode,
-                        }),
-                    handleGoToAnnotation: annnotationUrl =>
-                        this.processEvent('goToAnnotation', { annnotationUrl }),
-                    handleMouseEnter: annnotationUrl =>
-                        console.log('handleAnnotationBoxMouseEnter'),
-                    handleMouseLeave: annnotationUrl =>
-                        console.log('handleAnnotationBoxMouseLeave'),
-                    handleEditAnnotation: annnotationUrl =>
-                        this.processEvent('editAnnotation', { annnotationUrl }),
-                    handleDeleteAnnotation: annnotationUrl =>
-                        this.processEvent('deleteAnnotation', {
-                            annnotationUrl,
-                        }),
-                    handleBookmarkToggle: annnotationUrl => {},
-                }}
-                handleScrollPagination={() =>
-                    console.log('handleScrollPagination')
-                }
-                handleAnnotationBookmarkToggle={annnotationUrl =>
-                    this.processEvent('toggleAnnotationBookmark', {
-                        annnotationUrl,
-                    })
-                }
                 onQueryKeyDown={() => {}}
                 onQueryChange={searchQuery => {
                     this.processEvent('changeSearchQuery', { searchQuery })
@@ -113,7 +139,6 @@ export default class SidebarContainer extends StatefulUIElement<
                 onShowFiltersSidebarChange={() => {}}
                 onOpenSettings={() => {}}
                 clearAllFilters={() => {}}
-                resetPage={() => {}}
                 // Subcomponents
                 commentBox={{
                     ...this.state.commentBox,
@@ -185,16 +210,10 @@ export default class SidebarContainer extends StatefulUIElement<
                     isSocialSearch: this.state.isSocialSearch,
                     tagSuggestions: this.state.tagSuggestions,
                     highlighter: this.props.highlighter,
-                    annotationEventProps: {
-                        handleAnnotationTagClick: (annotationUrl, tag) => {},
-                        handleAnnotationModeSwitch: (annotationUrl, mode) => {},
-                        handleGoToAnnotation: annnotationUrl => {},
-                        handleMouseEnter: annnotationUrl => {},
-                        handleMouseLeave: annnotationUrl => {},
-                        handleEditAnnotation: annnotationUrl => {},
-                        handleDeleteAnnotation: annnotationUrl => {},
-                        handleBookmarkToggle: annnotationUrl => {},
-                    },
+                    annotationModes: this.state.annotationModes.searchResults,
+                    annotationEventHandlers: createAnnotationEventHandlers(
+                        'searchResults',
+                    ),
                     resetUrlDragged: () => {},
                     resetActiveTagIndex: () => {},
                     setUrlDragged: (url: string) => {},

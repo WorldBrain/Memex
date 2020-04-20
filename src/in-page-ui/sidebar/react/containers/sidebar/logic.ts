@@ -7,7 +7,7 @@ import {
 } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { SidebarControllerEventEmitter } from '../../../types'
-import { SidebarEnv, Page } from '../../types'
+import { SidebarEnv, Page, AnnotationMode } from '../../types'
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
 import { Result, ResultsByUrl } from 'src/overview/types'
 import { PageUrlsByDay } from 'src/search/background/types'
@@ -25,7 +25,11 @@ export interface SidebarContainerState {
     appendLoader: boolean
 
     annotations: Annotation[]
-    annotationModes: { [annotationUrl: string]: 'default' | 'edit' | 'delete' }
+    annotationModes: {
+        [context in AnnotationEventContext]: {
+            [annotationUrl: string]: AnnotationMode
+        }
+    }
 
     showCommentBox: boolean
     commentBox: {
@@ -111,13 +115,28 @@ export type SidebarContainerEvents = UIEvent<{
     closeDeletePagesModal: null
 
     // Annotation boxes
-    goToAnnotation: { annnotationUrl: string }
-    editAnnotation: { annnotationUrl: string }
-    deleteAnnotation: { annnotationUrl: string }
-    toggleAnnotationBookmark: { annnotationUrl: string }
-    handleAnnotationModeSwitch: {
+    goToAnnotation: { context: AnnotationEventContext; annnotationUrl: string }
+    editAnnotation: { context: AnnotationEventContext; annnotationUrl: string }
+    deleteAnnotation: {
+        context: AnnotationEventContext
+        annnotationUrl: string
+    }
+    toggleAnnotationBookmark: {
+        context: AnnotationEventContext
+        annnotationUrl: string
+    }
+    switchAnnotationMode: {
+        context: AnnotationEventContext
         annotationUrl: string
-        mode: 'default' | 'edit' | 'delete'
+        mode: AnnotationMode
+    }
+    annotationMouseEnter: {
+        context: AnnotationEventContext
+        annnotationUrl: string
+    }
+    annotationMouseLeave: {
+        context: AnnotationEventContext
+        annnotationUrl: string
     }
 
     // Search
@@ -133,6 +152,7 @@ export type SidebarContainerEvents = UIEvent<{
     resetFiterPopups: null
     toggleShowFilters: null
 }>
+export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 
 export interface SidebarContainerDependencies {
     sidebarEvents: SidebarControllerEventEmitter
@@ -200,7 +220,10 @@ export class SidebarContainerLogic extends UILogic<
             searchLoadState: 'pristine',
 
             state: 'visible',
-            annotationModes: {},
+            annotationModes: {
+                pageAnnotations: {},
+                searchResults: {},
+            },
 
             commentBox: { ...INITIAL_COMMENT_BOX_STATE },
             deletePagesModel: {
@@ -406,7 +429,9 @@ export class SidebarContainerLogic extends UILogic<
     editAnnotation: EventHandler<'editAnnotation'> = incoming => {
         return {
             annotationModes: {
-                [incoming.event.annnotationUrl]: { $set: 'default' },
+                [incoming.event.context]: {
+                    [incoming.event.annnotationUrl]: { $set: 'default' },
+                },
             },
         }
     }
@@ -415,7 +440,9 @@ export class SidebarContainerLogic extends UILogic<
         this.dependencies.deleteAnnotation(incoming.event.annnotationUrl)
         return {
             annotationModes: {
-                [incoming.event.annnotationUrl]: { $set: 'default' },
+                [incoming.event.context]: {
+                    [incoming.event.annnotationUrl]: { $set: 'default' },
+                },
             },
         }
     }
@@ -441,12 +468,14 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    handleAnnotationModeSwitch: EventHandler<
-        'handleAnnotationModeSwitch'
-    > = incoming => {
+    switchAnnotationMode: EventHandler<'switchAnnotationMode'> = incoming => {
         return {
             annotationModes: {
-                [incoming.event.annotationUrl]: { $set: incoming.event.mode },
+                [incoming.event.context]: {
+                    [incoming.event.annotationUrl]: {
+                        $set: incoming.event.mode,
+                    },
+                },
             },
         }
     }
@@ -467,7 +496,6 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        console.log('set page type', event)
         const mutation = {
             pageType: { $set: event.type },
         }
@@ -479,7 +507,6 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        console.log('set search type', event)
         const mutation = {
             searchType: { $set: event.type },
         }

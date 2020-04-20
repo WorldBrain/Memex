@@ -260,7 +260,6 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                         handleEditAnnotation={this._handleEditAnnotation}
                         commentText="Comment text"
                         tagsInput={[]}
-                        isTagInputActive={true}
                         rows={2}
                         tagSuggestions={[]}
                         onAddTag={() => {}}

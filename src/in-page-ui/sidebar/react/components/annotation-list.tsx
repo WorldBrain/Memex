@@ -7,6 +7,7 @@ import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 import { Annotation } from 'src/annotations/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from './annotation-box/annotation-box'
+import { AnnotationMode } from '../types'
 
 const styles = require('./annotation-list.css')
 
@@ -24,6 +25,7 @@ export interface OwnProps {
         HighlightInteractionInterface,
         'removeTempHighlights' | 'removeAnnotationHighlights'
     >
+    annotationModes: { [url: string]: AnnotationMode }
     annotationEventProps: AnnotationBoxEventProps
 }
 
@@ -173,7 +175,7 @@ export default class AnnotationList extends Component<
                 {...this.props.annotationEventProps}
                 highlighter={this.props.highlighter}
                 displayCrowdfunding={false}
-                mode={'default'}
+                mode={this.props.annotationModes[annot.url] || 'default'}
                 handleDeleteAnnotation={this.handleDeleteAnnotation}
                 handleEditAnnotation={this.handleEditAnnotation}
                 handleBookmarkToggle={this.handleBookmarkToggle}

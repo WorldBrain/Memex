@@ -86,7 +86,8 @@ stories.add('Dynamic - In page', () => (
                     } as any
                 }
                 loadTagSuggestions={async () => [
-                    // await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
+                    // (await getLocalStorage(TAG_SUGGESTIONS_KEY, [])).reverse()
+
                     'first suggestion',
                     'second suggestion',
                 ]}

@@ -22,6 +22,7 @@ import { features } from 'src/util/remote-functions-background'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { AnnotationBoxEventProps } from './annotation-box/annotation-box'
+import PageAnnotations, { PageAnnotationsProps } from './page-annotations'
 
 const styles = require('./sidebar.css')
 
@@ -32,18 +33,19 @@ interface OwnProps {
     annotationLoadState: TaskState
     searchLoadState: TaskState
 
-    needsWaypoint: boolean
-    appendLoader: boolean
-    annotations: Annotation[]
-    activeAnnotationUrl: string
-    hoverAnnotationUrl: string
-    showCommentBox: boolean
     searchValue: string
-    showCongratsMessage: boolean
-    page: Page
     pageType: 'page' | 'all'
     showFiltersSidebar: boolean
     showSocialSearch: boolean
+
+    showCommentBox: boolean
+    commentBox: CommentBoxProps
+
+    pageAnnotations: PageAnnotationsProps
+    pageInfo: {
+        page: Page
+        resetPage: () => void
+    }
 
     closeSidebar: () => void
 
@@ -55,19 +57,13 @@ interface OwnProps {
         handleDeletePagesModalClose: () => void
     }
 
-    annotationModes: { [annotationUrl: string]: 'default' | 'edit' | 'delete' }
     highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
-    annotationProps: AnnotationBoxEventProps
-    handleScrollPagination: (args: Waypoint.CallbackArgs) => void
-    handleAnnotationBookmarkToggle: (url: string) => void
     onQueryKeyDown: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
     onShowFiltersSidebarChange: (value: boolean) => void
     onOpenSettings: () => void
     clearAllFilters: () => void
-    resetPage: () => void
 
-    commentBox: CommentBoxProps
     resultsContainer: ResultsContainerProps
     searchTypeSwitch: SearchTypeSwitchProps
     filtersSidebar: FiltersSidebarProps
@@ -77,12 +73,6 @@ interface OwnProps {
 type Props = OwnProps
 
 export default class Sidebar extends React.Component<Props> {
-    async componentDidMount() {
-        this.setState({
-            showSocialSearch: await features.getFeature('SocialIntegration'),
-        })
-    }
-
     private handleSearchChange = (searchQuery: string) => {
         if (this.props.searchValue !== searchQuery) {
             this.props.onQueryChange(searchQuery)
@@ -120,42 +110,9 @@ export default class Sidebar extends React.Component<Props> {
         event: React.MouseEvent<HTMLElement>,
     ) => {
         event.preventDefault()
-        this.props.annotationProps.handleGoToAnnotation(annot.url)
-    }
-
-    private renderAnnots() {
-        const { annotationProps } = this.props
-        const annots = this.props.annotations.map((annot, i) => (
-            <AnnotationBox
-                key={i}
-                env={this.props.env}
-                highlighter={this.props.highlighter}
-                mode={this.props.annotationModes[annot.url] || 'default'}
-                displayCrowdfunding={false}
-                {...annot}
-                {...this.props.annotationProps}
-                isActive={this.props.activeAnnotationUrl === annot.url}
-                isHovered={this.props.hoverAnnotationUrl === annot.url}
-            />
-        ))
-
-        if (this.props.needsWaypoint) {
-            annots.push(
-                <Waypoint
-                    onEnter={this.props.handleScrollPagination}
-                    key="sidebar-waypoint"
-                />,
-            )
-        }
-
-        if (
-            this.props.annotationLoadState !== 'success' &&
-            this.props.appendLoader
-        ) {
-            annots.push(<LoadingIndicator key="spinner" />)
-        }
-
-        return annots
+        this.props.pageAnnotations.annotationEventHandlers.handleGoToAnnotation(
+            annot.url,
+        )
     }
 
     private renderResults() {
@@ -176,28 +133,19 @@ export default class Sidebar extends React.Component<Props> {
     }
 
     renderAnnotsOrResults() {
-        const { annotations, showCongratsMessage } = this.props
-
         if (
             this.props.searchTypeSwitch.searchType !== 'page' ||
             this.props.searchTypeSwitch.pageType !== 'page'
         ) {
             return this.renderResults()
         }
-        if (
-            this.props.annotationLoadState !== 'success' &&
-            !this.props.appendLoader
-        ) {
+        if (this.props.annotationLoadState !== 'success') {
             return <LoadingIndicator />
-        }
-        if (annotations.length === 0) {
-            return <EmptyMessage />
         }
 
         return (
             <div className={styles.annotationsSection}>
-                {this.renderAnnots()}
-                {showCongratsMessage && <CongratsMessage />}
+                <PageAnnotations {...this.props.pageAnnotations} />
             </div>
         )
     }
@@ -235,7 +183,6 @@ export default class Sidebar extends React.Component<Props> {
                     {...this.props.searchTypeSwitch}
                     isOverview={this.props.env === 'overview'}
                     handleAddPageCommentBtnClick={handleAddCommentBtnClick}
-                    showSocialSearch={this.props.showSocialSearch}
                 />
             </div>
         )
@@ -244,9 +191,9 @@ export default class Sidebar extends React.Component<Props> {
     renderPageInfo() {
         return (
             <PageInfo
-                page={this.props.page}
+                page={this.props.pageInfo.page}
                 isCurrentPage={this.props.pageType === 'page'}
-                resetPage={this.props.resetPage}
+                resetPage={this.props.pageInfo.resetPage}
             />
         )
     }

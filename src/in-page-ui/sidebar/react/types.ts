@@ -8,3 +8,4 @@ export type ClickHandler<T extends HTMLElement> = (
 ) => void
 
 export type SidebarEnv = 'inpage' | 'overview'
+export type AnnotationMode = 'default' | 'edit' | 'delete'
