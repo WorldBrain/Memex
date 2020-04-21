@@ -6,7 +6,7 @@ import * as constants from '../comment-box/constants'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
-import { Hover } from 'src/common-ui/components/design-library/Hover'
+import { TagHover } from 'src/common-ui/components/design-library/TagHover'
 
 const styles = require('./edit-mode-content.css')
 
