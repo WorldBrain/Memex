@@ -5,7 +5,7 @@ export const Hover = styled.div`
         rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
     overflow: hidden;
 
-    margin-top: 115px;
+    margin-top: 10px;
     position: absolute;
     width: 300px;
     z-index: 1;

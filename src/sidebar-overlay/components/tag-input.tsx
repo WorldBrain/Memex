@@ -4,6 +4,7 @@ import { IndexDropdown } from 'src/common-ui/containers'
 import TagHolder from './tag-holder'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags } from 'src/util/remote-functions-background'
+import { Hover } from 'src/common-ui/components/design-library/Hover'
 
 interface Props {
     env?: 'inpage' | 'overview'
@@ -40,21 +41,23 @@ const TagInput = ({
         }
 
         return (
-            <TagPicker
-                loadDefaultSuggestions={() => initTagSuggestions ?? []}
-                queryTags={(query: string) =>
-                    tags.searchForTagSuggestions({ query })
-                }
-                onUpdateTagSelection={handleTagsUpdate}
-                initialSelectedTags={async () => initialSelectedTags}
-            />
+            <Hover>
+                <TagPicker
+                    loadDefaultSuggestions={() => initTagSuggestions ?? []}
+                    queryTags={(query: string) =>
+                        tags.searchForTagSuggestions({ query })
+                    }
+                    onUpdateTagSelection={handleTagsUpdate}
+                    initialSelectedTags={async () => initialSelectedTags}
+                />
+            </Hover>
         )
     }
 
     return (
         <TagHolder
             tags={initialSelectedTags}
-            clickHandler={e => {
+            clickHandler={(e) => {
                 e.stopPropagation()
                 setTagInputActive(true)
             }}

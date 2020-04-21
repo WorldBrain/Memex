@@ -59,7 +59,7 @@ class EditModeContent extends React.Component<Props, State> {
     }
 
     private _addTag = (tag: string) => {
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             tagsInput: [tag, ...prevState.tagsInput],
         }))
     }
@@ -67,7 +67,7 @@ class EditModeContent extends React.Component<Props, State> {
     private _deleteTag = (tag: string) => {
         const tagIndex = this.state.tagsInput.indexOf(tag)
         if (tagIndex !== -1) {
-            this.setState(prevState => ({
+            this.setState((prevState) => ({
                 tagsInput: [
                     ...prevState.tagsInput.slice(0, tagIndex),
                     ...prevState.tagsInput.slice(tagIndex + 1),
@@ -77,15 +77,15 @@ class EditModeContent extends React.Component<Props, State> {
     }
 
     private onEnterSaveHandler = {
-        test: e => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: e =>
+        test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+        handle: (e) =>
             this.props.handleEditAnnotation(
                 this.state.commentText,
                 this.state.tagsInput,
             ),
     }
 
-    private _handleCommentChange = commentText => {
+    private _handleCommentChange = (commentText) => {
         this.setState({ commentText })
     }
 
@@ -102,22 +102,20 @@ class EditModeContent extends React.Component<Props, State> {
                 />
 
                 <div onKeyDown={this._handleTagInputKeydown}>
-                    <Hover>
-                        <TagInput
-                            env={this.props.env}
-                            tags={this.state.tagsInput}
-                            initTagSuggestions={[
-                                ...new Set([
-                                    ...this.state.tagsInput,
-                                    ...this.state.tagSuggestions,
-                                ]),
-                            ]}
-                            isTagInputActive={this.state.isTagInputActive}
-                            setTagInputActive={this._setTagInputActive}
-                            addTag={this._addTag}
-                            deleteTag={this._deleteTag}
-                        />
-                    </Hover>
+                    <TagInput
+                        env={this.props.env}
+                        tags={this.state.tagsInput}
+                        initTagSuggestions={[
+                            ...new Set([
+                                ...this.state.tagsInput,
+                                ...this.state.tagSuggestions,
+                            ]),
+                        ]}
+                        isTagInputActive={this.state.isTagInputActive}
+                        setTagInputActive={this._setTagInputActive}
+                        addTag={this._addTag}
+                        deleteTag={this._deleteTag}
+                    />
                 </div>
 
                 <AllModesFooter
