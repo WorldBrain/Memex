@@ -48,9 +48,15 @@ class EditModeContent extends React.Component<Props, State> {
     private _handleTagInputKeydown = (
         e: React.KeyboardEvent<HTMLDivElement>,
     ) => {
-        // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
         if (e.key === 'Tab') {
             this._setTagInputActive(false)
+        }
+        if (e.key === 'Escape') {
+            if (this.state.isTagInputActive) {
+                this._setTagInputActive(false)
+                e.stopPropagation()
+                e.preventDefault()
+            }
         }
     }
 
