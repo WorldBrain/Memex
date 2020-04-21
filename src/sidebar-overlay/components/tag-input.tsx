@@ -44,7 +44,7 @@ const TagInput = ({
         tagPicker = (
             <TagHover>
                 <TagPicker
-                    loadDefaultSuggestions={() => initTagSuggestions ?? []}
+                    loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                     queryTags={(query: string) =>
                         tags.searchForTagSuggestions({ query })
                     }

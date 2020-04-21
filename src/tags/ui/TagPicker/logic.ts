@@ -27,7 +27,7 @@ export interface TagPickerDependencies {
     ) => Promise<void>
     queryTags: (query: string) => Promise<string[]>
     tagAllTabs?: (query: string) => Promise<void>
-    loadDefaultSuggestions: () => string[]
+    loadDefaultSuggestions: () => string[] | Promise<string[]>
     initialSelectedTags?: () => Promise<string[]>
     children?: any
 }
@@ -87,9 +87,13 @@ export default class TagPickerLogic extends UILogic<
         this.emitMutation({ loadingSuggestions: { $set: true } })
 
         const initialSelectedTags = await this.dependencies.initialSelectedTags()
+        const defaultSuggestions =
+            typeof this.dependencies.loadDefaultSuggestions === 'string'
+                ? this.dependencies.loadDefaultSuggestions
+                : await this.dependencies.loadDefaultSuggestions()
 
         this.defaultTags = TagPickerLogic.decorateTagList(
-            await this.dependencies.loadDefaultSuggestions(),
+            defaultSuggestions,
             initialSelectedTags,
         )
 
@@ -276,8 +280,8 @@ export default class TagPickerLogic extends UILogic<
         return false
     }
 
-    _queryInitialSuggestions = term =>
-        this.defaultTags.filter(tag => tag.name.includes(term))
+    _queryInitialSuggestions = (term) =>
+        this.defaultTags.filter((tag) => tag.name.includes(term))
 
     selectedTagPress = async ({
         event: { tag },
@@ -474,7 +478,7 @@ export default class TagPickerLogic extends UILogic<
 
         return {
             displayTags,
-            selectedTags: selectedTags.filter(t => t !== tag),
+            selectedTags: selectedTags.filter((t) => t !== tag),
         }
     }
 
@@ -486,7 +490,7 @@ export default class TagPickerLogic extends UILogic<
         tagList: string[],
         selectedTags: string[],
     ): DisplayTag[] =>
-        tagList.map(tag => ({
+        tagList.map((tag) => ({
             name: tag,
             focused: false,
             selected: selectedTags?.includes(tag) ?? false,

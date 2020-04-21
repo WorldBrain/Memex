@@ -129,6 +129,7 @@ export function createBackgroundModules(options: {
         windows: browser.windows,
         searchBackgroundModule: search,
         analytics,
+        localBrowserStorage: options.browserAPIs.storage.local,
     })
 
     const notifications = new NotificationBackground({ storageManager })
@@ -161,7 +162,7 @@ export function createBackgroundModules(options: {
         storageManager,
         connectivityChecker,
         fetchPageData: options.fetchPageDataProcessor,
-        storePageContent: async content => {
+        storePageContent: async (content) => {
             await pages.storage.createOrUpdatePage(content)
         },
     })

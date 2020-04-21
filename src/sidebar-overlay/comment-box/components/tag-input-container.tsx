@@ -40,16 +40,10 @@ class TagAnnotationContainer extends React.Component<Props> {
 
     handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
     fetchTagsForAnnotation = async () => this.props.tags
-    fetchTagSuggestions = () => [
-        ...new Set([
-            ...this.props.initTagSuggestions,
-            ...this.props.tagSuggestions,
-        ]),
-    ]
 
     render = () => (
         <TagPicker
-            loadDefaultSuggestions={this.fetchTagSuggestions}
+            loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
             queryTags={this.handleTagQuery}
             onUpdateTagSelection={this.handleTagsUpdate}
             initialSelectedTags={this.fetchTagsForAnnotation}
@@ -57,21 +51,18 @@ class TagAnnotationContainer extends React.Component<Props> {
     )
 }
 
-const mapStateToProps: MapStateToProps<
-    StateProps,
-    OwnProps,
-    State
-> = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, State> = (
+    state,
+) => ({
     tags: selectors.tags(state),
     initTagSuggestions: selectors.initTagSuggestions(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
-    onAnnotationTagAdd: tag => dispatch(actions.addTag(tag)),
-    onAnnotationTagDel: tag => dispatch(actions.deleteTag(tag)),
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+) => ({
+    onAnnotationTagAdd: (tag) => dispatch(actions.addTag(tag)),
+    onAnnotationTagDel: (tag) => dispatch(actions.deleteTag(tag)),
 })
 
 export default connect(

@@ -115,12 +115,11 @@ class RibbonContainer extends Component<Props> {
     handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
     fetchTagsForPage = async () =>
         tags.fetchPageTags({ url: this.props.getUrl() })
-    fetchTagSuggestions = () => this.props.initTagSuggs
 
     // TODO: can we put this somewhere else with less indirection?
     private renderTagsManager = () => (
         <TagPicker
-            loadDefaultSuggestions={this.fetchTagSuggestions}
+            loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
             queryTags={this.handleTagQuery}
             onUpdateTagSelection={this.handleTagsUpdate}
             initialSelectedTags={this.fetchTagsForPage}
@@ -156,11 +155,9 @@ class RibbonContainer extends Component<Props> {
     }
 }
 
-const mapStateToProps: MapStateToProps<
-    StateProps,
-    OwnProps,
-    RootState
-> = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+    state,
+) => ({
     isExpanded: selectors.isExpanded(state),
     isTooltipEnabled: selectors.isTooltipEnabled(state),
     areHighlightsEnabled: selectors.areHighlightsEnabled(state),
@@ -178,13 +175,12 @@ const mapStateToProps: MapStateToProps<
     initCollSuggs: collections.initCollSuggestions(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+) => ({
     onInit: () => dispatch(actions.initState()),
     openRibbon: () => dispatch(actions.setIsExpanded(true)),
-    setAnnotationsManager: annotationsManager =>
+    setAnnotationsManager: (annotationsManager) =>
         dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     handleRibbonToggle: () => dispatch(actions.toggleRibbon()),
     handleTooltipToggle: () => dispatch(actions.toggleTooltip()),

@@ -5,13 +5,18 @@ import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { SearchIndex } from 'src/search'
 import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
 import PageStorage from 'src/page-indexing/background/storage'
-import { TagTab, RemoteTagsInterface } from './types'
+import { TagTab, RemoteTagsInterface, TagsSettings } from './types'
 import { bindMethod } from 'src/util/functions'
 import { initErrHandler } from 'src/search/storage'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 import SearchBackground from 'src/search/background'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { Analytics } from 'src/analytics/types'
+import { Storage } from 'webextension-polyfill-ts/src/generated/index'
+import { BrowserSettingsStore } from 'src/util/settings'
+
+const limitSuggestionsReturnLength = 20
+const limitSuggestionsStorageLength = 40
 
 export default class TagsBackground {
     storage: TagStorage
@@ -21,6 +26,7 @@ export default class TagsBackground {
 
     private windows: Windows.Static
     private searchIndex: SearchIndex
+    private localStorage: BrowserSettingsStore<TagsSettings>
 
     constructor(
         private options: {
@@ -31,6 +37,7 @@ export default class TagsBackground {
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             searchBackgroundModule: SearchBackground
+            localBrowserStorage: Storage.LocalStorageArea
         },
     ) {
         this.storage = new TagStorage({
@@ -48,10 +55,18 @@ export default class TagsBackground {
                 this,
                 'searchForTagSuggestions',
             ),
+            fetchInitialTagSuggestions: bindMethod(
+                this,
+                'fetchInitialTagSuggestions',
+            ),
         }
         this.windows = options.windows
         this.searchIndex = options.searchIndex
         this._createPageFromTab = options.searchIndex.createPageFromTab
+        this.localStorage = new BrowserSettingsStore<TagsSettings>(
+            options.localBrowserStorage,
+            { prefix: 'tags' },
+        )
     }
 
     setupRemoteFunctions() {
@@ -63,6 +78,38 @@ export default class TagsBackground {
             type: 'tag',
             ...args,
         })
+    }
+    async fetchInitialTagSuggestions(
+        { limit }: { limit?: number } = { limit: limitSuggestionsReturnLength },
+    ) {
+        let suggestions = await this.localStorage.get('suggestions')
+
+        if (!suggestions) {
+            // Populate first time suggestions for old users installing this version
+            suggestions =
+                (await this.options.searchBackgroundModule.storage.suggestExtended(
+                    { type: 'tag' },
+                )) ?? []
+            console['info'](
+                'No cached tag suggestions found so loaded suggestions from DB:',
+                suggestions,
+            )
+            await this.localStorage.set('suggestions', suggestions)
+        }
+
+        return suggestions.slice(0, limit)
+    }
+
+    async _updateTagSuggestionsCache({ added }) {
+        let suggestions = (await this.localStorage.get('suggestions')) ?? []
+        const tagIndex = suggestions.indexOf(added)
+        if (tagIndex) {
+            delete suggestions[tagIndex]
+            suggestions = suggestions.filter(Boolean)
+        }
+        suggestions.unshift(added)
+        suggestions = suggestions.slice(0, limitSuggestionsStorageLength)
+        await this.localStorage.set('suggestions', suggestions)
     }
 
     async addTagsToOpenTabs(params: {
@@ -85,8 +132,9 @@ export default class TagsBackground {
 
         await this.storage.addTags({
             name: params.name,
-            urls: indexed.map(tab => tab.fullUrl),
+            urls: indexed.map((tab) => tab.fullUrl),
         })
+        this._updateTagSuggestionsCache({ added: name })
     }
 
     async delTagsFromOpenTabs({
@@ -105,7 +153,7 @@ export default class TagsBackground {
 
         return this.storage.delTags({
             name,
-            urls: tabs.map(tab => tab.url),
+            urls: tabs.map((tab) => tab.url),
         })
     }
 
@@ -118,6 +166,7 @@ export default class TagsBackground {
             category: 'Tags',
             action: 'createForPageViaOverview',
         })
+        await this._updateTagSuggestionsCache({ added: tag })
         return this.storage.addTag({ name: tag, url })
     }
 
@@ -159,6 +208,7 @@ export default class TagsBackground {
             Date.now(),
         )
         await this.storage.addTag({ url, name: tag }).catch(initErrHandler())
+        await this._updateTagSuggestionsCache({ added: tag })
     }
 
     // Sugar for the Tag picking UI component

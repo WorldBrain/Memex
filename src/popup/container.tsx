@@ -42,8 +42,6 @@ import { EVENT_NAMES } from '../analytics/internal/constants'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags } from 'src/util/remote-functions-background'
 import { BackContainer } from 'src/popup/components/BackContainer'
-import { TagAllTabs } from 'src/tags/ui/TagPicker/components/row-buttons/TagAllTabs'
-import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 
@@ -90,7 +88,7 @@ class PopupContainer extends PureComponent<Props> {
 
     closePopup = () => window.close()
 
-    onSearchEnter: KeyboardEventHandler<HTMLInputElement> = event => {
+    onSearchEnter: KeyboardEventHandler<HTMLInputElement> = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault()
             analytics.trackEvent({
@@ -132,7 +130,6 @@ class PopupContainer extends PureComponent<Props> {
         tags.addTagsToOpenTabs({ name: tagName })
     handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
     fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
-    fetchTagSuggestions = () => this.props.initTagSuggs
 
     renderChildren() {
         if (this.props.blacklistConfirm) {
@@ -142,7 +139,7 @@ class PopupContainer extends PureComponent<Props> {
         if (this.props.showTagsPicker) {
             return (
                 <TagPicker
-                    loadDefaultSuggestions={this.fetchTagSuggestions}
+                    loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                     queryTags={this.handleTagQuery}
                     onUpdateTagSelection={this.handleTagsUpdate}
                     initialSelectedTags={this.fetchTagsForPage}
@@ -238,7 +235,7 @@ class PopupContainer extends PureComponent<Props> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     tabId: selectors.tabId(state),
     url: selectors.url(state),
     searchValue: selectors.searchValue(state),
@@ -255,7 +252,7 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
 
 const mapDispatch = (dispatch): DispatchProps => ({
     initState: () => dispatch(acts.initState()),
-    handleSearchChange: e => {
+    handleSearchChange: (e) => {
         e.preventDefault()
         const input = e.target as HTMLInputElement
         dispatch(acts.setSearchVal(input.value))

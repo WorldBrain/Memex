@@ -31,3 +31,42 @@ describe('Tags', () => {
         })
     })
 })
+
+describe('Tag Cache', () => {
+    async function setupTest() {
+        const setup = await setupBackgroundIntegrationTest()
+        const tagsModule = setup.backgroundModules.tags
+        return { tagsModule }
+    }
+
+    describe('modifies cache', () => {
+        test('add tags', async () => {
+            const { tagsModule } = await setupTest()
+            const { tag, url } = DATA.TAGS_1
+
+            await tagsModule.addTagToPage({ tag: DATA.TAGS_1.tag, url })
+            expect(await tagsModule.fetchInitialTagSuggestions()).toEqual([
+                DATA.TAGS_1.tag,
+            ])
+
+            await tagsModule.addTagToPage({ tag: DATA.TAGS_2.tag, url })
+            expect(await tagsModule.fetchInitialTagSuggestions()).toEqual([
+                DATA.TAGS_2.tag,
+                DATA.TAGS_1.tag,
+            ])
+
+            await tagsModule.addTagToPage({ tag: DATA.TAGS_1.tag, url })
+            expect(await tagsModule.fetchInitialTagSuggestions()).toEqual([
+                DATA.TAGS_1.tag,
+                DATA.TAGS_2.tag,
+            ])
+
+            await tagsModule.addTagToPage({ tag: DATA.TAGS_3.tag, url })
+            expect(await tagsModule.fetchInitialTagSuggestions()).toEqual([
+                DATA.TAGS_3.tag,
+                DATA.TAGS_1.tag,
+                DATA.TAGS_2.tag,
+            ])
+        })
+    })
+})

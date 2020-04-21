@@ -150,12 +150,7 @@ class ResultListContainer extends PureComponent<Props> {
                         queryTags={(query) =>
                             tags.searchForTagSuggestions({ query })
                         }
-                        loadDefaultSuggestions={() => [
-                            ...new Set([
-                                ...selectedTags,
-                                ...this.state.tagSuggestions,
-                            ]),
-                        ]}
+                        loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                         initialSelectedTags={() => selectedTags}
                     />
                 </div>
