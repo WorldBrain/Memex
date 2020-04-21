@@ -11,6 +11,7 @@ interface Props {
     value: string
     before: any
     searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
+    showPlaceholder?: boolean
 }
 
 interface State {
@@ -53,7 +54,11 @@ export class TagSearchInput extends React.Component<Props, State> {
                 <StyledSearchIcon size={24} />
                 {this.props.before}
                 <SearchInput
-                    placeholder={'Search & add tags'}
+                    placeholder={
+                        this.props.showPlaceholder ?? true
+                            ? 'Search & add tags'
+                            : ''
+                    }
                     defaultValue={this.props.value}
                     onChange={this.onChange}
                     onFocus={() => this.setState({ isFocused: true })}
@@ -70,16 +75,16 @@ export class TagSearchInput extends React.Component<Props, State> {
 }
 
 const StyledSearchIcon = styled(SearchIcon)`
-    color: ${props => props.theme.tag.searchIcon};
+    color: ${(props) => props.theme.tag.searchIcon};
     stroke-width: 2px;
     margin-right: 8px;
 `
 
 const SearchBox = styled.div`
     align-items: center;
-    background-color: ${props => props.theme.inputBackground};
+    background-color: ${(props) => props.theme.inputBackground};
     border-radius: 3px;
-    color: ${props => props.theme.text};
+    color: ${(props) => props.theme.text};
     display: flex;
     flex-wrap: wrap;
     font-size: 1rem;
@@ -97,7 +102,7 @@ const SearchInput = styled(TextInputControlled)`
     box-shadow: none;
     display: flex;
     flex: 1;
-    color: ${props => props.theme.text};
+    color: ${(props) => props.theme.text};
     font-family: 'Poppins', sans-serif;
     font-size: ${fontSizeSmall}px;
     min-height: 24px;

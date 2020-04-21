@@ -62,7 +62,7 @@ class TagPicker extends StatefulUIElement<
             onPress={this.handleResultTagPress}
             onPressTagAll={
                 this.props.tagAllTabs
-                    ? t => this.handleResultTagAllPress(t)
+                    ? (t) => this.handleResultTagAllPress(t)
                     : undefined
             }
             onFocus={this.handleResultTagFocus}
@@ -103,6 +103,7 @@ class TagPicker extends StatefulUIElement<
                                 onPress={this.handleSelectedTagPress}
                             />
                         }
+                        showPlaceholder={this.state.selectedTags.length === 0}
                     />
                     {this.state.newTagName !== '' && (
                         <AddNewTag
@@ -124,7 +125,7 @@ class TagPicker extends StatefulUIElement<
 }
 
 const OuterSearchBox = styled.div`
-    background: ${props => props.theme.background};
+    background: ${(props) => props.theme.background};
     padding: 8px;
     border-radius: 3px;
 `
