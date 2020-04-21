@@ -20,6 +20,12 @@ import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { tags } from 'src/util/remote-functions-background'
+import {
+    TagHover,
+    TagHoverDashboard,
+} from 'src/common-ui/components/design-library/TagHover'
 
 const styles = require('./result-list.css')
 
@@ -93,7 +99,7 @@ class ResultListContainer extends PureComponent<Props, State> {
         this.resultsDivRef.removeEventListener('click', this.handleOutsideClick)
     }
 
-    private handleOutsideClick: EventListener = event => {
+    private handleOutsideClick: EventListener = (event) => {
         // Reduces to `true` if any on input elements were clicked
         const wereAnyClicked = reduce((res, el) => {
             const isEqual = el != null ? el.isEqualNode(event.target) : false
@@ -113,27 +119,43 @@ class ResultListContainer extends PureComponent<Props, State> {
         }
     }
 
-    private renderTagsManager({ shouldDisplayTagPopup, url, tags }, index) {
+    handleTagUpdate = (index) => async (
+        tagsUpdate: string[],
+        added: string,
+        deleted: string,
+    ) => {
+        const url = this.props.searchResults[index].url
+        if (added) {
+            this.props.addTag(index)(added)
+            tags.addTagToPage({ tag: added, url })
+        }
+        if (deleted) {
+            this.props.delTag(index)(deleted)
+            tags.delTag({ tag: deleted, url })
+        }
+    }
+
+    private renderTagsManager(
+        { shouldDisplayTagPopup, url, tags: selectedTags },
+        index,
+    ) {
         if (!shouldDisplayTagPopup) {
             return null
         }
 
         return (
-            <IndexDropdown
-                env="inpage"
-                url={url}
-                onFilterAdd={this.props.addTag(index)}
-                onFilterDel={this.props.delTag(index)}
-                setTagDivRef={this.setTagDivRef}
-                initFilters={tags}
-                initSuggestions={[
-                    ...new Set([...tags, ...this.state.tagSuggestions]),
-                ]}
-                source="tag"
-                isForRibbon
-                sidebarTagDiv
-                fromOverview
-            />
+            <TagHover>
+                <div ref={(ref) => this.setTagDivRef(ref)}>
+                    <TagPicker
+                        onUpdateTagSelection={this.handleTagUpdate(index)}
+                        queryTags={(query) =>
+                            tags.searchForTagSuggestions({ query })
+                        }
+                        loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
+                        initialSelectedTags={() => selectedTags}
+                    />
+                </div>
+            </TagHover>
         )
     }
 
@@ -203,9 +225,7 @@ class ResultListContainer extends PureComponent<Props, State> {
 
         const els: JSX.Element[] = []
 
-        const sortedKeys = Object.keys(this.props.annotsByDay)
-            .sort()
-            .reverse()
+        const sortedKeys = Object.keys(this.props.annotsByDay).sort().reverse()
 
         for (const day of sortedKeys) {
             els.push(
@@ -272,7 +292,7 @@ class ResultListContainer extends PureComponent<Props, State> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     isLoading: results.isLoading(state),
     searchResults: results.results(state),
     resultsByUrl: results.resultsByUrl(state),
@@ -285,12 +305,14 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     isSocialSearch: results.isSocialPost(state),
 })
 
-const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
-    handleTagBtnClick: index => event => {
+const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
+    dispatch,
+) => ({
+    handleTagBtnClick: (index) => (event) => {
         event.preventDefault()
         dispatch(resultActs.showTags(index))
     },
-    handleCommentBtnClick: ({ url, title }, isSocialPost) => event => {
+    handleCommentBtnClick: ({ url, title }, isSocialPost) => (event) => {
         event.preventDefault()
         dispatch(sidebarActs.setPageType('page'))
         dispatch(
@@ -302,26 +324,29 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
             }),
         )
     },
-    handleToggleBm: ({ url, fullUrl }, index) => event => {
+    handleToggleBm: ({ url, fullUrl }, index) => (event) => {
         event.preventDefault()
         dispatch(resultActs.toggleBookmark({ url, fullUrl, index }))
     },
-    handleTrashBtnClick: ({ url }, index) => event => {
+    handleTrashBtnClick: ({ url }, index) => (event) => {
         event.preventDefault()
         dispatch(deleteConfActs.show(url, index))
     },
-    handleScrollPagination: args => dispatch(resultActs.getMoreResults(false)),
-    handlePillClick: tag => event => {
+    handleScrollPagination: (args) =>
+        dispatch(resultActs.getMoreResults(false)),
+    handlePillClick: (tag) => (event) => {
         event.preventDefault()
         event.stopPropagation()
         dispatch(filterActs.toggleTagFilter(tag))
     },
-    addTag: resultIndex => tag => dispatch(resultActs.addTag(tag, resultIndex)),
-    delTag: resultIndex => tag => dispatch(resultActs.delTag(tag, resultIndex)),
+    addTag: (resultIndex) => (tag) =>
+        dispatch(resultActs.addTag(tag, resultIndex)),
+    delTag: (resultIndex) => (tag) =>
+        dispatch(resultActs.delTag(tag, resultIndex)),
     resetActiveTagIndex: () => dispatch(resultActs.resetActiveTagIndex()),
-    setUrlDragged: url => dispatch(listActs.setUrlDragged(url)),
+    setUrlDragged: (url) => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
-    handleCrossRibbonClick: ({ url }, isSocialPost) => event => {
+    handleCrossRibbonClick: ({ url }, isSocialPost) => (event) => {
         event.preventDefault()
         event.stopPropagation()
         dispatch(listActs.delPageFromList(url, isSocialPost))
