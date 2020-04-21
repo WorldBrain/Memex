@@ -95,7 +95,6 @@ class TagHolder extends React.Component<Props, State> {
 
                 {this._renderTags()}
                 {this._renderNumberOfRemainingTags()}
-                <div className={cx(styles.plus, styles.tagIcon)} />
             </div>
         )
     }
