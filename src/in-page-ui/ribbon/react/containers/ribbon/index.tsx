@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {
-    RibbonContainerDependencies,
+    RibbonContainerOptions,
     RibbonContainerState,
     RibbonContainerLogic,
     RibbonContainerEvents,
@@ -11,7 +11,11 @@ import { Anchor } from 'src/highlighting/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { PageList } from 'src/custom-lists/background/types'
 
-export interface RibbonContainerProps extends RibbonContainerDependencies {}
+export interface RibbonContainerProps extends RibbonContainerOptions {
+    isSidebarOpen: boolean
+    openSidebar: () => void
+    closeSidebar: () => void
+}
 
 export default class RibbonContainer extends StatefulUIElement<
     RibbonContainerProps,
@@ -24,14 +28,20 @@ export default class RibbonContainer extends StatefulUIElement<
 
     componentDidMount() {
         super.componentDidMount()
-        this.props.ribbonEvents.on('showRibbon', this.showRibbon)
-        this.props.ribbonEvents.on('hideRibbon', this.hideRibbon)
+        this.props.ribbonController.events.on('showRibbon', this.showRibbon)
+        this.props.ribbonController.events.on('hideRibbon', this.hideRibbon)
     }
 
     componentWillUnmount() {
         super.componentWillUnmount()
-        this.props.ribbonEvents.removeListener('showRibbon', this.showRibbon)
-        this.props.ribbonEvents.removeListener('hideRibbon', this.hideRibbon)
+        this.props.ribbonController.events.removeListener(
+            'showRibbon',
+            this.showRibbon,
+        )
+        this.props.ribbonController.events.removeListener(
+            'hideRibbon',
+            this.hideRibbon,
+        )
     }
 
     showRibbon = () => {
@@ -45,18 +55,20 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                openSidebar={(args: any) => {
+                    this.props.openSidebar()
+                }}
+                closeSidebar={this.props.closeSidebar}
                 getRemoteFunction={this.props.getRemoteFunction}
                 highlighter={this.props.highlighter}
                 commentText={''}
-                isSidebarOpen={false}
+                isSidebarOpen={this.props.inPageUI.state.sidebar}
                 isRibbonEnabled={true}
+                handleRemoveRibbon={() => {}}
                 isCommentSaved={false}
                 annotationsManager={this.props.annotationsManager}
                 getUrl={() => ''}
                 setRibbonRef={(e: HTMLElement) => {}}
-                closeSidebar={() => {}}
-                handleRemoveRibbon={() => {}}
-                openSidebar={(args: any) => {}}
                 setShowSidebarCommentBox={() => {}}
                 insertOrRemoveTooltip={(isTooltipEnabled: false) => {}}
                 isExpanded={this.state.state === 'visible'}
@@ -92,7 +104,6 @@ export default class RibbonContainer extends StatefulUIElement<
                 setShowCollectionsPicker={(value: false) => {}}
                 setShowSearchBox={(value: false) => {}}
                 setSearchValue={(value: string) => {}}
-                openRibbon={() => {}}
             />
         )
     }

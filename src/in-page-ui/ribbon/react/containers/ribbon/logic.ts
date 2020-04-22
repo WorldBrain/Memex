@@ -9,6 +9,9 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import { RibbonControllerEventEmitter } from '../../../types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
+import { RibbonController } from 'src/in-page-ui/ribbon'
+import { InPageUI } from 'src/in-page-ui/shared-state'
+import { RibbonContainerDependencies } from './types'
 
 export interface RibbonContainerState {
     state: 'visible' | 'hidden'
@@ -19,12 +22,9 @@ export type RibbonContainerEvents = UIEvent<{
     hide: null
 }>
 
-export interface RibbonContainerDependencies {
-    ribbonEvents: RibbonControllerEventEmitter
-    currentTab: { id: number }
-    getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
-    highlighter: Pick<HighlightInteractionInterface, 'removeHighlights'>
-    annotationsManager: AnnotationsManager
+export interface RibbonContainerOptions extends RibbonContainerDependencies {
+    inPageUI: InPageUI
+    ribbonController: RibbonController
 }
 
 type EventHandler<
@@ -37,13 +37,15 @@ export class RibbonContainerLogic extends UILogic<
 >
 // implements UIEventHandlers<RibbonContainerState, RibbonContainerEvents>
 {
-    constructor(private dependencies: RibbonContainerDependencies) {
+    constructor(private dependencies: RibbonContainerOptions) {
         super()
     }
 
     getInitialState(): RibbonContainerState {
         return {
-            state: 'hidden',
+            state: this.dependencies.inPageUI.state.ribbon
+                ? 'visible'
+                : 'hidden',
         }
     }
 

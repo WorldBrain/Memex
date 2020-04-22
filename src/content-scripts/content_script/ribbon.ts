@@ -1,21 +1,20 @@
 import { browser } from 'webextension-polyfill-ts'
-import { ContentScriptRegistry } from './types'
-import { Ribbon } from 'src/in-page-ui/ribbon'
+import { ContentScriptRegistry, RibbonScriptMain } from './types'
+import { RibbonController } from 'src/in-page-ui/ribbon'
 import { setupRibbonUI } from 'src/in-page-ui/ribbon/react'
 import { createInPageUI } from 'src/in-page-ui/utils'
 
-export async function main() {
+export const main: RibbonScriptMain = async options => {
     const cssFile = browser.extension.getURL(`/content_script_ribbon.css`)
-    const ribbon = new Ribbon({
-        createUI: () => {
-            createInPageUI('ribbon', cssFile, element => {
-                setupRibbonUI(element, {
-                    ribbonEvents: ribbon.events,
-                })
-            })
-        },
+    const ribbonController = new RibbonController()
+    createInPageUI('ribbon', cssFile, async element => {
+        setupRibbonUI(element, {
+            containerDependencies: options,
+            ribbonController,
+            inPageUI: options.inPageUI,
+        })
     })
-    return { ribbonController: ribbon }
+    return { ribbonController }
 }
 
 const registry = window['contentScriptRegistry'] as ContentScriptRegistry

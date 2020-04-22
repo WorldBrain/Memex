@@ -7,9 +7,10 @@ import SidebarContainer from 'src/in-page-ui/sidebar/react/containers/sidebar'
 import { WithDependencies } from '../utils'
 import { ResultsByUrl } from 'src/overview/types'
 import { InPageUI } from 'src/in-page-ui/shared-state'
-import { Ribbon } from 'src/in-page-ui/ribbon'
-import { Sidebar } from 'src/in-page-ui/sidebar'
+import { RibbonController } from 'src/in-page-ui/ribbon'
+import { SidebarController } from 'src/in-page-ui/sidebar'
 import { SidebarEnv } from 'src/in-page-ui/sidebar/react/types'
+import RibbonHolder from 'src/in-page-ui/ribbon/react/containers/ribbon-holder'
 
 const stories = storiesOf('In-page UI', module)
 
@@ -48,18 +49,19 @@ async function createDependencies() {
         removeAnnotationHighlights: async () => {},
     }
 
-    const ribbon = new Ribbon({ createUI: () => {} })
-    const sidebar = new Sidebar({ createUI: () => {} })
+    const ribbonController = new RibbonController()
+    const sidebarController = new SidebarController({ createUI: () => {} })
     const inPageUI = new InPageUI({
-        ribbonController: ribbon,
-        sidebarController: sidebar,
+        ribbonController,
+        sidebarController,
     })
 
     const commonProps = {
         env: 'inpage' as SidebarEnv,
         currentTab: { id: 654, url: 'https://www.foo.com' },
-        sidebarEvents: sidebar.events,
-        ribbonEvents: ribbon.events,
+        inPageUI,
+        ribbonController,
+        sidebarController,
         annotationManager,
         highlighter,
         getRemoteFunction: () => async () => {},
@@ -114,7 +116,6 @@ async function createDependencies() {
     return {
         background,
         annotationManager,
-        inPageUIController: null,
         highlighter,
         inPageUI,
         commonProps,
@@ -123,9 +124,13 @@ async function createDependencies() {
 
 stories.add('Ribbon & Sidebar', () => (
     <WithDependencies setup={createDependencies}>
-        {({ commonProps }) => (
+        {({ commonProps, inPageUI }) => (
             <React.Fragment>
-                <RibbonContainer {...commonProps} />
+                <RibbonHolder
+                    inPageUI={inPageUI}
+                    ribbonController={commonProps.ribbonController}
+                    containerDependencies={commonProps}
+                />
                 <SidebarContainer {...commonProps} />
             </React.Fragment>
         )}
@@ -133,13 +138,31 @@ stories.add('Ribbon & Sidebar', () => (
 ))
 
 stories.add('Ribbon', () => (
-    <WithDependencies setup={createDependencies}>
-        {({ commonProps }) => <RibbonContainer {...commonProps} />}
+    <WithDependencies
+        setup={async () => {
+            const deps = await createDependencies()
+            return deps
+        }}
+    >
+        {({ commonProps }) => (
+            <RibbonContainer
+                {...commonProps}
+                isSidebarOpen={false}
+                openSidebar={() => {}}
+                closeSidebar={() => {}}
+            />
+        )}
     </WithDependencies>
 ))
 
 stories.add('Sidebar', () => (
-    <WithDependencies setup={createDependencies}>
+    <WithDependencies
+        setup={async () => {
+            const deps = await createDependencies()
+            await deps.inPageUI.showSidebar()
+            return deps
+        }}
+    >
         {({ commonProps }) => <SidebarContainer {...commonProps} />}
     </WithDependencies>
 ))

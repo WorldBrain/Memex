@@ -1,5 +1,7 @@
 import { ContentScriptsInterface } from './types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
+import { tabId } from 'src/popup/selectors'
+import { Tabs } from 'webextension-polyfill-ts'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider'>
@@ -10,10 +12,15 @@ export class ContentScriptsBackground {
                 tabId: number,
                 options: { file: string },
             ) => void
+            getTab: Tabs.Static['get']
         },
     ) {
         this.remoteFunctions = {
             injectContentScriptComponent: this.injectContentScriptComponent,
+            getCurrentTab: async ({ tab }) => ({
+                id: tab.id,
+                url: (await options.getTab(tab.id)).url,
+            }),
         }
     }
 

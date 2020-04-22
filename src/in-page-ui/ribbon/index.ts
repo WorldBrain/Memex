@@ -7,25 +7,17 @@ import {
 import { createInPageUIRoot } from '../dom'
 // import { setupSidebarUI } from './react'
 
-export class Ribbon implements RibbonControllerInterface {
+export class RibbonController implements RibbonControllerInterface {
     events = new EventEmitter() as RibbonControllerEventEmitter
-    private created = false
-
-    constructor(
-        private options: {
-            createUI: () => void
-        },
-    ) {}
+    state: 'visible' | 'hidden' = 'hidden'
 
     showRibbon(): void {
-        if (!this.created) {
-            this.options.createUI()
-            this.created = true
-        }
+        this.state = 'visible'
         this.events.emit('showRibbon')
     }
 
     hideRibbon(): void {
+        this.state = 'hidden'
         this.events.emit('hideRibbon')
     }
 }

@@ -1,0 +1,14 @@
+.holder {
+    position: fixed;
+    right: 0;
+    width: 34px;
+    top: 25%;
+    height: 50%;
+    z-index: 2147483645;
+}
+
+.withSidebar {
+    height: 105vh;
+    width: 34px;
+    top: 0px;
+}

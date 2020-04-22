@@ -56,7 +56,6 @@ interface DispatchProps {
     setShowCollectionsPicker: (value: boolean) => void
     setShowSearchBox: (value: boolean) => void
     setSearchValue: (value: string) => void
-    openRibbon: () => void
 }
 
 interface OwnProps {

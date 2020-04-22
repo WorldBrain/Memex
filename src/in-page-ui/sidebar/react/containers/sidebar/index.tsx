@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {
-    SidebarContainerDependencies,
+    SidebarContainerOptions,
     SidebarContainerState,
     SidebarContainerLogic,
     SidebarContainerEvents,
@@ -9,7 +9,7 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import Sidebar from '../../components/sidebar'
 import { Anchor } from 'src/highlighting/types'
 
-export interface SidebarContainerProps extends SidebarContainerDependencies {}
+export interface SidebarContainerProps extends SidebarContainerOptions {}
 
 export default class SidebarContainer extends StatefulUIElement<
     SidebarContainerProps,
@@ -22,14 +22,20 @@ export default class SidebarContainer extends StatefulUIElement<
 
     componentDidMount() {
         super.componentDidMount()
-        this.props.sidebarEvents.on('showSidebar', this.showSidebar)
-        this.props.sidebarEvents.on('hideSidebar', this.hideSidebar)
+        this.props.sidebarController.events.on('showSidebar', this.showSidebar)
+        this.props.sidebarController.events.on('hideSidebar', this.hideSidebar)
     }
 
     componentWillUnmount() {
         super.componentWillUnmount()
-        this.props.sidebarEvents.removeListener('showSidebar', this.showSidebar)
-        this.props.sidebarEvents.removeListener('hideSidebar', this.hideSidebar)
+        this.props.sidebarController.events.removeListener(
+            'showSidebar',
+            this.showSidebar,
+        )
+        this.props.sidebarController.events.removeListener(
+            'hideSidebar',
+            this.hideSidebar,
+        )
     }
 
     showSidebar = () => {
@@ -41,6 +47,7 @@ export default class SidebarContainer extends StatefulUIElement<
     }
 
     render() {
+        console.log(this.state)
         const createAnnotationEventHandlers = (
             context: 'pageAnnotations' | 'searchResults',
         ) => {
@@ -120,7 +127,9 @@ export default class SidebarContainer extends StatefulUIElement<
                 showFiltersSidebar={this.state.showFiltersSidebar}
                 showSocialSearch={false}
                 closeSidebar={() =>
-                    this.props.sidebarEvents.emit('requestCloseSidebar')
+                    this.props.sidebarController.events.emit(
+                        'requestCloseSidebar',
+                    )
                 }
                 handleAddPageCommentBtnClick={() =>
                     this.processEvent('addNewPageComment', null)

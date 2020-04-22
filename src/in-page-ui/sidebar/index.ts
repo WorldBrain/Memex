@@ -4,8 +4,9 @@ import {
     SidebarControllerEventEmitter,
 } from './types'
 
-export class Sidebar implements SidebarControllerInterface {
+export class SidebarController implements SidebarControllerInterface {
     events = new EventEmitter() as SidebarControllerEventEmitter
+    state: 'visible' | 'hidden' = 'hidden'
     private created = false
 
     constructor(
@@ -19,10 +20,12 @@ export class Sidebar implements SidebarControllerInterface {
             this.options.createUI()
             this.created = true
         }
+        this.state = 'visible'
         this.events.emit('showSidebar')
     }
 
     hideSidebar(): void {
+        this.state = 'hidden'
         this.events.emit('hideSidebar')
     }
 }

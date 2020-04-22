@@ -10,7 +10,9 @@ import { sniffWordpressWorldbrainUser } from 'src/backup-restore/content_script'
 import {
     runInBackground,
     makeRemotelyCallableType,
+    remoteFunction,
 } from 'src/util/webextensionRPC'
+import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 import { ContentScriptRegistry } from './types'
 import { ContentScriptsInterface } from '../background/types'
 import { ContentScriptComponent } from '../types'
@@ -19,8 +21,8 @@ import { InPageUI } from 'src/in-page-ui/shared-state'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { RibbonControllerInterface } from 'src/in-page-ui/ribbon/types'
 import { SidebarControllerInterface } from 'src/in-page-ui/sidebar/types'
-import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 import AnnotationsManager from 'src/annotations/annotations-manager'
+import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
 
 export function main() {
     const controllers: {
@@ -34,22 +36,35 @@ export function main() {
     >(component: Which['component']): Promise<Which['type']> {
         if (!controllers[component]) {
             controllers[component] = resolvablePromise<Which['type']>() as any
-            loadContentScript('sidebar')
+            loadContentScript(component)
         }
         return controllers[component]! as Promise<Which['type']>
     }
 
-    const annotationManager = new AnnotationsManager()
+    const annotationsManager = new AnnotationsManager()
+    const highlighter = new HighlightInteraction()
+
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
-            const ribbon = await execute()
+            const ribbon = await execute({
+                inPageUI,
+                annotationsManager,
+                getRemoteFunction: remoteFunction,
+                highlighter,
+                currentTab: await getCurrentTab(),
+            })
             controllers.ribbon!.resolve(ribbon.ribbonController)
         },
         async registerHighlightingScript(execute): Promise<void> {
             execute()
         },
         async registerSidebarScript(execute): Promise<void> {
-            const sidebar = await execute({ annotationManager })
+            const sidebar = await execute({
+                annotationsManager,
+                getRemoteFunction: remoteFunction,
+                highlighter,
+                currentTab: await getCurrentTab(),
+            })
             controllers.sidebar!.resolve(sidebar.sidebarController)
         },
         async registerTooltipScript(execute): Promise<void> {
@@ -109,18 +124,17 @@ export function main() {
     setupPageContentRPC()
     loadAnnotationWhenReady()
     setupRemoteDirectLinkFunction()
-    setupOnDemandInPageUi(loadContentScript)
+    setupOnDemandInPageUi(() => getController('ribbon'))
     initKeyboardShortcuts(inPageUI)
 
-    if (window.location.hostname === 'worldbrain.io') {
-        sniffWordpressWorldbrainUser()
-    }
+    // if (window.location.hostname === 'worldbrain.io') {
+    //     sniffWordpressWorldbrainUser()
+    // }
 
     // global['worldbrainMemex'] = {
     //     inPageUI,
     //     controllers,
     // }
-    // inPageUI.showSidebar()
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
@@ -137,15 +151,26 @@ export function createContentScriptLoader() {
     return loader
 }
 
-export function setupOnDemandInPageUi(loadContentScript: ContentScriptLoader) {
+export function setupOnDemandInPageUi(loadRibbon: () => void) {
     const listener = (event: MouseEvent) => {
         if (event.clientX > window.innerWidth - 200) {
-            // console.log('load in page UI')
-            // loadContentScript('in_page_ui')
-            // document.removeEventListener('mousemove', listener)
+            loadRibbon()
+            document.removeEventListener('mousemove', listener)
         }
     }
     document.addEventListener('mousemove', listener)
 }
+
+const getCurrentTab = (() => {
+    let currentTab: { id: number; url: string }
+    return async () => {
+        if (!currentTab) {
+            currentTab = await runInBackground<
+                ContentScriptsInterface<'caller'>
+            >().getCurrentTab()
+        }
+        return currentTab
+    }
+})()
 
 main()
