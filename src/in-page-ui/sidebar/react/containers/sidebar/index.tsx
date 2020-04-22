@@ -47,7 +47,6 @@ export default class SidebarContainer extends StatefulUIElement<
     }
 
     render() {
-        console.log(this.state)
         const createAnnotationEventHandlers = (
             context: 'pageAnnotations' | 'searchResults',
         ) => {

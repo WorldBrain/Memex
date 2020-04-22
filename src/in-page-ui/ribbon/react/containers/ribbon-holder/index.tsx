@@ -21,6 +21,7 @@ export default class RibbonHolder extends StatefulUIElement<
 > {
     shouldHide = false
     hideTimeout?: ReturnType<typeof setTimeout>
+    ref: HTMLElement
 
     constructor(props) {
         super(props, new RibbonHolderLogic(props))
@@ -35,6 +36,7 @@ export default class RibbonHolder extends StatefulUIElement<
     componentWillUnmount() {
         clearTimeout(this.hideTimeout)
         super.componentWillUnmount()
+        this.removeEventListeners()
         this.props.ribbonController.events.removeListener(
             'showRibbon',
             this.showRibbon,
@@ -43,6 +45,29 @@ export default class RibbonHolder extends StatefulUIElement<
             'hideRibbon',
             this.hideRibbon,
         )
+    }
+
+    handleRef = (ref: HTMLDivElement) => {
+        this.ref = ref
+        this.addEventListeners()
+    }
+
+    addEventListeners() {
+        this.ref.addEventListener('mouseenter', this.handleMouseEnter)
+        this.ref.addEventListener('mouseleave', this.hideRibbonWithTimeout)
+    }
+
+    removeEventListeners() {
+        this.ref.removeEventListener(
+            'mouseenter',
+            this.props.inPageUI.showRibbon,
+        )
+        this.ref.removeEventListener('mouseleave', this.hideRibbonWithTimeout)
+    }
+
+    handleMouseEnter = () => {
+        this.shouldHide = false
+        this.props.inPageUI.showRibbon()
     }
 
     showRibbon = () => {
@@ -87,19 +112,10 @@ export default class RibbonHolder extends StatefulUIElement<
     render() {
         return (
             <div
-                style={{ backgroundColor: 'red' }}
+                ref={this.handleRef}
                 className={cx(styles.holder, {
                     [styles.withSidebar]: this.state.isSidebarOpen,
                 })}
-                onMouseEnter={() => {
-                    console.log('mouse enter')
-                    this.shouldHide = false
-                    this.props.inPageUI.showRibbon()
-                }}
-                onMouseLeave={() => {
-                    console.log('mouse leave')
-                    this.hideRibbonWithTimeout()
-                }}
             >
                 {this.maybeRenderRibbon()}
             </div>
