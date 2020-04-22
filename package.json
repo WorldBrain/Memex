@@ -23,7 +23,7 @@
         "test:coverage": "jest --silent --coverage --config=.jest-config.js",
         "test:mocha": "TS_NODE_PROJECT=tsconfig.jest.json mocha --require ts-node/register -r tsconfig-paths/register 'src/backup-restore/background/**/*.test.ts' 'src/util/webextensionRPC.test.ts' 'src/util/webextensionRPC.test.ts' 'src/sync/**/*.test.ts' 'src/tests/**/*.test.ts'",
         "test:mocha:watch": "TS_NODE_PROJECT=tsconfig.jest.json mocha -r source-map-support/register -r ts-node/register -r tsconfig-paths/register 'src/backup-restore/background/**/*.test.ts' 'src/util/webextensionRPC.test.ts' 'src/sync/**/*.test.ts' 'src/tests/**/*.test.ts' --watch --watch-extensions ts",
-        "test:integration": "TS_NODE_PROJECT=tsconfig.jest.json mocha --require ts-node/register -r tsconfig-paths/register src/**/*.integration-test.ts",
+        "test:browser": "TS_NODE_PROJECT=tsconfig.jest.json mocha --require ts-node/register -r tsconfig-paths/register src/**/*.browser-test.ts",
         "lint": "npm-run-all --parallel lint:*",
         "lint:ts": "tslint --project . --format stylish",
         "lint:js": "eslint --ext js --ext jsx src",
