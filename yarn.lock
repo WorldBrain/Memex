@@ -3854,7 +3854,7 @@ address@^1.0.1:
   resolved "https://registry.yarnpkg.com/address/-/address-1.1.2.tgz#bf1116c9c758c51b7a933d296b72c221ed9428b6"
   integrity sha512-aT6camzM4xEA54YVJYSqxz1kv4IHnQZRtThJJHhUMRExaU5spC7jX5ugSwTaTgJliIgs4VhZOk7htClvQ/LmRA==
 
-adm-zip@~0.4.x:
+adm-zip@0.4.11, adm-zip@~0.4.x:
   version "0.4.11"
   resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.4.11.tgz#2aa54c84c4b01a9d0fb89bb11982a51f13e3d62a"
 
@@ -3866,6 +3866,13 @@ after@0.8.2:
 agent-base@^4.1.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-4.2.0.tgz#9838b5c3392b962bad031e6a4c5e1024abec45ce"
+  dependencies:
+    es6-promisify "^5.0.0"
+
+agent-base@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-4.3.0.tgz#8165f01c436009bccad0b1d122f05ed770efc6ee"
+  integrity sha512-salcGninV0nPrwpGNn4VTXBb1SOuXQBiqbrNXoeizJsHrsL6ERFM2Ne3JUSBWRE6aeNJI2ROP/WEEIDUiDe3cg==
   dependencies:
     es6-promisify "^5.0.0"
 
@@ -5162,6 +5169,11 @@ blob@0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/blob/-/blob-0.0.5.tgz#d680eeef25f8cd91ad533f5b01eed48e64caf683"
   integrity sha512-gaqbzQPqOoamawKg0LGVd7SzLgXS+JH61oWprSLH+P+abTczqJbhTR8CmJ2u9/bUYNmHTGJx/UEmn6doAvvuig==
+
+bluebird@3.4.6:
+  version "3.4.6"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.4.6.tgz#01da8d821d87813d158967e743d5fe6c62cf8c0f"
+  integrity sha1-AdqNgh2HgT0ViWfnQ9X+bGLPjA8=
 
 bluebird@^3.3.5, bluebird@^3.5.5:
   version "3.5.5"
@@ -6739,7 +6751,7 @@ create-ecdh@^4.0.0:
     bn.js "^4.1.0"
     elliptic "^6.0.0"
 
-create-error-class@^3.0.0:
+create-error-class@^3.0.0, create-error-class@^3.0.1:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/create-error-class/-/create-error-class-3.0.2.tgz#06be7abef947a3f14a30fd610671d401bca8b7b6"
   dependencies:
@@ -7751,6 +7763,13 @@ dtrace-provider@~0.8:
   resolved "https://registry.yarnpkg.com/dtrace-provider/-/dtrace-provider-0.8.7.tgz#dc939b4d3e0620cfe0c1cd803d0d2d7ed04ffd04"
   dependencies:
     nan "^2.10.0"
+
+duplexer2@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/duplexer2/-/duplexer2-0.1.4.tgz#8b12dab878c0d69e3e7891051662a32fc6bddcc1"
+  integrity sha1-ixLauHjA1p4+eJEFFmKjL8a93ME=
+  dependencies:
+    readable-stream "^2.0.2"
 
 duplexer3@^0.1.4:
   version "0.1.4"
@@ -9500,6 +9519,17 @@ gcp-metadata@^0.3.0:
     extend "^3.0.0"
     retry-request "^3.0.0"
 
+geckodriver@^1.19.1:
+  version "1.19.1"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.19.1.tgz#556f95fd6451b553cec89f81f81abbefce10d6e5"
+  integrity sha512-xWL/+eEhQ6+t98rc1c+xVM3hshDJibXtZf9WJA3sshxq4k5L1PBwfmswyBmmlKUfBr4xuC256gLVC2RxFhiCsQ==
+  dependencies:
+    adm-zip "0.4.11"
+    bluebird "3.4.6"
+    got "5.6.0"
+    https-proxy-agent "3.0.0"
+    tar "4.4.2"
+
 generate-function@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/generate-function/-/generate-function-2.0.0.tgz#6858fe7c0969b7d4e9093337647ac79f60dfbe74"
@@ -9814,6 +9844,28 @@ google-p12-pem@^0.1.0:
   integrity sha1-M8RqsCGqc0+gMys5YKmj/8svMXc=
   dependencies:
     node-forge "^0.7.1"
+
+got@5.6.0:
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/got/-/got-5.6.0.tgz#bb1d7ee163b78082bbc8eb836f3f395004ea6fbf"
+  integrity sha1-ux1+4WO3gIK7yOuDbz85UATqb78=
+  dependencies:
+    create-error-class "^3.0.1"
+    duplexer2 "^0.1.4"
+    is-plain-obj "^1.0.0"
+    is-redirect "^1.0.0"
+    is-retry-allowed "^1.0.0"
+    is-stream "^1.0.0"
+    lowercase-keys "^1.0.0"
+    node-status-codes "^1.0.0"
+    object-assign "^4.0.1"
+    parse-json "^2.1.0"
+    pinkie-promise "^2.0.0"
+    read-all-stream "^3.0.0"
+    readable-stream "^2.0.5"
+    timed-out "^2.0.0"
+    unzip-response "^1.0.0"
+    url-parse-lax "^1.0.0"
 
 got@^6.3.0, got@^6.7.1:
   version "6.7.1"
@@ -10322,6 +10374,14 @@ http-signature@~1.2.0:
 https-browserify@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-1.0.0.tgz#ec06c10e0a34c0f2faf199f7fd7fc78fffd03c73"
+
+https-proxy-agent@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-3.0.0.tgz#0106efa5d63d6d6f3ab87c999fa4877a3fd1ff97"
+  integrity sha512-y4jAxNEihqvBI5F3SaO2rtsjIOnnNA8sEbuiP+UhJZJHeM2NRm6c09ax2tgqme+SgUUvjao2fJXF4h3D6Cb2HQ==
+  dependencies:
+    agent-base "^4.3.0"
+    debug "^3.1.0"
 
 https-proxy-agent@^2.2.1:
   version "2.2.1"
@@ -13128,18 +13188,18 @@ minipass@^2.2.1, minipass@^2.3.3:
     safe-buffer "^5.1.2"
     yallist "^3.0.0"
 
-minipass@^2.6.4:
-  version "2.6.5"
-  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.6.5.tgz#1c245f9f2897f70fd4a219066261ce6c29f80b18"
-  integrity sha512-ewSKOPFH9blOLXx0YSE+mbrNMBFPS+11a2b03QZ+P4LVrUHW/GAlqeYC7DBknDyMWkHzrzTpDhUvy7MUxqyrPA==
+minipass@^2.2.4, minipass@^2.8.6:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.9.0.tgz#e713762e7d3e32fed803115cf93e04bca9fcc9a6"
+  integrity sha512-wxfUjg9WebH+CUDX/CdbRlh5SmfZiy/hpkxaRI16Y9W56Pa75sWgd/rvFilSgrauD9NyFymP/+JFV3KwzIsJeg==
   dependencies:
     safe-buffer "^5.1.2"
     yallist "^3.0.0"
 
-minipass@^2.8.6:
-  version "2.9.0"
-  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.9.0.tgz#e713762e7d3e32fed803115cf93e04bca9fcc9a6"
-  integrity sha512-wxfUjg9WebH+CUDX/CdbRlh5SmfZiy/hpkxaRI16Y9W56Pa75sWgd/rvFilSgrauD9NyFymP/+JFV3KwzIsJeg==
+minipass@^2.6.4:
+  version "2.6.5"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.6.5.tgz#1c245f9f2897f70fd4a219066261ce6c29f80b18"
+  integrity sha512-ewSKOPFH9blOLXx0YSE+mbrNMBFPS+11a2b03QZ+P4LVrUHW/GAlqeYC7DBknDyMWkHzrzTpDhUvy7MUxqyrPA==
   dependencies:
     safe-buffer "^5.1.2"
     yallist "^3.0.0"
@@ -13714,6 +13774,11 @@ node-rsa@^0.2.10:
     asn1 "0.2.3"
     lodash "3.3.0"
 
+node-status-codes@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/node-status-codes/-/node-status-codes-1.0.0.tgz#5ae5541d024645d32a58fcddc9ceecea7ae3ac2f"
+  integrity sha1-WuVUHQJGRdMqWPzdyc7s6nrjrC8=
+
 nomnom@^1.5.x:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/nomnom/-/nomnom-1.8.1.tgz#2151f722472ba79e50a76fc125bb8c8f2e4dc2a7"
@@ -14278,7 +14343,7 @@ parse-glob@^3.0.4:
     is-extglob "^1.0.0"
     is-glob "^2.0.0"
 
-parse-json@2.2.0, parse-json@^2.2.0:
+parse-json@2.2.0, parse-json@^2.1.0, parse-json@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/parse-json/-/parse-json-2.2.0.tgz#f480f40434ef80741f8469099f8dea18f55a4dc9"
   dependencies:
@@ -16368,6 +16433,14 @@ reactcss@^1.2.0:
   integrity sha512-KiwVUcFu1RErkI97ywr8nvx8dNOpT03rbnma0SSalTYjkrPYaEajR4a/MRt6DZ46K6arDRbWMNHF+xH7G7n/8A==
   dependencies:
     lodash "^4.0.1"
+
+read-all-stream@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/read-all-stream/-/read-all-stream-3.1.0.tgz#35c3e177f2078ef789ee4bfafa4373074eaef4fa"
+  integrity sha1-NcPhd/IHjveJ7kv6+kNzB06u9Po=
+  dependencies:
+    pinkie-promise "^2.0.0"
+    readable-stream "^2.0.0"
 
 read-pkg-up@^1.0.1:
   version "1.0.1"
@@ -18742,6 +18815,19 @@ tar-stream@^2.1.0:
     inherits "^2.0.3"
     readable-stream "^3.1.1"
 
+tar@4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.2.tgz#60685211ba46b38847b1ae7ee1a24d744a2cd462"
+  integrity sha512-BfkE9CciGGgDsATqkikUHrQrraBCO+ke/1f6SFAEMnxyyfN9lxC+nW1NFWMpqH865DhHIy9vQi682gk1X7friw==
+  dependencies:
+    chownr "^1.0.1"
+    fs-minipass "^1.2.5"
+    minipass "^2.2.4"
+    minizlib "^1.1.0"
+    mkdirp "^0.5.0"
+    safe-buffer "^5.1.2"
+    yallist "^3.0.2"
+
 tar@^4:
   version "4.4.4"
   resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.4.tgz#ec8409fae9f665a4355cc3b4087d0820232bb8cd"
@@ -18915,6 +19001,11 @@ through2@^2.0.0, through2@^2.0.2, through2@^2.0.3:
 through@2, "through@>=2.2.7 <3", through@^2.3.6, through@~2.3, through@~2.3.1, through@~2.3.4:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
+
+timed-out@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/timed-out/-/timed-out-2.0.0.tgz#f38b0ae81d3747d628001f41dafc652ace671c0a"
+  integrity sha1-84sK6B03R9YoAB9B2vxlKs5nHAo=
 
 timed-out@^4.0.0:
   version "4.0.1"
@@ -19559,6 +19650,11 @@ unset-value@^1.0.0:
   dependencies:
     has-value "^0.3.1"
     isobject "^3.0.0"
+
+unzip-response@^1.0.0:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/unzip-response/-/unzip-response-1.0.2.tgz#b984f0877fc0a89c2c773cc1ef7b5b232b5b06fe"
+  integrity sha1-uYTwh3/AqJwsdzzB73tbIytbBv4=
 
 unzip-response@^2.0.1:
   version "2.0.1"
