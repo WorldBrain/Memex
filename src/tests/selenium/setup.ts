@@ -83,9 +83,13 @@ export function makeTestFactory() {
         it(description, async () => {
             const deps = await setupTest(props ?? {})
 
-            await test(deps)
-
-            await deps.driver.quit()
+            try {
+                await test(deps)
+            } catch (err) {
+                throw err
+            } finally {
+                await deps.driver.quit()
+            }
         })
     }
 }
