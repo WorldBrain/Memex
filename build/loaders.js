@@ -84,7 +84,7 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         test: /\.(j|t)sx?$/,
         include: [
             path.resolve(context, './src'),
-            ...externalTsModules.map(mod =>
+            ...externalTsModules.map((mod) =>
                 path.resolve(context, `./external/${mod}`),
             ),
         ],
@@ -124,16 +124,16 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         use: [urlLoader],
     }
 
-    if (isCI) {
-        return [main, coffee, imgLoader, cssModules, cssVanilla]
-    }
-
     if (mode !== 'production') {
         main.use = [threadLoader, ...main.use]
         cssModulesLoader.options = Object.assign(
             cssModulesLoader.options,
             localIdentName,
         )
+    }
+
+    if (isCI) {
+        return [main, coffee, imgLoader, cssModules, cssVanilla]
     }
 
     return [main, coffee, imgLoader, lint, cssModules, cssVanilla]
