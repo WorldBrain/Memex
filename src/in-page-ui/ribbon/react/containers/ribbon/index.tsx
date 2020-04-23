@@ -7,11 +7,15 @@ import {
 } from './logic'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon-container'
+import { RibbonSubcomponentProps } from '../../components/types'
 import { Anchor } from 'src/highlighting/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { PageList } from 'src/custom-lists/background/types'
 
+type SingleArgOf<Func> = Func extends (arg: infer T) => void ? T : null
+
 export interface RibbonContainerProps extends RibbonContainerOptions {
+    state: 'visible' | 'hidden'
     isSidebarOpen: boolean
     openSidebar: () => void
     closeSidebar: () => void
@@ -55,55 +59,69 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
-                openSidebar={(args: any) => {
-                    this.props.openSidebar()
-                }}
-                closeSidebar={this.props.closeSidebar}
+                isExpanded={this.props.state === 'visible'}
                 getRemoteFunction={this.props.getRemoteFunction}
+                annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}
-                commentText={''}
-                isSidebarOpen={this.props.isSidebarOpen}
                 isRibbonEnabled={true}
                 handleRemoveRibbon={() => {}}
-                isCommentSaved={false}
-                annotationsManager={this.props.annotationsManager}
                 getUrl={() => ''}
-                setRibbonRef={(e: HTMLElement) => {}}
-                setShowSidebarCommentBox={() => {}}
-                insertOrRemoveTooltip={(isTooltipEnabled: false) => {}}
-                isExpanded={this.state.state === 'visible'}
-                isTooltipEnabled={false}
-                areHighlightsEnabled={false}
-                isPaused={false}
-                isBookmarked={false}
                 tabId={this.props.currentTab.id}
-                tags={[]}
-                initTagSuggs={[]}
-                collections={[]}
-                initCollSuggs={[]}
-                showCommentBox={false}
-                showSearchBox={false}
-                showTagsPicker={false}
-                showCollectionsPicker={false}
-                searchValue={''}
-                onInit={() => {}}
-                setAnnotationsManager={(
-                    annotationsManager: AnnotationsManager,
-                ) => {}}
                 handleRibbonToggle={() => {}}
-                handleTooltipToggle={() => {}}
-                handleHighlightsToggle={() => {}}
-                handlePauseToggle={() => {}}
-                handleBookmarkToggle={() => {}}
-                onTagAdd={(tag: string) => {}}
-                onTagDel={(tag: string) => {}}
-                onCollectionAdd={(collection: PageList) => {}}
-                onCollectionDel={(collection: PageList) => {}}
-                setShowCommentBox={(value: false) => {}}
-                setShowTagsPicker={(value: false) => {}}
-                setShowCollectionsPicker={(value: false) => {}}
-                setShowSearchBox={(value: false) => {}}
-                setSearchValue={(value: string) => {}}
+                highlights={{
+                    areHighlightsEnabled: false,
+                    handleHighlightsToggle: () =>
+                        this.processEvent('handleHighlightsToggle', null),
+                }}
+                tooltip={{
+                    isTooltipEnabled: false,
+                    handleTooltipToggle: () =>
+                        this.processEvent('handleTooltipToggle', null),
+                }}
+                sidebar={{
+                    isSidebarOpen: this.props.isSidebarOpen,
+                    setShowSidebarCommentBox: () => {},
+                    openSidebar: (args: any) => {
+                        this.props.openSidebar()
+                    },
+                    closeSidebar: this.props.closeSidebar,
+                }}
+                commentBox={{
+                    ...this.state.commentBox,
+                    setShowCommentBox: () =>
+                        this.processEvent('setShowCommentBox', null),
+                }}
+                bookmark={{
+                    isBookmarked: false,
+                    handleBookmarkToggle: () =>
+                        this.processEvent('handleBookmarkToggle', null),
+                }}
+                tagging={{
+                    tags: [],
+                    initTagSuggs: [],
+                    showTagsPicker: false,
+                    onTagAdd: (tag: string) => {},
+                    onTagDel: (tag: string) => {},
+                    setShowTagsPicker: (value: false) => {},
+                }}
+                lists={{
+                    collections: [],
+                    initCollSuggs: [],
+                    showCollectionsPicker: false,
+                    onCollectionAdd: (collection: PageList) => {},
+                    onCollectionDel: (collection: PageList) => {},
+                    setShowCollectionsPicker: (value: false) => {},
+                }}
+                search={{
+                    showSearchBox: false,
+                    searchValue: '',
+                    setShowSearchBox: (value: false) => {},
+                    setSearchValue: (value: string) => {},
+                }}
+                pausing={{
+                    isPaused: false,
+                    handlePauseToggle: () => {},
+                }}
             />
         )
     }

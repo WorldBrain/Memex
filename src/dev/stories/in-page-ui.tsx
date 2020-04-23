@@ -141,15 +141,15 @@ stories.add('Ribbon', () => (
     <WithDependencies
         setup={async () => {
             const deps = await createDependencies()
+            await deps.inPageUI.showRibbon()
             return deps
         }}
     >
-        {({ commonProps }) => (
-            <RibbonContainer
-                {...commonProps}
-                isSidebarOpen={false}
-                openSidebar={() => {}}
-                closeSidebar={() => {}}
+        {({ commonProps, inPageUI }) => (
+            <RibbonHolder
+                inPageUI={inPageUI}
+                ribbonController={commonProps.ribbonController}
+                containerDependencies={commonProps}
             />
         )}
     </WithDependencies>

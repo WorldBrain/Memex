@@ -99,6 +99,7 @@ export default class RibbonHolder extends StatefulUIElement<
         return (
             <RibbonContainer
                 {...this.props.containerDependencies}
+                state={this.state.state}
                 inPageUI={this.props.inPageUI}
                 ribbonController={this.props.ribbonController}
                 isSidebarOpen={this.state.isSidebarOpen}
@@ -109,6 +110,8 @@ export default class RibbonHolder extends StatefulUIElement<
     }
 
     render() {
+        console.log(this.state.state)
+
         return (
             <div
                 ref={this.handleRef}

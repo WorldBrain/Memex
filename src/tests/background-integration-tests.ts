@@ -71,6 +71,7 @@ export async function setupBackgroundIntegrationTest(options?: {
             },
             tabs: {
                 query: () => {},
+                get: () => {},
             },
         } as any,
         tabManager: options?.tabManager,

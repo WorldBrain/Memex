@@ -48,7 +48,9 @@ export class RibbonHolderLogic extends UILogic<
 
     getInitialState(): RibbonHolderState {
         return {
-            state: this.dependencies.ribbonController.state,
+            state: this.dependencies.inPageUI.state.ribbon
+                ? 'visible'
+                : 'hidden',
             isSidebarOpen: this.dependencies.inPageUI.state.sidebar,
         }
     }

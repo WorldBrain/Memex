@@ -18,42 +18,18 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { highlightAnnotations } from 'src/annotations'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
+import { RibbonSubcomponentProps } from './types'
 const styles = require('./ribbon.css')
 
-export interface Props {
-    onInit: () => void
+export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
     isExpanded: boolean
     isRibbonEnabled: boolean
-    areHighlightsEnabled: boolean
-    isTooltipEnabled: boolean
-    isSidebarOpen: boolean
-    isPaused: boolean
-    isBookmarked: boolean
-    showCommentBox: boolean
-    showSearchBox: boolean
-    showTagsPicker: boolean
-    showCollectionsPicker: boolean
-    searchValue: string
-    isCommentSaved: boolean
-    commentText: string
     shortcutsData?: ShortcutElData[]
     tagManager: ReactNode
     collectionsManager: ReactNode
-    openSidebar: (args: any) => void
-    closeSidebar: () => void
     handleRibbonToggle: () => void
-    handleTooltipToggle: () => void
-    handleHighlightsToggle: () => void
     handleRemoveRibbon: () => void
-    handleBookmarkToggle: () => void
-    handlePauseToggle: () => void
-    setShowSidebarCommentBox: () => void
-    setShowCommentBox: (value: boolean) => void
-    setShowTagsPicker: (value: boolean) => void
-    setShowCollectionsPicker: (value: boolean) => void
-    setShowSearchBox: (value: boolean) => void
-    setSearchValue: (value: string) => void
     highlighter: Pick<HighlightInteractionInterface, 'removeHighlights'>
     hideOnMouseLeave?: boolean
 }
@@ -91,9 +67,7 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     async componentDidMount() {
-        await this.props.onInit()
-
-        if (this.props.areHighlightsEnabled) {
+        if (this.props.highlights.areHighlightsEnabled) {
             highlightAnnotations()
         }
 
@@ -115,37 +89,39 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     private handleMouseLeave = () => {
-        if (!this.props.isSidebarOpen) {
-            const value = this.props.commentText.length > 0
-            this.props.setShowCommentBox(value)
+        if (!this.props.sidebar.isSidebarOpen) {
+            const value = this.props.commentBox.commentText.length > 0
+            this.props.commentBox.setShowCommentBox(value)
         }
     }
 
     private handleSearchEnterPress: KeyboardEventHandler<
         HTMLInputElement
     > = event => {
-        const queryFilters = extractQueryFilters(this.props.searchValue)
+        const queryFilters = extractQueryFilters(this.props.search.searchValue)
         const queryParams = qs.stringify(queryFilters)
 
         this.openOverviewTabRPC(queryParams)
     }
 
     private handleCommentIconBtnClick = () => {
-        if (this.props.isSidebarOpen) {
-            this.props.setShowSidebarCommentBox()
+        if (this.props.sidebar.isSidebarOpen) {
+            this.props.sidebar.setShowSidebarCommentBox(true)
             return
         }
-        this.props.setShowCommentBox(!this.props.showCommentBox)
+        this.props.commentBox.setShowCommentBox(
+            !this.props.commentBox.showCommentBox,
+        )
     }
 
     private toggleHighlights = async () => {
-        if (this.props.areHighlightsEnabled) {
+        if (this.props.highlights.areHighlightsEnabled) {
             this.props.highlighter.removeHighlights()
         } else {
             highlightAnnotations()
         }
 
-        await this.props.handleHighlightsToggle()
+        await this.props.highlights.handleHighlightsToggle()
     }
 
     private getTooltipText(name: string): string {
@@ -159,7 +135,7 @@ export default class Ribbon extends Component<Props, State> {
         let source = elData.tooltip
 
         if (['createBookmark', 'toggleSidebar'].includes(name)) {
-            source = this.props.isBookmarked
+            source = this.props.bookmark.isBookmarked
                 ? elData.toggleOff
                 : elData.toggleOn
         }
@@ -179,17 +155,19 @@ export default class Ribbon extends Component<Props, State> {
                 ref={ref => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
                     [styles.ribbonExpanded]: this.props.isExpanded,
-                    [styles.ribbonSidebarOpen]: this.props.isSidebarOpen,
+                    [styles.ribbonSidebarOpen]: this.props.sidebar
+                        .isSidebarOpen,
                 })}
             >
                 <div
                     className={cx(styles.innerRibbon, {
                         [styles.innerRibbonExpanded]: this.props.isExpanded,
-                        [styles.innerRibbonSidebarOpen]: this.props
+                        [styles.innerRibbonSidebarOpen]: this.props.sidebar
                             .isSidebarOpen,
                     })}
                 >
-                    {(this.props.isExpanded || this.props.isSidebarOpen) && (
+                    {(this.props.isExpanded ||
+                        this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
                             <div className={styles.generalActions}>
                                 <ButtonTooltip
@@ -214,15 +192,17 @@ export default class Ribbon extends Component<Props, State> {
                                 >
                                     <div
                                         className={cx(styles.button, {
-                                            [styles.arrow]: !this.props
+                                            [styles.arrow]: !this.props.sidebar
                                                 .isSidebarOpen,
                                             [styles.arrowReverse]: this.props
-                                                .isSidebarOpen,
+                                                .sidebar.isSidebarOpen,
                                         })}
                                         onClick={() =>
-                                            !this.props.isSidebarOpen
-                                                ? this.props.openSidebar({})
-                                                : this.props.closeSidebar()
+                                            !this.props.sidebar.isSidebarOpen
+                                                ? this.props.sidebar.openSidebar(
+                                                      {},
+                                                  )
+                                                : this.props.sidebar.closeSidebar()
                                         }
                                     />
                                 </ButtonTooltip>
@@ -250,13 +230,14 @@ export default class Ribbon extends Component<Props, State> {
                                             styles.search,
                                         )}
                                         onClick={() => {
-                                            this.props.setShowSearchBox(
-                                                !this.props.showSearchBox,
+                                            this.props.search.setShowSearchBox(
+                                                !this.props.search
+                                                    .showSearchBox,
                                             )
                                             this.inputQueryEl.focus()
                                         }}
                                     />
-                                    {this.props.showSearchBox && (
+                                    {this.props.search.showSearchBox && (
                                         <Tooltip
                                             position="left"
                                             itemClass={styles.tooltipLeft}
@@ -276,7 +257,7 @@ export default class Ribbon extends Component<Props, State> {
                                                     placeholder="Search your Memex"
                                                     autoComplete="off"
                                                     onChange={
-                                                        this.props
+                                                        this.props.search
                                                             .setSearchValue
                                                     }
                                                     specialHandlers={[
@@ -291,7 +272,8 @@ export default class Ribbon extends Component<Props, State> {
                                                         },
                                                     ]}
                                                     defaultValue={
-                                                        this.props.searchValue
+                                                        this.props.search
+                                                            .searchValue
                                                     }
                                                     type={'input'}
                                                 />
@@ -311,12 +293,12 @@ export default class Ribbon extends Component<Props, State> {
                                     <div
                                         className={cx(styles.button, {
                                             [styles.bookmark]: this.props
-                                                .isBookmarked,
+                                                .bookmark.isBookmarked,
                                             [styles.notBookmark]: !this.props
-                                                .isBookmarked,
+                                                .bookmark.isBookmarked,
                                         })}
                                         onClick={() =>
-                                            this.props.handleBookmarkToggle()
+                                            this.props.bookmark.handleBookmarkToggle()
                                         }
                                     />
                                 </ButtonTooltip>
@@ -333,7 +315,7 @@ export default class Ribbon extends Component<Props, State> {
                                         )}
                                         onClick={this.handleCommentIconBtnClick}
                                     />
-                                    {this.props.showCommentBox && (
+                                    {this.props.commentBox.showCommentBox && (
                                         <Tooltip position="left">
                                             {/* <CommentBoxContainer
                                                 env="inpage"
@@ -345,7 +327,7 @@ export default class Ribbon extends Component<Props, State> {
                                             /> */}
                                         </Tooltip>
                                     )}
-                                    {this.props.isCommentSaved && (
+                                    {this.props.commentBox.isCommentSaved && (
                                         <Tooltip
                                             position="left"
                                             itemClass={styles.commentSaved}
@@ -368,12 +350,13 @@ export default class Ribbon extends Component<Props, State> {
                                             styles.tag,
                                         )}
                                         onClick={() =>
-                                            this.props.setShowTagsPicker(
-                                                !this.props.showTagsPicker,
+                                            this.props.tagging.setShowTagsPicker(
+                                                !this.props.tagging
+                                                    .showTagsPicker,
                                             )
                                         }
                                     />
-                                    {this.props.showTagsPicker && (
+                                    {this.props.tagging.showTagsPicker && (
                                         <Tooltip position="left">
                                             {this.props.tagManager}
                                         </Tooltip>
@@ -392,13 +375,13 @@ export default class Ribbon extends Component<Props, State> {
                                             styles.collection,
                                         )}
                                         onClick={() =>
-                                            this.props.setShowCollectionsPicker(
-                                                !this.props
+                                            this.props.lists.setShowCollectionsPicker(
+                                                !this.props.lists
                                                     .showCollectionsPicker,
                                             )
                                         }
                                     />
-                                    {this.props.showCollectionsPicker && (
+                                    {this.props.lists.showCollectionsPicker && (
                                         <Tooltip
                                             position="left"
                                             itemClass={styles.collectionDiv}
@@ -427,7 +410,7 @@ export default class Ribbon extends Component<Props, State> {
                                         )}
                                         onClick={() => {
                                             this.props.handleRibbonToggle()
-                                            this.props.closeSidebar()
+                                            this.props.sidebar.closeSidebar()
                                         }}
                                     />
                                 </ButtonTooltip>
@@ -443,9 +426,11 @@ export default class Ribbon extends Component<Props, State> {
                                             styles.ribbonIcon,
                                             {
                                                 [styles.highlightsOn]: this
-                                                    .props.areHighlightsEnabled,
+                                                    .props.highlights
+                                                    .areHighlightsEnabled,
                                                 [styles.highlightsOff]: !this
-                                                    .props.areHighlightsEnabled,
+                                                    .props.highlights
+                                                    .areHighlightsEnabled,
                                             },
                                         )}
                                     />
@@ -456,15 +441,18 @@ export default class Ribbon extends Component<Props, State> {
                                     position="left"
                                 >
                                     <div
-                                        onClick={this.props.handleTooltipToggle}
+                                        onClick={
+                                            this.props.tooltip
+                                                .handleTooltipToggle
+                                        }
                                         className={cx(
                                             styles.button,
                                             styles.ribbonIcon,
                                             {
                                                 [styles.tooltipOn]: this.props
-                                                    .isTooltipEnabled,
+                                                    .tooltip.isTooltipEnabled,
                                                 [styles.tooltipOff]: !this.props
-                                                    .isTooltipEnabled,
+                                                    .tooltip.isTooltipEnabled,
                                             },
                                         )}
                                     />
@@ -477,12 +465,12 @@ export default class Ribbon extends Component<Props, State> {
                                     <div
                                         className={cx(styles.button, {
                                             [styles.playIcon]: this.props
-                                                .isPaused,
+                                                .pausing.isPaused,
                                             [styles.pauseIcon]: !this.props
-                                                .isPaused,
+                                                .pausing.isPaused,
                                         })}
                                         onClick={() =>
-                                            this.props.handlePauseToggle()
+                                            this.props.pausing.handlePauseToggle()
                                         }
                                     />
                                 </ButtonTooltip>
