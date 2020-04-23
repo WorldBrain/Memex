@@ -1029,7 +1029,7 @@ function mobileSyncTests(suiteOptions: {
                     annotsCount: 1,
                     displayTime: expect.any(Number),
                     favIcon: undefined,
-                    hasBookmark: false,
+                    hasBookmark: true,
                     screenshot: undefined,
                     tags: ['eggs', 'spam'],
                     title: 'This is a test page',
