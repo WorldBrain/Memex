@@ -1,5 +1,5 @@
 import React, {
-    PureComponent,
+    Component,
     ReactNode,
     MouseEventHandler,
     DragEventHandler,
@@ -53,7 +53,7 @@ export interface Props extends Partial<SocialPage> {
     setTagButtonRef: (el: HTMLElement) => void
 }
 
-class ResultItem extends PureComponent<Props> {
+class ResultItem extends Component<Props> {
     get hrefToPage() {
         return `${this.props.fullUrl}`
     }

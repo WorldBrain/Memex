@@ -90,7 +90,6 @@ export default class SidebarContainer extends StatefulUIElement<
                     }),
             }
         }
-        // console.log(this.state)
 
         return (
             <Sidebar
@@ -192,7 +191,10 @@ export default class SidebarContainer extends StatefulUIElement<
                             bookmarked,
                         }),
                     onSaveCb: () => {},
-                    closeComments: () => console.log('close comments'),
+                    closeComments: () => {
+                        console
+                        // .log('close comments')
+                    },
                     // this.processEvent('closeComments', null),
                 }}
                 resultsContainer={{
@@ -228,18 +230,25 @@ export default class SidebarContainer extends StatefulUIElement<
                     setUrlDragged: (url: string) => {},
                     addTag: (i: number) => (filter: string) => {},
                     delTag: (i: number) => (filter: string) => {},
-                    handlePillClick: (tag: string) => () =>
-                        console.log('handlePillClick'),
-                    handleTagBtnClick: (i: number) => () =>
-                        console.log('handleTagBtnClick'),
-                    handleCommentBtnClick: () =>
-                        console.log('handleCommentBtnClick'),
-                    handleCrossRibbonClick: () => () =>
-                        console.log('handleCrossRibbonClick'),
+                    handlePillClick: (tag: string) => () => {
+                        // console.log('handlePillClick')
+                    },
+                    handleTagBtnClick: (i: number) => () => {
+                        // console.log('handleTagBtnClick')
+                    },
+                    handleCommentBtnClick: () => {
+                        // console.log('handleCommentBtnClick')
+                    },
+                    handleCrossRibbonClick: () => () => {
+                        // console.log('handleCrossRibbonClick')
+                    },
                     handleScrollPagination: () => {},
-                    handleToggleBm: () => () => console.log('handleToggleBm'),
-                    handleTrashBtnClick: () => () =>
-                        console.log('handleTrashBtnClick'),
+                    handleToggleBm: () => () => {
+                        // console.log('handleToggleBm')
+                    },
+                    handleTrashBtnClick: () => () => {
+                        // console.log('handleTrashBtnClick')
+                    },
                 }}
                 searchTypeSwitch={{
                     allAnnotationsExpanded: this.state.allAnnotationsExpanded,

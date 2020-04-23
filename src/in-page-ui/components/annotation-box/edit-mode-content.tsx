@@ -27,7 +27,7 @@ interface State {
     isTagInputActive: boolean
 }
 
-class EditModeContent extends React.PureComponent<Props, State> {
+class EditModeContent extends React.Component<Props, State> {
     private _handleEditAnnotation = () => {
         const { commentText, tagsInput } = this.props
         this.props.handleEditAnnotation(commentText, tagsInput)

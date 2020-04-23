@@ -32,7 +32,7 @@ interface OwnProps {
 
 export type CommentBoxProps = StateProps & CommentBoxDispatchProps & OwnProps
 
-export default class CommentBoxContainer extends React.PureComponent<
+export default class CommentBoxContainer extends React.Component<
     CommentBoxProps
 > {
     save = async e => {

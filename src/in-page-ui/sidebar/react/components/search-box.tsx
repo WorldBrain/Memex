@@ -1,4 +1,4 @@
-import React, { PureComponent, SyntheticEvent } from 'react'
+import React, { Component, SyntheticEvent } from 'react'
 import { ClickHandler } from '../types'
 import CloseButton from './close-button'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
@@ -13,7 +13,7 @@ export interface Props {
     placeholder: string
 }
 
-class SearchBox extends PureComponent<Props> {
+class SearchBox extends Component<Props> {
     render() {
         return (
             <div className={styles.formContainer}>

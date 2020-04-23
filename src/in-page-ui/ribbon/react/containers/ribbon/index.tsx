@@ -62,7 +62,7 @@ export default class RibbonContainer extends StatefulUIElement<
                 getRemoteFunction={this.props.getRemoteFunction}
                 highlighter={this.props.highlighter}
                 commentText={''}
-                isSidebarOpen={this.props.inPageUI.state.sidebar}
+                isSidebarOpen={this.props.isSidebarOpen}
                 isRibbonEnabled={true}
                 handleRemoveRibbon={() => {}}
                 isCommentSaved={false}

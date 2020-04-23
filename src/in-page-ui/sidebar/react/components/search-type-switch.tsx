@@ -32,7 +32,7 @@ export interface OwnProps {
 
 export type SearchTypeSwitchProps = StateProps & DispatchProps & OwnProps
 
-export default class SearchTypeSwitch extends React.PureComponent<
+export default class SearchTypeSwitch extends React.Component<
     SearchTypeSwitchProps
 > {
     get unfoldBtnText() {

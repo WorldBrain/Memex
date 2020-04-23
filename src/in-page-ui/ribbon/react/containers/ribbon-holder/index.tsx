@@ -71,7 +71,6 @@ export default class RibbonHolder extends StatefulUIElement<
     }
 
     showRibbon = () => {
-        console.log('show ribbon')
         this.processEvent('show', null)
     }
 

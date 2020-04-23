@@ -50,7 +50,6 @@
     background: white;
     height: 105vh;
     width: 34px;
-    top: 0px;
 
     & .removeSidebar {
         visibility: hidden;

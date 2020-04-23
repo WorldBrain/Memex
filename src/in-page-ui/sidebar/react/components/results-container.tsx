@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import NoResultBadTerm from 'src/overview/results/components/NoResultBadTerm'
@@ -27,9 +27,7 @@ export type ResultsContainerProps = StateProps &
     OwnProps &
     ResultListContainerProps
 
-export default class ResultsContainer extends PureComponent<
-    ResultsContainerProps
-> {
+export default class ResultsContainer extends Component<ResultsContainerProps> {
     private renderContent() {
         if (this.props.isBadTerm) {
             return (

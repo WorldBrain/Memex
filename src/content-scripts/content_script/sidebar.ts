@@ -17,7 +17,6 @@ export const main: SidebarScriptMain = async dependencies => {
                             const annotations = await dependencies.getRemoteFunction(
                                 'getAllAnnotationsByUrl',
                             )({ url: pageUrl })
-                            console.log({ annotations })
                             return annotations
                         },
                         loadTagSuggestions: async () => [

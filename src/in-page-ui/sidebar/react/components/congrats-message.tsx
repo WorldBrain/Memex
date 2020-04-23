@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 import { browser } from 'webextension-polyfill-ts'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
@@ -6,7 +6,7 @@ const styles = require('./congrats-message.css')
 
 const partyPopperIcon = browser.runtime.getURL('/img/party_popper.svg')
 
-class CongratsMessage extends PureComponent {
+class CongratsMessage extends Component {
     openOptionsTab = remoteFunction('openOptionsTab')
 
     moreAboutSidebar = () => {

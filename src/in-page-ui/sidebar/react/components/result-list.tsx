@@ -1,4 +1,4 @@
-import React, { ReactChild, PureComponent } from 'react'
+import React, { ReactChild, Component } from 'react'
 import cx from 'classnames'
 
 const styles = require('./result-list.css')
@@ -8,7 +8,7 @@ export interface Props {
     children: ReactChild[] | ReactChild
 }
 
-class ResultList extends PureComponent<Props> {
+class ResultList extends Component<Props> {
     static defaultProps = {
         scrollDisabled: false,
     }

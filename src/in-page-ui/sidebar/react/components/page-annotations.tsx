@@ -62,6 +62,7 @@ export default class PageAnnotations extends React.Component<
     }
 
     render() {
+        console.log('rendering annotations')
         if (this.props.annotations.length === 0) {
             return <EmptyMessage />
         }

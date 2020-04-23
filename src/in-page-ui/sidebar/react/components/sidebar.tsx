@@ -130,7 +130,7 @@ export default class Sidebar extends React.Component<Props> {
 
     renderAnnotsOrResults() {
         if (
-            this.props.searchTypeSwitch.searchType !== 'page' ||
+            this.props.searchTypeSwitch.searchType !== 'notes' ||
             this.props.searchTypeSwitch.pageType !== 'page'
         ) {
             return this.renderResults()

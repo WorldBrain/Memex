@@ -46,6 +46,5 @@ export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
         return
     }
 
-    console.log('showing sidebar')
     await remoteFunction('showSidebar')()
 }

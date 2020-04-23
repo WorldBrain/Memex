@@ -1,4 +1,4 @@
-import React, { PureComponent, MouseEventHandler } from 'react'
+import React, { Component, MouseEventHandler } from 'react'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
@@ -62,7 +62,7 @@ interface OwnProps {
 
 export type ResultListContainerProps = StateProps & DispatchProps & OwnProps
 
-export default class ResultListContainer extends PureComponent<
+export default class ResultListContainer extends Component<
     ResultListContainerProps
 > {
     private dropdownRefs: HTMLSpanElement[] = []
