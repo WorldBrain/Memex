@@ -124,8 +124,11 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         use: [urlLoader],
     }
 
-    if (mode !== 'production') {
+    if (mode !== 'production' && !isCI) {
         main.use = [threadLoader, ...main.use]
+    }
+
+    if (mode !== 'production') {
         cssModulesLoader.options = Object.assign(
             cssModulesLoader.options,
             localIdentName,
