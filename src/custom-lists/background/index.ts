@@ -74,6 +74,7 @@ export default class CustomListBackground {
                 'fetchListNameSuggestions',
             ),
             fetchListPagesById: bindMethod(this, 'fetchListPagesById'),
+            fetchPageLists: bindMethod(this, 'fetchPageLists'),
             fetchListIgnoreCase: bindMethod(this, 'fetchListIgnoreCase'),
             searchForListSuggestions: bindMethod(
                 this,
@@ -160,6 +161,12 @@ export default class CustomListBackground {
         return this.storage.fetchListPagesByUrl({
             url: normalizeUrl(url),
         })
+    }
+
+    async fetchPageLists({ url }: { url: string }): Promise<string[]> {
+        const lists = await this.fetchListPagesByUrl({ url })
+
+        return lists.map(({ name }) => name)
     }
 
     async createCustomList({ name }: { name: string }): Promise<number> {

@@ -153,15 +153,19 @@ describe('Custom List Integrations', () => {
             expect(list.name).toBe('some good things')
         })
 
-        test('fetch Pages associated with list by url', async () => {
+        test('fetch list associated with page by url', async () => {
+            const url = DATA.PAGE_ENTRY_1.url
             const { customLists } = await setupTest()
 
-            const lists = await customLists.fetchListPagesByUrl({
-                url: 'https://www.ipsum.com/test',
-            })
+            const lists = await customLists.fetchListPagesByUrl({ url })
 
             checkDefined(lists)
             expect(lists.length).toBe(2)
+
+            expect(await customLists.fetchPageLists({ url })).toEqual([
+                DATA.LIST_1.name,
+                DATA.LIST_2.name,
+            ])
         })
 
         test('fetch lists with some urls excluded', async () => {
