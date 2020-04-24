@@ -198,6 +198,7 @@ export function createBackgroundModules(options: {
             windows: browser.windows,
             searchIndex: search.searchIndex,
             pageStorage: pages.storage,
+            localBrowserStorage: options.browserAPIs.storage.local,
         }),
         tags,
         bookmarks,

@@ -25,7 +25,7 @@ export interface RemoteCollectionsInterface {
         id: number
         url: string
         tabId?: number
-    }): Promise<void>
+    }): Promise<{ object: PageListEntry }>
     updateListName(args: { id: number; name: string }): Promise<void>
     removeList(args: { id: number }): Promise<any>
     removePageFromList(args: { id: number; url: string }): Promise<void>
@@ -37,6 +37,7 @@ export interface RemoteCollectionsInterface {
     }): Promise<PageList[]>
     fetchListById(args: { id: number }): Promise<PageList>
     fetchListPagesByUrl(args: { url: string }): Promise<PageList[]>
+    fetchInitialListSuggestions(args?: { limit?: number }): Promise<string[]>
     fetchListNameSuggestions(args: {
         name: string
         url: string
@@ -48,4 +49,8 @@ export interface RemoteCollectionsInterface {
         listId: number
         tabs?: Tab[]
     }): Promise<void>
+}
+
+export interface CollectionsSettings {
+    suggestions?: string[]
 }

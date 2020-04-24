@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { Windows, Tabs, browser } from 'webextension-polyfill-ts'
+import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
@@ -8,16 +8,28 @@ import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { SearchIndex } from 'src/search'
-import { Tab, RemoteCollectionsInterface } from './types'
+import {
+    Tab,
+    RemoteCollectionsInterface,
+    CollectionsSettings,
+    PageList,
+    PageListEntry,
+} from './types'
 import PageStorage from 'src/page-indexing/background/storage'
 import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
 import { bindMethod } from 'src/util/functions'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
+import { BrowserSettingsStore } from 'src/util/settings'
+
+const limitSuggestionsReturnLength = 10
+const limitSuggestionsStorageLength = 20
 
 export default class CustomListBackground {
     storage: CustomListStorage
     _createPage: SearchIndex['createPageViaBmTagActs'] // public so tests can override as a hack
     remoteFunctions: RemoteCollectionsInterface
+
+    private localStorage: BrowserSettingsStore<CollectionsSettings>
 
     constructor(
         private options: {
@@ -27,6 +39,7 @@ export default class CustomListBackground {
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             createPage?: SearchIndex['createPageViaBmTagActs']
+            localBrowserStorage: Storage.LocalStorageArea
         },
     ) {
         // Makes the custom list Table in indexed DB.
@@ -52,6 +65,10 @@ export default class CustomListBackground {
             fetchAllLists: bindMethod(this, 'fetchAllLists'),
             fetchListById: bindMethod(this, 'fetchListById'),
             fetchListPagesByUrl: bindMethod(this, 'fetchListPagesByUrl'),
+            fetchInitialListSuggestions: bindMethod(
+                this,
+                'fetchInitialListSuggestions',
+            ),
             fetchListNameSuggestions: bindMethod(
                 this,
                 'fetchListNameSuggestions',
@@ -61,6 +78,11 @@ export default class CustomListBackground {
             addOpenTabsToList: bindMethod(this, 'addOpenTabsToList'),
             removeOpenTabsFromList: bindMethod(this, 'removeOpenTabsFromList'),
         }
+
+        this.localStorage = new BrowserSettingsStore<CollectionsSettings>(
+            options.localBrowserStorage,
+            { prefix: 'custom-lists' },
+        )
     }
 
     setupRemoteFunctions() {
@@ -76,7 +98,7 @@ export default class CustomListBackground {
         skip = 0,
         limit = 20,
         skipMobileList = false,
-    }) {
+    }): Promise<PageList[]> {
         return this.storage.fetchAllLists({
             excludedIds: excludeIds,
             skipMobileList,
@@ -141,10 +163,14 @@ export default class CustomListBackground {
             type: EVENT_NAMES.CREATE_COLLECTION,
         })
 
-        return this.storage.insertCustomList({
+        const inserted = await this.storage.insertCustomList({
             id: this.generateListId(),
             name,
         })
+
+        await this._updateListSuggestionsCache({ added: name })
+
+        return inserted
     }
 
     async updateList({ id, name }: { id: number; name: string }) {
@@ -180,18 +206,23 @@ export default class CustomListBackground {
         id: number
         url: string
         tabId?: number
-    }) {
+    }): Promise<{ object: PageListEntry }> {
         internalAnalytics.processEvent({
             type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
         })
 
         await this.createPageIfNeeded({ url, tabId })
 
-        return this.storage.insertPageToList({
+        const retVal = await this.storage.insertPageToList({
             listId: id,
             pageUrl: normalizeUrl(url),
             fullUrl: url,
         })
+
+        const list = await this.fetchListById({ id })
+        await this._updateListSuggestionsCache({ added: list.name })
+
+        return retVal
     }
 
     async removeList({ id }: { id: number }) {
@@ -213,6 +244,53 @@ export default class CustomListBackground {
             listId: id,
             pageUrl: normalizeUrl(url),
         })
+    }
+
+    async fetchInitialListSuggestions(
+        { limit }: { limit?: number } = { limit: limitSuggestionsReturnLength },
+    ) {
+        let suggestions = await this.localStorage.get('suggestions')
+
+        if (!suggestions) {
+            const lists = await this.fetchAllLists({
+                limit,
+                skipMobileList: true,
+            })
+            suggestions = lists.map((l) => l.name)
+
+            console['info'](
+                'No cached tag suggestions found so loaded suggestions from DB:',
+                suggestions,
+            )
+            await this.localStorage.set('suggestions', suggestions)
+        }
+
+        return suggestions.slice(0, limit)
+    }
+
+    async _updateListSuggestionsCache(args: {
+        added?: string
+        removed?: string
+    }) {
+        let suggestions = (await this.localStorage.get('suggestions')) ?? []
+
+        if (args.added) {
+            const index = suggestions.indexOf(args.added)
+            if (index) {
+                delete suggestions[index]
+                suggestions = suggestions.filter(Boolean)
+            }
+            suggestions.unshift(args.added)
+        }
+
+        if (args.removed) {
+            const index = suggestions.indexOf(args.removed)
+            delete suggestions[index]
+            suggestions = suggestions.filter(Boolean)
+        }
+
+        suggestions = suggestions.slice(0, limitSuggestionsStorageLength)
+        await this.localStorage.set('suggestions', suggestions)
     }
 
     async fetchListNameSuggestions({
@@ -265,6 +343,9 @@ export default class CustomListBackground {
                 })
             }),
         )
+
+        const list = await this.fetchListById({ id: listId })
+        await this._updateListSuggestionsCache({ added: list.name })
     }
 
     async removeOpenTabsFromList({

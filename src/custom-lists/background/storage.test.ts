@@ -48,7 +48,7 @@ async function setupTest() {
 }
 
 describe('Custom List Integrations', () => {
-    const checkDefined = currPage => {
+    const checkDefined = (currPage) => {
         expect(currPage).toBeDefined()
         expect(currPage).not.toBeNull()
     }
@@ -226,6 +226,45 @@ describe('Custom List Integrations', () => {
             const pagesAfter = await customLists.fetchListPagesById({ id: 1 })
             // No of pages deleted
             expect(pagesBefore.length - pagesAfter.length).toBe(1)
+        })
+    })
+})
+
+describe('Collection Cache', () => {
+    async function setupTest() {
+        const setup = await setupBackgroundIntegrationTest()
+        const listsModule = setup.backgroundModules.customLists
+        return { listsModule }
+    }
+
+    describe('modifies cache', () => {
+        test('add lists', async () => {
+            const { listsModule } = await setupTest()
+
+            await listsModule.createCustomList(DATA.LIST_1)
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.createCustomList(DATA.LIST_2)
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_2.name,
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.createCustomList(DATA.LIST_3)
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_3.name,
+                DATA.LIST_2.name,
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.createCustomList(DATA.LIST_2)
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_2.name,
+                DATA.LIST_3.name,
+                DATA.LIST_1.name,
+            ])
         })
     })
 })
