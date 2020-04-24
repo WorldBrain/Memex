@@ -8,7 +8,7 @@ import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { SearchIndex } from 'src/search'
-import { Tab, CustomListsInterface } from './types'
+import { Tab, RemoteCollectionsInterface } from './types'
 import PageStorage from 'src/page-indexing/background/storage'
 import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
 import { bindMethod } from 'src/util/functions'
@@ -17,7 +17,7 @@ import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 export default class CustomListBackground {
     storage: CustomListStorage
     _createPage: SearchIndex['createPageViaBmTagActs'] // public so tests can override as a hack
-    public remoteFunctions: CustomListsInterface
+    remoteFunctions: RemoteCollectionsInterface
 
     constructor(
         private options: {
@@ -38,7 +38,7 @@ export default class CustomListBackground {
 
         this.remoteFunctions = {
             createCustomList: bindMethod(this, 'createCustomList'),
-            insertPageToList: async params => {
+            insertPageToList: async (params) => {
                 const currentTab = await this.options.queryTabs?.({
                     active: true,
                     currentWindow: true,
@@ -64,7 +64,7 @@ export default class CustomListBackground {
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable(this.remoteFunctions)
+        makeRemotelyCallable<RemoteCollectionsInterface>(this.remoteFunctions)
     }
 
     generateListId() {
@@ -104,10 +104,10 @@ export default class CustomListBackground {
             }
         }
 
-        const missing = names.filter(name => !existingLists.has(name))
+        const missing = names.filter((name) => !existingLists.has(name))
 
         const missingEntries = await Promise.all(
-            missing.map(async name => {
+            missing.map(async (name) => {
                 let id: number
                 try {
                     id = await this.createCustomList({ name })
@@ -121,7 +121,7 @@ export default class CustomListBackground {
 
         const listIds = new Map([...existingLists, ...missingEntries])
 
-        return names.map(name => listIds.get(name))
+        return names.map((name) => listIds.get(name))
     }
 
     async fetchListPagesById({ id }: { id: number }) {
@@ -239,7 +239,7 @@ export default class CustomListBackground {
         tabs,
     }: {
         listId: number
-        tabs?: Array<{ tabId: number; url: string }>
+        tabs?: Tab[]
     }) {
         if (!tabs) {
             tabs = await getOpenTabsInCurrentWindow(
@@ -272,7 +272,7 @@ export default class CustomListBackground {
         tabs,
     }: {
         listId: number
-        tabs?: Array<{ tabId: number; url: string }>
+        tabs?: Tab[]
     }) {
         if (!tabs) {
             tabs = await getOpenTabsInCurrentWindow(
@@ -282,7 +282,7 @@ export default class CustomListBackground {
         }
 
         await Promise.all(
-            tabs.map(tab =>
+            tabs.map((tab) =>
                 this.storage.removePageFromList({
                     listId,
                     pageUrl: normalizeUrl(tab.url),
