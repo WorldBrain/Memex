@@ -132,6 +132,14 @@ describe('Custom List Integrations', () => {
 
             expect(lists.length).toBe(1)
             expect(lists[0].active).toBe(true)
+
+            expect(
+                await customLists.searchForListSuggestions({ query: 'Go' }),
+            ).toEqual([DATA.LIST_2.name])
+
+            expect(
+                await customLists.searchForListSuggestions({ query: 'some' }),
+            ).toEqual([DATA.LIST_1.name, DATA.LIST_3.name])
         })
 
         test('Case insensitive name search', async () => {

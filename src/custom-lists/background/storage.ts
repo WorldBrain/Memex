@@ -9,6 +9,7 @@ import {
 import { MOBILE_LIST_NAME } from '@worldbrain/memex-storage/lib/mobile-app/features/meta-picker/constants'
 
 import { SuggestPlugin } from 'src/search/plugins'
+import { SuggestResult } from 'src/search/types'
 import { PageList, PageListEntry } from './types'
 
 export default class CustomListStorage extends StorageModule {
@@ -154,7 +155,7 @@ export default class CustomListStorage extends StorageModule {
     }
 
     private filterMobileList = (lists: any[]): any[] =>
-        lists.filter(list => list.name !== MOBILE_LIST_NAME)
+        lists.filter((list) => list.name !== MOBILE_LIST_NAME)
 
     async fetchAllLists({
         excludedIds = [],
@@ -173,7 +174,7 @@ export default class CustomListStorage extends StorageModule {
             skip,
         })
 
-        const prepared = lists.map(list => this.prepareList(list))
+        const prepared = lists.map((list) => this.prepareList(list))
 
         if (skipMobileList) {
             return this.filterMobileList(prepared)
@@ -193,7 +194,7 @@ export default class CustomListStorage extends StorageModule {
 
         return this.prepareList(
             list,
-            pages.map(p => p.fullUrl),
+            pages.map((p) => p.fullUrl),
             pages.length > 0,
         )
     }
@@ -212,7 +213,7 @@ export default class CustomListStorage extends StorageModule {
         const entriesByListId = new Map<number, any[]>()
         const listIds = new Set<string>()
 
-        pages.forEach(page => {
+        pages.forEach((page) => {
             listIds.add(page.listId)
             const current = entriesByListId.get(page.listId) || []
             entriesByListId.set(page.listId, [...current, page.fullUrl])
@@ -224,7 +225,7 @@ export default class CustomListStorage extends StorageModule {
             }),
         )
 
-        return lists.map(list => {
+        return lists.map((list) => {
             const entries = entriesByListId.get(list.id)
             return this.prepareList(list, entries, entries != null)
         })
@@ -307,6 +308,29 @@ export default class CustomListStorage extends StorageModule {
         return this.operation('deleteListEntriesById', { listId, pageUrl })
     }
 
+    async suggestLists({
+        query,
+        limit = 5,
+    }: {
+        query: string
+        limit?: number
+    }): Promise<SuggestResult<string, number>> {
+        const suggestions = await this.operation(
+            SuggestPlugin.SUGGEST_OBJS_OP_ID,
+            {
+                collection: CustomListStorage.CUSTOM_LISTS_COLL,
+                query: { name: query },
+                options: {
+                    includePks: true,
+                    ignoreCase: ['name'],
+                    limit,
+                },
+            },
+        )
+
+        return suggestions
+    }
+
     async fetchListNameSuggestions({
         name,
         url,
@@ -314,18 +338,7 @@ export default class CustomListStorage extends StorageModule {
         name: string
         url: string
     }) {
-        const suggestions = await this.operation(
-            SuggestPlugin.SUGGEST_OBJS_OP_ID,
-            {
-                collection: CustomListStorage.CUSTOM_LISTS_COLL,
-                query: { name },
-                options: {
-                    includePks: true,
-                    ignoreCase: ['name'],
-                    limit: 5,
-                },
-            },
-        )
+        const suggestions = await this.suggestLists({ query: name })
         const listIds = suggestions.map(({ pk }) => pk)
 
         const lists: PageList[] = suggestions.map(({ pk, suggestion }) => ({
@@ -340,13 +353,13 @@ export default class CustomListStorage extends StorageModule {
 
         const entriesByListId = new Map<number, any[]>()
 
-        pageEntries.forEach(page => {
+        pageEntries.forEach((page) => {
             const current = entriesByListId.get(page.listId) || []
             entriesByListId.set(page.listId, [...current, page.fullUrl])
         })
 
         return this.filterMobileList(
-            lists.map(list => {
+            lists.map((list) => {
                 const entries = entriesByListId.get(list.id)
                 return this.prepareList(list, entries, entries != null)
             }),

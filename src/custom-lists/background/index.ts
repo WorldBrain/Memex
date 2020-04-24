@@ -75,6 +75,10 @@ export default class CustomListBackground {
             ),
             fetchListPagesById: bindMethod(this, 'fetchListPagesById'),
             fetchListIgnoreCase: bindMethod(this, 'fetchListIgnoreCase'),
+            searchForListSuggestions: bindMethod(
+                this,
+                'searchForListSuggestions',
+            ),
             addOpenTabsToList: bindMethod(this, 'addOpenTabsToList'),
             removeOpenTabsFromList: bindMethod(this, 'removeOpenTabsFromList'),
         }
@@ -310,6 +314,15 @@ export default class CustomListBackground {
         return this.storage.fetchListIgnoreCase({
             name,
         })
+    }
+
+    async searchForListSuggestions(args: {
+        query: string
+        limit?: number
+    }): Promise<string[]> {
+        const suggestions = await this.storage.suggestLists(args)
+
+        return suggestions.map(({ suggestion }) => suggestion)
     }
 
     async addOpenTabsToList({

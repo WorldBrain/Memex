@@ -44,6 +44,10 @@ export interface RemoteCollectionsInterface {
     }): Promise<PageList[]>
     fetchListPagesById(args: { id: number }): Promise<PageListEntry[]>
     fetchListIgnoreCase(args: { name: string }): Promise<PageList[]>
+    searchForListSuggestions(args: {
+        query: string
+        limit?: number
+    }): Promise<string[]>
     addOpenTabsToList(args: { listId: number; tabs?: Tab[] }): Promise<void>
     removeOpenTabsFromList(args: {
         listId: number
