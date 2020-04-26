@@ -1,3 +1,4 @@
+import { calculateBG } from '../../util/computed-styles'
 const styles = require('src/highlighting/ui/styles.css')
 /**
  * Custom implementation of `dom-highlight-range`.
@@ -204,51 +205,9 @@ const getFirstTextNode = (node: Node) => {
     return walker.firstChild()
 }
 
-// Converts a decimal number to a hexidecimal number
-const decimalToHex = (num: number): string => {
-    const hex = num.toString(16)
-    return hex.length === 1 ? '0' + hex : hex
-}
-
-// Converts a rgb number array to a hexidecimal number (e.g. [255,255,255] -> 16777215)
-const rgbToHex = (rgb: number[]): number => {
-    const [r, g, b] = rgb
-    return parseInt(
-        '0x' + decimalToHex(r) + decimalToHex(g) + decimalToHex(b),
-        16,
-    )
-}
-
-// Very rudimentary, created by dividing the hexidecimal representation for white (0xFFFFFF) in half
-const MIDDLE_HEX_COLOR = 0x7fffff
-
-// Takes a color string and deterimes whether or not it is "dark" by comparing it to the MIDDLE_HEX_COLOR
-const checkBGColor = (color: string) => {
-    if (!color.startsWith('#')) {
-        const extractedRgb: number[] = color
-            .replace(/\w+\(?(.+)\)/, '$1')
-            .split(',')
-            .map((n) => parseInt(n, 10))
-        const parsed = rgbToHex(extractedRgb)
-        return parsed < MIDDLE_HEX_COLOR
-    } else {
-        return parseInt(color.replace('#', '0x'), 16) < MIDDLE_HEX_COLOR
-    }
-}
-
-// Calculates the background or background-color of the parent element of a highlight
-const calculateParentBG = (el: HTMLElement): boolean => {
-    const computedStyles = getComputedStyle(el)
-    const { background, backgroundColor } = computedStyles
-    if (background.length > 0) {
-        return checkBGColor(background)
-    }
-    return checkBGColor(backgroundColor)
-}
-
 // Replace [node] with <memex-highlight class=[highlightClass]>[node]</memex-highlight>
 const highlightNode = (node: Node, highlightClass: string) => {
-    const isDark = calculateParentBG(node.parentElement.parentElement)
+    const isDark = calculateBG(node.parentElement.parentElement)
     // Create a highlight
     const highlight: HTMLElement = document.createElement('memex-highlight')
     highlight.classList.add(highlightClass)
