@@ -8,6 +8,7 @@ import {
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Sidebar from '../../components/sidebar'
 import { Anchor } from 'src/highlighting/types'
+import { InPageUIEvents } from 'src/in-page-ui/shared-state/types'
 
 export interface SidebarContainerProps extends SidebarContainerOptions {}
 
@@ -22,20 +23,30 @@ export default class SidebarContainer extends StatefulUIElement<
 
     componentDidMount() {
         super.componentDidMount()
-        this.props.sidebarController.events.on('showSidebar', this.showSidebar)
-        this.props.sidebarController.events.on('hideSidebar', this.hideSidebar)
+        this.props.inPageUI.events.on(
+            'stateChanged',
+            this.handleInPageUIStateChange,
+        )
     }
 
     componentWillUnmount() {
         super.componentWillUnmount()
-        this.props.sidebarController.events.removeListener(
-            'showSidebar',
-            this.showSidebar,
+        this.props.inPageUI.events.removeListener(
+            'stateChanged',
+            this.handleInPageUIStateChange,
         )
-        this.props.sidebarController.events.removeListener(
-            'hideSidebar',
-            this.hideSidebar,
-        )
+    }
+
+    handleInPageUIStateChange: InPageUIEvents['stateChanged'] = ({
+        changes,
+    }) => {
+        if ('sidebar' in changes) {
+            if (changes.sidebar) {
+                this.showSidebar()
+            } else {
+                this.hideSidebar()
+            }
+        }
     }
 
     showSidebar = () => {
@@ -124,11 +135,7 @@ export default class SidebarContainer extends StatefulUIElement<
                 pageType={this.state.pageType}
                 showFiltersSidebar={this.state.showFiltersSidebar}
                 showSocialSearch={false}
-                closeSidebar={() =>
-                    this.props.sidebarController.events.emit(
-                        'requestCloseSidebar',
-                    )
-                }
+                closeSidebar={() => this.props.inPageUI.hideSidebar()}
                 handleAddPageCommentBtnClick={() =>
                     this.processEvent('addNewPageComment', null)
                 }

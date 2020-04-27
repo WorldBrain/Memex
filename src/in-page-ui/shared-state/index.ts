@@ -1,40 +1,45 @@
-import EventEmitter from 'event-emitter'
-import { InPageUIInterface } from './types'
+import EventEmitter from 'events'
+import {
+    InPageUIInterface,
+    InPageUIEvents,
+    InPageUIState,
+    InPageUIComponent,
+} from './types'
 import { RibbonControllerInterface } from '../ribbon/types'
 import { SidebarControllerInterface } from '../sidebar/types'
 import TypedEventEmitter from 'typed-emitter'
 
-export class InPageUIState {
-    ribbon: boolean
-    sidebar: boolean
-}
 export class InPageUI implements InPageUIInterface {
-    events = new EventEmitter() as TypedEventEmitter<{
-        stateChanged: (event: { newState: InPageUIState }) => void
-    }>
+    events = new EventEmitter() as TypedEventEmitter<InPageUIEvents>
     state: InPageUIState = {
+        ribbon: false,
+        sidebar: false,
+    }
+    componentsSetUp: InPageUIState = {
         ribbon: false,
         sidebar: false,
     }
 
     constructor(
         private options: {
-            ribbonController: RibbonControllerInterface
-            sidebarController: SidebarControllerInterface
+            loadComponent: (component: InPageUIComponent) => void
         },
     ) {}
 
-    showSidebar(options?: {
+    async showSidebar(options?: {
         action?: 'comment' | 'tag' | 'list' | 'bookmark' | 'annotate'
-    }): void {
+    }) {
         if (this.state.sidebar) {
             return
         }
 
-        this.options.sidebarController.showSidebar()
+        await this.loadComponent('sidebar')
         this.state.sidebar = true
         this.showRibbon()
-        this.events.emit('stateChanged', { newState: this.state })
+        this.events.emit('stateChanged', {
+            newState: this.state,
+            changes: { sidebar: this.state.sidebar },
+        })
     }
 
     hideSidebar() {
@@ -42,9 +47,12 @@ export class InPageUI implements InPageUIInterface {
             return
         }
 
-        this.options.sidebarController.hideSidebar()
+        // this.options.sidebarController.hideSidebar()
         this.state.sidebar = false
-        this.events.emit('stateChanged', { newState: this.state })
+        this.events.emit('stateChanged', {
+            newState: this.state,
+            changes: { sidebar: this.state.sidebar },
+        })
     }
 
     toggleSidebar(): void {
@@ -55,14 +63,22 @@ export class InPageUI implements InPageUIInterface {
         }
     }
 
-    showRibbon() {
+    async loadComponent(component: InPageUIComponent) {
+        await this.options.loadComponent(component)
+        this._maybeEmitShouldSetUp(component)
+    }
+
+    async showRibbon() {
         if (this.state.ribbon) {
             return
         }
 
-        this.options.ribbonController.showRibbon()
+        await this.loadComponent('ribbon')
         this.state.ribbon = true
-        this.events.emit('stateChanged', { newState: this.state })
+        this.events.emit('stateChanged', {
+            newState: this.state,
+            changes: { ribbon: this.state.ribbon },
+        })
     }
 
     hideRibbon() {
@@ -70,10 +86,19 @@ export class InPageUI implements InPageUIInterface {
             return
         }
 
-        this.options.ribbonController.hideRibbon()
         this.state.ribbon = false
-        this.events.emit('stateChanged', { newState: this.state })
+        this.events.emit('stateChanged', {
+            newState: this.state,
+            changes: { ribbon: this.state.ribbon },
+        })
     }
 
     toggleHighlights(): void {}
+
+    _maybeEmitShouldSetUp(component: InPageUIComponent) {
+        if (!this.componentsSetUp[component]) {
+            this.events.emit('componentShouldSetUp', { component })
+            this.componentsSetUp[component] = true
+        }
+    }
 }

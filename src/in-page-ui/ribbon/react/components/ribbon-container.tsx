@@ -39,10 +39,14 @@ export default class RibbonContainer extends Component<Props> {
                 url={this.props.getUrl()}
                 tabId={this.props.tabId}
                 initFilters={this.props.tagging.tags}
-                initSuggestions={this.props.tagging.initTagSuggs}
+                initSuggestions={this.props.tagging.initTagSuggestions}
                 source="tag"
-                onFilterAdd={this.props.tagging.onTagAdd}
-                onFilterDel={this.props.tagging.onTagDel}
+                onFilterAdd={tag =>
+                    this.props.tagging.addTag({ tag, context: 'tagging' })
+                }
+                onFilterDel={tag =>
+                    this.props.tagging.deleteTag({ tag, context: 'tagging' })
+                }
                 isForRibbon
             />
         )
@@ -53,8 +57,8 @@ export default class RibbonContainer extends Component<Props> {
             <AddListDropdownContainer
                 env="inpage"
                 url={this.props.getUrl()}
-                initLists={this.props.lists.collections}
-                initSuggestions={this.props.lists.initCollSuggs}
+                initLists={this.props.lists.initialLists}
+                initSuggestions={this.props.lists.initialListSuggestions}
                 onFilterAdd={this.props.lists.onCollectionAdd}
                 onFilterDel={this.props.lists.onCollectionDel}
                 isForRibbon

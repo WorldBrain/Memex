@@ -2,8 +2,10 @@ import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
 import { Result, ResultsByUrl } from 'src/overview/types'
 import { PageUrlsByDay } from 'src/search/background/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 
 export interface SidebarContainerDependencies {
+    inPageUI: InPageUIInterface
     annotationsManager: AnnotationsManagerInterface
     currentTab: { id: number; url: string }
     highlighter: Pick<

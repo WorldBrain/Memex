@@ -159,7 +159,6 @@ export type SidebarContainerEvents = UIEvent<{
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
-    sidebarController: SidebarController
     env: SidebarEnv
 }
 
@@ -202,7 +201,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationLoadState: 'pristine',
             searchLoadState: 'pristine',
 
-            state: this.options.sidebarController.state,
+            state: this.options.inPageUI.state.sidebar ? 'visible' : 'hidden',
             annotationModes: {
                 pageAnnotations: {},
                 searchResults: {},

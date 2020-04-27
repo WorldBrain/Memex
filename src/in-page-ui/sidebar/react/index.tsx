@@ -8,7 +8,7 @@ import { SidebarController } from '..'
 export function setupSidebarUI(
     target: HTMLElement,
     dependencies: SidebarContainerDependencies,
-    options: { env: SidebarEnv; sidebarController: SidebarController },
+    options: { env: SidebarEnv },
 ) {
     ReactDOM.render(<SidebarContainer {...options} {...dependencies} />, target)
 }

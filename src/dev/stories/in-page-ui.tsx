@@ -49,19 +49,14 @@ async function createDependencies() {
         removeAnnotationHighlights: async () => {},
     }
 
-    const ribbonController = new RibbonController()
-    const sidebarController = new SidebarController({ createUI: () => {} })
     const inPageUI = new InPageUI({
-        ribbonController,
-        sidebarController,
+        loadComponent: async () => {},
     })
 
     const commonProps = {
         env: 'inpage' as SidebarEnv,
         currentTab: { id: 654, url: 'https://www.foo.com' },
         inPageUI,
-        ribbonController,
-        sidebarController,
         annotationManager,
         highlighter,
         getRemoteFunction: () => async () => {},
@@ -128,7 +123,6 @@ stories.add('Ribbon & Sidebar', () => (
             <React.Fragment>
                 <RibbonHolder
                     inPageUI={inPageUI}
-                    ribbonController={commonProps.ribbonController}
                     containerDependencies={commonProps}
                 />
                 <SidebarContainer {...commonProps} />
@@ -148,7 +142,6 @@ stories.add('Ribbon', () => (
         {({ commonProps, inPageUI }) => (
             <RibbonHolder
                 inPageUI={inPageUI}
-                ribbonController={commonProps.ribbonController}
                 containerDependencies={commonProps}
             />
         )}

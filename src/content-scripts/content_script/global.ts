@@ -23,22 +23,19 @@ import { RibbonControllerInterface } from 'src/in-page-ui/ribbon/types'
 import { SidebarControllerInterface } from 'src/in-page-ui/sidebar/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
+import { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 
 export function main() {
     const controllers: {
-        ribbon?: Resolvable<RibbonControllerInterface>
-        sidebar?: Resolvable<SidebarControllerInterface>
+        ribbon?: Resolvable<void>
+        sidebar?: Resolvable<void>
     } = {}
-    async function getController<
-        Which extends
-            | { type: RibbonControllerInterface; component: 'ribbon' }
-            | { type: SidebarControllerInterface; component: 'sidebar' }
-    >(component: Which['component']): Promise<Which['type']> {
+    async function loadComponent(component: InPageUIComponent) {
         if (!controllers[component]) {
-            controllers[component] = resolvablePromise<Which['type']>() as any
+            controllers[component] = resolvablePromise<void>()
             loadContentScript(component)
         }
-        return controllers[component]! as Promise<Which['type']>
+        return controllers[component]!
     }
 
     const annotationsManager = new AnnotationsManager()
@@ -46,26 +43,27 @@ export function main() {
 
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
-            const ribbon = await execute({
+            await execute({
                 inPageUI,
                 annotationsManager,
                 getRemoteFunction: remoteFunction,
                 highlighter,
                 currentTab: await getCurrentTab(),
             })
-            controllers.ribbon!.resolve(ribbon.ribbonController)
+            controllers.ribbon!.resolve()
         },
         async registerHighlightingScript(execute): Promise<void> {
             execute()
         },
         async registerSidebarScript(execute): Promise<void> {
-            const sidebar = await execute({
+            await execute({
+                inPageUI,
                 annotationsManager,
                 getRemoteFunction: remoteFunction,
                 highlighter,
                 currentTab: await getCurrentTab(),
             })
-            controllers.sidebar!.resolve(sidebar.sidebarController)
+            controllers.sidebar!.resolve()
         },
         async registerTooltipScript(execute): Promise<void> {
             execute()
@@ -73,44 +71,7 @@ export function main() {
     }
     window['contentScriptRegistry'] = contentScriptRegistry
 
-    const inPageUI = new InPageUI({
-        ribbonController: {
-            showRibbon: async () => {
-                ;(
-                    await getController<{
-                        type: RibbonControllerInterface
-                        component: 'ribbon'
-                    }>('ribbon')
-                ).showRibbon()
-            },
-            hideRibbon: async () => {
-                ;(
-                    await getController<{
-                        type: RibbonControllerInterface
-                        component: 'ribbon'
-                    }>('ribbon')
-                ).hideRibbon()
-            },
-        },
-        sidebarController: {
-            showSidebar: async () => {
-                ;(
-                    await getController<{
-                        type: SidebarControllerInterface
-                        component: 'sidebar'
-                    }>('sidebar')
-                ).showSidebar()
-            },
-            hideSidebar: async () => {
-                ;(
-                    await getController<{
-                        type: SidebarControllerInterface
-                        component: 'sidebar'
-                    }>('sidebar')
-                ).hideSidebar()
-            },
-        },
-    })
+    const inPageUI = new InPageUI({ loadComponent })
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: async () => inPageUI.showSidebar(),
     })
@@ -124,7 +85,7 @@ export function main() {
     setupPageContentRPC()
     loadAnnotationWhenReady()
     setupRemoteDirectLinkFunction()
-    setupOnDemandInPageUi(() => getController('ribbon'))
+    setupOnDemandInPageUi(() => inPageUI.loadComponent('ribbon'))
     initKeyboardShortcuts(inPageUI)
 
     // if (window.location.hostname === 'worldbrain.io') {

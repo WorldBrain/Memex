@@ -16,7 +16,7 @@ import {
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { highlightAnnotations } from 'src/annotations'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
+import { HighlightInteractionInterface, Anchor } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 import { RibbonSubcomponentProps } from './types'
 const styles = require('./ribbon.css')
@@ -317,14 +317,43 @@ export default class Ribbon extends Component<Props, State> {
                                     />
                                     {this.props.commentBox.showCommentBox && (
                                         <Tooltip position="left">
-                                            {/* <CommentBoxContainer
-                                                env="inpage"
-                                                closeComments={() =>
-                                                    this.props.setShowCommentBox(
-                                                        false,
-                                                    )
-                                                }
-                                            /> */}
+                                            {
+                                                <CommentBox
+                                                    env="inpage"
+                                                    anchor={null}
+                                                    closeComments={() =>
+                                                        this.props.commentBox.setShowCommentBox(
+                                                            false,
+                                                        )
+                                                    }
+                                                    saveComment={
+                                                        this.props.commentBox
+                                                            .saveComment
+                                                    }
+                                                    form={{
+                                                        env: 'inpage',
+                                                        ...this.props
+                                                            .commentBox,
+                                                        addTag: tag =>
+                                                            this.props.commentBox.addTag(
+                                                                {
+                                                                    tag,
+                                                                    context:
+                                                                        'commentBox',
+                                                                },
+                                                            ),
+                                                        deleteTag: tag =>
+                                                            this.props.commentBox.deleteTag(
+                                                                {
+                                                                    tag,
+                                                                    context:
+                                                                        'commentBox',
+                                                                },
+                                                            ),
+                                                    }}
+                                                    onSaveCb={() => {}}
+                                                />
+                                            }
                                         </Tooltip>
                                     )}
                                     {this.props.commentBox.isCommentSaved && (

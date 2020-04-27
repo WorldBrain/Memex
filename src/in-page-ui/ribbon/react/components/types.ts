@@ -1,4 +1,5 @@
 import { PageList } from 'src/custom-lists/background/types'
+import { Anchor } from 'src/highlighting/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -29,10 +30,19 @@ export interface RibbonSidebarProps {
     setShowSidebarCommentBox: (value: boolean) => void
 }
 
-export interface RibbonCommentBoxProps {
+export interface RibbonCommentBoxProps extends CommonTaggingProps {
     commentText: string
     showCommentBox: boolean
     isCommentSaved: boolean
+    isCommentBookmarked: boolean
+    isAnnotation: boolean
+    isTagInputActive: boolean
+    showTagsPicker: boolean
+    handleCommentTextChange: (comment: string) => void
+    saveComment: () => void
+    cancelComment: () => void
+    toggleBookmark: () => void
+    toggleTagPicker: () => void
     setShowCommentBox: (value: boolean) => void
 }
 
@@ -41,18 +51,25 @@ export interface RibbonBookmarkProps {
     handleBookmarkToggle: () => void
 }
 
-export interface RibbonTaggingProps {
-    tags: string[]
-    initTagSuggs: string[]
+export interface RibbonTaggingProps extends CommonTaggingProps {
     showTagsPicker: boolean
-    onTagAdd: (tag: string) => void
-    onTagDel: (tag: string) => void
     setShowTagsPicker: (value: boolean) => void
 }
 
+export interface CommonTaggingProps {
+    tags: string[]
+    initTagSuggestions: string[]
+    tagSuggestions: string[]
+    addTag: (event: { tag: string; context: 'commentBox' | 'tagging' }) => void
+    deleteTag: (event: {
+        tag: string
+        context: 'commentBox' | 'tagging'
+    }) => void
+}
+
 export interface RibbonListsProps {
-    collections: []
-    initCollSuggs: []
+    initialLists: []
+    initialListSuggestions: []
     showCollectionsPicker: boolean
     onCollectionAdd: (collection: PageList) => void
     onCollectionDel: (collection: PageList) => void
@@ -67,6 +84,6 @@ export interface RibbonSearchProps {
 }
 
 export interface RibbonPausingProps {
-    isPaused: false
+    isPaused: boolean
     handlePauseToggle: () => void
 }

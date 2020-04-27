@@ -6,15 +6,21 @@ import { createInPageUI } from 'src/in-page-ui/utils'
 
 export const main: RibbonScriptMain = async options => {
     const cssFile = browser.extension.getURL(`/content_script_ribbon.css`)
-    const ribbonController = new RibbonController()
-    createInPageUI('ribbon', cssFile, async element => {
-        setupRibbonUI(element, {
-            containerDependencies: options,
-            ribbonController,
-            inPageUI: options.inPageUI,
-        })
+
+    options.inPageUI.events.on('componentShouldSetUp', ({ component }) => {
+        if (component === 'ribbon') {
+            setUp()
+        }
     })
-    return { ribbonController }
+
+    const setUp = () => {
+        createInPageUI('ribbon', cssFile, async element => {
+            setupRibbonUI(element, {
+                containerDependencies: options,
+                inPageUI: options.inPageUI,
+            })
+        })
+    }
 }
 
 const registry = window['contentScriptRegistry'] as ContentScriptRegistry

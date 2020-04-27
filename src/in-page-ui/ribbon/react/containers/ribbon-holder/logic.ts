@@ -11,8 +11,11 @@ import { HighlightInteractionInterface } from 'src/highlighting/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { RibbonController } from 'src/in-page-ui/ribbon'
 import { RibbonContainerDependencies } from '../ribbon/types'
-import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import { InPageUI, InPageUIState } from 'src/in-page-ui/shared-state'
+import {
+    InPageUIInterface,
+    InPageUIState,
+} from 'src/in-page-ui/shared-state/types'
+import { InPageUI } from 'src/in-page-ui/shared-state'
 
 export interface RibbonHolderState {
     state: 'visible' | 'hidden'
@@ -25,8 +28,7 @@ export type RibbonHolderEvents = UIEvent<{
 }>
 
 export interface RibbonHolderDependencies {
-    inPageUI: InPageUI
-    ribbonController: RibbonController
+    inPageUI: InPageUIInterface
     containerDependencies: RibbonContainerDependencies
 }
 

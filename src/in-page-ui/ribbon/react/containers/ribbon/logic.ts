@@ -1,11 +1,10 @@
+import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
-import { TaskState } from 'ui-logic-core/lib/types'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
-import AnnotationsManager from 'src/annotations/annotations-manager'
 import { RibbonController } from 'src/in-page-ui/ribbon'
 import { InPageUI } from 'src/in-page-ui/shared-state'
 import { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
+import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -16,17 +15,24 @@ export type PropKeys<Base, ValueCondition> = keyof Pick<
 type ValuesOf<Props> = Omit<Props, PropKeys<Props, Function>> // tslint:disable-line
 type HandlersOf<Props> = {
     [Key in PropKeys<Props, Function>]: Props[Key] extends (
+        // tslint:disable-line
         value: infer Arg,
     ) => void
-        ? Arg
+        ? { value: Arg }
         : null
-} // tslint:disable-line
+}
+type SubcomponentHandlers<
+    Subcomponent extends keyof componentTypes.RibbonSubcomponentProps
+> = HandlersOf<componentTypes.RibbonSubcomponentProps[Subcomponent]>
 
 export interface RibbonContainerState {
     highlights: ValuesOf<componentTypes.RibbonHighlightsProps>
     tooltip: ValuesOf<componentTypes.RibbonTooltipProps>
     // sidebar: ValuesOf<componentTypes.RibbonSidebarProps>
-    commentBox: ValuesOf<componentTypes.RibbonCommentBoxProps>
+    commentBox: Omit<
+        ValuesOf<componentTypes.RibbonCommentBoxProps>,
+        'initTagSuggestions'
+    >
     bookmark: ValuesOf<componentTypes.RibbonBookmarkProps>
     tagging: ValuesOf<componentTypes.RibbonTaggingProps>
     lists: ValuesOf<componentTypes.RibbonListsProps>
@@ -38,34 +44,54 @@ export type RibbonContainerEvents = UIEvent<
     {
         show: null
         hide: null
-    } & HandlersOf<componentTypes.RibbonHighlightsProps> &
-        HandlersOf<componentTypes.RibbonTooltipProps> &
-        // HandlersOf<componentTypes.RibbonSidebarProps> &
-        HandlersOf<componentTypes.RibbonCommentBoxProps> &
-        HandlersOf<componentTypes.RibbonBookmarkProps> &
-        HandlersOf<componentTypes.RibbonTaggingProps> &
-        HandlersOf<componentTypes.RibbonListsProps> &
-        HandlersOf<componentTypes.RibbonSearchProps> &
-        HandlersOf<componentTypes.RibbonPausingProps>
+    } & SubcomponentHandlers<'highlights'> &
+        SubcomponentHandlers<'tooltip'> &
+        // SubcomponentHandlers<'sidebar'> &
+        SubcomponentHandlers<'commentBox'> &
+        SubcomponentHandlers<'bookmark'> &
+        SubcomponentHandlers<'tagging'> &
+        SubcomponentHandlers<'lists'> &
+        SubcomponentHandlers<'search'> &
+        SubcomponentHandlers<'pausing'>
 >
 
 export interface RibbonContainerOptions extends RibbonContainerDependencies {
-    inPageUI: InPageUI
-    ribbonController: RibbonController
+    inPageUI: InPageUIInterface
 }
 
 type EventHandler<
     EventName extends keyof RibbonContainerEvents
 > = UIEventHandler<RibbonContainerState, RibbonContainerEvents, EventName>
 
+const INITIAL_COMMENT_BOX_STATE = {
+    commentText: '',
+    showCommentBox: false,
+    isCommentSaved: false,
+    isCommentBookmarked: false,
+    isAnnotation: false,
+    isTagInputActive: false,
+    showTagsPicker: false,
+    tags: [],
+    tagSuggestions: [],
+}
 export class RibbonContainerLogic extends UILogic<
     RibbonContainerState,
     RibbonContainerEvents
 >
 // implements UIEventHandlers<RibbonContainerState, RibbonContainerEvents>
 {
+    debouncedFetchTagSuggestions: (search: string) => Promise<string[]>
+
     constructor(private dependencies: RibbonContainerOptions) {
         super()
+
+        let sugCounter = 0
+        this.debouncedFetchTagSuggestions = debounce(() => {
+            // TODO: Actually fetch tag suggestions
+            return [`sug ${++sugCounter}`, `sug ${++sugCounter}`]
+        }, 300)
+
+        // TODO: Load page tags & lists when necessary (on ribbon show?)
     }
 
     getInitialState(): RibbonContainerState {
@@ -79,22 +105,19 @@ export class RibbonContainerLogic extends UILogic<
             // sidebar: {
             //     isSidebarOpen: false,
             // },
-            commentBox: {
-                commentText: '',
-                showCommentBox: false,
-                isCommentSaved: false,
-            },
+            commentBox: INITIAL_COMMENT_BOX_STATE,
             bookmark: {
                 isBookmarked: false,
             },
             tagging: {
-                tags: [],
-                initTagSuggs: [],
                 showTagsPicker: false,
+                tags: [],
+                initTagSuggestions: [],
+                tagSuggestions: [],
             },
             lists: {
-                collections: [],
-                initCollSuggs: [],
+                initialLists: [],
+                initialListSuggestions: [],
                 showCollectionsPicker: false,
             },
             search: {
@@ -115,11 +138,155 @@ export class RibbonContainerLogic extends UILogic<
 
     cleanup() {}
 
-    // show: EventHandler<'show'> = () => {
-    //     return { state: { $set: 'visible' } }
+    //
+    // Bookmark
+    //
+    handleBookmarkToggle: EventHandler<'handleBookmarkToggle'> = ({
+        previousState,
+    }) => {
+        const shouldBeBookmarked = !previousState.bookmark.isBookmarked
+        if (shouldBeBookmarked) {
+            // TODO: Bookmark current page
+        } else {
+            // TODO: Remove page bookmark
+        }
+        return { bookmark: { isBookmarked: { $set: shouldBeBookmarked } } }
+    }
+
+    //
+    // Comment box
+    //
+    setShowCommentBox: EventHandler<'setShowCommentBox'> = ({ event }) => {
+        return { commentBox: { showCommentBox: { $set: event.value } } }
+    }
+
+    handleCommentTextChange: EventHandler<'handleCommentTextChange'> = async ({
+        event,
+        previousState,
+    }) => {
+        return { commentBox: { commentText: { $set: event.value } } }
+    }
+    // return { commentBox: { tagSuggestions: { $set: await this.debouncedFetchTagSuggestions(event.value)}}}
+
+    saveComment: EventHandler<'saveComment'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
+
+        // TODO: Implement saving, bookmarking and tagging
+        const save = (options: { bookmark: boolean; tags: string[] }) =>
+            new Promise(resolve => {
+                console.log('save comment', options)
+                setTimeout(resolve, 300)
+            })
+        await save({
+            bookmark: previousState.commentBox.isCommentBookmarked,
+            tags: previousState.commentBox.tags,
+        })
+
+        this.emitMutation({
+            commentBox: {
+                $set: {
+                    ...INITIAL_COMMENT_BOX_STATE,
+                    isCommentSaved: true,
+                },
+            },
+        })
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
+    }
+
+    cancelComment: EventHandler<'cancelComment'> = ({
+        event,
+        previousState,
+    }) => {
+        return { commentBox: { showCommentBox: { $set: false } } }
+    }
+
+    toggleBookmark: EventHandler<'toggleBookmark'> = ({
+        event,
+        previousState,
+    }) => {
+        return {
+            commentBox: { isCommentBookmarked: { $apply: prev => !prev } },
+        }
+    }
+
+    toggleTagPicker: EventHandler<'toggleTagPicker'> = ({
+        event,
+        previousState,
+    }) => {
+        return { commentBox: { showTagsPicker: { $apply: prev => !prev } } }
+    }
+
+    //
+    // Tagging
+    //
+    addTag: EventHandler<'addTag'> = async ({ event, previousState }) => {
+        this.emitMutation({
+            [event.value.context]: {
+                tags: { $apply: tags => [...tags, event.value.tag] },
+            },
+        })
+        if (event.value.context === 'tagging') {
+            // TODO: Immediately add tag to page here
+        }
+    }
+
+    deleteTag: EventHandler<'deleteTag'> = async ({ event, previousState }) => {
+        const index = previousState[event.value.context].tags.indexOf(
+            event.value.tag,
+        )
+        if (index === -1) {
+            return
+        }
+        this.emitMutation({
+            [event.value.context]: { tags: { $splice: [index, 1] } },
+        })
+        if (event.value.context === 'tagging') {
+            // TODO: Immediately remove tag from page here
+        }
+    }
+
+    //
+    // Lists
+    //
+    // onCollectionAdd: EventHandler<'onCollectionAdd'> = async ({ event }) => {
+    //     // TODO: Add page to list
+    //     this.emitMutation({ lists: { initialLists: { $apply: collections => [...collections, event.value } } })
+
     // }
 
-    // hide: EventHandler<'hide'> = () => {
-    //     return { state: { $set: 'hidden' } }
+    // onCollectionDel: EventHandler<'onCollectionDel'> = async ({ event }) => {
+    //     // TODO: Remove page from list
     // }
+
+    setShowCollectionsPicker: EventHandler<
+        'setShowCollectionsPicker'
+    > = async ({ event }) => {
+        return { lists: { showCollectionsPicker: { $set: event.value } } }
+    }
+
+    //
+    // Search
+    //
+    setShowSearchBox: EventHandler<'setShowSearchBox'> = async ({ event }) => {
+        return { search: { showSearchBox: { $set: event.value } } }
+    }
+
+    setSearchValue: EventHandler<'setSearchValue'> = async ({ event }) => {
+        return { search: { searchValue: { $set: event.value } } }
+    }
+
+    //
+    // Pausing
+    //
+    handlePauseToggle: EventHandler<'handlePauseToggle'> = ({
+        event,
+        previousState,
+    }) => {
+        // TODO: Implement pause toggling
+        return { pausing: { isPaused: { $apply: prev => !prev } } }
+    }
 }

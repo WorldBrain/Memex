@@ -8,6 +8,7 @@ import {
 } from './logic'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import RibbonContainer from '../ribbon'
+import { InPageUIEvents } from 'src/in-page-ui/shared-state/types'
 const styles = require('./styles.css')
 
 const RIBBON_HIDE_TIMEOUT = 700
@@ -29,22 +30,32 @@ export default class RibbonHolder extends StatefulUIElement<
 
     componentDidMount() {
         super.componentDidMount()
-        this.props.ribbonController.events.on('showRibbon', this.showRibbon)
-        this.props.ribbonController.events.on('hideRibbon', this.hideRibbon)
+        this.props.inPageUI.events.on(
+            'stateChanged',
+            this.handleInPageUIStateChange,
+        )
     }
 
     componentWillUnmount() {
         clearTimeout(this.hideTimeout)
         super.componentWillUnmount()
         this.removeEventListeners()
-        this.props.ribbonController.events.removeListener(
-            'showRibbon',
-            this.showRibbon,
+        this.props.inPageUI.events.removeListener(
+            'stateChanged',
+            this.handleInPageUIStateChange,
         )
-        this.props.ribbonController.events.removeListener(
-            'hideRibbon',
-            this.hideRibbon,
-        )
+    }
+
+    handleInPageUIStateChange: InPageUIEvents['stateChanged'] = ({
+        changes,
+    }) => {
+        if ('ribbon' in changes) {
+            if (changes.ribbon) {
+                this.showRibbon()
+            } else {
+                this.hideRibbon()
+            }
+        }
     }
 
     handleRef = (ref: HTMLDivElement) => {
@@ -101,7 +112,6 @@ export default class RibbonHolder extends StatefulUIElement<
                 {...this.props.containerDependencies}
                 state={this.state.state}
                 inPageUI={this.props.inPageUI}
-                ribbonController={this.props.ribbonController}
                 isSidebarOpen={this.state.isSidebarOpen}
                 openSidebar={() => this.props.inPageUI.showSidebar()}
                 closeSidebar={() => this.props.inPageUI.hideSidebar()}
@@ -110,8 +120,6 @@ export default class RibbonHolder extends StatefulUIElement<
     }
 
     render() {
-        console.log(this.state.state)
-
         return (
             <div
                 ref={this.handleRef}
