@@ -59,6 +59,12 @@ export interface RemoteCollectionsInterface {
         listId: number
         tabs?: Tab[]
     }): Promise<void>
+    updateListForPage(args: {
+        added?: string
+        deleted?: string
+        url: string
+        tabId?: number
+    }): Promise<void>
 }
 
 export interface CollectionsSettings {

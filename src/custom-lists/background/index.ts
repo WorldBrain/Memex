@@ -82,6 +82,7 @@ export default class CustomListBackground {
             ),
             addOpenTabsToList: bindMethod(this, 'addOpenTabsToList'),
             removeOpenTabsFromList: bindMethod(this, 'removeOpenTabsFromList'),
+            updateListForPage: bindMethod(this, 'updateListForPage'),
         }
 
         this.localStorage = new BrowserSettingsStore<CollectionsSettings>(
@@ -396,5 +397,33 @@ export default class CustomListBackground {
                 }),
             ),
         )
+    }
+
+    // Sugar for the Tag picking UI component
+    async updateListForPage({
+        added,
+        deleted,
+        url,
+        tabId,
+    }: {
+        added?: string
+        deleted?: string
+        url: string
+        tabId?: number
+    }) {
+        const name = added ?? deleted
+        let list = await this.fetchListByName({ name })
+
+        if (!list) {
+            list = { id: await this.createCustomList({ name }) }
+        }
+
+        if (added) {
+            await this.insertPageToList({ id: list.id, url, tabId })
+        }
+
+        if (deleted) {
+            await this.removePageFromList({ id: list.id, url })
+        }
     }
 }
