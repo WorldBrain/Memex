@@ -183,8 +183,12 @@ export default class CustomListStorage extends StorageModule {
         return prepared
     }
 
-    async fetchListById(id: number) {
-        const list = await this.operation('findListById', { id })
+    async fetchListById(id: number): Promise<PageList | null> {
+        return this.operation('findListById', { id })
+    }
+
+    async fetchListWithPagesById(id: number) {
+        const list = await this.fetchListById(id)
 
         if (!list) {
             return null

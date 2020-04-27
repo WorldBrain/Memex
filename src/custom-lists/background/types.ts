@@ -49,7 +49,12 @@ export interface RemoteCollectionsInterface {
         query: string
         limit?: number
     }): Promise<string[]>
-    addOpenTabsToList(args: { listId: number; tabs?: Tab[] }): Promise<void>
+    addOpenTabsToList(args: {
+        name: string
+        listId?: number
+        tabs?: Tab[]
+        time?: number
+    }): Promise<void>
     removeOpenTabsFromList(args: {
         listId: number
         tabs?: Tab[]

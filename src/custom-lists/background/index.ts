@@ -113,7 +113,7 @@ export default class CustomListBackground {
     }
 
     async fetchListById({ id }: { id: number }) {
-        return this.storage.fetchListById(id)
+        return this.storage.fetchListWithPagesById(id)
     }
 
     async fetchListByName({ name }: { name: string }) {
@@ -332,40 +332,46 @@ export default class CustomListBackground {
         return suggestions.map(({ suggestion }) => suggestion)
     }
 
-    async addOpenTabsToList({
-        listId,
-        tabs,
-    }: {
-        listId: number
+    async addOpenTabsToList(args: {
+        name: string
+        listId?: number
         tabs?: Tab[]
+        time?: number
     }) {
-        if (!tabs) {
-            tabs = await getOpenTabsInCurrentWindow(
-                this.options.windows,
-                this.options.queryTabs,
-            )
+        if (!args.listId) {
+            const list = await this.fetchListByName({ name: args.name })
+
+            if (!list) {
+                throw new Error('No list found for name:' + args.name)
+            }
+
+            args.listId = list.id
         }
 
-        const time = Date.now()
+        const tabs =
+            args.tabs ??
+            (await getOpenTabsInCurrentWindow(
+                this.options.windows,
+                this.options.queryTabs,
+            ))
 
         const indexed = await maybeIndexTabs(tabs, {
             pageStorage: this.options.pageStorage,
             createPage: this._createPage,
-            time,
+            time: args.time ?? Date.now(),
         })
 
         await Promise.all(
             indexed.map(({ fullUrl }) => {
                 this.storage.insertPageToList({
-                    listId,
+                    listId: args.listId,
                     fullUrl,
                     pageUrl: normalizeUrl(fullUrl),
                 })
             }),
         )
 
-        const list = await this.fetchListById({ id: listId })
-        await this._updateListSuggestionsCache({ added: list.name })
+        await this._updateListSuggestionsCache({ added: args.name })
     }
 
     async removeOpenTabsFromList({

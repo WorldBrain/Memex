@@ -18,6 +18,88 @@ let listEntry!: any
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Custom lists',
     [
+        backgroundIntegrationTest('should add open tabs to list', () => {
+            const testList = 'ninja'
+            const testTabs = [
+                {
+                    tabId: 1,
+                    url: 'http://www.bar.com/eggs',
+                    normalized: 'bar.com/eggs',
+                },
+                {
+                    tabId: 2,
+                    url: 'http://www.foo.com/spam',
+                    normalized: 'foo.com/spam',
+                },
+            ]
+
+            return {
+                steps: [
+                    {
+                        execute: async ({ setup }) => {
+                            customLists(setup)._createPage =
+                                setup.backgroundModules.search.searchIndex.createTestPage
+
+                            for (const { url } of testTabs) {
+                                await setup.backgroundModules.search.searchIndex.createTestPage(
+                                    { url },
+                                )
+                            }
+
+                            listId = await customLists(
+                                setup,
+                            ).remoteFunctions.createCustomList({
+                                name: testList,
+                            })
+
+                            await customLists(
+                                setup,
+                            ).remoteFunctions.addOpenTabsToList({
+                                name: testList,
+                                tabs: testTabs,
+                                time: 555,
+                            })
+                        },
+                        postCheck: async ({
+                            setup: { storageManager: db },
+                        }) => {
+                            const stored = {
+                                customLists: await db
+                                    .collection('customLists')
+                                    .findObjects({}),
+                                pageListEntries: await db
+                                    .collection('pageListEntries')
+                                    .findObjects({}),
+                            }
+
+                            const expectedEntries = []
+
+                            for (const { url, normalized } of testTabs) {
+                                expectedEntries.push({
+                                    listId,
+                                    createdAt: expect.any(Date),
+                                    fullUrl: url,
+                                    pageUrl: normalized,
+                                })
+                            }
+
+                            expect(stored).toEqual({
+                                customLists: [
+                                    {
+                                        id: listId,
+                                        createdAt: expect.any(Date),
+                                        name: testList,
+                                        isDeletable: true,
+                                        isNestable: true,
+                                    },
+                                ],
+                                pageListEntries: expectedEntries,
+                            })
+                        },
+                    },
+                ],
+            }
+        }),
         backgroundIntegrationTest(
             'should create a list, edit its title, add an entry to it and retrieve the list and its pages',
             () => {

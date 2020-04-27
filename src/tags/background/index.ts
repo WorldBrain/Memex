@@ -118,7 +118,7 @@ export default class TagsBackground {
         time?: number
     }) {
         const tabs =
-            params.tabs ||
+            params.tabs ??
             (await getOpenTabsInCurrentWindow(
                 this.windows,
                 this.options.queryTabs,
@@ -134,7 +134,8 @@ export default class TagsBackground {
             name: params.name,
             urls: indexed.map((tab) => tab.fullUrl),
         })
-        this._updateTagSuggestionsCache({ added: name })
+
+        this._updateTagSuggestionsCache({ added: params.name })
     }
 
     async delTagsFromOpenTabs({
