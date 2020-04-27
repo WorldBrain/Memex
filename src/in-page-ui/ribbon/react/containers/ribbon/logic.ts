@@ -5,6 +5,8 @@ import { InPageUI } from 'src/in-page-ui/shared-state'
 import { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { TaskState } from 'ui-logic-core/lib/types'
+import { loadInitial } from 'src/util/ui-logic'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -26,6 +28,9 @@ type SubcomponentHandlers<
 > = HandlersOf<componentTypes.RibbonSubcomponentProps[Subcomponent]>
 
 export interface RibbonContainerState {
+    loadState: TaskState
+    isRibbonEnabled: boolean | null
+
     highlights: ValuesOf<componentTypes.RibbonHighlightsProps>
     tooltip: ValuesOf<componentTypes.RibbonTooltipProps>
     // sidebar: ValuesOf<componentTypes.RibbonSidebarProps>
@@ -44,6 +49,7 @@ export type RibbonContainerEvents = UIEvent<
     {
         show: null
         hide: null
+        toggleRibbon: null
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
         // SubcomponentHandlers<'sidebar'> &
@@ -96,6 +102,8 @@ export class RibbonContainerLogic extends UILogic<
 
     getInitialState(): RibbonContainerState {
         return {
+            loadState: 'pristine',
+            isRibbonEnabled: null,
             highlights: {
                 areHighlightsEnabled: false,
             },
@@ -131,19 +139,32 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        // await loadInitial<RibbonContainerState>(this, async () => {
-        //     await this._maybeLoad(previousState, {})
-        // })
+        await loadInitial<RibbonContainerState>(this, async () => {
+            this.emitMutation({
+                isRibbonEnabled: {
+                    $set: await this.dependencies.getSidebarEnabled(),
+                },
+            })
+        })
     }
 
     cleanup() {}
 
+    toggleRibbon: EventHandler<'toggleRibbon'> = async ({ previousState }) => {
+        const shouldBeEnabled = !previousState.isRibbonEnabled
+        if (shouldBeEnabled) {
+            this.emitMutation({ isRibbonEnabled: { $set: true } })
+        }
+        await this.dependencies.setSidebarEnabled(shouldBeEnabled)
+        if (!shouldBeEnabled) {
+            this.dependencies.inPageUI.removeRibbon()
+        }
+    }
+
     //
     // Bookmark
     //
-    handleBookmarkToggle: EventHandler<'handleBookmarkToggle'> = ({
-        previousState,
-    }) => {
+    toggleBookmark: EventHandler<'toggleBookmark'> = ({ previousState }) => {
         const shouldBeBookmarked = !previousState.bookmark.isBookmarked
         if (shouldBeBookmarked) {
             // TODO: Bookmark current page
@@ -204,7 +225,7 @@ export class RibbonContainerLogic extends UILogic<
         return { commentBox: { showCommentBox: { $set: false } } }
     }
 
-    toggleBookmark: EventHandler<'toggleBookmark'> = ({
+    toggleCommentBookmark: EventHandler<'toggleCommentBookmark'> = ({
         event,
         previousState,
     }) => {
@@ -223,6 +244,13 @@ export class RibbonContainerLogic extends UILogic<
     //
     // Tagging
     //
+    setShowTagsPicker: EventHandler<'setShowTagsPicker'> = ({
+        event,
+        previousState,
+    }) => {
+        return { tagging: { showTagsPicker: { $set: event.value } } }
+    }
+
     addTag: EventHandler<'addTag'> = async ({ event, previousState }) => {
         this.emitMutation({
             [event.value.context]: {
@@ -242,7 +270,7 @@ export class RibbonContainerLogic extends UILogic<
             return
         }
         this.emitMutation({
-            [event.value.context]: { tags: { $splice: [index, 1] } },
+            [event.value.context]: { tags: { $splice: [[index, 1]] } },
         })
         if (event.value.context === 'tagging') {
             // TODO: Immediately remove tag from page here
@@ -252,15 +280,13 @@ export class RibbonContainerLogic extends UILogic<
     //
     // Lists
     //
-    // onCollectionAdd: EventHandler<'onCollectionAdd'> = async ({ event }) => {
-    //     // TODO: Add page to list
-    //     this.emitMutation({ lists: { initialLists: { $apply: collections => [...collections, event.value } } })
+    onCollectionAdd: EventHandler<'onCollectionAdd'> = async ({ event }) => {
+        // TODO: Add page to list
+    }
 
-    // }
-
-    // onCollectionDel: EventHandler<'onCollectionDel'> = async ({ event }) => {
-    //     // TODO: Remove page from list
-    // }
+    onCollectionDel: EventHandler<'onCollectionDel'> = async ({ event }) => {
+        // TODO: Remove page from list
+    }
 
     setShowCollectionsPicker: EventHandler<
         'setShowCollectionsPicker'

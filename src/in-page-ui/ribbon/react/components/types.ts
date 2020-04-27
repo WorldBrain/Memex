@@ -41,14 +41,14 @@ export interface RibbonCommentBoxProps extends CommonTaggingProps {
     handleCommentTextChange: (comment: string) => void
     saveComment: () => void
     cancelComment: () => void
-    toggleBookmark: () => void
+    toggleCommentBookmark: () => void
     toggleTagPicker: () => void
     setShowCommentBox: (value: boolean) => void
 }
 
 export interface RibbonBookmarkProps {
     isBookmarked: boolean
-    handleBookmarkToggle: () => void
+    toggleBookmark: () => void
 }
 
 export interface RibbonTaggingProps extends CommonTaggingProps {

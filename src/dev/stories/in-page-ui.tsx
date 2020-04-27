@@ -61,6 +61,8 @@ async function createDependencies() {
         highlighter,
         getRemoteFunction: () => async () => {},
         annotationsManager: annotationManager,
+        getSidebarEnabled: async () => true,
+        setSidebarEnabled: async () => {},
         loadTagSuggestions: async () => [
             'first suggestion',
             'second suggestion',

@@ -4,6 +4,8 @@ import {
     InPageUIEvents,
     InPageUIState,
     InPageUIComponent,
+    InPageUIRibbonAction,
+    InPageUISidebarAction,
 } from './types'
 import { RibbonControllerInterface } from '../ribbon/types'
 import { SidebarControllerInterface } from '../sidebar/types'
@@ -26,10 +28,15 @@ export class InPageUI implements InPageUIInterface {
         },
     ) {}
 
-    async showSidebar(options?: {
-        action?: 'comment' | 'tag' | 'list' | 'bookmark' | 'annotate'
-    }) {
+    async showSidebar(options?: { action?: InPageUISidebarAction }) {
+        const maybeEmitAction = () => {
+            if (options?.action) {
+                this.events.emit('sidebarAction', { action: options.action })
+            }
+        }
+
         if (this.state.sidebar) {
+            maybeEmitAction()
             return
         }
 
@@ -40,6 +47,7 @@ export class InPageUI implements InPageUIInterface {
             newState: this.state,
             changes: { sidebar: this.state.sidebar },
         })
+        maybeEmitAction()
     }
 
     hideSidebar() {
@@ -68,8 +76,15 @@ export class InPageUI implements InPageUIInterface {
         this._maybeEmitShouldSetUp(component)
     }
 
-    async showRibbon() {
+    async showRibbon(options?: { action?: InPageUIRibbonAction }) {
+        const maybeEmitAction = () => {
+            if (options?.action) {
+                this.events.emit('ribbonAction', { action: options.action })
+            }
+        }
+
         if (this.state.ribbon) {
+            maybeEmitAction()
             return
         }
 
@@ -79,6 +94,8 @@ export class InPageUI implements InPageUIInterface {
             newState: this.state,
             changes: { ribbon: this.state.ribbon },
         })
+        this.loadComponent('sidebar')
+        maybeEmitAction()
     }
 
     hideRibbon() {
@@ -91,6 +108,19 @@ export class InPageUI implements InPageUIInterface {
             newState: this.state,
             changes: { ribbon: this.state.ribbon },
         })
+    }
+
+    removeRibbon() {
+        if (this.componentsSetUp.sidebar) {
+            this._removeComponent('sidebar')
+        }
+        this._removeComponent('ribbon')
+    }
+
+    _removeComponent(component: InPageUIComponent) {
+        this.state[component] = false
+        this.componentsSetUp[component] = false
+        this.events.emit('componentShouldDestroy', { component })
     }
 
     toggleHighlights(): void {}

@@ -37,16 +37,14 @@ function prepareShortcutHandler(handler: () => void) {
 
 function getShortcutHandlers(inPageUI: InPageUIInterface): HandleInterface {
     return {
-        addComment: () => inPageUI.showSidebar({ action: 'comment' }),
-        addTag: () => inPageUI.showSidebar({ action: 'tag' }),
-        addToCollection: () => inPageUI.showSidebar({ action: 'list' }),
-        createBookmark: () => inPageUI.showSidebar({ action: 'bookmark' }),
+        addComment: () => inPageUI.showRibbon({ action: 'comment' }),
+        addTag: () => inPageUI.showRibbon({ action: 'tag' }),
+        addToCollection: () => inPageUI.showRibbon({ action: 'list' }),
+        createBookmark: () => inPageUI.showRibbon({ action: 'bookmark' }),
         toggleSidebar: () => inPageUI.toggleSidebar(),
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createHighlight: () => {
-            // if (userSelectedText()) {
-            //     store.dispatch(createAnnotationAction())
-            // }
+            inPageUI.showSidebar({ action: 'annotate' })
         },
         createAnnotation: async () => {
             if (userSelectedText()) {

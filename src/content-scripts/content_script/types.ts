@@ -1,10 +1,7 @@
-import { RibbonControllerInterface } from 'src/in-page-ui/ribbon/types'
-import { SidebarControllerInterface } from 'src/in-page-ui/sidebar/types'
 import { AnnotationsManagerInterface } from 'src/annotations/types'
-import { InPageUI } from 'src/in-page-ui/shared-state'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
-import AnnotationsManager from 'src/annotations/annotations-manager'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { RibbonContainerDependencies } from 'src/in-page-ui/ribbon/react/containers/ribbon/types'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -21,13 +18,14 @@ export type SidebarScriptMain = (dependencies: {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
 }) => Promise<void>
 
-export type RibbonScriptMain = (options: {
-    inPageUI: InPageUIInterface
-    highlighter: HighlightInteractionInterface
-    annotationsManager: AnnotationsManager
-    getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
-    currentTab: { id: number; url: string }
-}) => Promise<void>
+export type RibbonScriptMain = (
+    options: Omit<
+        RibbonContainerDependencies,
+        'setSidebarEnabled' | 'getSidebarEnabled'
+    > & {
+        inPageUI: InPageUIInterface
+    },
+) => Promise<void>
 
 export type HighlightingScriptMain = () => Promise<void>
 

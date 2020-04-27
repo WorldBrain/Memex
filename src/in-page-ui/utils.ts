@@ -1,11 +1,7 @@
 import retargetEvents from 'react-shadow-dom-retarget-events'
 import { createInPageUIRoot } from './dom'
 
-export async function createInPageUI(
-    name: string,
-    cssFile: string,
-    setupUI: (rootElement: HTMLDivElement) => void | Promise<void>,
-) {
+export function createInPageUI(name: string, cssFile: string) {
     const mount = createInPageUIRoot({
         containerId: `memex-${name}-container`,
         rootId: `memex-${name}`,
@@ -15,5 +11,5 @@ export async function createInPageUI(
 
     retargetEvents(mount.shadowRoot)
 
-    await setupUI(mount.rootElement)
+    return mount
 }

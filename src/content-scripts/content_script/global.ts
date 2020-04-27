@@ -24,8 +24,9 @@ import { SidebarControllerInterface } from 'src/in-page-ui/sidebar/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
 import { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
+import { getSidebarState } from 'src/sidebar-overlay/utils'
 
-export function main() {
+export async function main() {
     const controllers: {
         ribbon?: Resolvable<void>
         sidebar?: Resolvable<void>
@@ -74,6 +75,10 @@ export function main() {
     const inPageUI = new InPageUI({ loadComponent })
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: async () => inPageUI.showSidebar(),
+        insertRibbon: async () => inPageUI.loadComponent('ribbon'),
+        removeRibbon: async () => inPageUI.removeRibbon(),
+        insertTooltip: async () => {},
+        removeTooltip: async () => {},
     })
 
     const loadContentScript = createContentScriptLoader()
@@ -85,8 +90,11 @@ export function main() {
     setupPageContentRPC()
     loadAnnotationWhenReady()
     setupRemoteDirectLinkFunction()
-    setupOnDemandInPageUi(() => inPageUI.loadComponent('ribbon'))
     initKeyboardShortcuts(inPageUI)
+
+    if (await getSidebarState()) {
+        setupOnDemandInPageUi(() => inPageUI.loadComponent('ribbon'))
+    }
 
     // if (window.location.hostname === 'worldbrain.io') {
     //     sniffWordpressWorldbrainUser()

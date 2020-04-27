@@ -19,17 +19,21 @@ import { highlightAnnotations } from 'src/annotations'
 import { HighlightInteractionInterface, Anchor } from 'src/highlighting/types'
 import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 import { RibbonSubcomponentProps } from './types'
+import {
+    AddListDropdownContainer,
+    IndexDropdown,
+} from 'src/common-ui/containers'
 const styles = require('./ribbon.css')
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
+    tabId: number
     isExpanded: boolean
     isRibbonEnabled: boolean
     shortcutsData?: ShortcutElData[]
-    tagManager: ReactNode
-    collectionsManager: ReactNode
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
+    getUrl: () => string
     highlighter: Pick<HighlightInteractionInterface, 'removeHighlights'>
     hideOnMouseLeave?: boolean
 }
@@ -143,6 +147,40 @@ export default class Ribbon extends Component<Props, State> {
         return short.shortcut && short.enabled
             ? `${source} (${short.shortcut})`
             : source
+    }
+
+    private renderTagsManager() {
+        return (
+            <IndexDropdown
+                env="inpage"
+                url={this.props.getUrl()}
+                tabId={this.props.tabId}
+                initFilters={this.props.tagging.tags}
+                initSuggestions={this.props.tagging.initTagSuggestions}
+                source="tag"
+                onFilterAdd={tag =>
+                    this.props.tagging.addTag({ tag, context: 'tagging' })
+                }
+                onFilterDel={tag =>
+                    this.props.tagging.deleteTag({ tag, context: 'tagging' })
+                }
+                isForRibbon
+            />
+        )
+    }
+
+    private renderCollectionsManager() {
+        return (
+            <AddListDropdownContainer
+                env="inpage"
+                url={this.props.getUrl()}
+                initLists={this.props.lists.initialLists}
+                initSuggestions={this.props.lists.initialListSuggestions}
+                onFilterAdd={this.props.lists.onCollectionAdd}
+                onFilterDel={this.props.lists.onCollectionDel}
+                isForRibbon
+            />
+        )
     }
 
     render() {
@@ -298,7 +336,7 @@ export default class Ribbon extends Component<Props, State> {
                                                 .bookmark.isBookmarked,
                                         })}
                                         onClick={() =>
-                                            this.props.bookmark.handleBookmarkToggle()
+                                            this.props.bookmark.toggleBookmark()
                                         }
                                     />
                                 </ButtonTooltip>
@@ -334,6 +372,9 @@ export default class Ribbon extends Component<Props, State> {
                                                         env: 'inpage',
                                                         ...this.props
                                                             .commentBox,
+                                                        toggleBookmark: this
+                                                            .props.commentBox
+                                                            .toggleCommentBookmark,
                                                         addTag: tag =>
                                                             this.props.commentBox.addTag(
                                                                 {
@@ -387,7 +428,7 @@ export default class Ribbon extends Component<Props, State> {
                                     />
                                     {this.props.tagging.showTagsPicker && (
                                         <Tooltip position="left">
-                                            {this.props.tagManager}
+                                            {this.renderTagsManager()}
                                         </Tooltip>
                                     )}
                                 </ButtonTooltip>
@@ -415,7 +456,7 @@ export default class Ribbon extends Component<Props, State> {
                                             position="left"
                                             itemClass={styles.collectionDiv}
                                         >
-                                            {this.props.collectionsManager}
+                                            {this.renderCollectionsManager()}
                                         </Tooltip>
                                     )}
                                 </ButtonTooltip>

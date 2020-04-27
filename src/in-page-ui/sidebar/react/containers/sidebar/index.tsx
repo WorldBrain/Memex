@@ -8,7 +8,11 @@ import {
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Sidebar from '../../components/sidebar'
 import { Anchor } from 'src/highlighting/types'
-import { InPageUIEvents } from 'src/in-page-ui/shared-state/types'
+import {
+    InPageUIEvents,
+    InPageUIRibbonAction,
+    InPageUISidebarAction,
+} from 'src/in-page-ui/shared-state/types'
 
 export interface SidebarContainerProps extends SidebarContainerOptions {}
 
@@ -27,6 +31,10 @@ export default class SidebarContainer extends StatefulUIElement<
             'stateChanged',
             this.handleInPageUIStateChange,
         )
+        this.props.inPageUI.events.on(
+            'sidebarAction',
+            this.handleExternalAction,
+        )
     }
 
     componentWillUnmount() {
@@ -34,6 +42,10 @@ export default class SidebarContainer extends StatefulUIElement<
         this.props.inPageUI.events.removeListener(
             'stateChanged',
             this.handleInPageUIStateChange,
+        )
+        this.props.inPageUI.events.removeListener(
+            'sidebarAction',
+            this.handleExternalAction,
         )
     }
 
@@ -55,6 +67,11 @@ export default class SidebarContainer extends StatefulUIElement<
 
     hideSidebar = () => {
         this.processEvent('hide', null)
+    }
+
+    handleExternalAction = (event: { action: InPageUISidebarAction }) => {
+        if (event.action === 'annotate') {
+        }
     }
 
     render() {

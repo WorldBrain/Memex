@@ -59,8 +59,10 @@ export default class RibbonHolder extends StatefulUIElement<
     }
 
     handleRef = (ref: HTMLDivElement) => {
-        this.ref = ref
-        this.addEventListeners()
+        if (ref) {
+            this.ref = ref
+            this.addEventListeners()
+        }
     }
 
     addEventListeners() {
@@ -69,10 +71,7 @@ export default class RibbonHolder extends StatefulUIElement<
     }
 
     removeEventListeners() {
-        this.ref.removeEventListener(
-            'mouseenter',
-            this.props.inPageUI.showRibbon,
-        )
+        this.ref.removeEventListener('mouseenter', this.handleMouseEnter)
         this.ref.removeEventListener('mouseleave', this.hideRibbonWithTimeout)
     }
 

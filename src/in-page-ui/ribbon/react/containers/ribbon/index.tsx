@@ -6,11 +6,9 @@ import {
     RibbonContainerEvents,
 } from './logic'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import Ribbon from '../../components/ribbon-container'
-import { RibbonSubcomponentProps } from '../../components/types'
-import { Anchor } from 'src/highlighting/types'
-import AnnotationsManager from 'src/annotations/annotations-manager'
+import Ribbon from '../../components/ribbon'
 import { PageList } from 'src/custom-lists/background/types'
+import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -28,44 +26,45 @@ export default class RibbonContainer extends StatefulUIElement<
         super(props, new RibbonContainerLogic(props))
     }
 
-    // componentDidMount() {
-    //     super.componentDidMount()
-    //     this.props.ribbonController.events.on('showRibbon', this.showRibbon)
-    //     this.props.ribbonController.events.on('hideRibbon', this.hideRibbon)
-    // }
+    componentDidMount() {
+        super.componentDidMount()
+        this.props.inPageUI.events.on('ribbonAction', this.handleExternalAction)
+    }
 
-    // componentWillUnmount() {
-    //     super.componentWillUnmount()
-    //     this.props.ribbonController.events.removeListener(
-    //         'showRibbon',
-    //         this.showRibbon,
-    //     )
-    //     this.props.ribbonController.events.removeListener(
-    //         'hideRibbon',
-    //         this.hideRibbon,
-    //     )
-    // }
+    componentWillUnmount() {
+        super.componentWillUnmount()
+        this.props.inPageUI.events.removeListener(
+            'ribbonAction',
+            this.handleExternalAction,
+        )
+    }
 
-    // showRibbon = () => {
-    //     this.processEvent('show', null)
-    // }
-
-    // hideRibbon = () => {
-    //     this.processEvent('hide', null)
-    // }
+    handleExternalAction = (event: { action: InPageUIRibbonAction }) => {
+        if (event.action === 'comment') {
+            this.processEvent('setShowCommentBox', { value: true })
+        } else if (event.action === 'bookmark') {
+            this.processEvent('toggleBookmark', null)
+        } else if (event.action === 'list') {
+            this.processEvent('setShowCollectionsPicker', { value: true })
+        } else if (event.action === 'tag') {
+            this.processEvent('setShowTagsPicker', { value: true })
+        }
+    }
 
     render() {
         return (
             <Ribbon
                 isExpanded={this.props.state === 'visible'}
                 getRemoteFunction={this.props.getRemoteFunction}
-                annotationsManager={this.props.annotationsManager}
+                // annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}
-                isRibbonEnabled={true}
-                handleRemoveRibbon={() => {}}
-                getUrl={() => ''}
+                isRibbonEnabled={this.state.isRibbonEnabled}
+                handleRemoveRibbon={() => this.props.inPageUI.removeRibbon()}
+                getUrl={() => this.props.currentTab.url}
                 tabId={this.props.currentTab.id}
-                handleRibbonToggle={() => {}}
+                handleRibbonToggle={() =>
+                    this.processEvent('toggleRibbon', null)
+                }
                 highlights={{
                     ...this.state.highlights,
                     handleHighlightsToggle: () =>
@@ -78,8 +77,9 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 sidebar={{
                     isSidebarOpen: this.props.isSidebarOpen,
-                    setShowSidebarCommentBox: () => {},
-                    openSidebar: (args: any) => {
+                    setShowSidebarCommentBox: () =>
+                        this.props.inPageUI.showSidebar({ action: 'comment' }),
+                    openSidebar: () => {
                         this.props.openSidebar()
                     },
                     closeSidebar: this.props.closeSidebar,
@@ -87,12 +87,15 @@ export default class RibbonContainer extends StatefulUIElement<
                 commentBox={{
                     ...this.state.commentBox,
                     initTagSuggestions: this.state.tagging.initTagSuggestions,
-                    handleCommentTextChange: (comment: string) => {},
+                    handleCommentTextChange: (comment: string) =>
+                        this.processEvent('handleCommentTextChange', {
+                            value: comment,
+                        }),
                     saveComment: () => this.processEvent('saveComment', null),
                     cancelComment: () =>
                         this.processEvent('cancelComment', null),
-                    toggleBookmark: () =>
-                        this.processEvent('toggleBookmark', null),
+                    toggleCommentBookmark: () =>
+                        this.processEvent('toggleCommentBookmark', null),
                     toggleTagPicker: () =>
                         this.processEvent('toggleTagPicker', null),
                     setShowCommentBox: value =>
@@ -104,8 +107,8 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 bookmark={{
                     ...this.state.bookmark,
-                    handleBookmarkToggle: () =>
-                        this.processEvent('handleBookmarkToggle', null),
+                    toggleBookmark: () =>
+                        this.processEvent('toggleBookmark', null),
                 }}
                 tagging={{
                     ...this.state.tagging,
@@ -118,14 +121,14 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 lists={{
                     ...this.state.lists,
-                    onCollectionAdd: (collection: PageList) => {},
-                    // this.processEvent('onCollectionAdd', {
-                    //     value: collection,
-                    // }),
-                    onCollectionDel: (collection: PageList) => {},
-                    // this.processEvent('onCollectionDel', {
-                    //     value: collection,
-                    // }),
+                    onCollectionAdd: (collection: PageList) =>
+                        this.processEvent('onCollectionAdd', {
+                            value: collection,
+                        }),
+                    onCollectionDel: (collection: PageList) =>
+                        this.processEvent('onCollectionDel', {
+                            value: collection,
+                        }),
                     setShowCollectionsPicker: (value: false) =>
                         this.processEvent('setShowCollectionsPicker', {
                             value,
