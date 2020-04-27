@@ -2,6 +2,7 @@ import { Alarms, Storage } from 'webextension-polyfill-ts'
 
 import { JobDefinition, PrimedJob } from './types'
 import { SCHEDULES } from '../constants'
+import { now as _now } from 'moment'
 
 export type Period = 'month' | 'week' | 'day'
 
@@ -65,7 +66,7 @@ export class JobScheduler {
     }
 
     private async attemptOneOffJob(
-        { name, delayInMinutes, job }: JobDefinition<PrimedJob>,
+        { name, delayInMinutes, job, when }: JobDefinition<PrimedJob>,
         now: number,
     ) {
         const timeToRun = await this.getTimeoutKey(name)
@@ -73,12 +74,12 @@ export class JobScheduler {
         if (timeToRun === JobScheduler.NOT_SET) {
             await this.setTimeoutKey(
                 name,
-                JobScheduler.calcTimeFromNow(delayInMinutes, now),
+                when ?? JobScheduler.calcTimeFromNow(delayInMinutes, now),
             )
         } else if (timeToRun === JobScheduler.ALREADY_RUN) {
             return
-        } else if (timeToRun < now) {
-            await job()
+        } else if (timeToRun < now || when) {
+            const response = await job()
             await this.setTimeoutKey(name, JobScheduler.ALREADY_RUN)
         }
     }
@@ -89,7 +90,7 @@ export class JobScheduler {
             return
         }
 
-        if (job.delayInMinutes) {
+        if (job.delayInMinutes || job.when) {
             return this.attemptOneOffJob(job, now)
         } else if (job.periodInMinutes) {
             return this.attemptPeriodicJob(job, now)
@@ -101,10 +102,18 @@ export class JobScheduler {
         this.jobs.set(job.name, job)
 
         this.props.alarmsAPI.create(job.name, {
+            // If a definite 'when' is not provided
             // fire the initial alarm in a random minute,
             // this will ensure all of the created alarms fire at different time of the hour
-            delayInMinutes: Math.floor(Math.random() * 60),
-            periodInMinutes: SCHEDULES.EVERY_HOUR,
+            delayInMinutes:
+                typeof job.when === 'undefined'
+                    ? Math.floor(Math.random() * 60)
+                    : undefined,
+            periodInMinutes:
+                typeof job.when === 'undefined'
+                    ? SCHEDULES.EVERY_HOUR
+                    : undefined,
+            when: job.when < _now() ? _now() + 1000 : job.when,
         })
 
         await this.handleAlarm({ name: job.name } as Alarms.Alarm)
