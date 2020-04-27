@@ -1,4 +1,4 @@
-import TagPickerLogic, { TagPickerState } from './logic'
+import ListPickerLogic, { ListPickerState } from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
@@ -11,111 +11,111 @@ import 'jest-extended'
 const TESTURL = 'http://test.com'
 
 const stateHelper = ({
-    tagResultListSelected,
-    tagResultListNotSelected,
-    tagResultListFocused,
-    selectedTags,
+    listResultListSelected,
+    listResultListNotSelected,
+    listResultListFocused,
+    selectedLists,
     query,
-    newTagButton,
+    newListButton,
 }: {
-    tagResultListSelected?: string[]
-    tagResultListNotSelected?: string[]
-    tagResultListFocused?: string[]
-    selectedTags?: string[]
+    listResultListSelected?: string[]
+    listResultListNotSelected?: string[]
+    listResultListFocused?: string[]
+    selectedLists?: string[]
     query?: string
-    newTagButton?: boolean
+    newListButton?: boolean
 }) => ({
-    displayTags: [
-        ...(tagResultListFocused ?? []).map((t) => ({
+    displayLists: [
+        ...(listResultListFocused ?? []).map((t) => ({
             name: t,
             focused: true,
             selected: false,
         })),
-        ...(tagResultListNotSelected ?? [])
-            .filter((t) => !(tagResultListFocused ?? []).includes(t))
+        ...(listResultListNotSelected ?? [])
+            .filter((t) => !(listResultListFocused ?? []).includes(t))
             .map((t) => ({
                 name: t,
                 focused: false,
                 selected: false,
             })),
-        ...(tagResultListSelected ?? [])
-            .filter((t) => !(tagResultListFocused ?? []).includes(t))
+        ...(listResultListSelected ?? [])
+            .filter((t) => !(listResultListFocused ?? []).includes(t))
             .map((t) => ({
                 name: t,
                 focused: false,
                 selected: true,
             })),
     ],
-    selectedTags: selectedTags ?? [],
+    selectedLists: selectedLists ?? [],
     loadingQueryResults: false,
     loadingSuggestions: false,
     query: query ?? '',
-    newTagName: newTagButton ? query : '',
+    newListName: newListButton ? query : '',
 })
 
 const setupLogicHelper = async ({
     device,
-    onUpdateTagSelection,
-    queryTags,
-    queryTagResults,
+    onUpdateListSelection,
+    queryLists,
+    queryListResults,
     initialSuggestions,
-    initialSelectedTags,
+    initialSelectedLists,
     url,
 }: {
     device: UILogicTestDevice
-    onUpdateTagSelection?: (
+    onUpdateListSelection?: (
         _: string[],
         added: string,
         deleted: string,
     ) => Promise<void>
-    queryTags?: (query: string) => Promise<string[]>
-    queryTagResults?: string[]
+    queryLists?: (query: string) => Promise<string[]>
+    queryListResults?: string[]
     initialSuggestions?: string[]
-    initialSelectedTags?: string[]
+    initialSelectedLists?: string[]
     url?: string
 }) => {
-    const backendTagUpdate = async (
+    const backendListUpdate = async (
         _: string[],
         added: string,
         deleted: string,
     ) =>
-        device.backgroundModules.tags.updateTagForPage({
+        device.backgroundModules.customLists.updateListForPage({
             added,
             deleted,
             url: url ?? TESTURL,
         })
 
-    const tagPickerLogic = new TagPickerLogic({
-        onUpdateTagSelection: onUpdateTagSelection ?? backendTagUpdate,
-        queryTags:
-            queryTags ?? queryTagResults
-                ? async (query: string) => queryTagResults
+    const listPickerLogic = new ListPickerLogic({
+        onUpdateListSelection: onUpdateListSelection ?? backendListUpdate,
+        queryLists:
+            queryLists ?? queryListResults
+                ? async (query: string) => queryListResults
                 : async (query: string) => [],
         loadDefaultSuggestions: () => initialSuggestions ?? [],
-        initialSelectedTags: async () => initialSelectedTags ?? [],
-        tagAllTabs: async (tab) => null,
+        initialSelectedLists: async () => initialSelectedLists ?? [],
+        listAllTabs: async (tab) => null,
     })
 
-    const testLogic = device.createElement(tagPickerLogic)
+    const testLogic = device.createElement(listPickerLogic)
     await testLogic.init()
-    return { testLogic, tagPickerLogic }
+    return { testLogic, listPickerLogic }
 }
 
 const expectStateToEqual = (
-    resultState: TagPickerState,
-    expectedState: TagPickerState,
+    resultState: ListPickerState,
+    expectedState: ListPickerState,
 ) => {
-    const { displayTags: queryTagsResult, ...restResult } = resultState
-    const { displayTags: queryTagsExpected, ...restExpected } = expectedState
+    const { displayLists: queryListsResult, ...restResult } = resultState
+    const { displayLists: queryListsExpected, ...restExpected } = expectedState
     expect(restResult).toEqual(restExpected)
     // Compares the array state without caring about order
-    expect(queryTagsResult).toIncludeSameMembers(queryTagsExpected)
+    expect(queryListsResult).toIncludeSameMembers(queryListsExpected)
 }
 
-describe('TagPickerLogic', () => {
+describe('ListPickerLogic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
-    it('should correctly load initial tags', async ({ device }) => {
+    it('should correctly load initial lists', async ({ device }) => {
         const initialSuggestions = ['sugg1', 'sugg2']
 
         const { testLogic } = await setupLogicHelper({
@@ -124,95 +124,95 @@ describe('TagPickerLogic', () => {
         })
 
         expect(testLogic.state).toEqual(
-            stateHelper({ tagResultListNotSelected: initialSuggestions }),
+            stateHelper({ listResultListNotSelected: initialSuggestions }),
         )
     })
 
-    it('should correctly load initial tags and set those selected when selected are in initial tags', async ({
+    it('should correctly load initial lists and set those selected when selected are in initial lists', async ({
         device,
     }) => {
         const initialSuggestions = ['sugg1', 'sugg2', 'test1']
-        const initialSelectedTags = ['test1']
+        const initialSelectedLists = ['test1']
 
         const { testLogic } = await setupLogicHelper({
             device,
             initialSuggestions,
-            initialSelectedTags,
+            initialSelectedLists,
         })
 
         expectStateToEqual(
             testLogic.state,
             stateHelper({
-                tagResultListNotSelected: ['sugg1', 'sugg2'],
-                tagResultListSelected: initialSelectedTags,
-                selectedTags: initialSelectedTags,
+                listResultListNotSelected: ['sugg1', 'sugg2'],
+                listResultListSelected: initialSelectedLists,
+                selectedLists: initialSelectedLists,
             }),
         )
     })
-    it('should correctly load initial tags and set those selected when selected are not in initial tags', async ({
+    it('should correctly load initial lists and set those selected when selected are not in initial lists', async ({
         device,
     }) => {
         const initialSuggestions = ['sugg1', 'sugg2']
-        const initialSelectedTags = ['test1']
+        const initialSelectedLists = ['test1']
 
         const { testLogic } = await setupLogicHelper({
             device,
             initialSuggestions,
-            initialSelectedTags,
+            initialSelectedLists,
         })
 
         expect(testLogic.state).toEqual(
             stateHelper({
-                tagResultListNotSelected: ['sugg1', 'sugg2'],
-                selectedTags: initialSelectedTags,
+                listResultListNotSelected: ['sugg1', 'sugg2'],
+                selectedLists: initialSelectedLists,
             }),
         )
     })
 
-    it('should correctly search for a tag when tag is already selected', async ({
+    it('should correctly search for a list when list is already selected', async ({
         device,
     }) => {
         const initialSuggestions = ['sugg1', 'sugg2']
-        const initialSelectedTags = ['test1']
+        const initialSelectedLists = ['test1']
 
         const { testLogic } = await setupLogicHelper({
             device,
             initialSuggestions,
-            initialSelectedTags,
-            queryTagResults: ['test1'],
-        })
-        await testLogic.processEvent('searchInputChanged', { query: 'test' })
-
-        expect(testLogic.state).toEqual(
-            stateHelper({
-                tagResultListSelected: ['test1'],
-                selectedTags: initialSelectedTags,
-                query: 'test',
-                newTagButton: true,
-            }),
-        )
-    })
-
-    it('should correctly search for a tag when tag is not selected', async ({
-        device,
-    }) => {
-        const initialSuggestions = ['sugg1', 'sugg2']
-        const initialSelectedTags = ['something']
-
-        const { testLogic } = await setupLogicHelper({
-            device,
-            initialSuggestions,
-            initialSelectedTags,
-            queryTagResults: ['test1'],
+            initialSelectedLists,
+            queryListResults: ['test1'],
         })
         await testLogic.processEvent('searchInputChanged', { query: 'test' })
 
         expect(testLogic.state).toEqual(
             stateHelper({
-                tagResultListNotSelected: ['test1'],
-                selectedTags: initialSelectedTags,
+                listResultListSelected: ['test1'],
+                selectedLists: initialSelectedLists,
                 query: 'test',
-                newTagButton: true,
+                newListButton: true,
+            }),
+        )
+    })
+
+    it('should correctly search for a list when list is not selected', async ({
+        device,
+    }) => {
+        const initialSuggestions = ['sugg1', 'sugg2']
+        const initialSelectedLists = ['something']
+
+        const { testLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+            initialSelectedLists,
+            queryListResults: ['test1'],
+        })
+        await testLogic.processEvent('searchInputChanged', { query: 'test' })
+
+        expect(testLogic.state).toEqual(
+            stateHelper({
+                listResultListNotSelected: ['test1'],
+                selectedLists: initialSelectedLists,
+                query: 'test',
+                newListButton: true,
             }),
         )
     })
@@ -221,35 +221,35 @@ describe('TagPickerLogic', () => {
         device,
     }) => {
         const initialSuggestions = ['sugg1', 'sugg2']
-        const initialSelectedTags = ['something']
-        const queryTagResults = ['test1', 'test2', 'test3', 'test4']
+        const initialSelectedLists = ['something']
+        const queryListResults = ['test1', 'test2', 'test3', 'test4']
 
         const { testLogic } = await setupLogicHelper({
             device,
             initialSuggestions,
-            initialSelectedTags,
-            queryTagResults,
+            initialSelectedLists,
+            queryListResults,
         })
         await testLogic.processEvent('searchInputChanged', { query: 'test' })
 
         expect(testLogic.state).toEqual(
             stateHelper({
-                tagResultListNotSelected: queryTagResults,
-                selectedTags: initialSelectedTags,
+                listResultListNotSelected: queryListResults,
+                selectedLists: initialSelectedLists,
                 query: 'test',
-                newTagButton: true,
+                newListButton: true,
             }),
         )
 
-        const expectStateToEqualWithFocus = (focusedTag) =>
+        const expectStateToEqualWithFocus = (focusedList) =>
             expectStateToEqual(
                 testLogic.state,
                 stateHelper({
-                    tagResultListNotSelected: queryTagResults,
-                    selectedTags: initialSelectedTags,
-                    tagResultListFocused: focusedTag ? [focusedTag] : [],
+                    listResultListNotSelected: queryListResults,
+                    selectedLists: initialSelectedLists,
+                    listResultListFocused: focusedList ? [focusedList] : [],
                     query: 'test',
-                    newTagButton: true,
+                    newListButton: true,
                 }),
             )
 
@@ -271,7 +271,7 @@ describe('TagPickerLogic', () => {
             ['ArrowUp', 'test3'],
             ['ArrowUp', 'test2'],
             ['ArrowUp', 'test1'],
-            // This is navigating beyond the initial result, which is the 'New Tag: ... ' button, so no tag will be selected
+            // This is navigating beyond the initial result, which is the 'New List: ... ' button, so no list will be selected
             ['ArrowUp'],
             ['ArrowUp'],
             ['ArrowUp'],
@@ -281,22 +281,22 @@ describe('TagPickerLogic', () => {
 
     it('should correctly remove search', async ({ device }) => {
         const initialSuggestions = ['sugg1', 'sugg2']
-        const initialSelectedTags = ['something']
+        const initialSelectedLists = ['something']
 
         const { testLogic } = await setupLogicHelper({
             device,
             initialSuggestions,
-            initialSelectedTags,
-            queryTagResults: ['test1'],
+            initialSelectedLists,
+            queryListResults: ['test1'],
         })
         await testLogic.processEvent('searchInputChanged', { query: 'test' })
 
         expect(testLogic.state).toEqual(
             stateHelper({
-                tagResultListNotSelected: ['test1'],
-                selectedTags: initialSelectedTags,
+                listResultListNotSelected: ['test1'],
+                selectedLists: initialSelectedLists,
                 query: 'test',
-                newTagButton: true,
+                newListButton: true,
             }),
         )
 
@@ -304,31 +304,31 @@ describe('TagPickerLogic', () => {
 
         expect(testLogic.state).toEqual(
             stateHelper({
-                tagResultListNotSelected: initialSuggestions,
-                selectedTags: initialSelectedTags,
+                listResultListNotSelected: initialSuggestions,
+                selectedLists: initialSelectedLists,
                 query: '',
-                newTagButton: false,
+                newListButton: false,
             }),
         )
     })
 
-    it('should show default tags after selecting a tag', async ({ device }) => {
+    it('should show default lists after selecting a list', async ({ device }) => {
         const initialSuggestions = ['sugg1', 'sugg2']
-        const initialSelectedTags = ['something']
+        const initialSelectedLists = ['something']
 
         const { testLogic } = await setupLogicHelper({
             device,
             initialSuggestions,
-            initialSelectedTags,
-            queryTagResults: ['test1'],
+            initialSelectedLists,
+            queryListResults: ['test1'],
         })
         await testLogic.processEvent('searchInputChanged', { query: 'test' })
 
         // expect(element.state).toEqual(
         //     stateHelper({
-        //         selectedTags: ['test1'],
+        //         selectedLists: ['test1'],
         //         query: 'test',
-        //         newTagButton: true,
+        //         newListButton: true,
         //     }),
         // )
         //
@@ -336,66 +336,66 @@ describe('TagPickerLogic', () => {
         //
         // expect(element.state).toEqual(
         //     stateHelper({
-        //         tagResultListNotSelected: [],
-        //         selectedTags: [],
+        //         listResultListNotSelected: [],
+        //         selectedLists: [],
         //         query: '',
-        //         newTagButton: false,
+        //         newListButton: false,
         //     }),
         // )
     })
 
-    it('should correctly add tag ', async ({ device }) => {
+    it('should correctly add list ', async ({ device }) => {
         const initialSuggestions = ['sugg1', 'sugg2']
-        const { testLogic, tagPickerLogic } = await setupLogicHelper({
+        const { testLogic, listPickerLogic } = await setupLogicHelper({
             device,
             initialSuggestions,
         })
 
-        const tagsBefore = await device.backgroundModules.tags.fetchPageTags({
+        const listsBefore = await device.backgroundModules.customLists.fetchPageLists({
             url: TESTURL,
         })
-        await testLogic.processEvent('resultTagPress', {
-            tag: { name: 'sugg1', focused: false, selected: false },
+        await testLogic.processEvent('resultListPress', {
+            list: { name: 'sugg1', focused: false, selected: false },
         })
-        await tagPickerLogic.processingUpstreamOperation
+        await listPickerLogic.processingUpstreamOperation
 
-        const tagsAfter = await device.backgroundModules.tags.fetchPageTags({
+        const listsAfter = await device.backgroundModules.customLists.fetchPageLists({
             url: TESTURL,
         })
 
-        expect(tagsBefore).toEqual([])
-        expect(tagsAfter).toEqual(['sugg1'])
+        expect(listsBefore).toEqual([])
+        expect(listsAfter).toEqual(['sugg1'])
     })
 
-    it('should be in the right state after an error adding a tag', async ({
+    it('should be in the right state after an error adding a list', async ({
         device,
     }) => {
         const initialSuggestions = ['sugg1', 'sugg2']
         const testError = Error('test error')
-        const onUpdateTagSelection = async () => {
+        const onUpdateListSelection = async () => {
             throw testError
         }
-        const { testLogic, tagPickerLogic } = await setupLogicHelper({
-            onUpdateTagSelection,
+        const { testLogic, listPickerLogic } = await setupLogicHelper({
+            onUpdateListSelection,
             device,
             initialSuggestions,
         })
 
-        const tagsBefore = await device.backgroundModules.tags.fetchPageTags({
+        const listsBefore = await device.backgroundModules.customLists.fetchPageLists({
             url: TESTURL,
         })
 
         await expect(
-            testLogic.processEvent('resultTagPress', {
-                tag: { name: 'sugg1', focused: false, selected: false },
+            testLogic.processEvent('resultListPress', {
+                list: { name: 'sugg1', focused: false, selected: false },
             }),
         ).rejects.toEqual(testError)
 
-        const tagsAfter = await device.backgroundModules.tags.fetchPageTags({
+        const listsAfter = await device.backgroundModules.customLists.fetchPageLists({
             url: TESTURL,
         })
 
-        expect(tagsBefore).toEqual([])
-        expect(tagsAfter).toEqual([])
+        expect(listsBefore).toEqual([])
+        expect(listsAfter).toEqual([])
     })
 })

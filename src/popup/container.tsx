@@ -167,10 +167,10 @@ class PopupContainer extends PureComponent<Props> {
         if (this.props.showCollectionsPicker) {
             return (
                 <CollectionPicker
-                    queryTags={this.handleListQuery}
-                    onUpdateTagSelection={this.handleListsUpdate}
-                    initialSelectedTags={this.fetchListsForPage}
-                    tagAllTabs={this.handleListAllTabs}
+                    queryLists={this.handleListQuery}
+                    onUpdateListSelection={this.handleListsUpdate}
+                    initialSelectedLists={this.fetchListsForPage}
+                    listAllTabs={this.handleListAllTabs}
                     loadDefaultSuggestions={
                         collections.fetchInitialListSuggestions
                     }

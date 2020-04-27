@@ -51,12 +51,11 @@ export class TagSearchInput extends React.Component<Props, State> {
     render() {
         return (
             <SearchBox isFocused={this.state.isFocused} id={'tagSearchBox'}>
-                <StyledSearchIcon size={24} />
                 {this.props.before}
                 <SearchInput
                     placeholder={
                         this.props.showPlaceholder ?? true
-                            ? 'Search & add tags'
+                            ? 'Search tags'
                             : ''
                     }
                     defaultValue={this.props.value}
@@ -89,6 +88,8 @@ const SearchBox = styled.div`
     flex-wrap: wrap;
     font-size: 1rem;
     padding: 2px 8px;
+    margin-left: 8px;
+    margin-right: 8px;
     transition: border 0.1s;
     margin-bottom: 1px;
 `

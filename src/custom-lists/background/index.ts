@@ -271,7 +271,7 @@ export default class CustomListBackground {
             suggestions = lists.map((l) => l.name)
 
             console['info'](
-                'No cached tag suggestions found so loaded suggestions from DB:',
+                'No cached list suggestions found so loaded suggestions from DB:',
                 suggestions,
             )
             await this.localStorage.set('suggestions', suggestions)
@@ -399,7 +399,7 @@ export default class CustomListBackground {
         )
     }
 
-    // Sugar for the Tag picking UI component
+    // Sugar for the List picking UI component
     async updateListForPage({
         added,
         deleted,

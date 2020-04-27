@@ -1,9 +1,9 @@
-import { TagAllTabsButton } from 'src/tags/ui/TagPicker/components/TagRow'
+import { ListAllTabsButton } from 'src/custom-lists/ui/CollectionPicker/components/ListRow'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import React from 'react'
 
-export const TagAllTabs = (props: { onClick: () => void }) => (
-    <ButtonTooltip tooltipText="Tag all tabs in window" position="left">
-        <TagAllTabsButton size={20} onClick={props.onClick} />
+export const ListAllTabs = (props: { onClick: () => void }) => (
+    <ButtonTooltip tooltipText="Add all tabs in window to list" position="left">
+        <ListAllTabsButton size={20} onClick={props.onClick} />
     </ButtonTooltip>
 )

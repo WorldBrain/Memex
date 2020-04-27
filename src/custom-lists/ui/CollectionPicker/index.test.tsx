@@ -11,25 +11,25 @@ import {
     queryByText,
 } from '@testing-library/react'
 import { waitFor, wait } from '@testing-library/dom'
-import TagPicker from './index'
-import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
+import ListPicker from './index'
+import { ListPickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 
-const initialSuggestions = ['suggested tag', 'another tag']
-const tags = ['tag a', 'abcde1', 'abcde2', 'abcde2 tag', ...initialSuggestions]
-const tagsSelected = ['Selected', 'Tag', 'suggested tag']
+const initialSuggestions = ['suggested list', 'another list']
+const lists = ['list a', 'abcde1', 'abcde2', 'abcde2 list', ...initialSuggestions]
+const listsSelected = ['Selected', 'List', 'suggested list']
 
 const setupDependencies = () => {
-    // const queryTags = tags.
+    // const queryLists = lists.
 }
 
-const renderTag = (opts: Partial<TagPickerDependencies> = {}) => {
+const renderList = (opts: Partial<ListPickerDependencies> = {}) => {
     const renderResult = render(
-        <TagPicker
-            queryTags={async (query) => tags.filter((t) => t.includes(query))}
+        <ListPicker
+            queryLists={async (query) => lists.filter((t) => t.includes(query))}
             loadDefaultSuggestions={() => initialSuggestions}
-            onUpdateTagSelection={(tags1) => null}
-            initialSelectedTags={async () => tagsSelected}
-            tagAllTabs={(tagName: string) => null}
+            onUpdateListSelection={(lists1) => null}
+            initialSelectedLists={async () => listsSelected}
+            listAllTabs={(listName: string) => null}
             {...opts}
         />,
     )
@@ -39,8 +39,8 @@ const renderTag = (opts: Partial<TagPickerDependencies> = {}) => {
 const findElements = (container) => ({
     container,
     input: container.querySelector('input'),
-    tagSearchBox: container.querySelector('#tagSearchBox'),
-    tagResults: container.querySelector('#tagResults'),
+    listSearchBox: container.querySelector('#listSearchBox'),
+    listResults: container.querySelector('#listResults'),
 })
 
 const testUtils = ({ input, container }) => ({
@@ -58,7 +58,7 @@ const testUtils = ({ input, container }) => ({
             waitFor(() => expect(input.value).toEqual(val), { timeout: 200 }),
         expectToFindStrings: (text: string[], element?: any) =>
             waitForElement(
-                () => text.map((tag) => getByText(element ?? container, tag)),
+                () => text.map((list) => getByText(element ?? container, list)),
                 {
                     container: element ?? container,
                 },
@@ -67,7 +67,7 @@ const testUtils = ({ input, container }) => ({
 })
 
 const expectToFindTexts = (container, text: string[]) =>
-    waitForElement(() => text.map((tag) => getByText(container, tag)), {
+    waitForElement(() => text.map((list) => getByText(container, list)), {
         container,
     })
 
@@ -76,66 +76,66 @@ const changeInput = (input, text) =>
         target: { value: text },
     })
 
-// TODO: if query has been changed back to nothing, make sure the initial tags are shown
+// TODO: if query has been changed back to nothing, make sure the initial lists are shown
 
-/*test('Shows the pre-selected tags', async () => {
-    const { tagSearchBox } = renderTag()
-    await expectToSeeText(tagSearchBox, tagsSelected)
+/*test('Shows the pre-selected lists', async () => {
+    const { listSearchBox } = renderList()
+    await expectToSeeText(listSearchBox, listsSelected)
 })
 
-test('Shows the same pre-selected tags after search', async () => {
-    const { input, tagSearchBox } = renderTag()
-    await expectToSeeText(tagSearchBox, tagsSelected)
+test('Shows the same pre-selected lists after search', async () => {
+    const { input, listSearchBox } = renderList()
+    await expectToSeeText(listSearchBox, listsSelected)
     changeInput(input, 'Test Search')
-    await expectToSeeText(tagSearchBox, tagsSelected)
+    await expectToSeeText(listSearchBox, listsSelected)
 })
 
-test('After search and select, adds the selected tag, subsequent clicks remove', async () => {
-    const { input, tagSearchBox, tagResults } = renderTag()
+test('After search and select, adds the selected list, subsequent clicks remove', async () => {
+    const { input, listSearchBox, listResults } = renderList()
     const query = 'abcde1'
-    await expectToSeeText(tagSearchBox, tagsSelected)
+    await expectToSeeText(listSearchBox, listsSelected)
     changeInput(input, query)
-    await expectToSeeText(tagResults, [query])
-    const queryResultTag = await findByText(tagResults as HTMLElement, query)
-    queryResultTag.click()
-    await expectToSeeText(tagSearchBox, [...tagsSelected, query])
+    await expectToSeeText(listResults, [query])
+    const queryResultList = await findByText(listResults as HTMLElement, query)
+    queryResultList.click()
+    await expectToSeeText(listSearchBox, [...listsSelected, query])
 
     // This next search and click should remove it
-    const queryResult2Tag = await findByText(tagResults as HTMLElement, query)
-    queryResult2Tag.click()
-    await expectToSeeText(tagSearchBox, [...tagsSelected])
-    expect(queryByText(tagSearchBox as HTMLElement, query)).toBeNull()
+    const queryResult2List = await findByText(listResults as HTMLElement, query)
+    queryResult2List.click()
+    await expectToSeeText(listSearchBox, [...listsSelected])
+    expect(queryByText(listSearchBox as HTMLElement, query)).toBeNull()
 })
 
-test('After search and select, removes the selected tag', async () => {
-    const { container, input } = renderTag()
-    await expectToSeeText(container, tagsSelected)
+test('After search and select, removes the selected list', async () => {
+    const { container, input } = renderList()
+    await expectToSeeText(container, listsSelected)
     changeInput(input, 'Test Search')
-    await expectToSeeText(container, tagsSelected)
+    await expectToSeeText(container, listsSelected)
 })*/
 
-test.skip('Shows relevant tags when typed into search box', async () => {
-    const container = renderTag()
+test.skip('Shows relevant lists when typed into search box', async () => {
+    const container = renderList()
     const elements = findElements(container)
     const { changes, tests } = testUtils(elements)
-    const query = 'tag'
+    const query = 'list'
 
-    await tests.expectToFindStrings(tagsSelected, elements.tagSearchBox)
-    await tests.expectToFindStrings(initialSuggestions, elements.tagResults)
+    await tests.expectToFindStrings(listsSelected, elements.listSearchBox)
+    await tests.expectToFindStrings(initialSuggestions, elements.listResults)
 
     // Then on changing the input,
     changes.typeIntoInput(query)
     await tests.expectInputToEqual(query)
 
-    // Wait for the query results list to show an element which includes a textual tag result from our test data
-    const [tagEl1] = await tests.expectToFindStrings(
-        ['suggested tag'],
-        elements.tagResults,
+    // Wait for the query results list to show an element which includes a textual list result from our test data
+    const [listEl1] = await tests.expectToFindStrings(
+        ['suggested list'],
+        elements.listResults,
     )
 
-    // 'Add tag: $query'
-    fireEvent.click(tagEl1)
+    // 'Add list: $query'
+    fireEvent.click(listEl1)
 
     // TODO: Perhaps need to make this into an E2E test with a backend storage implementation for this to work, instead of dummy functions.
-    // await waitFor( async() =>  tests.expectToFindStrings(['suggested tag'],elements.tagSearchBox))
+    // await waitFor( async() =>  tests.expectToFindStrings(['suggested list'],elements.listSearchBox))
 })

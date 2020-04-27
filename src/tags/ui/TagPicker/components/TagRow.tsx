@@ -60,7 +60,12 @@ class TagRow extends React.Component<Props> {
 
                 <IconStyleWrapper show={focused}>
                     {selected && (
-                        <XIcon size={20} onClick={this.handleTagPress} />
+                        <ButtonTooltip
+                            tooltipText="Remove tag from page"
+                            position="left"
+                        >
+                            <XIcon size={20} onClick={this.handleTagPress} />
+                        </ButtonTooltip>
                     )}
                     {onPressTagAll && (
                         <ButtonTooltip
@@ -92,7 +97,6 @@ export const IconStyleWrapper = styled.div`
             props.isFocused
                 ? props.theme.tag.hoverIcon
                 : opacify(0.5, props.theme.tag.icon)};
-        margin-left: 8px;
         opacity: ${props => (props.show ? '1' : '0')};
         transition: all 0.3s;
         pointer-events: none;
@@ -109,7 +113,7 @@ const Row = styled.div`
     align-items: center;
     border-bottom: 1px solid ${props => props.theme.border};
     display: flex;
-    padding: 4px 20px 4px 8px; // give space to the right for a scrollbar
+    padding: 4px 20px 4px 18px; // give space to the right for a scrollbar
     justify-content: space-between;
     transition: background 0.3s;
     cursor: pointer;

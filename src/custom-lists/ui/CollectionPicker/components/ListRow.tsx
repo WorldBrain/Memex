@@ -1,35 +1,35 @@
 import React, { SyntheticEvent } from 'react'
 import styled from 'styled-components'
-import { TagResultItem } from 'src/tags/ui/TagPicker/components/TagResultItem'
+import { ListResultItem } from 'src/custom-lists/ui/CollectionPicker/components/ListResultItem'
 import { Check, Layers, X as XIcon } from '@styled-icons/feather'
 import { StyledIconBase } from '@styled-icons/styled-icon'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { opacify } from 'polished'
-import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
+import { DisplayList } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 interface Props {
-    onPress?: (tag: DisplayTag) => void
-    onFocus?: (tag: DisplayTag, index?: number) => void
-    onPressTagAll?: (tag: DisplayTag, index?: number) => void
+    onPress?: (list: DisplayList) => void
+    onFocus?: (list: DisplayList, index?: number) => void
+    onPressListAll?: (list: DisplayList, index?: number) => void
     index: number
     name: string
     selected?: boolean
     focused?: boolean
 }
 
-class TagRow extends React.Component<Props> {
-    _getTag = (props) => {
+class ListRow extends React.Component<Props> {
+    _getList = (props) => {
         const { name, selected, focused } = this.props
         return { name, selected, focused }
     }
 
-    handleTagPress = () => {
-        this.props.onPress && this.props.onPress(this._getTag(this.props))
+    handleListPress = () => {
+        this.props.onPress && this.props.onPress(this._getList(this.props))
     }
 
-    handleTagAllPress = (e: SyntheticEvent) => {
-        this.props.onPressTagAll &&
-            this.props.onPressTagAll(this._getTag(this.props))
+    handleListAllPress = (e: SyntheticEvent) => {
+        this.props.onPressListAll &&
+            this.props.onPressListAll(this._getList(this.props))
         e.preventDefault()
         e.stopPropagation()
         return false
@@ -37,39 +37,44 @@ class TagRow extends React.Component<Props> {
 
     handleMouseOver = () => {
         this.props.onFocus &&
-            this.props.onFocus(this._getTag(this.props), this.props.index)
+            this.props.onFocus(this._getList(this.props), this.props.index)
     }
 
     handleMouseOut = () => {
-        this.props.onFocus && this.props.onFocus(this._getTag(this.props), null)
+        this.props.onFocus && this.props.onFocus(this._getList(this.props), null)
     }
 
     render() {
-        const { name, selected, focused, onPressTagAll } = this.props
+        const { name, selected, focused, onPressListAll } = this.props
 
         return (
             <Row
-                onClick={this.handleTagPress}
+                onClick={this.handleListPress}
                 onMouseOver={this.handleMouseOver}
                 onMouseOut={this.handleMouseOut}
                 isFocused={focused}
             >
-                <TagResultItem selected={selected} isFocused={focused}>
+                <ListResultItem selected={selected} isFocused={focused}>
                     {name}
-                </TagResultItem>
+                </ListResultItem>
 
                 <IconStyleWrapper show={focused}>
                     {selected && (
-                        <XIcon size={20} onClick={this.handleTagPress} />
-                    )}
-                    {onPressTagAll && (
                         <ButtonTooltip
-                            tooltipText="Tag all tabs in window"
+                            tooltipText="Remove from list"
                             position="left"
                         >
-                            <TagAllTabsButton
+                            <XIcon size={20} onClick={this.handleListPress} />
+                        </ButtonTooltip>
+                    )}
+                    {onPressListAll && (
+                        <ButtonTooltip
+                            tooltipText="Add all tabs in window to list"
+                            position="left"
+                        >
+                            <ListAllTabsButton
                                 size={20}
-                                onClick={this.handleTagAllPress}
+                                onClick={this.handleListAllPress}
                             />
                         </ButtonTooltip>
                     )}
@@ -79,7 +84,7 @@ class TagRow extends React.Component<Props> {
     }
 }
 
-export const TagAllTabsButton = styled(Layers)`
+export const ListAllTabsButton = styled(Layers)`
     pointer-events: auto !important;
 `
 
@@ -92,7 +97,6 @@ export const IconStyleWrapper = styled.div`
             props.isFocused
                 ? props.theme.tag.hoverIcon
                 : opacify(0.5, props.theme.tag.icon)};
-        margin-left: 8px;
         opacity: ${(props) => (props.show ? '1' : '0')};
         transition: all 0.3s;
         pointer-events: none;
@@ -109,11 +113,11 @@ const Row = styled.div`
     align-items: center;
     border-bottom: 1px solid ${(props) => props.theme.border};
     display: flex;
-    padding: 4px 20px 4px 8px; // give space to the right for a scrollbar
+    padding: 4px 20px 4px 12px; // give space to the right for a scrollbar
     justify-content: space-between;
     transition: background 0.3s;
     cursor: pointer;
     background: ${(props) => props.isFocused && props.theme.border};
 `
 
-export default TagRow
+export default ListRow

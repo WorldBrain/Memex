@@ -126,7 +126,8 @@ class TagPicker extends StatefulUIElement<
 
 const OuterSearchBox = styled.div`
     background: ${(props) => props.theme.background};
-    padding: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
     border-radius: 3px;
 `
 

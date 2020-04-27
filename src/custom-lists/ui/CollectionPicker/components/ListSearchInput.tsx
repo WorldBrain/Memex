@@ -33,12 +33,12 @@ export const keyEvents: KeyEvent[] = [
     'ArrowDown',
     ',',
     // TODO: adding backspace as a special handler here prevents regular backspace in the field.
-    // if we want to delete tags on backspace, perhaps the controlled text input needs to check
+    // if we want to delete lists on backspace, perhaps the controlled text input needs to check
     // the handler return function to know whether to prevent it's default or proceed with it.
     // 'Backspace',
 ]
 
-export class TagSearchInput extends React.Component<Props, State> {
+export class ListSearchInput extends React.Component<Props, State> {
     state = { isFocused: false }
 
     onChange = (value: string) => this.props.onChange(value)
@@ -54,12 +54,11 @@ export class TagSearchInput extends React.Component<Props, State> {
                 isFocused={this.state.isFocused}
                 id={'collectionSearchBox'}
             >
-                <StyledSearchIcon size={24} />
                 {this.props.before}
                 <SearchInput
                     placeholder={
                         this.props.showPlaceholder ?? true
-                            ? 'Search & add to collections'
+                            ? 'Search collections'
                             : ''
                     }
                     defaultValue={this.props.value}
@@ -91,9 +90,11 @@ const SearchBox = styled.div`
     display: flex;
     flex-wrap: wrap;
     font-size: 1rem;
-    padding: 2px 8px;
+    padding: 3px 8px;
+    margin-left: 8px;
+    margin-right: 8px;
     transition: border 0.1s;
-    margin-bottom: 1px;
+    margin-bottom: 4px;
 `
 
 const SearchInput = styled(TextInputControlled)`

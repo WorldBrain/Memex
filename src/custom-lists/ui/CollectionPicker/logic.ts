@@ -1,69 +1,69 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { KeyEvent } from 'src/tags/ui/TagPicker/components/TagSearchInput'
+import { KeyEvent } from 'src/custom-lists/ui/CollectionPicker/components/ListSearchInput'
 
 export const INITIAL_STATE = {
     query: '',
-    newTagName: '',
-    selectedTags: [],
+    newListName: '',
+    selectedLists: [],
     loadingQueryResults: false,
     loadingSuggestions: false,
 }
 
-export interface TagPickerState {
+export interface ListPickerState {
     query?: string
-    newTagName: string
-    selectedTags: string[]
-    displayTags: DisplayTag[]
+    newListName: string
+    selectedLists: string[]
+    displayLists: DisplayList[]
     loadingSuggestions: boolean
     loadingQueryResults: boolean
 }
 
-export interface TagPickerDependencies {
-    onUpdateTagSelection: (
-        tags: string[],
+export interface ListPickerDependencies {
+    onUpdateListSelection: (
+        lists: string[],
         added: string,
         deleted: string,
     ) => Promise<void>
-    queryTags: (query: string) => Promise<string[]>
-    tagAllTabs?: (query: string) => Promise<void>
+    queryLists: (query: string) => Promise<string[]>
+    listAllTabs?: (query: string) => Promise<void>
     loadDefaultSuggestions: () => string[] | Promise<string[]>
-    initialSelectedTags?: () => Promise<string[]>
+    initialSelectedLists?: () => Promise<string[]>
     children?: any
 }
 
-export type TagPickerEvent = UIEvent<{
+export type ListPickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
     loadedSuggestions: {}
     loadedQueryResults: {}
-    tagClicked: {}
+    listClicked: {}
     searchInputChanged: { query: string }
-    selectedTagPress: { tag: string }
-    resultTagAllPress: { tag: DisplayTag }
-    newTagAllPress: {}
-    resultTagPress: { tag: DisplayTag }
-    resultTagFocus: { tag: DisplayTag; index: number }
-    newTagPress: { tag: string }
+    selectedListPress: { list: string }
+    resultListAllPress: { list: DisplayList }
+    newListAllPress: {}
+    resultListPress: { list: DisplayList }
+    resultListFocus: { list: DisplayList; index: number }
+    newListPress: { list: string }
     keyPress: { key: KeyEvent }
     focusInput: {}
 }>
 
-interface TagPickerUIEvent<T extends keyof TagPickerEvent> {
-    event: TagPickerEvent[T]
-    previousState: TagPickerState
+interface ListPickerUIEvent<T extends keyof ListPickerEvent> {
+    event: ListPickerEvent[T]
+    previousState: ListPickerState
 }
 
-export default class TagPickerLogic extends UILogic<
-    TagPickerState,
-    TagPickerEvent
+export default class ListPickerLogic extends UILogic<
+    ListPickerState,
+    ListPickerEvent
 > {
     private searchInputRef?: HTMLInputElement
 
-    constructor(private dependencies: TagPickerDependencies) {
+    constructor(private dependencies: ListPickerDependencies) {
         super()
     }
 
-    private defaultTags: DisplayTag[] = []
+    private defaultLists: DisplayList[] = []
     private focusIndex = -1
 
     // For now, the only thing that needs to know if this has finished, is the tests.
@@ -75,39 +75,39 @@ export default class TagPickerLogic extends UILogic<
         this._processingUpstreamOperation = val
     }
 
-    getInitialState(): TagPickerState {
+    getInitialState(): ListPickerState {
         return {
             ...INITIAL_STATE,
-            selectedTags: [],
-            displayTags: [],
+            selectedLists: [],
+            displayLists: [],
         }
     }
 
     init = async () => {
         this.emitMutation({ loadingSuggestions: { $set: true } })
 
-        const initialSelectedTags = await this.dependencies.initialSelectedTags()
+        const initialSelectedLists = await this.dependencies.initialSelectedLists()
         const defaultSuggestions =
             typeof this.dependencies.loadDefaultSuggestions === 'string'
                 ? this.dependencies.loadDefaultSuggestions
                 : await this.dependencies.loadDefaultSuggestions()
 
-        this.defaultTags = TagPickerLogic.decorateTagList(
+        this.defaultLists = ListPickerLogic.decorateListList(
             defaultSuggestions,
-            initialSelectedTags,
+            initialSelectedLists,
         )
 
         this.emitMutation({
             loadingSuggestions: { $set: false },
-            displayTags: { $set: this.defaultTags },
-            selectedTags: { $set: initialSelectedTags },
+            displayLists: { $set: this.defaultLists },
+            selectedLists: { $set: initialSelectedLists },
         })
     }
 
     setSearchInputRef = ({
         event: { ref },
         previousState,
-    }: TagPickerUIEvent<'setSearchInputRef'>) => {
+    }: ListPickerUIEvent<'setSearchInputRef'>) => {
         this.searchInputRef = ref
     }
 
@@ -119,18 +119,18 @@ export default class TagPickerLogic extends UILogic<
     keyPress = ({
         event: { key },
         previousState,
-    }: TagPickerUIEvent<'keyPress'>) => {
+    }: ListPickerUIEvent<'keyPress'>) => {
         if (this.newTabKeys.includes(key)) {
-            if (previousState.newTagName !== '' && !(this.focusIndex >= 0)) {
-                return this.newTagPress({
+            if (previousState.newListName !== '' && !(this.focusIndex >= 0)) {
+                return this.newListPress({
                     previousState,
-                    event: { tag: previousState.newTagName },
+                    event: { list: previousState.newListName },
                 })
             }
 
-            if (previousState.displayTags[this.focusIndex]) {
-                return this.resultTagPress({
-                    event: { tag: previousState.displayTags[this.focusIndex] },
+            if (previousState.displayLists[this.focusIndex]) {
+                return this.resultListPress({
+                    event: { list: previousState.displayLists[this.focusIndex] },
                     previousState,
                 })
             }
@@ -140,16 +140,16 @@ export default class TagPickerLogic extends UILogic<
             if (this.focusIndex > -1) {
                 return this._updateFocus(
                     --this.focusIndex,
-                    previousState.displayTags,
+                    previousState.displayLists,
                 )
             }
         }
 
         if (key === 'ArrowDown') {
-            if (this.focusIndex < previousState.displayTags.length - 1) {
+            if (this.focusIndex < previousState.displayLists.length - 1) {
                 return this._updateFocus(
                     ++this.focusIndex,
-                    previousState.displayTags,
+                    previousState.displayLists,
                 )
             }
         }
@@ -158,122 +158,122 @@ export default class TagPickerLogic extends UILogic<
     searchInputChanged = async ({
         event: { query },
         previousState,
-    }: TagPickerUIEvent<'searchInputChanged'>) => {
+    }: ListPickerUIEvent<'searchInputChanged'>) => {
         this.emitMutation({
             query: { $set: query },
-            // Opportunistically set the new tag name before searching
-            newTagName: { $set: query },
+            // Opportunistically set the new list name before searching
+            newListName: { $set: query },
         })
 
         if (!query || query === '') {
             this.emitMutation({
-                displayTags: { $set: this.defaultTags },
+                displayLists: { $set: this.defaultLists },
                 query: { $set: '' },
-                newTagName: { $set: '' },
+                newListName: { $set: '' },
             })
         } else {
-            return this._query(query, previousState.selectedTags)
+            return this._query(query, previousState.selectedLists)
         }
     }
 
-    _queryBoth = async (term: string, selectedTags: string[]) => {
-        // await this._queryLocal(term, selectedTags)
-        await this._queryRemote(term, selectedTags)
+    _queryBoth = async (term: string, selectedLists: string[]) => {
+        // await this._queryLocal(term, selectedLists)
+        await this._queryRemote(term, selectedLists)
     }
 
     // /**
     //  *  Searches for the term in the initial suggestions provided to the component
     //  */
-    // _queryLocal = async (term: string, selectedTags: string[]) => {
+    // _queryLocal = async (term: string, selectedLists: string[]) => {
     //     const results = this._queryInitialSuggestions(term)
     //     const selected
     //     this.emitMutation({
     //         loadingQueryResults: { $set: false },
-    //         displayTags: { $set: results },
+    //         displayLists: { $set: results },
     //     })
-    //     this._setCreateTagDisplay(results, term)
+    //     this._setCreateListDisplay(results, term)
     // }
 
     /**
-     * Searches for the term via the `queryTags` function provided to the component
+     * Searches for the term via the `queryLists` function provided to the component
      */
-    _queryRemote = async (term: string, selectedTags: string[]) => {
+    _queryRemote = async (term: string, selectedLists: string[]) => {
         this.emitMutation({ loadingQueryResults: { $set: true } })
-        const results = await this.dependencies.queryTags(term)
+        const results = await this.dependencies.queryLists(term)
         results.sort()
-        const displayTags = TagPickerLogic.decorateTagList(
+        const displayLists = ListPickerLogic.decorateListList(
             results,
-            selectedTags,
+            selectedLists,
         )
         this.emitMutation({
             loadingQueryResults: { $set: false },
-            displayTags: {
-                $set: displayTags,
+            displayLists: {
+                $set: displayLists,
             },
         })
-        this._setCreateTagDisplay(results, displayTags, term)
+        this._setCreateListDisplay(results, displayLists, term)
     }
 
     _query = debounce(this._queryBoth, 150, { leading: true })
 
     /**
-     * If the term provided does not exist in the tag list, then set the new tag state to the term.
-     * (controls the 'Add a new Tag: ...')
+     * If the term provided does not exist in the list list, then set the new list state to the term.
+     * (controls the 'Add a new List: ...')
      */
-    _setCreateTagDisplay = (
+    _setCreateListDisplay = (
         list: string[],
-        displayTags: DisplayTag[],
+        displayLists: DisplayList[],
         term: string,
     ) => {
-        if (this._isTermInTagList(list, term)) {
+        if (this._isTermInListList(list, term)) {
             this.emitMutation({
-                newTagName: { $set: '' },
+                newListName: { $set: '' },
             })
-            // N.B. We update this focus index to this found tag, so that
+            // N.B. We update this focus index to this found list, so that
             // enter keys will action it. But we don't emit that focus
             // to the user, because otherwise the style of the button changes
             // showing the tick and it might seem like it's already selected.
-            this._updateFocus(0, displayTags, false)
+            this._updateFocus(0, displayLists, false)
         } else {
-            let tag
+            let list
             try {
-                tag = this._validateTag(term)
+                list = this._validateList(term)
             } catch (e) {
                 return
             }
             this.emitMutation({
-                newTagName: { $set: tag },
+                newListName: { $set: list },
             })
-            this._updateFocus(-1, displayTags)
+            this._updateFocus(-1, displayLists)
         }
     }
 
     _updateFocus = (
         focusIndex: number | undefined,
-        displayTags: DisplayTag[],
+        displayLists: DisplayList[],
         emit = true,
     ) => {
         this.focusIndex = focusIndex ?? -1
-        if (!displayTags) {
+        if (!displayLists) {
             return
         }
 
-        for (let i = 0; i < displayTags.length; i++) {
-            displayTags[i].focused = focusIndex === i
+        for (let i = 0; i < displayLists.length; i++) {
+            displayLists[i].focused = focusIndex === i
         }
 
         emit &&
             this.emitMutation({
-                displayTags: { $set: displayTags },
+                displayLists: { $set: displayLists },
             })
     }
 
     /**
-     * Loops through a list of tags and exits if a match is found
+     * Loops through a list of lists and exits if a match is found
      */
-    _isTermInTagList = (tagList: string[], term: string) => {
-        for (const tag of tagList) {
-            if (tag === term) {
+    _isTermInListList = (listList: string[], term: string) => {
+        for (const list of listList) {
+            if (list === term) {
                 return true
             }
         }
@@ -281,134 +281,134 @@ export default class TagPickerLogic extends UILogic<
     }
 
     _queryInitialSuggestions = (term) =>
-        this.defaultTags.filter((tag) => tag.name.includes(term))
+        this.defaultLists.filter((list) => list.name.includes(term))
 
-    selectedTagPress = async ({
-        event: { tag },
+    selectedListPress = async ({
+        event: { list },
         previousState,
-    }: TagPickerUIEvent<'selectedTagPress'>) => {
-        await this._updateSelectedTagState({
-            ...this._removeTagSelected(
-                tag,
-                previousState.displayTags,
-                previousState.selectedTags,
+    }: ListPickerUIEvent<'selectedListPress'>) => {
+        await this._updateSelectedListState({
+            ...this._removeListSelected(
+                list,
+                previousState.displayLists,
+                previousState.selectedLists,
             ),
             added: null,
-            deleted: tag,
+            deleted: list,
         })
     }
 
-    resultTagPress = async ({
-        event: { tag },
+    resultListPress = async ({
+        event: { list },
         previousState,
-    }: TagPickerUIEvent<'resultTagPress'>) => {
-        // Here we make the decision to make the tag result list go back to the
-        // default suggested tags after an action
-        // if this was prevState.displayTags, the tag list would persist.
-        const displayTags = this.defaultTags
+    }: ListPickerUIEvent<'resultListPress'>) => {
+        // Here we make the decision to make the list result list go back to the
+        // default suggested lists after an action
+        // if this was prevState.displayLists, the list list would persist.
+        const displayLists = this.defaultLists
 
-        if (tag.selected) {
-            await this._updateSelectedTagState({
-                ...this._removeTagSelected(
-                    tag.name,
-                    displayTags,
-                    previousState.selectedTags,
+        if (list.selected) {
+            await this._updateSelectedListState({
+                ...this._removeListSelected(
+                    list.name,
+                    displayLists,
+                    previousState.selectedLists,
                 ),
                 added: null,
-                deleted: tag.name,
+                deleted: list.name,
             })
         } else {
-            await this._updateSelectedTagState({
-                ...this._addTagSelected(
-                    tag.name,
-                    displayTags,
-                    previousState.selectedTags,
+            await this._updateSelectedListState({
+                ...this._addListSelected(
+                    list.name,
+                    displayLists,
+                    previousState.selectedLists,
                 ),
-                added: tag.name,
+                added: list.name,
                 deleted: null,
             })
         }
     }
 
-    resultTagAllPress = async ({
-        event: { tag },
+    resultListAllPress = async ({
+        event: { list },
         previousState,
-    }: TagPickerUIEvent<'resultTagPress'>) => {
+    }: ListPickerUIEvent<'resultListPress'>) => {
         // TODO: present feedback to the user?
 
-        const name = this._validateTag(tag.name)
-        this._processingUpstreamOperation = this.dependencies.tagAllTabs(name)
+        const name = this._validateList(list.name)
+        this._processingUpstreamOperation = this.dependencies.listAllTabs(name)
 
-        // Note `newTagPres` is used below to ensure when validating that this tag pressed is not
-        // already selected. Otherwise the Tag All Tabs might behave strangely - i.e. Unselecting
-        // from this page but still tag all the other tabs.
-        await this.newTagPress({ event: { tag: name }, previousState })
+        // Note `newListPres` is used below to ensure when validating that this list pressed is not
+        // already selected. Otherwise the List All Tabs might behave strangely - i.e. Unselecting
+        // from this page but still list all the other tabs.
+        await this.newListPress({ event: { list: name }, previousState })
     }
 
-    newTagAllPress = async ({
+    newListAllPress = async ({
         event: {},
         previousState,
-    }: TagPickerUIEvent<'newTagAllPress'>) => {
-        const tag = this._validateTag(previousState.query)
-        await this.newTagPress({ event: { tag: name }, previousState })
-        this._processingUpstreamOperation = this.dependencies.tagAllTabs(tag)
+    }: ListPickerUIEvent<'newListAllPress'>) => {
+        const list = this._validateList(previousState.query)
+        await this.newListPress({ event: { list: name }, previousState })
+        this._processingUpstreamOperation = this.dependencies.listAllTabs(list)
     }
 
-    resultTagFocus = ({
-        event: { tag, index },
+    resultListFocus = ({
+        event: { list, index },
         previousState,
-    }: TagPickerUIEvent<'resultTagFocus'>) => {
-        this._updateFocus(index, previousState.displayTags)
+    }: ListPickerUIEvent<'resultListFocus'>) => {
+        this._updateFocus(index, previousState.displayLists)
     }
 
-    newTagPress = async ({
-        event: { tag },
+    newListPress = async ({
+        event: { list },
         previousState,
-    }: TagPickerUIEvent<'newTagPress'>) => {
-        tag = this._validateTag(tag)
+    }: ListPickerUIEvent<'newListPress'>) => {
+        list = this._validateList(list)
 
-        if (previousState.selectedTags.includes(tag)) {
+        if (previousState.selectedLists.includes(list)) {
             return
         }
 
-        await this._updateSelectedTagState({
-            ...this._addTagSelected(
-                tag,
-                this.defaultTags,
-                previousState.selectedTags,
+        await this._updateSelectedListState({
+            ...this._addListSelected(
+                list,
+                this.defaultLists,
+                previousState.selectedLists,
             ),
-            added: tag,
+            added: list,
             deleted: null,
         })
     }
 
-    _validateTag = (tag: string) => {
-        tag = tag.trim()
+    _validateList = (list: string) => {
+        list = list.trim()
 
-        if (tag === '') {
-            throw Error(`Tag Validation: Can't add tag with only whitespace`)
+        if (list === '') {
+            throw Error(`List Validation: Can't add list with only whitespace`)
         }
-        return tag
+        return list
     }
 
-    _updateSelectedTagState = async ({
-        displayTags,
-        selectedTags = [],
+    _updateSelectedListState = async ({
+        displayLists,
+        selectedLists = [],
         added,
         deleted,
         skipUpdateCallback,
     }: {
-        displayTags: DisplayTag[]
-        selectedTags: string[]
+        displayLists: DisplayList[]
+        selectedLists: string[]
         added: string
         deleted: string
         skipUpdateCallback?: boolean
     }) => {
         this.emitMutation({
             query: { $set: '' },
-            newTagName: { $set: '' },
-            displayTags: { $set: displayTags },
-            selectedTags: { $set: selectedTags },
+            newListName: { $set: '' },
+            displayLists: { $set: displayLists },
+            selectedLists: { $set: selectedLists },
         })
 
         if (skipUpdateCallback === true) {
@@ -416,29 +416,29 @@ export default class TagPickerLogic extends UILogic<
         }
 
         try {
-            await this.dependencies.onUpdateTagSelection(
-                selectedTags,
+            await this.dependencies.onUpdateListSelection(
+                selectedLists,
                 added,
                 deleted,
             )
         } catch (e) {
-            this._undoAfterError({ displayTags, selectedTags, added, deleted })
+            this._undoAfterError({ displayLists, selectedLists, added, deleted })
             throw e
         }
     }
 
-    async _undoAfterError({ displayTags, selectedTags, added, deleted }) {
+    async _undoAfterError({ displayLists, selectedLists, added, deleted }) {
         // Reverse the logic skipping the call to run the update callback
         if (added) {
-            await this._updateSelectedTagState({
-                ...this._removeTagSelected(added, displayTags, selectedTags),
+            await this._updateSelectedListState({
+                ...this._removeListSelected(added, displayLists, selectedLists),
                 added: null,
                 deleted: added,
                 skipUpdateCallback: true,
             })
         } else {
-            await this._updateSelectedTagState({
-                ...this._addTagSelected(deleted, displayTags, selectedTags),
+            await this._updateSelectedListState({
+                ...this._addListSelected(deleted, displayLists, selectedLists),
                 added: deleted,
                 deleted: null,
                 skipUpdateCallback: true,
@@ -446,58 +446,58 @@ export default class TagPickerLogic extends UILogic<
         }
     }
 
-    _addTagSelected = (
-        tag: string,
-        displayTags: DisplayTag[],
-        selectedTags: string[] = [],
+    _addListSelected = (
+        list: string,
+        displayLists: DisplayList[],
+        selectedLists: string[] = [],
     ) => {
-        for (const i in displayTags) {
-            if (displayTags[i].name === tag) {
-                displayTags[i].selected = true
+        for (const i in displayLists) {
+            if (displayLists[i].name === list) {
+                displayLists[i].selected = true
                 break
             }
         }
 
         return {
-            displayTags,
-            selectedTags: [...selectedTags, tag],
+            displayLists,
+            selectedLists: [...selectedLists, list],
         }
     }
 
-    _removeTagSelected = (
-        tag: string,
-        displayTags: DisplayTag[],
-        selectedTags: string[] = [],
+    _removeListSelected = (
+        list: string,
+        displayLists: DisplayList[],
+        selectedLists: string[] = [],
     ) => {
-        for (const i in displayTags) {
-            if (displayTags[i].name === tag) {
-                displayTags[i].selected = false
+        for (const i in displayLists) {
+            if (displayLists[i].name === list) {
+                displayLists[i].selected = false
                 break
             }
         }
 
         return {
-            displayTags,
-            selectedTags: selectedTags.filter((t) => t !== tag),
+            displayLists,
+            selectedLists: selectedLists.filter((t) => t !== list),
         }
     }
 
     /**
-     * Takes a list of tag results and selected tags and combines them to return which tag
+     * Takes a list of list results and selected lists and combines them to return which list
      * is selected and which is not.
      */
-    static decorateTagList = (
-        tagList: string[],
-        selectedTags: string[],
-    ): DisplayTag[] =>
-        tagList.map((tag) => ({
-            name: tag,
+    static decorateListList = (
+        listList: string[],
+        selectedLists: string[],
+    ): DisplayList[] =>
+        listList.map((list) => ({
+            name: list,
             focused: false,
-            selected: selectedTags?.includes(tag) ?? false,
+            selected: selectedLists?.includes(list) ?? false,
         }))
 }
 
-export interface DisplayTag {
+export interface DisplayList {
     name: string
     selected: boolean
     focused: boolean

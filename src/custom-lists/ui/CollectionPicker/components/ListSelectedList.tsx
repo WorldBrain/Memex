@@ -1,38 +1,38 @@
 import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
-import { ActiveTag } from 'src/tags/ui/TagPicker/components/ActiveTag'
+import { ActiveList } from 'src/custom-lists/ui/CollectionPicker/components/ActiveList'
 import { X as XIcon } from '@styled-icons/feather'
 import { darken } from 'polished'
 
 interface Props {
-    tagsSelected: string[]
-    onPress: (tag: string) => void
+    listsSelected: string[]
+    onPress: (list: string) => void
 }
-export class TagSelectedList extends React.PureComponent<Props> {
-    _getTagAttr = (event) => event.target.getAttribute('data-tag-name')
+export class ListSelectedList extends React.PureComponent<Props> {
+    _getListAttr = (event) => event.target.getAttribute('data-list-name')
 
     handleSelectedTabPress = (event: ChangeEvent) =>
-        this.props.onPress(this._getTagAttr(event))
+        this.props.onPress(this._getListAttr(event))
 
     render() {
         return (
             <React.Fragment>
-                {this.props.tagsSelected?.map((tag) => (
-                    <StyledActiveTab
-                        key={`ActiveTab-${tag}`}
-                        data-tag-name={tag}
+                {this.props.listsSelected?.map((list) => (
+                    <StyledActiveList
+                        key={`ActiveTab-${list}`}
+                        data-list-name={list}
                         onClick={this.handleSelectedTabPress}
                     >
-                        {tag}
+                        {list}
                         <StyledXIcon size={12} />
-                    </StyledActiveTab>
+                    </StyledActiveList>
                 ))}
             </React.Fragment>
         )
     }
 }
 
-const StyledActiveTab = styled(ActiveTag)`
+const StyledActiveList = styled(ActiveList)`
     display: inline-flex;
     cursor: pointer;
 `

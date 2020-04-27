@@ -1,27 +1,27 @@
 import React from 'react'
 import styled from 'styled-components'
-import TagRowItem from './TagRow'
-import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
+import ListRowItem from './ListRow'
+import { DisplayList } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { Check, MinusCircle } from '@styled-icons/feather'
 import { StyledIconBase } from '@styled-icons/styled-icon'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 
 interface Props {
-    tags: DisplayTag[]
-    renderTagRow: (tag: DisplayTag, index: number) => React.ReactElement<any>
+    lists: DisplayList[]
+    renderListRow: (list: DisplayList, index: number) => React.ReactElement<any>
 }
 
-export default class TagResultsList extends React.Component<Props> {
+export default class ListResultsList extends React.Component<Props> {
     render = () => {
         return (
-            <StyledContainer id={'tagResults'}>
+            <StyledContainer id={'listResults'}>
                 {/*<FilterHelp>
-                    Select tags to include
+                    Select lists to include
                     <Check size={18} /> or exclude
                     <MinusCircle size={18} />
                 </FilterHelp>
                 */}
-                {this.props.tags?.map(this.props.renderTagRow) || null}
+                {this.props.lists?.map(this.props.renderListRow) || null}
             </StyledContainer>
         )
     }
