@@ -2,6 +2,7 @@ import * as React from 'react'
 import { auth, subscription } from 'src/util/remote-functions-background'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import {
+    SubscriptionStatus,
     UserFeature,
     UserPlan,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
@@ -12,6 +13,7 @@ export interface UserProps {
     currentUser: AuthenticatedUser | null
     authorizedFeatures: UserFeature[]
     authorizedPlans: UserPlan[]
+    subscriptionStatus: SubscriptionStatus
 }
 
 export function withCurrentUser<P extends UserProps = UserProps>(
@@ -24,6 +26,7 @@ export function withCurrentUser<P extends UserProps = UserProps>(
             super(props)
             this.state = {
                 currentUser: null,
+                subscriptionStatus: null as SubscriptionStatus,
                 authorizedFeatures: [] as UserFeature[],
                 authorizedPlans: [] as UserPlan[],
             }
@@ -33,6 +36,7 @@ export function withCurrentUser<P extends UserProps = UserProps>(
             this.setState({
                 currentUser: await auth.getCurrentUser(),
                 authorizedFeatures: await auth.getAuthorizedFeatures(),
+                subscriptionStatus: await auth.getSubscriptionStatus(),
             })
 
             const claims = await subscription.getCurrentUserClaims()
@@ -56,10 +60,11 @@ export function withCurrentUser<P extends UserProps = UserProps>(
                 )
         }
 
-        listenOnAuthStateChanged = async user => {
+        listenOnAuthStateChanged = async (user) => {
             this.setState({
                 currentUser: user,
                 authorizedFeatures: await auth.getAuthorizedFeatures(),
+                subscriptionStatus: await auth.getSubscriptionStatus(),
             })
         }
 
@@ -75,6 +80,7 @@ export function withCurrentUser<P extends UserProps = UserProps>(
                     currentUser={this.state.currentUser}
                     authorizedFeatures={this.state.authorizedFeatures}
                     authorizedPlans={this.state.authorizedPlans}
+                    subscriptionStatus={this.state.subscriptionStatus}
                     {...(this.props as P)}
                 />
             )

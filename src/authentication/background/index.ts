@@ -9,6 +9,7 @@ import {
     hasValidPlan,
     getAuthorizedFeatures,
     isAuthorizedForFeature,
+    getSubscriptionStatus,
 } from './utils'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
 import { AuthRemoteEvents, AuthRemoteFunctionsInterface } from './types'
@@ -33,6 +34,11 @@ export class AuthBackground {
                 return hasValidPlan(
                     await this.subscriptionService.getCurrentUserClaims(),
                     plan,
+                )
+            },
+            getSubscriptionStatus: async () => {
+                return getSubscriptionStatus(
+                    await this.subscriptionService.getCurrentUserClaims(),
                 )
             },
             getAuthorizedFeatures: async () => {

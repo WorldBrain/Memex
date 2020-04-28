@@ -3,6 +3,7 @@ import {
     Claims,
     UserFeature,
     FeatureMap,
+    SubscriptionStatus,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 export const SUBSCRIPTION_GRACE_MS = 1000 * 60 * 60
@@ -83,4 +84,8 @@ export function getSubscriptionExpirationTimestamp(
         claims.subscriptions != null &&
         claims.subscriptions[plan] != null
     return isPresent ? claims.subscriptions[plan].expiry : null
+}
+
+export function getSubscriptionStatus(claims: Claims): SubscriptionStatus {
+    return claims.subscriptionStatus
 }

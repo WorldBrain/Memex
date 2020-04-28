@@ -3,6 +3,7 @@ import {
     UserFeature,
     UserPlan,
     Claims,
+    SubscriptionStatus,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 
 export interface AuthRemoteFunctionsInterface {
@@ -12,6 +13,7 @@ export interface AuthRemoteFunctionsInterface {
 
     hasValidPlan(plan: UserPlan): Promise<boolean>
     getAuthorizedFeatures(): Promise<UserFeature[]>
+    getSubscriptionStatus(): Promise<SubscriptionStatus>
     isAuthorizedForFeature(feature: UserFeature): Promise<boolean>
 
     hasSubscribedBefore(): Promise<boolean>
