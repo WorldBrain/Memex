@@ -111,6 +111,32 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         }
     }
 
+    private async lookupLists(
+        pageUrls: string[],
+        listMap: Map<string, string[]>,
+    ) {
+        const listEntries = (await this.backend.dexieInstance
+            .table('pageListEntries')
+            .where('pageUrl')
+            .anyOf(pageUrls)
+            .primaryKeys()) as Array<[number, string]>
+
+        const listIds = new Set(listEntries.map(([listId]) => listId))
+        const nameLookupById = new Map<number, string>()
+
+        await this.backend.dexieInstance
+            .table('customLists')
+            .where('id')
+            .anyOf([...listIds])
+            .each(({ id, name }) => nameLookupById.set(id, name))
+
+        for (const [listId, url] of listEntries) {
+            const current = listMap.get(url) ?? []
+            const listName = nameLookupById.get(listId)
+            listMap.set(url, [...current, listName])
+        }
+    }
+
     private async lookupTags(
         pageUrls: string[],
         tagMap: Map<number | string, string[]>,
@@ -122,7 +148,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .anyOf(pageUrls)
             .primaryKeys()
 
-        tags.forEach(pk => {
+        tags.forEach((pk) => {
             const [name, url] = pk as [string, string]
             let key: number | string
 
@@ -164,7 +190,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
             .anyOf(pageUrls)
             .keys()) as string[]
 
-        annotUrls.forEach(url => {
+        annotUrls.forEach((url) => {
             let key: number | string
 
             if (isSocialSearch) {
@@ -259,6 +285,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const favIconMap = new Map<string, string>()
         const pageMap = new Map<string, Page>()
         const tagMap = new Map<string, string[]>()
+        const listMap = new Map<string, string[]>()
         const countMap = new Map<string, number>()
         const timeMap = new Map<string, number>()
 
@@ -266,11 +293,12 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         await Promise.all([
             this.lookupPages(pageUrls, pageMap, base64Img),
             this.lookupTags(pageUrls, tagMap),
+            this.lookupLists(pageUrls, listMap),
             this.lookupAnnotsCounts(pageUrls, countMap),
         ])
 
         const hostnames = new Set(
-            [...pageMap.values()].map(page => page.hostname),
+            [...pageMap.values()].map((page) => page.hostname),
         )
 
         // Run the subsequent set of queries that depend on earlier results
@@ -299,14 +327,15 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                 return {
                     ...page,
                     favIcon: favIconMap.get(page.hostname),
-                    tags: tagMap.get(url) || [],
+                    tags: tagMap.get(url) ?? [],
+                    lists: listMap.get(url) ?? [],
                     annotsCount: countMap.get(url),
                     displayTime: latestTimes
                         ? latestTimes[i]
                         : timeMap.get(url),
                 }
             })
-            .filter(page => page != null)
+            .filter((page) => page != null)
             .map(reshapePageForDisplay)
     }
 
@@ -327,7 +356,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const tagMap = new Map<number, string[]>()
         const userMap = new Map<number, User>()
 
-        const postUrlIds = postIds.map(postId => {
+        const postUrlIds = postIds.map((postId) => {
             const { url } = buildPostUrlId({ postId })
             return url
         })
@@ -339,7 +368,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         ])
 
         const userIds = new Set(
-            [...socialMap.values()].map(page => page.userId),
+            [...socialMap.values()].map((page) => page.userId),
         )
 
         await Promise.all([
@@ -375,6 +404,6 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                     url,
                 }
             })
-            .filter(page => page !== null)
+            .filter((page) => page !== null)
     }
 }

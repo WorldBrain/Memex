@@ -5,7 +5,6 @@ import reduce from 'lodash/fp/reduce'
 import moment from 'moment'
 
 import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
-import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from 'src/sidebar-overlay/sidebar/constants'
@@ -21,11 +20,9 @@ import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
 import TagPicker from 'src/tags/ui/TagPicker'
-import { tags } from 'src/util/remote-functions-background'
-import {
-    TagHover,
-    TagHoverDashboard,
-} from 'src/common-ui/components/design-library/TagHover'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import { tags, collections } from 'src/util/remote-functions-background'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 const styles = require('./result-list.css')
 
@@ -45,11 +42,15 @@ export interface StateProps {
 export interface DispatchProps {
     resetUrlDragged: () => void
     resetActiveTagIndex: () => void
+    resetActiveListIndex: () => void
     setUrlDragged: (url: string) => void
+    addList: (i: number) => (f: string) => void
+    delList: (i: number) => (f: string) => void
     addTag: (i: number) => (f: string) => void
     delTag: (i: number) => (f: string) => void
     handlePillClick: (tag: string) => MouseEventHandler
     handleTagBtnClick: (i: number) => MouseEventHandler
+    handleListBtnClick: (i: number) => MouseEventHandler
     handleCommentBtnClick: (
         doc: Result,
         isSocialSearch?: boolean,
@@ -74,15 +75,20 @@ interface State {
 class ResultListContainer extends PureComponent<Props, State> {
     private dropdownRefs: HTMLSpanElement[] = []
     private tagBtnRefs: HTMLButtonElement[] = []
+    private listBtnRefs: HTMLButtonElement[] = []
     private tagDivRef: HTMLDivElement
     private resultsDivRef: HTMLDivElement
+    private listDivRef: HTMLDivElement
 
     private setResultsDivRef = (el: HTMLDivElement) => (this.resultsDivRef = el)
     private trackDropdownRef = (el: HTMLSpanElement) =>
         this.dropdownRefs.push(el)
     private setTagDivRef = (el: HTMLDivElement) => (this.tagDivRef = el)
+    private setListDivRef = (el: HTMLDivElement) => (this.listDivRef = el)
     private setTagButtonRef = (el: HTMLButtonElement) =>
         this.tagBtnRefs.push(el)
+    private setListButtonRef = (el: HTMLButtonElement) =>
+        this.listBtnRefs.push(el)
 
     state: State = {
         tagSuggestions: [],
@@ -117,22 +123,55 @@ class ResultListContainer extends PureComponent<Props, State> {
         ) {
             this.props.resetActiveTagIndex()
         }
+
+        const clickedListDiv =
+            this.listDivRef != null &&
+            this.listDivRef.contains(event.target as Node)
+
+        if (!clickedListDiv && !wereAnyClicked(this.listBtnRefs)) {
+            this.props.resetActiveListIndex()
+        }
     }
 
-    handleTagUpdate = (index) => async (
-        tagsUpdate: string[],
+    handleTagUpdate = (index: number) => async (
+        _: string[],
         added: string,
         deleted: string,
     ) => {
         const url = this.props.searchResults[index].url
+        const backendResult = tags.updateTagForPage({
+            added,
+            deleted,
+            url,
+        })
+
         if (added) {
             this.props.addTag(index)(added)
-            tags.addTagToPage({ tag: added, url })
         }
         if (deleted) {
-            this.props.delTag(index)(deleted)
-            tags.delTag({ tag: deleted, url })
+            return this.props.delTag(index)(deleted)
         }
+        return backendResult
+    }
+
+    handleListUpdate = (index: number) => async (
+        _: string[],
+        added: string,
+        deleted: string,
+    ) => {
+        const url = this.props.searchResults[index].url
+        const backendResult = collections.updateListForPage({
+            added,
+            deleted,
+            url,
+        })
+        if (added) {
+            this.props.addList(index)(added)
+        }
+        if (deleted) {
+            return this.props.delList(index)(deleted)
+        }
+        return backendResult
     }
 
     private renderTagsManager(
@@ -144,7 +183,7 @@ class ResultListContainer extends PureComponent<Props, State> {
         }
 
         return (
-            <TagHover>
+            <HoverBox>
                 <div ref={(ref) => this.setTagDivRef(ref)}>
                     <TagPicker
                         onUpdateTagSelection={this.handleTagUpdate(index)}
@@ -155,7 +194,33 @@ class ResultListContainer extends PureComponent<Props, State> {
                         initialSelectedTags={() => selectedTags}
                     />
                 </div>
-            </TagHover>
+            </HoverBox>
+        )
+    }
+
+    private renderListsManager(
+        { shouldDisplayListPopup, lists: selectedLists }: Result,
+        index: number,
+    ) {
+        if (!shouldDisplayListPopup) {
+            return null
+        }
+
+        return (
+            <HoverBox>
+                <div ref={(ref) => this.setListDivRef(ref)}>
+                    <CollectionPicker
+                        onUpdateListSelection={this.handleListUpdate(index)}
+                        queryLists={(query) =>
+                            collections.searchForListSuggestions({ query })
+                        }
+                        loadDefaultSuggestions={
+                            collections.fetchInitialListSuggestions
+                        }
+                        initialSelectedLists={async () => selectedLists}
+                    />
+                </div>
+            </HoverBox>
         )
     }
 
@@ -186,11 +251,14 @@ class ResultListContainer extends PureComponent<Props, State> {
             <ResultItem
                 key={key}
                 setTagButtonRef={this.setTagButtonRef}
+                setListButtonRef={this.setListButtonRef}
                 tagHolder={this.renderTagHolder(doc, index)}
                 setUrlDragged={this.props.setUrlDragged}
                 tagManager={this.renderTagsManager(doc, index)}
+                listManager={this.renderListsManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}
                 onTagBtnClick={this.props.handleTagBtnClick(index)}
+                onListBtnClick={this.props.handleListBtnClick(index)}
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
@@ -310,7 +378,11 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
 ) => ({
     handleTagBtnClick: (index) => (event) => {
         event.preventDefault()
-        dispatch(resultActs.showTags(index))
+        dispatch(resultActs.toggleShowTagsPicker(index))
+    },
+    handleListBtnClick: (index) => (event) => {
+        event.preventDefault()
+        dispatch(resultActs.toggleShowListsPicker(index))
     },
     handleCommentBtnClick: ({ url, title }, isSocialPost) => (event) => {
         event.preventDefault()
@@ -339,11 +411,16 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
         event.stopPropagation()
         dispatch(filterActs.toggleTagFilter(tag))
     },
+    addList: (resultIndex) => (list) =>
+        dispatch(resultActs.addList(list, resultIndex)),
+    delList: (resultIndex) => (list) =>
+        dispatch(resultActs.delList(list, resultIndex)),
     addTag: (resultIndex) => (tag) =>
         dispatch(resultActs.addTag(tag, resultIndex)),
     delTag: (resultIndex) => (tag) =>
         dispatch(resultActs.delTag(tag, resultIndex)),
     resetActiveTagIndex: () => dispatch(resultActs.resetActiveTagIndex()),
+    resetActiveListIndex: () => dispatch(resultActs.resetActiveListIndex()),
     setUrlDragged: (url) => dispatch(listActs.setUrlDragged(url)),
     resetUrlDragged: () => dispatch(listActs.resetUrlDragged()),
     handleCrossRibbonClick: ({ url }, isSocialPost) => (event) => {

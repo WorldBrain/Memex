@@ -32,7 +32,7 @@ class ResultItemActions extends PureComponent<Props> {
             >
                 <div
                     className={styles.buttonsContainer}
-                    onClick={e => {
+                    onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
                     }}
@@ -54,6 +54,20 @@ class ResultItemActions extends PureComponent<Props> {
                         onClick={this.props.onTagBtnClick}
                         tooltipText="Edit Tags"
                         refHandler={this.props.setTagButtonRef}
+                    />
+                    <ResultItemActionBtn
+                        permanent={this.props.lists.length > 0}
+                        imgSrc={
+                            this.props.lists.length > 0 ? tagFull : tagEmpty
+                        }
+                        className={
+                            this.props.lists.length > 0
+                                ? styles.commentActive
+                                : styles.tag
+                        }
+                        onClick={this.props.onListBtnClick}
+                        tooltipText="Edit Collections"
+                        refHandler={this.props.setListButtonRef}
                     />
                     <ResultItemActionBtn
                         permanent={this.props.annotsCount > 0}

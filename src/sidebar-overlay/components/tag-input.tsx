@@ -4,7 +4,7 @@ import { IndexDropdown } from 'src/common-ui/containers'
 import TagHolder from './tag-holder'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags } from 'src/util/remote-functions-background'
-import { TagHover } from 'src/common-ui/components/design-library/TagHover'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 interface Props {
     env?: 'inpage' | 'overview'
@@ -42,7 +42,7 @@ const TagInput = ({
         }
 
         tagPicker = (
-            <TagHover>
+            <HoverBox>
                 <TagPicker
                     loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                     queryTags={(query: string) =>
@@ -51,7 +51,7 @@ const TagInput = ({
                     onUpdateTagSelection={handleTagsUpdate}
                     initialSelectedTags={async () => initialSelectedTags}
                 />
-            </TagHover>
+            </HoverBox>
         )
     }
 

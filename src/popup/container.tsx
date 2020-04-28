@@ -101,8 +101,8 @@ class PopupContainer extends PureComponent<Props> {
         }
     }
 
-    handleTagsUpdate = async (_: string[], added: string, deleted: string) => {
-        const backedResult = tags.updateTagForPage({
+    handleTagUpdate = async (_: string[], added: string, deleted: string) => {
+        const backendResult = tags.updateTagForPage({
             added,
             deleted,
             url: this.props.url,
@@ -114,7 +114,7 @@ class PopupContainer extends PureComponent<Props> {
         if (deleted) {
             return this.props.onTagDel(deleted)
         }
-        return backedResult
+        return backendResult
     }
 
     handleTagAllTabs = (tagName: string) =>
@@ -122,8 +122,8 @@ class PopupContainer extends PureComponent<Props> {
     handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
     fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
 
-    handleListsUpdate = async (_: string[], added: string, deleted: string) => {
-        const backedResult = collections.updateListForPage({
+    handleListUpdate = async (_: string[], added: string, deleted: string) => {
+        const backendResult = collections.updateListForPage({
             added,
             deleted,
             url: this.props.url,
@@ -135,7 +135,7 @@ class PopupContainer extends PureComponent<Props> {
         if (deleted) {
             return this.props.onCollectionDel(deleted)
         }
-        return backedResult
+        return backendResult
     }
 
     handleListAllTabs = (listName: string) =>
@@ -154,7 +154,7 @@ class PopupContainer extends PureComponent<Props> {
             return (
                 <TagPicker
                     queryTags={this.handleTagQuery}
-                    onUpdateTagSelection={this.handleTagsUpdate}
+                    onUpdateTagSelection={this.handleTagUpdate}
                     initialSelectedTags={this.fetchTagsForPage}
                     tagAllTabs={this.handleTagAllTabs}
                     loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
@@ -168,7 +168,7 @@ class PopupContainer extends PureComponent<Props> {
             return (
                 <CollectionPicker
                     queryLists={this.handleListQuery}
-                    onUpdateListSelection={this.handleListsUpdate}
+                    onUpdateListSelection={this.handleListUpdate}
                     initialSelectedLists={this.fetchListsForPage}
                     listAllTabs={this.handleListAllTabs}
                     loadDefaultSuggestions={
