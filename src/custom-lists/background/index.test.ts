@@ -103,6 +103,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         backgroundIntegrationTest(
             'should create a list, edit its title, add an entry to it and retrieve the list and its pages',
             () => {
+                const TEST_LIST_1 = 'My Custom List'
+                const TEST_LIST_2 = 'Updated List Title'
                 return {
                     steps: [
                         {
@@ -110,7 +112,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 listId = await customLists(
                                     setup,
                                 ).createCustomList({
-                                    name: 'My Custom List',
+                                    name: TEST_LIST_1,
                                 })
                             },
                             expectedStorageChanges: {
@@ -120,7 +122,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         object: {
                                             id: listId,
                                             createdAt: expect.any(Date),
-                                            name: 'My Custom List',
+                                            name: TEST_LIST_1,
                                             isDeletable: true,
                                             isNestable: true,
                                         },
@@ -137,7 +139,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             id: listId,
                                             isDeletable: true,
                                             isNestable: true,
-                                            name: 'My Custom List',
+                                            name: TEST_LIST_1,
                                         },
                                     ],
                                     result: {
@@ -231,14 +233,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) =>
                                 customLists(setup).updateList({
                                     id: listId,
-                                    name: 'Updated List Title',
+                                    name: TEST_LIST_2,
                                 }),
                             expectedStorageChanges: {
                                 customLists: (): StorageCollectionDiff => ({
                                     [listId]: {
                                         type: 'modify',
                                         updates: {
-                                            name: 'Updated List Title',
+                                            name: TEST_LIST_2,
                                         },
                                     },
                                 }),
@@ -250,7 +252,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     }),
                                 ).toEqual({
                                     id: expect.any(Number),
-                                    name: 'Updated List Title',
+                                    name: TEST_LIST_2,
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
@@ -286,7 +288,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             favIcon: undefined,
                                             hasBookmark: false,
                                             screenshot: undefined,
-                                            lists: [],
+                                            lists: [TEST_LIST_2],
+                                            tags: [],
                                             title: 'bla.com title',
                                             url: 'bla.com',
                                             fullUrl: 'http://www.bla.com/',
@@ -304,6 +307,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         backgroundIntegrationTest(
             'should create a list, add an entry of an existing page to it and retrieve the list and its pages',
             () => {
+                const TEST_LIST_1 = 'My Custom List'
                 return {
                     steps: [
                         {
@@ -311,7 +315,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 listId = await customLists(
                                     setup,
                                 ).createCustomList({
-                                    name: 'My Custom List',
+                                    name: TEST_LIST_1,
                                 })
                             },
                         },
@@ -343,7 +347,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     }),
                                 ).toEqual({
                                     id: expect.any(Number),
-                                    name: 'My Custom List',
+                                    name: TEST_LIST_1,
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
@@ -379,7 +383,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             favIcon: undefined,
                                             hasBookmark: false,
                                             screenshot: undefined,
-                                            lists: [],
+                                            lists: [TEST_LIST_1],
+                                            tags: [],
                                             title: 'bla.com title',
                                             url: 'bla.com',
                                             fullUrl: 'http://www.bla.com/',
