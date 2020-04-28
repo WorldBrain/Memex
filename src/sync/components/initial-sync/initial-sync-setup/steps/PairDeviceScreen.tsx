@@ -30,7 +30,7 @@ export const LoadingQRCode = ({
         header={titleText}
         actions={[
             <SecondaryAction
-                label={'back'}
+                label={'Back'}
                 onClick={onPressBack}
                 key={`LoadingQRCode-back`}
             />,
@@ -58,7 +58,7 @@ export const ScanQRCode = ({
         actions={[
             <SecondaryAction
                 key={`ScanQRCode-back`}
-                label={'back'}
+                label={'Back'}
                 onClick={onPressBack}
             />,
         ]}
@@ -80,7 +80,7 @@ export const ErrorPane = ({}) => (
         actions={[
             <SecondaryAction
                 key={`ErrorPane-back`}
-                label={'back'}
+                label={'Back'}
                 onClick={() => null}
             />,
         ]}
