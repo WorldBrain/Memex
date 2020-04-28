@@ -18,10 +18,18 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
         Role,
         | [CreateAnnotationParams]
         | [CreateAnnotationParams, { skipPageIndexing?: boolean }],
-        any
+        string // Returns unique annotation URL
     >
     editAnnotation: RemotePositionalFunction<Role, any[], any>
-    editAnnotationTags: RemotePositionalFunction<Role, any[], any>
+    editAnnotationTags: RemoteFunction<
+        Role,
+        {
+            tagsToBeAdded: string[]
+            tagsToBeDeleted: string[]
+            url: string
+        },
+        any
+    >
     deleteAnnotation: RemotePositionalFunction<Role, any[], any>
     getAnnotationTags: RemotePositionalFunction<Role, any[], any>
     addAnnotationTag: RemotePositionalFunction<Role, any[], any>
@@ -43,7 +51,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
 
 export interface CreateAnnotationParams {
     url: string
-    title: string
+    title?: string
     comment?: string
     body?: string
     selector?: Anchor

@@ -265,35 +265,28 @@ export default class DirectLinkingBackground {
 
     async createAnnotation(
         { tab }: TabArg,
-        {
-            url,
-            title,
-            comment,
-            body,
-            selector,
-            bookmarked,
-            isSocialPost,
-            createdWhen = new Date(),
-        }: CreateAnnotationParams,
+        toCreate: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
-        let pageUrl = this._normalizeUrl(url == null ? tab.url : url)
+        let pageUrl = this._normalizeUrl(
+            toCreate.url == null ? tab.url : toCreate.url,
+        )
 
-        if (isSocialPost) {
+        if (toCreate.isSocialPost) {
             pageUrl = await this.lookupSocialId(pageUrl)
         }
 
-        const pageTitle = title == null ? tab.title : title
+        const pageTitle = toCreate.title == null ? tab.title : toCreate.title
         const uniqueUrl = `${pageUrl}/#${Date.now()}`
 
         await this.annotationStorage.createAnnotation({
             pageUrl,
             url: uniqueUrl,
             pageTitle,
-            comment,
-            body,
-            selector,
-            createdWhen,
+            comment: toCreate.comment,
+            body: toCreate.body,
+            selector: toCreate.selector,
+            createdWhen: toCreate.createdWhen,
         })
 
         // Attempt to (re-)index, if user preference set, but don't wait for it
@@ -301,7 +294,7 @@ export default class DirectLinkingBackground {
             this.annotationStorage.indexPageFromTab(tab)
         }
 
-        if (bookmarked) {
+        if (toCreate.bookmarked) {
             await this.toggleAnnotBookmark({ tab }, { url: uniqueUrl })
         }
 
@@ -358,6 +351,7 @@ export default class DirectLinkingBackground {
     }
 
     async editAnnotationTags({ tab }, { tagsToBeAdded, tagsToBeDeleted, url }) {
+        console.log(url, tagsToBeAdded)
         return this.annotationStorage.editAnnotationTags(
             tagsToBeAdded,
             tagsToBeDeleted,

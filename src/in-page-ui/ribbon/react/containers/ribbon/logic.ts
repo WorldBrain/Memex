@@ -199,12 +199,20 @@ export class RibbonContainerLogic extends UILogic<
     }) => {
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        // TODO: Implement saving, bookmarking and tagging
-        const save = (options: { bookmark: boolean; tags: string[] }) =>
-            new Promise(resolve => {
-                console.log('save comment', options)
-                setTimeout(resolve, 300)
+        const save = async (options: { bookmark: boolean; tags: string[] }) => {
+            const annotUrl = await this.dependencies.annotations.createAnnotation(
+                {
+                    url: this.dependencies.currentTab.url,
+                    comment: previousState.commentBox.commentText,
+                    bookmarked: options.bookmark,
+                },
+            )
+            await this.dependencies.annotations.editAnnotationTags({
+                url: annotUrl,
+                tagsToBeAdded: previousState.commentBox.tags,
+                tagsToBeDeleted: [],
             })
+        }
         await save({
             bookmark: previousState.commentBox.isCommentBookmarked,
             tags: previousState.commentBox.tags,
@@ -262,7 +270,10 @@ export class RibbonContainerLogic extends UILogic<
             },
         })
         if (event.value.context === 'tagging') {
-            // TODO: Immediately add tag to page here
+            await this.dependencies.tags.addPageTag({
+                url: this.dependencies.currentTab.url,
+                tag: event.value.tag,
+            })
         }
     }
 
@@ -277,7 +288,10 @@ export class RibbonContainerLogic extends UILogic<
             [event.value.context]: { tags: { $splice: [[index, 1]] } },
         })
         if (event.value.context === 'tagging') {
-            // TODO: Immediately remove tag from page here
+            await this.dependencies.tags.delPageTag({
+                url: this.dependencies.currentTab.url,
+                tag: event.value.tag,
+            })
         }
     }
 
@@ -285,11 +299,17 @@ export class RibbonContainerLogic extends UILogic<
     // Lists
     //
     onCollectionAdd: EventHandler<'onCollectionAdd'> = async ({ event }) => {
-        // TODO: Add page to list
+        await this.dependencies.customLists.insertPageToList({
+            id: event.value.id,
+            url: this.dependencies.currentTab.url,
+        })
     }
 
     onCollectionDel: EventHandler<'onCollectionDel'> = async ({ event }) => {
-        // TODO: Remove page from list
+        await this.dependencies.customLists.removePageFromList({
+            id: event.value.id,
+            url: this.dependencies.currentTab.url,
+        })
     }
 
     setShowCollectionsPicker: EventHandler<
@@ -312,11 +332,11 @@ export class RibbonContainerLogic extends UILogic<
     //
     // Pausing
     //
-    handlePauseToggle: EventHandler<'handlePauseToggle'> = ({
+    handlePauseToggle: EventHandler<'handlePauseToggle'> = async ({
         event,
         previousState,
     }) => {
-        // TODO: Implement pause toggling
+        await this.dependencies.activityLogger.toggleLoggingPause()
         return { pausing: { isPaused: { $apply: prev => !prev } } }
     }
 }

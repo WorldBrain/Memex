@@ -60,7 +60,7 @@ export type RemotePositionalFunction<
     Returns = void
 > = Role extends 'provider'
     ? (info: { tab: { id: number } }, ...params: Params) => Promise<Returns>
-    : (params: Params) => Promise<Returns>
+    : (...params: Params) => Promise<Returns>
 
 // === Initiating side ===
 

@@ -21,10 +21,10 @@ export interface Tab {
 
 export interface CustomListsInterface {
     createCustomList: any
-    insertPageToList: any
+    insertPageToList: (args: { id: number; url: string }) => Promise<void>
     updateListName: any
     removeList: any
-    removePageFromList: any
+    removePageFromList: (args: { id: number; url: string }) => Promise<void>
     fetchAllLists: any
     fetchListById: any
     fetchListPagesByUrl: any

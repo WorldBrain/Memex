@@ -26,6 +26,7 @@ import { CustomListsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 
 export async function main() {
     const controllers: {
@@ -55,6 +56,7 @@ export async function main() {
                 bookmarks: runInBackground<BookmarksInterface>(),
                 tags: runInBackground<RemoteTagsInterface>(),
                 annotations: runInBackground<AnnotationInterface<'caller'>>(),
+                activityLogger: runInBackground<ActivityLoggerInterface>(),
             })
             controllers.ribbon!.resolve()
         },

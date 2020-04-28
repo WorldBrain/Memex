@@ -14,6 +14,8 @@ const stories = storiesOf('In-page UI', module)
 
 async function createDependencies() {
     const background = await setupBackgroundIntegrationTest()
+    window['background'] = background
+
     await background.backgroundModules.directLinking.annotationStorage.createAnnotation(
         {
             pageTitle: 'Foo title',
@@ -51,7 +53,11 @@ async function createDependencies() {
         loadComponent: async () => {},
     })
 
-    const currentTab = { id: 654, url: 'https://www.foo.com' }
+    const currentTab = {
+        id: 654,
+        url: 'https://www.foo.com',
+        title: 'Foo.com: Home',
+    }
     const commonProps = {
         env: 'inpage' as SidebarEnv,
         currentTab,
@@ -66,11 +72,13 @@ async function createDependencies() {
             background.backgroundModules.search.remoteFunctions.bookmarks,
         tags: background.backgroundModules.tags.remoteFunctions,
         customLists: background.backgroundModules.customLists.remoteFunctions,
+        activityLogger:
+            background.backgroundModules.activityLogger.remoteFunctions,
         annotations: mapValues(
             background.backgroundModules.directLinking.remoteFunctions,
             f => {
                 return (...args: any[]) => {
-                    f(currentTab, ...args)
+                    return f({ tab: currentTab }, ...args)
                 }
             },
         ),
