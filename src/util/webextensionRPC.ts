@@ -54,6 +54,13 @@ export type RemoteFunction<
 > = Role extends 'provider'
     ? (info: { tab: { id: number } }, params: Params) => Promise<Returns>
     : (params: Params) => Promise<Returns>
+export type RemotePositionalFunction<
+    Role extends RemoteFunctionRole,
+    Params extends Array<any>,
+    Returns = void
+> = Role extends 'provider'
+    ? (info: { tab: { id: number } }, ...params: Params) => Promise<Returns>
+    : (params: Params) => Promise<Returns>
 
 // === Initiating side ===
 

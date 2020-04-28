@@ -71,9 +71,6 @@ class Ribbon extends Component<Props, State> {
     private openOverviewTabRPC
     private openOptionsTabRPC
     private ribbonRef: HTMLElement
-    private inputQueryEl: HTMLInputElement
-
-    private setInputRef = (el: HTMLInputElement) => (this.inputQueryEl = el)
 
     state: State = { shortcutsReady: false }
 
@@ -252,7 +249,6 @@ class Ribbon extends Component<Props, State> {
                                             this.props.setShowSearchBox(
                                                 !this.props.showSearchBox,
                                             )
-                                            this.inputQueryEl.focus()
                                         }}
                                     />
                                     {this.props.showSearchBox && (
@@ -267,7 +263,6 @@ class Ribbon extends Component<Props, State> {
                                                 />
                                                 <TextInputControlled
                                                     autoFocus={false}
-                                                    setRef={this.setInputRef}
                                                     className={
                                                         styles.searchInput
                                                     }

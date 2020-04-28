@@ -1,3 +1,4 @@
+import mapValues from 'lodash/mapValues'
 import { storiesOf } from '@storybook/react'
 import React from 'react'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
@@ -53,9 +54,10 @@ async function createDependencies() {
         loadComponent: async () => {},
     })
 
+    const currentTab = { id: 654, url: 'https://www.foo.com' }
     const commonProps = {
         env: 'inpage' as SidebarEnv,
-        currentTab: { id: 654, url: 'https://www.foo.com' },
+        currentTab,
         inPageUI,
         annotationManager,
         highlighter,
@@ -63,6 +65,18 @@ async function createDependencies() {
         annotationsManager: annotationManager,
         getSidebarEnabled: async () => true,
         setSidebarEnabled: async () => {},
+        bookmarks:
+            background.backgroundModules.search.remoteFunctions.bookmarks,
+        tags: background.backgroundModules.tags.remoteFunctions,
+        customLists: background.backgroundModules.customLists.remoteFunctions,
+        annotations: mapValues(
+            background.backgroundModules.directLinking.remoteFunctions,
+            f => {
+                return (...args: any[]) => {
+                    f(currentTab, ...args)
+                }
+            },
+        ),
         loadTagSuggestions: async () => [
             'first suggestion',
             'second suggestion',

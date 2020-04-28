@@ -71,6 +71,8 @@ export default class SidebarContainer extends StatefulUIElement<
 
     handleExternalAction = (event: { action: InPageUISidebarAction }) => {
         if (event.action === 'annotate') {
+        } else if (event.action === 'comment') {
+            this.processEvent('addNewPageComment', null)
         }
     }
 

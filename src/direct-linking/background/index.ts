@@ -21,12 +21,14 @@ import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 import { SearchIndex } from 'src/search'
 import PageStorage from 'src/page-indexing/background/storage'
 import { Annotation } from 'src/annotations/types'
+import { AnnotationInterface, CreateAnnotationParams } from './types'
 
 interface TabArg {
     tab: Tabs.Tab
 }
 
 export default class DirectLinkingBackground {
+    remoteFunctions: AnnotationInterface<'provider'>
     private backend: DirectLinkingBackend
     annotationStorage: AnnotationStorage
     private sendAnnotation: AnnotationSender
@@ -67,33 +69,30 @@ export default class DirectLinkingBackground {
             this.backend,
             this.sendAnnotation,
         )
+
+        this.remoteFunctions = {
+            createDirectLink: this.createDirectLink.bind(this),
+            getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
+            createAnnotation: this.createAnnotation.bind(this),
+            editAnnotation: this.editAnnotation.bind(this),
+            editAnnotationTags: this.editAnnotationTags.bind(this),
+            deleteAnnotation: this.deleteAnnotation.bind(this),
+            getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
+            addAnnotationTag: this.addTagForAnnotation.bind(this),
+            delAnnotationTag: this.delTagForAnnotation.bind(this),
+            followAnnotationRequest: this.followAnnotationRequest.bind(this),
+            toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
+            toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
+            insertAnnotToList: this.insertAnnotToList.bind(this),
+            removeAnnotFromList: this.removeAnnotFromList.bind(this),
+            goToAnnotationFromSidebar: this.goToAnnotationFromSidebar.bind(
+                this,
+            ),
+        }
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable(
-            {
-                createDirectLink: this.createDirectLink.bind(this),
-                getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
-                createAnnotation: this.createAnnotation.bind(this),
-                editAnnotation: this.editAnnotation.bind(this),
-                editAnnotationTags: this.editAnnotationTags.bind(this),
-                deleteAnnotation: this.deleteAnnotation.bind(this),
-                getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
-                addAnnotationTag: this.addTagForAnnotation.bind(this),
-                delAnnotationTag: this.delTagForAnnotation.bind(this),
-                followAnnotationRequest: this.followAnnotationRequest.bind(
-                    this,
-                ),
-                toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
-                toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
-                insertAnnotToList: this.insertAnnotToList.bind(this),
-                removeAnnotFromList: this.removeAnnotFromList.bind(this),
-                goToAnnotationFromSidebar: this.goToAnnotationFromSidebar.bind(
-                    this,
-                ),
-            },
-            { insertExtraArg: true },
-        )
+        makeRemotelyCallable(this.remoteFunctions, { insertExtraArg: true })
     }
 
     setupRequestInterceptor() {
@@ -200,7 +199,7 @@ export default class DirectLinkingBackground {
         this.requests.followAnnotationRequest(tab.id)
     }
 
-    async createDirectLink({ tab }: TabArg, request) {
+    createDirectLink = async ({ tab }: TabArg, request) => {
         const pageTitle = tab.title
         const result = await this.backend.createDirectLink(request)
         await this.annotationStorage.createAnnotation({
@@ -218,7 +217,7 @@ export default class DirectLinkingBackground {
         return result
     }
 
-    async getAllAnnotationsByUrl(
+    getAllAnnotationsByUrl = async (
         { tab }: TabArg,
         { url, limit = 1000, skip = 0, ...params }: AnnotSearchParams,
         isSocialPost?: boolean,
@@ -230,7 +229,7 @@ export default class DirectLinkingBackground {
                 lastEdited?: number
             }
         >
-    > {
+    > => {
         url = url == null && tab != null ? tab.url : url
         url = isSocialPost
             ? await this.lookupSocialId(url)
@@ -275,7 +274,7 @@ export default class DirectLinkingBackground {
             bookmarked,
             isSocialPost,
             createdWhen = new Date(),
-        },
+        }: CreateAnnotationParams,
         { skipPageIndexing }: { skipPageIndexing?: boolean } = {},
     ) {
         let pageUrl = this._normalizeUrl(url == null ? tab.url : url)

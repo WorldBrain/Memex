@@ -164,12 +164,19 @@ export class RibbonContainerLogic extends UILogic<
     //
     // Bookmark
     //
-    toggleBookmark: EventHandler<'toggleBookmark'> = ({ previousState }) => {
+    toggleBookmark: EventHandler<'toggleBookmark'> = async ({
+        previousState,
+    }) => {
         const shouldBeBookmarked = !previousState.bookmark.isBookmarked
         if (shouldBeBookmarked) {
-            // TODO: Bookmark current page
+            await this.dependencies.bookmarks.addPageBookmark({
+                url: this.dependencies.currentTab.url,
+                tabId: this.dependencies.currentTab.id,
+            })
         } else {
-            // TODO: Remove page bookmark
+            await this.dependencies.bookmarks.delPageBookmark({
+                url: this.dependencies.currentTab.url,
+            })
         }
         return { bookmark: { isBookmarked: { $set: shouldBeBookmarked } } }
     }
@@ -187,7 +194,6 @@ export class RibbonContainerLogic extends UILogic<
     }) => {
         return { commentBox: { commentText: { $set: event.value } } }
     }
-    // return { commentBox: { tagSuggestions: { $set: await this.debouncedFetchTagSuggestions(event.value)}}}
 
     saveComment: EventHandler<'saveComment'> = async ({
         event,
