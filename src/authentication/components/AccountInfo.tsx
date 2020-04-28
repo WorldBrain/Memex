@@ -79,6 +79,14 @@ export class AccountInfo extends React.PureComponent<Props & UserProps> {
                             )}
                             readOnly
                         />
+                        <input
+                            type={'hidden'}
+                            name={'subscriptionStatus'}
+                            defaultValue={JSON.stringify(
+                                this.props.subscriptionStatus,
+                            )}
+                            readOnly
+                        />
                     </div>
                 )}
             </FullPage>
@@ -86,6 +94,6 @@ export class AccountInfo extends React.PureComponent<Props & UserProps> {
     }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(AccountInfo))
