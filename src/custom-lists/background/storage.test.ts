@@ -123,7 +123,7 @@ describe('Custom List Integrations', () => {
         test('fetch suggestions based on list names', async () => {
             const { customLists } = await setupTest()
 
-            const lists = await customLists.fetchListNameSuggestions({
+            const lists = await customLists.__fetchListNameSuggestions({
                 name: 'Go',
                 url: 'https://www.ipsum.com/test',
             })

@@ -6,7 +6,6 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import CustomListStorage from './storage'
 import internalAnalytics from '../../analytics/internal'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
-import { TabManager } from 'src/activity-logger/background/tab-manager'
 import { SearchIndex } from 'src/search'
 import {
     Tab,
@@ -16,7 +15,7 @@ import {
     PageListEntry,
 } from './types'
 import PageStorage from 'src/page-indexing/background/storage'
-import { pageIsStub, maybeIndexTabs } from 'src/page-indexing/utils'
+import { maybeIndexTabs } from 'src/page-indexing/utils'
 import { bindMethod } from 'src/util/functions'
 import { getOpenTabsInCurrentWindow } from 'src/activity-logger/background/util'
 import { BrowserSettingsStore } from 'src/util/settings'
@@ -63,15 +62,15 @@ export default class CustomListBackground {
             removeList: bindMethod(this, 'removeList'),
             removePageFromList: bindMethod(this, 'removePageFromList'),
             fetchAllLists: bindMethod(this, 'fetchAllLists'),
-            fetchListById: bindMethod(this, 'fetchListById'),
+            __fetchListById: bindMethod(this, 'fetchListById'),
             fetchListPagesByUrl: bindMethod(this, 'fetchListPagesByUrl'),
             fetchInitialListSuggestions: bindMethod(
                 this,
                 'fetchInitialListSuggestions',
             ),
-            fetchListNameSuggestions: bindMethod(
+            __fetchListNameSuggestions: bindMethod(
                 this,
-                'fetchListNameSuggestions',
+                '__fetchListNameSuggestions',
             ),
             fetchListPagesById: bindMethod(this, 'fetchListPagesById'),
             fetchPageLists: bindMethod(this, 'fetchPageLists'),
@@ -305,7 +304,7 @@ export default class CustomListBackground {
         await this.localStorage.set('suggestions', suggestions)
     }
 
-    async fetchListNameSuggestions({
+    async __fetchListNameSuggestions({
         name,
         url,
     }: {
