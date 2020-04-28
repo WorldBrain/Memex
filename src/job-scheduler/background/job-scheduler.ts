@@ -2,7 +2,6 @@ import { Alarms, Storage } from 'webextension-polyfill-ts'
 
 import { JobDefinition, PrimedJob } from './types'
 import { SCHEDULES } from '../constants'
-import { now as _now } from 'moment'
 
 export type Period = 'month' | 'week' | 'day'
 
@@ -28,7 +27,7 @@ export class JobScheduler {
     }
 
     private static calcTimeFromNow = (minutes: number, now = Date.now()) =>
-        now + minutes * 60 * 1000
+        typeof minutes === 'undefined' ? minutes : now + minutes * 60 * 1000
 
     private setTimeoutKey = (key: string, value: number) =>
         this.props.storageAPI.local.set({
@@ -45,18 +44,31 @@ export class JobScheduler {
         return timeToRun
     }
 
+    private async initJobTimeoutStatus(
+        name: string,
+        reInit = false,
+        now: number = Date.now(),
+    ) {
+        const job = this.jobs.get(name)
+        const timeToRun = await this.getTimeoutKey(name)
+
+        if (timeToRun !== JobScheduler.ALREADY_RUN || reInit) {
+            await this.setTimeoutKey(
+                name,
+                job.when ??
+                    JobScheduler.calcTimeFromNow(job.periodInMinutes, now) ??
+                    JobScheduler.calcTimeFromNow(job.delayInMinutes, now),
+            )
+        }
+    }
+
     private async attemptPeriodicJob(
         { name, periodInMinutes, job }: JobDefinition<PrimedJob>,
         now: number,
     ) {
         const timeToRun = await this.getTimeoutKey(name)
 
-        if (timeToRun === JobScheduler.NOT_SET) {
-            await this.setTimeoutKey(
-                name,
-                JobScheduler.calcTimeFromNow(periodInMinutes, now),
-            )
-        } else if (timeToRun < now) {
+        if (timeToRun < now) {
             await job()
             await this.setTimeoutKey(
                 name,
@@ -66,27 +78,26 @@ export class JobScheduler {
     }
 
     private async attemptOneOffJob(
-        { name, delayInMinutes, job, when }: JobDefinition<PrimedJob>,
+        { name, job }: JobDefinition<PrimedJob>,
         now: number,
     ) {
         const timeToRun = await this.getTimeoutKey(name)
 
-        if (timeToRun === JobScheduler.NOT_SET) {
-            await this.setTimeoutKey(
-                name,
-                when ?? JobScheduler.calcTimeFromNow(delayInMinutes, now),
-            )
-        } else if (timeToRun === JobScheduler.ALREADY_RUN) {
+        if (timeToRun === JobScheduler.ALREADY_RUN) {
             return
-        } else if (timeToRun < now || when) {
-            const response = await job()
+        } else if (timeToRun <= now) {
+            const result = await job()
             await this.setTimeoutKey(name, JobScheduler.ALREADY_RUN)
+            return result
         }
     }
 
     private handleAlarm = async ({ name }: Alarms.Alarm, now = Date.now()) => {
         const job = this.jobs.get(name)
         if (!job) {
+            console['warn']([
+                `Tried fire an alarm but no job was found with name: ${name}`,
+            ])
             return
         }
 
@@ -94,28 +105,33 @@ export class JobScheduler {
             return this.attemptOneOffJob(job, now)
         } else if (job.periodInMinutes) {
             return this.attemptPeriodicJob(job, now)
+        } else {
+            console['warn']([
+                `Tried fire an alarm but no the type of job could not be determined for name: ${name}`,
+            ])
         }
     }
 
     // Schedule all periodic ping attempts at a random minute past the hour, every hour
-    async scheduleJob(job: JobDefinition<PrimedJob>) {
+    async scheduleJobHourly(job: JobDefinition<PrimedJob>) {
+        this.jobs.set(job.name, job)
+
+        const jobDef = {
+            // fire the initial alarm in a random minute,
+            // this will ensure all of the created alarms fire at different time of the hour
+            delayInMinutes: Math.floor(Math.random() * 60),
+            periodInMinutes: SCHEDULES.EVERY_HOUR,
+        }
+        this.props.alarmsAPI.create(job.name, jobDef)
+        await this.initJobTimeoutStatus(job.name)
+    }
+
+    async scheduleJobOnce(job: JobDefinition<PrimedJob>) {
         this.jobs.set(job.name, job)
 
         this.props.alarmsAPI.create(job.name, {
-            // If a definite 'when' is not provided
-            // fire the initial alarm in a random minute,
-            // this will ensure all of the created alarms fire at different time of the hour
-            delayInMinutes:
-                typeof job.when === 'undefined'
-                    ? Math.floor(Math.random() * 60)
-                    : undefined,
-            periodInMinutes:
-                typeof job.when === 'undefined'
-                    ? SCHEDULES.EVERY_HOUR
-                    : undefined,
-            when: job.when < _now() ? _now() + 1000 : job.when,
+            when: job.when,
         })
-
-        await this.handleAlarm({ name: job.name } as Alarms.Alarm)
+        await this.initJobTimeoutStatus(job.name, true)
     }
 }

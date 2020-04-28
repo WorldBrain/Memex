@@ -151,7 +151,7 @@ export function createBackgroundModules(options: {
         options.auth ||
         new AuthBackground({
             ...createAuthDependencies(options.authOptions),
-            scheduleJob: jobScheduler.scheduler.scheduleJob.bind(
+            scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
                 jobScheduler.scheduler,
             ),
         })
