@@ -1,5 +1,4 @@
 import { ContentScriptRegistry, SidebarScriptMain } from './types'
-import { SidebarController } from 'src/in-page-ui/sidebar'
 import { browser } from 'webextension-polyfill-ts'
 import { createInPageUI } from 'src/in-page-ui/utils'
 import { setupSidebarUI, destroySidebarUI } from 'src/in-page-ui/sidebar/react'

@@ -1,7 +1,5 @@
 import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
-import { RibbonController } from 'src/in-page-ui/ribbon'
-import { InPageUI } from 'src/in-page-ui/shared-state'
 import { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'

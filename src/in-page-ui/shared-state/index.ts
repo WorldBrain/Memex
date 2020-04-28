@@ -7,8 +7,6 @@ import {
     InPageUIRibbonAction,
     InPageUISidebarAction,
 } from './types'
-import { RibbonControllerInterface } from '../ribbon/types'
-import { SidebarControllerInterface } from '../sidebar/types'
 import TypedEventEmitter from 'typed-emitter'
 
 export class InPageUI implements InPageUIInterface {

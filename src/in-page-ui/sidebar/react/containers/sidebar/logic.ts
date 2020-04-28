@@ -6,12 +6,11 @@ import {
     UIMutation,
 } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
-import { SidebarController } from '../../../'
 import { SidebarEnv, Page, AnnotationMode } from '../../types'
-import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
+import { Annotation } from 'src/annotations/types'
 import { Result, ResultsByUrl } from 'src/overview/types'
 import { PageUrlsByDay } from 'src/search/background/types'
-import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
+import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { SidebarContainerDependencies } from './types'
 

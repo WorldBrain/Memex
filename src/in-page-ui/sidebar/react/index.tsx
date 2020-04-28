@@ -3,7 +3,6 @@ import * as ReactDOM from 'react-dom'
 import SidebarContainer from './containers/sidebar'
 import { SidebarContainerDependencies } from './containers/sidebar/types'
 import { SidebarEnv } from './types'
-import { SidebarController } from '..'
 
 export function setupSidebarUI(
     target: HTMLElement,

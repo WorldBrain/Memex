@@ -1,21 +1,9 @@
-import {
-    UILogic,
-    UIEvent,
-    IncomingUIEvent,
-    UIEventHandler,
-    UIMutation,
-} from 'ui-logic-core'
-import { TaskState } from 'ui-logic-core/lib/types'
-import { RibbonControllerEventEmitter } from '../../../types'
-import { HighlightInteractionInterface } from 'src/highlighting/types'
-import AnnotationsManager from 'src/annotations/annotations-manager'
-import { RibbonController } from 'src/in-page-ui/ribbon'
+import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
 import { RibbonContainerDependencies } from '../ribbon/types'
 import {
     InPageUIInterface,
     InPageUIState,
 } from 'src/in-page-ui/shared-state/types'
-import { InPageUI } from 'src/in-page-ui/shared-state'
 
 export interface RibbonHolderState {
     state: 'visible' | 'hidden'

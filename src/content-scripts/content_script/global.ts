@@ -6,7 +6,6 @@ import {
     loadAnnotationWhenReady,
     setupRemoteDirectLinkFunction,
 } from 'src/direct-linking/content_script'
-import { sniffWordpressWorldbrainUser } from 'src/backup-restore/content_script'
 import {
     runInBackground,
     makeRemotelyCallableType,
@@ -19,8 +18,6 @@ import { ContentScriptComponent } from '../types'
 import { initKeyboardShortcuts } from 'src/in-page-ui/keyboard-shortcuts/content_script'
 import { InPageUI } from 'src/in-page-ui/shared-state'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { RibbonControllerInterface } from 'src/in-page-ui/ribbon/types'
-import { SidebarControllerInterface } from 'src/in-page-ui/sidebar/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
 import { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
