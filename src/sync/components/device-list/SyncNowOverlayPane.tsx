@@ -1,14 +1,26 @@
 import React, { Component } from 'react'
-import { features, sync } from 'src/util/remote-functions-background'
+import { features, sync, auth } from 'src/util/remote-functions-background'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
+import { UserSubscription } from 'src/authentication/ui/user-subscription'
+import { Helmet } from 'react-helmet'
+import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 import { SyncDevice } from 'src/sync/components/types'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
+const chargeBeeScriptSource = '/scripts/chargebeescript.js'
+
+export const subscriptionConfig = {
+    site:
+        process.env.NODE_ENV !== 'production'
+            ? 'worldbrain-test'
+            : 'worldbrain',
+}
 
 interface Props {
     onClickSync: () => void
@@ -37,6 +49,13 @@ export class SyncNowOverlayPane extends Component<Props> {
         }
     }
 
+    async componentDidMount() {
+        this.setState({
+            subscribed: await auth.hasSubscribedBefore(),
+            showSubscriptionOptions: true,
+        })
+    }
+
     renderSyncResults() {}
 
     render() {
@@ -51,6 +70,8 @@ export class SyncNowOverlayPane extends Component<Props> {
 
 interface ContainerProps {
     showSubscriptionModal: () => void
+    onClose?: () => void
+    subscriptionChanged: () => void
 }
 interface ContainerState {
     showSync: boolean
@@ -69,7 +90,13 @@ export class SyncNowOverlayPaneContainer extends Component<
         syncError: null,
         isSyncing: false,
         devices: [],
+        subscribed: null, 
+        showSubscriptionOptions: true 
     }
+
+    chargebeeInstance: any
+    userSubscription: UserSubscription
+
 
     refreshDevices = async () => {
         const devices = (await sync.listDevices()) as SyncDevice[]
@@ -100,6 +127,36 @@ export class SyncNowOverlayPaneContainer extends Component<
         window.location.href = '#/sync'
     }
 
+    _initChargebee = (): void => {
+        if (this.chargebeeInstance != null) {
+            return
+        }
+        // todo: Handle offline cases better
+        if (window['Chargebee'] == null) {
+            return console.error(
+                'Could not load payment provider as external script is not currently loaded.',
+            )
+        }
+        this.chargebeeInstance = window['Chargebee'].init({
+            site: subscriptionConfig.site,
+        })
+        this.userSubscription = new UserSubscription(this.chargebeeInstance)
+    }
+
+    openPortal = async () => {
+        this._initChargebee()
+        const portalEvents = await this.userSubscription.manageUserSubscription()
+
+        portalEvents.addListener('closed', async () => {
+            await auth.refreshUserInfo()
+            this.props.onClose()
+        })
+        portalEvents.addListener('changed', () => {
+            this.props.subscriptionChanged()
+            this.props.onClose()
+        })
+    }
+
     render() {
         const syncFeatureAllowed = this.props.authorizedFeatures.includes(
             'sync',
@@ -107,6 +164,18 @@ export class SyncNowOverlayPaneContainer extends Component<
 
         return (
             <div>
+            <Helmet>
+                    <script src={chargeBeeScriptSource} />
+            </Helmet>
+                {this.props.subscriptionStatus === 'in_trial' && (
+                        <div>
+                            <div onClick={this.openPortal} className={settingsStyle.trialNotif}>
+                            <div className={settingsStyle.trialHeader}><strong>Trial Period active</strong></div> 
+                            <div>Add payment details to prevent interruptions</div>
+                            </div>
+                        </div>
+                    )
+                }
                 {this.state.devices.length === 0 && syncFeatureAllowed && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
