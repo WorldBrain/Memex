@@ -1,17 +1,24 @@
 import React from 'react'
 import styled from 'styled-components'
-import ListRowItem from './ListRow'
 import { DisplayList } from 'src/custom-lists/ui/CollectionPicker/logic'
-import { Check, MinusCircle } from '@styled-icons/feather'
 import { StyledIconBase } from '@styled-icons/styled-icon'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 
 interface Props {
     lists: DisplayList[]
-    renderListRow: (list: DisplayList, index: number) => React.ReactElement<any>
+    renderListRow: (list: DisplayList, index: number) => JSX.Element
+    emptyView?: JSX.Element
 }
 
 export default class ListResultsList extends React.Component<Props> {
+    renderMain() {
+        if (!this.props.lists || !this.props.lists.length) {
+            return this.props.emptyView
+        }
+
+        return this.props.lists.map(this.props.renderListRow)
+    }
+
     render = () => {
         return (
             <StyledContainer id={'listResults'}>
@@ -21,7 +28,7 @@ export default class ListResultsList extends React.Component<Props> {
                     <MinusCircle size={18} />
                 </FilterHelp>
                 */}
-                {this.props.lists?.map(this.props.renderListRow) || null}
+                {this.renderMain()}
             </StyledContainer>
         )
     }

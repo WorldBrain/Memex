@@ -16,6 +16,7 @@ import { ListSelectedList } from 'src/custom-lists/ui/CollectionPicker/component
 import ListResultsList from 'src/custom-lists/ui/CollectionPicker/components/ListResultsList'
 import AddNewList from 'src/custom-lists/ui/CollectionPicker/components/AddNewList'
 import * as Colors from 'src/common-ui/components/design-library/colors'
+import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ListRowItem, {
     IconStyleWrapper,
     ListAllTabsButton,
@@ -97,6 +98,10 @@ class ListPicker extends StatefulUIElement<
         return null
     }
 
+    renderEmptyList() {
+        return <EmptyListsView>No collections exist yet</EmptyListsView>
+    }
+
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
@@ -129,6 +134,7 @@ class ListPicker extends StatefulUIElement<
                     <ListResultsList
                         lists={this.state.displayLists}
                         renderListRow={this.renderListRow}
+                        emptyView={this.renderEmptyList()}
                     />
                     {this.props.children}
                 </OuterSearchBox>
@@ -142,6 +148,13 @@ const OuterSearchBox = styled.div`
     padding-top: 8px;
     padding-bottom: 8px;
     border-radius: 3px;
+`
+
+const EmptyListsView = styled.div`
+    color: ${(props) => props.theme.tag.text};
+    padding: 20px 15px;
+    font-weight: 400;
+    font-size: ${fontSizeNormal}px;
 `
 
 export default ListPicker

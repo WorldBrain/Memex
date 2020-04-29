@@ -16,6 +16,7 @@ import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedLis
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
 import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
 import * as Colors from 'src/common-ui/components/design-library/colors'
+import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import TagRowItem, {
     IconStyleWrapper,
     TagAllTabsButton,
@@ -94,6 +95,10 @@ class TagPicker extends StatefulUIElement<
         return null
     }
 
+    renderEmptyList() {
+        return <EmptyTagsView>No tags exist yet</EmptyTagsView>
+    }
+
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
@@ -126,6 +131,7 @@ class TagPicker extends StatefulUIElement<
                     <TagResultsList
                         tags={this.state.displayTags}
                         renderTagRow={this.renderTagRow}
+                        emptyView={this.renderEmptyList()}
                     />
                     {this.props.children}
                 </OuterSearchBox>
@@ -139,6 +145,13 @@ const OuterSearchBox = styled.div`
     padding-top: 8px;
     padding-bottom: 8px;
     border-radius: 3px;
+`
+
+const EmptyTagsView = styled.div`
+    color: ${(props) => props.theme.tag.text};
+    padding: 20px 15px;
+    font-weight: 400;
+    font-size: ${fontSizeNormal}px;
 `
 
 export default TagPicker
