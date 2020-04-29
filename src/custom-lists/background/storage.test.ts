@@ -253,6 +253,7 @@ describe('Collection Cache', () => {
         test('add lists', async () => {
             const { listsModule } = await setupTest()
 
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
             await listsModule.createCustomList(DATA.LIST_1)
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([
                 DATA.LIST_1.name,
@@ -275,6 +276,36 @@ describe('Collection Cache', () => {
             expect(await listsModule.fetchInitialListSuggestions()).toEqual([
                 DATA.LIST_2.name,
                 DATA.LIST_3.name,
+                DATA.LIST_1.name,
+            ])
+        })
+
+        test("adding new page entry for non-existent list doesn't add dupe cache entries", async () => {
+            const { listsModule } = await setupTest()
+
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
+            await listsModule.updateListForPage({
+                added: DATA.LIST_1.name,
+                url: 'https://www.ipsum.com/test',
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.updateListForPage({
+                added: DATA.LIST_1.name,
+                url: 'https://www.ipsum.com/test1',
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.updateListForPage({
+                added: DATA.LIST_2.name,
+                url: 'https://www.ipsum.com/test',
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_2.name,
                 DATA.LIST_1.name,
             ])
         })

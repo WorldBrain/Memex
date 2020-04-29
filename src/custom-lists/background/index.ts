@@ -86,7 +86,7 @@ export default class CustomListBackground {
 
         this.localStorage = new BrowserSettingsStore<CollectionsSettings>(
             options.localBrowserStorage,
-            { prefix: 'custom-lists' },
+            { prefix: 'custom-lists_' },
         )
     }
 
@@ -287,7 +287,7 @@ export default class CustomListBackground {
 
         if (args.added) {
             const index = suggestions.indexOf(args.added)
-            if (index) {
+            if (index !== -1) {
                 delete suggestions[index]
                 suggestions = suggestions.filter(Boolean)
             }
