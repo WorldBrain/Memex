@@ -149,11 +149,9 @@ export class SyncNowOverlayPaneContainer extends Component<
 
         portalEvents.addListener('closed', async () => {
             await auth.refreshUserInfo()
-            this.props.onClose()
         })
         portalEvents.addListener('changed', () => {
             this.props.subscriptionChanged()
-            this.props.onClose()
         })
     }
 

@@ -42,6 +42,8 @@ interface Props {
     refreshDevices: () => Promise<void>
     handleUpgradeNeeded: () => void
     abortInitialSync: () => Promise<void>
+    subscriptionChanged: () => void
+    subscriptionStatus: string
 }
 
 interface State {
@@ -49,7 +51,12 @@ interface State {
     isAddingNewDevice: boolean
 }
 
-export class SyncDevicesPane extends Component<Props & UserProps, State> {
+interface ContainerProps {
+    onClose?: () => void
+    
+}
+
+export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
     state = { isTogglingSync: false, isAddingNewDevice: false }
 
     chargebeeInstance: any
@@ -138,11 +145,9 @@ export class SyncDevicesPane extends Component<Props & UserProps, State> {
 
         portalEvents.addListener('closed', async () => {
             await auth.refreshUserInfo()
-            this.props.onClose()
         })
         portalEvents.addListener('changed', () => {
             this.props.subscriptionChanged()
-            this.props.onClose()
         })
     }
 
@@ -284,6 +289,14 @@ class SyncDevicesPaneContainer extends React.Component<
         await this.refreshDevices()
     }
 
+    handleSubscriptionChanged = () => {
+        this.handleRefresh()
+    }
+
+    handleRefresh = async () => {
+        await auth.refreshUserInfo()
+    }
+
     handleRemoveDevice = async (deviceId: string) => {
         await sync.removeDevice(deviceId)
         await this.refreshDevices()
@@ -357,6 +370,8 @@ class SyncDevicesPaneContainer extends React.Component<
                         }
                         refreshDevices={this.refreshDevices}
                         abortInitialSync={this.abortInitialSync}
+                        subscriptionStatus={this.props.subscriptionStatus}
+                        subscriptionChanged={this.handleSubscriptionChanged}
                     />
                 </div>
                 <div className={settingsStyle.section}>

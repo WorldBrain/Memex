@@ -43,6 +43,8 @@ storiesOf('Sync', module)
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
+            subscriptionStatus={this.props.subscriptionStatus}
+            subscriptionChanged={this.handleSubscriptionChanged}
         />
     ))
     .add('DevicePane - Not Subscribed', () => (
@@ -57,6 +59,8 @@ storiesOf('Sync', module)
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
+            subscriptionStatus={this.props.subscriptionStatus}
+            subscriptionChanged={this.handleSubscriptionChanged}
         />
     ))
     .add('Initial Sync - Modal', () => (
