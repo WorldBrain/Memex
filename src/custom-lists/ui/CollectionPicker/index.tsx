@@ -21,6 +21,7 @@ import { fontSizeNormal } from 'src/common-ui/components/design-library/typograp
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { ListResultItem } from './components/ListResultItem'
 import { ActiveList } from './components/ActiveList'
+import { LoadingIndicator } from 'src/common-ui/components'
 
 class ListPicker extends StatefulUIElement<
     ListPickerDependencies,
@@ -93,7 +94,13 @@ class ListPicker extends StatefulUIElement<
     )
 
     renderEmptyList() {
-        return <EmptyListsView>No collections exist yet</EmptyListsView>
+       if (this.state.newListName !== '') {
+            return
+        }
+
+        if (!this.state.newListName) {
+            return <EmptyListsView><strong>No Collections yet</strong> <br/>Add new collections via the search bar</EmptyListsView>
+        }
     }
 
     render() {
@@ -156,9 +163,10 @@ const OuterSearchBox = styled.div`
 
 const EmptyListsView = styled.div`
     color: ${(props) => props.theme.tag.text};
-    padding: 20px 15px;
+    padding: 10px 15px;
     font-weight: 400;
     font-size: ${fontSizeNormal}px;
+    text-align: center;
 `
 
 export default ListPicker
