@@ -1,5 +1,6 @@
-import React, { EventHandler, KeyboardEvent, KeyboardEventHandler } from 'react'
+import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
+import { Loader } from '@styled-icons/feather'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
     DisplayTag,
@@ -13,7 +14,7 @@ import {
 } from 'src/tags/ui/TagPicker/components/TagSearchInput'
 import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedList'
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
-import AddNewTag, { AddNew } from 'src/tags/ui/TagPicker/components/AddNewTag'
+import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import TagRowItem, {
     IconStyleWrapper,
@@ -85,6 +86,14 @@ class TagPicker extends StatefulUIElement<
         </IconStyleWrapper>
     )
 
+    renderSearchLoader() {
+        if (this.state.loadingSuggestions || this.state.loadingQueryResults) {
+            return <Loader size={20} />
+        }
+
+        return null
+    }
+
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
@@ -93,17 +102,18 @@ class TagPicker extends StatefulUIElement<
                     onClick={this.handleOuterSearchBoxClick}
                 >
                     <TagSearchInput
+                        showPlaceholder={this.state.selectedTags.length === 0}
                         searchInputRef={this.handleSetSearchInputRef}
                         onChange={this.handleSearchInputChanged}
                         onKeyPress={this.handleKeyPress}
                         value={this.state.query}
+                        after={this.renderSearchLoader()}
                         before={
                             <TagSelectedList
                                 tagsSelected={this.state.selectedTags}
                                 onPress={this.handleSelectedTagPress}
                             />
                         }
-                        showPlaceholder={this.state.selectedTags.length === 0}
                     />
                     {this.state.newTagName !== '' && (
                         <AddNewTag

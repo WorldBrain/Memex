@@ -1,5 +1,6 @@
-import React, { EventHandler, KeyboardEvent, KeyboardEventHandler } from 'react'
+import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
+import { Loader } from '@styled-icons/feather'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic, {
     DisplayList,
@@ -13,9 +14,7 @@ import {
 } from 'src/custom-lists/ui/CollectionPicker/components/ListSearchInput'
 import { ListSelectedList } from 'src/custom-lists/ui/CollectionPicker/components/ListSelectedList'
 import ListResultsList from 'src/custom-lists/ui/CollectionPicker/components/ListResultsList'
-import AddNewList, {
-    AddNew,
-} from 'src/custom-lists/ui/CollectionPicker/components/AddNewList'
+import AddNewList from 'src/custom-lists/ui/CollectionPicker/components/AddNewList'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import ListRowItem, {
     IconStyleWrapper,
@@ -78,7 +77,10 @@ class ListPicker extends StatefulUIElement<
 
     renderNewListAllTabsButton = () => (
         <IconStyleWrapper show>
-            <ButtonTooltip tooltipText="List all tabs in window" position="left">
+            <ButtonTooltip
+                tooltipText="List all tabs in window"
+                position="left"
+            >
                 <ListAllTabsButton
                     size={20}
                     onClick={this.handleNewListAllPress}
@@ -86,6 +88,14 @@ class ListPicker extends StatefulUIElement<
             </ButtonTooltip>
         </IconStyleWrapper>
     )
+
+    renderSearchLoader() {
+        if (this.state.loadingSuggestions || this.state.loadingQueryResults) {
+            return <Loader size={20} />
+        }
+
+        return null
+    }
 
     render() {
         return (
@@ -95,17 +105,18 @@ class ListPicker extends StatefulUIElement<
                     onClick={this.handleOuterSearchBoxClick}
                 >
                     <ListSearchInput
+                        showPlaceholder={this.state.selectedLists.length === 0}
                         searchInputRef={this.handleSetSearchInputRef}
                         onChange={this.handleSearchInputChanged}
                         onKeyPress={this.handleKeyPress}
                         value={this.state.query}
+                        after={this.renderSearchLoader()}
                         before={
                             <ListSelectedList
                                 listsSelected={this.state.selectedLists}
                                 onPress={this.handleSelectedListPress}
                             />
                         }
-                        showPlaceholder={this.state.selectedLists.length === 0}
                     />
                     {this.state.newListName !== '' && (
                         <AddNewList

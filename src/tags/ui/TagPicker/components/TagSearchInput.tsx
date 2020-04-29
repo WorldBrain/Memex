@@ -1,7 +1,6 @@
-import React, { ChangeEvent } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
-import { colorGrey3 } from 'src/common-ui/components/design-library/colors'
 import { Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 
@@ -9,7 +8,8 @@ interface Props {
     onChange: (value: string) => void
     onKeyPress: (key: KeyEvent) => void
     value: string
-    before: any
+    before: JSX.Element
+    after?: JSX.Element
     searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
     showPlaceholder?: boolean
 }
@@ -54,9 +54,7 @@ export class TagSearchInput extends React.Component<Props, State> {
                 {this.props.before}
                 <SearchInput
                     placeholder={
-                        this.props.showPlaceholder ?? true
-                            ? 'Search tags'
-                            : ''
+                        this.props.showPlaceholder ?? true ? 'Search tags' : ''
                     }
                     defaultValue={this.props.value}
                     onChange={this.onChange}
@@ -68,6 +66,7 @@ export class TagSearchInput extends React.Component<Props, State> {
                     autoFocus
                     size="5"
                 />
+                {this.props.after}
             </SearchBox>
         )
     }
