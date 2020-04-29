@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { colorText } from 'src/common-ui/components/design-library/colors'
 import {
-    fontSizeNormal,
+    fontSizeTitle,
     TypographyActionText,
 } from 'src/common-ui/components/design-library/typography'
 
@@ -11,10 +11,11 @@ const StyledExternalLink = styled.a`
     display: inline-block;
 `
 const StyledExternalLinkText = styled(TypographyActionText)`
-    font-size: ${fontSizeNormal}px;
+    font-size: ${fontSizeTitle}px;
     text-decoration-line: underline;
     font-weight: normal;
     color: ${colorText};
+    margin-right: 4px;
     &::after {
         content: '↗';
         text-decoration-line: none;
