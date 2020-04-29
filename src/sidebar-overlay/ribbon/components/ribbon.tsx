@@ -240,22 +240,24 @@ class Ribbon extends Component<Props, State> {
                                         )}
                                     />
                                 </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText={'Search Memex via Dashboard'}
-                                    position="left"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.search,
-                                        )}
-                                        onClick={() => {
-                                            this.props.setShowSearchBox(
-                                                !this.props.showSearchBox,
-                                            )
-                                            this.inputQueryEl.focus()
-                                        }}
-                                    />
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={'Search Memex via Dashboard'}
+                                        position="left"
+                                    >
+                                        <div
+                                            className={cx(styles.button, styles.search, {
+                                                [styles.active]: this.props.showSearchBox,
+                                            })}
+                                            onClick={() => {
+                                                this.props.setShowSearchBox(
+                                                    !this.props.showSearchBox,
+                                                )
+                                                this.inputQueryEl.focus()
+                                            }}
+                                        />
+                                        
+                                    </ButtonTooltip>
                                     {this.props.showSearchBox && (
                                         <Tooltip
                                             position="left"
@@ -298,7 +300,7 @@ class Ribbon extends Component<Props, State> {
                                             </form>
                                         </Tooltip>
                                     )}
-                                </ButtonTooltip>
+                                </div>
                             </div>
                             <div className={styles.horizontalLine} />
                             <div className={styles.pageActions}>
@@ -320,84 +322,86 @@ class Ribbon extends Component<Props, State> {
                                         }
                                     />
                                 </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addComment',
-                                    )}
-                                    position="left"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.comments,
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addComment',
                                         )}
-                                        onClick={this.handleCommentIconBtnClick}
-                                    />
-                                    {this.props.showCommentBox && (
-                                        <Tooltip position="left">
-                                            <CommentBoxContainer
-                                                env="inpage"
-                                                closeComments={() =>
-                                                    this.props.setShowCommentBox(
-                                                        false,
-                                                    )
-                                                }
-                                            />
-                                        </Tooltip>
-                                    )}
-                                    {this.props.isCommentSaved && (
-                                        <Tooltip
-                                            position="left"
-                                            itemClass={styles.commentSaved}
-                                        >
-                                            <div className={styles.saveBox}>
-                                                <span
-                                                    className={styles.saveIcon}
+                                        position="left"
+                                    >
+                                        <div
+                                            className={cx(styles.button, styles.comments, {
+                                                [styles.active]: this.props.showCommentBox,
+                                            })}
+                                            onClick={this.handleCommentIconBtnClick}
+                                        />
+                                        {this.props.showCommentBox && (
+                                            <Tooltip position="left">
+                                                <CommentBoxContainer
+                                                    env="inpage"
+                                                    closeComments={() =>
+                                                        this.props.setShowCommentBox(
+                                                            false,
+                                                        )
+                                                    }
                                                 />
-                                            </div>
-                                        </Tooltip>
-                                    )}
-                                </ButtonTooltip>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText('addTag')}
-                                    position="left"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.tag,
+                                            </Tooltip>
                                         )}
-                                        onClick={() =>
-                                            this.props.setShowTagsPicker(
-                                                !this.props.showTagsPicker,
-                                            )
-                                        }
-                                    />
+                                    </ButtonTooltip>
+                                    {this.props.isCommentSaved && (
+                                            <Tooltip
+                                                position="left"
+                                                itemClass={styles.commentSaved}
+                                            >
+                                                <div className={styles.saveBox}>
+                                                    <span
+                                                        className={styles.saveIcon}
+                                                    />
+                                                </div>
+                                            </Tooltip>
+                                    )}
+                                </div>
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText('addTag')}
+                                        position="left"
+                                    >
+                                        <div
+                                            className={cx(styles.button, styles.tag, {
+                                                [styles.active]: this.props.showTagsPicker,
+                                            })}
+                                            onClick={() =>
+                                                this.props.setShowTagsPicker(
+                                                    !this.props.showTagsPicker,
+                                                )
+                                            }
+                                        />
+                                    </ButtonTooltip>
                                     {this.props.showTagsPicker && (
-                                        <Tooltip position="left">
-                                            {this.props.tagManager}
-                                        </Tooltip>
+                                            <Tooltip position="left">
+                                                {this.props.tagManager}
+                                            </Tooltip>
                                     )}
-                                </ButtonTooltip>
-
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addToCollection',
-                                    )}
-                                    position="left"
-                                >
-                                    <div
-                                        className={cx(
-                                            styles.button,
-                                            styles.collection,
+                                </div>
+                                <div>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addToCollection',
                                         )}
-                                        onClick={() =>
-                                            this.props.setShowCollectionsPicker(
-                                                !this.props
-                                                    .showCollectionsPicker,
-                                            )
-                                        }
-                                    />
+                                        position="left"
+                                    >
+                                        <div
+                                            className={cx(styles.button, styles.collection, {
+                                                [styles.active]: this.props.showCollectionsPicker,
+                                            })}
+                                            onClick={() =>
+                                                this.props.setShowCollectionsPicker(
+                                                    !this.props
+                                                        .showCollectionsPicker,
+                                                )
+                                            }
+                                        />
+                                    </ButtonTooltip>
                                     {this.props.showCollectionsPicker && (
                                         <Tooltip
                                             position="left"
@@ -406,7 +410,7 @@ class Ribbon extends Component<Props, State> {
                                             {this.props.collectionsManager}
                                         </Tooltip>
                                     )}
-                                </ButtonTooltip>
+                                </div>
                             </div>
                             <div className={styles.horizontalLine} />
                             <div className={styles.settingsActions}>

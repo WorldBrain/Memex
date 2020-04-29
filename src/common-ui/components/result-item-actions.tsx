@@ -9,6 +9,8 @@ import ResultItemActionBtn from './result-item-action-btn'
 const styles = require('./result-item.css')
 const tagEmpty = browser.extension.getURL('/img/tag_empty.svg')
 const tagFull = browser.extension.getURL('/img/tag_full.svg')
+const listAdd = browser.extension.getURL('/img/collections_add.svg')
+const listFull = browser.extension.getURL('/img/collections_full.svg')
 const heartEmpty = browser.extension.getURL('/img/star_empty.svg')
 const heartFull = browser.extension.getURL('/img/star_full.svg')
 const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
@@ -58,7 +60,7 @@ class ResultItemActions extends PureComponent<Props> {
                     <ResultItemActionBtn
                         permanent={this.props.lists.length > 0}
                         imgSrc={
-                            this.props.lists.length > 0 ? tagFull : tagEmpty
+                            this.props.lists.length > 0 ? listFull : listAdd
                         }
                         className={
                             this.props.lists.length > 0
