@@ -1,6 +1,5 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
-import { Loader } from '@styled-icons/feather'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
     DisplayTag,
@@ -8,10 +7,8 @@ import TagPickerLogic, {
     TagPickerEvent,
     TagPickerState,
 } from 'src/tags/ui/TagPicker/logic'
-import {
-    KeyEvent,
-    TagSearchInput,
-} from 'src/tags/ui/TagPicker/components/TagSearchInput'
+import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
+import { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedList'
 import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
 import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
@@ -87,14 +84,6 @@ class TagPicker extends StatefulUIElement<
         </IconStyleWrapper>
     )
 
-    renderSearchLoader() {
-        if (this.state.loadingSuggestions || this.state.loadingQueryResults) {
-            return <Loader size={20} />
-        }
-
-        return null
-    }
-
     renderEmptyList() {
         return <EmptyTagsView>No tags exist yet</EmptyTagsView>
     }
@@ -106,13 +95,16 @@ class TagPicker extends StatefulUIElement<
                     onKeyPress={this.handleKeyPress}
                     onClick={this.handleOuterSearchBoxClick}
                 >
-                    <TagSearchInput
+                    <PickerSearchInput
                         showPlaceholder={this.state.selectedTags.length === 0}
                         searchInputRef={this.handleSetSearchInputRef}
                         onChange={this.handleSearchInputChanged}
                         onKeyPress={this.handleKeyPress}
                         value={this.state.query}
-                        after={this.renderSearchLoader()}
+                        loading={
+                            this.state.loadingSuggestions ||
+                            this.state.loadingQueryResults
+                        }
                         before={
                             <TagSelectedList
                                 tagsSelected={this.state.selectedTags}

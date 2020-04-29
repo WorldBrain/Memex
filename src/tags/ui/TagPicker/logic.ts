@@ -1,6 +1,6 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { KeyEvent } from 'src/tags/ui/TagPicker/components/TagSearchInput'
+import { KeyEvent } from 'src/common-ui/GenericPicker/types'
 
 export const INITIAL_STATE = {
     query: '',

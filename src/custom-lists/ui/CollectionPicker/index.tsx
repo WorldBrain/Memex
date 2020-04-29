@@ -1,6 +1,5 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
-import { Loader } from '@styled-icons/feather'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic, {
     DisplayList,
@@ -8,10 +7,8 @@ import ListPickerLogic, {
     ListPickerEvent,
     ListPickerState,
 } from 'src/custom-lists/ui/CollectionPicker/logic'
-import {
-    KeyEvent,
-    ListSearchInput,
-} from 'src/custom-lists/ui/CollectionPicker/components/ListSearchInput'
+import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
+import { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import { ListSelectedList } from 'src/custom-lists/ui/CollectionPicker/components/ListSelectedList'
 import ListResultsList from 'src/custom-lists/ui/CollectionPicker/components/ListResultsList'
 import AddNewList from 'src/custom-lists/ui/CollectionPicker/components/AddNewList'
@@ -90,14 +87,6 @@ class ListPicker extends StatefulUIElement<
         </IconStyleWrapper>
     )
 
-    renderSearchLoader() {
-        if (this.state.loadingSuggestions || this.state.loadingQueryResults) {
-            return <Loader size={20} />
-        }
-
-        return null
-    }
-
     renderEmptyList() {
         return <EmptyListsView>No collections exist yet</EmptyListsView>
     }
@@ -109,13 +98,16 @@ class ListPicker extends StatefulUIElement<
                     onKeyPress={this.handleKeyPress}
                     onClick={this.handleOuterSearchBoxClick}
                 >
-                    <ListSearchInput
+                    <PickerSearchInput
                         showPlaceholder={this.state.selectedLists.length === 0}
                         searchInputRef={this.handleSetSearchInputRef}
                         onChange={this.handleSearchInputChanged}
                         onKeyPress={this.handleKeyPress}
                         value={this.state.query}
-                        after={this.renderSearchLoader()}
+                        loading={
+                            this.state.loadingSuggestions ||
+                            this.state.loadingQueryResults
+                        }
                         before={
                             <ListSelectedList
                                 listsSelected={this.state.selectedLists}

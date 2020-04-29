@@ -1,30 +1,23 @@
 import React from 'react'
 import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
-import { Search as SearchIcon } from '@styled-icons/feather'
+import { Loader, Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { KeyEvent } from '../types'
 
 interface Props {
     onChange: (value: string) => void
     onKeyPress: (key: KeyEvent) => void
     value: string
     before: JSX.Element
-    after?: JSX.Element
     searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
     showPlaceholder?: boolean
+    loading?: boolean
 }
 
 interface State {
     isFocused: boolean
 }
-
-export type KeyEvent =
-    | 'Enter'
-    | 'ArrowUp'
-    | 'ArrowDown'
-    | ','
-    | 'Tab'
-    | 'Backspace'
 
 export const keyEvents: KeyEvent[] = [
     'Enter',
@@ -33,12 +26,12 @@ export const keyEvents: KeyEvent[] = [
     'ArrowDown',
     ',',
     // TODO: adding backspace as a special handler here prevents regular backspace in the field.
-    // if we want to delete tags on backspace, perhaps the controlled text input needs to check
+    // if we want to delete entries on backspace, perhaps the controlled text input needs to check
     // the handler return function to know whether to prevent it's default or proceed with it.
     // 'Backspace',
 ]
 
-export class TagSearchInput extends React.Component<Props, State> {
+export class PickerSearchInput extends React.Component<Props, State> {
     state = { isFocused: false }
 
     onChange = (value: string) => this.props.onChange(value)
@@ -50,11 +43,16 @@ export class TagSearchInput extends React.Component<Props, State> {
 
     render() {
         return (
-            <SearchBox isFocused={this.state.isFocused} id={'tagSearchBox'}>
+            <SearchBox
+                isFocused={this.state.isFocused}
+                id={'collectionSearchBox'}
+            >
                 {this.props.before}
                 <SearchInput
                     placeholder={
-                        this.props.showPlaceholder ?? true ? 'Search tags' : ''
+                        this.props.showPlaceholder ?? true
+                            ? 'Search collections'
+                            : ''
                     }
                     defaultValue={this.props.value}
                     onChange={this.onChange}
@@ -66,7 +64,7 @@ export class TagSearchInput extends React.Component<Props, State> {
                     autoFocus
                     size="5"
                 />
-                {this.props.after}
+                {this.props.loading && <Loader size={20} />}
             </SearchBox>
         )
     }
@@ -86,11 +84,11 @@ const SearchBox = styled.div`
     display: flex;
     flex-wrap: wrap;
     font-size: 1rem;
-    padding: 2px 8px;
+    padding: 3px 8px;
     margin-left: 8px;
     margin-right: 8px;
     transition: border 0.1s;
-    margin-bottom: 1px;
+    margin-bottom: 4px;
 `
 
 const SearchInput = styled(TextInputControlled)`

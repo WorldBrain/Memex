@@ -1,6 +1,6 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { KeyEvent } from 'src/custom-lists/ui/CollectionPicker/components/ListSearchInput'
+import { KeyEvent } from 'src/common-ui/GenericPicker/types'
 
 export const INITIAL_STATE = {
     query: '',
@@ -130,7 +130,9 @@ export default class ListPickerLogic extends UILogic<
 
             if (previousState.displayLists[this.focusIndex]) {
                 return this.resultListPress({
-                    event: { list: previousState.displayLists[this.focusIndex] },
+                    event: {
+                        list: previousState.displayLists[this.focusIndex],
+                    },
                     previousState,
                 })
             }
@@ -422,7 +424,12 @@ export default class ListPickerLogic extends UILogic<
                 deleted,
             )
         } catch (e) {
-            this._undoAfterError({ displayLists, selectedLists, added, deleted })
+            this._undoAfterError({
+                displayLists,
+                selectedLists,
+                added,
+                deleted,
+            })
             throw e
         }
     }
