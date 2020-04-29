@@ -339,7 +339,7 @@ class SyncDevicesPaneContainer extends React.Component<
             <div>
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
-                        Sync your mobile phone
+                        <div className={settingsStyle.sectionTitleText}><span>Sync your mobile phone</span><span className={settingsStyle.betaPill}>{' '}Beta</span></div>
                         {!this.props.authorizedFeatures.includes(
                             'sync',
                         ) && (
@@ -354,6 +354,9 @@ class SyncDevicesPaneContainer extends React.Component<
                     <div className={settingsStyle.infoText}>
                         Use an end2end encrypted connection to keep your devices
                         in sync.
+                    </div>
+                    <div className={settingsStyle.infoTextSmall}>
+                        <strong>This feature is in beta status. You may experience bugs. <a href="https://community.worldbrain.io/c/bug-reports" target="_blank">Let us know if you do!</a></strong>
                     </div>
                     <SyncDevicesPane
                         devices={this.state.devices}
