@@ -99,7 +99,7 @@ class ListPicker extends StatefulUIElement<
         }
 
         if (!this.state.newListName) {
-            return <EmptyListsView><strong>No Collections yet</strong> <br/>Add new collections via the search bar</EmptyListsView>
+            return <EmptyListsView><strong>No Collections yet</strong><br/>Add new collections<br/>via the search bar</EmptyListsView>
         }
     }
 

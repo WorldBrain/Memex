@@ -90,7 +90,13 @@ class TagPicker extends StatefulUIElement<
     )
 
     renderEmptyList() {
-        return <EmptyTagsView>No tags exist yet</EmptyTagsView>
+       if (this.state.newTagName !== '') {
+            return
+        }
+
+        if (!this.state.newTagName) {
+            return <EmptyTagsView><strong>No Tags yet</strong><br/>Add new tags<br/>via the search bar</EmptyTagsView>
+        }
     }
 
     render() {
@@ -153,9 +159,10 @@ const OuterSearchBox = styled.div`
 
 const EmptyTagsView = styled.div`
     color: ${(props) => props.theme.tag.text};
-    padding: 20px 15px;
+    padding: 10px 15px;
     font-weight: 400;
     font-size: ${fontSizeNormal}px;
+    text-align: center;
 `
 
 export default TagPicker
