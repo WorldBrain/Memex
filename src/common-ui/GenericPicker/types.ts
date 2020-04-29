@@ -5,3 +5,9 @@ export type KeyEvent =
     | ','
     | 'Tab'
     | 'Backspace'
+
+export interface DisplayEntry {
+    name: string
+    selected: boolean
+    focused: boolean
+}

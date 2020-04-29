@@ -1,25 +1,18 @@
 import React, { ReactNode } from 'react'
 import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
-import { TagResultItem } from './TagResultItem'
-import { X as XIcon } from '@styled-icons/feather/X'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import {
-    IconStyleWrapper,
-    TagAllTabsButton,
-} from 'src/tags/ui/TagPicker/components/TagRow'
 
 interface Props {
     onPress: () => void
-    tag: string
     children: ReactNode | ReactNode[]
+    resultItem: ReactNode
 }
 
 export default (props: Props) => {
     return (
         <AddNew onClick={props.onPress}>
             <span>Create</span>
-            <TagResultItem>{props.tag}</TagResultItem>
+            {props.resultItem}
             <Flex />
             {props.children}
         </AddNew>
@@ -35,7 +28,7 @@ export const AddNew = styled.div`
     display: flex;
     align-items: center;
     background: ${(props) => props.theme.border};
-    color: ${props => props.theme.text};
+    color: ${(props) => props.theme.text};
     font-size: ${fontSizeSmall}px;
     padding: 4px;
     font-weight: 700;

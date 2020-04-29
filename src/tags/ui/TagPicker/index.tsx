@@ -8,17 +8,19 @@ import TagPickerLogic, {
     TagPickerState,
 } from 'src/tags/ui/TagPicker/logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
+import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
+import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
+import EntryRow, {
+    IconStyleWrapper,
+    ActOnAllTabsButton,
+} from 'src/common-ui/GenericPicker/components/EntryRow'
+import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
 import { KeyEvent } from 'src/common-ui/GenericPicker/types'
-import { TagSelectedList } from 'src/tags/ui/TagPicker/components/TagSelectedList'
-import TagResultsList from 'src/tags/ui/TagPicker/components/TagResultsList'
-import AddNewTag from 'src/tags/ui/TagPicker/components/AddNewTag'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-import TagRowItem, {
-    IconStyleWrapper,
-    TagAllTabsButton,
-} from 'src/tags/ui/TagPicker/components/TagRow'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { TagResultItem } from './components/TagResultItem'
+import { ActiveTag } from './components/ActiveTag'
 
 class TagPicker extends StatefulUIElement<
     TagPickerDependencies,
@@ -57,9 +59,9 @@ class TagPicker extends StatefulUIElement<
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
     renderTagRow = (tag: DisplayTag, index: number) => (
-        <TagRowItem
+        <EntryRow
             onPress={this.handleResultTagPress}
-            onPressTagAll={
+            onPressActOnAll={
                 this.props.tagAllTabs
                     ? (t) => this.handleResultTagAllPress(t)
                     : undefined
@@ -68,15 +70,18 @@ class TagPicker extends StatefulUIElement<
             key={`TagKeyName-${tag.name}`}
             index={index}
             name={tag.name}
-            selected={tag.selected}
             focused={tag.focused}
+            selected={tag.selected}
+            ResultItem={TagResultItem}
+            removeTooltipText="Remove tag from page"
+            actOnAllTooltipText="Tag all tabs in window"
         />
     )
 
     renderNewTagAllTabsButton = () => (
         <IconStyleWrapper show>
             <ButtonTooltip tooltipText="Tag all tabs in window" position="left">
-                <TagAllTabsButton
+                <ActOnAllTabsButton
                     size={20}
                     onClick={this.handleNewTagAllPress}
                 />
@@ -106,24 +111,31 @@ class TagPicker extends StatefulUIElement<
                             this.state.loadingQueryResults
                         }
                         before={
-                            <TagSelectedList
-                                tagsSelected={this.state.selectedTags}
+                            <EntrySelectedList
+                                ActiveEntry={ActiveTag}
+                                attributeName="data-tag-name"
+                                entriesSelected={this.state.selectedTags}
                                 onPress={this.handleSelectedTagPress}
                             />
                         }
                     />
                     {this.state.newTagName !== '' && (
-                        <AddNewTag
-                            tag={this.state.newTagName}
+                        <AddNewEntry
+                            resultItem={
+                                <TagResultItem>
+                                    {this.state.newTagName}
+                                </TagResultItem>
+                            }
                             onPress={this.handleNewTagPress}
                         >
                             {this.renderNewTagAllTabsButton}
-                        </AddNewTag>
+                        </AddNewEntry>
                     )}
-                    <TagResultsList
-                        tags={this.state.displayTags}
-                        renderTagRow={this.renderTagRow}
+                    <EntryResultsList
+                        entries={this.state.displayTags}
+                        renderEntryRow={this.renderTagRow}
                         emptyView={this.renderEmptyList()}
+                        id="tagResults"
                     />
                     {this.props.children}
                 </OuterSearchBox>

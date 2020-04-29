@@ -8,17 +8,19 @@ import ListPickerLogic, {
     ListPickerState,
 } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
+import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
+import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
+import EntryRow, {
+    IconStyleWrapper,
+    ActOnAllTabsButton,
+} from 'src/common-ui/GenericPicker/components/EntryRow'
+import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
 import { KeyEvent } from 'src/common-ui/GenericPicker/types'
-import { ListSelectedList } from 'src/custom-lists/ui/CollectionPicker/components/ListSelectedList'
-import ListResultsList from 'src/custom-lists/ui/CollectionPicker/components/ListResultsList'
-import AddNewList from 'src/custom-lists/ui/CollectionPicker/components/AddNewList'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-import ListRowItem, {
-    IconStyleWrapper,
-    ListAllTabsButton,
-} from 'src/custom-lists/ui/CollectionPicker/components/ListRow'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
+import { ListResultItem } from './components/ListResultItem'
+import { ActiveList } from './components/ActiveList'
 
 class ListPicker extends StatefulUIElement<
     ListPickerDependencies,
@@ -57,9 +59,9 @@ class ListPicker extends StatefulUIElement<
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
     renderListRow = (list: DisplayList, index: number) => (
-        <ListRowItem
+        <EntryRow
             onPress={this.handleResultListPress}
-            onPressListAll={
+            onPressActOnAll={
                 this.props.listAllTabs
                     ? (t) => this.handleResultListAllPress(t)
                     : undefined
@@ -70,6 +72,9 @@ class ListPicker extends StatefulUIElement<
             name={list.name}
             selected={list.selected}
             focused={list.focused}
+            ResultItem={ListResultItem}
+            removeTooltipText="Remove from list"
+            actOnAllTooltipText="Add all tabs in window to list"
         />
     )
 
@@ -79,7 +84,7 @@ class ListPicker extends StatefulUIElement<
                 tooltipText="List all tabs in window"
                 position="left"
             >
-                <ListAllTabsButton
+                <ActOnAllTabsButton
                     size={20}
                     onClick={this.handleNewListAllPress}
                 />
@@ -109,24 +114,31 @@ class ListPicker extends StatefulUIElement<
                             this.state.loadingQueryResults
                         }
                         before={
-                            <ListSelectedList
-                                listsSelected={this.state.selectedLists}
+                            <EntrySelectedList
+                                ActiveEntry={ActiveList}
+                                attributeName="data-list-name"
+                                entriesSelected={this.state.selectedLists}
                                 onPress={this.handleSelectedListPress}
                             />
                         }
                     />
                     {this.state.newListName !== '' && (
-                        <AddNewList
-                            list={this.state.newListName}
+                        <AddNewEntry
+                            resultItem={
+                                <ListResultItem>
+                                    {this.state.newListName}
+                                </ListResultItem>
+                            }
                             onPress={this.handleNewListPress}
                         >
                             {this.renderNewListAllTabsButton}
-                        </AddNewList>
+                        </AddNewEntry>
                     )}
-                    <ListResultsList
-                        lists={this.state.displayLists}
-                        renderListRow={this.renderListRow}
+                    <EntryResultsList
+                        entries={this.state.displayLists}
+                        renderEntryRow={this.renderListRow}
                         emptyView={this.renderEmptyList()}
+                        id="listResults"
                     />
                     {this.props.children}
                 </OuterSearchBox>

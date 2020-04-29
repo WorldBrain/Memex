@@ -1,29 +1,30 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import styled from 'styled-components'
-import { DisplayTag } from 'src/tags/ui/TagPicker/logic'
+import { DisplayEntry } from '../types'
 import { StyledIconBase } from '@styled-icons/styled-icon'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 
 interface Props {
-    tags: DisplayTag[]
-    renderTagRow: (tag: DisplayTag, index: number) => JSX.Element
-    emptyView?: JSX.Element
+    entries: DisplayEntry[]
+    renderEntryRow: (list: DisplayEntry, index: number) => ReactNode
+    emptyView?: ReactNode
+    id: string
 }
 
-export default class TagResultsList extends React.Component<Props> {
+export default class EntryResultsList extends React.Component<Props> {
     renderMain() {
-        if (!this.props.tags || !this.props.tags.length) {
+        if (!this.props.entries || !this.props.entries.length) {
             return this.props.emptyView
         }
 
-        return this.props.tags.map(this.props.renderTagRow)
+        return this.props.entries.map(this.props.renderEntryRow)
     }
 
     render = () => {
         return (
-            <StyledContainer id={'tagResults'}>
+            <StyledContainer id={this.props.id}>
                 {/*<FilterHelp>
-                    Select tags to include
+                    Select lists to include
                     <Check size={18} /> or exclude
                     <MinusCircle size={18} />
                 </FilterHelp>
