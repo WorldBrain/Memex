@@ -41,22 +41,37 @@ const AccountMenu = (
 
     return (
         <BottomLeft>
-            <OverlayMenu
-                menuHeader={
-                    <ButtonSideMenu>
-                        <MemexLogo />
-                        <TypographyHeadingBig>My Account</TypographyHeadingBig>
-                    </ButtonSideMenu>
-                }
-                menuItems={[
-                    {
-                        label: '⭐️ Upgrade',
-                        handler: props.showSubscriptionModal,
-                    },
-                    { label: 'Account Info', handler: handleAccountClick },
-                    { label: 'Log Out', handler: handleLogOutClick },
-                ]}
-            />
+           {props.subscriptionStatus === 'active' || 'in_trial' ? (
+                       <OverlayMenu
+                        menuHeader={
+                            <ButtonSideMenu>
+                                <MemexLogo />
+                                <TypographyHeadingBig>My Account</TypographyHeadingBig>
+                            </ButtonSideMenu>
+                        }
+                        menuItems={[
+                            { label: 'Account Info', handler: handleAccountClick },
+                            { label: 'Log Out', handler: handleLogOutClick },
+                        ]}
+                    />
+               ):(
+                <OverlayMenu
+                    menuHeader={
+                        <ButtonSideMenu>
+                            <MemexLogo />
+                            <TypographyHeadingBig>My Account</TypographyHeadingBig>
+                        </ButtonSideMenu>
+                    }
+                    menuItems={[
+                        {
+                            label: '⭐️ Upgrade',
+                            handler: props.showSubscriptionModal,
+                        },
+                        { label: 'Account Info', handler: handleAccountClick },
+                        { label: 'Log Out', handler: handleLogOutClick },
+                    ]}
+                />
+            )}
         </BottomLeft>
     )
 }
