@@ -8,6 +8,7 @@ import ListPickerLogic, {
 } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
+import { InitLoader } from 'src/common-ui/GenericPicker/components/InitLoader'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
 import EntryRow, {
     IconStyleWrapper,
@@ -108,6 +109,50 @@ class ListPicker extends StatefulUIElement<
         )
     }
 
+    renderMainContent() {
+        if (this.state.loadingSuggestions || this.state.loadingQueryResults) {
+            return <InitLoader size={20} />
+        }
+
+        return (
+            <>
+                <PickerSearchInput
+                    showPlaceholder={this.state.selectedEntries.length === 0}
+                    searchInputRef={this.handleSetSearchInputRef}
+                    onChange={this.handleSearchInputChanged}
+                    onKeyPress={this.handleKeyPress}
+                    value={this.state.query}
+                    before={
+                        <EntrySelectedList
+                            ActiveEntry={ActiveList}
+                            attributeName="data-list-name"
+                            entriesSelected={this.state.selectedEntries}
+                            onPress={this.handleSelectedListPress}
+                        />
+                    }
+                />
+                {this.state.newEntryName !== '' && (
+                    <AddNewEntry
+                        resultItem={
+                            <ListResultItem>
+                                {this.state.newEntryName}
+                            </ListResultItem>
+                        }
+                        onPress={this.handleNewListPress}
+                    >
+                        {this.renderNewListAllTabsButton}
+                    </AddNewEntry>
+                )}
+                <EntryResultsList
+                    entries={this.state.displayEntries}
+                    renderEntryRow={this.renderListRow}
+                    emptyView={this.renderEmptyList()}
+                    id="listResults"
+                />
+            </>
+        )
+    }
+
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
@@ -115,45 +160,7 @@ class ListPicker extends StatefulUIElement<
                     onKeyPress={this.handleKeyPress}
                     onClick={this.handleOuterSearchBoxClick}
                 >
-                    <PickerSearchInput
-                        showPlaceholder={
-                            this.state.selectedEntries.length === 0
-                        }
-                        searchInputRef={this.handleSetSearchInputRef}
-                        onChange={this.handleSearchInputChanged}
-                        onKeyPress={this.handleKeyPress}
-                        value={this.state.query}
-                        loading={
-                            this.state.loadingSuggestions ||
-                            this.state.loadingQueryResults
-                        }
-                        before={
-                            <EntrySelectedList
-                                ActiveEntry={ActiveList}
-                                attributeName="data-list-name"
-                                entriesSelected={this.state.selectedEntries}
-                                onPress={this.handleSelectedListPress}
-                            />
-                        }
-                    />
-                    {this.state.newEntryName !== '' && (
-                        <AddNewEntry
-                            resultItem={
-                                <ListResultItem>
-                                    {this.state.newEntryName}
-                                </ListResultItem>
-                            }
-                            onPress={this.handleNewListPress}
-                        >
-                            {this.renderNewListAllTabsButton}
-                        </AddNewEntry>
-                    )}
-                    <EntryResultsList
-                        entries={this.state.displayEntries}
-                        renderEntryRow={this.renderListRow}
-                        emptyView={this.renderEmptyList()}
-                        id="listResults"
-                    />
+                    {this.renderMainContent()}
                     {this.props.children}
                 </OuterSearchBox>
             </ThemeProvider>

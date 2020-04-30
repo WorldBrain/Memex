@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
-import { Loader, Search as SearchIcon } from '@styled-icons/feather'
+import { Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { KeyEvent } from '../types'
 
@@ -12,7 +12,6 @@ interface Props {
     before: JSX.Element
     searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
     showPlaceholder?: boolean
-    loading?: boolean
 }
 
 interface State {
@@ -64,7 +63,6 @@ export class PickerSearchInput extends React.Component<Props, State> {
                     autoFocus
                     size="5"
                 />
-                {this.props.loading && <Loader size={20} />}
             </SearchBox>
         )
     }

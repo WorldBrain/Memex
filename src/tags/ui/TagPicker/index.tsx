@@ -8,6 +8,7 @@ import TagPickerLogic, {
 } from 'src/tags/ui/TagPicker/logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
+import { InitLoader } from 'src/common-ui/GenericPicker/components/InitLoader'
 import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResultsList'
 import EntryRow, {
     IconStyleWrapper,
@@ -104,6 +105,50 @@ class TagPicker extends StatefulUIElement<
         )
     }
 
+    renderMainContent() {
+        if (this.state.loadingSuggestions || this.state.loadingQueryResults) {
+            return <InitLoader size={20} />
+        }
+
+        return (
+            <>
+                <PickerSearchInput
+                    showPlaceholder={this.state.selectedEntries.length === 0}
+                    searchInputRef={this.handleSetSearchInputRef}
+                    onChange={this.handleSearchInputChanged}
+                    onKeyPress={this.handleKeyPress}
+                    value={this.state.query}
+                    before={
+                        <EntrySelectedList
+                            ActiveEntry={ActiveTag}
+                            attributeName="data-tag-name"
+                            entriesSelected={this.state.selectedEntries}
+                            onPress={this.handleSelectedTagPress}
+                        />
+                    }
+                />
+                {this.state.newEntryName !== '' && (
+                    <AddNewEntry
+                        resultItem={
+                            <TagResultItem>
+                                {this.state.newEntryName}
+                            </TagResultItem>
+                        }
+                        onPress={this.handleNewTagPress}
+                    >
+                        {this.renderNewTagAllTabsButton}
+                    </AddNewEntry>
+                )}
+                <EntryResultsList
+                    entries={this.state.displayEntries}
+                    renderEntryRow={this.renderTagRow}
+                    emptyView={this.renderEmptyList()}
+                    id="tagResults"
+                />
+            </>
+        )
+    }
+
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
@@ -111,45 +156,7 @@ class TagPicker extends StatefulUIElement<
                     onKeyPress={this.handleKeyPress}
                     onClick={this.handleOuterSearchBoxClick}
                 >
-                    <PickerSearchInput
-                        showPlaceholder={
-                            this.state.selectedEntries.length === 0
-                        }
-                        searchInputRef={this.handleSetSearchInputRef}
-                        onChange={this.handleSearchInputChanged}
-                        onKeyPress={this.handleKeyPress}
-                        value={this.state.query}
-                        loading={
-                            this.state.loadingSuggestions ||
-                            this.state.loadingQueryResults
-                        }
-                        before={
-                            <EntrySelectedList
-                                ActiveEntry={ActiveTag}
-                                attributeName="data-tag-name"
-                                entriesSelected={this.state.selectedEntries}
-                                onPress={this.handleSelectedTagPress}
-                            />
-                        }
-                    />
-                    {this.state.newEntryName !== '' && (
-                        <AddNewEntry
-                            resultItem={
-                                <TagResultItem>
-                                    {this.state.newEntryName}
-                                </TagResultItem>
-                            }
-                            onPress={this.handleNewTagPress}
-                        >
-                            {this.renderNewTagAllTabsButton}
-                        </AddNewEntry>
-                    )}
-                    <EntryResultsList
-                        entries={this.state.displayEntries}
-                        renderEntryRow={this.renderTagRow}
-                        emptyView={this.renderEmptyList()}
-                        id="tagResults"
-                    />
+                    {this.renderMainContent()}
                     {this.props.children}
                 </OuterSearchBox>
             </ThemeProvider>
