@@ -166,12 +166,12 @@ export default class SidebarContainer extends StatefulUIElement<
                     this.processEvent('addNewPageComment', null)
                 }
                 pageDeleteDialog={{
-                    isDeletePageModelShown: this.state.deletePagesModel
-                        .isDeletePagesModelShown,
-                    handleDeletePages: () =>
-                        this.processEvent('deletePages', null),
-                    handleDeletePagesModalClose: () =>
-                        this.processEvent('closeDeletePagesModal', null),
+                    isDeletePageModalShown:
+                        this.state.deletePageModal.pageUrlToDelete != null,
+                    handleDeletePage: () =>
+                        this.processEvent('deletePage', null),
+                    handleDeletePageModalClose: () =>
+                        this.processEvent('closeDeletePageModal', null),
                 }}
                 onQueryKeyDown={() => {}}
                 onQueryChange={searchQuery => {
@@ -266,21 +266,29 @@ export default class SidebarContainer extends StatefulUIElement<
                     handlePillClick: (tag: string) => () => {
                         // console.log('handlePillClick')
                     },
-                    handleTagBtnClick: (i: number) => () => {
-                        // console.log('handleTagBtnClick')
+                    handleTagBtnClick: result => {
+                        this.processEvent('togglePageTagPicker', {
+                            pageUrl: result.url,
+                        })
                     },
-                    handleCommentBtnClick: () => {
-                        // console.log('handleCommentBtnClick')
+                    handleCommentBtnClick: result => {
+                        this.processEvent('togglePageAnnotationsView', {
+                            pageUrl: result.url,
+                        })
                     },
-                    handleCrossRibbonClick: () => () => {
+                    handleCrossRibbonClick: () => {
                         // console.log('handleCrossRibbonClick')
                     },
                     handleScrollPagination: () => {},
-                    handleToggleBm: () => () => {
-                        // console.log('handleToggleBm')
+                    handleToggleBm: result => {
+                        this.processEvent('togglePageBookmark', {
+                            pageUrl: result.url,
+                        })
                     },
-                    handleTrashBtnClick: () => () => {
-                        // console.log('handleTrashBtnClick')
+                    handleTrashBtnClick: result => {
+                        this.processEvent('showDeletePageModal', {
+                            pageUrl: result.url,
+                        })
                     },
                 }}
                 searchTypeSwitch={{

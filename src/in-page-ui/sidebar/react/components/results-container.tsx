@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { connect, MapStateToProps } from 'react-redux'
 
 import NoResultBadTerm from 'src/overview/results/components/NoResultBadTerm'
 import ResultsMessage from 'src/overview/results/components/results-message'

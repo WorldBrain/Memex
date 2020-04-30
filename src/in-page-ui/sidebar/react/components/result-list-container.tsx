@@ -9,7 +9,7 @@ import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from 'src/sidebar-overlay/sidebar/constants'
-import { Result, ResultsByUrl, ResultWithIndex } from 'src/overview/types'
+import { Result, ResultsByUrl } from 'src/overview/types'
 import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
@@ -44,7 +44,7 @@ interface DispatchProps {
     addTag: (i: number) => (f: string) => void
     delTag: (i: number) => (f: string) => void
     handlePillClick: (tag: string) => void
-    handleTagBtnClick: (i: number) => void
+    handleTagBtnClick: (doc: Result, i: number) => void
     handleCommentBtnClick: (doc: Result, isSocialSearch?: boolean) => void
     handleCrossRibbonClick: (doc: Result, isSocialPost: boolean) => void
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
@@ -132,14 +132,16 @@ export default class ResultListContainer extends Component<
         )
     }
 
-    private renderTagHolder = ({ tags }, resultIndex) => (
+    private renderTagHolder = (doc, resultIndex) => (
         <TagHolder
-            tags={[...new Set([...tags])]}
+            tags={[...new Set([...doc.tags])]}
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={tag => event => this.props.handlePillClick(tag)}
             env={'sidebar'}
-            handleTagBtnClick={() => this.props.handleTagBtnClick(resultIndex)}
+            handleTagBtnClick={() =>
+                this.props.handleTagBtnClick(doc, resultIndex)
+            }
         />
     )
 
@@ -163,7 +165,7 @@ export default class ResultListContainer extends Component<
                 setUrlDragged={this.props.setUrlDragged}
                 tagManager={this.renderTagsManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}
-                onTagBtnClick={() => this.props.handleTagBtnClick(index)}
+                onTagBtnClick={() => this.props.handleTagBtnClick(doc, index)}
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={() =>
                     this.props.handleTrashBtnClick(doc, index)
