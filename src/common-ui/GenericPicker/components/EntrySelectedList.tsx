@@ -3,18 +3,19 @@ import styled from 'styled-components'
 import { X as XIcon } from '@styled-icons/feather'
 
 interface Props {
-    attributeName: string
+    dataAttributeName: string
     entriesSelected: string[]
     ActiveEntry: typeof React.Component
     onPress: (entry: string) => void
 }
 
 export class EntrySelectedList extends React.PureComponent<Props> {
-    _getEntryAttr = (event: ChangeEvent) =>
-        event.target.getAttribute(this.props.attributeName)
+    private get dataAttribute(): string {
+        return `data-${this.props.dataAttributeName}`
+    }
 
     handleSelectedTabPress = (event: ChangeEvent) =>
-        this.props.onPress(this._getEntryAttr(event))
+        this.props.onPress(event.target.getAttribute(this.dataAttribute))
 
     render() {
         const StyledActiveEntry = createStyledActiveEntry(
@@ -26,8 +27,8 @@ export class EntrySelectedList extends React.PureComponent<Props> {
                 {this.props.entriesSelected?.map((entry) => (
                     <StyledActiveEntry
                         key={`ActiveTab-${entry}`}
-                        data-list-name={entry}
                         onClick={this.handleSelectedTabPress}
+                        {...{ [this.dataAttribute]: entry }} // Need to set a dynamic prop here
                     >
                         {entry}
                         <StyledXIcon size={12} />

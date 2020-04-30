@@ -126,7 +126,7 @@ class ListPicker extends StatefulUIElement<
                     before={
                         <EntrySelectedList
                             ActiveEntry={ActiveList}
-                            attributeName="data-list-name"
+                            dataAttributeName="list-name"
                             entriesSelected={this.state.selectedEntries}
                             onPress={this.handleSelectedListPress}
                         />

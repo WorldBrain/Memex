@@ -122,7 +122,7 @@ class TagPicker extends StatefulUIElement<
                     before={
                         <EntrySelectedList
                             ActiveEntry={ActiveTag}
-                            attributeName="data-tag-name"
+                            dataAttributeName="tag-name"
                             entriesSelected={this.state.selectedEntries}
                             onPress={this.handleSelectedTagPress}
                         />
