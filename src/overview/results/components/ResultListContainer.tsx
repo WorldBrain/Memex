@@ -189,14 +189,14 @@ class ResultListContainer extends PureComponent<Props> {
             <HoverBox marginLeftOffset={50}>
                 <div ref={(ref) => this.setListDivRef(ref)}>
                     <CollectionPicker
-                        onUpdateListSelection={this.handleListUpdate(index)}
-                        queryLists={(query) =>
+                        onUpdateEntrySelection={this.handleListUpdate(index)}
+                        queryEntries={(query) =>
                             collections.searchForListSuggestions({ query })
                         }
                         loadDefaultSuggestions={
                             collections.fetchInitialListSuggestions
                         }
-                        initialSelectedLists={async () => selectedLists}
+                        initialSelectedEntries={async () => selectedLists}
                     />
                 </div>
             </HoverBox>
@@ -215,12 +215,12 @@ class ResultListContainer extends PureComponent<Props> {
             <HoverBox>
                 <div ref={(ref) => this.setTagDivRef(ref)}>
                     <TagPicker
-                        onUpdateTagSelection={this.handleTagUpdate(index)}
-                        queryTags={(query) =>
+                        onUpdateEntrySelection={this.handleTagUpdate(index)}
+                        queryEntries={(query) =>
                             tags.searchForTagSuggestions({ query })
                         }
                         loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
-                        initialSelectedTags={async () => selectedTags}
+                        initialSelectedEntries={async () => selectedTags}
                     />
                 </div>
             </HoverBox>

@@ -19,24 +19,26 @@ const tags = ['tag a', 'abcde1', 'abcde2', 'abcde2 tag', ...initialSuggestions]
 const tagsSelected = ['Selected', 'Tag', 'suggested tag']
 
 const setupDependencies = () => {
-    // const queryTags = tags.
+    // const queryEntries = tags.
 }
 
 const renderTag = (opts: Partial<TagPickerDependencies> = {}) => {
     const renderResult = render(
         <TagPicker
-            queryTags={async query => tags.filter(t => t.includes(query))}
+            queryEntries={async (query) =>
+                tags.filter((t) => t.includes(query))
+            }
             loadDefaultSuggestions={() => initialSuggestions}
-            onUpdateTagSelection={tags1 => null}
-            initialSelectedTags={async () => tagsSelected}
-            tagAllTabs={(tagName: string) => null}
+            onUpdateEntrySelection={(tags1) => null}
+            initialSelectedEntries={async () => tagsSelected}
+            actOnAllTabs={(tagName: string) => null}
             {...opts}
         />,
     )
     return renderResult.container
 }
 
-const findElements = container => ({
+const findElements = (container) => ({
     container,
     input: container.querySelector('input'),
     tagSearchBox: container.querySelector('#tagSearchBox'),
@@ -45,7 +47,7 @@ const findElements = container => ({
 
 const testUtils = ({ input, container }) => ({
     changes: {
-        typeIntoInput: text => {
+        typeIntoInput: (text) => {
             for (let i = 1; i < text.length - 1; i++) {
                 fireEvent.change(input, { target: { value: text.slice(0, i) } })
             }
@@ -54,11 +56,11 @@ const testUtils = ({ input, container }) => ({
     },
 
     tests: {
-        expectInputToEqual: val =>
+        expectInputToEqual: (val) =>
             waitFor(() => expect(input.value).toEqual(val), { timeout: 200 }),
         expectToFindStrings: (text: string[], element?: any) =>
             waitForElement(
-                () => text.map(tag => getByText(element ?? container, tag)),
+                () => text.map((tag) => getByText(element ?? container, tag)),
                 {
                     container: element ?? container,
                 },
@@ -67,7 +69,7 @@ const testUtils = ({ input, container }) => ({
 })
 
 const expectToFindTexts = (container, text: string[]) =>
-    waitForElement(() => text.map(tag => getByText(container, tag)), {
+    waitForElement(() => text.map((tag) => getByText(container, tag)), {
         container,
     })
 

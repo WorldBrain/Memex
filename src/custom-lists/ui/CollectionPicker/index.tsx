@@ -2,7 +2,6 @@ import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic, {
-    DisplayList,
     ListPickerDependencies,
     ListPickerEvent,
     ListPickerState,
@@ -15,7 +14,7 @@ import EntryRow, {
     ActOnAllTabsButton,
 } from 'src/common-ui/GenericPicker/components/EntryRow'
 import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
-import { KeyEvent } from 'src/common-ui/GenericPicker/types'
+import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -41,29 +40,29 @@ class ListPicker extends StatefulUIElement<
     }
 
     handleSelectedListPress = (list: string) =>
-        this.processEvent('selectedListPress', { list })
+        this.processEvent('selectedEntryPress', { entry: list })
 
-    handleResultListPress = (list: DisplayList) =>
-        this.processEvent('resultListPress', { list })
+    handleResultListPress = (list: DisplayEntry) =>
+        this.processEvent('resultEntryPress', { entry: list })
 
-    handleResultListAllPress = (list: DisplayList) =>
-        this.processEvent('resultListAllPress', { list })
+    handleResultListAllPress = (list: DisplayEntry) =>
+        this.processEvent('resultEntryAllPress', { entry: list })
 
-    handleNewListAllPress = () => this.processEvent('newListAllPress', {})
+    handleNewListAllPress = () => this.processEvent('newEntryAllPress', {})
 
-    handleResultListFocus = (list: DisplayList, index?: number) =>
-        this.processEvent('resultListFocus', { list, index })
+    handleResultListFocus = (list: DisplayEntry, index?: number) =>
+        this.processEvent('resultEntryFocus', { entry: list, index })
 
     handleNewListPress = () =>
-        this.processEvent('newListPress', { list: this.state.newListName })
+        this.processEvent('newEntryPress', { entry: this.state.newEntryName })
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
-    renderListRow = (list: DisplayList, index: number) => (
+    renderListRow = (list: DisplayEntry, index: number) => (
         <EntryRow
             onPress={this.handleResultListPress}
             onPressActOnAll={
-                this.props.listAllTabs
+                this.props.actOnAllTabs
                     ? (t) => this.handleResultListAllPress(t)
                     : undefined
             }
@@ -94,13 +93,19 @@ class ListPicker extends StatefulUIElement<
     )
 
     renderEmptyList() {
-       if (this.state.newListName !== '') {
+        if (this.state.newEntryName !== '') {
             return
         }
 
-        if (!this.state.newListName) {
-            return <EmptyListsView><strong>No Collections yet</strong><br/>Add new collections<br/>via the search bar</EmptyListsView>
-        }
+        return (
+            <EmptyListsView>
+                <strong>No Collections yet</strong>
+                <br />
+                Add new collections
+                <br />
+                via the search bar
+            </EmptyListsView>
+        )
     }
 
     render() {
@@ -111,7 +116,9 @@ class ListPicker extends StatefulUIElement<
                     onClick={this.handleOuterSearchBoxClick}
                 >
                     <PickerSearchInput
-                        showPlaceholder={this.state.selectedLists.length === 0}
+                        showPlaceholder={
+                            this.state.selectedEntries.length === 0
+                        }
                         searchInputRef={this.handleSetSearchInputRef}
                         onChange={this.handleSearchInputChanged}
                         onKeyPress={this.handleKeyPress}
@@ -124,16 +131,16 @@ class ListPicker extends StatefulUIElement<
                             <EntrySelectedList
                                 ActiveEntry={ActiveList}
                                 attributeName="data-list-name"
-                                entriesSelected={this.state.selectedLists}
+                                entriesSelected={this.state.selectedEntries}
                                 onPress={this.handleSelectedListPress}
                             />
                         }
                     />
-                    {this.state.newListName !== '' && (
+                    {this.state.newEntryName !== '' && (
                         <AddNewEntry
                             resultItem={
                                 <ListResultItem>
-                                    {this.state.newListName}
+                                    {this.state.newEntryName}
                                 </ListResultItem>
                             }
                             onPress={this.handleNewListPress}
@@ -142,7 +149,7 @@ class ListPicker extends StatefulUIElement<
                         </AddNewEntry>
                     )}
                     <EntryResultsList
-                        entries={this.state.displayLists}
+                        entries={this.state.displayEntries}
                         renderEntryRow={this.renderListRow}
                         emptyView={this.renderEmptyList()}
                         id="listResults"

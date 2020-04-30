@@ -14,13 +14,15 @@ storiesOf('Tags Refactored', module)
     .add('Tag Picker - All together, Default theme', () => (
         <div>
             <TagPicker
-                onUpdateTagSelection={async (selectedTags) => {
+                onUpdateEntrySelection={async (selectedTags) => {
                     action('updatedTags')
                 }}
-                queryTags={async (term) => tags.filter((t) => t.includes(term))}
+                queryEntries={async (term) =>
+                    tags.filter((t) => t.includes(term))
+                }
                 loadDefaultSuggestions={() => [tags[4], tags[5]]}
-                initialSelectedTags={async () => [tags[0], tags[1]]}
-                tagAllTabs={async (tag) => {
+                initialSelectedEntries={async () => [tags[0], tags[1]]}
+                actOnAllTabs={async (tag) => {
                     action('Tag All tabs')
                 }}
             />
@@ -29,13 +31,15 @@ storiesOf('Tags Refactored', module)
     .add('Tag Picker - Errors', () => (
         <div>
             <TagPicker
-                onUpdateTagSelection={(selectedTags) => {
+                onUpdateEntrySelection={(selectedTags) => {
                     throw new Error('Causing error for test')
                 }}
-                queryTags={async (term) => tags.filter((t) => t.includes(term))}
+                queryEntries={async (term) =>
+                    tags.filter((t) => t.includes(term))
+                }
                 loadDefaultSuggestions={() => [tags[4], tags[5]]}
-                initialSelectedTags={async () => [tags[0], tags[1]]}
-                tagAllTabs={async (tag) => {
+                initialSelectedEntries={async () => [tags[0], tags[1]]}
+                actOnAllTabs={async (tag) => {
                     action('Tag All tabs')
                 }}
             />
@@ -44,13 +48,15 @@ storiesOf('Tags Refactored', module)
     .add('Tag Picker - Long delays in saving shouldnt effect UI', () => (
         <div>
             <TagPicker
-                onUpdateTagSelection={(selectedTags) => {
+                onUpdateEntrySelection={(selectedTags) => {
                     return new Promise((resolve) => setTimeout(resolve, 5000))
                 }}
-                queryTags={async (term) => tags.filter((t) => t.includes(term))}
+                queryEntries={async (term) =>
+                    tags.filter((t) => t.includes(term))
+                }
                 loadDefaultSuggestions={() => [tags[4], tags[5]]}
-                initialSelectedTags={async () => [tags[0], tags[1]]}
-                tagAllTabs={async (tag) => {
+                initialSelectedEntries={async () => [tags[0], tags[1]]}
+                actOnAllTabs={async (tag) => {
                     action('Tag All tabs')
                 }}
             />

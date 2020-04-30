@@ -19,7 +19,7 @@ interface Props {
 /* tslint:disable-next-line variable-name */
 const TagInput = ({
     isTagInputActive,
-    tags: initialSelectedTags,
+    tags: initialSelectedEntries,
     initTagSuggestions,
     addTag,
     deleteTag,
@@ -45,11 +45,11 @@ const TagInput = ({
             <HoverBox>
                 <TagPicker
                     loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
-                    queryTags={(query: string) =>
+                    queryEntries={(query: string) =>
                         tags.searchForTagSuggestions({ query })
                     }
-                    onUpdateTagSelection={handleTagsUpdate}
-                    initialSelectedTags={async () => initialSelectedTags}
+                    onUpdateEntrySelection={handleTagsUpdate}
+                    initialSelectedEntries={async () => initialSelectedEntries}
                 />
             </HoverBox>
         )
@@ -58,7 +58,7 @@ const TagInput = ({
     return (
         <>
             <TagHolder
-                tags={initialSelectedTags}
+                tags={initialSelectedEntries}
                 clickHandler={(e) => {
                     e.stopPropagation()
                     setTagInputActive(true)

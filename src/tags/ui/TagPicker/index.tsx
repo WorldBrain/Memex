@@ -2,7 +2,6 @@ import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
-    DisplayTag,
     TagPickerDependencies,
     TagPickerEvent,
     TagPickerState,
@@ -15,7 +14,7 @@ import EntryRow, {
     ActOnAllTabsButton,
 } from 'src/common-ui/GenericPicker/components/EntryRow'
 import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
-import { KeyEvent } from 'src/common-ui/GenericPicker/types'
+import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -40,29 +39,29 @@ class TagPicker extends StatefulUIElement<
     }
 
     handleSelectedTagPress = (tag: string) =>
-        this.processEvent('selectedTagPress', { tag })
+        this.processEvent('selectedEntryPress', { entry: tag })
 
-    handleResultTagPress = (tag: DisplayTag) =>
-        this.processEvent('resultTagPress', { tag })
+    handleResultTagPress = (tag: DisplayEntry) =>
+        this.processEvent('resultEntryPress', { entry: tag })
 
-    handleResultTagAllPress = (tag: DisplayTag) =>
-        this.processEvent('resultTagAllPress', { tag })
+    handleResultTagAllPress = (tag: DisplayEntry) =>
+        this.processEvent('resultEntryAllPress', { entry: tag })
 
-    handleNewTagAllPress = () => this.processEvent('newTagAllPress', {})
+    handleNewTagAllPress = () => this.processEvent('newEntryAllPress', {})
 
-    handleResultTagFocus = (tag: DisplayTag, index?: number) =>
-        this.processEvent('resultTagFocus', { tag, index })
+    handleResultTagFocus = (tag: DisplayEntry, index?: number) =>
+        this.processEvent('resultEntryFocus', { entry: tag, index })
 
     handleNewTagPress = () =>
-        this.processEvent('newTagPress', { tag: this.state.newTagName })
+        this.processEvent('newEntryPress', { entry: this.state.newEntryName })
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
-    renderTagRow = (tag: DisplayTag, index: number) => (
+    renderTagRow = (tag: DisplayEntry, index: number) => (
         <EntryRow
             onPress={this.handleResultTagPress}
             onPressActOnAll={
-                this.props.tagAllTabs
+                this.props.actOnAllTabs
                     ? (t) => this.handleResultTagAllPress(t)
                     : undefined
             }
@@ -90,13 +89,19 @@ class TagPicker extends StatefulUIElement<
     )
 
     renderEmptyList() {
-       if (this.state.newTagName !== '') {
+        if (this.state.newEntryName !== '') {
             return
         }
 
-        if (!this.state.newTagName) {
-            return <EmptyTagsView><strong>No Tags yet</strong><br/>Add new tags<br/>via the search bar</EmptyTagsView>
-        }
+        return (
+            <EmptyTagsView>
+                <strong>No Tags yet</strong>
+                <br />
+                Add new tags
+                <br />
+                via the search bar
+            </EmptyTagsView>
+        )
     }
 
     render() {
@@ -107,7 +112,9 @@ class TagPicker extends StatefulUIElement<
                     onClick={this.handleOuterSearchBoxClick}
                 >
                     <PickerSearchInput
-                        showPlaceholder={this.state.selectedTags.length === 0}
+                        showPlaceholder={
+                            this.state.selectedEntries.length === 0
+                        }
                         searchInputRef={this.handleSetSearchInputRef}
                         onChange={this.handleSearchInputChanged}
                         onKeyPress={this.handleKeyPress}
@@ -120,16 +127,16 @@ class TagPicker extends StatefulUIElement<
                             <EntrySelectedList
                                 ActiveEntry={ActiveTag}
                                 attributeName="data-tag-name"
-                                entriesSelected={this.state.selectedTags}
+                                entriesSelected={this.state.selectedEntries}
                                 onPress={this.handleSelectedTagPress}
                             />
                         }
                     />
-                    {this.state.newTagName !== '' && (
+                    {this.state.newEntryName !== '' && (
                         <AddNewEntry
                             resultItem={
                                 <TagResultItem>
-                                    {this.state.newTagName}
+                                    {this.state.newEntryName}
                                 </TagResultItem>
                             }
                             onPress={this.handleNewTagPress}
@@ -138,7 +145,7 @@ class TagPicker extends StatefulUIElement<
                         </AddNewEntry>
                     )}
                     <EntryResultsList
-                        entries={this.state.displayTags}
+                        entries={this.state.displayEntries}
                         renderEntryRow={this.renderTagRow}
                         emptyView={this.renderEmptyList()}
                         id="tagResults"

@@ -15,21 +15,29 @@ import ListPicker from './index'
 import { ListPickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 
 const initialSuggestions = ['suggested list', 'another list']
-const lists = ['list a', 'abcde1', 'abcde2', 'abcde2 list', ...initialSuggestions]
+const lists = [
+    'list a',
+    'abcde1',
+    'abcde2',
+    'abcde2 list',
+    ...initialSuggestions,
+]
 const listsSelected = ['Selected', 'List', 'suggested list']
 
 const setupDependencies = () => {
-    // const queryLists = lists.
+    // const queryEntries = lists.
 }
 
 const renderList = (opts: Partial<ListPickerDependencies> = {}) => {
     const renderResult = render(
         <ListPicker
-            queryLists={async (query) => lists.filter((t) => t.includes(query))}
+            queryEntries={async (query) =>
+                lists.filter((t) => t.includes(query))
+            }
             loadDefaultSuggestions={() => initialSuggestions}
-            onUpdateListSelection={(lists1) => null}
-            initialSelectedLists={async () => listsSelected}
-            listAllTabs={(listName: string) => null}
+            onUpdateEntrySelection={(lists1) => null}
+            initialSelectedEntries={async () => listsSelected}
+            actOnAllTabs={(listName: string) => null}
             {...opts}
         />,
     )

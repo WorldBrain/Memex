@@ -129,10 +129,10 @@ class RibbonContainer extends Component<Props> {
     private renderTagsManager = () => (
         <TagPicker
             loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
-            queryTags={this.handleTagQuery}
-            onUpdateTagSelection={this.handleTagsUpdate}
-            initialSelectedTags={this.fetchTagsForPage}
-            tagAllTabs={this.handleTagAllTabs}
+            queryEntries={this.handleTagQuery}
+            onUpdateEntrySelection={this.handleTagsUpdate}
+            initialSelectedEntries={this.fetchTagsForPage}
+            actOnAllTabs={this.handleTagAllTabs}
         />
     )
 
@@ -140,10 +140,10 @@ class RibbonContainer extends Component<Props> {
         return (
             <CollectionPicker
                 loadDefaultSuggestions={collections.fetchInitialListSuggestions}
-                queryLists={this.handleListQuery}
-                onUpdateListSelection={this.handleListsUpdate}
-                initialSelectedLists={this.fetchListsForPage}
-                listAllTabs={this.handleListAllTabs}
+                queryEntries={this.handleListQuery}
+                onUpdateEntrySelection={this.handleListsUpdate}
+                initialSelectedEntries={this.fetchListsForPage}
+                actOnAllTabs={this.handleListAllTabs}
             />
         )
     }

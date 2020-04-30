@@ -153,10 +153,10 @@ class PopupContainer extends PureComponent<Props> {
         if (this.props.showTagsPicker) {
             return (
                 <TagPicker
-                    queryTags={this.handleTagQuery}
-                    onUpdateTagSelection={this.handleTagUpdate}
-                    initialSelectedTags={this.fetchTagsForPage}
-                    tagAllTabs={this.handleTagAllTabs}
+                    queryEntries={this.handleTagQuery}
+                    onUpdateEntrySelection={this.handleTagUpdate}
+                    initialSelectedEntries={this.fetchTagsForPage}
+                    actOnAllTabs={this.handleTagAllTabs}
                     loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                 >
                     <BackContainer onClick={this.props.toggleShowTagsPicker} />
@@ -167,10 +167,10 @@ class PopupContainer extends PureComponent<Props> {
         if (this.props.showCollectionsPicker) {
             return (
                 <CollectionPicker
-                    queryLists={this.handleListQuery}
-                    onUpdateListSelection={this.handleListUpdate}
-                    initialSelectedLists={this.fetchListsForPage}
-                    listAllTabs={this.handleListAllTabs}
+                    queryEntries={this.handleListQuery}
+                    onUpdateEntrySelection={this.handleListUpdate}
+                    initialSelectedEntries={this.fetchListsForPage}
+                    actOnAllTabs={this.handleListAllTabs}
                     loadDefaultSuggestions={
                         collections.fetchInitialListSuggestions
                     }
