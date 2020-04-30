@@ -12,7 +12,7 @@ import {
     InitialComponent,
 } from './tooltip-states'
 
-import { conditionallyRemoveOnboardingSelectOption } from '../onboarding-interactions'
+import { conditionallyRemoveOnboardingSelectOption } from '../../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
 
 class TooltipContainer extends React.Component {

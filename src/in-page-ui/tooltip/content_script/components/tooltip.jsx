@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import ButtonTooltip from '../../common-ui/components/button-tooltip'
+import ButtonTooltip from '../../../../common-ui/components/button-tooltip'
 import AnimationWrapper from './AnimationWrapper'
 import styles from './tooltip.css'
 

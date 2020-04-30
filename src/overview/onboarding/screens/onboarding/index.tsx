@@ -12,7 +12,7 @@ import { SIDEBAR_STORAGE_NAME } from 'src/sidebar-overlay/constants'
 import {
     TRACKING_STORAGE_NAME,
     TOOLTIP_STORAGE_NAME,
-} from 'src/content-tooltip/constants'
+} from 'src/in-page-ui/tooltip/constants'
 import { OPTIONS_URL } from 'src/constants'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { OnboardingAction } from 'src/common-ui/components/design-library/actions/OnboardingAction'

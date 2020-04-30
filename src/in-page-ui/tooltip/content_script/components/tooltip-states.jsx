@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import ButtonTooltip from '../../common-ui/components/button-tooltip'
+import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import styles from './tooltip.css'
 import classNames from 'classnames'
 import { browser } from 'webextension-polyfill-ts'

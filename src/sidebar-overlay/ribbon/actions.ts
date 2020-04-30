@@ -8,7 +8,7 @@ import {
     setTooltipState,
     getHighlightsState,
     setHighlightsState,
-} from 'src/content-tooltip/utils'
+} from 'src/in-page-ui/tooltip/utils'
 
 export const setIsPageFullScreen = createAction<boolean>('setIsPageFullScreen')
 

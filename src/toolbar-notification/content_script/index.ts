@@ -2,9 +2,10 @@ import { bodyLoader } from 'src/util/loader'
 import { createRootElement, destroyRootElement } from './rendering'
 import { setupUIContainer } from './react'
 import { RemoteFunctionRegistry } from '../../util/webextensionRPC'
-import { any } from 'prop-types'
+import { ToolbarNotificationsInterface } from './types'
 
-export default class ToolbarNotifications {
+export default class ToolbarNotifications
+    implements ToolbarNotificationsInterface {
     _rootElement = null
 
     registerRemoteFunctions(registry: RemoteFunctionRegistry) {

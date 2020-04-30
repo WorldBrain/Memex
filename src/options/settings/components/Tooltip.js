@@ -2,7 +2,7 @@ import React from 'react'
 
 // import Checkbox from './Checkbox'
 import { Checkbox } from 'src/common-ui/components'
-import * as utils from 'src/content-tooltip/utils'
+import * as utils from 'src/in-page-ui/tooltip/utils'
 
 import styles from './settings.css'
 

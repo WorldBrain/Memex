@@ -99,6 +99,7 @@ export type SidebarContainerEvents = UIEvent<{
 
     // Adding a new page comment
     addNewPageComment: null
+    setNewPageCommentAnchor: { anchor: Anchor }
     changePageCommentText: { comment: string }
     saveNewPageComment: {
         anchor: Anchor
@@ -327,6 +328,14 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    setNewPageCommentAnchor: EventHandler<
+        'setNewPageCommentAnchor'
+    > = incoming => {
+        return this.emitMutation({
+            commentBox: { anchor: { $set: incoming.event.anchor } },
+        })
+    }
+
     changePageCommentText: EventHandler<'changePageCommentText'> = incoming => {
         return {
             commentBox: {
@@ -495,7 +504,6 @@ export class SidebarContainerLogic extends UILogic<
         const mutation = {
             pageType: { $set: event.type },
         }
-        console.log(mutation)
         this.emitMutation(mutation)
         await this._maybeLoad(previousState, mutation)
     }
@@ -507,7 +515,6 @@ export class SidebarContainerLogic extends UILogic<
         const mutation = {
             searchType: { $set: event.type },
         }
-        console.log(mutation)
         this.emitMutation(mutation)
         await this._maybeLoad(previousState, mutation)
     }

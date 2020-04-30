@@ -10,6 +10,7 @@ import {
     runInBackground,
     makeRemotelyCallableType,
     remoteFunction,
+    RemoteFunctionRegistry,
 } from 'src/util/webextensionRPC'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 import { ContentScriptRegistry } from './types'
@@ -28,22 +29,28 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import { SearchInterface } from 'src/search/background/types'
+import ToolbarNotifications from 'src/toolbar-notification/content_script'
+import { getTooltipState } from 'src/in-page-ui/tooltip/utils'
 
 export async function main() {
-    const controllers: {
+    const components: {
         ribbon?: Resolvable<void>
         sidebar?: Resolvable<void>
+        tooltip?: Resolvable<void>
     } = {}
     async function loadComponent(component: InPageUIComponent) {
-        if (!controllers[component]) {
-            controllers[component] = resolvablePromise<void>()
+        if (!components[component]) {
+            components[component] = resolvablePromise<void>()
             loadContentScript(component)
         }
-        return controllers[component]!
+        return components[component]!
     }
 
+    const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
     const highlighter = new HighlightInteraction()
+    const toolbarNotifications = new ToolbarNotifications()
+    toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
@@ -59,7 +66,7 @@ export async function main() {
                 annotations: runInBackground<AnnotationInterface<'caller'>>(),
                 activityLogger: runInBackground<ActivityLoggerInterface>(),
             })
-            controllers.ribbon!.resolve()
+            components.ribbon!.resolve()
         },
         async registerHighlightingScript(execute): Promise<void> {
             execute()
@@ -74,10 +81,14 @@ export async function main() {
                 annotations: runInBackground<AnnotationInterface<'caller'>>(),
                 search: runInBackground<SearchInterface>(),
             })
-            controllers.sidebar!.resolve()
+            components.sidebar!.resolve()
         },
         async registerTooltipScript(execute): Promise<void> {
-            execute()
+            await execute({
+                inPageUI,
+                toolbarNotifications,
+                annotationsManager,
+            })
         },
     }
     window['contentScriptRegistry'] = contentScriptRegistry
@@ -91,19 +102,23 @@ export async function main() {
         removeTooltip: async () => {},
     })
 
-    const loadContentScript = createContentScriptLoader()
-    if (shouldIncludeSearchInjection(window.location.hostname)) {
-        loadContentScript('search_injection')
-    }
-
     setupScrollReporter()
     setupPageContentRPC()
     loadAnnotationWhenReady()
     setupRemoteDirectLinkFunction()
     initKeyboardShortcuts(inPageUI)
 
+    const loadContentScript = createContentScriptLoader()
+    if (shouldIncludeSearchInjection(window.location.hostname)) {
+        loadContentScript('search_injection')
+    }
+
     if (await getSidebarState()) {
         setupOnDemandInPageUi(() => inPageUI.loadComponent('ribbon'))
+    }
+
+    if (await getTooltipState()) {
+        await loadComponent('tooltip')
     }
 
     // if (window.location.hostname === 'worldbrain.io') {

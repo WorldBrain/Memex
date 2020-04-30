@@ -8,16 +8,19 @@ import {
     InPageUISidebarAction,
 } from './types'
 import TypedEventEmitter from 'typed-emitter'
+import { Anchor } from 'src/highlighting/types'
 
 export class InPageUI implements InPageUIInterface {
     events = new EventEmitter() as TypedEventEmitter<InPageUIEvents>
     state: InPageUIState = {
         ribbon: false,
         sidebar: false,
+        tooltip: false,
     }
     componentsSetUp: InPageUIState = {
         ribbon: false,
         sidebar: false,
+        tooltip: true,
     }
 
     constructor(
@@ -26,10 +29,16 @@ export class InPageUI implements InPageUIInterface {
         },
     ) {}
 
-    async showSidebar(options?: { action?: InPageUISidebarAction }) {
+    async showSidebar(options?: {
+        action?: InPageUISidebarAction
+        anchor?: Anchor
+    }) {
         const maybeEmitAction = () => {
             if (options?.action) {
-                this.events.emit('sidebarAction', { action: options.action })
+                this.events.emit('sidebarAction', {
+                    action: options.action,
+                    anchor: options.anchor,
+                })
             }
         }
 

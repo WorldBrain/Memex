@@ -6,7 +6,7 @@ import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
 import { remoteFunction, runInTab } from '../../util/webextensionRPC'
 import { isLoggable } from '..'
-import { TooltipInteractionInterface } from 'src/content-tooltip/types'
+import { TooltipInteractionInterface } from 'src/in-page-ui/tooltip/types'
 import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 
 export interface TabProps extends TabState {

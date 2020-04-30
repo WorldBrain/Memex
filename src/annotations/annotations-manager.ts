@@ -7,6 +7,7 @@ import { Anchor } from 'src/highlighting/types'
 import { Annotation, AnnotationsManagerInterface } from 'src/annotations/types'
 
 export default class AnnotationsManager implements AnnotationsManagerInterface {
+    private _isSetUp = false
     _processEventRPC: (...args: any[]) => Promise<any>
     _createAnnotationRPC: (...args: any[]) => Promise<any>
     _addAnnotationTagRPC: (...args: any[]) => Promise<any>
@@ -19,6 +20,11 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
     _searchAnnotationsRPC: (...args: any[]) => Promise<any>
 
     _setupRPC() {
+        if (this._isSetUp) {
+            return
+        }
+        this._isSetUp = true
+
         this._processEventRPC = remoteFunction('processEvent')
         this._createAnnotationRPC = remoteFunction('createAnnotation')
         this._addAnnotationTagRPC = remoteFunction('addAnnotationTag')
@@ -52,6 +58,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         bookmarked?: boolean
         isSocialPost?: boolean
     }) => {
+        this._setupRPC()
         this._processEventRPC({ type: EVENT_NAMES.CREATE_ANNOTATION })
 
         if (tags && tags.length) {
@@ -99,6 +106,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         // skip = 0,
         isSocialPost?: boolean,
     ) => {
+        this._setupRPC()
         const annotationsWithoutTags: Omit<
             Annotation,
             'tags'
@@ -137,6 +145,8 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         tags: string[]
         isSocialPost?: boolean
     }) => {
+        this._setupRPC()
+
         // Get the previously tags for the annotation.
         const prevTags = await this._getTagsByAnnotationUrlRPC(url)
 
@@ -165,15 +175,19 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
     }
 
     public deleteAnnotation = async (url: string, isSocialPost?: boolean) => {
+        this._setupRPC()
+
         await this._processEventRPC({ type: EVENT_NAMES.DELETE_ANNOTATION })
         await this._deleteAnnotationRPC(url, isSocialPost)
     }
 
     public toggleBookmark = async (url: string) => {
+        this._setupRPC()
         return this._bookmarkAnnotationRPC({ url })
     }
 
     public searchAnnotations = async (searchParams: BackgroundSearchParams) => {
+        this._setupRPC()
         const annotations = await this._searchAnnotationsRPC(searchParams)
         return annotations
     }
@@ -185,6 +199,7 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         oldTags,
         newTags,
     ) => {
+        this._setupRPC()
         const oldSet = new Set(oldTags)
         const tagsToBeAdded = newTags.reduce((accumulator, currentTag) => {
             if (!oldSet.has(currentTag)) {

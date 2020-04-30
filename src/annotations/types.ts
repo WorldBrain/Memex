@@ -18,6 +18,16 @@ export interface Annotation {
 }
 
 export interface AnnotationsManagerInterface {
+    createAnnotation(input: {
+        url: string
+        title: string
+        body: string
+        comment: string
+        anchor: Anchor
+        tags: string[]
+        bookmarked?: boolean
+        isSocialPost?: boolean
+    }): Promise<Annotation>
     fetchAnnotationsWithTags(
         url: string,
         // limit = 10,

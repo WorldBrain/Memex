@@ -1,8 +1,8 @@
-@value colors: '../../common-ui/colors.css';
+@value colors: 'src/common-ui/colors.css';
 @value color4, color6 from colors;
 
 .tooltip {
-    composes: toolTips from '../../common-ui/elements.css';
+    composes: toolTips from 'src/common-ui/elements.css';
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -249,7 +249,7 @@
 }
 
 .imgCross {
-    composes: nakedButton from '../../common-ui/elements.css';
+    composes: nakedButton from 'src/common-ui/elements.css';
     background-image: url('/img/removeIcon.svg');
     padding: 0px;
     width: 20px;

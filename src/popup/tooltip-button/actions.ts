@@ -1,13 +1,16 @@
 import { createAction } from 'redux-act'
 
-import { getTooltipState, setTooltipState } from '../../content-tooltip/utils'
+import {
+    getTooltipState,
+    setTooltipState,
+} from '../../in-page-ui/tooltip/utils'
 import { remoteFunction, runInTab } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
 import * as popup from '../selectors'
 import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
-import { TooltipInteractionInterface } from 'src/content-tooltip/types'
+import { TooltipInteractionInterface } from 'src/in-page-ui/tooltip/types'
 
 const processEventRPC = remoteFunction('processEvent')
 
