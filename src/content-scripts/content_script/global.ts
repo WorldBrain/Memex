@@ -27,6 +27,7 @@ import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
+import { SearchInterface } from 'src/search/background/types'
 
 export async function main() {
     const controllers: {
@@ -67,9 +68,11 @@ export async function main() {
             await execute({
                 inPageUI,
                 annotationsManager,
-                getRemoteFunction: remoteFunction,
                 highlighter,
                 currentTab: await getCurrentTab(),
+                tags: runInBackground<RemoteTagsInterface>(),
+                annotations: runInBackground<AnnotationInterface<'caller'>>(),
+                search: runInBackground<SearchInterface>(),
             })
             controllers.sidebar!.resolve()
         },

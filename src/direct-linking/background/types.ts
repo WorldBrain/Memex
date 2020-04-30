@@ -30,7 +30,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
         },
         any
     >
-    deleteAnnotation: RemotePositionalFunction<Role, any[], any>
+    deleteAnnotation: RemotePositionalFunction<Role, [{ pk: string }], any>
     getAnnotationTags: RemotePositionalFunction<Role, any[], any>
     addAnnotationTag: RemotePositionalFunction<Role, any[], any>
     delAnnotationTag: RemotePositionalFunction<Role, any[], any>

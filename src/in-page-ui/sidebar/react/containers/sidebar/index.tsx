@@ -10,7 +10,6 @@ import Sidebar from '../../components/sidebar'
 import { Anchor } from 'src/highlighting/types'
 import {
     InPageUIEvents,
-    InPageUIRibbonAction,
     InPageUISidebarAction,
 } from 'src/in-page-ui/shared-state/types'
 

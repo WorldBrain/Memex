@@ -9,10 +9,11 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import { SidebarEnv, Page, AnnotationMode } from '../../types'
 import { Annotation } from 'src/annotations/types'
 import { Result, ResultsByUrl } from 'src/overview/types'
-import { PageUrlsByDay } from 'src/search/background/types'
+import { PageUrlsByDay, SearchInterface } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { SidebarContainerDependencies } from './types'
+import { AnnotationInterface } from 'src/direct-linking/background/types'
 
 export interface SidebarContainerState {
     loadState: TaskState
@@ -58,6 +59,7 @@ export interface SidebarContainerState {
     searchValue: string
     pageType: 'page' | 'all'
     searchType: 'notes' | 'page' | 'social'
+    resultsSearchType: 'notes' | 'page' | 'social'
     pageCount?: number
     noResults: boolean
     isBadTerm: boolean
@@ -215,7 +217,7 @@ export class SidebarContainerLogic extends UILogic<
             pageType: 'page',
             searchType: 'notes',
             // searchType: 'page',
-            // resultsSearchType: 'page',
+            resultsSearchType: 'page',
 
             allAnnotationsExpanded: false,
             isSocialPost: false,
@@ -257,8 +259,8 @@ export class SidebarContainerLogic extends UILogic<
     private async _loadAnnotations() {
         // Notes tab
         await executeUITask(this, 'annotationLoadState', async () => {
-            const annotations = await this.options.loadAnnotations(
-                this.options.currentTab.url,
+            const annotations = await this.options.annotations.getAllAnnotationsByUrl(
+                { url: this.options.currentTab.url },
             )
             this.emitMutation({ annotations: { $set: annotations } })
         })
@@ -273,20 +275,28 @@ export class SidebarContainerLogic extends UILogic<
         // Pages tab
         await executeUITask(this, 'searchLoadState', async () => {
             if (state.searchType === 'page') {
-                const results = await this.options.searchPages(
-                    state.searchValue,
-                )
+                const results = await this.options.search.searchPages({
+                    query: state.searchValue.length
+                        ? state.searchValue
+                        : undefined,
+                    contentTypes: {
+                        pages: true,
+                        notes: true,
+                        highlights: true,
+                    },
+                })
                 this.emitMutation({
                     searchResults: { $set: results },
                     pageCount: { $set: results.length },
                     noResults: { $set: !results.length },
                 })
             } else if (state.searchType === 'notes') {
-                const result = await this.options.searchAnnotations(
+                const result = await searchAnnotations(
+                    this.options.search,
                     state.searchValue,
-                    state.pageType === 'page'
-                        ? this.options.currentTab.url
-                        : null,
+                    // state.pageType === 'page'
+                    //     ? this.options.currentTab.url
+                    //     : null,
                 )
                 this.emitMutation({
                     searchResults: { $set: result.results },
@@ -311,7 +321,7 @@ export class SidebarContainerLogic extends UILogic<
 
     addNewPageComment: EventHandler<'addNewPageComment'> = async () => {
         this.emitMutation({ showCommentBox: { $set: true } })
-        const suggestions = await this.options.loadTagSuggestions()
+        const suggestions = []
         this.emitMutation({
             commentBox: { form: { tagSuggestions: { $set: suggestions } } },
         })
@@ -416,15 +426,17 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    deleteAnnotation: EventHandler<'deleteAnnotation'> = incoming => {
-        this.options.deleteAnnotation(incoming.event.annnotationUrl)
-        return {
+    deleteAnnotation: EventHandler<'deleteAnnotation'> = async incoming => {
+        this.emitMutation({
             annotationModes: {
                 [incoming.event.context]: {
                     [incoming.event.annnotationUrl]: { $set: 'default' },
                 },
             },
-        }
+        })
+        await this.options.annotations.deleteAnnotation({
+            pk: incoming.event.annnotationUrl,
+        })
     }
 
     toggleAnnotationBookmark: EventHandler<
@@ -483,6 +495,7 @@ export class SidebarContainerLogic extends UILogic<
         const mutation = {
             pageType: { $set: event.type },
         }
+        console.log(mutation)
         this.emitMutation(mutation)
         await this._maybeLoad(previousState, mutation)
     }
@@ -494,15 +507,16 @@ export class SidebarContainerLogic extends UILogic<
         const mutation = {
             searchType: { $set: event.type },
         }
+        console.log(mutation)
         this.emitMutation(mutation)
         await this._maybeLoad(previousState, mutation)
     }
 
-    // setResultsSearchType: EventHandler<'setResultsSearchType'> = incoming => {
-    //     this.emitMutation({
-    //         resultsSearchType: { $set: incoming.event.type },
-    //     })
-    // }
+    setResultsSearchType: EventHandler<'setResultsSearchType'> = incoming => {
+        this.emitMutation({
+            resultsSearchType: { $set: incoming.event.type },
+        })
+    }
 
     setAnnotationsExpanded: EventHandler<
         'setAnnotationsExpanded'
@@ -554,5 +568,25 @@ export class SidebarContainerLogic extends UILogic<
         } else {
             await this._doSearch(nextState)
         }
+    }
+}
+
+const searchAnnotations = async (search: SearchInterface, query: string) => {
+    const result = await search.searchAnnotations({
+        query: query.length ? query : undefined,
+    })
+
+    const resultsByUrl: ResultsByUrl = new Map()
+    result.docs.forEach((doc, index) => {
+        resultsByUrl.set(doc.pageId, {
+            ...doc,
+            index,
+        })
+    })
+
+    return {
+        results: result.docs,
+        resultsByUrl,
+        annotsByDay: result['annotsByDay'],
     }
 }

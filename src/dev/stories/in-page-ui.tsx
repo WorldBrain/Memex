@@ -68,6 +68,7 @@ async function createDependencies() {
         annotationsManager: annotationManager,
         getSidebarEnabled: async () => true,
         setSidebarEnabled: async () => {},
+        search: background.backgroundModules.search.remoteFunctions.search,
         bookmarks:
             background.backgroundModules.search.remoteFunctions.bookmarks,
         tags: background.backgroundModules.tags.remoteFunctions,
@@ -82,29 +83,6 @@ async function createDependencies() {
                 }
             },
         ),
-        loadTagSuggestions: async () => [
-            'first suggestion',
-            'second suggestion',
-        ],
-        loadAnnotations: async pageUrl => {
-            return background.backgroundModules.directLinking.getAllAnnotationsByUrl(
-                { tab: null },
-                { url: pageUrl },
-            )
-        },
-        searchPages: async query => {
-            const result = await background.backgroundModules.search.searchPages(
-                {
-                    query: query.length ? query : undefined,
-                    contentTypes: {
-                        pages: true,
-                        notes: true,
-                        highlights: true,
-                    },
-                },
-            )
-            return result.docs
-        },
         searchAnnotations: async query => {
             const result = await background.backgroundModules.search.searchAnnotations(
                 {
