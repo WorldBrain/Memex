@@ -110,7 +110,7 @@ class ListPicker extends StatefulUIElement<
     }
 
     renderMainContent() {
-        if (this.state.loadingSuggestions || this.state.loadingQueryResults) {
+        if (this.state.loadingSuggestions) {
             return <InitLoader size={20} />
         }
 
@@ -122,6 +122,7 @@ class ListPicker extends StatefulUIElement<
                     onChange={this.handleSearchInputChanged}
                     onKeyPress={this.handleKeyPress}
                     value={this.state.query}
+                    loading={this.state.loadingQueryResults}
                     before={
                         <EntrySelectedList
                             ActiveEntry={ActiveList}
