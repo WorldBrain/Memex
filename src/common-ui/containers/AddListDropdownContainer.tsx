@@ -78,9 +78,9 @@ class AddListDropdownContainer extends Component<Props, State> {
         this.removeOpenTabsFromListRPC = remoteFunction(
             'removeOpenTabsFromList',
         )
-        this.fetchListByIdRPC = remoteFunction('fetchListById')
+        this.fetchListByIdRPC = remoteFunction('__fetchListById')
         this.fetchListNameSuggestionsRPC = remoteFunction(
-            'fetchListNameSuggestions',
+            '__fetchListNameSuggestions',
         )
 
         this.fetchListSuggestions = debounce(300)(this.fetchListSuggestions)
@@ -313,7 +313,10 @@ class AddListDropdownContainer extends Component<Props, State> {
 
         if (!multiEdit.has(list.id)) {
             multiEdit.add(list.id)
-            opPromise = this.addOpenTabsToListRPC({ listId: list.id })
+            opPromise = this.addOpenTabsToListRPC({
+                listId: list.id,
+                listName: list.name,
+            })
         } else {
             multiEdit.delete(list.id)
             opPromise = this.removeOpenTabsFromListRPC({ listId: list.id })

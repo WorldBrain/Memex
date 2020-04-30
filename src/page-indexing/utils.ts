@@ -16,7 +16,7 @@ export async function maybeIndexTabs(
 ) {
     const indexed: { fullUrl: string }[] = []
     await Promise.all(
-        tabs.map(async (tab) => {
+        tabs.map(async tab => {
             const page = await options.pageStorage.getPage(tab.url)
 
             let error = false

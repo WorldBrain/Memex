@@ -41,11 +41,11 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         this.setState(keyboardShortcutsState)
     }
 
-    handleEnabledToggle = async (e) => {
+    handleEnabledToggle = async e => {
         const name = e.target.name as string
         const enabled = e.target.checked as boolean
 
-        const reducer = (state) => {
+        const reducer = state => {
             if (name === 'shortcutsEnabled') {
                 analytics.trackEvent({
                     category: 'Settings',
@@ -63,7 +63,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         )
     }
 
-    recordBinding = async (e) => {
+    recordBinding = async e => {
         e.preventDefault()
 
         const name = e.target.name as string
@@ -71,8 +71,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         // Afford way of clearing shortcut
         if (['Escape', 'Backspace'].includes(e.key)) {
             this.setState(
-                (state) =>
-                    ({ [name]: { ...state[name], shortcut: '' } } as any),
+                state => ({ [name]: { ...state[name], shortcut: '' } } as any),
                 () => setKeyboardShortcutsState({ ...this.state }),
             )
             return
@@ -85,7 +84,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
         }
 
         this.setState(
-            (state) => ({ [name]: { ...state[name], shortcut } } as any),
+            state => ({ [name]: { ...state[name], shortcut } } as any),
             () => setKeyboardShortcutsState({ ...this.state }),
         )
     }
@@ -107,7 +106,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                             type="text"
                             value={this.state[name].shortcut}
                             onKeyDown={this.recordBinding}
-                            onChange={(e) => e.preventDefault()}
+                            onChange={e => e.preventDefault()}
                             disabled={!this.state.shortcutsEnabled}
                             name={name}
                         />{' '}

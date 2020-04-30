@@ -100,6 +100,7 @@ describe.skip('annots search plugin', () => {
             storageManager,
             searchIndex: {} as any,
             pageStorage: {} as any,
+            localBrowserStorage: {} as any,
         })
 
         await storageManager.finishInitialization()

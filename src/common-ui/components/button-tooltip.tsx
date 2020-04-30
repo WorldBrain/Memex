@@ -50,14 +50,14 @@ class ButtonTooltip extends React.Component<Props, State> {
         const { tooltipText, position } = this.props
 
         return (
-            <div 
-                ref={this.setTooltipRef} 
+            <div
+                ref={this.setTooltipRef}
                 className={cx(styles.tooltipContainer, {
-                            [styles.tooltipContainerBottom]:
-                                this.props.position === 'bottom',
-                            [styles.tooltipContainerCenterCenter]:
-                                this.props.position === 'CenterCenter',
-                            })}
+                    [styles.tooltipContainerBottom]:
+                        this.props.position === 'bottom',
+                    [styles.tooltipContainerCenterCenter]:
+                        this.props.position === 'CenterCenter',
+                })}
             >
                 {this.state.displayTooltip && (
                     <div
@@ -74,8 +74,7 @@ class ButtonTooltip extends React.Component<Props, State> {
                                 this.props.position === 'rightCentered',
                             [styles.tooltipBottom]:
                                 this.props.position === 'bottom',
-                            [styles.tooltipTop]: 
-                                this.props.position === 'top',
+                            [styles.tooltipTop]: this.props.position === 'top',
                             [styles.tooltipRightContentTooltip]:
                                 this.props.position === 'rightContentTooltip',
                             [styles.tooltipCenterCenter]:

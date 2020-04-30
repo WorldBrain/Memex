@@ -47,9 +47,15 @@ class EditModeContent extends React.Component<Props, State> {
     private _handleTagInputKeydown = (
         e: React.KeyboardEvent<HTMLDivElement>,
     ) => {
-        // Only check for `Tab` and `Shift + Tab`, handle rest of the events normally.
         if (e.key === 'Tab') {
             this._setTagInputActive(false)
+        }
+        if (e.key === 'Escape') {
+            if (this.state.isTagInputActive) {
+                this._setTagInputActive(false)
+                e.stopPropagation()
+                e.preventDefault()
+            }
         }
     }
 
@@ -58,7 +64,7 @@ class EditModeContent extends React.Component<Props, State> {
     }
 
     private _addTag = (tag: string) => {
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             tagsInput: [tag, ...prevState.tagsInput],
         }))
     }
@@ -66,7 +72,7 @@ class EditModeContent extends React.Component<Props, State> {
     private _deleteTag = (tag: string) => {
         const tagIndex = this.state.tagsInput.indexOf(tag)
         if (tagIndex !== -1) {
-            this.setState(prevState => ({
+            this.setState((prevState) => ({
                 tagsInput: [
                     ...prevState.tagsInput.slice(0, tagIndex),
                     ...prevState.tagsInput.slice(tagIndex + 1),
@@ -76,15 +82,15 @@ class EditModeContent extends React.Component<Props, State> {
     }
 
     private onEnterSaveHandler = {
-        test: e => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: e =>
+        test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+        handle: (e) =>
             this.props.handleEditAnnotation(
                 this.state.commentText,
                 this.state.tagsInput,
             ),
     }
 
-    private _handleCommentChange = commentText => {
+    private _handleCommentChange = (commentText) => {
         this.setState({ commentText })
     }
 

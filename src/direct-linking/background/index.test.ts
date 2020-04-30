@@ -125,6 +125,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             pageId: 'lorem.com',
                                             screenshot: undefined,
                                             tags: [],
+                                            lists: [],
                                             title: undefined,
                                             url: 'lorem.com',
                                             fullUrl: DATA.PAGE_1.fullUrl,
@@ -206,6 +207,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             pageId: 'lorem.com',
                                             screenshot: undefined,
                                             tags: [],
+                                            lists: [],
                                             title: undefined,
                                             url: 'lorem.com',
                                             fullUrl: DATA.PAGE_1.fullUrl,
@@ -223,7 +225,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         backgroundIntegrationTest(
             'should create a page, create an annotation, edit its note, then retrieve it via a filtered search on edit time',
             () => {
-                const runFilteredTimeSearch = setup =>
+                const runFilteredTimeSearch = (setup) =>
                     searchModule(setup).searchAnnotations({
                         startDate: DATA.ANNOT_1.createdWhen.getTime() + 1000,
                     })
@@ -316,7 +318,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         backgroundIntegrationTest(
             'should create a page, create an annotation, tag it, retrieve it via a filtered search, then untag it, no longer being able to retrieve it via the same search',
             () => {
-                const runFilteredTagSearch = setup =>
+                const runFilteredTagSearch = (setup) =>
                     searchModule(setup).searchAnnotations({
                         tagsInc: [DATA.TAG_1],
                     })
@@ -389,6 +391,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             pageId: 'lorem.com',
                                             screenshot: undefined,
                                             tags: [],
+                                            lists: [],
                                             title: undefined,
                                             url: 'lorem.com',
                                             fullUrl: DATA.PAGE_1.fullUrl,
@@ -507,6 +510,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             pageId: 'lorem.com',
                                             screenshot: undefined,
                                             tags: [],
+                                            lists: [],
                                             title: undefined,
                                             url: 'lorem.com',
                                             fullUrl: 'https://www.lorem.com',

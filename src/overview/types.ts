@@ -10,10 +10,12 @@ export interface Result extends SocialPage {
     fullUrl: string
     title: string
     tags: string[]
+    lists: string[]
     hasBookmark: boolean
     isDeleting: boolean
     tagPillsData: string[]
     shouldDisplayTagPopup: boolean
+    shouldDisplayListPopup: boolean
     displayTime: number
     screenshot: string
     favIcon: string

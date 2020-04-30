@@ -237,7 +237,7 @@ async function runSyncBackgroundTest(options: {
                 const executedOperations = setup.storageOperationLogger.popOperations()
                 expect(
                     executedOperations.filter(
-                        (entry) => entry.operation[1] !== 'clientSyncLogEntry',
+                        entry => entry.operation[1] !== 'clientSyncLogEntry',
                     ),
                 ).toEqual(integrationTestStep.expectedStorageOperations())
             }
@@ -299,7 +299,7 @@ async function setupSyncBackgroundTest(options: {
         const setup = setups[deviceIndex]
         await setup.backgroundModules.sync.continuousSync.doIncrementalSync({
             debug: syncOptions.debug,
-            prettifier: (object) =>
+            prettifier: object =>
                 require('util').inspect(object, {
                     depth: null,
                     color: true,

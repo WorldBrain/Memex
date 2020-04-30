@@ -48,7 +48,7 @@ async function setupTest() {
 }
 
 describe('Custom List Integrations', () => {
-    const checkDefined = currPage => {
+    const checkDefined = (currPage) => {
         expect(currPage).toBeDefined()
         expect(currPage).not.toBeNull()
     }
@@ -123,7 +123,7 @@ describe('Custom List Integrations', () => {
         test('fetch suggestions based on list names', async () => {
             const { customLists } = await setupTest()
 
-            const lists = await customLists.fetchListNameSuggestions({
+            const lists = await customLists.__fetchListNameSuggestions({
                 name: 'Go',
                 url: 'https://www.ipsum.com/test',
             })
@@ -132,6 +132,14 @@ describe('Custom List Integrations', () => {
 
             expect(lists.length).toBe(1)
             expect(lists[0].active).toBe(true)
+
+            expect(
+                await customLists.searchForListSuggestions({ query: 'Go' }),
+            ).toEqual([DATA.LIST_2.name])
+
+            expect(
+                await customLists.searchForListSuggestions({ query: 'some' }),
+            ).toEqual([DATA.LIST_1.name, DATA.LIST_3.name])
         })
 
         test('Case insensitive name search', async () => {
@@ -145,15 +153,19 @@ describe('Custom List Integrations', () => {
             expect(list.name).toBe('some good things')
         })
 
-        test('fetch Pages associated with list by url', async () => {
+        test('fetch list associated with page by url', async () => {
+            const url = DATA.PAGE_ENTRY_1.url
             const { customLists } = await setupTest()
 
-            const lists = await customLists.fetchListPagesByUrl({
-                url: 'https://www.ipsum.com/test',
-            })
+            const lists = await customLists.fetchListPagesByUrl({ url })
 
             checkDefined(lists)
             expect(lists.length).toBe(2)
+
+            expect(await customLists.fetchPageLists({ url })).toEqual([
+                DATA.LIST_1.name,
+                DATA.LIST_2.name,
+            ])
         })
 
         test('fetch lists with some urls excluded', async () => {
@@ -226,6 +238,76 @@ describe('Custom List Integrations', () => {
             const pagesAfter = await customLists.fetchListPagesById({ id: 1 })
             // No of pages deleted
             expect(pagesBefore.length - pagesAfter.length).toBe(1)
+        })
+    })
+})
+
+describe('Collection Cache', () => {
+    async function setupTest() {
+        const setup = await setupBackgroundIntegrationTest()
+        const listsModule = setup.backgroundModules.customLists
+        return { listsModule }
+    }
+
+    describe('modifies cache', () => {
+        test('add lists', async () => {
+            const { listsModule } = await setupTest()
+
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
+            await listsModule.createCustomList(DATA.LIST_1)
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.createCustomList(DATA.LIST_2)
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_2.name,
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.createCustomList(DATA.LIST_3)
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_3.name,
+                DATA.LIST_2.name,
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.createCustomList(DATA.LIST_2)
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_2.name,
+                DATA.LIST_3.name,
+                DATA.LIST_1.name,
+            ])
+        })
+
+        test("adding new page entry for non-existent list doesn't add dupe cache entries", async () => {
+            const { listsModule } = await setupTest()
+
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([])
+            await listsModule.updateListForPage({
+                added: DATA.LIST_1.name,
+                url: 'https://www.ipsum.com/test',
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.updateListForPage({
+                added: DATA.LIST_1.name,
+                url: 'https://www.ipsum.com/test1',
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_1.name,
+            ])
+
+            await listsModule.updateListForPage({
+                added: DATA.LIST_2.name,
+                url: 'https://www.ipsum.com/test',
+            })
+            expect(await listsModule.fetchInitialListSuggestions()).toEqual([
+                DATA.LIST_2.name,
+                DATA.LIST_1.name,
+            ])
         })
     })
 })

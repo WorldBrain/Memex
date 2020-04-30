@@ -4,12 +4,12 @@ import classNames from 'classnames'
 
 import styles from './Notification.css'
 
-const hasOnlyButton = (hasButton) =>
+const hasOnlyButton = hasButton =>
     classNames(styles.buttonTick, {
         [styles.onlyTick]: !hasButton,
     })
 
-const Notification = (props) => (
+const Notification = props => (
     <li>
         <div className={styles.mainNotifContainer}>
             <div className={styles.notifContainer}>

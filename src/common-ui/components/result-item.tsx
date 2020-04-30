@@ -23,6 +23,7 @@ export interface Props extends Partial<SocialPage> {
     displayTime?: string
     isDeleting: boolean
     tags: string[]
+    lists: string[]
     hasBookmark?: boolean
     isSidebarOpen?: boolean
     isListFilterActive: boolean
@@ -35,7 +36,9 @@ export interface Props extends Partial<SocialPage> {
     annotsCount?: number
     tagHolder: ReactNode
     tagManager: ReactNode
+    listManager: ReactNode
     onTagBtnClick: MouseEventHandler
+    onListBtnClick: MouseEventHandler
     onTrashBtnClick: MouseEventHandler
     onCommentBtnClick: MouseEventHandler
     onToggleBookmarkClick: MouseEventHandler
@@ -43,6 +46,7 @@ export interface Props extends Partial<SocialPage> {
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
     setTagButtonRef: (el: HTMLElement) => void
+    setListButtonRef: (el: HTMLElement) => void
 }
 
 class ResultItem extends PureComponent<Props> {
@@ -58,7 +62,7 @@ class ResultItem extends PureComponent<Props> {
         }
     }
 
-    dragStart: DragEventHandler = e => {
+    dragStart: DragEventHandler = (e) => {
         const { url, setUrlDragged, isSocial } = this.props
 
         setUrlDragged(url)
@@ -106,6 +110,7 @@ class ResultItem extends PureComponent<Props> {
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
                 {this.props.tagManager}
+                {this.props.listManager}
                 <div
                     className={cx(styles.rootContainer, {
                         [styles.tweetRootContainer]: this.props.isSocial,

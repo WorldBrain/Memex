@@ -160,12 +160,18 @@
     transition: 0.2s cubic-bezier(0.55, 0.09, 0.68, 0.53);
 }
 
+.active {
+    background-color: #dadada;
+    border-radius: 3px;
+    background-size: 80%;
+}
+
 .search {
     background-image: url('/img/search.svg');
 }
 
 .tag {
-    background-image: url('/img/tag.svg');
+    background-image: url('/img/tag_empty.svg');
 }
 
 .collection {

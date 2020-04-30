@@ -40,9 +40,9 @@ export const setDomainDelete = createAction<boolean>(
     'blacklist/setDomainDelete',
 )
 
-export const addURLToBlacklist: (flag: boolean) => Thunk = (
-    isDomainChoice,
-) => async (dispatch, getState) => {
+export const addURLToBlacklist: (
+    flag: boolean,
+) => Thunk = isDomainChoice => async (dispatch, getState) => {
     const state = getState()
 
     analytics.trackEvent({
@@ -92,7 +92,7 @@ export const deleteBlacklistData: () => Thunk = () => async (
         dispatch(setShowBlacklistDelete(false))
     } catch (err) {
         handleDBQuotaErrors(
-            (error) =>
+            error =>
                 notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: deleting page',

@@ -112,21 +112,24 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         tabManager,
     })
+
+    const search = new SearchBackground({
+        storageManager,
+        pages,
+        idx: searchIndex,
+        tabMan: tabManager,
+        browserAPIs: options.browserAPIs,
+    })
+
     const tags = new TagsBackground({
         storageManager,
         pageStorage: pages.storage,
         searchIndex,
         queryTabs: bindMethod(browser.tabs, 'query'),
         windows: browser.windows,
+        searchBackgroundModule: search,
         analytics,
-    })
-    const search = new SearchBackground({
-        storageManager,
-        tags,
-        pages,
-        idx: searchIndex,
-        tabMan: tabManager,
-        browserAPIs: options.browserAPIs,
+        localBrowserStorage: options.browserAPIs.storage.local,
     })
 
     const notifications = new NotificationBackground({ storageManager })
@@ -195,6 +198,7 @@ export function createBackgroundModules(options: {
             windows: browser.windows,
             searchIndex: search.searchIndex,
             pageStorage: pages.storage,
+            localBrowserStorage: options.browserAPIs.storage.local,
         }),
         tags,
         bookmarks,

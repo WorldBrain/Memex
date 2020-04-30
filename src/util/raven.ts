@@ -10,9 +10,9 @@ const raven = AllRaven['default']
 let sentryEnabled = false
 
 // Init the enabled state based on stored flag
-browser.storage.local // tslint:disable-line
+browser.storage.local
     .get(SHOULD_TRACK)
-    .then((storage) => (sentryEnabled = !!storage[SHOULD_TRACK]))
+    .then(storage => (sentryEnabled = !!storage[SHOULD_TRACK]))
 
 /**
  * Inits Sentry's JS client Raven. Optionally supports adding redux middleware,
@@ -20,7 +20,7 @@ browser.storage.local // tslint:disable-line
  */
 export default function initSentry({
     reduxMiddlewares,
-    stateTransformer = (f) => f,
+    stateTransformer = f => f,
     storageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     }),

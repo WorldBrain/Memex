@@ -1032,6 +1032,7 @@ function mobileSyncTests(suiteOptions: {
                     hasBookmark: true,
                     screenshot: undefined,
                     tags: ['eggs', 'spam'],
+                    lists: ['widgets'],
                     title: 'This is a test page',
                     url: 'test.com/foo',
                     fullUrl: testPage.fullUrl,

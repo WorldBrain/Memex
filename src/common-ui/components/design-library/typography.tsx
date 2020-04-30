@@ -4,6 +4,7 @@ import {
     colorText,
 } from 'src/common-ui/components/design-library/colors'
 
+export const fontSizeSmallest = 12
 export const fontSizeSmall = 13
 export const fontSizeNormal = 14
 export const fontSizeBig = 17
@@ -148,4 +149,8 @@ export const WhiteSpacer20 = styled.div`
 
 export const WhiteSpacer30 = styled.div`
     margin-top: 30px;
+`
+
+export const HoverColor = styled.div`
+    background-color: #dadada
 `
