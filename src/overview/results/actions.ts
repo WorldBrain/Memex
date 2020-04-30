@@ -26,6 +26,16 @@ export const delTag = createAction('results/localDelTag', (tag, index) => ({
     index,
 }))
 
+export const addList = createAction('results/localAddList', (list, index) => ({
+    list,
+    index,
+}))
+
+export const delList = createAction('results/localDelList', (list, index) => ({
+    list,
+    index,
+}))
+
 export const setShowOnboardingMessage = createAction<boolean>(
     'results/setShowOnboardingMessage',
 )
@@ -47,6 +57,10 @@ export const setAreAnnotationsExpanded = createAction<boolean>(
 )
 export const toggleAreAnnotationsExpanded = createAction(
     'results/toggleAreAnnotationsExpanded',
+)
+export const resetActiveListIndex = createAction('results/resetActiveListIndex')
+export const setActiveListIndex = createAction<number>(
+    'results/setActiveListIndex',
 )
 export const resetActiveTagIndex = createAction('results/resetActiveTagIndex')
 export const setActiveTagIndex = createAction<number>(
@@ -99,7 +113,7 @@ export const toggleBookmark: (args: {
     } catch (err) {
         dispatch(changeHasBookmark(index))
         handleDBQuotaErrors(
-            error =>
+            (error) =>
                 notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: starring page',
@@ -124,7 +138,7 @@ export const updateSearchResult: (a: any) => Thunk = ({
 }
 
 // Egg
-export const easter: () => Thunk = () => dispatch =>
+export const easter: () => Thunk = () => (dispatch) =>
     dispatch(
         updateSearchResult({
             overwrite: true,
@@ -145,13 +159,31 @@ export const easter: () => Thunk = () => dispatch =>
         }),
     )
 
-export const showTags: (i: number) => Thunk = index => (dispatch, getState) => {
+export const toggleShowTagsPicker: (i: number) => Thunk = (index) => (
+    dispatch,
+    getState,
+) => {
     const activeTagIndex = selectors.activeTagIndex(getState())
 
     if (activeTagIndex === index) {
         dispatch(resetActiveTagIndex())
     } else {
+        dispatch(resetActiveListIndex())
         dispatch(setActiveTagIndex(index))
+    }
+}
+
+export const toggleShowListsPicker: (i: number) => Thunk = (index) => (
+    dispatch,
+    getState,
+) => {
+    const activeListIndex = selectors.activeListIndex(getState())
+
+    if (activeListIndex === index) {
+        dispatch(resetActiveListIndex())
+    } else {
+        dispatch(resetActiveTagIndex())
+        dispatch(setActiveListIndex(index))
     }
 }
 
@@ -160,7 +192,7 @@ export const showTags: (i: number) => Thunk = index => (dispatch, getState) => {
  */
 export const getMoreResults: (fromOverview?: boolean) => Thunk = (
     fromOverview = true,
-) => dispatch => {
+) => (dispatch) => {
     dispatch(nextPage())
     dispatch(searchBarActs.search({ fromOverview }))
 }

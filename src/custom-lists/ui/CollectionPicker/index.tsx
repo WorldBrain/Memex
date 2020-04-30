@@ -1,11 +1,11 @@
 import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import TagPickerLogic, {
-    TagPickerDependencies,
-    TagPickerEvent,
-    TagPickerState,
-} from 'src/tags/ui/TagPicker/logic'
+import ListPickerLogic, {
+    ListPickerDependencies,
+    ListPickerEvent,
+    ListPickerState,
+} from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PickerSearchInput } from 'src/common-ui/GenericPicker/components/SearchInput'
 import AddNewEntry from 'src/common-ui/GenericPicker/components/AddNewEntry'
 import { InitLoader } from 'src/common-ui/GenericPicker/components/InitLoader'
@@ -19,16 +19,17 @@ import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
-import { TagResultItem } from './components/TagResultItem'
-import { ActiveTag } from './components/ActiveTag'
+import { ListResultItem } from './components/ListResultItem'
+import { ActiveList } from './components/ActiveList'
+import { LoadingIndicator } from 'src/common-ui/components'
 
-class TagPicker extends StatefulUIElement<
-    TagPickerDependencies,
-    TagPickerState,
-    TagPickerEvent
+class ListPicker extends StatefulUIElement<
+    ListPickerDependencies,
+    ListPickerState,
+    ListPickerEvent
 > {
-    constructor(props: TagPickerDependencies) {
-        super(props, new TagPickerLogic(props))
+    constructor(props: ListPickerDependencies) {
+        super(props, new ListPickerLogic(props))
     }
 
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
@@ -39,51 +40,54 @@ class TagPicker extends StatefulUIElement<
         return this.processEvent('searchInputChanged', { query })
     }
 
-    handleSelectedTagPress = (tag: string) =>
-        this.processEvent('selectedEntryPress', { entry: tag })
+    handleSelectedListPress = (list: string) =>
+        this.processEvent('selectedEntryPress', { entry: list })
 
-    handleResultTagPress = (tag: DisplayEntry) =>
-        this.processEvent('resultEntryPress', { entry: tag })
+    handleResultListPress = (list: DisplayEntry) =>
+        this.processEvent('resultEntryPress', { entry: list })
 
-    handleResultTagAllPress = (tag: DisplayEntry) =>
-        this.processEvent('resultEntryAllPress', { entry: tag })
+    handleResultListAllPress = (list: DisplayEntry) =>
+        this.processEvent('resultEntryAllPress', { entry: list })
 
-    handleNewTagAllPress = () => this.processEvent('newEntryAllPress', {})
+    handleNewListAllPress = () => this.processEvent('newEntryAllPress', {})
 
-    handleResultTagFocus = (tag: DisplayEntry, index?: number) =>
-        this.processEvent('resultEntryFocus', { entry: tag, index })
+    handleResultListFocus = (list: DisplayEntry, index?: number) =>
+        this.processEvent('resultEntryFocus', { entry: list, index })
 
-    handleNewTagPress = () =>
+    handleNewListPress = () =>
         this.processEvent('newEntryPress', { entry: this.state.newEntryName })
 
     handleKeyPress = (key: KeyEvent) => this.processEvent('keyPress', { key })
 
-    renderTagRow = (tag: DisplayEntry, index: number) => (
+    renderListRow = (list: DisplayEntry, index: number) => (
         <EntryRow
-            onPress={this.handleResultTagPress}
+            onPress={this.handleResultListPress}
             onPressActOnAll={
                 this.props.actOnAllTabs
-                    ? (t) => this.handleResultTagAllPress(t)
+                    ? (t) => this.handleResultListAllPress(t)
                     : undefined
             }
-            onFocus={this.handleResultTagFocus}
-            key={`TagKeyName-${tag.name}`}
+            onFocus={this.handleResultListFocus}
+            key={`ListKeyName-${list.name}`}
             index={index}
-            name={tag.name}
-            focused={tag.focused}
-            selected={tag.selected}
-            ResultItem={TagResultItem}
-            removeTooltipText="Remove tag from page"
-            actOnAllTooltipText="Tag all tabs in window"
+            name={list.name}
+            selected={list.selected}
+            focused={list.focused}
+            ResultItem={ListResultItem}
+            removeTooltipText="Remove from list"
+            actOnAllTooltipText="Add all tabs in window to list"
         />
     )
 
-    renderNewTagAllTabsButton = () => (
+    renderNewListAllTabsButton = () => (
         <IconStyleWrapper show>
-            <ButtonTooltip tooltipText="Tag all tabs in window" position="left">
+            <ButtonTooltip
+                tooltipText="List all tabs in window"
+                position="left"
+            >
                 <ActOnAllTabsButton
                     size={20}
-                    onClick={this.handleNewTagAllPress}
+                    onClick={this.handleNewListAllPress}
                 />
             </ButtonTooltip>
         </IconStyleWrapper>
@@ -95,13 +99,13 @@ class TagPicker extends StatefulUIElement<
         }
 
         return (
-            <EmptyTagsView>
-                <strong>No Tags yet</strong>
+            <EmptyListsView>
+                <strong>No Collections yet</strong>
                 <br />
-                Add new tags
+                Add new collections
                 <br />
                 via the search bar
-            </EmptyTagsView>
+            </EmptyListsView>
         )
     }
 
@@ -121,30 +125,30 @@ class TagPicker extends StatefulUIElement<
                     loading={this.state.loadingQueryResults}
                     before={
                         <EntrySelectedList
-                            ActiveEntry={ActiveTag}
-                            dataAttributeName="tag-name"
+                            ActiveEntry={ActiveList}
+                            dataAttributeName="list-name"
                             entriesSelected={this.state.selectedEntries}
-                            onPress={this.handleSelectedTagPress}
+                            onPress={this.handleSelectedListPress}
                         />
                     }
                 />
                 {this.state.newEntryName !== '' && (
                     <AddNewEntry
                         resultItem={
-                            <TagResultItem>
+                            <ListResultItem>
                                 {this.state.newEntryName}
-                            </TagResultItem>
+                            </ListResultItem>
                         }
-                        onPress={this.handleNewTagPress}
+                        onPress={this.handleNewListPress}
                     >
-                        {this.renderNewTagAllTabsButton}
+                        {this.renderNewListAllTabsButton}
                     </AddNewEntry>
                 )}
                 <EntryResultsList
                     entries={this.state.displayEntries}
-                    renderEntryRow={this.renderTagRow}
+                    renderEntryRow={this.renderListRow}
                     emptyView={this.renderEmptyList()}
-                    id="tagResults"
+                    id="listResults"
                 />
             </>
         )
@@ -172,7 +176,7 @@ const OuterSearchBox = styled.div`
     border-radius: 3px;
 `
 
-const EmptyTagsView = styled.div`
+const EmptyListsView = styled.div`
     color: ${(props) => props.theme.tag.text};
     padding: 10px 15px;
     font-weight: 400;
@@ -180,4 +184,4 @@ const EmptyTagsView = styled.div`
     text-align: center;
 `
 
-export default TagPicker
+export default ListPicker

@@ -44,9 +44,9 @@ class TagAnnotationContainer extends React.Component<Props> {
     render = () => (
         <TagPicker
             loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
-            queryTags={this.handleTagQuery}
-            onUpdateTagSelection={this.handleTagsUpdate}
-            initialSelectedTags={this.fetchTagsForAnnotation}
+            queryEntries={this.handleTagQuery}
+            onUpdateEntrySelection={this.handleTagsUpdate}
+            initialSelectedEntries={this.fetchTagsForAnnotation}
         />
     )
 }

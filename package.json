@@ -141,6 +141,7 @@
         "@storybook/addon-knobs": "^5.3.14",
         "@storybook/addons": "^5.2.6",
         "@storybook/react": "^5.2.6",
+        "@testing-library/dom": "^7.2.2",
         "@testing-library/jest-dom": "^5.1.1",
         "@testing-library/react": "^9.4.1",
         "@types/jest": "^25.1.4",

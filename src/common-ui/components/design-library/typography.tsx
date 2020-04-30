@@ -150,3 +150,7 @@ export const WhiteSpacer20 = styled.div`
 export const WhiteSpacer30 = styled.div`
     margin-top: 30px;
 `
+
+export const HoverColor = styled.div`
+    background-color: #dadada
+`

@@ -65,7 +65,7 @@ export default class TagsBackground {
         this._createPageFromTab = options.searchIndex.createPageFromTab
         this.localStorage = new BrowserSettingsStore<TagsSettings>(
             options.localBrowserStorage,
-            { prefix: 'tags' },
+            { prefix: 'tags_' },
         )
     }
 
@@ -103,7 +103,7 @@ export default class TagsBackground {
     async _updateTagSuggestionsCache({ added }) {
         let suggestions = (await this.localStorage.get('suggestions')) ?? []
         const tagIndex = suggestions.indexOf(added)
-        if (tagIndex) {
+        if (tagIndex !== -1) {
             delete suggestions[tagIndex]
             suggestions = suggestions.filter(Boolean)
         }
@@ -118,7 +118,7 @@ export default class TagsBackground {
         time?: number
     }) {
         const tabs =
-            params.tabs ||
+            params.tabs ??
             (await getOpenTabsInCurrentWindow(
                 this.windows,
                 this.options.queryTabs,
@@ -134,7 +134,8 @@ export default class TagsBackground {
             name: params.name,
             urls: indexed.map((tab) => tab.fullUrl),
         })
-        this._updateTagSuggestionsCache({ added: name })
+
+        this._updateTagSuggestionsCache({ added: params.name })
     }
 
     async delTagsFromOpenTabs({
