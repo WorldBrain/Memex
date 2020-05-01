@@ -33,5 +33,12 @@ export interface InPageUIInterface {
     }): void
     hideSidebar(): void
     toggleSidebar(): void
+
+    setupTooltip(): void
+    showTooltip(): void
+    hideTooltip(): void
+    removeTooltip(): void
+    toggleTooltipSetUp(): void
+
     toggleHighlights(): void
 }

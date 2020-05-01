@@ -55,7 +55,7 @@ async function _getCloseMessageShown() {
 let target = null
 let showTooltip = null
 
-/* Denotes whether the user inserted/removed tooltip by his/her own self. */
+/* Denotes whether the user inserted/removed tooltip themselves. */
 let manualOverride = false
 
 /**
@@ -131,7 +131,9 @@ export const insertTooltip = async (params: {
     })
 }
 
-export const removeTooltip = () => {
+export const removeTooltip = (options?: { override?: boolean }) => {
+    manualOverride = !!options?.override
+
     if (!target) {
         return
     }
@@ -148,24 +150,24 @@ export const removeTooltip = () => {
  * Should either be called through the RPC, or pass the `toolbarNotifications`
  * wrapped in an object.
  */
-const insertOrRemoveTooltip = async (params: {
-    toolbarNotifications: any
-    inPageUI: InPageUIInterface
-    annotationsManager: AnnotationsManagerInterface
-}) => {
-    if (manualOverride) {
-        return
-    }
+// const insertOrRemoveTooltip = async (params: {
+//     toolbarNotifications: any
+//     inPageUI: InPageUIInterface
+//     annotationsManager: AnnotationsManagerInterface
+// }) => {
+//     if (manualOverride) {
+//         return
+//     }
 
-    const isTooltipEnabled = await getTooltipState()
-    const isTooltipPresent = !!target
+//     const isTooltipEnabled = await getTooltipState()
+//     const isTooltipPresent = !!target
 
-    if (isTooltipEnabled && !isTooltipPresent) {
-        insertTooltip(params)
-    } else if (!isTooltipEnabled && isTooltipPresent) {
-        removeTooltip()
-    }
-}
+//     if (isTooltipEnabled && !isTooltipPresent) {
+//         insertTooltip(params)
+//     } else if (!isTooltipEnabled && isTooltipPresent) {
+//         removeTooltip()
+//     }
+// }
 
 /**
  * Sets up RPC functions to insert and remove Tooltip from Popup.
@@ -175,28 +177,35 @@ export const setupRPC = (params: {
     inPageUI: InPageUIInterface
     annotationsManager: AnnotationsManagerInterface
 }) => {
-    makeRemotelyCallableType<TooltipInteractionInterface>({
-        showContentTooltip: async () => {
-            if (!showTooltip) {
-                await insertTooltip(params)
-            }
-            if (userSelectedText()) {
-                const position = calculateTooltipPostion()
-                showTooltip(position)
-            }
-        },
-        insertTooltip: async ({ override } = {}) => {
-            manualOverride = !!override
-            await insertTooltip(params)
-        },
-        removeTooltip: async ({ override } = {}) => {
-            manualOverride = !!override
-            await removeTooltip()
-        },
-        insertOrRemoveTooltip: async () => {
-            await insertOrRemoveTooltip(params)
-        },
-    })
+    // makeRemotelyCallableType<TooltipInteractionInterface>({
+    //     showContentTooltip: async () => {
+    //     },
+    //     insertTooltip: async ({ override } = {}) => {
+    //         manualOverride = !!override
+    //         await insertTooltip(params)
+    //     },
+    //     removeTooltip: async ({ override } = {}) => {
+    //         manualOverride = !!override
+    //         await removeTooltip()
+    //     },
+    //     insertOrRemoveTooltip: async () => {
+    //         await insertOrRemoveTooltip(params)
+    //     },
+    // })
+}
+
+export const showContentTooltip = async (params: {
+    toolbarNotifications: any
+    inPageUI: InPageUIInterface
+    annotationsManager: AnnotationsManagerInterface
+}) => {
+    if (!showTooltip) {
+        await insertTooltip(params)
+    }
+    if (userSelectedText()) {
+        const position = calculateTooltipPostion()
+        showTooltip(position)
+    }
 }
 
 /**

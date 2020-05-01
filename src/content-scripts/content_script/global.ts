@@ -102,8 +102,10 @@ export async function main() {
         showSidebar: async () => inPageUI.showSidebar(),
         insertRibbon: async () => inPageUI.loadComponent('ribbon'),
         removeRibbon: async () => inPageUI.removeRibbon(),
-        insertTooltip: async () => {},
-        removeTooltip: async () => {},
+        showContentTooltip: async () => inPageUI.showTooltip(),
+        insertTooltip: async () => inPageUI.loadComponent('tooltip'),
+        removeTooltip: async () => inPageUI.removeTooltip(),
+        insertOrRemoveTooltip: async () => inPageUI.toggleTooltipSetUp(),
     })
 
     setupScrollReporter()
@@ -121,7 +123,7 @@ export async function main() {
     }
 
     if (await getTooltipState()) {
-        await loadComponent('tooltip')
+        await inPageUI.setupTooltip()
     }
 
     // if (window.location.hostname === 'worldbrain.io') {

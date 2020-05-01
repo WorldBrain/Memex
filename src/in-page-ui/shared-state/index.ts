@@ -47,27 +47,14 @@ export class InPageUI implements InPageUIInterface {
             return
         }
 
-        await this.loadComponent('sidebar')
-        this.state.sidebar = true
+        this.loadComponent('sidebar')
         this.showRibbon()
-        this.events.emit('stateChanged', {
-            newState: this.state,
-            changes: { sidebar: this.state.sidebar },
-        })
+        this._setState('sidebar', true)
         maybeEmitAction()
     }
 
     hideSidebar() {
-        if (!this.state.sidebar) {
-            return
-        }
-
-        // this.options.sidebarController.hideSidebar()
-        this.state.sidebar = false
-        this.events.emit('stateChanged', {
-            newState: this.state,
-            changes: { sidebar: this.state.sidebar },
-        })
+        this._setState('sidebar', false)
     }
 
     toggleSidebar(): void {
@@ -96,25 +83,13 @@ export class InPageUI implements InPageUIInterface {
         }
 
         await this.loadComponent('ribbon')
-        this.state.ribbon = true
-        this.events.emit('stateChanged', {
-            newState: this.state,
-            changes: { ribbon: this.state.ribbon },
-        })
+        this._setState('ribbon', true)
         this.loadComponent('sidebar')
         maybeEmitAction()
     }
 
     hideRibbon() {
-        if (!this.state.ribbon) {
-            return
-        }
-
-        this.state.ribbon = false
-        this.events.emit('stateChanged', {
-            newState: this.state,
-            changes: { ribbon: this.state.ribbon },
-        })
+        this._setState('ribbon', false)
     }
 
     removeRibbon() {
@@ -124,13 +99,53 @@ export class InPageUI implements InPageUIInterface {
         this._removeComponent('ribbon')
     }
 
+    async setupTooltip() {
+        await this.loadComponent('tooltip')
+    }
+
+    async showTooltip() {
+        await this._setState('tooltip', true)
+    }
+
+    async hideTooltip() {
+        await this._setState('tooltip', false)
+    }
+
+    async removeTooltip() {
+        await this._removeComponent('tooltip')
+    }
+
+    async toggleTooltipSetUp() {
+        if (this.componentsSetUp.tooltip) {
+            await this.removeTooltip()
+        } else {
+            await this.loadComponent('tooltip')
+        }
+    }
+
+    toggleHighlights(): void {}
+
+    async _setState(component: InPageUIComponent, visible: boolean) {
+        if (this.state[component] === visible) {
+            return
+        }
+
+        if (visible) {
+            await this.loadComponent(component)
+        }
+
+        this.state[component] = visible
+        this.events.emit('stateChanged', {
+            newState: this.state,
+            changes: { [component]: this.state[component] },
+        })
+    }
+
     _removeComponent(component: InPageUIComponent) {
         this.state[component] = false
         this.componentsSetUp[component] = false
         this.events.emit('componentShouldDestroy', { component })
     }
-
-    toggleHighlights(): void {}
 
     _maybeEmitShouldSetUp(component: InPageUIComponent) {
         if (!this.componentsSetUp[component]) {

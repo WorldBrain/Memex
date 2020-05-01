@@ -11,11 +11,11 @@ export function setupUIContainer(
         createAnnotation,
         createHighlight,
     },
-) {
-    return new Promise(async resolve => {
+): Promise<() => void> {
+    return new Promise(async (resolve) => {
         ReactDOM.render(
             <TooltipContainer
-                onInit={showTooltip => resolve(showTooltip)}
+                onInit={(showTooltip) => resolve(showTooltip)}
                 destroy={destroyTooltip}
                 createAndCopyDirectLink={createAndCopyDirectLink}
                 createAnnotation={createAnnotation}
