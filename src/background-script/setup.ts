@@ -268,8 +268,6 @@ export async function setupBackgroundModules(
     backgroundModules.activityLogger.setupRemoteFunctions()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
-    backgroundModules.customLists.setupRemoteFunctions()
-    backgroundModules.tags.setupRemoteFunctions()
     backgroundModules.backupModule.setBackendFromStorage()
     backgroundModules.backupModule.setupRemoteFunctions()
     backgroundModules.backupModule.startRecordingChangesIfNeeded()

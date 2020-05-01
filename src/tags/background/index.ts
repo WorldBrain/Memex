@@ -69,10 +69,6 @@ export default class TagsBackground {
         )
     }
 
-    setupRemoteFunctions() {
-        makeRemotelyCallableType<RemoteTagsInterface>(this.remoteFunctions)
-    }
-
     async searchForTagSuggestions(args: { query: string; limit?: number }) {
         return this.options.searchBackgroundModule.storage.suggest({
             type: 'tag',

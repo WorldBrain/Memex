@@ -90,10 +90,6 @@ export default class CustomListBackground {
         )
     }
 
-    setupRemoteFunctions() {
-        makeRemotelyCallable<RemoteCollectionsInterface>(this.remoteFunctions)
-    }
-
     generateListId() {
         return Date.now()
     }

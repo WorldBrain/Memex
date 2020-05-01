@@ -32,6 +32,10 @@ import { SearchInterface } from 'src/search/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import { getTooltipState } from 'src/in-page-ui/tooltip/utils'
 
+// Set this up globally to prevent race conditions
+// TODO: Fix this with a proper restructuring of how pages are indexed
+setupPageContentRPC()
+
 export async function main() {
     const components: {
         ribbon?: Resolvable<void>
@@ -103,7 +107,6 @@ export async function main() {
     })
 
     setupScrollReporter()
-    setupPageContentRPC()
     loadAnnotationWhenReady()
     setupRemoteDirectLinkFunction()
     initKeyboardShortcuts(inPageUI)
