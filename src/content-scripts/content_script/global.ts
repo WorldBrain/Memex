@@ -34,9 +34,7 @@ import { getTooltipState } from 'src/in-page-ui/tooltip/utils'
 
 // Set this up globally to prevent race conditions
 // TODO: Fix this with a proper restructuring of how pages are indexed
-console.log('setting up page content RPC')
 setupPageContentRPC()
-console.log('set up page content RPC')
 
 export async function main() {
     const components: {
