@@ -7,9 +7,9 @@ export interface State {
     /** Denotes whether or not the popup should show the collections picker. */
     showCollectionsPicker: boolean
     /** Holds the collections associated with the page. */
-    collections: PageList[]
+    collections: string[]
     /** Holds the initial list suggestions to display for user list search. */
-    initCollSuggestions: PageList[]
+    initCollSuggestions: string[]
     /** Denotes whether or not the popup should show the tags picker for multiedit. */
     allTabs: boolean
 }
@@ -46,31 +46,25 @@ reducer.on(acts.setInitColls, (state, payload) => ({
 reducer.on(acts.addCollection, (state, payload) => {
     // Create a new suggested collection if it doesn't already exist, otherwise
     // just move it the front.
-    const index = state.initCollSuggestions.findIndex(
-        collection => collection.id === payload.id,
-    )
+    const index = state.initCollSuggestions.indexOf(payload)
     const initCollSuggestions =
         index === -1
-            ? [{ ...payload, active: true }, ...state.initCollSuggestions]
+            ? [payload, ...state.initCollSuggestions]
             : [
-                  { ...payload, active: true },
+                  payload,
                   ...state.initCollSuggestions.slice(0, index),
                   ...state.initCollSuggestions.slice(index + 1),
               ]
     return {
         ...state,
-        collections: [{ ...payload, active: true }, ...state.collections],
+        collections: [payload, ...state.collections],
         initCollSuggestions,
     }
 })
 
 reducer.on(acts.deleteCollection, (state, payload) => {
-    const collectionIndex = state.collections.findIndex(
-        collection => collection.id === payload.id,
-    )
-    const suggestionIndex = state.initCollSuggestions.findIndex(
-        collection => collection.id === payload.id,
-    )
+    const collectionIndex = state.collections.indexOf(payload)
+    const suggestionIndex = state.initCollSuggestions.indexOf(payload)
 
     // Remote the collection from the list of collections.
     const collections = [
@@ -82,7 +76,7 @@ reducer.on(acts.deleteCollection, (state, payload) => {
     const initCollSuggestions = [
         ...state.initCollSuggestions.slice(0, suggestionIndex),
         ...state.initCollSuggestions.slice(suggestionIndex + 1),
-        { ...state.initCollSuggestions[suggestionIndex], active: false },
+        state.initCollSuggestions[suggestionIndex],
     ]
 
     return {

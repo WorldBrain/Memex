@@ -68,7 +68,7 @@ function makeTestFactory<TestSetup>(options: {
         }
 
         runner(description, async () => {
-            await options.withDependencies(async dependencies => {
+            await options.withDependencies(async (dependencies) => {
                 await test(await options.setupTest(dependencies))
             })
         })
@@ -117,7 +117,7 @@ function extensionSyncTests(suiteOptions: {
         ) => BackgroundIntegrationTestSetup['backgroundModules']['search']
         customLists: (
             setup: BackgroundIntegrationTestSetup,
-        ) => BackgroundIntegrationTestSetup['backgroundModules']['customLists']['remoteFunctions']
+        ) => BackgroundIntegrationTestSetup['backgroundModules']['customLists']
         sharedSyncLog: SharedSyncLogStorage
         userId: number | string
         fetchPageProcessor?: MockFetchPageDataProcessor
@@ -169,7 +169,7 @@ function extensionSyncTests(suiteOptions: {
             const searchModule = (setup: BackgroundIntegrationTestSetup) =>
                 setup.backgroundModules.search
             const customLists = (setup: BackgroundIntegrationTestSetup) =>
-                setup.backgroundModules.customLists.remoteFunctions
+                setup.backgroundModules.customLists
 
             const userId: string = options.userId || uuid()
 
@@ -203,7 +203,7 @@ function extensionSyncTests(suiteOptions: {
             syncModule,
             forEachDevice: forEachSetup,
         } = await setup()
-        await forEachSetup(s => syncModule(s).setup())
+        await forEachSetup((s) => syncModule(s).setup())
 
         expect(syncModule(devices[0]).continuousSync.enabled).toBe(false)
         await devices[0].backgroundModules.customLists.createCustomList({
@@ -228,7 +228,7 @@ function extensionSyncTests(suiteOptions: {
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
 
-        await forEachSetup(s => syncModule(s).setup())
+        await forEachSetup((s) => syncModule(s).setup())
 
         // Initial data
 
@@ -289,7 +289,7 @@ function extensionSyncTests(suiteOptions: {
 
         // Check continuous sync
 
-        await forEachSetup(async s => {
+        await forEachSetup(async (s) => {
             expectIncrementalSyncScheduled(syncModule(s), {
                 when: Date.now() + INCREMENTAL_SYNC_FREQUENCY,
                 margin: 50,
@@ -298,7 +298,7 @@ function extensionSyncTests(suiteOptions: {
 
         // Force incremental sync from second device back to first
 
-        await customLists(devices[1]).updateListName({
+        await customLists(devices[1]).updateList({
             id: listId,
             name: 'Updated List Title',
         })
@@ -322,7 +322,7 @@ function extensionSyncTests(suiteOptions: {
 
         // Force incremental sync from first device to second
 
-        await customLists(devices[0]).updateListName({
+        await customLists(devices[0]).updateList({
             id: listId,
             name: 'Another Updated List Title',
         })
@@ -356,7 +356,7 @@ function extensionSyncTests(suiteOptions: {
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
 
-        await forEachSetup(s => syncModule(s).setup())
+        await forEachSetup((s) => syncModule(s).setup())
         await doInitialSync({
             source: devices[0].backgroundModules.sync,
             target: devices[1].backgroundModules.sync,
@@ -402,12 +402,12 @@ function extensionSyncTests(suiteOptions: {
             [SYNC_STORAGE_AREA_KEYS.deviceId]: deviceIds[1],
         })
 
-        await forEachSetup(s => syncModule(s).setup())
+        await forEachSetup((s) => syncModule(s).setup())
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
         devices[1].authService.setUser({ ...TEST_USER, id: userId as string })
 
-        await forEachSetup(s => syncModule(s).firstContinuousSyncPromise)
+        await forEachSetup((s) => syncModule(s).firstContinuousSyncPromise)
         // await forEachSetup(
         //     s => (syncModule(s).continuousSync.useEncryption = false),
         // )
@@ -583,7 +583,7 @@ function extensionSyncTests(suiteOptions: {
             devices,
             userId,
         } = await setup()
-        await forEachSetup(s => syncModule(s).setup())
+        await forEachSetup((s) => syncModule(s).setup())
 
         devices[0].authService.setUser({ ...TEST_USER, id: userId as string })
 
@@ -647,7 +647,7 @@ function extensionSyncTests(suiteOptions: {
                 userId,
             } = await params.setup()
 
-            await forEachSetup(s => syncModule(s).setup())
+            await forEachSetup((s) => syncModule(s).setup())
             devices[0].authService.setUser({
                 ...TEST_USER,
                 id: userId as string,
@@ -1029,9 +1029,10 @@ function mobileSyncTests(suiteOptions: {
                     annotsCount: 1,
                     displayTime: expect.any(Number),
                     favIcon: undefined,
-                    hasBookmark: false,
+                    hasBookmark: true,
                     screenshot: undefined,
                     tags: ['eggs', 'spam'],
+                    lists: ['widgets'],
                     title: 'This is a test page',
                     url: 'test.com/foo',
                     fullUrl: testPage.fullUrl,
@@ -1108,7 +1109,7 @@ function mobileSyncTests(suiteOptions: {
         let lastObjectCollection: string
         extensionInitialSync.getPreSendProcessor = () => {
             const origPreProcessor = origGetPreProcessor()
-            return async params => {
+            return async (params) => {
                 // When done with the bookmarks collection, create another bookmark
                 if (
                     lastObjectCollection === 'bookmarks' &&
@@ -1176,7 +1177,7 @@ describe('SyncBackground', () => {
 
     describe('Memory backend', () => {
         syncTests({
-            withDependencies: async body => {
+            withDependencies: async (body) => {
                 await body({
                     sharedSyncLog: await createMemorySharedSyncLog(),
                 })
@@ -1187,7 +1188,7 @@ describe('SyncBackground', () => {
     describe('Firestore backend', () => {
         syncTests({
             skip: !RUN_FIRESTORE_TESTS,
-            withDependencies: async body => {
+            withDependencies: async (body) => {
                 const userId = 'alice'
                 await withEmulatedFirestoreBackend(
                     {

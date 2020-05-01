@@ -23,8 +23,10 @@ import { resolvablePromise } from 'src/util/promises'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { bindMethod } from 'src/util/functions'
+import { Analytics } from 'src/analytics/types'
 
 export default class SyncBackground extends SyncService {
+    private analytics: Analytics
     initialSync: MemexInitialSync
     remoteFunctions: PublicSyncInterface
     firstContinuousSyncPromise?: Promise<void>
@@ -38,8 +40,10 @@ export default class SyncBackground extends SyncService {
         storageManager: StorageManager
         signalTransportFactory: SignalTransportFactory
         getSharedSyncLog: () => Promise<SharedSyncLog>
+        getIceServers?: () => Promise<string[]>
         browserAPIs: Pick<Browser, 'storage'>
         appVersion: string
+        analytics: Analytics
         disableEncryption?: boolean
         postReceiveProcessor?: SyncPostReceiveProcessor
     }) {
@@ -63,6 +67,7 @@ export default class SyncBackground extends SyncService {
         })
 
         this.auth = options.auth
+        this.analytics = options.analytics
 
         this.remoteFunctions = {
             requestInitialSync: bindMethod(
@@ -73,10 +78,7 @@ export default class SyncBackground extends SyncService {
                 this.initialSync,
                 'answerInitialSync',
             ),
-            waitForInitialSync: bindMethod(
-                this.initialSync,
-                'waitForInitialSync',
-            ),
+            waitForInitialSync: bindMethod(this, 'waitForInitialSync'),
             waitForInitialSyncConnected: bindMethod(
                 this.initialSync,
                 'waitForInitialSyncConnected',
@@ -92,6 +94,31 @@ export default class SyncBackground extends SyncService {
             ) as () => Promise<void>,
             listDevices: bindMethod(this.syncInfoStorage, 'listDevices'),
             removeDevice: bindMethod(this.syncInfoStorage, 'removeDevice'),
+        }
+
+        this.initialSync.debug = true
+    }
+
+    async waitForInitialSync() {
+        this.analytics.trackEvent({
+            category: 'Sync',
+            action: 'startInitSync',
+        })
+
+        try {
+            await this.initialSync.waitForInitialSync()
+
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'finishInitSync',
+            })
+        } catch (err) {
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'failInitSync',
+            })
+
+            throw err
         }
     }
 
@@ -123,7 +150,7 @@ export default class SyncBackground extends SyncService {
 
             await Promise.race([
                 authChangePromise,
-                new Promise(resolve => setTimeout(resolve, 2000)),
+                new Promise((resolve) => setTimeout(resolve, 2000)),
             ])
             await maybeSync()
         })()
@@ -136,16 +163,16 @@ export default class SyncBackground extends SyncService {
     registerRemoteEmitter() {
         const remoteEmitter = remoteEventEmitter<InitialSyncEvents>('sync')
 
-        this.initialSync.events.on('progress', args => {
+        this.initialSync.events.on('progress', (args) => {
             return remoteEmitter.emit('progress', args)
         })
-        this.initialSync.events.on('roleSwitch', args => {
+        this.initialSync.events.on('roleSwitch', (args) => {
             return remoteEmitter.emit('roleSwitch', args)
         })
-        this.initialSync.events.on('error', args => {
+        this.initialSync.events.on('error', (args) => {
             return remoteEmitter.emit('error', args)
         })
-        this.initialSync.events.on('finished', args => {
+        this.initialSync.events.on('finished', (args) => {
             return remoteEmitter.emit('finished', args)
         })
     }

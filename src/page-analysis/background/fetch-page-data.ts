@@ -72,7 +72,7 @@ const fetchPageData: FetchPageData = ({
          * @return {Promise<any>} Resolves to an object containing `content` and `favIconURI` data
          *  fetched from the DOM pointed at by the `url` of `fetchPageData` call.
          */
-        run = async function() {
+        run = async function () {
             const doc = await req.run()
 
             if (!doc) {
@@ -90,7 +90,7 @@ const fetchPageData: FetchPageData = ({
 
             return {
                 favIconURI: opts.includeFavIcon
-                    ? await extractFavIcon(doc)
+                    ? await extractFavIcon(url, doc)
                     : undefined,
                 content: opts.includePageContent
                     ? await extractPageContent()
@@ -104,6 +104,20 @@ const fetchPageData: FetchPageData = ({
 
 export default fetchPageData
 
+const fetchTimeout = (
+    url,
+    ms,
+    { signal, ...options }: { signal?: AbortSignal } = {},
+) => {
+    const controller = new AbortController()
+    const promise = fetch(url, { signal: controller.signal, ...options })
+    if (signal) {
+        signal.addEventListener('abort', () => controller.abort())
+    }
+    const timeout = setTimeout(() => controller.abort(), ms)
+    return promise.finally(() => clearTimeout(timeout))
+}
+
 /**
  * Async function that given a URL will attempt to grab the current DOM which it points to.
  * Uses native XMLHttpRequest API, as newer Fetch API doesn't seem to support fetching of
@@ -113,53 +127,53 @@ function fetchDOMFromUrl(
     url: string,
     timeout: number,
 ): { run: () => Promise<Document>; cancel: CancelXHR } {
-    const req = new XMLHttpRequest()
+    const controller = new AbortController()
 
     return {
-        cancel: () => req.abort(),
+        cancel: () => controller.abort(),
         run: () =>
             new Promise((resolve, reject) => {
-                const tempFailureHandler = reason =>
-                    reject(new FetchPageDataError(reason, 'temporary'))
-                const permanentFailureHandler = () =>
-                    reject(
-                        new FetchPageDataError(
-                            'Data fetch failed',
-                            'permanent',
-                        ),
-                    )
-
-                // Set up timeout handling
-                req.timeout = timeout
-                req.ontimeout = () => tempFailureHandler('Data fetch timeout')
-
-                // General non-HTTP errors; eg: a URL pointing at something that doesn't exist
-                req.onerror = permanentFailureHandler
-
-                req.onreadystatechange = function() {
-                    if (this.readyState === 4) {
-                        switch (this.status) {
+                fetchTimeout(url, timeout, { signal: controller.signal })
+                    .then((response) => {
+                        switch (response.status) {
                             case 200:
-                                return resolve(this.responseXML)
+                                return response.text()
                             case 429:
-                                return tempFailureHandler('Too many requests')
+                                throw new FetchPageDataError(
+                                    'Too many requests',
+                                    'temporary',
+                                )
                             case 500:
                             case 503:
                             case 504:
-                                return tempFailureHandler(
+                                throw new FetchPageDataError(
                                     'Server currently unavailable',
+                                    'temporary',
                                 )
                             default:
-                                return permanentFailureHandler()
+                                throw new FetchPageDataError(
+                                    'Data fetch failed',
+                                    'permanent',
+                                )
                         }
-                    }
-                }
-
-                req.open('GET', url)
-
-                // Sets the responseXML to be of Document/DOM type
-                req.responseType = 'document'
-                req.send()
+                    })
+                    .then((text) =>
+                        resolve(
+                            new DOMParser().parseFromString(text, 'text/html'),
+                        ),
+                    )
+                    .catch((error) => {
+                        if (error.name === 'AbortError') {
+                            reject(
+                                new FetchPageDataError(
+                                    'Data fetch timeout',
+                                    'temporary',
+                                ),
+                            )
+                        } else {
+                            reject(error)
+                        }
+                    })
             }),
     }
 }

@@ -32,7 +32,7 @@ const wantedTransitionTypes = new Set([
  * @param {history.VisitItem} item VisitItem object received from the WebExt History API.
  * @returns {boolean}
  */
-const filterVisitItemByTransType = item =>
+const filterVisitItemByTransType = (item) =>
     wantedTransitionTypes.has(item.transition)
 
 /**
@@ -55,7 +55,7 @@ async function checkVisitItemTransitionTypes({ url }) {
 const getVisitTimes = ({ url }) =>
     browser.history
         .getVisits({ url })
-        .then(visits => visits.map(visit => Math.trunc(visit.visitTime)))
+        .then((visits) => visits.map((visit) => Math.trunc(visit.visitTime)))
 
 async function getBookmarkTime({ browserId }) {
     // Web Ext. API should return array of BookmarkItems; grab first one
@@ -96,7 +96,7 @@ export default class ImportItemProcessor {
             tagsModule: TagsBackground
             customListsModule: CustomListBackground
         },
-    ) { }
+    ) {}
 
     /**
      * Hacky way of enabling cancellation. Checks state and throws an Error if detected change.
@@ -137,14 +137,17 @@ export default class ImportItemProcessor {
                 },
             )
             await Promise.all([
-                ...listIds.map(async listId => {
+                ...listIds.map(async (listId) => {
                     await this.options.customListsModule.insertPageToList({
                         id: listId,
                         url,
                     })
                 }),
-                ...tags.map(async tag => {
-                    await this.options.tagsModule.addTag({ url, tag })
+                ...tags.map(async (tag) => {
+                    await this.options.tagsModule.addTagToExistingUrl({
+                        url,
+                        tag,
+                    })
                 }),
             ])
         } catch (e) {
@@ -196,11 +199,11 @@ export default class ImportItemProcessor {
         const pageDoc = !options.indexTitle
             ? await this._createPageDoc(importItem)
             : {
-                url: importItem.url,
-                content: {
-                    title: importItem.title,
-                },
-            }
+                  url: importItem.url,
+                  content: {
+                      title: importItem.title,
+                  },
+              }
 
         const visits = await getVisitTimes(importItem)
 
@@ -225,24 +228,18 @@ export default class ImportItemProcessor {
         importItem,
         options: { indexTitle?: any; bookmarkImports?: any } = {},
     ) {
-        const {
-            url,
-            title,
-            tags,
-            collections,
-            annotations,
-        } = importItem
+        const { url, title, tags, collections, annotations } = importItem
 
         const timeAdded = padShortTimestamp(importItem.timeAdded)
 
         const pageDoc = !options.indexTitle
             ? await this._createPageDoc({ url })
             : {
-                url,
-                content: {
-                    title,
-                },
-            }
+                  url,
+                  content: {
+                      title,
+                  },
+              }
 
         const visits = await getVisitTimes({ url })
 

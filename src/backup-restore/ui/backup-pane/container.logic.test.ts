@@ -2,7 +2,7 @@ import expect from 'expect'
 import { fakeRemoteFunctions } from 'src/util/webextensionRPC'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
-import { FakeAnalytics } from 'src/analytics'
+import { FakeAnalytics } from 'src/analytics/mock'
 
 function setupTest() {
     const localStorage = new MemoryLocalStorage()
@@ -51,7 +51,7 @@ describe('Backup settings container logic', () => {
                     hasInitialBackup: () => false,
                     getBackupInfo: () => null,
                     getBackendLocation: () => undefined,
-                    setBackendLocation: choice => undefined,
+                    setBackendLocation: (choice) => undefined,
                 },
             },
         )
@@ -75,7 +75,7 @@ describe('Backup settings container logic', () => {
             {
                 remoteFunctions: {
                     isAutomaticBackupEnabled: () => false,
-                    setBackendLocation: newChoice =>
+                    setBackendLocation: (newChoice) =>
                         (backendLocation = newChoice),
                 },
             },
@@ -210,7 +210,7 @@ describe('Backup settings container logic', () => {
                     hasInitialBackup: () => false,
                     getBackupInfo: () => null,
                     getBackendLocation: () => undefined,
-                    setBackendLocation: choice => undefined,
+                    setBackendLocation: (choice) => undefined,
                 },
             },
         )
@@ -221,7 +221,7 @@ describe('Backup settings container logic', () => {
             {
                 remoteFunctions: {
                     isAutomaticBackupEnabled: () => false,
-                    setBackendLocation: choice => 'local',
+                    setBackendLocation: (choice) => 'local',
                 },
             },
         )
@@ -318,7 +318,7 @@ describe('Backup settings container logic', () => {
             { type: 'onChoice', choice: 'google-drive' },
             {
                 remoteFunctions: {
-                    initRestoreProcedure: provider =>
+                    initRestoreProcedure: (provider) =>
                         (backendLocation = provider),
                 },
             },
@@ -393,7 +393,7 @@ describe('Backup settings container logic', () => {
             { type: 'onChoice', choice: 'google-drive' },
             {
                 remoteFunctions: {
-                    initRestoreProcedure: provider => null,
+                    initRestoreProcedure: (provider) => null,
                     setBackendLocation: (choice: string) =>
                         (backendLocation = choice),
                 },
@@ -466,7 +466,7 @@ describe('Backup settings container logic', () => {
             { type: 'onChoice', choice: 'google-drive' },
             {
                 remoteFunctions: {
-                    initRestoreProcedure: provider =>
+                    initRestoreProcedure: (provider) =>
                         (backendLocation = provider),
                 },
             },
@@ -511,7 +511,7 @@ describe('Backup settings container logic', () => {
             { type: 'onChoice', choice: 'local' },
             {
                 remoteFunctions: {
-                    initRestoreProcedure: provider =>
+                    initRestoreProcedure: (provider) =>
                         (backendLocation = provider),
                 },
             },
@@ -556,12 +556,12 @@ describe('Backup settings container logic helpers', () => {
                     remoteFunction: 'remoteFunction' as any,
                     analytics: 'analytics',
                 },
-                eventProcessor: async args => {
+                eventProcessor: async (args) => {
                     calls.push({ type: 'process', args })
                     return { screen: 'bla', redirect: null }
                 },
-                onStateChange: args => calls.push({ type: 'state', args }),
-                onRedirect: args => calls.push({ type: 'redirect', args }),
+                onStateChange: (args) => calls.push({ type: 'state', args }),
+                onRedirect: (args) => calls.push({ type: 'redirect', args }),
             })
             await handlers['bla']()
             expect(calls).toEqual([
@@ -593,12 +593,12 @@ describe('Backup settings container logic helpers', () => {
                     remoteFunction: 'remoteFunction' as any,
                     analytics: 'analytics',
                 },
-                eventProcessor: async args => {
+                eventProcessor: async (args) => {
                     calls.push({ type: 'process', args })
                     return { screen: 'bla', redirect: null }
                 },
-                onStateChange: args => calls.push({ type: 'state', args }),
-                onRedirect: args => calls.push({ type: 'redirect', args }),
+                onStateChange: (args) => calls.push({ type: 'state', args }),
+                onRedirect: (args) => calls.push({ type: 'redirect', args }),
             })
             await handlers['bla']('foo')
             expect(calls).toEqual([

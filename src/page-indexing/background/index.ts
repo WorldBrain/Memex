@@ -85,14 +85,14 @@ export class PageIndexingBackground {
             .findObjects<PipelineRes>(query)
 
         return Promise.all(
-            pages.map(page =>
+            pages.map((page) =>
                 new Page(this.options.storageManager, page).delete(),
             ),
         ).catch(initErrHandler())
     }
 
     async delPages(urls: string[]): Promise<{ info: any }[]> {
-        const normalizedUrls: string[] = urls.map(url => normalizeUrl(url))
+        const normalizedUrls: string[] = urls.map((url) => normalizeUrl(url))
 
         return this._deletePages({ url: { $in: normalizedUrls } })
     }
@@ -166,6 +166,8 @@ export class PageIndexingBackground {
 
         if (props.stubOnly && analysisRes.content) {
             delete analysisRes.content.fullText
+        } else if (analysisRes.content) {
+            analysisRes.content.fullText = await analysisRes.getFullText()
         }
 
         const pageData = await pipeline({
@@ -188,7 +190,9 @@ export class PageIndexingBackground {
             )
         }
 
-        const pageData = await this.options.fetchPageData.process(props.fullUrl)
+        const pageData = await this.options.fetchPageData.process(
+            props.fullUrl ?? props.url,
+        )
 
         if (props.stubOnly && pageData.text && pageData.terms?.length) {
             delete pageData.text

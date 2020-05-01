@@ -35,23 +35,22 @@ const getCurrentTab = async () => {
 
     return currentTab
 }
-const setTabAndUrl: (id: number, url: string) => Thunk = (
-    id,
-    url,
-) => async dispatch => {
+const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
+    dispatch,
+) => {
     await dispatch(setTabId(id))
     await dispatch(setUrl(url))
 }
 
-const setTabIsBookmarked: (
-    tabId: number,
-) => Thunk = tabId => async dispatch => {
+const setTabIsBookmarked: (tabId: number) => Thunk = (tabId) => async (
+    dispatch,
+) => {
     const internalTab = await fetchInternalTabRPC(tabId)
     await dispatch(bookmarkActs.setIsBookmarked(internalTab.isBookmarked))
 }
 
 // N.B. This is also setup for all injections of the content script. Mainly so that keyboard shortcuts (bookmark) has the data when needed.
-export const initBasicStore: () => Thunk = () => async dispatch => {
+export const initBasicStore: () => Thunk = () => async (dispatch) => {
     const currentTab = await getCurrentTab()
 
     // If we can't get the tab data, then can't init action button states
@@ -63,7 +62,7 @@ export const initBasicStore: () => Thunk = () => async dispatch => {
     await dispatch(setTabIsBookmarked(currentTab.id))
 }
 
-export const initState: () => Thunk = () => async dispatch => {
+export const initState: () => Thunk = () => async (dispatch) => {
     const currentTab = await getCurrentTab()
 
     // If we can't get the tab data, then can't init action button states
@@ -90,7 +89,7 @@ export const initState: () => Thunk = () => async dispatch => {
         dispatch(collectionActs.setCollections(listsAssocWithPage))
 
         // Get 20 more tags that are not related related to the list.
-        const pageTags = await fetchPageTagsRPC(currentTab.url)
+        const pageTags = await fetchPageTagsRPC({ url: currentTab.url })
         const tags = await fetchInitTagSuggRPC({
             notInclude: pageTags,
             type: 'tag',

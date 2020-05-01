@@ -56,14 +56,14 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     private attachEventListeners() {
-        this.saveBtnRef.addEventListener('click', e => this.saveComment(e))
+        this.saveBtnRef.addEventListener('click', (e) => this.saveComment(e))
         this.cancelBtnRef.addEventListener('click', this.handleCancelBtnClick)
         this.bmBtnRef.addEventListener('click', this.handleBookmarkBtnClick)
         this.tagBtnRef.addEventListener('click', this.handleTagBtnClick)
     }
 
     private removeEventListeners() {
-        this.saveBtnRef.removeEventListener('click', e => this.saveComment(e))
+        this.saveBtnRef.removeEventListener('click', (e) => this.saveComment(e))
         this.cancelBtnRef.removeEventListener(
             'click',
             this.handleCancelBtnClick,
@@ -85,27 +85,27 @@ class CommentBoxForm extends React.Component<Props, State> {
         }
     }
 
-    private handleTagBtnClick = e => {
+    private handleTagBtnClick = (e) => {
         e.preventDefault()
         e.stopPropagation()
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             showTagsPicker: !prevState.showTagsPicker,
         }))
     }
 
-    private handleCancelBtnClick = e => {
+    private handleCancelBtnClick = (e) => {
         e.preventDefault()
         e.stopPropagation()
         this.props.cancelComment(e)
     }
 
-    private handleBookmarkBtnClick = e => {
+    private handleBookmarkBtnClick = (e) => {
         e.preventDefault()
         e.stopPropagation()
         this.props.toggleBookmark(e)
     }
 
-    private saveComment = e => {
+    private saveComment = (e) => {
         this.props.saveComment(e)
         if (this.state.showTagsPicker) {
             this.setState({
@@ -126,7 +126,7 @@ class CommentBoxForm extends React.Component<Props, State> {
         return (
             <Tooltip position="bottomLeft">
                 <TagsContainer
-                    env={this.props.env}
+                    // env={this.props.env}
                     tagSuggestions={this.state.tagSuggestions}
                 />
             </Tooltip>
@@ -134,8 +134,8 @@ class CommentBoxForm extends React.Component<Props, State> {
     }
 
     onEnterSaveHandler = {
-        test: e => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: e => this.saveComment(e),
+        test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+        handle: (e) => this.saveComment(e),
     }
 
     render() {
@@ -147,7 +147,7 @@ class CommentBoxForm extends React.Component<Props, State> {
                     defaultValue={commentText}
                     onClick={() => {
                         this.setTagInputActive(false)
-                        this.setState(state => ({ showTagsPicker: false }))
+                        this.setState((state) => ({ showTagsPicker: false }))
                     }}
                     className={styles.textArea}
                     placeholder="Add a private note... (save with cmd/ctrl+enter)"
@@ -158,29 +158,48 @@ class CommentBoxForm extends React.Component<Props, State> {
                 {/* Save and Cancel buttons. */}
                 <div className={styles.footer}>
                     <div className={styles.interactions}>
-                        <div ref={this.setTagButtonRef} className={styles.interactionsImgContainer}>
-                            <img src={tagEmpty} className={cx(styles.button, styles.tag)}/>
+                        <div
+                            ref={this.setTagButtonRef}
+                            className={styles.interactionsImgContainer}
+                        >
+                            <img
+                                src={tagEmpty}
+                                className={cx(styles.button, styles.tag)}
+                            />
                         </div>
-                        <div ref={ref => (this.bmBtnRef = ref)} className={styles.interactionsImgContainer}>
+                        <div
+                            ref={(ref) => (this.bmBtnRef = ref)}
+                            className={styles.interactionsImgContainer}
+                        >
                             {this.props.isCommentBookmarked ? (
-                                <img src={heartFull} className={cx(styles.button, styles.bookmark)}/>
-                            ):(
-                                <img src={heartEmpty} className={cx(styles.button, styles.notbookmark)}/>
-                            )
-                            }
+                                <img
+                                    src={heartFull}
+                                    className={cx(
+                                        styles.button,
+                                        styles.bookmark,
+                                    )}
+                                />
+                            ) : (
+                                <img
+                                    src={heartEmpty}
+                                    className={cx(
+                                        styles.button,
+                                        styles.notbookmark,
+                                    )}
+                                />
+                            )}
                         </div>
                     </div>
                     <div className={styles.confirmButtons}>
-
                         <div
-                            ref={ref => (this.cancelBtnRef = ref)}
+                            ref={(ref) => (this.cancelBtnRef = ref)}
                             className={styles.cancelBtn}
                         >
                             Cancel
                         </div>
                         <div
                             className={styles.saveBtn}
-                            ref={ref => (this.saveBtnRef = ref)}
+                            ref={(ref) => (this.saveBtnRef = ref)}
                         >
                             Save
                         </div>

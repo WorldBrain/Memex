@@ -15,6 +15,7 @@ interface Props extends Partial<KeyboardActions> {
     store: any
 }
 
+// TODO: Fix this ..rest as any type issue
 /* tslint:disable-next-line variable-name */
 const RibbonSidebarController = (props: Props) => {
     const { setRibbonSidebarRef, store, ...rest } = props
@@ -23,7 +24,7 @@ const RibbonSidebarController = (props: Props) => {
         <ErrorBoundary component={RuntimeError}>
             <Provider store={store}>
                 <RibbonSidebarContainer
-                    {...rest}
+                    {...(rest as any)}
                     innerRef={setRibbonSidebarRef}
                 />
             </Provider>

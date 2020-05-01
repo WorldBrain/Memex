@@ -7,6 +7,7 @@ export default (env = {}) => {
         notifsEnabled: !!env.notifs,
         isCI: !!env.ci,
         shouldPackage: !!env.package,
+        runSentry: !!env.sentry,
     })
 
     return conf

@@ -27,11 +27,7 @@ export const setStartDateText = createAction<string>('header/setStartDateText')
 export const setEndDateText = createAction<string>('header/setEndDateText')
 export const clearFilters = createAction('header/clearFilters')
 
-const stripTagPattern = tag =>
-    tag
-        .slice(1)
-        .split('+')
-        .join(' ')
+const stripTagPattern = (tag) => tag.slice(1).split('+').join(' ')
 
 export const setQueryTagsDomains: (
     input: string,
@@ -43,7 +39,7 @@ export const setQueryTagsDomains: (
         // Split input into terms and try to extract any tag/domain patterns to add to filters
         const terms = input.toLowerCase().match(/\S+/g) || []
 
-        terms.forEach(term => {
+        terms.forEach((term) => {
             // If '#tag' pattern in input, and not already tracked, add to filter state
             if (
                 constants.HASH_TAG_PATTERN.test(term) &&
@@ -51,8 +47,8 @@ export const setQueryTagsDomains: (
             ) {
                 dispatch(filterActs.toggleTagFilter(stripTagPattern(term)))
                 analytics.trackEvent({
-                    category: 'Tag',
-                    action: 'Filter by Tag',
+                    category: 'SearchFilters',
+                    action: 'addTagFilterViaQuery',
                 })
             }
 
@@ -78,8 +74,8 @@ export const setQueryTagsDomains: (
                 dispatch(act(term))
 
                 analytics.trackEvent({
-                    category: 'Domain',
-                    action: 'Filter by Domain',
+                    category: 'SearchFilters',
+                    action: 'addDomainFilterViaQuery',
                 })
             }
         })
@@ -173,7 +169,7 @@ export const search: (args?: any) => Thunk = (
     }
 }
 
-export const init = () => dispatch => {
+export const init = () => (dispatch) => {
     dispatch(notifActs.updateUnreadNotif())
     dispatch(search({ overwrite: true, fromOverview: false }))
 }

@@ -25,6 +25,8 @@ import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
+import { FakeAnalytics } from 'src/analytics/mock'
+import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
 
 export async function setupBackgroundIntegrationTest(options?: {
@@ -54,9 +56,14 @@ export async function setupBackgroundIntegrationTest(options?: {
         authService,
         subscriptionService,
     })
+    const analyticsManager = new AnalyticsManager({
+        backend: new FakeAnalytics(),
+        shouldTrack: async () => true,
+    })
 
     const backgroundModules = createBackgroundModules({
         storageManager,
+        analyticsManager,
         localStorageChangesManager: null,
         browserAPIs: {
             storage: {
@@ -79,8 +86,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         getSharedSyncLog: async () => options?.sharedSyncLog,
         includePostSyncProcessor: options?.includePostSyncProcessor,
         fetchPageDataProcessor:
-            options &&
-            (options.fetchPageProcessor || new MockFetchPageDataProcessor()),
+            options?.fetchPageProcessor ?? new MockFetchPageDataProcessor(),
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
     })
@@ -115,7 +121,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     await setStorageMiddleware(storageManager, {
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
-        modifyMiddleware: originalMiddleware => [
+        modifyMiddleware: (originalMiddleware) => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations
                 ? [storageOperationDebugger]
@@ -190,14 +196,15 @@ export async function runBackgroundIntegrationTest(
         if (step.expectedStorageChanges) {
             try {
                 expect(await setup.storageChangeDetector.compare()).toEqual(
-                    mapValues(step.expectedStorageChanges, getChanges =>
+                    mapValues(step.expectedStorageChanges, (getChanges) =>
                         getChanges(),
                     ),
                 )
             } catch (e) {
                 console.error(
-                    `Unexpected storage changes in step number ${stepIndex +
-                        1} (counting from 1)`,
+                    `Unexpected storage changes in step number ${
+                        stepIndex + 1
+                    } (counting from 1)`,
                 )
                 throw e
             }

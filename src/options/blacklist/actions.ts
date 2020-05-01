@@ -31,7 +31,7 @@ export const removeSiteFromBlacklist = createAction(
     'settings/removeSiteFromBlacklist',
 ) as any
 
-export const initBlacklist = () => async dispatch => {
+export const initBlacklist = () => async (dispatch) => {
     dispatch(setIsLoading(true))
     try {
         const { [STORAGE_KEY]: blacklist } = await window[
@@ -50,10 +50,10 @@ export const initBlacklist = () => async dispatch => {
     }
 }
 
-export const addToBlacklist = expression => async (dispatch, getState) => {
+export const addToBlacklist = (expression) => async (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Blacklist',
-        action: 'Add blacklist entry',
+        action: 'createEntryViaSettings',
     })
 
     processEvent({
@@ -87,10 +87,10 @@ export const addToBlacklist = expression => async (dispatch, getState) => {
     }
 }
 
-export const removeFromBlacklist = index => async (dispatch, getState) => {
+export const removeFromBlacklist = (index) => async (dispatch, getState) => {
     analytics.trackEvent({
         category: 'Blacklist',
-        action: 'Remove blacklist entry',
+        action: 'deleteEntryViaSettings',
     })
 
     processEvent({
@@ -115,10 +115,13 @@ export const removeFromBlacklist = index => async (dispatch, getState) => {
     dirtyEstsCache() // Force import ests to recalc next visit
 }
 
-export const removeMatchingDocs = expression => async (dispatch, getState) => {
+export const removeMatchingDocs = (expression) => async (
+    dispatch,
+    getState,
+) => {
     analytics.trackEvent({
-        category: 'Blacklist',
-        action: 'Delete matching pages',
+        category: 'Pages',
+        action: 'deleteViaRegexBlacklist',
         value: selectors.matchedDocCount(getState()),
     })
     dispatch(setModalShow(false))
@@ -127,7 +130,7 @@ export const removeMatchingDocs = expression => async (dispatch, getState) => {
         await deletePagesByPattern(expression) // To be run in background; can take long
     } catch (err) {
         handleDBQuotaErrors(
-            error =>
+            (error) =>
                 notifications.create({
                     requireInteraction: false,
                     title: 'Memex error: deleting page',

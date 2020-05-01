@@ -49,9 +49,12 @@ import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
 import { ContentScriptsBackground } from 'src/content-scripts/background'
 import { InPageUIBackground } from 'src/in-page-ui/background'
+import { AnalyticsBackground } from 'src/analytics/background'
+import { Analytics } from 'src/analytics/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
+    analytics: AnalyticsBackground
     notifications: NotificationBackground
     social: SocialBackground
     activityLogger: ActivityLoggerBackground
@@ -83,12 +86,18 @@ export function createBackgroundModules(options: {
     fetchPageDataProcessor: FetchPageProcessor
     tabManager?: TabManager
     auth?: AuthBackground
+    analyticsManager: Analytics
     authOptions?: { devAuthState: DevAuthState }
     includePostSyncProcessor?: boolean
     disableSyncEnryption?: boolean
+    getIceServers?: () => Promise<string[]>
 }): BackgroundModules {
     const { storageManager } = options
     const tabManager = options.tabManager || new TabManager()
+
+    const analytics = new AnalyticsBackground(options.analyticsManager, {
+        localBrowserStorage: options.browserAPIs.storage.local,
+    })
 
     const bookmarks = new BookmarksBackground({ storageManager })
     const pages = new PageIndexingBackground({
@@ -107,20 +116,24 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         tabManager,
     })
+
+    const search = new SearchBackground({
+        storageManager,
+        pages,
+        idx: searchIndex,
+        tabMan: tabManager,
+        browserAPIs: options.browserAPIs,
+    })
+
     const tags = new TagsBackground({
         storageManager,
         pageStorage: pages.storage,
         searchIndex,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         windows: options.browserAPIs.windows,
-    })
-    const search = new SearchBackground({
-        storageManager,
-        tags,
-        pages,
-        idx: searchIndex,
-        tabMan: tabManager,
-        browserAPIs: options.browserAPIs,
+        searchBackgroundModule: search,
+        analytics,
+        localBrowserStorage: options.browserAPIs.storage.local,
     })
 
     const notifications = new NotificationBackground({ storageManager })
@@ -153,7 +166,7 @@ export function createBackgroundModules(options: {
         storageManager,
         connectivityChecker,
         fetchPageData: options.fetchPageDataProcessor,
-        storePageContent: async content => {
+        storePageContent: async (content) => {
             await pages.storage.createOrUpdatePage(content)
         },
     })
@@ -168,11 +181,12 @@ export function createBackgroundModules(options: {
 
     return {
         auth,
-        notifications,
         social,
+        analytics,
+        jobScheduler,
+        notifications,
         activityLogger,
         connectivityChecker,
-        jobScheduler,
         directLinking: new DirectLinkingBackground({
             browserAPIs: options.browserAPIs,
             storageManager,
@@ -188,6 +202,7 @@ export function createBackgroundModules(options: {
             windows: options.browserAPIs.windows,
             searchIndex: search.searchIndex,
             pageStorage: pages.storage,
+            localBrowserStorage: options.browserAPIs.storage.local,
         }),
         tags,
         bookmarks,
@@ -200,14 +215,16 @@ export function createBackgroundModules(options: {
                 auth.remoteFunctions.isAuthorizedForFeature('backup'),
         }),
         sync: new SyncBackground({
-            auth: auth.authService,
             signalTransportFactory: options.signalTransportFactory,
-            storageManager,
+            disableEncryption: options.disableSyncEnryption,
             getSharedSyncLog: options.getSharedSyncLog,
+            getIceServers: options.getIceServers,
             browserAPIs: options.browserAPIs,
             appVersion: process.env.VERSION,
+            auth: auth.authService,
             postReceiveProcessor,
-            disableEncryption: options.disableSyncEnryption,
+            storageManager,
+            analytics,
         }),
         storexHub: new StorexHubBackground({
             storageManager,
@@ -267,6 +284,7 @@ export async function setupBackgroundModules(
     backgroundModules.backupModule.storage.setupChangeTracking()
 
     await backgroundModules.sync.setup()
+    await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
     backgroundModules.sync.registerRemoteEmitter()
 }

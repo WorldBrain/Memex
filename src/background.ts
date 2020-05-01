@@ -31,6 +31,7 @@ import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-
 import fetchPageData from 'src/page-analysis/background/fetch-page-data'
 import pipeline from 'src/search/pipeline'
 import { setStorageMiddleware } from './storage/middleware'
+import { getFirebase } from './util/firebase-app-initialized'
 
 export async function main() {
     const localStorageChangesManager = new StorageChangesManager({
@@ -46,15 +47,24 @@ export async function main() {
 
     const storageManager = initStorex()
     const backgroundModules = createBackgroundModules({
-        storageManager,
-        localStorageChangesManager,
-        includePostSyncProcessor: true,
-        browserAPIs: browser,
         signalTransportFactory: createFirebaseSignalTransport,
+        includePostSyncProcessor: true,
+        analyticsManager: analytics,
+        localStorageChangesManager,
         fetchPageDataProcessor,
+        browserAPIs: browser,
         getSharedSyncLog,
+        storageManager,
         authOptions: {
             devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
+        },
+        getIceServers: async () => {
+            const firebase = await getFirebase()
+            const generateToken = firebase
+                .functions()
+                .httpsCallable('generateTwilioNTSToken')
+            const response = await generateToken({})
+            return response.data.iceServers
         },
     })
     registerBackgroundModuleCollections(storageManager, backgroundModules)
@@ -91,6 +101,8 @@ export async function main() {
         },
         sync: backgroundModules.sync.remoteFunctions,
         features: new FeatureOptIns(),
+        tags: backgroundModules.tags.remoteFunctions,
+        collections: backgroundModules.customLists.remoteFunctions,
     })
 
     // Attach interesting features onto global window scope for interested users

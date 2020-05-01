@@ -48,7 +48,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
         onSaveCb: noop,
     }
 
-    save = async e => {
+    save = async (e) => {
         e.preventDefault()
         e.stopPropagation()
 
@@ -66,7 +66,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
         saveComment(anchor, commentText.trim(), tags, isCommentBookmarked)
     }
 
-    cancelComment = async e => {
+    cancelComment = () => {
         this.props.cancelComment()
         this.props.highlighter.removeTempHighlights()
     }
@@ -104,11 +104,9 @@ class CommentBoxContainer extends React.PureComponent<Props> {
     }
 }
 
-const mapStateToProps: MapStateToProps<
-    StateProps,
-    OwnProps,
-    State
-> = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, State> = (
+    state,
+) => ({
     anchor: selectors.anchor(state),
     commentText: selectors.commentText(state),
     tags: selectors.tags(state),
@@ -119,7 +117,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
     dispatch,
     props,
 ) => ({
-    handleCommentTextChange: comment =>
+    handleCommentTextChange: (comment) =>
         dispatch(actions.setCommentText(comment)),
     saveComment: async (anchor, commentText, tags, bookmarked) => {
         if (props.closeComments) {
@@ -143,5 +141,6 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
 })
 
 export default withSidebarContext(
+    // @ts-ignore
     connect(mapStateToProps, mapDispatchToProps)(CommentBoxContainer),
 )

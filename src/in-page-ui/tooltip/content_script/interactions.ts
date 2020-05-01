@@ -1,5 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 
+import analytics from 'src/analytics'
 import { delayed, getPositionState, getTooltipState } from '../utils'
 import { createAndCopyDirectLink } from '../../../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
@@ -22,7 +23,7 @@ const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
 
 export function setupTooltipTrigger(callback, toolbarNotifications) {
-    mouseupListener = event => {
+    mouseupListener = (event) => {
         conditionallyTriggerTooltip({ callback, toolbarNotifications }, event)
     }
 
@@ -83,6 +84,10 @@ export const insertTooltip = async (params: {
     showTooltip = await setupUIContainer(target, {
         createAndCopyDirectLink,
         createAnnotation: async (selection?) => {
+            analytics.trackEvent({
+                category: 'InPageTooltip',
+                action: 'annotateText',
+            })
             const highlight = await createHighlight(selection, true)
             params.inPageUI.showSidebar({
                 action: 'comment',
@@ -90,6 +95,10 @@ export const insertTooltip = async (params: {
             })
         },
         createHighlight: async () => {
+            analytics.trackEvent({
+                category: 'InPageTooltip',
+                action: 'highlightText',
+            })
             await createHighlightFromTooltip({
                 annotationsManager: params.annotationsManager,
                 title: document.title,
@@ -98,6 +107,10 @@ export const insertTooltip = async (params: {
         },
         openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
+            analytics.trackEvent({
+                category: 'InPageTooltip',
+                action: 'closeTooltip',
+            })
             manualOverride = true
             removeTooltip()
 
@@ -213,6 +226,11 @@ export const conditionallyTriggerTooltip = delayed(
         } else if (positioning === 'mouse' && event) {
             position = { x: event.pageX, y: event.pageY }
         }
+
+        analytics.trackEvent({
+            category: 'InPageTooltip',
+            action: 'showTooltip',
+        })
         callback(position)
 
         conditionallyShowHighlightNotification({

@@ -231,7 +231,7 @@
     flex-direction: row;
     justify-content: flex-start;
     width: 100%;
-    height: 26px;
+    min-height: 26px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

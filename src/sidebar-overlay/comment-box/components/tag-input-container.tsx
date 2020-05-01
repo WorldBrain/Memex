@@ -5,7 +5,9 @@ import * as actions from '../actions'
 import * as selectors from '../selectors'
 import State from '../types'
 import { MapDispatchToProps } from '../../types'
-import { IndexDropdown } from 'src/common-ui/containers'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { tags } from 'src/util/remote-functions-background'
+import TagPicker from 'src/tags/ui/TagPicker'
 
 interface StateProps {
     tags: string[]
@@ -13,52 +15,57 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    addTag: (tag: string) => void
-    deleteTag: (tag: string) => void
+    onAnnotationTagAdd: (tag: string) => void
+    onAnnotationTagDel: (tag: string) => void
 }
 
 interface OwnProps {
-    env?: 'inpage' | 'overview'
-    /* tags from local storage */
+    // url: string
     tagSuggestions: string[]
+    // and selected?
 }
 
 type Props = StateProps & DispatchProps & OwnProps
 
-/* tslint:disable-next-line variable-name */
-const TagsContainer = (props: Props) => (
-    <IndexDropdown
-        env={props.env}
-        isForAnnotation
-        allowAdd
-        initFilters={props.tags}
-        initSuggestions={[
-            ...new Set([...props.initTagSuggestions, ...props.tagSuggestions]),
-        ]}
-        onFilterAdd={props.addTag}
-        onFilterDel={props.deleteTag}
-        source="tag"
-    />
-)
+// N.B. this is used for creating new annotations
+class TagAnnotationContainer extends React.Component<Props> {
+    handleTagsUpdate = async (_: string[], added: string, deleted: string) => {
+        if (added) {
+            this.props.onAnnotationTagAdd(added)
+        }
+        if (deleted) {
+            return this.props.onAnnotationTagDel(deleted)
+        }
+    }
 
-const mapStateToProps: MapStateToProps<
-    StateProps,
-    OwnProps,
-    State
-> = state => ({
+    handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
+    fetchTagsForAnnotation = async () => this.props.tags
+
+    render = () => (
+        <TagPicker
+            loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
+            queryEntries={this.handleTagQuery}
+            onUpdateEntrySelection={this.handleTagsUpdate}
+            initialSelectedEntries={this.fetchTagsForAnnotation}
+        />
+    )
+}
+
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, State> = (
+    state,
+) => ({
     tags: selectors.tags(state),
     initTagSuggestions: selectors.initTagSuggestions(state),
 })
 
-const mapDispatchToProps: MapDispatchToProps<
-    DispatchProps,
-    OwnProps
-> = dispatch => ({
-    addTag: tag => dispatch(actions.addTag(tag)),
-    deleteTag: tag => dispatch(actions.deleteTag(tag)),
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
+    dispatch,
+) => ({
+    onAnnotationTagAdd: (tag) => dispatch(actions.addTag(tag)),
+    onAnnotationTagDel: (tag) => dispatch(actions.deleteTag(tag)),
 })
 
 export default connect(
     mapStateToProps,
     mapDispatchToProps,
-)(TagsContainer)
+)(TagAnnotationContainer)
