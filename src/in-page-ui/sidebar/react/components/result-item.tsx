@@ -26,6 +26,7 @@ export interface Props extends Partial<SocialPage> {
     displayTime?: string
     isDeleting: boolean
     tags: string[]
+    lists: string[]
     hasBookmark?: boolean
     isSidebarOpen?: boolean
     isListFilterActive: boolean
@@ -38,12 +39,14 @@ export interface Props extends Partial<SocialPage> {
     annotsCount?: number
     tagHolder: ReactNode
     tagManager: ReactNode
+    listManager: ReactNode
     highlighter: HighlightInteractionInterface
     annotationEventProps: AnnotationBoxEventProps
     annotationModes: {
         [annotationUrl: string]: AnnotationMode
     }
     onTagBtnClick: MouseEventHandler
+    onListBtnClick: MouseEventHandler
     onTrashBtnClick: MouseEventHandler
     onCommentBtnClick: MouseEventHandler
     onToggleBookmarkClick: MouseEventHandler
@@ -51,6 +54,7 @@ export interface Props extends Partial<SocialPage> {
     resetUrlDragged: () => void
     setUrlDragged: (url: string) => void
     setTagButtonRef: (el: HTMLElement) => void
+    setListButtonRef: (el: HTMLElement) => void
 }
 
 class ResultItem extends Component<Props> {
@@ -66,7 +70,7 @@ class ResultItem extends Component<Props> {
         }
     }
 
-    dragStart: DragEventHandler = e => {
+    dragStart: DragEventHandler = (e) => {
         const { url, setUrlDragged, isSocial } = this.props
 
         setUrlDragged(url)

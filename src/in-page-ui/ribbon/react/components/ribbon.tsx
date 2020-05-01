@@ -59,7 +59,7 @@ export default class Ribbon extends Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.shortcutsData = new Map(
-            props.shortcutsData.map(s => [s.name, s]) as [
+            props.shortcutsData.map((s) => [s.name, s]) as [
                 string,
                 ShortcutElData,
             ][],
@@ -99,9 +99,9 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    private handleSearchEnterPress: KeyboardEventHandler<
-        HTMLInputElement
-    > = event => {
+    private handleSearchEnterPress: KeyboardEventHandler<HTMLInputElement> = (
+        event,
+    ) => {
         const queryFilters = extractQueryFilters(this.props.search.searchValue)
         const queryParams = qs.stringify(queryFilters)
 
@@ -158,10 +158,10 @@ export default class Ribbon extends Component<Props, State> {
                 initFilters={this.props.tagging.tags}
                 initSuggestions={this.props.tagging.initTagSuggestions}
                 source="tag"
-                onFilterAdd={tag =>
+                onFilterAdd={(tag) =>
                     this.props.tagging.addTag({ tag, context: 'tagging' })
                 }
-                onFilterDel={tag =>
+                onFilterDel={(tag) =>
                     this.props.tagging.deleteTag({ tag, context: 'tagging' })
                 }
                 isForRibbon
@@ -190,7 +190,7 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <div
-                ref={ref => (this.ribbonRef = ref)}
+                ref={(ref) => (this.ribbonRef = ref)}
                 className={cx(styles.ribbon, {
                     [styles.ribbonExpanded]: this.props.isExpanded,
                     [styles.ribbonSidebarOpen]: this.props.sidebar
@@ -287,7 +287,7 @@ export default class Ribbon extends Component<Props, State> {
                                                 />
                                                 <TextInputControlled
                                                     autoFocus={false}
-                                                    setRef={this.setInputRef}
+                                                    updateRef={this.setInputRef}
                                                     className={
                                                         styles.searchInput
                                                     }
@@ -300,10 +300,10 @@ export default class Ribbon extends Component<Props, State> {
                                                     }
                                                     specialHandlers={[
                                                         {
-                                                            test: e =>
+                                                            test: (e) =>
                                                                 e.key ===
                                                                 'Enter',
-                                                            handle: e =>
+                                                            handle: (e) =>
                                                                 this.handleSearchEnterPress(
                                                                     e,
                                                                 ),
@@ -375,7 +375,7 @@ export default class Ribbon extends Component<Props, State> {
                                                         toggleBookmark: this
                                                             .props.commentBox
                                                             .toggleCommentBookmark,
-                                                        addTag: tag =>
+                                                        addTag: (tag) =>
                                                             this.props.commentBox.addTag(
                                                                 {
                                                                     tag,
@@ -383,7 +383,7 @@ export default class Ribbon extends Component<Props, State> {
                                                                         'commentBox',
                                                                 },
                                                             ),
-                                                        deleteTag: tag =>
+                                                        deleteTag: (tag) =>
                                                             this.props.commentBox.deleteTag(
                                                                 {
                                                                     tag,

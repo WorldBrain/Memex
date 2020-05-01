@@ -23,7 +23,7 @@ import AnnotationsManager from 'src/annotations/annotations-manager'
 import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
 import { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import { getSidebarState } from 'src/sidebar-overlay/utils'
-import { CustomListsInterface } from 'src/custom-lists/background/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
@@ -60,7 +60,7 @@ export async function main() {
                 getRemoteFunction: remoteFunction,
                 highlighter,
                 currentTab: await getCurrentTab(),
-                customLists: runInBackground<CustomListsInterface>(),
+                customLists: runInBackground<RemoteCollectionsInterface>(),
                 bookmarks: runInBackground<BookmarksInterface>(),
                 tags: runInBackground<RemoteTagsInterface>(),
                 annotations: runInBackground<AnnotationInterface<'caller'>>(),

@@ -226,7 +226,7 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
         })
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        await new Promise((resolve) => setTimeout(resolve, 2000))
         this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
     }
 
@@ -242,7 +242,7 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
     }) => {
         return {
-            commentBox: { isCommentBookmarked: { $apply: prev => !prev } },
+            commentBox: { isCommentBookmarked: { $apply: (prev) => !prev } },
         }
     }
 
@@ -250,7 +250,7 @@ export class RibbonContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        return { commentBox: { showTagsPicker: { $apply: prev => !prev } } }
+        return { commentBox: { showTagsPicker: { $apply: (prev) => !prev } } }
     }
 
     //
@@ -266,11 +266,11 @@ export class RibbonContainerLogic extends UILogic<
     addTag: EventHandler<'addTag'> = async ({ event, previousState }) => {
         this.emitMutation({
             [event.value.context]: {
-                tags: { $apply: tags => [...tags, event.value.tag] },
+                tags: { $apply: (tags) => [...tags, event.value.tag] },
             },
         })
         if (event.value.context === 'tagging') {
-            await this.dependencies.tags.addPageTag({
+            await this.dependencies.tags.addTagToPage({
                 url: this.dependencies.currentTab.url,
                 tag: event.value.tag,
             })
@@ -288,7 +288,7 @@ export class RibbonContainerLogic extends UILogic<
             [event.value.context]: { tags: { $splice: [[index, 1]] } },
         })
         if (event.value.context === 'tagging') {
-            await this.dependencies.tags.delPageTag({
+            await this.dependencies.tags.delTag({
                 url: this.dependencies.currentTab.url,
                 tag: event.value.tag,
             })
@@ -337,6 +337,6 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
     }) => {
         await this.dependencies.activityLogger.toggleLoggingPause()
-        return { pausing: { isPaused: { $apply: prev => !prev } } }
+        return { pausing: { isPaused: { $apply: (prev) => !prev } } }
     }
 }
