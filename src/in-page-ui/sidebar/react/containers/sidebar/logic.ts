@@ -123,7 +123,12 @@ export type SidebarContainerEvents = UIEvent<{
 
     // Annotation boxes
     goToAnnotation: { context: AnnotationEventContext; annnotationUrl: string }
-    editAnnotation: { context: AnnotationEventContext; annnotationUrl: string }
+    editAnnotation: {
+        context: AnnotationEventContext
+        annnotationUrl: string
+        comment: string
+        tags: string[]
+    }
     deleteAnnotation: {
         context: AnnotationEventContext
         annnotationUrl: string
@@ -354,14 +359,26 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    saveNewPageComment: EventHandler<'changePageCommentText'> = () => {
-        this.emitMutation({
-            commentBox: { form: { showTagsPicker: { $set: false } } },
-        })
+    saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
+        event,
+    }) => {
+        const pageUrl = this.options.currentTab.url
         this.emitMutation({
             commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
             showCommentBox: { $set: false },
         })
+
+        await this.options.annotations.createAnnotation({
+            url: pageUrl,
+            comment: event.commentText,
+            bookmarked: event.bookmarked,
+        })
+        for (const tag of event.tags) {
+            await this.options.annotations.addAnnotationTag({
+                tag,
+                url: pageUrl,
+            })
+        }
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
@@ -437,14 +454,14 @@ export class SidebarContainerLogic extends UILogic<
 
     goToAnnotation: EventHandler<'goToAnnotation'> = incoming => {}
 
-    editAnnotation: EventHandler<'editAnnotation'> = incoming => {
-        return {
+    editAnnotation: EventHandler<'editAnnotation'> = async ({ event }) => {
+        this.emitMutation({
             annotationModes: {
-                [incoming.event.context]: {
-                    [incoming.event.annnotationUrl]: { $set: 'default' },
+                [event.context]: {
+                    [event.annnotationUrl]: { $set: 'default' },
                 },
             },
-        }
+        })
     }
 
     deleteAnnotation: EventHandler<'deleteAnnotation'> = async incoming => {
@@ -455,32 +472,36 @@ export class SidebarContainerLogic extends UILogic<
                 },
             },
         })
-        await this.options.annotations.deleteAnnotation({
-            pk: incoming.event.annnotationUrl,
-        })
+        await this.options.annotations
+            .deleteAnnotation({
+                pk: incoming.event.annnotationUrl,
+            })
+            .catch()
     }
 
-    toggleAnnotationBookmark: EventHandler<'toggleAnnotationBookmark'> = ({
-        previousState,
-        event,
-    }) => {
+    toggleAnnotationBookmark: EventHandler<
+        'toggleAnnotationBookmark'
+    > = async ({ previousState, event }) => {
+        const toggleBookmarkState = (hasBookmark: boolean) =>
+            this.emitMutation({
+                annotations: {
+                    [annotationIndex]: {
+                        hasBookmark: { $set: hasBookmark },
+                    },
+                },
+            })
+
         const annotationIndex = previousState.annotations.findIndex(
             annotation => (annotation.url = event.annnotationUrl),
         )
         const currentlyBookmarked = !!previousState.annotations[annotationIndex]
             .hasBookmark
         const shouldBeBookmarked = !currentlyBookmarked
+        toggleBookmarkState(shouldBeBookmarked)
 
-        this.emitMutation({
-            annotations: {
-                [annotationIndex]: {
-                    hasBookmark: { $set: shouldBeBookmarked },
-                },
-            },
-        })
-        if (shouldBeBookmarked) {
-        } else {
-        }
+        await this.options.annotations
+            .toggleAnnotBookmark({ url: event.annnotationUrl })
+            .catch(err => toggleBookmarkState(!shouldBeBookmarked))
     }
 
     switchAnnotationMode: EventHandler<'switchAnnotationMode'> = incoming => {
@@ -503,13 +524,13 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    deletePage: EventHandler<'deletePage'> = ({ previousState }) => {
+    deletePage: EventHandler<'deletePage'> = async ({ previousState }) => {
+        const { pageUrlToDelete } = previousState.deletePageModal
         const resultIndex = previousState.searchResults.findIndex(
-            result =>
-                result.url === previousState.deletePageModal.pageUrlToDelete,
+            result => result.url === pageUrlToDelete,
         )
 
-        return {
+        this.emitMutation({
             searchResults: {
                 $set: [
                     ...previousState.searchResults.slice(0, resultIndex),
@@ -519,7 +540,13 @@ export class SidebarContainerLogic extends UILogic<
             deletePageModal: {
                 pageUrlToDelete: { $set: undefined },
             },
-        }
+        })
+
+        await this.options.search.delPages([pageUrlToDelete]).catch(err =>
+            this.emitMutation({
+                searchResults: { $set: previousState.searchResults },
+            }),
+        )
     }
 
     closeDeletePageModal: EventHandler<'closeDeletePageModal'> = () => {
@@ -530,10 +557,19 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    togglePageBookmark: EventHandler<'togglePageBookmark'> = ({
+    togglePageBookmark: EventHandler<'togglePageBookmark'> = async ({
         previousState,
         event,
     }) => {
+        const toggleBookmarkState = (hasBookmark: boolean) =>
+            this.emitMutation({
+                searchResults: {
+                    [resultIndex]: {
+                        hasBookmark: { $set: hasBookmark },
+                    },
+                },
+            })
+
         const resultIndex = previousState.searchResults.findIndex(
             result => result.url === event.pageUrl,
         )
@@ -541,13 +577,13 @@ export class SidebarContainerLogic extends UILogic<
             .hasBookmark
         const shouldBeBookmarked = !currentlyBookmarked
 
-        return {
-            searchResults: {
-                [resultIndex]: {
-                    hasBookmark: { $set: shouldBeBookmarked },
-                },
-            },
-        }
+        toggleBookmarkState(shouldBeBookmarked)
+
+        const pending = shouldBeBookmarked
+            ? this.options.bookmarks.addPageBookmark({ url: event.pageUrl })
+            : this.options.bookmarks.delPageBookmark({ url: event.pageUrl })
+
+        await pending.catch(err => toggleBookmarkState(!shouldBeBookmarked))
     }
 
     togglePageTagPicker: EventHandler<'togglePageTagPicker'> = ({

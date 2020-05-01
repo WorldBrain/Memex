@@ -110,10 +110,16 @@ export default class SidebarContainer extends StatefulUIElement<
                         context,
                         annnotationUrl,
                     }),
-                handleEditAnnotation: annnotationUrl =>
+                handleEditAnnotation: (
+                    url: string,
+                    comment: string,
+                    tags: string[],
+                ) =>
                     this.processEvent('editAnnotation', {
                         context,
-                        annnotationUrl,
+                        annnotationUrl: url,
+                        comment,
+                        tags,
                     }),
                 handleDeleteAnnotation: annnotationUrl =>
                     this.processEvent('deleteAnnotation', {

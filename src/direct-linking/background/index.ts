@@ -351,7 +351,6 @@ export default class DirectLinkingBackground {
     }
 
     async editAnnotationTags({ tab }, { tagsToBeAdded, tagsToBeDeleted, url }) {
-        console.log(url, tagsToBeAdded)
         return this.annotationStorage.editAnnotationTags(
             tagsToBeAdded,
             tagsToBeDeleted,

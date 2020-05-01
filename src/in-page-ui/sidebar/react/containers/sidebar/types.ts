@@ -4,6 +4,7 @@ import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
+import { BookmarksInterface } from 'src/bookmarks/background/types'
 
 export interface SidebarContainerDependencies {
     inPageUI: InPageUIInterface
@@ -17,4 +18,5 @@ export interface SidebarContainerDependencies {
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
     search: SearchInterface
+    bookmarks: BookmarksInterface
 }
