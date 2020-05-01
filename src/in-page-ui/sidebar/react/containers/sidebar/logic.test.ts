@@ -35,9 +35,29 @@ const setupLogicHelper = async ({
 describe('SidebarContainerLogic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
-    describe('annotation results', () => {})
+    describe('annotation results', () => {
+        it("should be able to edit an annotation's comment", async () => {})
 
-    describe('page results', () => {})
+        it('should be able to delete an annotation', async () => {})
+
+        it("should be able to toggle an annotation's bookmark status", async () => {})
+
+        it('should be able to go to an annotation highlight on the page', async () => {})
+    })
+
+    describe('page results', () => {
+        it('should be able to delete a page via modal', async () => {})
+
+        it("should be able to toggle a page's bookmark status", async () => {})
+
+        it("should be able to toggle a page's tag picker", async () => {})
+
+        it("should be able to toggle a page's collection picker", async () => {})
+
+        it("should be able to toggle a page's annotations view", async () => {})
+
+        it("should be able to toggle open a page's annotations list", async () => {})
+    })
 
     // TODO: Figure out why we're passing in all the comment data that's already available in state
     describe('new comment box', () => {
@@ -189,5 +209,9 @@ describe('SidebarContainerLogic', () => {
         })
     })
 
-    describe('search-type switch', () => {})
+    describe('search-type switch', () => {
+        it('should be able to set search type', async () => {})
+
+        it('should be able to set results search type', async () => {})
+    })
 })
