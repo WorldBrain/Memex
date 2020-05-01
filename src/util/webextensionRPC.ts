@@ -122,7 +122,7 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
             ? "the tab's content script"
             : 'the background script'
 
-    const f = async function(...args) {
+    const f = async function (...args) {
         const message = {
             [RPC_CALL]: RPC_CALL,
             funcName,
@@ -170,7 +170,11 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
 
 // === Executing side ===
 
-const remotelyCallableFunctions = {}
+const remotelyCallableFunctions =
+    typeof window !== 'undefined' ? window['remoteFunctions'] || {} : {}
+if (typeof window !== 'undefined') {
+    window['remoteFunctions'] = remotelyCallableFunctions
+}
 
 async function incomingRPCListener(message, sender) {
     if (!message || message[RPC_CALL] !== RPC_CALL) {
@@ -256,7 +260,7 @@ export function makeRemotelyCallable<T>(
     if (!insertExtraArg) {
         // Replace each func with...
         // @ts-ignore
-        const wrapFunctions = mapValues(func =>
+        const wrapFunctions = mapValues((func) =>
             // ...a function that calls func, but hides the inserted argument.
             // @ts-ignore
             (extraArg, ...args) => func(...args),
@@ -291,7 +295,7 @@ export class RemoteFunctionRegistry {
 export function fakeRemoteFunctions(functions: {
     [name: string]: (...args) => any
 }) {
-    return name => {
+    return (name) => {
         if (!functions[name]) {
             throw new Error(
                 `Tried to call fake remote function '${name}' for which no implementation was provided`,
