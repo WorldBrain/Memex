@@ -18,10 +18,12 @@ const parseToRgb = (colorString: string): number[] => {
     if (colorString.startsWith('#')) {
         return hexToRgb(colorString)
     } else if (colorString.startsWith('r')) {
-        return colorString
+        const parsedColor = colorString
             .replace(/\w+\(?(.+)\)/, '$1')
-            .split(',')
-            .map((n) => parseInt(n, 10))
+            .replace(/,\s?/g, '') // to handle non comma separated colors
+            .split('')
+            .map((n) => parseInt(n.trim(), 10))
+        return parsedColor
     } else {
         return hexToRgb(cssNamedColors[colorString] || '#000')
     }
@@ -44,17 +46,65 @@ export const hexToRgb = (hex: string): number[] => {
     ]
 }
 
-// Takes a color string and deterimes whether or not it is "dark" by calculating its luminance
+const parseColor = (color: string): boolean => {
+    switch (true) {
+        case color.startsWith('#'): // hex color
+            return true
+        case color.startsWith('r'): // rgb(a)
+            return true
+        case Boolean(cssNamedColors[color]): // named colors (e.g. papayawhip)
+            return true
+        default:
+            return false
+    }
+}
+// Takes a color string and deterimes whether or not it is "dark" by calculating its luminance, and whether or not it is a "parsable" color
 export const checkBGColor = (color: string) => getLuminance(color) < 0.179
+
+const parseBackgroundProperties = (
+    background: string,
+    backgroundColor: string,
+) => {
+    const backgroundIsParsable = parseColor(background)
+    const backgroundColorIsParsable = parseColor(backgroundColor)
+    switch (true) {
+        case backgroundIsParsable && backgroundColorIsParsable: {
+            // if both are parsable, background-color will take precedence
+            return checkBGColor(backgroundColor)
+        }
+        case backgroundIsParsable && !backgroundColorIsParsable: {
+            // bg is parseable, but bg-color is not
+            return checkBGColor(background)
+        }
+        case !backgroundIsParsable && backgroundColorIsParsable: {
+            // bg is not parsable, but bg-color is
+            return checkBGColor(backgroundColor)
+        }
+        case !backgroundIsParsable && !backgroundColorIsParsable: {
+            // neither can be parsed
+            return false
+        }
+        default:
+            return false
+    }
+}
 
 // Calculates the background or background-color of an element
 export const calculateBG = (el: HTMLElement): boolean => {
     const computedStyles = getComputedStyle(el)
     const { background, backgroundColor } = computedStyles
-    if (background.length > 0) {
-        return checkBGColor(background)
+    const hasBackgroundPropertySet = background.length > 0
+    const hasBackgroundColorPropertySet = backgroundColor.length > 0
+    switch (true) {
+        case hasBackgroundPropertySet && hasBackgroundColorPropertySet:
+            return parseBackgroundProperties(background, backgroundColor)
+        case hasBackgroundPropertySet && !hasBackgroundColorPropertySet:
+            return checkBGColor(background)
+        case !hasBackgroundPropertySet && hasBackgroundColorPropertySet:
+            return checkBGColor(backgroundColor)
+        default:
+            return false
     }
-    return checkBGColor(backgroundColor)
 }
 
 const cssNamedColors = {
