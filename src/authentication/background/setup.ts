@@ -55,7 +55,7 @@ export function createAuthDependencies(options?: {
         return {
             authService,
             subscriptionService: new MemorySubscriptionsService({
-                expiry: Date.now() + 1000 * 60 * 60 * 24,
+                expiry: Date.now() / 1000 + 1000 * 60 * 60 * 24,
             }),
         }
     }
@@ -67,13 +67,13 @@ export function createAuthDependencies(options?: {
         return {
             authService,
             subscriptionService: new MemorySubscriptionsService({
-                expiry: Date.now() - 1000 * 60 * 60,
+                expiry: Date.now() / 1000 - 1000 * 60 * 60,
             }),
         }
     }
 
     if (devAuthState === 'user_subscription_expires_60s') {
-        const expiry = Date.now() + 1000 * 60
+        const expiry = Date.now() / 1000 + 1000 * 60
         console['log'](
             `Using dev auth state: ${devAuthState}, expiring at ${new Date(
                 expiry,
