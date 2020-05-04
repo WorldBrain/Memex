@@ -77,6 +77,7 @@ export default class DirectLinkingBackground {
             createAnnotation: this.createAnnotation.bind(this),
             editAnnotation: this.editAnnotation.bind(this),
             editAnnotationTags: this.editAnnotationTags.bind(this),
+            updateAnnotationTags: this.updateAnnotationTags.bind(this),
             deleteAnnotation: this.deleteAnnotation.bind(this),
             getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
             addAnnotationTag: this.addTagForAnnotation.bind(this),
@@ -356,6 +357,38 @@ export default class DirectLinkingBackground {
             tagsToBeDeleted,
             url,
         )
+    }
+
+    async updateAnnotationTags(
+        _,
+        { tags, url }: { tags: string[]; url: string },
+    ) {
+        const existingTags = await this.annotationStorage.getTagsByAnnotationUrl(
+            url,
+        )
+
+        const existingTagsSet = new Set(existingTags.map((tag) => tag.name))
+        const incomingTagsSet = new Set(tags)
+        const tagsToBeDeleted: string[] = []
+        const tagsToBeAdded: string[] = []
+
+        for (const incomingTag of incomingTagsSet) {
+            if (!existingTagsSet.has(incomingTag)) {
+                tagsToBeAdded.push(incomingTag)
+            }
+        }
+
+        for (const existingTag of existingTagsSet) {
+            if (!incomingTagsSet.has(existingTag)) {
+                tagsToBeDeleted.push(existingTag)
+            }
+        }
+
+        return this.editAnnotationTags(_, {
+            url,
+            tagsToBeAdded,
+            tagsToBeDeleted,
+        })
     }
 
     private async lookupSocialId(id: string): Promise<string> {

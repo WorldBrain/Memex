@@ -13,24 +13,30 @@ interface Props {
     env?: 'inpage' | 'overview'
     comment?: string
     tags: string[]
-    commentText: string
-    tagsInput: string[]
     rows: number
     tagSuggestions: string[]
     handleCancelOperation: () => void
     handleEditAnnotation: (commentText: string, tagsInput: string[]) => void
-    onAddTag: (tag: string) => void
-    onDeleteTag: (tag: string) => void
 }
 
 interface State {
     isTagInputActive: boolean
+    commentEditText: string
+    tags: string[]
 }
 
 class EditModeContent extends React.Component<Props, State> {
+    state: State = {
+        isTagInputActive: false,
+        commentEditText: this.props.comment ?? '',
+        tags: this.props.tags ?? [],
+    }
+
     private _handleEditAnnotation = () => {
-        const { commentText, tagsInput } = this.props
-        this.props.handleEditAnnotation(commentText, tagsInput)
+        this.props.handleEditAnnotation(
+            this.state.commentEditText,
+            this.state.tags,
+        )
     }
 
     private _handleTagInputKeydown = (
@@ -47,19 +53,40 @@ class EditModeContent extends React.Component<Props, State> {
     }
 
     private onEnterSaveHandler = {
-        test: e => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: e => this._handleCommentChange,
+        test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+        handle: (e) => this._handleCommentChange,
     }
 
-    private _handleCommentChange = commentText => {
-        this.props.handleEditAnnotation(commentText, this.props.tagsInput)
-    }
+    private _handleCommentChange = (comment: string) =>
+        this.setState((state) => ({ commentEditText: comment }))
+
+    private addTag = (tag: string) =>
+        this.setState((state) => {
+            const index = state.tags.indexOf(tag)
+
+            if (index !== -1) {
+                return
+            }
+
+            return { tags: [...state.tags, tag] }
+        })
+
+    private deleteTag = (tag: string) =>
+        this.setState((state) => {
+            const index = state.tags.indexOf(tag)
+            return {
+                tags: [
+                    ...state.tags.slice(0, index),
+                    ...state.tags.slice(index + 1),
+                ],
+            }
+        })
 
     render() {
         return (
             <React.Fragment>
                 <TextInputControlled
-                    defaultValue={this.props.commentText}
+                    defaultValue={this.state.commentEditText}
                     onClick={() => this._setTagInputActive(false)}
                     className={styles.textArea}
                     placeholder="Add a private note... (save with cmd/ctrl+enter)"
@@ -70,17 +97,17 @@ class EditModeContent extends React.Component<Props, State> {
                 <div onKeyDown={this._handleTagInputKeydown}>
                     <TagInput
                         env={this.props.env}
-                        tags={this.props.tagsInput}
+                        tags={this.state.tags}
                         initTagSuggestions={[
                             ...new Set([
-                                ...this.props.tagsInput,
+                                ...(this.props.tags ?? []),
                                 ...this.props.tagSuggestions,
                             ]),
                         ]}
                         isTagInputActive={this.state.isTagInputActive}
                         setTagInputActive={this._setTagInputActive}
-                        addTag={this.props.onAddTag}
-                        deleteTag={this.props.onDeleteTag}
+                        addTag={this.addTag}
+                        deleteTag={this.deleteTag}
                     />
                 </div>
 

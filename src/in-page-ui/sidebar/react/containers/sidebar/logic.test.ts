@@ -4,21 +4,27 @@ import {
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
+import { Annotation } from 'src/annotations/types'
 // import 'jest-extended'
 
 const setupLogicHelper = async ({
     device,
     currentTabUrl = DATA.CURRENT_TAB_URL_1,
+    getAllAnnotationsByUrl = async () => [],
 }: {
     device: UILogicTestDevice
     currentTabUrl?: string
+    getAllAnnotationsByUrl?: () => Promise<Annotation[]>
 }) => {
     // TODO: figure out how to set up all these deps
     const sidebarLogic = new SidebarContainerLogic({
         currentTab: { url: currentTabUrl },
         annotations: {
+            editAnnotation: () => undefined,
             createAnnotation: () => undefined,
             addAnnotationTag: () => undefined,
+            updateAnnotationTags: () => undefined,
+            getAllAnnotationsByUrl,
         },
         inPageUI: {
             state: {
@@ -36,7 +42,92 @@ describe('SidebarContainerLogic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
 
     describe('annotation results', () => {
-        it("should be able to edit an annotation's comment", async () => {})
+        it("should be able to edit an annotation's comment", async ({
+            device,
+        }) => {
+            const getAllAnnotationsByUrl = async () => [DATA.ANNOT_1]
+            const { testLogic } = await setupLogicHelper({
+                device,
+                getAllAnnotationsByUrl,
+            })
+            const context = 'pageAnnotations'
+            const editedComment = DATA.ANNOT_1.comment + ' new stuff'
+
+            expect(testLogic.state.annotations.length).toBe(1)
+            const annotation = testLogic.state.annotations[0]
+            expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
+
+            await testLogic.processEvent('switchAnnotationMode', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+                mode: 'edit',
+            })
+            expect(
+                testLogic.state.annotationModes[context][DATA.ANNOT_1.url],
+            ).toEqual('edit')
+
+            await testLogic.processEvent('editAnnotation', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+                comment: editedComment,
+                tags: [],
+            })
+            expect(
+                testLogic.state.annotationModes[context][annotation.url],
+            ).toEqual('default')
+            expect(testLogic.state.annotations[0].comment).toEqual(
+                editedComment,
+            )
+            expect(testLogic.state.annotations[0].tags).toEqual([])
+            expect(testLogic.state.annotations[0].lastEdited).not.toEqual(
+                annotation.lastEdited,
+            )
+        })
+
+        it("should be able to edit an annotation's comment and tags", async ({
+            device,
+        }) => {
+            const getAllAnnotationsByUrl = async () => [DATA.ANNOT_1]
+            const { testLogic } = await setupLogicHelper({
+                device,
+                getAllAnnotationsByUrl,
+            })
+            const context = 'pageAnnotations'
+            const editedComment = DATA.ANNOT_1.comment + ' new stuff'
+
+            expect(testLogic.state.annotations.length).toBe(1)
+            const annotation = testLogic.state.annotations[0]
+            expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
+
+            await testLogic.processEvent('switchAnnotationMode', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+                mode: 'edit',
+            })
+            expect(
+                testLogic.state.annotationModes[context][DATA.ANNOT_1.url],
+            ).toEqual('edit')
+
+            await testLogic.processEvent('editAnnotation', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+                comment: editedComment,
+                tags: [DATA.TAG_1, DATA.TAG_2],
+            })
+            expect(
+                testLogic.state.annotationModes[context][annotation.url],
+            ).toEqual('default')
+            expect(testLogic.state.annotations[0].comment).toEqual(
+                editedComment,
+            )
+            expect(testLogic.state.annotations[0].tags).toEqual([
+                DATA.TAG_1,
+                DATA.TAG_2,
+            ])
+            expect(testLogic.state.annotations[0].lastEdited).not.toEqual(
+                annotation.lastEdited,
+            )
+        })
 
         it('should be able to delete an annotation', async () => {})
 

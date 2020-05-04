@@ -95,17 +95,17 @@ export default class SidebarContainer extends StatefulUIElement<
                         annotationUrl,
                         mode,
                     }),
-                handleGoToAnnotation: annnotationUrl =>
+                handleGoToAnnotation: (annnotationUrl) =>
                     this.processEvent('goToAnnotation', {
                         context,
                         annnotationUrl,
                     }),
-                handleMouseEnter: annnotationUrl =>
+                handleMouseEnter: (annnotationUrl) =>
                     this.processEvent('annotationMouseEnter', {
                         context,
                         annnotationUrl,
                     }),
-                handleMouseLeave: annnotationUrl =>
+                handleMouseLeave: (annnotationUrl) =>
                     this.processEvent('annotationMouseLeave', {
                         context,
                         annnotationUrl,
@@ -117,16 +117,16 @@ export default class SidebarContainer extends StatefulUIElement<
                 ) =>
                     this.processEvent('editAnnotation', {
                         context,
-                        annnotationUrl: url,
+                        annotationUrl: url,
                         comment,
                         tags,
                     }),
-                handleDeleteAnnotation: annnotationUrl =>
+                handleDeleteAnnotation: (annnotationUrl) =>
                     this.processEvent('deleteAnnotation', {
                         context,
                         annnotationUrl,
                     }),
-                handleBookmarkToggle: annnotationUrl =>
+                handleBookmarkToggle: (annnotationUrl) =>
                     this.processEvent('toggleAnnotationBookmark', {
                         context,
                         annnotationUrl,
@@ -180,7 +180,7 @@ export default class SidebarContainer extends StatefulUIElement<
                         this.processEvent('closeDeletePageModal', null),
                 }}
                 onQueryKeyDown={() => {}}
-                onQueryChange={searchQuery => {
+                onQueryChange={(searchQuery) => {
                     this.processEvent('changeSearchQuery', { searchQuery })
                 }}
                 onShowFiltersSidebarChange={() => {}}
@@ -210,9 +210,9 @@ export default class SidebarContainer extends StatefulUIElement<
                                 'toggleNewPageCommentTagPicker',
                                 null,
                             ),
-                        addTag: tag =>
+                        addTag: (tag) =>
                             this.processEvent('addNewPageCommentTag', { tag }),
-                        deleteTag: tag =>
+                        deleteTag: (tag) =>
                             this.processEvent('deleteNewPageCommentTag', {
                                 tag,
                             }),
@@ -272,12 +272,12 @@ export default class SidebarContainer extends StatefulUIElement<
                     handlePillClick: (tag: string) => () => {
                         // console.log('handlePillClick')
                     },
-                    handleTagBtnClick: result => {
+                    handleTagBtnClick: (result) => {
                         this.processEvent('togglePageTagPicker', {
                             pageUrl: result.url,
                         })
                     },
-                    handleCommentBtnClick: result => {
+                    handleCommentBtnClick: (result) => {
                         this.processEvent('togglePageAnnotationsView', {
                             pageUrl: result.url,
                         })
@@ -286,12 +286,12 @@ export default class SidebarContainer extends StatefulUIElement<
                         // console.log('handleCrossRibbonClick')
                     },
                     handleScrollPagination: () => {},
-                    handleToggleBm: result => {
+                    handleToggleBm: (result) => {
                         this.processEvent('togglePageBookmark', {
                             pageUrl: result.url,
                         })
                     },
-                    handleTrashBtnClick: result => {
+                    handleTrashBtnClick: (result) => {
                         this.processEvent('showDeletePageModal', {
                             pageUrl: result.url,
                         })

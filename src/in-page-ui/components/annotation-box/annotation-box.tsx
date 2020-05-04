@@ -110,7 +110,7 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
 
     private _getTruncatedTextObject: (
         text: string,
-    ) => { isTextTooLong: boolean; text: string } = text => {
+    ) => { isTextTooLong: boolean; text: string } = (text) => {
         if (text.length > 280) {
             const truncatedText = text.slice(0, 280)
             return {
@@ -239,7 +239,7 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                         }
                         handleDeleteAnnotation={this._handleDeleteAnnotation}
                         handleCancelOperation={this._handleCancelOperation}
-                        handleTagClick={tag =>
+                        handleTagClick={(tag) =>
                             this.props.handleAnnotationTagClick(
                                 this.props.url,
                                 tag,
@@ -258,12 +258,8 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                         tags={this.props.tags}
                         handleCancelOperation={this._handleCancelOperation}
                         handleEditAnnotation={this._handleEditAnnotation}
-                        commentText="Comment text"
-                        tagsInput={[]}
                         rows={2}
                         tagSuggestions={[]}
-                        onAddTag={() => {}}
-                        onDeleteTag={() => {}}
                     />
                 )}
             </div>

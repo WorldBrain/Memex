@@ -125,7 +125,7 @@ export type SidebarContainerEvents = UIEvent<{
     goToAnnotation: { context: AnnotationEventContext; annnotationUrl: string }
     editAnnotation: {
         context: AnnotationEventContext
-        annnotationUrl: string
+        annotationUrl: string
         comment: string
         tags: string[]
     }
@@ -343,15 +343,17 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    setNewPageCommentAnchor: EventHandler<
-        'setNewPageCommentAnchor'
-    > = incoming => {
+    setNewPageCommentAnchor: EventHandler<'setNewPageCommentAnchor'> = (
+        incoming,
+    ) => {
         return this.emitMutation({
             commentBox: { anchor: { $set: incoming.event.anchor } },
         })
     }
 
-    changePageCommentText: EventHandler<'changePageCommentText'> = incoming => {
+    changePageCommentText: EventHandler<'changePageCommentText'> = (
+        incoming,
+    ) => {
         return {
             commentBox: {
                 form: { commentText: { $set: incoming.event.comment } },
@@ -396,7 +398,7 @@ export class SidebarContainerLogic extends UILogic<
             commentBox: {
                 form: {
                     isCommentBookmarked: {
-                        $apply: bookmarked => !bookmarked,
+                        $apply: (bookmarked) => !bookmarked,
                     },
                 },
             },
@@ -408,12 +410,12 @@ export class SidebarContainerLogic extends UILogic<
     > = () => {
         return {
             commentBox: {
-                form: { showTagsPicker: { $apply: active => !active } },
+                form: { showTagsPicker: { $apply: (active) => !active } },
             },
         }
     }
 
-    addNewPageCommentTag: EventHandler<'addNewPageCommentTag'> = incoming => {
+    addNewPageCommentTag: EventHandler<'addNewPageCommentTag'> = (incoming) => {
         return {
             commentBox: {
                 form: {
@@ -428,9 +430,9 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    deleteNewPageCommentTag: EventHandler<
-        'deleteNewPageCommentTag'
-    > = incoming => {
+    deleteNewPageCommentTag: EventHandler<'deleteNewPageCommentTag'> = (
+        incoming,
+    ) => {
         return {
             commentBox: {
                 form: {
@@ -452,19 +454,55 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    goToAnnotation: EventHandler<'goToAnnotation'> = incoming => {}
+    goToAnnotation: EventHandler<'goToAnnotation'> = (incoming) => {}
 
-    editAnnotation: EventHandler<'editAnnotation'> = async ({ event }) => {
-        this.emitMutation({
-            annotationModes: {
-                [event.context]: {
-                    [event.annnotationUrl]: { $set: 'default' },
+    editAnnotation: EventHandler<'editAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
+        const resultIndex = previousState.annotations.findIndex(
+            (annot) => annot.url === event.annotationUrl,
+        )
+        const originalAnnot = previousState.annotations[resultIndex]
+
+        const updateState = (args: {
+            tags: string[]
+            comment?: string
+            lastEdited: number
+        }) =>
+            this.emitMutation({
+                annotationModes: {
+                    [event.context]: {
+                        [event.annotationUrl]: { $set: 'default' },
+                    },
                 },
-            },
-        })
+                annotations: {
+                    [resultIndex]: {
+                        tags: { $set: args.tags },
+                        comment: { $set: args.comment },
+                        lastEdited: { $set: args.lastEdited },
+                    },
+                },
+            })
+
+        updateState({ ...event, lastEdited: Date.now() })
+
+        try {
+            await this.options.annotations.editAnnotation(
+                event.annotationUrl,
+                event.comment,
+            )
+            await this.options.annotations.updateAnnotationTags({
+                url: event.annotationUrl,
+                tags: event.tags,
+            })
+        } catch (err) {
+            updateState({ ...originalAnnot })
+            throw err
+        }
     }
 
-    deleteAnnotation: EventHandler<'deleteAnnotation'> = async incoming => {
+    deleteAnnotation: EventHandler<'deleteAnnotation'> = async (incoming) => {
         this.emitMutation({
             annotationModes: {
                 [incoming.event.context]: {
@@ -492,7 +530,7 @@ export class SidebarContainerLogic extends UILogic<
             })
 
         const annotationIndex = previousState.annotations.findIndex(
-            annotation => (annotation.url = event.annnotationUrl),
+            (annotation) => (annotation.url = event.annnotationUrl),
         )
         const currentlyBookmarked = !!previousState.annotations[annotationIndex]
             .hasBookmark
@@ -501,10 +539,10 @@ export class SidebarContainerLogic extends UILogic<
 
         await this.options.annotations
             .toggleAnnotBookmark({ url: event.annnotationUrl })
-            .catch(err => toggleBookmarkState(!shouldBeBookmarked))
+            .catch((err) => toggleBookmarkState(!shouldBeBookmarked))
     }
 
-    switchAnnotationMode: EventHandler<'switchAnnotationMode'> = incoming => {
+    switchAnnotationMode: EventHandler<'switchAnnotationMode'> = (incoming) => {
         return {
             annotationModes: {
                 [incoming.event.context]: {
@@ -527,7 +565,7 @@ export class SidebarContainerLogic extends UILogic<
     deletePage: EventHandler<'deletePage'> = async ({ previousState }) => {
         const { pageUrlToDelete } = previousState.deletePageModal
         const resultIndex = previousState.searchResults.findIndex(
-            result => result.url === pageUrlToDelete,
+            (result) => result.url === pageUrlToDelete,
         )
 
         this.emitMutation({
@@ -542,7 +580,7 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
 
-        await this.options.search.delPages([pageUrlToDelete]).catch(err =>
+        await this.options.search.delPages([pageUrlToDelete]).catch((err) =>
             this.emitMutation({
                 searchResults: { $set: previousState.searchResults },
             }),
@@ -571,7 +609,7 @@ export class SidebarContainerLogic extends UILogic<
             })
 
         const resultIndex = previousState.searchResults.findIndex(
-            result => result.url === event.pageUrl,
+            (result) => result.url === event.pageUrl,
         )
         const currentlyBookmarked = !!previousState.searchResults[resultIndex]
             .hasBookmark
@@ -583,7 +621,7 @@ export class SidebarContainerLogic extends UILogic<
             ? this.options.bookmarks.addPageBookmark({ url: event.pageUrl })
             : this.options.bookmarks.delPageBookmark({ url: event.pageUrl })
 
-        await pending.catch(err => toggleBookmarkState(!shouldBeBookmarked))
+        await pending.catch((err) => toggleBookmarkState(!shouldBeBookmarked))
     }
 
     togglePageTagPicker: EventHandler<'togglePageTagPicker'> = ({
@@ -591,7 +629,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
     }) => {
         const resultIndex = previousState.searchResults.findIndex(
-            result => result.url === event.pageUrl,
+            (result) => result.url === event.pageUrl,
         )
         const currentlyShown = !!previousState.searchResults[resultIndex]
             .shouldDisplayTagPopup
@@ -612,7 +650,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
     }) => {
         const resultIndex = previousState.searchResults.findIndex(
-            result => result.url === event.pageUrl,
+            (result) => result.url === event.pageUrl,
         )
         // const currentlyShown = !!previousState.searchResults[resultIndex].
         // const shouldBeShown = !currentlyShown
@@ -630,13 +668,13 @@ export class SidebarContainerLogic extends UILogic<
     //     return { hoverAnnotationUrl}
     // }
 
-    changeSearchQuery: EventHandler<'changeSearchQuery'> = incoming => {
+    changeSearchQuery: EventHandler<'changeSearchQuery'> = (incoming) => {
         return {
             searchValue: { $set: incoming.event.searchQuery },
         }
     }
 
-    togglePageType: EventHandler<'togglePageType'> = incoming => {
+    togglePageType: EventHandler<'togglePageType'> = (incoming) => {
         const currentPageType = incoming.previousState.pageType
         const toggledPageType = currentPageType === 'all' ? 'page' : 'all'
         this.setPageType({ ...incoming, event: { type: toggledPageType } })
@@ -664,37 +702,37 @@ export class SidebarContainerLogic extends UILogic<
         await this._maybeLoad(previousState, mutation)
     }
 
-    setResultsSearchType: EventHandler<'setResultsSearchType'> = incoming => {
+    setResultsSearchType: EventHandler<'setResultsSearchType'> = (incoming) => {
         this.emitMutation({
             resultsSearchType: { $set: incoming.event.type },
         })
     }
 
-    setAnnotationsExpanded: EventHandler<
-        'setAnnotationsExpanded'
-    > = incoming => {}
+    setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (
+        incoming,
+    ) => {}
 
-    clearAllFilters: EventHandler<'clearAllFilters'> = incoming => {}
+    clearAllFilters: EventHandler<'clearAllFilters'> = (incoming) => {}
 
-    fetchSuggestedTags: EventHandler<'fetchSuggestedTags'> = incoming => {}
+    fetchSuggestedTags: EventHandler<'fetchSuggestedTags'> = (incoming) => {}
 
-    fetchSuggestedDomains: EventHandler<
-        'fetchSuggestedDomains'
-    > = incoming => {}
+    fetchSuggestedDomains: EventHandler<'fetchSuggestedDomains'> = (
+        incoming,
+    ) => {}
 
-    resetFiterPopups: EventHandler<'resetFiterPopups'> = incoming => {}
+    resetFiterPopups: EventHandler<'resetFiterPopups'> = (incoming) => {}
 
-    toggleShowFilters: EventHandler<'toggleShowFilters'> = incoming => {
-        return { showFiltersSidebar: { $apply: show => !show } }
+    toggleShowFilters: EventHandler<'toggleShowFilters'> = (incoming) => {
+        return { showFiltersSidebar: { $apply: (show) => !show } }
     }
 
-    toggleAllAnnotationsFold: EventHandler<
-        'toggleAllAnnotationsFold'
-    > = incoming => {
-        return { allAnnotationsExpanded: { $apply: value => !value } }
+    toggleAllAnnotationsFold: EventHandler<'toggleAllAnnotationsFold'> = (
+        incoming,
+    ) => {
+        return { allAnnotationsExpanded: { $apply: (value) => !value } }
     }
 
-    annotationMouseEnter: EventHandler<'annotationMouseEnter'> = incoming => {
+    annotationMouseEnter: EventHandler<'annotationMouseEnter'> = (incoming) => {
         return {
             hoverAnnotationUrl: {
                 [incoming.event.context]: {
@@ -704,7 +742,7 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    annotationMouseLeave: EventHandler<'annotationMouseLeave'> = incoming => {
+    annotationMouseLeave: EventHandler<'annotationMouseLeave'> = (incoming) => {
         return {
             hoverAnnotationUrl: { [incoming.event.context]: { $set: '' } },
         }
