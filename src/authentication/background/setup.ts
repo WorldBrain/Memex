@@ -14,6 +14,7 @@ export type DevAuthState =
     | 'user_signed_in'
     | 'user_subscribed'
     | 'user_subscription_expired'
+    | 'user_subscription_expires_60s'
 
 export function createAuthDependencies(options?: {
     devAuthState?: DevAuthState
@@ -71,7 +72,24 @@ export function createAuthDependencies(options?: {
         }
     }
 
+    if (devAuthState === 'user_subscription_expires_60s') {
+        const expiry = Date.now() + 1000 * 60
+        console['log'](
+            `Using dev auth state: ${devAuthState}, expiring at ${new Date(
+                expiry,
+            ).toLocaleString()}`,
+        )
+        const authService = new MemoryAuthService()
+        authService.setUser(TEST_USER)
+        return {
+            authService,
+            subscriptionService: new MemorySubscriptionsService({
+                expiry,
+            }),
+        }
+    }
+
     throw new Error(
-        `Tried to set up auth dependies with unknow DEV_AUTH_STATE: ${devAuthState}`,
+        `Tried to set up auth dependencies with unknown DEV_AUTH_STATE: ${devAuthState}`,
     )
 }

@@ -8,7 +8,7 @@ class MockAlarmsApi {
     alarms: Map<string, Alarms.CreateAlarmInfoType> = new Map()
 
     onAlarm = {
-        addListener: listener => (this.listener = listener),
+        addListener: (listener) => (this.listener = listener),
     }
 
     create(name: string, info: Alarms.CreateAlarmInfoType) {
@@ -20,11 +20,11 @@ class MockStorageApi {
     values: Map<string, any> = new Map()
 
     local = {
-        set: dict => {
+        set: (dict) => {
             const [[key, value]] = Object.entries(dict)
             this.values.set(key, value)
         },
-        get: dict => {
+        get: (dict) => {
             const [[key, def]] = Object.entries(dict)
             return { [key]: this.values.get(key) || def }
         },
@@ -65,7 +65,7 @@ describe('JobScheduler tests', () => {
             [testJob.name]: JobScheduler.NOT_SET,
         })
 
-        await scheduler.scheduleJob(testJob)
+        await scheduler.scheduleJobHourly(testJob)
 
         expect(scheduler['jobs'].get(testJob.name)).toEqual(testJob)
         expect(
@@ -110,7 +110,7 @@ describe('JobScheduler tests', () => {
             [testJob.name]: JobScheduler.NOT_SET,
         })
 
-        await scheduler.scheduleJob(testJob)
+        await scheduler.scheduleJobHourly(testJob)
 
         expect(scheduler['jobs'].get(testJob.name)).toEqual(testJob)
         expect(

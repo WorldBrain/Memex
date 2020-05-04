@@ -149,7 +149,12 @@ export function createBackgroundModules(options: {
 
     const auth =
         options.auth ||
-        new AuthBackground(createAuthDependencies(options.authOptions))
+        new AuthBackground({
+            ...createAuthDependencies(options.authOptions),
+            scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
+                jobScheduler.scheduler,
+            ),
+        })
 
     const connectivityChecker = new ConnectivityCheckerBackground({
         xhr: new XMLHttpRequest(),
