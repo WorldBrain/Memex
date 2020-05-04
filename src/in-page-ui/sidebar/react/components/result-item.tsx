@@ -121,6 +121,7 @@ class ResultItem extends Component<Props> {
                     <LoadingIndicator className={styles.deletingSpinner} />
                 )}
                 {this.props.tagManager}
+                {this.props.listManager}
                 <div
                     className={cx(styles.rootContainer, {
                         [styles.tweetRootContainer]: this.props.isSocial,

@@ -168,6 +168,7 @@ export type SidebarContainerEvents = UIEvent<{
     // Page search result interactions
     togglePageBookmark: { pageUrl: string }
     togglePageTagPicker: { pageUrl: string }
+    togglePageListPicker: { pageUrl: string }
     togglePageAnnotationsView: { pageUrl: string }
 }>
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
@@ -709,6 +710,26 @@ export class SidebarContainerLogic extends UILogic<
             searchResults: {
                 [resultIndex]: {
                     shouldDisplayTagPopup: { $set: shouldBeShown },
+                },
+            },
+        }
+    }
+
+    togglePageListPicker: EventHandler<'togglePageListPicker'> = ({
+        previousState,
+        event,
+    }) => {
+        const resultIndex = previousState.searchResults.findIndex(
+            (result) => result.url === event.pageUrl,
+        )
+        const currentlyShown = !!previousState.searchResults[resultIndex]
+            .shouldDisplayListPopup
+        const shouldBeShown = !currentlyShown
+
+        return {
+            searchResults: {
+                [resultIndex]: {
+                    shouldDisplayListPopup: { $set: shouldBeShown },
                 },
             },
         }

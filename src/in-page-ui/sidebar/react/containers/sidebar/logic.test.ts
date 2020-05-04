@@ -175,9 +175,69 @@ describe('SidebarContainerLogic', () => {
 
         it("should be able to toggle a page's bookmark status", async () => {})
 
-        it("should be able to toggle a page's tag picker", async () => {})
+        it("should be able to toggle a page's tag picker", async ({
+            device,
+        }) => {
+            const { testLogic } = await setupLogicHelper({
+                device,
+            })
 
-        it("should be able to toggle a page's collection picker", async () => {})
+            testLogic.processMutation({
+                searchResults: {
+                    $set: [
+                        {
+                            url: DATA.PAGE_URL_1,
+                            shouldDisplayTagPopup: false,
+                        } as any,
+                    ],
+                },
+            })
+
+            await testLogic.processEvent('togglePageTagPicker', {
+                pageUrl: DATA.PAGE_URL_1,
+            })
+            expect(testLogic.state.searchResults[0].shouldDisplayTagPopup).toBe(
+                true,
+            )
+            await testLogic.processEvent('togglePageTagPicker', {
+                pageUrl: DATA.PAGE_URL_1,
+            })
+            expect(testLogic.state.searchResults[0].shouldDisplayTagPopup).toBe(
+                false,
+            )
+        })
+
+        it("should be able to toggle a page's collection picker", async ({
+            device,
+        }) => {
+            const { testLogic } = await setupLogicHelper({
+                device,
+            })
+
+            testLogic.processMutation({
+                searchResults: {
+                    $set: [
+                        {
+                            url: DATA.PAGE_URL_1,
+                            shouldDisplayListPopup: false,
+                        } as any,
+                    ],
+                },
+            })
+
+            await testLogic.processEvent('togglePageListPicker', {
+                pageUrl: DATA.PAGE_URL_1,
+            })
+            expect(
+                testLogic.state.searchResults[0].shouldDisplayListPopup,
+            ).toBe(true)
+            await testLogic.processEvent('togglePageListPicker', {
+                pageUrl: DATA.PAGE_URL_1,
+            })
+            expect(
+                testLogic.state.searchResults[0].shouldDisplayListPopup,
+            ).toBe(false)
+        })
 
         it("should be able to toggle a page's annotations view", async () => {})
 

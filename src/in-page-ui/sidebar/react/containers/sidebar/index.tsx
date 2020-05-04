@@ -269,11 +269,18 @@ export default class SidebarContainer extends StatefulUIElement<
                     setUrlDragged: (url: string) => {},
                     addTag: (i: number) => (filter: string) => {},
                     delTag: (i: number) => (filter: string) => {},
+                    addList: (i: number) => (filter: string) => {},
+                    delList: (i: number) => (filter: string) => {},
                     handlePillClick: (tag: string) => () => {
                         // console.log('handlePillClick')
                     },
                     handleTagBtnClick: (result) => {
                         this.processEvent('togglePageTagPicker', {
+                            pageUrl: result.url,
+                        })
+                    },
+                    handleListBtnClick: (result) => {
+                        this.processEvent('togglePageListPicker', {
                             pageUrl: result.url,
                         })
                     },
