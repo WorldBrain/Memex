@@ -7,10 +7,6 @@ import * as constants from '../constants'
 import analytics from '../analytics'
 import extractQueryFilters from '../util/nlp-time-filter'
 import { remoteFunction } from '../util/webextensionRPC'
-import {
-    IndexDropdown,
-    AddListDropdownContainer,
-} from '../common-ui/containers'
 import Search from './components/Search'
 import LinkButton from './components/LinkButton'
 import ButtonIcon from './components/ButtonIcon'
@@ -18,9 +14,13 @@ import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
 import { NotifButton } from './notif-button'
 import { HistoryPauser } from './pause-button'
-import { selectors as tags, acts as tagActs, TagsButton } from './tags-button'
 import {
-    selectors as collections,
+    selectors as tagsSelectors,
+    acts as tagActs,
+    TagsButton,
+} from './tags-button'
+import {
+    selectors as collectionsSelectors,
     acts as collectionActs,
     CollectionsButton,
 } from './collections-button'
@@ -33,9 +33,11 @@ import { BookmarkButton } from './bookmark-button'
 import * as selectors from './selectors'
 import * as acts from './actions'
 import { ClickHandler, RootState } from './types'
-import { PageList } from '../custom-lists/background/types'
 import { EVENT_NAMES } from '../analytics/internal/constants'
-
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { tags, collections } from 'src/util/remote-functions-background'
+import { BackContainer } from 'src/popup/components/BackContainer'
 const btnStyles = require('./components/Button.css')
 const styles = require('./components/Popup.css')
 
@@ -47,13 +49,7 @@ interface StateProps {
     showCollectionsPicker: boolean
     tabId: number
     url: string
-    tags: string[]
-    collections: PageList[]
     searchValue: string
-    initTagSuggs: string[]
-    initCollSuggs: PageList[]
-    allTabs: boolean
-    allTabsCollection: boolean
 }
 
 interface DispatchProps {
@@ -63,8 +59,8 @@ interface DispatchProps {
     toggleShowCollectionsPicker: () => void
     onTagAdd: (tag: string) => void
     onTagDel: (tag: string) => void
-    onCollectionAdd: (collection: PageList) => void
-    onCollectionDel: (collection: PageList) => void
+    onCollectionAdd: (collection: string) => void
+    onCollectionDel: (collection: string) => void
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
@@ -105,6 +101,50 @@ class PopupContainer extends PureComponent<Props> {
         }
     }
 
+    handleTagUpdate = async (_: string[], added: string, deleted: string) => {
+        const backendResult = tags.updateTagForPage({
+            added,
+            deleted,
+            url: this.props.url,
+        })
+        // Redux actions
+        if (added) {
+            this.props.onTagAdd(added)
+        }
+        if (deleted) {
+            return this.props.onTagDel(deleted)
+        }
+        return backendResult
+    }
+
+    handleTagAllTabs = (tagName: string) =>
+        tags.addTagsToOpenTabs({ name: tagName })
+    handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
+    fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
+
+    handleListUpdate = async (_: string[], added: string, deleted: string) => {
+        const backendResult = collections.updateListForPage({
+            added,
+            deleted,
+            url: this.props.url,
+        })
+        // Redux actions
+        if (added) {
+            this.props.onCollectionAdd(added)
+        }
+        if (deleted) {
+            return this.props.onCollectionDel(deleted)
+        }
+        return backendResult
+    }
+
+    handleListAllTabs = (listName: string) =>
+        collections.addOpenTabsToList({ name: listName })
+    handleListQuery = (query: string) =>
+        collections.searchForListSuggestions({ query })
+    fetchListsForPage = async () =>
+        collections.fetchPageLists({ url: this.props.url })
+
     renderChildren() {
         if (this.props.blacklistConfirm) {
             return <BlacklistConfirm />
@@ -112,32 +152,33 @@ class PopupContainer extends PureComponent<Props> {
 
         if (this.props.showTagsPicker) {
             return (
-                <IndexDropdown
-                    url={this.props.url}
-                    tabId={this.props.tabId}
-                    initFilters={this.props.tags}
-                    initSuggestions={this.props.initTagSuggs}
-                    source="tag"
-                    onBackBtnClick={this.props.toggleShowTagsPicker}
-                    onFilterAdd={this.props.onTagAdd}
-                    onFilterDel={this.props.onTagDel}
-                    allTabs={this.props.allTabs}
-                />
+                <TagPicker
+                    queryEntries={this.handleTagQuery}
+                    onUpdateEntrySelection={this.handleTagUpdate}
+                    initialSelectedEntries={this.fetchTagsForPage}
+                    actOnAllTabs={this.handleTagAllTabs}
+                    loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
+                >
+                    <BackContainer onClick={this.props.toggleShowTagsPicker} />
+                </TagPicker>
             )
         }
 
         if (this.props.showCollectionsPicker) {
             return (
-                <AddListDropdownContainer
-                    mode="popup"
-                    initLists={this.props.collections}
-                    initSuggestions={this.props.initCollSuggs}
-                    url={this.props.url}
-                    onBackBtnClick={this.props.toggleShowCollectionsPicker}
-                    onFilterAdd={this.props.onCollectionAdd}
-                    onFilterDel={this.props.onCollectionDel}
-                    allTabsCollection={this.props.allTabsCollection}
-                />
+                <CollectionPicker
+                    queryEntries={this.handleListQuery}
+                    onUpdateEntrySelection={this.handleListUpdate}
+                    initialSelectedEntries={this.fetchListsForPage}
+                    actOnAllTabs={this.handleListAllTabs}
+                    loadDefaultSuggestions={
+                        collections.fetchInitialListSuggestions
+                    }
+                >
+                    <BackContainer
+                        onClick={this.props.toggleShowCollectionsPicker}
+                    />
+                </CollectionPicker>
             )
         }
 
@@ -216,14 +257,8 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     url: selectors.url(state),
     searchValue: selectors.searchValue(state),
     blacklistConfirm: blacklist.showDeleteConfirm(state),
-    showCollectionsPicker: collections.showCollectionsPicker(state),
-    collections: collections.collections(state),
-    initCollSuggs: collections.initCollSuggestions(state),
-    showTagsPicker: tags.showTagsPicker(state),
-    tags: tags.tags(state),
-    initTagSuggs: tags.initTagSuggestions(state),
-    allTabs: tags.allTabs(state),
-    allTabsCollection: collections.allTabs(state),
+    showCollectionsPicker: collectionsSelectors.showCollectionsPicker(state),
+    showTagsPicker: tagsSelectors.showTagsPicker(state),
 })
 
 const mapDispatch = (dispatch): DispatchProps => ({
@@ -238,9 +273,9 @@ const mapDispatch = (dispatch): DispatchProps => ({
         dispatch(collectionActs.toggleShowTagsPicker()),
     onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
     onTagDel: (tag: string) => dispatch(tagActs.deleteTag(tag)),
-    onCollectionAdd: (collection: PageList) =>
+    onCollectionAdd: (collection: string) =>
         dispatch(collectionActs.addCollectionToPage(collection)),
-    onCollectionDel: (collection: PageList) =>
+    onCollectionDel: (collection: string) =>
         dispatch(collectionActs.deleteCollection(collection)),
 })
 

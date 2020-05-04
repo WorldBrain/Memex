@@ -31,7 +31,7 @@ export class IdleManager {
     private runHandler = (handler: Handler) =>
         Promise.resolve(handler()).catch(this._errHandler)
 
-    private _errHandler: ErrHandler = (err) => {
+    private _errHandler: ErrHandler = err => {
         if (process.env.NODE_ENV === 'development') {
             console.error(err)
         } else {

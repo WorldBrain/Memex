@@ -332,6 +332,6 @@ class SyncDevicesPaneContainer extends React.Component<
     }
 }
 
-export default connect(null, (dispatch) => ({
+export default connect(null, dispatch => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(SyncDevicesPaneContainer))

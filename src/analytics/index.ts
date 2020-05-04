@@ -20,7 +20,7 @@ if (
     analytics = new FakeAnalytics()
 } else {
     analytics = new AnalyticsManager({
-        shouldTrack: (def) => shouldTrack(def),
+        shouldTrack: def => shouldTrack(def),
         backend: new CountlyAnalyticsBackend({
             fetchUserId: () => generateUserId({}),
             countlyConnector: Countly,

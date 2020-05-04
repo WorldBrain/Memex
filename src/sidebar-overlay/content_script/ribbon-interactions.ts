@@ -66,7 +66,7 @@ export const insertRibbon = async ({
     retargetEvents(shadowRoot)
 
     // Setup UI for Ribbon/Sidebar.
-    setupRibbonAndSidebarUI(target, {
+    setupRibbonAndSidebarUI(target, shadow, {
         annotationsManager,
         handleRemoveRibbon: () =>
             _removeRibbonViaRibbonCross({ toolbarNotifications }),

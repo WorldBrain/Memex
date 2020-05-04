@@ -101,6 +101,8 @@ export async function main() {
         },
         sync: backgroundModules.sync.remoteFunctions,
         features: new FeatureOptIns(),
+        tags: backgroundModules.tags.remoteFunctions,
+        collections: backgroundModules.customLists.remoteFunctions,
     })
 
     // Attach interesting features onto global window scope for interested users

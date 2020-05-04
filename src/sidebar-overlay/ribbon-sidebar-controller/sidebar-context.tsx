@@ -1,21 +1,20 @@
 import React from 'react'
-import { SidebarContextInterface } from 'src/sidebar-overlay/types'
 import { HighlightInteraction } from 'src/highlighting/ui/highlight-interactions'
-
-type Optionalize<T extends K, K> = Omit<T, keyof K>
 
 const highlighter = new HighlightInteraction()
 
-export function withSidebarContext<
-    T extends SidebarContextInterface = SidebarContextInterface
->(WrappedComponent: React.ComponentType<T>) {
+type WithInnerRef<T> = T & { innerRef?: any }
+
+export function withSidebarContext<TProps>(
+    WrappedComponent: React.ComponentType<TProps>,
+) {
     const displayName =
         WrappedComponent.displayName ||
         WrappedComponent.name ||
         'ComponentwithSidebarContext'
 
     return class ComponentWithSidebarContext extends React.Component<
-        Optionalize<T, SidebarContextInterface> & { innerRef?: any }
+        WithInnerRef<Omit<TProps, 'highlighter'>>
     > {
         public static displayName = `withSidebarContext(${displayName})`
 
@@ -23,9 +22,9 @@ export function withSidebarContext<
             const { innerRef, ...rest } = this.props
             return (
                 <WrappedComponent
+                    {...(rest as TProps)}
                     ref={innerRef}
                     highlighter={highlighter}
-                    {...(rest as T)}
                 />
             )
         }

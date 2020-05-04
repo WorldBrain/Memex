@@ -90,7 +90,7 @@ export const initState: () => Thunk = () => async dispatch => {
         dispatch(collectionActs.setCollections(listsAssocWithPage))
 
         // Get 20 more tags that are not related related to the list.
-        const pageTags = await fetchPageTagsRPC(currentTab.url)
+        const pageTags = await fetchPageTagsRPC({ url: currentTab.url })
         const tags = await fetchInitTagSuggRPC({
             notInclude: pageTags,
             type: 'tag',

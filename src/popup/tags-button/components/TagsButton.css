@@ -2,7 +2,7 @@
 @value color7 from colors;
 
 .tag {
-    background-image: url('/img/tag.svg');
+    background-image: url('/img/tag_empty.svg');
     background-repeat: no-repeat;
     background-size: 20px;
     opacity: 0.8;

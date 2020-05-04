@@ -25,7 +25,7 @@ class SearchInjectionContainer extends React.Component {
         })
     }
 
-    private bindToggleInjection = (name) => async () => {
+    private bindToggleInjection = name => async () => {
         const { injectionPreference } = this.state
         // Toggle that particular search engine key
         injectionPreference[name] = !injectionPreference[name]

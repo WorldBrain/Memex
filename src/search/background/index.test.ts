@@ -9,16 +9,16 @@ import { Annotation } from 'src/direct-linking/types'
 
 const mockEvent = { addListener: () => undefined }
 
-const countAnnots = (res) => {
+const countAnnots = res => {
     return res.docs.reduce(
         (count, { annotations }) => count + annotations.length,
         0,
     )
 }
 
-const flattenAnnotUrls = (res) => {
+const flattenAnnotUrls = res => {
     return res.docs.reduce(
-        (urls, { annotations }) => [...urls, ...annotations.map((a) => a.url)],
+        (urls, { annotations }) => [...urls, ...annotations.map(a => a.url)],
         [],
     )
 }
@@ -28,7 +28,7 @@ const flattenAnnotUrlsFromDayMap = (res: PageUrlsByDay) => {
 
     for (const annotsByPageUrl of Object.values(res)) {
         const annots = Object.values(annotsByPageUrl) as Annotation[][]
-        urls.push(...[].concat(...annots).map((a) => a.url))
+        urls.push(...[].concat(...annots).map(a => a.url))
     }
 
     return urls
@@ -324,7 +324,7 @@ describe('Annotations search', () => {
                 { url: DATA.pageUrl },
             )
             expect(results.length).toBe(3)
-            expect(results.map((a) => a.url)).toEqual(
+            expect(results.map(a => a.url)).toEqual(
                 expect.arrayContaining([
                     DATA.highlight.url,
                     DATA.annotation.url,
@@ -341,7 +341,7 @@ describe('Annotations search', () => {
                 { url: DATA.pageUrl, bookmarksOnly: true },
             )
             expect(results.length).toBe(1)
-            expect(results.map((a) => a.url)).toEqual(
+            expect(results.map(a => a.url)).toEqual(
                 expect.arrayContaining([DATA.highlight.url]),
             )
         })
@@ -357,7 +357,7 @@ describe('Annotations search', () => {
                 },
             )
             expect(results.length).toBe(1)
-            expect(results.map((a) => a.url)).toEqual(
+            expect(results.map(a => a.url)).toEqual(
                 expect.arrayContaining([DATA.annotation.url]),
             )
         })
@@ -383,7 +383,7 @@ describe('Annotations search', () => {
                 collections: [coll2Id],
             } as any)
             expect(resA.length).toBe(3)
-            expect(resA.map((a) => a.url)).toEqual(
+            expect(resA.map(a => a.url)).toEqual(
                 expect.arrayContaining([
                     DATA.highlight.url,
                     DATA.annotation.url,
@@ -396,7 +396,7 @@ describe('Annotations search', () => {
                 collections: [coll1Id],
             } as any)
             expect(resB.length).toBe(1)
-            expect(resB.map((a) => a.url)).toEqual(
+            expect(resB.map(a => a.url)).toEqual(
                 expect.arrayContaining([DATA.directLink.url]),
             )
         })
@@ -412,7 +412,7 @@ describe('Annotations search', () => {
             expect(results.length).toBe(3)
 
             // Ensure order is by latest visit
-            expect(results.map((res) => res.url)).toEqual([
+            expect(results.map(res => res.url)).toEqual([
                 DATA.hybrid.pageUrl,
                 DATA.highlight.pageUrl,
                 DATA.directLink.pageUrl,

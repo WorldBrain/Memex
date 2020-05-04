@@ -99,13 +99,13 @@ class SaveToMemexContainer extends Component<Props, State> {
             normalizeUrl(window.location.href) === normalizeUrl(this.url) &&
             !this.state.setTagHolder
         ) {
-            this.setState(state => ({
+            this.setState((state) => ({
                 setTagHolder: true,
             }))
             const postTags = await remoteFunction('fetchSocialPostTags')({
                 url: this.url,
             })
-            this.setState(state => ({
+            this.setState((state) => ({
                 tags: postTags,
             }))
             const tweetFooter = this.props.element.querySelector(
@@ -125,12 +125,12 @@ class SaveToMemexContainer extends Component<Props, State> {
         if (isCallback && this.state.saved) {
             return
         }
-        this.setState(state => ({ saving: true }))
+        this.setState((state) => ({ saving: true }))
         try {
             const id = this.state.saved
                 ? await remoteFunction('delSocialPages')([this.url])
                 : await this.props.saveTweet()
-            this.setState(prevState => ({
+            this.setState((prevState) => ({
                 saved: !prevState.saved,
                 saving: false,
             }))
@@ -140,14 +140,14 @@ class SaveToMemexContainer extends Component<Props, State> {
     }
 
     private handleMouseEnter = () => {
-        this.setState(state => ({
+        this.setState((state) => ({
             isMouseInside: true,
         }))
     }
 
     private handleMouseLeave = () => {
         if (!this.props.commentText.length) {
-            this.setState(state => ({
+            this.setState((state) => ({
                 isMouseInside: false,
             }))
         }
@@ -164,7 +164,7 @@ class SaveToMemexContainer extends Component<Props, State> {
                 )}
             >
                 <button
-                    ref={ref => (this.memexBtnRef = ref)}
+                    ref={(ref) => (this.memexBtnRef = ref)}
                     className={cx(
                         'ProfileTweet-actionButton u-textUserColorHover js-actionButton',
                         styles.hoverButton,
@@ -204,15 +204,13 @@ class SaveToMemexContainer extends Component<Props, State> {
     }
 }
 
-const mapStateToProps: MapStateToProps<
-    StateProps,
-    OwnProps,
-    RootState
-> = state => ({
+const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
+    state,
+) => ({
     tags: tags.tags(state),
     initTagSuggs: tags.initTagSuggestions(state),
-    collections: collections.collections(state),
-    initCollSuggs: collections.initCollSuggestions(state),
+    collections: collections._collectionsLegacy(state),
+    initCollSuggs: collections._initCollSuggestionsLegacy(state),
     isCommentSaved: commentBox.isCommentSaved(state),
     commentText: commentBox.commentText(state),
 })
@@ -222,19 +220,19 @@ const mapDispatchToProps: MapDispatchToProps<
     OwnProps,
     RootState
 > = (dispatch, props) => ({
-    onInit: url => dispatch(acts.initState(url)),
+    onInit: (url) => dispatch(acts.initState(url)),
     toggleBookmark: (url, isBookmarked) =>
         dispatch(acts.toggleBookmark(url, isBookmarked)),
     saveTweet: () => dispatch(acts.saveTweet(props.element)),
-    setAnnotationsManager: annotationsManager =>
+    setAnnotationsManager: (annotationsManager) =>
         dispatch(sidebarActs.setAnnotationsManager(annotationsManager)),
     setPage: (page: Page) => dispatch(sidebarActs.setPage(page)),
     onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
     onTagDel: (tag: string) => dispatch(tagActs.deleteTag(tag)),
     onCollectionAdd: (collection: PageList) =>
-        dispatch(collectionActs.addCollectionToPage(collection)),
+        dispatch(collectionActs._addCollectionToPageLegacy(collection)),
     onCollectionDel: (collection: PageList) =>
-        dispatch(collectionActs.deleteCollection(collection)),
+        dispatch(collectionActs._deleteCollectionLegacy(collection)),
 })
 
 export default connect(

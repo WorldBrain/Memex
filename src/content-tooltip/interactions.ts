@@ -18,7 +18,7 @@ const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
 
 export function setupTooltipTrigger(callback, toolbarNotifications) {
-    mouseupListener = (event) => {
+    mouseupListener = event => {
         conditionallyTriggerTooltip({ callback, toolbarNotifications }, event)
     }
 

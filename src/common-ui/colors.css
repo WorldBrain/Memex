@@ -19,6 +19,7 @@
 @value color15: #dfdfdf; /* loadingindicator */
 @value color16: #555555; /* mid grey */
 @value color17: #667bcc; /* light purple */
+@value grey9: #3a2f45; /* gray-9 , part of the new colour consts. Using here until we can use styled components everywhere */
 
 /* BORDER RADIUS */
 @value radius1: 1px;

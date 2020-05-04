@@ -126,7 +126,7 @@ class CommentBoxForm extends React.Component<Props, State> {
         return (
             <Tooltip position="bottomLeft">
                 <TagsContainer
-                    env={this.props.env}
+                    // env={this.props.env}
                     tagSuggestions={this.state.tagSuggestions}
                 />
             </Tooltip>
@@ -158,20 +158,39 @@ class CommentBoxForm extends React.Component<Props, State> {
                 {/* Save and Cancel buttons. */}
                 <div className={styles.footer}>
                     <div className={styles.interactions}>
-                        <div ref={this.setTagButtonRef} className={styles.interactionsImgContainer}>
-                            <img src={tagEmpty} className={cx(styles.button, styles.tag)}/>
+                        <div
+                            ref={this.setTagButtonRef}
+                            className={styles.interactionsImgContainer}
+                        >
+                            <img
+                                src={tagEmpty}
+                                className={cx(styles.button, styles.tag)}
+                            />
                         </div>
-                        <div ref={ref => (this.bmBtnRef = ref)} className={styles.interactionsImgContainer}>
+                        <div
+                            ref={ref => (this.bmBtnRef = ref)}
+                            className={styles.interactionsImgContainer}
+                        >
                             {this.props.isCommentBookmarked ? (
-                                <img src={heartFull} className={cx(styles.button, styles.bookmark)}/>
-                            ):(
-                                <img src={heartEmpty} className={cx(styles.button, styles.notbookmark)}/>
-                            )
-                            }
+                                <img
+                                    src={heartFull}
+                                    className={cx(
+                                        styles.button,
+                                        styles.bookmark,
+                                    )}
+                                />
+                            ) : (
+                                <img
+                                    src={heartEmpty}
+                                    className={cx(
+                                        styles.button,
+                                        styles.notbookmark,
+                                    )}
+                                />
+                            )}
                         </div>
                     </div>
                     <div className={styles.confirmButtons}>
-
                         <div
                             ref={ref => (this.cancelBtnRef = ref)}
                             className={styles.cancelBtn}
