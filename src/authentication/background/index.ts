@@ -14,6 +14,7 @@ import {
     getAuthorizedFeatures,
     isAuthorizedForFeature,
     getSubscriptionStatus,
+    getAuthorizedPlans,
 } from './utils'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
 import { AuthRemoteEvents, AuthRemoteFunctionsInterface } from './types'
@@ -56,6 +57,11 @@ export class AuthBackground {
                     await this.subscriptionService.getCurrentUserClaims(),
                 )
             },
+            getAuthorizedPlans: async () => {
+                return getAuthorizedPlans(
+                    await this.subscriptionService.getCurrentUserClaims(),
+                )
+            },
             isAuthorizedForFeature: async (feature: UserFeature) => {
                 return isAuthorizedForFeature(
                     await this.subscriptionService.getCurrentUserClaims(),
@@ -73,14 +79,34 @@ export class AuthBackground {
     _scheduleSubscriptionCheck = (
         userWithClaims: AuthenticatedUser & { claims: Claims },
     ) => {
-        if (userWithClaims) {
-            const soonestExpiringSubscription = Object.values(
+        if (userWithClaims?.claims?.subscriptions) {
+            const subscriptions = Object.values(
                 userWithClaims.claims.subscriptions,
-            ).reduce((prev, val) => (prev.expiry < val.expiry ? prev : val))
+            )
+            if (!subscriptions || subscriptions.length === 0) {
+                return
+            }
+            const soonestExpiringSubscription = subscriptions.reduce(
+                (prev, val) => (prev.expiry < val.expiry ? val : prev),
+                { expiry: 0 },
+            )
+            const when = soonestExpiringSubscription.expiry * 1000
+            console['info'](
+                `Subscription check scheduled for ${new Date(
+                    when,
+                ).toLocaleString()}`,
+            )
             this.scheduleJob({
                 name: 'user-subscription-expiry-refresh',
-                when: soonestExpiringSubscription.expiry * 1000,
-                job: this.authService.refreshUserInfo.bind(this.authService),
+                when,
+                job: () => {
+                    console['info'](
+                        `Checking subscription status (due ${new Date(
+                            when,
+                        ).toLocaleString()})`,
+                    )
+                    this.authService.refreshUserInfo.bind(this.authService)
+                },
             })
         }
     }

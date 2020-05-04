@@ -107,7 +107,7 @@ export class JobScheduler {
             return this.attemptPeriodicJob(job, now)
         } else {
             console['warn']([
-                `Tried fire an alarm but no the type of job could not be determined for name: ${name}`,
+                `Tried fire an alarm but the type of job could not be determined for name: ${name}`,
             ])
         }
     }

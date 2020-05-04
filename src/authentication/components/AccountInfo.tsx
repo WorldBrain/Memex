@@ -9,10 +9,12 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
-import Link from 'src/common-ui/components/link'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { InputTextField } from 'src/common-ui/components/design-library/form/InputTextField'
+
+const hiddenInProduction =
+    process.env.NODE_ENV === 'production' ? 'hidden' : 'text'
 
 interface Props {
     initiallyShowSubscriptionModal?: boolean
@@ -53,34 +55,34 @@ export class AccountInfo extends React.PureComponent<Props & UserProps> {
                             {'Manage Subscriptions'}
                         </PrimaryButton>
 
-                        <input
-                            type={'hidden'}
+                        <InputTextField
+                            type={hiddenInProduction}
                             name={'Email Verified'}
                             defaultValue={JSON.stringify(user.emailVerified)}
                             readOnly
                         />
-                        <input
-                            type={'hidden'}
+                        <InputTextField
+                            type={hiddenInProduction}
                             name={'User ID'}
                             defaultValue={user.id}
                             readOnly
                         />
-                        <input
-                            type={'hidden'}
+                        <InputTextField
+                            type={hiddenInProduction}
                             name={'Features'}
                             defaultValue={JSON.stringify(features)}
                             readOnly
                         />
-                        <input
-                            type={'hidden'}
+                        <InputTextField
+                            type={hiddenInProduction}
                             name={'Plans'}
                             defaultValue={JSON.stringify(
                                 this.props.authorizedPlans,
                             )}
                             readOnly
                         />
-                        <input
-                            type={'hidden'}
+                        <InputTextField
+                            type={hiddenInProduction}
                             name={'subscriptionStatus'}
                             defaultValue={JSON.stringify(
                                 this.props.subscriptionStatus,

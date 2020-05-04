@@ -6,6 +6,7 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
+import { LOGIN_URL } from 'src/constants'
 const styles = require('./styles.css')
 
 interface Props {
@@ -17,7 +18,7 @@ class UserScreen extends React.PureComponent<Props & UserProps> {
         return (
             <div className={styles.section}>
                 {this.props.currentUser == null ? (
-                    <p>
+                    <div>
                         <p className={styles.instructionsTitle}>
                             {' Login or Create an Account'}
                         </p>
@@ -26,8 +27,8 @@ class UserScreen extends React.PureComponent<Props & UserProps> {
                                 ' To create an account just type in a new email address'
                             }
                         </p>
-                        <SignInScreen />
-                    </p>
+                        <SignInScreen redirectTo={LOGIN_URL} />
+                    </div>
                 ) : (
                     <AccountInfo
                         initiallyShowSubscriptionModal={

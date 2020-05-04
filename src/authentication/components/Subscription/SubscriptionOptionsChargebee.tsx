@@ -157,20 +157,22 @@ export class SubscriptionOptionsChargebee extends React.Component<
                     <script src={chargeBeeScriptSource} />
                 </Helmet>
                 <div>
-                    {!this.props.plans ?( 
-                        <SubscriptionInnerOptions
-                        openCheckoutBackupMonthly={
-                            this.openCheckoutBackupMonthly
-                        }
-                        openCheckoutBackupYearly={this.openCheckoutBackupYearly}
-                        openPortal={this.openPortal}
-                        plans={this.props.plans}
-                    />
-                    ):(
+                    {(this.props.plans?.length ?? 0) > 0 ? (
                         <PlanBox>
-                            <PlanTitle>Your plan:{' '}</PlanTitle>
+                            <PlanTitle>Your plan: </PlanTitle>
                             <PlanName>{this.props.plans}</PlanName>
                         </PlanBox>
+                    ) : (
+                        <SubscriptionInnerOptions
+                            openCheckoutBackupMonthly={
+                                this.openCheckoutBackupMonthly
+                            }
+                            openCheckoutBackupYearly={
+                                this.openCheckoutBackupYearly
+                            }
+                            openPortal={this.openPortal}
+                            plans={this.props.plans}
+                        />
                     )}
                     <CenterText>
                         {this.state.subscribed && (

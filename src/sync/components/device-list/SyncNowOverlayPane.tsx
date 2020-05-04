@@ -13,6 +13,7 @@ import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typograph
 import { SyncDevice } from 'src/sync/components/types'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
+import { SYNC_URL } from 'src/constants'
 const chargeBeeScriptSource = '/scripts/chargebeescript.js'
 
 export const subscriptionConfig = {
@@ -90,13 +91,12 @@ export class SyncNowOverlayPaneContainer extends Component<
         syncError: null,
         isSyncing: false,
         devices: [],
-        subscribed: null, 
-        showSubscriptionOptions: true 
+        subscribed: null,
+        showSubscriptionOptions: true,
     }
 
     chargebeeInstance: any
     userSubscription: UserSubscription
-
 
     refreshDevices = async () => {
         const devices = (await sync.listDevices()) as SyncDevice[]
@@ -162,18 +162,24 @@ export class SyncNowOverlayPaneContainer extends Component<
 
         return (
             <div>
-            <Helmet>
+                <Helmet>
                     <script src={chargeBeeScriptSource} />
-            </Helmet>
+                </Helmet>
                 {this.props.subscriptionStatus === 'in_trial' && (
-                        <div>
-                            <div onClick={this.openPortal} className={settingsStyle.trialNotif}>
-                            <div className={settingsStyle.trialHeader}><strong>Trial Period active</strong></div> 
-                            <div>Add payment details to prevent interruptions</div>
+                    <div>
+                        <div
+                            onClick={this.openPortal}
+                            className={settingsStyle.trialNotif}
+                        >
+                            <div className={settingsStyle.trialHeader}>
+                                <strong>Trial Period active</strong>
+                            </div>
+                            <div>
+                                Add payment details to prevent interruptions
                             </div>
                         </div>
-                    )
-                }
+                    </div>
+                )}
                 {this.state.devices.length === 0 && syncFeatureAllowed && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
@@ -286,6 +292,6 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(SyncNowOverlayPaneContainer))

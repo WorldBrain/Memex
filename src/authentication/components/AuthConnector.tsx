@@ -32,21 +32,17 @@ export function withCurrentUser<P extends UserProps = UserProps>(
             }
         }
 
-        componentDidMount = async () => {
+        updateUserState = async (user) => {
             this.setState({
-                currentUser: await auth.getCurrentUser(),
+                currentUser: user,
                 authorizedFeatures: await auth.getAuthorizedFeatures(),
+                authorizedPlans: await auth.getAuthorizedPlans(),
                 subscriptionStatus: await auth.getSubscriptionStatus(),
             })
+        }
 
-            const claims = await subscription.getCurrentUserClaims()
-            if (claims && claims.subscriptions) {
-                this.setState({
-                    authorizedPlans: Object.keys(
-                        claims.subscriptions,
-                    ) as UserPlan[],
-                })
-            }
+        componentDidMount = async () => {
+            await this.updateUserState(await auth.getCurrentUser())
 
             const authEvents = getRemoteEventEmitter('auth')
             authEvents.addListener(
@@ -61,11 +57,7 @@ export function withCurrentUser<P extends UserProps = UserProps>(
         }
 
         listenOnAuthStateChanged = async (user) => {
-            this.setState({
-                currentUser: user,
-                authorizedFeatures: await auth.getAuthorizedFeatures(),
-                subscriptionStatus: await auth.getSubscriptionStatus(),
-            })
+            await this.updateUserState(user)
         }
 
         componentWillUnmount = () => {

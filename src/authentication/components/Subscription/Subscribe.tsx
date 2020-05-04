@@ -1,15 +1,18 @@
 import * as React from 'react'
 import { SignInScreen } from 'src/authentication/components/SignIn'
-import { PricingPlanTitle, PricingPlanItem, LoginTitle, LoginButton, WhiteSpacer30 } from 'src/authentication/components/Subscription/pricing.style'
+import {
+    PricingPlanTitle,
+    PricingPlanItem,
+    LoginTitle,
+    LoginButton,
+    WhiteSpacer30,
+} from 'src/authentication/components/Subscription/pricing.style'
 
 import { SubscriptionOptionsChargebee } from 'src/authentication/components/Subscription/SubscriptionOptionsChargebee'
 import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
-import {
-    hasValidPlan,
-} from '../../background/utils'
 import { auth } from 'src/util/remote-functions-background'
 const styles = require('../styles.css')
 
@@ -17,7 +20,7 @@ type Props = {
     onClose: () => void
 } & UserProps
 
-export class Subscribe extends React.PureComponent<Props> {
+class Subscribe extends React.PureComponent<Props> {
     handleSubscriptionChanged = () => {
         this.handleRefresh()
     }
@@ -30,24 +33,39 @@ export class Subscribe extends React.PureComponent<Props> {
         await auth.refreshUserInfo()
     }
 
-    render() {
-        return (
-            <div>
-                {this.props.currentUser == null && (
-                    <div className={styles.section}>
-                        <div className={styles.instructionsTitle}>
-                            {' Login or Create an Account'}
-                        </div>
-                        <div className={styles.instructions}>
-                            {
-                                ' To create an account just type in a new email address'
-                            }
-                        </div>
-                        <SignInScreen />
+    renderLoginOrSubscription() {
+        if (this.props.currentUser === null) {
+            return (
+                <div className={styles.section}>
+                    <div className={styles.instructionsTitle}>
+                        {' Login or Create an Account'}
                     </div>
-                )}
-
-                {this.props.currentUser != null && !this.props.authorizedPlans && (
+                    <div className={styles.instructions}>
+                        {
+                            ' To create an account just type in a new email address'
+                        }
+                    </div>
+                    <SignInScreen />
+                </div>
+            )
+        } else {
+            if ((this.props.authorizedPlans?.length ?? 0) > 0) {
+                return (
+                    <div>
+                        <PricingPlanTitle className={''}>
+                            💫 You're subscribed!
+                        </PricingPlanTitle>
+                        <WhiteSpacer30 />
+                        <SubscriptionOptionsChargebee
+                            user={this.props.currentUser}
+                            plans={this.props.authorizedPlans}
+                            onClose={this.handleClose}
+                            subscriptionChanged={this.handleSubscriptionChanged}
+                        />
+                    </div>
+                )
+            } else {
+                return (
                     <div>
                         <PricingPlanTitle className={''}>
                             ⭐️ Upgrade to Memex Pro
@@ -61,21 +79,7 @@ export class Subscribe extends React.PureComponent<Props> {
                             💾 Automatic Backups
                         </PricingPlanItem>
 
-                        <WhiteSpacer30/>
-                        <SubscriptionOptionsChargebee
-                            user={this.props.currentUser}
-                            plans={this.props.authorizedPlans}
-                            onClose={this.handleClose}
-                            subscriptionChanged={this.handleSubscriptionChanged}
-                        />
-                    </div>)}
-
-                {this.props.currentUser != null && this.props.authorizedPlans && (
-                    <div>
-                        <PricingPlanTitle className={''}>
-                            💫 You're subscribed!
-                        </PricingPlanTitle>
-                        <WhiteSpacer30/>
+                        <WhiteSpacer30 />
                         <SubscriptionOptionsChargebee
                             user={this.props.currentUser}
                             plans={this.props.authorizedPlans}
@@ -83,9 +87,13 @@ export class Subscribe extends React.PureComponent<Props> {
                             subscriptionChanged={this.handleSubscriptionChanged}
                         />
                     </div>
-                )}
-            </div>
-        )
+                )
+            }
+        }
+    }
+
+    render() {
+        return <div>{this.renderLoginOrSubscription()}</div>
     }
 }
 

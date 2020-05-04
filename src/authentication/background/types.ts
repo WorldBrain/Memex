@@ -13,6 +13,7 @@ export interface AuthRemoteFunctionsInterface {
 
     hasValidPlan(plan: UserPlan): Promise<boolean>
     getAuthorizedFeatures(): Promise<UserFeature[]>
+    getAuthorizedPlans(): Promise<UserPlan[]>
     getSubscriptionStatus(): Promise<SubscriptionStatus>
     isAuthorizedForFeature(feature: UserFeature): Promise<boolean>
 

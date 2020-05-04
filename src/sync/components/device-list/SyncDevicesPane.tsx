@@ -7,7 +7,7 @@ import {
     UserProps,
     withCurrentUser,
 } from 'src/authentication/components/AuthConnector'
-import { features, sync, auth } from 'src/util/remote-functions-background'
+import { sync, auth } from 'src/util/remote-functions-background'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -16,8 +16,6 @@ import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { UserSubscription } from 'src/authentication/ui/user-subscription'
 import { Helmet } from 'react-helmet'
-import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import analytics from 'src/analytics'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -53,7 +51,6 @@ interface State {
 
 interface ContainerProps {
     onClose?: () => void
-    
 }
 
 export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
@@ -122,7 +119,6 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
         )
     }
 
-
     _initChargebee = (): void => {
         if (this.chargebeeInstance != null) {
             return
@@ -172,7 +168,7 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
         }
 
         if (this.props.devices.length > 0 && this.props.isDeviceSyncAllowed) {
-             pairButton = (
+            pairButton = (
                 <ButtonTooltip
                     tooltipText="You currently can only sync one computer and one phone"
                     position="bottom"
@@ -211,18 +207,24 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
 
         return (
             <div>
-              <Helmet>
+                <Helmet>
                     <script src={chargeBeeScriptSource} />
                 </Helmet>
                 {this.props.subscriptionStatus === 'in_trial' && (
-                        <div>
-                            <div onClick={this.openPortal} className={settingsStyle.trialNotif}>
-                            <div className={settingsStyle.trialHeader}><strong>Trial Period active</strong></div> 
-                            <div>Add payment details to prevent interruptions</div>
+                    <div>
+                        <div
+                            onClick={this.openPortal}
+                            className={settingsStyle.trialNotif}
+                        >
+                            <div className={settingsStyle.trialHeader}>
+                                <strong>Trial Period active</strong>
+                            </div>
+                            <div>
+                                Add payment details to prevent interruptions
                             </div>
                         </div>
-                    )
-                }
+                    </div>
+                )}
                 <div className={styles.container}>
                     <div className={styles.syncLeftCol}>
                         <ButtonTooltip
@@ -339,10 +341,14 @@ class SyncDevicesPaneContainer extends React.Component<
             <div>
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
-                        <div className={settingsStyle.sectionTitleText}><span>Sync your mobile phone</span><span className={settingsStyle.betaPill}>{' '}Beta</span></div>
-                        {!this.props.authorizedFeatures.includes(
-                            'sync',
-                        ) && (
+                        <div className={settingsStyle.sectionTitleText}>
+                            <span>Sync your mobile phone</span>
+                            <span className={settingsStyle.betaPill}>
+                                {' '}
+                                Beta
+                            </span>
+                        </div>
+                        {!this.props.authorizedFeatures.includes('sync') && (
                             <span
                                 className={styles.labelFree}
                                 onClick={this.handleUpgradeNeeded}
@@ -356,7 +362,16 @@ class SyncDevicesPaneContainer extends React.Component<
                         in sync.
                     </div>
                     <div className={settingsStyle.infoTextSmall}>
-                        <strong>This feature is in beta status. You may experience bugs. <a href="https://community.worldbrain.io/c/bug-reports" target="_blank">Let us know if you do!</a></strong>
+                        <strong>
+                            This feature is in beta status. You may experience
+                            bugs.{' '}
+                            <a
+                                href="https://community.worldbrain.io/c/bug-reports"
+                                target="_blank"
+                            >
+                                Let us know if you do!
+                            </a>
+                        </strong>
                     </div>
                     <SyncDevicesPane
                         devices={this.state.devices}
