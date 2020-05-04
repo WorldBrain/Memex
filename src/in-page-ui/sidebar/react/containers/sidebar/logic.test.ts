@@ -24,6 +24,7 @@ const setupLogicHelper = async ({
             createAnnotation: () => undefined,
             addAnnotationTag: () => undefined,
             deleteAnnotation: () => undefined,
+            toggleAnnotBookmark: () => undefined,
             updateAnnotationTags: () => undefined,
             getAllAnnotationsByUrl,
         },
@@ -143,7 +144,28 @@ describe('SidebarContainerLogic', () => {
             expect(testLogic.state.annotations.length).toBe(0)
         })
 
-        it("should be able to toggle an annotation's bookmark status", async () => {})
+        it("should be able to toggle an annotation's bookmark status", async ({
+            device,
+        }) => {
+            const { testLogic } = await setupLogicHelper({
+                device,
+                getAllAnnotationsByUrl: async () => [DATA.ANNOT_1],
+            })
+            const context = 'pageAnnotations'
+
+            expect(testLogic.state.annotations.length).toBe(1)
+            expect(testLogic.state.annotations[0].hasBookmark).toBe(undefined)
+            await testLogic.processEvent('toggleAnnotationBookmark', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+            })
+            expect(testLogic.state.annotations[0].hasBookmark).toBe(true)
+            await testLogic.processEvent('toggleAnnotationBookmark', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+            })
+            expect(testLogic.state.annotations[0].hasBookmark).toBe(false)
+        })
 
         it('should be able to go to an annotation highlight on the page', async () => {})
     })

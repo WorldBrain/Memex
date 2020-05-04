@@ -129,7 +129,7 @@ export default class SidebarContainer extends StatefulUIElement<
                 handleBookmarkToggle: (annnotationUrl) =>
                     this.processEvent('toggleAnnotationBookmark', {
                         context,
-                        annnotationUrl,
+                        annotationUrl: annnotationUrl,
                     }),
             }
         }

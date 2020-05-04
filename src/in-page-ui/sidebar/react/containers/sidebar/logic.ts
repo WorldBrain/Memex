@@ -135,7 +135,7 @@ export type SidebarContainerEvents = UIEvent<{
     }
     toggleAnnotationBookmark: {
         context: AnnotationEventContext
-        annnotationUrl: string
+        annotationUrl: string
     }
     switchAnnotationMode: {
         context: AnnotationEventContext
@@ -573,29 +573,31 @@ export class SidebarContainerLogic extends UILogic<
     toggleAnnotationBookmark: EventHandler<
         'toggleAnnotationBookmark'
     > = async ({ previousState, event }) => {
+        const resultIndex = previousState.annotations.findIndex(
+            (annotation) => annotation.url === event.annotationUrl,
+        )
+
         const toggleBookmarkState = (hasBookmark: boolean) =>
             this.emitMutation({
                 annotations: {
-                    [annotationIndex]: {
+                    [resultIndex]: {
                         hasBookmark: { $set: hasBookmark },
                     },
                 },
             })
 
-        const annotationIndex = previousState.annotations.findIndex(
-            (annotation) => (annotation.url = event.annnotationUrl),
-        )
-        const currentlyBookmarked = !!previousState.annotations[annotationIndex]
+        const currentlyBookmarked = !!previousState.annotations[resultIndex]
             .hasBookmark
         const shouldBeBookmarked = !currentlyBookmarked
         toggleBookmarkState(shouldBeBookmarked)
 
         try {
             await this.options.annotations.toggleAnnotBookmark({
-                url: event.annnotationUrl,
+                url: event.annotationUrl,
             })
         } catch (err) {
             toggleBookmarkState(!shouldBeBookmarked)
+
             throw err
         }
     }
