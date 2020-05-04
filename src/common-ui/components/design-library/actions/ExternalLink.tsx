@@ -1,24 +1,19 @@
 import React from 'react'
 import styled from 'styled-components'
+import { ExternalLink as ExternalLinkIcon } from '@styled-icons/feather'
 import { colorText } from 'src/common-ui/components/design-library/colors'
-import {
-    fontSizeTitle,
-    TypographyActionText,
-} from 'src/common-ui/components/design-library/typography'
+import { darken } from 'polished'
 
 const StyledExternalLink = styled.a`
+    font-family: Poppins;
     cursor: pointer;
     display: inline-block;
-`
-const StyledExternalLinkText = styled(TypographyActionText)`
-    font-size: ${fontSizeTitle}px;
     text-decoration-line: underline;
-    font-weight: normal;
     color: ${colorText};
+    font-weight: 500;
     margin-right: 4px;
-    &::after {
-        content: '↗';
-        text-decoration-line: none;
+    &:hover {
+        color: ${(props) => darken(0.3, colorText)};
     }
 `
 export const ExternalLink = ({
@@ -28,7 +23,15 @@ export const ExternalLink = ({
     label: string
     href: string
 }) => (
-    <StyledExternalLink target="_blank" href={href}>
-        <StyledExternalLinkText>{label}</StyledExternalLinkText>
+    <StyledExternalLink target="_blank" href={href} rel="noopener noreferrer">
+        {label}
+        <StyledExternalLinkIcon size={18} />
     </StyledExternalLink>
 )
+
+export const StyledExternalLinkIcon = styled(ExternalLinkIcon)`
+    stroke-width: 2px;
+    position: relative;
+    top: -3px;
+    margin-left: 2px;
+`

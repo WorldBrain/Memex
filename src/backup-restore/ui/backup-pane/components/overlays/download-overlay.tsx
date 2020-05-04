@@ -1,6 +1,6 @@
 import React, { PureComponent, Fragment } from 'react'
 import cx from 'classnames'
-
+import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import Overlay from 'src/common-ui/components/overview-overlay'
 import { OverlayProps as Props } from './types'
 
@@ -16,14 +16,11 @@ export default class DownloadOverlay extends PureComponent<Props, {}> {
                     <Fragment>
                         <div className={styles.text}>
                             Start the app & pick a backup folder. Then return
-                            here to continue your backup.
-                            <a
-                                className={styles.link}
-                                target="_blank"
+                            here to continue your backup.{' '}
+                            <ExternalLink
+                                label="Learn more"
                                 href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59"
-                            >
-                                &nbsp; Learn more ▸
-                            </a>
+                            />
                         </div>
                     </Fragment>
                 }

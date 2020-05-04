@@ -3,7 +3,7 @@ import React from 'react'
 
 import './design-library'
 import './icons'
-// import './sync'
+import './sync'
 // import './backup'
 import './tagsCurrent'
 import './tagsRefactored'

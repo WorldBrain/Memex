@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Styles from './provider-list.css'
 import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
+import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 
@@ -23,19 +24,16 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             <p className={settingsStyle.infoText}>
                                 Use cloud providers that have a syncing folder
                                 on your computer (e.g. Dropbox, Spideroak,
-                                GDrive){' '}
-                                <a
-                                    className={Styles.link}
-                                    target="_blank"
+                                GDrive).{' '}
+                                <ExternalLink
+                                    label="Learn more"
                                     href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59"
-                                >
-                                    Learn More ▸
-                                </a>
+                                />
                             </p>
                             {backupPath !== null ? (
                                 <button
                                     className={Styles.destination}
-                                    onClick={e => {
+                                    onClick={(e) => {
                                         e.preventDefault()
                                         handleChangeBackupPath()
                                     }}
@@ -79,14 +77,11 @@ export function ProviderList({ onChange, backupPath, handleChangeBackupPath }) {
                             <p className={settingsStyle.infoText}>
                                 Make sure you are trying to backup your data to
                                 the same Google Account as the one logged into
-                                your browser profile.
-                                <a
-                                    className={Styles.link}
-                                    target="_blank"
+                                your browser profile.{' '}
+                                <ExternalLink
+                                    label="Learn more"
                                     href="https://www.notion.so/worldbrain/7dacad9e95b44c5db681033fc264fb59"
-                                >
-                                    Learn More ▸
-                                </a>
+                                />
                             </p>
                         </div>
                     </div>

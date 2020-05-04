@@ -53,9 +53,4 @@ const StyledXIcon = styled(XIcon)`
     display: flex;
     flex-shrink: 0;
     pointer-events: none;
-
-    &:hover {
-        stroke-width: 3px;
-        stroke: darken(0.2, ${(props) => props.theme.tag.text});
-    }
 `
