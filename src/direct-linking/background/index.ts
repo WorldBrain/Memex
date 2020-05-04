@@ -17,11 +17,12 @@ import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
-import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 import { SearchIndex } from 'src/search'
 import PageStorage from 'src/page-indexing/background/storage'
 import { Annotation } from 'src/annotations/types'
 import { AnnotationInterface, CreateAnnotationParams } from './types'
+import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -130,9 +131,9 @@ export default class DirectLinkingBackground {
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
                 // Necessary to insert the ribbon/sidebar in case the user has turned
                 // it off.
-                await runInTab<RibbonInteractionsInterface>(
+                await runInTab<InPageUIContentScriptRemoteInterface>(
                     tabId,
-                ).insertRibbon({ forceExpandRibbon: true })
+                ).showRibbon()
                 await remoteFunction('goToAnnotation', { tabId })(annotation)
                 this.options.browserAPIs.tabs.onUpdated.removeListener(listener)
             }
@@ -169,25 +170,24 @@ export default class DirectLinkingBackground {
 
         const { id: tabId } = currentTab
 
-        const forceExpandRibbon =
-            openToTags ||
-            openToComment ||
-            openToCollections ||
-            openToBookmark ||
-            openSidebar
+        const actions: { [Action in InPageUIRibbonAction]: boolean } = {
+            tag: openToTags,
+            comment: openToComment,
+            bookmark: openToBookmark,
+            list: openToCollections,
+        }
+        const actionPair = Object.entries(actions).findIndex((pair) => {
+            return pair[1]
+        })
+        const action: InPageUIRibbonAction = actionPair[0]
 
         // Make sure that the ribbon is inserted before trying to open the
         // sidebar.
-        await runInTab<RibbonInteractionsInterface>(tabId).insertRibbon({
-            override,
-            forceExpandRibbon,
-            openToCollections,
-            openToBookmark,
-            openToComment,
-            openToTags,
+        await runInTab<InPageUIContentScriptRemoteInterface>(tabId).showRibbon({
+            action,
         })
 
-        if (!forceExpandRibbon || openSidebar) {
+        if (!action || openSidebar) {
             await remoteFunction('openSidebar', { tabId })({
                 anchor,
                 activeUrl,

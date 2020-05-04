@@ -11,6 +11,7 @@ export interface InPageUIEvents {
         changes: Partial<InPageUIState>
     }) => void
     ribbonAction: (event: { action: InPageUIRibbonAction }) => void
+    ribbonUpdate: () => void
     sidebarAction: (event: {
         action: InPageUISidebarAction
         anchor?: Anchor
@@ -23,10 +24,14 @@ export interface InPageUIInterface {
     events: TypedEventEmitter<InPageUIEvents>
     state: InPageUIState
 
+    // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): void
     hideRibbon(): void
     removeRibbon(): void
+    toggleRibbon(): void
+    updateRibbon(): void
 
+    // Sidebar
     showSidebar(options?: {
         action?: InPageUISidebarAction
         anchor?: Anchor
@@ -34,11 +39,13 @@ export interface InPageUIInterface {
     hideSidebar(): void
     toggleSidebar(): void
 
+    // Tooltip
     setupTooltip(): void
     showTooltip(): void
     hideTooltip(): void
     removeTooltip(): void
-    toggleTooltipSetUp(): void
+    toggleTooltip(): void
 
+    // Highlights
     toggleHighlights(): void
 }

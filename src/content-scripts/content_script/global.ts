@@ -93,6 +93,7 @@ export async function main() {
                 toolbarNotifications,
                 annotationsManager,
             })
+            components.tooltip!.resolve()
         },
     }
     window['contentScriptRegistry'] = contentScriptRegistry
@@ -100,12 +101,17 @@ export async function main() {
     const inPageUI = new InPageUI({ loadComponent })
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         showSidebar: async () => inPageUI.showSidebar(),
+        showRibbon: async (options?) => {
+            inPageUI.showRibbon(options)
+        },
         insertRibbon: async () => inPageUI.loadComponent('ribbon'),
         removeRibbon: async () => inPageUI.removeRibbon(),
+        insertOrRemoveRibbon: async () => inPageUI.toggleRibbon(),
+        updateRibbon: async () => inPageUI.updateRibbon(),
         showContentTooltip: async () => inPageUI.showTooltip(),
-        insertTooltip: async () => inPageUI.loadComponent('tooltip'),
+        insertTooltip: async () => inPageUI.showTooltip(),
         removeTooltip: async () => inPageUI.removeTooltip(),
-        insertOrRemoveTooltip: async () => inPageUI.toggleTooltipSetUp(),
+        insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
     })
 
     setupScrollReporter()

@@ -5,13 +5,20 @@ import ButtonTooltip from '../../../../common-ui/components/button-tooltip'
 import AnimationWrapper from './AnimationWrapper'
 import styles from './tooltip.css'
 
-const deriveTooltipClass = state =>
+const deriveTooltipClass = (state) =>
     classNames(styles.tooltip, {
         [styles.statePristine]: state === 'pristine',
         [styles.stateCopied]: state === 'copied',
     })
 
-const Tooltip = ({ x, y, state, tooltipComponent, closeTooltip }) => (
+const Tooltip = ({
+    x = null,
+    y = null,
+    state,
+    tooltipComponent,
+    closeTooltip,
+    openSettings,
+}) => (
     <div
         className={deriveTooltipClass(state)}
         style={{ left: x, top: y, height: 28, width: 85 }}
@@ -22,11 +29,12 @@ const Tooltip = ({ x, y, state, tooltipComponent, closeTooltip }) => (
 )
 
 Tooltip.propTypes = {
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
+    x: PropTypes.number,
+    y: PropTypes.number,
     state: PropTypes.string.isRequired,
     tooltipComponent: PropTypes.element.isRequired,
     closeTooltip: PropTypes.func.isRequired,
+    openSettings: PropTypes.func.isRequired,
 }
 
 export default Tooltip

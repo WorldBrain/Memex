@@ -1,8 +1,8 @@
 import { browser } from 'webextension-polyfill-ts'
 
 import { remoteFunction, runInTab } from 'src/util/webextensionRPC'
-import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
 import { Annotation } from 'src/annotations/types'
+import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 
 /**
  * Defines how to go to an annotation from the `overview` sidebar.
@@ -30,9 +30,9 @@ export const goToAnnotation = (pageUrl: string) => async (
             if (tabId === tab.id && changeInfo.status === 'complete') {
                 // Necessary to insert the ribbon/sidebar in case the user has turned
                 // it off.
-                await runInTab<RibbonInteractionsInterface>(
+                await runInTab<InPageUIContentScriptRemoteInterface>(
                     tabId,
-                ).insertRibbon({ forceExpandRibbon: true })
+                ).showRibbon()
                 await remoteFunction('goToAnnotation', { tabId })(annotation)
                 browser.tabs.onUpdated.removeListener(listener)
             }

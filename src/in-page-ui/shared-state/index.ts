@@ -9,6 +9,7 @@ import {
 } from './types'
 import TypedEventEmitter from 'typed-emitter'
 import { Anchor } from 'src/highlighting/types'
+import { TooltipPosition } from '../tooltip/types'
 
 export class InPageUI implements InPageUIInterface {
     events = new EventEmitter() as TypedEventEmitter<InPageUIEvents>
@@ -20,7 +21,7 @@ export class InPageUI implements InPageUIInterface {
     componentsSetUp: InPageUIState = {
         ribbon: false,
         sidebar: false,
-        tooltip: true,
+        tooltip: false,
     }
 
     constructor(
@@ -88,15 +89,27 @@ export class InPageUI implements InPageUIInterface {
         maybeEmitAction()
     }
 
-    hideRibbon() {
+    async hideRibbon() {
         this._setState('ribbon', false)
     }
 
-    removeRibbon() {
+    async removeRibbon() {
         if (this.componentsSetUp.sidebar) {
-            this._removeComponent('sidebar')
+            await this._removeComponent('sidebar')
         }
-        this._removeComponent('ribbon')
+        await this._removeComponent('ribbon')
+    }
+
+    async toggleRibbon() {
+        if (this.state.ribbon) {
+            await this.hideRibbon()
+        } else {
+            await this.showRibbon()
+        }
+    }
+
+    updateRibbon() {
+        this.events.emit('ribbonUpdate')
     }
 
     async setupTooltip() {
@@ -115,11 +128,11 @@ export class InPageUI implements InPageUIInterface {
         await this._removeComponent('tooltip')
     }
 
-    async toggleTooltipSetUp() {
+    async toggleTooltip() {
         if (this.componentsSetUp.tooltip) {
             await this.removeTooltip()
         } else {
-            await this.loadComponent('tooltip')
+            await this.showTooltip()
         }
     }
 

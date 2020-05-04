@@ -6,8 +6,7 @@ import ScrollState from './scroll-state'
 import { TabState, NavState } from './types'
 import { remoteFunction, runInTab } from '../../util/webextensionRPC'
 import { isLoggable } from '..'
-import { TooltipInteractionInterface } from 'src/in-page-ui/tooltip/types'
-import { RibbonInteractionsInterface } from 'src/sidebar-overlay/ribbon/types'
+import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 
 export interface TabProps extends TabState {
     storageAPI: Storage.Static
@@ -83,7 +82,7 @@ class Tab implements TabState {
             return
         }
 
-        return runInTab<RibbonInteractionsInterface>(
+        return runInTab<InPageUIContentScriptRemoteInterface>(
             this.id,
         ).insertOrRemoveRibbon()
     }
@@ -93,7 +92,7 @@ class Tab implements TabState {
             return
         }
 
-        return runInTab<TooltipInteractionInterface>(
+        return runInTab<InPageUIContentScriptRemoteInterface>(
             this.id,
         ).insertOrRemoveTooltip()
     }
@@ -103,7 +102,9 @@ class Tab implements TabState {
             return
         }
 
-        return runInTab<RibbonInteractionsInterface>(this.id).updateRibbon()
+        return runInTab<InPageUIContentScriptRemoteInterface>(
+            this.id,
+        ).updateRibbon()
     }
 
     private _pauseLogTimer() {

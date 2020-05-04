@@ -14,18 +14,34 @@ import {
 
 import { conditionallyRemoveOnboardingSelectOption } from '../../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
+import {
+    InPageUIInterface,
+    InPageUIEvents,
+} from 'src/in-page-ui/shared-state/types'
 
-class TooltipContainer extends React.Component {
-    static propTypes = {
-        onInit: PropTypes.func.isRequired,
-        createAndCopyDirectLink: PropTypes.func.isRequired,
-        createAnnotation: PropTypes.func.isRequired,
-        createHighlight: PropTypes.func.isRequired,
-        openSettings: PropTypes.func.isRequired,
-        destroy: PropTypes.func.isRequired,
-    }
+interface TooltipContainerProps {
+    inPageUI: InPageUIInterface
+    onInit: any
+    createAndCopyDirectLink: any
+    createAnnotation: any
+    createHighlight: any
+    openSettings: any
+    destroyTooltip: any
+}
 
-    state = {
+interface TooltipContainerState {
+    showTooltip: boolean
+    showCreateLink: boolean
+    showingCloseMessage?: boolean
+    position: { x: number; y: number } | {}
+    tooltipState: 'copied' | 'running' | 'pristine' | 'runnning' | 'done'
+}
+
+class TooltipContainer extends React.Component<
+    TooltipContainerProps,
+    TooltipContainerState
+> {
+    state: TooltipContainerState = {
         showTooltip: false,
         showCreateLink: false,
         position: { x: 250, y: 200 },
@@ -33,13 +49,34 @@ class TooltipContainer extends React.Component {
     }
 
     async componentDidMount() {
+        this.props.inPageUI.events.on('stateChanged', this.handleUIStateChange)
         this.props.onInit(this.showTooltip)
         this.setState({
             showCreateLink: await features.getFeature('DirectLink'),
         })
     }
 
-    showTooltip = position => {
+    componentWillUnmount() {
+        this.props.inPageUI.events.removeListener(
+            'stateChanged',
+            this.handleUIStateChange,
+        )
+    }
+
+    handleUIStateChange: InPageUIEvents['stateChanged'] = (event) => {
+        if (!('tooltip' in event.changes)) {
+            return
+        }
+
+        if (!event.newState.tooltip) {
+            this.setState({
+                showTooltip: false,
+                position: {},
+            })
+        }
+    }
+
+    showTooltip = (position) => {
         if (!this.state.showTooltip && this.state.tooltipState !== 'running') {
             this.setState({
                 showTooltip: true,
@@ -50,10 +87,7 @@ class TooltipContainer extends React.Component {
     }
 
     handleClickOutside = async () => {
-        this.setState({
-            showTooltip: false,
-            position: {},
-        })
+        this.props.inPageUI.hideTooltip()
         // Remove onboarding select option notification if it's present
         await conditionallyRemoveOnboardingSelectOption(
             STAGES.annotation.notifiedHighlightText,
@@ -64,7 +98,7 @@ class TooltipContainer extends React.Component {
         event.preventDefault()
         event.stopPropagation()
 
-        this.props.destroy()
+        this.props.inPageUI.removeTooltip()
     }
 
     showCloseMessage() {
@@ -81,7 +115,7 @@ class TooltipContainer extends React.Component {
         })
     }
 
-    createAnnotation = async e => {
+    createAnnotation = async (e) => {
         e.preventDefault()
         e.stopPropagation()
         await this.props.createAnnotation()
@@ -95,23 +129,22 @@ class TooltipContainer extends React.Component {
         setTimeout(() => {
             this.setState({
                 tooltipState: 'runnning',
-                showTooltip: false,
-                position: {},
             })
+            this.props.inPageUI.hideTooltip()
         }, 400)
     }
-    createHighlight = async e => {
+    createHighlight = async (e) => {
         this.setState({
             tooltipState: 'running',
         })
         await this.props.createHighlight()
         this.setState({
-            showTooltip: false,
             tooltipState: 'pristine',
         })
+        this.props.inPageUI.hideTooltip()
     }
 
-    openSettings = event => {
+    openSettings = (event) => {
         event.preventDefault()
         this.props.openSettings()
     }

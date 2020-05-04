@@ -4,25 +4,23 @@ import analytics from 'src/analytics'
 import { delayed, getPositionState, getTooltipState } from '../utils'
 import { createAndCopyDirectLink } from '../../../direct-linking/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
-import {
-    remoteFunction,
-    makeRemotelyCallableType,
-} from '../../../util/webextensionRPC'
+import { remoteFunction } from '../../../util/webextensionRPC'
 import { injectCSS } from '../../../util/content-injection'
 import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
-import { TooltipInteractionInterface } from 'src/in-page-ui/tooltip/types'
-import { createAnnotationDraftInSidebar } from 'src/annotations'
-import { createAnnotation as createAnnotationAction } from 'src/annotations/actions'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { createHighlight, extractAnchor } from 'src/highlighting/ui'
 import { AnnotationsManagerInterface } from 'src/annotations/types'
 import { renderHighlight } from 'src/highlighting/ui/highlight-interactions'
 import { Highlight } from 'src/highlighting/types'
+import { TooltipPosition } from '../types'
 
 const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
 
-export function setupTooltipTrigger(callback, toolbarNotifications) {
+export function setupTooltipTrigger(
+    callback: (position: TooltipPosition) => void,
+    toolbarNotifications,
+) {
     mouseupListener = (event) => {
         conditionallyTriggerTooltip({ callback, toolbarNotifications }, event)
     }
@@ -82,6 +80,7 @@ export const insertTooltip = async (params: {
     injectCSS(cssFile)
 
     showTooltip = await setupUIContainer(target, {
+        inPageUI: params.inPageUI,
         createAndCopyDirectLink,
         createAnnotation: async (selection?) => {
             analytics.trackEvent({
@@ -124,9 +123,11 @@ export const insertTooltip = async (params: {
         },
     })
 
-    setupTooltipTrigger(showTooltip, params.toolbarNotifications)
+    setupTooltipTrigger(() => {
+        params.inPageUI.showTooltip()
+    }, params.toolbarNotifications)
     conditionallyTriggerTooltip({
-        callback: showTooltip,
+        callback: () => params.inPageUI.showTooltip(),
         toolbarNotifications: params.toolbarNotifications,
     })
 }
@@ -198,6 +199,7 @@ export const showContentTooltip = async (params: {
     toolbarNotifications: any
     inPageUI: InPageUIInterface
     annotationsManager: AnnotationsManagerInterface
+    position?: TooltipPosition
 }) => {
     if (!showTooltip) {
         await insertTooltip(params)
@@ -218,7 +220,16 @@ export const showContentTooltip = async (params: {
  * tooltip wouldn't have popped up yet.
  */
 export const conditionallyTriggerTooltip = delayed(
-    async ({ callback, toolbarNotifications }, event) => {
+    async (
+        {
+            callback,
+            toolbarNotifications,
+        }: {
+            callback: (position: TooltipPosition) => void
+            toolbarNotifications: any
+        },
+        event,
+    ) => {
         if (!userSelectedText() || (event && isTargetInsideTooltip(event))) {
             return
         }
@@ -229,7 +240,7 @@ export const conditionallyTriggerTooltip = delayed(
     case of tooltip popping up before page load, it resorts to text based method
     */
         const positioning = await getPositionState()
-        let position
+        let position: TooltipPosition
         if (positioning === 'text' || !event) {
             position = calculateTooltipPostion()
         } else if (positioning === 'mouse' && event) {
@@ -250,7 +261,7 @@ export const conditionallyTriggerTooltip = delayed(
     300,
 )
 
-export function calculateTooltipPostion() {
+export function calculateTooltipPostion(): TooltipPosition {
     const range = document.getSelection().getRangeAt(0)
     const boundingRect = range.getBoundingClientRect()
     // x = position of element from the left + half of it's width

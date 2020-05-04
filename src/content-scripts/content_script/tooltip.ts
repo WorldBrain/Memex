@@ -17,12 +17,16 @@ export const main: TooltipScriptMain = async (options) => {
         toolbarNotifications: options.toolbarNotifications,
     })
 
-    options.inPageUI.events.on('componentShouldSetUp', async () => {
-        await bodyLoader()
-        await insertTooltip(options)
+    options.inPageUI.events.on('componentShouldSetUp', async (event) => {
+        if (event.component === 'tooltip') {
+            await bodyLoader()
+            await insertTooltip(options)
+        }
     })
-    options.inPageUI.events.on('componentShouldDestroy', async () => {
-        await removeTooltip()
+    options.inPageUI.events.on('componentShouldDestroy', async (event) => {
+        if (event.component === 'tooltip') {
+            await removeTooltip()
+        }
     })
     options.inPageUI.events.on('stateChanged', async (event) => {
         if (!('tooltip' in event.changes)) {
@@ -30,8 +34,6 @@ export const main: TooltipScriptMain = async (options) => {
         }
         if (event.newState.tooltip) {
             showContentTooltip(options)
-        } else {
-            removeTooltip()
         }
     })
 }
