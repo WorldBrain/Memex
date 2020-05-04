@@ -131,7 +131,7 @@ export type SidebarContainerEvents = UIEvent<{
     }
     deleteAnnotation: {
         context: AnnotationEventContext
-        annnotationUrl: string
+        annotationUrl: string
     }
     toggleAnnotationBookmark: {
         context: AnnotationEventContext
@@ -363,23 +363,57 @@ export class SidebarContainerLogic extends UILogic<
 
     saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
         event,
+        previousState,
     }) => {
         const pageUrl = this.options.currentTab.url
-        this.emitMutation({
-            commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
-            showCommentBox: { $set: false },
+        const dummyAnnotation = {
+            pageUrl,
+            tags: event.tags,
+            comment: event.commentText,
+            createdWhen: Date.now(),
+            lastEdited: Date.now(),
+            selector: event.anchor,
+        } as Annotation
+
+        const updateState = (args: { annotations: Annotation[] }) =>
+            this.emitMutation({
+                commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
+                showCommentBox: { $set: false },
+                annotations: {
+                    $set: args.annotations,
+                },
+            })
+
+        updateState({
+            annotations: [...previousState.annotations, dummyAnnotation],
         })
 
-        await this.options.annotations.createAnnotation({
-            url: pageUrl,
-            comment: event.commentText,
-            bookmarked: event.bookmarked,
-        })
-        for (const tag of event.tags) {
-            await this.options.annotations.addAnnotationTag({
-                tag,
-                url: pageUrl,
+        try {
+            const annotationUrl = await this.options.annotations.createAnnotation(
+                {
+                    url: pageUrl,
+                    comment: event.commentText,
+                    bookmarked: event.bookmarked,
+                },
+            )
+
+            this.emitMutation({
+                annotations: {
+                    [previousState.annotations.length]: {
+                        url: { $set: annotationUrl },
+                    },
+                },
             })
+
+            for (const tag of event.tags) {
+                await this.options.annotations.addAnnotationTag({
+                    tag,
+                    url: pageUrl,
+                })
+            }
+        } catch (err) {
+            updateState({ annotations: previousState.annotations })
+            throw err
         }
     }
 
@@ -463,7 +497,6 @@ export class SidebarContainerLogic extends UILogic<
         const resultIndex = previousState.annotations.findIndex(
             (annot) => annot.url === event.annotationUrl,
         )
-        const originalAnnot = previousState.annotations[resultIndex]
 
         const updateState = (args: {
             tags: string[]
@@ -497,24 +530,44 @@ export class SidebarContainerLogic extends UILogic<
                 tags: event.tags,
             })
         } catch (err) {
-            updateState({ ...originalAnnot })
+            updateState({ ...previousState.annotations[resultIndex] })
             throw err
         }
     }
 
-    deleteAnnotation: EventHandler<'deleteAnnotation'> = async (incoming) => {
-        this.emitMutation({
-            annotationModes: {
-                [incoming.event.context]: {
-                    [incoming.event.annnotationUrl]: { $set: 'default' },
+    deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
+        const resultIndex = previousState.annotations.findIndex(
+            (annot) => annot.url === event.annotationUrl,
+        )
+
+        const updateState = (args: { annotations: Annotation[] }) =>
+            this.emitMutation({
+                annotationModes: {
+                    [event.context]: {
+                        [event.annotationUrl]: { $set: 'default' },
+                    },
                 },
-            },
-        })
-        await this.options.annotations
-            .deleteAnnotation({
-                pk: incoming.event.annnotationUrl,
+                annotations: {
+                    $set: args.annotations,
+                },
             })
-            .catch()
+
+        updateState({
+            annotations: [
+                ...previousState.annotations.slice(0, resultIndex),
+                ...previousState.annotations.slice(resultIndex + 1),
+            ],
+        })
+
+        try {
+            await this.options.annotations.deleteAnnotation(event.annotationUrl)
+        } catch (err) {
+            updateState({ annotations: previousState.annotations })
+            throw err
+        }
     }
 
     toggleAnnotationBookmark: EventHandler<
@@ -537,9 +590,14 @@ export class SidebarContainerLogic extends UILogic<
         const shouldBeBookmarked = !currentlyBookmarked
         toggleBookmarkState(shouldBeBookmarked)
 
-        await this.options.annotations
-            .toggleAnnotBookmark({ url: event.annnotationUrl })
-            .catch((err) => toggleBookmarkState(!shouldBeBookmarked))
+        try {
+            await this.options.annotations.toggleAnnotBookmark({
+                url: event.annnotationUrl,
+            })
+        } catch (err) {
+            toggleBookmarkState(!shouldBeBookmarked)
+            throw err
+        }
     }
 
     switchAnnotationMode: EventHandler<'switchAnnotationMode'> = (incoming) => {
@@ -580,11 +638,15 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
 
-        await this.options.search.delPages([pageUrlToDelete]).catch((err) =>
+        try {
+            await this.options.search.delPages([pageUrlToDelete])
+        } catch (err) {
             this.emitMutation({
                 searchResults: { $set: previousState.searchResults },
-            }),
-        )
+            })
+
+            throw err
+        }
     }
 
     closeDeletePageModal: EventHandler<'closeDeletePageModal'> = () => {
@@ -621,7 +683,13 @@ export class SidebarContainerLogic extends UILogic<
             ? this.options.bookmarks.addPageBookmark({ url: event.pageUrl })
             : this.options.bookmarks.delPageBookmark({ url: event.pageUrl })
 
-        await pending.catch((err) => toggleBookmarkState(!shouldBeBookmarked))
+        try {
+            await pending
+        } catch (err) {
+            toggleBookmarkState(!shouldBeBookmarked)
+
+            throw err
+        }
     }
 
     togglePageTagPicker: EventHandler<'togglePageTagPicker'> = ({

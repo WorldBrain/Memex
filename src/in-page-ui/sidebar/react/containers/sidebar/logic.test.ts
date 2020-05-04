@@ -23,6 +23,7 @@ const setupLogicHelper = async ({
             editAnnotation: () => undefined,
             createAnnotation: () => undefined,
             addAnnotationTag: () => undefined,
+            deleteAnnotation: () => undefined,
             updateAnnotationTags: () => undefined,
             getAllAnnotationsByUrl,
         },
@@ -45,10 +46,9 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment", async ({
             device,
         }) => {
-            const getAllAnnotationsByUrl = async () => [DATA.ANNOT_1]
             const { testLogic } = await setupLogicHelper({
                 device,
-                getAllAnnotationsByUrl,
+                getAllAnnotationsByUrl: async () => [DATA.ANNOT_1],
             })
             const context = 'pageAnnotations'
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
@@ -87,10 +87,9 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment and tags", async ({
             device,
         }) => {
-            const getAllAnnotationsByUrl = async () => [DATA.ANNOT_1]
             const { testLogic } = await setupLogicHelper({
                 device,
-                getAllAnnotationsByUrl,
+                getAllAnnotationsByUrl: async () => [DATA.ANNOT_1],
             })
             const context = 'pageAnnotations'
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
@@ -129,7 +128,20 @@ describe('SidebarContainerLogic', () => {
             )
         })
 
-        it('should be able to delete an annotation', async () => {})
+        it('should be able to delete an annotation', async ({ device }) => {
+            const { testLogic } = await setupLogicHelper({
+                device,
+                getAllAnnotationsByUrl: async () => [DATA.ANNOT_1],
+            })
+            const context = 'pageAnnotations'
+
+            expect(testLogic.state.annotations.length).toBe(1)
+            await testLogic.processEvent('deleteAnnotation', {
+                context,
+                annotationUrl: DATA.ANNOT_1.url,
+            })
+            expect(testLogic.state.annotations.length).toBe(0)
+        })
 
         it("should be able to toggle an annotation's bookmark status", async () => {})
 
@@ -209,6 +221,13 @@ describe('SidebarContainerLogic', () => {
                 bookmarked: false,
                 anchor: {} as any,
             })
+            expect(testLogic.state.annotations.length).toBe(1)
+            expect(testLogic.state.annotations).toEqual([
+                expect.objectContaining({
+                    comment: DATA.COMMENT_1,
+                    tags: [],
+                }),
+            ])
             expect(testLogic.state.commentBox.form.commentText).toEqual('')
             expect(testLogic.state.showCommentBox).toBe(false)
         })
@@ -241,9 +260,15 @@ describe('SidebarContainerLogic', () => {
             await testLogic.processEvent('saveNewPageComment', {
                 commentText: DATA.COMMENT_1,
                 tags: [],
-                bookmarked: false,
+                bookmarked: true,
                 anchor: {} as any,
             })
+            expect(testLogic.state.annotations).toEqual([
+                expect.objectContaining({
+                    comment: DATA.COMMENT_1,
+                    tags: [],
+                }),
+            ])
             expect(testLogic.state.commentBox.form.isCommentBookmarked).toBe(
                 false,
             )
@@ -287,10 +312,16 @@ describe('SidebarContainerLogic', () => {
 
             await testLogic.processEvent('saveNewPageComment', {
                 commentText: DATA.COMMENT_1,
-                tags: [],
+                tags: [DATA.TAG_1],
                 bookmarked: false,
                 anchor: {} as any,
             })
+            expect(testLogic.state.annotations).toEqual([
+                expect.objectContaining({
+                    comment: DATA.COMMENT_1,
+                    tags: [DATA.TAG_1],
+                }),
+            ])
             expect(testLogic.state.commentBox.form.tags).toEqual([])
             expect(testLogic.state.commentBox.form.isCommentBookmarked).toBe(
                 false,
