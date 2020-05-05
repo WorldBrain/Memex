@@ -3,6 +3,7 @@
 
 .progressContainer {
     text-align: center;
+    margin-top: 1rem;
 }
 
 .progressStep {
@@ -11,7 +12,7 @@
     cursor: pointer;
     display: inline-block;
     height: 10px;
-    margin: 1rem 0.25rem 0;
+    margin: 0 0.25rem 0;
     width: 10px;
     transition: all 200ms;
 
