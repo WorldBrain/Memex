@@ -633,10 +633,10 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({
             resultsByUrl: {
-                [pageUrlToDelete]: { $unset: null },
+                $unset: [pageUrlToDelete],
             },
             deletePageModal: {
-                pageUrlToDelete: { $set: undefined },
+                $unset: ['pageUrlToDelete'],
             },
         })
 

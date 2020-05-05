@@ -28,6 +28,9 @@ const setupLogicHelper = async ({
             updateAnnotationTags: () => undefined,
             getAllAnnotationsByUrl,
         },
+        search: {
+            delPages: () => undefined,
+        },
         inPageUI: {
             state: {
                 sidebar: true,
@@ -171,9 +174,44 @@ describe('SidebarContainerLogic', () => {
     })
 
     describe('page results', () => {
-        it('should be able to delete a page via modal', async () => {})
+        it('should be able to delete a page via modal', async ({ device }) => {
+            const { testLogic } = await setupLogicHelper({
+                device,
+            })
 
-        it("should be able to toggle a page's bookmark status", async () => {})
+            testLogic.processMutation({
+                resultsByUrl: {
+                    [DATA.PAGE_URL_1]: {
+                        $set: {
+                            url: DATA.PAGE_URL_1,
+                            shouldDisplayTagPopup: false,
+                        } as any,
+                    },
+                },
+            })
+
+            expect(Object.keys(testLogic.state.resultsByUrl).length).toBe(1)
+
+            expect(
+                testLogic.state.deletePageModal.pageUrlToDelete,
+            ).toBeUndefined()
+            await testLogic.processEvent('showDeletePageModal', {
+                pageUrl: DATA.PAGE_URL_1,
+            })
+            expect(testLogic.state.deletePageModal.pageUrlToDelete).toEqual(
+                DATA.PAGE_URL_1,
+            )
+
+            await testLogic.processEvent('deletePage', null)
+            expect(
+                testLogic.state.deletePageModal.pageUrlToDelete,
+            ).toBeUndefined()
+            expect(Object.keys(testLogic.state.resultsByUrl).length).toBe(0)
+        })
+
+        it("should be able to toggle a page's bookmark status", async ({
+            device,
+        }) => {})
 
         it("should be able to toggle a page's tag picker", async ({
             device,
