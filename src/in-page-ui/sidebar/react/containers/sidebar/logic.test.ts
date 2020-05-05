@@ -183,28 +183,30 @@ describe('SidebarContainerLogic', () => {
             })
 
             testLogic.processMutation({
-                searchResults: {
-                    $set: [
-                        {
+                resultsByUrl: {
+                    [DATA.PAGE_URL_1]: {
+                        $set: {
                             url: DATA.PAGE_URL_1,
                             shouldDisplayTagPopup: false,
                         } as any,
-                    ],
+                    },
                 },
             })
 
             await testLogic.processEvent('togglePageTagPicker', {
                 pageUrl: DATA.PAGE_URL_1,
             })
-            expect(testLogic.state.searchResults[0].shouldDisplayTagPopup).toBe(
-                true,
-            )
+            expect(
+                testLogic.state.resultsByUrl[DATA.PAGE_URL_1]
+                    .shouldDisplayTagPopup,
+            ).toBe(true)
             await testLogic.processEvent('togglePageTagPicker', {
                 pageUrl: DATA.PAGE_URL_1,
             })
-            expect(testLogic.state.searchResults[0].shouldDisplayTagPopup).toBe(
-                false,
-            )
+            expect(
+                testLogic.state.resultsByUrl[DATA.PAGE_URL_1]
+                    .shouldDisplayTagPopup,
+            ).toBe(false)
         })
 
         it("should be able to toggle a page's collection picker", async ({
@@ -215,13 +217,13 @@ describe('SidebarContainerLogic', () => {
             })
 
             testLogic.processMutation({
-                searchResults: {
-                    $set: [
-                        {
+                resultsByUrl: {
+                    [DATA.PAGE_URL_1]: {
+                        $set: {
                             url: DATA.PAGE_URL_1,
-                            shouldDisplayListPopup: false,
+                            shouldDisplayTagPopup: false,
                         } as any,
-                    ],
+                    },
                 },
             })
 
@@ -229,13 +231,15 @@ describe('SidebarContainerLogic', () => {
                 pageUrl: DATA.PAGE_URL_1,
             })
             expect(
-                testLogic.state.searchResults[0].shouldDisplayListPopup,
+                testLogic.state.resultsByUrl[DATA.PAGE_URL_1]
+                    .shouldDisplayListPopup,
             ).toBe(true)
             await testLogic.processEvent('togglePageListPicker', {
                 pageUrl: DATA.PAGE_URL_1,
             })
             expect(
-                testLogic.state.searchResults[0].shouldDisplayListPopup,
+                testLogic.state.resultsByUrl[DATA.PAGE_URL_1]
+                    .shouldDisplayListPopup,
             ).toBe(false)
         })
 

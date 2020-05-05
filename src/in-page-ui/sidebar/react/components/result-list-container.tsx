@@ -9,7 +9,11 @@ import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from 'src/sidebar-overlay/sidebar/constants'
-import { Result, ResultsByUrl } from 'src/overview/types'
+import {
+    ResultWithIndex as Result,
+    ResultsByUrl,
+    AnnotationMode,
+} from '../types'
 import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
@@ -19,7 +23,6 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
-import { AnnotationMode } from '../types'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 const styles = require('./result-list.css')
@@ -30,7 +33,6 @@ interface StateProps {
     isNewSearchLoading: boolean
     isListFilterActive: boolean
     areAnnotationsExpanded: boolean
-    searchResults: Result[]
     resultsByUrl: ResultsByUrl
     resultsClusteredByDay: boolean
     annotsByDay: PageUrlsByDay
@@ -45,18 +47,18 @@ interface DispatchProps {
     resetUrlDragged: () => void
     resetActiveTagIndex: () => void
     setUrlDragged: (url: string) => void
-    addList: (i: number) => (f: string) => void
-    delList: (i: number) => (f: string) => void
-    addTag: (i: number) => (f: string) => void
-    delTag: (i: number) => (f: string) => void
+    addList: (f: string) => void
+    delList: (f: string) => void
+    addTag: (f: string) => void
+    delTag: (f: string) => void
     handlePillClick: (tag: string) => void
-    handleTagBtnClick: (doc: Result, i: number) => void
-    handleListBtnClick: (doc: Result, i: number) => void
+    handleTagBtnClick: (doc: Result) => void
+    handleListBtnClick: (doc: Result) => void
     handleCommentBtnClick: (doc: Result, isSocialSearch?: boolean) => void
     handleCrossRibbonClick: (doc: Result, isSocialPost: boolean) => void
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
-    handleToggleBm: (doc: Result, i: number) => void
-    handleTrashBtnClick: (doc: Result, i: number) => void
+    handleToggleBm: (doc: Result) => void
+    handleTrashBtnClick: (doc: Result) => void
 }
 
 interface OwnProps {
@@ -117,12 +119,11 @@ export default class ResultListContainer extends Component<
         }
     }
 
-    private handleTagUpdate = (index: number) => async (
+    private handleTagUpdate = (url: string) => async (
         _: string[],
         added: string,
         deleted: string,
     ) => {
-        const url = this.props.searchResults[index].url
         const backendResult = tags.updateTagForPage({
             added,
             deleted,
@@ -130,38 +131,38 @@ export default class ResultListContainer extends Component<
         })
 
         if (added) {
-            this.props.addTag(index)(added)
+            this.props.addTag(added)
         }
         if (deleted) {
-            return this.props.delTag(index)(deleted)
+            return this.props.delTag(deleted)
         }
         return backendResult
     }
 
-    private handleListUpdate = (index: number) => async (
+    private handleListUpdate = (url: string) => async (
         _: string[],
         added: string,
         deleted: string,
     ) => {
-        const url = this.props.searchResults[index].url
         const backendResult = collections.updateListForPage({
             added,
             deleted,
             url,
         })
         if (added) {
-            this.props.addList(index)(added)
+            this.props.addList(added)
         }
         if (deleted) {
-            return this.props.delList(index)(deleted)
+            return this.props.delList(deleted)
         }
         return backendResult
     }
 
-    private renderTagsManager(
-        { shouldDisplayTagPopup, tags: selectedTags },
-        index,
-    ) {
+    private renderTagsManager({
+        shouldDisplayTagPopup,
+        tags: selectedTags,
+        url,
+    }: Result) {
         if (!shouldDisplayTagPopup) {
             return null
         }
@@ -170,22 +171,23 @@ export default class ResultListContainer extends Component<
             <HoverBox>
                 <div ref={(ref) => this.setTagDivRef(ref)}>
                     <TagPicker
-                        onUpdateEntrySelection={this.handleTagUpdate(index)}
+                        onUpdateEntrySelection={this.handleTagUpdate(url)}
                         queryEntries={(query) =>
                             tags.searchForTagSuggestions({ query })
                         }
                         loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
-                        initialSelectedEntries={() => selectedTags}
+                        initialSelectedEntries={async () => selectedTags}
                     />
                 </div>
             </HoverBox>
         )
     }
 
-    private renderListsManager(
-        { shouldDisplayListPopup, lists: selectedLists }: Result,
-        index: number,
-    ) {
+    private renderListsManager({
+        shouldDisplayListPopup,
+        lists: selectedLists,
+        url,
+    }: Result) {
         if (!shouldDisplayListPopup) {
             return null
         }
@@ -194,7 +196,7 @@ export default class ResultListContainer extends Component<
             <HoverBox>
                 <div ref={(ref) => this.setListDivRef(ref)}>
                     <CollectionPicker
-                        onUpdateEntrySelection={this.handleListUpdate(index)}
+                        onUpdateEntrySelection={this.handleListUpdate(url)}
                         queryEntries={(query) =>
                             collections.searchForListSuggestions({ query })
                         }
@@ -208,7 +210,7 @@ export default class ResultListContainer extends Component<
         )
     }
 
-    private renderTagHolder = (doc, resultIndex) => (
+    private renderTagHolder = (doc: Result) => (
         <TagHolder
             tags={[...new Set([...doc.tags])]}
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
@@ -216,9 +218,7 @@ export default class ResultListContainer extends Component<
             handlePillClick={(tag) => (event) =>
                 this.props.handlePillClick(tag)}
             env={'sidebar'}
-            handleTagBtnClick={() =>
-                this.props.handleTagBtnClick(doc, resultIndex)
-            }
+            handleTagBtnClick={() => this.props.handleTagBtnClick(doc)}
         />
     )
 
@@ -231,27 +231,23 @@ export default class ResultListContainer extends Component<
         })
     }
 
-    private attachDocWithPageResultItem(doc, index, key) {
+    private attachDocWithPageResultItem(doc, key: number) {
         const isSocialPost = doc.hasOwnProperty('user')
 
         return (
             <ResultItem
                 key={key}
                 setTagButtonRef={this.setTagButtonRef}
-                tagHolder={this.renderTagHolder(doc, index)}
+                tagHolder={this.renderTagHolder(doc)}
                 setUrlDragged={this.props.setUrlDragged}
-                tagManager={this.renderTagsManager(doc, index)}
-                listManager={this.renderListsManager(doc, index)}
+                tagManager={this.renderTagsManager(doc)}
+                listManager={this.renderListsManager(doc)}
                 resetUrlDragged={this.props.resetUrlDragged}
-                onTagBtnClick={() => this.props.handleTagBtnClick(doc, index)}
-                onListBtnClick={() => this.props.handleListBtnClick(doc, index)}
+                onTagBtnClick={() => this.props.handleTagBtnClick(doc)}
+                onListBtnClick={() => this.props.handleListBtnClick(doc)}
                 isListFilterActive={this.props.isListFilterActive}
-                onTrashBtnClick={() =>
-                    this.props.handleTrashBtnClick(doc, index)
-                }
-                onToggleBookmarkClick={() =>
-                    this.props.handleToggleBm(doc, index)
-                }
+                onTrashBtnClick={() => this.props.handleTrashBtnClick(doc)}
+                onToggleBookmarkClick={() => this.props.handleToggleBm(doc)}
                 onCommentBtnClick={() =>
                     this.props.handleCommentBtnClick(doc, isSocialPost)
                 }
@@ -277,8 +273,8 @@ export default class ResultListContainer extends Component<
      */
     private resultsStateToItems() {
         if (!this.props.resultsClusteredByDay) {
-            return this.props.searchResults.map((res, i) =>
-                this.attachDocWithPageResultItem(res, i, i),
+            return Object.values(this.props.resultsByUrl).map((result) =>
+                this.attachDocWithPageResultItem(result, result.index),
             )
         }
 
@@ -286,6 +282,7 @@ export default class ResultListContainer extends Component<
 
         const sortedKeys = Object.keys(this.props.annotsByDay).sort().reverse()
 
+        let resultItemCount = 0
         for (const day of sortedKeys) {
             els.push(
                 <p className={styles.clusterTime} key={day}>
@@ -297,7 +294,7 @@ export default class ResultListContainer extends Component<
             for (const [pageUrl, annotations] of Object.entries(
                 currentCluster,
             )) {
-                const page = this.props.resultsByUrl.get(pageUrl)
+                const page = this.props.resultsByUrl[pageUrl]
 
                 if (!page) {
                     continue // Page not found for whatever reason...
@@ -306,8 +303,7 @@ export default class ResultListContainer extends Component<
                 els.push(
                     this.attachDocWithPageResultItem(
                         { ...page, annotations },
-                        page.index,
-                        `${day}${pageUrl}`,
+                        resultItemCount++,
                     ),
                 )
             }

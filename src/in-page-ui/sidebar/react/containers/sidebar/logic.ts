@@ -6,9 +6,14 @@ import {
     UIMutation,
 } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
-import { SidebarEnv, Page, AnnotationMode } from '../../types'
+import {
+    SidebarEnv,
+    Page,
+    AnnotationMode,
+    ResultWithIndex as Result,
+    ResultsByUrl,
+} from '../../types'
 import { Annotation } from 'src/annotations/types'
-import { Result, ResultsByUrl } from 'src/overview/types'
 import { PageUrlsByDay, SearchInterface } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
@@ -64,7 +69,6 @@ export interface SidebarContainerState {
     pageCount?: number
     noResults: boolean
     isBadTerm: boolean
-    searchResults: Result[]
     resultsByUrl: ResultsByUrl
     resultsClusteredByDay: boolean
     annotsByDay: PageUrlsByDay
@@ -256,8 +260,7 @@ export class SidebarContainerLogic extends UILogic<
             isInvalidSearch: false,
             totalResultCount: 0,
             isListFilterActive: false,
-            searchResults: [],
-            resultsByUrl: new Map(),
+            resultsByUrl: {},
             resultsClusteredByDay: false,
             annotsByDay: {},
             isSocialSearch: false,
@@ -302,8 +305,9 @@ export class SidebarContainerLogic extends UILogic<
                         },
                     })
                 ).docs
+
                 this.emitMutation({
-                    searchResults: { $set: results },
+                    resultsByUrl: { $set: createResultsByUrlObj(results) },
                     pageCount: { $set: results.length },
                     noResults: { $set: !results.length },
                 })
@@ -316,11 +320,12 @@ export class SidebarContainerLogic extends UILogic<
                     //     : null,
                 )
                 this.emitMutation({
-                    searchResults: { $set: result.results },
                     pageCount: { $set: result.results.length },
                     noResults: { $set: !result.results.length },
                     annotsByDay: { $set: result.annotsByDay },
-                    resultsByUrl: { $set: result.resultsByUrl },
+                    resultsByUrl: {
+                        $set: createResultsByUrlObj(result.results),
+                    },
                 })
             }
         })
@@ -625,16 +630,10 @@ export class SidebarContainerLogic extends UILogic<
 
     deletePage: EventHandler<'deletePage'> = async ({ previousState }) => {
         const { pageUrlToDelete } = previousState.deletePageModal
-        const resultIndex = previousState.searchResults.findIndex(
-            (result) => result.url === pageUrlToDelete,
-        )
 
         this.emitMutation({
-            searchResults: {
-                $set: [
-                    ...previousState.searchResults.slice(0, resultIndex),
-                    ...previousState.searchResults.slice(resultIndex + 1),
-                ],
+            resultsByUrl: {
+                [pageUrlToDelete]: { $unset: null },
             },
             deletePageModal: {
                 pageUrlToDelete: { $set: undefined },
@@ -645,7 +644,7 @@ export class SidebarContainerLogic extends UILogic<
             await this.options.search.delPages([pageUrlToDelete])
         } catch (err) {
             this.emitMutation({
-                searchResults: { $set: previousState.searchResults },
+                resultsByUrl: { $set: previousState.resultsByUrl },
             })
 
             throw err
@@ -666,18 +665,15 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const toggleBookmarkState = (hasBookmark: boolean) =>
             this.emitMutation({
-                searchResults: {
-                    [resultIndex]: {
+                resultsByUrl: {
+                    [event.pageUrl]: {
                         hasBookmark: { $set: hasBookmark },
                     },
                 },
             })
 
-        const resultIndex = previousState.searchResults.findIndex(
-            (result) => result.url === event.pageUrl,
-        )
-        const currentlyBookmarked = !!previousState.searchResults[resultIndex]
-            .hasBookmark
+        const currentlyBookmarked = !!previousState.resultsByUrl[event.pageUrl]
+            ?.hasBookmark
         const shouldBeBookmarked = !currentlyBookmarked
 
         toggleBookmarkState(shouldBeBookmarked)
@@ -690,7 +686,6 @@ export class SidebarContainerLogic extends UILogic<
             await pending
         } catch (err) {
             toggleBookmarkState(!shouldBeBookmarked)
-
             throw err
         }
     }
@@ -699,16 +694,13 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const resultIndex = previousState.searchResults.findIndex(
-            (result) => result.url === event.pageUrl,
-        )
-        const currentlyShown = !!previousState.searchResults[resultIndex]
-            .shouldDisplayTagPopup
+        const currentlyShown = !!previousState.resultsByUrl[event.pageUrl]
+            ?.shouldDisplayTagPopup
         const shouldBeShown = !currentlyShown
 
         return {
-            searchResults: {
-                [resultIndex]: {
+            resultsByUrl: {
+                [event.pageUrl]: {
                     shouldDisplayTagPopup: { $set: shouldBeShown },
                 },
             },
@@ -719,16 +711,13 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const resultIndex = previousState.searchResults.findIndex(
-            (result) => result.url === event.pageUrl,
-        )
-        const currentlyShown = !!previousState.searchResults[resultIndex]
-            .shouldDisplayListPopup
+        const currentlyShown = !!previousState.resultsByUrl[event.pageUrl]
+            ?.shouldDisplayListPopup
         const shouldBeShown = !currentlyShown
 
         return {
-            searchResults: {
-                [resultIndex]: {
+            resultsByUrl: {
+                [event.pageUrl]: {
                     shouldDisplayListPopup: { $set: shouldBeShown },
                 },
             },
@@ -740,9 +729,6 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const resultIndex = previousState.searchResults.findIndex(
-            (result) => result.url === event.pageUrl,
-        )
         // const currentlyShown = !!previousState.searchResults[resultIndex].
         // const shouldBeShown = !currentlyShown
 
@@ -857,17 +843,19 @@ const searchAnnotations = async (search: SearchInterface, query: string) => {
         query: query.length ? query : undefined,
     })
 
-    const resultsByUrl: ResultsByUrl = new Map()
-    result.docs.forEach((doc, index) => {
-        resultsByUrl.set(doc.pageId, {
-            ...doc,
-            index,
-        })
-    })
-
     return {
         results: result.docs,
-        resultsByUrl,
+        resultsByUrl: createResultsByUrlObj(result.docs),
         annotsByDay: result['annotsByDay'],
     }
+}
+
+const createResultsByUrlObj = (results: Result[]): ResultsByUrl => {
+    const obj: ResultsByUrl = {}
+
+    results.forEach((result, index) => {
+        obj[result.url] = { ...result, index }
+    })
+
+    return obj
 }

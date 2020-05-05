@@ -251,7 +251,6 @@ export default class SidebarContainer extends StatefulUIElement<
                     isNewSearchLoading:
                         this.state.searchLoadState !== 'success',
                     isListFilterActive: this.state.isListFilterActive,
-                    searchResults: this.state.searchResults,
                     resultsByUrl: this.state.resultsByUrl,
                     resultsClusteredByDay:
                         this.state.searchType === 'notes' &&
@@ -267,10 +266,10 @@ export default class SidebarContainer extends StatefulUIElement<
                     resetUrlDragged: () => {},
                     resetActiveTagIndex: () => {},
                     setUrlDragged: (url: string) => {},
-                    addTag: (i: number) => (filter: string) => {},
-                    delTag: (i: number) => (filter: string) => {},
-                    addList: (i: number) => (filter: string) => {},
-                    delList: (i: number) => (filter: string) => {},
+                    addTag: (filter: string) => {},
+                    delTag: (filter: string) => {},
+                    addList: (filter: string) => {},
+                    delList: (filter: string) => {},
                     handlePillClick: (tag: string) => () => {
                         // console.log('handlePillClick')
                     },
