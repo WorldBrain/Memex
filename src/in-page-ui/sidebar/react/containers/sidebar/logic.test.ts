@@ -31,6 +31,10 @@ const setupLogicHelper = async ({
         search: {
             delPages: () => undefined,
         },
+        bookmarks: {
+            addPageBookmark: () => undefined,
+            delPageBookmark: () => undefined,
+        },
         inPageUI: {
             state: {
                 sidebar: true,
@@ -211,7 +215,38 @@ describe('SidebarContainerLogic', () => {
 
         it("should be able to toggle a page's bookmark status", async ({
             device,
-        }) => {})
+        }) => {
+            const { testLogic } = await setupLogicHelper({
+                device,
+            })
+
+            testLogic.processMutation({
+                resultsByUrl: {
+                    [DATA.PAGE_URL_1]: {
+                        $set: {
+                            url: DATA.PAGE_URL_1,
+                            hasBookmark: false,
+                        } as any,
+                    },
+                },
+            })
+
+            expect(
+                testLogic.state.resultsByUrl[DATA.PAGE_URL_1].hasBookmark,
+            ).toBe(false)
+            await testLogic.processEvent('togglePageBookmark', {
+                pageUrl: DATA.PAGE_URL_1,
+            })
+            expect(
+                testLogic.state.resultsByUrl[DATA.PAGE_URL_1].hasBookmark,
+            ).toBe(true)
+            await testLogic.processEvent('togglePageBookmark', {
+                pageUrl: DATA.PAGE_URL_1,
+            })
+            expect(
+                testLogic.state.resultsByUrl[DATA.PAGE_URL_1].hasBookmark,
+            ).toBe(false)
+        })
 
         it("should be able to toggle a page's tag picker", async ({
             device,
@@ -456,8 +491,24 @@ describe('SidebarContainerLogic', () => {
     })
 
     describe('search-type switch', () => {
-        it('should be able to set search type', async () => {})
+        it('should be able to set search type', async ({ device }) => {
+            const { testLogic } = await setupLogicHelper({ device })
 
-        it('should be able to set results search type', async () => {})
+            await testLogic.processEvent('setSearchType', { type: 'notes' })
+            expect(testLogic.state.searchType).toEqual('notes')
+            await testLogic.processEvent('setSearchType', { type: 'page' })
+            expect(testLogic.state.searchType).toEqual('page')
+            await testLogic.processEvent('setSearchType', { type: 'social' })
+            expect(testLogic.state.searchType).toEqual('social')
+        })
+
+        it('should be able to set page type', async ({ device }) => {
+            const { testLogic } = await setupLogicHelper({ device })
+
+            await testLogic.processEvent('setPageType', { type: 'all' })
+            expect(testLogic.state.pageType).toEqual('all')
+            await testLogic.processEvent('setPageType', { type: 'page' })
+            expect(testLogic.state.pageType).toEqual('page')
+        })
     })
 })
