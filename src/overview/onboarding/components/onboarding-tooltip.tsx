@@ -1,11 +1,18 @@
 import React from 'react'
-
-const styles = require('./onboarding-tooltip.css')
+import styled from 'styled-components'
+import ProgressStepContainer from 'src/common-ui/components/progress-step-container'
+import { TypographyBodyCenter } from 'src/common-ui/components/design-library/typography'
+import {
+    colorMidPurple,
+    colorGrey9,
+} from 'src/common-ui/components/design-library/colors'
+import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 export interface Props {
     imgSrc?: string
     CTAText?: string
-    descriptionText: string
+    title: string
+    subtitle?: string
     onCTAClick?: () => void
 }
 
@@ -16,12 +23,10 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
         }
 
         return (
-            <button
-                className={styles.ctaButton}
+            <SecondaryAction
                 onClick={this.props.onCTAClick}
-            >
-                {this.props.CTAText}
-            </button>
+                label={this.props.CTAText}
+            />
         )
     }
 
@@ -30,24 +35,66 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
             return
         }
 
-        return <img className={styles.img} src={this.props.imgSrc} />
+        return (
+            <StyledImage>
+                <img src={this.props.imgSrc} />
+            </StyledImage>
+        )
     }
 
     render() {
         return (
-            <>
+            <StyledOnboardingTooltip>
+                <Title>{this.props.title}</Title>
+                <Subtitle>{this.props.subtitle}</Subtitle>
+                <TypographyBodyCenter>
+                    {this.props.children}
+                </TypographyBodyCenter>
                 {this.renderImg()}
-                <div className={styles.textContainer}>
-                    <p className={styles.containerTitle}>
-                        <span className={styles.tipIcon} />
-                        <span>Pro tip</span>
-                    </p>
-                    <p className={styles.descriptionText}>
-                        {this.props.descriptionText}
-                    </p>
-                </div>
                 {this.renderCTAButton()}
-            </>
+                <ProgressWrapper>
+                    <ProgressStepContainer
+                        totalSteps={5}
+                        currentStep={4}
+                        onStepClick={() => undefined}
+                    />
+                    <NextLink>Next</NextLink>
+                </ProgressWrapper>
+            </StyledOnboardingTooltip>
         )
     }
 }
+
+const StyledOnboardingTooltip = styled.div`
+    font-family: 'Poppins', sans-serif;
+    max-width: 600px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`
+const Subtitle = styled(TypographyBodyCenter)`
+    color: ${colorGrey9};
+    font-weight: 600;
+`
+const Title = styled(TypographyBodyCenter)`
+    color: ${colorMidPurple};
+    font-weight: 600;
+    margin-bottom: 20px;
+`
+const StyledImage = styled.div`
+    margin: 20px 0;
+`
+
+const ProgressWrapper = styled.div`
+    margin: 10px 0;
+    display: flex;
+`
+
+const NextLink = styled.a`
+    align-items: center;
+    color: ${colorMidPurple};
+    font-weight: 600;
+    cursor: pointer;
+    margin: 1rem 0 0 0.5rem;
+`

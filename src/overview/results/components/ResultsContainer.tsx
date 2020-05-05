@@ -5,6 +5,7 @@ import NotificationContainer, {
     selectors as notifs,
 } from '../../../notifications'
 import { selectors as filters } from 'src/search-filters'
+//import EmptyStateIllustration from './EmptyStateIllustration'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './results-message'
 import ResultList from './ResultListContainer'
@@ -72,7 +73,7 @@ class ResultsContainer extends React.Component<Props, State> {
         if (showOnboarding === 'true' && this.props.noResults) {
             return (
                 <ResultsMessage>
-                    <NoResultBadTerm title="You don't have anything saved yet">
+                    <NoResultBadTerm title="Welcome to Memex!">
                         <OnboardingMessage />
                     </NoResultBadTerm>
                 </ResultsMessage>
@@ -142,7 +143,7 @@ class ResultsContainer extends React.Component<Props, State> {
     }
 }
 
-const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
+const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     showInbox: notifs.showInbox(state),
     noResults: selectors.noResults(state),
     isBadTerm: selectors.isBadTerm(state),
@@ -156,8 +157,10 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = state => ({
     showOnboardingMessage: selectors.showOnboardingMessage(state),
 })
 
-const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = dispatch => ({
-    toggleAreAnnotationsExpanded: e => {
+const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
+    dispatch,
+) => ({
+    toggleAreAnnotationsExpanded: (e) => {
         e.preventDefault()
         dispatch(actions.toggleAreAnnotationsExpanded())
     },

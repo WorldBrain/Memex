@@ -1,8 +1,9 @@
 .container {
-    composes: boxShadow from 'src/common-ui/colors.css';
+    box-shadow: 0px 4px 15px rgba(80, 80, 80, 0.1);
     composes: fadeIn from 'src/common-ui/elements.css';
     align-items: center;
     background-color: white;
+    border: 1px #ededed;
     border-radius: 3px;
     display: flex;
     flex-direction: column;
