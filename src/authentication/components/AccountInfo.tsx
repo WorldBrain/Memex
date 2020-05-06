@@ -1,9 +1,5 @@
 import * as React from 'react'
 import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
-import {
     TypographyHeadingPage,
     TypographyInputTitle,
 } from 'src/common-ui/components/design-library/typography'
@@ -12,16 +8,21 @@ import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { InputTextField } from 'src/common-ui/components/design-library/form/InputTextField'
+import { AuthContextInterface } from 'src/authentication/background/types'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 
 const hiddenInProduction =
     process.env.NODE_ENV === 'production' ? 'hidden' : 'text'
+const dev = process.env.NODE_ENV !== 'production'
 
 interface Props {
     initiallyShowSubscriptionModal?: boolean
     showSubscriptionModal: () => void
 }
 
-export class AccountInfo extends React.PureComponent<Props & UserProps> {
+export class AccountInfo extends React.PureComponent<
+    Props & AuthContextInterface
+> {
     componentDidMount(): void {
         if (this.props.initiallyShowSubscriptionModal) {
             this.props.showSubscriptionModal()
@@ -30,7 +31,8 @@ export class AccountInfo extends React.PureComponent<Props & UserProps> {
 
     render() {
         const user = this.props.currentUser
-        const features = this.props.authorizedFeatures
+        const features = user?.authorizedFeatures
+        const plans = user?.authorizedPlans
         return (
             <FullPage>
                 <TypographyHeadingPage>My Account</TypographyHeadingPage>
@@ -57,36 +59,45 @@ export class AccountInfo extends React.PureComponent<Props & UserProps> {
 
                         <InputTextField
                             type={hiddenInProduction}
-                            name={'Email Verified'}
-                            defaultValue={JSON.stringify(user.emailVerified)}
-                            readOnly
-                        />
-                        <InputTextField
-                            type={hiddenInProduction}
                             name={'User ID'}
                             defaultValue={user.id}
                             readOnly
                         />
                         <InputTextField
                             type={hiddenInProduction}
+                            name={'Email Verified'}
+                            defaultValue={`EmailVerified: ${JSON.stringify(
+                                user.emailVerified,
+                            )}`}
+                            readOnly
+                        />
+                        <InputTextField
+                            type={hiddenInProduction}
                             name={'Features'}
-                            defaultValue={JSON.stringify(features)}
+                            defaultValue={features}
                             readOnly
                         />
                         <InputTextField
                             type={hiddenInProduction}
                             name={'Plans'}
-                            defaultValue={JSON.stringify(
-                                this.props.authorizedPlans,
-                            )}
+                            defaultValue={plans}
                             readOnly
                         />
                         <InputTextField
                             type={hiddenInProduction}
                             name={'subscriptionStatus'}
-                            defaultValue={JSON.stringify(
-                                this.props.subscriptionStatus,
-                            )}
+                            defaultValue={user.subscriptionStatus}
+                            readOnly
+                        />
+                        <InputTextField
+                            type={hiddenInProduction}
+                            name={'subscriptionExpiry'}
+                            defaultValue={
+                                user.subscriptionExpiry &&
+                                new Date(
+                                    user.subscriptionExpiry * 1000,
+                                ).toLocaleString()
+                            }
                             readOnly
                         />
                     </div>

@@ -1,11 +1,9 @@
 import React from 'react'
 import Subscribe from 'src/authentication/components/Subscription/Subscribe'
 import Modal from 'src/common-ui/components/Modal'
-import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { SubscriptionPreview } from 'src/authentication/components/Subscription/SubscriptionPreview'
+import { AuthContextInterface } from 'src/authentication/background/types'
 
 interface Props {
     onClose: () => void
@@ -14,7 +12,10 @@ interface State {
     showSubscribeWithLogin: boolean
 }
 
-class SubscribeModal extends React.PureComponent<Props & UserProps, State> {
+class SubscribeModal extends React.PureComponent<
+    Props & AuthContextInterface,
+    State
+> {
     state = {
         showSubscribeWithLogin: null,
     }
@@ -49,8 +50,8 @@ class SubscribeModal extends React.PureComponent<Props & UserProps, State> {
 
 const styles = {
     container: {
-        width: "100%",
-        backgroundColor: "white",
+        width: '100%',
+        backgroundColor: 'white',
     },
 }
 

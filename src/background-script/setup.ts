@@ -49,6 +49,7 @@ import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
 import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
+import { subscriptionRedirect } from 'src/authentication/background/redirect'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -150,7 +151,10 @@ export function createBackgroundModules(options: {
     const auth =
         options.auth ||
         new AuthBackground({
-            ...createAuthDependencies(options.authOptions),
+            ...createAuthDependencies({
+                ...options.authOptions,
+                redirectUrl: subscriptionRedirect,
+            }),
             scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
                 jobScheduler.scheduler,
             ),
@@ -249,6 +253,7 @@ export async function setupBackgroundModules(
     })
 
     backgroundModules.auth.registerRemoteEmitter()
+    backgroundModules.auth.setupRequestInterceptor()
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()

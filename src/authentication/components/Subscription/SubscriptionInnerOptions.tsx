@@ -18,22 +18,12 @@ export class SubscriptionInnerOptions extends React.Component<Props> {
                     onClick={this.props.openCheckoutBackupMonthly}
                     title={'Monthly'}
                     price={'€2'}
-                    subscribed={
-                        this.props.plans &&
-                        this.props.plans.includes('pro-monthly')
-                    }
-                    manageSubscription={this.props.openPortal}
                 />
                 <SubscriptionPriceBox
                     key={'SubscriptionBoxBackupsYearly'}
                     onClick={this.props.openCheckoutBackupYearly}
                     price={'€20'}
                     title={'Yearly'}
-                    subscribed={
-                        this.props.plans &&
-                        this.props.plans.includes('pro-yearly')
-                    }
-                    manageSubscription={this.props.openPortal}
                 />
             </div>
         )

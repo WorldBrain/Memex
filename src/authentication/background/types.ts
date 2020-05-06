@@ -15,6 +15,7 @@ export interface AuthRemoteFunctionsInterface {
     getAuthorizedFeatures(): Promise<UserFeature[]>
     getAuthorizedPlans(): Promise<UserPlan[]>
     getSubscriptionStatus(): Promise<SubscriptionStatus>
+    getSubscriptionExpiry(): Promise<number | null>
     isAuthorizedForFeature(feature: UserFeature): Promise<boolean>
 
     hasSubscribedBefore(): Promise<boolean>
@@ -25,3 +26,14 @@ export interface AuthRemoteEvents {
         user: (AuthenticatedUser & { claims: Claims }) | null,
     ) => void
 }
+
+export interface AuthContextInterface {
+    currentUser: MemexUser
+}
+
+export type MemexUser = {
+    authorizedFeatures: UserFeature[]
+    authorizedPlans: UserPlan[]
+    subscriptionStatus: SubscriptionStatus
+    subscriptionExpiry: number | null
+} & AuthenticatedUser

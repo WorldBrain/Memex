@@ -18,6 +18,7 @@ export type DevAuthState =
 
 export function createAuthDependencies(options?: {
     devAuthState?: DevAuthState
+    redirectUrl: string
 }): {
     authService: AuthService
     subscriptionService: SubscriptionsService
@@ -28,6 +29,7 @@ export function createAuthDependencies(options?: {
             authService: new WorldbrainAuthService(getFirebase()),
             subscriptionService: new WorldbrainSubscriptionsService(
                 getFirebase(),
+                options.redirectUrl,
             ),
         }
     }

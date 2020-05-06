@@ -3,37 +3,71 @@ import { SignInScreen } from 'src/authentication/components/SignIn'
 import {
     PricingPlanTitle,
     PricingPlanItem,
-    LoginTitle,
-    LoginButton,
     WhiteSpacer30,
+    PlanTitle,
 } from 'src/authentication/components/Subscription/pricing.style'
 
 import { SubscriptionOptionsChargebee } from 'src/authentication/components/Subscription/SubscriptionOptionsChargebee'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { AuthContextInterface } from 'src/authentication/background/types'
 import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
+    CenterText,
+    WhiteSpacer10,
+} from 'src/common-ui/components/design-library/typography'
+import { PrimaryButton } from 'src/common-ui/components/primary-button'
 import { auth } from 'src/util/remote-functions-background'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 const styles = require('../styles.css')
 
 type Props = {
     onClose: () => void
-} & UserProps
+} & AuthContextInterface
 
-class Subscribe extends React.PureComponent<Props> {
-    handleSubscriptionChanged = () => {
-        this.handleRefresh()
+interface State {
+    showRefreshSubscription: boolean
+    refreshing: boolean
+}
+
+class Subscribe extends React.Component<Props, State> {
+    state = {
+        showRefreshSubscription: false,
+        refreshing: false,
     }
 
     handleClose = () => {
         this.props.onClose()
     }
 
-    handleRefresh = async () => {
-        await auth.refreshUserInfo()
+    handleSubscriptionClicked = () => {
+        this.setState({
+            showRefreshSubscription: true,
+        })
     }
 
-    renderLoginOrSubscription() {
+    handleRefresh = async () => {
+        this.setState({
+            refreshing: true,
+        })
+        await auth.refreshUserInfo()
+        this.setState({
+            refreshing: false,
+            showRefreshSubscription: false,
+        })
+    }
+
+    componentDidUpdate(
+        prevProps: Readonly<Props>,
+        prevState: Readonly<State>,
+        snapshot?: any,
+    ) {
+        // When the user has been updated (subscription refresh has changed the user), set the display back
+        // to show the result (subscribed or not)
+        if (prevProps.currentUser !== this.props.currentUser) {
+            this.setState({ showRefreshSubscription: false })
+        }
+    }
+
+    render() {
         if (this.props.currentUser === null) {
             return (
                 <div className={styles.section}>
@@ -49,7 +83,34 @@ class Subscribe extends React.PureComponent<Props> {
                 </div>
             )
         } else {
-            if ((this.props.authorizedPlans?.length ?? 0) > 0) {
+            if (this.state.showRefreshSubscription) {
+                return (
+                    <div>
+                        <PricingPlanTitle>
+                            Continue in new page
+                        </PricingPlanTitle>
+                        <CenterText>
+                            Please wait for the new page to load and complete
+                            the checkout process there, clicking refresh once
+                            done.
+                        </CenterText>
+                        <WhiteSpacer10 />
+                        <CenterText>
+                            {this.state.refreshing ? (
+                                <PrimaryButton onClick={() => null}>
+                                    <LoadingIndicator />
+                                </PrimaryButton>
+                            ) : (
+                                <PrimaryButton onClick={this.handleRefresh}>
+                                    Refresh Subscription
+                                </PrimaryButton>
+                            )}
+                        </CenterText>
+                    </div>
+                )
+            }
+
+            if ((this.props.currentUser?.authorizedPlans?.length ?? 0) > 0) {
                 return (
                     <div>
                         <PricingPlanTitle className={''}>
@@ -58,9 +119,11 @@ class Subscribe extends React.PureComponent<Props> {
                         <WhiteSpacer30 />
                         <SubscriptionOptionsChargebee
                             user={this.props.currentUser}
-                            plans={this.props.authorizedPlans}
+                            plans={this.props.currentUser?.authorizedPlans}
                             onClose={this.handleClose}
-                            subscriptionChanged={this.handleSubscriptionChanged}
+                            onSubscriptionClicked={
+                                this.handleSubscriptionClicked
+                            }
                         />
                     </div>
                 )
@@ -82,18 +145,16 @@ class Subscribe extends React.PureComponent<Props> {
                         <WhiteSpacer30 />
                         <SubscriptionOptionsChargebee
                             user={this.props.currentUser}
-                            plans={this.props.authorizedPlans}
+                            plans={this.props.currentUser?.authorizedPlans}
                             onClose={this.handleClose}
-                            subscriptionChanged={this.handleSubscriptionChanged}
+                            onSubscriptionClicked={
+                                this.handleSubscriptionClicked
+                            }
                         />
                     </div>
                 )
             }
         }
-    }
-
-    render() {
-        return <div>{this.renderLoginOrSubscription()}</div>
     }
 }
 

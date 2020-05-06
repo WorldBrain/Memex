@@ -2,11 +2,8 @@ import {
     UserPlan,
     Claims,
     UserFeature,
-    FeatureMap,
     SubscriptionStatus,
-    SubscriptionMap,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
-import { UserSubscription } from 'src/authentication/ui/user-subscription'
 
 export function hasSubscribedBefore(claims: Claims): boolean {
     return (

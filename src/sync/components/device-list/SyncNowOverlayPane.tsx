@@ -1,20 +1,11 @@
 import React, { Component } from 'react'
-import { features, sync, auth } from 'src/util/remote-functions-background'
+import { sync, auth, subscription } from 'src/util/remote-functions-background'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
-import { UserSubscription } from 'src/authentication/ui/user-subscription'
-import { Helmet } from 'react-helmet'
-import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { SyncDevice } from 'src/sync/components/types'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
-import { SYNC_URL } from 'src/constants'
-const chargeBeeScriptSource = '/scripts/chargebeescript.js'
+import { AuthContextInterface } from 'src/authentication/background/types'
 
 export const subscriptionConfig = {
     site:
@@ -72,7 +63,7 @@ export class SyncNowOverlayPane extends Component<Props> {
 interface ContainerProps {
     showSubscriptionModal: () => void
     onClose?: () => void
-    subscriptionChanged: () => void
+    subscriptionChanged?: () => void
 }
 interface ContainerState {
     showSync: boolean
@@ -82,7 +73,7 @@ interface ContainerState {
     devices: SyncDevice[]
 }
 export class SyncNowOverlayPaneContainer extends Component<
-    ContainerProps & UserProps,
+    ContainerProps & AuthContextInterface,
     ContainerState
 > {
     state = {
@@ -94,9 +85,6 @@ export class SyncNowOverlayPaneContainer extends Component<
         subscribed: null,
         showSubscriptionOptions: true,
     }
-
-    chargebeeInstance: any
-    userSubscription: UserSubscription
 
     refreshDevices = async () => {
         const devices = (await sync.listDevices()) as SyncDevice[]
@@ -127,45 +115,19 @@ export class SyncNowOverlayPaneContainer extends Component<
         window.location.href = '#/sync'
     }
 
-    _initChargebee = (): void => {
-        if (this.chargebeeInstance != null) {
-            return
-        }
-        // todo: Handle offline cases better
-        if (window['Chargebee'] == null) {
-            return console.error(
-                'Could not load payment provider as external script is not currently loaded.',
-            )
-        }
-        this.chargebeeInstance = window['Chargebee'].init({
-            site: subscriptionConfig.site,
-        })
-        this.userSubscription = new UserSubscription(this.chargebeeInstance)
-    }
-
     openPortal = async () => {
-        this._initChargebee()
-        const portalEvents = await this.userSubscription.manageUserSubscription()
-
-        portalEvents.addListener('closed', async () => {
-            await auth.refreshUserInfo()
-        })
-        portalEvents.addListener('changed', () => {
-            this.props.subscriptionChanged()
-        })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
     }
 
     render() {
-        const syncFeatureAllowed = this.props.authorizedFeatures.includes(
+        const syncFeatureAllowed = this.props.currentUser?.authorizedFeatures?.includes(
             'sync',
         )
 
         return (
             <div>
-                <Helmet>
-                    <script src={chargeBeeScriptSource} />
-                </Helmet>
-                {this.props.subscriptionStatus === 'in_trial' && (
+                {this.props.currentUser?.subscriptionStatus === 'in_trial' && (
                     <div>
                         <div
                             onClick={this.openPortal}

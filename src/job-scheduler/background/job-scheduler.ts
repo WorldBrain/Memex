@@ -2,6 +2,7 @@ import { Alarms, Storage } from 'webextension-polyfill-ts'
 
 import { JobDefinition, PrimedJob } from './types'
 import { SCHEDULES } from '../constants'
+import { isDev } from 'src/analytics/internal/constants'
 
 export type Period = 'month' | 'week' | 'day'
 
@@ -96,7 +97,7 @@ export class JobScheduler {
         const job = this.jobs.get(name)
         if (!job) {
             console['warn']([
-                `Tried fire an alarm but no job was found with name: ${name}`,
+                `Tried to fire an alarm but no job was found with name: ${name}`,
             ])
             return
         }
@@ -107,7 +108,7 @@ export class JobScheduler {
             return this.attemptPeriodicJob(job, now)
         } else {
             console['warn']([
-                `Tried fire an alarm but the type of job could not be determined for name: ${name}`,
+                `Tried to fire an alarm but the type of job could not be determined for name: ${name}`,
             ])
         }
     }
@@ -127,11 +128,17 @@ export class JobScheduler {
     }
 
     async scheduleJobOnce(job: JobDefinition<PrimedJob>) {
+        const oldJob = this.jobs.get(job.name)
+
+        if (oldJob && oldJob.when && oldJob.when === job.when) {
+            return
+        }
+
         this.jobs.set(job.name, job)
+        await this.initJobTimeoutStatus(job.name, true)
 
         this.props.alarmsAPI.create(job.name, {
             when: job.when,
         })
-        await this.initJobTimeoutStatus(job.name, true)
     }
 }

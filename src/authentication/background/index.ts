@@ -18,9 +18,9 @@ import {
 } from './utils'
 import { remoteEventEmitter } from 'src/util/webextensionRPC'
 import { AuthRemoteEvents, AuthRemoteFunctionsInterface } from './types'
-import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
-import { JobDefinition, PrimedJob } from 'src/job-scheduler/background/types'
-import { now } from 'moment'
+import { JobDefinition } from 'src/job-scheduler/background/types'
+import { isDev } from 'src/analytics/internal/constants'
+import { setupRequestInterceptors } from 'src/authentication/background/redirect'
 
 export class AuthBackground {
     authService: AuthService
@@ -62,6 +62,9 @@ export class AuthBackground {
                     await this.subscriptionService.getCurrentUserClaims(),
                 )
             },
+            getSubscriptionExpiry: async () =>
+                (await this.subscriptionService.getCurrentUserClaims())
+                    ?.subscriptionExpiry,
             isAuthorizedForFeature: async (feature: UserFeature) => {
                 return isAuthorizedForFeature(
                     await this.subscriptionService.getCurrentUserClaims(),
@@ -76,37 +79,38 @@ export class AuthBackground {
         }
     }
 
+    setupRequestInterceptor() {
+        setupRequestInterceptors({ webRequest: window['browser'].webRequest })
+    }
+
     _scheduleSubscriptionCheck = (
         userWithClaims: AuthenticatedUser & { claims: Claims },
     ) => {
-        if (userWithClaims?.claims?.subscriptions) {
-            const subscriptions = Object.values(
-                userWithClaims.claims.subscriptions,
-            )
-            if (!subscriptions || subscriptions.length === 0) {
-                return
-            }
-            const soonestExpiringSubscription = subscriptions.reduce(
-                (prev, val) => (prev.expiry < val.expiry ? val : prev),
-                { expiry: 0 },
-            )
-            const when = soonestExpiringSubscription.expiry * 1000
-            console['info'](
-                `Subscription check scheduled for ${new Date(
-                    when,
-                ).toLocaleString()}`,
-            )
+        if (userWithClaims?.claims?.subscriptionExpiry) {
+            const when = userWithClaims?.claims?.subscriptionExpiry * 1000
+            isDev &&
+                console['info'](
+                    `Subscription check: scheduled for ${new Date(
+                        when,
+                    ).toLocaleString()}`,
+                )
+
             this.scheduleJob({
                 name: 'user-subscription-expiry-refresh',
                 when,
-                job: () => {
-                    console['info'](
-                        `Checking subscription status (due ${new Date(
-                            when,
-                        ).toLocaleString()})`,
-                    )
-                    this.authService.refreshUserInfo.bind(this.authService)
+                job: async () => {
+                    isDev && console['info'](`Subscription check: running`)
+                    const result = await this.authService.refreshUserInfo.bind(
+                        this.authService,
+                    )()
+                    isDev && console['info'](`Subscription check: done`, result)
                 },
+            })
+        } else {
+            this.scheduleJob({
+                name: 'user-subscription-expiry-refresh',
+                when: Date.now(),
+                job: () => null,
             })
         }
     }
@@ -121,6 +125,21 @@ export class AuthBackground {
                   }
                 : null
             this._scheduleSubscriptionCheck(userWithClaims)
+
+            if (isDev) {
+                const claims = userWithClaims?.claims
+                const userDebug = {
+                    Status: claims?.subscriptionStatus,
+                    Expiry:
+                        claims?.subscriptionExpiry &&
+                        new Date(
+                            claims?.subscriptionExpiry * 1000,
+                        ).toLocaleString(),
+                    Plans: getAuthorizedPlans(claims),
+                }
+                console['info'](`User changed:`, userDebug)
+            }
+
             remoteEmitter.emit('onAuthStateChanged', userWithClaims)
         })
     }

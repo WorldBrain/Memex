@@ -3,24 +3,19 @@ import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import { SyncDevicesList } from 'src/sync/components/device-list/SyncDevicesList'
 import { SyncDevice } from 'src/sync/components/types'
 import { LOGIN_URL } from 'src/constants'
-import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
-import { sync, auth } from 'src/util/remote-functions-background'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { sync, auth, subscription } from 'src/util/remote-functions-background'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
-import { UserSubscription } from 'src/authentication/ui/user-subscription'
-import { Helmet } from 'react-helmet'
 import analytics from 'src/analytics'
+import { AuthContextInterface } from 'src/authentication/background/types'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const styles = require('../styles.css')
-const chargeBeeScriptSource = '/scripts/chargebeescript.js'
 
 export const subscriptionConfig = {
     site:
@@ -40,7 +35,6 @@ interface Props {
     refreshDevices: () => Promise<void>
     handleUpgradeNeeded: () => void
     abortInitialSync: () => Promise<void>
-    subscriptionChanged: () => void
     subscriptionStatus: string
 }
 
@@ -55,9 +49,6 @@ interface ContainerProps {
 
 export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
     state = { isTogglingSync: false, isAddingNewDevice: false }
-
-    chargebeeInstance: any
-    userSubscription: UserSubscription
 
     enableSync = () => {
         this.setState({ isTogglingSync: true })
@@ -119,32 +110,9 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
         )
     }
 
-    _initChargebee = (): void => {
-        if (this.chargebeeInstance != null) {
-            return
-        }
-        // todo: Handle offline cases better
-        if (window['Chargebee'] == null) {
-            return console.error(
-                'Could not load payment provider as external script is not currently loaded.',
-            )
-        }
-        this.chargebeeInstance = window['Chargebee'].init({
-            site: subscriptionConfig.site,
-        })
-        this.userSubscription = new UserSubscription(this.chargebeeInstance)
-    }
-
     openPortal = async () => {
-        this._initChargebee()
-        const portalEvents = await this.userSubscription.manageUserSubscription()
-
-        portalEvents.addListener('closed', async () => {
-            await auth.refreshUserInfo()
-        })
-        portalEvents.addListener('changed', () => {
-            this.props.subscriptionChanged()
-        })
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
     }
 
     renderDeviceList() {
@@ -207,9 +175,6 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
 
         return (
             <div>
-                <Helmet>
-                    <script src={chargeBeeScriptSource} />
-                </Helmet>
                 {this.props.subscriptionStatus === 'in_trial' && (
                     <div>
                         <div
@@ -279,7 +244,7 @@ export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
 }
 
 class SyncDevicesPaneContainer extends React.Component<
-    UserProps & { showSubscriptionModal: () => void },
+    AuthContextInterface & { showSubscriptionModal: () => void },
     {
         devices: SyncDevice[]
         featureSyncEnabled: boolean
@@ -289,14 +254,6 @@ class SyncDevicesPaneContainer extends React.Component<
 
     async componentDidMount() {
         await this.refreshDevices()
-    }
-
-    handleSubscriptionChanged = () => {
-        this.handleRefresh()
-    }
-
-    handleRefresh = async () => {
-        await auth.refreshUserInfo()
     }
 
     handleRemoveDevice = async (deviceId: string) => {
@@ -348,7 +305,9 @@ class SyncDevicesPaneContainer extends React.Component<
                                 Beta
                             </span>
                         </div>
-                        {!this.props.authorizedFeatures.includes('sync') && (
+                        {!this.props.currentUser?.authorizedFeatures?.includes(
+                            'sync',
+                        ) && (
                             <span
                                 className={styles.labelFree}
                                 onClick={this.handleUpgradeNeeded}
@@ -376,7 +335,7 @@ class SyncDevicesPaneContainer extends React.Component<
                     <SyncDevicesPane
                         devices={this.state.devices}
                         isDeviceSyncEnabled
-                        isDeviceSyncAllowed={this.props.authorizedFeatures.includes(
+                        isDeviceSyncAllowed={this.props.currentUser?.authorizedFeatures?.includes(
                             'sync',
                         )}
                         handleRemoveDevice={this.handleRemoveDevice}
@@ -388,8 +347,9 @@ class SyncDevicesPaneContainer extends React.Component<
                         }
                         refreshDevices={this.refreshDevices}
                         abortInitialSync={this.abortInitialSync}
-                        subscriptionStatus={this.props.subscriptionStatus}
-                        subscriptionChanged={this.handleSubscriptionChanged}
+                        subscriptionStatus={
+                            this.props.currentUser?.subscriptionStatus
+                        }
                     />
                 </div>
                 <div className={settingsStyle.section}>
