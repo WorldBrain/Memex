@@ -36,7 +36,6 @@ interface StateProps {
     resultsClusteredByDay: boolean
     annotsByDay: PageUrlsByDay
     isSocialSearch: boolean
-    tagSuggestions: string[]
     annotationModes: {
         [annotationUrl: string]: AnnotationMode
     }
@@ -90,9 +89,6 @@ export default class ResultListContainer extends Component<
         this.tagBtnRefs.push(el)
 
     async componentDidMount() {
-        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
-        this.setState({ tagSuggestions: tagSuggestions.reverse() })
-
         this.resultsDivRef.addEventListener('click', this.handleOutsideClick)
     }
 

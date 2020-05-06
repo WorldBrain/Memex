@@ -86,7 +86,6 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 commentBox={{
                     ...this.state.commentBox,
-                    initTagSuggestions: this.state.tagging.initTagSuggestions,
                     handleCommentTextChange: (comment: string) =>
                         this.processEvent('handleCommentTextChange', {
                             value: comment,
@@ -120,6 +119,10 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('updateTags', { value }),
                     fetchInitialTagSuggestions: () =>
                         this.props.tags.fetchInitialTagSuggestions(),
+                    fetchInitialTagSelections: () =>
+                        this.props.tags.fetchPageTags({
+                            url: this.props.currentTab.url,
+                        }),
                     queryTagSuggestions: (query: string) =>
                         this.props.tags.searchForTagSuggestions({ query }),
                 }}
@@ -133,6 +136,10 @@ export default class RibbonContainer extends StatefulUIElement<
                         }),
                     fetchInitialListSuggestions: () =>
                         this.props.customLists.fetchInitialListSuggestions(),
+                    fetchInitialListSelections: () =>
+                        this.props.customLists.fetchPageLists({
+                            url: this.props.currentTab.url,
+                        }),
                     queryListSuggestions: (query: string) =>
                         this.props.customLists.searchForListSuggestions({
                             query,

@@ -152,11 +152,11 @@ export default class Ribbon extends Component<Props, State> {
             <TagPicker
                 onUpdateEntrySelection={this.props.tagging.updateTags}
                 queryEntries={this.props.tagging.queryTagSuggestions}
+                initialSelectedEntries={
+                    this.props.tagging.fetchInitialTagSelections
+                }
                 loadDefaultSuggestions={
                     this.props.tagging.fetchInitialTagSuggestions
-                }
-                initialSelectedEntries={async () =>
-                    this.props.tagging.initTagSuggestions
                 }
             />
         )
@@ -167,11 +167,11 @@ export default class Ribbon extends Component<Props, State> {
             <CollectionPicker
                 onUpdateEntrySelection={this.props.lists.updateLists}
                 queryEntries={this.props.lists.queryListSuggestions}
+                initialSelectedEntries={
+                    this.props.lists.fetchInitialListSelections
+                }
                 loadDefaultSuggestions={
                     this.props.lists.fetchInitialListSuggestions
-                }
-                initialSelectedEntries={async () =>
-                    this.props.lists.initialListSuggestions
                 }
             />
         )

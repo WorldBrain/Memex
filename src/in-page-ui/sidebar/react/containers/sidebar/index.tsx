@@ -262,7 +262,6 @@ export default class SidebarContainer extends StatefulUIElement<
                         this.state.pageType === 'all',
                     annotsByDay: this.state.annotsByDay,
                     isSocialSearch: this.state.isSocialSearch,
-                    tagSuggestions: this.state.tagSuggestions,
                     highlighter: this.props.highlighter,
                     annotationModes: this.state.annotationModes.searchResults,
                     annotationEventHandlers: createAnnotationEventHandlers(

@@ -32,10 +32,7 @@ export interface RibbonContainerState {
     highlights: ValuesOf<componentTypes.RibbonHighlightsProps>
     tooltip: ValuesOf<componentTypes.RibbonTooltipProps>
     // sidebar: ValuesOf<componentTypes.RibbonSidebarProps>
-    commentBox: Omit<
-        ValuesOf<componentTypes.RibbonCommentBoxProps>,
-        'initTagSuggestions'
-    >
+    commentBox: ValuesOf<componentTypes.RibbonCommentBoxProps>
     bookmark: ValuesOf<componentTypes.RibbonBookmarkProps>
     tagging: ValuesOf<componentTypes.RibbonTaggingProps>
     lists: ValuesOf<componentTypes.RibbonListsProps>
@@ -76,26 +73,14 @@ const INITIAL_COMMENT_BOX_STATE = {
     isTagInputActive: false,
     showTagsPicker: false,
     tags: [],
-    tagSuggestions: [],
 }
 export class RibbonContainerLogic extends UILogic<
     RibbonContainerState,
     RibbonContainerEvents
->
-// implements UIEventHandlers<RibbonContainerState, RibbonContainerEvents>
-{
+> {
     debouncedFetchTagSuggestions: (search: string) => Promise<string[]>
-
     constructor(private dependencies: RibbonContainerOptions) {
         super()
-
-        let sugCounter = 0
-        this.debouncedFetchTagSuggestions = debounce(() => {
-            // TODO: Actually fetch tag suggestions
-            return [`sug ${++sugCounter}`, `sug ${++sugCounter}`]
-        }, 300)
-
-        // TODO: Load page tags & lists when necessary (on ribbon show?)
     }
 
     getInitialState(): RibbonContainerState {
@@ -108,22 +93,15 @@ export class RibbonContainerLogic extends UILogic<
             tooltip: {
                 isTooltipEnabled: false,
             },
-            // sidebar: {
-            //     isSidebarOpen: false,
-            // },
             commentBox: INITIAL_COMMENT_BOX_STATE,
             bookmark: {
                 isBookmarked: false,
             },
             tagging: {
-                showTagsPicker: false,
                 tags: [],
-                initTagSuggestions: [],
-                tagSuggestions: [],
+                showTagsPicker: false,
             },
             lists: {
-                initialLists: [],
-                initialListSuggestions: [],
                 showListsPicker: false,
             },
             search: {

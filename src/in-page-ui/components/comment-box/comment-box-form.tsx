@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { ClickHandler } from '../../sidebar/react/types'
-import TagsContainer, { TagsContainerProps } from './tag-input'
 import { Tooltip } from 'src/common-ui/components'
 import cx from 'classnames'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { browser } from 'webextension-polyfill-ts'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const styles = require('./comment-box-form.css')
 
@@ -15,6 +16,7 @@ const heartFull = browser.extension.getURL('/img/star_full.svg')
 
 interface OwnProps {
     env?: 'inpage' | 'overview'
+    tags: string[]
     commentText: string
     isCommentBookmarked: boolean
     isAnnotation: boolean
@@ -23,15 +25,17 @@ interface OwnProps {
     cancelComment: ClickHandler<HTMLDivElement>
     toggleBookmark: ClickHandler<HTMLDivElement>
     toggleTagPicker: () => void
+    queryTagSuggestions: (query: string) => Promise<string[]>
+    fetchInitialTagSuggestions: () => Promise<string[]>
+    updateTags: PickerUpdateHandler
 }
+
 interface CommentBoxFormStateProps {
     isTagInputActive: boolean
     showTagsPicker: boolean
-    tagSuggestions: string[]
 }
-export type CommentBoxFormProps = OwnProps &
-    CommentBoxFormStateProps &
-    TagsContainerProps
+
+export type CommentBoxFormProps = OwnProps & CommentBoxFormStateProps
 
 class CommentBoxForm extends React.Component<CommentBoxFormProps> {
     /** Ref of the tag button element to focus on it when tabbing. */
@@ -111,7 +115,13 @@ class CommentBoxForm extends React.Component<CommentBoxFormProps> {
 
         return (
             <Tooltip position="bottomLeft">
-                <TagsContainer {...this.props} />
+                <TagPicker
+                    queryEntries={this.props.queryTagSuggestions}
+                    onUpdateEntrySelection={this.props.updateTags}
+                    loadDefaultSuggestions={
+                        this.props.fetchInitialTagSuggestions
+                    }
+                />
             </Tooltip>
         )
     }

@@ -49,11 +49,9 @@ export interface SidebarContainerState {
             isCommentBookmarked: boolean
             isTagInputActive: boolean
             showTagsPicker: boolean
-            tagSuggestions: string[]
             commentText: string
             isAnnotation: boolean
             tags: string[]
-            initTagSuggestions: string[]
         }
     }
 
@@ -95,7 +93,6 @@ export interface SidebarContainerState {
 
     isListFilterActive: boolean
     isSocialSearch: boolean
-    tagSuggestions: string[]
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -200,11 +197,9 @@ const INITIAL_COMMENT_BOX_STATE: SidebarContainerState['commentBox'] = {
         isCommentBookmarked: false,
         isTagInputActive: false,
         showTagsPicker: false,
-        tagSuggestions: [],
         commentText: '',
         isAnnotation: false,
         tags: [],
-        initTagSuggestions: [],
     },
 }
 
@@ -268,7 +263,6 @@ export class SidebarContainerLogic extends UILogic<
             resultsClusteredByDay: false,
             annotsByDay: {},
             isSocialSearch: false,
-            tagSuggestions: [],
         }
     }
 
@@ -347,10 +341,6 @@ export class SidebarContainerLogic extends UILogic<
 
     addNewPageComment: EventHandler<'addNewPageComment'> = async () => {
         this.emitMutation({ showCommentBox: { $set: true } })
-        const suggestions = []
-        this.emitMutation({
-            commentBox: { form: { tagSuggestions: { $set: suggestions } } },
-        })
     }
 
     setNewPageCommentAnchor: EventHandler<'setNewPageCommentAnchor'> = (

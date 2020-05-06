@@ -53,14 +53,13 @@ export interface RibbonBookmarkProps {
 
 export interface RibbonTaggingProps extends CommonTaggingProps {
     showTagsPicker: boolean
-    setShowTagsPicker: (value: boolean) => void
     updateTags: PickerUpdateHandler
+    setShowTagsPicker: (value: boolean) => void
+    fetchInitialTagSelections: () => Promise<string[]>
 }
 
 export interface CommonTaggingProps {
     tags: string[]
-    tagSuggestions: string[]
-    initTagSuggestions: string[]
     queryTagSuggestions: (query: string) => Promise<string[]>
     fetchInitialTagSuggestions: () => Promise<string[]>
 }
@@ -71,13 +70,12 @@ export interface ListEntryArgs {
 }
 
 export interface RibbonListsProps {
-    initialLists: []
-    initialListSuggestions: []
     showListsPicker: boolean
     updateLists: PickerUpdateHandler
     setShowListsPicker: (value: boolean) => void
     queryListSuggestions: (query: string) => Promise<string[]>
     fetchInitialListSuggestions: () => Promise<string[]>
+    fetchInitialListSelections: () => Promise<string[]>
 }
 
 export interface RibbonSearchProps {
