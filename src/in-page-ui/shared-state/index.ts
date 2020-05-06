@@ -23,12 +23,45 @@ export class InPageUI implements InPageUIInterface {
         sidebar: false,
         tooltip: false,
     }
+    _pendingEvents: {
+        sidebarAction?: {
+            emittedWhen: number
+            action: InPageUISidebarAction
+            anchor?: Anchor
+        }
+        ribbonAction?: { emittedWhen: number; action: InPageUIRibbonAction }
+    } = {}
 
     constructor(
         private options: {
             loadComponent: (component: InPageUIComponent) => void
         },
-    ) {}
+    ) {
+        this.events.on('newListener' as any, this._handleNewListener)
+    }
+
+    _handleNewListener = (
+        eventName: keyof InPageUIEvents,
+        listener: (...args: any[]) => void,
+    ) => {
+        if (eventName !== 'ribbonAction' && eventName !== 'sidebarAction') {
+            return
+        }
+
+        if (!this._pendingEvents[eventName]) {
+            return
+        }
+
+        // If this event was emitted less than 5 seconds ago
+        if (
+            this._pendingEvents[eventName].emittedWhen >
+            Date.now() - 1000 * 5
+        ) {
+            listener(this._pendingEvents[eventName] as any)
+        }
+
+        delete this._pendingEvents[eventName]
+    }
 
     async showSidebar(options?: {
         action?: InPageUISidebarAction
@@ -36,7 +69,8 @@ export class InPageUI implements InPageUIInterface {
     }) {
         const maybeEmitAction = () => {
             if (options?.action) {
-                this.events.emit('sidebarAction', {
+                this._emitAction({
+                    type: 'sidebarAction',
                     action: options.action,
                     anchor: options.anchor,
                 })
@@ -52,6 +86,28 @@ export class InPageUI implements InPageUIInterface {
         this.showRibbon()
         this._setState('sidebar', true)
         maybeEmitAction()
+    }
+
+    _emitAction(
+        params:
+            | {
+                  type: 'sidebarAction'
+                  action: InPageUISidebarAction
+                  anchor?: Anchor
+              }
+            | { type: 'ribbonAction'; action: InPageUIRibbonAction },
+    ) {
+        const handled =
+            params.type === 'sidebarAction'
+                ? this.events.emit('sidebarAction', params)
+                : this.events.emit('ribbonAction', params)
+
+        if (!handled) {
+            this._pendingEvents[params.type] = {
+                ...params,
+                emittedWhen: Date.now(),
+            } as any
+        }
     }
 
     hideSidebar() {
@@ -74,7 +130,10 @@ export class InPageUI implements InPageUIInterface {
     async showRibbon(options?: { action?: InPageUIRibbonAction }) {
         const maybeEmitAction = () => {
             if (options?.action) {
-                this.events.emit('ribbonAction', { action: options.action })
+                this._emitAction({
+                    type: 'ribbonAction',
+                    action: options.action,
+                })
             }
         }
 

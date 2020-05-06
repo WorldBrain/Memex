@@ -28,7 +28,7 @@ export async function initKeyboardShortcuts(inPageUI: InPageUIInterface) {
 }
 
 function prepareShortcutHandler(handler: () => void) {
-    return function(event) {
+    return function (event) {
         event.preventDefault()
         event.stopPropagation()
         return handler()
@@ -41,7 +41,10 @@ function getShortcutHandlers(inPageUI: InPageUIInterface): HandleInterface {
         addTag: () => inPageUI.showRibbon({ action: 'tag' }),
         addToCollection: () => inPageUI.showRibbon({ action: 'list' }),
         createBookmark: () => inPageUI.showRibbon({ action: 'bookmark' }),
-        toggleSidebar: () => inPageUI.toggleSidebar(),
+        toggleSidebar: () => {
+            console.log('toggle sidebar')
+            inPageUI.toggleSidebar()
+        },
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createHighlight: () => {
             inPageUI.showSidebar({ action: 'annotate' })

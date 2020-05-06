@@ -340,6 +340,8 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     addNewPageComment: EventHandler<'addNewPageComment'> = async () => {
+        console.log('handle add new comment')
+
         this.emitMutation({ showCommentBox: { $set: true } })
     }
 
@@ -418,7 +420,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
-        // TODO: this.props.highlighter.removeTempHighlights()
+        this.options.highlighter.removeTempHighlights()
         return {
             commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
             showCommentBox: { $set: false },

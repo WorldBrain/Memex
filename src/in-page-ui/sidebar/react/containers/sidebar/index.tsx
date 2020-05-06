@@ -72,8 +72,7 @@ export default class SidebarContainer extends StatefulUIElement<
         action: InPageUISidebarAction
         anchor?: Anchor
     }) => {
-        if (event.action === 'annotate') {
-        } else if (event.action === 'comment') {
+        if (event.action === 'annotate' || event.action === 'comment') {
             this.processEvent('addNewPageComment', null)
             if (event.anchor) {
                 this.processEvent('setNewPageCommentAnchor', {
@@ -81,6 +80,7 @@ export default class SidebarContainer extends StatefulUIElement<
                 })
             }
         }
+        this.forceUpdate()
     }
 
     render() {
