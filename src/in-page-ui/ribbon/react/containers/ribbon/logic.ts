@@ -64,7 +64,7 @@ type EventHandler<
     EventName extends keyof RibbonContainerEvents
 > = UIEventHandler<RibbonContainerState, RibbonContainerEvents, EventName>
 
-const INITIAL_COMMENT_BOX_STATE = {
+export const INITIAL_RIBBON_COMMENT_BOX_STATE = {
     commentText: '',
     showCommentBox: false,
     isCommentSaved: false,
@@ -79,6 +79,9 @@ export class RibbonContainerLogic extends UILogic<
     RibbonContainerEvents
 > {
     debouncedFetchTagSuggestions: (search: string) => Promise<string[]>
+    commentSavedTimeout = 2000
+    skipAnnotationPageIndexing = false
+
     constructor(private dependencies: RibbonContainerOptions) {
         super()
     }
@@ -93,7 +96,7 @@ export class RibbonContainerLogic extends UILogic<
             tooltip: {
                 isTooltipEnabled: false,
             },
-            commentBox: INITIAL_COMMENT_BOX_STATE,
+            commentBox: INITIAL_RIBBON_COMMENT_BOX_STATE,
             bookmark: {
                 isBookmarked: false,
             },
@@ -121,6 +124,7 @@ export class RibbonContainerLogic extends UILogic<
                     $set: await this.dependencies.getSidebarEnabled(),
                 },
             })
+            // TODO: Load bookmarked state
         })
     }
 
@@ -128,9 +132,7 @@ export class RibbonContainerLogic extends UILogic<
 
     toggleRibbon: EventHandler<'toggleRibbon'> = async ({ previousState }) => {
         const shouldBeEnabled = !previousState.isRibbonEnabled
-        if (shouldBeEnabled) {
-            this.emitMutation({ isRibbonEnabled: { $set: true } })
-        }
+        this.emitMutation({ isRibbonEnabled: { $set: shouldBeEnabled } })
         await this.dependencies.setSidebarEnabled(shouldBeEnabled)
         if (!shouldBeEnabled) {
             this.dependencies.inPageUI.removeRibbon()
@@ -184,10 +186,11 @@ export class RibbonContainerLogic extends UILogic<
                     comment: previousState.commentBox.commentText,
                     bookmarked: options.bookmark,
                 },
+                { skipPageIndexing: this.skipAnnotationPageIndexing },
             )
             await this.dependencies.annotations.editAnnotationTags({
                 url: annotUrl,
-                tagsToBeAdded: previousState.commentBox.tags,
+                tagsToBeAdded: options.tags,
                 tagsToBeDeleted: [],
             })
         }
@@ -199,12 +202,14 @@ export class RibbonContainerLogic extends UILogic<
         this.emitMutation({
             commentBox: {
                 $set: {
-                    ...INITIAL_COMMENT_BOX_STATE,
+                    ...INITIAL_RIBBON_COMMENT_BOX_STATE,
                     isCommentSaved: true,
                 },
             },
         })
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+        await new Promise((resolve) =>
+            setTimeout(resolve, this.commentSavedTimeout),
+        )
         this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
     }
 

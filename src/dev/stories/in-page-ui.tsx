@@ -82,28 +82,6 @@ async function createDependencies() {
                 }
             },
         ),
-        searchAnnotations: async (query) => {
-            const result = await background.backgroundModules.search.searchAnnotations(
-                {
-                    query: query.length ? query : undefined,
-                },
-            )
-
-            const resultsByUrl: ResultsByUrl = {}
-            result.docs.forEach((doc, index) => {
-                resultsByUrl[doc.pageId] = {
-                    ...doc,
-                    index,
-                }
-            })
-
-            return {
-                results: result.docs,
-                resultsByUrl,
-                annotsByDay: result['annotsByDay'],
-            }
-        },
-        deleteAnnotation: async () => {},
     }
 
     return {
