@@ -3,6 +3,7 @@ import { SearchInterface } from 'src/search/background/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { RemoteTagsInterface } from 'src/tags/background/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 
@@ -17,6 +18,7 @@ export interface SidebarContainerDependencies {
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
+    customLists: RemoteCollectionsInterface
     search: SearchInterface
     bookmarks: BookmarksInterface
 }

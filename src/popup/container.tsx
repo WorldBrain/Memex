@@ -101,7 +101,7 @@ class PopupContainer extends PureComponent<Props> {
         }
     }
 
-    handleTagUpdate = async (_: string[], added: string, deleted: string) => {
+    handleTagUpdate = async ({ added, deleted }) => {
         const backendResult = tags.updateTagForPage({
             added,
             deleted,
@@ -122,7 +122,7 @@ class PopupContainer extends PureComponent<Props> {
     handleTagQuery = (query: string) => tags.searchForTagSuggestions({ query })
     fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
 
-    handleListUpdate = async (_: string[], added: string, deleted: string) => {
+    handleListUpdate = async ({ added, deleted }) => {
         const backendResult = collections.updateListForPage({
             added,
             deleted,

@@ -13,6 +13,7 @@ import SocialResultItem from 'src/common-ui/components/social-result-item'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
 import { AnnotationMode } from '../types'
+import { TagsEventProps } from 'src/in-page-ui/components/annotation-box/edit-mode-content'
 
 const styles = require('./result-item.css')
 
@@ -45,6 +46,7 @@ export interface Props extends Partial<SocialPage> {
     annotationModes: {
         [annotationUrl: string]: AnnotationMode
     }
+    tagsEventProps: TagsEventProps
     onTagBtnClick: MouseEventHandler
     onListBtnClick: MouseEventHandler
     onTrashBtnClick: MouseEventHandler
@@ -106,6 +108,7 @@ class ResultItem extends Component<Props> {
                 highlighter={this.props.highlighter}
                 annotationModes={this.props.annotationModes}
                 annotationEventProps={this.props.annotationEventProps}
+                tagsEventProps={this.props.tagsEventProps}
             />
         )
     }

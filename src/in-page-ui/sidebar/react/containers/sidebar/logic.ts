@@ -116,6 +116,10 @@ export type SidebarContainerEvents = UIEvent<{
     toggleNewPageCommentBookmark: null
     togglePageCommentTags: null
     toggleNewPageCommentTagPicker: null
+
+    updateTags: { added: string; deleted: string }
+    updateTagsForPageResult: { added: string; deleted: string; url: string }
+    updateListsForPageResult: { added: string; deleted: string; url: string }
     addNewPageCommentTag: { tag: string }
     deleteNewPageCommentTag: { tag: string }
     // closeComments: null,
@@ -445,6 +449,89 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    updateTags: EventHandler<'updateTags'> = async ({ event }) => {
+        const backendResult = this.options.tags.updateTagForPage({
+            added: event.added,
+            deleted: event.deleted,
+            url: this.options.currentTab.url,
+            tabId: this.options.currentTab.id,
+        })
+
+        let tagsStateUpdater: (tags: string[]) => string[]
+
+        if (event.added) {
+            tagsStateUpdater = (tags) => {
+                const tag = event.added
+                return tags.includes(tag) ? tags : [...tags, tag]
+            }
+        }
+
+        if (event.deleted) {
+            tagsStateUpdater = (tags) => {
+                const index = tags.indexOf(event.deleted)
+                if (index === -1) {
+                    return tags
+                }
+
+                return [...tags.slice(0, index), ...tags.slice(index + 1)]
+            }
+        }
+        this.emitMutation({
+            commentBox: { form: { tags: { $apply: tagsStateUpdater } } },
+        })
+
+        return backendResult
+    }
+
+    updateTagsForPageResult: EventHandler<'updateTagsForPageResult'> = async ({
+        event,
+    }) => {
+        const backendResult = this.options.tags.updateTagForPage({
+            added: event.added,
+            deleted: event.deleted,
+            url: event.url,
+        })
+
+        let tagsStateUpdater: (tags: string[]) => string[]
+
+        if (event.added) {
+            tagsStateUpdater = (tags) => {
+                const tag = event.added
+                return tags.includes(tag) ? tags : [...tags, tag]
+            }
+        }
+
+        if (event.deleted) {
+            tagsStateUpdater = (tags) => {
+                const index = tags.indexOf(event.deleted)
+                if (index === -1) {
+                    return tags
+                }
+
+                return [...tags.slice(0, index), ...tags.slice(index + 1)]
+            }
+        }
+        this.emitMutation({
+            resultsByUrl: {
+                [event.url]: {
+                    tags: { $apply: tagsStateUpdater },
+                },
+            },
+        })
+
+        return backendResult
+    }
+
+    updateListsForPageResult: EventHandler<
+        'updateListsForPageResult'
+    > = async ({ event }) => {
+        return this.options.customLists.updateListForPage({
+            added: event.added,
+            deleted: event.deleted,
+            url: event.url,
+        })
+    }
+
     toggleNewPageCommentTagPicker: EventHandler<
         'toggleNewPageCommentTagPicker'
     > = () => {
@@ -593,7 +680,7 @@ export class SidebarContainerLogic extends UILogic<
             })
 
         const currentlyBookmarked = !!previousState.annotations[resultIndex]
-            .hasBookmark
+            ?.hasBookmark
         const shouldBeBookmarked = !currentlyBookmarked
         toggleBookmarkState(shouldBeBookmarked)
 

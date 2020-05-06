@@ -2,8 +2,6 @@ import * as React from 'react'
 import { ClickHandler } from '../../sidebar/react/types'
 import TagsContainer, { TagsContainerProps } from './tag-input'
 import { Tooltip } from 'src/common-ui/components'
-import { getLocalStorage } from 'src/util/storage'
-import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import cx from 'classnames'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { browser } from 'webextension-polyfill-ts'
@@ -51,14 +49,14 @@ class CommentBoxForm extends React.Component<CommentBoxFormProps> {
     }
 
     private attachEventListeners() {
-        this.saveBtnRef.addEventListener('click', e => this.saveComment(e))
+        this.saveBtnRef.addEventListener('click', (e) => this.saveComment(e))
         this.cancelBtnRef.addEventListener('click', this.handleCancelBtnClick)
         this.bmBtnRef.addEventListener('click', this.handleBookmarkBtnClick)
         this.tagBtnRef.addEventListener('click', this.handleTagBtnClick)
     }
 
     private removeEventListeners() {
-        this.saveBtnRef.removeEventListener('click', e => this.saveComment(e))
+        this.saveBtnRef.removeEventListener('click', (e) => this.saveComment(e))
         this.cancelBtnRef.removeEventListener(
             'click',
             this.handleCancelBtnClick,
@@ -80,25 +78,25 @@ class CommentBoxForm extends React.Component<CommentBoxFormProps> {
         }
     }
 
-    private handleTagBtnClick = e => {
+    private handleTagBtnClick = (e) => {
         e.preventDefault()
         e.stopPropagation()
         this.props.toggleTagPicker()
     }
 
-    private handleCancelBtnClick = e => {
+    private handleCancelBtnClick = (e) => {
         e.preventDefault()
         e.stopPropagation()
         this.props.cancelComment(e)
     }
 
-    private handleBookmarkBtnClick = e => {
+    private handleBookmarkBtnClick = (e) => {
         e.preventDefault()
         e.stopPropagation()
         this.props.toggleBookmark(e)
     }
 
-    private saveComment = e => {
+    private saveComment = (e) => {
         this.props.saveComment(e)
     }
 
@@ -113,18 +111,14 @@ class CommentBoxForm extends React.Component<CommentBoxFormProps> {
 
         return (
             <Tooltip position="bottomLeft">
-                <TagsContainer
-                    env={this.props.env}
-                    tagSuggestions={this.props.tagSuggestions}
-                    {...this.props}
-                />
+                <TagsContainer {...this.props} />
             </Tooltip>
         )
     }
 
     onEnterSaveHandler = {
-        test: e => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: e => this.saveComment(e),
+        test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+        handle: (e) => this.saveComment(e),
     }
 
     render() {
@@ -136,7 +130,7 @@ class CommentBoxForm extends React.Component<CommentBoxFormProps> {
                     defaultValue={commentText}
                     onClick={() => {
                         this.setTagInputActive(false)
-                        this.setState(state => ({ showTagsPicker: false }))
+                        this.setState((state) => ({ showTagsPicker: false }))
                     }}
                     className={styles.textArea}
                     placeholder="Add a private note... (save with cmd/ctrl+enter)"
@@ -157,7 +151,7 @@ class CommentBoxForm extends React.Component<CommentBoxFormProps> {
                             />
                         </div>
                         <div
-                            ref={ref => (this.bmBtnRef = ref)}
+                            ref={(ref) => (this.bmBtnRef = ref)}
                             className={styles.interactionsImgContainer}
                         >
                             {this.props.isCommentBookmarked ? (
@@ -181,14 +175,14 @@ class CommentBoxForm extends React.Component<CommentBoxFormProps> {
                     </div>
                     <div className={styles.confirmButtons}>
                         <div
-                            ref={ref => (this.cancelBtnRef = ref)}
+                            ref={(ref) => (this.cancelBtnRef = ref)}
                             className={styles.cancelBtn}
                         >
                             Cancel
                         </div>
                         <div
                             className={styles.saveBtn}
-                            ref={ref => (this.saveBtnRef = ref)}
+                            ref={(ref) => (this.saveBtnRef = ref)}
                         >
                             Save
                         </div>

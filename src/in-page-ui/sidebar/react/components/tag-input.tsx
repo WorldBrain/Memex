@@ -1,39 +1,34 @@
 import * as React from 'react'
 
-import { IndexDropdown } from 'src/common-ui/containers'
+import TagPicker from 'src/tags/ui/TagPicker'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import TagHolder from './tag-holder'
 
-interface Props {
-    env?: 'inpage' | 'overview'
+export interface Props {
+    queryTagSuggestions: (query: string) => Promise<string[]>
+    fetchInitialTagSuggestions: () => Promise<string[]>
+    setTagInputActive: (isTagInputActive: boolean) => void
+    deleteTag: (tag: string) => void
+    updateTags: PickerUpdateHandler
     isTagInputActive: boolean
     tags: string[]
-    initTagSuggestions?: string[]
-    addTag: (tag: string) => void
-    deleteTag: (tag: string) => void
-    setTagInputActive: (isTagInputActive: boolean) => void
 }
 
 /* tslint:disable-next-line variable-name */
 const TagInput = ({
     isTagInputActive,
     tags,
-    initTagSuggestions,
-    addTag,
-    deleteTag,
     setTagInputActive,
-    env,
+    deleteTag,
+    ...props
 }: Props) => {
     if (isTagInputActive) {
         return (
-            <IndexDropdown
-                env={env}
-                isForAnnotation
-                allowAdd
-                initFilters={tags}
-                initSuggestions={initTagSuggestions}
-                onFilterAdd={addTag}
-                onFilterDel={deleteTag}
-                source="tag"
+            <TagPicker
+                onUpdateEntrySelection={props.updateTags}
+                queryEntries={props.queryTagSuggestions}
+                loadDefaultSuggestions={props.fetchInitialTagSuggestions}
+                initialSelectedEntries={async () => tags}
             />
         )
     }
@@ -41,7 +36,7 @@ const TagInput = ({
     return (
         <TagHolder
             tags={tags}
-            clickHandler={e => {
+            clickHandler={(e) => {
                 e.stopPropagation()
                 setTagInputActive(true)
             }}

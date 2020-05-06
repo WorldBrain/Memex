@@ -5,6 +5,7 @@ import AnnotationBox, {
     AnnotationBoxEventProps,
     AnnotationBoxGeneralProps,
 } from 'src/in-page-ui/components/annotation-box/annotation-box'
+import { TagsEventProps } from 'src/in-page-ui/components/annotation-box/edit-mode-content'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { SidebarEnv, AnnotationMode } from '../types'
 import CongratsMessage from './congrats-message'
@@ -24,13 +25,17 @@ export interface PageAnnotationsProps {
     annotationEventHandlers: AnnotationBoxEventProps
     showCongratsMessage: boolean
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
+    tagsEventProps: TagsEventProps
 }
 
 export default class PageAnnotations extends React.Component<
     PageAnnotationsProps
 > {
     renderList() {
-        const { annotationEventHandlers: annotationProps } = this.props
+        const {
+            annotationEventHandlers: annotationProps,
+            tagsEventProps,
+        } = this.props
         const annots = this.props.annotations.map((annot, i) => (
             <AnnotationBox
                 key={i}
@@ -40,6 +45,7 @@ export default class PageAnnotations extends React.Component<
                 displayCrowdfunding={false}
                 {...annot}
                 {...annotationProps}
+                {...tagsEventProps}
                 isActive={this.props.activeAnnotationUrl === annot.url}
                 isHovered={this.props.hoverAnnotationUrl === annot.url}
             />

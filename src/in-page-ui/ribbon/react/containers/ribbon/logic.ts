@@ -124,7 +124,7 @@ export class RibbonContainerLogic extends UILogic<
             lists: {
                 initialLists: [],
                 initialListSuggestions: [],
-                showCollectionsPicker: false,
+                showListsPicker: false,
             },
             search: {
                 showSearchBox: false,
@@ -263,61 +263,64 @@ export class RibbonContainerLogic extends UILogic<
         return { tagging: { showTagsPicker: { $set: event.value } } }
     }
 
-    addTag: EventHandler<'addTag'> = async ({ event, previousState }) => {
-        this.emitMutation({
-            [event.value.context]: {
-                tags: { $apply: (tags) => [...tags, event.value.tag] },
-            },
+    private _updateTags: (
+        context: 'commentBox' | 'tagging',
+    ) => EventHandler<'updateTags' | 'updateCommentTags'> = (
+        context,
+    ) => async ({ event }) => {
+        const backendResult = this.dependencies.tags.updateTagForPage({
+            added: event.value.added,
+            deleted: event.value.deleted,
+            url: this.dependencies.currentTab.url,
+            tabId: this.dependencies.currentTab.id,
         })
-        if (event.value.context === 'tagging') {
-            await this.dependencies.tags.addTagToPage({
-                url: this.dependencies.currentTab.url,
-                tag: event.value.tag,
-            })
+
+        let tagsStateUpdater: (tags: string[]) => string[]
+
+        if (event.value.added) {
+            tagsStateUpdater = (tags) => {
+                const tag = event.value.added
+                return tags.includes(tag) ? tags : [...tags, tag]
+            }
         }
+
+        if (event.value.deleted) {
+            tagsStateUpdater = (tags) => {
+                const index = tags.indexOf(event.value.deleted)
+                if (index === -1) {
+                    return tags
+                }
+
+                return [...tags.slice(0, index), ...tags.slice(index + 1)]
+            }
+        }
+        this.emitMutation({
+            [context]: { tags: { $apply: tagsStateUpdater } },
+        })
+
+        return backendResult
     }
 
-    deleteTag: EventHandler<'deleteTag'> = async ({ event, previousState }) => {
-        const index = previousState[event.value.context].tags.indexOf(
-            event.value.tag,
-        )
-        if (index === -1) {
-            return
-        }
-        this.emitMutation({
-            [event.value.context]: { tags: { $splice: [[index, 1]] } },
-        })
-        if (event.value.context === 'tagging') {
-            await this.dependencies.tags.delTag({
-                url: this.dependencies.currentTab.url,
-                tag: event.value.tag,
-            })
-        }
-    }
+    updateCommentTags = this._updateTags('commentBox')
+    updateTags = this._updateTags('commentBox')
 
     //
     // Lists
     //
-    onCollectionAdd: EventHandler<'onCollectionAdd'> = async ({ event }) => {
-        await this.dependencies.customLists.insertPageToList({
-            id: event.value.id,
+    updateLists: EventHandler<'updateLists'> = async ({ event }) => {
+        return this.dependencies.customLists.updateListForPage({
+            added: event.value.added,
+            deleted: event.value.deleted,
             url: this.dependencies.currentTab.url,
+            tabId: this.dependencies.currentTab.id,
         })
     }
 
-    onCollectionDel: EventHandler<'onCollectionDel'> = async ({ event }) => {
-        await this.dependencies.customLists.removePageFromList({
-            id: event.value.id,
-            url: this.dependencies.currentTab.url,
-        })
+    setShowListsPicker: EventHandler<'setShowListsPicker'> = async ({
+        event,
+    }) => {
+        return { lists: { showListsPicker: { $set: event.value } } }
     }
-
-    setShowCollectionsPicker: EventHandler<
-        'setShowCollectionsPicker'
-    > = async ({ event }) => {
-        return { lists: { showCollectionsPicker: { $set: event.value } } }
-    }
-
     //
     // Search
     //

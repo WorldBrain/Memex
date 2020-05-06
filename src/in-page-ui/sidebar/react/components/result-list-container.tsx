@@ -5,7 +5,6 @@ import moment from 'moment'
 
 import { LoadingIndicator } from 'src/common-ui/components'
 import ResultItem from './result-item'
-import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from 'src/sidebar-overlay/sidebar/constants'
@@ -20,10 +19,10 @@ import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import { tags, collections } from 'src/util/remote-functions-background'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const styles = require('./result-list.css')
 
@@ -47,10 +46,12 @@ interface DispatchProps {
     resetUrlDragged: () => void
     resetActiveTagIndex: () => void
     setUrlDragged: (url: string) => void
-    addList: (f: string) => void
-    delList: (f: string) => void
-    addTag: (f: string) => void
-    delTag: (f: string) => void
+    updateTags: (url: string) => PickerUpdateHandler
+    updateLists: (url: string) => PickerUpdateHandler
+    fetchInitialTagSuggestions: () => Promise<string[]>
+    queryTagSuggestions: (query: string) => Promise<string[]>
+    fetchInitialListSuggestions: () => Promise<string[]>
+    queryListSuggestions: (query: string) => Promise<string[]>
     handlePillClick: (tag: string) => void
     handleTagBtnClick: (doc: Result) => void
     handleListBtnClick: (doc: Result) => void
@@ -119,45 +120,6 @@ export default class ResultListContainer extends Component<
         }
     }
 
-    private handleTagUpdate = (url: string) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
-        const backendResult = tags.updateTagForPage({
-            added,
-            deleted,
-            url,
-        })
-
-        if (added) {
-            this.props.addTag(added)
-        }
-        if (deleted) {
-            return this.props.delTag(deleted)
-        }
-        return backendResult
-    }
-
-    private handleListUpdate = (url: string) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
-        const backendResult = collections.updateListForPage({
-            added,
-            deleted,
-            url,
-        })
-        if (added) {
-            this.props.addList(added)
-        }
-        if (deleted) {
-            return this.props.delList(deleted)
-        }
-        return backendResult
-    }
-
     private renderTagsManager({
         shouldDisplayTagPopup,
         tags: selectedTags,
@@ -171,11 +133,11 @@ export default class ResultListContainer extends Component<
             <HoverBox>
                 <div ref={(ref) => this.setTagDivRef(ref)}>
                     <TagPicker
-                        onUpdateEntrySelection={this.handleTagUpdate(url)}
-                        queryEntries={(query) =>
-                            tags.searchForTagSuggestions({ query })
+                        onUpdateEntrySelection={this.props.updateTags(url)}
+                        queryEntries={this.props.queryTagSuggestions}
+                        loadDefaultSuggestions={
+                            this.props.fetchInitialTagSuggestions
                         }
-                        loadDefaultSuggestions={tags.fetchInitialTagSuggestions}
                         initialSelectedEntries={async () => selectedTags}
                     />
                 </div>
@@ -196,12 +158,10 @@ export default class ResultListContainer extends Component<
             <HoverBox>
                 <div ref={(ref) => this.setListDivRef(ref)}>
                     <CollectionPicker
-                        onUpdateEntrySelection={this.handleListUpdate(url)}
-                        queryEntries={(query) =>
-                            collections.searchForListSuggestions({ query })
-                        }
+                        onUpdateEntrySelection={this.props.updateLists(url)}
+                        queryEntries={this.props.queryListSuggestions}
                         loadDefaultSuggestions={
-                            collections.fetchInitialListSuggestions
+                            this.props.fetchInitialListSuggestions
                         }
                         initialSelectedEntries={async () => selectedLists}
                     />
@@ -261,6 +221,11 @@ export default class ResultListContainer extends Component<
                 annotationEventProps={this.props.annotationEventHandlers}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
+                tagsEventProps={{
+                    fetchInitialTagSuggestions: this.props
+                        .fetchInitialTagSuggestions,
+                    queryTagSuggestions: this.props.queryTagSuggestions,
+                }}
             />
         )
     }

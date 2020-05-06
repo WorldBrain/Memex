@@ -7,6 +7,7 @@ import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 import { Annotation } from 'src/annotations/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
+import { TagsEventProps } from 'src/in-page-ui/components/annotation-box/edit-mode-content'
 import { AnnotationMode } from '../types'
 
 const styles = require('./annotation-list.css')
@@ -27,6 +28,7 @@ export interface OwnProps {
     >
     annotationModes: { [url: string]: AnnotationMode }
     annotationEventProps: AnnotationBoxEventProps
+    tagsEventProps: TagsEventProps
 }
 
 interface StateProps {}
@@ -91,7 +93,7 @@ export default class AnnotationList extends Component<
         // Find the annotation in state and update it
         const { annotations } = this.state
 
-        const index = annotations.findIndex(annot => annot.url === url)
+        const index = annotations.findIndex((annot) => annot.url === url)
         const annotation: Annotation = annotations[index]
 
         if (
@@ -125,7 +127,7 @@ export default class AnnotationList extends Component<
         // Delete the annotation in the state too
         const { annotations } = this.state
         const index = this.state.annotations.findIndex(
-            annot => annot.url === url,
+            (annot) => annot.url === url,
         )
         const newAnnotations = [
             ...annotations.slice(0, index),
@@ -141,7 +143,7 @@ export default class AnnotationList extends Component<
 
         const { annotations } = this.state
 
-        const index = annotations.findIndex(annot => annot.url === url)
+        const index = annotations.findIndex((annot) => annot.url === url)
         const annotation: Annotation = annotations[index]
         const newAnnotations: Annotation[] = [
             ...annotations.slice(0, index),
@@ -163,7 +165,7 @@ export default class AnnotationList extends Component<
     }
 
     private renderAnnotations() {
-        return this.state.annotations.map(annot => (
+        return this.state.annotations.map((annot) => (
             <AnnotationBox
                 key={annot.url}
                 className={cx({
@@ -179,6 +181,7 @@ export default class AnnotationList extends Component<
                 handleDeleteAnnotation={this.handleDeleteAnnotation}
                 handleEditAnnotation={this.handleEditAnnotation}
                 handleBookmarkToggle={this.handleBookmarkToggle}
+                {...this.props.tagsEventProps}
                 {...annot}
             />
         ))

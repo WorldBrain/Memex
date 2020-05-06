@@ -4,6 +4,7 @@ import {
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
 import 'jest-extended'
+import { PickerUpdateHandler } from './types'
 
 // see https://github.com/WorldBrain/Memex-Mobile/blob/develop/app/src/features/overview/ui/screens/dashboard/logic.test.ts
 // see https://github.com/WorldBrain/Memex-Mobile/blob/7b74b83d3f3ebec793317c84222939d3fcba67b7/app/src/ui/index.tests.ts#L3
@@ -67,22 +68,17 @@ const setupLogicHelper = async ({
     url,
 }: {
     device: UILogicTestDevice
-    onUpdateEntrySelection?: (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => Promise<void>
+    onUpdateEntrySelection?: PickerUpdateHandler
     queryEntries?: (query: string) => Promise<string[]>
     queryEntryResults?: string[]
     initialSuggestions?: string[]
     initialSelectedEntries?: string[]
     url?: string
 }) => {
-    const backendEntryUpdate = async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) =>
+    const backendEntryUpdate: PickerUpdateHandler = async ({
+        added,
+        deleted,
+    }) =>
         device.backgroundModules.customLists.updateListForPage({
             added,
             deleted,

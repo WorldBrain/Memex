@@ -134,6 +134,13 @@ export default class SidebarContainer extends StatefulUIElement<
             }
         }
 
+        const tagsEventProps = {
+            fetchInitialTagSuggestions: () =>
+                this.props.tags.fetchInitialTagSuggestions(),
+            queryTagSuggestions: (query: string) =>
+                this.props.tags.searchForTagSuggestions({ query }),
+        }
+
         return (
             <Sidebar
                 loadState={this.state.loadState}
@@ -155,6 +162,7 @@ export default class SidebarContainer extends StatefulUIElement<
                     ),
                     handleScrollPagination: () => {},
                     showCongratsMessage: this.state.showCongratsMessage,
+                    tagsEventProps,
                 }}
                 highlighter={this.props.highlighter}
                 isOpen={this.state.state === 'visible'}
@@ -210,12 +218,9 @@ export default class SidebarContainer extends StatefulUIElement<
                                 'toggleNewPageCommentTagPicker',
                                 null,
                             ),
-                        addTag: (tag) =>
-                            this.processEvent('addNewPageCommentTag', { tag }),
-                        deleteTag: (tag) =>
-                            this.processEvent('deleteNewPageCommentTag', {
-                                tag,
-                            }),
+                        updateTags: (args) =>
+                            this.processEvent('updateTags', args),
+                        ...tagsEventProps,
                     },
                     saveComment: (
                         anchor: Anchor,
@@ -266,10 +271,16 @@ export default class SidebarContainer extends StatefulUIElement<
                     resetUrlDragged: () => {},
                     resetActiveTagIndex: () => {},
                     setUrlDragged: (url: string) => {},
-                    addTag: (filter: string) => {},
-                    delTag: (filter: string) => {},
-                    addList: (filter: string) => {},
-                    delList: (filter: string) => {},
+                    updateTags: (url: string) => (args) =>
+                        this.processEvent('updateTagsForPageResult', {
+                            url,
+                            ...args,
+                        }),
+                    updateLists: (url: string) => (args) =>
+                        this.processEvent('updateListsForPageResult', {
+                            url,
+                            ...args,
+                        }),
                     handlePillClick: (tag: string) => () => {
                         // console.log('handlePillClick')
                     },
@@ -302,6 +313,13 @@ export default class SidebarContainer extends StatefulUIElement<
                             pageUrl: result.url,
                         })
                     },
+                    ...tagsEventProps,
+                    fetchInitialListSuggestions: () =>
+                        this.props.customLists.fetchInitialListSuggestions(),
+                    queryListSuggestions: (query: string) =>
+                        this.props.customLists.searchForListSuggestions({
+                            query,
+                        }),
                 }}
                 searchTypeSwitch={{
                     allAnnotationsExpanded: this.state.allAnnotationsExpanded,

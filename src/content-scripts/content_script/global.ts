@@ -85,6 +85,7 @@ export async function main() {
                 bookmarks: runInBackground<BookmarksInterface>(),
                 annotations: runInBackground<AnnotationInterface<'caller'>>(),
                 search: runInBackground<SearchInterface>(),
+                customLists: runInBackground<RemoteCollectionsInterface>(),
             })
             components.sidebar!.resolve()
         },

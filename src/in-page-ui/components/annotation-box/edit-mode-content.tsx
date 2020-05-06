@@ -3,18 +3,20 @@ import * as React from 'react'
 import TagInput from '../../sidebar/react/components/tag-input'
 import AllModesFooter from './all-modes-footer'
 // import * as constants from '../comment-box/constants'
-import { getLocalStorage } from 'src/util/storage'
-import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const styles = require('./edit-mode-content.css')
 
-interface Props {
-    env?: 'inpage' | 'overview'
+export interface TagsEventProps {
+    fetchInitialTagSuggestions: () => Promise<string[]>
+    queryTagSuggestions: (query: string) => Promise<string[]>
+}
+
+interface Props extends TagsEventProps {
     comment?: string
-    tags: string[]
     rows: number
-    tagSuggestions: string[]
+    tags: string[]
     handleCancelOperation: () => void
     handleEditAnnotation: (commentText: string, tagsInput: string[]) => void
 }
@@ -82,6 +84,16 @@ class EditModeContent extends React.Component<Props, State> {
             }
         })
 
+    private updateTags: PickerUpdateHandler = async (args) => {
+        if (args.added) {
+            return this.addTag(args.added)
+        }
+
+        if (args.deleted) {
+            return this.deleteTag(args.deleted)
+        }
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -96,18 +108,15 @@ class EditModeContent extends React.Component<Props, State> {
 
                 <div onKeyDown={this._handleTagInputKeydown}>
                     <TagInput
-                        env={this.props.env}
                         tags={this.state.tags}
-                        initTagSuggestions={[
-                            ...new Set([
-                                ...(this.props.tags ?? []),
-                                ...this.props.tagSuggestions,
-                            ]),
-                        ]}
-                        isTagInputActive={this.state.isTagInputActive}
-                        setTagInputActive={this._setTagInputActive}
-                        addTag={this.addTag}
                         deleteTag={this.deleteTag}
+                        updateTags={this.updateTags}
+                        setTagInputActive={this._setTagInputActive}
+                        isTagInputActive={this.state.isTagInputActive}
+                        queryTagSuggestions={this.props.queryTagSuggestions}
+                        fetchInitialTagSuggestions={
+                            this.props.fetchInitialTagSuggestions
+                        }
                     />
                 </div>
 
