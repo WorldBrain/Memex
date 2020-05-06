@@ -5,18 +5,24 @@ import moment from 'moment'
 
 import { LoadingIndicator } from 'src/common-ui/components'
 import ResultItem from './result-item'
-import { IndexDropdown } from 'src/common-ui/containers'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
 import * as constants from 'src/sidebar-overlay/sidebar/constants'
-import { Result, ResultsByUrl, ResultWithIndex } from 'src/overview/types'
+import {
+    ResultWithIndex as Result,
+    ResultsByUrl,
+    AnnotationMode,
+} from '../types'
 import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
+import TagPicker from 'src/tags/ui/TagPicker'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
-import { AnnotationMode } from '../types'
+import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const styles = require('./result-list.css')
 
@@ -26,12 +32,10 @@ interface StateProps {
     isNewSearchLoading: boolean
     isListFilterActive: boolean
     areAnnotationsExpanded: boolean
-    searchResults: Result[]
     resultsByUrl: ResultsByUrl
     resultsClusteredByDay: boolean
     annotsByDay: PageUrlsByDay
     isSocialSearch: boolean
-    tagSuggestions: string[]
     annotationModes: {
         [annotationUrl: string]: AnnotationMode
     }
@@ -41,15 +45,20 @@ interface DispatchProps {
     resetUrlDragged: () => void
     resetActiveTagIndex: () => void
     setUrlDragged: (url: string) => void
-    addTag: (i: number) => (f: string) => void
-    delTag: (i: number) => (f: string) => void
+    updateTags: (url: string) => PickerUpdateHandler
+    updateLists: (url: string) => PickerUpdateHandler
+    fetchInitialTagSuggestions: () => Promise<string[]>
+    queryTagSuggestions: (query: string) => Promise<string[]>
+    fetchInitialListSuggestions: () => Promise<string[]>
+    queryListSuggestions: (query: string) => Promise<string[]>
     handlePillClick: (tag: string) => void
-    handleTagBtnClick: (i: number) => void
+    handleTagBtnClick: (doc: Result) => void
+    handleListBtnClick: (doc: Result) => void
     handleCommentBtnClick: (doc: Result, isSocialSearch?: boolean) => void
     handleCrossRibbonClick: (doc: Result, isSocialPost: boolean) => void
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
-    handleToggleBm: (doc: Result, i: number) => void
-    handleTrashBtnClick: (doc: Result, i: number) => void
+    handleToggleBm: (doc: Result) => void
+    handleTrashBtnClick: (doc: Result) => void
 }
 
 interface OwnProps {
@@ -69,18 +78,17 @@ export default class ResultListContainer extends Component<
     private tagBtnRefs: HTMLButtonElement[] = []
     private tagDivRef: HTMLDivElement
     private resultsDivRef: HTMLDivElement
+    private listDivRef: HTMLDivElement
 
     private setResultsDivRef = (el: HTMLDivElement) => (this.resultsDivRef = el)
     private trackDropdownRef = (el: HTMLSpanElement) =>
         this.dropdownRefs.push(el)
     private setTagDivRef = (el: HTMLDivElement) => (this.tagDivRef = el)
+    private setListDivRef = (el: HTMLDivElement) => (this.listDivRef = el)
     private setTagButtonRef = (el: HTMLButtonElement) =>
         this.tagBtnRefs.push(el)
 
     async componentDidMount() {
-        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
-        this.setState({ tagSuggestions: tagSuggestions.reverse() })
-
         this.resultsDivRef.addEventListener('click', this.handleOutsideClick)
     }
 
@@ -88,7 +96,7 @@ export default class ResultListContainer extends Component<
         this.resultsDivRef.removeEventListener('click', this.handleOutsideClick)
     }
 
-    private handleOutsideClick: EventListener = event => {
+    private handleOutsideClick: EventListener = (event) => {
         // Reduces to `true` if any on input elements were clicked
         const wereAnyClicked = reduce((res, el) => {
             const isEqual = el != null ? el.isEqualNode(event.target) : false
@@ -108,38 +116,65 @@ export default class ResultListContainer extends Component<
         }
     }
 
-    private renderTagsManager({ shouldDisplayTagPopup, url, tags }, index) {
+    private renderTagsManager({
+        shouldDisplayTagPopup,
+        tags: selectedTags,
+        url,
+    }: Result) {
         if (!shouldDisplayTagPopup) {
             return null
         }
 
         return (
-            <IndexDropdown
-                env="inpage"
-                url={url}
-                onFilterAdd={this.props.addTag(index)}
-                onFilterDel={this.props.delTag(index)}
-                setTagDivRef={this.setTagDivRef}
-                initFilters={tags}
-                initSuggestions={[
-                    ...new Set([...tags, ...this.props.tagSuggestions]),
-                ]}
-                source="tag"
-                isForRibbon
-                sidebarTagDiv
-                fromOverview
-            />
+            <HoverBox>
+                <div ref={(ref) => this.setTagDivRef(ref)}>
+                    <TagPicker
+                        onUpdateEntrySelection={this.props.updateTags(url)}
+                        queryEntries={this.props.queryTagSuggestions}
+                        loadDefaultSuggestions={
+                            this.props.fetchInitialTagSuggestions
+                        }
+                        initialSelectedEntries={async () => selectedTags}
+                    />
+                </div>
+            </HoverBox>
         )
     }
 
-    private renderTagHolder = ({ tags }, resultIndex) => (
+    private renderListsManager({
+        shouldDisplayListPopup,
+        lists: selectedLists,
+        url,
+    }: Result) {
+        if (!shouldDisplayListPopup) {
+            return null
+        }
+
+        return (
+            <HoverBox>
+                <div ref={(ref) => this.setListDivRef(ref)}>
+                    <CollectionPicker
+                        onUpdateEntrySelection={this.props.updateLists(url)}
+                        queryEntries={this.props.queryListSuggestions}
+                        loadDefaultSuggestions={
+                            this.props.fetchInitialListSuggestions
+                        }
+                        initialSelectedEntries={async () => selectedLists}
+                    />
+                </div>
+            </HoverBox>
+        )
+    }
+
+    private renderTagHolder = (doc: Result) => (
         <TagHolder
-            tags={[...new Set([...tags])]}
+            tags={[...new Set([...doc.tags])]}
             maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
             setTagManagerRef={this.trackDropdownRef}
-            handlePillClick={tag => event => this.props.handlePillClick(tag)}
+            handlePillClick={(tag) => (event) =>
+                this.props.handlePillClick(tag)}
             env={'sidebar'}
-            handleTagBtnClick={() => this.props.handleTagBtnClick(resultIndex)}
+            handleTagBtnClick={() => this.props.handleTagBtnClick(doc)}
         />
     )
 
@@ -152,25 +187,23 @@ export default class ResultListContainer extends Component<
         })
     }
 
-    private attachDocWithPageResultItem(doc, index, key) {
+    private attachDocWithPageResultItem(doc, key: number) {
         const isSocialPost = doc.hasOwnProperty('user')
 
         return (
             <ResultItem
                 key={key}
                 setTagButtonRef={this.setTagButtonRef}
-                tagHolder={this.renderTagHolder(doc, index)}
+                tagHolder={this.renderTagHolder(doc)}
                 setUrlDragged={this.props.setUrlDragged}
-                tagManager={this.renderTagsManager(doc, index)}
+                tagManager={this.renderTagsManager(doc)}
+                listManager={this.renderListsManager(doc)}
                 resetUrlDragged={this.props.resetUrlDragged}
-                onTagBtnClick={() => this.props.handleTagBtnClick(index)}
+                onTagBtnClick={() => this.props.handleTagBtnClick(doc)}
+                onListBtnClick={() => this.props.handleListBtnClick(doc)}
                 isListFilterActive={this.props.isListFilterActive}
-                onTrashBtnClick={() =>
-                    this.props.handleTrashBtnClick(doc, index)
-                }
-                onToggleBookmarkClick={() =>
-                    this.props.handleToggleBm(doc, index)
-                }
+                onTrashBtnClick={() => this.props.handleTrashBtnClick(doc)}
+                onToggleBookmarkClick={() => this.props.handleToggleBm(doc)}
                 onCommentBtnClick={() =>
                     this.props.handleCommentBtnClick(doc, isSocialPost)
                 }
@@ -184,6 +217,11 @@ export default class ResultListContainer extends Component<
                 annotationEventProps={this.props.annotationEventHandlers}
                 {...doc}
                 displayTime={niceTime(doc.displayTime)}
+                tagsEventProps={{
+                    fetchInitialTagSuggestions: this.props
+                        .fetchInitialTagSuggestions,
+                    queryTagSuggestions: this.props.queryTagSuggestions,
+                }}
             />
         )
     }
@@ -196,17 +234,16 @@ export default class ResultListContainer extends Component<
      */
     private resultsStateToItems() {
         if (!this.props.resultsClusteredByDay) {
-            return this.props.searchResults.map((res, i) =>
-                this.attachDocWithPageResultItem(res, i, i),
+            return Object.values(this.props.resultsByUrl).map((result) =>
+                this.attachDocWithPageResultItem(result, result.index),
             )
         }
 
         const els: JSX.Element[] = []
 
-        const sortedKeys = Object.keys(this.props.annotsByDay)
-            .sort()
-            .reverse()
+        const sortedKeys = Object.keys(this.props.annotsByDay).sort().reverse()
 
+        let resultItemCount = 0
         for (const day of sortedKeys) {
             els.push(
                 <p className={styles.clusterTime} key={day}>
@@ -218,7 +255,7 @@ export default class ResultListContainer extends Component<
             for (const [pageUrl, annotations] of Object.entries(
                 currentCluster,
             )) {
-                const page = this.props.resultsByUrl.get(pageUrl)
+                const page = this.props.resultsByUrl[pageUrl]
 
                 if (!page) {
                     continue // Page not found for whatever reason...
@@ -227,8 +264,7 @@ export default class ResultListContainer extends Component<
                 els.push(
                     this.attachDocWithPageResultItem(
                         { ...page, annotations },
-                        page.index,
-                        `${day}${pageUrl}`,
+                        resultItemCount++,
                     ),
                 )
             }

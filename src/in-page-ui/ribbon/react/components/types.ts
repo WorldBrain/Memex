@@ -1,5 +1,4 @@
-import { PageList } from 'src/custom-lists/background/types'
-import { Anchor } from 'src/highlighting/types'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -44,6 +43,7 @@ export interface RibbonCommentBoxProps extends CommonTaggingProps {
     toggleCommentBookmark: () => void
     toggleTagPicker: () => void
     setShowCommentBox: (value: boolean) => void
+    updateCommentTags: PickerUpdateHandler
 }
 
 export interface RibbonBookmarkProps {
@@ -53,27 +53,29 @@ export interface RibbonBookmarkProps {
 
 export interface RibbonTaggingProps extends CommonTaggingProps {
     showTagsPicker: boolean
+    updateTags: PickerUpdateHandler
     setShowTagsPicker: (value: boolean) => void
+    fetchInitialTagSelections: () => Promise<string[]>
 }
 
 export interface CommonTaggingProps {
     tags: string[]
-    initTagSuggestions: string[]
-    tagSuggestions: string[]
-    addTag: (event: { tag: string; context: 'commentBox' | 'tagging' }) => void
-    deleteTag: (event: {
-        tag: string
-        context: 'commentBox' | 'tagging'
-    }) => void
+    queryTagSuggestions: (query: string) => Promise<string[]>
+    fetchInitialTagSuggestions: () => Promise<string[]>
+}
+
+export interface ListEntryArgs {
+    listId: number
+    pageUrl: string
 }
 
 export interface RibbonListsProps {
-    initialLists: []
-    initialListSuggestions: []
-    showCollectionsPicker: boolean
-    onCollectionAdd: (collection: PageList) => void
-    onCollectionDel: (collection: PageList) => void
-    setShowCollectionsPicker: (value: boolean) => void
+    showListsPicker: boolean
+    updateLists: PickerUpdateHandler
+    setShowListsPicker: (value: boolean) => void
+    queryListSuggestions: (query: string) => Promise<string[]>
+    fetchInitialListSuggestions: () => Promise<string[]>
+    fetchInitialListSelections: () => Promise<string[]>
 }
 
 export interface RibbonSearchProps {

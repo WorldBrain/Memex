@@ -5,9 +5,8 @@ import { setupBackgroundIntegrationTest } from 'src/tests/background-integration
 import AnnotationsManager from 'src/annotations/annotations-manager'
 import SidebarContainer from 'src/in-page-ui/sidebar/react/containers/sidebar'
 import { WithDependencies } from '../utils'
-import { ResultsByUrl } from 'src/overview/types'
 import { InPageUI } from 'src/in-page-ui/shared-state'
-import { SidebarEnv } from 'src/in-page-ui/sidebar/react/types'
+import { SidebarEnv, ResultsByUrl } from 'src/in-page-ui/sidebar/react/types'
 import RibbonHolder from 'src/in-page-ui/ribbon/react/containers/ribbon-holder'
 
 const stories = storiesOf('In-page UI', module)
@@ -77,25 +76,25 @@ async function createDependencies() {
             background.backgroundModules.activityLogger.remoteFunctions,
         annotations: mapValues(
             background.backgroundModules.directLinking.remoteFunctions,
-            f => {
+            (f) => {
                 return (...args: any[]) => {
                     return f({ tab: currentTab }, ...args)
                 }
             },
         ),
-        searchAnnotations: async query => {
+        searchAnnotations: async (query) => {
             const result = await background.backgroundModules.search.searchAnnotations(
                 {
                     query: query.length ? query : undefined,
                 },
             )
 
-            const resultsByUrl: ResultsByUrl = new Map()
+            const resultsByUrl: ResultsByUrl = {}
             result.docs.forEach((doc, index) => {
-                resultsByUrl.set(doc.pageId, {
+                resultsByUrl[doc.pageId] = {
                     ...doc,
                     index,
-                })
+                }
             })
 
             return {

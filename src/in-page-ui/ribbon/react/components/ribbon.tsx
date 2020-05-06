@@ -17,12 +17,10 @@ import {
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { highlightAnnotations } from 'src/annotations'
 import { HighlightInteractionInterface, Anchor } from 'src/highlighting/types'
-import { withSidebarContext } from 'src/sidebar-overlay/ribbon-sidebar-controller/sidebar-context'
 import { RibbonSubcomponentProps } from './types'
-import {
-    AddListDropdownContainer,
-    IndexDropdown,
-} from 'src/common-ui/containers'
+import TagPicker from 'src/tags/ui/TagPicker'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+
 const styles = require('./ribbon.css')
 
 export interface Props extends RibbonSubcomponentProps {
@@ -151,34 +149,30 @@ export default class Ribbon extends Component<Props, State> {
 
     private renderTagsManager() {
         return (
-            <IndexDropdown
-                env="inpage"
-                url={this.props.getUrl()}
-                tabId={this.props.tabId}
-                initFilters={this.props.tagging.tags}
-                initSuggestions={this.props.tagging.initTagSuggestions}
-                source="tag"
-                onFilterAdd={(tag) =>
-                    this.props.tagging.addTag({ tag, context: 'tagging' })
+            <TagPicker
+                onUpdateEntrySelection={this.props.tagging.updateTags}
+                queryEntries={this.props.tagging.queryTagSuggestions}
+                initialSelectedEntries={
+                    this.props.tagging.fetchInitialTagSelections
                 }
-                onFilterDel={(tag) =>
-                    this.props.tagging.deleteTag({ tag, context: 'tagging' })
+                loadDefaultSuggestions={
+                    this.props.tagging.fetchInitialTagSuggestions
                 }
-                isForRibbon
             />
         )
     }
 
     private renderCollectionsManager() {
         return (
-            <AddListDropdownContainer
-                env="inpage"
-                url={this.props.getUrl()}
-                initLists={this.props.lists.initialLists}
-                initSuggestions={this.props.lists.initialListSuggestions}
-                onFilterAdd={this.props.lists.onCollectionAdd}
-                onFilterDel={this.props.lists.onCollectionDel}
-                isForRibbon
+            <CollectionPicker
+                onUpdateEntrySelection={this.props.lists.updateLists}
+                queryEntries={this.props.lists.queryListSuggestions}
+                initialSelectedEntries={
+                    this.props.lists.fetchInitialListSelections
+                }
+                loadDefaultSuggestions={
+                    this.props.lists.fetchInitialListSuggestions
+                }
             />
         )
     }
@@ -375,22 +369,9 @@ export default class Ribbon extends Component<Props, State> {
                                                         toggleBookmark: this
                                                             .props.commentBox
                                                             .toggleCommentBookmark,
-                                                        addTag: (tag) =>
-                                                            this.props.commentBox.addTag(
-                                                                {
-                                                                    tag,
-                                                                    context:
-                                                                        'commentBox',
-                                                                },
-                                                            ),
-                                                        deleteTag: (tag) =>
-                                                            this.props.commentBox.deleteTag(
-                                                                {
-                                                                    tag,
-                                                                    context:
-                                                                        'commentBox',
-                                                                },
-                                                            ),
+                                                        updateTags: this.props
+                                                            .commentBox
+                                                            .updateCommentTags,
                                                     }}
                                                     onSaveCb={() => {}}
                                                 />
@@ -445,13 +426,13 @@ export default class Ribbon extends Component<Props, State> {
                                             styles.collection,
                                         )}
                                         onClick={() =>
-                                            this.props.lists.setShowCollectionsPicker(
+                                            this.props.lists.setShowListsPicker(
                                                 !this.props.lists
-                                                    .showCollectionsPicker,
+                                                    .showListsPicker,
                                             )
                                         }
                                     />
-                                    {this.props.lists.showCollectionsPicker && (
+                                    {this.props.lists.showListsPicker && (
                                         <Tooltip
                                             position="left"
                                             itemClass={styles.collectionDiv}

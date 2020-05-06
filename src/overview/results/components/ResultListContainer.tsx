@@ -136,11 +136,7 @@ class ResultListContainer extends PureComponent<Props> {
         }
     }
 
-    handleTagUpdate = (index: number) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
+    handleTagUpdate = (index: number) => async ({ added, deleted }) => {
         const url = this.props.searchResults[index].url
         const backendResult = tags.updateTagForPage({
             added,
@@ -157,11 +153,7 @@ class ResultListContainer extends PureComponent<Props> {
         return backendResult
     }
 
-    handleListUpdate = (index: number) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
+    handleListUpdate = (index: number) => async ({ added, deleted }) => {
         const url = this.props.searchResults[index].url
         const backendResult = collections.updateListForPage({
             added,

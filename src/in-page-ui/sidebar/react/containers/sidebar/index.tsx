@@ -95,37 +95,50 @@ export default class SidebarContainer extends StatefulUIElement<
                         annotationUrl,
                         mode,
                     }),
-                handleGoToAnnotation: annnotationUrl =>
+                handleGoToAnnotation: (annnotationUrl) =>
                     this.processEvent('goToAnnotation', {
                         context,
                         annnotationUrl,
                     }),
-                handleMouseEnter: annnotationUrl =>
+                handleMouseEnter: (annnotationUrl) =>
                     this.processEvent('annotationMouseEnter', {
                         context,
                         annnotationUrl,
                     }),
-                handleMouseLeave: annnotationUrl =>
+                handleMouseLeave: (annnotationUrl) =>
                     this.processEvent('annotationMouseLeave', {
                         context,
                         annnotationUrl,
                     }),
-                handleEditAnnotation: annnotationUrl =>
+                handleEditAnnotation: (
+                    url: string,
+                    comment: string,
+                    tags: string[],
+                ) =>
                     this.processEvent('editAnnotation', {
                         context,
-                        annnotationUrl,
+                        annotationUrl: url,
+                        comment,
+                        tags,
                     }),
-                handleDeleteAnnotation: annnotationUrl =>
+                handleDeleteAnnotation: (annnotationUrl) =>
                     this.processEvent('deleteAnnotation', {
                         context,
-                        annnotationUrl,
+                        annotationUrl: annnotationUrl,
                     }),
-                handleBookmarkToggle: annnotationUrl =>
+                handleBookmarkToggle: (annnotationUrl) =>
                     this.processEvent('toggleAnnotationBookmark', {
                         context,
-                        annnotationUrl,
+                        annotationUrl: annnotationUrl,
                     }),
             }
+        }
+
+        const tagsEventProps = {
+            fetchInitialTagSuggestions: () =>
+                this.props.tags.fetchInitialTagSuggestions(),
+            queryTagSuggestions: (query: string) =>
+                this.props.tags.searchForTagSuggestions({ query }),
         }
 
         return (
@@ -149,6 +162,7 @@ export default class SidebarContainer extends StatefulUIElement<
                     ),
                     handleScrollPagination: () => {},
                     showCongratsMessage: this.state.showCongratsMessage,
+                    tagsEventProps,
                 }}
                 highlighter={this.props.highlighter}
                 isOpen={this.state.state === 'visible'}
@@ -166,15 +180,15 @@ export default class SidebarContainer extends StatefulUIElement<
                     this.processEvent('addNewPageComment', null)
                 }
                 pageDeleteDialog={{
-                    isDeletePageModelShown: this.state.deletePagesModel
-                        .isDeletePagesModelShown,
-                    handleDeletePages: () =>
-                        this.processEvent('deletePages', null),
-                    handleDeletePagesModalClose: () =>
-                        this.processEvent('closeDeletePagesModal', null),
+                    isDeletePageModalShown:
+                        this.state.deletePageModal.pageUrlToDelete != null,
+                    handleDeletePage: () =>
+                        this.processEvent('deletePage', null),
+                    handleDeletePageModalClose: () =>
+                        this.processEvent('closeDeletePageModal', null),
                 }}
                 onQueryKeyDown={() => {}}
-                onQueryChange={searchQuery => {
+                onQueryChange={(searchQuery) => {
                     this.processEvent('changeSearchQuery', { searchQuery })
                 }}
                 onShowFiltersSidebarChange={() => {}}
@@ -204,12 +218,9 @@ export default class SidebarContainer extends StatefulUIElement<
                                 'toggleNewPageCommentTagPicker',
                                 null,
                             ),
-                        addTag: tag =>
-                            this.processEvent('addNewPageCommentTag', { tag }),
-                        deleteTag: tag =>
-                            this.processEvent('deleteNewPageCommentTag', {
-                                tag,
-                            }),
+                        updateTags: (args) =>
+                            this.processEvent('updateTags', args),
+                        ...tagsEventProps,
                     },
                     saveComment: (
                         anchor: Anchor,
@@ -245,14 +256,12 @@ export default class SidebarContainer extends StatefulUIElement<
                     isNewSearchLoading:
                         this.state.searchLoadState !== 'success',
                     isListFilterActive: this.state.isListFilterActive,
-                    searchResults: this.state.searchResults,
                     resultsByUrl: this.state.resultsByUrl,
                     resultsClusteredByDay:
                         this.state.searchType === 'notes' &&
                         this.state.pageType === 'all',
                     annotsByDay: this.state.annotsByDay,
                     isSocialSearch: this.state.isSocialSearch,
-                    tagSuggestions: this.state.tagSuggestions,
                     highlighter: this.props.highlighter,
                     annotationModes: this.state.annotationModes.searchResults,
                     annotationEventHandlers: createAnnotationEventHandlers(
@@ -261,27 +270,55 @@ export default class SidebarContainer extends StatefulUIElement<
                     resetUrlDragged: () => {},
                     resetActiveTagIndex: () => {},
                     setUrlDragged: (url: string) => {},
-                    addTag: (i: number) => (filter: string) => {},
-                    delTag: (i: number) => (filter: string) => {},
+                    updateTags: (url: string) => (args) =>
+                        this.processEvent('updateTagsForPageResult', {
+                            url,
+                            ...args,
+                        }),
+                    updateLists: (url: string) => (args) =>
+                        this.processEvent('updateListsForPageResult', {
+                            url,
+                            ...args,
+                        }),
                     handlePillClick: (tag: string) => () => {
                         // console.log('handlePillClick')
                     },
-                    handleTagBtnClick: (i: number) => () => {
-                        // console.log('handleTagBtnClick')
+                    handleTagBtnClick: (result) => {
+                        this.processEvent('togglePageTagPicker', {
+                            pageUrl: result.url,
+                        })
                     },
-                    handleCommentBtnClick: () => {
-                        // console.log('handleCommentBtnClick')
+                    handleListBtnClick: (result) => {
+                        this.processEvent('togglePageListPicker', {
+                            pageUrl: result.url,
+                        })
                     },
-                    handleCrossRibbonClick: () => () => {
+                    handleCommentBtnClick: (result) => {
+                        this.processEvent('togglePageAnnotationsView', {
+                            pageUrl: result.url,
+                        })
+                    },
+                    handleCrossRibbonClick: () => {
                         // console.log('handleCrossRibbonClick')
                     },
                     handleScrollPagination: () => {},
-                    handleToggleBm: () => () => {
-                        // console.log('handleToggleBm')
+                    handleToggleBm: (result) => {
+                        this.processEvent('togglePageBookmark', {
+                            pageUrl: result.url,
+                        })
                     },
-                    handleTrashBtnClick: () => () => {
-                        // console.log('handleTrashBtnClick')
+                    handleTrashBtnClick: (result) => {
+                        this.processEvent('showDeletePageModal', {
+                            pageUrl: result.url,
+                        })
                     },
+                    ...tagsEventProps,
+                    fetchInitialListSuggestions: () =>
+                        this.props.customLists.fetchInitialListSuggestions(),
+                    queryListSuggestions: (query: string) =>
+                        this.props.customLists.searchForListSuggestions({
+                            query,
+                        }),
                 }}
                 searchTypeSwitch={{
                     allAnnotationsExpanded: this.state.allAnnotationsExpanded,

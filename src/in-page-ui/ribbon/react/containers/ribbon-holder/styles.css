@@ -1,9 +1,7 @@
 .holder {
     position: fixed;
     right: 0;
-    width: 34px;
-    top: 25%;
-    height: 50%;
+    top: 0;
     z-index: 2147483645;
 }
 

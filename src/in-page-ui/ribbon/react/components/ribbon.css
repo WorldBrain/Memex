@@ -16,11 +16,6 @@
     flex-direction: column;
     justify-content: center;
     align-self: center;
-    right: 0;
-    width: 34px;
-    top: 25%;
-    height: 50%;
-    z-index: 2147483645;
 
     /* z-index: 2147483647;
     border-top-left-radius: 5px;
@@ -29,6 +24,8 @@
     border-right: none; */
     transform: translate(0, -20px);
     transition: all 0.1s ease-in-out;
+    width: 34px;
+    height: 105vh;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
@@ -37,19 +34,12 @@
 }
 
 .ribbonExpanded {
-    display: flex;
-    width: 34px;
     transition: all 0.1s ease-in-out;
 }
 
 .ribbonSidebarOpen {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     box-shadow: none;
     background: white;
-    height: 105vh;
-    width: 34px;
 
     & .removeSidebar {
         visibility: hidden;

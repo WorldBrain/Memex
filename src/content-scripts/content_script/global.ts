@@ -82,8 +82,10 @@ export async function main() {
                 highlighter,
                 currentTab: await getCurrentTab(),
                 tags: runInBackground<RemoteTagsInterface>(),
+                bookmarks: runInBackground<BookmarksInterface>(),
                 annotations: runInBackground<AnnotationInterface<'caller'>>(),
                 search: runInBackground<SearchInterface>(),
+                customLists: runInBackground<RemoteCollectionsInterface>(),
             })
             components.sidebar!.resolve()
         },

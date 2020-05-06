@@ -7,8 +7,8 @@ import {
 } from './logic'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
-import { PageList } from 'src/custom-lists/background/types'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
+import { ListEntryArgs } from '../../components/types'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -45,7 +45,7 @@ export default class RibbonContainer extends StatefulUIElement<
         } else if (event.action === 'bookmark') {
             this.processEvent('toggleBookmark', null)
         } else if (event.action === 'list') {
-            this.processEvent('setShowCollectionsPicker', { value: true })
+            this.processEvent('setShowListsPicker', { value: true })
         } else if (event.action === 'tag') {
             this.processEvent('setShowTagsPicker', { value: true })
         }
@@ -86,7 +86,6 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 commentBox={{
                     ...this.state.commentBox,
-                    initTagSuggestions: this.state.tagging.initTagSuggestions,
                     handleCommentTextChange: (comment: string) =>
                         this.processEvent('handleCommentTextChange', {
                             value: comment,
@@ -98,12 +97,14 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('toggleCommentBookmark', null),
                     toggleTagPicker: () =>
                         this.processEvent('toggleTagPicker', null),
-                    setShowCommentBox: value =>
+                    setShowCommentBox: (value) =>
                         this.processEvent('setShowCommentBox', { value }),
-                    addTag: event =>
-                        this.processEvent('addTag', { value: event }),
-                    deleteTag: event =>
-                        this.processEvent('deleteTag', { value: event }),
+                    updateCommentTags: (value) =>
+                        this.processEvent('updateCommentTags', { value }),
+                    fetchInitialTagSuggestions: () =>
+                        this.props.tags.fetchInitialTagSuggestions(),
+                    queryTagSuggestions: (query: string) =>
+                        this.props.tags.searchForTagSuggestions({ query }),
                 }}
                 bookmark={{
                     ...this.state.bookmark,
@@ -112,26 +113,36 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 tagging={{
                     ...this.state.tagging,
-                    addTag: event =>
-                        this.processEvent('addTag', { value: event }),
-                    deleteTag: event =>
-                        this.processEvent('deleteTag', { value: event }),
-                    setShowTagsPicker: (value: false) =>
+                    setShowTagsPicker: (value) =>
                         this.processEvent('setShowTagsPicker', { value }),
+                    updateTags: (value) =>
+                        this.processEvent('updateTags', { value }),
+                    fetchInitialTagSuggestions: () =>
+                        this.props.tags.fetchInitialTagSuggestions(),
+                    fetchInitialTagSelections: () =>
+                        this.props.tags.fetchPageTags({
+                            url: this.props.currentTab.url,
+                        }),
+                    queryTagSuggestions: (query: string) =>
+                        this.props.tags.searchForTagSuggestions({ query }),
                 }}
                 lists={{
                     ...this.state.lists,
-                    onCollectionAdd: (collection: PageList) =>
-                        this.processEvent('onCollectionAdd', {
-                            value: collection,
-                        }),
-                    onCollectionDel: (collection: PageList) =>
-                        this.processEvent('onCollectionDel', {
-                            value: collection,
-                        }),
-                    setShowCollectionsPicker: (value: false) =>
-                        this.processEvent('setShowCollectionsPicker', {
+                    updateLists: (value) =>
+                        this.processEvent('updateLists', { value }),
+                    setShowListsPicker: (value: false) =>
+                        this.processEvent('setShowListsPicker', {
                             value,
+                        }),
+                    fetchInitialListSuggestions: () =>
+                        this.props.customLists.fetchInitialListSuggestions(),
+                    fetchInitialListSelections: () =>
+                        this.props.customLists.fetchPageLists({
+                            url: this.props.currentTab.url,
+                        }),
+                    queryListSuggestions: (query: string) =>
+                        this.props.customLists.searchForListSuggestions({
+                            query,
                         }),
                 }}
                 search={{

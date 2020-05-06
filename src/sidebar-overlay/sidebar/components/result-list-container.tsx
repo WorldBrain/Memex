@@ -23,6 +23,7 @@ import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const styles = require('./result-list.css')
 
@@ -133,11 +134,10 @@ class ResultListContainer extends PureComponent<Props, State> {
         }
     }
 
-    handleTagUpdate = (index: number) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
+    handleTagUpdate: (i: number) => PickerUpdateHandler = (index) => async ({
+        added,
+        deleted,
+    }) => {
         const url = this.props.searchResults[index].url
         const backendResult = tags.updateTagForPage({
             added,
@@ -154,11 +154,10 @@ class ResultListContainer extends PureComponent<Props, State> {
         return backendResult
     }
 
-    handleListUpdate = (index: number) => async (
-        _: string[],
-        added: string,
-        deleted: string,
-    ) => {
+    handleListUpdate: (i: number) => PickerUpdateHandler = (index) => async ({
+        added,
+        deleted,
+    }) => {
         const url = this.props.searchResults[index].url
         const backendResult = collections.updateListForPage({
             added,

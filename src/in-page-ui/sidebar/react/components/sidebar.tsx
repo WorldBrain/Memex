@@ -48,9 +48,9 @@ interface OwnProps {
     handleAddPageCommentBtnClick: () => void
 
     pageDeleteDialog: {
-        isDeletePageModelShown: boolean
-        handleDeletePages: () => Promise<void>
-        handleDeletePagesModalClose: () => void
+        isDeletePageModalShown: boolean
+        handleDeletePage: () => Promise<void>
+        handleDeletePageModalClose: () => void
     }
 
     highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
@@ -116,10 +116,10 @@ export default class Sidebar extends React.Component<Props> {
             <React.Fragment>
                 <ResultsContainer {...this.props.resultsContainer} />
                 <DeleteConfirmModal
-                    deleteDocs={this.props.pageDeleteDialog.handleDeletePages}
-                    isShown={this.props.pageDeleteDialog.isDeletePageModelShown}
+                    deleteDocs={this.props.pageDeleteDialog.handleDeletePage}
+                    isShown={this.props.pageDeleteDialog.isDeletePageModalShown}
                     onClose={
-                        this.props.pageDeleteDialog.handleDeletePagesModalClose
+                        this.props.pageDeleteDialog.handleDeletePageModalClose
                     }
                     message="Delete page and related notes"
                 />

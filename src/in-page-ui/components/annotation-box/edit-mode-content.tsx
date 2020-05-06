@@ -3,34 +3,42 @@ import * as React from 'react'
 import TagInput from '../../sidebar/react/components/tag-input'
 import AllModesFooter from './all-modes-footer'
 // import * as constants from '../comment-box/constants'
-import { getLocalStorage } from 'src/util/storage'
-import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
+import { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 
 const styles = require('./edit-mode-content.css')
 
-interface Props {
-    env?: 'inpage' | 'overview'
+export interface TagsEventProps {
+    fetchInitialTagSuggestions: () => Promise<string[]>
+    queryTagSuggestions: (query: string) => Promise<string[]>
+}
+
+interface Props extends TagsEventProps {
     comment?: string
-    tags: string[]
-    commentText: string
-    tagsInput: string[]
     rows: number
-    tagSuggestions: string[]
+    tags: string[]
     handleCancelOperation: () => void
     handleEditAnnotation: (commentText: string, tagsInput: string[]) => void
-    onAddTag: (tag: string) => void
-    onDeleteTag: (tag: string) => void
 }
 
 interface State {
     isTagInputActive: boolean
+    commentEditText: string
+    tags: string[]
 }
 
 class EditModeContent extends React.Component<Props, State> {
+    state: State = {
+        isTagInputActive: false,
+        commentEditText: this.props.comment ?? '',
+        tags: this.props.tags ?? [],
+    }
+
     private _handleEditAnnotation = () => {
-        const { commentText, tagsInput } = this.props
-        this.props.handleEditAnnotation(commentText, tagsInput)
+        this.props.handleEditAnnotation(
+            this.state.commentEditText,
+            this.state.tags,
+        )
     }
 
     private _handleTagInputKeydown = (
@@ -47,19 +55,50 @@ class EditModeContent extends React.Component<Props, State> {
     }
 
     private onEnterSaveHandler = {
-        test: e => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
-        handle: e => this._handleCommentChange,
+        test: (e) => (e.ctrlKey || e.metaKey) && e.key === 'Enter',
+        handle: (e) => this._handleCommentChange,
     }
 
-    private _handleCommentChange = commentText => {
-        this.props.handleEditAnnotation(commentText, this.props.tagsInput)
+    private _handleCommentChange = (comment: string) =>
+        this.setState((state) => ({ commentEditText: comment }))
+
+    private addTag = (tag: string) =>
+        this.setState((state) => {
+            const index = state.tags.indexOf(tag)
+
+            if (index !== -1) {
+                return
+            }
+
+            return { tags: [...state.tags, tag] }
+        })
+
+    private deleteTag = (tag: string) =>
+        this.setState((state) => {
+            const index = state.tags.indexOf(tag)
+            return {
+                tags: [
+                    ...state.tags.slice(0, index),
+                    ...state.tags.slice(index + 1),
+                ],
+            }
+        })
+
+    private updateTags: PickerUpdateHandler = async (args) => {
+        if (args.added) {
+            return this.addTag(args.added)
+        }
+
+        if (args.deleted) {
+            return this.deleteTag(args.deleted)
+        }
     }
 
     render() {
         return (
             <React.Fragment>
                 <TextInputControlled
-                    defaultValue={this.props.commentText}
+                    defaultValue={this.state.commentEditText}
                     onClick={() => this._setTagInputActive(false)}
                     className={styles.textArea}
                     placeholder="Add a private note... (save with cmd/ctrl+enter)"
@@ -69,18 +108,15 @@ class EditModeContent extends React.Component<Props, State> {
 
                 <div onKeyDown={this._handleTagInputKeydown}>
                     <TagInput
-                        env={this.props.env}
-                        tags={this.props.tagsInput}
-                        initTagSuggestions={[
-                            ...new Set([
-                                ...this.props.tagsInput,
-                                ...this.props.tagSuggestions,
-                            ]),
-                        ]}
-                        isTagInputActive={this.state.isTagInputActive}
+                        tags={this.state.tags}
+                        deleteTag={this.deleteTag}
+                        updateTags={this.updateTags}
                         setTagInputActive={this._setTagInputActive}
-                        addTag={this.props.onAddTag}
-                        deleteTag={this.props.onDeleteTag}
+                        isTagInputActive={this.state.isTagInputActive}
+                        queryTagSuggestions={this.props.queryTagSuggestions}
+                        fetchInitialTagSuggestions={
+                            this.props.fetchInitialTagSuggestions
+                        }
                     />
                 </div>
 

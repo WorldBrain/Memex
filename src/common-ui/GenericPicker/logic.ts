@@ -1,6 +1,6 @@
 import { UILogic, UIEvent } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { KeyEvent, DisplayEntry } from './types'
+import { KeyEvent, DisplayEntry, PickerUpdateHandler } from './types'
 
 export const INITIAL_STATE: GenericPickerState = {
     query: '',
@@ -21,11 +21,7 @@ export interface GenericPickerState {
 }
 
 export interface GenericPickerDependencies {
-    onUpdateEntrySelection: (
-        entries: string[],
-        added: string,
-        deleted: string,
-    ) => Promise<void>
+    onUpdateEntrySelection: PickerUpdateHandler
     queryEntries: (query: string) => Promise<string[]>
     actOnAllTabs?: (query: string) => Promise<void>
     loadDefaultSuggestions: () => string[] | Promise<string[]>
@@ -429,11 +425,11 @@ export default abstract class GenericPickerLogic extends UILogic<
         }
 
         try {
-            await this.dependencies.onUpdateEntrySelection(
-                selectedEntries,
+            await this.dependencies.onUpdateEntrySelection({
+                selected: selectedEntries,
                 added,
                 deleted,
-            )
+            })
         } catch (e) {
             this._undoAfterError({
                 displayEntries,

@@ -1,10 +1,9 @@
 import * as React from 'react'
 import cx from 'classnames'
 import noop from 'lodash/fp/noop'
-import { connect } from 'react-redux'
 
 import DefaultDeleteModeContent from './default-delete-mode-content'
-import EditModeContent from './edit-mode-content'
+import EditModeContent, { TagsEventProps } from './edit-mode-content'
 import TruncatedTextRenderer from '../truncated-text-renderer'
 import niceTime from 'src/util/nice-time'
 import { CrowdfundingBox } from 'src/common-ui/crowdfunding'
@@ -52,7 +51,8 @@ export interface AnnotationBoxEventProps {
 
 type AnnotationBoxProps = AnnotationBoxGeneralProps &
     AnnotationBoxAnnotationProps &
-    AnnotationBoxEventProps
+    AnnotationBoxEventProps &
+    TagsEventProps
 
 export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
     private _boxRef: HTMLDivElement = null
@@ -110,7 +110,7 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
 
     private _getTruncatedTextObject: (
         text: string,
-    ) => { isTextTooLong: boolean; text: string } = text => {
+    ) => { isTextTooLong: boolean; text: string } = (text) => {
         if (text.length > 280) {
             const truncatedText = text.slice(0, 280)
             return {
@@ -239,7 +239,7 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                         }
                         handleDeleteAnnotation={this._handleDeleteAnnotation}
                         handleCancelOperation={this._handleCancelOperation}
-                        handleTagClick={tag =>
+                        handleTagClick={(tag) =>
                             this.props.handleAnnotationTagClick(
                                 this.props.url,
                                 tag,
@@ -253,17 +253,15 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                     />
                 ) : (
                     <EditModeContent
-                        env={this.props.env}
-                        comment={this.props.comment}
-                        tags={this.props.tags}
-                        handleCancelOperation={this._handleCancelOperation}
-                        handleEditAnnotation={this._handleEditAnnotation}
-                        commentText="Comment text"
-                        tagsInput={[]}
                         rows={2}
-                        tagSuggestions={[]}
-                        onAddTag={() => {}}
-                        onDeleteTag={() => {}}
+                        tags={this.props.tags}
+                        comment={this.props.comment}
+                        handleEditAnnotation={this._handleEditAnnotation}
+                        handleCancelOperation={this._handleCancelOperation}
+                        queryTagSuggestions={this.props.queryTagSuggestions}
+                        fetchInitialTagSuggestions={
+                            this.props.fetchInitialTagSuggestions
+                        }
                     />
                 )}
             </div>

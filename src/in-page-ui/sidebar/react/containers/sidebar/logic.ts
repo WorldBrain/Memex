@@ -6,9 +6,14 @@ import {
     UIMutation,
 } from 'ui-logic-core'
 import { TaskState } from 'ui-logic-core/lib/types'
-import { SidebarEnv, Page, AnnotationMode } from '../../types'
+import {
+    SidebarEnv,
+    Page,
+    AnnotationMode,
+    ResultWithIndex as Result,
+    ResultsByUrl,
+} from '../../types'
 import { Annotation } from 'src/annotations/types'
-import { Result, ResultsByUrl } from 'src/overview/types'
 import { PageUrlsByDay, SearchInterface } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
@@ -44,16 +49,15 @@ export interface SidebarContainerState {
             isCommentBookmarked: boolean
             isTagInputActive: boolean
             showTagsPicker: boolean
-            tagSuggestions: string[]
             commentText: string
             isAnnotation: boolean
             tags: string[]
-            initTagSuggestions: string[]
         }
     }
 
-    deletePagesModel: {
-        isDeletePagesModelShown: boolean
+    deletePageModal: {
+        pageUrlToDelete?: string
+        // isDeletePageModalShown: boolean
     }
 
     searchValue: string
@@ -63,7 +67,6 @@ export interface SidebarContainerState {
     pageCount?: number
     noResults: boolean
     isBadTerm: boolean
-    searchResults: Result[]
     resultsByUrl: ResultsByUrl
     resultsClusteredByDay: boolean
     annotsByDay: PageUrlsByDay
@@ -90,7 +93,6 @@ export interface SidebarContainerState {
 
     isListFilterActive: boolean
     isSocialSearch: boolean
-    tagSuggestions: string[]
 }
 
 export type SidebarContainerEvents = UIEvent<{
@@ -111,24 +113,34 @@ export type SidebarContainerEvents = UIEvent<{
     toggleNewPageCommentBookmark: null
     togglePageCommentTags: null
     toggleNewPageCommentTagPicker: null
+
+    updateTags: { added: string; deleted: string }
+    updateTagsForPageResult: { added: string; deleted: string; url: string }
+    updateListsForPageResult: { added: string; deleted: string; url: string }
     addNewPageCommentTag: { tag: string }
     deleteNewPageCommentTag: { tag: string }
     // closeComments: null,
 
     // Delete page(s) modal
-    deletePages: null
-    closeDeletePagesModal: null
+    deletePage: null
+    closeDeletePageModal: null
+    showDeletePageModal: { pageUrl: string }
 
     // Annotation boxes
     goToAnnotation: { context: AnnotationEventContext; annnotationUrl: string }
-    editAnnotation: { context: AnnotationEventContext; annnotationUrl: string }
+    editAnnotation: {
+        context: AnnotationEventContext
+        annotationUrl: string
+        comment: string
+        tags: string[]
+    }
     deleteAnnotation: {
         context: AnnotationEventContext
-        annnotationUrl: string
+        annotationUrl: string
     }
     toggleAnnotationBookmark: {
         context: AnnotationEventContext
-        annnotationUrl: string
+        annotationUrl: string
     }
     switchAnnotationMode: {
         context: AnnotationEventContext
@@ -157,6 +169,12 @@ export type SidebarContainerEvents = UIEvent<{
     fetchSuggestedDomains: null
     resetFiterPopups: null
     toggleShowFilters: null
+
+    // Page search result interactions
+    togglePageBookmark: { pageUrl: string }
+    togglePageTagPicker: { pageUrl: string }
+    togglePageListPicker: { pageUrl: string }
+    togglePageAnnotationsView: { pageUrl: string }
 }>
 export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
 
@@ -179,11 +197,9 @@ const INITIAL_COMMENT_BOX_STATE: SidebarContainerState['commentBox'] = {
         isCommentBookmarked: false,
         isTagInputActive: false,
         showTagsPicker: false,
-        tagSuggestions: [],
         commentText: '',
         isAnnotation: false,
         tags: [],
-        initTagSuggestions: [],
     },
 }
 
@@ -210,8 +226,9 @@ export class SidebarContainerLogic extends UILogic<
             },
 
             commentBox: { ...INITIAL_COMMENT_BOX_STATE },
-            deletePagesModel: {
-                isDeletePagesModelShown: false,
+            deletePageModal: {
+                pageUrlToDelete: undefined,
+                // isDeletePageModalShown: false,
             },
 
             // pageType: 'all',
@@ -242,12 +259,10 @@ export class SidebarContainerLogic extends UILogic<
             isInvalidSearch: false,
             totalResultCount: 0,
             isListFilterActive: false,
-            searchResults: [],
-            resultsByUrl: new Map(),
+            resultsByUrl: {},
             resultsClusteredByDay: false,
             annotsByDay: {},
             isSocialSearch: false,
-            tagSuggestions: [],
         }
     }
 
@@ -288,8 +303,9 @@ export class SidebarContainerLogic extends UILogic<
                         },
                     })
                 ).docs
+
                 this.emitMutation({
-                    searchResults: { $set: results },
+                    resultsByUrl: { $set: createResultsByUrlObj(results) },
                     pageCount: { $set: results.length },
                     noResults: { $set: !results.length },
                 })
@@ -302,11 +318,12 @@ export class SidebarContainerLogic extends UILogic<
                     //     : null,
                 )
                 this.emitMutation({
-                    searchResults: { $set: result.results },
                     pageCount: { $set: result.results.length },
                     noResults: { $set: !result.results.length },
                     annotsByDay: { $set: result.annotsByDay },
-                    resultsByUrl: { $set: result.resultsByUrl },
+                    resultsByUrl: {
+                        $set: createResultsByUrlObj(result.results),
+                    },
                 })
             }
         })
@@ -324,10 +341,6 @@ export class SidebarContainerLogic extends UILogic<
 
     addNewPageComment: EventHandler<'addNewPageComment'> = async () => {
         this.emitMutation({ showCommentBox: { $set: true } })
-        const suggestions = []
-        this.emitMutation({
-            commentBox: { form: { tagSuggestions: { $set: suggestions } } },
-        })
     }
 
     setNewPageCommentAnchor: EventHandler<'setNewPageCommentAnchor'> = (
@@ -348,14 +361,60 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    saveNewPageComment: EventHandler<'changePageCommentText'> = () => {
-        this.emitMutation({
-            commentBox: { form: { showTagsPicker: { $set: false } } },
+    saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
+        event,
+        previousState,
+    }) => {
+        const pageUrl = this.options.currentTab.url
+        const dummyAnnotation = {
+            pageUrl,
+            tags: event.tags,
+            comment: event.commentText,
+            createdWhen: Date.now(),
+            lastEdited: Date.now(),
+            selector: event.anchor,
+        } as Annotation
+
+        const updateState = (args: { annotations: Annotation[] }) =>
+            this.emitMutation({
+                commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
+                showCommentBox: { $set: false },
+                annotations: {
+                    $set: args.annotations,
+                },
+            })
+
+        updateState({
+            annotations: [...previousState.annotations, dummyAnnotation],
         })
-        this.emitMutation({
-            commentBox: { $set: INITIAL_COMMENT_BOX_STATE },
-            showCommentBox: { $set: false },
-        })
+
+        try {
+            const annotationUrl = await this.options.annotations.createAnnotation(
+                {
+                    url: pageUrl,
+                    comment: event.commentText,
+                    bookmarked: event.bookmarked,
+                },
+            )
+
+            this.emitMutation({
+                annotations: {
+                    [previousState.annotations.length]: {
+                        url: { $set: annotationUrl },
+                    },
+                },
+            })
+
+            for (const tag of event.tags) {
+                await this.options.annotations.addAnnotationTag({
+                    tag,
+                    url: pageUrl,
+                })
+            }
+        } catch (err) {
+            updateState({ annotations: previousState.annotations })
+            throw err
+        }
     }
 
     cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
@@ -378,6 +437,89 @@ export class SidebarContainerLogic extends UILogic<
                 },
             },
         }
+    }
+
+    updateTags: EventHandler<'updateTags'> = async ({ event }) => {
+        const backendResult = this.options.tags.updateTagForPage({
+            added: event.added,
+            deleted: event.deleted,
+            url: this.options.currentTab.url,
+            tabId: this.options.currentTab.id,
+        })
+
+        let tagsStateUpdater: (tags: string[]) => string[]
+
+        if (event.added) {
+            tagsStateUpdater = (tags) => {
+                const tag = event.added
+                return tags.includes(tag) ? tags : [...tags, tag]
+            }
+        }
+
+        if (event.deleted) {
+            tagsStateUpdater = (tags) => {
+                const index = tags.indexOf(event.deleted)
+                if (index === -1) {
+                    return tags
+                }
+
+                return [...tags.slice(0, index), ...tags.slice(index + 1)]
+            }
+        }
+        this.emitMutation({
+            commentBox: { form: { tags: { $apply: tagsStateUpdater } } },
+        })
+
+        return backendResult
+    }
+
+    updateTagsForPageResult: EventHandler<'updateTagsForPageResult'> = async ({
+        event,
+    }) => {
+        const backendResult = this.options.tags.updateTagForPage({
+            added: event.added,
+            deleted: event.deleted,
+            url: event.url,
+        })
+
+        let tagsStateUpdater: (tags: string[]) => string[]
+
+        if (event.added) {
+            tagsStateUpdater = (tags) => {
+                const tag = event.added
+                return tags.includes(tag) ? tags : [...tags, tag]
+            }
+        }
+
+        if (event.deleted) {
+            tagsStateUpdater = (tags) => {
+                const index = tags.indexOf(event.deleted)
+                if (index === -1) {
+                    return tags
+                }
+
+                return [...tags.slice(0, index), ...tags.slice(index + 1)]
+            }
+        }
+        this.emitMutation({
+            resultsByUrl: {
+                [event.url]: {
+                    tags: { $apply: tagsStateUpdater },
+                },
+            },
+        })
+
+        return backendResult
+    }
+
+    updateListsForPageResult: EventHandler<
+        'updateListsForPageResult'
+    > = async ({ event }) => {
+        return this.options.customLists.updateListForPage({
+            added: event.added,
+            deleted: event.deleted,
+            url: event.url,
+        })
     }
 
     toggleNewPageCommentTagPicker: EventHandler<
@@ -431,47 +573,115 @@ export class SidebarContainerLogic extends UILogic<
 
     goToAnnotation: EventHandler<'goToAnnotation'> = (incoming) => {}
 
-    editAnnotation: EventHandler<'editAnnotation'> = (incoming) => {
-        return {
-            annotationModes: {
-                [incoming.event.context]: {
-                    [incoming.event.annnotationUrl]: { $set: 'default' },
+    editAnnotation: EventHandler<'editAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
+        const resultIndex = previousState.annotations.findIndex(
+            (annot) => annot.url === event.annotationUrl,
+        )
+
+        const updateState = (args: {
+            tags: string[]
+            comment?: string
+            lastEdited: number
+        }) =>
+            this.emitMutation({
+                annotationModes: {
+                    [event.context]: {
+                        [event.annotationUrl]: { $set: 'default' },
+                    },
                 },
-            },
+                annotations: {
+                    [resultIndex]: {
+                        tags: { $set: args.tags },
+                        comment: { $set: args.comment },
+                        lastEdited: { $set: args.lastEdited },
+                    },
+                },
+            })
+
+        updateState({ ...event, lastEdited: Date.now() })
+
+        try {
+            await this.options.annotations.editAnnotation(
+                event.annotationUrl,
+                event.comment,
+            )
+            await this.options.annotations.updateAnnotationTags({
+                url: event.annotationUrl,
+                tags: event.tags,
+            })
+        } catch (err) {
+            updateState({ ...previousState.annotations[resultIndex] })
+            throw err
         }
     }
 
-    deleteAnnotation: EventHandler<'deleteAnnotation'> = async (incoming) => {
-        this.emitMutation({
-            annotationModes: {
-                [incoming.event.context]: {
-                    [incoming.event.annnotationUrl]: { $set: 'default' },
+    deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
+        const resultIndex = previousState.annotations.findIndex(
+            (annot) => annot.url === event.annotationUrl,
+        )
+
+        const updateState = (args: { annotations: Annotation[] }) =>
+            this.emitMutation({
+                annotationModes: {
+                    [event.context]: {
+                        [event.annotationUrl]: { $set: 'default' },
+                    },
                 },
-            },
+                annotations: {
+                    $set: args.annotations,
+                },
+            })
+
+        updateState({
+            annotations: [
+                ...previousState.annotations.slice(0, resultIndex),
+                ...previousState.annotations.slice(resultIndex + 1),
+            ],
         })
-        await this.options.annotations.deleteAnnotation({
-            pk: incoming.event.annnotationUrl,
-        })
+
+        try {
+            await this.options.annotations.deleteAnnotation(event.annotationUrl)
+        } catch (err) {
+            updateState({ annotations: previousState.annotations })
+            throw err
+        }
     }
 
-    toggleAnnotationBookmark: EventHandler<'toggleAnnotationBookmark'> = (
-        incoming,
-    ) => {
-        const annotationIndex = incoming.previousState.annotations.findIndex(
-            (annotation) => (annotation.url = incoming.event.annnotationUrl),
+    toggleAnnotationBookmark: EventHandler<
+        'toggleAnnotationBookmark'
+    > = async ({ previousState, event }) => {
+        const resultIndex = previousState.annotations.findIndex(
+            (annotation) => annotation.url === event.annotationUrl,
         )
-        const currentlyBookmarked =
-            incoming.previousState.annotations[annotationIndex].hasBookmark
-        const shouldBeBookmarked = !currentlyBookmarked
-        this.emitMutation({
-            annotations: {
-                [annotationIndex]: {
-                    hasBookmark: { $set: shouldBeBookmarked },
+
+        const toggleBookmarkState = (hasBookmark: boolean) =>
+            this.emitMutation({
+                annotations: {
+                    [resultIndex]: {
+                        hasBookmark: { $set: hasBookmark },
+                    },
                 },
-            },
-        })
-        if (shouldBeBookmarked) {
-        } else {
+            })
+
+        const currentlyBookmarked = !!previousState.annotations[resultIndex]
+            ?.hasBookmark
+        const shouldBeBookmarked = !currentlyBookmarked
+        toggleBookmarkState(shouldBeBookmarked)
+
+        try {
+            await this.options.annotations.toggleAnnotBookmark({
+                url: event.annotationUrl,
+            })
+        } catch (err) {
+            toggleBookmarkState(!shouldBeBookmarked)
+
+            throw err
         }
     }
 
@@ -484,6 +694,127 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 },
             },
+        }
+    }
+
+    showDeletePageModal: EventHandler<'showDeletePageModal'> = ({ event }) => {
+        return {
+            deletePageModal: {
+                pageUrlToDelete: { $set: event.pageUrl },
+            },
+        }
+    }
+
+    deletePage: EventHandler<'deletePage'> = async ({ previousState }) => {
+        const { pageUrlToDelete } = previousState.deletePageModal
+
+        this.emitMutation({
+            resultsByUrl: {
+                $unset: [pageUrlToDelete],
+            },
+            deletePageModal: {
+                $unset: ['pageUrlToDelete'],
+            },
+        })
+
+        try {
+            await this.options.search.delPages([pageUrlToDelete])
+        } catch (err) {
+            this.emitMutation({
+                resultsByUrl: { $set: previousState.resultsByUrl },
+            })
+
+            throw err
+        }
+    }
+
+    closeDeletePageModal: EventHandler<'closeDeletePageModal'> = () => {
+        return {
+            deletePageModal: {
+                pageUrlToDelete: { $set: undefined },
+            },
+        }
+    }
+
+    togglePageBookmark: EventHandler<'togglePageBookmark'> = async ({
+        previousState,
+        event,
+    }) => {
+        const toggleBookmarkState = (hasBookmark: boolean) =>
+            this.emitMutation({
+                resultsByUrl: {
+                    [event.pageUrl]: {
+                        hasBookmark: { $set: hasBookmark },
+                    },
+                },
+            })
+
+        const currentlyBookmarked = !!previousState.resultsByUrl[event.pageUrl]
+            ?.hasBookmark
+        const shouldBeBookmarked = !currentlyBookmarked
+
+        toggleBookmarkState(shouldBeBookmarked)
+
+        const pending = shouldBeBookmarked
+            ? this.options.bookmarks.addPageBookmark({ url: event.pageUrl })
+            : this.options.bookmarks.delPageBookmark({ url: event.pageUrl })
+
+        try {
+            await pending
+        } catch (err) {
+            toggleBookmarkState(!shouldBeBookmarked)
+            throw err
+        }
+    }
+
+    togglePageTagPicker: EventHandler<'togglePageTagPicker'> = ({
+        previousState,
+        event,
+    }) => {
+        const currentlyShown = !!previousState.resultsByUrl[event.pageUrl]
+            ?.shouldDisplayTagPopup
+        const shouldBeShown = !currentlyShown
+
+        return {
+            resultsByUrl: {
+                [event.pageUrl]: {
+                    shouldDisplayTagPopup: { $set: shouldBeShown },
+                },
+            },
+        }
+    }
+
+    togglePageListPicker: EventHandler<'togglePageListPicker'> = ({
+        previousState,
+        event,
+    }) => {
+        const currentlyShown = !!previousState.resultsByUrl[event.pageUrl]
+            ?.shouldDisplayListPopup
+        const shouldBeShown = !currentlyShown
+
+        return {
+            resultsByUrl: {
+                [event.pageUrl]: {
+                    shouldDisplayListPopup: { $set: shouldBeShown },
+                },
+            },
+        }
+    }
+
+    // TODO: figure out which is the correct state to show annots for a given page
+    togglePageAnnotationsView: EventHandler<'togglePageAnnotationsView'> = ({
+        previousState,
+        event,
+    }) => {
+        // const currentlyShown = !!previousState.searchResults[resultIndex].
+        // const shouldBeShown = !currentlyShown
+
+        return {
+            // searchResults: {
+            //     [resultIndex]: {
+            //         shouldDisplayTagPopup: { $set: shouldBeShown }
+            //     }
+            // }
         }
     }
 
@@ -589,17 +920,19 @@ const searchAnnotations = async (search: SearchInterface, query: string) => {
         query: query.length ? query : undefined,
     })
 
-    const resultsByUrl: ResultsByUrl = new Map()
-    result.docs.forEach((doc, index) => {
-        resultsByUrl.set(doc.pageId, {
-            ...doc,
-            index,
-        })
-    })
-
     return {
         results: result.docs,
-        resultsByUrl,
+        resultsByUrl: createResultsByUrlObj(result.docs),
         annotsByDay: result['annotsByDay'],
     }
+}
+
+const createResultsByUrlObj = (results: Result[]): ResultsByUrl => {
+    const obj: ResultsByUrl = {}
+
+    results.forEach((result, index) => {
+        obj[result.url] = { ...result, index }
+    })
+
+    return obj
 }
