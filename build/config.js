@@ -31,14 +31,11 @@ export default ({ context = __dirname, mode = 'development', ...opts }) => {
         src: path.resolve(context, './src'),
     }
 
-    for (const externalTsModule of externalTsModules) {
-        const extPath = path.resolve(
-            context,
-            `./external/${externalTsModule}/ts`,
-        )
+    for (const [moduleAlias, modulePath] of Object.entries(externalTsModules)) {
+        const extPath = path.resolve(context, `./external/${modulePath}/ts`)
         Object.assign(aliases, {
-            [`${externalTsModule}$`]: extPath,
-            [`${externalTsModule}/lib`]: extPath,
+            [`${moduleAlias}$`]: extPath,
+            [`${moduleAlias}/lib`]: extPath,
         })
     }
 

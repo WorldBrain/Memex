@@ -34,6 +34,11 @@ export default class SidebarContainer extends StatefulUIElement<
             'sidebarAction',
             this.handleExternalAction,
         )
+
+        // setTimeout(() => {
+        //     console.clear()
+        //     this.processEvent('setSearchType', { type: 'page' })
+        // }, 1000)
     }
 
     componentWillUnmount() {
@@ -84,6 +89,8 @@ export default class SidebarContainer extends StatefulUIElement<
     }
 
     render() {
+        console.log(this.state)
+
         const createAnnotationEventHandlers = (
             context: 'pageAnnotations' | 'searchResults',
         ) => {
