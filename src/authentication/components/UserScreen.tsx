@@ -11,6 +11,7 @@ const styles = require('./styles.css')
 interface Props {
     initiallyShowSubscriptionModal?: boolean
     refreshUser?: boolean
+    refreshing: boolean
 }
 
 class UserScreen extends React.PureComponent<Props & AuthContextInterface> {
@@ -37,6 +38,7 @@ class UserScreen extends React.PureComponent<Props & AuthContextInterface> {
                     </div>
                 ) : (
                     <AccountInfo
+                        refreshing={false}
                         initiallyShowSubscriptionModal={
                             this.props.initiallyShowSubscriptionModal
                         }

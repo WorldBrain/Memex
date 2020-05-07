@@ -27,6 +27,9 @@ interface State {
     subscribed: boolean | null
     showSubscriptionOptions: boolean
     subscriptionRefreshing?: boolean
+    loadingMonthly: boolean
+    loadingYearly: boolean
+    loading: boolean
 }
 
 export class SubscriptionOptionsChargebee extends React.Component<
@@ -37,6 +40,9 @@ export class SubscriptionOptionsChargebee extends React.Component<
         subscribed: null,
         showSubscriptionOptions: true,
         subscriptionRefreshing: null,
+        loading: null,
+        loadingMonthly: null,
+        loadingYearly: null,
     }
 
     async componentDidMount() {
@@ -46,13 +52,27 @@ export class SubscriptionOptionsChargebee extends React.Component<
     }
 
     openPortal = async () => {
+        this.setState({
+            loading: true,
+        })
         this.props.onSubscriptionClicked?.()
         const portalLink = await subscription.getManageLink()
         window.open(portalLink['access_url'])
     }
 
+    openPortalBridge = async () => {
+        await this.openPortal().then(() => {
+            this.setState({
+                loading: false,
+            })
+        })
+    }
+
     openCheckoutBackupYearly = async () => {
         this.props.onSubscriptionClicked?.()
+        this.setState({
+            loadingYearly: true,
+        })
 
         const checkoutExternalUrl = await subscription.getCheckoutLink({
             planId: 'pro-yearly',
@@ -61,11 +81,32 @@ export class SubscriptionOptionsChargebee extends React.Component<
     }
 
     openCheckoutBackupMonthly = async () => {
+        this.setState({
+            loadingMonthly: true,
+        })
         this.props.onSubscriptionClicked?.()
         const checkoutExternalUrl = await subscription.getCheckoutLink({
             planId: 'pro-monthly',
         })
+        
+
         window.open(checkoutExternalUrl.url)
+    }
+
+    openCheckoutMonthly = async () => {
+        await this.openCheckoutBackupMonthly().then(() => {
+            this.setState({
+                loadingMonthly: false,
+            })
+        })
+    }
+
+    openCheckoutYearly = async () => {
+        await this.openCheckoutBackupYearly().then(() => {
+            this.setState({
+                loadingYearly: false,
+            })
+        })
     }
 
     handleSubscriptionRefresh = async () => {
@@ -81,6 +122,9 @@ export class SubscriptionOptionsChargebee extends React.Component<
     renderSubscriptionRefresh() {
         let onClick = () => null
         let child
+        this.setState({
+            loading: false,
+        })
 
         if (this.state.subscriptionRefreshing === true) {
             // child = "Refreshing..."
@@ -112,24 +156,32 @@ export class SubscriptionOptionsChargebee extends React.Component<
                         <>
                             <SubscriptionInnerOptions
                                 openCheckoutBackupMonthly={
-                                    this.openCheckoutBackupMonthly
+                                    this.openCheckoutMonthly
                                 }
                                 openCheckoutBackupYearly={
-                                    this.openCheckoutBackupYearly
+                                    this.openCheckoutYearly
                                 }
-                                openPortal={this.openPortal}
+                                openPortal={this.openPortalBridge}
                                 plans={this.props.plans}
+                                loadingMonthly={this.state.loadingMonthly}
+                                loadingYearly={this.state.loadingYearly}
                             />
-                            <WhiteSpacer10 />
-                            {this.renderSubscriptionRefresh()}
                             <WhiteSpacer10 />
                         </>
                     )}
                     <CenterText>
                         {this.state.subscribed && (
-                            <PrimaryButton onClick={this.openPortal}>
-                                {'Edit Subscriptions'}
-                            </PrimaryButton>
+                            <div>
+                                {this.state.loading ? (
+                                    <PrimaryButton onClick={() => null}>
+                                        <LoadingIndicator />
+                                    </PrimaryButton>
+                                ):(
+                                    <PrimaryButton onClick={this.openPortalBridge}>
+                                        {'Edit Subscriptions'}
+                                    </PrimaryButton>
+                                )}
+                            </div>
                         )}
                     </CenterText>
                 </div>

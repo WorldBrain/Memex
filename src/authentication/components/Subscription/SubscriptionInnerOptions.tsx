@@ -7,9 +7,14 @@ interface Props {
     openCheckoutBackupYearly?: () => void
     openPortal?: () => void
     plans?: UserPlan[]
+    loadingMonthly: boolean
+    loadingYearly: boolean
 }
 
+
+
 export class SubscriptionInnerOptions extends React.Component<Props> {
+
     render() {
         return (
             <div style={styles.subscriptionOptionsContainer}>
@@ -18,12 +23,14 @@ export class SubscriptionInnerOptions extends React.Component<Props> {
                     onClick={this.props.openCheckoutBackupMonthly}
                     title={'Monthly'}
                     price={'€2'}
+                    loading={this.props.loadingMonthly}
                 />
                 <SubscriptionPriceBox
                     key={'SubscriptionBoxBackupsYearly'}
                     onClick={this.props.openCheckoutBackupYearly}
                     price={'€20'}
                     title={'Yearly'}
+                    loading={this.props.loadingYearly}
                 />
             </div>
         )

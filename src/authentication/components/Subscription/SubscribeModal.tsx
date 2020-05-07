@@ -5,24 +5,14 @@ import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { SubscriptionPreview } from 'src/authentication/components/Subscription/SubscriptionPreview'
 import { AuthContextInterface } from 'src/authentication/background/types'
 
-interface Props {
+type Props = {
     onClose: () => void
-}
-interface State {
-    showSubscribeWithLogin: boolean
-}
+} & AuthContextInterface
+
 
 class SubscribeModal extends React.PureComponent<
-    Props & AuthContextInterface,
-    State
+    Props & AuthContextInterface
 > {
-    state = {
-        showSubscribeWithLogin: null,
-    }
-
-    handlePreviewPress = () => {
-        this.setState({ showSubscribeWithLogin: true })
-    }
 
     // Shows the live Subscribe window if user is logged in, or a static preview
     // of the plan picker if not.
@@ -34,14 +24,7 @@ class SubscribeModal extends React.PureComponent<
                 large
             >
                 <div style={styles.container}>
-                    {this.props.currentUser === null &&
-                    this.state.showSubscribeWithLogin !== true ? (
-                        <SubscriptionPreview
-                            onPress={this.handlePreviewPress}
-                        />
-                    ) : (
-                        <Subscribe onClose={this.props.onClose} />
-                    )}
+                    <Subscribe onClose={this.props.onClose}/>
                 </div>
             </Modal>
         )
@@ -51,6 +34,10 @@ class SubscribeModal extends React.PureComponent<
 const styles = {
     container: {
         width: '100%',
+        minHeight: 300,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: 'white',
     },
 }

@@ -236,6 +236,14 @@ const PricingButtonWrapper = styled.div`
     }
 `
 
+const PricingBox = styled.div `
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 130px;
+    flex-direction: column;
+`; 
+
 const PlanBox = styled.div `
     display: flex;
     justify-content: center;
@@ -275,5 +283,6 @@ export {
     SwitchWrapper,
     PricingButtonWrapper,
     DeviceSelection,
+    PricingBox,
 }
 export default PricingTable

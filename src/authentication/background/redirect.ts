@@ -26,7 +26,7 @@ export function makeChargebeeCallbackHandler() {
         // this is probably a bit glitchy at first, but we may be able to improve on that experience. For now it should be OK.
         setTimeout(() => {
             browser.tabs.update(tabId, { active: true, url: targetUrl })
-        }, 1000)
+        }, 1)
 
         return { redirectUrl: targetUrl }
     }
