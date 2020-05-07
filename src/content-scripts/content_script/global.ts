@@ -1,4 +1,5 @@
 import 'core-js'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
 import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
@@ -86,6 +87,7 @@ export async function main() {
                 annotations: runInBackground<AnnotationInterface<'caller'>>(),
                 search: runInBackground<SearchInterface>(),
                 customLists: runInBackground<RemoteCollectionsInterface>(),
+                normalizeUrl,
             })
             components.sidebar!.resolve()
         },

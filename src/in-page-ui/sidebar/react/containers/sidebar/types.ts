@@ -1,3 +1,5 @@
+import { URLNormalizer } from '@worldbrain/memex-url-utils'
+
 import { AnnotationsManagerInterface } from 'src/annotations/types'
 import { SearchInterface } from 'src/search/background/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
@@ -11,6 +13,7 @@ export interface SidebarContainerDependencies {
     inPageUI: InPageUIInterface
     annotationsManager: AnnotationsManagerInterface
     currentTab: { id: number; url: string }
+    normalizeUrl: URLNormalizer
     highlighter: Pick<
         HighlightInteractionInterface,
         'removeTempHighlights' | 'removeAnnotationHighlights'

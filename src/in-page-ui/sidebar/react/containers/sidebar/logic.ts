@@ -1,3 +1,4 @@
+import debounce from 'lodash/debounce'
 import {
     UILogic,
     UIEvent,
@@ -21,7 +22,6 @@ import { SidebarContainerDependencies } from './types'
 
 export interface SidebarContainerState {
     loadState: TaskState
-    annotationLoadState: TaskState
     searchLoadState: TaskState
 
     state: 'visible' | 'hidden'
@@ -157,6 +157,7 @@ export type SidebarContainerEvents = UIEvent<{
     }
 
     // Search
+    enterSearchQuery: { searchQuery: string }
     changeSearchQuery: { searchQuery: string }
     togglePageType: null
     setPageType: { type: 'page' | 'all' }
@@ -216,7 +217,6 @@ export class SidebarContainerLogic extends UILogic<
     getInitialState(): SidebarContainerState {
         return {
             loadState: 'pristine',
-            annotationLoadState: 'pristine',
             searchLoadState: 'pristine',
 
             state: this.options.inPageUI.state.sidebar ? 'visible' : 'hidden',
@@ -290,23 +290,9 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    private async _loadAnnotations() {
-        // Notes tab
-        await executeUITask(this, 'annotationLoadState', async () => {
-            const annotations = await this.options.annotations.getAllAnnotationsByUrl(
-                { url: this.options.currentTab.url },
-            )
-            this.emitMutation({ annotations: { $set: annotations } })
-        })
-    }
+    private doSearch = debounce(this._doSearch, 300)
 
-    private async _doSearch(
-        state: Pick<
-            SidebarContainerState,
-            'searchType' | 'searchValue' | 'pageType'
-        >,
-    ) {
-        // Pages tab
+    private async _doSearch(state: SidebarContainerState) {
         await executeUITask(this, 'searchLoadState', async () => {
             if (state.searchType === 'page') {
                 const results = (
@@ -319,6 +305,7 @@ export class SidebarContainerLogic extends UILogic<
                             notes: true,
                             highlights: true,
                         },
+                        base64Img: true,
                     })
                 ).docs
 
@@ -328,22 +315,52 @@ export class SidebarContainerLogic extends UILogic<
                     noResults: { $set: !results.length },
                 })
             } else if (state.searchType === 'notes') {
-                const result = await searchAnnotations(
-                    this.options.search,
-                    state.searchValue,
-                    // state.pageType === 'page'
-                    //     ? this.options.currentTab.url
-                    //     : null,
-                )
-                this.emitMutation({
-                    pageCount: { $set: result.results.length },
-                    noResults: { $set: !result.results.length },
-                    annotsByDay: { $set: result.annotsByDay },
-                    resultsByUrl: {
-                        $set: createResultsByUrlObj(result.results),
-                    },
-                })
+                if (state.pageType === 'page') {
+                    await this.searchAnnotationsForPage(state)
+                } else {
+                    // TODO: implement all annots search
+                }
             }
+        })
+    }
+
+    private async searchAnnotationsForPage(state: SidebarContainerState) {
+        const query = state.searchValue.length ? state.searchValue : undefined
+        const url = this.options.currentTab.url
+
+        const annotations: Annotation[] = []
+        const result = await this.options.search.searchAnnotations({
+            base64Img: true,
+            query,
+            url,
+        })
+
+        if (!query) {
+            const sortedKeys = Object.keys(result.annotsByDay).sort().reverse()
+
+            for (const day of sortedKeys) {
+                const cluster = result.annotsByDay[day]
+
+                for (const pageUrl of Object.keys(cluster)) {
+                    if (pageUrl === this.options.normalizeUrl(url)) {
+                        annotations.push(...cluster[pageUrl])
+                    }
+                }
+            }
+        } else {
+            for (const doc of result.docs) {
+                if (doc.url === this.options.normalizeUrl(url)) {
+                    annotations.push(...doc.annotations)
+                }
+            }
+        }
+
+        this.emitMutation({
+            pageCount: { $set: result.docs.length },
+            noResults: { $set: !result.docs.length },
+            annotations: { $set: annotations },
+            annotsByDay: { $set: result.annotsByDay },
+            resultsByUrl: { $set: createResultsByUrlObj(result.docs) },
         })
     }
 
@@ -937,10 +954,25 @@ export class SidebarContainerLogic extends UILogic<
     //     return { hoverAnnotationUrl}
     // }
 
-    changeSearchQuery: EventHandler<'changeSearchQuery'> = (incoming) => {
-        return {
-            searchValue: { $set: incoming.event.searchQuery },
-        }
+    enterSearchQuery: EventHandler<'enterSearchQuery'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.doSearch(
+            this.withMutation(previousState, {
+                searchValue: { $set: event.searchQuery },
+            }),
+        )
+    }
+
+    changeSearchQuery: EventHandler<'changeSearchQuery'> = async ({
+        event,
+        previousState,
+    }) => {
+        const mutation = { searchValue: { $set: event.searchQuery } }
+        this.emitMutation(mutation)
+
+        await this.doSearch(this.withMutation(previousState, mutation))
     }
 
     togglePageType: EventHandler<'togglePageType'> = (incoming) => {
@@ -1022,23 +1054,12 @@ export class SidebarContainerLogic extends UILogic<
         changes: UIMutation<SidebarContainerState>,
     ) {
         const nextState = this.withMutation(state, changes)
-        if (nextState.searchType === 'notes' && nextState.pageType === 'page') {
-            await this._loadAnnotations()
-        } else {
-            await this._doSearch(nextState)
-        }
-    }
-}
-
-const searchAnnotations = async (search: SearchInterface, query: string) => {
-    const result = await search.searchAnnotations({
-        query: query.length ? query : undefined,
-    })
-
-    return {
-        results: result.docs,
-        resultsByUrl: createResultsByUrlObj(result.docs),
-        annotsByDay: result['annotsByDay'],
+        await this._doSearch(nextState)
+        // if (nextState.searchType === 'notes' && nextState.pageType === 'page') {
+        //     await this._loadAnnotations()
+        // } else {
+        //     await this._doSearch(nextState)
+        // }
     }
 }
 

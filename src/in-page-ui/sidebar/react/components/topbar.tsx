@@ -37,7 +37,7 @@ const Topbar = ({
             <ButtonTooltip tooltipText="Close (ESC)" position="rightCentered">
                 <CloseButton
                     title="Close sidebar once. Disable via Memex icon in the extension toolbar."
-                    clickHandler={e => {
+                    clickHandler={(e) => {
                         e.stopPropagation()
                         handleCloseBtnClick()
                     }}
@@ -47,7 +47,7 @@ const Topbar = ({
         {props.env === 'inpage' && (
             <React.Fragment>
                 <SearchBox
-                    placeholder={'Search Memex'}
+                    placeholder="Search Memex"
                     searchValue={props.searchValue}
                     onSearchChange={props.handleSearchChange}
                     onSearchEnter={props.handleSearchEnter}
@@ -85,7 +85,7 @@ const Topbar = ({
                         className={cx(styles.button, styles.comments, {
                             [styles.disabled]: disableAddCommentBtn,
                         })}
-                        onClick={e => {
+                        onClick={(e) => {
                             e.stopPropagation()
                             handleAddCommentBtnClick()
                         }}

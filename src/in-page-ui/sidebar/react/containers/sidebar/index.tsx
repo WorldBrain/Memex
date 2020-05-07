@@ -144,7 +144,6 @@ export default class SidebarContainer extends StatefulUIElement<
         return (
             <Sidebar
                 loadState={this.state.loadState}
-                annotationLoadState={this.state.annotationLoadState}
                 searchLoadState={this.state.searchLoadState}
                 env={this.props.env}
                 pageAnnotations={{
@@ -187,7 +186,9 @@ export default class SidebarContainer extends StatefulUIElement<
                     handleDeletePageModalClose: () =>
                         this.processEvent('closeDeletePageModal', null),
                 }}
-                onQueryKeyDown={() => {}}
+                onQueryEnter={(searchQuery) =>
+                    this.processEvent('enterSearchQuery', { searchQuery })
+                }
                 onQueryChange={(searchQuery) => {
                     this.processEvent('changeSearchQuery', { searchQuery })
                 }}

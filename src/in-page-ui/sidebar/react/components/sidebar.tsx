@@ -26,7 +26,6 @@ interface OwnProps {
     env: 'inpage' | 'overview'
     isOpen: boolean
     loadState: TaskState
-    annotationLoadState: TaskState
     searchLoadState: TaskState
 
     searchValue: string
@@ -54,7 +53,7 @@ interface OwnProps {
     }
 
     highlighter: Pick<HighlightInteractionInterface, 'removeTempHighlights'>
-    onQueryKeyDown: (searchValue: string) => void
+    onQueryEnter: (searchValue: string) => void
     onQueryChange: (searchValue: string) => void
     onShowFiltersSidebarChange: (value: boolean) => void
     onOpenSettings: () => void
@@ -77,7 +76,7 @@ export default class Sidebar extends React.Component<Props> {
 
     private handleSearchEnter = (
         e: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ) => this.props.onQueryKeyDown(this.props.searchValue)
+    ) => this.props.onQueryEnter(this.props.searchValue)
 
     private handleClearBtn = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
@@ -135,7 +134,7 @@ export default class Sidebar extends React.Component<Props> {
         ) {
             return this.renderResults()
         }
-        if (this.props.annotationLoadState !== 'success') {
+        if (this.props.searchLoadState === 'running') {
             return <LoadingIndicator />
         }
 

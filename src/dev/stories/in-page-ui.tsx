@@ -67,6 +67,7 @@ async function createDependencies() {
         annotationsManager: annotationManager,
         getSidebarEnabled: async () => true,
         setSidebarEnabled: async () => {},
+        normalizeUrl: (url) => url,
         search: background.backgroundModules.search.remoteFunctions.search,
         bookmarks:
             background.backgroundModules.search.remoteFunctions.bookmarks,

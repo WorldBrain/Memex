@@ -53,6 +53,7 @@ const setupLogicHelper = async ({
             toggleAnnotBookmark: () => undefined,
             updateAnnotationTags: () => undefined,
         } as any,
+        normalizeUrl: (url) => url,
         search: {
             ...backgroundModules.search.remoteFunctions.search,
         },
