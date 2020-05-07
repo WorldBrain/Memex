@@ -1,6 +1,11 @@
 import React from 'react'
 import cx from 'classnames'
 import { browser } from 'webextension-polyfill-ts'
+import {
+    SearchTypeChange,
+    SearchType,
+    PageType,
+} from '../containers/sidebar/types'
 
 const commentAdd = browser.extension.getURL('/img/comment_add.svg')
 
@@ -8,20 +13,18 @@ const styles = require('./search-type-switch.css')
 
 export interface StateProps {
     allAnnotationsExpanded: boolean
-    resultsSearchType: 'page' | 'notes' | 'social'
-    searchType: 'notes' | 'page' | 'social'
-    pageType: 'page' | 'all'
+    resultsSearchType: SearchType
+    searchType: SearchType
+    pageType: PageType
     pageCount?: number
     annotCount?: number
 }
 
 export interface DispatchProps {
     handleAllAnnotationsFoldToggle: React.MouseEventHandler<HTMLButtonElement>
-    setSearchType: (value: 'notes' | 'page' | 'social') => Promise<void>
-    setPageType: (value: 'page' | 'all') => Promise<void>
-    setResultsSearchType: (value: 'page' | 'notes' | 'social') => Promise<void>
     setAnnotationsExpanded: (value: boolean) => void
     handlePageTypeToggle: () => Promise<void>
+    handleSwitch: (changes: SearchTypeChange) => Promise<void>
 }
 
 export interface OwnProps {
@@ -59,10 +62,10 @@ export default class SearchTypeSwitch extends React.Component<
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        await this.props.handlePageTypeToggle()
-        if (this.props.resultsSearchType !== 'notes') {
-            await this.props.setResultsSearchType('notes')
-        }
+        await this.props.handleSwitch({
+            pageType: 'all',
+            resultsSearchType: 'notes',
+        })
         this.props.setAnnotationsExpanded(true)
     }
 
@@ -70,10 +73,11 @@ export default class SearchTypeSwitch extends React.Component<
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        await this.props.setSearchType('page')
-
-        await this.props.setResultsSearchType('page')
-        await this.props.setPageType('all')
+        await this.props.handleSwitch({
+            searchType: 'page',
+            resultsSearchType: 'page',
+            pageType: 'all',
+        })
         this.props.setAnnotationsExpanded(false)
     }
 
@@ -81,17 +85,18 @@ export default class SearchTypeSwitch extends React.Component<
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        await this.props.setSearchType('notes')
-        await this.props.setPageType('page')
+        await this.props.handleSwitch({ searchType: 'notes', pageType: 'page' })
     }
 
     private handleSocialBtnClick = async (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        await this.props.setSearchType('social')
-        await this.props.setResultsSearchType('social')
-        await this.props.setPageType('all')
+        await this.props.handleSwitch({
+            searchType: 'social',
+            resultsSearchType: 'social',
+            pageType: 'all',
+        })
         this.props.setAnnotationsExpanded(false)
     }
 

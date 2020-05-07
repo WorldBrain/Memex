@@ -334,12 +334,8 @@ export default class SidebarContainer extends StatefulUIElement<
                     annotCount: this.state.annotCount,
                     handleAllAnnotationsFoldToggle: () =>
                         this.processEvent('toggleAllAnnotationsFold', null),
-                    setSearchType: (type: 'notes' | 'page') =>
-                        this.processEvent('setSearchType', { type }),
-                    setPageType: (type: 'page' | 'all') =>
-                        this.processEvent('setPageType', { type }),
-                    setResultsSearchType: (type: 'page' | 'notes') =>
-                        this.processEvent('setResultsSearchType', { type }),
+                    handleSwitch: (changes) =>
+                        this.processEvent('switchSearch', { changes }),
                     setAnnotationsExpanded: (value: boolean) =>
                         this.processEvent('setAnnotationsExpanded', { value }),
                     handlePageTypeToggle: () =>

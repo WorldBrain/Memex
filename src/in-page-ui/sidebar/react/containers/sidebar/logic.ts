@@ -17,7 +17,12 @@ import { Annotation } from 'src/annotations/types'
 import { PageUrlsByDay, SearchInterface } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
-import { SidebarContainerDependencies } from './types'
+import {
+    SidebarContainerDependencies,
+    PageType,
+    SearchType,
+    SearchTypeChange,
+} from './types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 
 export interface SidebarContainerState {
@@ -61,9 +66,9 @@ export interface SidebarContainerState {
     }
 
     searchValue: string
-    pageType: 'page' | 'all'
-    searchType: 'notes' | 'page' | 'social'
-    resultsSearchType: 'notes' | 'page' | 'social'
+    pageType: PageType
+    searchType: SearchType
+    resultsSearchType: SearchType
     pageCount?: number
     noResults: boolean
     isBadTerm: boolean
@@ -159,9 +164,7 @@ export type SidebarContainerEvents = UIEvent<{
     // Search
     changeSearchQuery: { searchQuery: string }
     togglePageType: null
-    setPageType: { type: 'page' | 'all' }
-    setSearchType: { type: 'notes' | 'page' | 'social' }
-    setResultsSearchType: { type: 'notes' | 'page' | 'social' }
+    switchSearch: { changes: SearchTypeChange }
     setAnnotationsExpanded: { value: boolean }
     toggleAllAnnotationsFold: null
     clearAllFilters: null
@@ -830,38 +833,33 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    togglePageType: EventHandler<'togglePageType'> = (incoming) => {
+    togglePageType: EventHandler<'togglePageType'> = async (incoming) => {
         const currentPageType = incoming.previousState.pageType
         const toggledPageType = currentPageType === 'all' ? 'page' : 'all'
-        this.setPageType({ ...incoming, event: { type: toggledPageType } })
-    }
-
-    setPageType: EventHandler<'setPageType'> = async ({
-        previousState,
-        event,
-    }) => {
-        const mutation = {
-            pageType: { $set: event.type },
-        }
-        this.emitMutation(mutation)
-        await this._maybeLoad(previousState, mutation)
-    }
-
-    setSearchType: EventHandler<'setSearchType'> = async ({
-        previousState,
-        event,
-    }) => {
-        const mutation = {
-            searchType: { $set: event.type },
-        }
-        this.emitMutation(mutation)
-        await this._maybeLoad(previousState, mutation)
-    }
-
-    setResultsSearchType: EventHandler<'setResultsSearchType'> = (incoming) => {
-        this.emitMutation({
-            resultsSearchType: { $set: incoming.event.type },
+        await this.switchSearch({
+            ...incoming,
+            event: { changes: { pageType: toggledPageType } },
         })
+    }
+
+    switchSearch: EventHandler<'switchSearch'> = async ({
+        previousState,
+        event,
+    }) => {
+        const mutation: UIMutation<SidebarContainerState> = {}
+        if (event.changes.pageType) {
+            mutation.pageType = { $set: event.changes.pageType }
+        }
+        if (event.changes.searchType) {
+            mutation.searchType = { $set: event.changes.searchType }
+        }
+        if (event.changes.resultsSearchType) {
+            mutation.resultsSearchType = {
+                $set: event.changes.resultsSearchType,
+            }
+        }
+        this.emitMutation(mutation)
+        await this._maybeLoad(previousState, mutation)
     }
 
     setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (
