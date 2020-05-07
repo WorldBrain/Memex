@@ -18,7 +18,6 @@ import { PageUrlsByDay, SearchInterface } from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import { SidebarContainerDependencies } from './types'
-import { AnnotationInterface } from 'src/direct-linking/background/types'
 
 export interface SidebarContainerState {
     loadState: TaskState
@@ -108,6 +107,7 @@ export type SidebarContainerEvents = UIEvent<{
         commentText: string
         tags: string[]
         bookmarked: boolean
+        skipPageIndexing?: boolean
     }
     cancelNewPageComment: null
     toggleNewPageCommentBookmark: null
@@ -266,6 +266,24 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    private static findIndexOfAnnotsByDay(
+        annotationUrl: string,
+        annotsByDay: PageUrlsByDay,
+    ): { time: number; pageUrl: string; index: number } {
+        for (const [time, annotsByPageObj] of Object.entries(annotsByDay)) {
+            for (const [pageUrl, annotations] of Object.entries(
+                annotsByPageObj as { [pageUrl: string]: Annotation[] },
+            )) {
+                const index = annotations.findIndex(
+                    (annot) => annot.url === annotationUrl,
+                )
+                if (index === -1) {
+                    continue
+                }
+                return { time, pageUrl, index } as any
+            }
+        }
+    }
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial<SidebarContainerState>(this, async () => {
             await this._maybeLoad(previousState, {})
@@ -340,8 +358,6 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     addNewPageComment: EventHandler<'addNewPageComment'> = async () => {
-        console.log('handle add new comment')
-
         this.emitMutation({ showCommentBox: { $set: true } })
     }
 
@@ -397,6 +413,7 @@ export class SidebarContainerLogic extends UILogic<
                     comment: event.commentText,
                     bookmarked: event.bookmarked,
                 },
+                { skipPageIndexing: event.skipPageIndexing },
             )
 
             this.emitMutation({
@@ -579,31 +596,59 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const resultIndex = previousState.annotations.findIndex(
-            (annot) => annot.url === event.annotationUrl,
-        )
+        let mutation: any
+        let resetMutation: any
 
-        const updateState = (args: {
-            tags: string[]
-            comment?: string
-            lastEdited: number
-        }) =>
-            this.emitMutation({
-                annotationModes: {
-                    [event.context]: {
-                        [event.annotationUrl]: { $set: 'default' },
+        if (event.context === 'searchResults') {
+            const {
+                time,
+                pageUrl,
+                index,
+            } = SidebarContainerLogic.findIndexOfAnnotsByDay(
+                event.annotationUrl,
+                previousState.annotsByDay,
+            )
+
+            mutation = {
+                annotsByDay: {
+                    [time]: {
+                        [pageUrl]: {
+                            [index]: {
+                                tags: { $set: event.tags },
+                                comment: { $set: event.comment },
+                                lastEdited: { $set: Date.now() },
+                            },
+                        },
                     },
                 },
+            }
+
+            resetMutation = { annotsByDay: { $set: previousState.annotsByDay } }
+        } else {
+            const resultIndex = previousState.annotations.findIndex(
+                (annot) => annot.url === event.annotationUrl,
+            )
+            mutation = {
                 annotations: {
                     [resultIndex]: {
-                        tags: { $set: args.tags },
-                        comment: { $set: args.comment },
-                        lastEdited: { $set: args.lastEdited },
+                        tags: { $set: event.tags },
+                        comment: { $set: event.comment },
+                        lastEdited: { $set: Date.now() },
                     },
                 },
-            })
+            }
 
-        updateState({ ...event, lastEdited: Date.now() })
+            resetMutation = { annotations: { $set: previousState.annotations } }
+        }
+
+        this.emitMutation({
+            annotationModes: {
+                [event.context]: {
+                    [event.annotationUrl]: { $set: 'default' },
+                },
+            },
+            ...mutation,
+        })
 
         try {
             await this.options.annotations.editAnnotation(
@@ -615,7 +660,7 @@ export class SidebarContainerLogic extends UILogic<
                 tags: event.tags,
             })
         } catch (err) {
-            updateState({ ...previousState.annotations[resultIndex] })
+            this.emitMutation(resetMutation)
             throw err
         }
     }
@@ -624,33 +669,69 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const resultIndex = previousState.annotations.findIndex(
-            (annot) => annot.url === event.annotationUrl,
-        )
+        let mutation: any
+        let resetMutation: any
 
-        const updateState = (args: { annotations: Annotation[] }) =>
-            this.emitMutation({
-                annotationModes: {
-                    [event.context]: {
-                        [event.annotationUrl]: { $set: 'default' },
+        if (event.context === 'searchResults') {
+            const {
+                time,
+                pageUrl,
+                index,
+            } = SidebarContainerLogic.findIndexOfAnnotsByDay(
+                event.annotationUrl,
+                previousState.annotsByDay,
+            )
+
+            // If only one annot left for the page, remove the page
+            if (previousState.annotsByDay[time]?.[pageUrl]?.length === 1) {
+                mutation = {
+                    annotsByDay: {
+                        [time]: {
+                            $unset: [pageUrl],
+                        },
                     },
-                },
-                annotations: {
-                    $set: args.annotations,
-                },
-            })
+                }
+            } else {
+                mutation = {
+                    annotsByDay: {
+                        [time]: {
+                            [pageUrl]: {
+                                $unset: [index],
+                            },
+                        },
+                    },
+                }
+            }
 
-        updateState({
-            annotations: [
-                ...previousState.annotations.slice(0, resultIndex),
-                ...previousState.annotations.slice(resultIndex + 1),
-            ],
+            resetMutation = { annotsByDay: { $set: previousState.annotsByDay } }
+        } else {
+            const resultIndex = previousState.annotations.findIndex(
+                (annot) => annot.url === event.annotationUrl,
+            )
+            mutation = {
+                annotations: {
+                    $apply: (annotations) => [
+                        ...annotations.slice(0, resultIndex),
+                        ...annotations.slice(resultIndex + 1),
+                    ],
+                },
+            }
+            resetMutation = { annotations: { $set: previousState.annotations } }
+        }
+
+        this.emitMutation({
+            annotationModes: {
+                [event.context]: {
+                    [event.annotationUrl]: { $set: 'default' },
+                },
+            },
+            ...mutation,
         })
 
         try {
             await this.options.annotations.deleteAnnotation(event.annotationUrl)
         } catch (err) {
-            updateState({ annotations: previousState.annotations })
+            this.emitMutation(resetMutation)
             throw err
         }
     }
@@ -658,30 +739,62 @@ export class SidebarContainerLogic extends UILogic<
     toggleAnnotationBookmark: EventHandler<
         'toggleAnnotationBookmark'
     > = async ({ previousState, event }) => {
-        const resultIndex = previousState.annotations.findIndex(
-            (annotation) => annotation.url === event.annotationUrl,
-        )
+        let updateState: (hasBookmark: boolean) => void
+        let currentlyBookmarked: boolean
 
-        const toggleBookmarkState = (hasBookmark: boolean) =>
-            this.emitMutation({
-                annotations: {
-                    [resultIndex]: {
-                        hasBookmark: { $set: hasBookmark },
+        if (event.context === 'searchResults') {
+            const {
+                time,
+                pageUrl,
+                index,
+            } = SidebarContainerLogic.findIndexOfAnnotsByDay(
+                event.annotationUrl,
+                previousState.annotsByDay,
+            )
+
+            currentlyBookmarked = !!previousState.annotsByDay[time]?.[
+                pageUrl
+            ]?.[index]?.hasBookmark
+
+            updateState = (hasBookmark) =>
+                this.emitMutation({
+                    annotsByDay: {
+                        [time]: {
+                            [pageUrl]: {
+                                [index]: {
+                                    hasBookmark: { $set: hasBookmark },
+                                },
+                            },
+                        },
                     },
-                },
-            })
+                })
+        } else {
+            const resultIndex = previousState.annotations.findIndex(
+                (annotation) => annotation.url === event.annotationUrl,
+            )
 
-        const currentlyBookmarked = !!previousState.annotations[resultIndex]
-            ?.hasBookmark
+            currentlyBookmarked = !!previousState.annotations[resultIndex]
+                ?.hasBookmark
+
+            updateState = (hasBookmark) =>
+                this.emitMutation({
+                    annotations: {
+                        [resultIndex]: {
+                            hasBookmark: { $set: hasBookmark },
+                        },
+                    },
+                })
+        }
+
         const shouldBeBookmarked = !currentlyBookmarked
-        toggleBookmarkState(shouldBeBookmarked)
+        updateState(shouldBeBookmarked)
 
         try {
             await this.options.annotations.toggleAnnotBookmark({
                 url: event.annotationUrl,
             })
         } catch (err) {
-            toggleBookmarkState(!shouldBeBookmarked)
+            updateState(!shouldBeBookmarked)
 
             throw err
         }

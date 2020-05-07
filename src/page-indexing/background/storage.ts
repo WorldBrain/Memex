@@ -43,7 +43,7 @@ export default class PageStorage extends StorageModule {
                 },
             },
             deletePage: {
-                operation: 'deletePage',
+                operation: 'deleteObject',
                 collection: 'pages',
                 args: {
                     url: '$url:string',
@@ -172,7 +172,7 @@ export default class PageStorage extends StorageModule {
             { url: normalizedUrl },
         )
         const existingVisitTimes = new Set(
-            existingVisits.map(visit => visit.time),
+            existingVisits.map((visit) => visit.time),
         )
         const newVisits: Visit[] = []
         for (const visitTime of visitTimes) {
