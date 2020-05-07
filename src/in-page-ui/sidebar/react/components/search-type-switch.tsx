@@ -1,6 +1,11 @@
 import React from 'react'
 import cx from 'classnames'
 import { browser } from 'webextension-polyfill-ts'
+import {
+    SearchTypeChange,
+    SearchType,
+    PageType,
+} from '../containers/sidebar/types'
 
 const commentAdd = browser.extension.getURL('/img/comment_add.svg')
 
@@ -8,20 +13,18 @@ const styles = require('./search-type-switch.css')
 
 export interface StateProps {
     allAnnotationsExpanded: boolean
-    resultsSearchType: 'page' | 'notes' | 'social'
-    searchType: 'notes' | 'page' | 'social'
-    pageType: 'page' | 'all'
+    resultsSearchType: SearchType
+    searchType: SearchType
+    pageType: PageType
     pageCount?: number
     annotCount?: number
 }
 
 export interface DispatchProps {
     handleAllAnnotationsFoldToggle: React.MouseEventHandler<HTMLButtonElement>
-    setSearchType: (value: 'notes' | 'page' | 'social') => void
-    setPageType: (value: 'page' | 'all') => void
-    setResultsSearchType: (value: 'page' | 'notes' | 'social') => void
     setAnnotationsExpanded: (value: boolean) => void
-    handlePageTypeToggle: () => void
+    handlePageTypeToggle: () => Promise<void>
+    handleSwitch: (changes: SearchTypeChange) => Promise<void>
 }
 
 export interface OwnProps {
@@ -55,43 +58,45 @@ export default class SearchTypeSwitch extends React.Component<
         return <span className={styles.searchCount}>{count}</span>
     }
 
-    private handleAllBtnClick = (
+    private handleAllBtnClick = async (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        this.props.handlePageTypeToggle()
-        if (this.props.resultsSearchType !== 'notes') {
-            this.props.setResultsSearchType('notes')
-        }
+        await this.props.handleSwitch({
+            pageType: 'all',
+            resultsSearchType: 'notes',
+        })
         this.props.setAnnotationsExpanded(true)
     }
 
-    private handlePagesBtnClick = (
+    private handlePagesBtnClick = async (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        this.props.setSearchType('page')
-
-        this.props.setResultsSearchType('page')
-        this.props.setPageType('all')
+        await this.props.handleSwitch({
+            searchType: 'page',
+            resultsSearchType: 'page',
+            pageType: 'all',
+        })
         this.props.setAnnotationsExpanded(false)
     }
 
-    private handleNotesBtnClick = (
+    private handleNotesBtnClick = async (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        this.props.setSearchType('notes')
-        this.props.setPageType('page')
+        await this.props.handleSwitch({ searchType: 'notes', pageType: 'page' })
     }
 
-    private handleSocialBtnClick = (
+    private handleSocialBtnClick = async (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        this.props.setSearchType('social')
-        this.props.setResultsSearchType('social')
-        this.props.setPageType('all')
+        await this.props.handleSwitch({
+            searchType: 'social',
+            resultsSearchType: 'social',
+            pageType: 'all',
+        })
         this.props.setAnnotationsExpanded(false)
     }
 
@@ -142,7 +147,7 @@ export default class SearchTypeSwitch extends React.Component<
                             </button>
                         </div>
                         <div
-                            onClick={e => {
+                            onClick={(e) => {
                                 e.stopPropagation()
                                 this.props.handleAddPageCommentBtnClick()
                             }}
@@ -160,7 +165,7 @@ export default class SearchTypeSwitch extends React.Component<
                                             styles.searchSwitchBtn,
                                             styles.btn,
                                         )}
-                                        onClick={e => {
+                                        onClick={(e) => {
                                             e.preventDefault()
                                             this.props.handlePageTypeToggle()
                                         }}

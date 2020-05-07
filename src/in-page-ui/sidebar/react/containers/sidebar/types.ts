@@ -25,3 +25,11 @@ export interface SidebarContainerDependencies {
     search: SearchInterface
     bookmarks: BookmarksInterface
 }
+
+export type SearchType = 'notes' | 'page' | 'social'
+export type PageType = 'page' | 'all'
+export interface SearchTypeChange {
+    searchType?: 'notes' | 'page' | 'social'
+    resultsSearchType?: 'notes' | 'page' | 'social'
+    pageType?: 'page' | 'all'
+}

@@ -640,20 +640,30 @@ describe('SidebarContainerLogic', () => {
         it('should be able to set search type', async ({ device }) => {
             const { sidebar } = await setupLogicHelper({ device })
 
-            await sidebar.processEvent('setSearchType', { type: 'notes' })
+            await sidebar.processEvent('switchSearch', {
+                changes: { searchType: 'notes' },
+            })
             expect(sidebar.state.searchType).toEqual('notes')
-            await sidebar.processEvent('setSearchType', { type: 'page' })
+            await sidebar.processEvent('switchSearch', {
+                changes: { searchType: 'page' },
+            })
             expect(sidebar.state.searchType).toEqual('page')
-            await sidebar.processEvent('setSearchType', { type: 'social' })
+            await sidebar.processEvent('switchSearch', {
+                changes: { searchType: 'social' },
+            })
             expect(sidebar.state.searchType).toEqual('social')
         })
 
         it('should be able to set page type', async ({ device }) => {
             const { sidebar } = await setupLogicHelper({ device })
 
-            await sidebar.processEvent('setPageType', { type: 'all' })
+            await sidebar.processEvent('switchSearch', {
+                changes: { pageType: 'all' },
+            })
             expect(sidebar.state.pageType).toEqual('all')
-            await sidebar.processEvent('setPageType', { type: 'page' })
+            await sidebar.processEvent('switchSearch', {
+                changes: { pageType: 'page' },
+            })
             expect(sidebar.state.pageType).toEqual('page')
         })
     })

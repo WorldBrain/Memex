@@ -34,6 +34,11 @@ export default class SidebarContainer extends StatefulUIElement<
             'sidebarAction',
             this.handleExternalAction,
         )
+
+        // setTimeout(() => {
+        //     console.clear()
+        //     this.processEvent('setSearchType', { type: 'page' })
+        // }, 1000)
     }
 
     componentWillUnmount() {
@@ -330,17 +335,12 @@ export default class SidebarContainer extends StatefulUIElement<
                     annotCount: this.state.annotCount,
                     handleAllAnnotationsFoldToggle: () =>
                         this.processEvent('toggleAllAnnotationsFold', null),
-                    setSearchType: (type: 'notes' | 'page') =>
-                        this.processEvent('setSearchType', { type }),
-                    setPageType: (type: 'page' | 'all') =>
-                        this.processEvent('setPageType', { type }),
-                    setResultsSearchType: (type: 'page' | 'notes') =>
-                        this.processEvent('setResultsSearchType', { type }),
+                    handleSwitch: (changes) =>
+                        this.processEvent('switchSearch', { changes }),
                     setAnnotationsExpanded: (value: boolean) =>
                         this.processEvent('setAnnotationsExpanded', { value }),
-                    handlePageTypeToggle: () => {
-                        this.processEvent('togglePageType', null)
-                    },
+                    handlePageTypeToggle: () =>
+                        this.processEvent('togglePageType', null),
                     isOverview: this.props.env === 'overview',
                     handleAddPageCommentBtnClick: () =>
                         this.processEvent('addNewPageComment', null),

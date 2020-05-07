@@ -40,3 +40,6 @@
 [submodule "external/@worldbrain/storex-middleware-change-watcher"]
 	path = external/@worldbrain/storex-middleware-change-watcher
 	url = https://github.com/WorldBrain/storex-middleware-change-watcher
+[submodule "external/ui-logic"]
+	path = external/ui-logic
+	url = git@github.com:ShishKabab/ui-logic.git

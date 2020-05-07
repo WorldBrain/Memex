@@ -42,7 +42,6 @@ function getShortcutHandlers(inPageUI: InPageUIInterface): HandleInterface {
         addToCollection: () => inPageUI.showRibbon({ action: 'list' }),
         createBookmark: () => inPageUI.showRibbon({ action: 'bookmark' }),
         toggleSidebar: () => {
-            console.log('toggle sidebar')
             inPageUI.toggleSidebar()
         },
         toggleHighlights: () => inPageUI.toggleHighlights(),
