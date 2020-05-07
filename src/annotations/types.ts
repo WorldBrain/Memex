@@ -33,5 +33,5 @@ export interface AnnotationsManagerInterface {
         // limit = 10,
         // skip = 0,
         isSocialPost?: boolean,
-    ): Promise<Array<any>>
+    ): Promise<Annotation[]>
 }

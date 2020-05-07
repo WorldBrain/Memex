@@ -105,32 +105,14 @@ export default class AnnotationsManager implements AnnotationsManagerInterface {
         // limit = 10,
         // skip = 0,
         isSocialPost?: boolean,
-    ) => {
-        this._setupRPC()
-        const annotationsWithoutTags: Omit<
-            Annotation,
-            'tags'
-        >[] = await this._getAllAnnotationsByUrlRPC(
+    ): Promise<Annotation[]> => {
+        return this._getAllAnnotationsByUrlRPC(
             {
                 url,
                 // limit,
                 // skip,
             },
             isSocialPost,
-        )
-
-        return Promise.all(
-            annotationsWithoutTags.map(async (annotation) => {
-                const annotationTags: {
-                    name: string
-                    url: string
-                }[] = await this._getTagsByAnnotationUrlRPC(annotation.url)
-                const tags = annotationTags.map((tag) => tag.name)
-                return {
-                    ...annotation,
-                    tags,
-                }
-            }),
         )
     }
 

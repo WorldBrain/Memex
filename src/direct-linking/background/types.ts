@@ -12,7 +12,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     getAllAnnotationsByUrl: RemotePositionalFunction<
         Role,
         [AnnotSearchParams] | [AnnotSearchParams, boolean],
-        any
+        Annotation[]
     >
     createAnnotation: RemotePositionalFunction<
         Role,

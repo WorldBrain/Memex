@@ -247,17 +247,26 @@ export default class DirectLinkingBackground {
 
         const annotResults = (await Promise.all(
             annotations.map(
-                async ({ createdWhen, lastEdited, ...annotation }) => ({
-                    ...annotation,
-                    hasBookmark: await this.annotationStorage.annotHasBookmark({
-                        url: annotation.url,
-                    }),
-                    createdWhen: createdWhen.getTime(),
-                    lastEdited:
-                        lastEdited && lastEdited instanceof Date
-                            ? lastEdited.getTime()
-                            : undefined,
-                }),
+                async ({ createdWhen, lastEdited, ...annotation }) => {
+                    const tags = await this.annotationStorage.getTagsByAnnotationUrl(
+                        annotation.url,
+                    )
+
+                    return {
+                        ...annotation,
+                        hasBookmark: await this.annotationStorage.annotHasBookmark(
+                            {
+                                url: annotation.url,
+                            },
+                        ),
+                        createdWhen: createdWhen.getTime(),
+                        tags: tags.map((t) => t.name),
+                        lastEdited:
+                            lastEdited && lastEdited instanceof Date
+                                ? lastEdited.getTime()
+                                : undefined,
+                    }
+                },
             ),
         )) as any
 
