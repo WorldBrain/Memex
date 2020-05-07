@@ -89,8 +89,6 @@ export default class SidebarContainer extends StatefulUIElement<
     }
 
     render() {
-        console.log(this.state)
-
         const createAnnotationEventHandlers = (
             context: 'pageAnnotations' | 'searchResults',
         ) => {
@@ -344,9 +342,8 @@ export default class SidebarContainer extends StatefulUIElement<
                         this.processEvent('setResultsSearchType', { type }),
                     setAnnotationsExpanded: (value: boolean) =>
                         this.processEvent('setAnnotationsExpanded', { value }),
-                    handlePageTypeToggle: () => {
-                        this.processEvent('togglePageType', null)
-                    },
+                    handlePageTypeToggle: () =>
+                        this.processEvent('togglePageType', null),
                     isOverview: this.props.env === 'overview',
                     handleAddPageCommentBtnClick: () =>
                         this.processEvent('addNewPageComment', null),

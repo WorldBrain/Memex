@@ -17,11 +17,11 @@ export interface StateProps {
 
 export interface DispatchProps {
     handleAllAnnotationsFoldToggle: React.MouseEventHandler<HTMLButtonElement>
-    setSearchType: (value: 'notes' | 'page' | 'social') => void
-    setPageType: (value: 'page' | 'all') => void
-    setResultsSearchType: (value: 'page' | 'notes' | 'social') => void
+    setSearchType: (value: 'notes' | 'page' | 'social') => Promise<void>
+    setPageType: (value: 'page' | 'all') => Promise<void>
+    setResultsSearchType: (value: 'page' | 'notes' | 'social') => Promise<void>
     setAnnotationsExpanded: (value: boolean) => void
-    handlePageTypeToggle: () => void
+    handlePageTypeToggle: () => Promise<void>
 }
 
 export interface OwnProps {
@@ -55,43 +55,43 @@ export default class SearchTypeSwitch extends React.Component<
         return <span className={styles.searchCount}>{count}</span>
     }
 
-    private handleAllBtnClick = (
+    private handleAllBtnClick = async (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        this.props.handlePageTypeToggle()
+        await this.props.handlePageTypeToggle()
         if (this.props.resultsSearchType !== 'notes') {
-            this.props.setResultsSearchType('notes')
+            await this.props.setResultsSearchType('notes')
         }
         this.props.setAnnotationsExpanded(true)
     }
 
-    private handlePagesBtnClick = (
+    private handlePagesBtnClick = async (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        this.props.setSearchType('page')
+        await this.props.setSearchType('page')
 
-        this.props.setResultsSearchType('page')
-        this.props.setPageType('all')
+        await this.props.setResultsSearchType('page')
+        await this.props.setPageType('all')
         this.props.setAnnotationsExpanded(false)
     }
 
-    private handleNotesBtnClick = (
+    private handleNotesBtnClick = async (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        this.props.setSearchType('notes')
-        this.props.setPageType('page')
+        await this.props.setSearchType('notes')
+        await this.props.setPageType('page')
     }
 
-    private handleSocialBtnClick = (
+    private handleSocialBtnClick = async (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault()
-        this.props.setSearchType('social')
-        this.props.setResultsSearchType('social')
-        this.props.setPageType('all')
+        await this.props.setSearchType('social')
+        await this.props.setResultsSearchType('social')
+        await this.props.setPageType('all')
         this.props.setAnnotationsExpanded(false)
     }
 
@@ -142,7 +142,7 @@ export default class SearchTypeSwitch extends React.Component<
                             </button>
                         </div>
                         <div
-                            onClick={e => {
+                            onClick={(e) => {
                                 e.stopPropagation()
                                 this.props.handleAddPageCommentBtnClick()
                             }}
@@ -160,7 +160,7 @@ export default class SearchTypeSwitch extends React.Component<
                                             styles.searchSwitchBtn,
                                             styles.btn,
                                         )}
-                                        onClick={e => {
+                                        onClick={(e) => {
                                             e.preventDefault()
                                             this.props.handlePageTypeToggle()
                                         }}
