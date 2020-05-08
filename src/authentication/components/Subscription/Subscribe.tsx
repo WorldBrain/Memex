@@ -23,7 +23,6 @@ const styles = require('../styles.css')
 
 type Props = {
     onClose: () => void
-    onPress: () => void
 } & AuthContextInterface
 
 interface State {
@@ -57,7 +56,7 @@ class Subscribe extends React.Component<Props, State> {
         this.setState({
             loading: true,
         })
-        setTimeout(()=>{
+        setTimeout(() => {
             this.setState({
                 loading: false,
                 showOptions: true,
