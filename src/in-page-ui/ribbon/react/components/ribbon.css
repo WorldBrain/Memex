@@ -26,6 +26,7 @@
     transition: all 0.1s ease-in-out;
     width: 34px;
     height: 105vh;
+    margin-right: 0px;
 
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
