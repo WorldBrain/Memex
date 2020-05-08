@@ -283,7 +283,7 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
         this.setState({ isMouseInRibbonSideSidebar: false })
     }
 
-    private handleOutsideClick: EventListener = (e) => {
+    private handleOutsideClick: EventListener = e => {
         // Only close the sidebar when all of the following conditions are met:
         // 1. Sidebar is open.
         // 2. Mouse is not inside the sidebar.
@@ -440,9 +440,11 @@ class RibbonSidebarContainer extends React.Component<Props, State> {
 // TODO: Upgrade to React 16.6
 // RibbonSidebarContainer.contextType = SidebarContext;
 
-const mapStateToProps: MapStateToProps<StateProps, OwnProps, RootState> = (
-    state,
-) => ({
+const mapStateToProps: MapStateToProps<
+    StateProps,
+    OwnProps,
+    RootState
+> = state => ({
     url: popup.url(state),
     isPageFullScreen: ribbonSelectors.isPageFullScreen(state),
     isSidebarOpen: sidebarSelectors.isOpen(state),
@@ -464,7 +466,7 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
 
         dispatch(actions.initState())
     },
-    handleToggleFullScreen: (e) => {
+    handleToggleFullScreen: e => {
         e.stopPropagation()
         dispatch(ribbonActions.toggleFullScreen())
     },
@@ -473,11 +475,11 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
         return dispatch(sidebarActions.openSidebar(args))
     },
     closeSidebar: () => dispatch(sidebarActions.closeSidebar()),
-    openCommentBoxWithHighlight: (anchor) =>
+    openCommentBoxWithHighlight: anchor =>
         dispatch(commentBoxActions.openCommentBoxWithHighlight(anchor)),
-    setRibbonEnabled: (isRibbonEnabled) =>
+    setRibbonEnabled: isRibbonEnabled =>
         dispatch(ribbonActions.setRibbonEnabled(isRibbonEnabled)),
-    setTooltipEnabled: (isTooltipEnabled) =>
+    setTooltipEnabled: isTooltipEnabled =>
         dispatch(ribbonActions.setTooltipEnabled(isTooltipEnabled)),
     setShowCommentBox: (value: boolean) =>
         dispatch(ribbonActions.setShowCommentBox(value)),
@@ -485,9 +487,9 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
         dispatch(ribbonActions.setShowTagsPicker(value)),
     setShowCollectionsPicker: (value: boolean) =>
         dispatch(ribbonActions.setShowCollsPicker(value)),
-    setActiveAnnotationUrl: (url) =>
+    setActiveAnnotationUrl: url =>
         dispatch(sidebarActions.setActiveAnnotationUrl(url)),
-    setHoverAnnotationUrl: (url) =>
+    setHoverAnnotationUrl: url =>
         dispatch(sidebarActions.setHoverAnnotationUrl(url)),
     setShowSidebarCommentBox: () =>
         dispatch(commentBoxActions.setShowCommentBox(true)),

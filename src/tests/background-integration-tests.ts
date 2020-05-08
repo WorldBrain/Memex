@@ -90,8 +90,7 @@ export async function setupBackgroundIntegrationTest(options?: {
         getSharedSyncLog: async () => options?.sharedSyncLog,
         includePostSyncProcessor: options?.includePostSyncProcessor,
         fetchPageDataProcessor:
-            options &&
-            (options.fetchPageProcessor || new MockFetchPageDataProcessor()),
+            options?.fetchPageProcessor ?? new MockFetchPageDataProcessor(),
         auth,
         disableSyncEnryption: !options?.enableSyncEncyption,
     })
@@ -126,7 +125,7 @@ export async function setupBackgroundIntegrationTest(options?: {
     await setStorageMiddleware(storageManager, {
         syncService: backgroundModules.sync,
         storexHub: backgroundModules.storexHub,
-        modifyMiddleware: (originalMiddleware) => [
+        modifyMiddleware: originalMiddleware => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations
                 ? [storageOperationDebugger]
@@ -201,15 +200,14 @@ export async function runBackgroundIntegrationTest(
         if (step.expectedStorageChanges) {
             try {
                 expect(await setup.storageChangeDetector.compare()).toEqual(
-                    mapValues(step.expectedStorageChanges, (getChanges) =>
+                    mapValues(step.expectedStorageChanges, getChanges =>
                         getChanges(),
                     ),
                 )
             } catch (e) {
                 console.error(
-                    `Unexpected storage changes in step number ${
-                        stepIndex + 1
-                    } (counting from 1)`,
+                    `Unexpected storage changes in step number ${stepIndex +
+                        1} (counting from 1)`,
                 )
                 throw e
             }

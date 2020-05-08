@@ -179,7 +179,7 @@ export class BackupRestoreProcedure {
                 const batch = await queue.getNext()
                 await this.interruptable.forOfLoop(
                     batch.changes || batch.images,
-                    async (change) => {
+                    async change => {
                         await writeObject(change)
                     },
                 )
@@ -233,7 +233,7 @@ export class BackupRestoreProcedure {
     }
 
     _createDownloadQueue(collection: string, timestamps: string[]) {
-        const items = sorted(timestamps).map((timestamp) => [
+        const items = sorted(timestamps).map(timestamp => [
             collection,
             timestamp,
         ])
@@ -386,6 +386,6 @@ export function _migrateObject(change: ObjectChange) {
     migrate({
         collection: 'annotations',
         field: 'lastEdited',
-        value: (prev) => prev.createdWhen,
+        value: prev => prev.createdWhen,
     })
 }

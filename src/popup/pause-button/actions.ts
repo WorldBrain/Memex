@@ -14,7 +14,7 @@ export const setPaused = createAction<boolean>('pause/setPaused')
 export const setTimeout = createAction<number>('pause/setTimeout')
 export const resetTimeout = createAction('pause/resetTimeout')
 
-export const init: () => Thunk = () => async (dispatch) => {
+export const init: () => Thunk = () => async dispatch => {
     const isPaused = await getPauseState()
     dispatch(setPaused(isPaused))
 }

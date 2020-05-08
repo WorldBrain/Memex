@@ -72,31 +72,31 @@ class ListItem extends Component<Props, State> {
     }
 
     private handleMouseEnter = () => {
-        this.setState((state) => ({
+        this.setState(state => ({
             isMouseInside: true,
         }))
     }
 
     private handleMouseLeave = () => {
-        this.setState((state) => ({
+        this.setState(state => ({
             isMouseInside: false,
         }))
     }
 
-    private handleDragOver = (e) => {
+    private handleDragOver = e => {
         e.preventDefault()
-        this.setState((state) => ({
+        this.setState(state => ({
             isDragInside: true,
         }))
     }
 
     private handleDragLeave = () => {
-        this.setState((state) => ({
+        this.setState(state => ({
             isDragInside: false,
         }))
     }
 
-    private handleDrop: DragEventHandler = (e) => {
+    private handleDrop: DragEventHandler = e => {
         e.preventDefault()
         this.handleDragLeave()
         // const url = e.dataTransfer.getData('URL')
@@ -114,16 +114,16 @@ class ListItem extends Component<Props, State> {
         this.props.onAddPageToList(url, isSocialPost)
     }
 
-    private handleEditBtnClick: React.MouseEventHandler<HTMLButtonElement> = (
-        e,
-    ) => {
+    private handleEditBtnClick: React.MouseEventHandler<
+        HTMLButtonElement
+    > = e => {
         e.stopPropagation()
         this.props.onEditButtonClick(e)
     }
 
-    private handleCrossBtnClick: React.MouseEventHandler<HTMLButtonElement> = (
-        e,
-    ) => {
+    private handleCrossBtnClick: React.MouseEventHandler<
+        HTMLButtonElement
+    > = e => {
         e.stopPropagation()
         this.props.onCrossButtonClick(e)
     }

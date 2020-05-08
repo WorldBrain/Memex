@@ -14,7 +14,7 @@ const processEventRPC = remoteFunction('processEvent')
 
 export const setTooltipFlag = createAction<boolean>('tooltip/setTooltipFlag')
 
-export const init: () => Thunk = () => async (dispatch) => {
+export const init: () => Thunk = () => async dispatch => {
     const sidebar = await getTooltipState()
     dispatch(setTooltipFlag(sidebar))
 }

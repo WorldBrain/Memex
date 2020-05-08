@@ -57,9 +57,9 @@ describe('Search index integration', () => {
         })
 
         // // Add some test tags
-        await tags.addTag({ url: DATA.PAGE_3.url, tag: 'good' })
-        await tags.addTag({ url: DATA.PAGE_3.url, tag: 'quality' })
-        await tags.addTag({ url: DATA.PAGE_2.url, tag: 'quality' })
+        await tags.addTagToExistingUrl({ url: DATA.PAGE_3.url, tag: 'good' })
+        await tags.addTagToExistingUrl({ url: DATA.PAGE_3.url, tag: 'quality' })
+        await tags.addTagToExistingUrl({ url: DATA.PAGE_2.url, tag: 'quality' })
     }
 
     describe('read ops', () => {
@@ -604,7 +604,10 @@ describe('Search index integration', () => {
             )
 
             // This page doesn't have any tags; 'quality' tag has 2 other pages
-            await tags.addTag({ url: DATA.PAGE_1.url, tag: 'quality' })
+            await tags.addTagToExistingUrl({
+                url: DATA.PAGE_1.url,
+                tag: 'quality',
+            })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(3)

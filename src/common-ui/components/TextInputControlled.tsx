@@ -21,7 +21,6 @@
 // of HTML elements that this event should come from. (real event is on shadow root, but path will
 // indicate the intended element)
 import * as React from 'react'
-import ReactDOM from 'react-dom'
 const matchAll = require('string.prototype.matchall')
 
 type ReTargetedTextElementEvent = React.KeyboardEvent<
@@ -30,8 +29,15 @@ type ReTargetedTextElementEvent = React.KeyboardEvent<
     path: (HTMLElement & HTMLTextAreaElement & HTMLInputElement)[]
 }
 
+type TextInputAttributes = Omit<
+    Partial<React.TextareaHTMLAttributes<any>>,
+    'onChange'
+> &
+    Omit<Partial<React.InputHTMLAttributes<any>>, 'onChange'>
+
 export interface ControlledTextInputProps {
     onChange: (s: string) => void
+    // TODO: change these e's to KeyboardEvent ? and change usage
     specialHandlers?: { test: (e) => boolean; handle: (e) => void }[]
     updateRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
     defaultValue?: string
@@ -46,8 +52,9 @@ interface ControlledTextInputState {
     text: string
     selection: Selection
 }
+
 class TextInputControlled extends React.Component<
-    ControlledTextInputProps & Partial<ReactDOM.IntrinsicElements.textElement>,
+    TextInputAttributes & ControlledTextInputProps,
     ControlledTextInputState
 > {
     textElement: HTMLTextAreaElement | HTMLInputElement
@@ -78,11 +85,29 @@ class TextInputControlled extends React.Component<
                 start: this.props.defaultValue.length,
                 end: this.props.defaultValue.length,
             },
+            fireChange: false,
         })
     }
 
     componentWillUnmount() {
         this.deRegisterEventListeners()
+    }
+
+    componentDidUpdate(
+        prevProps: Readonly<TextInputAttributes & ControlledTextInputProps>,
+        prevState: Readonly<ControlledTextInputState>,
+        snapshot?: any,
+    ): void {
+        if (this.props.defaultValue !== this.state.text) {
+            this.updateTextElement({
+                text: this.props.defaultValue,
+                selection: {
+                    start: this.props.defaultValue.length,
+                    end: this.props.defaultValue.length,
+                },
+                fireChange: false,
+            })
+        }
     }
 
     registerEventListeners = () => {
@@ -344,7 +369,7 @@ class TextInputControlled extends React.Component<
     }
 
     // Helper method to update our state with intended content or selection for the textElement
-    updateTextElement = ({ text, selection }) => {
+    updateTextElement = ({ text, selection, fireChange = true }) => {
         const updatedContent = text
         const updatedSelection = selection
         this.setState(
@@ -354,7 +379,7 @@ class TextInputControlled extends React.Component<
             },
             () => this.syncSelectionToDom(this.textElement, updatedSelection),
         )
-        if (this.props.onChange) {
+        if (this.props.onChange && fireChange) {
             this.props.onChange(updatedContent)
         }
     }

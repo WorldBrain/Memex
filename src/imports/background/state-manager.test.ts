@@ -145,7 +145,7 @@ const runSuite = (DATA: TestData) => () => {
 
         // For each item in each chunk, save the URL as bookmark/history and
         for await (const { chunk } of state.fetchItems()) {
-            Object.values<ImportItem>(chunk).forEach((item) => {
+            Object.values<ImportItem>(chunk).forEach(item => {
                 if (item.type === 'h') {
                     historyItemUrls.push(item.url)
                 } else {
@@ -238,7 +238,7 @@ const runSuite = (DATA: TestData) => () => {
         // There should be no intersection between okay and errord URLs
         const errordSet = new Set(errordUrls)
         let intersected = false
-        okayUrls.forEach((url) => {
+        okayUrls.forEach(url => {
             if (errordSet.has(url)) {
                 intersected = true
             }

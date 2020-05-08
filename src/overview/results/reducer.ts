@@ -20,6 +20,8 @@ export interface State {
     showOnboardingMessage: boolean
     /** Holds the index of the result where the tags popup should be displayed (-1 by default). */
     activeTagIndex: number
+    /** Holds the index of the result where the collections popup should be displayed (-1 by default). */
+    activeListIndex: number
     /** Holds the index of the result which has the sidebar open (-1 by default) */
     activeSidebarIndex: number
     /** Holds the current page of results that the user has scrolled to (0-based). */
@@ -38,13 +40,14 @@ export interface State {
     searchType: 'notes' | 'page' | 'social'
 }
 
-const defState: State = {
+export const defaultState: State = {
     results: [],
     resultsExhausted: false,
     isLoading: true,
     isBadTerm: false,
     isInvalidSearch: false,
     activeTagIndex: -1,
+    activeListIndex: -1,
     activeSidebarIndex: -1,
     currentPage: 0,
     totalCount: null,
@@ -95,12 +98,52 @@ const handleSearchResult = (overwrite: boolean) => (
     }
 }
 
-const reducer = createReducer<State>({}, defState)
+const reducer = createReducer<State>({}, defaultState)
 
 reducer.on(acts.setShowOnboardingMessage, (state, showOnboardingMessage) => ({
     ...state,
     showOnboardingMessage,
 }))
+
+reducer.on(acts.addList, (state, { list, index }) => {
+    const doc = state.results[index]
+
+    return {
+        ...state,
+        results: [
+            ...state.results.slice(0, index),
+            {
+                ...doc,
+                lists: [...doc.lists, list],
+            },
+            ...state.results.slice(index + 1),
+        ],
+    }
+})
+
+reducer.on(acts.delList, (state, { list, index }) => {
+    const doc = state.results[index]
+    const removalIndex = doc.lists.findIndex((val) => val === list)
+
+    if (removalIndex === -1) {
+        return state
+    }
+
+    return {
+        ...state,
+        results: [
+            ...state.results.slice(0, index),
+            {
+                ...doc,
+                lists: [
+                    ...doc.lists.slice(0, removalIndex),
+                    ...doc.lists.slice(removalIndex + 1),
+                ],
+            },
+            ...state.results.slice(index + 1),
+        ],
+    }
+})
 
 reducer.on(acts.addTag, (state, { tag, index }) => {
     const doc = state.results[index]
@@ -181,7 +224,12 @@ reducer.on(acts.changeHasBookmark, (state, index) => {
 
 reducer.on(acts.resetActiveTagIndex, (state) => ({
     ...state,
-    activeTagIndex: defState.activeTagIndex,
+    activeTagIndex: defaultState.activeTagIndex,
+}))
+
+reducer.on(acts.resetActiveListIndex, (state) => ({
+    ...state,
+    activeListIndex: defaultState.activeListIndex,
 }))
 
 reducer.on(acts.setActiveTagIndex, (state, payload) => ({
@@ -189,9 +237,14 @@ reducer.on(acts.setActiveTagIndex, (state, payload) => ({
     activeTagIndex: payload,
 }))
 
+reducer.on(acts.setActiveListIndex, (state, payload) => ({
+    ...state,
+    activeListIndex: payload,
+}))
+
 reducer.on(acts.resetActiveSidebarIndex, (state) => ({
     ...state,
-    activeSidebarIndex: defState.activeSidebarIndex,
+    activeSidebarIndex: defaultState.activeSidebarIndex,
 }))
 
 reducer.on(acts.setActiveSidebarIndex, (state, payload) => ({
@@ -215,7 +268,7 @@ reducer.on(acts.nextPage, (state) => ({
 }))
 reducer.on(acts.resetPage, (state) => ({
     ...state,
-    currentPage: defState.currentPage,
+    currentPage: defaultState.currentPage,
 }))
 
 reducer.on(acts.incSearchCount, (state) => ({
@@ -225,7 +278,7 @@ reducer.on(acts.incSearchCount, (state) => ({
 
 reducer.on(acts.initSearchCount, (state) => ({
     ...state,
-    searchCount: defState.searchCount,
+    searchCount: defaultState.searchCount,
 }))
 
 reducer.on(acts.setLoading, (state, payload) => ({
@@ -235,13 +288,13 @@ reducer.on(acts.setLoading, (state, payload) => ({
 reducer.on(acts.appendSearchResult, handleSearchResult(false))
 reducer.on(acts.resetSearchResult, (state) => ({
     ...state,
-    resultsExhausted: defState.resultsExhausted,
-    totalCount: defState.totalCount,
-    isBadTerm: defState.isBadTerm,
-    isInvalidSearch: defState.isInvalidSearch,
-    isAnnotsSearch: defState.isAnnotsSearch,
-    results: defState.results,
-    annotsByDay: defState.annotsByDay,
+    resultsExhausted: defaultState.resultsExhausted,
+    totalCount: defaultState.totalCount,
+    isBadTerm: defaultState.isBadTerm,
+    isInvalidSearch: defaultState.isInvalidSearch,
+    isAnnotsSearch: defaultState.isAnnotsSearch,
+    results: defaultState.results,
+    annotsByDay: defaultState.annotsByDay,
 }))
 reducer.on(acts.setSearchResult, handleSearchResult(true))
 reducer.on(acts.setSearchType, (state, searchType) => ({

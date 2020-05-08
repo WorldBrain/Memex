@@ -36,7 +36,7 @@ export const toggleFullScreen: () => Thunk = () => (dispatch, getState) => {
 /**
  * Hydrates the initial state of the ribbon.
  */
-export const initState: () => Thunk = () => async (dispatch) => {
+export const initState: () => Thunk = () => async dispatch => {
     dispatch(setHighlightsEnabled(await getHighlightsState()))
     dispatch(setTooltipEnabled(await getTooltipState()))
 }

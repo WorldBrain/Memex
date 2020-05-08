@@ -6,7 +6,6 @@ import {
 } from 'src/tests/integration-tests'
 import { StorageCollectionDiff } from 'src/tests/storage-change-detector'
 import { LoggedStorageOperation } from 'src/tests/storage-operation-logger'
-import * as DATA from 'src/direct-linking/background/index.test.data'
 
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
@@ -18,9 +17,93 @@ let listEntry!: any
 export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
     'Custom lists',
     [
+        backgroundIntegrationTest('should add open tabs to list', () => {
+            const testList = 'ninja'
+            const testTabs = [
+                {
+                    tabId: 1,
+                    url: 'http://www.bar.com/eggs',
+                    normalized: 'bar.com/eggs',
+                },
+                {
+                    tabId: 2,
+                    url: 'http://www.foo.com/spam',
+                    normalized: 'foo.com/spam',
+                },
+            ]
+
+            return {
+                steps: [
+                    {
+                        execute: async ({ setup }) => {
+                            customLists(setup)._createPage =
+                                setup.backgroundModules.search.searchIndex.createTestPage
+
+                            for (const { url } of testTabs) {
+                                await setup.backgroundModules.search.searchIndex.createTestPage(
+                                    { url },
+                                )
+                            }
+
+                            listId = await customLists(
+                                setup,
+                            ).remoteFunctions.createCustomList({
+                                name: testList,
+                            })
+
+                            await customLists(
+                                setup,
+                            ).remoteFunctions.addOpenTabsToList({
+                                name: testList,
+                                tabs: testTabs,
+                                time: 555,
+                            })
+                        },
+                        postCheck: async ({
+                            setup: { storageManager: db },
+                        }) => {
+                            const stored = {
+                                customLists: await db
+                                    .collection('customLists')
+                                    .findObjects({}),
+                                pageListEntries: await db
+                                    .collection('pageListEntries')
+                                    .findObjects({}),
+                            }
+
+                            const expectedEntries = []
+
+                            for (const { url, normalized } of testTabs) {
+                                expectedEntries.push({
+                                    listId,
+                                    createdAt: expect.any(Date),
+                                    fullUrl: url,
+                                    pageUrl: normalized,
+                                })
+                            }
+
+                            expect(stored).toEqual({
+                                customLists: [
+                                    {
+                                        id: listId,
+                                        createdAt: expect.any(Date),
+                                        name: testList,
+                                        isDeletable: true,
+                                        isNestable: true,
+                                    },
+                                ],
+                                pageListEntries: expectedEntries,
+                            })
+                        },
+                    },
+                ],
+            }
+        }),
         backgroundIntegrationTest(
             'should create a list, edit its title, add an entry to it and retrieve the list and its pages',
             () => {
+                const TEST_LIST_1 = 'My Custom List'
+                const TEST_LIST_2 = 'Updated List Title'
                 return {
                     steps: [
                         {
@@ -28,7 +111,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 listId = await customLists(
                                     setup,
                                 ).createCustomList({
-                                    name: 'My Custom List',
+                                    name: TEST_LIST_1,
                                 })
                             },
                             expectedStorageChanges: {
@@ -38,7 +121,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         object: {
                                             id: listId,
                                             createdAt: expect.any(Date),
-                                            name: 'My Custom List',
+                                            name: TEST_LIST_1,
                                             isDeletable: true,
                                             isNestable: true,
                                         },
@@ -55,7 +138,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             id: listId,
                                             isDeletable: true,
                                             isNestable: true,
-                                            name: 'My Custom List',
+                                            name: TEST_LIST_1,
                                         },
                                     ],
                                     result: {
@@ -149,14 +232,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) =>
                                 customLists(setup).updateList({
                                     id: listId,
-                                    name: 'Updated List Title',
+                                    name: TEST_LIST_2,
                                 }),
                             expectedStorageChanges: {
                                 customLists: (): StorageCollectionDiff => ({
                                     [listId]: {
                                         type: 'modify',
                                         updates: {
-                                            name: 'Updated List Title',
+                                            name: TEST_LIST_2,
                                         },
                                     },
                                 }),
@@ -168,7 +251,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     }),
                                 ).toEqual({
                                     id: expect.any(Number),
-                                    name: 'Updated List Title',
+                                    name: TEST_LIST_2,
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
@@ -204,6 +287,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             favIcon: undefined,
                                             hasBookmark: false,
                                             screenshot: undefined,
+                                            lists: [TEST_LIST_2],
                                             tags: [],
                                             title: 'bla.com title',
                                             url: 'bla.com',
@@ -222,6 +306,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         backgroundIntegrationTest(
             'should create a list, add an entry of an existing page to it and retrieve the list and its pages',
             () => {
+                const TEST_LIST_1 = 'My Custom List'
                 return {
                     steps: [
                         {
@@ -229,7 +314,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 listId = await customLists(
                                     setup,
                                 ).createCustomList({
-                                    name: 'My Custom List',
+                                    name: TEST_LIST_1,
                                 })
                             },
                         },
@@ -261,7 +346,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     }),
                                 ).toEqual({
                                     id: expect.any(Number),
-                                    name: 'My Custom List',
+                                    name: TEST_LIST_1,
                                     isDeletable: true,
                                     isNestable: true,
                                     createdAt: expect.any(Date),
@@ -297,6 +382,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             favIcon: undefined,
                                             hasBookmark: false,
                                             screenshot: undefined,
+                                            lists: [TEST_LIST_1],
                                             tags: [],
                                             title: 'bla.com title',
                                             url: 'bla.com',

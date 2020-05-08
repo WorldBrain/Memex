@@ -66,7 +66,7 @@ class CommentBoxContainer extends React.PureComponent<Props> {
         saveComment(anchor, commentText.trim(), tags, isCommentBookmarked)
     }
 
-    cancelComment = async e => {
+    cancelComment = () => {
         this.props.cancelComment()
         this.props.highlighter.removeTempHighlights()
     }
@@ -143,5 +143,6 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, OwnProps> = (
 })
 
 export default withSidebarContext(
+    // @ts-ignore
     connect(mapStateToProps, mapDispatchToProps)(CommentBoxContainer),
 )
