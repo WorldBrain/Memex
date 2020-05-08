@@ -48,9 +48,6 @@ export default class Ribbon extends Component<Props, State> {
     private openOverviewTabRPC
     private openOptionsTabRPC
     private ribbonRef: HTMLElement
-    private inputQueryEl: HTMLInputElement
-
-    private setInputRef = (el: HTMLInputElement) => (this.inputQueryEl = el)
 
     state: State = { shortcutsReady: false }
 
@@ -266,7 +263,6 @@ export default class Ribbon extends Component<Props, State> {
                                                 !this.props.search
                                                     .showSearchBox,
                                             )
-                                            this.inputQueryEl.focus()
                                         }}
                                     />
                                     {this.props.search.showSearchBox && (
@@ -280,8 +276,7 @@ export default class Ribbon extends Component<Props, State> {
                                                     className={styles.search}
                                                 />
                                                 <TextInputControlled
-                                                    autoFocus={false}
-                                                    updateRef={this.setInputRef}
+                                                    autoFocus
                                                     className={
                                                         styles.searchInput
                                                     }
@@ -307,7 +302,7 @@ export default class Ribbon extends Component<Props, State> {
                                                         this.props.search
                                                             .searchValue
                                                     }
-                                                    type={'input'}
+                                                    type="input"
                                                 />
                                             </form>
                                         </Tooltip>
