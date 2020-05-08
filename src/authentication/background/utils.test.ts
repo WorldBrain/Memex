@@ -9,6 +9,7 @@ describe('Authentication Subscription Status Tests', () => {
     it('should not be subscribed to pro-yearly plan if user is new', async () => {
         const { subscriptionService } = createAuthDependencies({
             devAuthState: 'user_signed_out',
+            redirectUrl: 'chrome-extension://test',
         })
 
         const claims = await subscriptionService.getCurrentUserClaims()
@@ -22,6 +23,7 @@ describe('Authentication Subscription Status Tests', () => {
     it('should not be subscribed to pro-yearly plan if subscription expired', async () => {
         const { subscriptionService } = createAuthDependencies({
             devAuthState: 'user_subscription_expired',
+            redirectUrl: 'chrome-extension://test',
         })
 
         const claims = await subscriptionService.getCurrentUserClaims()
@@ -35,6 +37,7 @@ describe('Authentication Subscription Status Tests', () => {
     it('should be subscribed to pro-yearly plan if subscription is valid', async () => {
         const { subscriptionService } = createAuthDependencies({
             devAuthState: 'user_subscribed',
+            redirectUrl: 'chrome-extension://test',
         })
 
         const claims = await subscriptionService.getCurrentUserClaims()

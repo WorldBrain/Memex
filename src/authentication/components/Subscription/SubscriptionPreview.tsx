@@ -37,6 +37,8 @@ export class SubscriptionPreview extends React.Component<Props> {
                 <SubscriptionInnerOptions
                     openCheckoutBackupMonthly={this.props.onPress}
                     openCheckoutBackupYearly={this.props.onPress}
+                    loadingMonthly={null}
+                    loadingYearly={null}
                 />
                 <LoginTitle className={''}>
                     Already have a subscription?

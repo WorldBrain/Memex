@@ -16,4 +16,5 @@ export const InputTextField = styled.input`
     border-radius: 3px;
     margin-right: 15px;
     margin-bottom: 1em;
+    display: ${(props) => (props.type === 'hidden' ? 'none' : 'unset')};
 `

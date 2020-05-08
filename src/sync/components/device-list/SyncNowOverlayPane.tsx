@@ -1,14 +1,18 @@
 import React, { Component } from 'react'
-import { features, sync } from 'src/util/remote-functions-background'
+import { sync, auth, subscription } from 'src/util/remote-functions-background'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
-import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { SyncDevice } from 'src/sync/components/types'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
+import { AuthContextInterface } from 'src/authentication/background/types'
+
+export const subscriptionConfig = {
+    site:
+        process.env.NODE_ENV !== 'production'
+            ? 'worldbrain-test'
+            : 'worldbrain',
+}
 
 interface Props {
     onClickSync: () => void
@@ -37,6 +41,13 @@ export class SyncNowOverlayPane extends Component<Props> {
         }
     }
 
+    async componentDidMount() {
+        this.setState({
+            subscribed: await auth.hasSubscribedBefore(),
+            showSubscriptionOptions: true,
+        })
+    }
+
     renderSyncResults() {}
 
     render() {
@@ -51,6 +62,8 @@ export class SyncNowOverlayPane extends Component<Props> {
 
 interface ContainerProps {
     showSubscriptionModal: () => void
+    onClose?: () => void
+    subscriptionChanged?: () => void
 }
 interface ContainerState {
     showSync: boolean
@@ -60,7 +73,7 @@ interface ContainerState {
     devices: SyncDevice[]
 }
 export class SyncNowOverlayPaneContainer extends Component<
-    ContainerProps & UserProps,
+    ContainerProps & AuthContextInterface,
     ContainerState
 > {
     state = {
@@ -69,6 +82,8 @@ export class SyncNowOverlayPaneContainer extends Component<
         syncError: null,
         isSyncing: false,
         devices: [],
+        subscribed: null,
+        showSubscriptionOptions: true,
     }
 
     refreshDevices = async () => {
@@ -100,13 +115,33 @@ export class SyncNowOverlayPaneContainer extends Component<
         window.location.href = '#/sync'
     }
 
+    openPortal = async () => {
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+    }
+
     render() {
-        const syncFeatureAllowed = this.props.authorizedFeatures.includes(
+        const syncFeatureAllowed = this.props.currentUser?.authorizedFeatures?.includes(
             'sync',
         )
 
         return (
             <div>
+                {this.props.currentUser?.subscriptionStatus === 'in_trial' && (
+                    <div>
+                        <div
+                            onClick={this.openPortal}
+                            className={settingsStyle.trialNotif}
+                        >
+                            <div className={settingsStyle.trialHeader}>
+                                <strong>Trial Period active</strong>
+                            </div>
+                            <div>
+                                Add payment details to prevent interruptions
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {this.state.devices.length === 0 && syncFeatureAllowed && (
                     <div className={settingsStyle.buttonArea}>
                         <div>
@@ -219,6 +254,6 @@ export class SyncNowOverlayPaneContainer extends Component<
     }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(SyncNowOverlayPaneContainer))
