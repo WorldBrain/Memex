@@ -117,11 +117,22 @@ export class RibbonContainerLogic extends UILogic<
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial<RibbonContainerState>(this, async () => {
             this.emitMutation({
+                pausing: {
+                    isPaused: {
+                        $set: await this.dependencies.activityLogger.isLoggingPaused(),
+                    },
+                },
+                bookmark: {
+                    isBookmarked: {
+                        $set: await this.dependencies.bookmarks.pageHasBookmark(
+                            this.dependencies.currentTab.url,
+                        ),
+                    },
+                },
                 isRibbonEnabled: {
                     $set: await this.dependencies.getSidebarEnabled(),
                 },
             })
-            // TODO: Load bookmarked state
         })
     }
 

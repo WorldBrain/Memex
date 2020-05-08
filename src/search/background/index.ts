@@ -92,6 +92,7 @@ export default class SearchBackground {
             bookmarks: {
                 addPageBookmark: this.searchIndex.addBookmark,
                 delPageBookmark: this.searchIndex.delBookmark,
+                pageHasBookmark: this.searchIndex.pageHasBookmark,
             },
             search: {
                 search: this.searchIndex.search,

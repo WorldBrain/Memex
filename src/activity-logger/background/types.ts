@@ -4,6 +4,7 @@ import Tab from './tab-state'
 
 export interface ActivityLoggerInterface {
     toggleLoggingPause(minutes?: number): void
+    isLoggingPaused(): Promise<boolean>
     fetchTab(id: number): Tab
     fetchTabByUrl(url: string): Tab
 }

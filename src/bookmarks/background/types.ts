@@ -7,4 +7,5 @@ export interface BookmarksInterface {
     }): Promise<any>
 
     delPageBookmark(args: { url: string }): Promise<any>
+    pageHasBookmark(url: string): Promise<boolean>
 }
