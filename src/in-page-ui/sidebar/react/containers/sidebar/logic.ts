@@ -291,7 +291,7 @@ export class SidebarContainerLogic extends UILogic<
     }
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial<SidebarContainerState>(this, async () => {
-            await this._maybeLoad(previousState, {})
+            await this._doSearch(previousState)
         })
     }
 
@@ -1019,7 +1019,7 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
         this.emitMutation(mutation)
-        await this._maybeLoad(previousState, mutation)
+        await this._doSearch(this.withMutation(previousState, mutation))
     }
 
     setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (
@@ -1060,19 +1060,6 @@ export class SidebarContainerLogic extends UILogic<
         return {
             hoverAnnotationUrl: { [incoming.event.context]: { $set: '' } },
         }
-    }
-
-    async _maybeLoad(
-        state: SidebarContainerState,
-        changes: UIMutation<SidebarContainerState>,
-    ) {
-        const nextState = this.withMutation(state, changes)
-        await this._doSearch(nextState)
-        // if (nextState.searchType === 'notes' && nextState.pageType === 'page') {
-        //     await this._loadAnnotations()
-        // } else {
-        //     await this._doSearch(nextState)
-        // }
     }
 }
 

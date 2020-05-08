@@ -20,11 +20,11 @@ function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
 const setupLogicHelper = async ({
     device,
     currentTabUrl = DATA.CURRENT_TAB_URL_1,
-    getAllAnnotationsByUrl = async () => [],
+    initSearchType = 'pages',
 }: {
     device: UILogicTestDevice
     currentTabUrl?: string
-    getAllAnnotationsByUrl?: () => Promise<Annotation[]>
+    initSearchType?: 'pageAnnots' | 'allAnnots' | 'pages'
 }) => {
     const { backgroundModules } = device
     const currentTab = {
@@ -45,13 +45,13 @@ const setupLogicHelper = async ({
             //     backgroundModules.directLinking.remoteFunctions,
             //     currentTab,
             // ),
-            getAllAnnotationsByUrl,
             editAnnotation: () => undefined,
             createAnnotation: () => undefined,
             addAnnotationTag: () => undefined,
             deleteAnnotation: () => undefined,
             toggleAnnotBookmark: () => undefined,
             updateAnnotationTags: () => undefined,
+            getAllAnnotationsByUrl: () => undefined,
         } as any,
         normalizeUrl: (url) => url,
         search: {
@@ -67,7 +67,27 @@ const setupLogicHelper = async ({
         env: 'inpage',
     })
 
+    let initSearchTypeMutation
+    switch (initSearchType) {
+        case 'allAnnots':
+            initSearchTypeMutation = {
+                searchType: { $set: 'notes' },
+                pageType: { $set: 'all' },
+            }
+            break
+        case 'pageAnnots':
+            initSearchTypeMutation = {
+                searchType: { $set: 'notes' },
+                pageType: { $set: 'page' },
+            }
+            break
+        case 'pages':
+        default:
+            initSearchTypeMutation = { searchType: { $set: 'page' } }
+    }
+
     const sidebar = device.createElement(sidebarLogic)
+    sidebar.processMutation(initSearchTypeMutation)
     await sidebar.init()
     return { sidebar, sidebarLogic }
 }
@@ -81,13 +101,13 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment", async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({
-                device,
-                getAllAnnotationsByUrl: async () => [DATA.ANNOT_1],
-            })
+            const { sidebar } = await setupLogicHelper({ device })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
-            expect(sidebar.state.annotations.length).toBe(1)
+            sidebar.processMutation({
+                annotations: { $set: [DATA.ANNOT_1] },
+            })
+
             const annotation = sidebar.state.annotations[0]
             expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
 
@@ -119,13 +139,13 @@ describe('SidebarContainerLogic', () => {
         it("should be able to edit an annotation's comment and tags", async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({
-                device,
-                getAllAnnotationsByUrl: async () => [DATA.ANNOT_1],
-            })
+            const { sidebar } = await setupLogicHelper({ device })
             const editedComment = DATA.ANNOT_1.comment + ' new stuff'
 
-            expect(sidebar.state.annotations.length).toBe(1)
+            sidebar.processMutation({
+                annotations: { $set: [DATA.ANNOT_1] },
+            })
+
             const annotation = sidebar.state.annotations[0]
             expect(annotation.comment).toEqual(DATA.ANNOT_1.comment)
 
@@ -158,12 +178,12 @@ describe('SidebarContainerLogic', () => {
         })
 
         it('should be able to delete an annotation', async ({ device }) => {
-            const { sidebar } = await setupLogicHelper({
-                device,
-                getAllAnnotationsByUrl: async () => [DATA.ANNOT_1],
+            const { sidebar } = await setupLogicHelper({ device })
+
+            sidebar.processMutation({
+                annotations: { $set: [DATA.ANNOT_1] },
             })
 
-            expect(sidebar.state.annotations.length).toBe(1)
             await sidebar.processEvent('deleteAnnotation', {
                 context,
                 annotationUrl: DATA.ANNOT_1.url,
@@ -174,12 +194,12 @@ describe('SidebarContainerLogic', () => {
         it("should be able to toggle an annotation's bookmark status", async ({
             device,
         }) => {
-            const { sidebar } = await setupLogicHelper({
-                device,
-                getAllAnnotationsByUrl: async () => [DATA.ANNOT_1],
+            const { sidebar } = await setupLogicHelper({ device })
+
+            sidebar.processMutation({
+                annotations: { $set: [DATA.ANNOT_1] },
             })
 
-            expect(sidebar.state.annotations.length).toBe(1)
             expect(sidebar.state.annotations[0].hasBookmark).toBe(undefined)
             await sidebar.processEvent('toggleAnnotationBookmark', {
                 context,
