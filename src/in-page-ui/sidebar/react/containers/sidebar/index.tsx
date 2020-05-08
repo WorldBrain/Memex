@@ -261,6 +261,7 @@ export default class SidebarContainer extends StatefulUIElement<
                     isNewSearchLoading:
                         this.state.searchLoadState !== 'success',
                     isListFilterActive: this.state.isListFilterActive,
+                    isTermsSearch: this.state.searchValue.length > 0,
                     resultsByUrl: this.state.resultsByUrl,
                     resultsClusteredByDay:
                         this.state.searchType === 'notes' &&

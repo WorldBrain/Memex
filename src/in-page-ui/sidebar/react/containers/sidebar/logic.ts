@@ -15,7 +15,11 @@ import {
     ResultsByUrl,
 } from '../../types'
 import { Annotation } from 'src/annotations/types'
-import { PageUrlsByDay, SearchInterface } from 'src/search/background/types'
+import {
+    PageUrlsByDay,
+    StandardSearchResponse,
+    AnnotationsSearchResponse,
+} from 'src/search/background/types'
 import { Anchor } from 'src/highlighting/types'
 import { loadInitial, executeUITask } from 'src/util/ui-logic'
 import {
@@ -294,19 +298,21 @@ export class SidebarContainerLogic extends UILogic<
     private doSearch = debounce(this._doSearch, 300)
 
     private async _doSearch(state: SidebarContainerState) {
+        const { search, currentTab } = this.options
+        const query = state.searchValue.length ? state.searchValue : undefined
+        const url = state.pageType === 'page' ? currentTab.url : undefined
+
         await executeUITask(this, 'searchLoadState', async () => {
             if (state.searchType === 'page') {
                 const results = (
-                    await this.options.search.searchPages({
-                        query: state.searchValue.length
-                            ? state.searchValue
-                            : undefined,
+                    await search.searchPages({
+                        base64Img: true,
+                        query,
                         contentTypes: {
                             pages: true,
                             notes: true,
                             highlights: true,
                         },
-                        base64Img: true,
                     })
                 ).docs
 
@@ -316,53 +322,67 @@ export class SidebarContainerLogic extends UILogic<
                     noResults: { $set: !results.length },
                 })
             } else if (state.searchType === 'notes') {
-                if (state.pageType === 'page') {
-                    await this.searchAnnotationsForPage(state)
-                } else {
-                    // TODO: implement all annots search
-                }
+                const result = await search.searchAnnotations({
+                    base64Img: true,
+                    query,
+                    url,
+                })
+
+                const extraMutation =
+                    state.pageType === 'page'
+                        ? this.calcPageAnnotationsMutation(result, !!query)
+                        : {}
+
+                this.emitMutation({
+                    pageCount: { $set: result.docs.length },
+                    noResults: { $set: !result.docs.length },
+                    resultsByUrl: { $set: createResultsByUrlObj(result.docs) },
+                    ...extraMutation,
+                })
             }
         })
     }
 
-    private async searchAnnotationsForPage(state: SidebarContainerState) {
-        const query = state.searchValue.length ? state.searchValue : undefined
-        const url = this.options.currentTab.url
-
+    private calcPageAnnotationsMutation(
+        result: StandardSearchResponse | AnnotationsSearchResponse,
+        isTermsSearch: boolean,
+    ): UIMutation<SidebarContainerState> {
+        const url = this.options.normalizeUrl(this.options.currentTab.url)
         const annotations: Annotation[] = []
-        const result = await this.options.search.searchAnnotations({
-            base64Img: true,
-            query,
-            url,
-        })
 
-        if (!query) {
-            const sortedKeys = Object.keys(result.annotsByDay).sort().reverse()
-
-            for (const day of sortedKeys) {
-                const cluster = result.annotsByDay[day]
-
-                for (const pageUrl of Object.keys(cluster)) {
-                    if (pageUrl === this.options.normalizeUrl(url)) {
-                        annotations.push(...cluster[pageUrl])
-                    }
+        if (isTermsSearch) {
+            for (const doc of result.docs) {
+                if (doc.url === url) {
+                    annotations.push(
+                        ...doc.annotations.map((annot) => ({
+                            ...annot,
+                            createdWhen: annot.createdWhen?.valueOf(),
+                            lastEdited: annot.lastEdited?.valueOf(),
+                        })),
+                    )
                 }
             }
-        } else {
-            for (const doc of result.docs) {
-                if (doc.url === this.options.normalizeUrl(url)) {
-                    annotations.push(...doc.annotations)
+
+            return { annotations: { $set: annotations } }
+        }
+
+        const { annotsByDay } = result as AnnotationsSearchResponse
+        const sortedKeys = Object.keys(annotsByDay).sort().reverse()
+
+        for (const day of sortedKeys) {
+            const cluster = annotsByDay[day]
+
+            for (const pageUrl of Object.keys(cluster)) {
+                if (pageUrl === url) {
+                    annotations.push(...cluster[pageUrl])
                 }
             }
         }
 
-        this.emitMutation({
-            pageCount: { $set: result.docs.length },
-            noResults: { $set: !result.docs.length },
+        return {
             annotations: { $set: annotations },
-            annotsByDay: { $set: result.annotsByDay },
-            resultsByUrl: { $set: createResultsByUrlObj(result.docs) },
-        })
+            annotsByDay: { $set: annotsByDay },
+        }
     }
 
     cleanup() {}
@@ -1056,7 +1076,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 }
 
-const createResultsByUrlObj = (results: Result[]): ResultsByUrl => {
+const createResultsByUrlObj = (results): ResultsByUrl => {
     const obj: ResultsByUrl = {}
 
     results.forEach((result, index) => {

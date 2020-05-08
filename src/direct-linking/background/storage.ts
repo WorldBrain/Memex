@@ -272,7 +272,7 @@ export default class AnnotationStorage extends StorageModule {
         comment,
         selector,
         createdWhen = new Date(),
-    }: Annotation) {
+    }: Omit<Annotation, 'tags'>) {
         return this.operation('createAnnotation', {
             pageTitle,
             pageUrl,
@@ -306,7 +306,7 @@ export default class AnnotationStorage extends StorageModule {
     private deleteTags = (query: { name: string; url: string }) =>
         this.db.collection(AnnotationStorage.TAGS_COLL).deleteObjects(query)
 
-    private createTag = tag =>
+    private createTag = (tag) =>
         this.db.collection(AnnotationStorage.TAGS_COLL).createObject(tag)
 
     editAnnotationTags = async (
@@ -316,14 +316,16 @@ export default class AnnotationStorage extends StorageModule {
     ) => {
         // Remove the tags that are to be deleted.
         await Promise.all(
-            tagsToBeDeleted.map(async tag =>
+            tagsToBeDeleted.map(async (tag) =>
                 this.deleteTags({ name: tag, url }),
             ),
         )
 
         // Add the tags that are to be added.
         return Promise.all(
-            tagsToBeAdded.map(async tag => this.createTag({ name: tag, url })),
+            tagsToBeAdded.map(async (tag) =>
+                this.createTag({ name: tag, url }),
+            ),
         )
     }
 

@@ -10,7 +10,7 @@ export interface Annotation {
     /** Defined for annotations with a user comment. */
     comment?: string
     /** Selector required for highlighting annotations. */
-    selector: Anchor
+    selector?: Anchor
     createdWhen: number
     lastEdited: number
     tags: string[]

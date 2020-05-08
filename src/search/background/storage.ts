@@ -273,9 +273,9 @@ export default class SearchStorage extends StorageModule {
                 return
             }
 
-            const current = clusteredResults[day][pageUrl] || []
+            const currentAnnots = clusteredResults[day][pageUrl] || []
             clusteredResults[day][pageUrl] = [
-                ...current,
+                ...currentAnnots,
                 {
                     ...annot,
                     tags,
@@ -341,7 +341,9 @@ export default class SearchStorage extends StorageModule {
         }
     }
 
-    async searchAnnots(params: AnnotSearchParams) {
+    async searchAnnots(
+        params: AnnotSearchParams,
+    ): Promise<{ docs: AnnotPage[]; annotsByDay?: PageUrlsByDay }> {
         if (!params.termsInc || !params.termsInc.length) {
             return this.searchAnnotsByDay(params)
         }

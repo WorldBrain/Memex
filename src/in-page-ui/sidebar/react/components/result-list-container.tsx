@@ -29,6 +29,7 @@ const styles = require('./result-list.css')
 interface StateProps {
     // isLoading: boolean
     needsWaypoint: boolean
+    isTermsSearch: boolean
     isNewSearchLoading: boolean
     isListFilterActive: boolean
     areAnnotationsExpanded: boolean
@@ -251,22 +252,39 @@ export default class ResultListContainer extends Component<
                 </p>,
             )
 
+            const pageEls: JSX.Element[] = []
+
             const currentCluster: AnnotsByPageUrl = this.props.annotsByDay[day]
             for (const [pageUrl, annotations] of Object.entries(
                 currentCluster,
             )) {
                 const page = this.props.resultsByUrl[pageUrl]
 
+                // Page may be missing from `resultsByUrl` state, but present in `annotsByUrl`, in case of terms search :S
                 if (!page) {
-                    continue // Page not found for whatever reason...
+                    continue
                 }
 
-                els.push(
+                pageEls.push(
                     this.attachDocWithPageResultItem(
-                        { ...page, annotations },
+                        // This is silly we need the presentational components to care about such things;
+                        //  we need a better solution for this awkward `annotsByDay` return value from annots search!
+                        {
+                            ...page,
+                            annotations: this.props.isTermsSearch
+                                ? page.annotations
+                                : annotations,
+                        },
                         resultItemCount++,
                     ),
                 )
+            }
+
+            // We don't want an empty element for the time if there's no matching annots
+            if (pageEls.length === 0) {
+                els.pop()
+            } else {
+                els.push(...pageEls)
             }
         }
 

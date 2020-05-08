@@ -1,6 +1,6 @@
 import { Annotation } from 'src/direct-linking/types'
 
-interface TestAnnot extends Annotation {
+interface TestAnnot extends Omit<Annotation, 'tags'> {
     tags?: string[]
     lists?: string[]
     hasBookmark?: boolean
