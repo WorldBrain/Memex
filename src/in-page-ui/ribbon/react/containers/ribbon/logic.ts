@@ -153,18 +153,29 @@ export class RibbonContainerLogic extends UILogic<
     toggleBookmark: EventHandler<'toggleBookmark'> = async ({
         previousState,
     }) => {
+        const updateState = (isBookmarked) =>
+            this.emitMutation({
+                bookmark: { isBookmarked: { $set: isBookmarked } },
+            })
+
         const shouldBeBookmarked = !previousState.bookmark.isBookmarked
-        if (shouldBeBookmarked) {
-            await this.dependencies.bookmarks.addPageBookmark({
-                url: this.dependencies.currentTab.url,
-                tabId: this.dependencies.currentTab.id,
-            })
-        } else {
-            await this.dependencies.bookmarks.delPageBookmark({
-                url: this.dependencies.currentTab.url,
-            })
+        updateState(shouldBeBookmarked)
+
+        try {
+            if (shouldBeBookmarked) {
+                await this.dependencies.bookmarks.addPageBookmark({
+                    url: this.dependencies.currentTab.url,
+                    tabId: this.dependencies.currentTab.id,
+                })
+            } else {
+                await this.dependencies.bookmarks.delPageBookmark({
+                    url: this.dependencies.currentTab.url,
+                })
+            }
+        } catch (err) {
+            updateState(!shouldBeBookmarked)
+            throw err
         }
-        return { bookmark: { isBookmarked: { $set: shouldBeBookmarked } } }
     }
 
     //
@@ -174,35 +185,28 @@ export class RibbonContainerLogic extends UILogic<
         return { commentBox: { showCommentBox: { $set: event.value } } }
     }
 
-    handleCommentTextChange: EventHandler<'handleCommentTextChange'> = async ({
+    handleCommentTextChange: EventHandler<'handleCommentTextChange'> = ({
         event,
-        previousState,
     }) => {
         return { commentBox: { commentText: { $set: event.value } } }
     }
 
     saveComment: EventHandler<'saveComment'> = async ({ previousState }) => {
+        const { annotations, currentTab } = this.dependencies
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        const save = async (options: { bookmark: boolean; tags: string[] }) => {
-            const annotUrl = await this.dependencies.annotations.createAnnotation(
-                {
-                    url: this.dependencies.currentTab.url,
-                    comment: previousState.commentBox.commentText,
-                    bookmarked: options.bookmark,
-                },
-                { skipPageIndexing: this.skipAnnotationPageIndexing },
-            )
-            await this.dependencies.annotations.editAnnotationTags({
-                url: annotUrl,
-                tagsToBeAdded: options.tags,
-                tagsToBeDeleted: [],
-            })
-        }
-
-        await save({
-            bookmark: previousState.commentBox.isCommentBookmarked,
-            tags: previousState.commentBox.tags,
+        const annotUrl = await annotations.createAnnotation(
+            {
+                url: currentTab.url,
+                comment: previousState.commentBox.commentText,
+                bookmarked: previousState.commentBox.isCommentBookmarked,
+            },
+            { skipPageIndexing: this.skipAnnotationPageIndexing },
+        )
+        await annotations.editAnnotationTags({
+            url: annotUrl,
+            tagsToBeAdded: previousState.commentBox.tags,
+            tagsToBeDeleted: [],
         })
 
         this.emitMutation({
@@ -308,19 +312,17 @@ export class RibbonContainerLogic extends UILogic<
         })
     }
 
-    setShowListsPicker: EventHandler<'setShowListsPicker'> = async ({
-        event,
-    }) => {
+    setShowListsPicker: EventHandler<'setShowListsPicker'> = ({ event }) => {
         return { lists: { showListsPicker: { $set: event.value } } }
     }
     //
     // Search
     //
-    setShowSearchBox: EventHandler<'setShowSearchBox'> = async ({ event }) => {
+    setShowSearchBox: EventHandler<'setShowSearchBox'> = ({ event }) => {
         return { search: { showSearchBox: { $set: event.value } } }
     }
 
-    setSearchValue: EventHandler<'setSearchValue'> = async ({ event }) => {
+    setSearchValue: EventHandler<'setSearchValue'> = ({ event }) => {
         return { search: { searchValue: { $set: event.value } } }
     }
 
@@ -331,7 +333,18 @@ export class RibbonContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        await this.dependencies.activityLogger.toggleLoggingPause()
-        return { pausing: { isPaused: { $apply: (prev) => !prev } } }
+        const togglePauseState = () =>
+            this.emitMutation({
+                pausing: { isPaused: { $apply: (prev) => !prev } },
+            })
+
+        togglePauseState()
+
+        try {
+            await this.dependencies.activityLogger.toggleLoggingPause()
+        } catch (err) {
+            togglePauseState()
+            throw err
+        }
     }
 }
