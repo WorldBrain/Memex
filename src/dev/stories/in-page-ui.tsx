@@ -125,7 +125,7 @@ stories.add('Ribbon', () => (
     </WithDependencies>
 ))
 
-stories.add('Sidebar', () => (
+stories.add('Sidebar - Page Annotations', () => (
     <WithDependencies
         setup={async () => {
             const deps = await createDependencies()
@@ -134,5 +134,55 @@ stories.add('Sidebar', () => (
         }}
     >
         {({ commonProps }) => <SidebarContainer {...commonProps} />}
+    </WithDependencies>
+))
+
+stories.add('Sidebar - All Annotations', () => (
+    <WithDependencies
+        setup={async () => {
+            const deps = await createDependencies()
+            await deps.inPageUI.showSidebar()
+            return deps
+        }}
+    >
+        {({ commonProps }) => (
+            <SidebarContainer
+                {...commonProps}
+                ref={(sidebar) => {
+                    sidebar.processEvent('switchSearch', {
+                        changes: {
+                            searchType: 'notes',
+                            pageType: 'all',
+                            resultsSearchType: 'notes',
+                        },
+                    })
+                }}
+            />
+        )}
+    </WithDependencies>
+))
+
+stories.add('Sidebar - Page Search', () => (
+    <WithDependencies
+        setup={async () => {
+            const deps = await createDependencies()
+            await deps.inPageUI.showSidebar()
+            return deps
+        }}
+    >
+        {({ commonProps }) => (
+            <SidebarContainer
+                {...commonProps}
+                ref={(sidebar) => {
+                    sidebar.processEvent('switchSearch', {
+                        changes: {
+                            searchType: 'page',
+                            pageType: 'all',
+                            resultsSearchType: 'page',
+                        },
+                    })
+                }}
+            />
+        )}
     </WithDependencies>
 ))
