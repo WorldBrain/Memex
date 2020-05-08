@@ -10,7 +10,7 @@ import { Anchor, HighlightInteractionInterface } from 'src/highlighting/types'
 const styles = require('./comment-box.css')
 
 interface StateProps {
-    anchor: Anchor | null
+    anchor?: Anchor
     form: Omit<CommentBoxFormProps, 'saveComment'>
 }
 
@@ -26,7 +26,6 @@ interface CommentBoxDispatchProps {
 interface OwnProps {
     env: 'inpage' | 'overview'
     isSocialPost?: boolean
-    onSaveCb: () => void
     closeComments?: () => void
 }
 
@@ -35,15 +34,13 @@ export type CommentBoxProps = StateProps & CommentBoxDispatchProps & OwnProps
 export default class CommentBoxContainer extends React.Component<
     CommentBoxProps
 > {
-    save = async e => {
+    save = async (e) => {
         e.preventDefault()
         e.stopPropagation()
 
-        const { anchor, form, saveComment, onSaveCb } = this.props
+        const { anchor, form, saveComment } = this.props
 
-        await onSaveCb()
-
-        saveComment(
+        return saveComment(
             anchor,
             form.commentText.trim(),
             form.tags,
@@ -68,11 +65,7 @@ export default class CommentBoxContainer extends React.Component<
                     />
                 )}
 
-                <CommentBoxForm
-                    {...this.props.form}
-                    saveComment={this.save}
-                    isAnnotation={true} // TODO: we need to pass the right state here
-                />
+                <CommentBoxForm {...this.props.form} saveComment={this.save} />
             </div>
         )
     }

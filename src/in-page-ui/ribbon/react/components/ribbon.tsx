@@ -352,7 +352,6 @@ export default class Ribbon extends Component<Props, State> {
                                             {
                                                 <CommentBox
                                                     env="inpage"
-                                                    anchor={null}
                                                     closeComments={() =>
                                                         this.props.commentBox.setShowCommentBox(
                                                             false,
@@ -373,7 +372,6 @@ export default class Ribbon extends Component<Props, State> {
                                                             .commentBox
                                                             .updateCommentTags,
                                                     }}
-                                                    onSaveCb={() => {}}
                                                 />
                                             }
                                         </Tooltip>

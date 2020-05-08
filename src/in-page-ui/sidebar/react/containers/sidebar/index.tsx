@@ -225,7 +225,7 @@ export default class SidebarContainer extends StatefulUIElement<
                                 null,
                             ),
                         updateTags: (args) =>
-                            this.processEvent('updateTags', args),
+                            this.processEvent('updateTagsForNewComment', args),
                         ...tagsEventProps,
                     },
                     saveComment: (
@@ -240,7 +240,6 @@ export default class SidebarContainer extends StatefulUIElement<
                             tags,
                             bookmarked,
                         }),
-                    onSaveCb: () => {},
                     closeComments: () => {
                         console
                         // .log('close comments')
@@ -277,7 +276,7 @@ export default class SidebarContainer extends StatefulUIElement<
                     resetActiveTagIndex: () => {},
                     setUrlDragged: (url: string) => {},
                     updateTags: (url: string) => (args) =>
-                        this.processEvent('updateTagsForPageResult', {
+                        this.processEvent('updateTagsForResult', {
                             url,
                             ...args,
                         }),

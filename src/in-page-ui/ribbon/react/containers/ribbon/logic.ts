@@ -1,4 +1,3 @@
-import debounce from 'lodash/debounce'
 import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
 import { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
@@ -69,7 +68,6 @@ export const INITIAL_RIBBON_COMMENT_BOX_STATE = {
     showCommentBox: false,
     isCommentSaved: false,
     isCommentBookmarked: false,
-    isAnnotation: false,
     isTagInputActive: false,
     showTagsPicker: false,
     tags: [],
@@ -78,7 +76,6 @@ export class RibbonContainerLogic extends UILogic<
     RibbonContainerState,
     RibbonContainerEvents
 > {
-    debouncedFetchTagSuggestions: (search: string) => Promise<string[]>
     commentSavedTimeout = 2000
     skipAnnotationPageIndexing = false
 
@@ -173,10 +170,7 @@ export class RibbonContainerLogic extends UILogic<
         return { commentBox: { commentText: { $set: event.value } } }
     }
 
-    saveComment: EventHandler<'saveComment'> = async ({
-        event,
-        previousState,
-    }) => {
+    saveComment: EventHandler<'saveComment'> = async ({ previousState }) => {
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
         const save = async (options: { bookmark: boolean; tags: string[] }) => {
@@ -194,6 +188,7 @@ export class RibbonContainerLogic extends UILogic<
                 tagsToBeDeleted: [],
             })
         }
+
         await save({
             bookmark: previousState.commentBox.isCommentBookmarked,
             tags: previousState.commentBox.tags,
@@ -251,12 +246,15 @@ export class RibbonContainerLogic extends UILogic<
     ) => EventHandler<'updateTags' | 'updateCommentTags'> = (
         context,
     ) => async ({ event }) => {
-        const backendResult = this.dependencies.tags.updateTagForPage({
-            added: event.value.added,
-            deleted: event.value.deleted,
-            url: this.dependencies.currentTab.url,
-            tabId: this.dependencies.currentTab.id,
-        })
+        const backendResult =
+            context === 'commentBox'
+                ? Promise.resolve()
+                : this.dependencies.tags.updateTagForPage({
+                      added: event.value.added,
+                      deleted: event.value.deleted,
+                      url: this.dependencies.currentTab.url,
+                      tabId: this.dependencies.currentTab.id,
+                  })
 
         let tagsStateUpdater: (tags: string[]) => string[]
 
@@ -285,7 +283,7 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     updateCommentTags = this._updateTags('commentBox')
-    updateTags = this._updateTags('commentBox')
+    updateTags = this._updateTags('tagging')
 
     //
     // Lists

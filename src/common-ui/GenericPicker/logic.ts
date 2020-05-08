@@ -25,7 +25,7 @@ export interface GenericPickerDependencies {
     queryEntries: (query: string) => Promise<string[]>
     actOnAllTabs?: (query: string) => Promise<void>
     loadDefaultSuggestions: () => string[] | Promise<string[]>
-    initialSelectedEntries?: () => Promise<string[]>
+    initialSelectedEntries?: () => string[] | Promise<string[]>
     children?: any
 }
 
@@ -88,7 +88,10 @@ export default abstract class GenericPickerLogic extends UILogic<
     init = async () => {
         this.emitMutation({ loadingSuggestions: { $set: true } })
 
-        const initialSelectedEntries = await this.dependencies.initialSelectedEntries()
+        const initialSelectedEntries = this.dependencies.initialSelectedEntries
+            ? await this.dependencies.initialSelectedEntries()
+            : []
+
         const defaultSuggestions =
             typeof this.dependencies.loadDefaultSuggestions === 'string'
                 ? this.dependencies.loadDefaultSuggestions

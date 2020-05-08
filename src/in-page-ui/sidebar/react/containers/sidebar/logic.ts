@@ -54,7 +54,6 @@ export interface SidebarContainerState {
             isTagInputActive: boolean
             showTagsPicker: boolean
             commentText: string
-            isAnnotation: boolean
             tags: string[]
         }
     }
@@ -119,8 +118,8 @@ export type SidebarContainerEvents = UIEvent<{
     togglePageCommentTags: null
     toggleNewPageCommentTagPicker: null
 
-    updateTags: { added: string; deleted: string }
-    updateTagsForPageResult: { added: string; deleted: string; url: string }
+    updateTagsForNewComment: { added: string; deleted: string }
+    updateTagsForResult: { added: string; deleted: string; url: string }
     updateListsForPageResult: { added: string; deleted: string; url: string }
     addNewPageCommentTag: { tag: string }
     deleteNewPageCommentTag: { tag: string }
@@ -202,7 +201,6 @@ const INITIAL_COMMENT_BOX_STATE: SidebarContainerState['commentBox'] = {
         isTagInputActive: false,
         showTagsPicker: false,
         commentText: '',
-        isAnnotation: false,
         tags: [],
     },
 }
@@ -407,10 +405,12 @@ export class SidebarContainerLogic extends UILogic<
         const dummyAnnotation = {
             pageUrl,
             tags: event.tags,
+            hasBookmark: event.bookmarked,
             comment: event.commentText,
+            body: event.anchor?.quote,
+            selector: event.anchor,
             createdWhen: Date.now(),
             lastEdited: Date.now(),
-            selector: event.anchor,
         } as Annotation
 
         const updateState = (args: { annotations: Annotation[] }) =>
@@ -423,22 +423,24 @@ export class SidebarContainerLogic extends UILogic<
             })
 
         updateState({
-            annotations: [...previousState.annotations, dummyAnnotation],
+            annotations: [dummyAnnotation, ...previousState.annotations],
         })
 
         try {
             const annotationUrl = await this.options.annotations.createAnnotation(
                 {
                     url: pageUrl,
-                    comment: event.commentText,
                     bookmarked: event.bookmarked,
+                    body: dummyAnnotation.body,
+                    comment: dummyAnnotation.comment,
+                    selector: dummyAnnotation.selector,
                 },
                 { skipPageIndexing: event.skipPageIndexing },
             )
 
             this.emitMutation({
                 annotations: {
-                    [previousState.annotations.length]: {
+                    [0]: {
                         url: { $set: annotationUrl },
                     },
                 },
@@ -447,7 +449,7 @@ export class SidebarContainerLogic extends UILogic<
             for (const tag of event.tags) {
                 await this.options.annotations.addAnnotationTag({
                     tag,
-                    url: pageUrl,
+                    url: annotationUrl,
                 })
             }
         } catch (err) {
@@ -478,14 +480,9 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    updateTags: EventHandler<'updateTags'> = async ({ event }) => {
-        const backendResult = this.options.tags.updateTagForPage({
-            added: event.added,
-            deleted: event.deleted,
-            url: this.options.currentTab.url,
-            tabId: this.options.currentTab.id,
-        })
-
+    updateTagsForNewComment: EventHandler<'updateTagsForNewComment'> = async ({
+        event,
+    }) => {
         let tagsStateUpdater: (tags: string[]) => string[]
 
         if (event.added) {
@@ -508,11 +505,9 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             commentBox: { form: { tags: { $apply: tagsStateUpdater } } },
         })
-
-        return backendResult
     }
 
-    updateTagsForPageResult: EventHandler<'updateTagsForPageResult'> = async ({
+    updateTagsForResult: EventHandler<'updateTagsForResult'> = async ({
         event,
     }) => {
         const backendResult = this.options.tags.updateTagForPage({

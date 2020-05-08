@@ -34,7 +34,6 @@ export interface RibbonCommentBoxProps extends CommonTaggingProps {
     showCommentBox: boolean
     isCommentSaved: boolean
     isCommentBookmarked: boolean
-    isAnnotation: boolean
     isTagInputActive: boolean
     showTagsPicker: boolean
     handleCommentTextChange: (comment: string) => void

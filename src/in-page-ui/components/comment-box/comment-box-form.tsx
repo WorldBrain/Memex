@@ -19,7 +19,6 @@ interface OwnProps {
     tags: string[]
     commentText: string
     isCommentBookmarked: boolean
-    isAnnotation: boolean
     handleCommentTextChange: (comment: string) => void
     saveComment: React.EventHandler<React.SyntheticEvent>
     cancelComment: ClickHandler<HTMLDivElement>
