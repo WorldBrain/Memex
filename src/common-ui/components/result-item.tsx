@@ -41,6 +41,7 @@ export interface Props extends Partial<SocialPage> {
     onTagBtnClick: MouseEventHandler
     onListBtnClick: MouseEventHandler
     onTrashBtnClick: MouseEventHandler
+    onReaderBtnClick: MouseEventHandler
     onCommentBtnClick: MouseEventHandler
     onToggleBookmarkClick: MouseEventHandler
     handleCrossRibbonClick: MouseEventHandler

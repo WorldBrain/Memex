@@ -16,6 +16,7 @@ const heartFull = browser.extension.getURL('/img/star_full.svg')
 const commentEmpty = browser.extension.getURL('/img/comment_empty.svg')
 const commentFull = browser.extension.getURL('/img/comment_full.svg')
 const deleteItem = browser.extension.getURL('/img/trash.svg')
+const readerIcon = browser.extension.getURL('/img/worldbrain-logo-narrow.png')
 
 class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {
@@ -39,6 +40,12 @@ class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         e.stopPropagation()
                     }}
                 >
+                    <ResultItemActionBtn
+                        imgSrc={readerIcon}
+                        onClick={this.props.onReaderBtnClick}
+                        tooltipText="Open in reader view"
+                        className={styles.trash}
+                    />
                     <ResultItemActionBtn
                         imgSrc={deleteItem}
                         onClick={this.props.onTrashBtnClick}

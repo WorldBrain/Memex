@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { ModalIds } from 'src/overview/modals/reducer'
 import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
+import ViewerModal from 'src/reader/components/ViewerModal'
 
 export interface Props {
     modalId?: ModalIds
@@ -11,6 +12,9 @@ export interface Props {
 const modalsMap = {
     Subscription: ({ modalOptions, onClose }) => (
         <SubscribeModal onClose={onClose} {...modalOptions} />
+    ),
+    ReaderView: ({ modalOptions, onClose }) => (
+        <ViewerModal onClose={onClose} {...modalOptions} />
     ),
 }
 

@@ -123,7 +123,7 @@ const fetchTimeout = (
  * Uses native XMLHttpRequest API, as newer Fetch API doesn't seem to support fetching of
  * the DOM; the Response object must be parsed.
  */
-function fetchDOMFromUrl(
+export function fetchDOMFromUrl(
     url: string,
     timeout: number,
 ): { run: () => Promise<Document>; cancel: CancelXHR } {

@@ -1,4 +1,4 @@
-import React, { PureComponent, MouseEventHandler } from 'react'
+import React, { PureComponent, MouseEventHandler, MouseEvent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
 import reduce from 'lodash/fp/reduce'
@@ -25,6 +25,7 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
+import { show } from 'src/overview/modals/actions'
 
 const styles = require('./ResultList.css')
 
@@ -70,6 +71,7 @@ export interface DispatchProps {
     handleScrollPagination: (args: Waypoint.CallbackArgs) => void
     handleToggleBm: (doc: Result, i: number) => MouseEventHandler
     handleTrashBtnClick: (doc: Result, i: number) => MouseEventHandler
+    handleReaderViewClick: (fullUrl: string) => void
 }
 
 export interface OwnProps {
@@ -247,6 +249,13 @@ class ResultListContainer extends PureComponent<Props> {
         })
     }
 
+    private handleReaderBtnClick = (doc: Result, i: number) => async (
+        event: MouseEvent,
+    ) => {
+        const fullUrl = doc.fullUrl
+        this.props.handleReaderViewClick(fullUrl)
+    }
+
     private attachDocWithPageResultItem(doc: Result, index, key) {
         const isSocialPost = doc.hasOwnProperty('user')
 
@@ -270,6 +279,7 @@ class ResultListContainer extends PureComponent<Props> {
                 onListBtnClick={this.props.handleListBtnClick(index)}
                 isListFilterActive={this.props.isListFilterActive}
                 onTrashBtnClick={this.props.handleTrashBtnClick(doc, index)}
+                onReaderBtnClick={this.handleReaderBtnClick(doc, index)}
                 onToggleBookmarkClick={this.props.handleToggleBm(doc, index)}
                 onCommentBtnClick={this.props.handleCommentBtnClick(
                     doc,
@@ -409,6 +419,8 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
+    handleReaderViewClick: (fullUrl) =>
+        dispatch(show({ modalId: 'ReaderView', options: { fullUrl } })),
     handleTagBtnClick: (index) => (event) => {
         if (event) {
             event.preventDefault()
