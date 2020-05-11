@@ -193,12 +193,18 @@ export class RibbonContainerLogic extends UILogic<
 
     saveComment: EventHandler<'saveComment'> = async ({ previousState }) => {
         const { annotations, currentTab } = this.dependencies
+        const comment = previousState.commentBox.commentText.trim()
+
+        if (comment.length === 0) {
+            return
+        }
+
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
         const annotUrl = await annotations.createAnnotation(
             {
+                comment,
                 url: currentTab.url,
-                comment: previousState.commentBox.commentText,
                 bookmarked: previousState.commentBox.isCommentBookmarked,
             },
             { skipPageIndexing: this.skipAnnotationPageIndexing },

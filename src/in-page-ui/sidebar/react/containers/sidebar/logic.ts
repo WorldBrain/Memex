@@ -421,13 +421,20 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        const comment = event.commentText.trim()
+        const body = event.anchor?.quote
+
+        if (comment.length === 0 && !body?.length) {
+            return
+        }
+
         const pageUrl = this.options.currentTab.url
         const dummyAnnotation = {
             pageUrl,
+            comment,
+            body,
             tags: event.tags,
             hasBookmark: event.bookmarked,
-            comment: event.commentText,
-            body: event.anchor?.quote,
             selector: event.anchor,
             createdWhen: Date.now(),
             lastEdited: Date.now(),

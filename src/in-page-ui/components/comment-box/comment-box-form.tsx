@@ -131,12 +131,10 @@ class CommentBoxForm extends React.Component<CommentBoxFormProps> {
     }
 
     render() {
-        const { commentText, cancelComment } = this.props
-
         return (
             <React.Fragment>
                 <TextInputControlled
-                    defaultValue={commentText}
+                    defaultValue={this.props.commentText}
                     onClick={() => {
                         this.setTagInputActive(false)
                         this.setState((state) => ({ showTagsPicker: false }))
