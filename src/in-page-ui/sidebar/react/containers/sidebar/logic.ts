@@ -289,6 +289,7 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
     }
+
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial<SidebarContainerState>(this, async () => {
             await this._doSearch(previousState)
@@ -299,7 +300,9 @@ export class SidebarContainerLogic extends UILogic<
 
     private async _doSearch(state: SidebarContainerState) {
         const { search, currentTab } = this.options
-        const query = state.searchValue.length ? state.searchValue : undefined
+        const query = state.searchValue.trim().length
+            ? state.searchValue.trim()
+            : undefined
         const url = state.pageType === 'page' ? currentTab.url : undefined
 
         await executeUITask(this, 'searchLoadState', async () => {
@@ -1006,8 +1009,11 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const mutation = { searchValue: { $set: event.searchQuery } }
         this.emitMutation(mutation)
+        const nextState = this.withMutation(previousState, mutation)
 
-        await this.doSearch(this.withMutation(previousState, mutation))
+        if (nextState.searchValue.trim() !== previousState.searchValue.trim()) {
+            await this.doSearch(nextState)
+        }
     }
 
     togglePageType: EventHandler<'togglePageType'> = async (incoming) => {
