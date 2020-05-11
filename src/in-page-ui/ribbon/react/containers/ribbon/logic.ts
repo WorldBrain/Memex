@@ -1,4 +1,4 @@
-import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
+import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
@@ -182,7 +182,18 @@ export class RibbonContainerLogic extends UILogic<
     // Comment box
     //
     setShowCommentBox: EventHandler<'setShowCommentBox'> = ({ event }) => {
-        return { commentBox: { showCommentBox: { $set: event.value } } }
+        const extra: UIMutation<RibbonContainerState> =
+            event.value === true
+                ? {
+                      tagging: { showTagsPicker: { $set: false } },
+                      lists: { showListsPicker: { $set: false } },
+                  }
+                : {}
+
+        return {
+            commentBox: { showCommentBox: { $set: event.value } },
+            ...extra,
+        }
     }
 
     handleCommentTextChange: EventHandler<'handleCommentTextChange'> = ({
@@ -255,11 +266,19 @@ export class RibbonContainerLogic extends UILogic<
     //
     // Tagging
     //
-    setShowTagsPicker: EventHandler<'setShowTagsPicker'> = ({
-        event,
-        previousState,
-    }) => {
-        return { tagging: { showTagsPicker: { $set: event.value } } }
+    setShowTagsPicker: EventHandler<'setShowTagsPicker'> = ({ event }) => {
+        const extra: UIMutation<RibbonContainerState> =
+            event.value === true
+                ? {
+                      commentBox: { showCommentBox: { $set: false } },
+                      lists: { showListsPicker: { $set: false } },
+                  }
+                : {}
+
+        return {
+            tagging: { showTagsPicker: { $set: event.value } },
+            ...extra,
+        }
     }
 
     private _updateTags: (
@@ -319,7 +338,15 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     setShowListsPicker: EventHandler<'setShowListsPicker'> = ({ event }) => {
-        return { lists: { showListsPicker: { $set: event.value } } }
+        const extra: UIMutation<RibbonContainerState> =
+            event.value === true
+                ? {
+                      commentBox: { showCommentBox: { $set: false } },
+                      tagging: { showTagsPicker: { $set: false } },
+                  }
+                : {}
+
+        return { lists: { showListsPicker: { $set: event.value } }, ...extra }
     }
     //
     // Search
