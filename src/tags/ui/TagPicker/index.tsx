@@ -78,16 +78,20 @@ class TagPicker extends StatefulUIElement<
         />
     )
 
-    renderNewTagAllTabsButton = () => (
-        <IconStyleWrapper show>
-            <ButtonTooltip tooltipText="Tag all tabs in window" position="left">
-                <ActOnAllTabsButton
-                    size={20}
-                    onClick={this.handleNewTagAllPress}
-                />
-            </ButtonTooltip>
-        </IconStyleWrapper>
-    )
+    renderNewTagAllTabsButton = () =>
+        this.props.actOnAllTabs && (
+            <IconStyleWrapper show>
+                <ButtonTooltip
+                    tooltipText="Tag all tabs in window"
+                    position="left"
+                >
+                    <ActOnAllTabsButton
+                        size={20}
+                        onClick={this.handleNewTagAllPress}
+                    />
+                </ButtonTooltip>
+            </IconStyleWrapper>
+        )
 
     renderEmptyList() {
         if (this.state.newEntryName !== '') {
@@ -138,7 +142,7 @@ class TagPicker extends StatefulUIElement<
                         }
                         onPress={this.handleNewTagPress}
                     >
-                        {this.renderNewTagAllTabsButton}
+                        {this.renderNewTagAllTabsButton()}
                     </AddNewEntry>
                 )}
                 <EntryResultsList

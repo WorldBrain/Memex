@@ -168,7 +168,6 @@ export default abstract class GenericPickerLogic extends UILogic<
     }: GenericPickerUIEvent<'searchInputChanged'>) => {
         this.emitMutation({
             query: { $set: query },
-            // Opportunistically set the new entry name before searching
             newEntryName: { $set: query },
         })
 
