@@ -1,4 +1,6 @@
 import * as React from 'react'
+import onClickOutside from 'react-onclickoutside'
+
 import {
     SidebarContainerOptions,
     SidebarContainerState,
@@ -15,7 +17,7 @@ import {
 
 export interface SidebarContainerProps extends SidebarContainerOptions {}
 
-export default class SidebarContainer extends StatefulUIElement<
+class SidebarContainer extends StatefulUIElement<
     SidebarContainerProps,
     SidebarContainerState,
     SidebarContainerEvents
@@ -51,6 +53,14 @@ export default class SidebarContainer extends StatefulUIElement<
             'sidebarAction',
             this.handleExternalAction,
         )
+    }
+
+    handleClickOutside = () => {
+        if (this.state.state === 'visible') {
+            this.hideSidebar()
+            this.props.inPageUI.hideRibbon()
+            this.props.inPageUI.hideSidebar()
+        }
     }
 
     handleInPageUIStateChange: InPageUIEvents['stateChanged'] = ({
@@ -373,3 +383,5 @@ export default class SidebarContainer extends StatefulUIElement<
         )
     }
 }
+
+export default onClickOutside(SidebarContainer)

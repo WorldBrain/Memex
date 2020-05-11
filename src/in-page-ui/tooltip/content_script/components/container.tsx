@@ -1,6 +1,5 @@
 import React from 'react'
-import PropTypes from 'prop-types'
-import OnClickOutside from 'react-onclickoutside'
+import onClickOutside from 'react-onclickoutside'
 import { features } from 'src/util/remote-functions-background'
 
 import Tooltip from './tooltip'
@@ -195,4 +194,4 @@ class TooltipContainer extends React.Component<
     }
 }
 
-export default OnClickOutside(TooltipContainer)
+export default onClickOutside(TooltipContainer)
