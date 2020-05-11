@@ -1,5 +1,7 @@
 import React from 'react'
+import onClickOutside from 'react-onclickoutside'
 import styled, { ThemeProvider } from 'styled-components'
+
 import { StatefulUIElement } from 'src/util/ui-logic'
 import TagPickerLogic, {
     TagPickerDependencies,
@@ -29,6 +31,12 @@ class TagPicker extends StatefulUIElement<
 > {
     constructor(props: TagPickerDependencies) {
         super(props, new TagPickerLogic(props))
+    }
+
+    handleClickOutside = () => {
+        if (this.props.onClickOutside) {
+            this.props.onClickOutside()
+        }
     }
 
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
@@ -185,4 +193,4 @@ const EmptyTagsView = styled.div`
     text-align: center;
 `
 
-export default TagPicker
+export default onClickOutside(TagPicker)
