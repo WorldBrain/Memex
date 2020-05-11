@@ -53,6 +53,13 @@ export default class PageStorage extends StorageModule {
                 operation: 'createObject',
                 collection: 'visits',
             },
+            countVisits: {
+                operation: 'countObjects',
+                collection: 'visits',
+                args: {
+                    url: '$url:string',
+                },
+            },
             findVisitsByUrl: {
                 operation: 'findObjects',
                 collection: 'visits',
@@ -186,10 +193,10 @@ export default class PageStorage extends StorageModule {
 
     async pageHasVisits(url: string): Promise<boolean> {
         const normalizedUrl = normalizeUrl(url, {})
-        const visits = await this.operation('findVisitsByUrl', {
+        const visitCount = await this.operation('countVisits', {
             url: normalizedUrl,
         })
-        return !!visits.length
+        return visitCount > 0
     }
 
     async addPageVisit(url: string, time: number) {
@@ -248,10 +255,10 @@ export default class PageStorage extends StorageModule {
 
     async deletePageIfOrphaned(url: string) {
         const normalizedUrl = normalizeUrl(url, {})
-        if (
-            (await this.operation('findVisitsByUrl', { url: normalizeUrl }))
-                .length
-        ) {
+        const visitCount = await this.operation('countVisits', {
+            url: normalizeUrl,
+        })
+        if (visitCount > 0) {
             return
         }
         if (
