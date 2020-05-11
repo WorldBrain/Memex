@@ -1,5 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import { StyleSheetManager } from 'styled-components'
+
 import RibbonHolder from './containers/ribbon-holder'
 import { InPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { RibbonContainerDependencies } from './containers/ribbon/types'
@@ -11,7 +13,12 @@ export function setupRibbonUI(
         containerDependencies: RibbonContainerDependencies
     },
 ) {
-    ReactDOM.render(<RibbonHolder {...options} />, target)
+    ReactDOM.render(
+        <StyleSheetManager target={target}>
+            <RibbonHolder {...options} />
+        </StyleSheetManager>,
+        target,
+    )
 }
 
 export function destroyRibbonUI(target: HTMLElement, shadowRoot?: ShadowRoot) {

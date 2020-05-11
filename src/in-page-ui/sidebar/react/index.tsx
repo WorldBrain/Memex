@@ -1,5 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import { StyleSheetManager } from 'styled-components'
+
 import SidebarContainer from './containers/sidebar'
 import { SidebarContainerDependencies } from './containers/sidebar/types'
 import { SidebarEnv } from './types'
@@ -9,7 +11,12 @@ export function setupSidebarUI(
     dependencies: SidebarContainerDependencies,
     options: { env: SidebarEnv },
 ) {
-    ReactDOM.render(<SidebarContainer {...options} {...dependencies} />, target)
+    ReactDOM.render(
+        <StyleSheetManager target={target}>
+            <SidebarContainer {...options} {...dependencies} />
+        </StyleSheetManager>,
+        target,
+    )
 }
 
 export function destroySidebarUI(target: HTMLElement, shadowRoot?: ShadowRoot) {
