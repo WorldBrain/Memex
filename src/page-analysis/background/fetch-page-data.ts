@@ -72,7 +72,7 @@ const fetchPageData: FetchPageData = ({
          * @return {Promise<any>} Resolves to an object containing `content` and `favIconURI` data
          *  fetched from the DOM pointed at by the `url` of `fetchPageData` call.
          */
-        run = async function() {
+        run = async function () {
             const doc = await req.run()
 
             if (!doc) {
@@ -123,7 +123,7 @@ const fetchTimeout = (
  * Uses native XMLHttpRequest API, as newer Fetch API doesn't seem to support fetching of
  * the DOM; the Response object must be parsed.
  */
-function fetchDOMFromUrl(
+export function fetchDOMFromUrl(
     url: string,
     timeout: number,
 ): { run: () => Promise<Document>; cancel: CancelXHR } {
@@ -134,7 +134,7 @@ function fetchDOMFromUrl(
         run: () =>
             new Promise((resolve, reject) => {
                 fetchTimeout(url, timeout, { signal: controller.signal })
-                    .then(response => {
+                    .then((response) => {
                         switch (response.status) {
                             case 200:
                                 return response.text()
@@ -157,12 +157,12 @@ function fetchDOMFromUrl(
                                 )
                         }
                     })
-                    .then(text =>
+                    .then((text) =>
                         resolve(
                             new DOMParser().parseFromString(text, 'text/html'),
                         ),
                     )
-                    .catch(error => {
+                    .catch((error) => {
                         if (error.name === 'AbortError') {
                             reject(
                                 new FetchPageDataError(

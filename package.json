@@ -94,6 +94,7 @@
         "react-shadow-dom-retarget-events": "^1.0.8",
         "react-string-replace": "^0.4.4",
         "react-waypoint": "^8.0.3",
+        "readability": "github:mozilla/readability",
         "redux": "^4.0.0",
         "redux-act": "^1.7.4",
         "redux-observable": "^0.14.1",
