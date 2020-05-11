@@ -13,17 +13,18 @@ import {
 
 export const AuthContext = React.createContext<AuthContextInterface>({
     currentUser: null as MemexUser,
+    loadingUser: false,
 })
 
 export class AuthContextProvider extends React.Component<
     {},
-    { currentUser: any }
+    { currentUser: any; loadingUser: boolean }
 > {
     unsubscribe: () => void
 
     constructor(props) {
         super(props)
-        this.state = { currentUser: null }
+        this.state = { currentUser: null, loadingUser: false }
     }
 
     updateUserState = (user) => {
@@ -42,9 +43,16 @@ export class AuthContextProvider extends React.Component<
                 },
             })
         }
+        this.setState({
+            loadingUser: false,
+        })
     }
 
     componentDidMount = async () => {
+        this.setState({
+            loadingUser: true,
+        })
+
         const user = await auth.getCurrentUser()
         this.updateUserState(
             user === null
@@ -60,15 +68,22 @@ export class AuthContextProvider extends React.Component<
             'onAuthStateChanged',
             this.listenOnAuthStateChanged,
         )
-        this.unsubscribe = () =>
+        authEvents.addListener('onLoadingUser', this.listenOnLoadingUser)
+        this.unsubscribe = () => {
             authEvents.removeListener(
                 'onAuthStateChanged',
                 this.listenOnAuthStateChanged,
             )
+            authEvents.removeListener('onLoadingUser', this.listenOnLoadingUser)
+        }
     }
 
     listenOnAuthStateChanged = async (user) => {
         this.updateUserState(user)
+    }
+
+    listenOnLoadingUser = async (loadingUser) => {
+        this.setState({ loadingUser })
     }
 
     componentWillUnmount = () => {
@@ -80,7 +95,10 @@ export class AuthContextProvider extends React.Component<
     render() {
         return (
             <AuthContext.Provider
-                value={{ currentUser: this.state.currentUser }}
+                value={{
+                    currentUser: this.state.currentUser,
+                    loadingUser: this.state.loadingUser,
+                }}
             >
                 {this.props.children}
             </AuthContext.Provider>

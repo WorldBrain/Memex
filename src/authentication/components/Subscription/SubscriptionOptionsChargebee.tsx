@@ -15,12 +15,15 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 import styled from 'styled-components'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { AuthContextInterface } from 'src/authentication/background/types'
 
 interface Props {
     user: AuthenticatedUser | null
     onClose?: () => void
     plans: UserPlan[]
     onSubscriptionClicked?: () => void
+    onSubscriptionOpened?: () => void
 }
 
 interface State {
@@ -29,20 +32,20 @@ interface State {
     subscriptionRefreshing?: boolean
     loadingMonthly: boolean
     loadingYearly: boolean
-    loading: boolean
+    loadingPortal: boolean
 }
 
-export class SubscriptionOptionsChargebee extends React.Component<
-    Props,
+class SubscriptionOptionsChargebee extends React.Component<
+    Props & AuthContextInterface,
     State
 > {
     public state = {
         subscribed: null,
         showSubscriptionOptions: true,
         subscriptionRefreshing: null,
-        loading: null,
         loadingMonthly: null,
         loadingYearly: null,
+        loadingPortal: null,
     }
 
     async componentDidMount() {
@@ -52,24 +55,28 @@ export class SubscriptionOptionsChargebee extends React.Component<
     }
 
     openPortal = async () => {
-        this.setState({
-            loading: true,
-        })
         this.props.onSubscriptionClicked?.()
+        if (!this.props.currentUser) {
+            return
+        }
+
+        this.setState({
+            loadingPortal: true,
+        })
         const portalLink = await subscription.getManageLink()
         window.open(portalLink['access_url'])
-    }
-
-    openPortalBridge = async () => {
-        await this.openPortal().then(() => {
-            this.setState({
-                loading: false,
-            })
+        this.setState({
+            loadingPortal: false,
         })
+        this.props.onSubscriptionOpened?.()
     }
 
     openCheckoutBackupYearly = async () => {
         this.props.onSubscriptionClicked?.()
+        if (!this.props.currentUser) {
+            return
+        }
+
         this.setState({
             loadingYearly: true,
         })
@@ -78,9 +85,14 @@ export class SubscriptionOptionsChargebee extends React.Component<
             planId: 'pro-yearly',
         })
         window.open(checkoutExternalUrl.url)
+        this.props.onSubscriptionOpened?.()
     }
 
     openCheckoutBackupMonthly = async () => {
+        this.props.onSubscriptionClicked?.()
+        if (!this.props.currentUser) {
+            return
+        }
         this.setState({
             loadingMonthly: true,
         })
@@ -88,9 +100,9 @@ export class SubscriptionOptionsChargebee extends React.Component<
         const checkoutExternalUrl = await subscription.getCheckoutLink({
             planId: 'pro-monthly',
         })
-        
 
         window.open(checkoutExternalUrl.url)
+        this.props.onSubscriptionOpened?.()
     }
 
     openCheckoutMonthly = async () => {
@@ -122,9 +134,6 @@ export class SubscriptionOptionsChargebee extends React.Component<
     renderSubscriptionRefresh() {
         let onClick = () => null
         let child
-        this.setState({
-            loading: false,
-        })
 
         if (this.state.subscriptionRefreshing === true) {
             // child = "Refreshing..."
@@ -161,7 +170,7 @@ export class SubscriptionOptionsChargebee extends React.Component<
                                 openCheckoutBackupYearly={
                                     this.openCheckoutYearly
                                 }
-                                openPortal={this.openPortalBridge}
+                                openPortal={this.openPortal}
                                 plans={this.props.plans}
                                 loadingMonthly={this.state.loadingMonthly}
                                 loadingYearly={this.state.loadingYearly}
@@ -172,12 +181,12 @@ export class SubscriptionOptionsChargebee extends React.Component<
                     <CenterText>
                         {this.state.subscribed && (
                             <div>
-                                {this.state.loading ? (
+                                {this.state.loadingPortal ? (
                                     <PrimaryButton onClick={() => null}>
                                         <LoadingIndicator />
                                     </PrimaryButton>
-                                ):(
-                                    <PrimaryButton onClick={this.openPortalBridge}>
+                                ) : (
+                                    <PrimaryButton onClick={this.openPortal}>
                                         {'Edit Subscriptions'}
                                     </PrimaryButton>
                                 )}
@@ -189,3 +198,5 @@ export class SubscriptionOptionsChargebee extends React.Component<
         )
     }
 }
+
+export default withCurrentUser(SubscriptionOptionsChargebee)

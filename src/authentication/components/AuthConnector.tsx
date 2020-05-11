@@ -16,6 +16,7 @@ export function withCurrentUser<
                     {(context) => (
                         <WrappedComponent
                             currentUser={context?.currentUser}
+                            loadingUser={context?.loadingUser}
                             {...(this.props as P)}
                         />
                     )}

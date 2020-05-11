@@ -1,18 +1,14 @@
 import * as React from 'react'
-import {
-    TypographyHeadingPage,
-    TypographyInputTitle,
-} from 'src/common-ui/components/design-library/typography'
+import { TypographyInputTitle } from 'src/common-ui/components/design-library/typography'
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
 import { PrimaryButton } from 'src/common-ui/components/primary-button'
-import { connect } from 'react-redux'
-import { show } from 'src/overview/modals/actions'
 import { InputTextField } from 'src/common-ui/components/design-library/form/InputTextField'
 import { AuthContextInterface } from 'src/authentication/background/types'
 import { auth, subscription } from 'src/util/remote-functions-background'
 import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
-
+import { connect } from 'react-redux'
+import { show } from 'src/overview/modals/actions'
 
 const styles = require('./styles.css')
 
@@ -21,52 +17,34 @@ const hiddenInProduction =
 const dev = process.env.NODE_ENV !== 'production'
 
 interface Props {
-    initiallyShowSubscriptionModal?: boolean
     showSubscriptionModal: () => void
-    refreshing: boolean
-    onSubscriptionClicked?: () => void
+    refreshUser?: boolean
 }
 
-export class AccountInfo extends React.PureComponent<
-    Props & AuthContextInterface
-> {
-
+export class AccountInfo extends React.Component<Props & AuthContextInterface> {
     state = {
-        refreshing: false,
-        loading: false,
-    }
-
-    componentDidMount(): void {
-        if (this.props.initiallyShowSubscriptionModal) {
-            this.props.showSubscriptionModal()
-        }
+        loadingChargebee: false,
     }
 
     openPortal = async () => {
         this.setState({
-            loading: true,
+            loadingChargebee: true,
         })
-        this.props.onSubscriptionClicked?.()
         const portalLink = await subscription.getManageLink()
         window.open(portalLink['access_url'])
+        this.setState({
+            loadingChargebee: false,
+        })
     }
 
-    openPortalBridge = async () => {
-        await this.openPortal().then(() => {
-            this.setState({
-                loading: false,
-            })
-        })
+    componentDidMount() {
+        if (this.props.refreshUser) {
+            this.handleRefresh()
+        }
     }
 
     handleRefresh = async () => {
-        this.setState({
-            refreshing: true,
-        })
         await auth.refreshUserInfo()
-        this.setState({
-            refreshing: false,
-        })
     }
 
     render() {
@@ -88,14 +66,14 @@ export class AccountInfo extends React.PureComponent<
                             readonly
                             disabled
                         />
-                         {!user.subscriptionStatus && (
+                        {!user.subscriptionStatus && (
                             <InputTextField
                                 name={'Plans'}
                                 defaultValue={'No subscriptions yet'}
                                 readOnly
                             />
-                         )}
-                        {user.subscriptionStatus &&(
+                        )}
+                        {user.subscriptionStatus && (
                             <div>
                                 <TypographyInputTitle>
                                     {' '}
@@ -112,82 +90,86 @@ export class AccountInfo extends React.PureComponent<
                         {user.subscriptionExpiry && (
                             <div>
                                 {user.subscriptionStatus === 'non_renewing' ? (
-                                        <div>
-                                            <TypographyInputTitle>
-                                                {' '}
-                                                Expiration Date{' '}
-                                            </TypographyInputTitle>
-                                            <InputTextField
-                                                name={'subscriptionExpiry'}
-                                                defaultValue={
-                                                    user.subscriptionExpiry &&
-                                                    new Date(
-                                                        user.subscriptionExpiry * 1000,
-                                                    ).toLocaleString()
-                                                }
-                                                readOnly
-                                            />
-                                        </div>
-                                    ):(
-                                        <div>
-                                            <TypographyInputTitle>
-                                                {' '}
-                                                Renewal Date{' '}
-                                            </TypographyInputTitle>
-                                            <InputTextField
-                                                name={'subscriptionExpiry'}
-                                                defaultValue={
-                                                    user.subscriptionExpiry &&
-                                                    new Date(
-                                                        user.subscriptionExpiry * 1000,
-                                                    ).toLocaleString()
-                                                }
-                                                readOnly
-                                            />
+                                    <div>
+                                        <TypographyInputTitle>
+                                            {' '}
+                                            Expiration Date{' '}
+                                        </TypographyInputTitle>
+                                        <InputTextField
+                                            name={'subscriptionExpiry'}
+                                            defaultValue={
+                                                user.subscriptionExpiry &&
+                                                new Date(
+                                                    user.subscriptionExpiry *
+                                                        1000,
+                                                ).toLocaleString()
+                                            }
+                                            readOnly
+                                        />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <TypographyInputTitle>
+                                            {' '}
+                                            Renewal Date{' '}
+                                        </TypographyInputTitle>
+                                        <InputTextField
+                                            name={'subscriptionExpiry'}
+                                            defaultValue={
+                                                user.subscriptionExpiry &&
+                                                new Date(
+                                                    user.subscriptionExpiry *
+                                                        1000,
+                                                ).toLocaleString()
+                                            }
+                                            readOnly
+                                        />
                                     </div>
                                 )}
-                                </div>
-                        )}
-                        <div className={styles.buttonBox}>
-                        {!user.subscriptionStatus  ? (
-                               <div className={styles.button}>
-                                   <PrimaryButton
-                                    onClick={this.props.showSubscriptionModal}
-                                      >
-                                        {'Upgrade Subscription'}
-                                    </PrimaryButton> 
-                                </div>
-                            ):(
-                            <div>
-                                {this.state.loading ? (
-                                    <div className={styles.button}>
-                                        <PrimaryButton
-                                            onClick={undefined}
-                                        >
-                                            <LoadingIndicator/>
-                                        </PrimaryButton>  
-                                    </div>
-                                ):(
-                                    <div className={styles.button}>
-                                        <PrimaryButton
-                                        onClick={this.openPortalBridge}
-                                        >
-                                            {'Edit Subscriptions'}
-                                        </PrimaryButton>  
-                                    </div>
-                                )}  
                             </div>
                         )}
-                        <span className={styles.horizontalSpace}/>
-                        {this.state.refreshing ? (
-                            <PrimaryButton onClick={() => null}>
-                                <LoadingIndicator />
-                            </PrimaryButton>
-                        ) : (
-                            <PrimaryButton onClick={this.handleRefresh}>
-                                Refresh Subscription Status
-                            </PrimaryButton>
-                        )}
+                        <div className={styles.buttonBox}>
+                            {!user.subscriptionStatus ? (
+                                <div className={styles.button}>
+                                    <PrimaryButton
+                                        onClick={
+                                            this.props.showSubscriptionModal
+                                        }
+                                    >
+                                        {'Upgrade Subscription'}
+                                    </PrimaryButton>
+                                </div>
+                            ) : (
+                                <div>
+                                    {this.state.loadingChargebee ||
+                                    this.props.loadingUser ? (
+                                        <div className={styles.button}>
+                                            <PrimaryButton onClick={() => null}>
+                                                <LoadingIndicator />
+                                            </PrimaryButton>
+                                        </div>
+                                    ) : (
+                                        <div className={styles.button}>
+                                            <PrimaryButton
+                                                onClick={this.openPortal}
+                                            >
+                                                {'Edit Subscriptions'}
+                                            </PrimaryButton>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            <span className={styles.horizontalSpace} />
+                            {this.state.loadingChargebee ||
+                            this.props.loadingUser ? (
+                                <PrimaryButton onClick={() => null}>
+                                    <LoadingIndicator />
+                                </PrimaryButton>
+                            ) : (
+                                <PrimaryButton onClick={this.handleRefresh}>
+                                    Refresh Subscription Status
+                                </PrimaryButton>
+                            )}
                         </div>
                         {dev === true && (
                             <div>
@@ -211,23 +193,21 @@ export class AccountInfo extends React.PureComponent<
                                     defaultValue={features}
                                     readOnly
                                 />
-                                 <TypographyInputTitle>
-                                        {' '}
-                                        Email Address Verified?{' '}
-                                    </TypographyInputTitle>
-                                    
-                                    <InputTextField
-                                        type={hiddenInProduction}
-                                        name={'Email Verified'}
-                                        defaultValue={`EmailVerified: ${JSON.stringify(
-                                            user.emailVerified,
-                                        )}`}
-                                        readOnly
-                                    />
+                                <TypographyInputTitle>
+                                    {' '}
+                                    Email Address Verified?{' '}
+                                </TypographyInputTitle>
 
+                                <InputTextField
+                                    type={hiddenInProduction}
+                                    name={'Email Verified'}
+                                    defaultValue={`EmailVerified: ${JSON.stringify(
+                                        user.emailVerified,
+                                    )}`}
+                                    readOnly
+                                />
                             </div>
                         )}
-                       
                     </div>
                 )}
             </FullPage>

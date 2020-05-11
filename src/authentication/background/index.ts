@@ -16,7 +16,10 @@ import {
     getSubscriptionStatus,
     getAuthorizedPlans,
 } from './utils'
-import { remoteEventEmitter } from 'src/util/webextensionRPC'
+import {
+    RemoteEventEmitter,
+    remoteEventEmitter,
+} from 'src/util/webextensionRPC'
 import { AuthRemoteEvents, AuthRemoteFunctionsInterface } from './types'
 import { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
@@ -27,6 +30,7 @@ export class AuthBackground {
     subscriptionService: SubscriptionsService
     remoteFunctions: AuthRemoteFunctionsInterface
     scheduleJob: (job: JobDefinition) => void
+    remoteEmitter: RemoteEventEmitter<AuthRemoteEvents>
 
     constructor(options: {
         authService: AuthService
@@ -36,10 +40,11 @@ export class AuthBackground {
         this.authService = options.authService
         this.subscriptionService = options.subscriptionService
         this.scheduleJob = options.scheduleJob
+        this.remoteEmitter = remoteEventEmitter<AuthRemoteEvents>('auth')
         this.remoteFunctions = {
             getCurrentUser: () => this.authService.getCurrentUser(),
             signOut: () => this.authService.signOut(),
-            refreshUserInfo: () => this.authService.refreshUserInfo(),
+            refreshUserInfo: () => this.refreshUserInfo(),
 
             hasValidPlan: async (plan: UserPlan) => {
                 return hasValidPlan(
@@ -79,6 +84,12 @@ export class AuthBackground {
         }
     }
 
+    refreshUserInfo = async () => {
+        await this.remoteEmitter.emit('onLoadingUser', true)
+        await this.authService.refreshUserInfo()
+        await this.remoteEmitter.emit('onLoadingUser', false)
+    }
+
     setupRequestInterceptor() {
         setupRequestInterceptors({ webRequest: window['browser'].webRequest })
     }
@@ -116,8 +127,9 @@ export class AuthBackground {
     }
 
     registerRemoteEmitter() {
-        const remoteEmitter = remoteEventEmitter<AuthRemoteEvents>('auth')
         this.authService.events.on('changed', async ({ user }) => {
+            await this.remoteEmitter.emit('onLoadingUser', true)
+
             const userWithClaims = user
                 ? {
                       ...user,
@@ -140,7 +152,8 @@ export class AuthBackground {
                 console['info'](`User changed:`, userDebug)
             }
 
-            remoteEmitter.emit('onAuthStateChanged', userWithClaims)
+            await this.remoteEmitter.emit('onLoadingUser', false)
+            await this.remoteEmitter.emit('onAuthStateChanged', userWithClaims)
         })
     }
 }

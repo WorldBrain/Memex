@@ -25,10 +25,13 @@ export interface AuthRemoteEvents {
     onAuthStateChanged: (
         user: (AuthenticatedUser & { claims: Claims }) | null,
     ) => void
+
+    onLoadingUser: (loading: boolean) => void
 }
 
 export interface AuthContextInterface {
     currentUser: MemexUser
+    loadingUser: boolean
 }
 
 export type MemexUser = {
