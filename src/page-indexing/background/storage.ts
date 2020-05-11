@@ -167,18 +167,9 @@ export default class PageStorage extends StorageModule {
             time: number
         }
         const normalizedUrl = normalizeUrl(url, {})
-        const existingVisits: Visit[] = await this.operation(
-            'findVisitsByUrl',
-            { url: normalizedUrl },
-        )
-        const existingVisitTimes = new Set(
-            existingVisits.map(visit => visit.time),
-        )
         const newVisits: Visit[] = []
         for (const visitTime of visitTimes) {
-            if (!existingVisitTimes.has(visitTime)) {
-                newVisits.push({ url: normalizedUrl, time: visitTime })
-            }
+            newVisits.push({ url: normalizedUrl, time: visitTime })
         }
         for (const visit of newVisits) {
             await this.operation('createVisit', visit)
