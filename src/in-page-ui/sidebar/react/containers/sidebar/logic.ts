@@ -328,10 +328,20 @@ export class SidebarContainerLogic extends UILogic<
                     url,
                 })
 
-                const extraMutation =
-                    state.pageType === 'page'
-                        ? this.calcPageAnnotationsMutation(result, !!query)
+                let extraMutation: UIMutation<SidebarContainerState>
+                if (state.pageType === 'page') {
+                    extraMutation = this.calcPageAnnotationsMutation(
+                        result,
+                        !!query,
+                    )
+                } else {
+                    const { annotsByDay } = result as AnnotationsSearchResponse
+                    extraMutation = annotsByDay
+                        ? {
+                              annotsByDay: { $set: annotsByDay },
+                          }
                         : {}
+                }
 
                 this.emitMutation({
                     pageCount: { $set: result.docs.length },
