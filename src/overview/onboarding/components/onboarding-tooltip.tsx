@@ -1,7 +1,10 @@
 import React from 'react'
 import styled from 'styled-components'
 import ProgressStepContainer from 'src/common-ui/components/progress-step-container'
-import { TypographyBodyCenter } from 'src/common-ui/components/design-library/typography'
+import {
+    TypographyBodyCenter,
+    fontSizeNormal,
+} from 'src/common-ui/components/design-library/typography'
 import {
     colorMidPurple,
     colorGrey9,
@@ -67,7 +70,7 @@ export default class OnboardingTooltip extends React.PureComponent<Props> {
 
 const StyledOnboardingTooltip = styled.div`
     font-family: 'Poppins', sans-serif;
-    max-width: 600px;
+    max-width: 800px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -80,7 +83,7 @@ const Subtitle = styled(TypographyBodyCenter)`
 const Title = styled(TypographyBodyCenter)`
     color: ${colorMidPurple};
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 `
 const StyledImage = styled.div`
     margin: 20px 0;
@@ -89,11 +92,13 @@ const StyledImage = styled.div`
 const ProgressWrapper = styled.div`
     margin: 10px 0;
     display: flex;
+    align-items: center;
 `
 
 const NextLink = styled.a`
     align-items: center;
     color: ${colorMidPurple};
+    font-size: ${fontSizeNormal}px;
     font-weight: 600;
     cursor: pointer;
     margin: 1rem 0 0 0.5rem;
