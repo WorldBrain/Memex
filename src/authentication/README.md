@@ -128,6 +128,26 @@ DEV_AUTH_STATE="user_signed_in"
 or
 DEV_AUTH_STATE="user_signed_out"
 
+### Debugging
+
+in the extension bg console to find out if a user has subscriptions:
+
+```
+(await this.bgModules.auth.subscriptionService.getCurrentUserClaims()).subscriptions
+```
+
+to find out when a subscription expires for monthly:
+
+```
+(new Date((await this.bgModules.auth.subscriptionService.getCurrentUserClaims()).subscriptions['pro-monthly'].expiry * 1000)).toLocaleString()
+```
+
+for yearly:
+
+```
+(new Date((await this.bgModules.auth.subscriptionService.getCurrentUserClaims()).subscriptions['pro-yearly'].expiry * 1000)).toLocaleString()
+```
+
 ## Appendix
 
 ### Checkout flow

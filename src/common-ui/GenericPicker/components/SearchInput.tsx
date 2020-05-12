@@ -8,6 +8,7 @@ import { KeyEvent } from '../types'
 interface Props {
     onChange: (value: string) => void
     onKeyPress: (key: KeyEvent) => void
+    searchInputPlaceholder: string
     value: string
     before: JSX.Element
     searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
@@ -51,7 +52,7 @@ export class PickerSearchInput extends React.Component<Props, State> {
                 <SearchInput
                     placeholder={
                         this.props.showPlaceholder ?? true
-                            ? 'Search collections'
+                            ? this.props.searchInputPlaceholder
                             : ''
                     }
                     defaultValue={this.props.value}

@@ -43,6 +43,7 @@ storiesOf('Sync', module)
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
+            subscriptionStatus={this.props.subscriptionStatus}
         />
     ))
     .add('DevicePane - Not Subscribed', () => (
@@ -57,6 +58,7 @@ storiesOf('Sync', module)
             refreshDevices={async () => {}}
             handleUpgradeNeeded={() => {}}
             abortInitialSync={async () => {}}
+            subscriptionStatus={this.props.subscriptionStatus}
         />
     ))
     .add('Initial Sync - Modal', () => (
@@ -64,13 +66,13 @@ storiesOf('Sync', module)
             <InitialSyncSetup
                 open={true}
                 getInitialSyncMessage={() =>
-                    new Promise(r => setTimeout(r, 1000, 'hello '.repeat(5)))
+                    new Promise((r) => setTimeout(r, 1000, 'hello '.repeat(5)))
                 }
                 waitForInitialSyncConnected={() =>
-                    new Promise(r => setTimeout(r, 3000, 1))
+                    new Promise((r) => setTimeout(r, 3000, 1))
                 }
                 waitForInitialSync={() =>
-                    new Promise(r =>
+                    new Promise((r) =>
                         setTimeout(r, 500 * progressStoryData.length, 1),
                     )
                 }
@@ -81,9 +83,9 @@ storiesOf('Sync', module)
                     >
 
                     const testEventSender = async () => {
-                        await new Promise(r => setTimeout(r, 3000 + 100, 1))
+                        await new Promise((r) => setTimeout(r, 3000 + 100, 1))
                         for (const e of progressStoryData) {
-                            await new Promise(r =>
+                            await new Promise((r) =>
                                 setTimeout(
                                     r,
                                     500,

@@ -18,7 +18,7 @@ export default class JobSchedulerBackground {
 
     async setup() {
         for (const job of this.props.jobs) {
-            await this.scheduler.scheduleJob({
+            await this.scheduler.scheduleJobHourly({
                 ...job,
                 job: job.job.bind(job, this.props),
             })

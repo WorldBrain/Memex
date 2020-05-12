@@ -1,30 +1,14 @@
 import React from 'react'
 import Subscribe from 'src/authentication/components/Subscription/Subscribe'
 import Modal from 'src/common-ui/components/Modal'
-import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
-import { SubscriptionPreview } from 'src/authentication/components/Subscription/SubscriptionPreview'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { AuthContextInterface } from 'src/authentication/background/types'
 
-interface Props {
+type Props = {
     onClose: () => void
-}
-interface State {
-    showSubscribeWithLogin: boolean
-}
+} & AuthContextInterface
 
-class SubscribeModal extends React.PureComponent<Props & UserProps, State> {
-    state = {
-        showSubscribeWithLogin: null,
-    }
-
-    handlePreviewPress = () => {
-        this.setState({ showSubscribeWithLogin: true })
-    }
-
-    // Shows the live Subscribe window if user is logged in, or a static preview
-    // of the plan picker if not.
+class SubscribeModal extends React.PureComponent<Props & AuthContextInterface> {
     render() {
         return (
             <Modal
@@ -33,14 +17,7 @@ class SubscribeModal extends React.PureComponent<Props & UserProps, State> {
                 large
             >
                 <div style={styles.container}>
-                    {this.props.currentUser === null &&
-                    this.state.showSubscribeWithLogin !== true ? (
-                        <SubscriptionPreview
-                            onPress={this.handlePreviewPress}
-                        />
-                    ) : (
-                        <Subscribe onClose={this.props.onClose} />
-                    )}
+                    <Subscribe onClose={this.props.onClose} />
                 </div>
             </Modal>
         )
@@ -49,8 +26,12 @@ class SubscribeModal extends React.PureComponent<Props & UserProps, State> {
 
 const styles = {
     container: {
-        width: "100%",
-        backgroundColor: "white",
+        width: '100%',
+        minHeight: 300,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
     },
 }
 

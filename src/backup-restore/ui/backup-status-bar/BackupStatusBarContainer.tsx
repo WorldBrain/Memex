@@ -4,7 +4,6 @@ import { remoteFunction } from 'src/util/webextensionRPC'
 import { getLocalStorageTyped, LocalStorageTypes } from 'src/util/storage'
 import StatusBar from './components/StatusBar'
 import { BACKUP_STATUS_MESSAGES as messages } from '../../../notifications/constants'
-import { SUBSCRIPTIONS_URL } from 'src/constants'
 import {
     BackupLocation,
     BackupStatusType,

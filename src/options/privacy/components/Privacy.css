@@ -33,3 +33,24 @@
         margin-left: 10px;
     }
 }
+
+.eventTable {
+    text-align: left;
+    font-size: 14px;
+    color: #3a2f45;
+    border-spacing: 00px 15px;
+}
+
+.tableTitle {
+    font-size: 16px;
+}
+
+.eventRow {
+    font-size: 12px;
+    padding-bottom: 20px;
+}
+
+.eventName {
+    font-weight: 600;
+}
+
