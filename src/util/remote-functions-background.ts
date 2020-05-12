@@ -7,6 +7,7 @@ import { PublicSyncInterface } from 'src/sync/background/types'
 import { FeaturesInterface } from 'src/feature-opt-in/background/feature-opt-ins'
 import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { RemoteReaderInterface } from 'src/reader/types'
 
 export interface RemoteFunctionImplementations {
     notifications: NotificationCreator
@@ -17,6 +18,7 @@ export interface RemoteFunctionImplementations {
     features: FeaturesInterface
     tags: RemoteTagsInterface
     collections: RemoteCollectionsInterface
+    readable: RemoteReaderInterface
 }
 
 // See `src/background.ts` for the concrete remote function bindings
@@ -30,6 +32,7 @@ export const remoteFunctions: RemoteFunctionImplementations = {
     features: runInBackground<FeaturesInterface>(),
     tags: runInBackground<RemoteTagsInterface>(),
     collections: runInBackground<RemoteCollectionsInterface>(),
+    readable: runInBackground<RemoteReaderInterface>(),
 }
 
 export const notifications = remoteFunctions.notifications
@@ -40,3 +43,4 @@ export const sync = remoteFunctions.sync
 export const features = remoteFunctions.features
 export const tags = remoteFunctions.tags
 export const collections = remoteFunctions.collections
+export const readable = remoteFunctions.readable

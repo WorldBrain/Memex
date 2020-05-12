@@ -2,6 +2,14 @@ import React from 'react'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { fetchDOMFromUrl } from 'src/page-analysis/background/fetch-page-data'
 import Readability from 'readability/Readability'
+import { remoteFunction } from 'src/util/webextensionRPC'
+import { renderHighlights } from 'src/highlighting/ui/highlight-interactions'
+import styled from 'styled-components'
+import { colorText } from 'src/common-ui/components/design-library/colors'
+import { readable } from 'src/util/remote-functions-background'
+import { now } from 'moment'
+import { message } from 'openpgp'
+import read = message.read
 
 interface Props {
     fullUrl: string
@@ -17,25 +25,30 @@ export default class Viewer extends React.Component<Props, State> {
     private _readerContainerRef: React.RefObject<HTMLDivElement>
 
     async componentDidMount() {
-        const doc = await this.fetchDocument(this.props.fullUrl)
-        const article = await this.parseDocument(doc)
+        const url = this.props.fullUrl
+        const article = (await readable.readableExists(url))
+            ? await readable.getReadableVersion(url)
+            : await readable.parseAndSaveReadable({ fullUrl: url })
+
         await this.renderArticle(article)
         this.setState({ loading: false })
+
+        // load annotations
+        await this.loadAndRenderAnnotations(this.props.fullUrl)
     }
 
-    fetchDocument = async (fullUrl) => fetchDOMFromUrl(fullUrl, 5000).run()
-
-    parseDocument = (doc) => {
-        window.performance.mark('StartReaderParse')
-        const article = new Readability(doc).parse()
-        window.performance.mark('EndReaderParse')
-        window.performance.measure(
-            'Reader Parsing',
-            'StartReaderParse',
-            'EndReaderParse',
+    loadAndRenderAnnotations = async (fullUrl) => {
+        const annots = await remoteFunction('getAllAnnotationsByUrl')({
+            url: fullUrl,
+        })
+        // console.log(`Found ${annots?.length} annots for url`)
+        // console.dir(annots)
+        const highlightables = annots.filter(
+            (annotation) => annotation.selector,
         )
-        return article
+        await renderHighlights(highlightables, () => null)
     }
+
     renderArticle = (article) => {
         this.setState({ readerHtml: { __html: article.content } })
     }
@@ -46,10 +59,29 @@ export default class Viewer extends React.Component<Props, State> {
         }
 
         return (
-            <div
+            <ViewerContainer
                 ref={(ref) => this._readerContainerRef}
                 dangerouslySetInnerHTML={this.state.readerHtml}
-            ></div>
+            />
         )
     }
 }
+
+const ViewerContainer = styled.div`
+    & img {
+        max-width: 400px !important;
+        margin: auto auto;
+    }
+
+    & p,
+    div,
+    span {
+        font-style: normal;
+        font-weight: 300;
+        font-size: 18px;
+        line-height: 1.4;
+        margin-top: 20px;
+        text-align: left;
+        color: ${colorText};
+    }
+`

@@ -50,6 +50,7 @@ import { bindMethod } from 'src/util/functions'
 import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
+import { ReaderBackground } from 'src/reader/background'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -72,6 +73,7 @@ export interface BackgroundModules {
     features: FeatureOptIns
     pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
+    readable: ReaderBackground
 }
 
 export function createBackgroundModules(options: {
@@ -133,6 +135,8 @@ export function createBackgroundModules(options: {
         localBrowserStorage: options.browserAPIs.storage.local,
     })
 
+    const reader = new ReaderBackground({ storageManager })
+
     const notifications = new NotificationBackground({ storageManager })
 
     const jobScheduler = new JobSchedulerBackground({
@@ -192,6 +196,7 @@ export function createBackgroundModules(options: {
         notifications,
         activityLogger,
         connectivityChecker,
+        readable: reader,
         directLinking: new DirectLinkingBackground({
             browserAPIs: options.browserAPIs,
             storageManager,
@@ -278,6 +283,7 @@ export async function setupBackgroundModules(
     setupNotificationClickListener()
     setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
+    backgroundModules.readable.setupRemoteFunctions()
 
     await backgroundModules.sync.setup()
     await backgroundModules.analytics.setup()
@@ -302,6 +308,7 @@ export function getBackgroundStorageModules(
         clientSyncLog: backgroundModules.sync.clientSyncLog,
         syncInfo: backgroundModules.sync.syncInfoStorage,
         pages: backgroundModules.pages.storage,
+        reader: backgroundModules.readable.storage,
     }
 }
 

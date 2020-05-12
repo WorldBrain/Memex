@@ -106,7 +106,7 @@ function _remoteFunction(funcName: string, { tabId }: { tabId?: number } = {}) {
             ? "the tab's content script"
             : 'the background script'
 
-    const f = async function(...args) {
+    const f = async function (...args) {
         const message = {
             [RPC_CALL]: RPC_CALL,
             funcName,
@@ -240,7 +240,7 @@ export function makeRemotelyCallable<T>(
     if (!insertExtraArg) {
         // Replace each func with...
         // @ts-ignore
-        const wrapFunctions = mapValues(func =>
+        const wrapFunctions = mapValues((func) =>
             // ...a function that calls func, but hides the inserted argument.
             // @ts-ignore
             (extraArg, ...args) => func(...args),
@@ -275,7 +275,7 @@ export class RemoteFunctionRegistry {
 export function fakeRemoteFunctions(functions: {
     [name: string]: (...args) => any
 }) {
-    return name => {
+    return (name) => {
         if (!functions[name]) {
             throw new Error(
                 `Tried to call fake remote function '${name}' for which no implementation was provided`,
@@ -333,6 +333,7 @@ function registerRemoteEventForwarder() {
     }
     browser.runtime.onMessage.addListener(remoteEventForwarder)
 }
+
 const remoteEventForwarder = (message, _) => {
     if (message == null || message[__REMOTE_EVENT__] !== __REMOTE_EVENT__) {
         return
