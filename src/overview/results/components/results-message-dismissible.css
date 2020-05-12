@@ -3,7 +3,7 @@
     composes: fadeIn from 'src/common-ui/elements.css';
     align-items: center;
     background-color: white;
-    border: 1px #ededed;
+    border: 1px #e2e2ea solid;
     border-radius: 3px;
     display: flex;
     flex-direction: column;

@@ -5,7 +5,6 @@ import NotificationContainer, {
     selectors as notifs,
 } from '../../../notifications'
 import { selectors as filters } from 'src/search-filters'
-//import EmptyStateIllustration from './EmptyStateIllustration'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './results-message'
 import ResultList from './ResultListContainer'
@@ -74,6 +73,9 @@ class ResultsContainer extends React.Component<Props, State> {
             return (
                 <ResultsMessage>
                     <NoResultBadTerm title="Welcome to Memex!">
+                        It looks like you don't have anything saved yet. Visit
+                        some websites to fill your Memex or import bookmarks
+                        from other tools.
                         <OnboardingMessage />
                     </NoResultBadTerm>
                 </ResultsMessage>
