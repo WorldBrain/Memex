@@ -12,6 +12,7 @@ import { CONCURR_TAB_LOAD } from '../constants'
 import { SearchIndex } from 'src/search'
 import { bindMethod } from 'src/util/functions'
 import * as Raven from 'src/util/raven'
+import PageStorage from 'src/page-indexing/background/storage'
 
 export default class ActivityLoggerBackground {
     static SCROLL_UPDATE_FN = 'updateScrollState'
@@ -31,11 +32,12 @@ export default class ActivityLoggerBackground {
      * Used to stop of tab updated event listeners while the
      * tracking of existing tabs is happening.
      */
-    private tabQueryP = new Promise(resolve => resolve())
+    private tabQueryP = new Promise((resolve) => resolve())
 
     constructor(options: {
         tabManager: TabManager
         searchIndex: SearchIndex
+        pageStorage: PageStorage
         browserAPIs: Pick<
             Browser,
             'tabs' | 'runtime' | 'webNavigation' | 'storage'
@@ -53,6 +55,7 @@ export default class ActivityLoggerBackground {
         }
 
         this.pageVisitLogger = new PageVisitLogger({
+            pageStorage: options.pageStorage,
             searchIndex: options.searchIndex,
             tabManager: this.tabManager,
         })
@@ -78,30 +81,34 @@ export default class ActivityLoggerBackground {
 
     async trackExistingTabs() {
         let resolveTabQueryP
-        this.tabQueryP = new Promise(resolve => (resolveTabQueryP = resolve))
+        this.tabQueryP = new Promise((resolve) => (resolveTabQueryP = resolve))
         const tabs = await this.tabsAPI.query({})
 
-        await mapChunks<Tabs.Tab>(tabs, CONCURR_TAB_LOAD, async browserTab => {
-            this.tabManager.trackTab(browserTab, {
-                isLoaded: ActivityLoggerBackground.isTabLoaded(browserTab),
-                isBookmarked: await this.tabChangeListener.checkBookmark(
-                    browserTab.url,
-                ),
-            })
-
-            await this.tabChangeListener
-                .injectContentScripts(browserTab)
-                .catch(err => {
-                    Raven.captureException(err)
+        await mapChunks<Tabs.Tab>(
+            tabs,
+            CONCURR_TAB_LOAD,
+            async (browserTab) => {
+                this.tabManager.trackTab(browserTab, {
+                    isLoaded: ActivityLoggerBackground.isTabLoaded(browserTab),
+                    isBookmarked: await this.tabChangeListener.checkBookmark(
+                        browserTab.url,
+                    ),
                 })
 
-            // NOTE: Important we don't wait on this, as the Promise won't resolve until the tab is activated - if we wait, the next chunk to map over may not happen
-            this.tabChangeListener._handleVisitIndexing(
-                browserTab.id,
-                browserTab,
-                { skipStubLog: true },
-            )
-        })
+                await this.tabChangeListener
+                    .injectContentScripts(browserTab)
+                    .catch((err) => {
+                        Raven.captureException(err)
+                    })
+
+                // NOTE: Important we don't wait on this, as the Promise won't resolve until the tab is activated - if we wait, the next chunk to map over may not happen
+                this.tabChangeListener._handleVisitIndexing(
+                    browserTab.id,
+                    browserTab,
+                    { skipStubLog: true },
+                )
+            },
+        )
 
         resolveTabQueryP()
     }
@@ -146,7 +153,7 @@ export default class ActivityLoggerBackground {
         })
 
         // Runs stage 3 of the visit indexing
-        this.tabsAPI.onRemoved.addListener(tabId => {
+        this.tabsAPI.onRemoved.addListener((tabId) => {
             // Remove tab from tab tracking state and update the visit with tab-derived metadata
             const tab = this.tabManager.removeTab(tabId)
 

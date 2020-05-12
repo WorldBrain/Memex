@@ -112,6 +112,7 @@ export function createBackgroundModules(options: {
         searchIndex,
         browserAPIs: options.browserAPIs,
         tabManager,
+        pageStorage: pages.storage,
     })
 
     const search = new SearchBackground({

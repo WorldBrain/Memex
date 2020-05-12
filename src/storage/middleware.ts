@@ -22,14 +22,17 @@ export async function setStorageMiddleware(
     storageManager.setMiddleware(
         modifyMiddleware([
             {
-                process: (context) => {
-                    const result = context.next.process({
+                process: async (context) => {
+                    const result = await context.next.process({
                         operation: context.operation,
                     })
+                    console.groupCollapsed('operation', context.operation[0])
                     console.log({
                         operation: context.operation,
                         result,
                     })
+                    console.trace()
+                    console.groupEnd()
                     return result
                 },
             },

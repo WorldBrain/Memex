@@ -60,6 +60,14 @@ export default class PageStorage extends StorageModule {
                     url: '$url:string',
                 },
             },
+            findLatestVisitByUrl: {
+                operation: 'findObjects',
+                collection: 'visits',
+                args: [
+                    { url: '$url:string' },
+                    { sort: [['time', 'desc']], limit: 1 },
+                ],
+            },
             findVisitsByUrl: {
                 operation: 'findObjects',
                 collection: 'visits',
@@ -270,6 +278,16 @@ export default class PageStorage extends StorageModule {
         await this.operation('deletePage', {
             url: normalizedUrl,
         })
+    }
+
+    async getLatestVisit(
+        url: string,
+    ): Promise<{ url: string; time: number } | null> {
+        const normalizedUrl = normalizeUrl(url, {})
+        const result = await this.operation('findLatestVisitByUrl', {
+            url: normalizedUrl,
+        })
+        return result.length ? result[0] : null
     }
 
     async _maybeDecodeBlob(
