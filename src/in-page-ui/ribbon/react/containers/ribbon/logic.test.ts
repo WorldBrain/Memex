@@ -6,7 +6,6 @@ import {
 import { RibbonContainerLogic, INITIAL_RIBBON_COMMENT_BOX_STATE } from './logic'
 import { InPageUI } from 'src/in-page-ui/shared-state'
 import { RibbonContainerDependencies } from './types'
-import { PipelineRes } from 'src/search'
 import { Annotation } from 'src/annotations/types'
 
 function insertBackgroundFunctionTab(remoteFunctions, tab: any) {
@@ -37,6 +36,9 @@ describe('Ribbon logic', () => {
         })
         const highlighter = {} as any
         const annotationsManager = {} as any
+
+        let globalTooltipState = false
+
         const ribbonLogic = new RibbonContainerLogic({
             getSidebarEnabled: async () => true,
             setSidebarEnabled: async () => {},
@@ -54,6 +56,12 @@ describe('Ribbon logic', () => {
                 currentTab,
             ),
             ...(options?.dependencies ?? {}),
+            tooltip: {
+                getTooltipState: async () => globalTooltipState,
+                setTooltipState: async (value) => {
+                    globalTooltipState = value
+                },
+            },
         })
         const ribbon = device.createElement(ribbonLogic)
         return { ribbon, inPageUI, ribbonLogic }
@@ -121,6 +129,17 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.bookmark.isBookmarked).toBe(false)
         await ribbon.processEvent('toggleBookmark', null)
         expect(ribbon.state.bookmark.isBookmarked).toBe(true)
+    })
+
+    it('should be able to toggle tooltip', async ({ device }) => {
+        const { ribbon } = await setupTest(device)
+
+        await ribbon.init()
+        expect(ribbon.state.tooltip.isTooltipEnabled).toBe(false)
+        await ribbon.processEvent('handleTooltipToggle', null)
+        expect(ribbon.state.tooltip.isTooltipEnabled).toBe(true)
+        await ribbon.processEvent('handleTooltipToggle', null)
+        expect(ribbon.state.tooltip.isTooltipEnabled).toBe(false)
     })
 
     it('should save a comment that is bookmarked', async ({ device }) => {

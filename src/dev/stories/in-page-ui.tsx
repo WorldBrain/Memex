@@ -83,6 +83,10 @@ async function createDependencies() {
                 }
             },
         ),
+        tooltip: {
+            getTooltipState: async () => true,
+            setTooltipState: async () => undefined,
+        },
     }
 
     return {

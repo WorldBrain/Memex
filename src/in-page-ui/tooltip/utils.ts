@@ -27,10 +27,10 @@ export const delayed = (f, delay) => {
     }
 }
 
-export const getExtURL = location =>
+export const getExtURL = (location) =>
     browser.runtime ? browser.runtime.getURL(location) : location
 
-export const copyToClipboard = text => {
+export const copyToClipboard = (text) => {
     const dummy = document.createElement('input')
     document.body.appendChild(dummy)
     dummy.setAttribute('value', text)
@@ -51,10 +51,10 @@ export const getHighlightsState: () => Promise<boolean> = async () =>
         constants.HIGHLIGHTS_DEFAULT_OPTION,
     )
 
-export const setHighlightsState = async highlightsValue =>
+export const setHighlightsState = async (highlightsValue) =>
     setLocalStorage(constants.HIGHLIGHTS_STORAGE_NAME, highlightsValue)
 
-export const setTooltipState = async tooltipValue =>
+export const setTooltipState = async (tooltipValue: boolean): Promise<void> =>
     setLocalStorage(constants.TOOLTIP_STORAGE_NAME, tooltipValue)
 
 export const getPositionState = async () =>
@@ -63,7 +63,7 @@ export const getPositionState = async () =>
         constants.POSITION_DEFAULT_OPTION,
     )
 
-export const setPositionState = async positionValue =>
+export const setPositionState = async (positionValue) =>
     setLocalStorage(constants.POSITION_STORAGE_NAME, positionValue)
 
 /**
@@ -74,7 +74,7 @@ export function runOnScriptShutdown(callback) {
     const destroyEvent = `destroy-${browser.runtime.id}`
     document.dispatchEvent(new CustomEvent(destroyEvent))
 
-    document.addEventListener(destroyEvent, function() {
+    document.addEventListener(destroyEvent, function () {
         document.removeEventListener(destroyEvent, this)
         callback()
     })

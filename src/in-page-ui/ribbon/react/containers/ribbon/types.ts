@@ -6,6 +6,11 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 
+interface TooltipInterface {
+    getTooltipState(): Promise<boolean>
+    setTooltipState(value: boolean): Promise<void>
+}
+
 export interface RibbonContainerDependencies {
     currentTab: { id: number; url: string }
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -18,4 +23,5 @@ export interface RibbonContainerDependencies {
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
     activityLogger: ActivityLoggerInterface
+    tooltip: TooltipInterface
 }

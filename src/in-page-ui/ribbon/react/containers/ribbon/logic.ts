@@ -132,6 +132,11 @@ export class RibbonContainerLogic extends UILogic<
                 isRibbonEnabled: {
                     $set: await this.dependencies.getSidebarEnabled(),
                 },
+                tooltip: {
+                    isTooltipEnabled: {
+                        $set: await this.dependencies.tooltip.getTooltipState(),
+                    },
+                },
             })
         })
     }
@@ -366,17 +371,42 @@ export class RibbonContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const togglePauseState = () =>
+        const toggleState = () =>
             this.emitMutation({
                 pausing: { isPaused: { $apply: (prev) => !prev } },
             })
 
-        togglePauseState()
+        toggleState()
 
         try {
             await this.dependencies.activityLogger.toggleLoggingPause()
         } catch (err) {
-            togglePauseState()
+            toggleState()
+            throw err
+        }
+    }
+
+    //
+    // Tooltip
+    //
+    handleTooltipToggle: EventHandler<'handleTooltipToggle'> = async ({}) => {
+        const currentSetting = await this.dependencies.tooltip.getTooltipState()
+        const setState = (state: boolean) =>
+            this.emitMutation({
+                tooltip: { isTooltipEnabled: { $set: state } },
+            })
+
+        setState(!currentSetting)
+
+        try {
+            if (currentSetting === true) {
+                await this.dependencies.inPageUI.removeTooltip()
+            } else {
+                await this.dependencies.inPageUI.showTooltip()
+            }
+            await this.dependencies.tooltip.setTooltipState(!currentSetting)
+        } catch (err) {
+            setState(!currentSetting)
             throw err
         }
     }
