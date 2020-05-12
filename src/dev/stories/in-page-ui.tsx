@@ -84,8 +84,12 @@ async function createDependencies() {
             },
         ),
         tooltip: {
-            getTooltipState: async () => true,
-            setTooltipState: async () => undefined,
+            getState: async () => true,
+            setState: async () => undefined,
+        },
+        highlights: {
+            getState: async () => true,
+            setState: async () => undefined,
         },
     }
 

@@ -38,6 +38,7 @@ describe('Ribbon logic', () => {
         const annotationsManager = {} as any
 
         let globalTooltipState = false
+        let globalHighlightsState = false
 
         const ribbonLogic = new RibbonContainerLogic({
             getSidebarEnabled: async () => true,
@@ -57,12 +58,19 @@ describe('Ribbon logic', () => {
             ),
             ...(options?.dependencies ?? {}),
             tooltip: {
-                getTooltipState: async () => globalTooltipState,
-                setTooltipState: async (value) => {
+                getState: async () => globalTooltipState,
+                setState: async (value) => {
                     globalTooltipState = value
                 },
             },
+            highlights: {
+                getState: async () => globalHighlightsState,
+                setState: async (value) => {
+                    globalHighlightsState = value
+                },
+            },
         })
+
         const ribbon = device.createElement(ribbonLogic)
         return { ribbon, inPageUI, ribbonLogic }
     }
@@ -140,6 +148,17 @@ describe('Ribbon logic', () => {
         expect(ribbon.state.tooltip.isTooltipEnabled).toBe(true)
         await ribbon.processEvent('handleTooltipToggle', null)
         expect(ribbon.state.tooltip.isTooltipEnabled).toBe(false)
+    })
+
+    it('should be able to toggle highlights', async ({ device }) => {
+        const { ribbon } = await setupTest(device)
+
+        await ribbon.init()
+        expect(ribbon.state.highlights.areHighlightsEnabled).toBe(false)
+        await ribbon.processEvent('handleHighlightsToggle', null)
+        expect(ribbon.state.highlights.areHighlightsEnabled).toBe(true)
+        await ribbon.processEvent('handleHighlightsToggle', null)
+        expect(ribbon.state.highlights.areHighlightsEnabled).toBe(false)
     })
 
     it('should save a comment that is bookmarked', async ({ device }) => {

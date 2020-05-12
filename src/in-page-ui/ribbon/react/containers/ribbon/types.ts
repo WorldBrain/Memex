@@ -6,9 +6,9 @@ import { RemoteTagsInterface } from 'src/tags/background/types'
 import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 
-interface TooltipInterface {
-    getTooltipState(): Promise<boolean>
-    setTooltipState(value: boolean): Promise<void>
+interface FlagSetterInterface {
+    getState(): Promise<boolean>
+    setState(value: boolean): Promise<void>
 }
 
 export interface RibbonContainerDependencies {
@@ -23,5 +23,6 @@ export interface RibbonContainerDependencies {
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>
     activityLogger: ActivityLoggerInterface
-    tooltip: TooltipInterface
+    tooltip: FlagSetterInterface
+    highlights: FlagSetterInterface
 }

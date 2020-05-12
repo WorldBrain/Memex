@@ -66,10 +66,6 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     async componentDidMount() {
-        if (this.props.highlights.areHighlightsEnabled) {
-            highlightAnnotations()
-        }
-
         this.keyboardShortcuts = await getKeyboardShortcutsState.getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
 

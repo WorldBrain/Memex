@@ -44,6 +44,7 @@ export type RibbonContainerEvents = UIEvent<
         show: null
         hide: null
         toggleRibbon: null
+        highlightAnnotations: null
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
         // SubcomponentHandlers<'sidebar'> &
@@ -134,7 +135,12 @@ export class RibbonContainerLogic extends UILogic<
                 },
                 tooltip: {
                     isTooltipEnabled: {
-                        $set: await this.dependencies.tooltip.getTooltipState(),
+                        $set: await this.dependencies.tooltip.getState(),
+                    },
+                },
+                highlights: {
+                    areHighlightsEnabled: {
+                        $set: await this.dependencies.highlights.getState(),
                     },
                 },
             })
@@ -390,7 +396,7 @@ export class RibbonContainerLogic extends UILogic<
     // Tooltip
     //
     handleTooltipToggle: EventHandler<'handleTooltipToggle'> = async ({}) => {
-        const currentSetting = await this.dependencies.tooltip.getTooltipState()
+        const currentSetting = await this.dependencies.tooltip.getState()
         const setState = (state: boolean) =>
             this.emitMutation({
                 tooltip: { isTooltipEnabled: { $set: state } },
@@ -404,7 +410,26 @@ export class RibbonContainerLogic extends UILogic<
             } else {
                 await this.dependencies.inPageUI.showTooltip()
             }
-            await this.dependencies.tooltip.setTooltipState(!currentSetting)
+            await this.dependencies.tooltip.setState(!currentSetting)
+        } catch (err) {
+            setState(!currentSetting)
+            throw err
+        }
+    }
+
+    handleHighlightsToggle: EventHandler<
+        'handleHighlightsToggle'
+    > = async ({}) => {
+        const currentSetting = await this.dependencies.highlights.getState()
+        const setState = (state: boolean) =>
+            this.emitMutation({
+                highlights: { areHighlightsEnabled: { $set: state } },
+            })
+
+        setState(!currentSetting)
+
+        try {
+            await this.dependencies.highlights.setState(!currentSetting)
         } catch (err) {
             setState(!currentSetting)
             throw err

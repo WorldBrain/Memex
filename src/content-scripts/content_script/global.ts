@@ -31,7 +31,7 @@ import { AnnotationInterface } from 'src/direct-linking/background/types'
 import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import { SearchInterface } from 'src/search/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
-import { getTooltipState, setTooltipState } from 'src/in-page-ui/tooltip/utils'
+import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 
 // Set this up globally to prevent race conditions
 // TODO: Fix this with a proper restructuring of how pages are indexed
@@ -71,8 +71,12 @@ export async function main() {
                 annotations: runInBackground<AnnotationInterface<'caller'>>(),
                 activityLogger: runInBackground<ActivityLoggerInterface>(),
                 tooltip: {
-                    getTooltipState,
-                    setTooltipState,
+                    getState: tooltipUtils.getTooltipState,
+                    setState: tooltipUtils.setTooltipState,
+                },
+                highlights: {
+                    getState: tooltipUtils.getHighlightsState,
+                    setState: tooltipUtils.setHighlightsState,
                 },
             })
             components.ribbon!.resolve()
@@ -136,7 +140,7 @@ export async function main() {
         setupOnDemandInPageUi(() => inPageUI.loadComponent('ribbon'))
     }
 
-    if (await getTooltipState()) {
+    if (await tooltipUtils.getTooltipState()) {
         await inPageUI.setupTooltip()
     }
 
