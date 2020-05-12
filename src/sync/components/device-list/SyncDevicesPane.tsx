@@ -3,11 +3,8 @@ import ToggleSwitch from 'src/common-ui/components/ToggleSwitch'
 import { SyncDevicesList } from 'src/sync/components/device-list/SyncDevicesList'
 import { SyncDevice } from 'src/sync/components/types'
 import { LOGIN_URL } from 'src/constants'
-import {
-    UserProps,
-    withCurrentUser,
-} from 'src/authentication/components/AuthConnector'
-import { sync } from 'src/util/remote-functions-background'
+import { withCurrentUser } from 'src/authentication/components/AuthConnector'
+import { sync, auth, subscription } from 'src/util/remote-functions-background'
 import InitialSyncSetup from 'src/sync/components/initial-sync/initial-sync-setup'
 import { getRemoteEventEmitter } from 'src/util/webextensionRPC'
 import ButtonTooltip from 'src/common-ui/components/button-tooltip'
@@ -15,9 +12,17 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import analytics from 'src/analytics'
+import { AuthContextInterface } from 'src/authentication/background/types'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const styles = require('../styles.css')
+
+export const subscriptionConfig = {
+    site:
+        process.env.NODE_ENV !== 'production'
+            ? 'worldbrain-test'
+            : 'worldbrain',
+}
 
 interface Props {
     devices: SyncDevice[]
@@ -30,6 +35,7 @@ interface Props {
     refreshDevices: () => Promise<void>
     handleUpgradeNeeded: () => void
     abortInitialSync: () => Promise<void>
+    subscriptionStatus: string
 }
 
 interface State {
@@ -37,7 +43,11 @@ interface State {
     isAddingNewDevice: boolean
 }
 
-export class SyncDevicesPane extends Component<Props, State> {
+interface ContainerProps {
+    onClose?: () => void
+}
+
+export class SyncDevicesPane extends Component<Props & ContainerProps, State> {
     state = { isTogglingSync: false, isAddingNewDevice: false }
 
     enableSync = () => {
@@ -100,6 +110,11 @@ export class SyncDevicesPane extends Component<Props, State> {
         )
     }
 
+    openPortal = async () => {
+        const portalLink = await subscription.getManageLink()
+        window.open(portalLink['access_url'])
+    }
+
     renderDeviceList() {
         let pairButton
 
@@ -121,7 +136,18 @@ export class SyncDevicesPane extends Component<Props, State> {
         }
 
         if (this.props.devices.length > 0 && this.props.isDeviceSyncAllowed) {
-            pairButton = null
+            pairButton = (
+                <ButtonTooltip
+                    tooltipText="You currently can only sync one computer and one phone"
+                    position="bottom"
+                >
+                    <SecondaryAction
+                        onClick={null}
+                        disabled
+                        label={`All devices paired`}
+                    />
+                </ButtonTooltip>
+            )
         }
 
         if (this.props.devices.length > 0 && !this.props.isDeviceSyncAllowed) {
@@ -149,6 +175,21 @@ export class SyncDevicesPane extends Component<Props, State> {
 
         return (
             <div>
+                {this.props.subscriptionStatus === 'in_trial' && (
+                    <div>
+                        <div
+                            onClick={this.openPortal}
+                            className={settingsStyle.trialNotif}
+                        >
+                            <div className={settingsStyle.trialHeader}>
+                                <strong>Trial Period active</strong>
+                            </div>
+                            <div>
+                                Add payment details to prevent interruptions
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className={styles.container}>
                     <div className={styles.syncLeftCol}>
                         <ButtonTooltip
@@ -203,7 +244,7 @@ export class SyncDevicesPane extends Component<Props, State> {
 }
 
 class SyncDevicesPaneContainer extends React.Component<
-    UserProps & { showSubscriptionModal: () => void },
+    AuthContextInterface & { showSubscriptionModal: () => void },
     {
         devices: SyncDevice[]
         featureSyncEnabled: boolean
@@ -257,22 +298,44 @@ class SyncDevicesPaneContainer extends React.Component<
             <div>
                 <div className={settingsStyle.section}>
                     <div className={settingsStyle.sectionTitle}>
-                        Sync your mobile phone
-                        <span
-                            className={styles.labelFree}
-                            onClick={this.handleUpgradeNeeded}
-                        >
-                            ⭐️ Pro Feature
-                        </span>
+                        <div className={settingsStyle.sectionTitleText}>
+                            <span>Sync your mobile phone</span>
+                            <span className={settingsStyle.betaPill}>
+                                {' '}
+                                Beta
+                            </span>
+                        </div>
+                        {!this.props.currentUser?.authorizedFeatures?.includes(
+                            'sync',
+                        ) && (
+                            <span
+                                className={styles.labelFree}
+                                onClick={this.handleUpgradeNeeded}
+                            >
+                                ⭐️ Pro Feature
+                            </span>
+                        )}
                     </div>
                     <div className={settingsStyle.infoText}>
                         Use an end2end encrypted connection to keep your devices
                         in sync.
                     </div>
+                    <div className={settingsStyle.infoTextSmall}>
+                        <strong>
+                            This feature is in beta status. You may experience
+                            bugs.{' '}
+                            <a
+                                href="https://community.worldbrain.io/c/bug-reports"
+                                target="_blank"
+                            >
+                                Let us know if you do!
+                            </a>
+                        </strong>
+                    </div>
                     <SyncDevicesPane
                         devices={this.state.devices}
                         isDeviceSyncEnabled
-                        isDeviceSyncAllowed={this.props.authorizedFeatures.includes(
+                        isDeviceSyncAllowed={this.props.currentUser?.authorizedFeatures?.includes(
                             'sync',
                         )}
                         handleRemoveDevice={this.handleRemoveDevice}
@@ -284,6 +347,9 @@ class SyncDevicesPaneContainer extends React.Component<
                         }
                         refreshDevices={this.refreshDevices}
                         abortInitialSync={this.abortInitialSync}
+                        subscriptionStatus={
+                            this.props.currentUser?.subscriptionStatus
+                        }
                     />
                 </div>
                 <div className={settingsStyle.section}>
@@ -332,6 +398,6 @@ class SyncDevicesPaneContainer extends React.Component<
     }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(SyncDevicesPaneContainer))

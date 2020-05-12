@@ -117,6 +117,7 @@ class ListPicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
+                    searchInputPlaceholder="Add to collection"
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}

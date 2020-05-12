@@ -14,7 +14,7 @@ const HeaderText = styled.h2`
     font-family: Poppins;
     font-style: normal;
     font-weight: 600;
-    font-size: 25px;
+    font-size: 20px;
     margin: 0px 0 30px;
     text-align: center;
 
@@ -27,18 +27,19 @@ const Header = styled.div`
     flex: 1;
 `
 const StyledLine = styled.div`
-    border: 0.5px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
 `
 const Actions = styled.div`
     display: flex;
     justify-content: center;
-    padding: 20px;
+    padding-top: 20px;
 `
 const Body = styled.div`
     display: flex;
     align-content: center;
-    padding: 40px 50px;
     flex: 5;
+    margin-top: 20px;
+    justify-content: space-between;
 `
 export const ModalBox = ({
     header,
@@ -60,8 +61,8 @@ export const ModalBox = ({
 )
 
 export const ModalColLeft = styled.div`
-    width: 60%;
-    padding-right: 50px;
+    width: 55%;
+    padding-right: 5%;
 `
 export const ModalColRight = styled.div`
     width: 40%;

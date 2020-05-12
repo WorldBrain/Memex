@@ -113,6 +113,7 @@ class TagPicker extends StatefulUIElement<
         return (
             <>
                 <PickerSearchInput
+                    searchInputPlaceholder="Add tags"
                     showPlaceholder={this.state.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}

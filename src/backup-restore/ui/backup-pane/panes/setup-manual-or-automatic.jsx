@@ -16,7 +16,7 @@ class SetupManualOrAutomatic extends React.Component {
     }
 
     render() {
-        const isAuthorizedForAutomaticBackup = this.props.authorizedFeatures.includes(
+        const isAuthorizedForAutomaticBackup = this.props.authorizedFeatures?.includes(
             'backup',
         )
         return (
@@ -28,7 +28,7 @@ class SetupManualOrAutomatic extends React.Component {
                     </div>
                     <OnboardingBackupMode
                         className={Styles.selectionlist}
-                        onModeChange={mode => this.setState({ mode })}
+                        onModeChange={(mode) => this.setState({ mode })}
                         showSubscriptionModal={this.props.showSubscriptionModal}
                         isAuthorizedForAutomaticBackup={
                             isAuthorizedForAutomaticBackup
@@ -81,7 +81,7 @@ class SetupManualOrAutomatic extends React.Component {
     }
 }
 
-export default connect(null, dispatch => ({
+export default connect(null, (dispatch) => ({
     showSubscriptionModal: () => dispatch(show({ modalId: 'Subscription' })),
 }))(withCurrentUser(SetupManualOrAutomatic))
 

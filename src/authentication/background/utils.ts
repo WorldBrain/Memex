@@ -2,15 +2,13 @@ import {
     UserPlan,
     Claims,
     UserFeature,
-    FeatureMap,
+    SubscriptionStatus,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
-
-export const SUBSCRIPTION_GRACE_MS = 1000 * 60 * 60
 
 export function hasSubscribedBefore(claims: Claims): boolean {
     return (
-        claims.lastSubscribed != null ||
-        (claims.subscriptions != null &&
+        claims?.lastSubscribed != null ||
+        (claims?.subscriptions != null &&
             Object.keys(claims.subscriptions).length > 0)
     )
 }
@@ -27,12 +25,28 @@ export function getAuthorizedFeatures(claims: Claims): UserFeature[] {
     }
 
     Object.keys(claims.features).forEach((feature: UserFeature) => {
-        if (isFeatureInDate(claims.features[feature])) {
+        if (isExpiryInFuture(claims.features[feature])) {
             features.push(feature)
         }
     })
 
     return features
+}
+
+export function getAuthorizedPlans(claims: Claims): UserPlan[] {
+    const plans = [] as UserPlan[]
+
+    if (claims == null || claims.subscriptions == null) {
+        return plans
+    }
+
+    for (const [planName, plan] of Object.entries(claims.subscriptions)) {
+        if (isExpiryInFuture(plan)) {
+            plans.push(planName as UserPlan)
+        }
+    }
+
+    return plans
 }
 
 export function isAuthorizedForFeature(
@@ -41,20 +55,15 @@ export function isAuthorizedForFeature(
 ): boolean {
     if (claims != null && claims.features != null) {
         const featureObject = claims.features[feature]
-        return isFeatureInDate(featureObject)
+        return isExpiryInFuture(featureObject)
     }
     return false
 }
 
-function isFeatureInDate(
-    featureObject?: FeatureMap[keyof FeatureMap],
-): boolean {
-    return (
-        featureObject != null &&
-        featureObject.expiry != null &&
-        featureObject.expiry + SUBSCRIPTION_GRACE_MS >
-            new Date().getUTCMilliseconds()
-    )
+const nowInSecs = () => Math.round(new Date().getTime() / 1000)
+
+function isExpiryInFuture(object?: { expiry?: number }): boolean {
+    return object.expiry != null && object.expiry > nowInSecs()
 }
 
 export function checkValidPlan(
@@ -67,7 +76,7 @@ export function checkValidPlan(
         return { valid: false, reason: 'not-present' }
     }
 
-    if (Date.now() >= subscriptionExpiry + SUBSCRIPTION_GRACE_MS) {
+    if (nowInSecs() >= subscriptionExpiry) {
         return { valid: false, reason: 'expired' }
     }
 
@@ -80,7 +89,11 @@ export function getSubscriptionExpirationTimestamp(
 ): number | null {
     const isPresent =
         claims != null &&
-        claims.subscriptions != null &&
-        claims.subscriptions[plan] != null
-    return isPresent ? claims.subscriptions[plan].expiry : null
+        claims?.subscriptions != null &&
+        claims?.subscriptions[plan] != null
+    return isPresent ? claims?.subscriptions[plan]?.expiry : null
+}
+
+export function getSubscriptionStatus(claims: Claims): SubscriptionStatus {
+    return claims?.subscriptionStatus
 }

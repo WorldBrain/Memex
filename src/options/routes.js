@@ -87,11 +87,11 @@ export default [
         hideFromSidebar: true,
     },
     {
-        name: 'User Account Subscriptions',
+        name: 'User Account',
         pathname: '/account-subscriptions',
         icon: 'settings',
-        component: props => (
-            <UserScreen initiallyShowSubscriptionModal {...props} />
+        component: (props) => (
+            <UserScreen initiallyShowSubscriptionModal refreshUser {...props} />
         ),
         hideFromSidebar: true,
     },
