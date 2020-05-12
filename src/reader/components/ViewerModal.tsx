@@ -15,7 +15,7 @@ class ViewerModal extends React.PureComponent<Props & AuthContextInterface> {
             <Modal
                 onClose={this.props.onClose}
                 onClick={this.props.onClose}
-                large
+                full
             >
                 <div style={styles.container}>
                     <Viewer fullUrl={this.props.fullUrl} />

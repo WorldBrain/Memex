@@ -353,6 +353,7 @@ function registerRemoteEventForwarder() {
     }
     browser.runtime.onMessage.addListener(remoteEventForwarder)
 }
+
 const remoteEventForwarder = (message, _) => {
     if (message == null || message[__REMOTE_EVENT__] !== __REMOTE_EVENT__) {
         return
