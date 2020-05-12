@@ -1,29 +1,3 @@
-.button {
-    border: none;
-    transition: all 200ms;
-    cursor: pointer;
-}
-
-.overlay {
-    display: flex;
-    flex-direction: row;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 2147483646;
-    background: rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    justify-content: center;
-    align-items: center;
-
-    &:disabled,
-    &[disabled] {
-        cursor: default;
-    }
-}
-
 .popup {
     composes: toolTips from 'src/common-ui/elements.css';
     background: #fff;
@@ -41,25 +15,4 @@
     height: fit-content;
     max-height: 95vh;
     max-width: 95vw;
-}
-
-.close {
-    composes: closeIcon from 'src/common-ui/icons.css';
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-size: 12px;
-    width: 22px;
-    height: 22px;
-}
-
-.content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    font-size: 13.5px;
-    min-height: 100%;
-    height: 100%;
-    align-items: center;
-    padding: 50px;
 }

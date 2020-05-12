@@ -1,4 +1,4 @@
-import React, { PureComponent, ReactChild } from 'react'
+import React, { PureComponent } from 'react'
 import cx from 'classnames'
 
 import Modal from './Modal'
@@ -10,7 +10,6 @@ export interface Props {
     isShown: boolean
     message: string
     isLoading?: boolean
-    children?: ReactChild | ReactChild[]
     onClose: () => void
 }
 

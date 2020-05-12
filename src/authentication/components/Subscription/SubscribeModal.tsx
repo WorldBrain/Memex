@@ -27,11 +27,7 @@ class SubscribeModal extends React.PureComponent<Props & UserProps, State> {
     // of the plan picker if not.
     render() {
         return (
-            <Modal
-                onClose={this.props.onClose}
-                onClick={this.props.onClose}
-                large
-            >
+            <Modal onClose={this.props.onClose} large>
                 <div style={styles.container}>
                     {this.props.currentUser === null &&
                     this.state.showSubscribeWithLogin !== true ? (
@@ -49,8 +45,8 @@ class SubscribeModal extends React.PureComponent<Props & UserProps, State> {
 
 const styles = {
     container: {
-        width: "100%",
-        backgroundColor: "white",
+        width: '100%',
+        backgroundColor: 'white',
     },
 }
 
