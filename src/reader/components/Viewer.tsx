@@ -50,7 +50,7 @@ export default class Viewer extends React.Component<Props, State> {
     }
 
     renderArticle = (article) => {
-        this.setState({ readerHtml: { __html: article.content } })
+        this.setState({ readerHtml: { __html: article.title && article.content } })
     }
 
     render() {
@@ -69,8 +69,50 @@ export default class Viewer extends React.Component<Props, State> {
 
 const ViewerContainer = styled.div`
     & img {
-        max-width: 400px !important;
-        margin: auto auto;
+        max-width: 800px !important;
+        width: 80%;
+        margin: 20px 20px;
+    }
+
+    & h1 > span {
+        font-size: 26px;
+        font-weight: 600;
+    }
+
+    & blockquote {
+        font-style: italic;
+
+        & span, 
+            p, 
+            div, 
+            a {
+            font-style: italic;
+
+        }
+    }
+
+    & figcaption {
+
+        font-size: 14px;
+
+        & span, p, div {
+            font-size: 14px;
+        }
+    }
+
+    & h2 > span {
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+    & h3 > span {
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    & picture {
+        display: flex;
+        justify-content: center;
     }
 
     & p,
@@ -83,5 +125,12 @@ const ViewerContainer = styled.div`
         margin-top: 20px;
         text-align: left;
         color: ${colorText};
+        width: 100%;
+        max-width: 800px;
+    }
+
+    & table {
+        width: 100%;
+        max-width: 800px;
     }
 `

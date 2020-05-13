@@ -28,9 +28,10 @@ class ViewerModal extends React.PureComponent<Props & AuthContextInterface> {
 const styles = {
     container: {
         width: '100%',
+        maxWidth: 800,
         minHeight: 300,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         backgroundColor: 'white',
     },
