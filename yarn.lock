@@ -3667,6 +3667,13 @@
     "@types/history" "*"
     "@types/react" "*"
 
+"@types/react-burger-menu@^2.6.1":
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/@types/react-burger-menu/-/react-burger-menu-2.6.1.tgz#9733e700f0ddb6f288fdb6eef8a785b27a486229"
+  integrity sha512-uWY/xQ4WzdMk0oN3/KmtQ7MWLcdLsymFjSIG5awHMju2vIS0V6C4vqwVCmULz9UlVKpmH1TP6si0E75GY9Sc9w==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-color@^3.0.1":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@types/react-color/-/react-color-3.0.1.tgz#5433e2f503ea0e0831cbc6fd0c20f8157d93add0"

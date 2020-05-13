@@ -1,12 +1,12 @@
 import * as React from 'react'
-import Menu from 'react-burger-menu/lib/menus/slide'
+import { slide as Menu } from 'react-burger-menu'
 
 import Topbar, { TopbarState } from './topbar'
 import menuStyles from './menu-styles'
 import CommentBoxContainer, {
     CommentBoxProps,
 } from '../../../components/comment-box/comment-box'
-import { Page } from '../types'
+import { Page, SidebarEnv } from '../types'
 import FiltersSidebar, { FiltersSidebarProps } from './filters-sidebar'
 import ResultsContainer, { ResultsContainerProps } from './results-container'
 import DragElement from 'src/overview/components/DragElement'
@@ -23,7 +23,7 @@ import PageAnnotations, { PageAnnotationsProps } from './page-annotations'
 const styles = require('./sidebar.css')
 
 interface OwnProps {
-    env: 'inpage' | 'overview'
+    env: SidebarEnv
     isOpen: boolean
     loadState: TaskState
     searchLoadState: TaskState
@@ -101,7 +101,13 @@ export default class Sidebar extends React.Component<Props> {
         this.props.clearAllFilters()
     }
 
-    handleGoToAnnotation = (annot: Annotation) => (
+    private handleSidebarKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            this.props.closeSidebar()
+        }
+    }
+
+    private handleGoToAnnotation = (annot: Annotation) => (
         event: React.MouseEvent<HTMLElement>,
     ) => {
         event.preventDefault()
@@ -204,7 +210,7 @@ export default class Sidebar extends React.Component<Props> {
                     styles={menuStyles(env, isOpen)}
                     right
                     noOverlay
-                    disableCloseOnEsc
+                    customOnKeyDown={this.handleSidebarKeyDown}
                 >
                     <div className={styles.sidebar}>
                         <div className={styles.topSection}>

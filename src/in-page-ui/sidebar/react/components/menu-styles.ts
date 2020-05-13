@@ -1,17 +1,18 @@
-// Styles for react-burger-menu.
+import { Styles } from 'react-burger-menu'
 
+// Styles for react-burger-menu.
 const baseStyles = {
     bmMenuWrap: {
-        top: 0,
+        top: '0px',
         right: '-60px',
-        zIndex: 2147483644,
+        zIndex: '2147483644',
         transition: 'all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1)',
     },
     bmMenu: {
         position: 'fixed',
         right: '30px',
         top: '0px',
-        zIndex: 2147483646,
+        zIndex: '2147483646',
         overflowY: 'hidden',
         width: '450px',
         opacity: '1',
@@ -42,7 +43,7 @@ const baseStyles = {
     },
 }
 
-const menuStyles = (env, isOpen) => {
+const menuStyles = (env, isOpen): Partial<Styles> => {
     if (env === 'overview') {
         ;((baseStyles.bmMenu.top as unknown) as string) = '55px'
         ;((baseStyles.bmMenuWrap.top as unknown) as string) = '0px'
