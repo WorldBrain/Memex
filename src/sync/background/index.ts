@@ -204,18 +204,20 @@ export default class SyncBackground extends SyncService {
         this.initialSync.events.on('progress', (event) => {
             progress = event.progress
             progressEventCount += 1
-            if (stalled || progressEventCount % 100 === 0) {
+            if (stalled || progressEventCount % 100 === 1) {
                 stalled = false
                 this.analytics.trackEvent({
                     category: 'Sync',
                     action: 'progressInitSync',
+                    value: { role },
                 })
             }
         })
-        this.initialSync.events.on('roleSwitch', () => {
+        this.initialSync.events.on('roleSwitch', (event) => {
             this.analytics.trackEvent({
                 category: 'Sync',
                 action: 'roleSwitchInitSync',
+                value: event,
             })
         })
         this.initialSync.events.on('stalled', () => {
@@ -223,13 +225,14 @@ export default class SyncBackground extends SyncService {
             this.analytics.trackEvent({
                 category: 'Sync',
                 action: 'stalledInitSync',
+                value: { role },
             })
         })
         this.initialSync.events.on('error', () => {
             this.analytics.trackEvent({
                 category: 'Sync',
                 action: 'errorInitSync',
-                value: { progress },
+                value: { progress, role },
             })
         })
         this.initialSync.events.on('finished', () => {
