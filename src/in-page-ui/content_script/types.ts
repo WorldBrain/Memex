@@ -1,7 +1,12 @@
 import { InPageUIRibbonAction } from '../shared-state/types'
+import { Anchor } from 'src/highlighting/types'
+import { Annotation } from 'src/annotations/types'
 
 export interface InPageUIContentScriptRemoteInterface {
-    showSidebar(): Promise<void>
+    showSidebar(options?: {
+        action?: InPageUIRibbonAction
+        anchor?: Anchor
+    }): Promise<void>
 
     // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): Promise<void>
@@ -15,4 +20,10 @@ export interface InPageUIContentScriptRemoteInterface {
     insertTooltip(): Promise<void>
     removeTooltip(): Promise<void>
     insertOrRemoveTooltip(): Promise<void>
+
+    // Highlights
+    goToHighlight(
+        annotation: Annotation,
+        pageAnnotations: Annotation[],
+    ): Promise<void>
 }

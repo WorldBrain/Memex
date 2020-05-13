@@ -32,6 +32,7 @@ import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import { SearchInterface } from 'src/search/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
+import { Annotation } from 'src/annotations/types'
 
 // Set this up globally to prevent race conditions
 // TODO: Fix this with a proper restructuring of how pages are indexed
@@ -51,6 +52,8 @@ export async function main() {
         return components[component]!
     }
 
+    const currentTab = await getCurrentTab()
+    const annotations = runInBackground<AnnotationInterface<'caller'>>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
     const highlighter = new HighlightInteraction()
@@ -64,11 +67,11 @@ export async function main() {
                 annotationsManager,
                 getRemoteFunction: remoteFunction,
                 highlighter,
-                currentTab: await getCurrentTab(),
+                annotations,
+                currentTab,
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 bookmarks: runInBackground<BookmarksInterface>(),
                 tags: runInBackground<RemoteTagsInterface>(),
-                annotations: runInBackground<AnnotationInterface<'caller'>>(),
                 activityLogger: runInBackground<ActivityLoggerInterface>(),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
@@ -89,10 +92,10 @@ export async function main() {
                 inPageUI,
                 annotationsManager,
                 highlighter,
-                currentTab: await getCurrentTab(),
+                annotations,
+                currentTab,
                 tags: runInBackground<RemoteTagsInterface>(),
                 bookmarks: runInBackground<BookmarksInterface>(),
-                annotations: runInBackground<AnnotationInterface<'caller'>>(),
                 search: runInBackground<SearchInterface>(),
                 customLists: runInBackground<RemoteCollectionsInterface>(),
                 normalizeUrl,
@@ -124,6 +127,13 @@ export async function main() {
         insertTooltip: async () => inPageUI.showTooltip(),
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
+        goToHighlight: async (annotation, pageAnnotations) => {
+            await highlighter.renderHighlights(
+                pageAnnotations,
+                annotations.toggleSidebarOverlay,
+            )
+            await highlighter.highlightAndScroll(annotation)
+        },
     })
 
     setupScrollReporter()

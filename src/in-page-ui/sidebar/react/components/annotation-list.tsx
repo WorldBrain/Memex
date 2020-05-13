@@ -3,17 +3,16 @@ import cx from 'classnames'
 
 import AnnotationBox from 'src/in-page-ui/components/annotation-box'
 
-import { goToAnnotation } from 'src/sidebar-overlay/sidebar/utils'
 import { Annotation } from 'src/annotations/types'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
 import { TagsEventProps } from 'src/in-page-ui/components/annotation-box/edit-mode-content'
-import { AnnotationMode } from '../types'
+import { AnnotationMode, SidebarEnv } from '../types'
 
 const styles = require('./annotation-list.css')
 
 export interface OwnProps {
-    env: 'inpage' | 'overview'
+    env: SidebarEnv
     /** Override for expanding annotations by default */
     isExpandedOverride: boolean
     /** Array of matched annotations, limited to 3 */
@@ -55,8 +54,6 @@ export default class AnnotationList extends Component<
         prevIsExpandedOverride: this.props.isExpandedOverride,
         annotations: this.props.annotations,
     }
-
-    private goToAnnotation = goToAnnotation(this.props.pageUrl)
 
     /**
      * We compare if the previous isExpandedOverride prop is different from
@@ -156,14 +153,6 @@ export default class AnnotationList extends Component<
         })
     }
 
-    private handleGoToAnnotation = (annotation: Annotation) => (
-        e: React.MouseEvent<HTMLElement>,
-    ) => {
-        e.preventDefault()
-        e.stopPropagation()
-        this.goToAnnotation(annotation, this.props.env)
-    }
-
     private renderAnnotations() {
         return this.state.annotations.map((annot) => (
             <AnnotationBox
@@ -173,7 +162,6 @@ export default class AnnotationList extends Component<
                     [styles.annotationBoxInpage]: this.props.env === 'inpage',
                 })}
                 env={this.props.env}
-                handleGoToAnnotation={() => this.handleGoToAnnotation(annot)}
                 {...this.props.annotationEventProps}
                 highlighter={this.props.highlighter}
                 displayCrowdfunding={false}

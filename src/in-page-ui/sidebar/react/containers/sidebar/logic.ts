@@ -135,7 +135,7 @@ export type SidebarContainerEvents = UIEvent<{
     showDeletePageModal: { pageUrl: string }
 
     // Annotation boxes
-    goToAnnotation: { context: AnnotationEventContext; annnotationUrl: string }
+    goToAnnotation: { context: AnnotationEventContext; annotationUrl: string }
     editAnnotation: {
         context: AnnotationEventContext
         annotationUrl: string
@@ -157,11 +157,11 @@ export type SidebarContainerEvents = UIEvent<{
     }
     annotationMouseEnter: {
         context: AnnotationEventContext
-        annnotationUrl: string
+        annotationUrl: string
     }
     annotationMouseLeave: {
         context: AnnotationEventContext
-        annnotationUrl: string
+        annotationUrl: string
     }
 
     // Search
@@ -645,7 +645,69 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    goToAnnotation: EventHandler<'goToAnnotation'> = (incoming) => {}
+    goToAnnotation: EventHandler<'goToAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { url } = this.options.currentTab
+        const normalizedUrl = this.options.normalizeUrl(url)
+        let annotation: Annotation
+        let pageAnnotations: Annotation[]
+
+        const goToAnnotationInNewTab = (args: {
+            url: string
+            annotation: Annotation
+        }) => this.options.annotations.goToAnnotationFromSidebar(args)
+
+        if (event.context === 'searchResults') {
+            const {
+                time,
+                pageUrl,
+                index,
+            } = SidebarContainerLogic.findIndexOfAnnotsByDay(
+                event.annotationUrl,
+                previousState.annotsByDay,
+            )
+
+            annotation = previousState.annotsByDay[time][pageUrl][index] as any
+
+            if (pageUrl !== normalizedUrl) {
+                return goToAnnotationInNewTab({
+                    url: annotation.pageUrl,
+                    annotation,
+                })
+            }
+
+            pageAnnotations = await this.options.annotations.getAllAnnotationsByUrl(
+                { url },
+            )
+        } else {
+            pageAnnotations = previousState.annotations
+            annotation = pageAnnotations.find(
+                (annot) => annot.url === event.annotationUrl,
+            )
+        }
+
+        if (!annotation?.body?.length) {
+            return
+        }
+
+        if (this.options.env === 'overview') {
+            return goToAnnotationInNewTab({
+                url: annotation.pageUrl,
+                annotation,
+            })
+        }
+
+        const highlightables = pageAnnotations.filter((annot) => annot.selector)
+
+        await this.options.highlighter.renderHighlights(
+            highlightables,
+            this.options.annotations.toggleSidebarOverlay,
+        )
+
+        await this.options.highlighter.highlightAndScroll(annotation)
+    }
 
     editAnnotation: EventHandler<'editAnnotation'> = async ({
         event,
@@ -1073,7 +1135,7 @@ export class SidebarContainerLogic extends UILogic<
         return {
             hoverAnnotationUrl: {
                 [incoming.event.context]: {
-                    $set: incoming.event.annnotationUrl,
+                    $set: incoming.event.annotationUrl,
                 },
             },
         }

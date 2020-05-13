@@ -69,6 +69,10 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
         return this.props.lastEdited !== this.props.createdWhen
     }
 
+    private get isClickable() {
+        return this.props.body && this.props.env !== 'overview'
+    }
+
     private _setupEventListeners = () => {
         if (this._boxRef) {
             this._boxRef.addEventListener('mouseenter', () =>
@@ -146,6 +150,14 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
         this.props.handleEditAnnotation(url, commentText.trim(), tagsInput)
     }
 
+    private _handleGoToAnnotation = () => {
+        if (!this.isClickable) {
+            return
+        }
+
+        this.props.handleGoToAnnotation(this.props.url)
+    }
+
     private _handleDeleteAnnotation = () => {
         this.props.handleDeleteAnnotation(this.props.url)
     }
@@ -193,8 +205,6 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
             ? this._getFormattedTimestamp(this.props.lastEdited)
             : this._getFormattedTimestamp(this.props.createdWhen)
 
-        const isClickable = this.props.body && this.props.env !== 'overview'
-
         return (
             <div
                 id={this.props.url} // Focusing on annotation relies on this ID.
@@ -202,11 +212,11 @@ export default class AnnotationBox extends React.Component<AnnotationBoxProps> {
                     [styles.isActive]: this.props.isActive,
                     [styles.isHovered]: this.props.isHovered,
                     [footerStyles.isHovered]: this.props.isHovered,
-                    [styles.isClickable]: isClickable,
+                    [styles.isClickable]: this.isClickable,
                     [styles.isJustComment]: mode !== 'edit' && !this.props.body,
                     [styles.isEdit]: mode === 'edit',
                 })}
-                onClick={isClickable ? this.props.handleGoToAnnotation : noop}
+                onClick={this._handleGoToAnnotation}
                 ref={this._setBoxRef}
             >
                 {/* Highlighted text for the annotation. If available, shown in

@@ -123,10 +123,18 @@ export default class DirectLinkingBackground {
             annotation: Annotation
         },
     ) {
+        url = url.startsWith('http') ? url : `https://${url}`
+
         const activeTab = await this.options.browserAPIs.tabs.create({
             active: true,
             url,
         })
+
+        const pageAnnotations = await this.getAllAnnotationsByUrl(
+            { tab },
+            { url },
+        )
+        const highlightables = pageAnnotations.filter((annot) => annot.selector)
 
         const listener = async (tabId, changeInfo) => {
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
@@ -135,7 +143,10 @@ export default class DirectLinkingBackground {
                 await runInTab<InPageUIContentScriptRemoteInterface>(
                     tabId,
                 ).showRibbon()
-                await remoteFunction('goToAnnotation', { tabId })(annotation)
+                await runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).goToHighlight(annotation, highlightables)
+
                 this.options.browserAPIs.tabs.onUpdated.removeListener(listener)
             }
         }
@@ -189,9 +200,10 @@ export default class DirectLinkingBackground {
         })
 
         if (!action || openSidebar) {
-            await remoteFunction('openSidebar', { tabId })({
+            await runInTab<InPageUIContentScriptRemoteInterface>(
+                tabId,
+            ).showSidebar({
                 anchor,
-                activeUrl,
             })
         }
     }

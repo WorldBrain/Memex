@@ -110,20 +110,20 @@ class SidebarContainer extends StatefulUIElement<
                         annotationUrl,
                         mode,
                     }),
-                handleGoToAnnotation: (annnotationUrl) =>
+                handleGoToAnnotation: (annotationUrl) =>
                     this.processEvent('goToAnnotation', {
                         context,
-                        annnotationUrl,
+                        annotationUrl,
                     }),
-                handleMouseEnter: (annnotationUrl) =>
+                handleMouseEnter: (annotationUrl) =>
                     this.processEvent('annotationMouseEnter', {
                         context,
-                        annnotationUrl,
+                        annotationUrl,
                     }),
-                handleMouseLeave: (annnotationUrl) =>
+                handleMouseLeave: (annotationUrl) =>
                     this.processEvent('annotationMouseLeave', {
                         context,
-                        annnotationUrl,
+                        annotationUrl,
                     }),
                 handleEditAnnotation: (
                     url: string,
@@ -136,15 +136,15 @@ class SidebarContainer extends StatefulUIElement<
                         comment,
                         tags,
                     }),
-                handleDeleteAnnotation: (annnotationUrl) =>
+                handleDeleteAnnotation: (annotationUrl) =>
                     this.processEvent('deleteAnnotation', {
                         context,
-                        annotationUrl: annnotationUrl,
+                        annotationUrl,
                     }),
-                handleBookmarkToggle: (annnotationUrl) =>
+                handleBookmarkToggle: (annotationUrl) =>
                     this.processEvent('toggleAnnotationBookmark', {
                         context,
-                        annotationUrl: annnotationUrl,
+                        annotationUrl,
                     }),
             }
         }
