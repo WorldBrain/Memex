@@ -7,15 +7,12 @@ import { LoadingIndicator } from 'src/common-ui/components'
 import ResultItem from './result-item'
 import ResultList from './result-list'
 import { TagHolder } from 'src/common-ui/components/'
-import * as constants from 'src/sidebar-overlay/sidebar/constants'
 import {
     ResultWithIndex as Result,
     ResultsByUrl,
     AnnotationMode,
 } from '../types'
 import { PageUrlsByDay, AnnotsByPageUrl } from 'src/search/background/types'
-import { getLocalStorage } from 'src/util/storage'
-import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
@@ -68,6 +65,7 @@ interface OwnProps {
         'removeTempHighlights' | 'removeAnnotationHighlights'
     >
     annotationEventHandlers: AnnotationBoxEventProps
+    shownTagsLimit?: number
 }
 
 export type ResultListContainerProps = StateProps & DispatchProps & OwnProps
@@ -75,6 +73,10 @@ export type ResultListContainerProps = StateProps & DispatchProps & OwnProps
 export default class ResultListContainer extends Component<
     ResultListContainerProps
 > {
+    static defaultProps: Partial<ResultListContainerProps> = {
+        shownTagsLimit: 10,
+    }
+
     private dropdownRefs: HTMLSpanElement[] = []
     private tagBtnRefs: HTMLButtonElement[] = []
     private tagDivRef: HTMLDivElement
@@ -170,7 +172,7 @@ export default class ResultListContainer extends Component<
     private renderTagHolder = (doc: Result) => (
         <TagHolder
             tags={[...new Set([...doc.tags])]}
-            maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
+            maxTagsLimit={this.props.shownTagsLimit}
             setTagManagerRef={this.trackDropdownRef}
             handlePillClick={(tag) => (event) =>
                 this.props.handlePillClick(tag)}

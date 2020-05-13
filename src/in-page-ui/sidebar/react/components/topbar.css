@@ -45,7 +45,7 @@
 }
 
 .clearFilters {
-    composes: clearFilters from 'src/sidebar-overlay/sidebar/components/filters-sidebar.css';
+    composes: clearFilters from 'src/in-page-ui/sidebar/react/components/filters-sidebar.css';
 
     &:hover {
         background-color: color8 !important; /* stylelint-disable-line declaration-no-important */
