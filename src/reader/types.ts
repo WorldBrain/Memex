@@ -2,6 +2,7 @@ export interface ReadableData {
     content: string
     title: string
     url: string
+    length: string
     created: number
     strategy: ReadableStrategy
 }
