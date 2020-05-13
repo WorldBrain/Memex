@@ -43,6 +43,12 @@ export interface AnalyticsEvents {
         | 'failInitSync'
         | 'clickPairNewDevice'
         | 'generateQRPairingCode'
+        | 'preparedInitSync'
+        | 'roleSwitchInitSync'
+        | 'progressInitSync'
+        | 'connectedInitSync'
+        | 'stalledInitSync'
+        | 'errorInitSync'
     Collections: 'create' | 'addPageViaPopup' | 'addPageViaDragAndDrop'
     InPageTooltip:
         | 'highlightText'

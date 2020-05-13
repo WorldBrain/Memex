@@ -24,6 +24,10 @@ import { remoteEventEmitter } from 'src/util/webextensionRPC'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { bindMethod } from 'src/util/functions'
 import { Analytics } from 'src/analytics/types'
+import {
+    FastSyncProgress,
+    FastSyncRole,
+} from '@worldbrain/storex-sync/lib/fast-sync/types'
 
 export default class SyncBackground extends SyncService {
     private analytics: Analytics
@@ -96,22 +100,13 @@ export default class SyncBackground extends SyncService {
             removeDevice: bindMethod(this.syncInfoStorage, 'removeDevice'),
         }
 
+        this.setupSyncAnalytics()
         this.initialSync.debug = true
     }
 
     async waitForInitialSync() {
-        this.analytics.trackEvent({
-            category: 'Sync',
-            action: 'startInitSync',
-        })
-
         try {
             await this.initialSync.waitForInitialSync()
-
-            this.analytics.trackEvent({
-                category: 'Sync',
-                action: 'finishInitSync',
-            })
         } catch (err) {
             this.analytics.trackEvent({
                 category: 'Sync',
@@ -150,7 +145,7 @@ export default class SyncBackground extends SyncService {
 
             await Promise.race([
                 authChangePromise,
-                new Promise(resolve => setTimeout(resolve, 2000)),
+                new Promise((resolve) => setTimeout(resolve, 2000)),
             ])
             await maybeSync()
         })()
@@ -163,17 +158,87 @@ export default class SyncBackground extends SyncService {
     registerRemoteEmitter() {
         const remoteEmitter = remoteEventEmitter<InitialSyncEvents>('sync')
 
-        this.initialSync.events.on('progress', args => {
+        this.initialSync.events.on('progress', (args) => {
             return remoteEmitter.emit('progress', args)
         })
-        this.initialSync.events.on('roleSwitch', args => {
+        this.initialSync.events.on('roleSwitch', (args) => {
             return remoteEmitter.emit('roleSwitch', args)
         })
-        this.initialSync.events.on('error', args => {
+        this.initialSync.events.on('error', (args) => {
             return remoteEmitter.emit('error', args)
         })
-        this.initialSync.events.on('finished', args => {
+        this.initialSync.events.on('finished', (args) => {
             return remoteEmitter.emit('finished', args)
         })
     }
+
+    setupSyncAnalytics() {
+        let progress: FastSyncProgress | null = null
+        let role: FastSyncRole | null = null
+        let progressEventCount = 0
+        let stalled = false
+        this.initialSync.events.on('start', () => {
+            progress = null
+            role = null
+            progressEventCount = 0
+            stalled = false
+
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'startInitSync',
+            })
+        })
+        this.initialSync.events.on('prepared', (event) => {
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'preparedInitSync',
+                value: event.syncInfo,
+            })
+        })
+        this.initialSync.events.on('connected', () => {
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'connectedInitSync',
+            })
+        })
+        this.initialSync.events.on('progress', (event) => {
+            progress = event.progress
+            progressEventCount += 1
+            if (stalled || progressEventCount % 100 === 0) {
+                stalled = false
+                this.analytics.trackEvent({
+                    category: 'Sync',
+                    action: 'progressInitSync',
+                })
+            }
+        })
+        this.initialSync.events.on('roleSwitch', () => {
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'roleSwitchInitSync',
+            })
+        })
+        this.initialSync.events.on('stalled', () => {
+            stalled = true
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'stalledInitSync',
+            })
+        })
+        this.initialSync.events.on('error', () => {
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'errorInitSync',
+                value: { progress },
+            })
+        })
+        this.initialSync.events.on('finished', () => {
+            this.analytics.trackEvent({
+                category: 'Sync',
+                action: 'finishInitSync',
+            })
+        })
+    }
+
+    _getTime = () => Date.now()
 }

@@ -142,6 +142,26 @@ export const ANALYTICS_EVENTS: {
         generateQRPairingCode: {
             description: 'A new QR code has been generated for pairing devices',
         },
+        preparedInitSync: {
+            description:
+                'The initial sync knows how many objects its going to sync',
+        },
+        roleSwitchInitSync: {
+            description:
+                'The initial sync is switching between sending and receiving objects',
+        },
+        progressInitSync: {
+            description: 'The initial sync has made progress',
+        },
+        connectedInitSync: {
+            description: 'The initial sync has successfully connected',
+        },
+        stalledInitSync: {
+            description: 'The inital sync has stalled',
+        },
+        errorInitSync: {
+            description: 'There was an error during initial sync',
+        },
     },
     Collections: {
         create: {
