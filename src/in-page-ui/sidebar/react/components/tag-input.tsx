@@ -29,6 +29,7 @@ const TagInput = ({
                 queryEntries={props.queryTagSuggestions}
                 loadDefaultSuggestions={props.fetchInitialTagSuggestions}
                 initialSelectedEntries={async () => tags}
+                onEscapeKeyDown={() => setTagInputActive(false)}
             />
         )
     }

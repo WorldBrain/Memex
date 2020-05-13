@@ -140,6 +140,9 @@ export default class Ribbon extends Component<Props, State> {
                 loadDefaultSuggestions={
                     this.props.tagging.fetchInitialTagSuggestions
                 }
+                onEscapeKeyDown={() =>
+                    this.props.tagging.setShowTagsPicker(false)
+                }
             />
         )
     }
@@ -154,6 +157,9 @@ export default class Ribbon extends Component<Props, State> {
                 }
                 loadDefaultSuggestions={
                     this.props.lists.fetchInitialListSuggestions
+                }
+                onEscapeKeyDown={() =>
+                    this.props.lists.setShowListsPicker(false)
                 }
             />
         )

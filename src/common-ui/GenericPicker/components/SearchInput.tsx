@@ -25,6 +25,7 @@ export const keyEvents: KeyEvent[] = [
     'Tab',
     'ArrowUp',
     'ArrowDown',
+    'Escape',
     ',',
     // TODO: adding backspace as a special handler here prevents regular backspace in the field.
     // if we want to delete entries on backspace, perhaps the controlled text input needs to check

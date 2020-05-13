@@ -5,6 +5,7 @@ export type KeyEvent =
     | ','
     | 'Tab'
     | 'Backspace'
+    | 'Escape'
 
 export interface DisplayEntry {
     name: string

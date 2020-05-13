@@ -119,12 +119,8 @@ export default class ResultListContainer extends Component<
         }
     }
 
-    private renderTagsManager({
-        shouldDisplayTagPopup,
-        tags: selectedTags,
-        url,
-    }: Result) {
-        if (!shouldDisplayTagPopup) {
+    private renderTagsManager(doc: Result) {
+        if (!doc.shouldDisplayTagPopup) {
             return null
         }
 
@@ -132,24 +128,23 @@ export default class ResultListContainer extends Component<
             <HoverBox>
                 <div ref={(ref) => this.setTagDivRef(ref)}>
                     <TagPicker
-                        onUpdateEntrySelection={this.props.updateTags(url)}
+                        onUpdateEntrySelection={this.props.updateTags(doc.url)}
                         queryEntries={this.props.queryTagSuggestions}
                         loadDefaultSuggestions={
                             this.props.fetchInitialTagSuggestions
                         }
-                        initialSelectedEntries={async () => selectedTags}
+                        initialSelectedEntries={async () => doc.tags}
+                        onEscapeKeyDown={() =>
+                            this.props.handleTagBtnClick(doc)
+                        }
                     />
                 </div>
             </HoverBox>
         )
     }
 
-    private renderListsManager({
-        shouldDisplayListPopup,
-        lists: selectedLists,
-        url,
-    }: Result) {
-        if (!shouldDisplayListPopup) {
+    private renderListsManager(doc: Result) {
+        if (!doc.shouldDisplayListPopup) {
             return null
         }
 
@@ -157,12 +152,15 @@ export default class ResultListContainer extends Component<
             <HoverBox>
                 <div ref={(ref) => this.setListDivRef(ref)}>
                     <CollectionPicker
-                        onUpdateEntrySelection={this.props.updateLists(url)}
+                        onUpdateEntrySelection={this.props.updateLists(doc.url)}
                         queryEntries={this.props.queryListSuggestions}
                         loadDefaultSuggestions={
                             this.props.fetchInitialListSuggestions
                         }
-                        initialSelectedEntries={async () => selectedLists}
+                        initialSelectedEntries={async () => doc.lists}
+                        onEscapeKeyDown={() =>
+                            this.props.handleListBtnClick(doc)
+                        }
                     />
                 </div>
             </HoverBox>

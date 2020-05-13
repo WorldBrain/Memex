@@ -120,6 +120,7 @@ class CommentBoxForm extends React.Component<CommentBoxFormProps> {
                     loadDefaultSuggestions={
                         this.props.fetchInitialTagSuggestions
                     }
+                    onEscapeKeyDown={this.props.toggleTagPicker}
                 />
             </Tooltip>
         )
