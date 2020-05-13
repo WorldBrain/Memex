@@ -32,7 +32,6 @@ import { ActivityLoggerInterface } from 'src/activity-logger/background/types'
 import { SearchInterface } from 'src/search/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
-import { Annotation } from 'src/annotations/types'
 
 // Set this up globally to prevent race conditions
 // TODO: Fix this with a proper restructuring of how pages are indexed
@@ -59,6 +58,20 @@ export async function main() {
     const highlighter = new HighlightInteraction()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
+
+    const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
+    if (areHighlightsEnabled) {
+        const pageAnnotations = await annotations.getAllAnnotationsByUrl({
+            url: currentTab.url,
+        })
+        const highlightables = pageAnnotations.filter(
+            (annotation) => annotation.selector,
+        )
+        await highlighter.renderHighlights(
+            highlightables,
+            annotations.toggleSidebarOverlay,
+        )
+    }
 
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
