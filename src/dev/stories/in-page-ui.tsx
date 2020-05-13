@@ -161,7 +161,7 @@ stories.add('Sidebar - All Annotations', () => (
             <SidebarContainer
                 {...commonProps}
                 ref={(sidebar) => {
-                    sidebar.processEvent('switchSearch', {
+                    ;(sidebar as any).processEvent('switchSearch', {
                         changes: {
                             searchType: 'notes',
                             pageType: 'all',
@@ -186,7 +186,7 @@ stories.add('Sidebar - Page Search', () => (
             <SidebarContainer
                 {...commonProps}
                 ref={(sidebar) => {
-                    sidebar.processEvent('switchSearch', {
+                    ;(sidebar as any).processEvent('switchSearch', {
                         changes: {
                             searchType: 'page',
                             pageType: 'all',
