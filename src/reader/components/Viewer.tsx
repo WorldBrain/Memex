@@ -49,8 +49,36 @@ export default class Viewer extends React.Component<Props, State> {
         await renderHighlights(highlightables, () => null)
     }
 
+    getHostName() {
+        const url = this.props.fullUrl
+        const match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
+        if (match != null && match.length > 2 && typeof match[2] === 'string' && match[2].length > 0) {
+        return match[2];
+        }
+        else {
+            return null;
+        }
+    }
+
+
     renderArticle = (article) => {
-        this.setState({ readerHtml: { __html: article.title && article.content } })
+
+        const readingTime = Math.floor(article.length / 5 / 268)
+
+        const hostName = this.getHostName()
+
+        const HTML = '<html>'
+                        +'<h1>'+ article.title +'</h1>'
+                        +'<span id="readingTime">'+ readingTime + ' min' +'</span>'
+                        +'<span id="separator"> - </span>'
+                        +'<span id="domain">'+ hostName +'</span>'
+                        +'<span id="separator"> - </span>'
+                        +'<span id="visitUrl">'+ '<a target="_blank" href="'+this.props.fullUrl+'">Visit Original</a>'+'</span>' 
+                        +'<div id="hLine"></div>'
+                        +'<body>'+ article.content + '</body>'+
+                    '</html>'
+
+        this.setState({ readerHtml: { __html: HTML } })
     }
 
     render() {
@@ -68,10 +96,16 @@ export default class Viewer extends React.Component<Props, State> {
 }
 
 const ViewerContainer = styled.div`
+    color: #3a2f45;
+
     & img {
         max-width: 800px !important;
         width: 80%;
         margin: 20px 20px;
+    }
+
+    & h1 {
+        margin-bottom: 0.3em;
     }
 
     & h1 > span {
@@ -79,15 +113,24 @@ const ViewerContainer = styled.div`
         font-weight: 600;
     }
 
+    & #hLine {
+        border-bottom: 1px #cacaca solid
+        width: 100%
+    }
+
     & blockquote {
         font-style: italic;
+        font-weight: 400;
+        background: #ececec;
+        border-radius: 8px;
+        padding: 10px 35px;
 
         & span, 
             p, 
             div, 
             a {
             font-style: italic;
-
+            font-weight: 400;
         }
     }
 
@@ -127,6 +170,14 @@ const ViewerContainer = styled.div`
         color: ${colorText};
         width: 100%;
         max-width: 800px;
+    }
+
+    & #separator {
+        padding: 0 10px
+    }
+
+    & #readingTime {
+        font-weight: 600;
     }
 
     & table {
