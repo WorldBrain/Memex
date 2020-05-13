@@ -232,7 +232,12 @@ export default class SyncBackground extends SyncService {
             this.analytics.trackEvent({
                 category: 'Sync',
                 action: 'errorInitSync',
-                value: { progress, role },
+                value: {
+                    progress,
+                    role,
+                    percentage:
+                        progress.totalObjectsProcessed / progress.objectCount,
+                },
             })
         })
         this.initialSync.events.on('finished', () => {
