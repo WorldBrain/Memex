@@ -397,6 +397,14 @@
     }
 }
 
+.reader {
+    height: 16px;
+
+    &:hover {
+        opacity: 0.6;
+    }
+}
+
 .comment {
     &:hover {
         opacity: 0.6;
