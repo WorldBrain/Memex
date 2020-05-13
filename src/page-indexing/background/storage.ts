@@ -53,6 +53,21 @@ export default class PageStorage extends StorageModule {
                 operation: 'createObject',
                 collection: 'visits',
             },
+            countVisits: {
+                operation: 'countObjects',
+                collection: 'visits',
+                args: {
+                    url: '$url:string',
+                },
+            },
+            findLatestVisitByUrl: {
+                operation: 'findObjects',
+                collection: 'visits',
+                args: [
+                    { url: '$url:string' },
+                    { sort: [['time', 'desc']], limit: 1 },
+                ],
+            },
             findVisitsByUrl: {
                 operation: 'findObjects',
                 collection: 'visits',
@@ -167,18 +182,9 @@ export default class PageStorage extends StorageModule {
             time: number
         }
         const normalizedUrl = normalizeUrl(url, {})
-        const existingVisits: Visit[] = await this.operation(
-            'findVisitsByUrl',
-            { url: normalizedUrl },
-        )
-        const existingVisitTimes = new Set(
-            existingVisits.map(visit => visit.time),
-        )
         const newVisits: Visit[] = []
         for (const visitTime of visitTimes) {
-            if (!existingVisitTimes.has(visitTime)) {
-                newVisits.push({ url: normalizedUrl, time: visitTime })
-            }
+            newVisits.push({ url: normalizedUrl, time: visitTime })
         }
         for (const visit of newVisits) {
             await this.operation('createVisit', visit)
@@ -195,10 +201,10 @@ export default class PageStorage extends StorageModule {
 
     async pageHasVisits(url: string): Promise<boolean> {
         const normalizedUrl = normalizeUrl(url, {})
-        const visits = await this.operation('findVisitsByUrl', {
+        const visitCount = await this.operation('countVisits', {
             url: normalizedUrl,
         })
-        return !!visits.length
+        return visitCount > 0
     }
 
     async addPageVisit(url: string, time: number) {
@@ -257,10 +263,10 @@ export default class PageStorage extends StorageModule {
 
     async deletePageIfOrphaned(url: string) {
         const normalizedUrl = normalizeUrl(url, {})
-        if (
-            (await this.operation('findVisitsByUrl', { url: normalizeUrl }))
-                .length
-        ) {
+        const visitCount = await this.operation('countVisits', {
+            url: normalizeUrl,
+        })
+        if (visitCount > 0) {
             return
         }
         if (
@@ -272,6 +278,16 @@ export default class PageStorage extends StorageModule {
         await this.operation('deletePage', {
             url: normalizedUrl,
         })
+    }
+
+    async getLatestVisit(
+        url: string,
+    ): Promise<{ url: string; time: number } | null> {
+        const normalizedUrl = normalizeUrl(url, {})
+        const result = await this.operation('findLatestVisitByUrl', {
+            url: normalizedUrl,
+        })
+        return result.length ? result[0] : null
     }
 
     async _maybeDecodeBlob(
