@@ -5,6 +5,7 @@ import React, {
     DragEventHandler,
 } from 'react'
 import cx from 'classnames'
+
 import AnnotationList from './annotation-list'
 import { LoadingIndicator } from 'src/common-ui/components'
 import { SocialPage } from 'src/social-integration/types'
@@ -12,7 +13,7 @@ import PageResultItem from 'src/common-ui/components/page-result-item'
 import SocialResultItem from 'src/common-ui/components/social-result-item'
 import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { AnnotationBoxEventProps } from 'src/in-page-ui/components/annotation-box/annotation-box'
-import { AnnotationMode } from '../types'
+import { AnnotationMode, SidebarEnv } from '../types'
 import { TagsEventProps } from 'src/in-page-ui/components/annotation-box/edit-mode-content'
 
 const styles = require('./result-item.css')
@@ -64,7 +65,7 @@ class ResultItem extends Component<Props> {
         return `${this.props.fullUrl}`
     }
 
-    get environment() {
+    get environment(): SidebarEnv {
         if (this.props.isOverview) {
             return 'overview'
         } else {

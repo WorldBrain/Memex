@@ -417,9 +417,16 @@ export class RibbonContainerLogic extends UILogic<
         }
     }
 
-    handleHighlightsToggle: EventHandler<
-        'handleHighlightsToggle'
-    > = async ({}) => {
+    handleHighlightsToggle: EventHandler<'handleHighlightsToggle'> = async ({
+        previousState,
+    }) => {
+        const {
+            currentTab,
+            annotations,
+            highlights,
+            highlighter,
+        } = this.dependencies
+
         const currentSetting = await this.dependencies.highlights.getState()
         const setState = (state: boolean) =>
             this.emitMutation({
@@ -429,7 +436,22 @@ export class RibbonContainerLogic extends UILogic<
         setState(!currentSetting)
 
         try {
-            await this.dependencies.highlights.setState(!currentSetting)
+            if (previousState.highlights.areHighlightsEnabled) {
+                highlighter.removeHighlights()
+            } else {
+                const pageAnnotations = await annotations.getAllAnnotationsByUrl(
+                    { url: currentTab.url },
+                )
+                const highlightables = pageAnnotations.filter(
+                    (annotation) => annotation.selector,
+                )
+                await highlighter.renderHighlights(
+                    highlightables,
+                    annotations.toggleSidebarOverlay,
+                )
+            }
+
+            await highlights.setState(!currentSetting)
         } catch (err) {
             setState(!currentSetting)
             throw err

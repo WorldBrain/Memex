@@ -62,7 +62,7 @@ const setupLogicHelper = async ({
         highlighter: {
             removeAnnotationHighlights: () => undefined,
             removeTempHighlights: () => undefined,
-        },
+        } as any,
         annotationsManager,
         env: 'inpage',
     })

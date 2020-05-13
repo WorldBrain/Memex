@@ -14,10 +14,7 @@ export interface SidebarContainerDependencies {
     annotationsManager: AnnotationsManagerInterface
     currentTab: { id: number; url: string }
     normalizeUrl: URLNormalizer
-    highlighter: Pick<
-        HighlightInteractionInterface,
-        'removeTempHighlights' | 'removeAnnotationHighlights'
-    >
+    highlighter: HighlightInteractionInterface
 
     tags: RemoteTagsInterface
     annotations: AnnotationInterface<'caller'>

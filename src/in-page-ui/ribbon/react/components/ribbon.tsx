@@ -15,8 +15,7 @@ import {
     Shortcut,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
-import { highlightAnnotations } from 'src/annotations'
-import { HighlightInteractionInterface, Anchor } from 'src/highlighting/types'
+import { HighlightInteractionInterface } from 'src/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
 import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
@@ -107,16 +106,6 @@ export default class Ribbon extends Component<Props, State> {
         this.props.commentBox.setShowCommentBox(
             !this.props.commentBox.showCommentBox,
         )
-    }
-
-    private toggleHighlights = async () => {
-        if (this.props.highlights.areHighlightsEnabled) {
-            this.props.highlighter.removeHighlights()
-        } else {
-            highlightAnnotations()
-        }
-
-        await this.props.highlights.handleHighlightsToggle()
     }
 
     private getTooltipText(name: string): string {
@@ -460,7 +449,10 @@ export default class Ribbon extends Component<Props, State> {
                                     position="left"
                                 >
                                     <div
-                                        onClick={this.toggleHighlights}
+                                        onClick={
+                                            this.props.highlights
+                                                .handleHighlightsToggle
+                                        }
                                         className={cx(
                                             styles.button,
                                             styles.ribbonIcon,

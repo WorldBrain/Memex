@@ -34,7 +34,10 @@ describe('Ribbon logic', () => {
         const inPageUI = new InPageUI({
             loadComponent: async () => {},
         })
-        const highlighter = {} as any
+        const highlighter = {
+            renderHighlights: () => {},
+            removeHighlights: () => {},
+        } as any
         const annotationsManager = {} as any
 
         let globalTooltipState = false

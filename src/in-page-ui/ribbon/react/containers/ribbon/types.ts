@@ -14,7 +14,7 @@ interface FlagSetterInterface {
 export interface RibbonContainerDependencies {
     currentTab: { id: number; url: string }
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
-    highlighter: Pick<HighlightInteractionInterface, 'removeHighlights'>
+    highlighter: HighlightInteractionInterface
     annotationsManager: AnnotationsManager
     setSidebarEnabled: (value: boolean) => Promise<void>
     getSidebarEnabled: () => Promise<boolean>

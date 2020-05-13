@@ -46,7 +46,11 @@ async function createDependencies() {
         removeHighlights: async () => {},
         removeTempHighlights: async () => {},
         removeAnnotationHighlights: async () => {},
-    }
+        renderHighlights: async () => {},
+        renderHighlight: async () => {},
+        scrollToHighlight: async () => {},
+        highlightAndScroll: async () => {},
+    } as any
 
     const inPageUI = new InPageUI({
         loadComponent: async () => {},
